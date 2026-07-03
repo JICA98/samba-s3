@@ -1,12 +1,15 @@
 package com.zenithblue.sambas3.ui.settings.components.preference
 
+import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.foundation.ExperimentalFoundationApi
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -24,7 +27,10 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.drawBehind
+import androidx.compose.ui.focus.onFocusChanged
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -40,75 +46,78 @@ fun HomePreference(
     title: String,
     description: String,
     onClick: () -> Unit = {},
-    onLongClick: () -> Unit = {}
+    onLongClick: () -> Unit = {},
+    onFocusChanged: (Boolean) -> Unit = {}
 ) {
+    var isFocused by remember { mutableStateOf(false) }
+    val paddingLeft by animateDpAsState(if (isFocused) 20.dp else 16.dp, label = "paddingLeft")
+    val contentColor = if (isFocused) com.zenithblue.sambas3.RPCSXColors.primary else com.zenithblue.sambas3.RPCSXColors.textPrimary
+
     Surface(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(horizontal = 16.dp, vertical = 8.dp)
-            .clip(RoundedCornerShape(24.dp))
-            .safeCombinedClickable(onClick = onClick, onLongClick = onLongClick),
-        color = MaterialTheme.colorScheme.surfaceContainer,
-        tonalElevation = 2.dp
+            .onFocusChanged {
+                isFocused = it.isFocused
+                onFocusChanged(it.isFocused)
+            }
+            .safeCombinedClickable(onClick = onClick, onLongClick = onLongClick)
+            .drawBehind {
+                if (isFocused) {
+                    drawRect(
+                        color = com.zenithblue.sambas3.RPCSXColors.focusRing,
+                        topLeft = Offset(0f, 0f),
+                        size = Size(4.dp.toPx(), size.height)
+                    )
+                }
+            },
+        color = if (isFocused) com.zenithblue.sambas3.RPCSXColors.surfaceOverlay else com.zenithblue.sambas3.RPCSXColors.surface,
+        tonalElevation = 0.dp
     ) {
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(horizontal = 20.dp, vertical = 16.dp),
-            verticalAlignment = Alignment.CenterVertically
+        CompositionLocalProvider(
+            LocalContentColor provides contentColor
         ) {
-            Surface(
-                shape = CircleShape,
-                color = MaterialTheme.colorScheme.secondaryContainer
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(start = paddingLeft, end = 16.dp)
+                    .heightIn(min = 72.dp),
+                verticalAlignment = Alignment.CenterVertically
             ) {
-                Box(
-                    modifier = Modifier.size(40.dp),
-                    contentAlignment = Alignment.Center
+                Surface(
+                    shape = CircleShape,
+                    color = if (isFocused) com.zenithblue.sambas3.RPCSXColors.primaryMuted else com.zenithblue.sambas3.RPCSXColors.surfaceElevated
                 ) {
-                    CompositionLocalProvider(
-                        LocalContentColor provides MaterialTheme.colorScheme.onSecondaryContainer
+                    Box(
+                        modifier = Modifier.size(40.dp),
+                        contentAlignment = Alignment.Center
                     ) {
-                        icon()
+                        CompositionLocalProvider(
+                            LocalContentColor provides if (isFocused) com.zenithblue.sambas3.RPCSXColors.primary else com.zenithblue.sambas3.RPCSXColors.textSecondary
+                        ) {
+                            icon()
+                        }
                     }
                 }
-            }
 
-            Spacer(modifier = Modifier.width(16.dp))
+                Spacer(modifier = Modifier.width(16.dp))
 
-            Column(
-                modifier = Modifier.weight(1f),
-                verticalArrangement = Arrangement.spacedBy(4.dp)
-            ) {
-                Text(
-                    text = title,
-                    style = MaterialTheme.typography.titleMedium,
-                    color = MaterialTheme.colorScheme.onSurface
-                )
+                Column(
+                    modifier = Modifier.weight(1f).padding(vertical = 12.dp),
+                    verticalArrangement = Arrangement.spacedBy(4.dp)
+                ) {
+                    Text(
+                        text = title,
+                        style = MaterialTheme.typography.titleMedium,
+                        color = contentColor
+                    )
 
-                Text(
-                    text = description,
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                )
+                    Text(
+                        text = description,
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = if (isFocused) com.zenithblue.sambas3.RPCSXColors.textSecondary else com.zenithblue.sambas3.RPCSXColors.textSecondary.copy(alpha = 0.8f)
+                    )
+                }
             }
         }
-    }
-}
-
-@Preview
-@Composable
-fun PreviewHomePreference() {
-    ComposePreview {
-        var description by remember { mutableStateOf("Description") }
-
-        HomePreference(
-            title = "Title",
-            description = description,
-            icon = { PreferenceIcon(painterResource(R.drawable.ic_star)) },
-            onClick = {
-                description = "clicked"
-            },
-            onLongClick = { description = "long click" }
-        )
     }
 }

@@ -89,6 +89,8 @@ class GameRepository {
         val isRefreshing = mutableStateOf(false)
         private var isRefreshInCooldown = false
 
+        val activeInstallProgress: MutableState<Long?> = mutableStateOf(null)
+
         fun save() {
             try {
                 File(RPCSX.rootDirectory + "games.json").writeText(Json.encodeToString(instance.games.map { game ->

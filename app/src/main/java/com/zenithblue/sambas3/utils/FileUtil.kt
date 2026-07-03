@@ -89,9 +89,14 @@ object FileUtil {
                 }
 
                 val progress = ProgressRepository.create(context, context.getString(R.string.installing_dir))
+                GameRepository.activeInstallProgress.value = progress
                 GameRepository.add(arrayOf(GameInfo("$")), progress)
                 copyDirUriToInternalStorage(context, it.uri, it.targetPath, progress)
                 RPCSX.instance.collectGameInfo(it.targetPath, -1L)
+            }
+
+            if (batchDirs.isNotEmpty()) {
+                GameRepository.activeInstallProgress.value = null
             }
         }
     }

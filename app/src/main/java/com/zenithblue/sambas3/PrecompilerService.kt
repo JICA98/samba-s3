@@ -116,6 +116,8 @@ class PrecompilerService : Service() {
                 if (entry.isFinished()) {
                     if (isFwInstall) {
                         FirmwareRepository.progressChannel.value = null
+                    } else {
+                        GameRepository.activeInstallProgress.value = null
                     }
 
                     stopSelf(startId)
@@ -124,6 +126,8 @@ class PrecompilerService : Service() {
 
         if (isFwInstall) {
             FirmwareRepository.progressChannel.value = installProgress
+        } else {
+            GameRepository.activeInstallProgress.value = installProgress
         }
 
         try {

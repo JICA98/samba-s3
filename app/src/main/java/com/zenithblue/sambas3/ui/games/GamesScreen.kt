@@ -25,6 +25,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.blur
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.draw.drawWithContent
 import androidx.compose.ui.draw.scale
@@ -35,11 +36,8 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.graphics.ColorMatrix
 import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.withTimeout
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
@@ -98,7 +96,6 @@ fun GamesScreen(
     var focusedIndex by remember { mutableStateOf(if (games.isNotEmpty()) 0 else -1) }
     var bootingGame by remember { mutableStateOf<Game?>(null) }
     var showImportDialog by remember { mutableStateOf(false) }
-    var isInstalling by remember { mutableStateOf(false) }
 
     val bootScale by animateFloatAsState(if (bootingGame != null) 5f else 1f, animationSpec = tween(700))
     val bootAlpha by animateFloatAsState(if (bootingGame != null) 0f else 1f, animationSpec = tween(500))
@@ -115,7 +112,6 @@ fun GamesScreen(
         contract = ActivityResultContracts.GetContent()
     ) { uri: Uri? ->
         if (uri != null) {
-            isInstalling = true
             PrecompilerService.start(context, PrecompilerServiceAction.Install, uri)
         }
     }
@@ -124,27 +120,10 @@ fun GamesScreen(
         contract = ActivityResultContracts.OpenDocumentTree()
     ) { uri: Uri? ->
         if (uri != null) {
-            isInstalling = true
             val takeFlags = Intent.FLAG_GRANT_READ_URI_PERMISSION
             context.contentResolver.takePersistableUriPermission(uri, takeFlags)
             FileUtil.installPackages(context, uri)
         }
-    }
-
-    LaunchedEffect(isInstalling) {
-        if (!isInstalling) return@LaunchedEffect
-        val initialSize = games.size
-        try {
-            kotlinx.coroutines.withTimeout(60_000) {
-                while (games.size == initialSize) {
-                    delay(500)
-                }
-                delay(3000)
-            }
-        } catch (_: kotlinx.coroutines.TimeoutCancellationException) {
-            // Installation may have timed out, dismiss spinner
-        }
-        isInstalling = false
     }
 
     Box(
@@ -264,11 +243,66 @@ fun GamesScreen(
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 val fwVersion by remember { FirmwareRepository.version }
-                Text(
-                    text = stringResource(R.string.firmware) + " " + (fwVersion ?: BuildConfig.Version),
-                    style = AppTypography.labelSmall,
-                    color = RPCSXColors.textSecondary
-                )
+                val fwProgressId by remember { FirmwareRepository.progressChannel }
+                val fwProgressEntry = ProgressRepository.getItem(fwProgressId)?.value
+                val fwProgressMessage = fwProgressEntry?.message?.value
+                val isFwInstalling = fwProgressId != null
+
+                Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
+                    if (fwVersion != null) {
+                        Text(
+                            text = stringResource(R.string.firmware) + " " + fwVersion,
+                            style = AppTypography.labelSmall,
+                            color = RPCSXColors.textSecondary
+                        )
+                    } else if (isFwInstalling) {
+                        Text(
+                            text = "Installing firmware...",
+                            style = AppTypography.labelSmall,
+                            color = RPCSXColors.primary
+                        )
+                        if (fwProgressEntry != null) {
+                            val fwVal = fwProgressEntry.value.longValue
+                            val fwMax = fwProgressEntry.max.longValue
+                            if (fwMax > 0) {
+                                LinearProgressIndicator(
+                                    progress = { fwVal.toFloat() / fwMax.toFloat() },
+                                    modifier = Modifier
+                                        .width(120.dp)
+                                        .clip(RoundedCornerShape(4.dp)),
+                                    color = RPCSXColors.primary,
+                                    trackColor = RPCSXColors.surfaceOverlay,
+                                )
+                            } else {
+                                LinearProgressIndicator(
+                                    modifier = Modifier
+                                        .width(120.dp)
+                                        .clip(RoundedCornerShape(4.dp)),
+                                    color = RPCSXColors.primary,
+                                    trackColor = RPCSXColors.surfaceOverlay,
+                                )
+                            }
+                            fwProgressMessage?.let {
+                                Text(
+                                    text = it,
+                                    style = AppTypography.labelSmall,
+                                    color = RPCSXColors.textSecondary,
+                                    maxLines = 1,
+                                    overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis
+                                )
+                            }
+                        }
+                    } else {
+                        Text(
+                            text = stringResource(R.string.firmware) + " Not installed",
+                            style = AppTypography.labelSmall,
+                            color = RPCSXColors.textSecondary,
+                            modifier = Modifier
+                                .clickable { installFwLauncher?.launch("*/*") }
+                                .padding(4.dp)
+                        )
+                    }
+                }
                 Row(horizontalArrangement = Arrangement.spacedBy(24.dp)) {
                     HintButton(text = "PLAY", icon = "X", color = RPCSXColors.primary, onClick = {
                         // For play, we can just use the currently centered page (no easy access to pagerState here without refactoring)
@@ -293,31 +327,6 @@ fun GamesScreen(
                     isoPickerLauncher.launch("*/*")
                 }
             )
-        }
-
-        if (isInstalling) {
-            Box(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .background(Color(0xCC000000))
-                    .clickable(enabled = false, onClick = {}),
-                contentAlignment = Alignment.Center
-            ) {
-                Column(
-                    horizontalAlignment = Alignment.CenterHorizontally,
-                    verticalArrangement = Arrangement.spacedBy(16.dp)
-                ) {
-                    CircularProgressIndicator(
-                        color = RPCSXColors.primary,
-                        modifier = Modifier.size(48.dp)
-                    )
-                    Text(
-                        text = "Importing game...",
-                        style = AppTypography.labelMedium,
-                        color = RPCSXColors.textSecondary
-                    )
-                }
-            }
         }
     }
 }
@@ -374,6 +383,14 @@ fun GameCard(game: Game, distance: Int, onClick: () -> Unit, onPlay: () -> Unit)
     
     val scale by animateFloatAsState(targetScale, animationSpec = tween(300))
     val alpha by animateFloatAsState(targetAlpha, animationSpec = tween(300))
+
+    val installProgressId = game.findProgress(GameProgressType.Install)?.firstOrNull()?.id
+    val progressEntry = ProgressRepository.getItem(installProgressId)?.value
+    val isImporting = progressEntry != null
+    val progressValue = progressEntry?.value?.longValue ?: 0
+    val progressMax = progressEntry?.max?.longValue ?: 0
+    val progressMessage = progressEntry?.message?.value
+    val isIndeterminate = progressMax == 0L
 
     val colorMatrix = remember(isFocused) {
         if (isFocused) ColorMatrix() else ColorMatrix().apply { setToSaturation(0f) }
@@ -441,8 +458,53 @@ fun GameCard(game: Game, distance: Int, onClick: () -> Unit, onPlay: () -> Unit)
                         contentDescription = null,
                         contentScale = ContentScale.Fit,
                         colorFilter = ColorFilter.colorMatrix(colorMatrix),
-                        modifier = Modifier.fillMaxSize()
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .padding(16.dp)
                     )
+                }
+            }
+            
+            if (isImporting) {
+                Box(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .background(Color(0xCC000000)),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Column(
+                        horizontalAlignment = Alignment.CenterHorizontally,
+                        verticalArrangement = Arrangement.spacedBy(8.dp),
+                        modifier = Modifier.padding(horizontal = 16.dp)
+                    ) {
+                        CircularProgressIndicator(
+                            color = RPCSXColors.primary,
+                            modifier = Modifier.size(32.dp),
+                            strokeWidth = 3.dp
+                        )
+                        if (!isIndeterminate) {
+                            LinearProgressIndicator(
+                                progress = { progressValue.toFloat() / progressMax.toFloat() },
+                                modifier = Modifier.fillMaxWidth().clip(RoundedCornerShape(4.dp)),
+                                color = RPCSXColors.primary,
+                                trackColor = RPCSXColors.surfaceOverlay,
+                            )
+                        } else {
+                            LinearProgressIndicator(
+                                modifier = Modifier.fillMaxWidth().clip(RoundedCornerShape(4.dp)),
+                                color = RPCSXColors.primary,
+                                trackColor = RPCSXColors.surfaceOverlay,
+                            )
+                        }
+                        Text(
+                            text = progressMessage ?: "Importing...",
+                            style = AppTypography.labelSmall,
+                            color = RPCSXColors.textSecondary,
+                            textAlign = TextAlign.Center,
+                            maxLines = 2,
+                            overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis
+                        )
+                    }
                 }
             }
         }

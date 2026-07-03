@@ -93,11 +93,254 @@ import com.zenithblue.sambas3.dialogs.AlertDialogQueue
 import com.zenithblue.sambas3.provider.AppDataDocumentProvider
 import com.zenithblue.sambas3.ui.common.ComposePreview
 import com.zenithblue.sambas3.utils.FileUtil
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.background
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.ui.draw.drawBehind
+import androidx.compose.ui.graphics.drawscope.Stroke
 import com.zenithblue.sambas3.utils.GeneralSettings
 import com.zenithblue.sambas3.utils.InputBindingPrefs
 import org.json.JSONObject
 import java.io.File
 import kotlin.math.ceil
+
+@Composable
+fun PulsingDot(modifier: Modifier = Modifier) {
+    val infiniteTransition = androidx.compose.animation.core.rememberInfiniteTransition(label = "pulse")
+    val alpha by infiniteTransition.animateFloat(
+        initialValue = 0.3f,
+        targetValue = 1f,
+        animationSpec = androidx.compose.animation.core.infiniteRepeatable(
+            animation = androidx.compose.animation.core.tween(1000, easing = androidx.compose.animation.core.FastOutSlowInEasing),
+            repeatMode = androidx.compose.animation.core.RepeatMode.Reverse
+        ),
+        label = "alpha"
+    )
+    Box(
+        modifier = modifier
+            .size(8.dp)
+            .graphicsLayer { this.alpha = alpha }
+            .background(color = com.zenithblue.sambas3.RPCSXColors.primary, shape = CircleShape)
+    )
+}
+
+@Composable
+fun ControllerHintStrip(
+    modifier: Modifier = Modifier,
+    hints: List<Pair<Int, String>>
+) {
+    Row(
+        modifier = modifier
+            .fillMaxWidth()
+            .height(48.dp)
+            .background(com.zenithblue.sambas3.RPCSXColors.surfaceElevated)
+            .drawBehind {
+                drawLine(
+                    color = com.zenithblue.sambas3.RPCSXColors.surfaceOverlay,
+                    start = androidx.compose.ui.geometry.Offset(0f, 0f),
+                    end = androidx.compose.ui.geometry.Offset(size.width, 0f),
+                    strokeWidth = 1.dp.toPx()
+                )
+            }
+            .padding(horizontal = 16.dp),
+        horizontalArrangement = Arrangement.End,
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        hints.forEachIndexed { index, (drawableId, label) ->
+            if (index > 0) {
+                Spacer(modifier = Modifier.width(16.dp))
+                Box(
+                    modifier = Modifier
+                        .width(1.dp)
+                        .fillMaxHeight(0.5f)
+                        .background(com.zenithblue.sambas3.RPCSXColors.textDisabled)
+                )
+                Spacer(modifier = Modifier.width(16.dp))
+            }
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+                Image(
+                    painter = painterResource(id = drawableId),
+                    contentDescription = null,
+                    modifier = Modifier.size(18.dp)
+                )
+                Text(
+                    text = label.uppercase(),
+                    color = if (drawableId == R.drawable.cross) com.zenithblue.sambas3.RPCSXColors.primary else com.zenithblue.sambas3.RPCSXColors.textSecondary,
+                    style = MaterialTheme.typography.labelSmall,
+                    fontWeight = FontWeight.Bold
+                )
+            }
+        }
+    }
+}
+
+@Composable
+fun SettingsDetailPane(
+    focusedKey: String,
+    activeUser: String
+) {
+    val title: String
+    val description: String
+    val status: String
+    val backend: String
+
+    when (focusedKey) {
+        "internal_directory" -> {
+            title = "Storage Directory"
+            description = "Access the emulator's internal storage directory. Here you can manage cache, config files, shaders, and installed packages directly."
+            status = "ACTIVE"
+            backend = "LOCAL STORAGE"
+        }
+        "users" -> {
+            title = "User Profiles"
+            val username = com.zenithblue.sambas3.UserRepository.getUsername(activeUser)
+            description = "Manage local user accounts, game saves, and save data directories. Current active user is $username."
+            status = "ACTIVE"
+            backend = "PROFILE SYSTEM"
+        }
+        "advanced_settings" -> {
+            title = "Advanced Config"
+            description = "Configure core emulation parameters, CPU instruction set compilers, system variables, and file system path mappings."
+            status = "CONFIGURED"
+            backend = "RPCSX SYSTEM"
+        }
+        "custom_driver" -> {
+            title = "GPU Drivers"
+            description = "Load custom graphics drivers (like Turnip or custom Vulkan/Adreno drivers) to optimize rendering performance, fix graphical glitches, and improve stability."
+            status = if (com.zenithblue.sambas3.RPCSX.instance.supportsCustomDriverLoading()) "SUPPORTED" else "UNSUPPORTED"
+            backend = "VULKAN 1.3"
+        }
+        "controls" -> {
+            title = "Controller Bindings"
+            description = "Configure physical gamepad mappings, D-pad sensitivity, touch-screen overlays, haptic feedback, and input profiles."
+            status = "CONNECTED"
+            backend = "INPUT INTERFACE"
+        }
+        "share_logs" -> {
+            title = "System Logs"
+            description = "Export and share the emulator execution logs. Helpful for debugging crashes, verifying compatibility, and reporting bugs to the developers."
+            status = "READY"
+            backend = "TEXT/PLAIN"
+        }
+        else -> {
+            title = "SambaS3 Core"
+            description = "Configure the heartbeat of your gaming experience. Adjust core frequency, cycle accuracy, and bios paths to optimize performance for seventh-generation console emulation."
+            status = "OPTIMIZED"
+            backend = "VULKAN 1.3"
+        }
+    }
+
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(com.zenithblue.sambas3.RPCSXColors.surfaceOverlay.copy(alpha = 0.2f))
+            .drawBehind {
+                drawRect(
+                    color = com.zenithblue.sambas3.RPCSXColors.surfaceOverlay,
+                    topLeft = androidx.compose.ui.geometry.Offset(0f, 0f),
+                    size = size,
+                    style = androidx.compose.ui.graphics.drawscope.Stroke(width = 1.dp.toPx())
+                )
+            }
+            .padding(24.dp)
+    ) {
+        Column(
+            modifier = Modifier
+                .align(Alignment.BottomStart)
+                .fillMaxWidth(),
+            verticalArrangement = Arrangement.spacedBy(16.dp)
+        ) {
+            Text(
+                text = title,
+                color = com.zenithblue.sambas3.RPCSXColors.primary,
+                fontFamily = androidx.compose.ui.text.font.FontFamily.Monospace,
+                fontWeight = FontWeight.Bold,
+                fontSize = 20.sp,
+                letterSpacing = 1.sp
+            )
+
+            Text(
+                text = description,
+                color = com.zenithblue.sambas3.RPCSXColors.textPrimary,
+                fontFamily = androidx.compose.ui.text.font.FontFamily.SansSerif,
+                fontSize = 14.sp,
+                lineHeight = 20.sp
+            )
+
+            Row(
+                horizontalArrangement = Arrangement.spacedBy(16.dp),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Row(
+                    modifier = Modifier
+                        .background(com.zenithblue.sambas3.RPCSXColors.surface)
+                        .drawBehind {
+                            drawLine(
+                                color = com.zenithblue.sambas3.RPCSXColors.primary,
+                                start = androidx.compose.ui.geometry.Offset(0f, 0f),
+                                end = androidx.compose.ui.geometry.Offset(0f, size.height),
+                                strokeWidth = 2.dp.toPx()
+                            )
+                        }
+                        .padding(horizontal = 12.dp, vertical = 8.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Column {
+                        Text(
+                            text = "STATUS",
+                            color = com.zenithblue.sambas3.RPCSXColors.textSecondary,
+                            style = MaterialTheme.typography.labelSmall,
+                            fontWeight = FontWeight.Bold
+                        )
+                        Text(
+                            text = status,
+                            color = com.zenithblue.sambas3.RPCSXColors.primary,
+                            style = MaterialTheme.typography.bodyMedium,
+                            fontWeight = FontWeight.Bold
+                        )
+                    }
+                }
+
+                Row(
+                    modifier = Modifier
+                        .background(com.zenithblue.sambas3.RPCSXColors.surface)
+                        .drawBehind {
+                            drawLine(
+                                color = com.zenithblue.sambas3.RPCSXColors.primaryDim,
+                                start = androidx.compose.ui.geometry.Offset(0f, 0f),
+                                end = androidx.compose.ui.geometry.Offset(0f, size.height),
+                                strokeWidth = 2.dp.toPx()
+                            )
+                        }
+                        .padding(horizontal = 12.dp, vertical = 8.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Column {
+                        Text(
+                            text = "BACKEND",
+                            color = com.zenithblue.sambas3.RPCSXColors.textSecondary,
+                            style = MaterialTheme.typography.labelSmall,
+                            fontWeight = FontWeight.Bold
+                        )
+                        Text(
+                            text = backend,
+                            color = com.zenithblue.sambas3.RPCSXColors.textPrimary,
+                            style = MaterialTheme.typography.bodyMedium,
+                            fontWeight = FontWeight.Bold
+                        )
+                    }
+                }
+            }
+        }
+    }
+}
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -225,6 +468,14 @@ fun AdvancedSettingsScreen(
                         }
                     }
                 },
+            )
+        },
+        bottomBar = {
+            ControllerHintStrip(
+                hints = listOf(
+                    R.drawable.cross to "Select",
+                    R.drawable.circle to "Back"
+                )
             )
         }
     ) { contentPadding ->
@@ -517,28 +768,75 @@ fun SettingsScreen(
 ) {
     val topBarScrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior()
     val activeUser by remember { UserRepository.activeUser }
+    var focusedKey by remember { mutableStateOf("internal_directory") }
+    val configuration = androidx.compose.ui.platform.LocalConfiguration.current
+    val isWideScreen = configuration.screenWidthDp > 600
 
     Scaffold(
-        modifier = Modifier
-            .nestedScroll(topBarScrollBehavior.nestedScrollConnection)
-            .then(modifier), topBar = {
-            LargeTopAppBar(
-                title = { Text(text = stringResource(R.string.settings), fontWeight = FontWeight.Medium) },
-                scrollBehavior = topBarScrollBehavior,
-                navigationIcon = {
-                    IconButton(
-                        onClick = navigateBack
-                    ) {
-                        Icon(painter = painterResource(id = R.drawable.ic_keyboard_arrow_left), null)
-                    }
-                })
+        modifier = modifier,
+        topBar = {
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(56.dp)
+                    .background(com.zenithblue.sambas3.RPCSXColors.background)
+                    .padding(horizontal = 16.dp),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                IconButton(
+                    onClick = navigateBack,
+                    modifier = Modifier.padding(end = 8.dp)
+                ) {
+                    Icon(
+                        painter = painterResource(id = R.drawable.ic_keyboard_arrow_left),
+                        contentDescription = null,
+                        tint = com.zenithblue.sambas3.RPCSXColors.primary
+                    )
+                }
+                Icon(
+                    painter = painterResource(id = R.drawable.gamepad),
+                    contentDescription = null,
+                    tint = com.zenithblue.sambas3.RPCSXColors.primary,
+                    modifier = Modifier.size(24.dp)
+                )
+                Spacer(modifier = Modifier.width(12.dp))
+                Text(
+                    text = stringResource(R.string.settings).uppercase(),
+                    color = com.zenithblue.sambas3.RPCSXColors.primary,
+                    fontFamily = androidx.compose.ui.text.font.FontFamily.Monospace,
+                    fontWeight = FontWeight.Bold,
+                    fontSize = 18.sp,
+                    letterSpacing = 2.sp
+                )
+                Spacer(modifier = Modifier.weight(1f))
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    Text(
+                        text = "v" + com.zenithblue.sambas3.BuildConfig.VERSION_NAME,
+                        color = com.zenithblue.sambas3.RPCSXColors.textSecondary,
+                        fontFamily = androidx.compose.ui.text.font.FontFamily.Monospace,
+                        fontSize = 12.sp
+                    )
+                    PulsingDot()
+                }
+            }
+        },
+        bottomBar = {
+            ControllerHintStrip(
+                hints = listOf(
+                    R.drawable.cross to "Select",
+                    R.drawable.circle to "Back"
+                )
+            )
         }
     ) { contentPadding ->
         val context = LocalContext.current
         val configPicker = rememberLauncherForActivityResult(
             contract = ActivityResultContracts.OpenDocument(),
             onResult = { uri: Uri? ->
-                uri?.let { 
+                uri?.let {
                     if (FileUtil.importConfig(context, it))
                         onRefresh()
                 }
@@ -551,133 +849,159 @@ fun SettingsScreen(
                 uri?.let { FileUtil.exportConfig(context, it) }
             }
         )
-        
-        LazyColumn(
+
+        Row(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(contentPadding),
+                .padding(contentPadding)
+                .background(com.zenithblue.sambas3.RPCSXColors.background),
+            horizontalArrangement = Arrangement.spacedBy(16.dp)
         ) {
-            item {
-                Spacer(modifier = Modifier.height(16.dp))
-            }
-
-            item(
-                key = "internal_directory"
+            LazyColumn(
+                modifier = Modifier
+                    .weight(if (isWideScreen) 1f else 3f)
+                    .fillMaxHeight(),
             ) {
-                HomePreference(
-                    title = stringResource(R.string.view_internal_dir),
-                    icon = { PreferenceIcon(icon = painterResource(R.drawable.ic_folder)) },
-                    description = stringResource(R.string.view_internal_dir_description),
-                    onClick = {
-                        if (!FileUtil.launchInternalDir(context)) {
-                            AlertDialogQueue.showDialog(
-                                context.getString(R.string.failed_to_view_internal_dir),
-                                context.getString(R.string.no_activity_to_handle_action)
-                            )
-                        }
-                    }
-                )
-            }
+                item {
+                    Spacer(modifier = Modifier.height(16.dp))
+                }
 
-            item(
-                key = "users"
-            ) {
-                HomePreference(
-                    title = stringResource(R.string.users),
-                    description = "${stringResource(R.string.active_user)}: ${UserRepository.getUsername(activeUser)}",
-                    icon = {
-                        PreferenceIcon(icon = painterResource(id = R.drawable.ic_person))
-                    },
-                    onClick = {
-                        navigateTo("users")
-                    }
-                )
-            }
-
-            item(key = "advanced_settings") {
-                HomePreference(
-                    title = stringResource(R.string.advanced_settings),
-                    icon = { Icon(painterResource(R.drawable.tune), null) },
-                    description = stringResource(R.string.advanced_settings_description),
-                    onClick = {
-                        navigateTo("settings@@$")
-                    },
-                    onLongClick = {
-                        AlertDialogQueue.showDialog(
-                            title = context.getString(R.string.manage_settings),
-                            confirmText = context.getString(R.string.export),
-                            dismissText = context.getString(R.string.import_),
-                            onDismiss = {
-                                configPicker.launch(arrayOf("*/*"))
-                            },
-                            onConfirm = {
-                                configExporter.launch("config.yml")
+                item(
+                    key = "internal_directory"
+                ) {
+                    HomePreference(
+                        title = stringResource(R.string.view_internal_dir),
+                        icon = { PreferenceIcon(icon = painterResource(R.drawable.ic_folder)) },
+                        description = stringResource(R.string.view_internal_dir_description),
+                        onClick = {
+                            if (!FileUtil.launchInternalDir(context)) {
+                                AlertDialogQueue.showDialog(
+                                    context.getString(R.string.failed_to_view_internal_dir),
+                                    context.getString(R.string.no_activity_to_handle_action)
+                                )
                             }
-                        )
-                    }
-                )
-            }
+                        },
+                        onFocusChanged = { if (it) focusedKey = "internal_directory" }
+                    )
+                }
 
-            item(
-                key = "custom_driver"
-            ) {
-                HomePreference(
-                    title = stringResource(R.string.custom_driver),
-                    icon = { Icon(painterResource(R.drawable.memory), contentDescription = null) },
-                    description = stringResource(R.string.custom_driver_description),
-                    onClick = {
-                        if (RPCSX.instance.supportsCustomDriverLoading()) {
-                            navigateTo("drivers")
-                        } else {
+                item(
+                    key = "users"
+                ) {
+                    HomePreference(
+                        title = stringResource(R.string.users),
+                        description = "${stringResource(R.string.active_user)}: ${UserRepository.getUsername(activeUser)}",
+                        icon = {
+                            PreferenceIcon(icon = painterResource(id = R.drawable.ic_person))
+                        },
+                        onClick = {
+                            navigateTo("users")
+                        },
+                        onFocusChanged = { if (it) focusedKey = "users" }
+                    )
+                }
+
+                item(key = "advanced_settings") {
+                    HomePreference(
+                        title = stringResource(R.string.advanced_settings),
+                        icon = { Icon(painterResource(R.drawable.tune), null) },
+                        description = stringResource(R.string.advanced_settings_description),
+                        onClick = {
+                            navigateTo("settings@@$")
+                        },
+                        onLongClick = {
                             AlertDialogQueue.showDialog(
-                                title = context.getString(R.string.custom_driver_not_supported),
-                                message = context.getString(R.string.custom_driver_not_supported_description),
-                                confirmText = context.getString(R.string.close),
-                                dismissText = ""
+                                title = context.getString(R.string.manage_settings),
+                                confirmText = context.getString(R.string.export),
+                                dismissText = context.getString(R.string.import_),
+                                onDismiss = {
+                                    configPicker.launch(arrayOf("*/*"))
+                                },
+                                onConfirm = {
+                                    configExporter.launch("config.yml")
+                                }
                             )
-                        }
-                    }  
-                )
-            }
+                        },
+                        onFocusChanged = { if (it) focusedKey = "advanced_settings" }
+                    )
+                }
 
-            item(key = "controls") {
-                HomePreference(
-                    title = stringResource(R.string.controls),
-                    icon = { Icon(painterResource(R.drawable.gamepad), null) },
-                    description = stringResource(R.string.controls_description),
-                    onClick = { navigateTo("controls") }
-                )       
-            }
-
-            item(key = "share_logs") {
-                HomePreference(
-                    title = stringResource(R.string.share_log),
-                    icon = { Icon(painter = painterResource(id = R.drawable.ic_share), contentDescription = null) },
-                    description = stringResource(R.string.share_log_description),
-                    onClick = {
-                        val file = DocumentFile.fromSingleUri(
-                            context, DocumentsContract.buildDocumentUri(
-                                AppDataDocumentProvider.AUTHORITY,
-                                "${AppDataDocumentProvider.ROOT_ID}/cache/RPCSX${if (RPCSX.lastPlayedGame.isNotEmpty()) "" else ".old"}.log"
-                            )
-                        )
-
-                        if (file != null && file.exists() && file.length() != 0L) {
-                            val intent = Intent(Intent.ACTION_SEND).apply {
-                                setDataAndType(file.uri, "text/plain")
-                                addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
-                                putExtra(Intent.EXTRA_STREAM, file.uri)
+                item(
+                    key = "custom_driver"
+                ) {
+                    HomePreference(
+                        title = stringResource(R.string.custom_driver),
+                        icon = { Icon(painterResource(R.drawable.memory), contentDescription = null) },
+                        description = stringResource(R.string.custom_driver_description),
+                        onClick = {
+                            if (RPCSX.instance.supportsCustomDriverLoading()) {
+                                navigateTo("drivers")
+                            } else {
+                                AlertDialogQueue.showDialog(
+                                    title = context.getString(R.string.custom_driver_not_supported),
+                                    message = context.getString(R.string.custom_driver_not_supported_description),
+                                    confirmText = context.getString(R.string.close),
+                                    dismissText = ""
+                                )
                             }
-                            context.startActivity(Intent.createChooser(intent, context.getString(R.string.share_log)))
-                        } else {
-                            Toast.makeText(context, context.getString(R.string.log_not_found), Toast.LENGTH_SHORT).show()
-                        }
-                    }
-                )
+                        },
+                        onFocusChanged = { if (it) focusedKey = "custom_driver" }
+                    )
+                }
+
+                item(key = "controls") {
+                    HomePreference(
+                        title = stringResource(R.string.controls),
+                        icon = { Icon(painterResource(R.drawable.gamepad), null) },
+                        description = stringResource(R.string.controls_description),
+                        onClick = { navigateTo("controls") },
+                        onFocusChanged = { if (it) focusedKey = "controls" }
+                    )
+                }
+
+                item(key = "share_logs") {
+                    HomePreference(
+                        title = stringResource(R.string.share_log),
+                        icon = { Icon(painter = painterResource(id = R.drawable.ic_share), contentDescription = null) },
+                        description = stringResource(R.string.share_log_description),
+                        onClick = {
+                            val file = DocumentFile.fromSingleUri(
+                                context, DocumentsContract.buildDocumentUri(
+                                    AppDataDocumentProvider.AUTHORITY,
+                                    "${AppDataDocumentProvider.ROOT_ID}/cache/RPCSX${if (RPCSX.lastPlayedGame.isNotEmpty()) "" else ".old"}.log"
+                                )
+                            )
+
+                            if (file != null && file.exists() && file.length() != 0L) {
+                                val intent = Intent(Intent.ACTION_SEND).apply {
+                                    setDataAndType(file.uri, "text/plain")
+                                    addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+                                    putExtra(Intent.EXTRA_STREAM, file.uri)
+                                }
+                                context.startActivity(Intent.createChooser(intent, context.getString(R.string.share_log)))
+                            } else {
+                                Toast.makeText(context, context.getString(R.string.log_not_found), Toast.LENGTH_SHORT).show()
+                            }
+                        },
+                        onFocusChanged = { if (it) focusedKey = "share_logs" }
+                    )
+                }
+            }
+
+            if (isWideScreen) {
+                Box(
+                    modifier = Modifier
+                        .weight(2f)
+                        .fillMaxHeight()
+                        .padding(end = 16.dp, top = 16.dp, bottom = 16.dp)
+                ) {
+                    SettingsDetailPane(focusedKey = focusedKey, activeUser = activeUser)
+                }
             }
         }
     }
 }
+
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -701,6 +1025,14 @@ fun ControllerSettings(
                         Icon(painter = painterResource(id = R.drawable.ic_keyboard_arrow_left), null)
                     }
                 }
+            )
+        },
+        bottomBar = {
+            ControllerHintStrip(
+                hints = listOf(
+                    R.drawable.cross to "Select",
+                    R.drawable.circle to "Back"
+                )
             )
         }
     ) { contentPadding ->

@@ -248,7 +248,7 @@ class PadOverlay(context: Context?, attrs: AttributeSet?) : SurfaceView(context,
             ),
 
             createButton(
-                R.drawable.ic_sambas3_foreground,
+                R.mipmap.ic_sambas3_foreground,
                 btnHomeX,
                 btnHomeY,
                 buttonSize,

@@ -10,10 +10,19 @@ import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Surface
+import androidx.compose.material3.LocalContentColor
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.setValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.focus.onFocusChanged
+import androidx.compose.ui.draw.drawBehind
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
@@ -25,27 +34,6 @@ import com.zenithblue.sambas3.ui.settings.components.LocalPreferenceState
 import com.zenithblue.sambas3.ui.settings.components.core.PreferenceIcon
 import com.zenithblue.sambas3.ui.settings.components.core.PreferenceSubtitle
 import com.zenithblue.sambas3.ui.settings.components.core.PreferenceTitle
-
-/**
- * A composable function that creates a base layout for a preference item.
- *
- * @param title title of the preference.
- * @param modifier The modifier applied to the preference container.
- * @param subContent Optional composable content to display below the title.
- * @param leadingContent Optional composable content to display at the start of the preference item.
- * This is typically used for icons or other visual cues.
- *
- * @param trailingContent Optional composable content to display at the end of the preference item.
- * This is typically used for switches, checkboxes, or other interactive elements.
- *
- * @param shape The shape of the preference surface.
- * @param tonalElevation The tonal elevation of the preference surface.
- * @param shadowElevation The shadow elevation of the preference surface.
- * @param enabled Whether the preference is enabled or disabled.
- * @param onClick callback invoked when the preference item is clicked.
- *
- * @see Surface
- */
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
@@ -63,6 +51,10 @@ fun BasePreference(
     onClick: () -> Unit,
     onLongClick: () -> Unit = {}
 ) {
+    var isFocused by remember { mutableStateOf(false) }
+    val paddingLeft by androidx.compose.animation.core.animateDpAsState(if (isFocused) 20.dp else 16.dp, label = "paddingLeft")
+    val contentColor = if (isFocused) com.zenithblue.sambas3.RPCSXColors.primary else com.zenithblue.sambas3.RPCSXColors.textPrimary
+
     CompositionLocalProvider(
         LocalPreferenceState provides enabled
     ) {
@@ -70,32 +62,48 @@ fun BasePreference(
             if (enabled) onClick()
         }
         Surface(
-            modifier = modifier.combinedClickable(
-                onClick = preferenceOnClick,
-                onLongClick = onLongClick
-            ),
+            modifier = modifier
+                .onFocusChanged { isFocused = it.isFocused }
+                .combinedClickable(
+                    onClick = preferenceOnClick,
+                    onLongClick = onLongClick
+                )
+                .drawBehind {
+                    if (isFocused) {
+                        drawRect(
+                            color = com.zenithblue.sambas3.RPCSXColors.focusRing,
+                            topLeft = Offset(0f, 0f),
+                            size = Size(4.dp.toPx(), size.height)
+                        )
+                    }
+                },
             shape = shape,
+            color = if (isFocused) com.zenithblue.sambas3.RPCSXColors.surfaceOverlay else com.zenithblue.sambas3.RPCSXColors.surface,
             tonalElevation = tonalElevation,
             shadowElevation = shadowElevation
         ) {
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = 16.dp)
-                    .heightIn(min = 72.dp),
-                horizontalArrangement = Arrangement.spacedBy(16.dp),
-                verticalAlignment = Alignment.CenterVertically
+            CompositionLocalProvider(
+                LocalContentColor provides contentColor
             ) {
-                leadingContent?.invoke()
-                Column(
-                    modifier = Modifier.weight(1f).padding(vertical = 12.dp),
-                    verticalArrangement = Arrangement.spacedBy(4.dp),
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(start = paddingLeft, end = 16.dp)
+                        .heightIn(min = 72.dp),
+                    horizontalArrangement = Arrangement.spacedBy(16.dp),
+                    verticalAlignment = Alignment.CenterVertically
                 ) {
-                    title()
-                    subContent?.invoke()
-                    value?.invoke()
+                    leadingContent?.invoke()
+                    Column(
+                        modifier = Modifier.weight(1f).padding(vertical = 12.dp),
+                        verticalArrangement = Arrangement.spacedBy(4.dp),
+                    ) {
+                        title()
+                        subContent?.invoke()
+                        value?.invoke()
+                    }
+                    trailingContent?.invoke()
                 }
-                trailingContent?.invoke()
             }
         }
     }
@@ -107,24 +115,9 @@ private fun BasePreferencePreview() {
     ComposePreview {
         BasePreference(
             title = { PreferenceTitle("Preference Title") },
-            subContent = { PreferenceSubtitle("Lorem ipsum dolor sit amet, consectetur adipiscing elit. Ullamcorper tempor imperdiet. Tempor magna proident pariatur nonumy iusto, sint laborum possim accumsan, elit nonummy facer enim autem eiusmod lobortis reprehenderit molestie vel esse aliquyam cupiditat velit nisi aliquid ipsum. Erat accusam reprehenderit. Feugiat aliquyam iure. Nisi ex officia.", maxLines = 2) },
+            subContent = { PreferenceSubtitle("Lorem ipsum dolor sit amet, consectetur adipiscing elit.", maxLines = 2) },
             leadingContent = { PreferenceIcon(painterResource(id = R.drawable.ic_search)) },
             trailingContent = { PreferenceIcon(painterResource(id = R.drawable.ic_keyboard_arrow_right)) },
-            onClick = {}
-        )
-    }
-}
-
-@Preview
-@Composable
-private fun BasePreferenceDisabledPreview() {
-    ComposePreview {
-        BasePreference(
-            title = { PreferenceTitle("Preference Title") },
-            subContent = { PreferenceSubtitle("Lorem ipsum dolor sit amet, consectetur adipiscing elit. Ullamcorper tempor imperdiet. Tempor magna proident pariatur nonumy iusto, sint laborum possim accumsan, elit nonummy facer enim autem eiusmod lobortis reprehenderit molestie vel esse aliquyam cupiditat velit nisi aliquid ipsum. Erat accusam reprehenderit. Feugiat aliquyam iure. Nisi ex officia.", maxLines = 2) },
-            leadingContent = { PreferenceIcon(painterResource(id = R.drawable.ic_search)) },
-            trailingContent = { PreferenceIcon(painterResource(id = R.drawable.ic_keyboard_arrow_right)) },
-            enabled = false,
             onClick = {}
         )
     }
