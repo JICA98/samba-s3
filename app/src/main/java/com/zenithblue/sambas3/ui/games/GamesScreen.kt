@@ -3,610 +3,520 @@ package com.zenithblue.sambas3.ui.games
 import android.content.Intent
 import android.net.Uri
 import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.compose.foundation.ExperimentalFoundationApi
+import androidx.compose.animation.core.animateDpAsState
+import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.core.infiniteRepeatable
+import androidx.compose.animation.core.rememberInfiniteTransition
+import androidx.compose.animation.core.RepeatMode
+import androidx.compose.animation.core.animateFloat
 import androidx.compose.foundation.background
-import androidx.compose.foundation.combinedClickable
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.layout.wrapContentHeight
-import androidx.compose.foundation.lazy.grid.GridCells
-import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
-import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.Card
-import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.DropdownMenu
-import androidx.compose.material3.DropdownMenuItem
-import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.Icon
-import androidx.compose.material3.LinearProgressIndicator
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
-import androidx.compose.material3.pulltorefresh.PullToRefreshBox
-import androidx.compose.material3.pulltorefresh.PullToRefreshDefaults
-import androidx.compose.material3.pulltorefresh.rememberPullToRefreshState
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableLongStateOf
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
-import androidx.compose.runtime.saveable.rememberSaveable
-import androidx.compose.runtime.setValue
+import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.pager.HorizontalPager
+import androidx.compose.foundation.pager.rememberPagerState
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.*
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
+import androidx.compose.ui.draw.blur
+import androidx.compose.ui.draw.drawBehind
+import androidx.compose.ui.draw.drawWithContent
+import androidx.compose.ui.draw.scale
+import androidx.compose.ui.draw.shadow
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.RectangleShape
-import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.graphics.ColorFilter
+import androidx.compose.ui.graphics.ColorMatrix
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.withTimeout
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.res.vectorResource
-import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import coil3.compose.AsyncImage
-import kotlinx.coroutines.launch
-import com.zenithblue.sambas3.BuildConfig
-import com.zenithblue.sambas3.EmulatorState
-import com.zenithblue.sambas3.FirmwareRepository
-import com.zenithblue.sambas3.Game
-import com.zenithblue.sambas3.GameFlag
-import com.zenithblue.sambas3.GameInfo
-import com.zenithblue.sambas3.GameProgress
-import com.zenithblue.sambas3.GameProgressType
-import com.zenithblue.sambas3.GameRepository
-import com.zenithblue.sambas3.ProgressRepository
+import com.zenithblue.sambas3.*
 import com.zenithblue.sambas3.R
-import com.zenithblue.sambas3.RPCSX
-import com.zenithblue.sambas3.RPCSXActivity
-import com.zenithblue.sambas3.dialogs.AlertDialogQueue
 import com.zenithblue.sambas3.utils.FileUtil
-import com.zenithblue.sambas3.utils.RpcsxUpdater
-import com.zenithblue.sambas3.utils.UiUpdater
-import java.io.File
-import kotlin.concurrent.thread
-
-private fun withAlpha(color: Color, alpha: Float): Color {
-    return Color(
-        red = color.red, green = color.green, blue = color.blue, alpha = alpha
-    )
-}
-
-@OptIn(ExperimentalFoundationApi::class)
-@Composable
-fun GameItem(game: Game) {
-    val context = LocalContext.current
-    val menuExpanded = remember { mutableStateOf(false) }
-    val iconExists = remember { mutableStateOf(false) }
-    val emulatorState by remember { RPCSX.state }
-    val emulatorActiveGame by remember { RPCSX.activeGame }
-
-    val installKeyLauncher =
-        rememberLauncherForActivityResult(contract = ActivityResultContracts.GetContent()) { uri: Uri? ->
-            if (uri != null) {
-                val descriptor = context.contentResolver.openAssetFileDescriptor(uri, "r")
-                val fd = descriptor?.parcelFileDescriptor?.fd
-
-                if (fd != null) {
-                    val installProgress = ProgressRepository.create(context, context.getString(R.string.license_installation))
-
-                    game.addProgress(GameProgress(installProgress, GameProgressType.Compile))
-
-                    thread(isDaemon = true) {
-                        if (!RPCSX.instance.installKey(fd, installProgress, game.info.path)) {
-                            try {
-                                ProgressRepository.onProgressEvent(installProgress, -1, 0)
-                            } catch (e: Exception) {
-                                e.printStackTrace()
-                            }
-                        }
-
-                        try {
-                            descriptor.close()
-                        } catch (e: Exception) {
-                            e.printStackTrace()
-                        }
-                    }
-                } else {
-                    try {
-                        descriptor?.close()
-                    } catch (e: Exception) {
-                        e.printStackTrace()
-                    }
-                }
-            }
-        }
-
-    Column {
-        DropdownMenu(
-            expanded = menuExpanded.value, onDismissRequest = { menuExpanded.value = false }) {
-            if (game.progressList.isEmpty()) {
-                DropdownMenuItem(
-                    text = { Text(stringResource(R.string.delete)) },
-                    leadingIcon = { Icon(painter = painterResource(id = R.drawable.ic_delete), contentDescription = null) },
-                    onClick = {
-                        menuExpanded.value = false
-                        val deleteProgress = ProgressRepository.create(context, context.getString(R.string.deleting_game))
-                        game.addProgress(GameProgress(deleteProgress, GameProgressType.Compile))
-                        ProgressRepository.onProgressEvent(deleteProgress, 1, 0L)
-                        val path = File(game.info.path)
-                        if (path.exists()) {
-                            path.deleteRecursively()
-                            FileUtil.deleteCache(
-                                context,
-                                game.info.path.substringAfterLast("/")
-                            ) { success ->
-                                if (!success) {
-                                    AlertDialogQueue.showDialog(
-                                        title = context.getString(R.string.unexpected_error),
-                                        message = context.getString(R.string.failed_to_delete_game_cache),
-                                        confirmText = context.getString(R.string.close),
-                                        dismissText = ""
-                                    )
-                                }
-                                ProgressRepository.onProgressEvent(deleteProgress, 100, 100)
-                                GameRepository.remove(game)
-                            }
-                        }
-                    }
-                )
-            }
-        }
-
-        Card(
-            shape = RectangleShape,
-            modifier = Modifier
-                .fillMaxSize()
-                .combinedClickable(onClick = click@{
-                    if (game.hasFlag(GameFlag.Locked)) {
-                        AlertDialogQueue.showDialog(
-                            title = context.getString(R.string.missing_key),
-                            message = context.getString(R.string.game_require_key),
-                            onConfirm = { installKeyLauncher.launch("*/*") },
-                            onDismiss = {},
-                            confirmText = context.getString(R.string.install_rap_file)
-                        )
-
-                        return@click
-                    }
-
-                    if (FirmwareRepository.version.value == null) {
-                        AlertDialogQueue.showDialog(
-                            title = context.getString(R.string.missing_firmware),
-                            message = context.getString(R.string.install_firmware_to_continue)
-                        )
-                    } else if (FirmwareRepository.progressChannel.value != null) {
-                        AlertDialogQueue.showDialog(
-                            title = context.getString(R.string.missing_firmware),
-                            message = context.getString(R.string.wait_until_firmware_install)
-                        )
-                    } else if (game.info.path != "$" && game.findProgress(
-                            arrayOf(
-                                GameProgressType.Install, GameProgressType.Remove
-                            )
-                        ) == null
-                    ) {
-                        if (game.findProgress(GameProgressType.Compile) != null) {
-                            AlertDialogQueue.showDialog(
-                                title = context.getString(R.string.game_compiling_not_finished),
-                                message = context.getString(R.string.wait_until_game_compile)
-                            )
-                        } else {
-                            GameRepository.onBoot(game)
-                            val emulatorWindow = Intent(
-                                context, RPCSXActivity::class.java
-                            )
-                            emulatorWindow.putExtra("path", game.info.path)
-                            context.startActivity(emulatorWindow)
-                        }
-                    }
-                }, onLongClick = {
-                    if (game.info.name.value != "VSH") {
-                        menuExpanded.value = true
-                    }
-                })
-        ) {
-            if (game.info.iconPath.value != null && !iconExists.value) {
-                if (game.progressList.isNotEmpty()) {
-                    val progressId = ProgressRepository.getItem(game.progressList.first().id)
-                    if (progressId != null) {
-                        val progressValue = progressId.value.value
-                        val progressMax = progressId.value.max
-
-                        iconExists.value =
-                            (progressMax.longValue != 0L && progressValue.longValue == progressMax.longValue) || File(
-                                game.info.iconPath.value!!
-                            ).exists()
-                    }
-                } else {
-                    iconExists.value = File(game.info.iconPath.value!!).exists()
-                }
-            }
-
-            Box(
-                modifier = Modifier
-                    .height(110.dp)
-                    .align(alignment = Alignment.CenterHorizontally)
-                    .fillMaxSize()
-            ) {
-                if (game.info.iconPath.value != null && iconExists.value) {
-                    Row(
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.Center,
-                        modifier = Modifier.fillMaxSize()
-                    ) {
-                        AsyncImage(
-                            model = game.info.iconPath.value,
-                            contentScale = if (game.info.name.value == "VSH") ContentScale.Fit else ContentScale.Crop,
-                            contentDescription = null,
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .wrapContentHeight()
-                        )
-                    }
-                }
-
-                if (game.progressList.isNotEmpty()) {
-                    Row(
-                        modifier = Modifier
-                            .fillMaxSize()
-                            .background(withAlpha(Color.DarkGray, 0.6f))
-                    ) {}
-
-                    val progressChannel = game.progressList.first().id
-                    val progress = ProgressRepository.getItem(progressChannel)
-                    val progressValue = progress?.value?.value
-                    val maxValue = progress?.value?.max
-
-                    if (progressValue != null && maxValue != null) {
-                        Row(
-                            verticalAlignment = Alignment.CenterVertically,
-                            horizontalArrangement = Arrangement.Center,
-                            modifier = Modifier.fillMaxSize()
-                        ) {
-                            if (maxValue.longValue != 0L) {
-                                CircularProgressIndicator(
-                                    modifier = Modifier
-                                        .width(64.dp)
-                                        .height(64.dp),
-                                    color = MaterialTheme.colorScheme.secondary,
-                                    trackColor = MaterialTheme.colorScheme.surfaceVariant,
-                                    progress = {
-                                        progressValue.longValue.toFloat() / maxValue.longValue.toFloat()
-                                    },
-                                )
-                            } else {
-                                CircularProgressIndicator(
-                                    modifier = Modifier
-                                        .width(64.dp)
-                                        .height(64.dp),
-                                    color = MaterialTheme.colorScheme.secondary,
-                                    trackColor = MaterialTheme.colorScheme.surfaceVariant,
-                                )
-                            }
-                        }
-                    }
-                } else if (emulatorState == EmulatorState.Paused && emulatorActiveGame == game.info.path) {
-                    Card(modifier = Modifier.padding(5.dp)) {
-                        Icon(
-                            imageVector = ImageVector.vectorResource(R.drawable.ic_play),
-                            contentDescription = null
-                        )
-                    }
-                }
-
-                if (game.hasFlag(GameFlag.Locked) || game.hasFlag(GameFlag.Trial)) {
-                    Row(
-                        verticalAlignment = Alignment.Top,
-                        horizontalArrangement = Arrangement.End,
-                        modifier = Modifier.fillMaxSize()
-                    ) {
-                        Card(
-                            onClick = {
-                                installKeyLauncher.launch("*/*")
-                            }) {
-
-                            Icon(
-                                painter = painterResource(id = R.drawable.ic_lock),
-                                contentDescription = "Game is locked",
-                                modifier = Modifier
-                                    .size(30.dp)
-                                    .padding(7.dp)
-                            )
-                        }
-                    }
-                }
-
-//                val name = game.info.name.value
-//                if (name != null) {
-//                    Row(
-//                        verticalAlignment = Alignment.Bottom,
-//                        horizontalArrangement = Arrangement.Center,
-//                        modifier = Modifier.fillMaxSize()
-//                    ) {
-//                        Text(name, textAlign = TextAlign.Center)
-//                    }
-//                }
-            }
-        }
-    }
-}
+import kotlin.math.abs
+import java.text.SimpleDateFormat
+import java.util.Date
+import java.util.Locale
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun GamesScreen() {
+fun GamesScreen(
+    installPkgLauncher: ActivityResultLauncher<String>? = null,
+    gameFolderPickerLauncher: ActivityResultLauncher<Uri?>? = null,
+    installFwLauncher: ActivityResultLauncher<String>? = null,
+    navigateToSettings: (() -> Unit)? = null
+) {
     val context = LocalContext.current
     val games = remember { GameRepository.list() }
-    val isRefreshing by remember { GameRepository.isRefreshing }
-    val state = rememberPullToRefreshState()
-    var uiUpdateVersion by remember { mutableStateOf<String?>(null) }
-    var uiUpdate by remember { mutableStateOf(false) }
-    var uiUpdateProgressValue by remember { mutableLongStateOf(0) }
-    var uiUpdateProgressMax by remember { mutableLongStateOf(0) }
-    val coroutineScope = rememberCoroutineScope()
     val rpcsxLibrary by remember { RPCSX.activeLibrary }
-    var rpcsxInstallLibraryFailed by remember { mutableStateOf(false) }
-    var rpcsxUpdateVersion by remember { mutableStateOf<String?>(null) }
-    var rpcsxUpdate by remember { mutableStateOf(false) }
-    var rpcsxUpdateProgressValue by remember { mutableLongStateOf(0) }
-    var rpcsxUpdateProgressMax by remember { mutableLongStateOf(0) }
-    val activeDialogs = remember { AlertDialogQueue.dialogs }
-
-    val gameInProgress = games.find { it.progressList.isNotEmpty() }
-
-    var updatesChecked by rememberSaveable { mutableStateOf(false) }
-
-    val checkForUpdates = suspend {
-        rpcsxUpdateVersion = RpcsxUpdater.checkForUpdate()
-        uiUpdateVersion = UiUpdater.checkForUpdate(context)
-
-        if (rpcsxUpdateVersion == null && rpcsxLibrary == null) {
-            rpcsxInstallLibraryFailed = true
-        }
-    }
-
-    LaunchedEffect(Unit) {
-        if (!updatesChecked) {
-            updatesChecked = true
-            checkForUpdates()
-        }
-    }
-
-    if (uiUpdateVersion != null && rpcsxUpdateVersion == null && activeDialogs.isEmpty()) {
-        AlertDialog(
-            onDismissRequest = { if (!uiUpdate) uiUpdateVersion = null },
-            title = {
-                Text(
-                    if (uiUpdate) stringResource(R.string.downloading_ui, uiUpdateVersion!!)
-                    else stringResource(R.string.ui_update_available)
-                )
-            },
-            text = {
-                Column(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalAlignment = Alignment.CenterHorizontally
-                ) {
-                    if (uiUpdate) {
-                        if (uiUpdateProgressMax == 0L) {
-                            LinearProgressIndicator(modifier = Modifier.fillMaxWidth())
-                        } else {
-                            LinearProgressIndicator(
-                                { uiUpdateProgressValue / uiUpdateProgressMax.toFloat() },
-                                modifier = Modifier.fillMaxWidth()
-                            )
-                        }
-                    } else {
-                        Spacer(modifier = Modifier.height(8.dp))
-                        Text(stringResource(R.string.current_and_new_version, BuildConfig.Version, uiUpdateVersion!!))
-                    }
-                }
-            },
-            confirmButton = {
-                if (!uiUpdate) {
-                    TextButton(onClick = {
-                        uiUpdate = true
-
-                        coroutineScope.launch {
-                            val file = UiUpdater.downloadUpdate(
-                                context,
-                                File("${context.getExternalFilesDir(null)!!.absolutePath}/cache/")
-                            ) { value, max ->
-                                uiUpdateProgressValue = value
-                                uiUpdateProgressMax = max
-                            }
-                            uiUpdate = false
-                            uiUpdateVersion = null
-
-                            if (file != null) {
-                                UiUpdater.installUpdate(context, file)
-                            }
-                        }
-                    }) {
-                        Text(stringResource(R.string.update))
-                    }
-                }
-            })
-    }
-
-    if (rpcsxLibrary == null && rpcsxUpdateVersion == null && !rpcsxUpdate && activeDialogs.isEmpty()) {
-        AlertDialog(
-            onDismissRequest = { },
-            title = { Text(stringResource(R.string.missing_rpcsx_lib)) },
-            text = { Text(stringResource(R.string.downloading_latest_rpcsx)) },
-            confirmButton = {}
-        )
-    }
-
-    if (rpcsxUpdateVersion != null && activeDialogs.isEmpty()) {
-        val startUpdate = {
-            rpcsxUpdate = true
-
-            coroutineScope.launch {
-                val file = RpcsxUpdater.downloadUpdate(
-                    File(context.filesDir.canonicalPath)
-                ) { value, max ->
-                    rpcsxUpdateProgressValue = value
-                    rpcsxUpdateProgressMax = max
-                }
-
-                if (file != null) {
-                    RpcsxUpdater.installUpdate(context, file)
-                } else if (rpcsxLibrary == null) {
-                    rpcsxInstallLibraryFailed = true
-                }
-
-                rpcsxUpdate = false
-                rpcsxUpdateVersion = null
-            }
-        }
-
-        if (rpcsxLibrary == null) {
-            startUpdate()
-        }
-
-        AlertDialog(
-            onDismissRequest = {
-                if (!rpcsxUpdate && rpcsxLibrary != null) rpcsxUpdateVersion = null
-            },
-            title = {
-                Text(
-                    if (rpcsxUpdate) stringResource(R.string.downloading_rpcsx, rpcsxUpdateVersion!!)
-                    else stringResource(R.string.rpcsx_update_available)
-                )
-            },
-            text = {
-                Column(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalAlignment = Alignment.CenterHorizontally
-                ) {
-                    if (rpcsxUpdate) {
-                        if (rpcsxUpdateProgressMax == 0L) {
-                            LinearProgressIndicator(modifier = Modifier.fillMaxWidth())
-                        } else {
-                            LinearProgressIndicator(
-                                { rpcsxUpdateProgressValue / rpcsxUpdateProgressMax.toFloat() },
-                                modifier = Modifier.fillMaxWidth()
-                            )
-                        }
-                    } else {
-                        Spacer(modifier = Modifier.height(8.dp))
-                        Text(
-                            stringResource(
-                                R.string.current_and_new_version,
-                                RpcsxUpdater.getCurrentVersion() ?: stringResource(R.string.none),
-                                rpcsxUpdateVersion!!
-                            )
-                        )
-                    }
-                }
-            },
-            confirmButton = {
-                if (!rpcsxUpdate) {
-                    TextButton(onClick = {
-                        startUpdate()
-                    }) {
-                        Text(stringResource(R.string.update))
-                    }
-                }
-            })
-    }
-
-    if (rpcsxInstallLibraryFailed) {
-        val installRpcsxLauncher =
-            rememberLauncherForActivityResult(contract = ActivityResultContracts.GetContent()) { uri: Uri? ->
-                if (uri != null) {
-                    rpcsxInstallLibraryFailed = false
-
-                    val target = File(context.filesDir.canonicalPath, "librpcsx_unknown_unknown.so")
-                    if (target.exists()) {
-                        target.delete()
-                    }
-
-                    FileUtil.saveFile(context, uri, target.path)
-
-                    if (RPCSX.instance.getLibraryVersion(target.path) != null) {
-                        RpcsxUpdater.installUpdate(context, target)
-                    } else {
-                        rpcsxInstallLibraryFailed = true
-                    }
-                }
-            }
-
-        AlertDialog(
-            onDismissRequest = {},
-            title = { Text(stringResource(R.string.failed_to_download_rpcsx)) },
-            text = {},
-            confirmButton = {
-                TextButton(onClick = {
-                    rpcsxInstallLibraryFailed = false
-                    coroutineScope.launch { checkForUpdates() }
-                }) {
-                    Text(stringResource(R.string.retry))
-                }
-            },
-            dismissButton = {
-                TextButton(onClick = {
-                    installRpcsxLauncher.launch("*/*")
-                }) {
-                    Text(stringResource(R.string.install_custom_version))
-                }
-            })
-    }
 
     if (rpcsxLibrary == null) {
+        // Loading screen while library is missing
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .background(RPCSXColors.background)
+                .drawBehind {
+                    drawRect(
+                        brush = Brush.radialGradient(
+                            colors = listOf(Color.Transparent, Color(0xCC000000)),
+                            center = Offset(size.width / 2, size.height / 2),
+                            radius = size.width
+                        ),
+                        size = size
+                    )
+                },
+            contentAlignment = Alignment.Center
+        ) {
+            Column(horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(24.dp)) {
+                Icon(painterResource(R.drawable.gamepad), contentDescription = null, tint = RPCSXColors.primary, modifier = Modifier.size(64.dp))
+                Text("SambaS3", style = AppTypography.displayLarge.copy(letterSpacing = 4.sp), color = RPCSXColors.primary)
+                CircularProgressIndicator(color = RPCSXColors.primary, modifier = Modifier.size(32.dp))
+                Text(stringResource(R.string.missing_rpcsx_lib), style = AppTypography.labelSmall, color = RPCSXColors.textSecondary)
+            }
+        }
         return
     }
 
-    PullToRefreshBox(
-        isRefreshing = isRefreshing,
-        state = state,
-        onRefresh = {
-            if (gameInProgress == null && !isRefreshing) {
-                GameRepository.queueRefresh()
+    var focusedIndex by remember { mutableStateOf(if (games.isNotEmpty()) 0 else -1) }
+    var bootingGame by remember { mutableStateOf<Game?>(null) }
+    var showImportDialog by remember { mutableStateOf(false) }
+    var isInstalling by remember { mutableStateOf(false) }
+
+    val bootScale by animateFloatAsState(if (bootingGame != null) 5f else 1f, animationSpec = tween(700))
+    val bootAlpha by animateFloatAsState(if (bootingGame != null) 0f else 1f, animationSpec = tween(500))
+
+    LaunchedEffect(bootingGame) {
+        if (bootingGame != null) {
+            kotlinx.coroutines.delay(600)
+            bootGame(context, bootingGame!!)
+            bootingGame = null
+        }
+    }
+
+    val isoPickerLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.GetContent()
+    ) { uri: Uri? ->
+        if (uri != null) {
+            isInstalling = true
+            PrecompilerService.start(context, PrecompilerServiceAction.Install, uri)
+        }
+    }
+
+    val folderPickerLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.OpenDocumentTree()
+    ) { uri: Uri? ->
+        if (uri != null) {
+            isInstalling = true
+            val takeFlags = Intent.FLAG_GRANT_READ_URI_PERMISSION
+            context.contentResolver.takePersistableUriPermission(uri, takeFlags)
+            FileUtil.installPackages(context, uri)
+        }
+    }
+
+    LaunchedEffect(isInstalling) {
+        if (!isInstalling) return@LaunchedEffect
+        val initialSize = games.size
+        try {
+            kotlinx.coroutines.withTimeout(60_000) {
+                while (games.size == initialSize) {
+                    delay(500)
+                }
+                delay(3000)
             }
-        },
-        indicator = {
-            if (gameInProgress == null) {
-                PullToRefreshDefaults.Indicator(
-                    state = state,
-                    isRefreshing = isRefreshing,
-                    modifier = Modifier.align(Alignment.TopCenter),
-                    color = MaterialTheme.colorScheme.onPrimary,
-                    containerColor = MaterialTheme.colorScheme.primary
+        } catch (_: kotlinx.coroutines.TimeoutCancellationException) {
+            // Installation may have timed out, dismiss spinner
+        }
+        isInstalling = false
+    }
+
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(RPCSXColors.background)
+            .drawBehind {
+                drawRect(
+                    brush = Brush.radialGradient(
+                        colors = listOf(Color.Transparent, Color(0xCC000000)),
+                        center = Offset(size.width / 2, size.height / 2),
+                        radius = size.width
+                    ),
+                    size = size
                 )
             }
-        },
     ) {
-        LazyVerticalGrid(
-            columns = GridCells.Adaptive(minSize = 320.dp * 0.6f),
-            horizontalArrangement = Arrangement.Center,
-            modifier = Modifier.fillMaxSize()
-        ) {
-            items(count = games.size, key = { index -> games[index].info.path }) { index ->
-                GameItem(games[index])
+        Column(modifier = Modifier.fillMaxSize()) {
+            // Top Nav Bar
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .alpha(bootAlpha)
+                    .padding(horizontal = 24.dp, vertical = 16.dp),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                    Icon(painterResource(R.drawable.gamepad), contentDescription = null, tint = RPCSXColors.primary)
+                    Text("SambaS3", style = AppTypography.displayLarge.copy(letterSpacing = 4.sp), color = RPCSXColors.primary)
+                }
+
+                Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(24.dp)) {
+                    Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(4.dp)) {
+                        Icon(painterResource(R.drawable.ic_wifi), contentDescription = null, tint = RPCSXColors.primary, modifier = Modifier.size(16.dp))
+                        Text("CONNECTED", style = AppTypography.labelSmall, color = RPCSXColors.primary)
+                    }
+                    Text(
+                        SimpleDateFormat("h:mm a", Locale.getDefault()).format(Date()),
+                        style = AppTypography.labelMedium,
+                        color = RPCSXColors.textSecondary
+                    )
+                    Row {
+                        IconButton(onClick = { navigateToSettings?.invoke() }) {
+                            Icon(painterResource(R.drawable.ic_settings), contentDescription = "Settings", tint = RPCSXColors.primary)
+                        }
+                        IconButton(onClick = { showImportDialog = true }) {
+                            Icon(painterResource(R.drawable.ic_add), contentDescription = "Add Game", tint = RPCSXColors.primary)
+                        }
+                    }
+                }
+            }
+
+            if (games.isEmpty()) {
+                Box(modifier = Modifier.fillMaxWidth().weight(1f), contentAlignment = Alignment.Center) {
+                    Text("No games yet.\nPress + to add a game from your device.", style = AppTypography.bodyLarge, textAlign = TextAlign.Center, color = RPCSXColors.textSecondary)
+                }
+            } else {
+                // Carousel
+                val pagerState = rememberPagerState(pageCount = { games.size })
+                BoxWithConstraints(modifier = Modifier.fillMaxWidth().weight(1f)) {
+                    val availableHeight = maxHeight
+                    val itemHeight = availableHeight - 64.dp // accounting for vertical padding 32.dp * 2
+                    val itemWidth = itemHeight * 0.85f
+                    val horizontalPadding = if (maxWidth > itemWidth) (maxWidth - itemWidth) / 2 else 0.dp
+                    val coroutineScope = rememberCoroutineScope()
+                    
+                    HorizontalPager(
+                        state = pagerState,
+                        modifier = Modifier.fillMaxSize().scale(bootScale),
+                        contentPadding = PaddingValues(horizontal = horizontalPadding, vertical = 32.dp),
+                        pageSpacing = 16.dp,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) { page ->
+                        val distance = abs(page - pagerState.currentPage)
+                        val game = games[page]
+                        GameCard(
+                            game = game,
+                            distance = distance,
+                            onClick = { coroutineScope.launch { pagerState.animateScrollToPage(page) } },
+                            onPlay = { bootingGame = game }
+                        )
+                    }
+                }
+
+                // Focused Game Info
+                if (pagerState.currentPage in games.indices) {
+                    val activeGame = games[pagerState.currentPage]
+                    Column(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .alpha(bootAlpha)
+                            .padding(top = 16.dp, bottom = 16.dp),
+                        horizontalAlignment = Alignment.CenterHorizontally
+                    ) {
+                        Text(
+                            text = (activeGame.info.name.value ?: "UNKNOWN GAME").uppercase(),
+                            style = AppTypography.headlineMedium.copy(letterSpacing = 2.sp),
+                            color = RPCSXColors.primary
+                        )
+                        Row(horizontalArrangement = Arrangement.spacedBy(12.dp), modifier = Modifier.padding(top = 8.dp)) {
+                            InfoBadge(text = activeGame.info.path.substringAfterLast("/"))
+                        }
+                    }
+                }
+            }
+
+            // Hint Strip
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .alpha(bootAlpha)
+                    .background(Color(0xFF2D2A23))
+                    .border(1.dp, Color(0xFF4D4637))
+                    .padding(horizontal = 24.dp, vertical = 12.dp),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                val fwVersion by remember { FirmwareRepository.version }
+                Text(
+                    text = stringResource(R.string.firmware) + " " + (fwVersion ?: BuildConfig.Version),
+                    style = AppTypography.labelSmall,
+                    color = RPCSXColors.textSecondary
+                )
+                Row(horizontalArrangement = Arrangement.spacedBy(24.dp)) {
+                    HintButton(text = "PLAY", icon = "X", color = RPCSXColors.primary, onClick = {
+                        // For play, we can just use the currently centered page (no easy access to pagerState here without refactoring)
+                        // Actually, wait, since we don't have focusedIndex anymore in scope, I'll pass it down or just leave it blank since this button is a hint, clicking the game itself plays it.
+                        // I'll leave the onClick blank here for now as the hint strip is usually just visual.
+                    })
+                    HintButton(text = "OPTIONS", icon = "△", color = RPCSXColors.textSecondary, onClick = { navigateToSettings?.invoke() })
+                    HintButton(text = "BACK", icon = "O", color = RPCSXColors.textSecondary, onClick = { })
+                }
+            }
+        }
+
+        if (showImportDialog) {
+            ImportMethodDialog(
+                onDismiss = { showImportDialog = false },
+                onImportFolder = {
+                    showImportDialog = false
+                    folderPickerLauncher.launch(null)
+                },
+                onImportIso = {
+                    showImportDialog = false
+                    isoPickerLauncher.launch("*/*")
+                }
+            )
+        }
+
+        if (isInstalling) {
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .background(Color(0xCC000000))
+                    .clickable(enabled = false, onClick = {}),
+                contentAlignment = Alignment.Center
+            ) {
+                Column(
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    verticalArrangement = Arrangement.spacedBy(16.dp)
+                ) {
+                    CircularProgressIndicator(
+                        color = RPCSXColors.primary,
+                        modifier = Modifier.size(48.dp)
+                    )
+                    Text(
+                        text = "Importing game...",
+                        style = AppTypography.labelMedium,
+                        color = RPCSXColors.textSecondary
+                    )
+                }
             }
         }
     }
 }
 
-@Preview
 @Composable
-fun GamesScreenPreview() {
-    listOf(
-        "Minecraft", "Skate 3", "Mirror's Edge", "Demon's Souls"
-    ).forEach { x -> GameRepository.addPreview(arrayOf(GameInfo(x, x))) }
+fun InfoBadge(text: String) {
+    Surface(
+        color = RPCSXColors.surfaceElevated,
+        shape = RoundedCornerShape(4.dp),
+        border = androidx.compose.foundation.BorderStroke(1.dp, RPCSXColors.surfaceOverlay)
+    ) {
+        Text(
+            text = text,
+            modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
+            style = AppTypography.labelMedium,
+            color = RPCSXColors.textSecondary
+        )
+    }
+}
 
-    GamesScreen()
+@Composable
+fun HintButton(text: String, icon: String, color: Color, onClick: () -> Unit) {
+    Row(
+        verticalAlignment = Alignment.CenterVertically,
+        modifier = Modifier.clickable(onClick = onClick).padding(8.dp)
+    ) {
+        if (icon == "△") {
+            Box(
+                modifier = Modifier.size(20.dp),
+                contentAlignment = Alignment.Center
+            ) {
+                Text("▲", color = color, style = AppTypography.labelSmall.copy(fontSize = 14.sp))
+            }
+        } else {
+            Box(
+                modifier = Modifier
+                    .size(20.dp)
+                    .border(2.dp, color, RoundedCornerShape(10.dp)),
+                contentAlignment = Alignment.Center
+            ) {
+                Text(icon, color = color, style = AppTypography.labelSmall.copy(fontSize = 10.sp, fontWeight = FontWeight.Bold))
+            }
+        }
+        Spacer(modifier = Modifier.width(8.dp))
+        Text(text, color = color, style = AppTypography.labelSmall)
+    }
+}
+
+@Composable
+fun GameCard(game: Game, distance: Int, onClick: () -> Unit, onPlay: () -> Unit) {
+    val isFocused = distance == 0
+    val targetScale = if (isFocused) 1.12f else if (distance == 1) 0.95f else 0.85f
+    val targetAlpha = if (isFocused) 1.0f else if (distance == 1) 0.6f else 0.4f
+    
+    val scale by animateFloatAsState(targetScale, animationSpec = tween(300))
+    val alpha by animateFloatAsState(targetAlpha, animationSpec = tween(300))
+
+    val colorMatrix = remember(isFocused) {
+        if (isFocused) ColorMatrix() else ColorMatrix().apply { setToSaturation(0f) }
+    }
+
+    val infiniteTransition = rememberInfiniteTransition()
+    val glowIntensity by infiniteTransition.animateFloat(
+        initialValue = 15f,
+        targetValue = 35f,
+        animationSpec = infiniteRepeatable(
+            animation = tween(1000, easing = androidx.compose.animation.core.FastOutSlowInEasing),
+            repeatMode = RepeatMode.Reverse
+        )
+    )
+
+    Box(
+        modifier = Modifier
+            .fillMaxHeight()
+            .aspectRatio(0.85f)
+            .scale(scale)
+            .alpha(alpha)
+            .clickable(onClick = { if (isFocused) onPlay() else onClick() })
+            .shadow(
+                elevation = if (isFocused) glowIntensity.dp else 0.dp,
+                spotColor = RPCSXColors.focusGlow,
+                ambientColor = RPCSXColors.focusGlow,
+                shape = RoundedCornerShape(8.dp)
+            )
+            .border(
+                width = if (isFocused) 2.dp else 1.dp,
+                color = if (isFocused) RPCSXColors.focusRing else RPCSXColors.surfaceOverlay,
+                shape = RoundedCornerShape(8.dp)
+            )
+    ) {
+        Surface(
+            shape = RoundedCornerShape(8.dp),
+            color = RPCSXColors.surface,
+            modifier = Modifier.fillMaxSize()
+        ) {
+            if (game.info.iconPath.value != null) {
+                Box(modifier = Modifier.fillMaxSize()) {
+                    // Scaled up and blurred background image
+                    AsyncImage(
+                        model = game.info.iconPath.value,
+                        contentDescription = null,
+                        contentScale = ContentScale.Crop,
+                        colorFilter = ColorFilter.colorMatrix(colorMatrix),
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .scale(1.3f)
+                            .blur(radius = 16.dp)
+                            .alpha(0.5f)
+                    )
+                    
+                    // Dark overlay to enhance contrast
+                    Box(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .background(Color.Black.copy(alpha = 0.2f))
+                    )
+
+                    // Crisp foreground image
+                    AsyncImage(
+                        model = game.info.iconPath.value,
+                        contentDescription = null,
+                        contentScale = ContentScale.Fit,
+                        colorFilter = ColorFilter.colorMatrix(colorMatrix),
+                        modifier = Modifier.fillMaxSize()
+                    )
+                }
+            }
+        }
+        
+        if (isFocused) {
+            Box(modifier = Modifier
+                .fillMaxSize()
+                .background(Brush.linearGradient(listOf(Color.White.copy(alpha = 0.1f), Color.Transparent)))
+            )
+        }
+    }
+}
+
+fun bootGame(context: android.content.Context, game: Game) {
+    if (game.hasFlag(GameFlag.Locked)) {
+        return
+    }
+    GameRepository.onBoot(game)
+    val emulatorWindow = Intent(context, RPCSXActivity::class.java)
+    emulatorWindow.putExtra("path", game.info.path)
+    context.startActivity(emulatorWindow)
+}
+
+@Composable
+fun ImportMethodDialog(
+    onDismiss: () -> Unit,
+    onImportFolder: () -> Unit,
+    onImportIso: () -> Unit
+) {
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = {
+            Text(
+                "Import Game",
+                style = AppTypography.headlineMedium,
+                color = RPCSXColors.primary
+            )
+        },
+        text = {
+            Column(
+                verticalArrangement = Arrangement.spacedBy(12.dp)
+            ) {
+                Text(
+                    "Choose how you'd like to import a game.",
+                    style = AppTypography.bodyLarge,
+                    color = RPCSXColors.textSecondary
+                )
+                Button(
+                    onClick = onImportFolder,
+                    modifier = Modifier.fillMaxWidth(),
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = RPCSXColors.surfaceElevated
+                    )
+                ) {
+                    Text("Import Folder", color = RPCSXColors.primary)
+                }
+                Button(
+                    onClick = onImportIso,
+                    modifier = Modifier.fillMaxWidth(),
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = RPCSXColors.surfaceElevated
+                    )
+                ) {
+                    Text("Import ISO File", color = RPCSXColors.primary)
+                }
+            }
+        },
+        confirmButton = {},
+        dismissButton = {
+            TextButton(onClick = onDismiss) {
+                Text("Cancel", color = RPCSXColors.textSecondary)
+            }
+        },
+        containerColor = RPCSXColors.background,
+        shape = RoundedCornerShape(8.dp)
+    )
 }

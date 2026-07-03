@@ -48,7 +48,7 @@ The emulator core is **not compiled into the APK**. It's downloaded from GitHub 
 ./gradlew assembleDebug
 
 # Build + install + launch
-./build_and_install.sh
+./build_and_install.sh debug
 
 # Output APK
 # app/build/outputs/apk/debug/samba-s3-debug.apk

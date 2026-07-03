@@ -2,7 +2,6 @@ package com.zenithblue.sambas3.ui.navigation
 
 import android.content.ClipData
 import android.content.ClipboardManager
-import android.content.Context
 import android.content.Intent
 import android.net.Uri
 import android.util.Log
@@ -71,23 +70,11 @@ import com.zenithblue.sambas3.EmulatorState
 import com.zenithblue.sambas3.FirmwareRepository
 import com.zenithblue.sambas3.PrecompilerService
 import com.zenithblue.sambas3.PrecompilerServiceAction
-import com.zenithblue.sambas3.ProgressRepository
 import com.zenithblue.sambas3.R
 import com.zenithblue.sambas3.RPCSX
 import com.zenithblue.sambas3.UserRepository
 import com.zenithblue.sambas3.dialogs.AlertDialogQueue
 import com.zenithblue.sambas3.overlay.OverlayEditActivity
-import com.zenithblue.sambas3.ui.channels.DefaultGpuDriverChannel
-import com.zenithblue.sambas3.ui.channels.DevRpcsxChannel
-import com.zenithblue.sambas3.ui.channels.DevUiChannel
-import com.zenithblue.sambas3.ui.channels.ReleaseRpcsxChannel
-import com.zenithblue.sambas3.ui.channels.ReleaseUiChannel
-import com.zenithblue.sambas3.ui.channels.UpdateChannelListScreen
-import com.zenithblue.sambas3.ui.channels.UpdateChannelsScreen
-import com.zenithblue.sambas3.ui.channels.channelToUiText
-import com.zenithblue.sambas3.ui.channels.channelsToUiText
-import com.zenithblue.sambas3.ui.channels.uiTextToChannel
-import com.zenithblue.sambas3.ui.channels.uiTextToChannels
 import com.zenithblue.sambas3.ui.drivers.GpuDriversScreen
 import com.zenithblue.sambas3.ui.games.GamesScreen
 import com.zenithblue.sambas3.ui.settings.AdvancedSettingsScreen
@@ -95,7 +82,6 @@ import com.zenithblue.sambas3.ui.settings.ControllerSettings
 import com.zenithblue.sambas3.ui.settings.SettingsScreen
 import com.zenithblue.sambas3.ui.user.UsersScreen
 import com.zenithblue.sambas3.utils.FileUtil
-import com.zenithblue.sambas3.utils.RpcsxUpdater
 import org.json.JSONObject
 
 @Preview
@@ -105,57 +91,12 @@ fun AppNavHost() {
     val navController = rememberNavController()
     val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
     val scope = rememberCoroutineScope()
-    val prefs = remember { context.getSharedPreferences("app_prefs", Context.MODE_PRIVATE) }
     val rpcsxLibrary by remember { RPCSX.activeLibrary }
 
     val navigateTo: (String) -> Unit = { route ->
         navController.navigate(route) {
             launchSingleTop = true
             restoreState = true
-        }
-    }
-
-    var gpuDriverChannelList =
-        prefs.getStringSet("gpu_driver_channel_list", setOf(DefaultGpuDriverChannel))?.toList()
-    if (gpuDriverChannelList == null) {
-        gpuDriverChannelList = listOf(DefaultGpuDriverChannel)
-    }
-    var gpuDriverChannels by remember { mutableStateOf(gpuDriverChannelList) }
-
-    var uiChannelList =
-        prefs.getStringSet("ui_channel_list", setOf(ReleaseUiChannel, DevUiChannel))?.toList()
-    if (uiChannelList == null) {
-        uiChannelList = listOf(ReleaseUiChannel, DevUiChannel)
-    }
-    var uiChannels by remember { mutableStateOf(uiChannelList) }
-
-    var rpcsxChannelList =
-        prefs.getStringSet("rpcsx_channel_list", setOf(ReleaseRpcsxChannel, DevRpcsxChannel))
-            ?.toList()
-    if (rpcsxChannelList == null) {
-        rpcsxChannelList = listOf(ReleaseRpcsxChannel, DevRpcsxChannel)
-    }
-    var rpcsxChannels by remember { mutableStateOf(rpcsxChannelList) }
-
-    val isValidChannel = { channel: String, releaseRepo: String, devRepo: String ->
-        channel != "Release" && channel != "Development" && channel != releaseRepo && channel != devRepo
-    }
-
-    if (prefs.getString("gpu_driver_channel", "") == "") {
-        prefs.edit {
-            putString("gpu_driver_channel", DefaultGpuDriverChannel)
-        }
-    }
-
-    if (prefs.getString("ui_channel", "") == "") {
-        prefs.edit {
-            putString("ui_channel", ReleaseUiChannel)
-        }
-    }
-
-    if (prefs.getString("rpcsx_channel", "") == "") {
-        prefs.edit {
-            putString("rpcsx_channel", ReleaseRpcsxChannel)
         }
     }
 
@@ -266,210 +207,10 @@ fun AppNavHost() {
                 navigateBack = navController::navigateUp
             )
         }
-
-        composable(
-            route = "update_channels"
-        ) {
-            UpdateChannelsScreen(
-                navigateBack = navController::navigateUp,
-                navigateTo = navigateTo,
-            )
-        }
-
-        composable(
-            route = "gpu_driver_channels"
-        ) {
-            UpdateChannelListScreen(
-                navigateBack = navController::navigateUp,
-                title = stringResource(R.string.driver_download_channel),
-                items = gpuDriverChannels.toList(),
-                selected = prefs.getString("gpu_driver_channel", null),
-                onSelect = { channel ->
-                    prefs.edit {
-                        putString("gpu_driver_channel", channel)
-                    }
-
-                    navController.navigateUp()
-                },
-                onDelete = { channel ->
-                    gpuDriverChannels = gpuDriverChannels.filter { it != channel }
-
-                    prefs.edit {
-                        putStringSet("gpu_driver_channel_list", gpuDriverChannels.toSet())
-                    }
-                },
-                onAdd = { channel ->
-                    if (gpuDriverChannels.find { it == channel } != null) {
-                        return@UpdateChannelListScreen
-                    }
-
-                    gpuDriverChannels = gpuDriverChannels + channel
-
-                    prefs.edit {
-                        putStringSet("gpu_driver_channel_list", gpuDriverChannels.toSet())
-                    }
-                },
-                isDeletable = { gpuDriverChannels.size > 1 })
-        }
-
-        composable(
-            route = "ui_channels"
-        ) {
-            UpdateChannelListScreen(
-                navigateBack = navController::navigateUp,
-                title = stringResource(R.string.ui_update_channel),
-                items = channelsToUiText(uiChannels, ReleaseUiChannel, DevUiChannel),
-                selected = channelToUiText(
-                    prefs.getString("ui_channel", ReleaseUiChannel)!!,
-                    ReleaseUiChannel,
-                    DevUiChannel
-                ),
-                onSelect = { channel ->
-                    prefs.edit {
-                        putString(
-                            "ui_channel",
-                            uiTextToChannel(channel, ReleaseUiChannel, DevUiChannel)
-                        )
-                    }
-
-                    navController.navigateUp()
-                },
-                onDelete = { channel ->
-                    uiChannels = uiChannels.filter { it != channel }
-
-                    prefs.edit {
-                        putStringSet(
-                            "ui_channel_list",
-                            uiTextToChannels(uiChannels, ReleaseUiChannel, DevUiChannel).toSet()
-                        )
-                    }
-                },
-                onAdd = { channel ->
-                    if (!isValidChannel(
-                            channel,
-                            ReleaseUiChannel,
-                            DevUiChannel
-                        ) || uiChannels.find { it == channel } != null
-                    ) {
-                        return@UpdateChannelListScreen
-                    }
-
-                    uiChannels += channel
-
-                    prefs.edit {
-                        putStringSet(
-                            "ui_channel_list",
-                            uiTextToChannels(uiChannels, ReleaseUiChannel, DevUiChannel).toSet()
-                        )
-                    }
-                },
-                isDeletable = { isValidChannel(it, ReleaseUiChannel, DevUiChannel) }
-            )
-        }
-
-        composable(
-            route = "rpcsx_channels"
-        ) {
-            UpdateChannelListScreen(
-                navigateBack = navController::navigateUp,
-                title = stringResource(R.string.rpcsx_download_channel),
-                items = channelsToUiText(rpcsxChannels, ReleaseRpcsxChannel, DevRpcsxChannel),
-                selected = channelToUiText(
-                    prefs.getString("rpcsx_channel", ReleaseRpcsxChannel)!!,
-                    ReleaseRpcsxChannel,
-                    DevRpcsxChannel
-                ),
-                onSelect = { channel ->
-                    prefs.edit {
-                        putString(
-                            "rpcsx_channel",
-                            uiTextToChannel(channel, ReleaseRpcsxChannel, DevRpcsxChannel)
-                        )
-                    }
-
-                    navController.navigateUp()
-                },
-                onDelete = { channel ->
-                    rpcsxChannels = rpcsxChannels.filter { it != channel }
-
-                    prefs.edit {
-                        putStringSet(
-                            "rpcsx_channel_list",
-                            uiTextToChannels(
-                                rpcsxChannels,
-                                ReleaseRpcsxChannel,
-                                DevRpcsxChannel
-                            ).toSet()
-                        )
-                    }
-                },
-                onAdd = { channel ->
-                    if (!isValidChannel(
-                            channel,
-                            ReleaseRpcsxChannel,
-                            DevRpcsxChannel
-                        ) || rpcsxChannels.find { it == channel } != null
-                    ) {
-                        return@UpdateChannelListScreen
-                    }
-
-                    rpcsxChannels += channel
-
-                    prefs.edit {
-                        putStringSet(
-                            "rpcsx_channel_list",
-                            uiTextToChannels(
-                                rpcsxChannels,
-                                ReleaseRpcsxChannel,
-                                DevRpcsxChannel
-                            ).toSet()
-                        )
-                    }
-                },
-                isDeletable = { isValidChannel(it, ReleaseRpcsxChannel, DevRpcsxChannel) },
-                actions = actions@{
-                    if (RpcsxUpdater.getAbi() != "arm64-v8a") {
-                        return@actions
-                    }
-                    var downloadArch by remember { mutableStateOf(RpcsxUpdater.getArch()) }
-                    var expanded by remember { mutableStateOf(false) }
-
-                    TextButton(onClick = { expanded = true }) {
-                        Text(downloadArch)
-                    }
-
-                    DropdownMenu(
-                        expanded = expanded,
-                        onDismissRequest = { expanded = false }
-                    ) {
-                        listOf(
-                            "armv8-a",
-                            "armv8.1-a",
-                            "armv8.2-a",
-                            "armv8.4-a",
-                            "armv8.5-a",
-                            "armv9-a",
-                            "armv9.1-a",
-                        ).forEach { arch ->
-                            DropdownMenuItem(
-                                text = { Text(arch) },
-                                onClick = {
-                                    RpcsxUpdater.setArch(arch)
-                                    downloadArch = arch
-                                    expanded = false
-                                }
-                            )
-                        }
-                    }
-                }
-            )
-        }
-
         unwrapSetting(settings.value)
     }
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun GamesDestination(
     navigateToSettings: () -> Unit,
@@ -525,258 +266,10 @@ fun GamesDestination(
         }
     )
 
-    ModalNavigationDrawer(
-        drawerState = drawerState,
-        drawerContent = {
-            ModalDrawerSheet {
-                Column(
-                    modifier = Modifier
-                        .padding(horizontal = 16.dp)
-                        .verticalScroll(
-                            rememberScrollState()
-                        )
-                ) {
-                    Spacer(Modifier.height(12.dp))
-
-                    NavigationDrawerItem(
-                        label = {
-                            Text(
-                                "${stringResource(R.string.firmware)}: ${
-                                    FirmwareRepository.version.value ?: stringResource(R.string.none)
-                                }"
-                            )
-                        },
-                        selected = false,
-                        icon = { Icon(painterResource(R.drawable.hard_drive), contentDescription = null) },
-                        badge = {
-                            val progressChannel = FirmwareRepository.progressChannel
-                            val progress = ProgressRepository.getItem(progressChannel.value)
-                            val progressValue = progress?.value?.value
-                            val maxValue = progress?.value?.max
-                            Log.e("Main", "Update $progressChannel, $progress")
-                            if (progressValue != null && maxValue != null) {
-                                if (maxValue.longValue != 0L) {
-                                    CircularProgressIndicator(
-                                        modifier = Modifier
-                                            .width(32.dp)
-                                            .height(32.dp),
-                                        color = MaterialTheme.colorScheme.secondary,
-                                        trackColor = MaterialTheme.colorScheme.surfaceVariant,
-                                        progress = {
-                                            progressValue.longValue.toFloat() / maxValue.longValue.toFloat()
-                                        },
-                                    )
-                                } else {
-                                    CircularProgressIndicator(
-                                        modifier = Modifier
-                                            .width(32.dp)
-                                            .height(32.dp),
-                                        color = MaterialTheme.colorScheme.secondary,
-                                        trackColor = MaterialTheme.colorScheme.surfaceVariant,
-                                    )
-                                }
-                            }
-                        }, // Placeholder
-                        onClick = {
-                            if (FirmwareRepository.progressChannel.value == null) {
-                                installFwLauncher.launch("*/*")
-                            }
-                        }
-                    )
-                    HorizontalDivider(modifier = Modifier.padding(vertical = 8.dp))
-                    NavigationDrawerItem(
-                        label = { Text(stringResource(R.string.settings)) },
-                        selected = false,
-                        icon = { Icon(painter = painterResource(id = R.drawable.ic_settings), null) },
-                        onClick = navigateToSettings
-                    )
-
-                    NavigationDrawerItem(
-                        label = { Text(stringResource(R.string.edit_overlay)) },
-                        selected = false,
-                        icon = {
-                            Icon(
-                                painter = painterResource(id = R.drawable.ic_show_osc),
-                                null
-                            )
-                        },
-                        onClick = {
-                            context.startActivity(
-                                Intent(
-                                    context,
-                                    OverlayEditActivity::class.java
-                                )
-                            )
-                        }
-                    )
-
-                    NavigationDrawerItem(
-                        label = { Text(stringResource(R.string.device_info)) },
-                        selected = false,
-                        icon = { Icon(painterResource(R.drawable.perm_device_information), contentDescription = null) },
-                        onClick = {
-                            AlertDialogQueue.showDialog(
-                                context.getString(R.string.device_info),
-                                RPCSX.instance.systemInfo(),
-                                confirmText = context.getString(android.R.string.copy),
-                                dismissText = context.getString(R.string.close),
-                                onConfirm = {
-                                    val clipboard =
-                                        context.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
-                                    val clip = ClipData.newPlainText(
-                                        context.getString(R.string.device_info),
-                                        RPCSX.instance.systemInfo()
-                                    )
-                                    clipboard.setPrimaryClip(clip)
-                                    Toast.makeText(
-                                        context,
-                                        context.getString(R.string.copied_to_clipboard),
-                                        Toast.LENGTH_SHORT
-                                    ).show()
-                                }
-                            )
-                        }
-                    )
-
-                    HorizontalDivider()
-
-                    NavigationDrawerItem(
-                        label = { Text(stringResource(R.string.about)) },
-                        selected = false,
-                        icon = { Icon(painter = painterResource(id = R.drawable.ic_info), contentDescription = null) },
-                        onClick = {
-                            val versionInfo = "UI: ${BuildConfig.Version}\nRPCSX: ${RpcsxUpdater.getCurrentVersion()}"
-                            AlertDialogQueue.showDialog(
-                                title = "RPCSX UI Android",
-                                message = versionInfo,
-                                confirmText = context.getString(android.R.string.copy),
-                                dismissText = context.getString(R.string.close),
-                                onConfirm = {
-                                    val clipboard =
-                                        context.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
-                                    val clip = ClipData.newPlainText(
-                                        context.getString(R.string.about),
-                                        versionInfo
-                                    )
-                                    clipboard.setPrimaryClip(clip)
-                                    Toast.makeText(
-                                        context,
-                                        context.getString(R.string.copied_to_clipboard),
-                                        Toast.LENGTH_SHORT
-                                    ).show()
-                                }
-                            )
-                        }
-                    )
-
-                }
-            }
-        }
-    ) {
-        Scaffold(
-            modifier = Modifier.windowInsetsPadding(WindowInsets.navigationBars),
-            topBar = {
-                CenterAlignedTopAppBar(
-                    colors = TopAppBarDefaults.topAppBarColors(
-                        containerColor = MaterialTheme.colorScheme.primaryContainer,
-                        titleContentColor = MaterialTheme.colorScheme.primary,
-                    ),
-                    title = {
-                        Text(
-                            "RPCSX",
-                            maxLines = 1,
-                            overflow = TextOverflow.Ellipsis
-                        )
-                    },
-                    navigationIcon = {
-                        IconButton(onClick = {
-                            scope.launch {
-                                if (drawerState.isClosed) {
-                                    drawerState.open()
-                                } else {
-                                    drawerState.close()
-                                }
-                            }
-                        }) {
-                            Icon(
-                                painter = painterResource(id = R.drawable.ic_menu),
-                                contentDescription = "Open menu"
-                            )
-                        }
-                    },
-                    actions = {
-                        if (emulatorActiveGame != null && emulatorState != EmulatorState.Stopped && emulatorState != EmulatorState.Stopping) {
-                            IconButton(onClick = {
-                                emulatorState = EmulatorState.Stopped
-                                RPCSX.instance.kill()
-                            }) {
-                                Icon(
-                                    imageVector = ImageVector.vectorResource(R.drawable.ic_stop),
-                                    contentDescription = null
-                                )
-                            }
-                        }
-                    }
-                )
-            },
-            floatingActionButton = {
-                DropUpFloatingActionButton(installPkgLauncher, gameFolderPickerLauncher)
-            },
-        ) { innerPadding -> Column(modifier = Modifier.padding(innerPadding)) { GamesScreen() } }
-    }
-}
-
-@Composable
-fun DropUpFloatingActionButton(
-    installPkgLauncher: ActivityResultLauncher<String>,
-    gameFolderPickerLauncher: ActivityResultLauncher<Uri?>
-) {
-    var expanded by remember { mutableStateOf(false) }
-
-    Box(
-        modifier = Modifier.padding(16.dp),
-        contentAlignment = androidx.compose.ui.Alignment.BottomEnd
-    ) {
-        Column(
-            verticalArrangement = Arrangement.spacedBy(8.dp),
-            horizontalAlignment = androidx.compose.ui.Alignment.End
-        ) {
-            AnimatedVisibility(
-                visible = expanded,
-                enter = androidx.compose.animation.expandVertically(
-                    animationSpec = tween(300, easing = FastOutSlowInEasing)
-                ),
-                exit = androidx.compose.animation.shrinkVertically(
-                    animationSpec = tween(200, easing = FastOutSlowInEasing)
-                )
-            ) {
-                Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                    FloatingActionButton(
-                        onClick = { installPkgLauncher.launch("*/*"); expanded = false },
-                        containerColor = MaterialTheme.colorScheme.secondary
-                    ) {
-                        Icon(
-                            painter = painterResource(id = R.drawable.ic_description),
-                            contentDescription = "Select Game"
-                        )
-                    }
-                    FloatingActionButton(
-                        onClick = { gameFolderPickerLauncher.launch(null); expanded = false },
-                        containerColor = MaterialTheme.colorScheme.secondary
-                    ) {
-                        Icon(
-                            painter = painterResource(id = R.drawable.ic_folder),
-                            contentDescription = "Select Folder"
-                        )
-                    }
-                }
-            }
-
-            FloatingActionButton(
-                onClick = { expanded = !expanded }
-            ) {
-                Icon(painter = painterResource(id = R.drawable.ic_add), contentDescription = "Add")
-            }
-        }
-    }
+    GamesScreen(
+        installPkgLauncher = installPkgLauncher,
+        gameFolderPickerLauncher = gameFolderPickerLauncher,
+        installFwLauncher = installFwLauncher,
+        navigateToSettings = navigateToSettings
+    )
 }

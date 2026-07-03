@@ -1,6 +1,12 @@
 {
   "version": 1,
   "skills": {
+    "agent-device": {
+      "source": "callstackincubator/agent-device",
+      "sourceType": "github",
+      "skillPath": "skills/agent-device/SKILL.md",
+      "computedHash": "366d030f7f9a5acf98ddeda1b41de6232397d7af15233d5c40387ea5ce640d6d"
+    },
     "caveman": {
       "source": "juliusbrussee/caveman",
       "sourceType": "github",

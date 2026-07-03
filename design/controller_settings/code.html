@@ -1,0 +1,319 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<link href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@400;600;700&amp;family=JetBrains+Mono:wght@400&amp;family=Press+Start+2P&amp;family=Rajdhani:wght@400;500;600;700&amp;family=Share+Tech+Mono&amp;family=Space+Mono&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            "colors": {
+                    "tertiary": "#b9c4ff",
+                    "on-primary-fixed": "#241a00",
+                    "error-container": "#93000a",
+                    "inverse-surface": "#e9e1d7",
+                    "on-secondary-container": "#b2b7d1",
+                    "on-tertiary-container": "#2e3b77",
+                    "outline": "#99907e",
+                    "on-primary-container": "#503d00",
+                    "on-secondary-fixed-variant": "#40465b",
+                    "primary-container": "#c9a84c",
+                    "on-secondary": "#2a3044",
+                    "surface-container-low": "#1e1b15",
+                    "primary-fixed": "#ffe08f",
+                    "on-background": "#e9e1d7",
+                    "surface-container-lowest": "#100e08",
+                    "surface-variant": "#38342d",
+                    "text-secondary": "#9A8E72",
+                    "inverse-on-surface": "#343029",
+                    "on-secondary-fixed": "#151b2e",
+                    "primary-fixed-dim": "#e6c364",
+                    "secondary-fixed-dim": "#c0c5df",
+                    "tertiary-fixed": "#dde1ff",
+                    "secondary": "#c0c5df",
+                    "surface-container-high": "#2d2a23",
+                    "on-error-container": "#ffdad6",
+                    "on-tertiary-fixed": "#041451",
+                    "outline-variant": "#4d4637",
+                    "tertiary-fixed-dim": "#b9c3ff",
+                    "focus-ring": "#F0C040",
+                    "primary-muted": "#2A2010",
+                    "inverse-primary": "#755b00",
+                    "tertiary-container": "#9ba8eb",
+                    "secondary-container": "#43485e",
+                    "on-tertiary": "#1e2b66",
+                    "surface-container-highest": "#38342d",
+                    "on-primary-fixed-variant": "#584400",
+                    "primary-dim": "#8C6E2A",
+                    "surface-container": "#221f19",
+                    "error": "#E05252",
+                    "on-surface": "#e9e1d7",
+                    "on-surface-variant": "#d0c5b2",
+                    "surface-dim": "#16130d",
+                    "text-primary": "#F0E8D0",
+                    "primary": "#e6c364",
+                    "on-error": "#690005",
+                    "surface-overlay": "#1C2850",
+                    "secondary-fixed": "#dce1fc",
+                    "surface": "#16130d",
+                    "surface-bright": "#3d3931"
+            },
+            "borderRadius": {
+                    "DEFAULT": "0.25rem",
+                    "lg": "0.5rem",
+                    "xl": "0.75rem",
+                    "full": "9999px"
+            },
+            "spacing": {
+                    "2xl": "64px",
+                    "sm": "8px",
+                    "xs": "4px",
+                    "lg": "24px",
+                    "xl": "40px",
+                    "md": "16px"
+            },
+            "fontFamily": {
+                    "label-sm": ["Hanken Grotesk"],
+                    "metadata-xs": ["JetBrains Mono"],
+                    "headline-md": ["Hanken Grotesk"],
+                    "display-lg": ["Space Mono"],
+                    "metadata": ["Share Tech Mono"],
+                    "body": ["Rajdhani"],
+                    "label": ["Rajdhani"],
+                    "heading": ["Rajdhani"],
+                    "body-md": ["Hanken Grotesk"],
+                    "display": ["\"Press Start 2P\""]
+            },
+            "fontSize": {
+                    "label-sm": ["12px", {"lineHeight": "14px", "letterSpacing": "0.1em", "fontWeight": "600"}],
+                    "metadata-xs": ["11px", {"lineHeight": "15px", "letterSpacing": "0.05em", "fontWeight": "400"}],
+                    "headline-md": ["20px", {"lineHeight": "26px", "letterSpacing": "0.06em", "fontWeight": "700"}],
+                    "display-lg": ["24px", {"lineHeight": "38px", "letterSpacing": "0.04em", "fontWeight": "400"}],
+                    "metadata": ["0.7rem", {"lineHeight": "1.4", "letterSpacing": "0.05em", "fontWeight": "400"}],
+                    "body": ["1rem", {"lineHeight": "1.5", "letterSpacing": "0.02em", "fontWeight": "400"}],
+                    "label": ["0.75rem", {"lineHeight": "1.2", "letterSpacing": "0.1em", "fontWeight": "600"}],
+                    "heading": ["1.25rem", {"lineHeight": "1.3", "letterSpacing": "0.06em", "fontWeight": "700"}],
+                    "body-md": ["16px", {"lineHeight": "24px", "letterSpacing": "0.02em", "fontWeight": "400"}],
+                    "display": ["1.5rem", {"lineHeight": "1.6", "letterSpacing": "0.04em", "fontWeight": "400"}]
+            }
+          },
+        },
+      }
+    </script>
+<style>
+        body {
+            background-color: #0A0D1A;
+            background-image: radial-gradient(circle at center, #172040 0%, #0A0D1A 100%);
+            overflow: hidden;
+            font-family: 'Rajdhani', sans-serif;
+        }
+        .vignette {
+            position: fixed;
+            inset: 0;
+            background: radial-gradient(circle, transparent 50%, rgba(0,0,0,0.6) 100%);
+            pointer-events: none;
+            z-index: 10;
+        }
+        .grain {
+            position: fixed;
+            inset: 0;
+            background-image: url("https://www.transparenttextures.com/patterns/carbon-fibre.png");
+            opacity: 0.05;
+            pointer-events: none;
+            z-index: 5;
+        }
+        .glow-active {
+            box-shadow: 0 0 15px #F0C040;
+            border-color: #F0C040;
+        }
+        .scroll-mask {
+            mask-image: linear-gradient(to bottom, transparent, black 10%, black 90%, transparent);
+        }
+        .controller-line {
+            stroke: #9A8E72;
+            stroke-width: 1;
+            fill: none;
+        }
+        .controller-label-line {
+            stroke: #F0C040;
+            stroke-width: 2;
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="text-on-background h-screen w-screen flex flex-col items-center justify-center p-0 m-0">
+<div class="grain"></div>
+<div class="vignette"></div>
+<!-- Top AppBar -->
+<header class="bg-background fixed top-0 w-full px-lg py-md flex justify-between items-center z-50">
+<div class="flex items-center gap-md">
+<span class="material-symbols-outlined text-primary text-3xl">videogame_asset</span>
+<h1 class="font-display text-display text-primary tracking-widest">CONTROLLER</h1>
+</div>
+<div class="flex items-center gap-lg">
+<div class="flex items-center gap-sm">
+<span class="w-3 h-3 rounded-full bg-green-500 animate-pulse"></span>
+<span class="font-label text-label text-text-secondary">DUALSENSE CONNECTED</span>
+</div>
+<span class="material-symbols-outlined text-text-secondary hover:text-focus-ring transition-colors cursor-pointer">settings</span>
+</div>
+</header>
+<!-- Main Content Layout (Bento Style) -->
+<main class="w-full h-full pt-24 pb-12 px-xl grid grid-cols-12 gap-lg relative z-20">
+<!-- Left Panel: Visual Representation -->
+<div class="col-span-7 flex flex-col gap-md">
+<div class="bg-surface-container/40 border border-outline-variant p-lg relative h-full flex flex-col items-center justify-center">
+<div class="absolute top-md left-md">
+<h2 class="font-heading text-heading text-primary uppercase tracking-tighter">Device Layout</h2>
+<p class="font-label text-label text-text-secondary">SambaS3 Professional Input</p>
+</div>
+<!-- Visual Gamepad (Abstract SVG representation) -->
+<div class="relative w-full max-w-2xl aspect-video flex items-center justify-center">
+<img class="w-[80%] opacity-90 drop-shadow-[0_0_20px_rgba(240,192,64,0.2)]" data-alt="A high-end cinematic studio photograph of a modern ergonomic gaming controller with a brushed metallic gunmetal finish and gold-accented buttons. The controller is shown from a top-down perspective, perfectly centered against a dark navy atmospheric background. The lighting is dramatic and tactical, with golden rim lighting highlighting its sleek contours and premium textures. The aesthetic is reminiscent of seventh-generation console hardware advertisements, clean and technologically advanced." src="https://lh3.googleusercontent.com/aida-public/AB6AXuDZcjaO0ZwDeq2Z_uuaP_PR67Nf40rM-QaPhGPKEAeqA03EhUaNLPTAQ4FHl1CKGhP6cKnWwGWO0mFFuRo0gL9fWsEHCN7fcJsE7tYtEm_fsFmBD6b3P3Ps1KNyjnmWUxwjyeoHPSGygsyRfWgHLZfF9QB8GEX-niImfpGtssrP1iJEd7k5R2pvI2hcVNJDN5N-KIASu3ghxTrYEW0-kVumU1SWp1c9k9JyIQV7TIGZRY5ubxdAKmeLDg"/>
+<!-- Callout Labels -->
+<div class="absolute top-[15%] left-[20%] flex flex-col items-end">
+<span class="bg-primary px-sm py-xs text-on-primary font-label text-label mb-xs uppercase tracking-widest">Button Mapping</span>
+<div class="w-24 h-[2px] bg-primary"></div>
+</div>
+<div class="absolute bottom-[15%] left-[30%] flex flex-col items-end">
+<span class="bg-surface-container-high border border-primary px-sm py-xs text-primary font-label text-label mb-xs uppercase tracking-widest">Deadzone Calibration</span>
+<div class="w-16 h-[2px] bg-primary"></div>
+</div>
+<div class="absolute top-[20%] right-[15%] flex flex-col items-start">
+<span class="bg-surface-container-high border border-primary px-sm py-xs text-primary font-label text-label mb-xs uppercase tracking-widest">Haptic Feedback</span>
+<div class="w-20 h-[2px] bg-primary"></div>
+</div>
+</div>
+<!-- Dynamic Status Indicators -->
+<div class="absolute bottom-md left-md flex gap-lg">
+<div class="flex flex-col">
+<span class="font-label-sm text-label-sm text-text-secondary uppercase">Latency</span>
+<span class="font-metadata text-metadata text-primary">1.2 MS</span>
+</div>
+<div class="flex flex-col">
+<span class="font-label-sm text-label-sm text-text-secondary uppercase">Polling</span>
+<span class="font-metadata text-metadata text-primary">1000 HZ</span>
+</div>
+</div>
+</div>
+</div>
+<!-- Right Panel: List of Mappings -->
+<div class="col-span-5 flex flex-col gap-md h-full overflow-hidden">
+<div class="bg-surface-container-high/60 border border-outline-variant flex-1 flex flex-col overflow-hidden">
+<div class="p-md border-b border-outline-variant bg-surface-container">
+<h2 class="font-heading text-heading text-on-surface uppercase italic">Input Assignment</h2>
+</div>
+<div class="flex-1 overflow-y-auto scroll-mask p-md space-y-sm">
+<!-- Mapping Rows -->
+<div class="group flex justify-between items-center bg-surface p-md border-l-4 border-transparent hover:border-focus-ring hover:bg-surface-overlay transition-all cursor-pointer focus:outline-none" tabindex="0">
+<div class="flex items-center gap-md">
+<span class="material-symbols-outlined text-text-secondary group-hover:text-focus-ring">radio_button_unchecked</span>
+<span class="font-body text-body text-on-surface uppercase font-bold tracking-wider">Primary Action</span>
+</div>
+<span class="font-metadata text-metadata text-primary bg-primary-muted px-md py-xs border border-primary-dim">CROSS</span>
+</div>
+<div class="group flex justify-between items-center bg-surface p-md border-l-4 border-focus-ring bg-surface-overlay shadow-[inset_0_0_10px_rgba(240,192,64,0.1)] cursor-pointer" tabindex="0">
+<div class="flex items-center gap-md">
+<span class="material-symbols-outlined text-focus-ring">close</span>
+<span class="font-body text-body text-focus-ring uppercase font-bold tracking-wider">Secondary Action</span>
+</div>
+<span class="font-metadata text-metadata text-on-primary bg-primary px-md py-xs shadow-[0_0_10px_rgba(240,192,64,0.5)]">CIRCLE</span>
+</div>
+<div class="group flex justify-between items-center bg-surface p-md border-l-4 border-transparent hover:border-focus-ring hover:bg-surface-overlay transition-all cursor-pointer" tabindex="0">
+<div class="flex items-center gap-md">
+<span class="material-symbols-outlined text-text-secondary group-hover:text-focus-ring">change_history</span>
+<span class="font-body text-body text-on-surface uppercase font-bold tracking-wider">Navigation Menu</span>
+</div>
+<span class="font-metadata text-metadata text-primary bg-primary-muted px-md py-xs border border-primary-dim">TRIANGLE</span>
+</div>
+<div class="group flex justify-between items-center bg-surface p-md border-l-4 border-transparent hover:border-focus-ring hover:bg-surface-overlay transition-all cursor-pointer" tabindex="0">
+<div class="flex items-center gap-md">
+<span class="material-symbols-outlined text-text-secondary group-hover:text-focus-ring">check_box_outline_blank</span>
+<span class="font-body text-body text-on-surface uppercase font-bold tracking-wider">Tactical Reload</span>
+</div>
+<span class="font-metadata text-metadata text-primary bg-primary-muted px-md py-xs border border-primary-dim">SQUARE</span>
+</div>
+<div class="group flex justify-between items-center bg-surface p-md border-l-4 border-transparent hover:border-focus-ring hover:bg-surface-overlay transition-all cursor-pointer" tabindex="0">
+<div class="flex items-center gap-md">
+<span class="material-symbols-outlined text-text-secondary group-hover:text-focus-ring">keyboard_arrow_up</span>
+<span class="font-body text-body text-on-surface uppercase font-bold tracking-wider">Heal / Utility</span>
+</div>
+<span class="font-metadata text-metadata text-primary bg-primary-muted px-md py-xs border border-primary-dim">D-PAD UP</span>
+</div>
+<div class="group flex justify-between items-center bg-surface p-md border-l-4 border-transparent hover:border-focus-ring hover:bg-surface-overlay transition-all cursor-pointer" tabindex="0">
+<div class="flex items-center gap-md">
+<span class="material-symbols-outlined text-text-secondary group-hover:text-focus-ring">ads_click</span>
+<span class="font-body text-body text-on-surface uppercase font-bold tracking-wider">Aim Down Sights</span>
+</div>
+<span class="font-metadata text-metadata text-primary bg-primary-muted px-md py-xs border border-primary-dim">L2 TRIGGER</span>
+</div>
+<div class="group flex justify-between items-center bg-surface p-md border-l-4 border-transparent hover:border-focus-ring hover:bg-surface-overlay transition-all cursor-pointer" tabindex="0">
+<div class="flex items-center gap-md">
+<span class="material-symbols-outlined text-text-secondary group-hover:text-focus-ring">target</span>
+<span class="font-body text-body text-on-surface uppercase font-bold tracking-wider">Fire Weapon</span>
+</div>
+<span class="font-metadata text-metadata text-primary bg-primary-muted px-md py-xs border border-primary-dim">R2 TRIGGER</span>
+</div>
+</div>
+<div class="p-md bg-surface-container border-t border-outline-variant flex justify-between items-center">
+<span class="font-label text-label text-text-secondary uppercase">Current Profile</span>
+<span class="font-label text-label text-primary font-bold">COMPETITIVE-01</span>
+</div>
+</div>
+</div>
+</main>
+<!-- Hint Strip / Footer Nav -->
+<footer class="fixed bottom-0 left-0 w-full z-50 flex justify-end items-center px-lg h-12 bg-surface-container-high border-t border-outline-variant shadow-lg">
+<div class="flex items-center gap-xl h-full">
+<div class="flex items-center gap-sm group cursor-pointer hover:bg-surface-variant h-full px-md transition-all">
+<span class="w-5 h-5 flex items-center justify-center border-2 border-primary rounded-full text-[10px] font-bold text-primary shadow-[0_0_5px_rgba(240,192,64,0.5)]">X</span>
+<span class="font-label-sm text-label-sm text-on-surface uppercase tracking-widest">EDIT</span>
+</div>
+<div class="flex items-center gap-sm group cursor-pointer hover:bg-surface-variant h-full px-md transition-all">
+<span class="w-5 h-5 flex items-center justify-center border-2 border-primary rounded-full text-[10px] font-bold text-primary shadow-[0_0_5px_rgba(240,192,64,0.5)]">O</span>
+<span class="font-label-sm text-label-sm text-on-surface uppercase tracking-widest">BACK</span>
+</div>
+<div class="flex items-center gap-sm group cursor-pointer hover:bg-surface-variant h-full px-md transition-all">
+<span class="w-5 h-5 flex items-center justify-center border-2 border-primary text-[10px] font-bold text-primary shadow-[0_0_5px_rgba(240,192,64,0.5)]">■</span>
+<span class="font-label-sm text-label-sm text-on-surface uppercase tracking-widest">RESET</span>
+</div>
+</div>
+</footer>
+<!-- Interactive Layer / Micro-interactions -->
+<script>
+        document.querySelectorAll('.group').forEach(item => {
+            item.addEventListener('mouseenter', () => {
+                // Subtle interaction logic can be added here
+            });
+            
+            // Controller-like navigation simulation
+            item.addEventListener('keydown', (e) => {
+                if (e.key === 'ArrowDown') {
+                    const next = item.nextElementSibling;
+                    if (next) next.focus();
+                }
+                if (e.key === 'ArrowUp') {
+                    const prev = item.previousElementSibling;
+                    if (prev) prev.focus();
+                }
+            });
+        });
+
+        // Ambient pulse for the gold accents
+        const animateGold = () => {
+            const elements = document.querySelectorAll('.text-primary, .border-primary');
+            elements.forEach(el => {
+                // Potential dynamic glow animation
+            });
+        }
+    </script>
+</body></html>

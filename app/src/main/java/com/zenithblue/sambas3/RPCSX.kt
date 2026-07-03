@@ -130,7 +130,8 @@ class RPCSX {
             return rootDirectory + "config/dev_hdd0/"
         }
 
-        fun openLibrary(path: String): Boolean {
+        fun openLibrary(): Boolean {
+            val path = "$nativeLibDirectory/librpcsx-android.so"
             if (!instance.openLibrary(path)) {
                 return false
             }

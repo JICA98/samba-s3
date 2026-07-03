@@ -69,8 +69,7 @@ import kotlinx.coroutines.withContext
 import com.zenithblue.sambas3.R
 import com.zenithblue.sambas3.RPCSX
 import com.zenithblue.sambas3.dialogs.AlertDialogQueue
-import com.zenithblue.sambas3.ui.channels.DefaultGpuDriverChannel
-import com.zenithblue.sambas3.utils.DriversFetcher
+import com.zenithblue.sambas3.utils.DefaultGpuDriverChannel
 import com.zenithblue.sambas3.utils.GeneralSettings
 import com.zenithblue.sambas3.utils.GeneralSettings.string
 import com.zenithblue.sambas3.utils.GitHub
@@ -140,7 +139,6 @@ fun GpuDriversScreen(navigateBack: () -> Unit) {
     if (shouldFetchAndShowDrivers) {
         FetchAndShowDrivers(
             repoUrl = repoUrl!!,
-            bypassValidation = false,
             onDismiss = { shouldFetchAndShowDrivers = false },
             onDownloadDriver = { url, name ->
                 driverToDownload = Pair(url, name)
@@ -328,7 +326,6 @@ fun DriverDialog(
 @Composable
 fun FetchAndShowDrivers(
     repoUrl: String,
-    bypassValidation: Boolean = false,
     onDismiss: () -> Unit,
     onDownloadDriver: (String, String) -> Unit
 ) {
@@ -340,7 +337,7 @@ fun FetchAndShowDrivers(
     val hasScrolled = remember { derivedStateOf { scrollState.value > 0 } }
 
     LaunchedEffect(Unit) {
-        val fetchOutput = DriversFetcher.fetchReleases(repoUrl, bypassValidation)
+        val fetchOutput = GitHub.fetchReleases(repoUrl)
         isLoading = false
 
         if (fetchOutput is GitHub.FetchResult.Success<*>) {

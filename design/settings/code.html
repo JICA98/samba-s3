@@ -1,0 +1,279 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>SambaS3 - Settings</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@400;600;700&amp;family=JetBrains+Mono&amp;family=Press+Start+2P&amp;family=Rajdhani:wght@400;500;600;700&amp;family=Share+Tech+Mono&amp;family=Space+Mono&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .glow-primary:focus-within {
+            box-shadow: 0 0 15px rgba(230, 195, 100, 0.4);
+        }
+        .noise-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            opacity: 0.03;
+            z-index: 9999;
+            background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
+        }
+        .vignette {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            background: radial-gradient(circle, transparent 60%, rgba(10, 13, 26, 0.8) 100%);
+            z-index: 9998;
+        }
+        .settings-row:focus {
+            outline: none;
+            background-color: #1C2850;
+            border-left: 4px solid #F0C040;
+            padding-left: 20px;
+        }
+        .settings-row {
+            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+            border-left: 4px solid transparent;
+        }
+    </style>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "tertiary": "#b9c4ff",
+                        "on-primary-fixed": "#241a00",
+                        "error-container": "#93000a",
+                        "inverse-surface": "#e9e1d7",
+                        "on-secondary-container": "#b2b7d1",
+                        "on-tertiary-container": "#2e3b77",
+                        "outline": "#99907e",
+                        "on-primary-container": "#503d00",
+                        "on-secondary-fixed-variant": "#40465b",
+                        "primary-container": "#c9a84c",
+                        "on-secondary": "#2a3044",
+                        "surface-container-low": "#1e1b15",
+                        "primary-fixed": "#ffe08f",
+                        "on-background": "#e9e1d7",
+                        "surface-container-lowest": "#100e08",
+                        "surface-variant": "#38342d",
+                        "text-secondary": "#9A8E72",
+                        "inverse-on-surface": "#343029",
+                        "on-secondary-fixed": "#151b2e",
+                        "primary-fixed-dim": "#e6c364",
+                        "secondary-fixed-dim": "#c0c5df",
+                        "tertiary-fixed": "#dde1ff",
+                        "secondary": "#c0c5df",
+                        "surface-container-high": "#2d2a23",
+                        "on-error-container": "#ffdad6",
+                        "on-tertiary-fixed": "#041451",
+                        "outline-variant": "#4d4637",
+                        "tertiary-fixed-dim": "#b9c3ff",
+                        "focus-ring": "#F0C040",
+                        "primary-muted": "#2A2010",
+                        "inverse-primary": "#755b00",
+                        "tertiary-container": "#9ba8eb",
+                        "secondary-container": "#43485e",
+                        "on-tertiary": "#1e2b66",
+                        "surface-container-highest": "#38342d",
+                        "on-primary-fixed-variant": "#584400",
+                        "primary-dim": "#8C6E2A",
+                        "surface-container": "#221f19",
+                        "error": "#E05252",
+                        "on-surface": "#e9e1d7",
+                        "on-surface-variant": "#d0c5b2",
+                        "surface-dim": "#16130d",
+                        "text-primary": "#F0E8D0",
+                        "primary": "#e6c364",
+                        "on-error": "#690005",
+                        "surface-overlay": "#1C2850",
+                        "secondary-fixed": "#dce1fc",
+                        "surface": "#16130d",
+                        "surface-bright": "#3d3931",
+                        "background": "#0A0D1A"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    "spacing": {
+                        "2xl": "64px",
+                        "sm": "8px",
+                        "xs": "4px",
+                        "lg": "24px",
+                        "xl": "40px",
+                        "md": "16px"
+                    },
+                    "fontFamily": {
+                        "label-sm": ["Hanken Grotesk"],
+                        "metadata-xs": ["JetBrains Mono"],
+                        "headline-md": ["Hanken Grotesk"],
+                        "display-lg": ["Space Mono"],
+                        "metadata": ["Share Tech Mono"],
+                        "body": ["Rajdhani"],
+                        "label": ["Rajdhani"],
+                        "heading": ["Rajdhani"],
+                        "body-md": ["Hanken Grotesk"],
+                        "display": ["\"Press Start 2P\""]
+                    }
+                }
+            }
+        }
+    </script>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+</head>
+<body class="bg-background text-on-background font-body selection:bg-primary selection:text-on-primary overflow-hidden h-screen flex flex-col">
+<div class="noise-overlay"></div>
+<div class="vignette"></div>
+<!-- Top Navigation Header -->
+<header class="bg-background dark:bg-background text-primary dark:text-primary font-display text-display flex justify-between items-center w-full px-lg py-md max-w-full docked full-width top-0 z-50">
+<div class="flex items-center gap-md">
+<span class="material-symbols-outlined text-primary text-3xl" style="font-variation-settings: 'FILL' 1;">videogame_asset</span>
+<h1 class="font-display text-primary tracking-widest uppercase">SETTINGS</h1>
+</div>
+<div class="flex items-center gap-md">
+<span class="font-metadata text-text-secondary text-sm">v1.2.0-STABLE</span>
+<div class="w-2 h-2 bg-primary rounded-full animate-pulse shadow-[0_0_8px_#e6c364]"></div>
+</div>
+</header>
+<!-- Main Content Canvas -->
+<main class="flex-grow overflow-y-auto px-xl py-lg flex flex-col md:flex-row gap-xl relative z-10">
+<!-- Sidebar Navigation (Settings Categories) -->
+<nav class="w-full md:w-1/3 flex flex-col" id="settings-nav">
+<div class="mb-lg">
+<span class="font-label-sm text-label-sm text-text-secondary uppercase tracking-[0.2em]">Categories</span>
+<div class="h-[1px] w-full bg-outline-variant mt-xs opacity-50"></div>
+</div>
+<div class="space-y-sm">
+<!-- Emulation Category -->
+<button class="settings-row w-full flex items-center justify-between px-md py-lg bg-surface-container/30 group hover:bg-surface-overlay/40 focus:bg-surface-overlay" tabindex="0">
+<div class="flex items-center gap-md">
+<span class="material-symbols-outlined text-text-secondary group-focus:text-primary">memory</span>
+<span class="font-heading text-heading text-text-secondary group-focus:text-primary">Emulation</span>
+</div>
+<span class="material-symbols-outlined text-text-secondary/50 group-focus:text-primary">chevron_right</span>
+</button>
+<!-- Graphics Category -->
+<button class="settings-row w-full flex items-center justify-between px-md py-lg bg-surface-container/30 group hover:bg-surface-overlay/40 focus:bg-surface-overlay" tabindex="0">
+<div class="flex items-center gap-md">
+<span class="material-symbols-outlined text-text-secondary group-focus:text-primary">grid_view</span>
+<span class="font-heading text-heading text-text-secondary group-focus:text-primary">Graphics</span>
+</div>
+<span class="material-symbols-outlined text-text-secondary/50 group-focus:text-primary">chevron_right</span>
+</button>
+<!-- Audio Category -->
+<button class="settings-row w-full flex items-center justify-between px-md py-lg bg-surface-container/30 group hover:bg-surface-overlay/40 focus:bg-surface-overlay" tabindex="0">
+<div class="flex items-center gap-md">
+<span class="material-symbols-outlined text-text-secondary group-focus:text-primary">volume_up</span>
+<span class="font-heading text-heading text-text-secondary group-focus:text-primary">Audio</span>
+</div>
+<span class="material-symbols-outlined text-text-secondary/50 group-focus:text-primary">chevron_right</span>
+</button>
+<!-- System Category -->
+<button class="settings-row w-full flex items-center justify-between px-md py-lg bg-surface-container/30 group hover:bg-surface-overlay/40 focus:bg-surface-overlay" tabindex="0">
+<div class="flex items-center gap-md">
+<span class="material-symbols-outlined text-text-secondary group-focus:text-primary">settings_suggest</span>
+<span class="font-heading text-heading text-text-secondary group-focus:text-primary">System</span>
+</div>
+<span class="material-symbols-outlined text-text-secondary/50 group-focus:text-primary">chevron_right</span>
+</button>
+<!-- About Category -->
+<button class="settings-row w-full flex items-center justify-between px-md py-lg bg-surface-container/30 group hover:bg-surface-overlay/40 focus:bg-surface-overlay" tabindex="0">
+<div class="flex items-center gap-md">
+<span class="material-symbols-outlined text-text-secondary group-focus:text-primary">info</span>
+<span class="font-heading text-heading text-text-secondary group-focus:text-primary">About</span>
+</div>
+<span class="material-symbols-outlined text-text-secondary/50 group-focus:text-primary">chevron_right</span>
+</button>
+</div>
+</nav>
+<!-- Preview/Detail Area (Asymmetric Content) -->
+<section class="hidden md:flex flex-grow bg-surface-overlay/20 border border-outline-variant/30 relative overflow-hidden">
+<div class="absolute inset-0 z-0">
+
+</div>
+<div class="relative z-10 p-xl flex flex-col justify-end w-full bg-gradient-to-t from-background via-transparent to-transparent">
+<h2 class="font-display text-primary-fixed mb-sm">SambaS3 Core</h2>
+<p class="font-body-md text-on-surface-variant max-w-lg">
+                    Configure the heartbeat of your gaming experience. Adjust core frequency, cycle accuracy, and bios paths to optimize performance for seventh-generation console emulation.
+                </p>
+<div class="mt-lg flex gap-md">
+<div class="bg-surface-container px-md py-sm border-l-2 border-primary">
+<span class="block font-label-sm text-text-secondary uppercase">Status</span>
+<span class="font-metadata text-primary">OPTIMIZED</span>
+</div>
+<div class="bg-surface-container px-md py-sm border-l-2 border-secondary">
+<span class="block font-label-sm text-text-secondary uppercase">Backend</span>
+<span class="font-metadata text-secondary">VULKAN 1.3</span>
+</div>
+</div>
+</div>
+</section>
+</main>
+<!-- Bottom Navigation Shell (Controller Hints) -->
+<footer class="fixed bottom-0 left-0 w-full z-50 flex justify-end items-center px-lg h-12 bg-surface-container-high shadow-lg border-t border-outline-variant">
+<div class="flex items-center gap-xl h-full">
+<!-- Hint: Options (Unused but available) -->
+<div class="flex flex-row items-center gap-xs text-text-secondary px-md py-sm">
+<span class="material-symbols-outlined text-sm">settings</span>
+<span class="font-label-sm text-label-sm uppercase">OPTIONS</span>
+</div>
+<!-- Hint: Select -->
+<div class="flex flex-row items-center gap-xs text-primary font-bold px-md py-sm border-l border-outline-variant/30">
+<span class="material-symbols-outlined text-sm" style="font-variation-settings: 'FILL' 1;">circle</span>
+<span class="font-label-sm text-label-sm uppercase">SELECT</span>
+</div>
+<!-- Hint: Back -->
+<div class="flex flex-row items-center gap-xs text-text-secondary px-md py-sm border-l border-outline-variant/30">
+<span class="material-symbols-outlined text-sm">cancel</span>
+<span class="font-label-sm text-label-sm uppercase">BACK</span>
+</div>
+</div>
+</footer>
+<script>
+        // Simulate controller navigation
+        const rows = document.querySelectorAll('.settings-row');
+        let currentIndex = 0;
+
+        // Auto-focus first element
+        window.addEventListener('DOMContentLoaded', () => {
+            rows[0].focus();
+        });
+
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'ArrowDown') {
+                currentIndex = (currentIndex + 1) % rows.length;
+                rows[currentIndex].focus();
+            } else if (e.key === 'ArrowUp') {
+                currentIndex = (currentIndex - 1 + rows.length) % rows.length;
+                rows[currentIndex].focus();
+            }
+        });
+
+        // Click to focus handling
+        rows.forEach((row, index) => {
+            row.addEventListener('click', () => {
+                currentIndex = index;
+                row.focus();
+            });
+        });
+    </script>
+</body></html>

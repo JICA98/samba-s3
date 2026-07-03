@@ -95,7 +95,6 @@ import com.zenithblue.sambas3.ui.common.ComposePreview
 import com.zenithblue.sambas3.utils.FileUtil
 import com.zenithblue.sambas3.utils.GeneralSettings
 import com.zenithblue.sambas3.utils.InputBindingPrefs
-import com.zenithblue.sambas3.utils.RpcsxUpdater
 import org.json.JSONObject
 import java.io.File
 import kotlin.math.ceil
@@ -139,26 +138,6 @@ fun AdvancedSettingsScreen(
             }
         }
     }
-
-    val installRpcsxLauncher =
-        rememberLauncherForActivityResult(contract = ActivityResultContracts.GetContent()) { uri: Uri? ->
-            if (uri != null) {
-                val target = File(context.filesDir.canonicalPath, "librpcsx-dev.so")
-                if (target.exists()) {
-                    target.delete()
-                }
-
-                scope.launch {
-                    withContext(Dispatchers.IO) {
-                        FileUtil.saveFile(context, uri, target.path)
-                    }
-
-                    if (RPCSX.instance.getLibraryVersion(target.path) != null) {
-                        RpcsxUpdater.installUpdate(context, target)
-                    }
-                }
-            }
-        }
 
     val topBarScrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior()
     Scaffold(
@@ -522,13 +501,6 @@ fun AdvancedSettingsScreen(
             }
 
             if (path.isEmpty()) {
-                item(key = "install_dev_rpcsx") {
-                    RegularPreference(
-                        title = stringResource(R.string.install_custom_rpcsx_lib),
-                        leadingIcon = null,
-                        onClick = { installRpcsxLauncher.launch("*/*") }
-                    )
-                }
             }
         }
     }
@@ -618,17 +590,6 @@ fun SettingsScreen(
                     },
                     onClick = {
                         navigateTo("users")
-                    }
-                )
-            }
-
-            item(key = "update_channels") {
-                HomePreference(
-                    title = stringResource(R.string.download_channels),
-                    icon = { PreferenceIcon(icon = painterResource(R.drawable.ic_cloud_download)) },
-                    description = "",
-                    onClick = {
-                        navigateTo("update_channels")
                     }
                 )
             }

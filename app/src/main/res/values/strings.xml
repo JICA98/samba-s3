@@ -14,25 +14,16 @@
     <string name="about">About</string>
     <string name="copied_to_clipboard">Copied to clipboard!</string>
     <string name="device_info">Device Info</string>
-    <string name="driver_download_channel">GPU Driver Download Channel</string>
     <string name="edit_overlay">Edit Overlay</string>
     <string name="firmware">Firmware</string>
-    <string name="rpcsx_download_channel">SambaS3 Download Channel</string>
     <string name="settings">Settings</string>
-    <string name="ui_update_channel">SambaS3 UI Android Update Channel</string>
 
     <!-- FileUtil -->
     <string name="installing_dir">Installing directory</string>
 
     <!-- GamesScreen -->
-    <string name="current_and_new_version">Current version: %1$s\nNew version: %2$s</string>
     <string name="deleting_game">Deleting Game</string>
     <string name="delete">Delete</string>
-    <string name="downloading_latest_rpcsx">Downloading latest SambaS3</string>
-    <string name="downloading_rpcsx">Downloading SambaS3 %1$s</string>
-    <string name="downloading_ui">Downloading SambaS3 UI Android %1$s</string>
-    <string name="failed_to_delete_game_cache">Failed to delete game cache</string>
-    <string name="failed_to_download_rpcsx">Failed to download SambaS3</string>
     <string name="game_compiling_not_finished">Game compiling isn\'t finished yet</string>
     <string name="game_require_key">This game requires key to play</string>
     <string name="install_custom_version">Install custom version</string>
@@ -43,10 +34,7 @@
     <string name="missing_key">Missing Key</string>
     <string name="missing_rpcsx_lib">Missing SambaS3 Library</string>
     <string name="retry">Retry</string>
-    <string name="rpcsx_update_available">SambaS3 Update Available</string>
-    <string name="ui_update_available">UI Update Available</string>
     <string name="unexpected_error">Unexpected Error</string>
-    <string name="update">Update</string>
     <string name="wait_until_firmware_install">Please wait until firmware installs successfully to continue.</string>
     <string name="wait_until_game_compile">Please wait until game compiles to continue.</string>
 
@@ -83,9 +71,6 @@
     <string name="error_with_msg">Error: %1$s</string>
     <string name="failed_to_boot">Failed to boot</string>
 
-    <!-- RpcsxUpdater -->
-    <string name="restart_ui_to_apply_change">Restart SambaS3 UI to apply change</string>
-
     <!-- SettingsScreen -->
     <string name="active_user">Active User</string>
     <string name="advanced_settings">Advanced Settings</string>
@@ -97,13 +82,11 @@
     <string name="custom_driver_description">Install alternative drivers for potentially better performance or accuracy</string>
     <string name="custom_driver_not_supported">Custom Driver Not Supported</string>
     <string name="custom_driver_not_supported_description">Custom driver loading isn\'t currently supported for this device.</string>
-    <string name="download_channels">Download Channels</string>
     <string name="enable_haptic_feedback">Enable Haptic Feedback</string>
     <string name="failed_to_assign_value">Failed to assign value %1$s to %2$s</string>
     <string name="failed_to_reset_key">Failed to reset %1$s</string>
     <string name="failed_to_view_internal_dir">Failed to view internal directory</string>
     <string name="gamepad_overlay">Gamepad Overlay</string>
-    <string name="install_custom_rpcsx_lib">Install Custom SambaS3 Library</string>
     <string name="key_mappings">Key Mappings</string>
     <string name="log_not_found">Log file not found!</string>
     <string name="manage_settings">Manage Settings</string>
@@ -120,15 +103,6 @@
     <!-- SliderPreference -->
     <string name="slider_value_supporting">Value must be a multiple of step size %1$d within %2$.0f to %3$.0f</string>
     <string name="value">Value</string>
-
-    <!-- UiUpdater -->
-    <string name="failed_to_update_ui">Failed to update UI</string>
-    <string name="permission_required">Permission Required</string>
-    <string name="permission_required_description">Enable install from this source permission to update.</string>
-
-    <!-- UpdateChannelListScreen -->
-    <string name="enter_repo_url">Enter Repository URL</string>
-    <string name="select_repo">Select Repository</string>
 
     <!-- UsersScreen -->
     <string name="ask_if_stop_emu">Stop Emulator?</string>

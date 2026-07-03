@@ -1,0 +1,290 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>SambaS3 - Game Library</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&amp;family=Rajdhani:wght@300;400;500;600;700&amp;family=Hanken+Grotesk:wght@400;600;700&amp;family=Space+Mono&amp;family=JetBrains+Mono&amp;family=Share+Tech+Mono&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<!-- Shared Components JSON Integration & Style Guidance -->
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            "colors": {
+                "tertiary": "#b9c4ff",
+                "on-primary-fixed": "#241a00",
+                "error-container": "#93000a",
+                "inverse-surface": "#e9e1d7",
+                "on-secondary-container": "#b2b7d1",
+                "on-tertiary-container": "#2e3b77",
+                "outline": "#99907e",
+                "on-primary-container": "#503d00",
+                "on-secondary-fixed-variant": "#40465b",
+                "primary-container": "#c9a84c",
+                "on-secondary": "#2a3044",
+                "surface-container-low": "#1e1b15",
+                "primary-fixed": "#ffe08f",
+                "on-background": "#e9e1d7",
+                "surface-container-lowest": "#100e08",
+                "surface-variant": "#38342d",
+                "text-secondary": "#9A8E72",
+                "inverse-on-surface": "#343029",
+                "on-secondary-fixed": "#151b2e",
+                "primary-fixed-dim": "#e6c364",
+                "secondary-fixed-dim": "#c0c5df",
+                "tertiary-fixed": "#dde1ff",
+                "secondary": "#c0c5df",
+                "surface-container-high": "#2d2a23",
+                "on-error-container": "#ffdad6",
+                "on-tertiary-fixed": "#041451",
+                "outline-variant": "#4d4637",
+                "tertiary-fixed-dim": "#b9c3ff",
+                "focus-ring": "#F0C040",
+                "primary-muted": "#2A2010",
+                "inverse-primary": "#755b00",
+                "tertiary-container": "#9ba8eb",
+                "secondary-container": "#43485e",
+                "on-tertiary": "#1e2b66",
+                "surface-container-highest": "#38342d",
+                "on-primary-fixed-variant": "#584400",
+                "primary-dim": "#8C6E2A",
+                "surface-container": "#221f19",
+                "error": "#E05252",
+                "on-surface": "#e9e1d7",
+                "on-surface-variant": "#d0c5b2",
+                "surface-dim": "#16130d",
+                "text-primary": "#F0E8D0",
+                "primary": "#e6c364",
+                "on-error": "#690005",
+                "surface-overlay": "#1C2850",
+                "secondary-fixed": "#dce1fc",
+                "surface": "#16130d",
+                "surface-elevated": "#172040",
+                "surface-tint": "#e6c364",
+                "on-primary": "#3d2e00",
+                "background": "#0A0D1A",
+                "on-tertiary-fixed-variant": "#35437e",
+                "surface-bright": "#3d3931"
+            },
+            "borderRadius": {
+                "DEFAULT": "0.25rem",
+                "lg": "0.5rem",
+                "xl": "0.75rem",
+                "full": "9999px"
+            },
+            "spacing": {
+                "2xl": "64px",
+                "sm": "8px",
+                "xs": "4px",
+                "lg": "24px",
+                "xl": "40px",
+                "md": "16px"
+            },
+            "fontFamily": {
+                "label-sm": ["Hanken Grotesk"],
+                "metadata-xs": ["JetBrains Mono"],
+                "headline-md": ["Hanken Grotesk"],
+                "display-lg": ["Space Mono"],
+                "metadata": ["Share Tech Mono"],
+                "body": ["Rajdhani"],
+                "label": ["Rajdhani"],
+                "heading": ["Rajdhani"],
+                "body-md": ["Hanken Grotesk"],
+                "display": ["\"Press Start 2P\""]
+            },
+            "fontSize": {
+                "label-sm": ["12px", {"lineHeight": "14px", "letterSpacing": "0.1em", "fontWeight": "600"}],
+                "metadata-xs": ["11px", {"lineHeight": "15px", "letterSpacing": "0.05em", "fontWeight": "400"}],
+                "headline-md": ["20px", {"lineHeight": "26px", "letterSpacing": "0.06em", "fontWeight": "700"}],
+                "display-lg": ["24px", {"lineHeight": "38px", "letterSpacing": "0.04em", "fontWeight": "400"}],
+                "metadata": ["0.7rem", {"lineHeight": "1.4", "letterSpacing": "0.05em", "fontWeight": "400"}],
+                "body": ["1rem", {"lineHeight": "1.5", "letterSpacing": "0.02em", "fontWeight": "400"}],
+                "label": ["0.75rem", {"lineHeight": "1.2", "letterSpacing": "0.1em", "fontWeight": "600"}],
+                "heading": ["1.25rem", {"lineHeight": "1.3", "letterSpacing": "0.06em", "fontWeight": "700"}],
+                "body-md": ["16px", {"lineHeight": "24px", "letterSpacing": "0.02em", "fontWeight": "400"}],
+                "display": ["1.5rem", {"lineHeight": "1.6", "letterSpacing": "0.04em", "fontWeight": "400"}]
+            }
+          },
+        },
+      }
+    </script>
+<style>
+        .noise-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            opacity: 0.05;
+            background: url('https://grainy-gradients.vercel.app/noise.svg');
+            z-index: 100;
+        }
+        
+        .vignette {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            background: radial-gradient(circle, transparent 40%, rgba(0,0,0,0.8) 100%);
+            z-index: 90;
+        }
+
+        .glow-primary {
+            box-shadow: 0 0 25px 5px rgba(240, 192, 64, 0.4);
+        }
+
+        .carousel-container {
+            mask-image: linear-gradient(to right, transparent, black 20%, black 80%, transparent);
+        }
+
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 1, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+            vertical-align: middle;
+        }
+
+        /* Scanline effect for that retro-modern feel */
+        .scanlines {
+            background: linear-gradient(
+                to bottom,
+                rgba(18, 16, 16, 0) 50%,
+                rgba(0, 0, 0, 0.05) 50%
+            );
+            background-size: 100% 4px;
+            z-index: 101;
+            pointer-events: none;
+            position: fixed;
+            inset: 0;
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+</head>
+<body class="bg-background text-on-background min-h-screen overflow-hidden font-body flex flex-col select-none">
+<div class="noise-overlay"></div>
+<div class="vignette"></div>
+<div class="scanlines"></div>
+<!-- TopAppBar -->
+<header class="bg-background dark:bg-background text-primary dark:text-primary docked full-width top-0 flex justify-between items-center w-full px-lg py-md max-w-full z-[80] relative">
+<div class="flex items-center gap-md">
+<span class="material-symbols-outlined text-primary" data-icon="videogame_asset">videogame_asset</span>
+<h1 class="font-display text-display text-primary dark:text-primary tracking-widest">SambaS3</h1>
+</div>
+<div class="flex items-center gap-lg">
+<div class="flex items-center gap-sm font-label-sm text-label-sm text-primary font-bold">
+<span class="material-symbols-outlined" data-icon="wifi">wifi</span>
+<span>CONNECTED</span>
+</div>
+<div class="font-metadata text-metadata text-text-secondary">
+                12:45 PM
+            </div>
+</div>
+</header>
+<!-- Main Content Canvas -->
+<main class="flex-grow flex flex-col justify-center items-center relative z-50 py-xl">
+<!-- Background Ambient Shader -->
+<div class="absolute inset-0 z-[-1] opacity-30">
+
+</div>
+<!-- Carousel -->
+<div class="w-full carousel-container overflow-hidden flex flex-col items-center">
+<div class="flex items-center justify-center gap-xl h-[450px] px-xl">
+<!-- Card 1 (Inactive) -->
+<div class="w-48 aspect-[2/3] bg-surface-container border border-outline-variant opacity-40 transition-all duration-300 flex-shrink-0 group hover:scale-105">
+<div class="w-full h-full grayscale" data-alt="Official high-resolution game cover art for Uncharted 2 Among Thieves, featuring Nathan Drake in a cinematic action pose against a backdrop of snow-covered mountains and ancient ruins. The visual style is realistic with a warm sunset lighting contrast, utilizing deep blues and golden highlights to match the premium gaming OS aesthetic." style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuAbdGKLmKDa1DzwBg6QfQuUmnivCG4Kt7xD7tgci2vJpM1jDYmr-aAFKf0xl_ODiyHyWw3-inNXr7G7S-DA4y1_0sebH4TKirHQTa3D2j1hS6yaXVvgRWdrz_uQsU9St0gCA9jBQrmnQrVbdEi2VudZe3fRHyLEm1YMoScRU6QgffobTUtl8cC6sQebU9rMVDV0zw5fZ_FO_jvBUl-Nw4w5ehlCvs9Mz35obr8FXr_SQUzhbOjhRG24hA')"></div>
+</div>
+<!-- Card 2 (Inactive) -->
+<div class="w-56 aspect-[2/3] bg-surface-container border border-outline-variant opacity-60 transition-all duration-300 flex-shrink-0 group hover:scale-105">
+<div class="w-full h-full grayscale" data-alt="Iconic cover art for Metal Gear Solid 4: Guns of the Patriots, showcasing Old Snake in a highly detailed tactical suit with metallic textures. The lighting is cold and atmospheric, with a monochromatic palette of greys and blacks, fitting the high-end Seventh Generation console gaming aesthetic. The image is crisp and centered." style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuDB2A_7tiUGLgDeYT7VMFAkHSIgmqyLNIG60B73W3mHhwH7HZaxXK-mrY4pKpM0d6o8NXG1Jf4cpaiECIzjycOhF80xC8Q7RnAhlYClZ62p4FFwtbPDJ55vh_F8TX3zfjc-sExV-WMOduRjfltuiKTyRoEKDgsru6dC2M-DV2aC0bfFND4dR9onVFu8DBtlczCPqE0cEcpbEdROT5Zcu_EyVT7JGqCduaj__F87D017EO690jvJKHMa0Q')"></div>
+</div>
+<!-- Card 3 (Focused) -->
+<div class="w-64 aspect-[2/3] bg-surface-container border-2 border-focus-ring glow-primary scale-[1.12] z-10 transition-all duration-500 flex-shrink-0 relative">
+<div class="w-full h-full bg-cover bg-center" data-alt="Dynamic and aggressive game cover art for God of War III, featuring Kratos's fierce face with glowing red tattoos and intense white eyes. The background is a dark, storm-filled Olympus with lightning bolts illuminating the scene in electric blues and deep crimsons. The lighting is high-contrast, creating a powerful, premium, and menacing cinematic mood." style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuArGUQ0shcE8KBSEPSsGV4ZMSiT-6GDXgpOiY_PIYqaaSOXWdp5YQV6YIZ5QGVmZVUWbGi8ejc-3qzvastf99lXdZA2jK9Ctg_cIs2vBRBoTJY5Dymi2MRgR_mHPbpYnfiRO9SlDYGJP31QhBGWM1NySAIRz1wxIXDBS9xNCcqzL_8GHYF8f8Nu7ajqq3J-2CXpDwifcZFV9XJCGSRePsXHjYQDAmjMgZV3RF32RqVWhetTY9c5e6EGMg')"></div>
+<!-- Reflection Overlay -->
+<div class="absolute inset-0 bg-gradient-to-tr from-white/10 to-transparent pointer-events-none"></div>
+</div>
+<!-- Card 4 (Inactive) -->
+<div class="w-56 aspect-[2/3] bg-surface-container border border-outline-variant opacity-60 transition-all duration-300 flex-shrink-0 group hover:scale-105">
+<div class="w-full h-full grayscale" data-alt="The Last of Us original cover art showing Joel and Ellie walking through a post-apocalyptic city reclaimed by nature. The lighting is soft, natural, and filtered through green foliage, creating a melancholic yet beautiful atmosphere. The palette includes muted greens, earthy browns, and deep shadows, perfectly framed for a horizontal gaming carousel." style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuBLlol_z8vQGKt0RACGL1xRwPU_ku57jYUQrrdhQYugVW3lvofvr-KnZTKH9JfGTAz1Z6O8SjAQVqXvnrSrehW2uSnzJMU9FT3pPv4xefeZyQcU3OgCexsypHrhWZrL36oG8jsFjGDA_NVgvJVpy8SkSQdjXbUM4Q6XrpAtraUYHkaQaBxVjuB6nBfxScfatKjNa4K1pVcKSCyJqEVoG8_dS6ugRKia-s2XmrUJVg50CWMBNiN_IOX4tA')"></div>
+</div>
+<!-- Card 5 (Inactive) -->
+<div class="w-48 aspect-[2/3] bg-surface-container border border-outline-variant opacity-40 transition-all duration-300 flex-shrink-0 group hover:scale-105">
+<div class="w-full h-full grayscale" data-alt="Gran Turismo 5 cover art featuring a sleek, red metallic sports car speeding through a night city circuit. The car's surface has high-quality reflections of city lights, with motion blur effects in the background. The aesthetic is clean, technological, and high-performance, using vibrant reds and deep black asphalt tones." style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuBUUFbQg4DelbFJr68hSkKG93kscrF9BR1LG08N8hcvi9Z9DSbjTeUxNVGcR7rZ-QeprnEUVrge7Uro6akgByYYbplsvAvtM-EgdE8trAI5huAH2ngdRcuKkISrLwyTh1ZJOqc1_F6rliF2M046Go1edoqBfhActBSJVqGi5CRQ3cGv7LYUz17n_cD8xMZs8gksUDrPLD5P0Ilbh9lv4aiq_J2mNNZnQluDfR9pP5OWm-ioS2KQdK4Rmw')"></div>
+</div>
+</div>
+<!-- Focused Game Info -->
+<div class="mt-xl text-center space-y-sm animate-pulse-slow">
+<h2 class="font-heading text-heading text-primary uppercase tracking-[0.2em]">God of War III</h2>
+<div class="flex items-center justify-center gap-md font-metadata text-metadata text-text-secondary">
+<span class="bg-surface-variant px-sm py-xs border border-outline-variant">BCES-00510</span>
+<span class="flex items-center gap-xs"><span class="material-symbols-outlined text-[14px]" data-icon="hd">hd</span> 1080p</span>
+<span class="flex items-center gap-xs"><span class="material-symbols-outlined text-[14px]" data-icon="bolt">bolt</span> 60 FPS</span>
+<span class="flex items-center gap-xs"><span class="material-symbols-outlined text-[14px]" data-icon="database">database</span> 35.4 GB</span>
+</div>
+</div>
+</div>
+</main>
+<!-- BottomNavBar (Hint Strip) -->
+<nav class="fixed bottom-0 left-0 w-full z-50 flex justify-end items-center px-lg h-12 bg-surface-container-high border-t border-outline-variant shadow-lg">
+<div class="flex items-center gap-xl">
+<!-- PLAY -->
+<div class="flex flex-row items-center gap-xs text-primary font-bold px-md py-sm cursor-pointer transition-all active:scale-110">
+<div class="w-5 h-5 rounded-full border-2 border-primary flex items-center justify-center text-[10px] font-bold">X</div>
+<span class="font-label-sm text-label-sm uppercase">PLAY</span>
+</div>
+<!-- INFO -->
+<div class="flex flex-row items-center gap-xs text-text-secondary px-md py-sm cursor-pointer hover:bg-surface-variant transition-all">
+<div class="w-0 h-0 border-l-[10px] border-l-transparent border-r-[10px] border-r-transparent border-b-[18px] border-b-text-secondary"></div>
+<span class="font-label-sm text-label-sm uppercase">OPTIONS</span>
+</div>
+<!-- BACK -->
+<div class="flex flex-row items-center gap-xs text-text-secondary px-md py-sm cursor-pointer hover:bg-surface-variant transition-all">
+<div class="w-5 h-5 rounded-full border-2 border-text-secondary flex items-center justify-center text-[10px] font-bold">O</div>
+<span class="font-label-sm text-label-sm uppercase">BACK</span>
+</div>
+</div>
+</nav>
+<script>
+        // Simple interactive handling for 'controller' navigation feel
+        document.addEventListener('keydown', (e) => {
+            const sounds = {
+                move: 'https://www.soundjay.com/buttons/sounds/button-16.mp3',
+                select: 'https://www.soundjay.com/buttons/sounds/button-3.mp3'
+            };
+
+            const playSound = (src) => {
+                const audio = new Audio(src);
+                audio.volume = 0.2;
+                audio.play().catch(() => {}); // Catch browser auto-play block
+            };
+
+            if (e.key === 'ArrowRight' || e.key === 'ArrowLeft') {
+                playSound(sounds.move);
+                // In a real app, logic to shift focus would go here
+            }
+            if (e.key === 'Enter') {
+                playSound(sounds.select);
+            }
+        });
+
+        // Atmosphere: Subtle movement on mouse move
+        document.addEventListener('mousemove', (e) => {
+            const x = (e.clientX / window.innerWidth) - 0.5;
+            const y = (e.clientY / window.innerHeight) - 0.5;
+            
+            const shaderContainer = document.querySelector('webgl-shader');
+            if (shaderContainer) {
+                shaderContainer.style.transform = `translate(${x * 20}px, ${y * 20}px)`;
+            }
+        });
+    </script>
+</body></html>
