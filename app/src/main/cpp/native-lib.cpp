@@ -129,7 +129,7 @@ static jstring wrap(JNIEnv *env, const char *string) {
 }
 
 extern "C" JNIEXPORT jboolean JNICALL
-Java_net_rpcsx_RPCSX_openLibrary(JNIEnv *env, jobject, jstring path) {
+Java_com_zenithblue_sambas3_RPCSX_openLibrary(JNIEnv *env, jobject, jstring path) {
   if (auto library = RPCSXLibrary::Open(unwrap(env, path).c_str())) {
     rpcsxLib = std::move(*library);
     return true;
@@ -139,7 +139,7 @@ Java_net_rpcsx_RPCSX_openLibrary(JNIEnv *env, jobject, jstring path) {
 }
 
 extern "C" JNIEXPORT jstring JNICALL
-Java_net_rpcsx_RPCSX_getLibraryVersion(JNIEnv *env, jobject, jstring path) {
+Java_com_zenithblue_sambas3_RPCSX_getLibraryVersion(JNIEnv *env, jobject, jstring path) {
   if (auto library = RPCSXLibrary::Open(unwrap(env, path).c_str())) {
     if (auto getVersion = library->getVersion) {
       return wrap(env, getVersion());
@@ -149,142 +149,142 @@ Java_net_rpcsx_RPCSX_getLibraryVersion(JNIEnv *env, jobject, jstring path) {
   return {};
 }
 
-extern "C" JNIEXPORT jboolean JNICALL Java_net_rpcsx_RPCSX_overlayPadData(
+extern "C" JNIEXPORT jboolean JNICALL Java_com_zenithblue_sambas3_RPCSX_overlayPadData(
     JNIEnv *, jobject, jint digital1, jint digital2, jint leftStickX,
     jint leftStickY, jint rightStickX, jint rightStickY) {
   return rpcsxLib.overlayPadData(digital1, digital2, leftStickX, leftStickY,
                                  rightStickX, rightStickY);
 }
 
-extern "C" JNIEXPORT jboolean JNICALL Java_net_rpcsx_RPCSX_initialize(
+extern "C" JNIEXPORT jboolean JNICALL Java_com_zenithblue_sambas3_RPCSX_initialize(
     JNIEnv *env, jobject, jstring rootDir, jstring user) {
   return rpcsxLib.initialize(unwrap(env, rootDir), unwrap(env, user));
 }
 
 extern "C" JNIEXPORT jboolean JNICALL
-Java_net_rpcsx_RPCSX_processCompilationQueue(JNIEnv *env, jobject) {
+Java_com_zenithblue_sambas3_RPCSX_processCompilationQueue(JNIEnv *env, jobject) {
   return rpcsxLib.processCompilationQueue(env);
 }
 
 extern "C" JNIEXPORT jboolean JNICALL
-Java_net_rpcsx_RPCSX_startMainThreadProcessor(JNIEnv *env, jobject) {
+Java_com_zenithblue_sambas3_RPCSX_startMainThreadProcessor(JNIEnv *env, jobject) {
   return rpcsxLib.startMainThreadProcessor(env);
 }
 
-extern "C" JNIEXPORT jboolean JNICALL Java_net_rpcsx_RPCSX_collectGameInfo(
+extern "C" JNIEXPORT jboolean JNICALL Java_com_zenithblue_sambas3_RPCSX_collectGameInfo(
     JNIEnv *env, jobject, jstring jrootDir, jlong progressId) {
   return rpcsxLib.collectGameInfo(env, unwrap(env, jrootDir), progressId);
 }
 
-extern "C" JNIEXPORT void JNICALL Java_net_rpcsx_RPCSX_shutdown(JNIEnv *env,
+extern "C" JNIEXPORT void JNICALL Java_com_zenithblue_sambas3_RPCSX_shutdown(JNIEnv *env,
                                                                 jobject) {
   return rpcsxLib.shutdown();
 }
 
-extern "C" JNIEXPORT jint JNICALL Java_net_rpcsx_RPCSX_boot(JNIEnv *env,
+extern "C" JNIEXPORT jint JNICALL Java_com_zenithblue_sambas3_RPCSX_boot(JNIEnv *env,
                                                             jobject,
                                                             jstring jpath) {
   return rpcsxLib.boot(unwrap(env, jpath));
 }
 
-extern "C" JNIEXPORT jint JNICALL Java_net_rpcsx_RPCSX_getState(JNIEnv *env,
+extern "C" JNIEXPORT jint JNICALL Java_com_zenithblue_sambas3_RPCSX_getState(JNIEnv *env,
                                                                 jobject) {
   return rpcsxLib.getState();
 }
 
-extern "C" JNIEXPORT void JNICALL Java_net_rpcsx_RPCSX_kill(JNIEnv *env,
+extern "C" JNIEXPORT void JNICALL Java_com_zenithblue_sambas3_RPCSX_kill(JNIEnv *env,
                                                             jobject) {
   return rpcsxLib.kill();
 }
 
-extern "C" JNIEXPORT void JNICALL Java_net_rpcsx_RPCSX_resume(JNIEnv *env,
+extern "C" JNIEXPORT void JNICALL Java_com_zenithblue_sambas3_RPCSX_resume(JNIEnv *env,
                                                               jobject) {
   return rpcsxLib.resume();
 }
 
-extern "C" JNIEXPORT void JNICALL Java_net_rpcsx_RPCSX_openHomeMenu(JNIEnv *env,
+extern "C" JNIEXPORT void JNICALL Java_com_zenithblue_sambas3_RPCSX_openHomeMenu(JNIEnv *env,
                                                                     jobject) {
   return rpcsxLib.openHomeMenu();
 }
 
 extern "C" JNIEXPORT jstring JNICALL
-Java_net_rpcsx_RPCSX_getTitleId(JNIEnv *env, jobject) {
+Java_com_zenithblue_sambas3_RPCSX_getTitleId(JNIEnv *env, jobject) {
   return wrap(env, rpcsxLib.getTitleId());
 }
 
-extern "C" JNIEXPORT jboolean JNICALL Java_net_rpcsx_RPCSX_surfaceEvent(
+extern "C" JNIEXPORT jboolean JNICALL Java_com_zenithblue_sambas3_RPCSX_surfaceEvent(
     JNIEnv *env, jobject, jobject surface, jint event) {
   return rpcsxLib.surfaceEvent(env, surface, event);
 }
 
-extern "C" JNIEXPORT jboolean JNICALL Java_net_rpcsx_RPCSX_usbDeviceEvent(
+extern "C" JNIEXPORT jboolean JNICALL Java_com_zenithblue_sambas3_RPCSX_usbDeviceEvent(
     JNIEnv *env, jobject, jint fd, jint vendorId, jint productId, jint event) {
   return rpcsxLib.usbDeviceEvent(fd, vendorId, productId, event);
 }
 
-extern "C" JNIEXPORT jboolean JNICALL Java_net_rpcsx_RPCSX_installFw(
+extern "C" JNIEXPORT jboolean JNICALL Java_com_zenithblue_sambas3_RPCSX_installFw(
     JNIEnv *env, jobject, jint fd, jlong progressId) {
   return rpcsxLib.installFw(env, fd, progressId);
 }
 
 extern "C" JNIEXPORT jboolean JNICALL
-Java_net_rpcsx_RPCSX_isInstallableFile(JNIEnv *env, jobject, jint fd) {
+Java_com_zenithblue_sambas3_RPCSX_isInstallableFile(JNIEnv *env, jobject, jint fd) {
   return rpcsxLib.isInstallableFile(fd);
 }
 
 extern "C" JNIEXPORT jstring JNICALL
-Java_net_rpcsx_RPCSX_getDirInstallPath(JNIEnv *env, jobject, jint fd) {
+Java_com_zenithblue_sambas3_RPCSX_getDirInstallPath(JNIEnv *env, jobject, jint fd) {
   return rpcsxLib.getDirInstallPath(env, fd);
 }
 
 extern "C" JNIEXPORT jboolean JNICALL
-Java_net_rpcsx_RPCSX_install(JNIEnv *env, jobject, jint fd, jlong progressId) {
+Java_com_zenithblue_sambas3_RPCSX_install(JNIEnv *env, jobject, jint fd, jlong progressId) {
   return rpcsxLib.install(env, fd, progressId);
 }
 
-extern "C" JNIEXPORT jboolean JNICALL Java_net_rpcsx_RPCSX_installKey(
+extern "C" JNIEXPORT jboolean JNICALL Java_com_zenithblue_sambas3_RPCSX_installKey(
     JNIEnv *env, jobject, jint fd, jlong progressId, jstring gamePath) {
   return rpcsxLib.installKey(env, fd, progressId, unwrap(env, gamePath));
 }
 
 extern "C" JNIEXPORT jstring JNICALL
-Java_net_rpcsx_RPCSX_systemInfo(JNIEnv *env, jobject) {
+Java_com_zenithblue_sambas3_RPCSX_systemInfo(JNIEnv *env, jobject) {
   return wrap(env, rpcsxLib.systemInfo());
 }
 
 extern "C" JNIEXPORT void JNICALL
-Java_net_rpcsx_RPCSX_loginUser(JNIEnv *env, jobject, jstring user_id) {
+Java_com_zenithblue_sambas3_RPCSX_loginUser(JNIEnv *env, jobject, jstring user_id) {
   return rpcsxLib.loginUser(unwrap(env, user_id));
 }
 
-extern "C" JNIEXPORT jstring JNICALL Java_net_rpcsx_RPCSX_getUser(JNIEnv *env,
+extern "C" JNIEXPORT jstring JNICALL Java_com_zenithblue_sambas3_RPCSX_getUser(JNIEnv *env,
                                                                   jobject) {
   return wrap(env, rpcsxLib.getUser());
 }
 
 extern "C" JNIEXPORT jstring JNICALL
-Java_net_rpcsx_RPCSX_settingsGet(JNIEnv *env, jobject, jstring jpath) {
+Java_com_zenithblue_sambas3_RPCSX_settingsGet(JNIEnv *env, jobject, jstring jpath) {
   return wrap(env, rpcsxLib.settingsGet(unwrap(env, jpath)));
 }
 
-extern "C" JNIEXPORT jboolean JNICALL Java_net_rpcsx_RPCSX_settingsSet(
+extern "C" JNIEXPORT jboolean JNICALL Java_com_zenithblue_sambas3_RPCSX_settingsSet(
     JNIEnv *env, jobject, jstring jpath, jstring jvalue) {
   return rpcsxLib.settingsSet(unwrap(env, jpath), unwrap(env, jvalue));
 }
 
 extern "C" JNIEXPORT jboolean JNICALL
-Java_net_rpcsx_RPCSX_supportsCustomDriverLoading(JNIEnv *env,
+Java_com_zenithblue_sambas3_RPCSX_supportsCustomDriverLoading(JNIEnv *env,
                                                  jobject instance) {
   return access("/dev/kgsl-3d0", F_OK) == 0;
 }
 
 extern "C" JNIEXPORT jstring JNICALL
-Java_net_rpcsx_RPCSX_getVersion(JNIEnv *env, jobject) {
+Java_com_zenithblue_sambas3_RPCSX_getVersion(JNIEnv *env, jobject) {
   return wrap(env, rpcsxLib.getVersion());
 }
 
 extern "C" JNIEXPORT jboolean JNICALL
-Java_net_rpcsx_RPCSX_setCustomDriver(JNIEnv *env, jobject, jstring jpath,
+Java_com_zenithblue_sambas3_RPCSX_setCustomDriver(JNIEnv *env, jobject, jstring jpath,
                                      jstring jlibraryName, jstring jhookDir) {
 #ifdef __aarch64__
   if (rpcsxLib.setCustomDriver == nullptr) {

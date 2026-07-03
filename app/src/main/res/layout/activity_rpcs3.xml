@@ -8,12 +8,12 @@
     android:keepScreenOn="true"
     tools:context=".RPCSXActivity">
 
-    <net.rpcsx.GraphicsFrame
+    <com.zenithblue.sambas3.GraphicsFrame
         android:id="@+id/surfaceView"
         android:layout_width="match_parent"
         android:layout_height="match_parent" />
 
-    <net.rpcsx.overlay.PadOverlay
+    <com.zenithblue.sambas3.overlay.PadOverlay
         android:id="@+id/padOverlay"
         android:layout_width="match_parent"
         android:layout_height="match_parent" />

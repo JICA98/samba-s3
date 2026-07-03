@@ -7,15 +7,15 @@ plugins {
 }
 
 android {
-    namespace = "net.rpcsx"
+    namespace = "com.zenithblue.sambas3"
     compileSdk = 36
-    ndkVersion = "29.0.13113456"
+    ndkVersion = "30.0.14904198"
 
     defaultConfig {
-        applicationId = "net.rpcsx"
+        applicationId = "com.zenithblue.sambas3"
         minSdk = 29
         targetSdk = 35
-        versionCode = 1
+        versionCode = 20260703
         versionName = "${System.getenv("RX_VERSION") ?: "local"}${if (System.getenv("RX_SHA") != null) "-" + System.getenv("RX_SHA") else ""}"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
@@ -67,7 +67,6 @@ android {
     externalNativeBuild {
         cmake {
             path = file("src/main/cpp/CMakeLists.txt")
-            version = "3.31.6"
         }
     }
 
@@ -87,7 +86,7 @@ android {
     }
 }
 
-base.archivesName = "rpcsx"
+base.archivesName = "samba-s3"
 
 dependencies {
     implementation(libs.androidx.navigation.compose)

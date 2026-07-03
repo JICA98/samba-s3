@@ -20,5 +20,5 @@ dependencyResolutionManagement {
     }
 }
 
-rootProject.name = "RPCSX"
+rootProject.name = "SambaS3"
 include(":app")
