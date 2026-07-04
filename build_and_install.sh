@@ -74,9 +74,6 @@ VARIANT_CAP="${VARIANT^}"  # Capitalise first letter
 
 APP_NAME="SambaS3"
 PACKAGE="com.zenithblue.sambas3"
-if [[ "$VARIANT" == "debug" ]]; then
-    PACKAGE="com.zenithblue.sambas3.debug"
-fi
 ACTIVITY=".MainActivity"
 ADB="adb.exe"
 

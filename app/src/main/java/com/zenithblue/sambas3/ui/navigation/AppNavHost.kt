@@ -219,8 +219,6 @@ fun GamesDestination(
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
     // val prefs = remember { context.getSharedPreferences("app_prefs", Context.MODE_PRIVATE) }
-    var emulatorState by remember { RPCSX.state }
-    val emulatorActiveGame by remember { RPCSX.activeGame }
     val rpcsxLibrary by remember { RPCSX.activeLibrary }
 
     if (rpcsxLibrary == null) {
@@ -270,6 +268,8 @@ fun GamesDestination(
         installPkgLauncher = installPkgLauncher,
         gameFolderPickerLauncher = gameFolderPickerLauncher,
         installFwLauncher = installFwLauncher,
-        navigateToSettings = navigateToSettings
+        navigateToSettings = navigateToSettings,
+        emulatorState = RPCSX.state,
+        emulatorActiveGame = RPCSX.activeGame
     )
 }

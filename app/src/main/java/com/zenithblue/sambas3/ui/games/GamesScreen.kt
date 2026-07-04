@@ -38,6 +38,9 @@ import androidx.compose.ui.graphics.ColorMatrix
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import kotlinx.coroutines.launch
+import androidx.compose.runtime.State
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
@@ -49,6 +52,7 @@ import com.zenithblue.sambas3.*
 import com.zenithblue.sambas3.R
 import com.zenithblue.sambas3.utils.FileUtil
 import kotlin.math.abs
+import kotlin.concurrent.thread
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
@@ -59,7 +63,9 @@ fun GamesScreen(
     installPkgLauncher: ActivityResultLauncher<String>? = null,
     gameFolderPickerLauncher: ActivityResultLauncher<Uri?>? = null,
     installFwLauncher: ActivityResultLauncher<String>? = null,
-    navigateToSettings: (() -> Unit)? = null
+    navigateToSettings: (() -> Unit)? = null,
+    emulatorState: State<EmulatorState> = mutableStateOf(EmulatorState.Stopped),
+    emulatorActiveGame: State<String?> = mutableStateOf(null)
 ) {
     val context = LocalContext.current
     val games = remember { GameRepository.list() }
@@ -96,6 +102,7 @@ fun GamesScreen(
     var focusedIndex by remember { mutableStateOf(if (games.isNotEmpty()) 0 else -1) }
     var bootingGame by remember { mutableStateOf<Game?>(null) }
     var showImportDialog by remember { mutableStateOf(false) }
+    val isRunning = emulatorState.value == EmulatorState.Running || emulatorState.value == EmulatorState.Paused
 
     val bootScale by animateFloatAsState(if (bootingGame != null) 5f else 1f, animationSpec = tween(700))
     val bootAlpha by animateFloatAsState(if (bootingGame != null) 0f else 1f, animationSpec = tween(500))
@@ -204,7 +211,8 @@ fun GamesScreen(
                             game = game,
                             distance = distance,
                             onClick = { coroutineScope.launch { pagerState.animateScrollToPage(page) } },
-                            onPlay = { bootingGame = game }
+                            onPlay = { bootingGame = game },
+                            isRunning = isRunning && emulatorActiveGame.value == game.info.path
                         )
                     }
                 }
@@ -212,6 +220,7 @@ fun GamesScreen(
                 // Focused Game Info
                 if (pagerState.currentPage in games.indices) {
                     val activeGame = games[pagerState.currentPage]
+                    val isActiveGameRunning = isRunning && emulatorActiveGame.value == activeGame.info.path
                     Column(
                         modifier = Modifier
                             .fillMaxWidth()
@@ -225,6 +234,9 @@ fun GamesScreen(
                             color = RPCSXColors.primary
                         )
                         Row(horizontalArrangement = Arrangement.spacedBy(12.dp), modifier = Modifier.padding(top = 8.dp)) {
+                            if (isActiveGameRunning) {
+                                InfoBadge(text = "RUNNING", color = RPCSXColors.errorColor)
+                            }
                             InfoBadge(text = activeGame.info.path.substringAfterLast("/"))
                         }
                     }
@@ -311,11 +323,13 @@ fun GamesScreen(
                     }
                 }
                 Row(horizontalArrangement = Arrangement.spacedBy(24.dp)) {
-                    HintButton(text = "PLAY", icon = "X", color = RPCSXColors.primary, onClick = {
-                        // For play, we can just use the currently centered page (no easy access to pagerState here without refactoring)
-                        // Actually, wait, since we don't have focusedIndex anymore in scope, I'll pass it down or just leave it blank since this button is a hint, clicking the game itself plays it.
-                        // I'll leave the onClick blank here for now as the hint strip is usually just visual.
-                    })
+                        if (isRunning) {
+                        HintButton(text = "STOP", icon = "■", color = RPCSXColors.errorColor, onClick = {
+                            thread { RPCSX.instance.kill() }
+                        })
+                    } else {
+                        HintButton(text = "PLAY", icon = "X", color = RPCSXColors.primary, onClick = { })
+                    }
                     HintButton(text = "OPTIONS", icon = "△", color = RPCSXColors.textSecondary, onClick = { navigateToSettings?.invoke() })
                     HintButton(text = "BACK", icon = "O", color = RPCSXColors.textSecondary, onClick = { })
                 }
@@ -339,7 +353,7 @@ fun GamesScreen(
 }
 
 @Composable
-fun InfoBadge(text: String) {
+fun InfoBadge(text: String, color: Color = RPCSXColors.textSecondary) {
     Surface(
         color = RPCSXColors.surfaceElevated,
         shape = RoundedCornerShape(4.dp),
@@ -349,7 +363,7 @@ fun InfoBadge(text: String) {
             text = text,
             modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
             style = AppTypography.labelMedium,
-            color = RPCSXColors.textSecondary
+            color = color
         )
     }
 }
@@ -367,6 +381,12 @@ fun HintButton(text: String, icon: String, color: Color, onClick: () -> Unit) {
             ) {
                 Text("▲", color = color, style = AppTypography.labelSmall.copy(fontSize = 14.sp))
             }
+        } else if (icon == "■") {
+            Box(
+                modifier = Modifier
+                    .size(20.dp)
+                    .background(color, RoundedCornerShape(4.dp))
+            )
         } else {
             Box(
                 modifier = Modifier
@@ -383,7 +403,7 @@ fun HintButton(text: String, icon: String, color: Color, onClick: () -> Unit) {
 }
 
 @Composable
-fun GameCard(game: Game, distance: Int, onClick: () -> Unit, onPlay: () -> Unit) {
+fun GameCard(game: Game, distance: Int, onClick: () -> Unit, onPlay: () -> Unit, isRunning: Boolean = false) {
     val isFocused = distance == 0
     val targetScale = if (isFocused) 1.12f else if (distance == 1) 0.95f else 0.85f
     val targetAlpha = if (isFocused) 1.0f else if (distance == 1) 0.6f else 0.4f
@@ -521,6 +541,32 @@ fun GameCard(game: Game, distance: Int, onClick: () -> Unit, onPlay: () -> Unit)
                 .fillMaxSize()
                 .background(Brush.linearGradient(listOf(Color.White.copy(alpha = 0.1f), Color.Transparent)))
             )
+        }
+
+        if (isRunning) {
+            Box(
+                modifier = Modifier
+                    .align(Alignment.TopStart)
+                    .padding(8.dp)
+                    .background(
+                        color = RPCSXColors.errorColor.copy(alpha = 0.85f),
+                        shape = RoundedCornerShape(4.dp)
+                    )
+                    .padding(horizontal = 8.dp, vertical = 4.dp)
+            ) {
+                Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(4.dp)) {
+                    Box(
+                        modifier = Modifier
+                            .size(6.dp)
+                            .background(Color.White, RoundedCornerShape(3.dp))
+                    )
+                    Text(
+                        "RUNNING",
+                        style = AppTypography.labelSmall.copy(fontSize = 9.sp),
+                        color = Color.White
+                    )
+                }
+            }
         }
     }
 }

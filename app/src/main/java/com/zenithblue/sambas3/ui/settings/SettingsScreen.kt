@@ -6,9 +6,14 @@ import android.provider.DocumentsContract
 import android.util.Log
 import android.view.KeyEvent
 import android.widget.Toast
+import androidx.activity.compose.BackHandler
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.animation.AnimatedContent
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.runtime.mutableStateListOf
+import com.zenithblue.sambas3.ui.user.UsersScreen
+import com.zenithblue.sambas3.ui.drivers.GpuDriversScreen
 import androidx.compose.animation.animateContentSize
 import androidx.compose.animation.core.RepeatMode
 import androidx.compose.animation.core.animateFloat
@@ -349,10 +354,11 @@ fun AdvancedSettingsScreen(
     navigateBack: () -> Unit,
     navigateTo: (path: String) -> Unit,
     settings: JSONObject,
-    path: String = ""
+    path: String = "",
+    isInSplitPane: Boolean = false
 ) {
     val context = LocalContext.current
-    val settingValue = remember { mutableStateOf(settings) }
+    val settingValue = remember(settings) { mutableStateOf(settings) }
     var searchQuery by remember { mutableStateOf("") }
     var isSearching by remember { mutableStateOf(false) }
     val scope = rememberCoroutineScope()
@@ -383,102 +389,10 @@ fun AdvancedSettingsScreen(
     }
 
     val topBarScrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior()
-    Scaffold(
-        modifier = Modifier
-            .nestedScroll(topBarScrollBehavior.nestedScrollConnection)
-            .then(modifier),
-        topBar = {
-            val titlePath = path.replace("@@", " / ").removePrefix(" / ")
-            LargeTopAppBar(
-                title = {
-                    AnimatedContent(
-                        targetState = isSearching,
-                        transitionSpec = {
-                            fadeIn(tween(220)) + slideInVertically { -it / 2 } togetherWith
-                                    fadeOut(tween(150)) + slideOutVertically { -it / 2 }
-                        },
-                        label = "SearchTransition"
-                    ) { searching ->
-                        if (searching) {
-                            var expanded by remember { mutableStateOf(false) }
 
-                            CompositionLocalProvider(
-                                LocalTextStyle provides MaterialTheme.typography.bodyLarge.copy(fontSize = 16.sp)
-                            ) {
-                                SearchBar(
-                                    expanded = expanded,
-                                    onExpandedChange = {},
-                                    modifier = Modifier.fillMaxWidth().animateContentSize(),
-                                    windowInsets = WindowInsets(0, 0, 0, 0),
-                                    inputField = {
-                                        SearchBarDefaults.InputField(
-                                            query = searchQuery,
-                                            onQueryChange = { searchQuery = it },
-                                            onSearch = { expanded = false },
-                                            placeholder = { Text(stringResource(R.string.search)) },
-                                            leadingIcon = {
-                                                Icon(painter = painterResource(id = R.drawable.ic_search), null)
-                                            },
-                                            trailingIcon = {
-                                                IconButton(onClick = {
-                                                    if (searchQuery.isNotEmpty()) {
-                                                        searchQuery = ""
-                                                    } else {
-                                                        isSearching = false
-                                                    }
-                                                }) {
-                                                    Icon(painter = painterResource(id = R.drawable.ic_close), null)
-                                                }
-                                            },
-                                            expanded = expanded,
-                                            onExpandedChange = {}
-                                        )
-                                    }
-                                ) {}
-                            }
-                        } else {
-                            Text(
-                                text = titlePath.ifEmpty { stringResource(R.string.advanced_settings) },
-                                fontWeight = FontWeight.Medium
-                            )
-                        }
-                    }
-                },
-                scrollBehavior = topBarScrollBehavior,
-                navigationIcon = {
-                    IconButton(
-                        onClick = navigateBack,
-                        modifier = Modifier.padding(0.dp)
-                    ) {
-                        Icon(
-                            painter = painterResource(id = R.drawable.ic_keyboard_arrow_left),
-                            contentDescription = null
-                        )
-                    }
-                },
-                actions = {
-                    if (!isSearching) {
-                        IconButton(
-                            onClick = { isSearching = true }
-                        ) {
-                            Icon(
-                                painter = painterResource(id = R.drawable.ic_search),
-                                contentDescription = "Search"
-                            )
-                        }
-                    }
-                },
-            )
-        },
-        bottomBar = {
-            ControllerHintStrip(
-                hints = listOf(
-                    R.drawable.cross to "Select",
-                    R.drawable.circle to "Back"
-                )
-            )
-        }
-    ) { contentPadding ->
+    @Composable
+    fun AdvancedSettingsContent(contentPadding: PaddingValues) {
+        
         LazyColumn(
             modifier = Modifier
                 .fillMaxSize()
@@ -754,9 +668,198 @@ fun AdvancedSettingsScreen(
             if (path.isEmpty()) {
             }
         }
+    
     }
-}
 
+    if (isInSplitPane) {
+        Column(modifier = Modifier.fillMaxSize()) {
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 16.dp, vertical = 16.dp),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                IconButton(onClick = navigateBack) {
+                    Icon(
+                        painter = painterResource(id = R.drawable.ic_keyboard_arrow_left),
+                        contentDescription = null,
+                        tint = com.zenithblue.sambas3.RPCSXColors.primary
+                    )
+                }
+                Spacer(modifier = Modifier.width(8.dp))
+                if (isSearching) {
+                    var expanded by remember { mutableStateOf(false) }
+                    CompositionLocalProvider(
+                        LocalTextStyle provides MaterialTheme.typography.bodyLarge.copy(fontSize = 16.sp)
+                    ) {
+                        SearchBar(
+                            expanded = expanded,
+                            onExpandedChange = {},
+                            modifier = Modifier
+                                .weight(1f)
+                                .animateContentSize(),
+                            windowInsets = WindowInsets(0, 0, 0, 0),
+                            inputField = {
+                                SearchBarDefaults.InputField(
+                                    query = searchQuery,
+                                    onQueryChange = { searchQuery = it },
+                                    onSearch = { expanded = false },
+                                    placeholder = { Text(stringResource(R.string.search)) },
+                                    leadingIcon = {
+                                        Icon(painter = painterResource(id = R.drawable.ic_search), null)
+                                    },
+                                    trailingIcon = {
+                                        IconButton(onClick = {
+                                            if (searchQuery.isNotEmpty()) {
+                                                searchQuery = ""
+                                            } else {
+                                                isSearching = false
+                                            }
+                                        }) {
+                                            Icon(painter = painterResource(id = R.drawable.ic_close), null)
+                                        }
+                                    },
+                                    expanded = expanded,
+                                    onExpandedChange = {}
+                                )
+                            }
+                        ) {}
+                    }
+                } else {
+                    val displayTitle = path.replace("@@", " / ").removePrefix(" / ")
+                        .ifEmpty { stringResource(R.string.advanced_settings) }
+                    Text(
+                        text = displayTitle.uppercase(),
+                        color = com.zenithblue.sambas3.RPCSXColors.primary,
+                        fontFamily = androidx.compose.ui.text.font.FontFamily.Monospace,
+                        fontWeight = FontWeight.Bold,
+                        fontSize = 18.sp,
+                        letterSpacing = 2.sp,
+                        modifier = Modifier.weight(1f)
+                    )
+                    IconButton(onClick = { isSearching = true }) {
+                        Icon(
+                            painter = painterResource(id = R.drawable.ic_search),
+                            contentDescription = "Search",
+                            tint = com.zenithblue.sambas3.RPCSXColors.primary
+                        )
+                    }
+                }
+            }
+            AdvancedSettingsContent(contentPadding = PaddingValues(0.dp))
+        }
+    } else {
+        Scaffold(
+            modifier = Modifier
+                .nestedScroll(topBarScrollBehavior.nestedScrollConnection)
+                .then(modifier),
+            topBar = {
+                val titlePath = path.replace("@@", " / ").removePrefix(" / ")
+                LargeTopAppBar(
+                    title = {
+                        AnimatedContent(
+                            targetState = isSearching,
+                            transitionSpec = {
+                                fadeIn(tween(220)) + slideInVertically { -it / 2 } togetherWith
+                                        fadeOut(tween(150)) + slideOutVertically { -it / 2 }
+                            },
+                            label = "SearchTransition"
+                        ) { searching ->
+                            if (searching) {
+                                var expanded by remember { mutableStateOf(false) }
+
+                                CompositionLocalProvider(
+                                    LocalTextStyle provides MaterialTheme.typography.bodyLarge.copy(fontSize = 16.sp)
+                                ) {
+                                    SearchBar(
+                                        expanded = expanded,
+                                        onExpandedChange = {},
+                                        modifier = Modifier.fillMaxWidth().animateContentSize(),
+                                        windowInsets = WindowInsets(0, 0, 0, 0),
+                                        inputField = {
+                                            SearchBarDefaults.InputField(
+                                                query = searchQuery,
+                                                onQueryChange = { searchQuery = it },
+                                                onSearch = { expanded = false },
+                                                placeholder = { Text(stringResource(R.string.search)) },
+                                                leadingIcon = {
+                                                    Icon(painter = painterResource(id = R.drawable.ic_search), null)
+                                                },
+                                                trailingIcon = {
+                                                    IconButton(onClick = {
+                                                        if (searchQuery.isNotEmpty()) {
+                                                            searchQuery = ""
+                                                        } else {
+                                                            isSearching = false
+                                                        }
+                                                    }) {
+                                                        Icon(painter = painterResource(id = R.drawable.ic_close), null)
+                                                    }
+                                                },
+                                                expanded = expanded,
+                                                onExpandedChange = {}
+                                            )
+                                        }
+                                    ) {}
+                                }
+                            } else {
+                                Text(
+                                    text = titlePath.ifEmpty { stringResource(R.string.advanced_settings) },
+                                    fontWeight = FontWeight.Medium
+                                )
+                            }
+                        }
+                    },
+                    scrollBehavior = topBarScrollBehavior,
+                    navigationIcon = {
+                        IconButton(
+                            onClick = navigateBack,
+                            modifier = Modifier.padding(0.dp)
+                        ) {
+                            Icon(
+                                painter = painterResource(id = R.drawable.ic_keyboard_arrow_left),
+                                contentDescription = null
+                            )
+                        }
+                    },
+                    actions = {
+                        if (!isSearching) {
+                            IconButton(
+                                onClick = { isSearching = true }
+                            ) {
+                                Icon(
+                                    painter = painterResource(id = R.drawable.ic_search),
+                                    contentDescription = "Search"
+                                )
+                            }
+                        }
+                    },
+                )
+            },
+            bottomBar = {
+                ControllerHintStrip(
+                    hints = listOf(
+                        R.drawable.cross to "Select",
+                        R.drawable.circle to "Back"
+                    )
+                )
+            }
+        ) { contentPadding ->
+            AdvancedSettingsContent(contentPadding = contentPadding)
+        }
+    }
+    }
+
+
+private fun getNestedSettings(root: JSONObject, path: String): JSONObject {
+    if (path.isEmpty() || path == "settings@@$") return root
+    val parts = path.removePrefix("settings").split("@@").filter { it.isNotEmpty() }
+    var current = root
+    for (part in parts) {
+        current = current.optJSONObject(part) ?: return current
+    }
+    return current
+}
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -769,8 +872,19 @@ fun SettingsScreen(
     val topBarScrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior()
     val activeUser by remember { UserRepository.activeUser }
     var focusedKey by remember { mutableStateOf("internal_directory") }
+    var activeSettingKey by remember { mutableStateOf<String?>(null) }
+    val advancedSettingsPathStack = remember { mutableStateListOf("") }
+    val settings = remember { JSONObject(RPCSX.instance.settingsGet("")) }
     val configuration = androidx.compose.ui.platform.LocalConfiguration.current
     val isWideScreen = configuration.screenWidthDp > 600
+
+    BackHandler(enabled = activeSettingKey != null) {
+        if (activeSettingKey == "advanced_settings" && advancedSettingsPathStack.size > 1) {
+            advancedSettingsPathStack.removeLast()
+        } else {
+            activeSettingKey = null
+        }
+    }
 
     Scaffold(
         modifier = modifier,
@@ -895,7 +1009,7 @@ fun SettingsScreen(
                             PreferenceIcon(icon = painterResource(id = R.drawable.ic_person))
                         },
                         onClick = {
-                            navigateTo("users")
+                            activeSettingKey = "users"
                         },
                         onFocusChanged = { if (it) focusedKey = "users" }
                     )
@@ -907,7 +1021,9 @@ fun SettingsScreen(
                         icon = { Icon(painterResource(R.drawable.tune), null) },
                         description = stringResource(R.string.advanced_settings_description),
                         onClick = {
-                            navigateTo("settings@@$")
+                            advancedSettingsPathStack.clear()
+                            advancedSettingsPathStack.add("settings@@$")
+                            activeSettingKey = "advanced_settings"
                         },
                         onLongClick = {
                             AlertDialogQueue.showDialog(
@@ -935,7 +1051,7 @@ fun SettingsScreen(
                         description = stringResource(R.string.custom_driver_description),
                         onClick = {
                             if (RPCSX.instance.supportsCustomDriverLoading()) {
-                                navigateTo("drivers")
+                                activeSettingKey = "custom_driver"
                             } else {
                                 AlertDialogQueue.showDialog(
                                     title = context.getString(R.string.custom_driver_not_supported),
@@ -954,7 +1070,7 @@ fun SettingsScreen(
                         title = stringResource(R.string.controls),
                         icon = { Icon(painterResource(R.drawable.gamepad), null) },
                         description = stringResource(R.string.controls_description),
-                        onClick = { navigateTo("controls") },
+                        onClick = { activeSettingKey = "controls" },
                         onFocusChanged = { if (it) focusedKey = "controls" }
                     )
                 }
@@ -994,8 +1110,62 @@ fun SettingsScreen(
                         .weight(2f)
                         .fillMaxHeight()
                         .padding(end = 16.dp, top = 16.dp, bottom = 16.dp)
+                        .background(com.zenithblue.sambas3.RPCSXColors.surfaceOverlay.copy(alpha = 0.2f))
+                        .drawBehind {
+                            drawRect(
+                                color = com.zenithblue.sambas3.RPCSXColors.surfaceOverlay,
+                                topLeft = androidx.compose.ui.geometry.Offset(0f, 0f),
+                                size = size,
+                                style = androidx.compose.ui.graphics.drawscope.Stroke(width = 1.dp.toPx())
+                            )
+                        }
                 ) {
-                    SettingsDetailPane(focusedKey = focusedKey, activeUser = activeUser)
+                    when (activeSettingKey) {
+                        "users" -> {
+                            UsersScreen(
+                                navigateBack = { activeSettingKey = null },
+                                isInSplitPane = true
+                            )
+                        }
+                        "advanced_settings" -> {
+                            val currentPath = advancedSettingsPathStack.lastOrNull() ?: ""
+                            val currentObj = getNestedSettings(settings, currentPath)
+                            AdvancedSettingsScreen(
+                                navigateBack = {
+                                    if (advancedSettingsPathStack.size > 1) {
+                                        advancedSettingsPathStack.removeLast()
+                                    } else {
+                                        activeSettingKey = null
+                                    }
+                                },
+                                navigateTo = { path ->
+                                    if (path.startsWith("settings@@")) {
+                                        advancedSettingsPathStack.add(path)
+                                    } else {
+                                        navigateTo(path)
+                                    }
+                                },
+                                settings = currentObj,
+                                path = currentPath,
+                                isInSplitPane = true
+                            )
+                        }
+                        "custom_driver" -> {
+                            GpuDriversScreen(
+                                navigateBack = { activeSettingKey = null },
+                                isInSplitPane = true
+                            )
+                        }
+                        "controls" -> {
+                            ControllerSettings(
+                                navigateBack = { activeSettingKey = null },
+                                isInSplitPane = true
+                            )
+                        }
+                        else -> {
+                            SettingsDetailPane(focusedKey = focusedKey, activeUser = activeUser)
+                        }
+                    }
                 }
             }
         }
@@ -1007,35 +1177,14 @@ fun SettingsScreen(
 @Composable
 fun ControllerSettings(
     modifier: Modifier = Modifier,
-    navigateBack: () -> Unit
+    navigateBack: () -> Unit,
+    isInSplitPane: Boolean = false
 ) {
     val topBarScrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior()
-    Scaffold(
-        modifier = Modifier
-            .nestedScroll(topBarScrollBehavior.nestedScrollConnection)
-            .then(modifier),
-        topBar = {
-            LargeTopAppBar(
-                title = { Text(text = stringResource(R.string.controls), fontWeight = FontWeight.Medium) },
-                scrollBehavior = topBarScrollBehavior,
-                navigationIcon = {
-                    IconButton(
-                        onClick = navigateBack
-                    ) {
-                        Icon(painter = painterResource(id = R.drawable.ic_keyboard_arrow_left), null)
-                    }
-                }
-            )
-        },
-        bottomBar = {
-            ControllerHintStrip(
-                hints = listOf(
-                    R.drawable.cross to "Select",
-                    R.drawable.circle to "Back"
-                )
-            )
-        }
-    ) { contentPadding ->
+
+    @Composable
+    fun ControllerContent(contentPadding: PaddingValues) {
+        
         //val context = LocalContext.current
         val inputBindings = remember {
             mutableStateMapOf<Int, Pair<Int, Int>>().apply {
@@ -1170,8 +1319,71 @@ fun ControllerSettings(
                 requester.requestFocus()
             }
         }
+    
     }
-}
+
+    if (isInSplitPane) {
+        Column(
+            modifier = modifier
+                .fillMaxSize()
+                .padding(16.dp)
+        ) {
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(bottom = 16.dp),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                IconButton(onClick = navigateBack) {
+                    Icon(
+                        painter = painterResource(id = R.drawable.ic_keyboard_arrow_left),
+                        contentDescription = null,
+                        tint = com.zenithblue.sambas3.RPCSXColors.primary
+                    )
+                }
+                Spacer(modifier = Modifier.width(8.dp))
+                Text(
+                    text = stringResource(R.string.controls).uppercase(),
+                    color = com.zenithblue.sambas3.RPCSXColors.primary,
+                    fontFamily = androidx.compose.ui.text.font.FontFamily.Monospace,
+                    fontWeight = FontWeight.Bold,
+                    fontSize = 18.sp,
+                    letterSpacing = 2.sp
+                )
+            }
+            ControllerContent(contentPadding = PaddingValues(0.dp))
+        }
+    } else {
+        Scaffold(
+            modifier = Modifier
+                .nestedScroll(topBarScrollBehavior.nestedScrollConnection)
+                .then(modifier),
+            topBar = {
+                LargeTopAppBar(
+                    title = { Text(text = stringResource(R.string.controls), fontWeight = FontWeight.Medium) },
+                    scrollBehavior = topBarScrollBehavior,
+                    navigationIcon = {
+                        IconButton(
+                            onClick = navigateBack
+                        ) {
+                            Icon(painter = painterResource(id = R.drawable.ic_keyboard_arrow_left), null)
+                        }
+                    }
+                )
+            },
+            bottomBar = {
+                ControllerHintStrip(
+                    hints = listOf(
+                        R.drawable.cross to "Select",
+                        R.drawable.circle to "Back"
+                    )
+                )
+            }
+        ) { contentPadding ->
+            ControllerContent(contentPadding = contentPadding)
+        }
+    }
+    }
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable

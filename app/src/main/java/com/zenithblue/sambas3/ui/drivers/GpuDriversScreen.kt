@@ -78,9 +78,14 @@ import com.zenithblue.sambas3.utils.GpuDriverInstallResult
 import java.io.File
 import java.io.FileInputStream
 
+import androidx.compose.ui.unit.sp
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun GpuDriversScreen(navigateBack: () -> Unit) {
+fun GpuDriversScreen(
+    navigateBack: () -> Unit,
+    isInSplitPane: Boolean = false
+) {
     val context = LocalContext.current
     var drivers by remember { mutableStateOf(GpuDriverHelper.getInstalledDrivers(context)) }
     var selectedDriver by remember { mutableStateOf<String?>(null) }
@@ -161,22 +166,11 @@ fun GpuDriversScreen(navigateBack: () -> Unit) {
             })
     }
 
-    Scaffold(snackbarHost = { SnackbarHost(hostState = snackbarHostState) }, topBar = {
-        TopAppBar(
-            title = { Text(text = stringResource(R.string.custom_driver), fontWeight = FontWeight.Medium) },
-            scrollBehavior = topBarScrollBehavior,
-            navigationIcon = {
-                IconButton(
-                    onClick = navigateBack
-                ) {
-                    Icon(painter = painterResource(id = R.drawable.ic_keyboard_arrow_left), null)
-                }
-            })
-    }) { paddingValues ->
+    @Composable
+    fun DriversContent(modifier: Modifier = Modifier) {
         Column(
-            modifier = Modifier
+            modifier = modifier
                 .fillMaxSize()
-                .padding(paddingValues)
                 .padding(16.dp)
         ) {
             Text(
@@ -272,7 +266,50 @@ fun GpuDriversScreen(navigateBack: () -> Unit) {
 
                 }
             }
+        }
+    }
 
+    if (isInSplitPane) {
+        Column(modifier = Modifier.fillMaxSize()) {
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 16.dp, vertical = 16.dp),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                IconButton(onClick = navigateBack) {
+                    Icon(
+                        painter = painterResource(id = R.drawable.ic_keyboard_arrow_left),
+                        contentDescription = null,
+                        tint = com.zenithblue.sambas3.RPCSXColors.primary
+                    )
+                }
+                Spacer(modifier = Modifier.width(8.dp))
+                Text(
+                    text = stringResource(R.string.custom_driver).uppercase(),
+                    color = com.zenithblue.sambas3.RPCSXColors.primary,
+                    fontFamily = androidx.compose.ui.text.font.FontFamily.Monospace,
+                    fontWeight = FontWeight.Bold,
+                    fontSize = 18.sp,
+                    letterSpacing = 2.sp
+                )
+            }
+            DriversContent(modifier = Modifier.weight(1f))
+        }
+    } else {
+        Scaffold(snackbarHost = { SnackbarHost(hostState = snackbarHostState) }, topBar = {
+            TopAppBar(
+                title = { Text(text = stringResource(R.string.custom_driver), fontWeight = FontWeight.Medium) },
+                scrollBehavior = topBarScrollBehavior,
+                navigationIcon = {
+                    IconButton(
+                        onClick = navigateBack
+                    ) {
+                        Icon(painter = painterResource(id = R.drawable.ic_keyboard_arrow_left), null)
+                    }
+                })
+        }) { paddingValues ->
+            DriversContent(modifier = Modifier.padding(paddingValues))
         }
     }
 }

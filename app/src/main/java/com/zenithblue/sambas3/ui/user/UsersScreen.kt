@@ -5,11 +5,14 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -29,7 +32,9 @@ import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import com.zenithblue.sambas3.EmulatorState
 import com.zenithblue.sambas3.R
 import com.zenithblue.sambas3.RPCSX
@@ -72,7 +77,8 @@ fun UserItem(
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun UsersScreen(
-    navigateBack: () -> Unit
+    navigateBack: () -> Unit,
+    isInSplitPane: Boolean = false
 ) {
     val users = remember { UserRepository.users }
     val activeUser by remember { UserRepository.activeUser }
@@ -83,58 +89,97 @@ fun UsersScreen(
         UserRepository.load()
     }
 
-    Scaffold(
-        modifier = Modifier.windowInsetsPadding(WindowInsets.navigationBars),
-        topBar = {
-            TopAppBar(
-                title = {
-                    Text(stringResource(R.string.users))
-                },
-                navigationIcon = {
-                    IconButton(onClick = navigateBack) {
-                        Icon(
-                            painter = painterResource(id = R.drawable.ic_keyboard_arrow_left),
-                            contentDescription = null
-                        )
-                    }
-                }
-            )
-        }
-    ) { innerPadding ->
-        Column(
-            modifier = Modifier.padding(innerPadding)
+    @Composable
+    fun UsersContent(modifier: Modifier = Modifier) {
+        LazyColumn(
+            contentPadding = PaddingValues(8.dp),
+            modifier = modifier
         ) {
-            LazyColumn(
-                contentPadding = PaddingValues(8.dp)
+            items(
+                count = users.size,
+                key = { index -> users.toList()[index].first }
             ) {
-                items(
-                    count = users.size,
-                    key = { index -> users.toList()[index].first }
-                ) {
-                    val user = users.values.elementAt(it)
-                    UserItem(
-                        user = user,
-                        isActive = user.userId == activeUser,
-                        setActive = {
-                            if (emulatorState != EmulatorState.Stopped) {
-                                AlertDialogQueue.showDialog(
-                                    title = context.getString(R.string.ask_if_stop_emu),
-                                    message = context.getString(R.string.ask_if_stop_emu_description),
-                                    onConfirm = {
-                                        RPCSX.instance.kill()
-                                        RPCSX.updateState()
-                                        UserRepository.loginUser(user.userId)
-                                    }
-                                )
-                            } else {
-                                UserRepository.loginUser(user.userId)
-                            }
-                        },
+                val user = users.values.elementAt(it)
+                UserItem(
+                    user = user,
+                    isActive = user.userId == activeUser,
+                    setActive = {
+                        if (emulatorState != EmulatorState.Stopped) {
+                            AlertDialogQueue.showDialog(
+                                title = context.getString(R.string.ask_if_stop_emu),
+                                message = context.getString(R.string.ask_if_stop_emu_description),
+                                onConfirm = {
+                                    RPCSX.instance.kill()
+                                    RPCSX.updateState()
+                                    UserRepository.loginUser(user.userId)
+                                }
+                            )
+                        } else {
+                            UserRepository.loginUser(user.userId)
+                        }
+                    },
+                )
+            }
+            item {
+                Box(Modifier.height(LocalConfiguration.current.screenHeightDp.dp * 0.4f))
+            }
+        }
+    }
+
+    if (isInSplitPane) {
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(16.dp)
+        ) {
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(bottom = 16.dp),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                IconButton(onClick = navigateBack) {
+                    Icon(
+                        painter = painterResource(id = R.drawable.ic_keyboard_arrow_left),
+                        contentDescription = null,
+                        tint = com.zenithblue.sambas3.RPCSXColors.primary
                     )
                 }
-                item {
-                    Box(Modifier.height(LocalConfiguration.current.screenHeightDp.dp * 0.4f))
-                }
+                Spacer(modifier = Modifier.width(8.dp))
+                Text(
+                    text = stringResource(R.string.users).uppercase(),
+                    color = com.zenithblue.sambas3.RPCSXColors.primary,
+                    fontFamily = androidx.compose.ui.text.font.FontFamily.Monospace,
+                    fontWeight = FontWeight.Bold,
+                    fontSize = 18.sp,
+                    letterSpacing = 2.sp
+                )
+            }
+            UsersContent(modifier = Modifier.weight(1f))
+        }
+    } else {
+        Scaffold(
+            modifier = Modifier.windowInsetsPadding(WindowInsets.navigationBars),
+            topBar = {
+                TopAppBar(
+                    title = {
+                        Text(stringResource(R.string.users))
+                    },
+                    navigationIcon = {
+                        IconButton(onClick = navigateBack) {
+                            Icon(
+                                painter = painterResource(id = R.drawable.ic_keyboard_arrow_left),
+                                contentDescription = null
+                            )
+                        }
+                    }
+                )
+            }
+        ) { innerPadding ->
+            Column(
+                modifier = Modifier.padding(innerPadding)
+            ) {
+                UsersContent()
             }
         }
     }

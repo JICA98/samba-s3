@@ -1,0 +1,1016 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<title>PS3 Controller Overlay</title>
+<style>
+  /* ── Reset & base ── */
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --btn-size: 52px;          /* ≥ 44pt HIG minimum */
+    --stick-size: 96px;
+    --stick-inner: 46px;
+    --dpad-cell: 48px;
+    --shoulder-w: 72px;
+    --shoulder-h: 40px;
+    --center-h: 36px;
+    --center-w: 52px;
+    --ps-size: 46px;
+
+    /* Overlay palette — readable on any game content */
+    --glass-bg: rgba(15, 15, 20, 0.45);
+    --glass-border: rgba(255, 255, 255, 0.14);
+    --glass-active: rgba(255, 255, 255, 0.30);
+    --glass-label: rgba(255, 255, 255, 0.70);
+    --glass-label-dim: rgba(255, 255, 255, 0.38);
+    --shadow-btn: 0 2px 8px rgba(0,0,0,0.45), inset 0 1px 0 rgba(255,255,255,0.10);
+    --shadow-active: 0 0 0 3px rgba(255,255,255,0.22), 0 2px 12px rgba(0,0,0,0.6);
+    --radius-btn: 50%;
+    --radius-rect: 10px;
+    --radius-shoulder: 12px;
+    --transition: 80ms cubic-bezier(0.25, 0.46, 0.45, 0.94);
+
+    /* Face button colours — muted, HIG-compliant contrast */
+    --tri-color: rgba(50, 180, 130, 0.85);
+    --tri-border: rgba(80, 210, 160, 0.6);
+    --cross-color: rgba(80, 140, 220, 0.85);
+    --cross-border: rgba(100, 165, 240, 0.6);
+    --sq-color: rgba(200, 80, 130, 0.80);
+    --sq-border: rgba(225, 110, 155, 0.60);
+    --circ-color: rgba(210, 70, 60, 0.80);
+    --circ-border: rgba(235, 100, 90, 0.60);
+
+    /* Safe area insets (notch / home bar) */
+    --safe-bottom: env(safe-area-inset-bottom, 12px);
+    --safe-left:   env(safe-area-inset-left,   0px);
+    --safe-right:  env(safe-area-inset-right,  0px);
+  }
+
+  html, body {
+    width: 100%; height: 100%;
+    overflow: hidden;
+    background: #0a0a10; /* fallback; game canvas sits behind */
+    -webkit-tap-highlight-color: transparent;
+    touch-action: none;
+    user-select: none;
+    -webkit-user-select: none;
+  }
+
+  /* ── Game canvas placeholder ── */
+  #game-canvas {
+    position: fixed;
+    inset: 0;
+    background: linear-gradient(160deg, #0d1117 0%, #1a1d2e 100%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', system-ui, sans-serif;
+    color: rgba(255,255,255,0.18);
+    font-size: 15px;
+    letter-spacing: 0.04em;
+    pointer-events: none;
+  }
+
+  /* ── Controller overlay root ── */
+  #controller {
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    z-index: 100;
+  }
+
+  /* ── Shared button base ── */
+  .btn {
+    position: absolute;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    pointer-events: auto;
+    touch-action: none;
+    cursor: pointer;
+    transition: transform var(--transition), background var(--transition), box-shadow var(--transition);
+    -webkit-tap-highlight-color: transparent;
+    will-change: transform;
+    backdrop-filter: blur(6px);
+    -webkit-backdrop-filter: blur(6px);
+  }
+
+  .btn:active,
+  .btn.pressed {
+    transform: scale(0.88);
+    background: var(--glass-active) !important;
+    box-shadow: var(--shadow-active) !important;
+  }
+
+  /* ── Labels inside buttons ── */
+  .btn-label {
+    font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', system-ui, sans-serif;
+    font-weight: 600;
+    line-height: 1;
+    pointer-events: none;
+    user-select: none;
+  }
+
+  /* ── Floating section label ── */
+  .zone-label {
+    position: absolute;
+    font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Text', system-ui, sans-serif;
+    font-size: 9px;
+    font-weight: 500;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--glass-label-dim);
+    pointer-events: none;
+  }
+
+  /* ════════════════════════════════════
+     SHOULDER BUTTONS — top edge
+  ════════════════════════════════════ */
+  .shoulder {
+    width: var(--shoulder-w);
+    height: var(--shoulder-h);
+    border-radius: var(--radius-shoulder);
+    background: var(--glass-bg);
+    border: 1px solid var(--glass-border);
+    box-shadow: var(--shadow-btn);
+    top: calc(10px + env(safe-area-inset-top, 0px));
+  }
+
+  #l2 { left: calc(var(--safe-left) + 14px); }
+  #l1 { left: calc(var(--safe-left) + 14px); top: calc(58px + env(safe-area-inset-top, 0px)); }
+  #r2 { right: calc(var(--safe-right) + 14px); }
+  #r1 { right: calc(var(--safe-right) + 14px); top: calc(58px + env(safe-area-inset-top, 0px)); }
+
+  .shoulder .btn-label {
+    font-size: 14px;
+    color: var(--glass-label);
+  }
+
+  /* ════════════════════════════════════
+     D-PAD — bottom-left
+  ════════════════════════════════════ */
+  #dpad {
+    position: absolute;
+    width: calc(var(--dpad-cell) * 3);
+    height: calc(var(--dpad-cell) * 3);
+    bottom: calc(var(--safe-bottom) + 110px);
+    left: calc(var(--safe-left) + 18px);
+    pointer-events: none;
+  }
+
+  .dpad-btn {
+    position: absolute;
+    width: var(--dpad-cell);
+    height: var(--dpad-cell);
+    background: var(--glass-bg);
+    border: 1px solid var(--glass-border);
+    box-shadow: var(--shadow-btn);
+    pointer-events: auto;
+    touch-action: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: transform var(--transition), background var(--transition), box-shadow var(--transition);
+    backdrop-filter: blur(6px);
+    -webkit-backdrop-filter: blur(6px);
+    cursor: pointer;
+  }
+
+  .dpad-btn:active, .dpad-btn.pressed {
+    transform: scale(0.88);
+    background: var(--glass-active);
+    box-shadow: var(--shadow-active);
+  }
+
+  #dpad-up    { top: 0;                         left: var(--dpad-cell); border-radius: 8px 8px 0 0; }
+  #dpad-down  { top: calc(var(--dpad-cell)*2);  left: var(--dpad-cell); border-radius: 0 0 8px 8px; }
+  #dpad-left  { top: var(--dpad-cell);           left: 0;                border-radius: 8px 0 0 8px; }
+  #dpad-right { top: var(--dpad-cell);           left: calc(var(--dpad-cell)*2); border-radius: 0 8px 8px 0; }
+  #dpad-center {
+    top: var(--dpad-cell); left: var(--dpad-cell);
+    background: rgba(15,15,20,0.35);
+    border-color: rgba(255,255,255,0.06);
+    pointer-events: none;
+  }
+
+  .dpad-arrow {
+    font-size: 14px;
+    color: var(--glass-label);
+    pointer-events: none;
+  }
+
+  /* ════════════════════════════════════
+     FACE BUTTONS — bottom-right
+  ════════════════════════════════════ */
+  #face-group {
+    position: absolute;
+    width: calc(var(--btn-size) * 2 + 14px);
+    height: calc(var(--btn-size) * 2 + 14px);
+    bottom: calc(var(--safe-bottom) + 108px);
+    right: calc(var(--safe-right) + 18px);
+    pointer-events: none;
+  }
+
+  .face-btn {
+    width: var(--btn-size);
+    height: var(--btn-size);
+    border-radius: var(--radius-btn);
+    position: absolute;
+  }
+
+  /* Triangle — top center */
+  #btn-triangle {
+    background: var(--tri-color);
+    border: 1.5px solid var(--tri-border);
+    box-shadow: var(--shadow-btn);
+    top: 0;
+    left: calc(50% - var(--btn-size)/2);
+  }
+  #btn-triangle .btn-label { font-size: 20px; color: #fff; }
+
+  /* Cross — bottom center */
+  #btn-cross {
+    background: var(--cross-color);
+    border: 1.5px solid var(--cross-border);
+    box-shadow: var(--shadow-btn);
+    bottom: 0;
+    left: calc(50% - var(--btn-size)/2);
+  }
+  #btn-cross .btn-label { font-size: 18px; color: #fff; }
+
+  /* Square — left center */
+  #btn-square {
+    background: var(--sq-color);
+    border: 1.5px solid var(--sq-border);
+    box-shadow: var(--shadow-btn);
+    top: calc(50% - var(--btn-size)/2);
+    left: 0;
+  }
+  #btn-square .btn-label { font-size: 18px; color: #fff; }
+
+  /* Circle — right center */
+  #btn-circle {
+    background: var(--circ-color);
+    border: 1.5px solid var(--circ-border);
+    box-shadow: var(--shadow-btn);
+    top: calc(50% - var(--btn-size)/2);
+    right: 0;
+  }
+  #btn-circle .btn-label { font-size: 20px; color: #fff; }
+
+  /* ════════════════════════════════════
+     ANALOG STICKS
+  ════════════════════════════════════ */
+  .stick-ring {
+    position: absolute;
+    width: var(--stick-size);
+    height: var(--stick-size);
+    border-radius: 50%;
+    background: rgba(15,15,20,0.32);
+    border: 1.5px solid rgba(255,255,255,0.10);
+    pointer-events: auto;
+    touch-action: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    backdrop-filter: blur(4px);
+    -webkit-backdrop-filter: blur(4px);
+  }
+
+  .stick-nub {
+    width: var(--stick-inner);
+    height: var(--stick-inner);
+    border-radius: 50%;
+    background: var(--glass-bg);
+    border: 1.5px solid rgba(255,255,255,0.22);
+    box-shadow: var(--shadow-btn), inset 0 1px 0 rgba(255,255,255,0.15);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background var(--transition), box-shadow var(--transition);
+    pointer-events: none;
+  }
+
+  .stick-nub .btn-label {
+    font-size: 10px;
+    color: var(--glass-label-dim);
+    letter-spacing: 0.04em;
+  }
+
+  /* Left stick: bottom-left, above dpad */
+  #stick-left {
+    bottom: calc(var(--safe-bottom) + 14px);
+    left: calc(var(--safe-left) + 58px);
+  }
+
+  /* Right stick: bottom-right, between dpad-position and face-buttons */
+  #stick-right {
+    bottom: calc(var(--safe-bottom) + 14px);
+    right: calc(var(--safe-right) + 120px);
+  }
+
+  /* ════════════════════════════════════
+     CENTER CLUSTER — SELECT / PS / START
+  ════════════════════════════════════ */
+  #center-cluster {
+    position: absolute;
+    bottom: calc(var(--safe-bottom) + 62px);
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    pointer-events: none;
+  }
+
+  .center-btn {
+    height: var(--center-h);
+    width: var(--center-w);
+    border-radius: 18px;
+    background: var(--glass-bg);
+    border: 1px solid var(--glass-border);
+    box-shadow: var(--shadow-btn);
+    pointer-events: auto;
+    touch-action: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    backdrop-filter: blur(6px);
+    -webkit-backdrop-filter: blur(6px);
+    transition: transform var(--transition), background var(--transition), box-shadow var(--transition);
+  }
+
+  .center-btn:active, .center-btn.pressed {
+    transform: scale(0.90);
+    background: var(--glass-active);
+    box-shadow: var(--shadow-active);
+  }
+
+  .center-btn .btn-label {
+    font-size: 10px;
+    letter-spacing: 0.06em;
+    color: var(--glass-label-dim);
+  }
+
+  #ps-btn {
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    background: rgba(20, 20, 35, 0.72);
+    border: 1.5px solid rgba(130, 120, 220, 0.55);
+    box-shadow: 0 0 18px rgba(110, 100, 200, 0.30), var(--shadow-btn);
+    pointer-events: auto;
+    touch-action: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    backdrop-filter: blur(6px);
+    -webkit-backdrop-filter: blur(6px);
+    transition: transform var(--transition), background var(--transition), box-shadow var(--transition);
+  }
+
+  #ps-btn:active, #ps-btn.pressed {
+    transform: scale(0.88);
+    background: rgba(110, 100, 200, 0.40);
+    box-shadow: 0 0 24px rgba(130,120,220,0.50), var(--shadow-active);
+  }
+
+  #ps-btn .btn-label {
+    font-size: 13px;
+    font-weight: 700;
+    color: rgba(180, 170, 240, 0.90);
+    letter-spacing: 0.02em;
+  }
+
+  /* ════════════════════════════════════
+     SETTINGS TOGGLE
+  ════════════════════════════════════ */
+  #settings-btn {
+    position: absolute;
+    top: calc(10px + env(safe-area-inset-top, 0px));
+    left: 50%;
+    transform: translateX(-50%);
+    width: 36px;
+    height: 24px;
+    border-radius: 12px;
+    background: rgba(255,255,255,0.08);
+    border: 1px solid rgba(255,255,255,0.12);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    pointer-events: auto;
+    touch-action: none;
+    cursor: pointer;
+    transition: background var(--transition);
+    backdrop-filter: blur(4px);
+    -webkit-backdrop-filter: blur(4px);
+    gap: 3px;
+    z-index: 200;
+  }
+
+  #settings-btn:active { background: rgba(255,255,255,0.18); }
+
+  .settings-dot {
+    width: 4px; height: 4px;
+    border-radius: 50%;
+    background: rgba(255,255,255,0.50);
+  }
+
+  /* ════════════════════════════════════
+     SETTINGS PANEL
+  ════════════════════════════════════ */
+  #settings-panel {
+    position: absolute;
+    top: calc(44px + env(safe-area-inset-top, 0px));
+    left: 50%;
+    transform: translateX(-50%);
+    width: 260px;
+    background: rgba(15,15,22,0.88);
+    border: 1px solid rgba(255,255,255,0.14);
+    border-radius: 16px;
+    padding: 16px;
+    pointer-events: auto;
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    z-index: 300;
+    display: none;
+    flex-direction: column;
+    gap: 14px;
+    box-shadow: 0 8px 32px rgba(0,0,0,0.6);
+  }
+
+  #settings-panel.open { display: flex; }
+
+  .panel-title {
+    font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', system-ui, sans-serif;
+    font-size: 13px;
+    font-weight: 600;
+    color: rgba(255,255,255,0.80);
+    letter-spacing: 0.02em;
+    margin-bottom: 2px;
+  }
+
+  .panel-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+  }
+
+  .panel-row label {
+    font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Text', system-ui, sans-serif;
+    font-size: 12px;
+    color: rgba(255,255,255,0.55);
+    flex: 1;
+  }
+
+  .panel-row input[type=range] {
+    flex: 1.4;
+    -webkit-appearance: none;
+    height: 3px;
+    border-radius: 2px;
+    background: rgba(255,255,255,0.20);
+    outline: none;
+    cursor: pointer;
+  }
+
+  .panel-row input[type=range]::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    width: 18px; height: 18px;
+    border-radius: 50%;
+    background: #fff;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.5);
+    cursor: pointer;
+  }
+
+  .panel-row .val-label {
+    font-size: 11px;
+    color: rgba(255,255,255,0.40);
+    min-width: 28px;
+    text-align: right;
+    font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Mono', monospace, sans-serif;
+  }
+
+  /* Toggle switch */
+  .toggle-wrap { display: flex; align-items: center; gap: 8px; }
+  .toggle {
+    width: 36px; height: 20px;
+    border-radius: 10px;
+    background: rgba(255,255,255,0.14);
+    border: 1px solid rgba(255,255,255,0.18);
+    position: relative;
+    cursor: pointer;
+    transition: background 200ms;
+    flex-shrink: 0;
+  }
+  .toggle.on { background: rgba(100, 180, 120, 0.7); border-color: rgba(120, 210, 140, 0.5); }
+  .toggle::after {
+    content: '';
+    position: absolute;
+    top: 2px; left: 2px;
+    width: 14px; height: 14px;
+    border-radius: 50%;
+    background: #fff;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.4);
+    transition: transform 200ms cubic-bezier(0.34, 1.56, 0.64, 1);
+  }
+  .toggle.on::after { transform: translateX(16px); }
+
+  /* ════════════════════════════════════
+     HAPTIC FEEDBACK RIPPLE
+  ════════════════════════════════════ */
+  @keyframes ripple-out {
+    0%   { transform: scale(0.8); opacity: 0.5; }
+    100% { transform: scale(1.6); opacity: 0; }
+  }
+
+  .ripple {
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    border: 1.5px solid rgba(255,255,255,0.4);
+    animation: ripple-out 320ms ease-out forwards;
+    pointer-events: none;
+  }
+
+  /* ════════════════════════════════════
+     INPUT DISPLAY (debug)
+  ════════════════════════════════════ */
+  #input-display {
+    position: absolute;
+    top: calc(12px + env(safe-area-inset-top, 0px));
+    right: calc(var(--safe-right) + 100px);
+    font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Mono', monospace, sans-serif;
+    font-size: 10px;
+    color: rgba(255,255,255,0.35);
+    text-align: right;
+    pointer-events: none;
+    line-height: 1.6;
+    display: none;
+  }
+</style>
+</head>
+<body>
+
+<!-- Game output sits here in production -->
+<div id="game-canvas">
+  <span>← game output renders here →</span>
+</div>
+
+<!-- Controller overlay -->
+<div id="controller" aria-label="PS3 game controller overlay" role="group">
+
+  <!-- ── Shoulder buttons ── -->
+  <button class="btn shoulder" id="l2" aria-label="L2 trigger">
+    <span class="btn-label">L2</span>
+  </button>
+  <button class="btn shoulder" id="l1" aria-label="L1 shoulder">
+    <span class="btn-label">L1</span>
+  </button>
+  <button class="btn shoulder" id="r2" aria-label="R2 trigger">
+    <span class="btn-label">R2</span>
+  </button>
+  <button class="btn shoulder" id="r1" aria-label="R1 shoulder">
+    <span class="btn-label">R1</span>
+  </button>
+
+  <!-- ── D-Pad ── -->
+  <div id="dpad" aria-label="D-pad">
+    <div class="dpad-btn" id="dpad-up"    data-key="up"    aria-label="D-pad up">
+      <span class="dpad-arrow">▲</span>
+    </div>
+    <div class="dpad-btn" id="dpad-down"  data-key="down"  aria-label="D-pad down">
+      <span class="dpad-arrow">▼</span>
+    </div>
+    <div class="dpad-btn" id="dpad-left"  data-key="left"  aria-label="D-pad left">
+      <span class="dpad-arrow">◀</span>
+    </div>
+    <div class="dpad-btn" id="dpad-right" data-key="right" aria-label="D-pad right">
+      <span class="dpad-arrow">▶</span>
+    </div>
+    <div class="dpad-btn" id="dpad-center"></div>
+  </div>
+
+  <!-- ── Face buttons ── -->
+  <div id="face-group" aria-label="Face buttons">
+    <button class="btn face-btn" id="btn-triangle" aria-label="Triangle">
+      <span class="btn-label">△</span>
+    </button>
+    <button class="btn face-btn" id="btn-cross" aria-label="Cross">
+      <span class="btn-label">✕</span>
+    </button>
+    <button class="btn face-btn" id="btn-square" aria-label="Square">
+      <span class="btn-label">□</span>
+    </button>
+    <button class="btn face-btn" id="btn-circle" aria-label="Circle">
+      <span class="btn-label">○</span>
+    </button>
+  </div>
+
+  <!-- ── Analog sticks ── -->
+  <div class="stick-ring" id="stick-left" aria-label="Left analog stick" role="slider">
+    <div class="stick-nub" id="nub-left">
+      <span class="btn-label">L3</span>
+    </div>
+  </div>
+
+  <div class="stick-ring" id="stick-right" aria-label="Right analog stick" role="slider">
+    <div class="stick-nub" id="nub-right">
+      <span class="btn-label">R3</span>
+    </div>
+  </div>
+
+  <!-- ── Center cluster ── -->
+  <div id="center-cluster" aria-label="System buttons">
+    <button class="center-btn" id="btn-select" aria-label="Select">
+      <span class="btn-label">SELECT</span>
+    </button>
+    <button id="ps-btn" aria-label="PS button">
+      <span class="btn-label">PS</span>
+    </button>
+    <button class="center-btn" id="btn-start" aria-label="Start">
+      <span class="btn-label">START</span>
+    </button>
+  </div>
+
+  <!-- ── Settings toggle ── -->
+  <button id="settings-btn" aria-label="Controller settings" aria-expanded="false">
+    <div class="settings-dot"></div>
+    <div class="settings-dot"></div>
+    <div class="settings-dot"></div>
+  </button>
+
+  <!-- ── Settings panel ── -->
+  <div id="settings-panel" role="dialog" aria-label="Controller settings">
+    <div class="panel-title">Controller settings</div>
+
+    <div class="panel-row">
+      <label for="opacity-slider">Opacity</label>
+      <input type="range" id="opacity-slider" min="20" max="95" value="60" step="5">
+      <span class="val-label" id="opacity-val">60%</span>
+    </div>
+
+    <div class="panel-row">
+      <label for="size-slider">Button size</label>
+      <input type="range" id="size-slider" min="44" max="72" value="52" step="2">
+      <span class="val-label" id="size-val">52px</span>
+    </div>
+
+    <div class="panel-row">
+      <label>Vibration</label>
+      <div class="toggle-wrap">
+        <div class="toggle on" id="haptic-toggle" role="switch" aria-checked="true" tabindex="0"></div>
+      </div>
+    </div>
+
+    <div class="panel-row">
+      <label>Input log</label>
+      <div class="toggle-wrap">
+        <div class="toggle" id="debug-toggle" role="switch" aria-checked="false" tabindex="0"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── Debug input log ── -->
+  <div id="input-display" aria-live="polite"></div>
+
+</div><!-- /controller -->
+
+<script>
+/* ════════════════════════════════════════
+   STATE
+════════════════════════════════════════ */
+const state = {
+  haptic: true,
+  debug: false,
+  opacity: 60,
+  btnSize: 52,
+  pressedKeys: new Set(),
+  sticks: {
+    left:  { x: 0, y: 0, touching: false, touchId: null },
+    right: { x: 0, y: 0, touching: false, touchId: null }
+  }
+};
+
+/* ════════════════════════════════════════
+   ELEMENT REFS
+════════════════════════════════════════ */
+const controller    = document.getElementById('controller');
+const settingsBtn   = document.getElementById('settings-btn');
+const settingsPanel = document.getElementById('settings-panel');
+const opacitySlider = document.getElementById('opacity-slider');
+const opacityVal    = document.getElementById('opacity-val');
+const sizeSlider    = document.getElementById('size-slider');
+const sizeVal       = document.getElementById('size-val');
+const hapticToggle  = document.getElementById('haptic-toggle');
+const debugToggle   = document.getElementById('debug-toggle');
+const inputDisplay  = document.getElementById('input-display');
+const stickLeft     = document.getElementById('stick-left');
+const stickRight    = document.getElementById('stick-right');
+const nubLeft       = document.getElementById('nub-left');
+const nubRight      = document.getElementById('nub-right');
+
+/* ════════════════════════════════════════
+   HAPTIC FEEDBACK
+════════════════════════════════════════ */
+function haptic(style = 'light') {
+  if (!state.haptic) return;
+  if ('vibrate' in navigator) {
+    const patterns = { light: [8], medium: [15], heavy: [25, 10, 15] };
+    navigator.vibrate(patterns[style] || [8]);
+  }
+  // iOS-style via AudioContext impulsive click simulation (silent but triggers haptic engine on some devices)
+  try {
+    const ctx = new (window.AudioContext || window.webkitAudioContext)();
+    const osc = ctx.createOscillator();
+    const gain = ctx.createGain();
+    osc.connect(gain); gain.connect(ctx.destination);
+    osc.frequency.value = 200;
+    gain.gain.setValueAtTime(0.001, ctx.currentTime);
+    osc.start(); osc.stop(ctx.currentTime + 0.01);
+    setTimeout(() => ctx.close(), 100);
+  } catch(e) {}
+}
+
+/* ════════════════════════════════════════
+   RIPPLE EFFECT
+════════════════════════════════════════ */
+function addRipple(el) {
+  const r = document.createElement('div');
+  r.className = 'ripple';
+  el.appendChild(r);
+  r.addEventListener('animationend', () => r.remove());
+}
+
+/* ════════════════════════════════════════
+   DEBUG LOG
+════════════════════════════════════════ */
+function logInput(key, action) {
+  if (!state.debug) return;
+  const now = new Date().toLocaleTimeString('en', { hour12: false });
+  inputDisplay.textContent = `[${now}] ${action}: ${key}\n` + inputDisplay.textContent.split('\n').slice(0, 6).join('\n');
+}
+
+/* ════════════════════════════════════════
+   BUTTON PRESS / RELEASE
+════════════════════════════════════════ */
+function pressBtn(el, key) {
+  if (state.pressedKeys.has(key)) return;
+  state.pressedKeys.add(key);
+  el.classList.add('pressed');
+  addRipple(el);
+  haptic('light');
+  logInput(key, 'press');
+  // Emit custom event for emulator integration
+  window.dispatchEvent(new CustomEvent('ps3-input', { detail: { key, action: 'press' } }));
+}
+
+function releaseBtn(el, key) {
+  state.pressedKeys.delete(key);
+  el.classList.remove('pressed');
+  logInput(key, 'release');
+  window.dispatchEvent(new CustomEvent('ps3-input', { detail: { key, action: 'release' } }));
+}
+
+/* ════════════════════════════════════════
+   ATTACH TOUCH EVENTS TO ALL BUTTONS
+════════════════════════════════════════ */
+function attachBtn(el, key) {
+  el.addEventListener('touchstart', e => {
+    e.preventDefault();
+    pressBtn(el, key);
+  }, { passive: false });
+
+  el.addEventListener('touchend', e => {
+    e.preventDefault();
+    releaseBtn(el, key);
+  }, { passive: false });
+
+  el.addEventListener('touchcancel', e => {
+    releaseBtn(el, key);
+  }, { passive: false });
+
+  // Mouse fallback for desktop testing
+  el.addEventListener('mousedown', e => {
+    e.preventDefault();
+    pressBtn(el, key);
+  });
+  el.addEventListener('mouseup',   () => releaseBtn(el, key));
+  el.addEventListener('mouseleave',() => releaseBtn(el, key));
+}
+
+/* ── Wire all buttons ── */
+attachBtn(document.getElementById('l1'), 'L1');
+attachBtn(document.getElementById('l2'), 'L2');
+attachBtn(document.getElementById('r1'), 'R1');
+attachBtn(document.getElementById('r2'), 'R2');
+attachBtn(document.getElementById('btn-triangle'), 'TRIANGLE');
+attachBtn(document.getElementById('btn-cross'),    'CROSS');
+attachBtn(document.getElementById('btn-square'),   'SQUARE');
+attachBtn(document.getElementById('btn-circle'),   'CIRCLE');
+attachBtn(document.getElementById('btn-select'),   'SELECT');
+attachBtn(document.getElementById('btn-start'),    'START');
+attachBtn(document.getElementById('ps-btn'),       'PS');
+
+document.querySelectorAll('.dpad-btn[data-key]').forEach(el => {
+  attachBtn(el, 'DPAD_' + el.dataset.key.toUpperCase());
+});
+
+/* ════════════════════════════════════════
+   ANALOG STICK LOGIC
+   — virtual joystick with clamped radius
+════════════════════════════════════════ */
+function setupStick(ringEl, nubEl, stickId) {
+  const MAX_RADIUS = 28; // px travel from center
+  let originX = 0, originY = 0;
+  let touchId = null;
+
+  function getCenter() {
+    const r = ringEl.getBoundingClientRect();
+    return { x: r.left + r.width / 2, y: r.top + r.height / 2 };
+  }
+
+  function moveNub(dx, dy) {
+    const dist = Math.sqrt(dx * dx + dy * dy);
+    if (dist > MAX_RADIUS) {
+      const ratio = MAX_RADIUS / dist;
+      dx *= ratio; dy *= ratio;
+    }
+    nubEl.style.transform = `translate(${dx}px, ${dy}px)`;
+
+    const nx = parseFloat((dx / MAX_RADIUS).toFixed(3));
+    const ny = parseFloat((dy / MAX_RADIUS).toFixed(3));
+    state.sticks[stickId] = { x: nx, y: ny, touching: true };
+
+    window.dispatchEvent(new CustomEvent('ps3-stick', {
+      detail: { stick: stickId, x: nx, y: ny }
+    }));
+    logInput(stickId, `x:${nx} y:${ny}`);
+  }
+
+  function resetNub() {
+    nubEl.style.transform = '';
+    nubEl.style.transition = 'transform 160ms cubic-bezier(0.34,1.56,0.64,1)';
+    setTimeout(() => { nubEl.style.transition = ''; }, 180);
+    state.sticks[stickId] = { x: 0, y: 0, touching: false };
+    window.dispatchEvent(new CustomEvent('ps3-stick', {
+      detail: { stick: stickId, x: 0, y: 0 }
+    }));
+  }
+
+  ringEl.addEventListener('touchstart', e => {
+    e.preventDefault();
+    if (touchId !== null) return;
+    const touch = e.changedTouches[0];
+    touchId = touch.identifier;
+    const c = getCenter();
+    originX = c.x; originY = c.y;
+    haptic('light');
+    moveNub(touch.clientX - originX, touch.clientY - originY);
+  }, { passive: false });
+
+  ringEl.addEventListener('touchmove', e => {
+    e.preventDefault();
+    for (const touch of e.changedTouches) {
+      if (touch.identifier === touchId) {
+        moveNub(touch.clientX - originX, touch.clientY - originY);
+      }
+    }
+  }, { passive: false });
+
+  const endStick = e => {
+    for (const touch of e.changedTouches) {
+      if (touch.identifier === touchId) {
+        touchId = null;
+        resetNub();
+        // L3/R3 click on lift if barely moved
+        const { x, y } = state.sticks[stickId];
+        if (Math.abs(x) < 0.15 && Math.abs(y) < 0.15) {
+          const key = stickId === 'left' ? 'L3' : 'R3';
+          window.dispatchEvent(new CustomEvent('ps3-input', { detail: { key, action: 'press' } }));
+          setTimeout(() => {
+            window.dispatchEvent(new CustomEvent('ps3-input', { detail: { key, action: 'release' } }));
+          }, 80);
+        }
+      }
+    }
+  };
+
+  ringEl.addEventListener('touchend',    endStick, { passive: false });
+  ringEl.addEventListener('touchcancel', endStick, { passive: false });
+
+  /* Mouse fallback */
+  let dragging = false;
+  ringEl.addEventListener('mousedown', e => {
+    dragging = true;
+    const c = getCenter();
+    originX = c.x; originY = c.y;
+    moveNub(e.clientX - originX, e.clientY - originY);
+  });
+  window.addEventListener('mousemove', e => {
+    if (!dragging) return;
+    moveNub(e.clientX - originX, e.clientY - originY);
+  });
+  window.addEventListener('mouseup', () => {
+    if (!dragging) return;
+    dragging = false; resetNub();
+  });
+}
+
+setupStick(stickLeft,  nubLeft,  'left');
+setupStick(stickRight, nubRight, 'right');
+
+/* ════════════════════════════════════════
+   SETTINGS PANEL
+════════════════════════════════════════ */
+settingsBtn.addEventListener('click', () => {
+  const open = settingsPanel.classList.toggle('open');
+  settingsBtn.setAttribute('aria-expanded', String(open));
+  haptic('light');
+});
+
+// Close panel on outside tap
+document.addEventListener('touchstart', e => {
+  if (settingsPanel.classList.contains('open') &&
+      !settingsPanel.contains(e.target) &&
+      !settingsBtn.contains(e.target)) {
+    settingsPanel.classList.remove('open');
+    settingsBtn.setAttribute('aria-expanded', 'false');
+  }
+}, { passive: true });
+
+/* ── Opacity slider ── */
+opacitySlider.addEventListener('input', () => {
+  state.opacity = parseInt(opacitySlider.value);
+  opacityVal.textContent = state.opacity + '%';
+  applyOpacity();
+});
+
+function applyOpacity() {
+  const a = state.opacity / 100;
+  controller.style.setProperty('--glass-bg', `rgba(15,15,20,${(a * 0.75).toFixed(2)})`);
+  controller.style.setProperty('--glass-border', `rgba(255,255,255,${(a * 0.22).toFixed(2)})`);
+  controller.style.setProperty('--glass-label', `rgba(255,255,255,${(a + 0.10).toFixed(2)})`);
+}
+
+/* ── Button size slider ── */
+sizeSlider.addEventListener('input', () => {
+  state.btnSize = parseInt(sizeSlider.value);
+  sizeVal.textContent = state.btnSize + 'px';
+  document.documentElement.style.setProperty('--btn-size', state.btnSize + 'px');
+  document.documentElement.style.setProperty('--dpad-cell', Math.round(state.btnSize * 0.92) + 'px');
+});
+
+/* ── Haptic toggle ── */
+function toggleHaptic() {
+  state.haptic = !state.haptic;
+  hapticToggle.classList.toggle('on', state.haptic);
+  hapticToggle.setAttribute('aria-checked', String(state.haptic));
+  if (state.haptic) haptic('medium');
+}
+hapticToggle.addEventListener('click', toggleHaptic);
+hapticToggle.addEventListener('keydown', e => { if (e.key === ' ' || e.key === 'Enter') toggleHaptic(); });
+
+/* ── Debug toggle ── */
+function toggleDebug() {
+  state.debug = !state.debug;
+  debugToggle.classList.toggle('on', state.debug);
+  debugToggle.setAttribute('aria-checked', String(state.debug));
+  inputDisplay.style.display = state.debug ? 'block' : 'none';
+}
+debugToggle.addEventListener('click', toggleDebug);
+debugToggle.addEventListener('keydown', e => { if (e.key === ' ' || e.key === 'Enter') toggleDebug(); });
+
+/* ════════════════════════════════════════
+   PREVENT CONTEXT MENU & SCROLL ON HOLD
+════════════════════════════════════════ */
+document.addEventListener('contextmenu', e => e.preventDefault());
+document.addEventListener('touchmove',   e => e.preventDefault(), { passive: false });
+document.addEventListener('selectstart', e => e.preventDefault());
+
+/* ════════════════════════════════════════
+   RESIZE — recompute safe areas
+════════════════════════════════════════ */
+window.addEventListener('resize', () => {
+  /* CSS env() values update automatically in modern browsers */
+});
+
+/* ════════════════════════════════════════
+   PUBLIC API
+   — listen to these in your emulator:
+     window.addEventListener('ps3-input', e => {
+       const { key, action } = e.detail; // key: 'CROSS', action: 'press'|'release'
+     });
+     window.addEventListener('ps3-stick', e => {
+       const { stick, x, y } = e.detail; // stick: 'left'|'right', x/y: -1..1
+     });
+════════════════════════════════════════ */
+console.info('[PS3 Overlay] Ready. Listen for "ps3-input" and "ps3-stick" events on window.');
+</script>
+</body>
+</html>
