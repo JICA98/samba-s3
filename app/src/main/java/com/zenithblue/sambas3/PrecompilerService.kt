@@ -24,7 +24,7 @@ class PrecompilerService : Service() {
             intent.putExtra("uri", uri)
 
             try {
-                context.startForegroundService(intent)
+                context.startService(intent)
             } catch (e: Exception) {
                 e.printStackTrace()
             }
@@ -45,7 +45,7 @@ class PrecompilerService : Service() {
             intent.putExtra("batch", batch)
 
             try {
-                context.startForegroundService(intent)
+                context.startService(intent)
             } catch (e: Exception) {
                 e.printStackTrace()
             }
@@ -130,20 +130,7 @@ class PrecompilerService : Service() {
             GameRepository.activeInstallProgress.value = installProgress
         }
 
-        try {
-            ServiceCompat.startForeground(
-                this,
-                installProgress.toInt(),
-                NotificationCompat.Builder(this, "rpcsx-progress").build(),
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
-                    ServiceInfo.FOREGROUND_SERVICE_TYPE_SPECIAL_USE
-                } else {
-                    0
-                }
-            )
-        } catch (e: Exception) {
-            e.printStackTrace()
-        }
+
 
         thread {
             var installResult = false

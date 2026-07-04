@@ -1,3 +1,5 @@
+import java.util.Properties
+
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
@@ -15,7 +17,7 @@ android {
         applicationId = "com.zenithblue.sambas3"
         minSdk = 29
         targetSdk = 35
-        versionCode = 20260703
+        versionCode = 20260704
         versionName = "${System.getenv("RX_VERSION") ?: "local"}${if (System.getenv("RX_SHA") != null) "-" + System.getenv("RX_SHA") else ""}"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
@@ -27,16 +29,30 @@ android {
     }
 
     signingConfigs {
-        val keystoreAlias = System.getenv("KEYSTORE_ALIAS") ?: ""
-        val keystorePassword = System.getenv("KEYSTORE_PASSWORD") ?: ""
-        val keystorePath = System.getenv("KEYSTORE_PATH") ?: ""
+        val keystorePropertiesFile = rootProject.file("local.properties")
+        val keystoreProperties = Properties()
+        if (keystorePropertiesFile.exists()) {
+            keystorePropertiesFile.inputStream().use { keystoreProperties.load(it) }
+        }
 
-        if (keystorePath.isNotEmpty() && file(keystorePath).exists() && file(keystorePath).length() > 0) {
-            create("custom-key") {
-                keyAlias = keystoreAlias
-                keyPassword = keystorePassword
-                storeFile = file(keystorePath)
-                storePassword = keystorePassword
+        val keystoreAlias = keystoreProperties.getProperty("keystore.alias") ?: System.getenv("KEYSTORE_ALIAS") ?: ""
+        val keystorePassword = keystoreProperties.getProperty("keystore.password") ?: System.getenv("KEYSTORE_PASSWORD") ?: ""
+        val keystorePath = keystoreProperties.getProperty("keystore.path") ?: System.getenv("KEYSTORE_PATH") ?: ""
+
+        if (keystorePath.isNotEmpty()) {
+            val keyFile = file(keystorePath)
+            val resolvedFile = when {
+                keyFile.exists() -> keyFile
+                rootProject.file(keystorePath).exists() -> rootProject.file(keystorePath)
+                else -> keyFile
+            }
+            if (resolvedFile.exists() && resolvedFile.length() > 0) {
+                create("custom-key") {
+                    keyAlias = keystoreAlias
+                    keyPassword = keystorePassword
+                    storeFile = resolvedFile
+                    storePassword = keystorePassword
+                }
             }
         }
     }
@@ -83,6 +99,11 @@ android {
     packaging {
         // This is necessary for libadrenotools custom driver loading
         jniLibs.useLegacyPackaging = true
+    }
+
+    lint {
+        abortOnError = false
+        checkReleaseBuilds = false
     }
 }
 

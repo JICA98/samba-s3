@@ -137,10 +137,10 @@ fun ControllerHintStrip(
         modifier = modifier
             .fillMaxWidth()
             .height(48.dp)
-            .background(com.zenithblue.sambas3.RPCSXColors.surfaceElevated)
+            .background(com.zenithblue.sambas3.RPCSXColors.surfaceContainerHigh)
             .drawBehind {
                 drawLine(
-                    color = com.zenithblue.sambas3.RPCSXColors.surfaceOverlay,
+                    color = com.zenithblue.sambas3.RPCSXColors.outlineVariant,
                     start = androidx.compose.ui.geometry.Offset(0f, 0f),
                     end = androidx.compose.ui.geometry.Offset(size.width, 0f),
                     strokeWidth = 1.dp.toPx()

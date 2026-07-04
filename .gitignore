@@ -16,3 +16,8 @@ local.properties
 .cache
 **/build*/
 .rx.version
+
+# Keystores
+samba-s3-release.jks
+*.jks
+*.keystore

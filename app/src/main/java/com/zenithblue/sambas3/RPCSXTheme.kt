@@ -32,6 +32,8 @@ object RPCSXColors {
     val focusGlow = Color(0xFFC9A84C)
     val errorColor = Color(0xFFE05252)
     val onErrorColor = Color(0xFFF0E8D0)
+    val surfaceContainerHigh = Color(0xFF2D2A23)
+    val outlineVariant = Color(0xFF4D4637)
 }
 
 private val sambaScheme = darkColorScheme(
@@ -48,7 +50,8 @@ private val sambaScheme = darkColorScheme(
     surfaceVariant = RPCSXColors.surfaceElevated,
     onSurfaceVariant = RPCSXColors.textSecondary,
     error = RPCSXColors.errorColor,
-    onError = RPCSXColors.onErrorColor
+    onError = RPCSXColors.onErrorColor,
+    outlineVariant = RPCSXColors.outlineVariant
 )
 
 val AppTypography = Typography(

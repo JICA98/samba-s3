@@ -186,7 +186,7 @@ fun GamesScreen(
                 val pagerState = rememberPagerState(pageCount = { games.size })
                 BoxWithConstraints(modifier = Modifier.fillMaxWidth().weight(1f)) {
                     val availableHeight = maxHeight
-                    val itemHeight = availableHeight - 64.dp // accounting for vertical padding 32.dp * 2
+                    val itemHeight = (availableHeight - 64.dp) * 0.8f
                     val itemWidth = itemHeight * 0.85f
                     val horizontalPadding = if (maxWidth > itemWidth) (maxWidth - itemWidth) / 2 else 0.dp
                     val coroutineScope = rememberCoroutineScope()
@@ -236,8 +236,15 @@ fun GamesScreen(
                 modifier = Modifier
                     .fillMaxWidth()
                     .alpha(bootAlpha)
-                    .background(Color(0xFF2D2A23))
-                    .border(1.dp, Color(0xFF4D4637))
+                    .background(RPCSXColors.surfaceContainerHigh)
+                    .drawBehind {
+                        drawLine(
+                            color = RPCSXColors.outlineVariant,
+                            start = Offset(0f, 0f),
+                            end = Offset(size.width, 0f),
+                            strokeWidth = 1.dp.toPx()
+                        )
+                    }
                     .padding(horizontal = 24.dp, vertical = 12.dp),
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically
@@ -408,7 +415,7 @@ fun GameCard(game: Game, distance: Int, onClick: () -> Unit, onPlay: () -> Unit)
 
     Box(
         modifier = Modifier
-            .fillMaxHeight()
+            .fillMaxHeight(0.8f)
             .aspectRatio(0.85f)
             .scale(scale)
             .alpha(alpha)
@@ -538,7 +545,7 @@ fun ImportMethodDialog(
         onDismissRequest = onDismiss,
         title = {
             Text(
-                "Import Game",
+                "IMPORT GAME",
                 style = AppTypography.headlineMedium,
                 color = RPCSXColors.primary
             )
@@ -552,33 +559,41 @@ fun ImportMethodDialog(
                     style = AppTypography.bodyLarge,
                     color = RPCSXColors.textSecondary
                 )
+                Spacer(modifier = Modifier.height(8.dp))
                 Button(
                     onClick = onImportFolder,
                     modifier = Modifier.fillMaxWidth(),
+                    shape = RoundedCornerShape(4.dp),
                     colors = ButtonDefaults.buttonColors(
-                        containerColor = RPCSXColors.surfaceElevated
+                        containerColor = RPCSXColors.primary,
+                        contentColor = RPCSXColors.onPrimary
                     )
                 ) {
-                    Text("Import Folder", color = RPCSXColors.primary)
+                    Text("IMPORT FOLDER", style = AppTypography.labelSmall)
                 }
                 Button(
                     onClick = onImportIso,
                     modifier = Modifier.fillMaxWidth(),
+                    shape = RoundedCornerShape(4.dp),
                     colors = ButtonDefaults.buttonColors(
-                        containerColor = RPCSXColors.surfaceElevated
+                        containerColor = RPCSXColors.primary,
+                        contentColor = RPCSXColors.onPrimary
                     )
                 ) {
-                    Text("Import ISO File", color = RPCSXColors.primary)
+                    Text("IMPORT ISO FILE", style = AppTypography.labelSmall)
                 }
             }
         },
         confirmButton = {},
         dismissButton = {
-            TextButton(onClick = onDismiss) {
-                Text("Cancel", color = RPCSXColors.textSecondary)
+            TextButton(
+                onClick = onDismiss,
+                shape = RoundedCornerShape(4.dp)
+            ) {
+                Text("CANCEL", style = AppTypography.labelSmall, color = RPCSXColors.textSecondary)
             }
         },
-        containerColor = RPCSXColors.background,
-        shape = RoundedCornerShape(8.dp)
+        containerColor = RPCSXColors.surfaceElevated,
+        shape = RoundedCornerShape(12.dp)
     )
 }
