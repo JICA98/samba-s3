@@ -20,6 +20,7 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
 
         GeneralSettings.init(this)
+        LogMonitor.start(this) // capture logs from boot
 
         WindowCompat.setDecorFitsSystemWindows(window, false)
 
@@ -97,5 +98,6 @@ class MainActivity : ComponentActivity() {
     override fun onDestroy() {
         super.onDestroy()
         unregisterUsbEventListener()
+        LogMonitor.stop()
     }
 }

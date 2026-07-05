@@ -78,6 +78,7 @@ import com.zenithblue.sambas3.overlay.OverlayEditActivity
 import com.zenithblue.sambas3.ui.drivers.GpuDriversScreen
 import com.zenithblue.sambas3.ui.games.GamesScreen
 import com.zenithblue.sambas3.ui.settings.AdvancedSettingsScreen
+import com.zenithblue.sambas3.ui.settings.LogMonitorScreen
 import com.zenithblue.sambas3.ui.settings.ControllerSettings
 import com.zenithblue.sambas3.ui.settings.SettingsScreen
 import com.zenithblue.sambas3.ui.user.UsersScreen
@@ -204,6 +205,14 @@ fun AppNavHost() {
             route = "drivers"
         ) {
             GpuDriversScreen(
+                navigateBack = navController::navigateUp
+            )
+        }
+
+        composable(
+            route = "logs"
+        ) {
+            LogMonitorScreen(
                 navigateBack = navController::navigateUp
             )
         }

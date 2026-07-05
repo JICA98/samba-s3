@@ -99,6 +99,24 @@
     <string name="users">Users</string>
     <string name="view_internal_dir">View Internal Directory</string>
     <string name="view_internal_dir_description">Open internal directory of SambaS3 in file manager</string>
+    <!-- LogMonitorScreen -->
+    <string name="log_monitor">Log Monitor</string>
+    <string name="log_monitor_description">View live logs from backend, Vulkan, driver and app</string>
+    <string name="log_level_all">All</string>
+    <string name="log_clear">Clear</string>
+    <string name="log_auto_scroll">Auto-scroll</string>
+    <string name="log_share_all">Share All Logs</string>
+    <string name="log_source_app">App</string>
+    <string name="log_source_rpcsx">RPCSX</string>
+    <string name="log_source_vulkan">Vulkan</string>
+    <string name="log_source_driver">Driver</string>
+    <string name="log_source_kernel">Kernel</string>
+    <string name="log_source_cell">Cell</string>
+    <string name="log_source_other">Other</string>
+    <string name="log_no_entries">No log entries yet</string>
+    <string name="log_files_backend">Backend Log</string>
+    <string name="log_files_vulkan">Vulkan Log</string>
+    <string name="log_files_app">App Log</string>
 
     <!-- SliderPreference -->
     <string name="slider_value_supporting">Value must be a multiple of step size %1$d within %2$.0f to %3$.0f</string>

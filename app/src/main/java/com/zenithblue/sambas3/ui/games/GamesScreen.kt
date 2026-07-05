@@ -57,6 +57,12 @@ import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
 
+sealed class PagerItem {
+    data class GameItem(val game: Game) : PagerItem()
+    data class AddGame(val disabled: Boolean = false) : PagerItem()
+    data object FirmwareCard : PagerItem()
+}
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun GamesScreen(
@@ -173,53 +179,105 @@ fun GamesScreen(
                         style = AppTypography.labelMedium,
                         color = RPCSXColors.textSecondary
                     )
-                    Row {
-                        IconButton(onClick = { navigateToSettings?.invoke() }) {
-                            Icon(painterResource(R.drawable.ic_settings), contentDescription = "Settings", tint = RPCSXColors.primary)
+                    IconButton(onClick = { navigateToSettings?.invoke() }) {
+                        Icon(painterResource(R.drawable.ic_settings), contentDescription = "Settings", tint = RPCSXColors.primary)
+                    }
+                }
+            }
+            val fwVersion by remember { FirmwareRepository.version }
+            val fwProgressId by remember { FirmwareRepository.progressChannel }
+            val isFwInstalling = fwProgressId != null
+            val hasFw = fwVersion != null
+
+            val showBothEnds = games.size > 5
+            val pagerItems = remember(games.size, hasFw, isFwInstalling) {
+                buildList {
+                    if (games.isEmpty()) {
+                        if (!hasFw) {
+                            add(PagerItem.FirmwareCard)
+                        } else if (isFwInstalling) {
+                            add(PagerItem.AddGame(disabled = true))
+                        } else {
+                            add(PagerItem.AddGame())
                         }
-                        IconButton(onClick = { showImportDialog = true }) {
-                            Icon(painterResource(R.drawable.ic_add), contentDescription = "Add Game", tint = RPCSXColors.primary)
+                    } else {
+                        if (showBothEnds) {
+                            add(PagerItem.AddGame())
+                            addAll(games.map { PagerItem.GameItem(it) })
+                            add(PagerItem.AddGame())
+                        } else {
+                            addAll(games.map { PagerItem.GameItem(it) })
+                            add(PagerItem.AddGame())
                         }
                     }
                 }
             }
+            val initialPage = if (showBothEnds) 1 else 0
+            val pagerState = rememberPagerState(pageCount = { pagerItems.size }, initialPage = initialPage)
+            val currentItem = pagerItems.getOrNull(pagerState.currentPage)
 
             if (games.isEmpty()) {
                 Box(modifier = Modifier.fillMaxWidth().weight(1f), contentAlignment = Alignment.Center) {
-                    Text("No games yet.\nPress + to add a game from your device.", style = AppTypography.bodyLarge, textAlign = TextAlign.Center, color = RPCSXColors.textSecondary)
+                    Text("No games yet.\nSelect Add Game from the carousel to import.", style = AppTypography.bodyLarge, textAlign = TextAlign.Center, color = RPCSXColors.textSecondary)
                 }
             } else {
-                // Carousel
-                val pagerState = rememberPagerState(pageCount = { games.size })
                 BoxWithConstraints(modifier = Modifier.fillMaxWidth().weight(1f)) {
-                    val availableHeight = maxHeight
-                    val itemHeight = (availableHeight - 64.dp) * 0.8f
-                    val itemWidth = itemHeight * 0.85f
+                    // On wide/landscape screens maxHeight is small, so drive size from the
+                    // smaller of width and height to keep cards a reasonable, readable size.
+                    val isLandscape = maxWidth > maxHeight
+                    val itemSize = if (isLandscape) {
+                        // In landscape: constrain by height but allow more room
+                        val h = (maxHeight - 32.dp).coerceAtLeast(120.dp)
+                        h
+                    } else {
+                        (maxHeight - 64.dp) * 0.8f
+                    }
+                    val itemHeight = itemSize
+                    val itemWidth = itemHeight * (if (isLandscape) 0.75f else 0.85f)
                     val horizontalPadding = if (maxWidth > itemWidth) (maxWidth - itemWidth) / 2 else 0.dp
                     val coroutineScope = rememberCoroutineScope()
-                    
+
                     HorizontalPager(
                         state = pagerState,
                         modifier = Modifier.fillMaxSize().scale(bootScale),
-                        contentPadding = PaddingValues(horizontal = horizontalPadding, vertical = 32.dp),
+                        contentPadding = PaddingValues(
+                            horizontal = horizontalPadding,
+                            vertical = if (isLandscape) 8.dp else 32.dp
+                        ),
                         pageSpacing = 16.dp,
                         verticalAlignment = Alignment.CenterVertically
                     ) { page ->
                         val distance = abs(page - pagerState.currentPage)
-                        val game = games[page]
-                        GameCard(
-                            game = game,
-                            distance = distance,
-                            onClick = { coroutineScope.launch { pagerState.animateScrollToPage(page) } },
-                            onPlay = { bootingGame = game },
-                            isRunning = isRunning && emulatorActiveGame.value == game.info.path
-                        )
+                        when (val item = pagerItems[page]) {
+                            is PagerItem.GameItem -> {
+                                GameCard(
+                                    game = item.game,
+                                    distance = distance,
+                                    onClick = { coroutineScope.launch { pagerState.animateScrollToPage(page) } },
+                                    onPlay = { bootingGame = item.game },
+                                    isRunning = isRunning && emulatorActiveGame.value == item.game.info.path
+                                )
+                            }
+                            is PagerItem.AddGame -> {
+                                AddGameCard(
+                                    distance = distance,
+                                    onClick = if (item.disabled) ({}) else ({ showImportDialog = true }),
+                                    disabled = item.disabled
+                                )
+                            }
+                            is PagerItem.FirmwareCard -> {
+                                FirmwareCard(
+                                    distance = distance,
+                                    onClick = { installFwLauncher?.launch("*/*") }
+                                )
+                            }
+                        }
                     }
                 }
 
                 // Focused Game Info
-                if (pagerState.currentPage in games.indices) {
-                    val activeGame = games[pagerState.currentPage]
+                if (currentItem is PagerItem.GameItem) {
+                    val activeGame = currentItem.game
                     val isActiveGameRunning = isRunning && emulatorActiveGame.value == activeGame.info.path
                     Column(
                         modifier = Modifier
@@ -240,6 +298,34 @@ fun GamesScreen(
                             InfoBadge(text = activeGame.info.path.substringAfterLast("/"))
                         }
                     }
+                } else if (currentItem is PagerItem.AddGame) {
+                    Column(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .alpha(bootAlpha)
+                            .padding(top = 16.dp, bottom = 16.dp),
+                        horizontalAlignment = Alignment.CenterHorizontally
+                    ) {
+                        Text(
+                            text = if (currentItem.disabled) "WAITING FOR FIRMWARE..." else "ADD GAME",
+                            style = AppTypography.headlineMedium.copy(letterSpacing = 2.sp),
+                            color = if (currentItem.disabled) RPCSXColors.textDisabled else RPCSXColors.textSecondary
+                        )
+                    }
+                } else if (currentItem is PagerItem.FirmwareCard) {
+                    Column(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .alpha(bootAlpha)
+                            .padding(top = 16.dp, bottom = 16.dp),
+                        horizontalAlignment = Alignment.CenterHorizontally
+                    ) {
+                        Text(
+                            text = "INSTALL FIRMWARE",
+                            style = AppTypography.headlineMedium.copy(letterSpacing = 2.sp),
+                            color = RPCSXColors.textSecondary
+                        )
+                    }
                 }
             }
 
@@ -257,7 +343,7 @@ fun GamesScreen(
                             strokeWidth = 1.dp.toPx()
                         )
                     }
-                    .padding(horizontal = 24.dp, vertical = 12.dp),
+                    .padding(horizontal = 16.dp, vertical = 2.dp),
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically
             ) {
@@ -267,7 +353,7 @@ fun GamesScreen(
                 val fwProgressMessage = fwProgressEntry?.message?.value
                 val isFwInstalling = fwProgressId != null
 
-                Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
+                Column(verticalArrangement = Arrangement.spacedBy(2.dp)) {
                     if (fwVersion != null) {
                         Text(
                             text = stringResource(R.string.firmware) + " " + fwVersion,
@@ -287,7 +373,7 @@ fun GamesScreen(
                                 LinearProgressIndicator(
                                     progress = { fwVal.toFloat() / fwMax.toFloat() },
                                     modifier = Modifier
-                                        .width(120.dp)
+                                        .widthIn(min = 80.dp, max = 200.dp)
                                         .clip(RoundedCornerShape(4.dp)),
                                     color = RPCSXColors.primary,
                                     trackColor = RPCSXColors.surfaceOverlay,
@@ -295,7 +381,7 @@ fun GamesScreen(
                             } else {
                                 LinearProgressIndicator(
                                     modifier = Modifier
-                                        .width(120.dp)
+                                        .widthIn(min = 80.dp, max = 200.dp)
                                         .clip(RoundedCornerShape(4.dp)),
                                     color = RPCSXColors.primary,
                                     trackColor = RPCSXColors.surfaceOverlay,
@@ -323,15 +409,26 @@ fun GamesScreen(
                     }
                 }
                 Row(horizontalArrangement = Arrangement.spacedBy(24.dp)) {
-                        if (isRunning) {
+                    if (currentItem is PagerItem.FirmwareCard) {
+                        HintButton(text = "INSTALL", icon = "X", color = RPCSXColors.primary, onClick = { installFwLauncher?.launch("*/*") })
+                    } else if (currentItem is PagerItem.AddGame) {
+                        if (currentItem.disabled) {
+                            HintButton(text = "WAITING", icon = "X", color = RPCSXColors.textDisabled, onClick = { })
+                        } else {
+                            HintButton(text = "ADD", icon = "X", color = RPCSXColors.primary, onClick = { showImportDialog = true })
+                        }
+                    } else if (isRunning) {
                         HintButton(text = "STOP", icon = "■", color = RPCSXColors.errorColor, onClick = {
-                            thread { RPCSX.instance.kill() }
+                            thread {
+                                RPCSX.instance.kill()
+                                RPCSX.state.value = EmulatorState.Stopped
+                                RPCSX.activeGame.value = null
+                            }
                         })
                     } else {
                         HintButton(text = "PLAY", icon = "X", color = RPCSXColors.primary, onClick = { })
                     }
                     HintButton(text = "OPTIONS", icon = "△", color = RPCSXColors.textSecondary, onClick = { navigateToSettings?.invoke() })
-                    HintButton(text = "BACK", icon = "O", color = RPCSXColors.textSecondary, onClick = { })
                 }
             }
         }
@@ -369,10 +466,91 @@ fun InfoBadge(text: String, color: Color = RPCSXColors.textSecondary) {
 }
 
 @Composable
+fun FirmwareCard(distance: Int, onClick: () -> Unit) {
+    val isFocused = distance == 0
+    val targetScale = if (isFocused) 1.12f else if (distance == 1) 0.95f else 0.85f
+    val targetAlpha = if (isFocused) 1.0f else if (distance == 1) 0.6f else 0.4f
+
+    val scale by animateFloatAsState(targetScale, animationSpec = tween(300))
+    val alpha by animateFloatAsState(targetAlpha, animationSpec = tween(300))
+
+    val infiniteTransition = rememberInfiniteTransition()
+    val glowIntensity by infiniteTransition.animateFloat(
+        initialValue = 15f,
+        targetValue = 35f,
+        animationSpec = infiniteRepeatable(
+            animation = tween(1000, easing = androidx.compose.animation.core.FastOutSlowInEasing),
+            repeatMode = RepeatMode.Reverse
+        )
+    )
+
+    BoxWithConstraints(
+        modifier = Modifier
+            .fillMaxSize()
+            .scale(scale)
+            .alpha(alpha)
+            .clickable(onClick = onClick)
+            .shadow(
+                elevation = if (isFocused) glowIntensity.dp else 0.dp,
+                spotColor = RPCSXColors.focusGlow,
+                ambientColor = RPCSXColors.focusGlow,
+                shape = RoundedCornerShape(8.dp)
+            )
+            .border(
+                width = if (isFocused) 2.dp else 1.dp,
+                color = if (isFocused) RPCSXColors.focusRing else RPCSXColors.surfaceOverlay,
+                shape = RoundedCornerShape(8.dp)
+            )
+    ) {
+        Surface(
+            shape = RoundedCornerShape(8.dp),
+            color = RPCSXColors.surface,
+            modifier = Modifier.fillMaxSize()
+        ) {
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .background(
+                        Brush.linearGradient(
+                            listOf(RPCSXColors.surface, RPCSXColors.surfaceContainerHigh)
+                        )
+                    ),
+                contentAlignment = Alignment.Center
+            ) {
+                Column(
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    verticalArrangement = Arrangement.spacedBy(12.dp)
+                ) {
+                    Icon(
+                        painter = painterResource(R.drawable.ic_cloud_download),
+                        contentDescription = null,
+                        tint = RPCSXColors.primary,
+                        modifier = Modifier.size(48.dp)
+                    )
+                    Text(
+                        "FIRMWARE REQUIRED",
+                        style = AppTypography.labelSmall,
+                        color = RPCSXColors.textSecondary
+                    )
+                }
+            }
+        }
+
+        if (isFocused) {
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .background(Brush.linearGradient(listOf(Color.White.copy(alpha = 0.1f), Color.Transparent)))
+            )
+        }
+    }
+}
+
+@Composable
 fun HintButton(text: String, icon: String, color: Color, onClick: () -> Unit) {
     Row(
         verticalAlignment = Alignment.CenterVertically,
-        modifier = Modifier.clickable(onClick = onClick).padding(8.dp)
+        modifier = Modifier.clickable(onClick = onClick).padding(horizontal = 8.dp, vertical = 4.dp)
     ) {
         if (icon == "△") {
             Box(
@@ -403,11 +581,94 @@ fun HintButton(text: String, icon: String, color: Color, onClick: () -> Unit) {
 }
 
 @Composable
+fun AddGameCard(distance: Int, onClick: () -> Unit, disabled: Boolean = false) {
+    val isFocused = distance == 0
+    val targetScale = if (isFocused) 1.12f else if (distance == 1) 0.95f else 0.85f
+    val targetAlpha = if (isFocused) 1.0f else if (distance == 1) 0.6f else 0.4f
+
+    val scale by animateFloatAsState(targetScale, animationSpec = tween(300))
+    val alpha by animateFloatAsState(targetAlpha, animationSpec = tween(300))
+
+    val infiniteTransition = rememberInfiniteTransition()
+    val glowIntensity by infiniteTransition.animateFloat(
+        initialValue = 15f,
+        targetValue = 35f,
+        animationSpec = infiniteRepeatable(
+            animation = tween(1000, easing = androidx.compose.animation.core.FastOutSlowInEasing),
+            repeatMode = RepeatMode.Reverse
+        )
+    )
+
+    BoxWithConstraints(
+        modifier = Modifier
+            .fillMaxSize()
+            .scale(scale)
+            .alpha(alpha)
+            .clickable(onClick = onClick)
+            .shadow(
+                elevation = if (isFocused) glowIntensity.dp else 0.dp,
+                spotColor = RPCSXColors.focusGlow,
+                ambientColor = RPCSXColors.focusGlow,
+                shape = RoundedCornerShape(8.dp)
+            )
+            .border(
+                width = if (isFocused) 2.dp else 1.dp,
+                color = if (isFocused) RPCSXColors.focusRing else RPCSXColors.surfaceOverlay,
+                shape = RoundedCornerShape(8.dp)
+            )
+    ) {
+        Surface(
+            shape = RoundedCornerShape(8.dp),
+            color = RPCSXColors.surface,
+            modifier = Modifier.fillMaxSize()
+        ) {
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .background(
+                        Brush.linearGradient(
+                            listOf(RPCSXColors.surface, RPCSXColors.surfaceContainerHigh)
+                        )
+                    ),
+                contentAlignment = Alignment.Center
+            ) {
+                Column(
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    verticalArrangement = Arrangement.spacedBy(12.dp)
+                ) {
+                    Box(
+                        modifier = Modifier
+                            .size(48.dp)
+                            .border(2.dp, if (disabled) RPCSXColors.textDisabled else RPCSXColors.primary, RoundedCornerShape(24.dp)),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Text(if (disabled) "..." else "+", color = if (disabled) RPCSXColors.textDisabled else RPCSXColors.primary, style = AppTypography.headlineMedium)
+                    }
+                    Text(
+                        if (disabled) "WAITING" else "ADD GAME",
+                        style = AppTypography.labelSmall,
+                        color = if (disabled) RPCSXColors.textDisabled else RPCSXColors.textSecondary
+                    )
+                }
+            }
+        }
+
+        if (isFocused) {
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .background(Brush.linearGradient(listOf(Color.White.copy(alpha = 0.1f), Color.Transparent)))
+            )
+        }
+    }
+}
+
+@Composable
 fun GameCard(game: Game, distance: Int, onClick: () -> Unit, onPlay: () -> Unit, isRunning: Boolean = false) {
     val isFocused = distance == 0
     val targetScale = if (isFocused) 1.12f else if (distance == 1) 0.95f else 0.85f
     val targetAlpha = if (isFocused) 1.0f else if (distance == 1) 0.6f else 0.4f
-    
+
     val scale by animateFloatAsState(targetScale, animationSpec = tween(300))
     val alpha by animateFloatAsState(targetAlpha, animationSpec = tween(300))
 
@@ -433,10 +694,10 @@ fun GameCard(game: Game, distance: Int, onClick: () -> Unit, onPlay: () -> Unit,
         )
     )
 
-    Box(
+    // Fill the pager page; the pager itself is already sized correctly for the aspect ratio
+    BoxWithConstraints(
         modifier = Modifier
-            .fillMaxHeight(0.8f)
-            .aspectRatio(0.85f)
+            .fillMaxSize()
             .scale(scale)
             .alpha(alpha)
             .clickable(onClick = { if (isFocused) onPlay() else onClick() })
@@ -452,6 +713,9 @@ fun GameCard(game: Game, distance: Int, onClick: () -> Unit, onPlay: () -> Unit,
                 shape = RoundedCornerShape(8.dp)
             )
     ) {
+        // Use compact progress layout when the card is short (landscape / wide screens)
+        val isCompact = maxHeight < 200.dp
+
         Surface(
             shape = RoundedCornerShape(8.dp),
             color = RPCSXColors.surface,
@@ -459,7 +723,7 @@ fun GameCard(game: Game, distance: Int, onClick: () -> Unit, onPlay: () -> Unit,
         ) {
             if (game.info.iconPath.value != null) {
                 Box(modifier = Modifier.fillMaxSize()) {
-                    // Scaled up and blurred background image
+                    // Blurred ambient background
                     AsyncImage(
                         model = game.info.iconPath.value,
                         contentDescription = null,
@@ -471,8 +735,8 @@ fun GameCard(game: Game, distance: Int, onClick: () -> Unit, onPlay: () -> Unit,
                             .blur(radius = 16.dp)
                             .alpha(0.5f)
                     )
-                    
-                    // Dark overlay to enhance contrast
+
+                    // Dark overlay
                     Box(
                         modifier = Modifier
                             .fillMaxSize()
@@ -487,11 +751,11 @@ fun GameCard(game: Game, distance: Int, onClick: () -> Unit, onPlay: () -> Unit,
                         colorFilter = ColorFilter.colorMatrix(colorMatrix),
                         modifier = Modifier
                             .fillMaxSize()
-                            .padding(16.dp)
+                            .padding(if (isCompact) 8.dp else 16.dp)
                     )
                 }
             }
-            
+
             if (isImporting) {
                 Box(
                     modifier = Modifier
@@ -499,47 +763,94 @@ fun GameCard(game: Game, distance: Int, onClick: () -> Unit, onPlay: () -> Unit,
                         .background(Color(0xCC000000)),
                     contentAlignment = Alignment.Center
                 ) {
-                    Column(
-                        horizontalAlignment = Alignment.CenterHorizontally,
-                        verticalArrangement = Arrangement.spacedBy(8.dp),
-                        modifier = Modifier.padding(horizontal = 16.dp)
-                    ) {
-                        CircularProgressIndicator(
-                            color = RPCSXColors.primary,
-                            modifier = Modifier.size(32.dp),
-                            strokeWidth = 3.dp
-                        )
-                        if (!isIndeterminate) {
-                            LinearProgressIndicator(
-                                progress = { progressValue.toFloat() / progressMax.toFloat() },
-                                modifier = Modifier.fillMaxWidth().clip(RoundedCornerShape(4.dp)),
-                                color = RPCSXColors.primary,
-                                trackColor = RPCSXColors.surfaceOverlay,
-                            )
-                        } else {
-                            LinearProgressIndicator(
-                                modifier = Modifier.fillMaxWidth().clip(RoundedCornerShape(4.dp)),
-                                color = RPCSXColors.primary,
-                                trackColor = RPCSXColors.surfaceOverlay,
+                    if (isCompact) {
+                        // Horizontal compact layout for landscape/wide screens
+                        Column(
+                            horizontalAlignment = Alignment.CenterHorizontally,
+                            verticalArrangement = Arrangement.spacedBy(4.dp),
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(horizontal = 12.dp)
+                        ) {
+                            Row(
+                                verticalAlignment = Alignment.CenterVertically,
+                                horizontalArrangement = Arrangement.spacedBy(8.dp),
+                                modifier = Modifier.fillMaxWidth()
+                            ) {
+                                CircularProgressIndicator(
+                                    color = RPCSXColors.primary,
+                                    modifier = Modifier.size(18.dp),
+                                    strokeWidth = 2.dp
+                                )
+                                if (!isIndeterminate) {
+                                    LinearProgressIndicator(
+                                        progress = { progressValue.toFloat() / progressMax.toFloat() },
+                                        modifier = Modifier.weight(1f).clip(RoundedCornerShape(4.dp)),
+                                        color = RPCSXColors.primary,
+                                        trackColor = RPCSXColors.surfaceOverlay,
+                                    )
+                                } else {
+                                    LinearProgressIndicator(
+                                        modifier = Modifier.weight(1f).clip(RoundedCornerShape(4.dp)),
+                                        color = RPCSXColors.primary,
+                                        trackColor = RPCSXColors.surfaceOverlay,
+                                    )
+                                }
+                            }
+                            Text(
+                                text = progressMessage ?: "Importing...",
+                                style = AppTypography.labelSmall.copy(fontSize = 9.sp),
+                                color = RPCSXColors.textSecondary,
+                                textAlign = TextAlign.Center,
+                                maxLines = 1,
+                                overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis
                             )
                         }
-                        Text(
-                            text = progressMessage ?: "Importing...",
-                            style = AppTypography.labelSmall,
-                            color = RPCSXColors.textSecondary,
-                            textAlign = TextAlign.Center,
-                            maxLines = 2,
-                            overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis
-                        )
+                    } else {
+                        // Standard vertical layout
+                        Column(
+                            horizontalAlignment = Alignment.CenterHorizontally,
+                            verticalArrangement = Arrangement.spacedBy(8.dp),
+                            modifier = Modifier.padding(horizontal = 16.dp)
+                        ) {
+                            CircularProgressIndicator(
+                                color = RPCSXColors.primary,
+                                modifier = Modifier.size(32.dp),
+                                strokeWidth = 3.dp
+                            )
+                            if (!isIndeterminate) {
+                                LinearProgressIndicator(
+                                    progress = { progressValue.toFloat() / progressMax.toFloat() },
+                                    modifier = Modifier.fillMaxWidth().clip(RoundedCornerShape(4.dp)),
+                                    color = RPCSXColors.primary,
+                                    trackColor = RPCSXColors.surfaceOverlay,
+                                )
+                            } else {
+                                LinearProgressIndicator(
+                                    modifier = Modifier.fillMaxWidth().clip(RoundedCornerShape(4.dp)),
+                                    color = RPCSXColors.primary,
+                                    trackColor = RPCSXColors.surfaceOverlay,
+                                )
+                            }
+                            Text(
+                                text = progressMessage ?: "Importing...",
+                                style = AppTypography.labelSmall,
+                                color = RPCSXColors.textSecondary,
+                                textAlign = TextAlign.Center,
+                                maxLines = 2,
+                                overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis
+                            )
+                        }
                     }
                 }
             }
         }
-        
+
         if (isFocused) {
-            Box(modifier = Modifier
-                .fillMaxSize()
-                .background(Brush.linearGradient(listOf(Color.White.copy(alpha = 0.1f), Color.Transparent)))
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .background(Brush.linearGradient(listOf(Color.White.copy(alpha = 0.1f), Color.Transparent)))
             )
         }
 

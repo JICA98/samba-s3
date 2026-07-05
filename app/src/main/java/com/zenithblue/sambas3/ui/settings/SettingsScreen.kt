@@ -14,6 +14,7 @@ import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.runtime.mutableStateListOf
 import com.zenithblue.sambas3.ui.user.UsersScreen
 import com.zenithblue.sambas3.ui.drivers.GpuDriversScreen
+import com.zenithblue.sambas3.ui.settings.LogMonitorScreen
 import androidx.compose.animation.animateContentSize
 import androidx.compose.animation.core.RepeatMode
 import androidx.compose.animation.core.animateFloat
@@ -141,7 +142,7 @@ fun ControllerHintStrip(
     Row(
         modifier = modifier
             .fillMaxWidth()
-            .height(48.dp)
+            .height(36.dp)
             .background(com.zenithblue.sambas3.RPCSXColors.surfaceContainerHigh)
             .drawBehind {
                 drawLine(
@@ -233,6 +234,12 @@ fun SettingsDetailPane(
             description = "Export and share the emulator execution logs. Helpful for debugging crashes, verifying compatibility, and reporting bugs to the developers."
             status = "READY"
             backend = "TEXT/PLAIN"
+        }
+        "logs" -> {
+            title = "Log Monitor"
+            description = "Live streaming log viewer capturing RPCSX backend, kernel syscalls, Cell modules, Vulkan, GPU driver, and Android app logs in real-time. Logs are saved to separate files per category."
+            status = "LIVE"
+            backend = "LOGCAT"
         }
         else -> {
             title = "SambaS3 Core"
@@ -1102,6 +1109,16 @@ fun SettingsScreen(
                         onFocusChanged = { if (it) focusedKey = "share_logs" }
                     )
                 }
+
+                item(key = "logs") {
+                    HomePreference(
+                        title = stringResource(R.string.log_monitor),
+                        icon = { Icon(painterResource(R.drawable.ic_terminal), null) },
+                        description = stringResource(R.string.log_monitor_description),
+                        onClick = { activeSettingKey = "logs" },
+                        onFocusChanged = { if (it) focusedKey = "logs" }
+                    )
+                }
             }
 
             if (isWideScreen) {
@@ -1158,6 +1175,12 @@ fun SettingsScreen(
                         }
                         "controls" -> {
                             ControllerSettings(
+                                navigateBack = { activeSettingKey = null },
+                                isInSplitPane = true
+                            )
+                        }
+                        "logs" -> {
+                            LogMonitorScreen(
                                 navigateBack = { activeSettingKey = null },
                                 isInSplitPane = true
                             )
