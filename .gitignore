@@ -21,3 +21,7 @@ local.properties
 samba-s3-release.jks
 *.jks
 *.keystore
+
+# Native binaries
+*.so
+app/src/main/jniLibs/
