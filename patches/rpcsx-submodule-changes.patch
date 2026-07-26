@@ -1,0 +1,131 @@
+diff --git a/android/src/rpcsx-android.cpp b/android/src/rpcsx-android.cpp
+index ce38967c1..44320274c 100644
+--- a/android/src/rpcsx-android.cpp
++++ b/android/src/rpcsx-android.cpp
+@@ -52,6 +52,7 @@
+ #include "util/fixed_typemap.hpp"
+ #include "util/logs.hpp"
+ #include "util/serialization.hpp"
++#include "util/bin_patch.h"
+ #include "util/sysinfo.hpp"
+ #include <Emu/Io/pad_config.h>
+ #include <Emu/RSX/GSFrameBase.h>
+@@ -2641,4 +2642,106 @@ extern "C" void *_rpcsx_setCustomDriver(void *driverHandle) {
+   return prevLoader;
+ }
+ 
++extern "C" std::string _rpcsx_patchEngineVersion() { return patch_engine_version; }
++
++extern "C" std::string _rpcsx_patchesList() {
++  nlohmann::json arr = nlohmann::json::array();
++
++  patch_engine::patch_map full_patches;
++  const std::string patches_dir = patch_engine::get_patches_path();
++  patch_engine::load(full_patches, patches_dir + "patch.yml");
++  patch_engine::load(full_patches, patch_engine::get_imported_patch_path());
++
++  const auto config_map = patch_engine::load_config();
++
++  for (const auto &[hash, container] : full_patches) {
++    for (const auto &[description, patch] : container.patch_info_map) {
++
++      bool enabled = false;
++      if (auto hash_it = config_map.find(hash);
++          hash_it != config_map.end()) {
++        if (auto desc_it = hash_it->second.patch_info_map.find(description);
++            desc_it != hash_it->second.patch_info_map.end()) {
++          for (const auto &[title, serials] : desc_it->second.titles) {
++            for (const auto &[serial, app_versions] : serials) {
++              for (const auto &[app_ver, cv] : app_versions) {
++                if (cv.enabled) {
++                  enabled = true;
++                  break;
++                }
++              }
++              if (enabled) break;
++            }
++            if (enabled) break;
++          }
++        }
++      }
++
++      std::vector<std::string> serials_list;
++      std::vector<std::string> titles_list;
++      for (const auto &[title, serials] : patch.titles) {
++        titles_list.push_back(title);
++        for (const auto &[serial, app_versions] : serials) {
++          serials_list.push_back(serial);
++        }
++      }
++
++      nlohmann::json entry;
++      entry["hash"] = hash;
++      entry["name"] = description;
++      entry["author"] = patch.author;
++      entry["version"] = patch.patch_version;
++      entry["notes"] = patch.notes;
++      entry["serials"] = serials_list;
++      entry["titles"] = titles_list;
++      entry["enabled"] = enabled;
++      arr.push_back(entry);
++    }
++  }
++
++  return arr.dump();
++}
++
++extern "C" bool _rpcsx_patchSetEnabled(std::string_view hash,
++                                       std::string_view description,
++                                       bool enabled) {
++  patch_engine::patch_map full_patches;
++  const std::string patches_dir = patch_engine::get_patches_path();
++  patch_engine::load(full_patches, patches_dir + "patch.yml");
++  patch_engine::load(full_patches, patch_engine::get_imported_patch_path());
++
++  auto hash_it = full_patches.find(std::string(hash));
++  if (hash_it == full_patches.end()) {
++    rpcsx_android.error("patchSetEnabled: hash %s not found", hash);
++    return false;
++  }
++
++  auto desc_it = hash_it->second.patch_info_map.find(std::string(description));
++  if (desc_it == hash_it->second.patch_info_map.end()) {
++    rpcsx_android.error("patchSetEnabled: description %s not found under hash %s",
++                        description, hash);
++    return false;
++  }
++
++  auto config_map = patch_engine::load_config();
++  auto &cfg_container = config_map[std::string(hash)];
++  auto &cfg_patch = cfg_container.patch_info_map[std::string(description)];
++
++  for (const auto &[title, serials] : desc_it->second.titles) {
++    for (const auto &[serial, app_versions] : serials) {
++      for (const auto &[app_ver, cv] : app_versions) {
++        auto &leaf =
++            cfg_patch.titles[title][serial][app_ver];
++        leaf.enabled = enabled;
++        if (!enabled) {
++          leaf.config_values.clear();
++        }
++      }
++    }
++  }
++
++  patch_engine::save_config(config_map);
++  return true;
++}
++
+ #pragma GCC diagnostic pop
+diff --git a/rx/include/rx/types.hpp b/rx/include/rx/types.hpp
+index ae4298642..eef6d549c 100644
+--- a/rx/include/rx/types.hpp
++++ b/rx/include/rx/types.hpp
+@@ -8,6 +8,7 @@
+ #include <cstdint>
+ #include <cstring>
+ #include <memory>
++#include <new>
+ #include <source_location>
+ #include <string>
+ #include <tuple>

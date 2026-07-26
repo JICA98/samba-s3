@@ -95,3 +95,9 @@ adb logcat -c && adb logcat | grep -E "sambas3|RPCSX|Main"
 - AGP: 8.13.2
 - Kotlin: 2.3.21
 - Compose Compiler Extension: 1.5.15
+
+## Submodule Patches
+
+| File | What |
+|---|---|
+| patches/rpcsx-submodule-changes.patch | Local changes to app/src/main/cpp/rpcsx (upstream: RPCSX/rpcsx) — patch engine API for Android. Apply with: git -C app/src/main/cpp/rpcsx apply ../../../../patches/rpcsx-submodule-changes.patch |
