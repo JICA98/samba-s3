@@ -90,7 +90,7 @@ jobs:
         CMAKE_C_COMPILER_LAUNCHER: "ccache"
         CMAKE_CXX_COMPILER_LAUNCHER: "ccache"
       run: |
-        ./gradlew assembleRelease
+        ./gradlew assembleStandardRelease assemblePlaystoreRelease
   
     - name: Build release artifacts
       uses: actions/upload-artifact@v4
@@ -99,7 +99,8 @@ jobs:
         name: rpcsx-build
         compression-level: 0
         path: |
-          app/build/outputs/apk/release/rpcsx-release.apk
+          app/build/outputs/apk/standard/release/*.apk
+          app/build/outputs/apk/playstore/release/*.apk
 
     - name: Create release
       uses: softprops/action-gh-release@v2
@@ -111,7 +112,7 @@ jobs:
         # body: 'Some release text body if needed'
         # body_path: or/as/file.md
         files: |
-          app/build/outputs/apk/release/rpcsx-release.apk
+          app/build/outputs/apk/standard/release/*.apk
 
     - name: Deploy build
       uses: softprops/action-gh-release@v2
@@ -126,5 +127,5 @@ jobs:
         repository: RPCSX/rpcsx-ui-android-build
         token: ${{ secrets.BUILD_TOKEN }}
         tag_name: v${{ env.RX_VERSION }}-${{ env.RX_SHA }}
-        files: app/build/outputs/apk/release/rpcsx-release.apk
+        files: app/build/outputs/apk/standard/release/*.apk
         body: ${{ github.server_url }}/${{ github.repository }}/commit/${{ github.sha }}

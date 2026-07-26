@@ -240,6 +240,11 @@ object LogMonitor {
     fun getAllLogFiles(): List<File> =
         LogFileCategory.entries.mapNotNull { getLogFile(it)?.takeIf { f -> f.exists() } }
 
+    /** Flush open writers so share/export sees latest lines. */
+    fun flushWriters() {
+        writers.values.forEach { runCatching { it.flush() } }
+    }
+
     // ------------------------------------------------------------------
     // Writers
     // ------------------------------------------------------------------
@@ -330,7 +335,7 @@ object LogMonitor {
 
         fun <T> ArrayDeque<T>.addCapped(item: T) {
             addLast(item)
-            if (size > MAX_UI_ENTRIES) removeFirst()
+            if (size > MAX_UI_ENTRIES) removeAt(0)
         }
 
         var batchCount = 0

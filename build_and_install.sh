@@ -75,15 +75,20 @@ VARIANT_CAP="${VARIANT^}"  # Capitalise first letter
 APP_NAME="SambaS3"
 PACKAGE="com.zenithblue.sambas3"
 ACTIVITY=".MainActivity"
-ADB="adb.exe"
+ADB="adb"
+
+# Distribution flavor: standard (default) or playstore. Override with FLAVOR=playstore
+FLAVOR="${FLAVOR:-standard}"
+FLAVOR_CAP="${FLAVOR^}"
 
 if [[ "$ARTIFACT_KIND" == "bundle" ]]; then
-    GRADLE_TASK="bundle${VARIANT_CAP}"
-    ARTIFACT_DIR="app/build/outputs/bundle/${VARIANT}"
+    GRADLE_TASK="bundle${FLAVOR_CAP}${VARIANT_CAP}"
+    # AGP output dir is camelCase, e.g. standardRelease
+    ARTIFACT_DIR="app/build/outputs/bundle/${FLAVOR}${VARIANT_CAP}"
     ARTIFACT_EXT="aab"
 else
-    GRADLE_TASK="assemble${VARIANT_CAP}"
-    ARTIFACT_DIR="app/build/outputs/apk/${VARIANT}"
+    GRADLE_TASK="assemble${FLAVOR_CAP}${VARIANT_CAP}"
+    ARTIFACT_DIR="app/build/outputs/apk/${FLAVOR}/${VARIANT}"
     ARTIFACT_EXT="apk"
 fi
 

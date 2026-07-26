@@ -31,24 +31,21 @@ if [ ! -f "$RPCSX_DIR/3rdparty/fmtlib/CMakeLists.txt" ]; then
     git submodule update --init --recursive app/src/main/cpp/rpcsx
 fi
 
-echo "Building RPCSX for ABI: arm64-v8a ($CMAKE_BUILD_TYPE)"
+ABIS=("arm64-v8a" "x86_64")
 
-BUILD_DIR="$SCRIPT_DIR/app/.cxx/rpcsx/arm64-v8a/$BUILD_TYPE"
-mkdir -p "$BUILD_DIR"
+for ABI in "${ABIS[@]}"; do
+    echo "Building RPCSX for ABI: $ABI ($CMAKE_BUILD_TYPE)"
 
-cmake \
-    -DCMAKE_TOOLCHAIN_FILE="$TOOLCHAIN" \
-    -DANDROID_ABI=arm64-v8a \
-    -DANDROID_PLATFORM=android-$MIN_SDK \
-    -DCMAKE_BUILD_TYPE="$CMAKE_BUILD_TYPE" \
-    -DCMAKE_LIBRARY_OUTPUT_DIRECTORY="$BUILD_DIR/out" \
-    -B "$BUILD_DIR" \
-    "$RPCSX_ANDROID_DIR"
+    BUILD_DIR="$SCRIPT_DIR/app/.cxx/rpcsx/$ABI/$BUILD_TYPE"
+    mkdir -p "$BUILD_DIR"
 
-cmake --build "$BUILD_DIR" --target rpcsx-android -j$(nproc 2>/dev/null || echo 4)
+    cmake         -DCMAKE_TOOLCHAIN_FILE="$TOOLCHAIN"         -DANDROID_ABI="$ABI"         -DANDROID_PLATFORM=android-$MIN_SDK         -DCMAKE_BUILD_TYPE="$CMAKE_BUILD_TYPE"         -DCMAKE_LIBRARY_OUTPUT_DIRECTORY="$BUILD_DIR/out"         -B "$BUILD_DIR"         "$RPCSX_ANDROID_DIR"
 
-mkdir -p "$JNILIBS_DIR/arm64-v8a"
-cp "$BUILD_DIR/out/librpcsx-android.so" "$JNILIBS_DIR/arm64-v8a/librpcsx-android.so"
-echo "Copied librpcsx-android.so to $JNILIBS_DIR/arm64-v8a/"
+    cmake --build "$BUILD_DIR" --target rpcsx-android -j$(nproc 2>/dev/null || echo 4)
 
-echo "RPCSX build complete ($BUILD_TYPE)"
+    mkdir -p "$JNILIBS_DIR/$ABI"
+    cp "$BUILD_DIR/out/librpcsx-android.so" "$JNILIBS_DIR/$ABI/librpcsx-android.so"
+    echo "Copied librpcsx-android.so to $JNILIBS_DIR/$ABI/"
+done
+
+echo "RPCSX build complete ($BUILD_TYPE) for ABIs: ${ABIS[*]}"

@@ -1,0 +1,12 @@
+Samba S3 Play Store builds may include Mesa Turnip Vulkan drivers:
+
+- Mesa Turnip 26.1.4
+- Mesa Turnip 25.3.4
+- Turnip A8XX v29 (experimental)
+
+Mesa is available from https://gitlab.freedesktop.org/mesa/mesa and is licensed
+under MIT and other permissive licenses. Corresponding source offers follow the
+upstream project terms. Packaged SHA-256 checksums are recorded in
+bundled_gpu_drivers/catalog.json.
+
+This notice does not claim Google Play policy compliance by itself.

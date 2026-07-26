@@ -1,0 +1,48 @@
+{
+  "schemaVersion": 1,
+  "drivers": [
+    {
+      "id": "turnip-26.1.4",
+      "displayName": "Turnip 26.1.4 — Recommended",
+      "role": "recommended",
+      "packageFile": "turnip-26.1.4-sambas3.zip",
+      "libraryName": "libvulkan_freedreno.so",
+      "supportedGpuFamilies": ["adreno6xx", "adreno7xx"],
+      "experimental": false,
+      "sha256": "c76c15499b7eeb3d6476415f98254c526b993882c9e8689cb5d641e3d69c9e51",
+      "sourceVersion": "Mesa 26.1.4",
+      "sourceCommit": "unknown",
+      "sourceRepo": "https://gitlab.freedesktop.org/mesa/mesa",
+      "notes": "Default recommended Turnip for Adreno 6xx/7xx. Not auto-selected on first launch."
+    },
+    {
+      "id": "turnip-25.3.4",
+      "displayName": "Turnip 25.3.4 — Compatibility",
+      "role": "compatibility",
+      "packageFile": "turnip-25.3.4-sambas3.zip",
+      "libraryName": "libvulkan_freedreno.so",
+      "supportedGpuFamilies": ["adreno6xx", "adreno7xx"],
+      "experimental": false,
+      "sha256": "8677f047e9386cfbeb06db9a0d32372beb295afc05b27854c344314e7bd70aad",
+      "sourceVersion": "Mesa 25.3.4",
+      "sourceCommit": "unknown",
+      "sourceRepo": "https://gitlab.freedesktop.org/mesa/mesa",
+      "notes": "Fallback when 26.1.4 regresses."
+    },
+    {
+      "id": "turnip-a8xx-v29",
+      "displayName": "Turnip A8XX v29 — Experimental",
+      "role": "experimental",
+      "packageFile": "turnip-a8xx-v29-sambas3.zip",
+      "libraryName": "libvulkan_freedreno.so",
+      "supportedGpuIds": ["810", "825", "829", "830", "840"],
+      "forceSysmemGpuIds": ["830"],
+      "experimental": true,
+      "sha256": "b87c974cbbad9005b7c5eb0259e62cf2ee97da5999475b066126390840768d2a",
+      "sourceVersion": "A8XX v29",
+      "sourceCommit": "unknown",
+      "sourceRepo": "upstream a8xx-turnip-gen8-V29 (normal/non-sync)",
+      "notes": "Experimental. Never auto-selected. Adreno 830 uses SYSMEM when selected."
+    }
+  ]
+}

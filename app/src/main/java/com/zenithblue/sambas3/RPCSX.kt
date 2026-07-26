@@ -98,6 +98,9 @@ class RPCSX {
     external fun getDirInstallPath(sfoFd: Int) : String?
     external fun getVersion(): String
     external fun setCustomDriver(path: String, libraryName: String, hookDir: String): Boolean
+    external fun patchEngineVersion(): String
+    external fun patchesList(): String
+    external fun patchSetEnabled(hash: String, description: String, enabled: Boolean): Boolean
 
 
     companion object {

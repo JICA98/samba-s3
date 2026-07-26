@@ -41,17 +41,38 @@ The emulator core is **not compiled into the APK**. It's downloaded from GitHub 
 - **RPCSXActivity** — Fullscreen emulator rendering surface (landscape, singleTask)
 - **OverlayEditActivity** — Controller overlay editor
 
+## Product flavors (`distribution`)
+
+| Flavor | Default | Bundled Turnip | External GPU import/download |
+|--------|---------|----------------|------------------------------|
+| `standard` | yes | no | yes |
+| `playstore` | no | yes (from assets) | no |
+
+BuildConfig flags: `IS_PLAYSTORE_BUILD`, `ALLOW_EXTERNAL_GPU_DRIVERS`, `INCLUDE_BUNDLED_TURNIP_DRIVERS`.
+
+Package approved drivers with `./scripts/package-bundled-turnip-drivers.sh` (inputs under `drivers/input/`). See `docs/BUNDLED_TURNIP_DRIVERS.md`.
+
 ## Key Build/Run Commands
 
 ```bash
-# Build debug APK
-./gradlew assembleDebug
+# Debug APKs (standard is default flavor)
+./gradlew assembleStandardDebug
+./gradlew assemblePlaystoreDebug
 
-# Build + install + launch
+# Play Store release APK / AAB
+./gradlew assemblePlaystoreRelease
+./gradlew bundlePlaystoreRelease
+
+# Unit tests
+./gradlew :app:testStandardDebugUnitTest :app:testPlaystoreDebugUnitTest
+
+# Build + install + launch (default FLAVOR=standard; override FLAVOR=playstore)
 ./build_and_install.sh debug
 
-# Output APK
-# app/build/outputs/apk/debug/samba-s3-debug.apk
+# Output APKs
+# app/build/outputs/apk/standard/debug/samba-s3-standard-debug.apk
+# app/build/outputs/apk/playstore/debug/samba-s3-playstore-debug.apk
+# app/build/outputs/bundle/playstoreRelease/samba-s3-playstore-release.aab
 ```
 
 ## Logging

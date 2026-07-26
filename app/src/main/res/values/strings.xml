@@ -102,7 +102,12 @@
     <!-- LogMonitorScreen -->
     <string name="log_monitor">Log Monitor</string>
     <string name="log_monitor_description">View live logs from backend, Vulkan, driver and app</string>
+    <string name="patch_manager">Patch Manager</string>
+    <string name="patch_manager_description">Manage game patches, fixes, and mods downloaded from the community</string>
     <string name="log_level_all">All</string>
+    <string name="log_filters">Filters</string>
+    <string name="log_filters_expand">Expand filters</string>
+    <string name="log_filters_collapse">Collapse filters</string>
     <string name="log_clear">Clear</string>
     <string name="log_auto_scroll">Auto-scroll</string>
     <string name="log_share_all">Share All Logs</string>

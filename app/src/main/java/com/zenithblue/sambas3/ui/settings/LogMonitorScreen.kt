@@ -1,13 +1,16 @@
 package com.zenithblue.sambas3.ui.settings
 
+import android.content.ActivityNotFoundException
+import android.content.ClipData
+import android.content.Context
 import android.content.Intent
 import android.net.Uri
-import androidx.compose.animation.core.FastOutSlowInEasing
-import androidx.compose.animation.core.RepeatMode
-import androidx.compose.animation.core.animateFloat
-import androidx.compose.animation.core.infiniteRepeatable
-import androidx.compose.animation.core.rememberInfiniteTransition
-import androidx.compose.animation.core.tween
+import android.widget.Toast
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.expandVertically
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.shrinkVertically
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -18,7 +21,6 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -30,7 +32,6 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FilterChip
@@ -38,10 +39,8 @@ import androidx.compose.material3.FilterChipDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
-import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -56,8 +55,6 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.graphicsLayer
-import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
@@ -68,7 +65,6 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.core.content.FileProvider
 import com.zenithblue.sambas3.LogEntry
-import com.zenithblue.sambas3.LogFileCategory
 import com.zenithblue.sambas3.LogLevel
 import com.zenithblue.sambas3.LogMonitor
 import com.zenithblue.sambas3.LogSource
@@ -114,11 +110,10 @@ fun LogMonitorScreen(
     navigateBack: () -> Unit,
     isInSplitPane: Boolean = false,
 ) {
-    val topBarScrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior()
-
     var selectedLevel by remember { mutableStateOf<LogLevel?>(null) }
     var selectedSource by remember { mutableStateOf<LogSource?>(null) }
     var autoScroll by remember { mutableStateOf(true) }
+    var filtersExpanded by remember { mutableStateOf(false) }
 
     val allLogs by LogMonitor.logs.collectAsState()
     val filtered by remember(allLogs, selectedLevel, selectedSource) {
@@ -138,70 +133,139 @@ fun LogMonitorScreen(
         }
     }
 
+    val activeFilterSummary = remember(selectedLevel, selectedSource) {
+        buildList {
+            selectedLevel?.let { add(it.name) }
+            selectedSource?.let { add(it.label) }
+        }.joinToString(" · ").ifEmpty { null }
+    }
+
     @Composable
-    fun LogContent(contentPadding: PaddingValues) {
+    fun LogContent(modifier: Modifier = Modifier) {
         Column(
-            modifier = Modifier
+            modifier = modifier
                 .fillMaxSize()
-                .padding(contentPadding)
                 .background(RPCSXColors.background)
         ) {
-            // Level filter chips
+            // Filters header: summary + expand/collapse
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .horizontalScroll(rememberScrollState())
+                    .clickable { filtersExpanded = !filtersExpanded }
                     .padding(horizontal = 12.dp, vertical = 6.dp),
-                horizontalArrangement = Arrangement.spacedBy(6.dp),
-                verticalAlignment = Alignment.CenterVertically
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(8.dp)
             ) {
-                LevelFilterChip(
-                    label = stringResource(R.string.log_level_all),
-                    selected = selectedLevel == null
-                ) { selectedLevel = null }
-                LogLevel.entries.forEach { level ->
-                    LevelFilterChip(
-                        label = level.name,
-                        selected = selectedLevel == level,
-                        color = level.color()
-                    ) { selectedLevel = if (selectedLevel == level) null else level }
+                Text(
+                    text = stringResource(R.string.log_filters).uppercase(),
+                    color = RPCSXColors.primary,
+                    fontFamily = FontFamily.Monospace,
+                    fontWeight = FontWeight.Bold,
+                    fontSize = 11.sp,
+                    letterSpacing = 1.5.sp
+                )
+                if (!filtersExpanded && activeFilterSummary != null) {
+                    Text(
+                        text = activeFilterSummary,
+                        color = RPCSXColors.textSecondary,
+                        fontFamily = FontFamily.Monospace,
+                        fontSize = 10.sp,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis,
+                        modifier = Modifier.weight(1f)
+                    )
+                } else {
+                    Spacer(Modifier.weight(1f))
+                }
+                Text(
+                    text = "${filtered.size}",
+                    color = RPCSXColors.textDisabled,
+                    fontFamily = FontFamily.Monospace,
+                    fontSize = 10.sp
+                )
+                Icon(
+                    painter = painterResource(
+                        if (filtersExpanded) R.drawable.ic_keyboard_arrow_up
+                        else R.drawable.ic_keyboard_arrow_down
+                    ),
+                    contentDescription = if (filtersExpanded) {
+                        stringResource(R.string.log_filters_collapse)
+                    } else {
+                        stringResource(R.string.log_filters_expand)
+                    },
+                    tint = RPCSXColors.primary,
+                    modifier = Modifier.size(20.dp)
+                )
+            }
+
+            AnimatedVisibility(
+                visible = filtersExpanded,
+                enter = expandVertically() + fadeIn(),
+                exit = shrinkVertically() + fadeOut()
+            ) {
+                Column {
+                    // Level filter chips
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .horizontalScroll(rememberScrollState())
+                            .padding(horizontal = 12.dp, vertical = 4.dp),
+                        horizontalArrangement = Arrangement.spacedBy(6.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        LevelFilterChip(
+                            label = stringResource(R.string.log_level_all),
+                            selected = selectedLevel == null
+                        ) { selectedLevel = null }
+                        LogLevel.entries.forEach { level ->
+                            LevelFilterChip(
+                                label = level.name,
+                                selected = selectedLevel == level,
+                                color = level.color()
+                            ) { selectedLevel = if (selectedLevel == level) null else level }
+                        }
+                    }
+
+                    // Source filter chips
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .horizontalScroll(rememberScrollState())
+                            .padding(horizontal = 12.dp)
+                            .padding(bottom = 6.dp),
+                        horizontalArrangement = Arrangement.spacedBy(6.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        LevelFilterChip(
+                            label = stringResource(R.string.log_level_all),
+                            selected = selectedSource == null
+                        ) { selectedSource = null }
+                        LogSource.entries.forEach { src ->
+                            LevelFilterChip(
+                                label = src.label,
+                                selected = selectedSource == src,
+                                color = src.color()
+                            ) { selectedSource = if (selectedSource == src) null else src }
+                        }
+                    }
                 }
             }
 
-            // Source filter chips
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .horizontalScroll(rememberScrollState())
-                    .padding(horizontal = 12.dp)
-                    .padding(bottom = 4.dp),
-                horizontalArrangement = Arrangement.spacedBy(6.dp),
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                LevelFilterChip(
-                    label = stringResource(R.string.log_level_all),
-                    selected = selectedSource == null
-                ) { selectedSource = null }
-                LogSource.entries.forEach { src ->
-                    LevelFilterChip(
-                        label = src.label,
-                        selected = selectedSource == src,
-                        color = src.color()
-                    ) { selectedSource = if (selectedSource == src) null else src }
-                }
-            }
+                    .height(1.dp)
+                    .background(RPCSXColors.outlineVariant)
+            ) {}
 
-            Row(modifier = Modifier.fillMaxWidth().height(1.dp).background(RPCSXColors.outlineVariant)) {}
-            Text(
-                text = "${filtered.size} entries",
-                color = RPCSXColors.textDisabled,
-                style = MaterialTheme.typography.labelSmall,
-                fontFamily = FontFamily.Monospace,
-                modifier = Modifier.padding(horizontal = 12.dp, vertical = 3.dp)
-            )
-
+            // weight(1f) so sibling bottom bar stays visible (fillMaxSize alone ate it)
             if (filtered.isEmpty()) {
-                Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                Box(
+                    Modifier
+                        .weight(1f)
+                        .fillMaxWidth(),
+                    contentAlignment = Alignment.Center
+                ) {
                     Column(horizontalAlignment = Alignment.CenterHorizontally) {
                         Icon(
                             painter = painterResource(R.drawable.ic_terminal),
@@ -221,7 +285,9 @@ fun LogMonitorScreen(
             } else {
                 LazyColumn(
                     state = listState,
-                    modifier = Modifier.weight(1f),
+                    modifier = Modifier
+                        .weight(1f)
+                        .fillMaxWidth(),
                     contentPadding = PaddingValues(vertical = 4.dp),
                 ) {
                     itemsIndexed(filtered, key = { _, e -> e.id }) { index, entry ->
@@ -229,17 +295,11 @@ fun LogMonitorScreen(
                     }
                 }
             }
-
-            LogActionBar(
-                autoScroll = autoScroll,
-                onAutoScrollToggle = { autoScroll = !autoScroll },
-                onClear = { LogMonitor.clearLogs() },
-            )
         }
     }
 
     @Composable
-    fun TopBar(compact: Boolean = false) {
+    fun TopBar() {
         Row(
             modifier = Modifier
                 .fillMaxWidth()
@@ -275,65 +335,30 @@ fun LogMonitorScreen(
                 color = RPCSXColors.primary,
                 fontFamily = FontFamily.Monospace,
                 fontWeight = FontWeight.Bold,
-                fontSize = if (compact) 15.sp else 18.sp,
+                fontSize = 18.sp,
                 letterSpacing = 2.sp
             )
-            Spacer(Modifier.weight(1f))
-            LiveIndicator()
-            Spacer(Modifier.width(12.dp))
         }
     }
 
-    if (isInSplitPane) {
-        Column(modifier = modifier.fillMaxSize()) {
-            TopBar(compact = true)
-            LogContent(contentPadding = PaddingValues(0.dp))
+    // Pin action bar under content so Clear / Auto-scroll / Share never get clipped
+    Column(modifier = modifier.fillMaxSize()) {
+        if (!isInSplitPane) {
+            TopBar()
         }
-    } else {
-        Scaffold(
-            modifier = modifier.nestedScroll(topBarScrollBehavior.nestedScrollConnection),
-            topBar = { TopBar() },
-            bottomBar = {
-                ControllerHintStrip(hints = listOf(R.drawable.circle to "Back"))
-            }
-        ) { padding ->
-            LogContent(contentPadding = padding)
-        }
+        LogContent(modifier = Modifier.weight(1f))
+        LogBottomBar(
+            autoScroll = autoScroll,
+            onAutoScrollToggle = { autoScroll = !autoScroll },
+            onClear = { LogMonitor.clearLogs() },
+            showBackHint = !isInSplitPane
+        )
     }
 }
 
 // ---------------------------------------------------------------------------
 // Sub-composables
 // ---------------------------------------------------------------------------
-
-@Composable
-private fun LiveIndicator() {
-    val inf = rememberInfiniteTransition(label = "live")
-    val alpha by inf.animateFloat(
-        0.3f, 1f,
-        infiniteRepeatable(tween(900, easing = FastOutSlowInEasing), RepeatMode.Reverse),
-        label = "alpha"
-    )
-    Row(
-        verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.spacedBy(5.dp)
-    ) {
-        Box(
-            Modifier
-                .size(7.dp)
-                .graphicsLayer { this.alpha = alpha }
-                .background(Color(0xFF4CAF50), CircleShape)
-        )
-        Text(
-            text = "LIVE",
-            color = Color(0xFF4CAF50).copy(alpha = alpha),
-            fontFamily = FontFamily.Monospace,
-            fontWeight = FontWeight.Bold,
-            fontSize = 10.sp,
-            letterSpacing = 1.5.sp
-        )
-    }
-}
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -435,109 +460,166 @@ private fun LogEntryRow(entry: LogEntry, index: Int) {
 }
 
 @Composable
-private fun LogActionBar(
+private fun LogBottomBar(
     autoScroll: Boolean,
     onAutoScrollToggle: () -> Unit,
     onClear: () -> Unit,
+    showBackHint: Boolean,
 ) {
     val context = LocalContext.current
-    Row(
+    Column(
         modifier = Modifier
             .fillMaxWidth()
-            .height(44.dp)
             .background(RPCSXColors.surfaceContainerHigh)
-            .drawBehind {
-                drawLine(
-                    color = RPCSXColors.outlineVariant,
-                    start = Offset(0f, 0f),
-                    end = Offset(size.width, 0f),
-                    strokeWidth = 1.dp.toPx()
-                )
-            }
-            .padding(horizontal = 8.dp),
-        verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.spacedBy(4.dp)
     ) {
-        TextButton(
-            onClick = onClear,
-            contentPadding = PaddingValues(horizontal = 10.dp, vertical = 0.dp)
-        ) {
-            Icon(
-                painterResource(R.drawable.ic_delete),
-                null,
-                tint = RPCSXColors.textSecondary,
-                modifier = Modifier.size(14.dp)
-            )
-            Spacer(Modifier.width(4.dp))
-            Text(
-                stringResource(R.string.log_clear).uppercase(),
-                color = RPCSXColors.textSecondary,
-                fontFamily = FontFamily.Monospace,
-                fontSize = 10.sp,
-                letterSpacing = 1.sp
-            )
-        }
-
-        Spacer(Modifier.weight(1f))
-
         Row(
             modifier = Modifier
-                .clip(RoundedCornerShape(4.dp))
-                .background(if (autoScroll) RPCSXColors.primaryMuted else Color.Transparent)
-                .border(
-                    0.5.dp,
-                    if (autoScroll) RPCSXColors.primary.copy(0.5f) else RPCSXColors.outlineVariant,
-                    RoundedCornerShape(4.dp)
-                )
-                .clickable(onClick = onAutoScrollToggle)
-                .padding(horizontal = 8.dp, vertical = 4.dp),
+                .fillMaxWidth()
+                .height(48.dp)
+                .drawBehind {
+                    drawLine(
+                        color = RPCSXColors.outlineVariant,
+                        start = Offset(0f, 0f),
+                        end = Offset(size.width, 0f),
+                        strokeWidth = 1.dp.toPx()
+                    )
+                }
+                .padding(horizontal = 8.dp),
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.spacedBy(4.dp)
         ) {
-            Icon(
-                painterResource(R.drawable.ic_keyboard_arrow_down),
-                null,
-                tint = if (autoScroll) RPCSXColors.primary else RPCSXColors.textSecondary,
-                modifier = Modifier.size(14.dp)
-            )
-            Text(
-                stringResource(R.string.log_auto_scroll).uppercase(),
-                color = if (autoScroll) RPCSXColors.primary else RPCSXColors.textSecondary,
-                fontFamily = FontFamily.Monospace,
-                fontWeight = if (autoScroll) FontWeight.Bold else FontWeight.Normal,
-                fontSize = 10.sp,
-                letterSpacing = 1.sp
-            )
+            TextButton(
+                onClick = onClear,
+                contentPadding = PaddingValues(horizontal = 10.dp, vertical = 0.dp)
+            ) {
+                Icon(
+                    painterResource(R.drawable.ic_delete),
+                    null,
+                    tint = RPCSXColors.textSecondary,
+                    modifier = Modifier.size(14.dp)
+                )
+                Spacer(Modifier.width(4.dp))
+                Text(
+                    stringResource(R.string.log_clear).uppercase(),
+                    color = RPCSXColors.textSecondary,
+                    fontFamily = FontFamily.Monospace,
+                    fontSize = 10.sp,
+                    letterSpacing = 1.sp
+                )
+            }
+
+            Spacer(Modifier.weight(1f))
+
+            Row(
+                modifier = Modifier
+                    .clip(RoundedCornerShape(4.dp))
+                    .background(if (autoScroll) RPCSXColors.primaryMuted else Color.Transparent)
+                    .border(
+                        0.5.dp,
+                        if (autoScroll) RPCSXColors.primary.copy(0.5f) else RPCSXColors.outlineVariant,
+                        RoundedCornerShape(4.dp)
+                    )
+                    .clickable(onClick = onAutoScrollToggle)
+                    .padding(horizontal = 8.dp, vertical = 4.dp),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(4.dp)
+            ) {
+                Icon(
+                    painterResource(R.drawable.ic_keyboard_arrow_down),
+                    null,
+                    tint = if (autoScroll) RPCSXColors.primary else RPCSXColors.textSecondary,
+                    modifier = Modifier.size(14.dp)
+                )
+                Text(
+                    stringResource(R.string.log_auto_scroll).uppercase(),
+                    color = if (autoScroll) RPCSXColors.primary else RPCSXColors.textSecondary,
+                    fontFamily = FontFamily.Monospace,
+                    fontWeight = if (autoScroll) FontWeight.Bold else FontWeight.Normal,
+                    fontSize = 10.sp,
+                    letterSpacing = 1.sp
+                )
+            }
+
+            Spacer(Modifier.width(4.dp))
+
+            IconButton(
+                onClick = {
+                    shareLogFiles(context)
+                },
+                modifier = Modifier.size(36.dp)
+            ) {
+                Icon(
+                    painterResource(R.drawable.ic_share),
+                    stringResource(R.string.log_share_all),
+                    tint = RPCSXColors.textSecondary,
+                    modifier = Modifier.size(16.dp)
+                )
+            }
         }
 
-        Spacer(Modifier.width(4.dp))
+        if (showBackHint) {
+            ControllerHintStrip(hints = listOf(R.drawable.circle to "Back"))
+        }
+    }
+}
 
-        IconButton(
-            onClick = {
-                val files = LogMonitor.getAllLogFiles()
-                if (files.isEmpty()) return@IconButton
-                val uris = ArrayList<Uri>(
-                    files.map { file ->
-                        FileProvider.getUriForFile(context, "${context.packageName}.provider", file)
-                    }
-                )
-                val intent = Intent(Intent.ACTION_SEND_MULTIPLE).apply {
-                    type = "text/plain"
-                    putParcelableArrayListExtra(Intent.EXTRA_STREAM, uris)
-                    addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+/**
+ * Share on-disk log files via system chooser.
+ * Requires FileProvider authority `${packageName}.provider` + external-files logs path.
+ */
+private fun shareLogFiles(context: Context) {
+    LogMonitor.flushWriters()
+    val files = LogMonitor.getAllLogFiles()
+    if (files.isEmpty()) {
+        Toast.makeText(context, context.getString(R.string.log_not_found), Toast.LENGTH_SHORT).show()
+        return
+    }
+
+    val authority = "${context.packageName}.provider"
+    val uris = ArrayList<Uri>(files.size)
+    for (file in files) {
+        try {
+            uris.add(FileProvider.getUriForFile(context, authority, file))
+        } catch (e: IllegalArgumentException) {
+            Toast.makeText(
+                context,
+                "Cannot share ${file.name}: ${e.message}",
+                Toast.LENGTH_LONG
+            ).show()
+            return
+        }
+    }
+    if (uris.isEmpty()) {
+        Toast.makeText(context, context.getString(R.string.log_not_found), Toast.LENGTH_SHORT).show()
+        return
+    }
+
+    val intent = if (uris.size == 1) {
+        Intent(Intent.ACTION_SEND).apply {
+            type = "text/plain"
+            putExtra(Intent.EXTRA_STREAM, uris[0])
+            clipData = ClipData.newUri(context.contentResolver, "log", uris[0])
+            addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+        }
+    } else {
+        Intent(Intent.ACTION_SEND_MULTIPLE).apply {
+            type = "text/plain"
+            putParcelableArrayListExtra(Intent.EXTRA_STREAM, uris)
+            // ClipData needed so FLAG_GRANT_READ_URI_PERMISSION applies to all URIs
+            clipData = ClipData.newUri(context.contentResolver, "log", uris[0]).also { clip ->
+                for (i in 1 until uris.size) {
+                    clip.addItem(ClipData.Item(uris[i]))
                 }
-                context.startActivity(
-                    Intent.createChooser(intent, context.getString(R.string.log_share_all))
-                )
-            },
-            modifier = Modifier.size(36.dp)
-        ) {
-            Icon(
-                painterResource(R.drawable.ic_share),
-                stringResource(R.string.log_share_all),
-                tint = RPCSXColors.textSecondary,
-                modifier = Modifier.size(16.dp)
-            )
+            }
+            addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
         }
+    }
+
+    try {
+        context.startActivity(
+            Intent.createChooser(intent, context.getString(R.string.log_share_all))
+        )
+    } catch (_: ActivityNotFoundException) {
+        Toast.makeText(context, context.getString(R.string.no_activity_to_handle_action), Toast.LENGTH_SHORT).show()
     }
 }

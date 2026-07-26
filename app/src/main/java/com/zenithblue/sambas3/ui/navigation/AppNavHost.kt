@@ -4,7 +4,6 @@ import android.content.ClipData
 import android.content.ClipboardManager
 import android.content.Intent
 import android.net.Uri
-import android.util.Log
 import android.widget.Toast
 import androidx.activity.compose.BackHandler
 import androidx.activity.compose.rememberLauncherForActivityResult
@@ -77,12 +76,21 @@ import com.zenithblue.sambas3.dialogs.AlertDialogQueue
 import com.zenithblue.sambas3.overlay.OverlayEditActivity
 import com.zenithblue.sambas3.ui.drivers.GpuDriversScreen
 import com.zenithblue.sambas3.ui.games.GamesScreen
+import com.zenithblue.sambas3.ui.settings.ADVANCED_SETTINGS_ROUTE
 import com.zenithblue.sambas3.ui.settings.AdvancedSettingsScreen
 import com.zenithblue.sambas3.ui.settings.LogMonitorScreen
+import com.zenithblue.sambas3.ui.settings.PatchManagerScreen
 import com.zenithblue.sambas3.ui.settings.ControllerSettings
 import com.zenithblue.sambas3.ui.settings.SettingsScreen
+import com.zenithblue.sambas3.ui.settings.advancedSettingsRoute
+import com.zenithblue.sambas3.ui.settings.decodeAdvancedSettingsPath
+import com.zenithblue.sambas3.ui.settings.getNestedSettings
+import com.zenithblue.sambas3.ui.settings.isAdvancedSettingsRoute
+import com.zenithblue.sambas3.ui.settings.normalizeAdvancedSettingsPath
 import com.zenithblue.sambas3.ui.user.UsersScreen
 import com.zenithblue.sambas3.utils.FileUtil
+import androidx.navigation.NavType
+import androidx.navigation.navArgument
 import org.json.JSONObject
 
 @Preview
@@ -95,7 +103,14 @@ fun AppNavHost() {
     val rpcsxLibrary by remember { RPCSX.activeLibrary }
 
     val navigateTo: (String) -> Unit = { route ->
-        navController.navigate(route) {
+        // Advanced settings keys can contain '/' (e.g. "Input/Output"). Encode into a
+        // single path segment instead of registering fragile dynamic routes.
+        val dest = if (isAdvancedSettingsRoute(route) && !route.startsWith("advanced_settings/")) {
+            advancedSettingsRoute(normalizeAdvancedSettingsPath(route))
+        } else {
+            route
+        }
+        navController.navigate(dest) {
             launchSingleTop = true
             restoreState = true
         }
@@ -142,44 +157,24 @@ fun AppNavHost() {
             UsersScreen(navigateBack = navController::navigateUp)
         }
 
-        fun unwrapSetting(obj: JSONObject, path: String = "") {
-            obj.keys().forEach self@{ key ->
-                val item = obj[key]
-                val elemPath = "$path@@$key"
-                val elemObject = item as? JSONObject
-                if (elemObject == null) {
-                    Log.e("Main", "element is not object: settings$elemPath, $item")
-                    return@self
-                }
-
-                if (elemObject.has("type")) {
-                    return@self
-                }
-
-                Log.e("Main", "registration settings$elemPath")
-
-                composable(
-                    route = "settings$elemPath"
-                ) {
-                    AdvancedSettingsScreen(
-                        navigateBack = navController::navigateUp,
-                        navigateTo = navigateTo,
-                        settings = elemObject,
-                        path = elemPath
-                    )
-                }
-
-                unwrapSetting(elemObject, elemPath)
-            }
-        }
-
         composable(
-            route = "settings@@$"
-        ) {
+            route = ADVANCED_SETTINGS_ROUTE,
+            arguments = listOf(
+                navArgument("encodedPath") {
+                    type = NavType.StringType
+                    defaultValue = "_"
+                }
+            )
+        ) { entry ->
+            val nestedPath = decodeAdvancedSettingsPath(entry.arguments?.getString("encodedPath"))
+            val node = remember(settings.value, nestedPath) {
+                getNestedSettings(settings.value, nestedPath)
+            }
             AdvancedSettingsScreen(
                 navigateBack = navController::navigateUp,
                 navigateTo = navigateTo,
-                settings = settings.value,
+                settings = node,
+                path = nestedPath
             )
         }
 
@@ -216,7 +211,16 @@ fun AppNavHost() {
                 navigateBack = navController::navigateUp
             )
         }
-        unwrapSetting(settings.value)
+
+        if (!BuildConfig.IS_PLAYSTORE_BUILD) {
+            composable(
+                route = "patches"
+            ) {
+                PatchManagerScreen(
+                    navigateBack = navController::navigateUp
+                )
+            }
+        }
     }
 }
 

@@ -132,29 +132,6 @@ fun UsersScreen(
                 .fillMaxSize()
                 .padding(16.dp)
         ) {
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(bottom = 16.dp),
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                IconButton(onClick = navigateBack) {
-                    Icon(
-                        painter = painterResource(id = R.drawable.ic_keyboard_arrow_left),
-                        contentDescription = null,
-                        tint = com.zenithblue.sambas3.RPCSXColors.primary
-                    )
-                }
-                Spacer(modifier = Modifier.width(8.dp))
-                Text(
-                    text = stringResource(R.string.users).uppercase(),
-                    color = com.zenithblue.sambas3.RPCSXColors.primary,
-                    fontFamily = androidx.compose.ui.text.font.FontFamily.Monospace,
-                    fontWeight = FontWeight.Bold,
-                    fontSize = 18.sp,
-                    letterSpacing = 2.sp
-                )
-            }
             UsersContent(modifier = Modifier.weight(1f))
         }
     } else {

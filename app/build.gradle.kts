@@ -17,8 +17,8 @@ android {
         applicationId = "com.zenithblue.sambas3"
         minSdk = 29
         targetSdk = 35
-        versionCode = 20260704
-        versionName = "${System.getenv("RX_VERSION") ?: "local"}${if (System.getenv("RX_SHA") != null) "-" + System.getenv("RX_SHA") else ""}"
+        versionCode = 20260722
+        versionName = "${System.getenv("RX_VERSION") ?: "2026.07.22"}${if (System.getenv("RX_SHA") != null) "-" + System.getenv("RX_SHA") else ""}"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         ndk {
@@ -57,6 +57,23 @@ android {
         }
     }
 
+    flavorDimensions += "distribution"
+    productFlavors {
+        create("standard") {
+            dimension = "distribution"
+            isDefault = true
+            buildConfigField("boolean", "IS_PLAYSTORE_BUILD", "false")
+            buildConfigField("boolean", "ALLOW_EXTERNAL_GPU_DRIVERS", "true")
+            buildConfigField("boolean", "INCLUDE_BUNDLED_TURNIP_DRIVERS", "false")
+        }
+        create("playstore") {
+            dimension = "distribution"
+            buildConfigField("boolean", "IS_PLAYSTORE_BUILD", "true")
+            buildConfigField("boolean", "ALLOW_EXTERNAL_GPU_DRIVERS", "false")
+            buildConfigField("boolean", "INCLUDE_BUNDLED_TURNIP_DRIVERS", "true")
+        }
+    }
+
     buildTypes {
         release {
             isMinifyEnabled = true
@@ -67,6 +84,11 @@ android {
             )
             signingConfig = signingConfigs.findByName("custom-key") ?: signingConfigs.getByName("debug")
         }
+    }
+
+    androidResources {
+        // Keep driver ZIPs and catalog uncompressed for direct AssetManager reads / SHA-256.
+        noCompress += listOf("zip", "json")
     }
 
     compileOptions {

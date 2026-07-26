@@ -44,6 +44,9 @@ struct RPCSXApi {
   std::string (*settingsGet)(std::string_view path);
   bool (*settingsSet)(std::string_view path, std::string_view valueString);
   std::string (*getVersion)();
+  std::string (*patchEngineVersion)();
+  std::string (*patchesList)();
+  bool (*patchSetEnabled)(std::string_view hash, std::string_view description, bool enabled);
   void *(*setCustomDriver)(void *driverHandle);
 };
 
@@ -106,6 +109,9 @@ struct RPCSXLibrary : RPCSXApi {
     result.settingsGet = reinterpret_cast<decltype(settingsGet)>(dlsym(handle, "_rpcsx_settingsGet"));
     result.settingsSet = reinterpret_cast<decltype(settingsSet)>(dlsym(handle, "_rpcsx_settingsSet"));
     result.getVersion = reinterpret_cast<decltype(getVersion)>(dlsym(handle, "_rpcsx_getVersion"));
+    result.patchEngineVersion = reinterpret_cast<decltype(patchEngineVersion)>(dlsym(handle, "_rpcsx_patchEngineVersion"));
+    result.patchesList = reinterpret_cast<decltype(patchesList)>(dlsym(handle, "_rpcsx_patchesList"));
+    result.patchSetEnabled = reinterpret_cast<decltype(patchSetEnabled)>(dlsym(handle, "_rpcsx_patchSetEnabled"));
     result.setCustomDriver = reinterpret_cast<decltype(setCustomDriver)>(dlsym(handle, "_rpcsx_setCustomDriver"));
     // clang-format on
 
@@ -322,4 +328,26 @@ Java_com_zenithblue_sambas3_RPCSX_setCustomDriver(JNIEnv *env, jobject, jstring 
 #else
   return false;
 #endif // __aarch64__
+}
+
+extern "C" JNIEXPORT jstring JNICALL
+Java_com_zenithblue_sambas3_RPCSX_patchEngineVersion(JNIEnv *env, jobject) {
+  if (!rpcsxLib.patchEngineVersion) return wrap(env, std::string{});
+  return wrap(env, rpcsxLib.patchEngineVersion());
+}
+
+extern "C" JNIEXPORT jstring JNICALL
+Java_com_zenithblue_sambas3_RPCSX_patchesList(JNIEnv *env, jobject) {
+  if (!rpcsxLib.patchesList) return wrap(env, std::string{});
+  return wrap(env, rpcsxLib.patchesList());
+}
+
+extern "C" JNIEXPORT jboolean JNICALL
+Java_com_zenithblue_sambas3_RPCSX_patchSetEnabled(JNIEnv *env, jobject,
+                                                   jstring jhash,
+                                                   jstring jdescription,
+                                                   jboolean jenabled) {
+  if (!rpcsxLib.patchSetEnabled) return false;
+  return rpcsxLib.patchSetEnabled(unwrap(env, jhash),
+                                   unwrap(env, jdescription), jenabled);
 }

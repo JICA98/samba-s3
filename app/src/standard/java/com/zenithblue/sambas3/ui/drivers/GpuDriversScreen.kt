@@ -74,6 +74,7 @@ import com.zenithblue.sambas3.utils.GeneralSettings
 import com.zenithblue.sambas3.utils.GeneralSettings.string
 import com.zenithblue.sambas3.utils.GitHub
 import com.zenithblue.sambas3.utils.GpuDriverHelper
+import com.zenithblue.sambas3.utils.GpuDriverSelection
 import com.zenithblue.sambas3.utils.GpuDriverInstallResult
 import java.io.File
 import java.io.FileInputStream
@@ -182,10 +183,10 @@ fun GpuDriversScreen(
 
             LazyColumn(modifier = Modifier.fillMaxSize()) {
                 items(drivers.entries.toList(), key = { it.key }) { (file, metadata) ->
-                    DeletableListItem(onDelete = if (metadata.name == "Default") null else ({
+                    DeletableListItem(onDelete = if (metadata.name == "Default" || metadata.isBundled) null else ({
                         coroutineScope.launch(Dispatchers.IO) {
-                            if (file.deleteRecursively()) {
-                                coroutineScope.launch {
+                            if (GpuDriverHelper.deleteDriver(context, file, metadata)) {
+                                withContext(Dispatchers.Main) {
                                     drivers = GpuDriverHelper.getInstalledDrivers(context)
                                 }
                             }
@@ -196,19 +197,22 @@ fun GpuDriversScreen(
                                 .fillMaxWidth()
                                 .padding(vertical = 4.dp)
                                 .clickable {
-                                    val path = if (metadata.name == "Default") "" else file.path
-
-                                    Log.w("Driver", "path $path, internal data dir ${context.filesDir}")
-                                    if (!RPCSX.instance.setCustomDriver(path, metadata.libraryName, RPCSX.nativeLibDirectory)) {
+                                    val isSystem = metadata.name == "Default"
+                                    Log.w("Driver", "select ${metadata.label}, dir ${if (isSystem) "<system>" else file.path}")
+                                    val ok = GpuDriverSelection.selectDriver(
+                                        context = context,
+                                        metadata = metadata,
+                                        driverDir = if (isSystem) null else file,
+                                        nativeLibraryDir = RPCSX.nativeLibDirectory,
+                                        forceSysmem = false,
+                                    )
+                                    if (!ok) {
                                         AlertDialogQueue.showDialog(
                                             context.getString(R.string.error),
                                             context.getString(R.string.failed_to_load_selected_driver)
                                         )
                                     } else {
-                                        selectedDriver = metadata.label     
-                                        GeneralSettings.setValue("selected_gpu_driver", selectedDriver ?: "")
-                                        GeneralSettings["gpu_driver_path"] = path
-                                        GeneralSettings["gpu_driver_name"] = metadata.libraryName
+                                        selectedDriver = if (isSystem) "Default" else metadata.label
                                     }
                                 },
                             colors = CardDefaults.cardColors(
@@ -223,7 +227,7 @@ fun GpuDriversScreen(
                         ) {
                             Column(modifier = Modifier.padding(16.dp)) {
                                 Text(
-                                    text = metadata.label,
+                                    text = metadata.uiTitle,
                                     style = MaterialTheme.typography.bodyLarge,
                                     color = if (metadata.label == selectedDriver) MaterialTheme.colorScheme.onPrimaryContainer else MaterialTheme.colorScheme.onSurface
                                 )
@@ -271,29 +275,6 @@ fun GpuDriversScreen(
 
     if (isInSplitPane) {
         Column(modifier = Modifier.fillMaxSize()) {
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = 16.dp, vertical = 16.dp),
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                IconButton(onClick = navigateBack) {
-                    Icon(
-                        painter = painterResource(id = R.drawable.ic_keyboard_arrow_left),
-                        contentDescription = null,
-                        tint = com.zenithblue.sambas3.RPCSXColors.primary
-                    )
-                }
-                Spacer(modifier = Modifier.width(8.dp))
-                Text(
-                    text = stringResource(R.string.custom_driver).uppercase(),
-                    color = com.zenithblue.sambas3.RPCSXColors.primary,
-                    fontFamily = androidx.compose.ui.text.font.FontFamily.Monospace,
-                    fontWeight = FontWeight.Bold,
-                    fontSize = 18.sp,
-                    letterSpacing = 2.sp
-                )
-            }
             DriversContent(modifier = Modifier.weight(1f))
         }
     } else {

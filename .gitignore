@@ -25,3 +25,12 @@ samba-s3-release.jks
 # Native binaries
 *.so
 app/src/main/jniLibs/
+
+# Approved Turnip driver inputs and packaged Play assets (binaries)
+drivers/input/*.zip
+drivers/input/*.so
+app/src/playstore/assets/bundled_gpu_drivers/*.zip
+
+# Local approved Turnip downloads
+turnip-inputs/
+.tmp/

@@ -1,39 +1,95 @@
-
 package com.zenithblue.sambas3.utils
 
-import java.io.*
+import java.io.BufferedInputStream
+import java.io.BufferedOutputStream
+import java.io.File
+import java.io.FileNotFoundException
+import java.io.IOException
+import java.io.InputStream
 import java.util.zip.ZipEntry
 import java.util.zip.ZipFile
 import java.util.zip.ZipInputStream
 
+/**
+ * Secure ZIP extraction for GPU driver packages.
+ *
+ * Rejects ZIP-slip, absolute paths, oversized archives, and excessive entry counts.
+ */
 object ZipUtil {
-  
+
+    const val DEFAULT_MAX_ENTRIES = 64
+    const val DEFAULT_MAX_ENTRY_BYTES = 64L * 1024L * 1024L
+    const val DEFAULT_MAX_TOTAL_BYTES = 128L * 1024L * 1024L
+
+    data class Limits(
+        val maxEntries: Int = DEFAULT_MAX_ENTRIES,
+        val maxEntryBytes: Long = DEFAULT_MAX_ENTRY_BYTES,
+        val maxTotalBytes: Long = DEFAULT_MAX_TOTAL_BYTES,
+    )
+
+    class ZipSecurityException(message: String) : IOException(message)
+
     @Throws(IOException::class)
-    fun unzip(file : File, targetDirectory : File) {
+    fun unzip(file: File, targetDirectory: File, limits: Limits = Limits()) {
         ZipFile(file).use { zipFile ->
-            for (zipEntry in zipFile.entries()) {
-                val destFile = createNewFile(targetDirectory, zipEntry)
-                // If the zip entry is a file, we need to create its parent directories
-                val destDirectory : File? = if (zipEntry.isDirectory) destFile else destFile.parentFile
-
-                // Create the destination directory
-                if (destDirectory == null || (!destDirectory.isDirectory && !destDirectory.mkdirs()))
-                    throw FileNotFoundException("Failed to create destination directory: $destDirectory")
-
-                // If the entry is a directory we don't need to copy anything
-                if (zipEntry.isDirectory)
+            var entryCount = 0
+            var totalBytes = 0L
+            val entries = zipFile.entries()
+            while (entries.hasMoreElements()) {
+                val zipEntry = entries.nextElement()
+                entryCount++
+                if (entryCount > limits.maxEntries) {
+                    throw ZipSecurityException("Archive exceeds max entry count (${limits.maxEntries})")
+                }
+                validateEntryName(zipEntry.name)
+                if (zipEntry.isDirectory) {
+                    val destDir = createNewFile(targetDirectory, zipEntry)
+                    if (!destDir.isDirectory && !destDir.mkdirs()) {
+                        throw FileNotFoundException("Failed to create destination directory: $destDir")
+                    }
                     continue
-
-                // Copy bytes to destination
+                }
+                val size = zipEntry.size
+                if (size >= 0) {
+                    if (size > limits.maxEntryBytes) {
+                        throw ZipSecurityException("Entry exceeds max size: ${zipEntry.name}")
+                    }
+                    totalBytes += size
+                    if (totalBytes > limits.maxTotalBytes) {
+                        throw ZipSecurityException("Archive exceeds max total uncompressed size")
+                    }
+                }
+                val destFile = createNewFile(targetDirectory, zipEntry)
+                val destDirectory = destFile.parentFile
+                if (destDirectory == null || (!destDirectory.isDirectory && !destDirectory.mkdirs())) {
+                    throw FileNotFoundException("Failed to create destination directory: $destDirectory")
+                }
                 try {
+                    var written = 0L
                     zipFile.getInputStream(zipEntry).use { inputStream ->
                         destFile.outputStream().use { outputStream ->
-                            inputStream.copyTo(outputStream)
+                            val buffer = ByteArray(32 * 1024)
+                            while (true) {
+                                val read = inputStream.read(buffer)
+                                if (read < 0) break
+                                written += read
+                                if (written > limits.maxEntryBytes) {
+                                    destFile.delete()
+                                    throw ZipSecurityException("Entry exceeds max size while extracting: ${zipEntry.name}")
+                                }
+                                outputStream.write(buffer, 0, read)
+                            }
                         }
                     }
-                } catch (e : IOException) {
-                    if (destFile.exists())
-                        destFile.delete()
+                    if (size < 0) {
+                        totalBytes += written
+                        if (totalBytes > limits.maxTotalBytes) {
+                            destFile.delete()
+                            throw ZipSecurityException("Archive exceeds max total uncompressed size")
+                        }
+                    }
+                } catch (e: IOException) {
+                    if (destFile.exists()) destFile.delete()
                     throw e
                 }
             }
@@ -41,44 +97,88 @@ object ZipUtil {
     }
 
     @Throws(IOException::class)
-    fun unzip(stream : InputStream, targetDirectory : File) {
+    fun unzip(stream: InputStream, targetDirectory: File, limits: Limits = Limits()) {
         ZipInputStream(BufferedInputStream(stream)).use { zis ->
-            do {
-                // Get the next entry, break if we've reached the end
+            var entryCount = 0
+            var totalBytes = 0L
+            while (true) {
                 val zipEntry = zis.nextEntry ?: break
-
-                val destFile = createNewFile(targetDirectory, zipEntry)
-                // If the zip entry is a file, we need to create its parent directories
-                val destDirectory : File? = if (zipEntry.isDirectory) destFile else destFile.parentFile
-
-                // Create the destination directory
-                if (destDirectory == null || (!destDirectory.isDirectory && !destDirectory.mkdirs()))
-                    throw FileNotFoundException("Failed to create destination directory: $destDirectory")
-
-                // If the entry is a directory we don't need to copy anything
-                if (zipEntry.isDirectory)
+                entryCount++
+                if (entryCount > limits.maxEntries) {
+                    throw ZipSecurityException("Archive exceeds max entry count (${limits.maxEntries})")
+                }
+                validateEntryName(zipEntry.name)
+                if (zipEntry.isDirectory) {
+                    val destDir = createNewFile(targetDirectory, zipEntry)
+                    if (!destDir.isDirectory && !destDir.mkdirs()) {
+                        throw FileNotFoundException("Failed to create destination directory: $destDir")
+                    }
                     continue
-
-                // Copy bytes to destination
+                }
+                val declared = zipEntry.size
+                if (declared >= 0 && declared > limits.maxEntryBytes) {
+                    throw ZipSecurityException("Entry exceeds max size: ${zipEntry.name}")
+                }
+                val destFile = createNewFile(targetDirectory, zipEntry)
+                val destDirectory = destFile.parentFile
+                if (destDirectory == null || (!destDirectory.isDirectory && !destDirectory.mkdirs())) {
+                    throw FileNotFoundException("Failed to create destination directory: $destDirectory")
+                }
                 try {
-                    BufferedOutputStream(destFile.outputStream()).use { zis.copyTo(it) }
-                } catch (e : IOException) {
-                    if (destFile.exists())
+                    var written = 0L
+                    BufferedOutputStream(destFile.outputStream()).use { out ->
+                        val buffer = ByteArray(32 * 1024)
+                        while (true) {
+                            val read = zis.read(buffer)
+                            if (read < 0) break
+                            written += read
+                            if (written > limits.maxEntryBytes) {
+                                destFile.delete()
+                                throw ZipSecurityException("Entry exceeds max size while extracting: ${zipEntry.name}")
+                            }
+                            out.write(buffer, 0, read)
+                        }
+                    }
+                    totalBytes += written
+                    if (totalBytes > limits.maxTotalBytes) {
                         destFile.delete()
+                        throw ZipSecurityException("Archive exceeds max total uncompressed size")
+                    }
+                } catch (e: IOException) {
+                    if (destFile.exists()) destFile.delete()
                     throw e
                 }
-            } while (true)
+            }
         }
     }
 
     @Throws(IOException::class)
-    private fun createNewFile(destinationDir : File, zipEntry : ZipEntry) : File {
-        val destFile = File(destinationDir, zipEntry.name)
+    internal fun validateEntryName(name: String) {
+        if (name.isEmpty()) {
+            throw ZipSecurityException("Empty ZIP entry name")
+        }
+        if (name.startsWith("/") || name.startsWith("\\")) {
+            throw ZipSecurityException("Absolute path in ZIP entry: $name")
+        }
+        // Windows-style drive letter
+        if (name.length >= 2 && name[1] == ':' && name[0].isLetter()) {
+            throw ZipSecurityException("Absolute path in ZIP entry: $name")
+        }
+        val normalized = name.replace('\\', '/')
+        if (normalized.split('/').any { it == ".." }) {
+            throw ZipSecurityException("Path traversal in ZIP entry: $name")
+        }
+    }
+
+    @Throws(IOException::class)
+    private fun createNewFile(destinationDir: File, zipEntry: ZipEntry): File {
+        val destFile = File(destinationDir, zipEntry.name.replace('\\', '/'))
         val destDirPath = destinationDir.canonicalPath
         val destFilePath = destFile.canonicalPath
 
-        if (!destFilePath.startsWith(destDirPath + File.separator))
-            throw IOException("Entry is outside of the target dir: " + zipEntry.name)
+        if (destFilePath != destDirPath && !destFilePath.startsWith(destDirPath + File.separator)) {
+            throw ZipSecurityException("Entry is outside of the target dir: ${zipEntry.name}")
+        }
 
         return destFile
     }

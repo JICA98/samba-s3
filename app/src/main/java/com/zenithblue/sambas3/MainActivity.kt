@@ -11,7 +11,8 @@ import androidx.lifecycle.lifecycleScope
 import kotlinx.coroutines.launch
 import com.zenithblue.sambas3.ui.navigation.AppNavHost
 import com.zenithblue.sambas3.utils.GeneralSettings
-import java.io.File
+import com.zenithblue.sambas3.utils.GpuDriverHelper
+import com.zenithblue.sambas3.utils.GpuDriverSelection
 import kotlin.concurrent.thread
 
 class MainActivity : ComponentActivity() {
@@ -59,11 +60,12 @@ class MainActivity : ComponentActivity() {
 
             if (RPCSX.activeLibrary.value != null) {
                 RPCSX.instance.initialize(RPCSX.rootDirectory, UserRepository.getUserFromSettings())
-                val gpuDriverPath = GeneralSettings["gpu_driver_path"] as? String
-                val gpuDriverName = GeneralSettings["gpu_driver_name"] as? String
 
-                if (gpuDriverPath != null && gpuDriverName != null) {
-                    RPCSX.instance.setCustomDriver(gpuDriverPath, gpuDriverName, nativeLibraryDir)
+                // Sync Play-bundled Turnip packages off the UI thread, then apply selection.
+                lifecycleScope.launch {
+                    GpuDriverHelper.syncBundledDrivers(this@MainActivity)
+                    GpuDriverHelper.ensureValidSelection(this@MainActivity)
+                    GpuDriverSelection.applyStoredSelection(this@MainActivity, nativeLibraryDir)
                 }
 
                 lifecycleScope.launch {

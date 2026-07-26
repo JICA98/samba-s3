@@ -9,7 +9,6 @@ import android.widget.Toast
 import androidx.activity.compose.BackHandler
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.compose.animation.AnimatedContent
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.runtime.mutableStateListOf
 import com.zenithblue.sambas3.ui.user.UsersScreen
@@ -21,11 +20,6 @@ import androidx.compose.animation.core.animateFloat
 import androidx.compose.animation.core.infiniteRepeatable
 import androidx.compose.animation.core.rememberInfiniteTransition
 import androidx.compose.animation.core.tween
-import androidx.compose.animation.fadeIn
-import androidx.compose.animation.fadeOut
-import androidx.compose.animation.slideInVertically
-import androidx.compose.animation.slideOutVertically
-import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.focusable
 import androidx.compose.foundation.layout.Box
@@ -62,7 +56,6 @@ import androidx.compose.runtime.mutableLongStateOf
 import androidx.compose.runtime.mutableStateMapOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -83,6 +76,7 @@ import androidx.compose.ui.unit.sp
 import androidx.documentfile.provider.DocumentFile
 import com.zenithblue.sambas3.ui.settings.components.core.PreferenceHeader
 import com.zenithblue.sambas3.ui.settings.components.core.PreferenceIcon
+import com.zenithblue.sambas3.ui.settings.components.core.PreferenceTitle
 import com.zenithblue.sambas3.ui.settings.components.core.PreferenceValue
 import com.zenithblue.sambas3.ui.settings.components.preference.HomePreference
 import com.zenithblue.sambas3.ui.settings.components.preference.RegularPreference
@@ -92,6 +86,7 @@ import com.zenithblue.sambas3.ui.settings.components.preference.SwitchPreference
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import com.zenithblue.sambas3.BuildConfig
 import com.zenithblue.sambas3.R
 import com.zenithblue.sambas3.RPCSX
 import com.zenithblue.sambas3.UserRepository
@@ -219,7 +214,11 @@ fun SettingsDetailPane(
         }
         "custom_driver" -> {
             title = "GPU Drivers"
-            description = "Load custom graphics drivers (like Turnip or custom Vulkan/Adreno drivers) to optimize rendering performance, fix graphical glitches, and improve stability."
+            description = if (BuildConfig.INCLUDE_BUNDLED_TURNIP_DRIVERS) {
+                "Select the Android system driver or offline Turnip packages included with Samba S3."
+            } else {
+                "Load custom graphics drivers (like Turnip or custom Vulkan/Adreno drivers) to optimize rendering performance, fix graphical glitches, and improve stability."
+            }
             status = if (com.zenithblue.sambas3.RPCSX.instance.supportsCustomDriverLoading()) "SUPPORTED" else "UNSUPPORTED"
             backend = "VULKAN 1.3"
         }
@@ -354,6 +353,99 @@ fun SettingsDetailPane(
     }
 }
 
+/**
+ * Pick a drawable for an advanced-settings key using exact top-level names first,
+ * then keyword match (path hint disambiguates e.g. Audio/Video "Renderer").
+ */
+@androidx.annotation.DrawableRes
+fun advancedSettingIconRes(name: String, pathHint: String = ""): Int {
+    val n = name.lowercase()
+    val ctx = "$pathHint/$name".lowercase()
+
+    when (n) {
+        "core" -> return R.drawable.memory
+        "video" -> return R.drawable.ic_video
+        "audio" -> return R.drawable.ic_audio
+        "vfs" -> return R.drawable.hard_drive
+        "input/output", "input", "output" -> return R.drawable.gamepad
+        "system" -> return R.drawable.perm_device_information
+        "net", "network" -> return R.drawable.ic_wifi
+        "savestate" -> return R.drawable.ic_save
+        "miscellaneous", "misc" -> return R.drawable.ic_settings
+        "log" -> return R.drawable.ic_terminal
+        "vulkan" -> return R.drawable.ic_video
+        "performance overlay" -> return R.drawable.ic_video
+        "shader loading dialog" -> return R.drawable.ic_video
+        "affinity" -> return R.drawable.memory
+        "custom driver" -> return R.drawable.memory
+        "workarounds" -> return R.drawable.ic_build
+    }
+
+    return when {
+        n.contains("audio") || n.contains("volume") || n.contains("sound") ||
+            n.contains("microphone") || n.contains("cubeb") || n.contains("avport") ||
+            n.contains("time stretch") || n.contains("channel layout") ||
+            n.contains("master volume") || n.contains("buffer duration") ||
+            n.contains("sampling") ||
+            (n.contains("renderer") && ctx.contains("audio")) -> R.drawable.ic_audio
+
+        n.contains("video") || n.contains("vulkan") || n.contains("shader") ||
+            n.contains("resolution") || n.contains("msaa") || n.contains("anisotropic") ||
+            n.contains("vsync") || n.contains("rsx") || n.contains("frame") ||
+            n.contains("gpu") || n.contains("texture") || n.contains("aspect") ||
+            n.contains("vblank") || n.contains("stereo") || n.contains("overlay") ||
+            n.contains("fidelityfx") || n.contains("rcas") || n.contains("vram") ||
+            n.contains("antialiasing") || n.contains("display") ||
+            (n.contains("renderer") && (ctx.contains("video") || !ctx.contains("audio"))) ->
+            R.drawable.ic_video
+
+        n.contains("ppu") || n.contains("spu") || n.contains("llvm") || n.contains("cpu") ||
+            n.contains("thread") || n.contains("tsx") || n.contains("affinity") ||
+            n.contains("core") || n.contains("mfc") || n.contains("preempt") ||
+            n.contains("xfloat") || n.contains("reservation") -> R.drawable.memory
+
+        n.contains("vfs") || n.contains("disk") || n.contains("hdd") || n.contains("cache") ||
+            n.contains("directory") || n.contains("host_root") || n.contains("path") ||
+            n.contains("dev_hdd") -> R.drawable.hard_drive
+
+        n.contains("input") || n.contains("pad") || n.contains("controller") ||
+            n.contains("mouse") || n.contains("keyboard") || n.contains("camera") ||
+            n.contains("move") || n.contains("gun") || n.contains("button") ||
+            n.contains("pressure") || n.contains("analog") -> R.drawable.gamepad
+
+        n.contains("net") || n.contains("psn") || n.contains("dns") || n.contains("upnp") ||
+            n.contains("internet") || n.contains("bind address") || n.contains("ip address") ||
+            n.contains("ip swap") || n.contains("country") || n.startsWith("ip ") ->
+            R.drawable.ic_wifi
+
+        n.contains("save") || n.contains("state") || n.contains("suspend") -> R.drawable.ic_save
+
+        n.contains("system") || n.contains("console") || n.contains("language") ||
+            n.contains("license") || n.contains("psid") || n.contains("time offset") ||
+            n.contains("enter button") -> R.drawable.perm_device_information
+
+        n.contains("log") || n.contains("debug") || n.contains("gdb") ||
+            n.contains("profiler") || n.contains("silence") -> R.drawable.ic_terminal
+
+        n.contains("trophy") || n.contains("popup") || n.contains("hint") ||
+            n.contains("fullscreen") || n.contains("autostart") || n.contains("autoexit") ||
+            n.contains("autopause") || n.contains("home menu") || n.contains("window title") ->
+            R.drawable.ic_settings
+
+        n.contains("lock") -> R.drawable.ic_lock
+        n.contains("info") -> R.drawable.ic_info
+        n.contains("work") || n.contains("hack") || n.contains("compatibility") ||
+            n.contains("libraries") -> R.drawable.ic_build
+
+        else -> R.drawable.tune
+    }
+}
+
+@Composable
+private fun SettingLeadingIcon(name: String, pathHint: String = "") {
+    PreferenceIcon(icon = painterResource(id = advancedSettingIconRes(name, pathHint)))
+}
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AdvancedSettingsScreen(
@@ -368,51 +460,58 @@ fun AdvancedSettingsScreen(
     val settingValue = remember(settings) { mutableStateOf(settings) }
     var searchQuery by remember { mutableStateOf("") }
     var isSearching by remember { mutableStateOf(false) }
-    val scope = rememberCoroutineScope()
 
     val filteredKeys = remember(searchQuery, settings, isSearching, path) {
         if (!isSearching || searchQuery.isBlank()) {
             settings.keys().asSequence().mapNotNull { key ->
                 val obj = settingValue.value[key] as? JSONObject
-                val itemPath = "$path@@$key"
+                val itemPath = if (path.isEmpty()) "@@$key" else "$path@@$key"
                 if (obj != null) itemPath to obj else null
             }.toList()
         } else {
             buildList {
-                settings.keys().forEach { parentKey ->
-                    val parentObj = settings[parentKey] as? JSONObject ?: return@forEach
-
-                    parentObj.keys().forEach { childKey ->
-                        val childObj = parentObj[childKey] as? JSONObject ?: return@forEach
-
-                        if (childKey.contains(searchQuery, ignoreCase = true)) {
-                            val itemPath = "$parentKey@@$childKey"
-                            add(itemPath to childObj)
+                fun search(obj: JSONObject, basePath: String) {
+                    obj.keys().forEach { key ->
+                        val child = obj[key] as? JSONObject ?: return@forEach
+                        val childPath = if (basePath.isEmpty()) "@@$key" else "$basePath@@$key"
+                        val nameMatches = key.contains(searchQuery, ignoreCase = true)
+                        if (isSettingsFolder(child)) {
+                            if (nameMatches) add(childPath to child)
+                            search(child, childPath)
+                        } else if (nameMatches) {
+                            add(childPath to child)
                         }
                     }
                 }
+                search(settings, path)
             }
         }
     }
 
-    val topBarScrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior()
-
     @Composable
-    fun AdvancedSettingsContent(contentPadding: PaddingValues) {
-        
+    fun AdvancedSettingsContent(
+        keys: List<Pair<String, JSONObject>>,
+        modifier: Modifier = Modifier,
+        contentPadding: PaddingValues = PaddingValues(0.dp)
+    ) {
         LazyColumn(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(contentPadding),
+            modifier = modifier.fillMaxSize().padding(contentPadding),
         ) {
-            items(filteredKeys, key = { it.first }) { (itemPath, itemObject) ->
+            items(keys, key = { it.first }) { (itemPath, itemObject) ->
                 val key = itemPath.substringAfterLast("@@")
                 if (itemObject != null) {
                     when (val type =
                         if (itemObject.has("type")) itemObject.getString("type") else null) {
                         null -> {
                             RegularPreference(
-                                title = key, leadingIcon = null, onClick = {
+                                title = { PreferenceTitle(title = key) },
+                                leadingIcon = { SettingLeadingIcon(key, itemPath) },
+                                trailingContent = {
+                                    PreferenceIcon(
+                                        icon = painterResource(id = R.drawable.ic_keyboard_arrow_right)
+                                    )
+                                },
+                                onClick = {
                                     Log.e(
                                         "Main",
                                         "Navigate to settings$itemPath, object $itemObject"
@@ -427,8 +526,12 @@ fun AdvancedSettingsScreen(
                             val def = itemObject.getBoolean("default")
                             SwitchPreference(
                                 checked = itemValue,
-                                title = key + if (itemValue == def) "" else " *",
-                                leadingIcon = null,
+                                title = {
+                                    PreferenceTitle(
+                                        title = key + if (itemValue == def) "" else " *"
+                                    )
+                                },
+                                leadingIcon = { SettingLeadingIcon(key, itemPath) },
                                 onClick = { value ->
                                     if (!RPCSX.instance.settingsSet(
                                             itemPath, if (value) "true" else "false"
@@ -483,8 +586,12 @@ fun AdvancedSettingsScreen(
                             SingleSelectionDialog(
                                 currentValue = if (itemValue in variants) itemValue else variants[0],
                                 values = variants,
-                                icon = null,
-                                title = key + if (itemValue == def) "" else " *",
+                                icon = { SettingLeadingIcon(key, itemPath) },
+                                title = {
+                                    PreferenceTitle(
+                                        title = key + if (itemValue == def) "" else " *"
+                                    )
+                                },
                                 onValueChange = { value ->
                                     if (!RPCSX.instance.settingsSet(
                                             itemPath, "\"" + value + "\""
@@ -546,6 +653,7 @@ fun AdvancedSettingsScreen(
                                     value = itemValue.toFloat(),
                                     valueRange = min.toFloat()..max.toFloat(),
                                     title = key + if (itemValue == def) "" else " *",
+                                    leadingIcon = { SettingLeadingIcon(key, itemPath) },
                                     steps = (max - min).toInt() - 1,
                                     onValueChange = { value ->
                                         if (!RPCSX.instance.settingsSet(
@@ -617,6 +725,7 @@ fun AdvancedSettingsScreen(
                                     value = itemValue.toFloat(),
                                     valueRange = min.toFloat()..max.toFloat(),
                                     title = key + if (itemValue == def) "" else " *",
+                                    leadingIcon = { SettingLeadingIcon(key, itemPath) },
                                     steps = ceil(max - min).toInt() - 1,
                                     onValueChange = { value ->
                                         if (!RPCSX.instance.settingsSet(
@@ -678,171 +787,198 @@ fun AdvancedSettingsScreen(
     
     }
 
-    if (isInSplitPane) {
-        Column(modifier = Modifier.fillMaxSize()) {
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = 16.dp, vertical = 16.dp),
-                verticalAlignment = Alignment.CenterVertically
+    val configuration = androidx.compose.ui.platform.LocalConfiguration.current
+    val isWideScreen = configuration.screenWidthDp > 600
+    val displayTitle = path.replace("@@", " / ").removePrefix(" / ")
+        .ifEmpty { stringResource(R.string.advanced_settings) }
+
+    @Composable
+    fun AdvancedTopBar(compact: Boolean = false) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(if (compact) 48.dp else 56.dp)
+                .background(com.zenithblue.sambas3.RPCSXColors.background)
+                .padding(horizontal = if (compact) 8.dp else 16.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            IconButton(
+                onClick = {
+                    if (isSearching) {
+                        isSearching = false
+                        searchQuery = ""
+                    } else {
+                        navigateBack()
+                    }
+                },
+                modifier = if (!compact) Modifier.padding(end = 8.dp) else Modifier
             ) {
-                IconButton(onClick = navigateBack) {
+                Icon(
+                    painter = painterResource(id = R.drawable.ic_keyboard_arrow_left),
+                    contentDescription = null,
+                    tint = com.zenithblue.sambas3.RPCSXColors.primary
+                )
+            }
+
+            if (isSearching) {
+                var expanded by remember { mutableStateOf(false) }
+                CompositionLocalProvider(
+                    LocalTextStyle provides MaterialTheme.typography.bodyLarge.copy(fontSize = 16.sp)
+                ) {
+                    SearchBar(
+                        expanded = expanded,
+                        onExpandedChange = {},
+                        modifier = Modifier
+                            .weight(1f)
+                            .animateContentSize(),
+                        windowInsets = WindowInsets(0, 0, 0, 0),
+                        inputField = {
+                            SearchBarDefaults.InputField(
+                                query = searchQuery,
+                                onQueryChange = { searchQuery = it },
+                                onSearch = { expanded = false },
+                                placeholder = { Text(stringResource(R.string.search)) },
+                                leadingIcon = {
+                                    Icon(painter = painterResource(id = R.drawable.ic_search), null)
+                                },
+                                trailingIcon = {
+                                    IconButton(onClick = {
+                                        if (searchQuery.isNotEmpty()) {
+                                            searchQuery = ""
+                                        } else {
+                                            isSearching = false
+                                        }
+                                    }) {
+                                        Icon(painter = painterResource(id = R.drawable.ic_close), null)
+                                    }
+                                },
+                                expanded = expanded,
+                                onExpandedChange = {}
+                            )
+                        }
+                    ) {}
+                }
+            } else {
+                if (!compact) {
                     Icon(
-                        painter = painterResource(id = R.drawable.ic_keyboard_arrow_left),
+                        painter = painterResource(id = R.drawable.tune),
                         contentDescription = null,
+                        tint = com.zenithblue.sambas3.RPCSXColors.primary,
+                        modifier = Modifier.size(24.dp)
+                    )
+                    Spacer(modifier = Modifier.width(12.dp))
+                } else {
+                    Spacer(modifier = Modifier.width(8.dp))
+                }
+                Text(
+                    text = displayTitle.uppercase(),
+                    color = com.zenithblue.sambas3.RPCSXColors.primary,
+                    fontFamily = androidx.compose.ui.text.font.FontFamily.Monospace,
+                    fontWeight = FontWeight.Bold,
+                    fontSize = if (compact) 16.sp else 18.sp,
+                    letterSpacing = 2.sp,
+                    maxLines = 1,
+                    modifier = Modifier.weight(1f)
+                )
+                IconButton(onClick = { isSearching = true }) {
+                    Icon(
+                        painter = painterResource(id = R.drawable.ic_search),
+                        contentDescription = "Search",
                         tint = com.zenithblue.sambas3.RPCSXColors.primary
                     )
                 }
-                Spacer(modifier = Modifier.width(8.dp))
-                if (isSearching) {
-                    var expanded by remember { mutableStateOf(false) }
-                    CompositionLocalProvider(
-                        LocalTextStyle provides MaterialTheme.typography.bodyLarge.copy(fontSize = 16.sp)
-                    ) {
-                        SearchBar(
-                            expanded = expanded,
-                            onExpandedChange = {},
-                            modifier = Modifier
-                                .weight(1f)
-                                .animateContentSize(),
-                            windowInsets = WindowInsets(0, 0, 0, 0),
-                            inputField = {
-                                SearchBarDefaults.InputField(
-                                    query = searchQuery,
-                                    onQueryChange = { searchQuery = it },
-                                    onSearch = { expanded = false },
-                                    placeholder = { Text(stringResource(R.string.search)) },
-                                    leadingIcon = {
-                                        Icon(painter = painterResource(id = R.drawable.ic_search), null)
-                                    },
-                                    trailingIcon = {
-                                        IconButton(onClick = {
-                                            if (searchQuery.isNotEmpty()) {
-                                                searchQuery = ""
-                                            } else {
-                                                isSearching = false
-                                            }
-                                        }) {
-                                            Icon(painter = painterResource(id = R.drawable.ic_close), null)
-                                        }
-                                    },
-                                    expanded = expanded,
-                                    onExpandedChange = {}
-                                )
-                            }
-                        ) {}
-                    }
-                } else {
-                    val displayTitle = path.replace("@@", " / ").removePrefix(" / ")
-                        .ifEmpty { stringResource(R.string.advanced_settings) }
-                    Text(
-                        text = displayTitle.uppercase(),
-                        color = com.zenithblue.sambas3.RPCSXColors.primary,
-                        fontFamily = androidx.compose.ui.text.font.FontFamily.Monospace,
-                        fontWeight = FontWeight.Bold,
-                        fontSize = 18.sp,
-                        letterSpacing = 2.sp,
-                        modifier = Modifier.weight(1f)
+            }
+        }
+    }
+
+    @Composable
+    fun WideAdvancedBody(contentPadding: PaddingValues) {
+        // Only folder nodes on the left. Leaf settings (have "type") are NOT categories —
+        // selecting them previously left an empty right pane ("dummy screen").
+        val categories = remember(settings) {
+            settings.keys().asSequence().filter { key ->
+                isSettingsFolder(settings.optJSONObject(key))
+            }.toList()
+        }
+        var selectedCategoryKey by remember(settings, categories) {
+            mutableStateOf(categories.firstOrNull() ?: "")
+        }
+        val categoryObj = remember(settings, selectedCategoryKey) {
+            settings.optJSONObject(selectedCategoryKey) ?: JSONObject()
+        }
+
+        Row(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(contentPadding)
+                .background(com.zenithblue.sambas3.RPCSXColors.background),
+            horizontalArrangement = Arrangement.spacedBy(16.dp)
+        ) {
+            LazyColumn(
+                modifier = Modifier
+                    .weight(1f)
+                    .fillMaxHeight(),
+            ) {
+                item {
+                    Spacer(modifier = Modifier.height(16.dp))
+                }
+                items(categories) { category ->
+                    HomePreference(
+                        title = category,
+                        icon = {
+                            Icon(
+                                painter = painterResource(id = advancedSettingIconRes(category)),
+                                contentDescription = null
+                            )
+                        },
+                        description = "",
+                        onClick = { selectedCategoryKey = category },
+                        onFocusChanged = { if (it) selectedCategoryKey = category }
                     )
-                    IconButton(onClick = { isSearching = true }) {
-                        Icon(
-                            painter = painterResource(id = R.drawable.ic_search),
-                            contentDescription = "Search",
-                            tint = com.zenithblue.sambas3.RPCSXColors.primary
-                        )
-                    }
                 }
             }
-            AdvancedSettingsContent(contentPadding = PaddingValues(0.dp))
+
+            Box(
+                modifier = Modifier
+                    .weight(2f)
+                    .fillMaxHeight()
+                    .padding(end = 16.dp, top = 16.dp, bottom = 16.dp)
+                    .background(com.zenithblue.sambas3.RPCSXColors.surfaceOverlay.copy(alpha = 0.2f))
+                    .drawBehind {
+                        drawRect(
+                            color = com.zenithblue.sambas3.RPCSXColors.surfaceOverlay,
+                            topLeft = androidx.compose.ui.geometry.Offset(0f, 0f),
+                            size = size,
+                            style = androidx.compose.ui.graphics.drawscope.Stroke(width = 1.dp.toPx())
+                        )
+                    }
+            ) {
+                val categoryPath =
+                    if (path.isEmpty()) "@@$selectedCategoryKey" else "$path@@$selectedCategoryKey"
+                val filteredKeysForCategory = remember(categoryObj, categoryPath) {
+                    categoryObj.keys().asSequence().mapNotNull { key ->
+                        val obj = categoryObj[key] as? JSONObject
+                        if (obj != null) "$categoryPath@@$key" to obj else null
+                    }.toList()
+                }
+
+                AdvancedSettingsContent(
+                    keys = filteredKeysForCategory,
+                    modifier = Modifier.fillMaxSize()
+                )
+            }
+        }
+    }
+
+    if (isInSplitPane) {
+        Column(modifier = Modifier.fillMaxSize()) {
+            AdvancedTopBar(compact = true)
+            AdvancedSettingsContent(keys = filteredKeys, contentPadding = PaddingValues(0.dp))
         }
     } else {
         Scaffold(
-            modifier = Modifier
-                .nestedScroll(topBarScrollBehavior.nestedScrollConnection)
-                .then(modifier),
-            topBar = {
-                val titlePath = path.replace("@@", " / ").removePrefix(" / ")
-                LargeTopAppBar(
-                    title = {
-                        AnimatedContent(
-                            targetState = isSearching,
-                            transitionSpec = {
-                                fadeIn(tween(220)) + slideInVertically { -it / 2 } togetherWith
-                                        fadeOut(tween(150)) + slideOutVertically { -it / 2 }
-                            },
-                            label = "SearchTransition"
-                        ) { searching ->
-                            if (searching) {
-                                var expanded by remember { mutableStateOf(false) }
-
-                                CompositionLocalProvider(
-                                    LocalTextStyle provides MaterialTheme.typography.bodyLarge.copy(fontSize = 16.sp)
-                                ) {
-                                    SearchBar(
-                                        expanded = expanded,
-                                        onExpandedChange = {},
-                                        modifier = Modifier.fillMaxWidth().animateContentSize(),
-                                        windowInsets = WindowInsets(0, 0, 0, 0),
-                                        inputField = {
-                                            SearchBarDefaults.InputField(
-                                                query = searchQuery,
-                                                onQueryChange = { searchQuery = it },
-                                                onSearch = { expanded = false },
-                                                placeholder = { Text(stringResource(R.string.search)) },
-                                                leadingIcon = {
-                                                    Icon(painter = painterResource(id = R.drawable.ic_search), null)
-                                                },
-                                                trailingIcon = {
-                                                    IconButton(onClick = {
-                                                        if (searchQuery.isNotEmpty()) {
-                                                            searchQuery = ""
-                                                        } else {
-                                                            isSearching = false
-                                                        }
-                                                    }) {
-                                                        Icon(painter = painterResource(id = R.drawable.ic_close), null)
-                                                    }
-                                                },
-                                                expanded = expanded,
-                                                onExpandedChange = {}
-                                            )
-                                        }
-                                    ) {}
-                                }
-                            } else {
-                                Text(
-                                    text = titlePath.ifEmpty { stringResource(R.string.advanced_settings) },
-                                    fontWeight = FontWeight.Medium
-                                )
-                            }
-                        }
-                    },
-                    scrollBehavior = topBarScrollBehavior,
-                    navigationIcon = {
-                        IconButton(
-                            onClick = navigateBack,
-                            modifier = Modifier.padding(0.dp)
-                        ) {
-                            Icon(
-                                painter = painterResource(id = R.drawable.ic_keyboard_arrow_left),
-                                contentDescription = null
-                            )
-                        }
-                    },
-                    actions = {
-                        if (!isSearching) {
-                            IconButton(
-                                onClick = { isSearching = true }
-                            ) {
-                                Icon(
-                                    painter = painterResource(id = R.drawable.ic_search),
-                                    contentDescription = "Search"
-                                )
-                            }
-                        }
-                    },
-                )
-            },
+            modifier = modifier,
+            topBar = { AdvancedTopBar() },
             bottomBar = {
                 ControllerHintStrip(
                     hints = listOf(
@@ -852,20 +988,19 @@ fun AdvancedSettingsScreen(
                 )
             }
         ) { contentPadding ->
-            AdvancedSettingsContent(contentPadding = contentPadding)
+            val folderCount = remember(settings) {
+                settings.keys().asSequence().count { key ->
+                    isSettingsFolder(settings.optJSONObject(key))
+                }
+            }
+            // Two-pane only when there are nested folders. Pure leaf pages use the list.
+            if (isWideScreen && !isSearching && folderCount > 0) {
+                WideAdvancedBody(contentPadding = contentPadding)
+            } else {
+                AdvancedSettingsContent(keys = filteredKeys, contentPadding = contentPadding)
+            }
         }
     }
-    }
-
-
-private fun getNestedSettings(root: JSONObject, path: String): JSONObject {
-    if (path.isEmpty() || path == "settings@@$") return root
-    val parts = path.removePrefix("settings").split("@@").filter { it.isNotEmpty() }
-    var current = root
-    for (part in parts) {
-        current = current.optJSONObject(part) ?: return current
-    }
-    return current
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -886,11 +1021,7 @@ fun SettingsScreen(
     val isWideScreen = configuration.screenWidthDp > 600
 
     BackHandler(enabled = activeSettingKey != null) {
-        if (activeSettingKey == "advanced_settings" && advancedSettingsPathStack.size > 1) {
-            advancedSettingsPathStack.removeLast()
-        } else {
-            activeSettingKey = null
-        }
+        activeSettingKey = null
     }
 
     Scaffold(
@@ -1016,7 +1147,8 @@ fun SettingsScreen(
                             PreferenceIcon(icon = painterResource(id = R.drawable.ic_person))
                         },
                         onClick = {
-                            activeSettingKey = "users"
+                            if (isWideScreen) activeSettingKey = "users"
+                            else navigateTo("users")
                         },
                         onFocusChanged = { if (it) focusedKey = "users" }
                     )
@@ -1028,9 +1160,7 @@ fun SettingsScreen(
                         icon = { Icon(painterResource(R.drawable.tune), null) },
                         description = stringResource(R.string.advanced_settings_description),
                         onClick = {
-                            advancedSettingsPathStack.clear()
-                            advancedSettingsPathStack.add("settings@@$")
-                            activeSettingKey = "advanced_settings"
+                            navigateTo("settings@@$")
                         },
                         onLongClick = {
                             AlertDialogQueue.showDialog(
@@ -1058,7 +1188,8 @@ fun SettingsScreen(
                         description = stringResource(R.string.custom_driver_description),
                         onClick = {
                             if (RPCSX.instance.supportsCustomDriverLoading()) {
-                                activeSettingKey = "custom_driver"
+                                if (isWideScreen) activeSettingKey = "custom_driver"
+                                else navigateTo("drivers")
                             } else {
                                 AlertDialogQueue.showDialog(
                                     title = context.getString(R.string.custom_driver_not_supported),
@@ -1077,7 +1208,10 @@ fun SettingsScreen(
                         title = stringResource(R.string.controls),
                         icon = { Icon(painterResource(R.drawable.gamepad), null) },
                         description = stringResource(R.string.controls_description),
-                        onClick = { activeSettingKey = "controls" },
+                        onClick = {
+                            if (isWideScreen) activeSettingKey = "controls"
+                            else navigateTo("controls")
+                        },
                         onFocusChanged = { if (it) focusedKey = "controls" }
                     )
                 }
@@ -1115,9 +1249,27 @@ fun SettingsScreen(
                         title = stringResource(R.string.log_monitor),
                         icon = { Icon(painterResource(R.drawable.ic_terminal), null) },
                         description = stringResource(R.string.log_monitor_description),
-                        onClick = { activeSettingKey = "logs" },
+                        onClick = {
+                            if (isWideScreen) activeSettingKey = "logs"
+                            else navigateTo("logs")
+                        },
                         onFocusChanged = { if (it) focusedKey = "logs" }
                     )
+                }
+
+                if (!BuildConfig.IS_PLAYSTORE_BUILD) {
+                    item(key = "patches") {
+                        HomePreference(
+                            title = stringResource(R.string.patch_manager),
+                            icon = { Icon(painterResource(R.drawable.tune), null) },
+                            description = stringResource(R.string.patch_manager_description),
+                            onClick = {
+                                if (isWideScreen) activeSettingKey = "patches"
+                                else navigateTo("patches")
+                            },
+                            onFocusChanged = { if (it) focusedKey = "patches" }
+                        )
+                    }
                 }
             }
 
@@ -1150,16 +1302,18 @@ fun SettingsScreen(
                             AdvancedSettingsScreen(
                                 navigateBack = {
                                     if (advancedSettingsPathStack.size > 1) {
-                                        advancedSettingsPathStack.removeLast()
+                                        advancedSettingsPathStack.removeAt(advancedSettingsPathStack.lastIndex)
                                     } else {
                                         activeSettingKey = null
                                     }
                                 },
-                                navigateTo = { path ->
-                                    if (path.startsWith("settings@@")) {
-                                        advancedSettingsPathStack.add(path)
+                                navigateTo = { route ->
+                                    if (isAdvancedSettingsRoute(route)) {
+                                        advancedSettingsPathStack.add(
+                                            normalizeAdvancedSettingsPath(route)
+                                        )
                                     } else {
-                                        navigateTo(path)
+                                        navigateTo(route)
                                     }
                                 },
                                 settings = currentObj,
@@ -1184,6 +1338,16 @@ fun SettingsScreen(
                                 navigateBack = { activeSettingKey = null },
                                 isInSplitPane = true
                             )
+                        }
+                        "patches" -> {
+                            if (!BuildConfig.IS_PLAYSTORE_BUILD) {
+                                PatchManagerScreen(
+                                    navigateBack = { activeSettingKey = null },
+                                    isInSplitPane = true
+                                )
+                            } else {
+                                SettingsDetailPane(focusedKey = focusedKey, activeUser = activeUser)
+                            }
                         }
                         else -> {
                             SettingsDetailPane(focusedKey = focusedKey, activeUser = activeUser)
@@ -1346,36 +1510,8 @@ fun ControllerSettings(
     }
 
     if (isInSplitPane) {
-        Column(
-            modifier = modifier
-                .fillMaxSize()
-                .padding(16.dp)
-        ) {
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(bottom = 16.dp),
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                IconButton(onClick = navigateBack) {
-                    Icon(
-                        painter = painterResource(id = R.drawable.ic_keyboard_arrow_left),
-                        contentDescription = null,
-                        tint = com.zenithblue.sambas3.RPCSXColors.primary
-                    )
-                }
-                Spacer(modifier = Modifier.width(8.dp))
-                Text(
-                    text = stringResource(R.string.controls).uppercase(),
-                    color = com.zenithblue.sambas3.RPCSXColors.primary,
-                    fontFamily = androidx.compose.ui.text.font.FontFamily.Monospace,
-                    fontWeight = FontWeight.Bold,
-                    fontSize = 18.sp,
-                    letterSpacing = 2.sp
-                )
-            }
-            ControllerContent(contentPadding = PaddingValues(0.dp))
-        }
+        // Settings left list already shows selection; no nested back/title chrome.
+        ControllerContent(contentPadding = PaddingValues(horizontal = 8.dp, vertical = 8.dp))
     } else {
         Scaffold(
             modifier = Modifier

@@ -12,6 +12,7 @@ import androidx.compose.animation.core.infiniteRepeatable
 import androidx.compose.animation.core.rememberInfiniteTransition
 import androidx.compose.animation.core.RepeatMode
 import androidx.compose.animation.core.animateFloat
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -96,7 +97,11 @@ fun GamesScreen(
             contentAlignment = Alignment.Center
         ) {
             Column(horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(24.dp)) {
-                Icon(painterResource(R.drawable.gamepad), contentDescription = null, tint = RPCSXColors.primary, modifier = Modifier.size(64.dp))
+                Image(
+                    painter = painterResource(R.mipmap.ic_sambas3_foreground),
+                    contentDescription = null,
+                    modifier = Modifier.size(64.dp)
+                )
                 Text("SambaS3", style = AppTypography.displayLarge.copy(letterSpacing = 4.sp), color = RPCSXColors.primary)
                 CircularProgressIndicator(color = RPCSXColors.primary, modifier = Modifier.size(32.dp))
                 Text(stringResource(R.string.missing_rpcsx_lib), style = AppTypography.labelSmall, color = RPCSXColors.textSecondary)
@@ -139,21 +144,79 @@ fun GamesScreen(
         }
     }
 
+    val fwVersion by remember { FirmwareRepository.version }
+    val fwProgressId by remember { FirmwareRepository.progressChannel }
+    val isFwInstalling = fwProgressId != null
+    val hasFw = fwVersion != null
+
+    val showBothEnds = games.size > 5
+    val pagerItems = remember(games.size, hasFw, isFwInstalling) {
+        buildList {
+            if (games.isEmpty()) {
+                if (!hasFw) {
+                    add(PagerItem.FirmwareCard)
+                } else if (isFwInstalling) {
+                    add(PagerItem.AddGame(disabled = true))
+                } else {
+                    add(PagerItem.AddGame())
+                }
+            } else {
+                if (showBothEnds) {
+                    add(PagerItem.AddGame())
+                    addAll(games.map { PagerItem.GameItem(it) })
+                    add(PagerItem.AddGame())
+                } else {
+                    addAll(games.map { PagerItem.GameItem(it) })
+                    add(PagerItem.AddGame())
+                }
+            }
+        }
+    }
+    val initialPage = if (showBothEnds) 1 else 0
+    val pagerState = rememberPagerState(pageCount = { pagerItems.size }, initialPage = initialPage)
+    val currentItem = pagerItems.getOrNull(pagerState.currentPage)
+    val selectedIconPath = (currentItem as? PagerItem.GameItem)?.game?.info?.iconPath?.value
+
     Box(
         modifier = Modifier
             .fillMaxSize()
             .background(RPCSXColors.background)
-            .drawBehind {
-                drawRect(
-                    brush = Brush.radialGradient(
-                        colors = listOf(Color.Transparent, Color(0xCC000000)),
-                        center = Offset(size.width / 2, size.height / 2),
-                        radius = size.width
-                    ),
-                    size = size
-                )
-            }
     ) {
+        // Frosted enlarged cover of focused game
+        if (selectedIconPath != null) {
+            AsyncImage(
+                model = selectedIconPath,
+                contentDescription = null,
+                contentScale = ContentScale.Crop,
+                modifier = Modifier
+                    .fillMaxSize()
+                    .scale(1.45f)
+                    .blur(radius = 36.dp)
+                    .alpha(0.55f)
+            )
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .background(Color.Black.copy(alpha = 0.5f))
+            )
+        }
+
+        // Vignette
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .drawBehind {
+                    drawRect(
+                        brush = Brush.radialGradient(
+                            colors = listOf(Color.Transparent, Color(0xCC000000)),
+                            center = Offset(size.width / 2, size.height / 2),
+                            radius = size.width
+                        ),
+                        size = size
+                    )
+                }
+        )
+
         Column(modifier = Modifier.fillMaxSize()) {
             // Top Nav Bar
             Row(
@@ -165,15 +228,15 @@ fun GamesScreen(
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                    Icon(painterResource(R.drawable.gamepad), contentDescription = null, tint = RPCSXColors.primary)
+                    Image(
+                        painter = painterResource(R.mipmap.ic_sambas3_foreground),
+                        contentDescription = null,
+                        modifier = Modifier.size(28.dp)
+                    )
                     Text("SambaS3", style = AppTypography.displayLarge.copy(letterSpacing = 4.sp), color = RPCSXColors.primary)
                 }
 
                 Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(24.dp)) {
-                    Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(4.dp)) {
-                        Icon(painterResource(R.drawable.ic_wifi), contentDescription = null, tint = RPCSXColors.primary, modifier = Modifier.size(16.dp))
-                        Text("CONNECTED", style = AppTypography.labelSmall, color = RPCSXColors.primary)
-                    }
                     Text(
                         SimpleDateFormat("h:mm a", Locale.getDefault()).format(Date()),
                         style = AppTypography.labelMedium,
@@ -184,37 +247,6 @@ fun GamesScreen(
                     }
                 }
             }
-            val fwVersion by remember { FirmwareRepository.version }
-            val fwProgressId by remember { FirmwareRepository.progressChannel }
-            val isFwInstalling = fwProgressId != null
-            val hasFw = fwVersion != null
-
-            val showBothEnds = games.size > 5
-            val pagerItems = remember(games.size, hasFw, isFwInstalling) {
-                buildList {
-                    if (games.isEmpty()) {
-                        if (!hasFw) {
-                            add(PagerItem.FirmwareCard)
-                        } else if (isFwInstalling) {
-                            add(PagerItem.AddGame(disabled = true))
-                        } else {
-                            add(PagerItem.AddGame())
-                        }
-                    } else {
-                        if (showBothEnds) {
-                            add(PagerItem.AddGame())
-                            addAll(games.map { PagerItem.GameItem(it) })
-                            add(PagerItem.AddGame())
-                        } else {
-                            addAll(games.map { PagerItem.GameItem(it) })
-                            add(PagerItem.AddGame())
-                        }
-                    }
-                }
-            }
-            val initialPage = if (showBothEnds) 1 else 0
-            val pagerState = rememberPagerState(pageCount = { pagerItems.size }, initialPage = initialPage)
-            val currentItem = pagerItems.getOrNull(pagerState.currentPage)
 
             if (games.isEmpty()) {
                 Box(modifier = Modifier.fillMaxWidth().weight(1f), contentAlignment = Alignment.Center) {
