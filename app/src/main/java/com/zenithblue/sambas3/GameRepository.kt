@@ -134,6 +134,9 @@ class GameRepository {
                     synchronized(instance) {
                         deduplicateGamesLocked()
                     }
+                    // Persist the normalized list so a source ISO cannot reappear as
+                    // a second card after the next process restart.
+                    save()
                 } catch (_: NotFoundException) {
                 } catch (e: Exception) {
                     e.printStackTrace()
