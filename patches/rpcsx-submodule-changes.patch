@@ -1,3 +1,38 @@
+diff --git a/rpcs3/Crypto/unzip.cpp b/rpcs3/Crypto/unzip.cpp
+index 2de74313e..281162f76 100644
+--- a/rpcs3/Crypto/unzip.cpp
++++ b/rpcs3/Crypto/unzip.cpp
+@@ -132,7 +132,7 @@ bool unzip(const void* src, usz size, fs::file& out)
+ 	return is_valid;
+ }
+ 
+-bool zip(const void* src, usz size, fs::file& out, bool multi_thread_it)
++bool zip(const void* src, usz size, fs::file& out, bool multi_thread_it, int compression_level)
+ {
+ 	if (!src || !size || !out)
+ 	{
+@@ -141,7 +141,7 @@ bool zip(const void* src, usz size, fs::file& out, bool multi_thread_it)
+ 
+ 	utils::serial compressor;
+ 	compressor.set_expect_little_data(!multi_thread_it || size < 0x40'0000);
+-	compressor.m_file_handler = make_compressed_serialization_file_handler(out);
++	compressor.m_file_handler = make_compressed_serialization_file_handler(out, compression_level);
+ 
+ 	std::string_view buffer_view{static_cast<const char*>(src), size};
+ 
+diff --git a/rpcs3/Crypto/unzip.h b/rpcs3/Crypto/unzip.h
+index 58de49ca0..0e9064de4 100644
+--- a/rpcs3/Crypto/unzip.h
++++ b/rpcs3/Crypto/unzip.h
+@@ -16,7 +16,7 @@ inline bool unzip(const std::vector<u8>& src, fs::file& out)
+ 	return unzip(src.data(), src.size(), out);
+ }
+ 
+-bool zip(const void* src, usz size, fs::file& out, bool multi_thread_it = false);
++bool zip(const void* src, usz size, fs::file& out, bool multi_thread_it = false, int compression_level = -1);
+ 
+ template <typename T>
+ inline bool zip(const T& src, fs::file& out)
 diff --git a/rpcs3/Emu/Cell/PPUThread.cpp b/rpcs3/Emu/Cell/PPUThread.cpp
 index b1d559ef7..c100d3a07 100644
 --- a/rpcs3/Emu/Cell/PPUThread.cpp
@@ -892,7 +927,7 @@ index a43a74488..e3bfbf5e7 100644
  	~jit_compiler() noexcept;
  
 diff --git a/rpcs3/util/JITLLVM.cpp b/rpcs3/util/JITLLVM.cpp
-index b67d303a3..65c9dce84 100644
+index b67d303a3..f5dc0fc90 100644
 --- a/rpcs3/util/JITLLVM.cpp
 +++ b/rpcs3/util/JITLLVM.cpp
 @@ -10,8 +10,10 @@
@@ -906,12 +941,17 @@ index b67d303a3..65c9dce84 100644
  
  LOG_CHANNEL(jit_log, "JIT");
  
-@@ -444,17 +446,28 @@ public:
+@@ -444,17 +446,32 @@ public:
  			return;
  		}
  
+-		if (!zip(obj.getBufferStart(), obj.getBufferSize(), module_file.file))
 +		const auto compress_start = std::chrono::steady_clock::now();
- 		if (!zip(obj.getBufferStart(), obj.getBufferSize(), module_file.file))
++		// PPU objects are generated again when their cache identity changes, so
++		// compile latency matters more than squeezing the last bytes from them.
++		// Keep the established high-compression policy for all other archives.
++		constexpr int ppu_cache_compression_level = 1;
++		if (!zip(obj.getBufferStart(), obj.getBufferSize(), module_file.file, true, ppu_cache_compression_level))
  		{
  			jit_log.error("LLVM: Failed to compress module: %s", std::string(_module->getName()));
  			return;
@@ -931,13 +971,13 @@ index b67d303a3..65c9dce84 100644
 +
 +		if (g_cfg.core.llvm_logs)
 +		{
-+			jit_log.notice("PPU_PROFILE stage=cache_write module=%s object_bytes=%zu compressed_bytes=%zu compress_ms=%.3f write_ms=%.3f committed=%s",
++			jit_log.notice("PPU_PROFILE stage=cache_write module=%s object_bytes=%zu compressed_bytes=%zu compression_level=1 compress_ms=%.3f write_ms=%.3f committed=%s",
 +				_module->getName().data(), obj.getBufferSize(), compressed_size, compress_ms, write_ms, committed ? "true" : "false");
 +		}
  	}
  
  	static std::unique_ptr<llvm::MemoryBuffer> load(const std::string& path)
-@@ -642,7 +655,7 @@ bool jit_compiler::add_sub_disk_space(ssz space)
+@@ -642,7 +659,7 @@ bool jit_compiler::add_sub_disk_space(ssz space)
  	    .second;
  }
  
@@ -946,7 +986,7 @@ index b67d303a3..65c9dce84 100644
  	: m_context(new llvm::LLVMContext, [](llvm::LLVMContext* context)
  		  {
  			  delete context;
-@@ -687,6 +700,14 @@ jit_compiler::jit_compiler(const std::unordered_map<std::string, u64>& _link, co
+@@ -687,6 +704,14 @@ jit_compiler::jit_compiler(const std::unordered_map<std::string, u64>& _link, co
  		mem = std::make_unique<MemoryManager1>(std::move(symbols_cement));
  	}
  
@@ -961,7 +1001,7 @@ index b67d303a3..65c9dce84 100644
  	{
  
  		m_engine = std::unique_ptr<llvm::ExecutionEngine, void (*)(llvm::ExecutionEngine*)>{
-@@ -694,7 +715,7 @@ jit_compiler::jit_compiler(const std::unordered_map<std::string, u64>& _link, co
+@@ -694,7 +719,7 @@ jit_compiler::jit_compiler(const std::unordered_map<std::string, u64>& _link, co
  				.setErrorStr(&result)
  				.setEngineKind(llvm::EngineKind::JIT)
  				.setMCJITMemoryManager(std::move(mem))
@@ -993,3 +1033,62 @@ index f8119dd39..211a11dba 100644
  	template <typename T, size_t N>
  		requires std::is_class_v<T>
  	static inline usz hash_array(const T (&arr)[N])
+diff --git a/rpcs3/util/serialization_ext.cpp b/rpcs3/util/serialization_ext.cpp
+index ea5220730..1320cca03 100644
+--- a/rpcs3/util/serialization_ext.cpp
++++ b/rpcs3/util/serialization_ext.cpp
+@@ -209,7 +209,8 @@ void compressed_serialization_file_handler::initialize(utils::serial& ar)
+ 		}
+ 
+ 		m_zs = {};
+-		ensure(deflateInit2(&m_zs, ar.expect_little_data() ? 9 : 8, Z_DEFLATED, 16 + 15, 9, Z_DEFAULT_STRATEGY) == Z_OK);
++		const int compression_level = m_compression_level >= 0 ? m_compression_level : (ar.expect_little_data() ? 9 : 8);
++		ensure(deflateInit2(&m_zs, compression_level, Z_DEFLATED, 16 + 15, 9, Z_DEFAULT_STRATEGY) == Z_OK);
+ #ifndef _MSC_VER
+ #pragma GCC diagnostic pop
+ #endif
+diff --git a/rpcs3/util/serialization_ext.hpp b/rpcs3/util/serialization_ext.hpp
+index 60cbeba84..7fd826ad9 100644
+--- a/rpcs3/util/serialization_ext.hpp
++++ b/rpcs3/util/serialization_ext.hpp
+@@ -54,13 +54,13 @@ struct compressed_stream_data;
+ // Compressed file serialization handler
+ struct compressed_serialization_file_handler : utils::serialization_file_handler
+ {
+-	explicit compressed_serialization_file_handler(fs::file&& file) noexcept
+-		: utils::serialization_file_handler(), m_file_storage(std::make_unique<fs::file>(std::move(file))), m_file(m_file_storage.get())
++	explicit compressed_serialization_file_handler(fs::file&& file, int compression_level = -1) noexcept
++		: utils::serialization_file_handler(), m_file_storage(std::make_unique<fs::file>(std::move(file))), m_file(m_file_storage.get()), m_compression_level(compression_level)
+ 	{
+ 	}
+ 
+-	explicit compressed_serialization_file_handler(const fs::file& file) noexcept
+-		: utils::serialization_file_handler(), m_file_storage(nullptr), m_file(std::addressof(file))
++	explicit compressed_serialization_file_handler(const fs::file& file, int compression_level = -1) noexcept
++		: utils::serialization_file_handler(), m_file_storage(nullptr), m_file(std::addressof(file)), m_compression_level(compression_level)
+ 	{
+ 	}
+ 
+@@ -85,6 +85,9 @@ struct compressed_serialization_file_handler : utils::serialization_file_handler
+ private:
+ 	const std::unique_ptr<fs::file> m_file_storage;
+ 	const std::add_pointer_t<const fs::file> m_file;
++	// -1 keeps the historical serialization policy; callers that own a
++	// latency-sensitive cache may request a faster zlib level explicitly.
++	const int m_compression_level = -1;
+ 	std::vector<u8> m_stream_data;
+ 	usz m_stream_data_index = 0;
+ 	usz m_file_read_index = 0;
+@@ -106,10 +109,10 @@ private:
+ 
+ template <typename File>
+ 	requires(std::is_same_v<std::remove_cvref_t<File>, fs::file>)
+-inline std::unique_ptr<compressed_serialization_file_handler> make_compressed_serialization_file_handler(File&& file)
++inline std::unique_ptr<compressed_serialization_file_handler> make_compressed_serialization_file_handler(File&& file, int compression_level = -1)
+ {
+ 	ensure(file);
+-	return std::make_unique<compressed_serialization_file_handler>(std::forward<File>(file));
++	return std::make_unique<compressed_serialization_file_handler>(std::forward<File>(file), compression_level);
+ }
+ 
+ struct compressed_zstd_stream_data;
