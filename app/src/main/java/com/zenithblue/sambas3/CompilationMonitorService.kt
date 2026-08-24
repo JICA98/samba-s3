@@ -116,17 +116,10 @@ class CompilationMonitorService : Service() {
             )
             isForeground = true
             Log.i(TAG, "startForeground NOTIF_FGS isActive=${state.isActive} ppu=${state.ppuActive} shader=${state.shaderActive}")
-
-            if (state.ppuActive) {
-                NotificationManagerCompat.from(this).notify(NOTIF_PPU, buildPpuSecondary(state))
-            } else {
-                NotificationManagerCompat.from(this).cancel(NOTIF_PPU)
-            }
-            if (state.shaderActive) {
-                NotificationManagerCompat.from(this).notify(NOTIF_SHADER, buildShaderSecondary(state))
-            } else {
-                NotificationManagerCompat.from(this).cancel(NOTIF_SHADER)
-            }
+            // The foreground notification is the single runtime compile notification.
+            // Older builds created one notification per domain, which made one PPU job
+            // appear two or three times in the notification shade.
+            cancelSecondaryNotifications()
             true
         } catch (e: Exception) {
             Log.e(TAG, "startForeground failed: ${e.message}", e)
@@ -146,26 +139,16 @@ class CompilationMonitorService : Service() {
         if (!state.isActive) {
             // Both domains done — stop foreground immediately
             Log.i(TAG, "State inactive — stopping foreground")
-            NotificationManagerCompat.from(this).cancel(NOTIF_PPU)
-            NotificationManagerCompat.from(this).cancel(NOTIF_SHADER)
             stopForegroundAndSelf()
             return
         }
 
-        // Update anchor and secondaries
+        // Update the single anchor notification. The launcher card is the detailed
+        // progress surface; Android only needs one compact runtime status entry.
         val anchor = buildAnchorNotification(state)
         try {
             NotificationManagerCompat.from(this).notify(NOTIF_FGS, anchor)
-            if (state.ppuActive) {
-                NotificationManagerCompat.from(this).notify(NOTIF_PPU, buildPpuSecondary(state))
-            } else {
-                NotificationManagerCompat.from(this).cancel(NOTIF_PPU)
-            }
-            if (state.shaderActive) {
-                NotificationManagerCompat.from(this).notify(NOTIF_SHADER, buildShaderSecondary(state))
-            } else {
-                NotificationManagerCompat.from(this).cancel(NOTIF_SHADER)
-            }
+            cancelSecondaryNotifications()
         } catch (e: Exception) {
             Log.e(TAG, "notify update failed: ${e.message}", e)
         }
@@ -212,37 +195,20 @@ class CompilationMonitorService : Service() {
         return builder.build()
     }
 
-    private fun buildPpuSecondary(state: CompileProgressBridge.CompileState): android.app.Notification {
-        val msg = state.ppuMsg ?: "PPU ${state.fileDone}/${state.fileTotal}"
-        return NotificationCompat.Builder(this, NotificationChannels.RPCSX_PROGRESS)
-            .setContentTitle(getString(R.string.compiling_ppu_title))
-            .setContentText(msg)
-            .setSmallIcon(R.mipmap.ic_sambas3_foreground)
-            .setCategory(NotificationCompat.CATEGORY_PROGRESS)
-            .setOngoing(true)
-            .setSilent(true)
-            .setProgress(state.ppuMax, state.ppuPercent, false)
-            .setStyle(NotificationCompat.BigTextStyle().bigText(msg))
-            .build()
-    }
-
-    private fun buildShaderSecondary(state: CompileProgressBridge.CompileState): android.app.Notification {
-        val msg = state.shaderMsg ?: getString(R.string.compiling_shaders_desc)
-        return NotificationCompat.Builder(this, NotificationChannels.RPCSX_PROGRESS)
-            .setContentTitle(getString(R.string.compiling_shaders_title))
-            .setContentText(msg)
-            .setSmallIcon(R.mipmap.ic_sambas3_foreground)
-            .setCategory(NotificationCompat.CATEGORY_PROGRESS)
-            .setOngoing(true)
-            .setSilent(true)
-            .setProgress(0, 0, true)
-            .build()
+    private fun cancelSecondaryNotifications() {
+        NotificationManagerCompat.from(this).apply {
+            cancel(NOTIF_PPU)
+            cancel(NOTIF_SHADER)
+        }
     }
 
     private fun stopForegroundAndSelf() {
         try {
             ServiceCompat.stopForeground(this, ServiceCompat.STOP_FOREGROUND_REMOVE)
-            NotificationManagerCompat.from(this).cancel(NOTIF_FGS)
+            NotificationManagerCompat.from(this).apply {
+                cancel(NOTIF_FGS)
+                cancelSecondaryNotifications()
+            }
         } catch (e: Exception) {
             Log.w(TAG, "stopForeground failed: ${e.message}")
         }
@@ -253,6 +219,7 @@ class CompilationMonitorService : Service() {
     override fun onDestroy() {
         collectJob?.cancel()
         serviceScope.cancel()
+        cancelSecondaryNotifications()
         super.onDestroy()
         Log.i(TAG, "onDestroy")
     }

@@ -79,6 +79,24 @@ private fun toStore(info: GameInfo) =
 private fun toInfo(store: GameInfoStore) =
     GameInfo(store.path, store.name.value, store.iconPath.value, store.gameFlags.intValue)
 
+internal object GameIdentity {
+    private val titleIdPattern = Regex("(?<![A-Za-z0-9])([A-Za-z]{4}\\d{5})(?![A-Za-z0-9])")
+
+    fun key(path: String, name: String?): String {
+        val titleId = titleIdPattern.find("$path ${name.orEmpty()}")
+            ?.groupValues
+            ?.getOrNull(1)
+            ?.uppercase()
+        return titleId ?: "path:${path.trimEnd('/').lowercase()}"
+    }
+
+    fun preferPath(candidate: String, existing: String): Boolean {
+        val candidateIsIso = candidate.endsWith(".iso", ignoreCase = true)
+        val existingIsIso = existing.endsWith(".iso", ignoreCase = true)
+        return existingIsIso && !candidateIsIso
+    }
+}
+
 class GameRepository {
     private val games = mutableStateListOf<Game>()
 
@@ -93,11 +111,14 @@ class GameRepository {
 
         fun save() {
             try {
-                File(RPCSX.rootDirectory + "games.json").writeText(Json.encodeToString(instance.games.map { game ->
-                    toInfo(
-                        game.info
+                synchronized(instance) {
+                    deduplicateGamesLocked()
+                    File(RPCSX.rootDirectory + "games.json").writeText(
+                        Json.encodeToString(instance.games.map { game ->
+                            toInfo(game.info)
+                        }.filter { info -> info.path != "$" })
                     )
-                }.filter { info -> info.path != "$" }))
+                }
             } catch (e: Exception) {
                 e.printStackTrace()
             }
@@ -110,6 +131,9 @@ class GameRepository {
                     instance.games += Json.decodeFromString<Array<GameInfo>>(
                         File(RPCSX.rootDirectory + "games.json").readText()
                     ).map { info -> Game(toStore(info)) }
+                    synchronized(instance) {
+                        deduplicateGamesLocked()
+                    }
                 } catch (_: NotFoundException) {
                 } catch (e: Exception) {
                     e.printStackTrace()
@@ -161,35 +185,84 @@ class GameRepository {
                     }
                 }
 
-                gameInfos.forEach { info ->
-                    val existsGame = instance.games.find { x -> x.info.path == info.path }
-                    if (existsGame == null) {
-                        val newGame = Game(toStore(info))
-                        if (progressId >= 0) {
-                            newGame.addProgress(GameProgress(progressId, GameProgressType.Install))
-                        }
-                        instance.games.add(0, newGame)
-                    } else {
-                        existsGame.info.name.value = info.name ?: existsGame.info.name.value
-                        existsGame.info.iconPath.value =
-                            info.iconPath ?: existsGame.info.iconPath.value
-                        existsGame.info.gameFlags.intValue = info.gameFlags
-                        if (progressId >= 0) {
-                            existsGame.addProgress(
-                                GameProgress(
-                                    progressId,
-                                    GameProgressType.Install
-                                )
-                            )
-                        }
-                    }
-                }
+                gameInfos.forEach { info -> addOrUpdateLocked(info, progressId) }
+                deduplicateGamesLocked()
                 save()
             }
         }
 
         fun addPreview(gameInfos: Array<GameInfo>) {
-            instance.games += gameInfos.map { info -> Game(toStore(info)) }
+            synchronized(instance) {
+                gameInfos.forEach { info -> addOrUpdateLocked(info, progressId = -1) }
+                deduplicateGamesLocked()
+            }
+        }
+
+        private fun addOrUpdateLocked(info: GameInfo, progressId: Long) {
+            val identity = GameIdentity.key(info.path, info.name)
+            val existsGame = instance.games.find { game ->
+                game.info.path == info.path ||
+                    (game.info.path != "$" &&
+                        GameIdentity.key(game.info.path, game.info.name.value) == identity)
+            }
+
+            if (existsGame == null) {
+                val newGame = Game(toStore(info))
+                addInstallProgressIfNeeded(newGame, progressId)
+                instance.games.add(0, newGame)
+                return
+            }
+
+            if (existsGame.info.path != info.path &&
+                GameIdentity.preferPath(info.path, existsGame.info.path)
+            ) {
+                val replacement = Game(toStore(info))
+                copyProgress(existsGame, replacement)
+                addInstallProgressIfNeeded(replacement, progressId)
+                instance.games.remove(existsGame)
+                instance.games.add(0, replacement)
+                return
+            }
+
+            existsGame.info.name.value = info.name ?: existsGame.info.name.value
+            existsGame.info.iconPath.value = info.iconPath ?: existsGame.info.iconPath.value
+            existsGame.info.gameFlags.intValue = info.gameFlags
+            addInstallProgressIfNeeded(existsGame, progressId)
+        }
+
+        private fun addInstallProgressIfNeeded(game: Game, progressId: Long) {
+            if (progressId >= 0 && game.findProgress(GameProgressType.Install) == null) {
+                game.addProgress(GameProgress(progressId, GameProgressType.Install))
+            }
+        }
+
+        private fun copyProgress(source: Game, target: Game) {
+            source.progressList.forEach { progress ->
+                if (target.findProgress(progress.type) == null) {
+                    target.addProgress(progress)
+                }
+            }
+        }
+
+        private fun deduplicateGamesLocked() {
+            val unique = LinkedHashMap<String, Game>()
+            instance.games.toList().forEach { game ->
+                val key = GameIdentity.key(game.info.path, game.info.name.value)
+                val existing = unique[key]
+                if (existing == null) {
+                    unique[key] = game
+                } else if (GameIdentity.preferPath(game.info.path, existing.info.path)) {
+                    copyProgress(existing, game)
+                    unique[key] = game
+                } else {
+                    copyProgress(game, existing)
+                }
+            }
+
+            if (unique.size != instance.games.size) {
+                instance.games.clear()
+                instance.games += unique.values
+            }
         }
 
         fun onBoot(game: Game) {
