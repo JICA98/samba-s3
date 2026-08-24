@@ -32,6 +32,17 @@ import androidx.compose.ui.unit.dp
 object AlertDialogQueue {
     val dialogs = mutableStateListOf<DialogData>()
 
+    /**
+     * True while the emulation UI (RPCSXActivity) is frontmost. Hosts that respect
+     * host suppression (the launcher host in AppNavHost) render nothing so dialogs
+     * enqueued during gameplay stay queued instead of rendering on the hidden
+     * launcher composition. The queue itself is NEVER cleared: once the flag clears
+     * in RPCSXActivity.onDestroy, the launcher host renders leftovers after
+     * MainActivity resumes.
+     */
+    @Volatile
+    var hostsSuppressed: Boolean = false
+
     fun showDialog(
         title: String,
         message: String? = null,
@@ -49,9 +60,19 @@ object AlertDialogQueue {
         }
     }
 
+    /**
+     * Renders the oldest queued dialog. [respectHostSuppression] scopes the gate per
+     * host: the launcher host keeps the default `true` (renders nothing while the
+     * emulation UI is frontmost); the in-game overlay host passes `false` so engine
+     * rejection error dialogs always render during gameplay regardless of the flag.
+     */
     @OptIn(ExperimentalMaterial3Api::class)
     @Composable
-    fun AlertDialog() {
+    fun AlertDialog(respectHostSuppression: Boolean = true) {
+        if (respectHostSuppression && hostsSuppressed) {
+            return
+        }
+
         if (dialogs.isEmpty()) {
             return
         }

@@ -20,7 +20,28 @@ SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 RPCSX_DIR="$SCRIPT_DIR/app/src/main/cpp/rpcsx"
 RPCSX_ANDROID_DIR="$RPCSX_DIR/android"
 JNILIBS_DIR="$SCRIPT_DIR/app/src/main/jniLibs"
-NDK_DIR="/home/jica/android-sdk/ndk/30.0.14904198-linux"
+if ! command -v cmake &>/dev/null; then
+    if [ -d "/opt/android-sdk/cmake/3.22.1/bin" ]; then
+        export PATH="/opt/android-sdk/cmake/3.22.1/bin:$PATH"
+    elif [ -n "${ANDROID_HOME:-}" ] && [ -d "$ANDROID_HOME/cmake/3.22.1/bin" ]; then
+        export PATH="$ANDROID_HOME/cmake/3.22.1/bin:$PATH"
+    fi
+fi
+
+if [ -z "${NDK_DIR:-}" ]; then
+    if [ -d "/opt/android-sdk/ndk/30.0.14904198" ]; then
+        NDK_DIR="/opt/android-sdk/ndk/30.0.14904198"
+    elif [ -n "${ANDROID_NDK_HOME:-}" ] && [ -d "$ANDROID_NDK_HOME" ]; then
+        NDK_DIR="$ANDROID_NDK_HOME"
+    elif [ -n "${ANDROID_HOME:-}" ] && [ -d "$ANDROID_HOME/ndk/30.0.14904198" ]; then
+        NDK_DIR="$ANDROID_HOME/ndk/30.0.14904198"
+    elif [ -d "$HOME/android-sdk/ndk/30.0.14904198-linux" ]; then
+        NDK_DIR="$HOME/android-sdk/ndk/30.0.14904198-linux"
+    else
+        echo "Error: NDK 30.0.14904198 not found"
+        exit 1
+    fi
+fi
 TOOLCHAIN="$NDK_DIR/build/cmake/android.toolchain.cmake"
 MIN_SDK=29
 
@@ -31,7 +52,17 @@ if [ ! -f "$RPCSX_DIR/3rdparty/fmtlib/CMakeLists.txt" ]; then
     git submodule update --init --recursive app/src/main/cpp/rpcsx
 fi
 
-ABIS=("arm64-v8a" "x86_64")
+if [ -n "${TARGET_ABI:-}" ]; then
+    ABIS=("$TARGET_ABI")
+else
+    ABIS=("arm64-v8a" "x86_64")
+fi
+
+NINJA_BIN="$(command -v ninja || echo "")"
+CMAKE_GENERATOR_ARGS=()
+if [ -n "$NINJA_BIN" ]; then
+    CMAKE_GENERATOR_ARGS=(-GNinja -DCMAKE_MAKE_PROGRAM="$NINJA_BIN")
+fi
 
 for ABI in "${ABIS[@]}"; do
     echo "Building RPCSX for ABI: $ABI ($CMAKE_BUILD_TYPE)"
@@ -39,7 +70,15 @@ for ABI in "${ABIS[@]}"; do
     BUILD_DIR="$SCRIPT_DIR/app/.cxx/rpcsx/$ABI/$BUILD_TYPE"
     mkdir -p "$BUILD_DIR"
 
-    cmake         -DCMAKE_TOOLCHAIN_FILE="$TOOLCHAIN"         -DANDROID_ABI="$ABI"         -DANDROID_PLATFORM=android-$MIN_SDK         -DCMAKE_BUILD_TYPE="$CMAKE_BUILD_TYPE"         -DCMAKE_LIBRARY_OUTPUT_DIRECTORY="$BUILD_DIR/out"         -B "$BUILD_DIR"         "$RPCSX_ANDROID_DIR"
+    cmake \
+        "${CMAKE_GENERATOR_ARGS[@]}" \
+        -DCMAKE_TOOLCHAIN_FILE="$TOOLCHAIN" \
+        -DANDROID_ABI="$ABI" \
+        -DANDROID_PLATFORM=android-$MIN_SDK \
+        -DCMAKE_BUILD_TYPE="$CMAKE_BUILD_TYPE" \
+        -DCMAKE_LIBRARY_OUTPUT_DIRECTORY="$BUILD_DIR/out" \
+        -B "$BUILD_DIR" \
+        "$RPCSX_ANDROID_DIR"
 
     cmake --build "$BUILD_DIR" --target rpcsx-android -j$(nproc 2>/dev/null || echo 4)
 

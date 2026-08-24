@@ -82,6 +82,7 @@ import com.zenithblue.sambas3.ui.settings.LogMonitorScreen
 import com.zenithblue.sambas3.ui.settings.PatchManagerScreen
 import com.zenithblue.sambas3.ui.settings.ControllerSettings
 import com.zenithblue.sambas3.ui.settings.SettingsScreen
+import com.zenithblue.sambas3.ui.debug.DebugControllerScreen
 import com.zenithblue.sambas3.ui.settings.advancedSettingsRoute
 import com.zenithblue.sambas3.ui.settings.decodeAdvancedSettingsPath
 import com.zenithblue.sambas3.ui.settings.getNestedSettings
@@ -210,6 +211,10 @@ fun AppNavHost() {
             LogMonitorScreen(
                 navigateBack = navController::navigateUp
             )
+        }
+
+        composable(route = "debug_controller") {
+            DebugControllerScreen(navigateBack = navController::navigateUp)
         }
 
         if (!BuildConfig.IS_PLAYSTORE_BUILD) {

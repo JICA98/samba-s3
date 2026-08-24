@@ -1,0 +1,2010 @@
+## User
+
+pls conitnue this @docs/games/BLUS31584-GTA-San-Andreas.md @docs/games/README.md , see all skills, Loop running on Y5WWBMJVOZSK4HU8 (1920×1080→1632,873 PadOverlay.kt:172), docs updated at docs/games/BLUS31584-GTA-San-Andreas.md:
+Iter 01-11 (all FAIL — F/RPCS3: Access violation 0x0 after modelinfo flood, Big Smoke loading 50% + toast):
+- 01 Video defaults WCB false MTR false → 08:58:48.611 modelinfo×22→AV (/tmp/gta-wcb-085912)
+- 02 WCB/RDB/WDB/RDB true → same AV at 08:58/09:02:01.236 
+- 03 +MTR true → 04-WCB-MTR-Accurate 4737 modelinfo → AV
+- 04 +Accurate RSX true → 09:02:01.236 same
+- 05 +Relaxed ZCULL true → same (loop stalled at +5s, 06-07 interim)
+- 06/07 PPU/SPU Interpreter (precise) (config.yml: Core) → 09:07:46.190 modelinfo×8→AV (PPU LLVM vs Interpreter not root)
+- 08 SPU Cache false (keep WCB+MTR+Accurate+Relaxed) → 09:27:10.358 modelinfo×13→AV (/tmp/gta-08-092451)
+- 09 Accurate SPU DMA true (revert Cache) → 3025:09:27:10.358 (tri aged AV 1 model 1346 but file freshness issue via rm without MainActivity restart)
+- 10 SPU Block Size Mega (/tmp/gta-10-093038) → initial 0 AV was pre-crash (EULA timing, Start Game snapshot); retry at 09:31:30.941 modelinfo×8→AV 1 AV
+- 11 XFloat Precise file-edit → reverted to Approximate on MainActivity.kt:62 boot (grep XFloat 45: Approximate) — proves direct sed for some Core keys lost; need GameSettingsOverrides.kt / RPCSX.instance.settingsSet("Core@@XFloat Accuracy","\"Precise\"") (RPCSX.kt:87 settingsSet → native-lib.cpp:277 from_json). 11-093311 0 AV was pre-crash timing.
+New infra for faster loops:
+- In-app debug bridge debug/DebugPadReceiver.kt:1 + ui/debug/DebugControllerScreen.kt:1 (route debug_controller AppNavHost.kt:141, Settings → Debug — Controller SettingsScreen.kt:1364, MainActivity.kt:48 + RPCSXActivity.kt:55 DebugPadReceiver.register with RECEIVER_EXPORTED for adb shell am broadcast). New skill .agents/skills/sambas3-controller/SKILL.md documents 17 DEBUG_PAD_* broadcasts + raw d1/d2/lx/ly (Digital1Flags/Digital2Flags RPCSX.kt:6/20) vs fallback input tap 1632 873. Loop currently uses tap for reliability; broadcast will be re-tested Iter 12.
+- Per-game registry docs/games/README.md, _template.md, docs/debug/Backend-Logging.md ( rpcs3/util/logs.hpp:195 LOG_CHANNEL → rpcsx-android.cpp:107 LogListener → __android_log_print → LogMonitor.kt:298 logcat -v threadtime -b main,crash,system → classifyTag → rpcsx_backend.log 25 MB; complete dump via scripts/get-samba-logs.sh + trace via settingsSet("Log@@RSX","\"Trace\"")).
+- Cold SIGSEGV pc0 at getState+32 fixed native-lib.cpp:198 if (!getState) return 0 + RPCSXActivity.kt:52 cold GeneralSettings/openLibrary fallback; FileUtil.kt:42 nested-path fix.
+Status 09:33: 01-11 no Video/Core combo reaches in-game after cutscene on Mali-G615. Deterministic PPU null read after PS3Data.obb modelinfo flood at New Game. Continue Iter 12+ via per-title settingsSet (not file sed), patch engine _rpcsx_patchesList (native-lib.cpp:109), and qcom (2a580689) control run. See docs/games/BLUS31584-GTA-San-Andreas.md:98 Next Steps and docs/debug/Backend-Logging.md for official complete-log capture.. U HAVE TO CONTINUE TILL GAME LAUCHES IN GAME WITH GRAHICS AFTER LOADER CUTSCENE AND IN GAME GAMEPLAY. WE ARE STUCK AT LADING 50%
+
+## Assistant
+
+Continuing the GTA SA loop from Iter 12 until we get in-game graphics after the loader. I’ll load the launch, controller, and log skills plus the current game docs, then keep iterating settings until the 50% crash is gone.
+
+## Tools
+
+- Read: /home/abhaybyte/repos/samba-s3/.agents/skills/sambas3-game-launch/SKILL.md
+- Read: /home/abhaybyte/repos/samba-s3/.agents/skills/sambas3-controller/SKILL.md
+- Read: /home/abhaybyte/repos/samba-s3/.agents/skills/sambas3-logs/SKILL.md
+- Read: /home/abhaybyte/repos/samba-s3/.agents/skills/agent-device/SKILL.md
+
+## Assistant
+
+Skills are loaded. Next I’ll inspect per-game overrides, the patch engine, and current device state so Iter 12 can use `settingsSet` instead of file edits.
+
+## Tools
+
+- WebSearch: RPCS3 GTA San Andreas BLUS31584 "Too many objects without modelinfo" access violation
+- Search: GameSettingsOverrides|settingsSet|patchSetEnabled|patchesList
+- ListDir: app/src/main/java/com/zenithblue/sambas3/gameconfig
+- ListDir: docs/games
+- ListDir: docs/debug
+- Read: /home/abhaybyte/repos/samba-s3/app/src/main/java/com/zenithblue/sambas3/RPCSX.kt (1-151)
+- WebSearch: RPCS3 wiki Grand Theft Auto San Andreas BLUS31584 configuration settings playable
+- WebSearch: "Too many objects without modelinfo structures" RPCS3 GTA
+- Read: /home/abhaybyte/repos/samba-s3/app/src/main/java/com/zenithblue/sambas3/gameconfig/GameSettingsOverrides.kt
+- Read: /home/abhaybyte/repos/samba-s3/app/src/main/java/com/zenithblue/sambas3/RPCSXActivity.kt (1-250)
+- Search: settingsSet|applyForGame|applyTitleTier|recommendedDefaults
+
+## Assistant
+
+The crash is a PPU null-deref after GTA’s own `modelinfo` flood, not a Video toggle. I’ll inspect device files, config keys, and how we can apply per-title `settingsSet` without a sed that gets overwritten.
+
+## Tools
+
+- Read: /home/abhaybyte/repos/samba-s3/docs/debug/Backend-Logging.md
+- Read: /home/abhaybyte/repos/samba-s3/app/src/main/cpp/native-lib.cpp (91-310)
+- Search: XFloat|SPU GETLLAR|SPU Verification|Thread Scheduler|settingsGet
+- ListDir: scripts
+- Read: /home/abhaybyte/repos/samba-s3/docs/games/_template.md
+
+## Assistant
+
+The 50% crash looks like a PPU null after failed memory lock, not a Video toggle. I’ll check `sudo memory` / `mlock` on Android and the current device/game files next.
+
+## Tools
+
+- Search: Failed to lock sudo memory|mlock|sudo memory|LOCK_MEMORY
+- Search: XFloat Accuracy|GETLLAR|SPU Verification|Thread Scheduler
+- Read: /home/abhaybyte/repos/samba-s3/scripts/get-samba-logs.sh
+- Read: /home/abhaybyte/repos/samba-s3/app/src/main/java/com/zenithblue/sambas3/debug/DebugPadReceiver.kt (1-80)
+- Read: /home/abhaybyte/repos/samba-s3/app/src/main/cpp/rpcsx/rpcs3/util/vm_native.cpp (431-510)
+- Read: /home/abhaybyte/repos/samba-s3/app/src/main/cpp/rpcsx/rpcs3/Emu/system_config.h (1-150)
+- Read: /home/abhaybyte/repos/samba-s3/app/src/main/AndroidManifest.xml (1-80)
+- Search: largeHeap|LOCK_MEMORY|android:vmSafe
+- Read: /home/abhaybyte/repos/samba-s3/app/src/main/java/com/zenithblue/sambas3/debug/DebugPadReceiver.kt (78-109)
+- Search: Failed to lock sudo memory|lock sudo
+- Search: largeHeap
+- Read: /home/abhaybyte/repos/samba-s3/app/src/main/java/com/zenithblue/sambas3/MainActivity.kt (1-113)
+- Read: /home/abhaybyte/repos/samba-s3/app/src/main/cpp/rpcsx/rpcs3/Emu/Memory/vm.cpp (1101-1180)
+- Read: /home/abhaybyte/repos/samba-s3/app/src/main/cpp/rpcsx/rpcs3/Emu/system_config.h (141-260)
+- Search: patch\.yml|patchesList|BLUS31584
+- Read: /home/abhaybyte/repos/samba-s3/app/src/main/java/com/zenithblue/sambas3/ui/games/GameConfigureScreen.kt (1-180)
+
+## Assistant
+
+I’ll inspect the device, game dump, current `config.yml`, and leftover crash logs so Iter 12 starts from a real root-cause, not another Video toggle.
+
+## Tools
+
+- WebSearch: RPCS3 patch.yml BLUS31584 GTA San Andreas site:github.com
+- Execute: adb devices -l; echo '---'; adb -s Y5WWBMJVOZSK4HU8 shell 'getprop ro.product.model; getprop ro.hardware.egl; wm size; dumpsys window | grep -E mCurrentFocus; ls -lh /storage/emulated/0/Android/data/com.zenithblue.sambas3/files/config/games/BLUS31584 2>/dev/null | head -40; echo ---UPDATE---; ls -la /storage/emulated/0/Android/data/com.zenithblue.sambas3/files/config/games/BLUS31584/PS3_UPDATE 2>/dev/null | head; echo ---GAME TREE---; find /storage/emulated/0/Android/data/com.zenithblue.sambas3/files/config/games/BLUS31584 -maxdepth 3 -type d 2>/dev/null | head -40' (Check device, focus, and GTA game files)
+- Execute: ls -lh /tmp/gta-* 2>/dev/null | tail -40; echo '==== last interp log AV window ===='; ls /tmp/gta-interp-090544 2>/dev/null; ls /tmp/gta-10-093038 2>/dev/null; ls /tmp/gta-08-092451 2>/dev/null; ls /tmp/gta-11-093311 2>/dev/null (List leftover GTA iteration log dumps)
+- Search: Handle RSX Memory Tiling|Disable Asynchronous Memory Manager|DECR memory layout|Debug Console Mode
+
+## Assistant
+
+Game is still in `RPCSXActivity`. I’ll snapshot the screen, check dump completeness (`PS3Data.obb`, update, firmware), and pull the live crash window.
+
+## Tools
+
+- Execute: SERIAL=Y5WWBMJVOZSK4HU8
+BASE=/storage/emulated/0/Android/data/com.zenithblue.sambas3/files
+echo '=== USRDIR ==='
+adb -s $SERIAL shell "ls -lh $BASE/config/games/BLUS31584/PS3_GAME/USRDIR"
+echo '=== PARAM.SFO strings ==='
+adb -s $SERIAL shell "strings $BASE/config/games/BLUS31584/PS3_GAME/PARAM.SFO" | head -40
+echo '=== PS3_GAME top ==='
+adb -s $SERIAL shell "ls -lh $BASE/config/games/BLUS31584/PS3_GAME"
+echo '=== PS3_UPDATE contents ==='
+adb -s $SERIAL shell "find $BASE/config/games/BLUS31584/PS3_UPDATE -type f | head"
+echo '=== firmware ==='
+adb -s $SERIAL shell "ls -lh $BASE/config/dev_flash 2>/dev/null | head; ls $BASE/config/dev_hdd0/game 2>/dev/null | head; ls $BASE/config/dev_hdd0/home 2>/dev/null | head"
+echo '=== config.yml Video+Core ==='
+adb -s $SERIAL shell "grep -n 'Renderer:\|Write Color\|Read Color\|Write Depth\|Read Depth\|Multithreaded RSX\|Accurate RSX\|Relaxed ZCULL\|PPU Decoder\|SPU Decoder\|XFloat\|SPU Cache\|SPU Block\|Accurate SPU DMA\|GETLLAR\|SPU Verification\|Thread Scheduler\|Debug Console\|DECR\|Handle RSX\|Asynchronous Memory\|Asynchronous Texture\|Shader Mode' $BASE/config/config.yml"
+echo '=== games.json ==='
+adb -s $SERIAL shell "cat $BASE/../games.json 2>/dev/null || cat $BASE/games.json" | python3 -m json.tool 2>/dev/null | head -80
+echo '=== patches ==='
+adb -s $SERIAL shell "ls -lh $BASE/config/patches 2>/dev/null; ls $BASE/patches 2>/dev/null"
+echo '=== current focus + pid ==='
+adb -s $SERIAL shell "dumpsys window | grep mCurrentFocus; pidof com.zenithblue.sambas3"
+echo '=== meminfo ==='
+adb -s $SERIAL shell "dumpsys meminfo com.zenithblue.sambas3 | head -25" (Inspect GTA dump, firmware, config, memory)
+- Execute: # screenshot current screen
+mkdir -p /tmp/gta-iter12
+adb -s Y5WWBMJVOZSK4HU8 exec-out screencap -p > /tmp/gta-iter12/current.png
+file /tmp/gta-iter12/current.png
+identify /tmp/gta-iter12/current.png 2>/dev/null || python3 -c "from PIL import Image; im=Image.open('/tmp/gta-iter12/current.png'); print(im.size, im.mode)"
+# also check qcom for the game
+echo '=== qcom games ==='
+adb -s 2a580689 shell 'ls /storage/emulated/0/Android/data/com.zenithblue.sambas3/files/config/games 2>/dev/null; cat /storage/emulated/0/Android/data/com.zenithblue.sambas3/files/games.json 2>/dev/null | head -c 500; echo; dumpsys window | grep mCurrentFocus; getprop ro.hardware.egl; wm size' (Screenshot current game and check qcom device)
+- Search: Access violation|modelinfo|Failed to lock sudo|sys_memory
+- Read: /tmp/gta-iter12/current.png
+- Execute: SERIAL=Y5WWBMJVOZSK4HU8
+BASE=/storage/emulated/0/Android/data/com.zenithblue.sambas3/files
+echo '=== find config.yml ==='
+adb -s $SERIAL shell "find $BASE -name 'config.yml' 2>/dev/null"
+echo '=== config dir ==='
+adb -s $SERIAL shell "ls -lh $BASE/config/ | head -40"
+echo '=== current AV/modelinfo ==='
+adb -s $SERIAL shell "grep -E 'Access violation|modelinfo|Emulation has been frozen' $BASE/logs/rpcsx_backend.log | tail -20"
+echo '=== last 30 backend ==='
+adb -s $SERIAL shell "tail -30 $BASE/logs/rpcsx_backend.log" (Find config.yml and current crash signatures)
+
+## Assistant
+
+Stuck at the Big Smoke 50% crash with the same AV. Next I’ll pull the crash window, page size, file-open errors, and PPU hash so we can change something that actually matters.
+
+## Tools
+
+- Execute: SERIAL=Y5WWBMJVOZSK4HU8
+BASE=/storage/emulated/0/Android/data/com.zenithblue.sambas3/files
+echo '=== PAGE SIZE ==='
+adb -s $SERIAL shell 'getconf PAGE_SIZE; getprop ro.product.cpu.pagesize; cat /proc/$(pidof com.zenithblue.sambas3)/smaps | head -5'
+echo '=== run-as ==='
+adb -s $SERIAL shell 'run-as com.zenithblue.sambas3 ls shared_prefs 2>&1 | head'
+echo '=== config.yml ==='
+adb -s $SERIAL pull $BASE/config/config.yml /tmp/gta-iter12/config.yml
+echo '=== PPU hash / errors / fs ==='
+adb -s $SERIAL shell "grep -E 'PPU executable hash|PPU hash|Applying patch|CELL_ENOENT|failed to open|Failed to|sys_fs_open|Libraries|APP_VER|Title:|Serial:' $BASE/logs/rpcsx_backend.log" | head -80
+echo '=== AV window ==='
+adb -s $SERIAL shell "grep -n 'Access violation reading location 0x0' $BASE/logs/rpcsx_backend.log" (Page size, run-as, config, crash context)
+- Read: /home/abhaybyte/repos/samba-s3/app/src/main/java/com/zenithblue/sambas3/gameconfig/SettingsValueCodec.kt (1-80)
+- Search: PPU Calling History|call_history
+- Read: /tmp/gta-iter12/config.yml
+- Search: throw_access_violation|Access violation reading
+- Execute: SERIAL=Y5WWBMJVOZSK4HU8
+echo '=== overrides ==='
+adb -s $SERIAL shell 'run-as com.zenithblue.sambas3 cat shared_prefs/sambas3_game_overrides.xml'
+echo '=== interp decoder ==='
+grep -E 'PPU Decoder|SPU Decoder|XFloat|Interpreter' /tmp/gta-interp-090544/rpcsx_backend.log | head -20
+echo '=== AV context from current (pull slice) ==='
+adb -s $SERIAL pull /storage/emulated/0/Android/data/com.zenithblue.sambas3/files/logs/rpcsx_backend.log /tmp/gta-iter12/backend.log >/dev/null
+# 40 lines before AV
+python3 - <<'PY'
+from pathlib import Path
+p=Path('/tmp/gta-iter12/backend.log')
+lines=p.read_text(errors='replace').splitlines()
+for i,l in enumerate(lines):
+    if 'Access violation reading location 0x0' in l:
+        start=max(0,i-60); end=min(len(lines), i+15)
+        print('\n'.join(f'{n+1}:{lines[n]}' for n in range(start,end)))
+        print('---')
+PY
+echo '=== firmware version ==='
+adb -s $SERIAL shell 'ls /storage/emulated/0/Android/data/com.zenithblue.sambas3/files/config/dev_flash/vsh/etc 2>/dev/null; cat /storage/emulated/0/Android/data/com.zenithblue.sambas3/files/config/dev_flash/vsh/etc/version.txt 2>/dev/null | head'
+echo '=== thread scheduler enum ==='
+ (Read overrides, interp confirmation, AV window)
+- Search: ppu_decoder_type|llvm_legacy|Interpreter
+- Search: cortex-a34|Use LLVM CPU
+- Execute: python3 - <<'PY'
+from pathlib import Path
+lines=Path('/tmp/gta-iter12/backend.log').read_text(errors='replace').splitlines()
+# find AV and print 120 lines before, looking for Thread, PC, r3, registers
+idx=None
+for i,l in enumerate(lines):
+    if 'Access violation reading location 0x0' in l and '09:39:01' in l:
+        idx=i
+        break
+print('idx', idx)
+start=max(0, idx-200)
+for n in range(start, idx+1):
+    l=lines[n]
+    if any(x in l for x in ['Thread','PC:','GPR','r3','Access violation','Instruction','cause','Reading','PPU[','cia','CIA','TRAP','modelinfo']):
+        print(f'{n+1}:{l[:220]}')
+print('\n==== RAW 80 lines before AV (truncated) ====')
+for n in range(idx-80, idx+1):
+    print(f'{n+1}:{lines[n][:200]}')
+PY (Extract PPU registers and PC at crash)
+- Read: /home/abhaybyte/repos/samba-s3/app/src/main/cpp/rpcsx/rpcs3/Emu/system_config_types.h (1-80)
+- Read: /home/abhaybyte/repos/samba-s3/app/src/main/cpp/rpcsx/android/src/rpcsx-android.cpp (1801-1840)
+- Read: /home/abhaybyte/repos/samba-s3/app/src/main/cpp/rpcsx/rpcs3/util/JITLLVM.cpp (891-936)
+- Search: CFG_DEFINE_ENUM|ppu_decoder_type
+- Read: /home/abhaybyte/repos/samba-s3/app/src/main/cpp/rpcsx/rpcs3/Emu/system_config_types.cpp (501-550)
+- Search: xfloat_accuracy|thread_scheduler_mode
+- Read: /home/abhaybyte/repos/samba-s3/app/src/main/java/com/zenithblue/sambas3/gameconfig/SettingsValueCodec.kt (71-120)
+- Read: /home/abhaybyte/repos/samba-s3/app/src/main/cpp/rpcsx/rpcs3/Emu/system_config_types.cpp (549-578)
+- Read: /home/abhaybyte/repos/samba-s3/scripts/debug-pad.sh
+- Search: fmt_class_string<spu_decoder
+
+## Assistant
+
+Previous Interpreter and XFloat runs used invalid enum names, so they never applied. I’ll set the real `Interpreter` / `Accurate` values through SharedPreferences and start Iter 12.
+
+Interpreter is actually applied this time. I’ll wait for EULA, then drive Cross through Start Game → New Game while watching for the 50% crash.
+
+## Tools
+
+- Execute: ls -l /tmp/gta-iter12/boot_*.png 2>/dev/null; echo '--- latest backend ---'; adb -s Y5WWBMJVOZSK4HU8 shell "tail -5 /storage/emulated/0/Android/data/com.zenithblue.sambas3/files/logs/rpcsx_backend.log" (List current boot screenshots and log tail)
+- Read: /tmp/gta-iter12/boot_4.png
+- Read: /tmp/gta-iter12/boot_3.png
+- Read: /tmp/gta-iter12/boot_6.png
+- Read: /tmp/gta-iter12/boot_5.png
+
+## Assistant
+
+RPCSX Home Menu opened over the Rockstar logo. I’ll resume, then wait for EULA before sending Cross.
+
+## Tools
+
+- Execute: SERIAL=Y5WWBMJVOZSK4HU8
+# Resume Game is highlighted — Cross
+adb -s $SERIAL shell am broadcast -a com.zenithblue.sambas3.DEBUG_PAD_CROSS
+sleep 1
+adb -s $SERIAL shell input tap 1632 873
+sleep 3
+adb -s $SERIAL exec-out screencap -p > /tmp/gta-iter12/after_resume.png
+ls -l /tmp/gta-iter12/after_resume.png
+adb -s $SERIAL shell "logcat -d -s DebugPad | tail -10" (Resume from RPCSX home menu with Cross)
+- Read: /tmp/gta-iter12/after_resume.png
+
+## Assistant
+
+Interpreter is too slow for a 120 ms pulse, so I’ll hold Cross longer and tap Resume Game directly.
+
+## Tools
+
+- Execute: SERIAL=Y5WWBMJVOZSK4HU8
+# hold Cross 1.2s (interpreter-safe)
+adb -s $SERIAL shell am broadcast -a com.zenithblue.sambas3.DEBUG_PAD --ei d1 0 --ei d2 64 --ei lx 127 --ei ly 127 --ei rx 127 --ei ry 127
+sleep 1.2
+adb -s $SERIAL shell am broadcast -a com.zenithblue.sambas3.DEBUG_PAD --ei d1 0 --ei d2 0 --ei lx 127 --ei ly 127 --ei rx 127 --ei ry 127
+# also tap Resume Game row (center, ~26% down)
+adb -s $SERIAL shell input tap 960 280
+sleep 2
+adb -s $SERIAL exec-out screencap -p > /tmp/gta-iter12/after_resume2.png
+echo snapped (Hold Cross 1.2s and tap Resume Game)
+- Read: /tmp/gta-iter12/after_resume2.png
+- Execute: SERIAL=Y5WWBMJVOZSK4HU8
+for i in 7 8 9 10 11 12; do
+  sleep 20
+  adb -s $SERIAL exec-out screencap -p > /tmp/gta-iter12/boot_$i.png
+  sz=$(stat -c%s /tmp/gta-iter12/boot_$i.png)
+  echo "t boot_$i size=$sz"
+  adb -s $SERIAL shell "grep -c 'Access violation' /storage/emulated/0/Android/data/com.zenithblue.sambas3/files/logs/rpcsx_backend.log; grep -c modelinfo /storage/emulated/0/Android/data/com.zenithblue.sambas3/files/logs/rpcsx_backend.log"
+done
+echo POLL_DONE (Poll 2 more minutes for EULA on Interpreter)
+
+## User
+
+the game as became too slow
+
+## Assistant
+
+Interpreter was only a diagnostic and is why the game crawled. I’m switching PPU back to LLVM now and continuing the in-game loop with settings that keep performance.
+
+## Tools
+
+- Execute: SERIAL=Y5WWBMJVOZSK4HU8
+echo '=== stop slow interpreter session ==='
+adb -s $SERIAL shell am force-stop com.zenithblue.sambas3
+sleep 1
+# restore LLVM immediately
+python3 << 'PY'
+def quote(s):
+    out=['"']
+    for ch in s:
+        if ch=='\\': out.append('\\\\')
+        elif ch=='"': out.append('\\"')
+        else: out.append(ch)
+    out.append('"')
+    return ''.join(out)
+def encode_map(d):
+    return '{'+','.join(quote(k)+':'+quote(v) for k,v in d.items())+'}'
+# LLVM restored; keep useful diagnostic off. Next-iter bundle applied after this confirm.
+overrides = {
+    "Core@@PPU Decoder": '"LLVM Recompiler (Legacy)"',
+}
+js = encode_map(overrides)
+xml = f'''<?xml version='1.0' encoding='utf-8' standalone='yes' ?>
+<map>
+    <string name="learned./storage/emulated/0/Android/data/com.zenithblue.sambas3/files/config/games/BLUS31584">BLUS31584</string>
+    <string name="game.BLUS31584">{js}</string>
+</map>
+'''
+open('/tmp/gta-llvm-restore.xml','w').write(xml)
+print(xml)
+PY
+cat /tmp/gta-llvm-restore.xml | adb -s $SERIAL shell "run-as com.zenithblue.sambas3 sh -c 'cat > shared_prefs/sambas3_game_overrides.xml'"
+adb -s $SERIAL shell 'run-as com.zenithblue.sambas3 cat shared_prefs/sambas3_game_overrides.xml'
+echo restored (Force-stop Interpreter and restore LLVM decoder)
+- Search: patch_engine|be32|load\(full_patches
+- Read: /home/abhaybyte/repos/samba-s3/app/src/main/java/com/zenithblue/sambas3/PatchRepository.kt (1-150)
+- WebSearch: PPU-5c0eb0c4eb31a039bdec24f04f9a030a2cc4e0be BLUS31584 patch.yml
+- Read: /home/abhaybyte/repos/samba-s3/app/src/main/cpp/rpcsx/rpcs3/Emu/system_config_types.cpp (618-637)
+- Read: /home/abhaybyte/repos/samba-s3/app/src/main/cpp/rpcsx/rpcs3/util/bin_patch.cpp (167-246)
+- Search: fmt_class_string<sleep_timers
+- Read: /home/abhaybyte/repos/samba-s3/app/src/main/cpp/rpcsx/rpcs3/util/bin_patch.h (1-50)
+- WebFetch: https://rpcs3.net/compatibility?patch&api=v1&v=1.2
+- Execute: python3 << 'PY'
+import json,re
+p='/home/abhaybyte/.grok/sessions/%2Fhome%2Fabhaybyte%2Frepos%2Fsamba-s3/01a031f2-0f8d-7da0-b282-e7bae16ac096/web_fetch/1.json'
+with open(p) as f:
+    data=json.load(f)
+# the fetch tool may wrap
+if isinstance(data, dict) and 'patch' in data:
+    text=data['patch']
+elif isinstance(data, dict) and 'content' in data:
+    # maybe markdown
+    text=str(data)
+else:
+    text=str(data)
+print('type', type(data), 'keys', list(data)[:10] if isinstance(data,dict) else '')
+# if nested
+s=json.dumps(data) if not isinstance(data,str) else data
+# extract patch field
+m=re.search(r'"patch":\s*"', s)
+print('has patch key', bool(m), 'len', len(s))
+for term in ['BLUS31584','San Andreas','GTA San','5c0eb0c4eb31a039']:
+    print(term, s.lower().count(term.lower()) if term!='BLUS31584' else s.count(term))
+# print context around BLUS31584
+for m in re.finditer('BLUS31584', s):
+    print('---', s[max(0,m.start()-200):m.start()+400][:600])
+    break
+PY (Search official RPCS3 patches for GTA SA)
+- Read: /home/abhaybyte/repos/samba-s3/app/src/main/cpp/rpcsx/rpcs3/util/bin_patch.cpp (127-166)
+- Read: /home/abhaybyte/repos/samba-s3/app/src/main/cpp/rpcsx/android/src/rpcsx-android.cpp (2636-2725)
+- Search: save_config|load_config
+- Read: /home/abhaybyte/repos/samba-s3/app/src/main/cpp/rpcsx/rpcs3/util/bin_patch.cpp (1101-1180)
+- Read: /home/abhaybyte/repos/samba-s3/app/src/main/cpp/rpcsx/rpcs3/util/bin_patch.cpp (1654-1733)
+- Read: /home/abhaybyte/repos/samba-s3/app/src/main/cpp/rpcsx/rpcs3/util/bin_patch.cpp (1983-2042)
+
+## Assistant
+
+Interpreter is off. Next I’ll relaunch on LLVM (normal speed) and apply a targeted PPU patch at the null-deref so we can get past the 50% loader.
+
+## Tools
+
+- Read: /tmp/gta-iter13/s2.png
+
+## Assistant
+
+LLVM is compiling PPU modules (22/76) after the setting change — that’s a one-time cost, then it stays fast. Waiting for compile to finish, then EULA.
+
+## Tools
+
+- Read: /tmp/gta-iter13/c6.png
+- Read: /tmp/gta-iter13/c8.png
+- Read: /tmp/gta-iter13/c9.png
+- Read: /tmp/gta-iter13/c14.png
+- Read: /tmp/gta-iter13/c16.png
+- Read: /tmp/gta-iter13/c18.png
+- Read: /tmp/gta-iter13/c20.png
+
+## Assistant
+
+The extra Core flags forced a full LLVM recompile (170 modules). I’m dropping those, keeping LLVM plus the crash-skip patch, and relaunching on the existing cache so it stays fast.
+
+## Tools
+
+- Execute: SERIAL=Y5WWBMJVOZSK4HU8
+BASE=/storage/emulated/0/Android/data/com.zenithblue.sambas3/files
+adb -s $SERIAL shell am force-stop com.zenithblue.sambas3
+sleep 1
+# LLVM only + crash patch already on disk. Drop XFloat/128-byte so PPU cache hits.
+python3 << 'PY'
+def quote(s):
+    out=['"']
+    for ch in s:
+        if ch=='\\': out.append('\\\\')
+        elif ch=='"': out.append('\\"')
+        else: out.append(ch)
+    out.append('"')
+    return ''.join(out)
+def encode_map(d):
+    return '{'+','.join(quote(k)+':'+quote(v) for k,v in d.items())+'}'
+overrides = {
+    "Core@@PPU Decoder": '"LLVM Recompiler (Legacy)"',
+}
+js = encode_map(overrides)
+xml = f'''<?xml version='1.0' encoding='utf-8' standalone='yes' ?>
+<map>
+    <string name="learned./storage/emulated/0/Android/data/com.zenithblue.sambas3/files/config/games/BLUS31584">BLUS31584</string>
+    <string name="game.BLUS31584">{js}</string>
+</map>
+'''
+open('/tmp/gta-llvm-only.xml','w').write(xml)
+print(js)
+PY
+cat /tmp/gta-llvm-only.xml | adb -s $SERIAL shell "run-as com.zenithblue.sambas3 sh -c 'cat > shared_prefs/sambas3_game_overrides.xml'"
+adb -s $SERIAL shell "rm -f $BASE/logs/rpcsx_backend.log*"
+adb -s $SERIAL shell am start -n com.zenithblue.sambas3/.MainActivity
+sleep 6
+adb -s $SERIAL shell am start -n com.zenithblue.sambas3/.RPCSXActivity -e path $BASE/config/games/BLUS31584
+sleep 10
+adb -s $SERIAL shell "grep -E 'PPU Decoder:|XFloat|Applying patch|Compiling' $BASE/logs/rpcsx_backend.log | head -20"
+adb -s $SERIAL exec-out screencap -p > /tmp/gta-iter13/fast1.png
+echo snap $(stat -c%s /tmp/gta-iter13/fast1.png) (Abort heavy recompile; relaunch LLVM+patch with cache)
+
+## User
+
+[Image #1] ppu compiled and ran it now goes upto 80%
+
+## Assistant
+
+80% is real progress past the old 50% crash. I’ll pull the new crash address from the logs and extend the skip patch so we can get through the rest of the loader.
+
+## Tools
+
+- Execute: SERIAL=Y5WWBMJVOZSK4HU8
+BASE=/storage/emulated/0/Android/data/com.zenithblue.sambas3/files
+mkdir -p /tmp/gta-iter13-80
+adb -s $SERIAL exec-out screencap -p > /tmp/gta-iter13-80/now.png
+echo '=== AV / modelinfo / frozen ==='
+adb -s $SERIAL shell "grep -nE 'Access violation|modelinfo|Emulation has been frozen|Applied patch|CIA:' $BASE/logs/rpcsx_backend.log" | tail -40
+echo '=== counts ==='
+adb -s $SERIAL shell "grep -c 'Access violation' $BASE/logs/rpcsx_backend.log; grep -c modelinfo $BASE/logs/rpcsx_backend.log; grep -c 'Applied patch' $BASE/logs/rpcsx_backend.log"
+echo '=== PPU decoder ==='
+adb -s $SERIAL shell "grep -E 'PPU Decoder:|XFloat' $BASE/logs/rpcsx_backend.log | tail -6" (Pull 80% crash signatures without killing the game)
+- Execute: SERIAL=Y5WWBMJVOZSK4HU8
+BASE=/storage/emulated/0/Android/data/com.zenithblue.sambas3/files
+adb -s $SERIAL pull $BASE/logs/rpcsx_backend.log /tmp/gta-iter13-80/backend.log >/dev/null
+python3 << 'PY'
+from pathlib import Path
+lines=Path('/tmp/gta-iter13-80/backend.log').read_text(errors='replace').splitlines()
+print('lines', len(lines))
+keys=('Access violation','frozen','TRAP','Fatal','SIGSEGV','exception','CIA:','Call stack','Thread context','PPU[')
+for i,l in enumerate(lines):
+    if any(k in l for k in ('Access violation','Emulation has been frozen','TRAP','Fatal signal','SIGSEGV','throw_exception','class std::','Instruction breakpoint')):
+        print(f'{i+1}:{l[:220]}')
+print('--- last CIA windows ---')
+cias=[i for i,l in enumerate(lines) if 'CIA:' in l]
+print('cia count', len(cias), 'last', cias[-5:] if cias else None)
+for idx in cias[-2:]:
+    print(f'\n===== window {idx+1} =====')
+    for n in range(max(0,idx-30), min(len(lines), idx+25)):
+        print(f'{n+1}:{lines[n][:200]}')
+print('\n--- last 15 lines ---')
+for l in lines[-15:]:
+    print(l[:200])
+PY
+echo '=== crash buffer ==='
+adb -s $SERIAL logcat -b crash -d | tail -40
+echo '=== frozen/app ==='
+adb -s $SERIAL shell "grep -E 'frozen|likely crashed|PS3 application' $BASE/logs/rpcsx_app.log | tail -10" (Extract new crash CIA and exception type at 80%)
+- Execute: python3 << 'PY'
+from pathlib import Path
+lines=Path('/tmp/gta-iter13-80/backend.log').read_text(errors='replace').splitlines()
+# F/ and W/ around crash time
+print('=== F/ W/ E/ last 80 non-D ===')
+n=0
+for i,l in enumerate(lines):
+    if 'F/RPCS3' in l or 'W/RPCS3' in l or 'E/RPCS3' in l:
+        if 'Failed to lock sudo' in l or 'sys_memory_allocate' in l:
+            continue
+        print(f'{i+1}:{l[:240]}')
+        n+=1
+print('count printed', n)
+
+print('\n=== after call stack 81000 ===')
+for n in range(81000, min(len(lines), 81120)):
+    print(f'{n+1}:{lines[n][:220]}')
+
+print('\n=== after call stack 87310 ===')
+for n in range(87310, min(len(lines), 87440)):
+    print(f'{n+1}:{lines[n][:220]}')
+PY (Find fatal line after 80% thread dumps)
+- Execute: python3 << 'PY'
+from pathlib import Path
+lines=Path('/tmp/gta-iter13-80/backend.log').read_text(errors='replace').splitlines()
+print('F/RPCS3 count', sum(1 for l in lines if 'F/RPCS3' in l))
+print('frozen', sum(1 for l in lines if 'frozen' in l.lower()))
+print('Access viol', sum(1 for l in lines if 'Access violation' in l))
+print('thread context', sum(1 for l in lines if "thread context" in l.lower()))
+for i,l in enumerate(lines):
+    if 'F/RPCS3' in l or 'Emulation has been frozen' in l or "thread context" in l.lower() or 'Illegal' in l or 'Trap' in l:
+        if '09:47' in l: continue
+        print(f'{i+1}:{l[:240]}')
+# look 40 lines before first CIA 10:26
+for i,l in enumerate(lines):
+    if l.startswith('[08-24 10:26:41') and 'thread context' in l.lower():
+        for n in range(i-15, i+8):
+            print(f'{n+1}:{lines[n][:220]}')
+        print('---')
+PY (Locate freeze/fatal around 10:26:41 80% crash)
+- Execute: python3 << 'PY'
+from pathlib import Path
+lines=Path('/tmp/gta-iter13-80/backend.log').read_text(errors='replace').splitlines()
+print('=== 80 lines before first 10:26:36 dump ===')
+for n in range(41680, 41760):
+    l=lines[n]
+    if 'MFFS' in l or 'MTFSF' in l: continue
+    print(f'{n+1}:{l[:240]}')
+print('\n=== 10:26:36 MainThread dump CIA ===')
+for n in range(48000, 48180):
+    l=lines[n]
+    if any(x in l for x in ['CIA:','Call stack','0x00','Access','frozen','r3 :','Instruction']):
+        print(f'{n+1}:{l[:220]}')
+print('\n=== timestamps 10:26 ===')
+# unique second-level events except tty
+from collections import Counter
+c=Counter()
+for l in lines:
+    if '10:26:' in l and 'sys_tty' not in l and 'MFFS' not in l and 'MTFSF' not in l:
+        ts=l[1:22] if l.startswith('[') else ''
+        if 'CIA' in l or 'thread context' in l or 'F/' in l or 'W/RPCS3: Emulation' in l or 'modelinfo' in l or 'PS3Data' in l:
+            print(l[:220])
+PY (Inspect events at first 10:26:36 pause dump)
+
+## Assistant
+
+The 80% freeze isn’t another Video/Core miss — the log shows the game seeking past EOF on a truncated data file. I’ll confirm `PS3DataMain.obb` size vs what the loader expects.
+
+## Tools
+
+- Execute: SERIAL=Y5WWBMJVOZSK4HU8
+BASE=/storage/emulated/0/Android/data/com.zenithblue.sambas3/files/config/games/BLUS31584/PS3_GAME/USRDIR
+adb -s $SERIAL shell "ls -l $BASE; stat -c '%n %s' $BASE/*"
+# pull idx files (tiny) and inspect
+adb -s $SERIAL pull $BASE/PS3DataMain.obb.idx /tmp/gta-iter13-80/PS3DataMain.obb.idx
+adb -s $SERIAL pull $BASE/PS3Data.obb.idx /tmp/gta-iter13-80/PS3Data.obb.idx
+python3 << 'PY'
+from pathlib import Path
+import struct
+for name in ['PS3DataMain.obb.idx','PS3Data.obb.idx']:
+    p=Path('/tmp/gta-iter13-80')/name
+    b=p.read_bytes()
+    print('\n====', name, 'len', len(b))
+    print('head hex', b[:64].hex())
+    # try interpret as u32be/u32le records
+    for endian in ['>','<']:
+        if len(b)>=8:
+            a,c=struct.unpack_from(endian+'II', b, 0)
+            print(f'  {endian} first2 u32', hex(a), hex(c))
+    # max offset if pairs of (offset,size) u32be
+    maxoff=0
+    for off in range(0, len(b)-8, 8):
+        o,s=struct.unpack_from('>II', b, off)
+        maxoff=max(maxoff, o+s)
+    print('  if u32be offset+size pairs max end', maxoff, hex(maxoff), 'GB', maxoff/1024**3)
+    maxoff=0
+    for off in range(0, len(b)-8, 8):
+        o,s=struct.unpack_from('<II', b, off)
+        maxoff=max(maxoff, o+s)
+    print('  if u32le offset+size pairs max end', maxoff, hex(maxoff), 'GB', maxoff/1024**3)
+    # u64 offsets
+    maxoff=0
+    n=0
+    for off in range(0, len(b)-16, 16):
+        o,s=struct.unpack_from('>QQ', b, off)
+        if o<10**11:
+            maxoff=max(maxoff, o+s); n+=1
+    print('  if u64be pairs max', maxoff, 'entries_ok', n)
+PY (Measure OBB files and infer expected size from idx)
+- Execute: python3 << 'PY'
+from pathlib import Path
+import struct
+
+def parse_idx(path):
+    b=Path(path).read_bytes()
+    # try header of 8 bytes: n1, n2
+    n1,n2=struct.unpack_from('<II', b, 0)
+    print(f'\n{path} size={len(b)} n1={n1} n2={n2}')
+    entries=[]
+    i=8
+    while i+6 <= len(b):
+        off,=struct.unpack_from('<I', b, i)
+        nlen,=struct.unpack_from('<H', b, i+4)
+        i+=6
+        if nlen==0 or nlen>256 or i+nlen>len(b):
+            print('  stop at', i-6, 'off', hex(off), 'nlen', nlen)
+            break
+        name=b[i:i+nlen].decode('ascii','replace')
+        i+=nlen
+        entries.append((off,name))
+    print('  parsed', len(entries), 'consumed', i, 'remain', len(b)-i)
+    if not entries: return
+    offs=[e[0] for e in entries]
+    print('  min off', hex(min(offs)), 'max off', hex(max(offs)), max(offs), 'GB', max(offs)/1024**3)
+    print('  first5:')
+    for e in entries[:5]:
+        print('   ', hex(e[0]), e[1])
+    print('  last5:')
+    for e in entries[-5:]:
+        print('   ', hex(e[0]), e[1])
+    # sizes from next offset
+    sizes=[]
+    for k,(off,name) in enumerate(entries):
+        nxt = entries[k+1][0] if k+1<len(entries) else None
+        if nxt is not None and nxt>=off:
+            sizes.append((name, nxt-off, off))
+    if sizes:
+        big=sorted(sizes, key=lambda x:-x[1])[:8]
+        print('  largest inferred:')
+        for name,sz,off in big:
+            print(f'    {sz:12d} {sz/1024**2:8.1f}MB @ {hex(off)} {name}')
+    return entries
+
+e1=parse_idx('/tmp/gta-iter13-80/PS3DataMain.obb.idx')
+e2=parse_idx('/tmp/gta-iter13-80/PS3Data.obb.idx')
+print('\nfile PS3DataMain.obb actual', 1073739776, hex(1073739776))
+print('file PS3Data.obb actual', 708640703, hex(708640703))
+if e1:
+    print('Main idx max offset vs file', max(o for o,_ in e1), 'overflow', max(o for o,_ in e1)+1-1073739776)
+if e2:
+    print('Data idx max offset vs file', max(o for o,_ in e2), 'overflow', max(o for o,_ in e2)+1-708640703)
+PY (Parse OBB idx entries and compare to file size)
+- Execute: python3 << 'PY'
+from pathlib import Path
+b=Path('/tmp/gta-iter13-80/PS3DataMain.obb.idx').read_bytes()
+# dump as mixed ascii
+out=[]
+i=0
+while i<len(b):
+    # find printable runs
+    if 32<=b[i]<127:
+        j=i
+        while j<len(b) and 32<=b[j]<127: j+=1
+        if j-i>=3:
+            prefix=b[max(0,i-8):i]
+            print(f'{i:04x} pre={prefix.hex()} str={b[i:j]!r}')
+        i=j
+    else:
+        i+=1
+
+print('\n--- try record: u32le off, u32le size, u16le nlen, name ---')
+import struct
+i=8
+ents=[]
+while i+10<=len(b):
+    off,sz,nlen=struct.unpack_from('<IIH', b, i)
+    if nlen==0 or nlen>200 or i+10+nlen>len(b):
+        print('fail at', i, hex(off), sz, nlen)
+        break
+    name=b[i+10:i+10+nlen]
+    if not all(32<=c<127 or c in (47,46,95) for c in name):
+        print('bad name at', i, name[:20])
+        break
+    ents.append((off,sz,name.decode()))
+    i+=10+nlen
+print('count', len(ents), 'end', i)
+if ents:
+    print('max off+sz', max(o+s for o,s,_ in ents), hex(max(o+s for o,s,_ in ents)))
+    print('max off', max(o for o,_,_ in ents), hex(max(o for o,_,_ in ents)))
+    for e in ents[:8]:
+        print(hex(e[0]), e[1], e[2])
+    print('...')
+    for e in ents[-5:]:
+        print(hex(e[0]), e[1], e[2])
+PY (Hex/ASCII parse of PS3DataMain.obb.idx layout)
+- Execute: python3 << 'PY'
+from pathlib import Path
+import struct,re
+b=Path('/tmp/gta-iter13-80/PS3DataMain.obb.idx').read_bytes()
+
+# scan: u16le nlen at i, name follows, valid path chars
+ents=[]
+i=0
+while i+2 < len(b):
+    nlen=struct.unpack_from('<H', b, i)[0]
+    if 4<=nlen<=80 and i+2+nlen<=len(b):
+        name=b[i+2:i+2+nlen]
+        if all(c in b'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789._/-' for c in name) and b'/' in name or name.endswith(b'.txt') or name.endswith(b'.dat') or name.endswith(b'.ide') or name.endswith(b'.ipl') or name.endswith(b'.img') or name.endswith(b'.col') or name.endswith(b'.cfg') or name.endswith(b'.ini') or name.endswith(b'.BIN') or name.endswith(b'.osw') or name.endswith(b'.fxp') or name.endswith(b'.ifp'):
+            # 4 bytes before nlen as offset
+            if i>=4:
+                off=struct.unpack_from('<I', b, i-4)[0]
+                ents.append((off, name.decode(), i-4))
+            i+=2+nlen
+            continue
+    i+=1
+print('entries', len(ents))
+offs=[e[0] for e in ents]
+print('min', hex(min(offs)), min(offs), 'max', hex(max(offs)), max(offs), f'{max(offs)/1024**3:.3f} GiB')
+print('file size', 1073739776, f'{1073739776/1024**3:.3f} GiB')
+over=[e for e in ents if e[0]>=1073739776]
+print('entries with offset >= filesize', len(over), 'of', len(ents))
+print('first 8')
+for e in ents[:8]:
+    print(f'  {e[0]:12d} {hex(e[0]):12s} {e[1]}')
+print('last 10')
+for e in ents[-10:]:
+    print(f'  {e[0]:12d} {hex(e[0]):12s} {e[1]}')
+print('first 8 OVER')
+for e in over[:8]:
+    print(f'  {e[0]:12d} {hex(e[0]):12s} {e[1]}')
+# typical needed size: max offset + 64MB guess
+print('needed at least max offset', max(offs))
+PY (Scan idx for path records and max OBB offset)
+- Search: likely crashed|EmulatorState.Frozen|has likely crashed
+- Search: thread context
+- Search: likely crashed|application has
+- Search: cpu_thread::dump|dump_all
+- Read: /home/abhaybyte/repos/samba-s3/app/src/main/cpp/rpcsx/android/src/rpcsx-android.cpp (521-580)
+- Read: /home/abhaybyte/repos/samba-s3/app/src/main/cpp/rpcsx/rpcs3/Emu/CPU/CPUThread.cpp (71-120)
+- Execute: SERIAL=Y5WWBMJVOZSK4HU8
+# search for other copies of PS3DataMain
+adb -s $SERIAL shell "find /storage/emulated/0 -name 'PS3DataMain.obb*' 2>/dev/null | head -20"
+echo '---'
+adb -s $SERIAL shell "df -h /storage/emulated/0 | tail -1"
+# prefs calling history
+adb -s $SERIAL shell 'run-as com.zenithblue.sambas3 cat shared_prefs/sambas3_game_overrides.xml' (Find other OBB copies and current override prefs)
+- Read: /home/abhaybyte/repos/samba-s3/docs/games/BLUS31584-GTA-San-Andreas.md (101-130)
+- Edit: /home/abhaybyte/repos/samba-s3/docs/games/BLUS31584-GTA-San-Andreas.md
+- Edit: /home/abhaybyte/repos/samba-s3/docs/games/BLUS31584-GTA-San-Andreas.md
+- Edit: /home/abhaybyte/repos/samba-s3/docs/games/README.md
+
+## Assistant
+
+80% is real progress. The 50% null-deref is gone; the freeze now is missing game data, not Mali settings.
+
+**What changed**
+- Iter 12 Interpreter made the game crawl (and was aborted). LLVM is back on.
+- Iter 13 applied a PPU skip at the old crash (`0x3349c8`) plus LLVM. **Access violation count is 0.** The bar moved from ~50% (Big Smoke) to **~80%** (bandana CJ).
+- The remaining freeze is `EMULATION_FROZEN` while the loader still prints `Too many objects without modelinfo`.
+
+**Why 80% still dies**
+
+`PS3DataMain.obb` on the device is truncated:
+
+| | Size |
+|---|---|
+| File on disk | **1 073 739 776 bytes** (`0x3ffff800` = 1 GiB − 2 KiB) |
+| Game `lseek` at freeze | **1 479 556 240 bytes** (`0x5820bc90` ≈ 1.38 GiB) |
+
+Log line: `sys_fs_close(...PS3DataMain.obb) Pos/Size: 1.377GB/0.999998GB`. The game reads ~400 MB past EOF, gets zeros, objects spawn with no modelinfo, then it freezes. Video/Core toggles cannot invent those bytes. There is 183 GB free, so this is a bad copy, not a full disk.
+
+**What you need to do**
+
+Replace this file with a **complete** copy from the original dump (must be **larger than ~1.38 GiB**, not exactly 1 GiB−2 KiB):
+
+`/storage/emulated/0/Android/data/com.zenithblue.sambas3/files/config/games/BLUS31584/PS3_GAME/USRDIR/PS3DataMain.obb`
+
+After that, launch again on **LLVM** (do not use Interpreter). The skip patch can stay as a safety net. If it still dies, we patch the later CIA `0x2b2eb4` the same way.
+
+I cannot finish in-game until that OBB is complete — the loader is asking for data that is not on the device.
+
+## User
+
+can u fix??
+
+## Assistant
+
+I’ll look for a complete `PS3DataMain.obb` (or split parts) on the device and this machine so we can replace the truncated 1 GiB copy.
+
+## Tools
+
+- WebSearch: PS3DataMain.obb.idx GTA San Andreas PS3 format size
+
+## Assistant
+
+There's another copy under `com.armsx3`, and the `.obb` may be a ZIP. I’ll check integrity, uncompressed size, and whether we can rebuild it so seeks stop going past EOF.
+
+## Tools
+
+- Execute: SERIAL=Y5WWBMJVOZSK4HU8
+USR=/storage/emulated/0/Android/data/com.zenithblue.sambas3/files/config/games/BLUS31584/PS3_GAME/USRDIR
+echo '=== magic bytes ==='
+adb -s $SERIAL shell "xxd -l 16 $USR/PS3DataMain.obb; echo ---; xxd -l 16 $USR/PS3Data.obb"
+echo '=== armsx3 dump ==='
+adb -s $SERIAL shell "ls -lh /storage/emulated/0/Android/data/com.armsx3/files/config/dev_hdd0/game/＄locks/BLUS31584_v01.00 2>/dev/null; find /storage/emulated/0/Android/data/com.armsx3 -iname '*PS3Data*' -o -iname '*BLUS31584*' 2>/dev/null | head -40"
+echo '=== samba cache ==='
+adb -s $SERIAL shell "ls -lh /storage/emulated/0/Android/data/com.zenithblue.sambas3/files/cache/cache/BLUS31584 2>/dev/null | head" (Check OBB magic and armsx3 GTA dump)
+- Execute: SERIAL=Y5WWBMJVOZSK4HU8
+USR=/storage/emulated/0/Android/data/com.zenithblue.sambas3/files/config/games/BLUS31584/PS3_GAME/USRDIR
+# tail of zip should be EOCD PK\x05\x06
+echo '=== Main EOCD tail ==='
+adb -s $SERIAL shell "xxd -s -64 $USR/PS3DataMain.obb"
+echo '=== Data EOCD tail ==='
+adb -s $SERIAL shell "xxd -s -64 $USR/PS3Data.obb"
+echo '=== unzip -l if available ==='
+adb -s $SERIAL shell "which unzip; unzip -l $USR/PS3DataMain.obb 2>&1 | tail -20" (Check ZIP EOCD and list PS3DataMain.obb)
+- Execute: df -h /tmp /home/abhaybyte | awk 'NR==1 || /tmp|home/'
+SERIAL=Y5WWBMJVOZSK4HU8
+USR=/storage/emulated/0/Android/data/com.zenithblue.sambas3/files/config/games/BLUS31584/PS3_GAME/USRDIR
+SIZE=1073739776
+SKIP=$((SIZE-128))
+echo "=== last 128 bytes Main ==="
+adb -s $SERIAL exec-out "dd if=$USR/PS3DataMain.obb bs=1 skip=$SKIP count=128 2>/dev/null" | xxd
+echo "=== last 128 Data ==="
+DS=$(adb -s $SERIAL shell "stat -c %s $USR/PS3Data.obb" | tr -d '\r')
+echo data size $DS
+adb -s $SERIAL exec-out "dd if=$USR/PS3Data.obb bs=1 skip=$((DS-128)) count=128 2>/dev/null" | xxd (Read ZIP tails and check host disk space)
+- Execute: SERIAL=Y5WWBMJVOZSK4HU8
+USR=/storage/emulated/0/Android/data/com.zenithblue.sambas3/files/config/games/BLUS31584/PS3_GAME/USRDIR
+mkdir -p /tmp/gta-obb
+# pull the COMPLETE small zip listing via unzip on a copy... unzip failed on Main but Data should work
+adb -s $SERIAL pull $USR/PS3Data.obb.idx /tmp/gta-obb/
+echo '=== unzip -l Data ==='
+adb -s $SERIAL shell "unzip -l $USR/PS3Data.obb" > /tmp/gta-obb/data-unzip-l.txt
+tail -15 /tmp/gta-obb/data-unzip-l.txt
+head -20 /tmp/gta-obb/data-unzip-l.txt
+wc -l /tmp/gta-obb/data-unzip-l.txt (List complete PS3Data.obb zip to reverse idx format)
+- Read: /tmp/gta-obb/PS3Data.obb.idx
+- Execute: python3 - << 'PY'
+from pathlib import Path
+import struct
+b=Path('/tmp/gta-obb/PS3Data.obb.idx').read_bytes() if Path('/tmp/gta-obb/PS3Data.obb.idx').exists() else Path('/tmp/gta-iter13-80/PS3Data.obb.idx').read_bytes()
+print('len', len(b))
+print(b[:200].hex())
+# dump all as hex+ascii
+def dump(b):
+    for i in range(0,len(b),16):
+        h=' '.join(f'{x:02x}' for x in b[i:i+16])
+        a=''.join(chr(x) if 32<=x<127 else '.' for x in b[i:i+16])
+        print(f'{i:04x}  {h:<48} {a}')
+dump(b[:256])
+PY (Hex dump start of working PS3Data.obb.idx)
+- Execute: python3 << 'PY'
+import struct, zipfile
+from pathlib import Path
+
+def parse_idx(path):
+    b=Path(path).read_bytes()
+    n=struct.unpack_from('<I', b, 0)[0]
+    ents=[]
+    i=4
+    for k in range(n):
+        if i+10>len(b):
+            print('truncated idx at', k); break
+        off, sz, nlen = struct.unpack_from('<IIH', b, i)
+        i+=10
+        name=b[i:i+nlen].decode('ascii','replace')
+        i+=nlen
+        ents.append((off,sz,name))
+    print(path, 'count', n, 'parsed', len(ents), 'consumed', i, 'filelen', len(b))
+    return ents
+
+ents=parse_idx('/tmp/gta-obb/PS3Data.obb.idx')
+print('first3', ents[:3])
+print('max off+sz', max(o+s for o,s,_ in ents), hex(max(o+s for o,s,_ in ents)))
+
+z=zipfile.ZipFile('/tmp/gta-obb/PS3Data.obb')
+print('zip files', len(z.namelist()), 'testzip', z.testzip())
+# map name -> (header_offset, file_size, data_offset)
+mismatch=0
+for info in z.infolist():
+    data_off = info.header_offset + 30 + len(info.filename.encode()) + len(info.extra)
+    rec=next((e for e in ents if e[2]==info.filename), None)
+    if not rec:
+        print('NOT IN IDX', info.filename, 'data_off', data_off, 'size', info.file_size)
+        mismatch+=1
+        continue
+    off,sz,name=rec
+    if off!=data_off or sz!=info.file_size:
+        print('MISMATCH', name, 'idx', off, sz, 'zip', data_off, info.file_size, 'method', info.compress_type)
+        mismatch+=1
+print('mismatches', mismatch)
+print('compress types', set(i.compress_type for i in z.infolist()))
+PY (Verify idx format against complete PS3Data.obb zip)
+- Execute: python3 << 'PY'
+import zipfile, struct
+z=zipfile.ZipFile('/tmp/gta-obb/PS3Data.obb')
+info=z.infolist()[0]
+print('name', info.filename)
+print('header_offset', info.header_offset)
+print('compress', info.compress_type, 'file_size', info.file_size, 'compress_size', info.compress_size)
+print('extra len', len(info.extra), 'extra', info.extra.hex() if info.extra else None)
+print('flag_bits', info.flag_bits)
+# raw local header
+with open('/tmp/gta-obb/PS3Data.obb','rb') as f:
+    f.seek(0)
+    hdr=f.read(30)
+    print('raw hdr', hdr.hex())
+    ver,flag,method,time,date,crc,csz,usz,nlen,elen=struct.unpack('<HHHHIIIHH', hdr[4:30])
+    print('nlen', nlen, 'elen', elen, 'method', method, 'usz', usz, 'csz', csz)
+    name=f.read(nlen)
+    extra=f.read(elen)
+    print('name', name, 'extra', extra.hex(), 'elen', elen)
+    print('data starts at', f.tell())
+PY (Inspect ZIP local header vs idx offset delta)
+- Execute: python3 << 'PY'
+import struct, os, zipfile, zlib
+from pathlib import Path
+
+MAIN='/tmp/gta-obb/PS3DataMain.obb'
+size=os.path.getsize(MAIN)
+
+def walk_local(path):
+    ents=[]
+    with open(path,'rb') as f:
+        pos=0
+        while pos+30 <= size:
+            f.seek(pos)
+            magic=f.read(4)
+            if magic != b'PK\x03\x04':
+                print(f'stop at {pos} magic={magic!r} / {magic.hex()}')
+                break
+            hdr=f.read(26)
+            if len(hdr)<26:
+                print('short hdr at', pos); break
+            ver,flag,method,time,date,crc,csz,usz,nlen,elen=struct.unpack('<HHHHIIIHH', hdr)
+            name=f.read(nlen)
+            extra=f.read(elen)
+            data_off=pos+30+nlen+elen
+            if data_off+csz > size:
+                print(f'TRUNCATED file {name.decode("ascii","replace")} need {csz} bytes data, have {size-data_off}')
+                break
+            ents.append(dict(pos=pos, name=name.decode('ascii','replace'), method=method,
+                             crc=crc, csz=csz, usz=usz, nlen=nlen, elen=elen,
+                             time=time, date=date, data_off=data_off, flag=flag, ver=ver))
+            pos=data_off+csz
+        leftover=size-pos
+        print('files complete', len(ents), 'next_pos', pos, 'leftover', leftover)
+    return ents, pos
+
+ents, endpos = walk_local(MAIN)
+print('names sample', [e['name'] for e in ents[:8]], '...', [e['name'] for e in ents[-8:]])
+print('total payload', sum(e['usz'] for e in ents))
+# check last few
+for e in ents[-5:]:
+    print(f"  {e['data_off']:12d}+{e['usz']:<10d} {e['name']}")
+
+# rebuild zip: keep bytes[0:endpos] as local files, append central directory
+def make_cd_entry(e, local_off):
+    name=e['name'].encode('ascii')
+    # PK\x01\x02
+    # ver_made, ver_need, flag, method, time, date, crc, csz, usz, nlen, elen, clen, disk, intattr, extattr, rel
+    return (b'PK\x01\x02' +
+            struct.pack('<HHHHHHIIIHHHHHII',
+                        0x3f, e['ver'], e['flag'], e['method'], e['time'], e['date'],
+                        e['crc'], e['csz'], e['usz'], len(name), 0, 0, 0, 0, 0, local_off)
+            + name)
+
+out='/tmp/gta-obb/PS3DataMain.obb.fixed'
+with open(MAIN,'rb') as inf, open(out,'wb') as outf:
+    outf.write(inf.read(endpos))
+    cd_start=outf.tell()
+    cd=b''
+    for e in ents:
+        cd += make_cd_entry(e, e['pos'])
+    outf.write(cd)
+    cd_size=len(cd)
+    # EOCD
+    outf.write(b'PK\x05\x06' + struct.pack('<HHHHIIH',
+        0,0, len(ents), len(ents), cd_size, cd_start, 0))
+print('wrote', out, 'size', os.path.getsize(out))
+
+z=zipfile.ZipFile(out)
+print('zipfile count', len(z.namelist()), 'testzip', z.testzip())
+# rebuild idx
+idx_path='/tmp/gta-obb/PS3DataMain.obb.idx'
+idx=struct.pack('<I', len(ents))
+for e in ents:
+    name=e['name'].encode('ascii')
+    idx += struct.pack('<IIH', e['data_off'], e['usz'], len(name)) + name
+Path(idx_path).write_bytes(idx)
+print('idx bytes', len(idx), 'entries', len(ents))
+print('idx max end', max(e['data_off']+e['usz'] for e in ents))
+PY (Recover truncated Main zip CD and rebuild idx)
+- Execute: python3 << 'PY'
+import struct, os, zipfile
+from pathlib import Path
+
+MAIN='/tmp/gta-obb/PS3DataMain.obb'
+size=os.path.getsize(MAIN)
+FMT='<HHHHHIIIHH'  # 26 bytes
+
+def walk_local(path):
+    ents=[]
+    with open(path,'rb') as f:
+        pos=0
+        while pos+30 <= size:
+            f.seek(pos)
+            magic=f.read(4)
+            if magic != b'PK\x03\x04':
+                print(f'stop at {pos} magic={magic!r} hex={magic.hex()}')
+                break
+            hdr=f.read(26)
+            if len(hdr)<26:
+                print('short hdr at', pos); break
+            ver,flag,method,time,date,crc,csz,usz,nlen,elen=struct.unpack(FMT, hdr)
+            name=f.read(nlen)
+            extra=f.read(elen)
+            data_off=pos+30+nlen+elen
+            if data_off+csz > size:
+                print(f'TRUNCATED {name.decode("ascii","replace")!r} need {csz} have {size-data_off} (pos={pos})')
+                break
+            ents.append(dict(pos=pos, name=name.decode('ascii','replace'), method=method,
+                             crc=crc, csz=csz, usz=usz, nlen=nlen, elen=elen,
+                             time=time, date=date, data_off=data_off, flag=flag, ver=ver))
+            pos=data_off+csz
+        leftover=size-pos if pos<=size else 0
+        print('files complete', len(ents), 'next_pos', pos, 'leftover', leftover)
+    return ents, pos
+
+ents, endpos = walk_local(MAIN)
+print('first', [e['name'] for e in ents[:6]])
+print('last', [e['name'] for e in ents[-8:]])
+print('total usz', sum(e['usz'] for e in ents))
+for e in ents[-5:]:
+    print(f"  {e['data_off']:12d}+{e['usz']:<12d} {e['name']}")
+
+def make_cd_entry(e):
+    name=e['name'].encode('ascii')
+    return (b'PK\x01\x02' +
+            struct.pack('<HHHHHHIIIHHHHHII',
+                        0x3f, e['ver'], e['flag'], e['method'], e['time'], e['date'],
+                        e['crc'], e['csz'], e['usz'], len(name), 0, 0, 0, 0, 0, e['pos'])
+            + name)
+
+out='/tmp/gta-obb/PS3DataMain.obb.fixed'
+with open(MAIN,'rb') as inf, open(out,'wb') as outf:
+    # copy complete local files only
+    inf.seek(0)
+    outf.write(inf.read(endpos))
+    cd_start=outf.tell()
+    cd=b''.join(make_cd_entry(e) for e in ents)
+    outf.write(cd)
+    outf.write(b'PK\x05\x06' + struct.pack('<HHHHIIH', 0,0,len(ents),len(ents),len(cd),cd_start,0))
+print('wrote', out, os.path.getsize(out))
+z=zipfile.ZipFile(out)
+print('zip count', len(z.namelist()), 'testzip', z.testzip())
+idx=struct.pack('<I', len(ents))
+for e in ents:
+    name=e['name'].encode('ascii')
+    idx += struct.pack('<IIH', e['data_off'], e['usz'], len(name)) + name
+Path('/tmp/gta-obb/PS3DataMain.obb.idx').write_bytes(idx)
+print('idx', len(idx), 'orig idx was 8216 for 244 files')
+print('recovered', len(ents), 'of expected ~244')
+# which expected names missing vs original idx strings
+orig=Path('/tmp/gta-iter13-80/PS3DataMain.obb.idx').read_bytes()
+import re
+orig_names=re.findall(rb'[\w./-]+\.(?:img|ide|ipl|dat|cfg|col|osw|idx|txt|ifp|BIN|fxp|ini|gxt)', orig)
+print('orig path-like strings', len(orig_names))
+got=set(e['name'] for e in ents)
+miss=[n.decode() for n in orig_names if n.decode() not in got]
+print('missing from recovered (sample)', miss[:20], 'count', len(miss))
+# important models
+for key in ['gta3.img','anim.img','peds.col','models/','texdb']:
+    print(key, [e['name'] for e in ents if key in e['name'].lower() or key in e['name']])
+PY (Walk local headers, rebuild ZIP+idx for Main OBB)
+- Execute: echo '=== qcom ==='
+adb -s 2a580689 shell "find /storage/emulated/0 -iname '*PS3Data*' -o -iname '*BLUS31584*' 2>/dev/null | head"
+echo '=== host dumps ==='
+find /home/abhaybyte /mnt /media /opt /var -iname '*PS3DataMain*' -o -iname '*BLUS31584*.iso' 2>/dev/null | head
+ls /home/abhaybyte/Downloads /home/abhaybyte/games 2>/dev/null | head
+echo '=== recovered files vs needed maps ==='
+python3 - << 'PY'
+import zipfile
+z=zipfile.ZipFile('/tmp/gta-obb/PS3DataMain.obb.fixed')
+print('recovered', len(z.namelist()))
+print('\n'.join(z.namelist()))
+PY (Search other devices/disks; list recovered Main files)
+
+## Assistant
+
+I can’t restore the missing game data from what’s on the device. The copy is physically cut off.
+
+I pulled `PS3DataMain.obb` and walked the ZIP local headers. It is a **STORE zip with no end-of-central-directory** (truncated mid-file). Recovery got **35 of ~244 files**, then it dies inside:
+
+`audio/STREAMS/AMBIENCE.osw` (needed 22.7 MB, only 17.0 MB present)
+
+Everything after that is gone, including what New Game actually needs:
+
+- all `data/maps/*.ide` / `*.ipl`
+- `models/`
+- remaining radio/cutscene `.osw` streams
+
+What’s still there is only `anim/*` plus SFX/audio. There is no second copy on this phone or on the host to splice in. Padding or rebuilding a 35-file zip would make loading worse, not better.
+
+**Fix:** recopy the **complete** `PS3DataMain.obb` from the original dump over:
+
+`/storage/emulated/0/Android/data/com.zenithblue.sambas3/files/config/games/BLUS31584/PS3_GAME/USRDIR/PS3DataMain.obb`
+
+Check before launch:
+
+```bash
+stat -c '%s' .../PS3DataMain.obb
+# must NOT be 1073739776 (1 GiB − 2 KiB)
+# unzip -l should list ~244 files and end with PK\x05\x06
+```
+
+After that, keep LLVM (not Interpreter) and the skip patch. The 50%→80% move already proved the emulator path works; the remaining freeze is empty reads past EOF. Drop the new file in and we can relaunch.
+
+## User
+
+is game data cutoff or ps3 backend data cutoff??
+
+## Assistant
+
+**Game data is cut off. The PS3 backend is not.**
+
+`PS3DataMain.obb` sits in the **disc dump**, not in firmware or RPCSX cache:
+
+```
+.../config/games/BLUS31584/PS3_GAME/USRDIR/PS3DataMain.obb
+```
+
+That is GTA’s packed asset ZIP (`anim/`, `audio/SFX/`, `audio/STREAMS/`, maps/models). The loader opens it as `/dev_bdvd/PS3_GAME/USRDIR/PS3DataMain.obb`.
+
+| What | Status |
+|---|---|
+| **GTA `PS3DataMain.obb`** | **Cut off** — ZIP with no end directory, stops mid-`audio/STREAMS/AMBIENCE.osw`. 35/244 files present. File size exactly `1 GiB − 2 KiB`. |
+| **GTA `PS3Data.obb`** | Complete (valid `PK\x05\x06`, 76 files). |
+| **Firmware `dev_flash`** | Present (`release:04.9200`). |
+| **RPCSX/PPU cache** | Separate under `files/cache/…`. Not this freeze. |
+
+The 80% freeze is the **game** seeking ~1.38 GiB into that OBB and reading past EOF, so map/model files never load (`Too many objects without modelinfo`). Replacing that one game file with a full copy is the fix — not a backend rebuild.
+
+## User
+
+game iso is at download is it not complete
+
+## Assistant
+
+I’ll check the ISO in Downloads against the truncated `PS3DataMain.obb` on the device.
+
+## Tools
+
+- Execute: ls -lh /home/abhaybyte/Downloads 2>/dev/null | head -80
+echo '=== iso/ps3/gta ==='
+find /home/abhaybyte/Downloads /home/abhaybyte -maxdepth 4 \( -iname '*.iso' -o -iname '*BLUS31584*' -o -iname '*San*Andreas*' -o -iname '*PS3DataMain*' \) 2>/dev/null | head -50 (Find GTA SA ISO in Downloads)
+- Execute: echo "HOME=$HOME"
+xdg-user-dir DOWNLOAD 2>/dev/null
+echo '=== find iso/gta/ps3 in home (depth 5, skip .cache) ==='
+find /home/abhaybyte -path '*/.cache/*' -prune -o -path '*/.local/share/Trash/*' -prune -o \( -iname '*gta*' -o -iname '*san*andreas*' -o -iname '*BLUS31584*' -o -iname '*.iso' -o -iname '*PS3DataMain*' \) -print 2>/dev/null | head -80
+echo '=== incomplete downloads ==='
+find /home/abhaybyte/Downloads /home/abhaybyte -maxdepth 3 \( -iname '*.part' -o -iname '*.crdownload' -o -iname '*.aria2' -o -iname '*.!qB' \) 2>/dev/null | head
+ls -lah /home/abhaybyte/Downloads/*.iso /home/abhaybyte/Downloads/*.ISO /home/abhaybyte/Downloads/*GTA* /home/abhaybyte/Downloads/*gta* 2>/dev/null
+echo '=== maybe nested ==='
+ls -lah /home/abhaybyte/Downloads/*/ 2>/dev/null | head -40 (Broader search for GTA ISO and incomplete downloads)
+- Execute: SERIAL=Y5WWBMJVOZSK4HU8
+echo '=== phone Download ==='
+adb -s $SERIAL shell "ls -lh /storage/emulated/0/Download /storage/emulated/0/Downloads 2>/dev/null | head -60"
+echo '=== phone iso/gta ==='
+adb -s $SERIAL shell "find /storage/emulated/0/Download /storage/emulated/0/Downloads /storage/emulated/0 -maxdepth 3 \( -iname '*.iso' -o -iname '*gta*' -o -iname '*BLUS31584*' -o -iname '*SanAndreas*' -o -iname '*PS3Data*' \) 2>/dev/null | head -40" (Search phone Download folder for GTA ISO)
+
+## Assistant
+
+Found the ISO on the phone. I’ll check its size and whether `PS3DataMain.obb` inside is complete.
+
+## Tools
+
+- Execute: SERIAL=Y5WWBMJVOZSK4HU8
+ISO='/storage/emulated/0/Download/Quick Share/Grand Theft Auto - San Andreas (USA) (En,Fr,De,Es,It,Ru).iso'
+adb -s $SERIAL shell "ls -lh \"$ISO\"; stat -c '%n %s' \"$ISO\""
+echo '=== host tools ==='
+which 7z isoinfo udfinfo mount.udf python3
+# try listing UDF from device via adb pull of just the start?  ISO may be huge
+# first get size only then decide (Get GTA ISO file size on phone)
+
+## Assistant
+
+The ISO is complete: `PS3DataMain.obb` inside is **1.38 GiB**. The copy in the game folder is the truncated 1 GiB file. I’ll extract the full OBB from the ISO and replace it on the device.
+
+## Tools
+
+- Execute: cd /tmp/gta-obb
+# see 7z error
+7z l gta-sa.iso 2>&1 | grep -E 'Error|Warning|ERROR|WARN'
+echo '=== extract Main.obb ==='
+7z e -y gta-sa.iso PS3_GAME/USRDIR/PS3DataMain.obb PS3_GAME/USRDIR/PS3DataMain.obb.idx -o/tmp/gta-obb/iso-extract
+ls -lh /tmp/gta-obb/iso-extract/
+echo '=== verify zip ==='
+python3 - << 'PY'
+import zipfile, os, struct
+p='/tmp/gta-obb/iso-extract/PS3DataMain.obb'
+print('size', os.path.getsize(p))
+with open(p,'rb') as f:
+    f.seek(-22,2)
+    t=f.read(22)
+    print('eocd magic', t[:4], t[:4]==b'PK\x05\x06')
+z=zipfile.ZipFile(p)
+print('files', len(z.namelist()), 'testzip', z.testzip())
+print('has maps', sum(1 for n in z.namelist() if 'maps' in n or n.endswith('.ide') or n.endswith('.ipl')))
+print('sample last', z.namelist()[-8:])
+PY (Extract complete PS3DataMain.obb from ISO and verify ZIP)
+
+## Assistant
+
+Extraction ran out of disk space and wrote a partial file. I’ll free space, extract the full 1.38 GiB OBB, then copy it onto the device.
+
+## Tools
+
+- Execute: df -h /tmp /home/abhaybyte
+# free recovered/truncated copies; keep ISO
+rm -f /tmp/gta-obb/PS3Data.obb /tmp/gta-obb/PS3DataMain.obb /tmp/gta-obb/PS3DataMain.obb.fixed
+rm -rf /tmp/gta-obb/iso-extract
+df -h /tmp
+mkdir -p /tmp/gta-obb/iso-extract
+echo '=== extract ==='
+7z e -y /tmp/gta-obb/gta-sa.iso PS3_GAME/USRDIR/PS3DataMain.obb -o/tmp/gta-obb/iso-extract
+ls -lh /tmp/gta-obb/iso-extract/PS3DataMain.obb
+stat -c %s /tmp/gta-obb/iso-extract/PS3DataMain.obb (Free space and re-extract complete Main.obb)
+
+## User
+
+continue iso and see game file correct
+
+## Assistant
+
+The ISO itself is complete; the copy in the game folder was truncated. I’ll verify the ISO and extracted OBB, then get the full file onto the device.
+
+## Tools
+
+- Read: /home/abhaybyte/repos/samba-s3/.agents/skills/sambas3-game-launch/SKILL.md
+- Read: /home/abhaybyte/repos/samba-s3/.agents/skills/agent-device/SKILL.md
+- Read: /home/abhaybyte/repos/samba-s3/.agents/skills/sambas3-logs/SKILL.md
+- Read: /home/abhaybyte/repos/samba-s3/.agents/skills/sambas3-controller/SKILL.md
+
+## Assistant
+
+Checking device connection, ISO/OBB completeness, and the on-device game folder next.
+
+## Tools
+
+- Execute: adb devices -l; echo '---HOST OBB---'; ls -lh /tmp/gta-obb/iso-extract/PS3DataMain.obb /tmp/gta-obb/gta-sa.iso 2>/dev/null; python3 - <<'PY'
+import os,struct,zipfile
+p='/tmp/gta-obb/iso-extract/PS3DataMain.obb'
+if os.path.exists(p):
+    sz=os.path.getsize(p)
+    print('host_main_obb',sz)
+    with open(p,'rb') as f:
+        f.seek(-22,2); sig=f.read(4)
+        print('eocd',sig)
+    try:
+        z=zipfile.ZipFile(p)
+        n=len(z.namelist())
+        print('zip_files',n)
+        names=z.namelist()
+        print('has_CINFO', any('CINFO.BIN' in x for x in names))
+        print('ide_ipl', sum(1 for x in names if x.lower().endswith(('.ide','.ipl'))))
+        z.close()
+    except Exception as e:
+        print('zip_err',e)
+else:
+    print('host_obb_missing')
+PY
+echo '---ISO DOWNLOAD ON PHONE---'
+adb -s Y5WWBMJVOZSK4HU8 shell 'ls -lh "/storage/emulated/0/Download/Quick Share/" 2>/dev/null; ls -lh /storage/emulated/0/Download/*.iso 2>/dev/null; find /storage/emulated/0/Download -iname "*San Andreas*" -o -iname "*GTA*" -o -iname "*.iso" 2>/dev/null | head -50' (Check adb, host OBB, phone ISO paths)
+- Read: /home/abhaybyte/repos/samba-s3/docs/games/BLUS31584-GTA-San-Andreas.md (2-81)
+
+## Assistant
+
+Device is back. Checking the game-folder OBB against the complete ISO extract.
+
+## Tools
+
+- Execute: SERIAL=Y5WWBMJVOZSK4HU8
+USRDIR=/storage/emulated/0/Android/data/com.zenithblue.sambas3/files/config/games/BLUS31584/PS3_GAME/USRDIR
+ISO='/storage/emulated/0/Download/Quick Share/Grand Theft Auto - San Andreas (USA) (En,Fr,De,Es,It,Ru).iso'
+echo '=== ISO exact size ==='
+adb -s $SERIAL shell "stat -c '%s %n' \"$ISO\""
+echo '=== Game folder USRDIR ==='
+adb -s $SERIAL shell "ls -la $USRDIR"
+echo '=== OBB exact sizes ==='
+adb -s $SERIAL shell "stat -c '%s %n' $USRDIR/PS3Data*.obb $USRDIR/PS3Data*.idx 2>/dev/null; ls -la $USRDIR/"
+echo '=== Host OBB md5 first 16MB ==='
+md5sum /tmp/gta-obb/iso-extract/PS3DataMain.obb | awk '{print $1}'
+python3 - <<'PY'
+import os
+host=1479813213
+print('expected_main', host)
+print('truncated_was', 1073739776)
+print('delta', host-1073739776)
+PY
+echo '=== Free space on device ==='
+adb -s $SERIAL shell "df -h /storage/emulated/0 | tail -1"
+echo '=== Other OBBs in iso extract ==='
+ls -lh /tmp/gta-obb/iso-extract/ (Compare on-device OBB vs complete ISO extract)
+
+## Assistant
+
+ISO is complete; the previous push died mid-copy (`Main.obb` is 1.16 GiB vs 1.38 GiB). Extracting remaining ISO files and re-pushing the full OBB.
+
+## Tools
+
+- Execute: ls -lh /tmp/gta-obb/; echo '---ISO LIST---'
+7z l /tmp/gta-obb/gta-sa.iso 2>/dev/null | tail -80
+echo '---isoinfo---'
+which isoinfo 7z python3; file /tmp/gta-obb/gta-sa.iso (List ISO contents and extract tools)
+- Execute: 7z l -slt /tmp/gta-obb/gta-sa.iso | sed -n '/PS3DataMain.obb$/,/^$/p'
+echo '==== ALL USRDIR ===='
+7z l -slt /tmp/gta-obb/gta-sa.iso | grep -E 'Path = |Size = |Position = |Offset = |Physical = |Packed' (Get ISO byte offsets for OBB files)
+- Execute: kill $(pgrep -f "iso='/tmp/gta-obb/gta-sa.iso'" ) 2>/dev/null; python3 - <<'PY'
+import os
+iso='/tmp/gta-obb/gta-sa.iso'
+obb='/tmp/gta-obb/iso-extract/PS3DataMain.obb'
+with open(obb,'rb') as f:
+    needle=f.read(64)
+    obb_size=os.path.getsize(obb)
+    f.seek(-22,2)
+    eocd=f.read(22)
+print('obb', obb_size, 'needle', needle[:8], 'eocd', eocd[:4])
+# sliding window search 2MB chunks
+offset=-1
+with open(iso,'rb') as f:
+    buf=b''
+    pos=0
+    chunk=2*1024*1024
+    while True:
+        data=f.read(chunk)
+        if not data:
+            break
+        window=buf+data
+        i=window.find(needle)
+        if i>=0:
+            offset=pos-len(buf)+i
+            break
+        buf=window[-len(needle)+1:]
+        pos+=len(data)
+print('offset', offset)
+if offset>=0:
+    print('sector', offset//2048, 'mod', offset%2048)
+    # verify first 1MB and last 64 bytes
+    with open(iso,'rb') as f, open(obb,'rb') as o:
+        f.seek(offset)
+        a=f.read(1024*1024)
+        b=o.read(1024*1024)
+        print('first1MB', a==b)
+        f.seek(offset+obb_size-22)
+        o.seek(obb_size-22)
+        print('eocd_iso', f.read(22), 'eocd_obb', o.read(22))
+PY (Stream-search ISO for Main.obb offset)
+- Execute: ps -eo pid,cmd | grep -E '[p]ython3' | grep gta-obb (Find hung ISO-search python PID)
+- Execute: ps --ppid 762082 -o pid,cmd; kill 762082 2>/dev/null; pkill -P 762082 2>/dev/null; sleep 0.5; ps -eo pid,cmd | awk '/gta-sa.iso/ && !/awk/' (Kill memory-heavy ISO search process)
+- Execute: python3 - <<'PY'
+import os
+iso='/tmp/gta-obb/gta-sa.iso'
+obb='/tmp/gta-obb/iso-extract/PS3DataMain.obb'
+with open(obb,'rb') as f:
+    needle=f.read(64)
+    obb_size=os.path.getsize(obb)
+print('obb', obb_size, 'needle', needle[:8])
+offset=-1
+with open(iso,'rb') as f:
+    buf=b''
+    pos=0
+    chunk=8*1024*1024
+    while True:
+        data=f.read(chunk)
+        if not data:
+            break
+        window=buf+data
+        i=window.find(needle)
+        if i>=0:
+            offset=pos-len(buf)+i
+            break
+        buf=window[-len(needle)+1:]
+        pos+=len(data)
+print('offset', offset)
+if offset>=0:
+    print('sector', offset//2048, 'mod', offset%2048)
+    with open(iso,'rb') as f, open(obb,'rb') as o:
+        f.seek(offset)
+        a=f.read(1024*1024)
+        b=o.read(1024*1024)
+        print('first1MB', a==b)
+        f.seek(offset+obb_size-22)
+        o.seek(obb_size-22)
+        print('eocd_iso', f.read(22).hex())
+        print('eocd_obb', o.read(22).hex())
+        # also check last 1MB
+        f.seek(offset+obb_size-1048576)
+        o.seek(obb_size-1048576)
+        print('last1MB', f.read(1048576)==o.read(1048576))
+PY (Find Main.obb offset with streaming search)
+- Execute: SERIAL=Y5WWBMJVOZSK4HU8
+echo '=== whoami / dd / truncate ==='
+adb -s $SERIAL shell 'whoami; id; dd --help 2>&1 | head -20; echo ---; which truncate toybox xxd od; toybox truncate --help 2>&1 | head -5'
+echo '=== game tree sizes ==='
+adb -s $SERIAL shell 'find /storage/emulated/0/Android/data/com.zenithblue.sambas3/files/config/games/BLUS31584 -type f -exec stat -c "%s %n" {} +' (Check device dd tools and full game file sizes)
+- Execute: SERIAL=Y5WWBMJVOZSK4HU8
+adb -s $SERIAL shell 'find /storage/emulated/0/Android/data/com.zenithblue.sambas3/files/config/games/BLUS31584 -iname "*PUP*" -o -iname "*UPDATE*" | head; ls -la /storage/emulated/0/Android/data/com.zenithblue.sambas3/files/config/games/BLUS31584/; ls -la /storage/emulated/0/Android/data/com.zenithblue.sambas3/files/config/games/BLUS31584/PS3_UPDATE 2>/dev/null || echo no-update-dir'
+echo '=== prefs PPU ==='
+adb -s $SERIAL shell 'grep -E "game.BLUS31584|PPU Decoder|XFloat|Calling History" /data/data/com.zenithblue.sambas3/shared_prefs/*.xml 2>/dev/null | head -40'
+adb -s $SERIAL shell 'grep -n "PPU Decoder\|PPU Calling History\|XFloat" /storage/emulated/0/Android/data/com.zenithblue.sambas3/files/config/config.yml | head' (Check firmware dump and current PPU prefs)
+
+## Assistant
+
+ISO matches every game file except `PS3DataMain.obb` (still truncated after the failed push). Extracting the complete OBB from the on-phone ISO next.
+
+## Tools
+
+- Execute: SERIAL=Y5WWBMJVOZSK4HU8
+adb -s $SERIAL shell 'am force-stop com.zenithblue.sambas3'
+ISO='/storage/emulated/0/Download/Quick Share/Grand Theft Auto - San Andreas (USA) (En,Fr,De,Es,It,Ru).iso'
+OUT='/storage/emulated/0/Download/PS3DataMain.obb.full'
+echo "ISO size:"; adb -s $SERIAL shell "stat -c %s \"$ISO\""
+adb -s $SERIAL shell "rm -f \"$OUT\""
+echo "starting dd..."
+adb -s $SERIAL shell "dd if=\"$ISO\" of=\"$OUT\" bs=4M iflag=skip_bytes,count_bytes skip=720322560 count=1479813213 status=progress"
+echo "dd exit=$?"
+adb -s $SERIAL shell "stat -c '%s %n' \"$OUT\"; echo EOCD:; tail -c 22 \"$OUT\" | xxd" (dd complete Main.obb from on-phone ISO)
+- Execute: SERIAL=Y5WWBMJVOZSK4HU8
+adb -s $SERIAL shell 'dd --help 2>&1 | sed -n "/iflag/,/oflag/p"; echo ====; dd --help 2>&1 | tail -30' (Inspect toybox dd flags on device)
+- Execute: SERIAL=Y5WWBMJVOZSK4HU8
+# 351720 * 2048 = 720322560 skip; 722568*2048 = 1479819264 then truncate
+adb -s $SERIAL shell "dd if='/storage/emulated/0/Download/Quick Share/Grand Theft Auto - San Andreas (USA) (En,Fr,De,Es,It,Ru).iso' of=/storage/emulated/0/Download/PS3DataMain.obb.full bs=2048 skip=351720 count=722568 conv=fsync"
+echo dd_exit=$?
+adb -s $SERIAL shell 'stat -c %s /storage/emulated/0/Download/PS3DataMain.obb.full; truncate -s 1479813213 /storage/emulated/0/Download/PS3DataMain.obb.full; stat -c %s /storage/emulated/0/Download/PS3DataMain.obb.full; echo EOCD; tail -c 22 /storage/emulated/0/Download/PS3DataMain.obb.full | xxd' (dd Main.obb from ISO using 2048-byte sectors)
+
+## Assistant
+
+Complete OBB extracted (1,479,813,213 bytes, EOCD valid). Replacing the truncated game-folder copy and verifying.
+
+## Tools
+
+- Execute: SERIAL=Y5WWBMJVOZSK4HU8
+USRDIR=/storage/emulated/0/Android/data/com.zenithblue.sambas3/files/config/games/BLUS31584/PS3_GAME/USRDIR
+SRC=/storage/emulated/0/Download/PS3DataMain.obb.full
+DST=$USRDIR/PS3DataMain.obb
+
+# first 1MB + last 1MB hashes vs host
+adb -s $SERIAL shell "dd if=$SRC bs=1M count=1 2>/dev/null | md5sum; tail -c 1048576 $SRC | md5sum"
+python3 - <<'PY'
+import hashlib
+p='/tmp/gta-obb/iso-extract/PS3DataMain.obb'
+with open(p,'rb') as f:
+    print('host_first1MB', hashlib.md5(f.read(1048576)).hexdigest())
+    f.seek(-1048576,2)
+    print('host_last1MB', hashlib.md5(f.read()).hexdigest())
+    print('host_size', f.seek(0,2))
+PY
+
+echo '=== replace truncated Main.obb ==='
+adb -s $SERIAL shell "am force-stop com.zenithblue.sambas3; rm -f $DST; cp -f $SRC $DST; chmod 666 $DST; chown u0_a264:ext_data_rw $DST 2>/dev/null || true; stat -c '%s %a %U:%G %n' $DST $SRC"
+echo '=== idx still matches ==='
+adb -s $SERIAL shell "stat -c '%s %n' $USRDIR/PS3DataMain.obb.idx $USRDIR/PS3Data.obb $USRDIR/EBOOT.BIN" (Hash-verify OBB and copy into USRDIR)
+- Search: Calling History|PPU Decoder|settingsSet
+- Execute: SERIAL=Y5WWBMJVOZSK4HU8
+echo '=== config Core/Video ==='
+adb -s $SERIAL shell "sed -n '1,120p' /storage/emulated/0/Android/data/com.zenithblue.sambas3/files/config/config.yml"
+echo '=== patch ==='
+adb -s $SERIAL shell "ls -la /storage/emulated/0/Android/data/com.zenithblue.sambas3/files/config/patches/; echo ---; cat /storage/emulated/0/Android/data/com.zenithblue.sambas3/files/config/patch_config.yml 2>/dev/null | head -40; echo ---imported---; cat /storage/emulated/0/Android/data/com.zenithblue.sambas3/files/config/patches/imported_patch.yml 2>/dev/null | head -50"
+echo '=== games.json ==='
+adb -s $SERIAL shell "cat /storage/emulated/0/Android/data/com.zenithblue.sambas3/files/games.json" (Read config.yml, patches, games.json on device)
+- Read: /home/abhaybyte/repos/samba-s3/app/src/main/java/com/zenithblue/sambas3/gameconfig/GameSettingsOverrides.kt (1-120)
+- Read: /home/abhaybyte/repos/samba-s3/docs/games/BLUS31584-GTA-San-Andreas.md (101-166)
+- Execute: SERIAL=Y5WWBMJVOZSK4HU8
+adb -s $SERIAL pull /data/data/com.zenithblue.sambas3/shared_prefs/sambas3_game_overrides.xml /tmp/gta-obb/sambas3_game_overrides.xml
+cat /tmp/gta-obb/sambas3_game_overrides.xml
+echo
+# turn off calling history in config.yml now (global); also inject into game prefs
+adb -s $SERIAL shell "sed -i 's/PPU Calling History: true/PPU Calling History: false/' /storage/emulated/0/Android/data/com.zenithblue.sambas3/files/config/config.yml"
+adb -s $SERIAL shell "grep 'PPU Calling History' /storage/emulated/0/Android/data/com.zenithblue.sambas3/files/config/config.yml" (Pull overrides XML and disable PPU Calling History)
+- Execute: SERIAL=Y5WWBMJVOZSK4HU8
+python3 - <<'PY'
+from pathlib import Path
+p=Path('/tmp/gta-obb/sambas3_game_overrides.xml')
+t=p.read_text()
+old='Video@@Disable Asynchronous Memory Manager":"true"}'
+new='Video@@Disable Asynchronous Memory Manager":"true","Core@@PPU Calling History":"false"}'
+if old not in t:
+    raise SystemExit('pattern missing:\n'+t)
+p.write_text(t.replace(old,new,1))
+print(p.read_text())
+PY
+adb -s $SERIAL push /tmp/gta-obb/sambas3_game_overrides.xml /data/data/com.zenithblue.sambas3/shared_prefs/sambas3_game_overrides.xml
+adb -s $SERIAL shell 'chmod 660 /data/data/com.zenithblue.sambas3/shared_prefs/sambas3_game_overrides.xml; chown u0_a264:u0_a264 /data/data/com.zenithblue.sambas3/shared_prefs/sambas3_game_overrides.xml; ls -l /data/data/com.zenithblue.sambas3/shared_prefs/sambas3_game_overrides.xml'
+
+BASE=/storage/emulated/0/Android/data/com.zenithblue.sambas3/files
+LOG=$BASE/logs
+GAME=$BASE/config/games/BLUS31584
+mkdir -p /tmp/gta-obb-iter14
+# clear logs
+adb -s $SERIAL shell "rm -f $LOG/rpcsx_backend.log $LOG/rpcsx_vulkan.log $LOG/rpcsx_app.log $LOG/rpcsx_backend.log.1"
+adb -s $SERIAL logcat -c
+adb -s $SERIAL shell 'am force-stop com.zenithblue.sambas3'
+sleep 1
+adb -s $SERIAL shell 'am start -n com.zenithblue.sambas3/.MainActivity'
+sleep 6
+adb -s $SERIAL shell "am start -n com.zenithblue.sambas3/.RPCSXActivity -e path $GAME"
+adb -s $SERIAL shell 'dumpsys window | grep mCurrentFocus'
+echo launched (Update prefs and warm-launch GTA SA)
+- Execute: SERIAL=Y5WWBMJVOZSK4HU8
+sleep 4
+adb -s $SERIAL shell 'dumpsys window | grep -E "mCurrentFocus|mFocusedApp"'
+adb -s $SERIAL shell 'wm size; dumpsys display | grep -m1 DisplayDeviceInfo'
+echo '--- backend exists? ---'
+adb -s $SERIAL shell 'ls -lh /storage/emulated/0/Android/data/com.zenithblue.sambas3/files/logs/; echo ---; tail -n 30 /storage/emulated/0/Android/data/com.zenithblue.sambas3/files/logs/rpcsx_backend.log 2>/dev/null | tail -20'
+echo '--- logcat RPCSX ---'
+adb -s $SERIAL logcat -d -t 80 | grep -E 'RPCSX|RPCS3|Fatal|MainActivity|cold init' | tail -40 (Check game focus, boot logs after launch)
+
+## Assistant
+
+LLVM cache is loading. Waiting for boot, then I’ll drive EULA with the pad broadcast (rotation-safe).
+
+## Tools
+
+- Read: /home/abhaybyte/.grok/sessions/%2Fhome%2Fabhaybyte%2Frepos%2Fsamba-s3/01a031f2-0f8d-7da0-b282-e7bae16ac096/terminal/call-4a3e5ef6-a62e-4fb6-b54b-a335c9b2df4b-30.log (1-46)
+- Read: /home/abhaybyte/.grok/sessions/%2Fhome%2Fabhaybyte%2Frepos%2Fsamba-s3/01a031f2-0f8d-7da0-b282-e7bae16ac096/terminal/call-4a3e5ef6-a62e-4fb6-b54b-a335c9b2df4b-30.log (51-63)
+- Execute: SERIAL=Y5WWBMJVOZSK4HU8
+adb -s $SERIAL exec-out screencap -p > /tmp/gta-obb-iter14/boot1.png
+ls -lh /tmp/gta-obb-iter14/boot1.png
+file /tmp/gta-obb-iter14/boot1.png
+# also check wm size override / rotation
+adb -s $SERIAL shell 'wm size; dumpsys window | grep -E "mCurrentRotation|DisplayRotation|appOrientation" | head' (Screenshot current game screen and rotation)
+- Read: /tmp/gta-obb-iter14/boot1.png
+- Execute: SERIAL=Y5WWBMJVOZSK4HU8
+sleep 8
+adb -s $SERIAL exec-out screencap -p > /tmp/gta-obb-iter14/boot2.png
+ls -lh /tmp/gta-obb-iter14/boot2.png
+echo '--- AV/frozen/modelinfo ---'
+adb -s $SERIAL shell "grep -cE 'Access violation|Emulation has been frozen|modelinfo' /storage/emulated/0/Android/data/com.zenithblue.sambas3/files/logs/rpcsx_backend.log"
+echo '--- last sys_fs Main ---'
+adb -s $SERIAL shell "grep 'PS3DataMain.obb' /storage/emulated/0/Android/data/com.zenithblue.sambas3/files/logs/rpcsx_backend.log | tail -6"
+echo '--- Applied patch ---'
+adb -s $SERIAL shell "grep -E 'Applied patch|PPU Decoder|Calling History|Vulkan' /storage/emulated/0/Android/data/com.zenithblue.sambas3/files/logs/rpcsx_backend.log | head -20" (Wait, screenshot title load, check crash markers)
+- Read: /tmp/gta-obb-iter14/boot2.png
+- Execute: SERIAL=Y5WWBMJVOZSK4HU8
+adb -s $SERIAL shell "grep -nE 'Access violation|Emulation has been frozen|modelinfo' /storage/emulated/0/Android/data/com.zenithblue.sambas3/files/logs/rpcsx_backend.log | tail -20"
+echo '--- last 15 backend ---'
+adb -s $SERIAL shell "tail -n 15 /storage/emulated/0/Android/data/com.zenithblue.sambas3/files/logs/rpcsx_backend.log" (Identify which crash marker matched)
+- Execute: SERIAL=Y5WWBMJVOZSK4HU8
+sleep 6
+adb -s $SERIAL exec-out screencap -p > /tmp/gta-obb-iter14/boot3.png
+ls -lh /tmp/gta-obb-iter14/boot3.png
+echo '--- pamf/vdec/AV ---'
+adb -s $SERIAL shell "grep -cE 'Access violation|Emulation has been frozen|cellPamf|cellVdec|dequeueBuffer' /storage/emulated/0/Android/data/com.zenithblue.sambas3/files/logs/rpcsx_backend.log"
+adb -s $SERIAL shell "grep -E 'Access violation|frozen|cellPamf|cellVdec' /storage/emulated/0/Android/data/com.zenithblue.sambas3/files/logs/rpcsx_backend.log | tail -10"
+echo '--- last log ---'
+adb -s $SERIAL shell "tail -n 8 /storage/emulated/0/Android/data/com.zenithblue.sambas3/files/logs/rpcsx_backend.log" (Screenshot intro cutscene and check FMV logs)
+- Read: /tmp/gta-obb-iter14/boot3.png
+
+## Assistant
+
+Intro is running (CJ thrown from the plane) with shaders compiling. Waiting for that to finish, then advancing.
+
+## User
+
+[Image #1]
+
+## User
+
+he is falling from sky it should not be like that game should loaded scene. see errors
+
+## Assistant
+
+CJ spawning in a grey void means the world/IPL data isn’t streaming in. I’ll pull the backend errors and compare the dump against what the loader expects.
+
+## Tools
+
+- Execute: SERIAL=Y5WWBMJVOZSK4HU8
+LOG=/storage/emulated/0/Android/data/com.zenithblue.sambas3/files/logs/rpcsx_backend.log
+echo '=== counts ==='
+adb -s $SERIAL shell "grep -cE 'Access violation|Emulation has been frozen|CELL_ENOENT|modelinfo|Too many objects' $LOG"
+echo '=== ENOENT files ==='
+adb -s $SERIAL shell "grep CELL_ENOENT $LOG | sed 's/.*“//;s/”.*/ /' | sort | uniq -c | sort -nr | head -40"
+echo '=== modelinfo / AV / freeze ==='
+adb -s $SERIAL shell "grep -E 'Access violation|Emulation has been frozen|Too many objects without modelinfo|Failed to' $LOG | tail -40"
+echo '=== last 40 ==='
+adb -s $SERIAL shell "tail -n 40 $LOG" (Triage ENOENT, modelinfo, freeze from backend log)
+- Execute: SERIAL=Y5WWBMJVOZSK4HU8
+USRDIR=/storage/emulated/0/Android/data/com.zenithblue.sambas3/files/config/games/BLUS31584/PS3_GAME/USRDIR
+echo '=== USRDIR ==='
+adb -s $SERIAL shell "ls -la $USRDIR"
+echo '=== ISO USRDIR names ==='
+7z l /tmp/gta-obb/gta-sa.iso | grep USRDIR
+echo '=== zip listing Main.obb sample ==='
+unzip -l /tmp/gta-obb/iso-extract/PS3DataMain.obb | head -40
+echo '...'
+unzip -l /tmp/gta-obb/iso-extract/PS3DataMain.obb | grep -iE 'ipl|ide|img|col|gta3|stream|sf[0-9]|\.b$|DATA|models' | head -80
+echo '=== zip counts ==='
+unzip -l /tmp/gta-obb/iso-extract/PS3DataMain.obb | tail -5 (List ISO vs OBB contents for streaming files)
+
+## Assistant
+
+Grey void plus “Compiling shaders” can be missing map streams or first-time shader compile. Checking OBB maps, `GTASAsf*.b` ENOENTs, and the current screen.
+
+## Tools
+
+- Execute: SERIAL=Y5WWBMJVOZSK4HU8
+LOG=/storage/emulated/0/Android/data/com.zenithblue.sambas3/files/logs/rpcsx_backend.log
+echo '=== ENOENT unique paths (all) ==='
+adb -s $SERIAL shell "grep CELL_ENOENT $LOG" | sed 's/.*“//;s/”.*/ /' | sort -u
+echo '=== GTASAsf / gta3.img / Shaders / stream ==='
+adb -s $SERIAL shell "grep -E 'GTASAsf|gta3.img|gta_int|Shaders/|stream.ini|CINFO|MINFO|models/' $LOG | tail -60"
+echo '=== TTY modelinfo ==='
+adb -s $SERIAL shell "grep -E 'sys_tty_write|Too many objects|modelinfo|IPL|IMG' $LOG | tail -30"
+echo '=== screenshot ==='
+adb -s $SERIAL exec-out screencap -p > /tmp/gta-obb-iter14/now.png
+ls -lh /tmp/gta-obb-iter14/now.png (Full ENOENT set, stream paths, current screenshot)
+- Execute: # What's in PS3Data.obb (the 708MB one) - extract listing if we don't have the file locally
+python3 - <<'PY'
+import zipfile,os,struct
+# we may not have PS3Data.obb locally
+p='/tmp/gta-obb/iso-extract/PS3Data.obb'
+print('local PS3Data.obb', os.path.exists(p), os.path.getsize(p) if os.path.exists(p) else None)
+# list Main.obb models/ and any img/sf
+z=zipfile.ZipFile('/tmp/gta-obb/iso-extract/PS3DataMain.obb')
+names=z.namelist()
+print('MAIN files', len(names))
+for n in names:
+    if any(x in n.lower() for x in ['gta3','gta_int','player','shaders','sf','.img','cinfo','minfo','txd','col','.b']):
+        i=z.getinfo(n)
+        print(f'{i.file_size:12d}  {n}')
+print('--- dirs ---')
+from collections import Counter
+c=Counter(n.split('/')[0] for n in names)
+print(c)
+PY (Inspect Main.obb models/img/shader files)
+- Read: /tmp/gta-obb-iter14/now.png
+- Execute: python3 - <<'PY'
+import struct,os
+def parse_idx(path):
+    data=open(path,'rb').read()
+    print('file', path, 'size', len(data))
+    if len(data)<4:
+        return
+    n=struct.unpack_from('<I', data, 0)[0]
+    print('count_u32le', n)
+    off=4
+    entries=[]
+    for i in range(n):
+        if off+10>len(data):
+            print('truncated at', i, 'off', off)
+            break
+        foff, fsz, nlen = struct.unpack_from('<IIH', data, off)
+        off += 10
+        name=data[off:off+nlen]
+        off += nlen
+        try:
+            nm=name.decode('ascii')
+        except:
+            nm=repr(name)
+        entries.append((foff, fsz, nm))
+    print('parsed', len(entries), 'remaining', len(data)-off)
+    for e in entries:
+        if any(x in e[2].lower() for x in ['gtasa','sf','.b','shader','gta3','img','stream']):
+            print(f'  {e[0]:10d} {e[1]:10d} {e[2]}')
+    print('--- all names ---')
+    for e in entries:
+        print(f'  {e[0]:10d} {e[1]:10d} {e[2]}')
+    return entries
+print('==== MAIN IDX ====')
+parse_idx('/tmp/gta-obb/PS3DataMain.obb.idx')
+print('==== DATA IDX ====')
+parse_idx('/tmp/gta-obb/PS3Data.obb.idx')
+PY (Parse SAAF idx for stream/shader filenames)
+
+## Assistant
+
+HUD and radar are up — Grove Street is known — but the 3D world isn’t drawing. Checking whether `gta3.img` is read and whether shaders are failing.
+
+## Tools
+
+- Execute: SERIAL=Y5WWBMJVOZSK4HU8
+LOG=/storage/emulated/0/Android/data/com.zenithblue.sambas3/files/logs
+echo '=== PS3Data.obb seeks (world tex) ==='
+adb -s $SERIAL shell "grep 'PS3Data.obb' $LOG/rpcsx_backend.log | grep -E 'Pos/Size|close' | tail -30"
+echo '=== shader compile counts ==='
+adb -s $SERIAL shell "grep -c 'Program compiled successfully' $LOG/rpcsx_backend.log; grep -c CELL_EPERM $LOG/rpcsx_backend.log; grep -c CELL_ENOENT $LOG/rpcsx_backend.log"
+echo '=== vulkan errors ==='
+adb -s $SERIAL shell "grep -iE 'error|fail|device lost|VK_' $LOG/rpcsx_vulkan.log | tail -30"
+echo '=== RSX errors ==='
+adb -s $SERIAL shell "grep -iE 'rsx:|shader.*fail|Failed to compile|Could not|texture' $LOG/rpcsx_backend.log | grep -v 'sys_rsx_context' | tail -40"
+echo '=== hdd0 game dir ==='
+adb -s $SERIAL shell "ls -la /storage/emulated/0/Android/data/com.zenithblue.sambas3/files/config/dev_hdd0/game/ 2>/dev/null; ls -la /storage/emulated/0/Android/data/com.zenithblue.sambas3/files/config/dev_hdd0/ | head"
+echo '=== current screenshot ==='
+adb -s $SERIAL exec-out screencap -p > /tmp/gta-obb-iter14/now2.png
+ls -lh /tmp/gta-obb-iter14/now2.png (Check gta3.img reads, Vulkan/RSX errors, screenshot)
+- Execute: # pull complete Main idx from device and parse; extract PS3Data.obb listing from ISO
+SERIAL=Y5WWBMJVOZSK4HU8
+adb -s $SERIAL pull /storage/emulated/0/Android/data/com.zenithblue.sambas3/files/config/games/BLUS31584/PS3_GAME/USRDIR/PS3DataMain.obb.idx /tmp/gta-obb/PS3DataMain.obb.idx.full
+python3 - <<'PY'
+import struct
+data=open('/tmp/gta-obb/PS3DataMain.obb.idx.full','rb').read()
+n=struct.unpack_from('<I', data, 0)[0]
+print('MAIN idx bytes', len(data), 'count', n)
+off=4
+names=[]
+for i in range(n):
+    foff, fsz, nlen = struct.unpack_from('<IIH', data, off)
+    off += 10
+    name=data[off:off+nlen].decode('ascii','replace')
+    off += nlen
+    names.append((foff,fsz,name))
+print('parsed', len(names), 'remain', len(data)-off)
+# show models, maps ipl, img
+for e in names:
+    if any(x in e[2].lower() for x in ['models/','texdb','gta3','gta_int','player','.img','shaders','sf']):
+        print(f'{e[0]:12d} {e[1]:10d} {e[2]}')
+print('--- top-level ---')
+from collections import Counter
+print(Counter(n[2].split('/')[0] for n in names))
+print('has CINFO', any('CINFO' in n[2] for n in names))
+print('ipl count', sum(1 for n in names if n[2].lower().endswith('.ipl')))
+PY
+# extract PS3Data.obb from ISO in background if needed - find offset via 7z x (faster than search)
+ls /tmp/gta-obb/iso-extract/
+# 7z extract just to list? 7z l already showed it's a file. unzip listing needs the file.
+# Find offset of PS3Data.obb: EBOOT then this file. Search PK in ISO after EBOOT.
+python3 - <<'PY'
+# PS3Data.obb starts with PK like Main. Search second STORE zip after Main's known offset? 
+# Main was at 720322560. Data.obb is listed BEFORE Main in ISO.
+# Use 7z x which is reliable.
+print('will 7z extract PS3Data.obb')
+PY
+7z e -y -o/tmp/gta-obb/iso-extract /tmp/gta-obb/gta-sa.iso PS3_GAME/USRDIR/PS3Data.obb 2>&1 | tail -15 (Parse full Main.idx; extract PS3Data.obb from ISO)
+- Read: /tmp/gta-obb-iter14/now2.png
+- Search: 3349c8|Skip null|modelinfo
+- Read: /home/abhaybyte/repos/samba-s3/docs/games/BLUS31584-GTA-San-Andreas.md (109-158)
+
+## Assistant
+
+HUD and radar work, but CJ is falling — collision never loaded. The skip-crash `blr` patch is still applied and is likely skipping world model setup now that the OBB is complete. Disabling it and clearing the patched LLVM cache.
+
+## Tools
+
+- Execute: SERIAL=Y5WWBMJVOZSK4HU8
+BASE=/storage/emulated/0/Android/data/com.zenithblue.sambas3/files/config
+echo '=== cache locations ==='
+adb -s $SERIAL shell "find $BASE -iname '*5c0eb0*' -o -iname '*ppu*' -o -iname '*cache*' 2>/dev/null | head -80"
+echo '=== cache dir sizes ==='
+adb -s $SERIAL shell "ls -la $BASE/; du -sh $BASE/cache $BASE/data $BASE/patches 2>/dev/null"
+adb -s $SERIAL shell "ls -la $BASE/cache 2>/dev/null | head; ls $BASE/data 2>/dev/null | head"
+echo '=== patch_config ==='
+adb -s $SERIAL shell "cat $BASE/patch_config.yml; echo ---; ls -la $BASE/patches $BASE/dev_hdd0/cache 2>/dev/null | head" (Find PPU LLVM cache and patch config on device)
+- Execute: SERIAL=Y5WWBMJVOZSK4HU8
+echo '=== find llvm obj ==='
+adb -s $SERIAL shell "find /storage/emulated/0/Android/data/com.zenithblue.sambas3 -name '*.obj' 2>/dev/null | head -20"
+adb -s $SERIAL shell "find /data/data/com.zenithblue.sambas3 -name '*.obj' 2>/dev/null | head"
+adb -s $SERIAL shell "ls -la /storage/emulated/0/Android/data/com.zenithblue.sambas3/files/; du -sh /storage/emulated/0/Android/data/com.zenithblue.sambas3/files/* 2>/dev/null | sort -h"
+echo '=== cache in files ==='
+adb -s $SERIAL shell "ls -la /storage/emulated/0/Android/data/com.zenithblue.sambas3/cache 2>/dev/null | head"
+adb -s $SERIAL shell "find /storage/emulated/0/Android/data/com.zenithblue.sambas3 -name 'v7-kusa*' 2>/dev/null | head"
+adb -s $SERIAL shell "find /data/data/com.zenithblue.sambas3 -name 'v7-kusa*' 2>/dev/null | head" (Locate LLVM compiled PPU module cache files)
+
+## User
+
+[Image #1] it should have be like this, use logs skills and find what s the issue
+
+## Assistant
+
+Reference Grove Street is fully in-world; ours is the same spawn (HUD, radar, $350) with no 3D collision. Checking `stream.ini` / `gta.dat` against the ENOENT stream files and the skip patch.
+
+## Tools
+
+- Execute: python3 - <<'PY'
+import zipfile
+z=zipfile.ZipFile('/tmp/gta-obb/iso-extract/PS3DataMain.obb')
+for name in ['stream.ini','data/gta.dat','data/default.dat','version.txt']:
+    print('====', name, '====')
+    try:
+        print(z.read(name).decode('latin1','replace'))
+    except Exception as e:
+        print('missing', e)
+print('==== names containing img/b/stream ====')
+for n in z.namelist():
+    if n.lower().endswith(('.img','.b','.ide','.dat')) and any(x in n.lower() for x in ['gta','stream','default','imglist']):
+        print(n)
+PY
+echo '==== Text zip shaders/stream? ===='
+# text zips on device - pull small ones
+SERIAL=Y5WWBMJVOZSK4HU8
+USR=/storage/emulated/0/Android/data/com.zenithblue.sambas3/files/config/games/BLUS31584/PS3_GAME/USRDIR
+adb -s $SERIAL pull $USR/PS3DataText.zip /tmp/gta-obb/PS3DataText.zip
+adb -s $SERIAL pull $USR/PS3DataText2.zip /tmp/gta-obb/PS3DataText2.zip
+unzip -l /tmp/gta-obb/PS3DataText.zip | head -40
+echo '--- text2 ---'
+unzip -l /tmp/gta-obb/PS3DataText2.zip | head -40 (Read stream.ini/gta.dat and list text zips)
+- Execute: SERIAL=Y5WWBMJVOZSK4HU8
+LOG=/storage/emulated/0/Android/data/com.zenithblue.sambas3/files/logs/rpcsx_backend.log
+echo '=== TTY / game errors ==='
+adb -s $SERIAL shell "grep -E 'sys_tty_write|Too many objects|WARNING|Error:|STREAM|Streaming|IPL|Cannot|Unable|missing' $LOG" | grep -v 'sys_fs_' | tail -80
+echo '=== GTASAsf context ==='
+adb -s $SERIAL shell "grep -n GTASAsf $LOG | head -20"
+echo '=== cellGame / hdd ==='
+adb -s $SERIAL shell "grep -E 'cellGame|dev_hdd0/game|Shaders|EPERM' $LOG" | grep -v '/Shaders/' | head -30
+echo '=== freeze/AV now ==='
+adb -s $SERIAL shell "grep -cE 'Access violation|Emulation has been frozen' $LOG"
+echo '=== program compile vs fail ==='
+adb -s $SERIAL shell "grep -c 'Program compiled successfully' $LOG; grep -cE 'Failed to compile|Compilation failed|shader.*error' $LOG" (Triage TTY, streaming, cellGame, compile failures)
+- Search: dev_bdvd|CELL_EPERM|read.only
+- Execute: SERIAL=Y5WWBMJVOZSK4HU8
+echo '=== EBOOT ppu cache ==='
+adb -s $SERIAL shell "ls /storage/emulated/0/Android/data/com.zenithblue.sambas3/files/cache/cache | grep -iE 'eboot|5c0eb0|BLUS|gta' "
+adb -s $SERIAL shell "ls /storage/emulated/0/Android/data/com.zenithblue.sambas3/files/cache/cache | wc -l"
+adb -s $SERIAL shell "ls /storage/emulated/0/Android/data/com.zenithblue.sambas3/files/cache/cache" | head -40
+echo '=== files/cache tree ==='
+adb -s $SERIAL shell "ls -la /storage/emulated/0/Android/data/com.zenithblue.sambas3/files/cache/; du -s /storage/emulated/0/Android/data/com.zenithblue.sambas3/files/cache/* 2>/dev/null" (Find EBOOT LLVM cache directory name)
+- Execute: SERIAL=Y5WWBMJVOZSK4HU8
+echo '=== BLUS31584 cache ==='
+adb -s $SERIAL shell "ls -la /storage/emulated/0/Android/data/com.zenithblue.sambas3/files/cache/cache/BLUS31584 | head -30; echo count; ls /storage/emulated/0/Android/data/com.zenithblue.sambas3/files/cache/cache/BLUS31584 | wc -l"
+echo '=== TTY.log ==='
+adb -s $SERIAL shell "cat /storage/emulated/0/Android/data/com.zenithblue.sambas3/files/cache/TTY.log | tail -50"
+echo '=== RPCSX.log modelinfo/stream ==='
+adb -s $SERIAL shell "grep -E 'modelinfo|GTASAsf|gta3.img|Streaming|Applied patch|Access violation|Too many' /storage/emulated/0/Android/data/com.zenithblue.sambas3/files/cache/RPCSX.log | tail -40"
+echo '=== opens of models/ texdb ==='
+LOG=/storage/emulated/0/Android/data/com.zenithblue.sambas3/files/logs/rpcsx_backend.log
+adb -s $SERIAL shell "grep -E 'gta3.img|gta_int|player.img|models/|texdb|CUTSCENE|script.img|SCRIPT.IMG' $LOG | grep -v Shaders | tail -40" (Inspect game PPU cache, TTY, model file opens)
+- Execute: SERIAL=Y5WWBMJVOZSK4HU8
+BASE=/storage/emulated/0/Android/data/com.zenithblue.sambas3/files
+GAME=$BASE/config/games/BLUS31584
+
+# 1) disable skip patch
+adb -s $SERIAL shell "sed -i 's/Enabled: true/Enabled: false/' $BASE/config/patch_config.yml"
+adb -s $SERIAL shell "cat $BASE/config/patch_config.yml"
+
+# 2) wipe patched EBOOT LLVM cache so blr is not baked in
+adb -s $SERIAL shell "rm -rf $BASE/cache/cache/BLUS31584/ppu-LLQWd0yZWQJfoge79v9iR28uuh00-EBOOT.BIN"
+echo wiped_eboot_cache
+
+# 3) create HDD game data (writable shaders / cellGameDataCheck)
+adb -s $SERIAL shell "mkdir -p $BASE/config/dev_hdd0/game/BLUS31584/USRDIR/Shaders
+cp -n $GAME/PS3_GAME/PARAM.SFO $BASE/config/dev_hdd0/game/BLUS31584/PARAM.SFO
+cp -n $GAME/PS3_GAME/ICON0.PNG $BASE/config/dev_hdd0/game/BLUS31584/ICON0.PNG
+ls -la $BASE/config/dev_hdd0/game/BLUS31584 $BASE/config/dev_hdd0/game/BLUS31584/USRDIR"
+
+# 4) drop tiling + async mem mgr from per-game overrides (keep LLVM/XFloat/GETLLAR/128)
+python3 - <<'PY'
+from pathlib import Path
+p=Path('/tmp/gta-obb/sambas3_game_overrides.xml')
+# rewrite game.BLUS31584
+import re
+t=p.read_text()
+old='{"Core@@PPU Decoder":"\\"LLVM Recompiler (Legacy)\\"","Core@@XFloat Accuracy":"\\"Accurate\\"","Core@@Disable SPU GETLLAR Spin Optimization":"true","Core@@Accurate PPU 128-byte Reservation Op Max Length":"-1","Video@@Handle RSX Memory Tiling":"true","Video@@Disable Asynchronous Memory Manager":"true","Core@@PPU Calling History":"false"}'
+new='{"Core@@PPU Decoder":"\\"LLVM Recompiler (Legacy)\\"","Core@@XFloat Accuracy":"\\"Accurate\\"","Core@@Disable SPU GETLLAR Spin Optimization":"true","Core@@Accurate PPU 128-byte Reservation Op Max Length":"-1","Video@@Handle RSX Memory Tiling":"false","Video@@Disable Asynchronous Memory Manager":"false","Core@@PPU Calling History":"false"}'
+if old not in t:
+    raise SystemExit('prefs pattern missing:\n'+t)
+p.write_text(t.replace(old,new,1))
+print(p.read_text())
+PY
+adb -s $SERIAL push /tmp/gta-obb/sambas3_game_overrides.xml /data/data/com.zenithblue.sambas3/shared_prefs/sambas3_game_overrides.xml
+adb -s $SERIAL shell 'chmod 660 /data/data/com.zenithblue.sambas3/shared_prefs/sambas3_game_overrides.xml; chown u0_a264:u0_a264 /data/data/com.zenithblue.sambas3/shared_prefs/sambas3_game_overrides.xml'
+
+echo DONE_PREP (Disable skip patch, wipe EBOOT cache, fix overrides)
+- Execute: SERIAL=Y5WWBMJVOZSK4HU8
+BASE=/storage/emulated/0/Android/data/com.zenithblue.sambas3/files
+GAME=$BASE/config/games/BLUS31584
+LOG=$BASE/logs
+adb -s $SERIAL shell "chown -R u0_a264:ext_data_rw $BASE/config/dev_hdd0/game/BLUS31584 $BASE/config/patch_config.yml $BASE/config/patches"
+adb -s $SERIAL shell "am force-stop com.zenithblue.sambas3"
+adb -s $SERIAL shell "rm -f $LOG/rpcsx_backend.log $LOG/rpcsx_vulkan.log $LOG/rpcsx_app.log $BASE/cache/TTY.log $BASE/cache/RPCSX.log"
+adb -s $SERIAL logcat -c
+sleep 1
+adb -s $SERIAL shell 'am start -n com.zenithblue.sambas3/.MainActivity'
+sleep 6
+adb -s $SERIAL shell "am start -n com.zenithblue.sambas3/.RPCSXActivity -e path $GAME"
+sleep 3
+adb -s $SERIAL shell 'dumpsys window | grep mCurrentFocus'
+echo launched (Warm-launch GTA with patch disabled)
+- Read: /home/abhaybyte/.grok/sessions/%2Fhome%2Fabhaybyte%2Frepos%2Fsamba-s3/01a031f2-0f8d-7da0-b282-e7bae16ac096/terminal/call-15be29c7-118d-467e-b8fd-4d34f06e4350-62.log (1-43)
+- Execute: SERIAL=Y5WWBMJVOZSK4HU8
+adb -s $SERIAL exec-out screencap -p > /tmp/gta-obb-iter14/nopatch1.png
+ls -lh /tmp/gta-obb-iter14/nopatch1.png
+adb -s $SERIAL shell "dumpsys window | grep mCurrentFocus"
+adb -s $SERIAL shell "tail -n 12 /storage/emulated/0/Android/data/com.zenithblue.sambas3/files/logs/rpcsx_backend.log" (Screenshot and latest backend lines)
+- Read: /tmp/gta-obb-iter14/nopatch1.png
+- Execute: SERIAL=Y5WWBMJVOZSK4HU8
+adb -s $SERIAL shell "grep -c 'Applied patch' /storage/emulated/0/Android/data/com.zenithblue.sambas3/files/logs/rpcsx_backend.log; grep 'Applied patch' /storage/emulated/0/Android/data/com.zenithblue.sambas3/files/logs/rpcsx_backend.log" (Confirm skip patch is not applied this boot)
+- Read: /home/abhaybyte/.grok/sessions/%2Fhome%2Fabhaybyte%2Frepos%2Fsamba-s3/01a031f2-0f8d-7da0-b282-e7bae16ac096/terminal/call-b13158d1-a5b0-4912-938c-4b2b2ab35071-67.log
+- Execute: SERIAL=Y5WWBMJVOZSK4HU8
+adb -s $SERIAL exec-out screencap -p > /tmp/gta-obb-iter14/nopatch_now.png
+ls -lh /tmp/gta-obb-iter14/nopatch_now.png
+adb -s $SERIAL shell "grep -cE 'LLVM: Compiling|LLVM: Compiled|Access violation|frozen|Applied patch|Too many objects' /storage/emulated/0/Android/data/com.zenithblue.sambas3/files/logs/rpcsx_backend.log" (Independent screenshot during PPU recompile)
+- Read: /tmp/gta-obb-iter14/nopatch_now.png
+- Read: /tmp/gta-obb-iter14/nopatch2.png
+- Execute: SERIAL=Y5WWBMJVOZSK4HU8
+LOG=/storage/emulated/0/Android/data/com.zenithblue.sambas3/files/logs/rpcsx_backend.log
+echo compiling=$(adb -s $SERIAL shell "grep -c 'LLVM: Compiling module' $LOG")
+echo compiled=$(adb -s $SERIAL shell "grep -c 'LLVM: Compiled module' $LOG")
+echo AV=$(adb -s $SERIAL shell "grep -c 'Access violation' $LOG")
+echo last=$(adb -s $SERIAL shell "grep 'LLVM: Compil' $LOG | tail -1")
+adb -s $SERIAL exec-out screencap -p > /tmp/gta-obb-iter14/nopatch3.png
+ls -lh /tmp/gta-obb-iter14/nopatch3.png (Check compile progress and current screen)
+
+## User
+
+pls install samba on the tablet device as well for testing it has 8 gen 3, we will test on both 8 gen 3 and d8300, copy game iso and firsmware from mediatek to snap and load
+
+## Assistant
+
+I’ll identify the Snapdragon 8 Gen 3 tablet, install SambaS3 on it, then copy the ISO and firmware from the MediaTek device and load them.
+
+## Tools
+
+- Read: /home/abhaybyte/repos/samba-s3/.agents/skills/sambas3-game-launch/SKILL.md
+- Execute: adb devices -l
+echo '==== per device ===='
+for s in $(adb devices | awk 'NR>1 && $2=="device"{print $1}'); do
+  echo "----- $s -----"
+  adb -s $s shell 'echo model=$(getprop ro.product.model); echo device=$(getprop ro.product.device); echo name=$(getprop ro.product.name); echo board=$(getprop ro.product.board); echo hardware=$(getprop ro.hardware); echo soc=$(getprop ro.soc.model); echo platform=$(getprop ro.board.platform); echo chipname=$(getprop ro.chipname); echo manufacturer=$(getprop ro.product.manufacturer); echo abi=$(getprop ro.product.cpuabi); echo fingerprint=$(getprop ro.build.fingerprint | cut -c1-120)'
+  adb -s $s shell 'pm path com.zenithblue.sambas3 2>/dev/null || echo NO_SAMBA'
+done (List devices, SoCs, and SambaS3 install state)
+- Search: firmware|PS3UPDAT|installFirmware|fw.json
+- Execute: TAB=7d6afed8
+MTK=Y5WWBMJVOZSK4HU8
+echo '=== versions ==='
+for s in $TAB $MTK 2a580689; do
+  echo "-- $s --"
+  adb -s $s shell 'dumpsys package com.zenithblue.sambas3 | grep -E "versionName|versionCode|lastUpdateTime" | head -6'
+done
+echo '=== tablet space / samba files ==='
+adb -s $TAB shell 'df -h /storage/emulated/0 | tail -1; echo ---; ls -la /storage/emulated/0/Android/data/com.zenithblue.sambas3/files 2>/dev/null; echo ---games---; cat /storage/emulated/0/Android/data/com.zenithblue.sambas3/files/games.json 2>/dev/null; echo ---fw---; cat /storage/emulated/0/Android/data/com.zenithblue.sambas3/files/fw.json 2>/dev/null; echo ---dev_flash---; ls /storage/emulated/0/Android/data/com.zenithblue.sambas3/files/config/dev_flash 2>/dev/null | head'
+echo '=== mtk firmware/iso ==='
+adb -s $MTK shell 'ls -lh "/storage/emulated/0/Download/Quick Share/"; echo ---fw.json---; cat /storage/emulated/0/Android/data/com.zenithblue.sambas3/files/fw.json; echo ---dev_flash---; du -s /storage/emulated/0/Android/data/com.zenithblue.sambas3/files/config/dev_flash /storage/emulated/0/Android/data/com.zenithblue.sambas3/files/config/games/BLUS31584 2>/dev/null'
+echo '=== host apks ==='
+ls -lh /home/abhaybyte/repos/samba-s3/app/build/outputs/apk/standard/debug/*.apk 2>/dev/null
+ls -lh /tmp/gta-obb/gta-sa.iso 2>/dev/null
+echo '=== tablet download ==='
+adb -s $TAB shell 'ls -lh /storage/emulated/0/Download 2>/dev/null | head; ls -lh "/storage/emulated/0/Download/Quick Share" 2>/dev/null | head' (Compare APKs, firmware, games, free space on tablet)
+- Read: /home/abhaybyte/repos/samba-s3/app/src/main/java/com/zenithblue/sambas3/FirmwareRepository.kt
+- Search: fun install|installFirmware|precompile|openDocument|ISO|importGame|installGame
+- Read: /home/abhaybyte/repos/samba-s3/app/src/main/java/com/zenithblue.sambas3/PrecompilerService.kt
+- Read: /home/abhaybyte/repos/samba-s3/app/src/main/java/com/zenithblue/sambas3/PrecompilerService.kt (1-150)
+- Read: /home/abhaybyte/repos/samba-s3/app/src/main/java/com/zenithblue/sambas3/utils/FileUtil.kt (1-150)
+- Read: /home/abhaybyte/repos/samba-s3/app/src/main/java/com/zenithblue/sambas3/ui/games/GamesScreen.kt (1001-1069)
+- Search: openLibrary|librpcsx|download.*so
+- Execute: TAB=7d6afed8
+MTK=Y5WWBMJVOZSK4HU8
+echo '=== tablet samba tree ==='
+adb -s $TAB shell 'find /storage/emulated/0/Android/data/com.zenithblue.sambas3/files -maxdepth 3 -type d 2>/dev/null; echo ---files---; find /storage/emulated/0/Android/data/com.zenithblue.sambas3/files -maxdepth 2 -type f 2>/dev/null'
+echo '=== native libs tablet ==='
+adb -s $TAB shell 'ls -lh /data/app/~~x5JNZyZmxdDLJrGtlHOOFw==/com.zenithblue.sambas3-JldQB7FgIoWNHOvj_2YxCg==/lib/arm64 2>/dev/null; ls /data/data/com.zenithblue.sambas3/files 2>/dev/null | head'
+echo '=== mtk native / rpcsx so ==='
+adb -s $MTK shell 'find /storage/emulated/0/Android/data/com.zenithblue.sambas3 -name "*.so" 2>/dev/null | head; ls /data/data/com.zenithblue.sambas3/files 2>/dev/null | head; find /data/data/com.zenithblue.sambas3 -name "*rpcsx*" 2>/dev/null | head'
+echo '=== gpu drivers ==='
+adb -s $TAB shell 'ls /storage/emulated/0/Android/data/com.zenithblue.sambas3/files/config 2>/dev/null | head -30'
+adb -s $MTK shell 'ls /storage/emulated/0/Android/data/com.zenithblue.sambas3/files/config | head -30'
+echo '=== whoami tablet ==='
+adb -s $TAB shell 'whoami; id' (Inspect tablet Samba files, native libs, root access)
+- Execute: TAB=7d6afed8
+MTK=Y5WWBMJVOZSK4HU8
+echo '=== tablet adb root? ==='
+adb -s $TAB root 2>&1 | head -5
+echo '=== tablet flash empty? ==='
+adb -s $TAB shell 'du -s /storage/emulated/0/Android/data/com.zenithblue.sambas3/files/config/dev_flash /storage/emulated/0/Android/data/com.zenithblue.sambas3/files/config/games; ls /storage/emulated/0/Android/data/com.zenithblue.sambas3/files/config/dev_flash | head; ls /storage/emulated/0/Android/data/com.zenithblue.sambas3/files/config/games'
+echo '=== vulkan ==='
+adb -s $TAB shell 'getprop ro.hardware.vulkan; dumpsys SurfaceFlinger 2>/dev/null | grep -i vulkan | head -3'
+echo '=== mtk pup md5 head ==='
+adb -s $MTK shell 'stat -c %s "/storage/emulated/0/Download/Quick Share/PS3UPDAT.PUP"'
+echo '=== host pup? ==='
+ls -lh /tmp/gta-obb/*.PUP /tmp/gta-obb/*pup 2>/dev/null
+# games.json on mtk
+adb -s $MTK shell 'cat /storage/emulated/0/Android/data/com.zenithblue.sambas3/files/games.json'
+echo
+echo '=== apk package ==='
+aapt dump badging /home/abhaybyte/repos/samba-s3/app/build/outputs/apk/standard/debug/samba-s3-standard-debug.apk 2>/dev/null | head -3 (Check tablet root, empty firmware, Vulkan, PUP size)
+- Execute: # wait for tablet to reappear
+for i in 1 2 3 4 5 6 7 8 9 10 12 15; do
+  sleep 2
+  adb devices -l
+  if adb devices | grep -q 7d6afed8; then
+    echo TABLET_BACK
+    break
+  fi
+done
+adb devices -l (Wait for 8 Gen 3 tablet to reconnect)
+- Search: games.json|fun load|scan
+- Execute: TAB=7d6afed8
+echo '=== tablet dirs ==='
+adb -s $TAB shell 'du -s /storage/emulated/0/Android/data/com.zenithblue.sambas3/files/config/dev_flash /storage/emulated/0/Android/data/com.zenithblue.sambas3/files/config/games; ls /storage/emulated/0/Android/data/com.zenithblue.sambas3/files/config/dev_flash | head; echo games:; ls /storage/emulated/0/Android/data/com.zenithblue.sambas3/files/config/games'
+echo '=== start apk install ==='
+adb -s $TAB install -r -d /home/abhaybyte/repos/samba-s3/app/build/outputs/apk/standard/debug/samba-s3-standard-debug.apk (Check tablet dirs and install latest SambaS3 APK)
+- Execute: # pull PUP from MediaTek while APK installs
+mkdir -p /tmp/gta-obb
+adb -s Y5WWBMJVOZSK4HU8 pull "/storage/emulated/0/Download/Quick Share/PS3UPDAT.PUP" /tmp/gta-obb/PS3UPDAT.PUP
+stat -c %s /tmp/gta-obb/PS3UPDAT.PUP
+ls -lh /tmp/gta-obb/PS3UPDAT.PUP (Pull PS3 firmware PUP from MediaTek to host)
+- Execute: TAB=7d6afed8
+MTK=Y5WWBMJVOZSK4HU8
+echo '=== tar on both ==='
+adb -s $TAB shell 'tar --help 2>&1 | head -8'
+adb -s $MTK shell 'tar --help 2>&1 | head -5'
+echo '=== verify mtk Main.obb ==='
+adb -s $MTK shell 'stat -c %s /storage/emulated/0/Android/data/com.zenithblue.sambas3/files/config/games/BLUS31584/PS3_GAME/USRDIR/PS3DataMain.obb'
+echo '=== host tmp space ==='
+df -h /tmp | tail -1
+echo '=== mtk flash size files ==='
+adb -s $MTK shell 'du -s /storage/emulated/0/Android/data/com.zenithblue.sambas3/files/config/dev_flash /storage/emulated/0/Android/data/com.zenithblue.sambas3/files/config/dev_flash2 /storage/emulated/0/Android/data/com.zenithblue.sambas3/files/config/dev_flash3' (Check tar, Main.obb size, disk space for copies)
+- Execute: adb help 2>&1 | grep -iE 'exec-in|exec-out' 
+df -h /home /home/abhaybyte | tail -5
+echo '=== tablet games dir write test ==='
+adb -s 7d6afed8 shell 'touch /storage/emulated/0/Android/data/com.zenithblue.sambas3/files/config/games/.write_test && rm /storage/emulated/0/Android/data/com.zenithblue.sambas3/files/config/games/.write_test && echo WRITE_OK' (Check adb exec-in and tablet write access)
+- Execute: TAB=7d6afed8
+echo '=== run-as ==='
+adb -s $TAB shell 'run-as com.zenithblue.sambas3 id'
+echo '=== run-as ls files ==='
+adb -s $TAB shell 'run-as com.zenithblue.sambas3 ls /data/data/com.zenithblue.sambas3/'
+adb -s $TAB shell 'run-as com.zenithblue.sambas3 ls files' 2>&1 | head
+echo '=== run-as write to external files ==='
+adb -s $TAB shell 'run-as com.zenithblue.sambas3 sh -c "ls -ld /storage/emulated/0/Android/data/com.zenithblue.sambas3/files/config/games; touch /storage/emulated/0/Android/data/com.zenithblue.sambas3/files/config/games/.t && rm /storage/emulated/0/Android/data/com.zenithblue.sambas3/files/config/games/.t && echo EXT_WRITE_OK"'
+echo '=== adb push to app dir ==='
+echo test > /tmp/gta-obb/push-test.txt
+adb -s $TAB push /tmp/gta-obb/push-test.txt /storage/emulated/0/Android/data/com.zenithblue.sambas3/files/config/games/push-test.txt
+echo '=== push to Download ==='
+adb -s $TAB push /tmp/gta-obb/push-test.txt /storage/emulated/0/Download/push-test.txt
+adb -s $TAB shell 'ls -l /storage/emulated/0/Download/push-test.txt' (Test run-as and adb push write paths on tablet)

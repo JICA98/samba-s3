@@ -158,12 +158,14 @@ Java_com_zenithblue_sambas3_RPCSX_getLibraryVersion(JNIEnv *env, jobject, jstrin
 extern "C" JNIEXPORT jboolean JNICALL Java_com_zenithblue_sambas3_RPCSX_overlayPadData(
     JNIEnv *, jobject, jint digital1, jint digital2, jint leftStickX,
     jint leftStickY, jint rightStickX, jint rightStickY) {
+  if (!rpcsxLib.overlayPadData) return false;
   return rpcsxLib.overlayPadData(digital1, digital2, leftStickX, leftStickY,
                                  rightStickX, rightStickY);
 }
 
 extern "C" JNIEXPORT jboolean JNICALL Java_com_zenithblue_sambas3_RPCSX_initialize(
     JNIEnv *env, jobject, jstring rootDir, jstring user) {
+  if (!rpcsxLib.initialize) return false;
   return rpcsxLib.initialize(unwrap(env, rootDir), unwrap(env, user));
 }
 
@@ -190,36 +192,47 @@ extern "C" JNIEXPORT void JNICALL Java_com_zenithblue_sambas3_RPCSX_shutdown(JNI
 extern "C" JNIEXPORT jint JNICALL Java_com_zenithblue_sambas3_RPCSX_boot(JNIEnv *env,
                                                             jobject,
                                                             jstring jpath) {
+  if (!rpcsxLib.boot) return 1; // GenericError
   return rpcsxLib.boot(unwrap(env, jpath));
 }
 
 extern "C" JNIEXPORT jint JNICALL Java_com_zenithblue_sambas3_RPCSX_getState(JNIEnv *env,
                                                                 jobject) {
+  if (!rpcsxLib.getState) return 0; // Stopped — library not yet dlopened (cold RPCSXActivity after force-stop)
   return rpcsxLib.getState();
 }
 
 extern "C" JNIEXPORT void JNICALL Java_com_zenithblue_sambas3_RPCSX_kill(JNIEnv *env,
                                                             jobject) {
+  if (!rpcsxLib.kill) return;
   return rpcsxLib.kill();
 }
 
 extern "C" JNIEXPORT void JNICALL Java_com_zenithblue_sambas3_RPCSX_resume(JNIEnv *env,
                                                               jobject) {
+  if (!rpcsxLib.resume) return;
   return rpcsxLib.resume();
 }
 
 extern "C" JNIEXPORT void JNICALL Java_com_zenithblue_sambas3_RPCSX_openHomeMenu(JNIEnv *env,
                                                                     jobject) {
+  if (!rpcsxLib.openHomeMenu) {
+    __android_log_print(ANDROID_LOG_ERROR, "RPCSX-UI",
+                        "openHomeMenu unavailable");
+    return;
+  }
   return rpcsxLib.openHomeMenu();
 }
 
 extern "C" JNIEXPORT jstring JNICALL
 Java_com_zenithblue_sambas3_RPCSX_getTitleId(JNIEnv *env, jobject) {
+  if (!rpcsxLib.getTitleId) return wrap(env, std::string{});
   return wrap(env, rpcsxLib.getTitleId());
 }
 
 extern "C" JNIEXPORT jboolean JNICALL Java_com_zenithblue_sambas3_RPCSX_surfaceEvent(
     JNIEnv *env, jobject, jobject surface, jint event) {
+  if (!rpcsxLib.surfaceEvent) return false;
   return rpcsxLib.surfaceEvent(env, surface, event);
 }
 

@@ -12,10 +12,12 @@ import androidx.compose.animation.core.infiniteRepeatable
 import androidx.compose.animation.core.rememberInfiniteTransition
 import androidx.compose.animation.core.RepeatMode
 import androidx.compose.animation.core.animateFloat
+import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
@@ -113,6 +115,8 @@ fun GamesScreen(
     var focusedIndex by remember { mutableStateOf(if (games.isNotEmpty()) 0 else -1) }
     var bootingGame by remember { mutableStateOf<Game?>(null) }
     var showImportDialog by remember { mutableStateOf(false) }
+    var configureGameTarget by remember { mutableStateOf<Game?>(null) }
+    var configuringGame by remember { mutableStateOf(false) }
     val isRunning = emulatorState.value == EmulatorState.Running || emulatorState.value == EmulatorState.Paused
 
     val bootScale by animateFloatAsState(if (bootingGame != null) 5f else 1f, animationSpec = tween(700))
@@ -287,7 +291,8 @@ fun GamesScreen(
                                     distance = distance,
                                     onClick = { coroutineScope.launch { pagerState.animateScrollToPage(page) } },
                                     onPlay = { bootingGame = item.game },
-                                    isRunning = isRunning && emulatorActiveGame.value == item.game.info.path
+                                    isRunning = isRunning && emulatorActiveGame.value == item.game.info.path,
+                                    onConfigure = { configureGameTarget = item.game }
                                 )
                             }
                             is PagerItem.AddGame -> {
@@ -461,6 +466,70 @@ fun GamesScreen(
                         HintButton(text = "PLAY", icon = "X", color = RPCSXColors.primary, onClick = { })
                     }
                     HintButton(text = "OPTIONS", icon = "△", color = RPCSXColors.textSecondary, onClick = { navigateToSettings?.invoke() })
+                }
+            }
+        }
+
+        if (configureGameTarget != null) {
+            // Engine gate (review F7): reading/editing the config tree requires a
+            // live initialized engine that is NOT running a game.
+            val engineIdle = RPCSX.activeLibrary.value != null &&
+                RPCSX.getState() == EmulatorState.Stopped
+            ModalBottomSheet(
+                onDismissRequest = {
+                    configureGameTarget = null
+                    configuringGame = false
+                }
+            ) {
+                if (!configuringGame) {
+                    Column(modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)) {
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .combinedClickable(enabled = engineIdle) { configuringGame = true }
+                                .padding(vertical = 12.dp)
+                        ) {
+                            Icon(
+                                painter = painterResource(R.drawable.tune),
+                                contentDescription = null,
+                                tint = if (engineIdle) RPCSXColors.primary else RPCSXColors.textDisabled,
+                                modifier = Modifier.size(24.dp)
+                            )
+                            Spacer(modifier = Modifier.width(16.dp))
+                            Column {
+                                Text(
+                                    text = stringResource(R.string.configure_game),
+                                    style = AppTypography.bodyLarge,
+                                    color = if (engineIdle) RPCSXColors.textPrimary else RPCSXColors.textDisabled
+                                )
+                                if (!engineIdle) {
+                                    Text(
+                                        text = stringResource(R.string.configure_game_gate_description),
+                                        style = AppTypography.labelSmall,
+                                        color = RPCSXColors.textSecondary
+                                    )
+                                } else {
+                                    Text(
+                                        text = (configureGameTarget?.info?.name?.value
+                                            ?: configureGameTarget?.info?.path?.substringAfterLast('/')
+                                            ?: "").uppercase(),
+                                        style = AppTypography.labelSmall,
+                                        color = RPCSXColors.textSecondary
+                                    )
+                                }
+                            }
+                        }
+                    }
+                } else {
+                    GameConfigureScreen(
+                        gamePath = configureGameTarget?.info?.path,
+                        modifier = Modifier.heightIn(max = 640.dp),
+                        onClose = {
+                            configuringGame = false
+                            configureGameTarget = null
+                        }
+                    )
                 }
             }
         }
@@ -695,8 +764,16 @@ fun AddGameCard(distance: Int, onClick: () -> Unit, disabled: Boolean = false) {
     }
 }
 
+@OptIn(ExperimentalFoundationApi::class)
 @Composable
-fun GameCard(game: Game, distance: Int, onClick: () -> Unit, onPlay: () -> Unit, isRunning: Boolean = false) {
+fun GameCard(
+    game: Game,
+    distance: Int,
+    onClick: () -> Unit,
+    onPlay: () -> Unit,
+    isRunning: Boolean = false,
+    onConfigure: () -> Unit = {}
+) {
     val isFocused = distance == 0
     val targetScale = if (isFocused) 1.12f else if (distance == 1) 0.95f else 0.85f
     val targetAlpha = if (isFocused) 1.0f else if (distance == 1) 0.6f else 0.4f
@@ -732,7 +809,10 @@ fun GameCard(game: Game, distance: Int, onClick: () -> Unit, onPlay: () -> Unit,
             .fillMaxSize()
             .scale(scale)
             .alpha(alpha)
-            .clickable(onClick = { if (isFocused) onPlay() else onClick() })
+            .combinedClickable(
+                onClick = { if (isFocused) onPlay() else onClick() },
+                onLongClick = onConfigure
+            )
             .shadow(
                 elevation = if (isFocused) glowIntensity.dp else 0.dp,
                 spotColor = RPCSXColors.focusGlow,

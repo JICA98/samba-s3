@@ -9,7 +9,15 @@
 #   ./build_and_install.sh --uninstall-first     # Uninstall existing app before install
 #   ./build_and_install.sh --bundle-only-bump-version  # Increment versionCode, then build app bundle
 # ============================================================
-export JAVA_HOME=/usr/lib/jvm/java-17-openjdk-amd64
+if [[ -z "${JAVA_HOME:-}" || ! -d "$JAVA_HOME" ]]; then
+    if [[ -d "/usr/lib/jvm/java-17-openjdk" ]]; then
+        export JAVA_HOME="/usr/lib/jvm/java-17-openjdk"
+    elif [[ -d "/usr/lib/jvm/java-17-openjdk-amd64" ]]; then
+        export JAVA_HOME="/usr/lib/jvm/java-17-openjdk-amd64"
+    elif [[ -d "/usr/lib/jvm/default" ]]; then
+        export JAVA_HOME="/usr/lib/jvm/default"
+    fi
+fi
 export PATH=$JAVA_HOME/bin:$PATH
 set -euo pipefail
 
@@ -100,6 +108,12 @@ if $BUMP_VERSION; then
     NEW_CODE=$((OLD_CODE + 1))
     info "Bumping versionCode: ${OLD_CODE} → ${NEW_CODE}"
     sed -i "s/versionCode = ${OLD_CODE}/versionCode = ${NEW_CODE}/" "$GRADLE_FILE"
+fi
+
+# ── Step 0: Ensure RPCSX core library is present ────────────
+if [[ ! -f "app/src/main/jniLibs/arm64-v8a/librpcsx-android.so" ]]; then
+    info "librpcsx-android.so not found in jniLibs, building RPCSX core..."
+    ./build_rpcsx.sh "$VARIANT"
 fi
 
 # ── Step 1: Build ────────────────────────────────────────────

@@ -240,6 +240,12 @@ fun SettingsDetailPane(
             status = "LIVE"
             backend = "LOGCAT"
         }
+        "debug_controller" -> {
+            title = "Debug Controller"
+            description = "Agent ADB bridge for pad injection (DEBUG_PAD broadcasts) + coordinate 1632,873 calibration for Y5WWBMJVOZSK4HU8. Test controller without EULA timing, verify overlayPadData, and copy adb loops for per-game fixes."
+            status = "READY"
+            backend = "ADB/BROADCAST"
+        }
         else -> {
             title = "SambaS3 Core"
             description = "Configure the heartbeat of your gaming experience. Adjust core frequency, cycle accuracy, and bios paths to optimize performance for seventh-generation console emulation."
@@ -454,7 +460,8 @@ fun AdvancedSettingsScreen(
     navigateTo: (path: String) -> Unit,
     settings: JSONObject,
     path: String = "",
-    isInSplitPane: Boolean = false
+    isInSplitPane: Boolean = false,
+    onValueCommitted: ((path: String, value: String) -> Unit)? = null
 ) {
     val context = LocalContext.current
     val settingValue = remember(settings) { mutableStateOf(settings) }
@@ -548,6 +555,9 @@ fun AdvancedSettingsScreen(
                                     } else {
                                         itemObject.put("value", value)
                                         itemValue = value
+                                        onValueCommitted?.invoke(
+                                            itemPath, if (value) "true" else "false"
+                                        )
                                     }
                                 },
                                 onLongClick = {
@@ -561,6 +571,7 @@ fun AdvancedSettingsScreen(
                                             ) {
                                                 itemObject.put("value", def)
                                                 itemValue = def
+                                                onValueCommitted?.invoke(itemPath, def.toString())
                                             } else {
                                                 AlertDialogQueue.showDialog(
                                                     context.getString(R.string.error),
@@ -608,6 +619,7 @@ fun AdvancedSettingsScreen(
                                     } else {
                                         itemObject.put("value", value)
                                         itemValue = value
+                                        onValueCommitted?.invoke(itemPath, "\"" + value + "\"")
                                     }
                                 },
                                 onLongClick = {
@@ -621,6 +633,9 @@ fun AdvancedSettingsScreen(
                                             ) {
                                                 itemObject.put("value", def)
                                                 itemValue = def
+                                                onValueCommitted?.invoke(
+                                                    itemPath, "\"" + def + "\""
+                                                )
                                             } else {
                                                 AlertDialogQueue.showDialog(
                                                     context.getString(R.string.error),
@@ -673,6 +688,9 @@ fun AdvancedSettingsScreen(
                                                 "value", value.toLong().toString()
                                             )
                                             itemValue = value.toLong()
+                                            onValueCommitted?.invoke(
+                                                itemPath, value.toLong().toString()
+                                            )
                                         }
                                     },
                                     valueContent = { PreferenceValue(text = itemValue.toString()) },
@@ -690,6 +708,7 @@ fun AdvancedSettingsScreen(
                                                 ) {
                                                     itemObject.put("value", def)
                                                     itemValue = def
+                                                    onValueCommitted?.invoke(itemPath, def.toString())
                                                 } else {
                                                     AlertDialogQueue.showDialog(
                                                         context.getString(R.string.error),
@@ -743,6 +762,9 @@ fun AdvancedSettingsScreen(
                                         } else {
                                             itemObject.put("value", value.toDouble().toString())
                                             itemValue = value.toDouble()
+                                            onValueCommitted?.invoke(
+                                                itemPath, value.toString()
+                                            )
                                         }
                                     },
                                     valueContent = { PreferenceValue(text = itemValue.toString()) },
@@ -760,6 +782,7 @@ fun AdvancedSettingsScreen(
                                                 ) {
                                                     itemObject.put("value", def)
                                                     itemValue = def
+                                                    onValueCommitted?.invoke(itemPath, def.toString())
                                                 } else {
                                                     AlertDialogQueue.showDialog(
                                                         context.getString(R.string.error),
@@ -1257,6 +1280,19 @@ fun SettingsScreen(
                     )
                 }
 
+                item(key = "debug_controller") {
+                    HomePreference(
+                        title = "Debug — Controller",
+                        icon = { Icon(painterResource(R.drawable.gamepad), null) },
+                        description = "Agent ADB bridge (DEBUG_PAD broadcasts) + tap calibration 1632,873. Test X/UP/Sticks without restarting game.",
+                        onClick = {
+                            if (isWideScreen) activeSettingKey = "debug_controller"
+                            else navigateTo("debug_controller")
+                        },
+                        onFocusChanged = { if (it) focusedKey = "debug_controller" }
+                    )
+                }
+
                 if (!BuildConfig.IS_PLAYSTORE_BUILD) {
                     item(key = "patches") {
                         HomePreference(
@@ -1337,6 +1373,11 @@ fun SettingsScreen(
                             LogMonitorScreen(
                                 navigateBack = { activeSettingKey = null },
                                 isInSplitPane = true
+                            )
+                        }
+                        "debug_controller" -> {
+                            com.zenithblue.sambas3.ui.debug.DebugControllerScreen(
+                                navigateBack = { activeSettingKey = null }
                             )
                         }
                         "patches" -> {

@@ -123,6 +123,12 @@ android {
         jniLibs.useLegacyPackaging = true
     }
 
+    testOptions {
+        // android.util.Log etc. are stubbed (return defaults) in JVM unit tests
+        // instead of throwing "not mocked" — needed by PadInputInjector failure-path tests.
+        unitTests.isReturnDefaultValues = true
+    }
+
     lint {
         abortOnError = false
         checkReleaseBuilds = false

@@ -19,6 +19,7 @@
     <string name="settings">Settings</string>
 
     <!-- FileUtil -->
+    <string name="game_import_failed">Game import failed: %1$s</string>
     <string name="installing_dir">Installing directory</string>
 
     <!-- GamesScreen -->
@@ -70,6 +71,31 @@
     <!-- SambaS3Activity -->
     <string name="error_with_msg">Error: %1$s</string>
     <string name="failed_to_boot">Failed to boot</string>
+
+    <!-- RPCSXActivity -->
+    <string name="home_menu_toggle_cd">Home menu</string>
+    <string name="exit_game_confirm_message">Quit the game and return to the launcher?</string>
+    <string name="exit_game_confirm_yes">Yes</string>
+    <string name="exit_game_confirm_no">No</string>
+
+    <!-- In-game menu / Configure Game -->
+    <string name="ingame_menu_title">SambaS3</string>
+    <string name="ingame_resume">Resume</string>
+    <string name="ingame_global_settings">Global Settings</string>
+    <string name="ingame_core_home_menu">Core Home Menu</string>
+    <string name="ingame_exit_game">Exit Game</string>
+    <string name="configure_game">Configure Game</string>
+    <string name="configure_game_gate_description">Requires the emulator engine to be initialized and idle.</string>
+    <string name="configure_game_unresolved_id">Cannot determine a title ID for this game; per-title overrides are unavailable.</string>
+    <string name="configure_game_reset_all_confirm">Restore every overridden setting for this game to its global value?</string>
+    <string name="use_global">Use Global</string>
+    <string name="override_value">Override</string>
+    <string name="reset_row">Reset this setting</string>
+    <string name="reset_all_game">Reset All</string>
+    <string name="setting_available_in_launcher">Available from the launcher settings</string>
+    <string name="ingame_section_video">Video</string>
+    <string name="ingame_section_core">Core</string>
+    <string name="ingame_section_audio">Audio</string>
 
     <!-- SettingsScreen -->
     <string name="active_user">Active User</string>

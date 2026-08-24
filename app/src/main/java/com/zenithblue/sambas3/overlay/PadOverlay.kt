@@ -11,6 +11,7 @@ import android.graphics.Rect
 import android.os.Build
 import android.os.Handler
 import android.os.Looper
+import android.os.SystemClock
 import android.os.VibrationEffect
 import android.os.Vibrator
 import android.os.VibratorManager
@@ -90,6 +91,12 @@ class PadOverlay(context: Context?, attrs: AttributeSet?) : SurfaceView(context,
 
     var onSelectedInputChange: ((Any?) -> Unit)? = null
     var isEditing = false
+
+    var isMenuMode = false
+        private set
+
+    private var preMenuModeAlpha = 1f
+    private var preMenuModeOverlayVisible = true
 
     private var fadeHandler:  Handler? = null
     private var fadeRunnable: Runnable? = null
@@ -301,8 +308,9 @@ class PadOverlay(context: Context?, attrs: AttributeSet?) : SurfaceView(context,
     private fun setupTouchListener(totalW: Int, totalH: Int, sideMargin: Int, buttonSize: Int) {
         setOnTouchListener { _, motionEvent ->
             var hit = false
+            val menuMode = isMenuMode && !isEditing
 
-            if (!isEditing) {
+            if (!menuMode) {
                 lastTouchTime = System.currentTimeMillis()
                 resetFadeTimer()
                 if (!isOverlayVisible) fadeInOverlay()
@@ -340,6 +348,12 @@ class PadOverlay(context: Context?, attrs: AttributeSet?) : SurfaceView(context,
                 return@setOnTouchListener true
             }
 
+            // A Compose in-game page is modal: consume every touch here and
+            // handle/push nothing below (the scrim above is the primary blocker).
+            if (!OverlayTouchPolicy.shouldAcceptOverlayTouch(menuMode)) {
+                return@setOnTouchListener true
+            }
+
             val force = action == MotionEvent.ACTION_UP || action == MotionEvent.ACTION_POINTER_UP ||
                     action == MotionEvent.ACTION_CANCEL || action == MotionEvent.ACTION_MOVE
 
@@ -361,7 +375,7 @@ class PadOverlay(context: Context?, attrs: AttributeSet?) : SurfaceView(context,
                 }
             }
 
-            if (force || !hit) {
+            if ((force || !hit) && OverlayTouchPolicy.shouldHandleFloatingSticks(menuMode)) {
                 for (i in floatingSticks.indices) {
                     val stick = floatingSticks[i] ?: continue
                     val touchResult = stick.onTouch(motionEvent, pointerIndex, state)
@@ -376,7 +390,8 @@ class PadOverlay(context: Context?, attrs: AttributeSet?) : SurfaceView(context,
                 state.rightStickX, state.rightStickY
             )
 
-            if (!hit && (action == MotionEvent.ACTION_DOWN || action == MotionEvent.ACTION_POINTER_DOWN)) {
+            if (OverlayTouchPolicy.shouldSpawnFloatingStick(menuMode) &&
+                !hit && (action == MotionEvent.ACTION_DOWN || action == MotionEvent.ACTION_POINTER_DOWN)) {
                 val xInFloatingArea = x > buttonSize * 2 && x < totalW - buttonSize * 2
                 val yInFloatingArea = y > buttonSize    && y < totalH - buttonSize
                 var inFloatingArea  = xInFloatingArea && yInFloatingArea
@@ -480,15 +495,49 @@ class PadOverlay(context: Context?, attrs: AttributeSet?) : SurfaceView(context,
     }
 
     private fun fadeOutOverlay() {
-        if (!isOverlayVisible) return
+        if (isMenuMode || !isOverlayVisible) return
         isOverlayVisible = false
         ObjectAnimator.ofFloat(this, "alpha", 1f, 0f).apply { duration = fadeDuration; start() }
     }
 
     private fun fadeInOverlay() {
-        if (isOverlayVisible) return
+        if (isMenuMode || isOverlayVisible) return
         isOverlayVisible = true
         ObjectAnimator.ofFloat(this, "alpha", 0f, 1f).apply { duration = fadeDuration; start() }
+    }
+
+    // ── Menu mode ──────────────────────────────────────────────────────────
+    fun setMenuMode(on: Boolean) {
+        if (isMenuMode == on) return
+        isMenuMode = on
+
+        if (on) {
+            val downTime = SystemClock.uptimeMillis()
+            for (i in floatingSticks.indices) {
+                val stick = floatingSticks[i] ?: continue
+                val cancel = MotionEvent.obtain(
+                    downTime, SystemClock.uptimeMillis(),
+                    MotionEvent.ACTION_CANCEL, 0f, 0f, 0
+                )
+                stick.onTouch(cancel, 0, state)
+                cancel.recycle()
+                floatingSticks[i] = null
+            }
+
+            preMenuModeAlpha = alpha
+            preMenuModeOverlayVisible = isOverlayVisible
+            isOverlayVisible = true
+            ObjectAnimator.ofFloat(this, "alpha", preMenuModeAlpha, OverlayTouchPolicy.MENU_DIM_ALPHA)
+                .apply { duration = fadeDuration; start() }
+        } else {
+            val restoreTo = if (preMenuModeOverlayVisible) 1f else 0f
+            ObjectAnimator.ofFloat(this, "alpha", alpha, restoreTo)
+                .apply { duration = fadeDuration; start() }
+            isOverlayVisible = preMenuModeOverlayVisible
+            resetFadeTimer()
+        }
+
+        invalidate()
     }
 
     // ── Edit-mode APIs (unchanged) ─────────────────────────────────────────

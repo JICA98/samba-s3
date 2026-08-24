@@ -1,5 +1,26 @@
+diff --git a/3rdparty/CMakeLists.txt b/3rdparty/CMakeLists.txt
+index 67174c58e..aba8b3a79 100644
+--- a/3rdparty/CMakeLists.txt
++++ b/3rdparty/CMakeLists.txt
+@@ -266,12 +266,14 @@ add_library(3rdparty_vulkan INTERFACE)
+ target_compile_definitions(3rdparty_vulkan INTERFACE -DHAVE_VULKAN)
+ 
+ if (NOT COMPILE_VULKAN_LOADER OR ANDROID OR APPLE)
+-	find_package(Vulkan 1.3 GLOBAL)
++	find_package(Vulkan)
+ 
+ 	if (Vulkan_FOUND)
+ 		message(STATUS "Using system Vulkan Loader")
+ 		target_link_libraries(3rdparty_vulkan INTERFACE Vulkan::Vulkan)
+-		add_library(Vulkan::Loader ALIAS Vulkan::Vulkan)
++		if (NOT TARGET Vulkan::Loader)
++			add_library(Vulkan::Loader ALIAS Vulkan::Vulkan)
++		endif()
+ 	else()
+ 		message(WARNING "Vulkan not found, using submodule")
+ 		set(COMPILE_VULKAN_LOADER on)
 diff --git a/android/src/rpcsx-android.cpp b/android/src/rpcsx-android.cpp
-index ce38967c1..44320274c 100644
+index ce38967c1..57455c776 100644
 --- a/android/src/rpcsx-android.cpp
 +++ b/android/src/rpcsx-android.cpp
 @@ -52,6 +52,7 @@
@@ -10,7 +31,41 @@ index ce38967c1..44320274c 100644
  #include "util/sysinfo.hpp"
  #include <Emu/Io/pad_config.h>
  #include <Emu/RSX/GSFrameBase.h>
-@@ -2641,4 +2642,106 @@ extern "C" void *_rpcsx_setCustomDriver(void *driverHandle) {
+@@ -1878,10 +1879,6 @@ extern "C" bool _rpcsx_surfaceEvent(JNIEnv *env, jobject surface, jint event) {
+       ANativeWindow_release(prevWindow);
+     }
+ 
+-    if (auto padThread = pad::get_pad_thread()) {
+-      padThread->open_home_menu();
+-    }
+-
+     Emu.Pause();
+   } else {
+     auto newWindow = ANativeWindow_fromSurface(env, surface);
+@@ -2071,8 +2068,6 @@ static bool installPup(JNIEnv *env, fs::file &&pup_f, jlong progressId) {
+     return false;
+   }
+ 
+-  sendVshBootable(env, progressId);
+-
+   jlong processed = 0;
+   for (const auto &update_filename : update_filenames) {
+     auto update_file_stream = update_files.get_file(update_filename);
+@@ -2120,9 +2115,10 @@ static bool installPup(JNIEnv *env, fs::file &&pup_f, jlong progressId) {
+   }
+ 
+   sendFirmwareInstalled(env, utils::get_firmware_version());
+-
+-  g_compilationQueue.push(progress,
+-                          g_cfg_vfs.get_dev_flash() + "/vsh/module/vsh.self");
++  sendVshBootable(env, -1);
++  rpcsx_android.notice(
++      "Firmware installed; automatic VSH PPU precompilation is disabled");
++  progress.success(update_filenames.size(), "Firmware installation complete");
+   return true;
+ }
+ 
+@@ -2641,4 +2637,106 @@ extern "C" void *_rpcsx_setCustomDriver(void *driverHandle) {
    return prevLoader;
  }
  

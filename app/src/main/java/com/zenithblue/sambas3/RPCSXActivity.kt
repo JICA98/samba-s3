@@ -1,13 +1,17 @@
 package com.zenithblue.sambas3
 
-import android.app.Activity
 import android.os.Bundle
 import android.util.Log
 import android.view.InputDevice
 import android.view.KeyEvent
 import android.view.MotionEvent
+import android.view.View
 import android.view.ViewGroup.MarginLayoutParams
 import android.view.WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_MODE_SHORT_EDGES
+import androidx.activity.ComponentActivity
+import androidx.activity.OnBackPressedCallback
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.ui.platform.ViewCompositionStrategy
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowCompat
 import androidx.core.view.WindowInsetsCompat
@@ -16,31 +20,106 @@ import androidx.core.view.isInvisible
 import androidx.core.view.updateLayoutParams
 import com.zenithblue.sambas3.databinding.ActivityRpcs3Binding
 import com.zenithblue.sambas3.dialogs.AlertDialogQueue
+import com.zenithblue.sambas3.gameconfig.GameSettingsOverrides
 import com.zenithblue.sambas3.overlay.State
+import com.zenithblue.sambas3.ui.ingame.EmulationOverlayHost
+import com.zenithblue.sambas3.ui.ingame.InGamePage
+import com.zenithblue.sambas3.ui.ingame.InGameUiState
+import com.zenithblue.sambas3.debug.DebugPadReceiver
 import com.zenithblue.sambas3.utils.InputBindingPrefs
 import kotlin.concurrent.thread
 import kotlin.math.abs
 
-class RPCSXActivity : Activity() {
+class RPCSXActivity : ComponentActivity() {
     private lateinit var binding: ActivityRpcs3Binding
     private lateinit var unregisterUsbEventListener: () -> Unit
     private var gamePadState: State = State()
     private var usesAxisL2 = false
     private var usesAxisR2 = false
     private var bootThread: Thread? = null
+    private var debugPadReceiver: DebugPadReceiver? = null
     private val inputBindings by lazy { InputBindingPrefs.loadBindings() }
+
+    // In-game overlay state machine (Compose host; P2). The ComposeView content is
+    // set ONCE here and reacts to [inGameUi] changes.
+    private val inGameUi = InGameUiState()
+
+    private lateinit var backCallback: OnBackPressedCallback
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        AlertDialogQueue.hostsSuppressed = true
+        // Ensure per-process singletons are ready even when RPCSXActivity is the cold entry point (adb launch after force-stop).
+        try { com.zenithblue.sambas3.utils.GeneralSettings.init(this) } catch (_: Exception) {}
+        if (RPCSX.rootDirectory.isEmpty()) {
+            RPCSX.rootDirectory = applicationContext.getExternalFilesDir(null)?.toString()?.let { if (it.endsWith("/")) it else "$it/" } ?: ""
+            try { com.zenithblue.sambas3.utils.FileUtil.fixNestedGameDirs(RPCSX.rootDirectory) } catch (_: Exception) {}
+        }
+        // Cold-start library init fallback (skill sambas3-game-launch §2): direct RPCSXActivity after force-stop bypasses MainActivity.kt:28-86.
+        if (!RPCSX.initialized) {
+            try { LogMonitor.start(this) } catch (_: Exception) {}
+            try {
+                RPCSX.nativeLibDirectory = packageManager.getApplicationInfo(packageName, 0).nativeLibraryDir
+                if (RPCSX.openLibrary()) {
+                    RPCSX.instance.initialize(RPCSX.rootDirectory, UserRepository.getUserFromSettings())
+                    RPCSX.initialized = true
+                    Log.i("RPCSX-UI", "RPCSX cold init via RPCSXActivity (nativeLib=${RPCSX.nativeLibDirectory})")
+                    thread { try { RPCSX.instance.startMainThreadProcessor() } catch (e: Exception) { Log.w("RPCSX-UI", "startMainThreadProcessor cold failed ${e.message}") } }
+                    thread { try { RPCSX.instance.processCompilationQueue() } catch (e: Exception) { Log.w("RPCSX-UI", "processCompilationQueue cold failed ${e.message}") } }
+                } else {
+                    Log.e("RPCSX-UI", "RPCSX cold openLibrary failed at ${RPCSX.nativeLibDirectory}")
+                }
+            } catch (e: Exception) {
+                Log.e("RPCSX-UI", "RPCSX cold init failed: ${e.message}", e)
+            }
+        }
+
         binding = ActivityRpcs3Binding.inflate(layoutInflater)
         setContentView(binding.root)
 
         unregisterUsbEventListener = listenUsbEvents(this)
         enableFullScreenImmersive()
 
+        binding.ingameOverlay.setViewCompositionStrategy(
+            ViewCompositionStrategy.DisposeOnViewTreeLifecycleDestroyed
+        )
+        binding.ingameOverlay.translationZ = 64f
+        binding.ingameOverlay.setContent {
+            RPCSXTheme {
+                EmulationOverlayHost(
+                    uiState = inGameUi,
+                    gamePath = intent.getStringExtra("path"),
+                    onCloseRequest = ::closeInGamePages,
+                    onOpenCoreHomeMenu = ::openCoreHomeMenu,
+                    onExitConfirmed = ::exitGame
+                )
+            }
+        }
+
+        backCallback = object : OnBackPressedCallback(false) {
+            override fun handleOnBackPressed() {
+                if (!inGameUi.popSubPage()) closeInGamePages()
+            }
+        }
+        onBackPressedDispatcher.addCallback(this, backCallback)
+
+        debugPadReceiver = DebugPadReceiver.register(this)
+
         binding.oscToggle.setOnClickListener {
             binding.padOverlay.isInvisible = !binding.padOverlay.isInvisible
             binding.oscToggle.setImageResource(if (binding.padOverlay.isInvisible) R.drawable.ic_osc_off else R.drawable.ic_show_osc)
+        }
+
+        binding.menuToggle.setOnClickListener {
+            if (RPCSX.getState() != EmulatorState.Running) {
+                Log.w("RPCSX State", "Cannot open home menu in state ${RPCSX.getState().name}")
+                return@setOnClickListener
+            }
+            if (inGameUi.page.value == InGamePage.Closed) {
+                openInGamePage(InGamePage.Menu)
+            } else {
+                closeInGamePages()
+            }
         }
 
         val gamePath = intent.getStringExtra("path")!!
@@ -71,6 +150,13 @@ class RPCSXActivity : Activity() {
             Log.w("RPCSX State", RPCSX.getState().name)
             RPCSX.activeGame.value = gamePath
 
+            // Pre-boot override replay (P4): full ladder defaults -> baseline ->
+            // global -> per-title, executed while Emu.IsStopped() so restart-required
+            // cfg nodes accept their values. Runs on THIS bootThread (single serial
+            // g_cfg writer).
+            val preBootTitleId = GameSettingsOverrides.resolveTitleId(gamePath, this@RPCSXActivity)
+            GameSettingsOverrides.applyForGame(this@RPCSXActivity, preBootTitleId)
+
             val bootResult = RPCSX.boot(gamePath)
             if (bootResult != BootResult.NoErrors) {
                 AlertDialogQueue.showDialog(
@@ -78,14 +164,84 @@ class RPCSXActivity : Activity() {
                     getString(R.string.error_with_msg, bootResult.name)
                 )
                 finish()
+            } else {
+                pollAndLearnTitleId(gamePath)
             }
+        }
+    }
+
+    // ── In-game Compose overlay pages ──────────────────────────────────────
+
+    private fun openInGamePage(page: InGamePage) {
+        inGameUi.open(page)
+        binding.ingameOverlay.visibility = View.VISIBLE
+        binding.padOverlay.setMenuMode(true)
+        backCallback.isEnabled = true
+    }
+
+    private fun closeInGamePages() {
+        inGameUi.close()
+        binding.ingameOverlay.visibility = View.GONE
+        binding.padOverlay.setMenuMode(false)
+        backCallback.isEnabled = false
+    }
+
+    /** Engine draws its own native home menu (guarded to Running). */
+    private fun openCoreHomeMenu() {
+        if (RPCSX.getState() != EmulatorState.Running) return
+        RPCSX.instance.openHomeMenu()
+    }
+
+    /** Exit Game confirm -> graceful kill, then finish back to the launcher. */
+    private fun exitGame() {
+        thread {
+            try {
+                RPCSX.instance.kill()
+                RPCSX.state.value = EmulatorState.Stopped
+            } catch (e: Exception) {
+                Log.w("RPCSX State", "kill failed: ${e.message}")
+            }
+            runOnUiThread { finish() }
+        }
+    }
+
+    /**
+     * Post-boot learning (P4 step 5, review F5): poll getTitleId up to 10 s ON the
+     * bootThread; on first non-blank value persist the path->titleId learning entry
+     * and replay ONLY the per-title tier — never defaults/baseline/global while
+     * Running. When the path was already TITLE_ID-shaped the pre-boot ladder applied
+     * this tier too, so re-application is benign documented rejection noise for
+     * restart-required nodes.
+     */
+    private fun pollAndLearnTitleId(gamePath: String) {
+        var waitedMs = 0L
+        while (waitedMs < TITLE_ID_POLL_TIMEOUT_MS) {
+            if (Thread.interrupted()) return
+            val titleId = try {
+                RPCSX.instance.getTitleId()
+            } catch (e: Exception) {
+                ""
+            }
+            if (titleId.isNotBlank()) {
+                GameSettingsOverrides.learnTitleId(this, gamePath, titleId)
+                GameSettingsOverrides.applyTitleTier(this, titleId)
+                return
+            }
+            try {
+                Thread.sleep(TITLE_ID_POLL_INTERVAL_MS)
+            } catch (e: InterruptedException) {
+                return
+            }
+            waitedMs += TITLE_ID_POLL_INTERVAL_MS
         }
     }
 
     override fun onDestroy() {
         super.onDestroy()
+        AlertDialogQueue.hostsSuppressed = false
         RPCSX.state.value = EmulatorState.Paused
         unregisterUsbEventListener()
+        try { debugPadReceiver?.let { unregisterReceiver(it) } } catch (_: Exception) {}
         bootThread?.interrupt()
         bootThread?.join()
     }
@@ -237,5 +393,10 @@ class RPCSXActivity : Activity() {
     override fun onWindowFocusChanged(hasFocus: Boolean) {
         super.onWindowFocusChanged(hasFocus)
         if (hasFocus) enableFullScreenImmersive()
+    }
+
+    companion object {
+        private const val TITLE_ID_POLL_INTERVAL_MS = 250L
+        private const val TITLE_ID_POLL_TIMEOUT_MS = 10_000L
     }
 }

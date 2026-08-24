@@ -18,6 +18,12 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent" />
 
+    <androidx.compose.ui.platform.ComposeView
+        android:id="@+id/ingameOverlay"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:visibility="gone" />
+
     <ImageButton
         android:id="@+id/osc_toggle"
         android:layout_width="wrap_content"
@@ -30,5 +36,18 @@
         app:layout_constraintEnd_toEndOf="parent"
         android:layout_marginEnd="10dp"
         android:layout_marginBottom="10dp" />
-    
+
+    <ImageButton
+        android:id="@+id/menu_toggle"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:background="?android:attr/actionBarItemBackground"
+        android:contentDescription="@string/home_menu_toggle_cd"
+        android:padding="8dp"
+        android:src="@drawable/ic_home_menu"
+        app:tint="#40FFFFFF"
+        app:layout_constraintBottom_toTopOf="@id/osc_toggle"
+        app:layout_constraintEnd_toEndOf="parent"
+        android:layout_marginEnd="10dp" />
+
 </androidx.constraintlayout.widget.ConstraintLayout>

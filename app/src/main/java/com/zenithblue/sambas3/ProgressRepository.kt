@@ -111,28 +111,28 @@ class ProgressRepository {
                 val max = message.data.getLong("max")
                 val text = message.data.getString("message")
 
-                if (hasPermission) {
-                    val notificationManager = NotificationManagerCompat.from(context)
-
-                    if (text != null) {
-                        builder.setContentText(text)
+                if (value < 0) {
+                    val contentText = text ?: context.getString(R.string.unexpected_error)
+                    if (hasPermission) {
+                        val notificationManager = NotificationManagerCompat.from(context)
+                        builder.setContentText(contentText)
+                            .setPriority(NotificationCompat.PRIORITY_HIGH)
+                            .setProgress(0, 0, false)
+                            .setOngoing(false)
+                        notificationManager.notify(requestId.toInt(), builder.build())
                     }
+                    AlertDialogQueue.showDialog(title, contentText)
+                } else if (hasPermission) {
+                    val notificationManager = NotificationManagerCompat.from(context)
+                    if (text != null) builder.setContentText(text)
 
-                    if (value >= 0 && max > 0) {
+                    if (max > 0) {
                         if (value == max) {
                             notificationManager.cancel(requestId.toInt())
                         } else {
                             builder.setProgress(max.toInt(), value.toInt(), false)
                             notificationManager.notify(requestId.toInt(), builder.build())
                         }
-                    } else if (value < 0) {
-                        val contentText = text ?: context.getString(R.string.unexpected_error)
-                        builder.setContentText(contentText)
-                            .setPriority(NotificationCompat.PRIORITY_HIGH)
-                            .setProgress(0, 0, false)
-                            .setOngoing(false)
-                        AlertDialogQueue.showDialog(title, contentText)
-                        notificationManager.notify(requestId.toInt(), builder.build())
                     } else {
                         builder.setProgress(max.toInt(), value.toInt(), true)
                         notificationManager.notify(requestId.toInt(), builder.build())

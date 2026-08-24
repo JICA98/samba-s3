@@ -9,6 +9,7 @@ import androidx.activity.compose.setContent
 import androidx.core.view.WindowCompat
 import androidx.lifecycle.lifecycleScope
 import kotlinx.coroutines.launch
+import com.zenithblue.sambas3.debug.DebugPadReceiver
 import com.zenithblue.sambas3.ui.navigation.AppNavHost
 import com.zenithblue.sambas3.utils.GeneralSettings
 import com.zenithblue.sambas3.utils.GpuDriverHelper
@@ -17,6 +18,7 @@ import kotlin.concurrent.thread
 
 class MainActivity : ComponentActivity() {
     private lateinit var unregisterUsbEventListener: () -> Unit
+    private var debugPadReceiver: DebugPadReceiver? = null
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
@@ -45,6 +47,9 @@ class MainActivity : ComponentActivity() {
             if (!RPCSX.rootDirectory.endsWith("/")) {
                 RPCSX.rootDirectory += "/"
             }
+
+            // Fix historical nested path bug before loading games.json
+            try { com.zenithblue.sambas3.utils.FileUtil.fixNestedGameDirs(RPCSX.rootDirectory) } catch (_: Exception) {}
 
             lifecycleScope.launch {
                 GameRepository.load()
@@ -95,11 +100,13 @@ class MainActivity : ComponentActivity() {
         } else {
             unregisterUsbEventListener = {}
         }
+        debugPadReceiver = DebugPadReceiver.register(this)
     }
 
     override fun onDestroy() {
         super.onDestroy()
         unregisterUsbEventListener()
+        try { debugPadReceiver?.let { unregisterReceiver(it) } } catch (_: Exception) {}
         LogMonitor.stop()
     }
 }
