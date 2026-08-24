@@ -204,6 +204,14 @@ class GameRepository {
 
         fun createGameInstallEntry(progressId: Long) {
             synchronized(instance) {
+                val existing = instance.games.find { game ->
+                    game.info.path == "$" &&
+                        game.findProgress(GameProgressType.Install)
+                            ?.any { progress -> progress.id == progressId } == true
+                }
+                if (existing != null) {
+                    return
+                }
                 val game = Game(GameInfoStore("$"))
                 game.addProgress(GameProgress(progressId, GameProgressType.Install))
                 instance.games.add(0, game)

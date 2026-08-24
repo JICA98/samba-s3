@@ -16,7 +16,8 @@ explicit invariant.
 Implementation beyond the pass-through spike remains gated on:
 
 1. a source-by-source license matrix;
-2. a build/size comparison between a reduced leegao/Mesa target and a smaller Samba proxy;
+2. a Gate B small-proxy decision, with reduced leegao/Mesa comparison only if thin forwarding
+   proves insufficient;
 3. device evidence showing which compatibility behavior RPCSX actually needs.
 
 ## Decision Summary
@@ -32,7 +33,7 @@ RPCSX Vulkan
 libvulkan_samba_compat.so
     |
     v
-/system/lib64/libvulkan.so
+Android public libvulkan.so (SONAME)
     |
     +-- Mali / Immortalis
     +-- Xclipse
@@ -40,10 +41,11 @@ libvulkan_samba_compat.so
     +-- Adreno OEM
 ```
 
-The wrapper is a Vk-on-Vk in-process proxy. It must export the Vulkan symbols RPCSX resolves,
-load Android's system Vulkan loader itself, intercept only the calls Samba needs, and forward the
-rest to the OEM stack. `VK_LAYER_PATH`, an ICD JSON, and Android layer discovery are not the
-primary integration mechanism.
+The wrapper is a Vk-on-Vk in-process proxy. It must export the direct Vulkan symbols RPCSX resolves,
+route RPCSX's `vkGetInstanceProcAddr`/`vkGetDeviceProcAddr` requests through its own dispatch,
+load Android's public system Vulkan loader itself, intercept only the calls Samba needs, and
+forward the rest to the OEM stack. `VK_LAYER_PATH`, an ICD JSON, and Android layer discovery are
+not the primary integration mechanism.
 
 Keep three distinct backends:
 
@@ -83,9 +85,39 @@ This directly matches a proxy shared library. A VkLayer environment is an unnece
 deterministic extra discovery path.
 
 RPCSX currently resolves roughly 125 unique `VK_GET_SYMBOL(...)` names with `dlsym()` from the
-loader handle. M0 must generate the exact required-symbol list from the pinned RPCSX source and
-compare it with `nm -D --defined-only libvulkan_samba_compat.so`; do not maintain this list by
-hand.
+loader handle. It also requests commands dynamically through `vkGetInstanceProcAddr` and
+`vkGetDeviceProcAddr`, including swapchain, physical-device feature/property, synchronization2,
+debug, conditional-rendering, device-fault, and external-memory-host commands.
+
+M0 therefore needs two generated audits from the pinned RPCSX source:
+
+```text
+Direct-symbol audit
+    VK_GET_SYMBOL(...) / dlsym names
+        -> exported by libvulkan_samba_compat.so
+
+Proc-address audit
+    vkGetInstanceProcAddr(...) / vkGetDeviceProcAddr(...) string requests
+        -> returned correctly by the Samba proxy
+```
+
+Generate both a complete source inventory and an Android ABI/build-configuration list so dead
+Win32/X11/macOS branches do not become false requirements. Compare the applicable direct list with
+`nm -D --defined-only libvulkan_samba_compat.so`; do not maintain either list by hand. Add a runtime
+test/log mode that requests every applicable generated proc-address name with a valid
+instance/device where required.
+
+The proxy's GIPA/GDPA routing rule is mandatory from M0 onward:
+
+```cpp
+if (isSambaInterceptedCommand(pName)) {
+    return sambaTrampoline(pName);
+}
+return hostProcAddress(dispatchableObject, pName);
+```
+
+This must cover aliases and the correct global/instance/device dispatch scope. An intercepted
+command must never bypass Samba by returning the OEM function directly from GIPA/GDPA.
 
 ### RPCSX already owns the Android presentation path
 
@@ -245,8 +277,26 @@ Backend behavior:
 | Backend | Handle passed to RPCSX | Host loader |
 |---|---|---|
 | `SystemDirect` | `nullptr` | RPCSX opens Android `libvulkan.so` |
-| `SystemCompat` | `dlopen(libvulkan_samba_compat.so)` | wrapper opens absolute system `libvulkan.so` |
+| `SystemCompat` | `dlopen(libvulkan_samba_compat.so)` | wrapper resolves Android public `libvulkan.so` by SONAME |
 | `AdrenoCustom` | result of `adrenotools_open_libvulkan(...)` | custom Turnip/Adreno driver |
+
+System Compatibility must use the Android public loader contract rather than a fixed filesystem
+location:
+
+```cpp
+void* openAndroidSystemVulkan() {
+    void* handle = dlopen("libvulkan.so", RTLD_NOW | RTLD_LOCAL);
+    if (!handle) {
+        // Optional platform-specific absolute-path fallback for diagnostics only.
+    }
+    return handle;
+}
+```
+
+Resolve a known loader symbol from the handle and use loader diagnostics such as `dladdr` where
+available to log the actual loaded object. Reject the handle if it resolves to
+`libvulkan_samba_compat.so`, an app-bundled OEM ICD, or an Adrenotools custom driver. A diagnostic
+absolute-path fallback must be separately gated and must not become the shipping API contract.
 
 Deterministic startup sequence:
 
@@ -314,17 +364,47 @@ download policy.
 
 Create two separately named and separately serialized capability reports.
 
+Define one reusable probe contract with a pinned RPCSX preset:
+
+```cpp
+struct ProbeContract {
+    std::string applicationName;
+    std::string engineName;
+    uint32_t applicationVersion;
+    uint32_t engineVersion;
+    uint32_t apiVersion;
+    std::vector<std::string> enabledInstanceExtensions;
+};
+```
+
+The preset must mirror the pinned RPCSX `vk::instance::create` contract: application and engine
+name `RPCS3`, zero application/engine versions, `VK_API_VERSION_1_0`, and the same applicable
+instance extensions. For M0, derive the requested extension set once from the pinned RPCSX policy
+and HostCaps support, then pass that exact set to both probes. Failure of the Effective probe to
+enumerate or enable an item is an equivalence failure, not a reason to silently construct a smaller
+contract. Record the preset version or source commit in both reports so a later RPCSX change cannot
+silently invalidate equivalence results.
+
 ### `HostVulkanCapabilities`
 
-The host probe directly opens the absolute Android loader (`/system/lib64/libvulkan.so` on arm64),
-creates its own temporary instance, enumerates the OEM physical device, records raw values, then
-destroys everything. It must not depend on `RPCSX.initialize()` or mutate RPCSX's loader handle.
+The host probe resolves Android's public `libvulkan.so` SONAME, creates its own temporary instance
+with the RPCSX probe contract, enumerates the OEM physical device, records raw values, then destroys
+everything. It must not depend on `RPCSX.initialize()` or mutate RPCSX's loader handle.
 
 ### `EffectiveVulkanCapabilities`
 
 The effective probe opens the selected compatibility wrapper as a client would and records what
-RPCSX would see after filtering/emulation. It must use its own temporary lifetime or run only when
-RPCSX has no live Vulkan objects.
+RPCSX would see after filtering/emulation. It must use the exact same probe contract as HostCaps and
+its own temporary lifetime, or run only when RPCSX has no live Vulkan objects.
+
+M0 comparison is semantic, not a JSON byte comparison. Normalize both reports before comparison:
+
+- sort extension names and compare them as sets;
+- compare feature and limit fields by key;
+- compare format feature bits by format and tiling/use category;
+- normalize queue families into stable indexed records and compare their fields;
+- normalize memory heaps/types while preserving indices and flags;
+- ignore enumeration order where Vulkan does not make it meaningful.
 
 Store enough identity to join reports:
 
@@ -373,12 +453,12 @@ For every field changed by the wrapper, emit a machine-readable reason:
 
 ## Source Strategy
 
-### Primary scaffold: leegao bionic Vulkan wrapper
+### Reference scaffold for later complexity: leegao bionic Vulkan wrapper
 
 Evaluate and selectively reuse:
 
 - proxy/ICD entrypoint generation and dispatch;
-- absolute Android system Vulkan loading;
+- Android public Vulkan SONAME loading and loaded-object diagnostics;
 - Android WSI forwarding;
 - wrapper object and queue state;
 - extension enumeration/filtering;
@@ -455,21 +535,28 @@ must still preserve all third-party notices and identify any incompatible or unc
 
 ### Gate B: build architecture
 
-Compare two prototypes before vendoring a large Mesa tree:
+Start with the small Samba proxy. M0 needs transparent exports/trampolines plus correct GIPA/GDPA
+routing, not Mesa's object model, WSI implementation, VMA, BC decoders, SPIRV-Tools,
+Vulkan-Utility-Libraries, or wrapper physical-device/device objects.
 
-**A. Reduced upstream target**
+**Default: B. Small Samba proxy**
+
+- generate/export the direct RPCSX Vulkan entrypoints;
+- generate/audit RPCSX GIPA/GDPA string requests;
+- implement thin global/instance/device dispatch and forwarding trampolines;
+- selectively add audited modules only as reproduced failures require them.
+
+**Fallback: A. Reduced upstream target**
 
 - pin an audited `leegao/bionic-vulkan-wrapper` commit;
-- build only the wrapper and required Mesa Vulkan common/WSI/generated dependencies;
-- strip DXVK policy and all unused decoder/shader paths.
+- build only the wrapper and demonstrated required Mesa Vulkan common/WSI/generated dependencies;
+- strip DXVK policy and all unused object, decoder, shader, and translation paths.
 
-**B. Small Samba proxy**
+Choose A only if the small proxy demonstrably grows enough object/dispatch/WSI infrastructure that
+the audited upstream pieces are lower-risk. Document the concrete requirement that caused each
+Mesa-derived subsystem to enter M0.
 
-- generate/export RPCSX-required Vulkan entrypoints;
-- implement a small dispatch/object layer;
-- selectively port audited modules only as failures require them.
-
-Record for both:
+Record for the small proxy and, only if evaluated, the reduced upstream alternative:
 
 - clean and incremental native build time;
 - checked-out and compiled source size;
@@ -479,8 +566,9 @@ Record for both:
 - startup time and pass-through CPU overhead;
 - maintenance cost of syncing Vulkan headers and RPCSX symbol use.
 
-Choose A or B in a short architecture decision record. Do not vendor the full wrapper repository by
-default.
+Record the choice in a short architecture decision record. The default decision is the small proxy;
+do not vendor the full wrapper repository or add a Mesa/WSI/VMA/SPIR-V/BC subsystem without the
+documented Gate B justification.
 
 ## Implementation Phases
 
@@ -488,12 +576,17 @@ default.
 
 Build `libvulkan_samba_compat.so` for arm64 with no compatibility policy:
 
-- export every Vulkan entrypoint RPCSX resolves from the loader handle;
-- load `/system/lib64/libvulkan.so` with `RTLD_NOW | RTLD_LOCAL`;
+- export every direct Vulkan entrypoint RPCSX resolves from the loader handle;
+- route every audited RPCSX GIPA/GDPA request through the proxy and prevent intercepted commands
+  from bypassing it;
+- resolve Android's public `libvulkan.so` SONAME with `RTLD_NOW | RTLD_LOCAL`, verify/log the actual
+  loaded object, and reject self/bundled/custom-driver resolution;
 - forward instance/device/queue/WSI calls;
 - preserve physical-device identity, features, extensions, properties, formats, limits, and return
   codes;
 - perform no shader edits, BC emulation, format remapping, feature spoofing, or version override;
+- contain no Mesa object/WSI, VMA, SPIR-V, Vulkan-Utility-Libraries, or BC subsystem unless the Gate
+  B decision records why thin forwarding cannot meet an M0 requirement;
 - add only lifecycle/error logs and opt-in call counters;
 - keep `ANativeWindow` handling unchanged.
 
@@ -636,11 +729,17 @@ Run for every milestone:
 
 Add native/static checks for:
 
-- generated RPCSX `VK_GET_SYMBOL` list is a subset of wrapper exports;
-- wrapper host path is the absolute Android system Vulkan loader;
+- generated RPCSX direct `VK_GET_SYMBOL` list is a subset of wrapper exports;
+- generated RPCSX GIPA/GDPA request list resolves in the correct dispatch scope;
+- intercepted commands receive Samba trampolines from GIPA/GDPA while pass-through commands
+  receive valid host functions;
+- wrapper resolves Android's public Vulkan SONAME, logs/verifies the actual object, and rejects
+  itself, bundled OEM ICDs, and custom Adrenotools drivers;
 - wrapper has no dependency on a bundled OEM Vulkan blob;
 - no `VK_LAYER_PATH`/`VK_INSTANCE_LAYERS` requirement in the shipping path;
 - no force-enabled features in M0;
+- M0 contains no Mesa object/WSI, VMA, SPIR-V, Vulkan-Utility-Libraries, or BC subsystem without an
+  explicit Gate B justification;
 - x86_64 UI/backend availability matches the built native capability;
 - backend configure is rejected while the emulator/Vulkan state is live.
 
@@ -664,7 +763,9 @@ Minimum physical coverage before recommending compatibility mode:
 ### Correctness and lifecycle
 
 - same GPU and driver identity in HostCaps, System Direct, and M0 System Compatibility;
-- same raw/effective features, extensions, properties, formats, and limits in M0;
+- HostCaps and EffectiveCaps use the same versioned RPCSX probe contract;
+- same normalized raw/effective features, extension sets, properties, formats, limits, queue
+  families, and memory records in M0; serialized JSON and enumeration order need not match;
 - GTA known-good checkpoint renders identically on G615;
 - surface create/change/destroy, rotation, background/foreground, pause/resume, and activity
   recreation work;
@@ -698,17 +799,26 @@ must make that trade-off explicit.
 ## Milestone M0 Acceptance Checklist
 
 - [ ] License/provenance matrix covers every M0 imported/generated component.
-- [ ] Gate B records reduced-upstream versus small-proxy decision.
+- [ ] Gate B records the small proxy as the default, or concrete evidence requiring the reduced
+  upstream fallback and each imported subsystem.
 - [ ] System Direct behavior is unchanged.
 - [ ] Adrenotools/Turnip behavior is unchanged.
 - [ ] KGSL/Adreno hardware eligibility protects only Adreno Custom.
 - [ ] Distribution install policy cannot make Custom appear on Mali/Xclipse/PowerVR.
 - [ ] `libvulkan_samba_compat.so` loads through `_rpcsx_setCustomDriver`.
-- [ ] The wrapper opens `/system/lib64/libvulkan.so` itself on arm64.
-- [ ] All RPCSX-required Vulkan symbols are exported and audited automatically.
+- [ ] Every direct RPCSX Vulkan symbol is generated/audited and resolves from the compat loader.
+- [ ] Every pinned RPCSX dynamic GIPA/GDPA request is generated/audited and resolves correctly.
+- [ ] Intercepted calls cannot bypass SambaCompat through host GIPA/GDPA lookup.
+- [ ] The wrapper resolves Android's public `libvulkan.so` SONAME and logs/verifies the actual
+  loaded object rather than resolving itself, a bundled OEM ICD, or an Adrenotools custom driver.
 - [ ] No `VK_LAYER_PATH`, layer manifest, or bundled OEM Vulkan blob is required.
 - [ ] M0 advertises no capability absent from the raw host report.
-- [ ] Host and Effective capability reports can be diffed field-by-field.
+- [ ] HostCaps and EffectiveCaps use the same pinned RPCSX application/engine/API/extension
+  `ProbeContract`.
+- [ ] Host and Effective capability reports are semantically normalized and diffed field-by-field,
+  not compared by JSON bytes or enumeration order.
+- [ ] M0 contains no Mesa object/WSI, VMA, SPIR-V, Vulkan-Utility-Libraries, or BC subsystem unless
+  Gate B explicitly documents why it is required.
 - [ ] Backend is selected before `systemInfo`, probe-through-RPCSX, or renderer creation.
 - [ ] Backend cannot switch while any Vulkan/emulator object is live.
 - [ ] Previous loader ownership and close behavior pass cold-switch lifecycle tests.
@@ -728,14 +838,14 @@ Only after all applicable M0 checks pass may compatibility rules enter M1/M2.
 | R1 | DXVK-oriented wrapper fabricates capabilities inappropriate for RPCSX | Strip force-enable policy; compare HostCaps and EffectiveCaps; require full semantics and tests |
 | R2 | Duplicate BC decode reduces performance or corrupts textures | Keep BC out of M0/M1; measure RPCSX BC1-3 fallback first |
 | R3 | Loader hot-swap leaves stale dispatch pointers or closes a live library | Serialized backend owner; hard no-live-Vulkan invariant; restart when uncertain |
-| R4 | Full Mesa-derived import inflates source, build, and APK | Gate B prototype comparison; pin/build only necessary target or use small proxy |
+| R4 | Full Mesa-derived import inflates source, build, and APK | Small proxy is the M0 default; add audited upstream subsystems only with Gate B evidence |
 | R5 | License/provenance is unclear across copied modules and shaders | File-level matrix before import; preserve notices and exact commits |
-| R6 | Raw host and wrapper-advertised capabilities are conflated | Separate probe implementations and explicit field-level diffs |
+| R6 | Raw host and wrapper-advertised capabilities are conflated or probed under different app contracts | Separate probes; identical versioned RPCSX `ProbeContract`; normalized field-level diffs |
 | R7 | GameNative/Winlator success is assumed to transfer from DXVK to RPCSX | Require RPCSX reproduction, trace, test, and device evidence for every rule |
 | R8 | Xclipse BCn compute is treated as universally correct | No BC acceptance requirement; note GameNative's Xclipse exclusion; device-driven tests only |
 | R9 | Distribution permission is confused with Adreno eligibility | Separate hardware, external-install, and bundled-package predicates |
-| R10 | Bundled OEM Vulkan blob causes licensing/ABI/firmware problems | Always use installed Android system Vulkan; never package vendor ICD blobs |
-| R11 | Wrapper cannot satisfy RPCSX's dlsym symbol model | Generate required-symbol list and export audit in M0; fail build on missing symbols |
+| R10 | Host loading resolves a bundled/custom/wrapper library or an OEM blob causes licensing/ABI/firmware problems | Resolve public `libvulkan.so` SONAME, verify/log the loaded object, reject wrong identities, and never package vendor ICD blobs |
+| R11 | Wrapper satisfies direct dlsym exports but GIPA/GDPA bypasses interception or returns a wrong-scope function | Generate both audits; runtime-resolve proc names; return Samba trampolines for intercepted commands |
 | R12 | Backend is applied after a temporary Vulkan consumer such as `systemInfo` | Central deterministic startup sequence immediately after `openLibrary()` |
 | R13 | x86_64 exposes an arm64-only backend | Build/test proxy for x86_64 or hide it and retain System Direct |
 | R14 | Rules selected by GPU name regress unknown driver versions | Key on capabilities plus IDs/version; unknown drivers default to no rules |

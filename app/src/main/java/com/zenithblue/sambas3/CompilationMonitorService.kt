@@ -58,76 +58,56 @@ class CompilationMonitorService : Service() {
     }
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
-        // Synchronous promotion from intent payload or latest bridge state
         val domain = intent?.getIntExtra("domain", -1) ?: -1
         val phase = intent?.getIntExtra("phase", -1) ?: -1
         val origin = intent?.getIntExtra("origin", -1) ?: -1
         val jobId = intent?.getLongExtra("jobId", -1L) ?: -1L
 
-        // Ignore install-origin PPU — owned by PrecompilerService
+        Log.i(TAG, "onStartCommand domain=$domain phase=$phase origin=$origin job=$jobId startId=$startId")
+
+        // Install-origin PPU is owned by PrecompilerService. We were still started via
+        // startForegroundService, so we must promote then stop to satisfy the ~5s contract.
         if (origin == RPCSX.COMPILE_ORIGIN_INSTALL) {
             Log.w(TAG, "Ignoring INSTALL-origin start request domain=$domain job=$jobId")
+            return promoteThenMaybeStop(CompileProgressBridge.state.value, forceStop = true, startId = startId)
+        }
+
+        val live = CompileProgressBridge.state.value
+        val intentJobActive = domain != -1 && jobId != -1L &&
+            CompileProgressBridge.isRuntimeJobActive(domain, jobId)
+        // Never reconstruct an active domain from a stale BEGIN extra. Live StateFlow is source of truth.
+        val snapshot = if (live.isActive) live else CompileProgressBridge.CompileState()
+        val forceStop = CompilationMonitorLogic.shouldStopAfterPromotion(live.activeDomainCount) && !intentJobActive
+        return promoteThenMaybeStop(snapshot, forceStop = forceStop, startId = startId)
+    }
+
+    private fun promoteThenMaybeStop(
+        snapshot: CompileProgressBridge.CompileState,
+        forceStop: Boolean,
+        startId: Int
+    ): Int {
+        val promoted = promoteForeground(snapshot)
+        if (!promoted) {
+            Log.e(TAG, "startForeground failed — stopping service (startId=$startId)")
+            isForeground = false
             stopSelf(startId)
             return START_NOT_STICKY
         }
-
-        // Validate we have an active event; if intent is null/empty, check bridge latest
-        val hasValidEvent = domain != -1 && phase != -1 && jobId != -1L
-        val latest = CompileProgressBridge.getLatestRuntimeEvent()
-        val latestState = CompileProgressBridge.state.value
-
-        if (!hasValidEvent && (latest == null || !latestState.isActive)) {
-            Log.w(TAG, "onStartCommand with no active event — stopping (startId=$startId)")
-            stopSelf(startId)
-            return START_NOT_STICKY
-        }
-
-        // Build and promote synchronously before returning (5s requirement)
-        val stateToRender = if (hasValidEvent) {
-            // Use intent snapshot for immediate promotion; collector will reconcile
-            // For PPU, build state from intent
-            val safeIntent = intent!!
-            if (domain == RPCSX.COMPILE_DOMAIN_PPU) {
-                CompileProgressBridge.CompileState(
-                    ppuActive = true,
-                    ppuPercent = safeIntent.getLongExtra("value", 0).toInt(),
-                    ppuMax = safeIntent.getLongExtra("max", 100).toInt().let { if (it==0) 100 else it },
-                    ppuMsg = safeIntent.getStringExtra("message"),
-                    fileDone = safeIntent.getIntExtra("fileDone", 0),
-                    fileTotal = safeIntent.getIntExtra("fileTotal", 0),
-                    moduleDone = safeIntent.getIntExtra("moduleDone", 0),
-                    moduleTotal = safeIntent.getIntExtra("moduleTotal", 0),
-                    shaderActive = latestState.shaderActive,
-                    shaderMsg = latestState.shaderMsg
-                )
-            } else {
-                CompileProgressBridge.CompileState(
-                    shaderActive = true,
-                    shaderMsg = safeIntent.getStringExtra("message") ?: "Compiling shaders…",
-                    ppuActive = latestState.ppuActive,
-                    ppuMsg = latestState.ppuMsg,
-                    ppuPercent = latestState.ppuPercent,
-                    ppuMax = latestState.ppuMax
-                )
-            }
-        } else {
-            latestState
-        }
-
-        promoteForeground(stateToRender)
-
-        // If after promotion the state is already inactive (e.g., quick terminal), stop immediately
-        if (!stateToRender.isActive && CompileProgressBridge.state.value.activeDomainCount == 0) {
-            Log.i(TAG, "No active domains after promotion — stopping")
+        // Re-read live count AFTER promotion. A fast COMPLETED can land between the snapshot
+        // used to build the notification and this point; using the stale snapshot would leak FGS.
+        if (forceStop || CompilationMonitorLogic.shouldStopAfterPromotion(
+                CompileProgressBridge.state.value.activeDomainCount
+            )
+        ) {
+            Log.i(TAG, "No live compile jobs after promotion — stopping")
             stopForegroundAndSelf()
         }
-
         return START_NOT_STICKY
     }
 
-    private fun promoteForeground(state: CompileProgressBridge.CompileState) {
+    private fun promoteForeground(state: CompileProgressBridge.CompileState): Boolean {
         val notification = buildAnchorNotification(state)
-        try {
+        return try {
             ServiceCompat.startForeground(
                 this,
                 NOTIF_FGS,
@@ -137,24 +117,21 @@ class CompilationMonitorService : Service() {
             isForeground = true
             Log.i(TAG, "startForeground NOTIF_FGS isActive=${state.isActive} ppu=${state.ppuActive} shader=${state.shaderActive}")
 
-            // Post secondaries if needed (ordinary ongoing notifications)
-            // Plan allows either merged InboxStyle on anchor OR secondaries. We keep anchor single,
-            // and also post secondaries for independent cancel semantics but never stopForeground per-domain.
-            // Secondaries are ordinary notify() only.
             if (state.ppuActive) {
-                val ppuNotif = buildPpuSecondary(state)
-                NotificationManagerCompat.from(this).notify(NOTIF_PPU, ppuNotif)
+                NotificationManagerCompat.from(this).notify(NOTIF_PPU, buildPpuSecondary(state))
             } else {
                 NotificationManagerCompat.from(this).cancel(NOTIF_PPU)
             }
             if (state.shaderActive) {
-                val shaderNotif = buildShaderSecondary(state)
-                NotificationManagerCompat.from(this).notify(NOTIF_SHADER, shaderNotif)
+                NotificationManagerCompat.from(this).notify(NOTIF_SHADER, buildShaderSecondary(state))
             } else {
                 NotificationManagerCompat.from(this).cancel(NOTIF_SHADER)
             }
+            true
         } catch (e: Exception) {
             Log.e(TAG, "startForeground failed: ${e.message}", e)
+            isForeground = false
+            false
         }
     }
 
@@ -280,5 +257,17 @@ class CompilationMonitorService : Service() {
         Log.i(TAG, "onDestroy")
     }
 
+    // Defensive: specialUse is not expected to receive the Android 15 dataSync 6h quota
+    // callback, but stop promptly if the platform invokes it anyway.
+    override fun onTimeout(startId: Int, fgsType: Int) {
+        Log.w(TAG, "onTimeout startId=$startId fgsType=$fgsType — stopping")
+        stopForegroundAndSelf()
+    }
+
     override fun onBind(intent: Intent?): IBinder? = null
+}
+
+internal object CompilationMonitorLogic {
+    /** After startForeground, remain up only while live runtime domains are still active. */
+    fun shouldStopAfterPromotion(liveActiveDomainCount: Int): Boolean = liveActiveDomainCount == 0
 }

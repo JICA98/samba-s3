@@ -437,7 +437,7 @@ index 000000000..18a8dfeb0
 +
 +} // namespace rpcsx::android
 diff --git a/android/src/rpcsx-android.cpp b/android/src/rpcsx-android.cpp
-index ce38967c1..66ccbdc78 100644
+index ce38967c1..11853bbb2 100644
 --- a/android/src/rpcsx-android.cpp
 +++ b/android/src/rpcsx-android.cpp
 @@ -1,3 +1,6 @@
@@ -463,7 +463,24 @@ index ce38967c1..66ccbdc78 100644
  #include "util/sysinfo.hpp"
  #include <Emu/Io/pad_config.h>
  #include <Emu/RSX/GSFrameBase.h>
-@@ -98,6 +103,12 @@ extern std::string g_android_cache_dir;
+@@ -72,12 +77,16 @@
+ #include <filesystem>
+ #include <functional>
+ #include <iterator>
++#include <cerrno>
+ #include <jni.h>
++#include <mutex>
+ #include <optional>
+ #include <span>
+ #include <string>
+ #include <sys/resource.h>
++#include <sys/stat.h>
+ #include <thread>
++#include <unistd.h>
+ #include <vector>
+ 
+ #pragma GCC diagnostic push
+@@ -98,6 +107,12 @@ extern std::string g_android_cache_dir;
  static std::mutex g_virtual_pad_mutex;
  static std::shared_ptr<Pad> g_virtual_pad;
  
@@ -476,10 +493,15 @@ index ce38967c1..66ccbdc78 100644
  std::string g_input_config_override;
  cfg_input_configurations g_cfg_input_configs;
  
-@@ -990,6 +1001,39 @@ static void invokeSync(std::function<void(JNIEnv *)> cb) {
+@@ -990,6 +1005,46 @@ static void invokeSync(std::function<void(JNIEnv *)> cb) {
    }
  }
  
++// Must match RPCSX.COMPILE_PROGRESS_ON_EVENT_JNI_DESCRIPTOR /
++// CompileProgressCallback.onEvent(Int, Int, Int, Long, Long, Long, String?, Int, Int, Int, Int)
++static constexpr const char* kCompileProgressOnEventDescriptor =
++    "(IIIJJJLjava/lang/String;IIII)V";
++
 +static void dispatchCompileEventToJava(const CompileEvent& ev)
 +{
 +  CompileEvent copy = ev;
@@ -504,7 +526,9 @@ index ce38967c1..66ccbdc78 100644
 +    {
 +      value = 0;
 +      max = 0;
++      if (!jmsg) jmsg = env->NewStringUTF("Compiling shaders");
 +    }
++    // Args: domain, phase, origin, jobId, value, max, message, fileDone, fileTotal, moduleDone, moduleTotal
 +    env->CallVoidMethod(g_compile_callback, g_compile_callback_method,
 +      (jint)copy.domain, (jint)copy.phase, (jint)copy.origin, (jlong)copy.jobId,
 +      value, max, jmsg, fileDone, fileTotal, modDone, modTotal);
@@ -516,7 +540,7 @@ index ce38967c1..66ccbdc78 100644
  struct ProgressMessageDialog : MsgDialogBase {
    jlong progressId;
    jlong value = 0;
-@@ -1413,7 +1457,13 @@ private:
+@@ -1413,7 +1468,13 @@ private:
        }
      }
  
@@ -531,7 +555,7 @@ index ce38967c1..66ccbdc78 100644
  
      rpcsx_android.error("Finalization");
      g_fxo->reset();
-@@ -1878,10 +1928,6 @@ extern "C" bool _rpcsx_surfaceEvent(JNIEnv *env, jobject surface, jint event) {
+@@ -1878,10 +1939,6 @@ extern "C" bool _rpcsx_surfaceEvent(JNIEnv *env, jobject surface, jint event) {
        ANativeWindow_release(prevWindow);
      }
  
@@ -542,7 +566,7 @@ index ce38967c1..66ccbdc78 100644
      Emu.Pause();
    } else {
      auto newWindow = ANativeWindow_fromSurface(env, surface);
-@@ -2071,8 +2117,6 @@ static bool installPup(JNIEnv *env, fs::file &&pup_f, jlong progressId) {
+@@ -2071,8 +2128,6 @@ static bool installPup(JNIEnv *env, fs::file &&pup_f, jlong progressId) {
      return false;
    }
  
@@ -551,7 +575,7 @@ index ce38967c1..66ccbdc78 100644
    jlong processed = 0;
    for (const auto &update_filename : update_filenames) {
      auto update_file_stream = update_files.get_file(update_filename);
-@@ -2120,9 +2164,10 @@ static bool installPup(JNIEnv *env, fs::file &&pup_f, jlong progressId) {
+@@ -2120,9 +2175,10 @@ static bool installPup(JNIEnv *env, fs::file &&pup_f, jlong progressId) {
    }
  
    sendFirmwareInstalled(env, utils::get_firmware_version());
@@ -565,7 +589,7 @@ index ce38967c1..66ccbdc78 100644
    return true;
  }
  
-@@ -2306,135 +2351,101 @@ static bool installRap(JNIEnv *env, fs::file &&file, jlong progressId,
+@@ -2306,145 +2362,260 @@ static bool installRap(JNIEnv *env, fs::file &&file, jlong progressId,
  }
  
  static bool installIso(JNIEnv *env, fs::file &&file, jlong progressId) {
@@ -604,23 +628,11 @@ index ce38967c1..66ccbdc78 100644
      progress.failure("Failed to fetch TITLE_ID from PARAM.SFO in ISO");
      return false;
    }
--
--  if (auto gameInfo = fetchGameInfo(sfo)) {
--    sendGameInfo(env, progressId, {{*gameInfo}});
 +  if (!rpcsx::android::isValidTitleIdForPath(title_id)) {
 +    progress.failure(fmt::format("Invalid TITLE_ID from ISO: %s", title_id));
 +    return false;
-   }
- 
--  std::filesystem::path destinationPath =
--      fs::get_config_dir() + "games/" + std::string(title_id);
--  std::size_t filesCount = 0;
--
--  auto roots = [&] {
--    std::vector<std::filesystem::path> result;
--    std::vector<std::filesystem::path> workList;
--    workList.push_back({});
--    result.push_back({});
++  }
++
 +  progress.report(0, 0, "Building manifest");
 +  std::string manifestError;
 +  auto manifestOpt = rpcsx::android::IsoInstallManifest::build(iso, manifestError);
@@ -630,9 +642,8 @@ index ce38967c1..66ccbdc78 100644
 +  }
 +  auto manifest = std::move(*manifestOpt);
  
--    while (!workList.empty()) {
--      auto path = std::move(workList.back());
--      workList.pop_back();
+-  if (auto gameInfo = fetchGameInfo(sfo)) {
+-    sendGameInfo(env, progressId, {{*gameInfo}});
 +  class JniReporter : public rpcsx::android::ProgressReporter {
 +    Progress& p;
 +  public:
@@ -640,32 +651,24 @@ index ce38967c1..66ccbdc78 100644
 +    bool report(long v, long m, const std::string& msg) override { return p.report(v, m, msg); }
 +  };
 +  JniReporter reporter(progress);
- 
--      fs::dir dir;
--      dir.reset(iso.open_dir(path));
++
 +  rpcsx::android::StagedGameInstaller installer(
 +      fs::get_config_dir(), std::string(title_id), std::move(manifest));
 +  if (auto error = installer.install(iso, reporter)) {
 +    progress.failure(*error);
 +    return false;
-+  }
+   }
  
--      for (auto &entry : dir) {
--        if (entry.name == "." || entry.name == "..") {
--          continue;
--        }
--        if (entry.name == "PS3_UPDATE" && path.empty()) {
--          continue;
--        }
+-  std::filesystem::path destinationPath =
+-      fs::get_config_dir() + "games/" + std::string(title_id);
+-  std::size_t filesCount = 0;
 +  const std::string finalPath = installer.finalPath();
  
--        if (entry.is_directory) {
--          result.push_back(path / entry.name);
--          workList.push_back(path / entry.name);
--        } else {
--          filesCount++;
--        }
--      }
+-  auto roots = [&] {
+-    std::vector<std::filesystem::path> result;
+-    std::vector<std::filesystem::path> workList;
+-    workList.push_back({});
+-    result.push_back({});
 +  auto ebootPath = locateEbootPath(finalPath);
 +  if (ebootPath.empty()) {
 +    progress.failure("Missing EBOOT.BIN after commit");
@@ -676,72 +679,18 @@ index ce38967c1..66ccbdc78 100644
 +    if (!ebootFile || ebootFile.size() == 0) {
 +      progress.failure("EBOOT.BIN not readable or empty after commit");
 +      return false;
-     }
--
--    return result;
--  }();
--
--  progress.report(0, filesCount);
--
--  std::size_t processedFiles = 0;
--  std::error_code ec;
--
--  for (auto &root : roots) {
--    auto rootDestPath = root.empty() ? destinationPath : destinationPath / root;
--
--    std::filesystem::create_directories(rootDestPath, ec);
--    if (ec) {
--      progress.failure(fmt::format("Failed to create dir %s: %s",
--                                   rootDestPath.string(), ec.message()));
++    }
 +    std::error_code ec;
 +    if (!std::filesystem::is_regular_file(ebootPath, ec) || ec ||
 +        std::filesystem::file_size(ebootPath, ec) == 0 || ec) {
 +      progress.failure("EBOOT.BIN is not a regular non-empty file after commit");
-       return false;
-     }
++      return false;
++    }
 +  }
  
--    fs::dir dir;
--    dir.reset(iso.open_dir(root));
--
--    for (auto &entry : dir) {
--      if (entry.name == "." || entry.name == "..") {
--        continue;
--      }
--
--      auto entryDestPath = rootDestPath / entry.name;
--
--      if (entry.is_directory) {
--        std::filesystem::create_directories(entryDestPath, ec);
--        if (ec) {
--          progress.failure(fmt::format("Failed to create dir %s: %s",
--                                       entryDestPath.string(), ec.message()));
--          return false;
--        }
--
--        continue;
--      }
--      auto raw_file = iso.open(root / entry.name, fs::read);
--
--      if (!raw_file) {
--        progress.failure(fmt::format("Failed to open file in ISO: %s",
--                                     (root / entry.name).string()));
--        return false;
--      }
--
--      fs::file file;
--      file.reset(std::move(raw_file));
--
--      if (!fs::write_file(entryDestPath,
--                          fs::open_mode::create + fs::open_mode::trunc,
--                          file.to_vector<std::uint8_t>())) {
--        progress.failure(fmt::format("Failed to write file: %s, dest %s",
--                                     entryDestPath.string(),
--                                     destinationPath.string()));
--        return false;
--      }
--
--      progress.report(processedFiles++, filesCount);
+-    while (!workList.empty()) {
+-      auto path = std::move(workList.back());
+-      workList.pop_back();
 +  auto sfoPath = locateParamSfoPath(finalPath);
 +  if (sfoPath.empty() || !std::filesystem::is_regular_file(sfoPath)) {
 +    progress.failure("PARAM.SFO missing after commit");
@@ -752,18 +701,254 @@ index ce38967c1..66ccbdc78 100644
 +    if (!sfoCheck || sfoCheck.size() == 0) {
 +      progress.failure("PARAM.SFO not readable or empty after commit");
 +      return false;
++    }
++  }
+ 
+-      fs::dir dir;
+-      dir.reset(iso.open_dir(path));
++  progress.report(0, 0, "Publishing installed game");
++  collectGameInfo(env, -1, {finalPath});
++  progress.report(0, 0, "Preparing PPU compilation");
++  g_compilationQueue.push(progress, std::move(ebootPath));
++  return true;
++}
+ 
+-      for (auto &entry : dir) {
+-        if (entry.name == "." || entry.name == "..") {
++// SAF / DocumentsProvider fds often implement read()+lseek() but not pread().
++// iso_dev uses read_at → pread; a broken pread returns 0 and ISO install fails
++// as "Unsupported file type". pread errno used to SIGTRAP via unix_file::ensure.
++class android_fd_file final : public fs::file_base {
++  int m_fd = -1;
++  u64 m_size = 0;
++  bool m_pread_broken = false;
++  std::mutex m_mutex;
++
++  u64 read_via_seek(u64 offset, void *buffer, u64 count) {
++    std::lock_guard lock(m_mutex);
++    if (::lseek64(m_fd, static_cast<off64_t>(offset), SEEK_SET) < 0) {
++      return 0;
++    }
++    u64 result = 0;
++    while (count) {
++      const auto r = ::read(m_fd, buffer, count);
++      if (r < 0) {
++        if (errno == EINTR) {
+           continue;
+         }
+-        if (entry.name == "PS3_UPDATE" && path.empty()) {
+-          continue;
+-        }
+-
+-        if (entry.is_directory) {
+-          result.push_back(path / entry.name);
+-          workList.push_back(path / entry.name);
+-        } else {
+-          filesCount++;
+-        }
++        break;
+       }
++      if (r == 0) {
++        break;
++      }
++      count -= static_cast<u64>(r);
++      result += static_cast<u64>(r);
++      buffer = static_cast<u8 *>(buffer) + r;
      }
+-
+     return result;
+-  }();
+-
+-  progress.report(0, filesCount);
++  }
+ 
+-  std::size_t processedFiles = 0;
+-  std::error_code ec;
++public:
++  explicit android_fd_file(int fd) : m_fd(fd) {
++    struct ::stat st {};
++    if (::fstat(m_fd, &st) == 0) {
++      m_size = static_cast<u64>(st.st_size);
++    }
++    std::byte probe[8]{};
++    const auto r = ::pread64(m_fd, probe, sizeof(probe), 0);
++    if (r <= 0 && m_size > 0) {
++      m_pread_broken = true;
++      rpcsx_android.notice(
++          "android_fd_file: pread unavailable; using lseek+read (fd=%d errno=%d)",
++          m_fd, errno);
++    }
++  }
+ 
+-  for (auto &root : roots) {
+-    auto rootDestPath = root.empty() ? destinationPath : destinationPath / root;
++  void release() override { m_fd = -1; }
+ 
+-    std::filesystem::create_directories(rootDestPath, ec);
+-    if (ec) {
+-      progress.failure(fmt::format("Failed to create dir %s: %s",
+-                                   rootDestPath.string(), ec.message()));
+-      return false;
++  fs::stat_t get_stat() override {
++    struct ::stat st {};
++    fs::stat_t info{};
++    if (::fstat(m_fd, &st) != 0) {
++      info.size = m_size;
++      return info;
+     }
++    info.is_directory = S_ISDIR(st.st_mode);
++    info.is_writable = false;
++    info.size = static_cast<u64>(st.st_size);
++    info.atime = st.st_atime;
++    info.mtime = st.st_mtime;
++    info.ctime = st.st_mtime;
++    return info;
++  }
+ 
+-    fs::dir dir;
+-    dir.reset(iso.open_dir(root));
++  void sync() override {}
+ 
+-    for (auto &entry : dir) {
+-      if (entry.name == "." || entry.name == "..") {
+-        continue;
+-      }
++  bool trunc(u64) override { return false; }
+ 
+-      auto entryDestPath = rootDestPath / entry.name;
+-
+-      if (entry.is_directory) {
+-        std::filesystem::create_directories(entryDestPath, ec);
+-        if (ec) {
+-          progress.failure(fmt::format("Failed to create dir %s: %s",
+-                                       entryDestPath.string(), ec.message()));
+-          return false;
++  u64 read(void *buffer, u64 count) override {
++    u64 result = 0;
++    while (count) {
++      const auto r = ::read(m_fd, buffer, count);
++      if (r < 0) {
++        if (errno == EINTR) {
++          continue;
+         }
+-
+-        continue;
++        break;
+       }
+-      auto raw_file = iso.open(root / entry.name, fs::read);
+-
+-      if (!raw_file) {
+-        progress.failure(fmt::format("Failed to open file in ISO: %s",
+-                                     (root / entry.name).string()));
+-        return false;
++      if (r == 0) {
++        break;
+       }
++      count -= static_cast<u64>(r);
++      result += static_cast<u64>(r);
++      buffer = static_cast<u8 *>(buffer) + r;
++    }
++    return result;
++  }
+ 
+-      fs::file file;
+-      file.reset(std::move(raw_file));
+-
+-      if (!fs::write_file(entryDestPath,
+-                          fs::open_mode::create + fs::open_mode::trunc,
+-                          file.to_vector<std::uint8_t>())) {
+-        progress.failure(fmt::format("Failed to write file: %s, dest %s",
+-                                     entryDestPath.string(),
+-                                     destinationPath.string()));
+-        return false;
++  u64 read_at(u64 offset, void *buffer, u64 count) override {
++    if (!m_pread_broken) {
++      u64 result = 0;
++      u64 off = offset;
++      u64 remaining = count;
++      void *buf = buffer;
++      while (remaining) {
++        const auto r =
++            ::pread64(m_fd, buf, remaining, static_cast<off64_t>(off));
++        if (r < 0) {
++          if (errno == EINTR) {
++            continue;
++          }
++          m_pread_broken = true;
++          break;
++        }
++        if (r == 0) {
++          if (result == 0 && off < m_size) {
++            m_pread_broken = true;
++          }
++          break;
++        }
++        remaining -= static_cast<u64>(r);
++        off += static_cast<u64>(r);
++        result += static_cast<u64>(r);
++        buf = static_cast<u8 *>(buf) + r;
++      }
++      if (!m_pread_broken) {
++        return result;
+       }
++    }
++    return read_via_seek(offset, buffer, count);
++  }
+ 
+-      progress.report(processedFiles++, filesCount);
++  u64 write(const void *, u64) override { return 0; }
++
++  u64 seek(s64 offset, fs::seek_mode whence) override {
++    int w = SEEK_SET;
++    if (whence == fs::seek_cur) {
++      w = SEEK_CUR;
++    } else if (whence == fs::seek_end) {
++      w = SEEK_END;
+     }
++    const auto r = ::lseek64(m_fd, static_cast<off64_t>(offset), w);
++    return r < 0 ? static_cast<u64>(-1) : static_cast<u64>(r);
    }
  
 -  collectGameInfo(env, -1, {destinationPath});
 -  auto ebootPath = locateEbootPath(destinationPath.string());
-+  progress.report(0, 0, "Publishing installed game");
-+  collectGameInfo(env, -1, {finalPath});
-+  progress.report(0, 0, "Preparing PPU compilation");
-   g_compilationQueue.push(progress, std::move(ebootPath));
-   return true;
+-  g_compilationQueue.push(progress, std::move(ebootPath));
+-  return true;
++  u64 size() override { return m_size; }
++
++  fs::native_handle get_handle() override { return m_fd; }
++};
++
++static fs::file file_from_android_fd(int fd) {
++  fs::file result;
++  result.reset(std::make_unique<android_fd_file>(fd));
++  return result;
  }
-@@ -2641,4 +2652,150 @@ extern "C" void *_rpcsx_setCustomDriver(void *driverHandle) {
+ 
+ extern "C" bool _rpcsx_installFw(JNIEnv *env, int fd, long progressId) {
+-  return installPup(env, fs::file::from_native_handle(fd), progressId);
++  return installPup(env, file_from_android_fd(fd), progressId);
+ }
+ 
+ extern "C" bool _rpcsx_isInstallableFile(jint fd) {
+-  auto file = fs::file::from_native_handle(fd);
++  auto file = file_from_android_fd(fd);
+   AtExit atExit{[&] { file.release_handle(); }};
+ 
+   auto type = getFileType(file);
+@@ -2466,10 +2637,11 @@ extern "C" jstring _rpcsx_getDirInstallPath(JNIEnv *env, jint fd) {
+ }
+ 
+ extern "C" bool _rpcsx_install(JNIEnv *env, int fd, long progressId) {
+-  auto file = fs::file::from_native_handle(fd);
++  auto file = file_from_android_fd(fd);
+   AtExit atExit{[&] { file.release_handle(); }};
+ 
+   auto type = getFileType(file);
++  rpcsx_android.notice("install: fd=%d type=%d", fd, static_cast<int>(type));
+   file.seek(0);
+ 
+   switch (type) {
+@@ -2641,4 +2813,159 @@ extern "C" void *_rpcsx_setCustomDriver(void *driverHandle) {
    return prevLoader;
  }
  
@@ -785,17 +970,26 @@ index ce38967c1..66ccbdc78 100644
 +
 +  env->GetJavaVM(&g_compile_jvm);
 +  g_compile_callback = env->NewGlobalRef(callback);
-+  jclass cls = env->GetObjectClass(callback);
-+  g_compile_callback_method = env->GetMethodID(cls, "onEvent", "(IIIJJLjava/lang/String;IIII)V");
++
++  // Look the method up on the fun-interface class so a Kotlin SAM lambda still
++  // resolves. Descriptor must include both Longs (jobId AND max): III J J J String IIII.
++  jclass iface = env->FindClass("com/zenithblue/sambas3/RPCSX$CompileProgressCallback");
++  if (env->ExceptionCheck()) env->ExceptionClear();
++  jclass cls = iface ? iface : env->GetObjectClass(callback);
++  g_compile_callback_method = env->GetMethodID(cls, "onEvent", kCompileProgressOnEventDescriptor);
 +  if (!g_compile_callback_method)
 +  {
-+    __android_log_print(ANDROID_LOG_ERROR, "RPCSX-UI", "setCompileProgressListener: onEvent method not found");
++    __android_log_print(ANDROID_LOG_ERROR, "RPCSX-UI",
++        "setCompileProgressListener: onEvent method not found (descriptor %s)",
++        kCompileProgressOnEventDescriptor);
 +    env->DeleteGlobalRef(g_compile_callback);
 +    g_compile_callback = nullptr;
++    if (iface) env->DeleteLocalRef(iface);
 +    if (env->ExceptionCheck()) env->ExceptionClear();
 +    set_compile_event_sink(nullptr);
 +    return false;
 +  }
++  if (iface) env->DeleteLocalRef(iface);
 +  if (env->ExceptionCheck()) env->ExceptionClear();
 +
 +  set_compile_event_sink([](const CompileEvent& ev) {
@@ -1437,22 +1631,19 @@ index a58ab0694..ae3a9e006 100644
      IdManager.cpp
      localized_string.cpp
 diff --git a/rpcs3/Emu/RSX/Overlays/overlay_compile_notification.cpp b/rpcs3/Emu/RSX/Overlays/overlay_compile_notification.cpp
-index 328b8ffdc..1dbcd635f 100644
+index 328b8ffdc..78daa120d 100644
 --- a/rpcs3/Emu/RSX/Overlays/overlay_compile_notification.cpp
 +++ b/rpcs3/Emu/RSX/Overlays/overlay_compile_notification.cpp
-@@ -27,6 +27,11 @@ namespace rsx
+@@ -26,7 +26,7 @@ namespace rsx
+ 				true);
  		}
  
- 		std::shared_ptr<atomic_t<u32>> show_ppu_compile_notification()
-+		{
-+			return show_ppu_compile_notification({});
-+		}
-+
+-		std::shared_ptr<atomic_t<u32>> show_ppu_compile_notification()
 +		std::shared_ptr<atomic_t<u32>> show_ppu_compile_notification(const std::string& detailed_message)
  		{
  			if (!s_ppu_loading_icon24)
  			{
-@@ -36,15 +41,41 @@ namespace rsx
+@@ -36,15 +36,41 @@ namespace rsx
  
  			std::shared_ptr<atomic_t<u32>> refs = std::make_shared<atomic_t<u32>>(1);
  
@@ -1499,10 +1690,10 @@ index 328b8ffdc..1dbcd635f 100644
  	} // namespace overlays
  } // namespace rsx
 diff --git a/rpcs3/Emu/RSX/Overlays/overlay_compile_notification.h b/rpcs3/Emu/RSX/Overlays/overlay_compile_notification.h
-index 5af7ed3ca..21cddd5bb 100644
+index 5af7ed3ca..47f8a0894 100644
 --- a/rpcs3/Emu/RSX/Overlays/overlay_compile_notification.h
 +++ b/rpcs3/Emu/RSX/Overlays/overlay_compile_notification.h
-@@ -2,6 +2,7 @@
+@@ -2,12 +2,14 @@
  
  #include "util/types.hpp"
  #include "util/atomic.hpp"
@@ -1510,16 +1701,16 @@ index 5af7ed3ca..21cddd5bb 100644
  
  namespace rsx
  {
-@@ -9,5 +10,7 @@ namespace rsx
+ 	namespace overlays
  	{
  		void show_shader_compile_notification();
- 		std::shared_ptr<atomic_t<u32>> show_ppu_compile_notification();
-+		std::shared_ptr<atomic_t<u32>> show_ppu_compile_notification(const std::string& detailed_message);
+-		std::shared_ptr<atomic_t<u32>> show_ppu_compile_notification();
++		std::shared_ptr<atomic_t<u32>> show_ppu_compile_notification(const std::string& detailed_message = {});
 +		void update_ppu_compile_notification(const std::string& detailed_message);
  	} // namespace overlays
  } // namespace rsx
 diff --git a/rpcs3/Emu/RSX/Program/ProgramStateCache.h b/rpcs3/Emu/RSX/Program/ProgramStateCache.h
-index 32b4f3185..e917aa778 100644
+index 32b4f3185..bb902f2d7 100644
 --- a/rpcs3/Emu/RSX/Program/ProgramStateCache.h
 +++ b/rpcs3/Emu/RSX/Program/ProgramStateCache.h
 @@ -2,6 +2,7 @@
@@ -1530,89 +1721,125 @@ index 32b4f3185..e917aa778 100644
  
  #include "util/mutex.h"
  #include "util/logs.hpp"
-@@ -395,12 +396,21 @@ public:
+@@ -9,6 +10,10 @@
+ #include "util/v128.hpp"
+ #include <util/bless.hpp>
+ 
++#include <atomic>
++#include <functional>
++#include <memory>
++#include <optional>
+ #include <span>
+ #include <unordered_map>
+ 
+@@ -395,41 +400,73 @@ public:
  
  		rsx_log.notice("Add program (vp id = %d, fp id = %d)", vertex_program.id, fragment_program.id);
  
+-		std::function<pipeline_type*(pipeline_storage_type&)> callback;
 +		// --- Shader compile progress: BEGIN at first placeholder insertion (shared VK/GL hook) ---
-+		const u64 _shader_jobId = allocate_compile_job_id();
-+		const bool _shader_is_deferred = compile_async; // only genuinely deferred jobs promote to FGS
-+		if (_shader_is_deferred)
++		// Deferred contract (VK/GL pipe_compiler):
++		//   1. build_pipeline immediately invokes the callback with an empty unique_ptr (not terminal)
++		//   2. the worker later invokes it with the real pipeline (COMPLETED) OR another empty / exception (FAILED)
++		// Inline compiles never emit FGS events (HUD-only).
++		struct ShaderCompileTracker
 +		{
-+			emit_compile_event(CompileEvent{CompileDomain::SHADER, CompilePhase::BEGIN, CompileOrigin::RUNTIME, _shader_jobId, std::nullopt});
++			u64 jobId = 0;
++			bool deferred = false;
++			std::atomic<bool> sawEmpty{false};
++			std::atomic<bool> terminalEmitted{false};
++		};
++		const u64 shaderJobId = allocate_compile_job_id();
++		const bool shaderDeferred = compile_async;
++		auto tracker = std::make_shared<ShaderCompileTracker>();
++		tracker->jobId = shaderJobId;
++		tracker->deferred = shaderDeferred;
++		if (shaderDeferred)
++		{
++			emit_compile_event(CompileEvent{CompileDomain::SHADER, CompilePhase::BEGIN, CompileOrigin::RUNTIME, shaderJobId, std::nullopt});
 +		}
-+
- 		std::function<pipeline_type*(pipeline_storage_type&)> callback;
  
- 		if (allow_notification)
+-		if (allow_notification)
++		auto emit_shader_terminal = [tracker](CompilePhase phase)
  		{
 -			callback = [this, vertex_shader, fragment_shader_ = RSXFragmentProgram::clone(fragment_shader), key](pipeline_storage_type& pipeline) -> pipeline_type*
-+			callback = [this, vertex_shader, fragment_shader_ = RSXFragmentProgram::clone(fragment_shader), key, _shader_jobId, _shader_is_deferred](pipeline_storage_type& pipeline) -> pipeline_type*
++			if (!tracker->deferred) return;
++			bool expected = false;
++			if (tracker->terminalEmitted.compare_exchange_strong(expected, true))
  			{
-+				// Deferred builds first invoke with empty result — not terminal
- 				if (!pipeline)
- 				{
- 					return nullptr;
-@@ -409,15 +419,21 @@ public:
- 				rsx_log.success("Program compiled successfully");
- 				notify_pipeline_compiled(key.properties, vertex_shader, fragment_shader_);
+-				if (!pipeline)
+-				{
+-					return nullptr;
+-				}
+-
+-				rsx_log.success("Program compiled successfully");
+-				notify_pipeline_compiled(key.properties, vertex_shader, fragment_shader_);
++				emit_compile_event(CompileEvent{CompileDomain::SHADER, phase, CompileOrigin::RUNTIME, tracker->jobId, std::nullopt});
++			}
++		};
  
 -				std::lock_guard lock(m_pipeline_mutex);
 -				auto& pipe_result = m_storage[key];
 -				pipe_result = std::move(pipeline);
 -				return pipe_result.get();
-+				{
-+					std::lock_guard lock(m_pipeline_mutex);
-+					auto& pipe_result = m_storage[key];
-+					pipe_result = std::move(pipeline);
-+					if (_shader_is_deferred)
-+					{
-+						emit_compile_event(CompileEvent{CompileDomain::SHADER, CompilePhase::COMPLETED, CompileOrigin::RUNTIME, _shader_jobId, std::nullopt});
-+					}
-+					return pipe_result.get();
-+				}
- 			};
+-			};
++		std::function<pipeline_type*(pipeline_storage_type&)> callback;
++		const bool notify = allow_notification;
++		std::optional<RSXFragmentProgram> fragment_clone;
++		if (notify)
++		{
++			fragment_clone = RSXFragmentProgram::clone(fragment_shader);
  		}
- 		else
+-		else
++
++		callback = [this, vertex_shader, fragment_clone, key, tracker, emit_shader_terminal, notify](pipeline_storage_type& pipeline) -> pipeline_type*
  		{
 -			callback = [this, key](pipeline_storage_type& pipeline) -> pipeline_type*
-+			callback = [this, key, _shader_jobId, _shader_is_deferred](pipeline_storage_type& pipeline) -> pipeline_type*
++			// Exceptions are disabled in this tree. Failure is a second empty callback
++			// (or cache.clear() CANCELED jobId=0 on shutdown).
++			if (!pipeline)
  			{
- 				if (!pipeline)
+-				if (!pipeline)
++				// First empty callback of a deferred job is the enqueue placeholder, not a failure.
++				if (tracker->deferred && !tracker->sawEmpty.exchange(true))
  				{
-@@ -427,6 +443,10 @@ public:
- 				std::lock_guard lock(m_pipeline_mutex);
- 				auto& pipe_result = m_storage[key];
- 				pipe_result = std::move(pipeline);
-+				if (_shader_is_deferred)
-+				{
-+					emit_compile_event(CompileEvent{CompileDomain::SHADER, CompilePhase::COMPLETED, CompileOrigin::RUNTIME, _shader_jobId, std::nullopt});
-+				}
- 				return pipe_result.get();
- 			};
- 		}
-@@ -439,6 +459,20 @@ public:
+ 					return nullptr;
+ 				}
++				emit_shader_terminal(CompilePhase::FAILED);
++				return nullptr;
++			}
+ 
+-				std::lock_guard lock(m_pipeline_mutex);
+-				auto& pipe_result = m_storage[key];
+-				pipe_result = std::move(pipeline);
+-				return pipe_result.get();
+-			};
+-		}
++			if (notify && fragment_clone)
++			{
++				rsx_log.success("Program compiled successfully");
++				notify_pipeline_compiled(key.properties, vertex_shader, *fragment_clone);
++			}
++
++			std::lock_guard lock(m_pipeline_mutex);
++			auto& pipe_result = m_storage[key];
++			pipe_result = std::move(pipeline);
++			emit_shader_terminal(CompilePhase::COMPLETED);
++			return pipe_result.get();
++		};
+ 
+ 		auto result = backend_traits::build_pipeline(
+ 			vertex_program,               // VS, must already be decompiled and recompiled above
+@@ -439,6 +476,8 @@ public:
  			callback,                     // Insertion and notification callback
  			std::forward<Args>(args)...); // Other arguments
  
-+		// Inline compilation that completes within the same renderer call should NOT churn FGS.
-+		// If build_pipeline returned a real pipeline synchronously, we already emitted BEGIN above for deferred case.
-+		// For inline (non-deferred or synchronous result), ensure we emit terminal immediately or suppress.
-+		if (_shader_is_deferred && result)
-+		{
-+			// Synchronous completion of a deferred request — already handled via callback's COMPLETED.
-+			// No additional emit needed because callback already emitted.
-+		}
-+		else if (!_shader_is_deferred && result)
-+		{
-+			// Inline build — keep HUD-only, no FGS lifecycle (do not emit BEGIN/COMPLETED)
-+			// The above BEGIN was suppressed for non-deferred, so no emit needed.
-+		}
-+
++		// Inline compilation that completes within the same renderer call stays HUD-only
++		// (BEGIN was not emitted). Deferred jobs emit COMPLETED/FAILED from the callback.
  		return {result, &vertex_program, &fragment_program};
  	}
  
-@@ -462,5 +496,7 @@ public:
+@@ -462,5 +501,7 @@ public:
  		m_fragment_shader_cache.clear();
  		m_vertex_shader_cache.clear();
  		m_storage.clear();
@@ -1622,14 +1849,16 @@ index 32b4f3185..e917aa778 100644
  };
 diff --git a/rpcs3/Emu/compile_progress.cpp b/rpcs3/Emu/compile_progress.cpp
 new file mode 100644
-index 000000000..158d89761
+index 000000000..03f55c519
 --- /dev/null
 +++ b/rpcs3/Emu/compile_progress.cpp
-@@ -0,0 +1,196 @@
+@@ -0,0 +1,190 @@
 +#include "stdafx.h"
 +#include "compile_progress.hpp"
-+#include "localized_string_id.h"
++#include "localized_string.h"
++#include "Emu/Cell/timers.hpp"
 +#include "util/logs.hpp"
++#include "rx/asm.hpp"
 +
 +#include <mutex>
 +#include <atomic>
@@ -1662,14 +1891,8 @@ index 000000000..158d89761
 +    }
 +    if (sink)
 +    {
-+        try
-+        {
-+            sink(ev);
-+        }
-+        catch (...)
-+        {
-+            sys_log.error("compile_progress sink threw");
-+        }
++        // Exceptions are disabled in the Android engine build.
++        sink(ev);
 +    }
 +}
 +
@@ -1714,8 +1937,6 @@ index 000000000..158d89761
 +// This mirrors the logic in system_progress.cpp:260-341 — compute progr, percent, ETA
 +// with time_left_queue smoothing. Extracted so both RSX UI and Android bridge share
 +// the exact same string and percentValue.
-+
-+extern std::string get_localized_string(localized_string_id id);
 +
 +PpuProgressSnapshot build_system_progress_snapshot(
 +    u32 fdone, u32 ftotal,
@@ -1920,7 +2141,7 @@ index 000000000..f8476e6c1
 +    std::vector<std::pair<u64, u64>>& time_left_queue,
 +    usz& time_left_queue_idx);
 diff --git a/rpcs3/Emu/system_progress.cpp b/rpcs3/Emu/system_progress.cpp
-index e3f001baa..4c0175e3c 100644
+index e3f001baa..8377d1e40 100644
 --- a/rpcs3/Emu/system_progress.cpp
 +++ b/rpcs3/Emu/system_progress.cpp
 @@ -1,5 +1,6 @@
@@ -1952,40 +2173,136 @@ index e3f001baa..4c0175e3c 100644
  		// Update progress
  		for (u64 sleep_until = get_system_time(), sleep_for = 500;
  			!g_system_progress_stopping && thread_ctrl::state() != thread_state::aborting;
-@@ -222,6 +238,12 @@ void progress_dialog_server::operator()()
+@@ -222,6 +238,10 @@ void progress_dialog_server::operator()()
  
  				if (show_overlay_message)
  				{
 +					// Build shared snapshot even for overlay path so Android FGS gets verbatim progr + ETA
-+					{
-+						auto _snap_overlay = build_system_progress_snapshot(fdone, ftotal, pdone, ptotal, fknown_bits, ftotal_bits, text1, start_time, time_left_queue, time_left_queue_idx, text1);
-+						if (!_ppu_begin_emitted) _ppu_emit(CompilePhase::BEGIN, _snap_overlay);
-+						_ppu_emit(CompilePhase::PROGRESS, _snap_overlay);
-+					}
++					auto _snap_overlay = build_system_progress_snapshot(fdone, ftotal, pdone, ptotal, fknown_bits, ftotal_bits, text1, start_time, time_left_queue, time_left_queue_idx, text1);
++					if (!_ppu_begin_emitted) _ppu_emit(CompilePhase::BEGIN, _snap_overlay);
++					_ppu_emit(CompilePhase::PROGRESS, _snap_overlay);
  					// Show a message instead (if compilation period is estimated to be lengthy)
  					if (pdone < ptotal && g_cfg.misc.show_ppu_compilation_hint)
  					{
-@@ -344,6 +366,19 @@ void progress_dialog_server::operator()()
- 					progr = get_localized_string(localized_string_id::PROGRESS_DIALOG_PROGRESS_ANALYZING);
+@@ -233,7 +253,7 @@ void progress_dialog_server::operator()()
+ 						{
+ 							if (!ppu_cue_refs || !*ppu_cue_refs)
+ 							{
+-								ppu_cue_refs = rsx::overlays::show_ppu_compile_notification();
++								ppu_cue_refs = rsx::overlays::show_ppu_compile_notification(_snap_overlay.message);
+ 							}
+ 
+ 							// Make sure to update any pending messages. PPU compilation may freeze the image.
+@@ -256,93 +276,12 @@ void progress_dialog_server::operator()()
+ 					continue;
  				}
  
-+				// Emit PPU progress snapshot to Android bridge (shared verbatim progr)
-+				{
-+					PpuProgressSnapshot _snap;
-+					_snap.percentValue = static_cast<int>(value);
-+					_snap.percentMax = 100;
-+					_snap.message = progr;
-+					_snap.fileDone = static_cast<int>(fdone);
-+					_snap.fileTotal = static_cast<int>(ftotal);
-+					_snap.moduleDone = static_cast<int>(pdone);
-+					_snap.moduleTotal = static_cast<int>(ptotal);
-+					if (!_ppu_begin_emitted) _ppu_emit(CompilePhase::BEGIN, _snap);
-+					_ppu_emit(CompilePhase::PROGRESS, _snap);
-+				}
+-				// Compute new progress in percents
+-				// Assume not all programs were found if files were not compiled (as it may contain more)
+-				const bool use_bits = fknown_bits && ftotal_bits;
+-				const u64 known_files = use_bits ? fknown_bits : ftotal;
+-				const u64 total = rx::rational_mul<u64>(std::max<u64>(ptotal, 1), std::max<u64>(use_bits ? ftotal_bits : ftotal, 1), std::max<u64>(known_files, 1));
+-				const u64 done = pdone;
+-				const u32 value = static_cast<u32>(done >= total ? 100 : done * 100 / total);
+-
+-				std::string progr;
+-
+-				if (ftotal || ptotal)
+-				{
+-					progr = get_localized_string(localized_string_id::PROGRESS_DIALOG_PROGRESS);
+-
+-					if (ftotal)
+-						fmt::append(progr, " %s %u %s %u%s", get_localized_string(localized_string_id::PROGRESS_DIALOG_FILE), fdone, get_localized_string(localized_string_id::PROGRESS_DIALOG_OF), ftotal, ptotal ? "," : "");
+-					if (ptotal)
+-						fmt::append(progr, " %s %u %s %u", get_localized_string(localized_string_id::PROGRESS_DIALOG_MODULE), pdone, get_localized_string(localized_string_id::PROGRESS_DIALOG_OF), ptotal);
+-
+-					const u32 of_1000 = static_cast<u32>(done >= total ? 1000 : done * 1000 / total);
+-
+-					if (of_1000 >= 2)
+-					{
+-						const u64 passed = (get_system_time() - start_time);
+-						const u64 total = rx::rational_mul<u64>(passed, 1000, of_1000);
+-						const u64 remaining = total - passed;
+-
+-						// Stabilize the result by using the maximum one from the recent history
+-						// This is a very simple approach yet appears to solve most inconsistencies
+-						u64 max_remaining = remaining;
+-
+-						for (usz i = 0; i < time_left_queue.size(); i++)
+-						{
+-							const auto& sample = time_left_queue[(time_left_queue.size() + time_left_queue_idx - i) % time_left_queue.size()];
+-
+-							const u64 sample_age = passed - sample.first;
+-
+-							if (passed - sample.first >= 4'000'000)
+-							{
+-								// Ignore old samples
+-								break;
+-							}
+-
+-							max_remaining = std::max<u64>(max_remaining, sample.second >= sample_age ? sample.second - sample_age : 0);
+-						}
+-
+-						if (auto new_val = std::make_pair(passed, remaining); time_left_queue[time_left_queue_idx] != new_val)
+-						{
+-							time_left_queue_idx = (time_left_queue_idx + 1) % time_left_queue.size();
+-							time_left_queue[time_left_queue_idx] = new_val;
+-						}
+-
+-						const u64 max_seconds_remaining = max_remaining / 1'000'000;
+-						const u64 seconds = max_seconds_remaining % 60;
+-						const u64 minutes = (max_seconds_remaining / 60) % 60;
+-						const u64 hours = (max_seconds_remaining / 3600);
+-
+-						if (passed < 4'000'000)
+-						{
+-							// Cannot rely on such small duration of time for estimation
+-						}
+-						else if (done >= total)
+-						{
+-							fmt::append(progr, " (%s)", get_localized_string(localized_string_id::PROGRESS_DIALOG_DONE));
+-						}
+-						else if (hours)
+-						{
+-							fmt::append(progr, " (%uh %2um %s)", hours, minutes, get_localized_string(localized_string_id::PROGRESS_DIALOG_REMAINING));
+-						}
+-						else if (minutes >= 2)
+-						{
+-							fmt::append(progr, " (%um %s)", minutes, get_localized_string(localized_string_id::PROGRESS_DIALOG_REMAINING));
+-						}
+-						else if (minutes == 0)
+-						{
+-							fmt::append(progr, " (%us %s)", std::max<u64>(seconds, 1), get_localized_string(localized_string_id::PROGRESS_DIALOG_REMAINING));
+-						}
+-						else
+-						{
+-							fmt::append(progr, " (%um %2us %s)", minutes, seconds, get_localized_string(localized_string_id::PROGRESS_DIALOG_REMAINING));
+-						}
+-					}
+-				}
+-				else
+-				{
+-					progr = get_localized_string(localized_string_id::PROGRESS_DIALOG_PROGRESS_ANALYZING);
+-				}
++				// Shared snapshot — same percent/progr/ETA as the overlay path and Android FGS
++				auto _snap = build_system_progress_snapshot(fdone, ftotal, pdone, ptotal, fknown_bits, ftotal_bits, text1, start_time, time_left_queue, time_left_queue_idx, text1);
++				if (!_ppu_begin_emitted) _ppu_emit(CompilePhase::BEGIN, _snap);
++				_ppu_emit(CompilePhase::PROGRESS, _snap);
++				const u32 value = static_cast<u32>(_snap.percentValue);
++				const std::string progr = _snap.message;
+ 
  				// Changes detected, send update
  				if (native_dlg)
- 				{
-@@ -392,6 +427,16 @@ void progress_dialog_server::operator()()
+@@ -352,7 +291,7 @@ void progress_dialog_server::operator()()
+ 						native_dlg->set_text(text1);
+ 					}
+ 
+-					native_dlg->progress_bar_set_message(0, std::move(progr));
++					native_dlg->progress_bar_set_message(0, progr);
+ 					native_dlg->progress_bar_set_value(0, static_cast<f32>(value));
+ 				}
+ 				else if (dlg)
+@@ -392,6 +331,16 @@ void progress_dialog_server::operator()()
  			*ppu_cue_refs = 0;
  		}
  
@@ -3136,6 +3453,45 @@ index 7879252f7..1520e4ac3 100644
 +	bool checked_add_u64(u64 lhs, u64 rhs, u64& result) const;
 +	std::optional<std::size_t> first_data_block(const iso::DirEntry& entry) const;
  };
+diff --git a/rpcs3/util/File.cpp b/rpcs3/util/File.cpp
+index c41e82ebf..6db9f2e65 100644
+--- a/rpcs3/util/File.cpp
++++ b/rpcs3/util/File.cpp
+@@ -706,16 +706,26 @@ namespace fs
+ 		{
+ 			u64 result = 0;
+ 
+-			// For safety; see read()
+-			while (auto r = ::pread(m_fd, buffer, count, offset))
++			while (count)
+ 			{
+-				ensure(r > 0); // "file::read_at"
+-				count -= r;
+-				offset += r;
+-				result += r;
+-				buffer = static_cast<u8*>(buffer) + r;
+-				if (!count)
++				const auto r = ::pread(m_fd, buffer, count, static_cast<off_t>(offset));
++				if (r < 0)
++				{
++					if (errno == EINTR)
++					{
++						continue;
++					}
++					g_tls_error = to_error(errno);
+ 					break;
++				}
++				if (r == 0)
++				{
++					break;
++				}
++				count -= static_cast<u64>(r);
++				offset += static_cast<u64>(r);
++				result += static_cast<u64>(r);
++				buffer = static_cast<u8*>(buffer) + r;
+ 			}
+ 
+ 			return result;
 diff --git a/rx/include/rx/types.hpp b/rx/include/rx/types.hpp
 index ae4298642..eef6d549c 100644
 --- a/rx/include/rx/types.hpp

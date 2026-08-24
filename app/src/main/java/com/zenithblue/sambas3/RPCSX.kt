@@ -134,6 +134,13 @@ class RPCSX {
         const val COMPILE_ORIGIN_INSTALL = 0
         const val COMPILE_ORIGIN_RUNTIME = 1
 
+        /**
+         * JNI descriptor for [CompileProgressCallback.onEvent]. Must match
+         * `kCompileProgressOnEventDescriptor` in rpcsx-android.cpp.
+         * jobId, value and max are all `J` (long).
+         */
+        const val COMPILE_PROGRESS_ON_EVENT_JNI_DESCRIPTOR = "(IIIJJJLjava/lang/String;IIII)V"
+
         var initialized = false
         val instance = RPCSX()
         var rootDirectory = ""

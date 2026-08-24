@@ -15,7 +15,7 @@ Make **both** compilation domains persistently visible outside the emulator surf
 Both must:
 - run as **FGS** (`ServiceCompat.startForeground`) when platform start rules permit, with ongoing `rpcsx-progress` notification showing `value/max`, percentage and the **time-remaining text** already produced natively,
 - survive app background after a legal foreground start until an explicit native terminal event (`COMPLETED`, `FAILED`, or `CANCELED`),
-- mirror in **Android Compose UI** in `RPCSXActivity` (top chip/badge + optional progress bar) so the user sees it without pulling the shade, while the RSX overlay stays for captures,
+- mirror in **Android Compose UI** on the launcher home `GameCard` (embedded progress message/bar) while the RSX overlay stays for captures; never mount this Compose mirror in `RPCSXActivity`,
 - expose distinct titles/icons so PPU vs shader are distinguishable (`"Compiling PPU Modules"` vs `"Compiling shaders"` from `rpcsx-android.cpp:325`).
 
 Non-goals: no new engine compilation logic, no change to `async_with_interpreter` semantics, no emoji.
@@ -36,7 +36,7 @@ RPCSX native (event includes domain + phase + origin/job id)
       CompileProgressBridge (process singleton; owns the one JNI listener)
              │  StateFlow<CompileState> + latest triggering event
              │
-             ├──────────────► dedicated RPCSXActivity ComposeView (compileStatusOverlay)
+             ├──────────────► launcher home card UI (GamesScreen → GameCard)
              │
              ├── legal start: startForegroundService(intent carrying event snapshot)
              └── denied background start: keep UI/native status, log + no crash
@@ -141,7 +141,7 @@ Result: user sees 10 m remaining only on the game surface (must be in `RPCSXActi
 | `app/src/main/java/com/zenithblue/sambas3/ProgressRepository.kt` | EXTEND with `createForeground(Service, notificationId, ...)` + `ServiceCompat.startForeground` helper; keep existing API for non-FGS callers |
 | `app/src/main/java/com/zenithblue/sambas3/CompilationMonitorService.kt` | **NEW** — single-anchor FGS (`NOTIF_FGS=2000`), secondary ordinary notifications (`PPU=2001`, `SHADER=2002`) or merged `InboxStyle`; synchronously promote in `onStartCommand` from triggering payload/latest state; `START_NOT_STICKY`; ignore install-origin PPU |
 | `app/src/main/java/com/zenithblue/sambas3/CompileProgressBridge.kt` **[NEW]** | Process singleton owns the one native listener, event reducer, `StateFlow`, legal FGS start attempt, background-start fallback, and idempotent registration; services/activities consume it but never replace its native listener |
-| `app/src/main/java/com/zenithblue/sambas3/RPCSXActivity.kt` | ADD **dedicated** `compileStatusOverlay : ComposeView` above `PadOverlay` (not inside the `gone` `ingameOverlay`); `activity_rpcs3.xml` new view; chip observes `CompileProgressBridge.state` |
+| `app/src/main/java/com/zenithblue/sambas3/ui/games/GamesScreen.kt` | ADD shared runtime/install compile progress inside the launcher `GameCard`; observe `CompileProgressBridge.state` and `installState` |
 | `app/src/main/java/com/zenithblue/sambas3/MainActivity.kt` + `RPCSXActivity.kt` cold path | Register native progress bridge at `RPCSX.initialized` time; do **not** start idle FGS with placeholder — FGS promotes only on first genuine active compilation event |
 | `patches/rpcsx-submodule-changes.patch` | REGENERATE/UPDATE for every change under `app/src/main/cpp/rpcsx`; required so runtime-core changes survive submodule reset/rebuild |
 | `gradle/libs.versions.toml` | no new deps (uses `androidx.core:core 1.12+` already) |
@@ -305,39 +305,13 @@ Result: user sees 10 m remaining only on the game surface (must be in `RPCSXActi
 
 3. **Do not** start `CompilationMonitorService` at `MainActivity` init with a `"Preparing compilation..."` placeholder merely to avoid a later start restriction. Register the process bridge early, but promote only from a real event payload. Accept that a first event received only after the app is fully backgrounded may not legally start an FGS; log/fallback instead of crashing.
 
-### P6 — In-UI mirror in `RPCSXActivity`  [REVISED — dedicated ComposeView]
+### P6 — In-UI mirror in the launcher home page
 
-1. `activity_rpcs3.xml` — add a **separate** `ComposeView` above `PadOverlay` (lower risk than refactoring the existing host):
-   ```xml
-   <androidx.compose.ui.platform.ComposeView
-       android:id="@+id/compileStatusOverlay"
-       android:layout_width="match_parent"
-       android:layout_height="wrap_content"
-       android:visibility="gone"
-       app:layout_constraintTop_toTopOf="parent"
-       app:layout_constraintStart_toStartOf="parent"
-       app:layout_constraintEnd_toEndOf="parent"/>
-   ```
-   The existing `ingameOverlay` (`:21-25`) is `visibility="gone"` and only shown when `InGameUi.page != Closed` — a chip inside it would be invisible during gameplay. Place `compileStatusOverlay` after/above `padOverlay` but before/below `ingameOverlay`; use a translation/elevation lower than the home-menu host and validate ordering by screenshot. Alternatively, refactor `ingameOverlay` so its `ComposeView` stays visible while only menu content is conditionally rendered — but the separate view is lower-risk.
+1. Keep the native RSX compile cue on the game surface for captures, but do not mount the Compose status chip in `RPCSXActivity` or `activity_rpcs3.xml`. The user-facing Compose mirror belongs to the launcher home page (`GamesScreen`).
 
-2. `RPCSXActivity.onCreate` after `setContent { RPCSXTheme { ... } }`:
-   ```kotlin
-   binding.compileStatusOverlay.setViewCompositionStrategy(DisposeOnViewTreeLifecycleDestroyed)
-   binding.compileStatusOverlay.setContent {
-     val s by CompileProgressBridge.state.collectAsState()
-     if (s.ppuActive || s.shaderActive) {
-       Surface(tint, 56dp) {
-         if (s.ppuActive) LinearProgressIndicator(progress={s.ppuPercent/100f})
-         else CircularProgressIndicator(indeterminate) // shader
-         Text(s.ppuMsg ?: s.shaderMsg ?: "Compiling…")
-         if (s.shaderActive) PulsingDot()
-       }
-     }
-   }
-   // Observe and toggle visibility:
-   lifecycleScope.launch { CompileProgressBridge.state.collect { binding.compileStatusOverlay.isVisible = it.ppuActive || it.shaderActive } }
-   ```
-   Respect `WindowInsets` (`applyInsetsToPadOverlay` pattern). Dismisses automatically when `StateFlow` idle. A short Compose-only fade after the final shader terminal event is allowed, but it must not keep the FGS active. Keep the RSX overlay for captures; the detailed PPU HUD update and Compose chip are additive.
+2. `GameCard` observes both `CompileProgressBridge.state` (runtime PPU/shaders) and `CompileProgressBridge.installState` (firmware/package install). Reuse the card’s existing dark progress overlay for PPU compile progress: title, progress bar, native `file/module/remaining` message, and an indeterminate bar for shaders. Do not render a notification-shaped chip at the top of the launcher.
+
+3. The card overlay dismisses automatically when the bridge state becomes idle. It must not control FGS lifetime; `CompilationMonitorService` and `PrecompilerService` continue to own notification/service cleanup. Returning from `RPCSXActivity` to the launcher therefore reveals the current runtime status without drawing Compose UI over the game.
 
 ### P7 — Strings & icons
 
@@ -363,8 +337,7 @@ Result: user sees 10 m remaining only on the game surface (must be in `RPCSXActi
 | `app/src/main/java/com/zenithblue/sambas3/ProgressRepository.kt` | MODIFY — `createForeground(Service, fixedNotificationId)` builder/update helper; keep service stop/timeout lifecycle in owning services | P2 fixed anchor IDs |
 | `app/src/main/java/com/zenithblue/sambas3/CompilationMonitorService.kt` | **NEW** — event-carrying synchronous promotion, `NOTIF_FGS=2000` anchor + ordinary secondaries, explicit terminal lifecycle, ignores install origin, `START_NOT_STICKY` | P5 |
 | `app/src/main/java/com/zenithblue/sambas3/PrecompilerService.kt` | MODIFY — fixed `NOTIF_INSTALL=3000`, `ContextCompat.startForegroundService`, install-origin ownership, `START_NOT_STICKY`, API 35 `onTimeout` | P5 install FGS |
-| `app/src/main/res/layout/activity_rpcs3.xml` | MODIFY — add `compileStatusOverlay` ComposeView above `PadOverlay` | P6 visibility fix |
-| `app/src/main/java/com/zenithblue/sambas3/RPCSXActivity.kt` | MODIFY — dedicated `compileStatusOverlay` observing `CompileProgressBridge.state` | P6 |
+| `app/src/main/java/com/zenithblue/sambas3/ui/games/GamesScreen.kt` | MODIFY — launcher-home `GameCard` renders runtime/install compile progress inside the card | P6 |
 | `app/src/main/java/com/zenithblue/sambas3/MainActivity.kt` + `RPCSXActivity.kt` cold path | MODIFY — register bridge early; promote FGS only on first real event (no idle placeholder) | P5 lifecycle |
 | `patches/rpcsx-submodule-changes.patch` | MODIFY/REGENERATE — include all RPCSX submodule event/snapshot/HUD changes | Required reproducibility |
 
@@ -377,9 +350,9 @@ Add reducer/service unit tests before device testing: duplicate BEGIN, out-of-or
 Manual on `Y5WWBMJVOZSK4HU8` (already has `samba-s3-standard-debug.apk` `141M` + 118M builds; `2a580689`/`7d6afed8` as controls):
 
 - M1 Install flow (ISO `BLUS30441` or `BLUS31584`) → pull shade during `StagedGameInstaller` `Scanning/Building manifest/Committing` → fixed notification `3000` appears as `Installing — 0% → ... → Preparing PPU compilation`; after commit, install-origin PPU progress updates that same `PrecompilerService` anchor. Verify notification/service dumps show **one** owner (`dataSync`) and no `CompilationMonitorService`/notification `2000` for the install job. It survives Home after the legal user-started promotion and stops on explicit completion/failure/cancel.
-- M2 Boot PPU (cold boot game with no cache, including **cold `RPCSXActivity` entry after `adb shell am force-stop`**) → process bridge receives BEGIN before the service exists, starts it with the event extra, and `onStartCommand` promotes synchronously. `Compiling PPU Modules...` chip appears ≤500 ms; detailed RSX HUD, Compose chip, and shade show the same `progr`/percentage. A 100% PROGRESS event alone must not stop the service; explicit terminal does. Kill game → native CANCELED clears anchor and chip within 2 s, with no idle-time heuristic.
-- M3 RSX shader trip — launch `GTASAsf*` intro traversal (intro→Grove Street) → first real `ProgramStateCache` enqueue sends BEGIN; the actual worker completion sends terminal. Shade/chip are indeterminate with no ETA. Multiple pending job IDs keep one domain active without notification spam. When the pending set reaches zero, the FGS stops immediately if PPU is inactive; the existing RSX cue and optional Compose fade may remain up to 5 s without keeping the service foreground.
-- M4 Both concurrent — start PPU cold boot then immediately trigger shader burst (enter world) → shade shows anchor `InboxStyle` with both lines (`PPU 24/33 (10m)` + `Shaders: compiling`) or anchor + two secondaries (`2000` + `2001` + `2002`); chip shows `PPU 24/33 (10m)` + shader dot. Verify PPU finishing does **not** demote FGS while shader still active (`dumpsys activity services` still `isForeground=true, specialUse`).
+- M2 Boot PPU (cold boot game with no cache, including **cold `RPCSXActivity` entry after `adb shell am force-stop`**) → process bridge receives BEGIN before the service exists, starts it with the event extra, and `onStartCommand` promotes synchronously. Returning to the launcher shows `Compiling PPU Modules...` inside the active `GameCard`; detailed RSX HUD, card overlay, and shade show the same `progr`/percentage. A 100% PROGRESS event alone must not stop the service; explicit terminal does. Kill game → native CANCELED clears anchor and card overlay within 2 s, with no idle-time heuristic.
+- M3 RSX shader trip — launch `GTASAsf*` intro traversal (intro→Grove Street) → first real `ProgramStateCache` enqueue sends BEGIN; the actual worker completion sends terminal. Shade and launcher card overlay are indeterminate with no ETA. Multiple pending job IDs keep one domain active without notification spam. When the pending set reaches zero, the FGS stops immediately if PPU is inactive; the existing RSX cue may remain up to 5 s without keeping the service foreground.
+- M4 Both concurrent — start PPU cold boot then immediately trigger shader burst (enter world) → shade shows anchor `InboxStyle` with both lines (`PPU 24/33 (10m)` + `Shaders: compiling`) or anchor + two secondaries (`2000` + `2001` + `2002`); launcher card shows the PPU line plus shader indeterminate state. Verify PPU finishing does **not** demote FGS while shader still active (`dumpsys activity services` still `isForeground=true, specialUse`).
 - M5 Permission denied — `adb shell appops set com.zenithblue.sambas3 POST_NOTIFICATION deny` → install FGS and runtime PPU FGS still start (`isForeground=true`) but **do not appear in the shade** — verify they are visible only via **Task Manager / `adb shell dumpsys notification`** and not via drawer; re-allow restores shade visibility. This replaces the previous incorrect "FGS still visible in shade" criterion.
 - M6 `POST_NOTIFICATIONS` granted/denied, rotation, `singleTask` bring-to-front, and `6.1.170-GKID` OEM log spam regression: verify no `ForegroundServiceDidNotStartInTimeException`, one idempotent JNI listener, and no leaked `GlobalRef`/duplicate events.
 - M7 Background-first fallback — launch game, press Home **before** the first runtime compile event, then trigger/observe the event if emulation continues. Verify a denied late FGS start is caught/logged without process crash or retry loop; native/StateFlow state remains coherent. Separately verify that an FGS started from a real event while the activity is visible continues after Home.
@@ -392,7 +365,7 @@ Manual on `Y5WWBMJVOZSK4HU8` (already has `samba-s3-standard-debug.apk` `141M` +
 - [ ] `grep -rn NotificationChannels app/src/main/java` shows `ensureCreated` called from `MainActivity`, `RPCSXActivity` cold path, `CompilationMonitorService.onCreate`, and `PrecompilerService.onCreate`.
 - [ ] `./gradlew assembleStandardDebug assemblePlaystoreDebug` passes both flavors with `compileSdk 36 / targetSdk 35`.
 - [ ] Install-origin PPU has exactly one foreground owner: fixed notification `3000`/`PrecompilerService=dataSync`; `CompilationMonitorService` ignores it. Runtime-origin PPU uses only monitor anchor `2000`.
-- [ ] Runtime PPU (including cold `RPCSXActivity` after force-stop) shows a persistent anchor with verbatim `Progress: file X of Y, module Z of W (Xm remaining)` from `build_system_progress_snapshot()`; detailed RSX HUD and Compose mirror use the same snapshot. Lifecycle is driven by explicit terminal phase, not `percentValue==100` or inactivity.
+- [ ] Runtime PPU (including cold `RPCSXActivity` after force-stop) shows a persistent anchor with verbatim `Progress: file X of Y, module Z of W (Xm remaining)` from `build_system_progress_snapshot()`; detailed RSX HUD and launcher card overlay use the same snapshot. Lifecycle is driven by explicit terminal phase, not `percentValue==100` or inactivity.
 - [ ] RSX traversal shows `Compiling shaders` as indeterminate with no ETA. Shader lifecycle comes from `ProgramStateCache` first enqueue and actual non-null worker completion/failure/cancel, keyed by job ID; renderer `check_cache_missed()` remains HUD-only.
 - [ ] When both runtime domains are active, one anchor is visible and cancelled correctly: explicit PPU terminal does not demote while shader job IDs remain; final shader terminal does not clear active PPU; `stopForeground` runs immediately only when `activeDomainCount==0`. A visual fade may outlive FGS state.
 - [ ] The process bridge owns exactly one idempotently registered JNI listener. `CompilationMonitorService` does not register it; the first event is carried into `onStartCommand`, which promotes synchronously. Listener replacement/shutdown deletes JNI global references and handles callback exceptions.
@@ -415,7 +388,7 @@ Manual on `Y5WWBMJVOZSK4HU8` (already has `samba-s3-standard-debug.apk` `141M` +
 - **R9 `ProgressRepository` races** — existing `ConcurrentHashMap` + `Handler.createAsync` serializes to main looper; new FGS path reuses it. Mitigation: fixed service IDs distinct from request IDs, per-domain secondary IDs, and all anchor mutations on the main handler.
 - **R10 Permission `POST_NOTIFICATIONS` denied** — FGS path must not gate `startForeground` but must expect shade invisibility. Mitigation: tests verify Task Manager/dumpsys visibility, not drawer visibility.
 - **R11 Missing terminal event** — compiler failure/shutdown could otherwise leak the FGS. Mitigation: exactly-once terminal contract on every native path plus emulator-stop CANCELED fallback; never auto-cancel merely because progress was quiet for 10 s.
-- **R12 Surface vs Compose z-order** — `compileStatusOverlay` must sit above `PadOverlay` but below `HomeMenu`. Mitigation: XML order/elevation validated by screenshot `Y5WWBMJVOZSK4HU8`; separate from the `gone` `ingameOverlay`.
+- **R12 Launcher visibility** — the card progress overlay must remain outside the game-surface view hierarchy and remain observable after returning from `RPCSXActivity`. Mitigation: render it in `GameCard` from the process-level bridge state; native RSX HUD remains game-surface-only.
 
 ## Handoff to Plan Reviewer
 
@@ -438,5 +411,48 @@ Resolved design decisions after two review passes:
 - [ ] `POST_NOTIFICATIONS` denied shade-invisibility is documented and tested via `dumpsys` / Task Manager, not drawer assertion.
 - [ ] PPU `percentValue` comes from `build_system_progress_snapshot()` (same as RSX bar), not `pdone/ptotal`.
 - [ ] Shader FGS is driven by shared pipeline enqueue/actual completion with job IDs; VK/GL `check_cache_missed()` and `show_shader_compile_notification()` remain HUD-only.
-- [ ] `compileStatusOverlay` is a separate `ComposeView` above `PadOverlay`, not inside the `gone` `ingameOverlay`.
+- [ ] Runtime and install compile status is rendered on the launcher home page, not in the `RPCSXActivity` game-surface hierarchy.
 - [ ] First-event service bootstrap is non-circular, install/runtime origins cannot create duplicate FGS owners, background-start denial is caught, and old runtime cores cannot null-call the new symbol.
+
+## Revision 3 — Review fixes (2026-08-24)
+
+Pushed `3e8ae010` was **not shippable**: runtime PPU/shader events never reached Kotlin, so notification 2000, the launcher card overlay, and install PPU card progress were dead. This revision implements the review plus the missing UI.
+
+### P0 — JNI `onEvent` descriptor (blocker)
+
+`CompileProgressCallback.onEvent(Int, Int, Int, Long, Long, Long, String?, Int, Int, Int, Int)` requires **`(IIIJJJLjava/lang/String;IIII)V`** (`jobId`, `value`, **and** `max` are all `J`). Native `GetMethodID` used `(IIIJJLjava/lang/String;IIII)V` (missing `max`'s `J`), so lookup failed, the global ref was deleted, the sink disabled, and `setCompileProgressListener` returned false. Tests only used `injectForTest()`.
+
+**Fix:** named constant `kCompileProgressOnEventDescriptor` / `RPCSX.COMPILE_PROGRESS_ON_EVENT_JNI_DESCRIPTOR`, lookup on the fun-interface class, Kotlin reflection smoke test that builds the JNI descriptor from `onEvent` and asserts the extra `J`. A failed lookup no longer permanently sets `registered=true`, so `registerOnce` can retry.
+
+### P1 — Stale BEGIN leaves FGS stuck
+
+`onStartCommand` no longer reconstructs `ppuActive`/`shaderActive` from a BEGIN extra. After `startForeground` (still required within ~5s), it re-reads **`CompileProgressBridge.state.value.activeDomainCount`**. If 0, `stopForeground` + `stopSelf`. `isRuntimeJobActive(domain, jobId)` is available for intent validation. Fast BEGIN→COMPLETED shaders therefore cannot leave notification 2000 up.
+
+### P1 — `startForeground` failure propagation
+
+`ProgressRepository.createForeground` returns `ForegroundCreateResult(requestId, promoted)` and no longer swallows promotion failure. `PrecompilerService` tracks a real `isForeground` flag (the previous helper always returned `true`), and stops immediately if promotion fails so install does not continue as a non-foreground started service. `CompilationMonitorService.promoteForeground()` returns Boolean and `stopSelf`s on failure.
+
+### P2 — Shader per-job failure terminal
+
+Deferred contract is now explicit in `ProgramStateCache`: first empty callback is not terminal; a later empty callback (worker returned no pipeline) emits `FAILED` once. The Android engine is built with `-fno-exceptions`, so try/catch around the compiler is not available; `cache.clear()` still emits `CANCELED(jobId=0)` on renderer shutdown. A process-killing compiler abort cannot leak the FGS past process death.
+
+### P2 — Reproducible core build
+
+`./build_rpcsx.sh` applies `patches/rpcsx-submodule-changes.patch` after submodule init: reverse-check if already applied, otherwise forward-apply, **fail** if neither is clean. `AGENTS.md` documents this. Regenerating the patch is required after every engine edit.
+
+### UI — both domains + install PPU card progress
+
+- **Runtime** (`GamesScreen.GameCard` launcher card): shows PPU progress and verbatim `progr` inside the card; shader-only work uses the same card overlay with an indeterminate bar. No game-surface Compose chip.
+- **Static/install** (`GamesScreen`): observes `CompileProgressBridge.installState`; the firmware strip and importing game card use the native PPU snapshot, with the card as the primary PPU message surface. Install FGS 3000 is updated from the same flow by `PrecompilerService` collecting `installState` (the bridge no longer `notify()`s 3000 itself).
+
+### Native snapshot sharing
+
+Both overlay and MessageDialog PPU paths consume `build_system_progress_snapshot()`. Overlay HUD first-show uses the snapshot message.
+
+### Tests added
+
+- JNI descriptor reflection (`compileProgressCallbackJniDescriptorMatchesNative`)
+- shader `FAILED` terminal + `isRuntimeJobActive`
+- `CompilationMonitorLogic.shouldStopAfterPromotion` + stale BEGIN→COMPLETED
+
+Device M0–M9 remain the release gate (see Testing Strategy). Both-flavor unit tests pass. Arm64 `librpcsx-android.so` was rebuilt with the corrected JNI descriptor (`strings` contains `(IIIJJJLjava/lang/String;IIII)V`). The architecture of revision 2 is unchanged. Install the rebuilt core + APK together; an old downloaded `.so` still degrades to HUD-only.

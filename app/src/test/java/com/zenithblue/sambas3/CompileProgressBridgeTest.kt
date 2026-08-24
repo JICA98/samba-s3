@@ -198,4 +198,55 @@ class CompileProgressBridgeTest {
         assertTrue(CompileProgressBridge.state.value.ppuActive)
         assertEquals(20, CompileProgressBridge.state.value.ppuPercent)
     }
+
+    @Test
+    fun shaderFailedIsTerminal() {
+        CompileProgressBridge.injectForTest(shaderEvent(RPCSX.COMPILE_PHASE_BEGIN, 77))
+        assertTrue(CompileProgressBridge.state.value.shaderActive)
+        assertTrue(CompileProgressBridge.isRuntimeJobActive(RPCSX.COMPILE_DOMAIN_SHADER, 77))
+        CompileProgressBridge.injectForTest(shaderEvent(RPCSX.COMPILE_PHASE_FAILED, 77))
+        assertFalse(CompileProgressBridge.state.value.shaderActive)
+        assertFalse(CompileProgressBridge.isRuntimeJobActive(RPCSX.COMPILE_DOMAIN_SHADER, 77))
+    }
+
+    @Test
+    fun isRuntimeJobActiveTracksPpuAndShader() {
+        assertFalse(CompileProgressBridge.isRuntimeJobActive(RPCSX.COMPILE_DOMAIN_PPU, 1))
+        CompileProgressBridge.injectForTest(ppuEvent(RPCSX.COMPILE_PHASE_BEGIN, 1, 10))
+        assertTrue(CompileProgressBridge.isRuntimeJobActive(RPCSX.COMPILE_DOMAIN_PPU, 1))
+        assertFalse(CompileProgressBridge.isRuntimeJobActive(RPCSX.COMPILE_DOMAIN_PPU, 2))
+        CompileProgressBridge.injectForTest(ppuEvent(RPCSX.COMPILE_PHASE_COMPLETED, 1))
+        assertFalse(CompileProgressBridge.isRuntimeJobActive(RPCSX.COMPILE_DOMAIN_PPU, 1))
+    }
+
+    @Test
+    fun compileProgressCallbackJniDescriptorMatchesNative() {
+        val method = RPCSX.CompileProgressCallback::class.java.declaredMethods
+            .single { it.name == "onEvent" }
+        assertEquals(
+            RPCSX.COMPILE_PROGRESS_ON_EVENT_JNI_DESCRIPTOR,
+            jniDescriptor(method)
+        )
+        // The previous broken native lookup used IIIJJ (missing max's J) and GetMethodID failed.
+        assertFalse(RPCSX.COMPILE_PROGRESS_ON_EVENT_JNI_DESCRIPTOR.contains("(IIIJJLjava/lang/String;"))
+        assertTrue(RPCSX.COMPILE_PROGRESS_ON_EVENT_JNI_DESCRIPTOR.startsWith("(IIIJJJLjava/lang/String;"))
+    }
+
+    private fun jniDescriptor(method: java.lang.reflect.Method): String {
+        fun desc(c: Class<*>): String = when {
+            c == Void.TYPE -> "V"
+            c == Integer.TYPE -> "I"
+            c == java.lang.Long.TYPE -> "J"
+            c == java.lang.Boolean.TYPE -> "Z"
+            c == String::class.java -> "Ljava/lang/String;"
+            c.isArray -> "[" + desc(c.componentType!!)
+            else -> "L" + c.name.replace('.', '/') + ";"
+        }
+        return buildString {
+            append('(')
+            method.parameterTypes.forEach { append(desc(it)) }
+            append(')')
+            append(desc(method.returnType))
+        }
+    }
 }

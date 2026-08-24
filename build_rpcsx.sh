@@ -52,6 +52,27 @@ if [ ! -f "$RPCSX_DIR/3rdparty/fmtlib/CMakeLists.txt" ]; then
     git submodule update --init --recursive app/src/main/cpp/rpcsx
 fi
 
+# Apply local RPCSX engine patches (compile-progress JNI, install helpers, etc.).
+# Reverse-check: if the patch is already applied, skip. Forward-apply otherwise.
+# Fail the build if neither direction is clean so a stale patch cannot silently
+# produce an old core where supportsCompileProgressEvents() is false.
+PATCH_FILE="$SCRIPT_DIR/patches/rpcsx-submodule-changes.patch"
+if [ -f "$PATCH_FILE" ]; then
+    if git -C "$RPCSX_DIR" apply --check --reverse "$PATCH_FILE" >/dev/null 2>&1; then
+        echo "RPCSX submodule patch already applied"
+    elif git -C "$RPCSX_DIR" apply --check "$PATCH_FILE" >/dev/null 2>&1; then
+        git -C "$RPCSX_DIR" apply "$PATCH_FILE"
+        echo "Applied patches/rpcsx-submodule-changes.patch"
+    else
+        echo "Error: patches/rpcsx-submodule-changes.patch does not apply cleanly (neither forward nor reverse)."
+        echo "Regenerate it from the rpcsx submodule after your engine edits:"
+        echo "  git -C app/src/main/cpp/rpcsx add -A"
+        echo "  git -C app/src/main/cpp/rpcsx diff --cached > patches/rpcsx-submodule-changes.patch"
+        echo "  git -C app/src/main/cpp/rpcsx reset"
+        exit 1
+    fi
+fi
+
 if [ -n "${TARGET_ABI:-}" ]; then
     ABIS=("$TARGET_ABI")
 else

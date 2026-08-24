@@ -134,6 +134,13 @@ fun GamesScreen(
         contract = ActivityResultContracts.GetContent()
     ) { uri: Uri? ->
         if (uri != null) {
+            try {
+                context.contentResolver.takePersistableUriPermission(
+                    uri,
+                    Intent.FLAG_GRANT_READ_URI_PERMISSION
+                )
+            } catch (_: Exception) {
+            }
             PrecompilerService.start(context, PrecompilerServiceAction.Install, uri)
         }
     }
@@ -152,6 +159,10 @@ fun GamesScreen(
     val fwProgressId by remember { FirmwareRepository.progressChannel }
     val isFwInstalling = fwProgressId != null
     val hasFw = fwVersion != null
+    val installPpu by CompileProgressBridge.installState.collectAsState()
+    val activeInstallId by GameRepository.activeInstallProgress
+    val activeInstallEntry = ProgressRepository.getItem(activeInstallId)?.value
+    val isPackageInstalling = activeInstallId != null
 
     val showBothEnds = games.size > 5
     val pagerItems = remember(games.size, hasFw, isFwInstalling) {
@@ -290,7 +301,13 @@ fun GamesScreen(
                                     game = item.game,
                                     distance = distance,
                                     onClick = { coroutineScope.launch { pagerState.animateScrollToPage(page) } },
-                                    onPlay = { bootingGame = item.game },
+                                    onPlay = {
+                                        if (item.game.info.path != "$" &&
+                                            item.game.findProgress(GameProgressType.Install) == null
+                                        ) {
+                                            bootingGame = item.game
+                                        }
+                                    },
                                     isRunning = isRunning && emulatorActiveGame.value == item.game.info.path,
                                     onConfigure = { configureGameTarget = item.game }
                                 )
@@ -324,7 +341,10 @@ fun GamesScreen(
                         horizontalAlignment = Alignment.CenterHorizontally
                     ) {
                         Text(
-                            text = (activeGame.info.name.value ?: "UNKNOWN GAME").uppercase(),
+                            text = when {
+                                activeGame.info.path == "$" -> "IMPORTING..."
+                                else -> (activeGame.info.name.value ?: "UNKNOWN GAME").uppercase()
+                            },
                             style = AppTypography.headlineMedium.copy(letterSpacing = 2.sp),
                             color = RPCSXColors.primary
                         )
@@ -391,7 +411,65 @@ fun GamesScreen(
                 val isFwInstalling = fwProgressId != null
 
                 Column(verticalArrangement = Arrangement.spacedBy(2.dp)) {
-                    if (fwVersion != null) {
+                    if (installPpu.ppuActive) {
+                        Text(
+                            text = stringResource(R.string.compiling_ppu_title),
+                            style = AppTypography.labelSmall,
+                            color = RPCSXColors.primary
+                        )
+                        LinearProgressIndicator(
+                            progress = { (installPpu.ppuPercent / 100f).coerceIn(0f, 1f) },
+                            modifier = Modifier
+                                .widthIn(min = 80.dp, max = 200.dp)
+                                .clip(RoundedCornerShape(4.dp)),
+                            color = RPCSXColors.primary,
+                            trackColor = RPCSXColors.surfaceOverlay,
+                        )
+                        installPpu.ppuMsg?.let {
+                            Text(
+                                text = it,
+                                style = AppTypography.labelSmall,
+                                color = RPCSXColors.textSecondary,
+                                maxLines = 1,
+                                overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis
+                            )
+                        }
+                    } else if (isPackageInstalling) {
+                        Text(
+                            text = stringResource(R.string.package_installation),
+                            style = AppTypography.labelSmall,
+                            color = RPCSXColors.primary
+                        )
+                        val installVal = activeInstallEntry?.value?.longValue ?: 0L
+                        val installMax = activeInstallEntry?.max?.longValue ?: 0L
+                        if (installMax > 0) {
+                            LinearProgressIndicator(
+                                progress = { (installVal.toFloat() / installMax.toFloat()).coerceIn(0f, 1f) },
+                                modifier = Modifier
+                                    .widthIn(min = 80.dp, max = 200.dp)
+                                    .clip(RoundedCornerShape(4.dp)),
+                                color = RPCSXColors.primary,
+                                trackColor = RPCSXColors.surfaceOverlay,
+                            )
+                        } else {
+                            LinearProgressIndicator(
+                                modifier = Modifier
+                                    .widthIn(min = 80.dp, max = 200.dp)
+                                    .clip(RoundedCornerShape(4.dp)),
+                                color = RPCSXColors.primary,
+                                trackColor = RPCSXColors.surfaceOverlay,
+                            )
+                        }
+                        activeInstallEntry?.message?.value?.let {
+                            Text(
+                                text = it,
+                                style = AppTypography.labelSmall,
+                                color = RPCSXColors.textSecondary,
+                                maxLines = 1,
+                                overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis
+                            )
+                        }
+                    } else if (fwVersion != null) {
                         Text(
                             text = stringResource(R.string.firmware) + " " + fwVersion,
                             style = AppTypography.labelSmall,
@@ -783,11 +861,41 @@ fun GameCard(
 
     val installProgressId = game.findProgress(GameProgressType.Install)?.firstOrNull()?.id
     val progressEntry = ProgressRepository.getItem(installProgressId)?.value
+    val runtimeCompile by CompileProgressBridge.state.collectAsState()
+    val installPpu by CompileProgressBridge.installState.collectAsState()
     val isImporting = progressEntry != null
-    val progressValue = progressEntry?.value?.longValue ?: 0
-    val progressMax = progressEntry?.max?.longValue ?: 0
-    val progressMessage = progressEntry?.message?.value
-    val isIndeterminate = progressMax == 0L
+    val isRuntimeGameCompile = RPCSX.activeGame.value == game.info.path &&
+        runtimeCompile.isActive
+    val usingRuntimePpu = isRuntimeGameCompile && runtimeCompile.ppuActive
+    val usingRuntimeShader = isRuntimeGameCompile && runtimeCompile.shaderActive && !usingRuntimePpu
+    val usingInstallPpu = isImporting && installPpu.ppuActive
+    val showCompileOverlay = isImporting || isRuntimeGameCompile
+    val progressValue = when {
+        usingRuntimePpu -> runtimeCompile.ppuPercent.toLong()
+        usingInstallPpu -> installPpu.ppuPercent.toLong()
+        else -> progressEntry?.value?.longValue ?: 0
+    }
+    val progressMax = when {
+        usingRuntimePpu -> runtimeCompile.ppuMax.toLong()
+        usingInstallPpu -> installPpu.ppuMax.toLong()
+        else -> progressEntry?.max?.longValue ?: 0
+    }
+    val progressMessage = when {
+        usingRuntimePpu -> runtimeCompile.ppuMsg ?: stringResource(R.string.compiling_ppu_title)
+        usingRuntimeShader -> runtimeCompile.shaderMsg ?: stringResource(R.string.compiling_shaders_desc)
+        usingInstallPpu -> installPpu.ppuMsg ?: stringResource(R.string.compiling_ppu_title)
+        else -> progressEntry?.message?.value
+    }
+    val isIndeterminate = when {
+        usingRuntimeShader -> true
+        usingRuntimePpu || usingInstallPpu -> progressMax <= 0L
+        else -> progressMax == 0L
+    }
+    val compileTitle = when {
+        usingRuntimeShader -> stringResource(R.string.compiling_shaders_title)
+        usingRuntimePpu || usingInstallPpu -> stringResource(R.string.compiling_ppu_title)
+        else -> null
+    }
 
     val colorMatrix = remember(isFocused) {
         if (isFocused) ColorMatrix() else ColorMatrix().apply { setToSaturation(0f) }
@@ -868,7 +976,7 @@ fun GameCard(
                 }
             }
 
-            if (isImporting) {
+            if (showCompileOverlay) {
                 Box(
                     modifier = Modifier
                         .fillMaxSize()
@@ -896,7 +1004,7 @@ fun GameCard(
                                 )
                                 if (!isIndeterminate) {
                                     LinearProgressIndicator(
-                                        progress = { progressValue.toFloat() / progressMax.toFloat() },
+                                        progress = { (progressValue.toFloat() / progressMax.toFloat()).coerceIn(0f, 1f) },
                                         modifier = Modifier.weight(1f).clip(RoundedCornerShape(4.dp)),
                                         color = RPCSXColors.primary,
                                         trackColor = RPCSXColors.surfaceOverlay,
@@ -908,6 +1016,16 @@ fun GameCard(
                                         trackColor = RPCSXColors.surfaceOverlay,
                                     )
                                 }
+                            }
+                            compileTitle?.let {
+                                Text(
+                                    text = it,
+                                    style = AppTypography.labelSmall.copy(fontSize = 9.sp),
+                                    color = RPCSXColors.primary,
+                                    textAlign = TextAlign.Center,
+                                    maxLines = 1,
+                                    overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis
+                                )
                             }
                             Text(
                                 text = progressMessage ?: "Importing...",
@@ -932,7 +1050,7 @@ fun GameCard(
                             )
                             if (!isIndeterminate) {
                                 LinearProgressIndicator(
-                                    progress = { progressValue.toFloat() / progressMax.toFloat() },
+                                    progress = { (progressValue.toFloat() / progressMax.toFloat()).coerceIn(0f, 1f) },
                                     modifier = Modifier.fillMaxWidth().clip(RoundedCornerShape(4.dp)),
                                     color = RPCSXColors.primary,
                                     trackColor = RPCSXColors.surfaceOverlay,
@@ -942,6 +1060,16 @@ fun GameCard(
                                     modifier = Modifier.fillMaxWidth().clip(RoundedCornerShape(4.dp)),
                                     color = RPCSXColors.primary,
                                     trackColor = RPCSXColors.surfaceOverlay,
+                                )
+                            }
+                            compileTitle?.let {
+                                Text(
+                                    text = it,
+                                    style = AppTypography.labelMedium,
+                                    color = RPCSXColors.primary,
+                                    textAlign = TextAlign.Center,
+                                    maxLines = 1,
+                                    overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis
                                 )
                             }
                             Text(

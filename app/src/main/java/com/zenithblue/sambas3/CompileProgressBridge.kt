@@ -33,6 +33,8 @@ object CompileProgressBridge {
 
     // Internal tracking
     private var registered = false
+    // Strong ref so the SAM is not collected before the JNI GlobalRef is installed.
+    private var nativeCallback: RPCSX.CompileProgressCallback? = null
     private val mainHandler: Handler? by lazy {
         try {
             val looper = Looper.getMainLooper()
@@ -100,13 +102,19 @@ object CompileProgressBridge {
         }
 
         try {
+            nativeCallback = callback
             val ok = RPCSX.instance.setCompileProgressListener(callback)
-            if (!ok) Log.w(TAG, "setCompileProgressListener returned false — old core?")
-            else Log.i(TAG, "CompileProgressListener registered")
+            if (!ok) {
+                nativeCallback = null
+                Log.w(TAG, "setCompileProgressListener returned false — JNI onEvent lookup failed or old core; will retry")
+                return
+            }
+            Log.i(TAG, "CompileProgressListener registered")
+            registered = true
         } catch (e: Exception) {
+            nativeCallback = null
             Log.e(TAG, "Failed to register compile listener: ${e.message}", e)
         }
-        registered = true
     }
 
     // Called from native thread via mainHandler
@@ -115,7 +123,7 @@ object CompileProgressBridge {
         // not to runtime monitor (2000). Shader never has INSTALL origin.
         if (ev.origin == RPCSX.COMPILE_ORIGIN_INSTALL) {
             if (ev.domain == RPCSX.COMPILE_DOMAIN_PPU) {
-                handleInstallPpu(ev, appCtx)
+                handleInstallPpu(ev)
             } else {
                 Log.d(TAG, "Ignoring INSTALL-origin shader event job=${ev.jobId}")
             }
@@ -130,7 +138,7 @@ object CompileProgressBridge {
         }
     }
 
-    private fun handleInstallPpu(ev: NativeEvent, appCtx: Context?) {
+    private fun handleInstallPpu(ev: NativeEvent) {
         val cur = _installState.value
         when (ev.phase) {
             RPCSX.COMPILE_PHASE_BEGIN -> {
@@ -167,32 +175,8 @@ object CompileProgressBridge {
                 _installState.value = cur.copy(ppuActive = false)
             }
         }
-        // Notify PrecompilerService to update its FGS notification title to PPU if active
-        if (appCtx != null) {
-            try {
-                // Update PrecompilerService's ongoing notification (3000) to show PPU title when install PPU is active
-                val isActive = _installState.value.ppuActive
-                val title = if (isActive) appCtx.getString(R.string.compiling_ppu_title) else appCtx.getString(R.string.package_installation)
-                val msg = _installState.value.ppuMsg ?: ev.message
-                val pct = _installState.value.ppuPercent
-                val max = _installState.value.ppuMax
-                // Use ProgressRepository helper to update the fixed 3000 notification
-                // We don't have Service instance here, so use ordinary notify for now; PrecompilerService observer will promote via its own collector
-                // For immediate feedback, post via NotificationManagerCompat
-                androidx.core.app.NotificationManagerCompat.from(appCtx).let { nm ->
-                    val builder = androidx.core.app.NotificationCompat.Builder(appCtx, NotificationChannels.RPCSX_PROGRESS)
-                        .setContentTitle(title)
-                        .setContentText(msg ?: title)
-                        .setSmallIcon(R.mipmap.ic_sambas3_foreground)
-                        .setCategory(androidx.core.app.NotificationCompat.CATEGORY_PROGRESS)
-                        .setOngoing(true)
-                        .setSilent(true)
-                    if (isActive && max > 0) builder.setProgress(max, pct, false) else builder.setProgress(0, 0, true)
-                    if (isActive) builder.setStyle(androidx.core.app.NotificationCompat.BigTextStyle().bigText(msg))
-                    try { nm.notify(PrecompilerService.NOTIF_INSTALL, builder.build()) } catch (_: Exception) {}
-                }
-            } catch (_: Exception) {}
-        }
+        // PrecompilerService observes installState and updates FGS 3000. Do not notify() here —
+        // racing the service's startForeground with a plain notify can hide the FGS notification.
     }
 
     private fun handlePpu(ev: NativeEvent, appCtx: Context?) {
@@ -246,12 +230,10 @@ object CompileProgressBridge {
                     return
                 }
                 ppuJobId = null
-                latestRuntimeEvent = null
+                if (shaderJobIds.isEmpty()) latestRuntimeEvent = null
                 _state.value = cur.copy(
                     ppuActive = false,
-                    // keep last percent/msg for fade? but clear active flag
                 )
-                // Reducer will cause service to stop when shader also inactive
             }
         }
     }
@@ -293,7 +275,7 @@ object CompileProgressBridge {
                     shaderActive = shaderJobIds.isNotEmpty(),
                     shaderMsg = if (shaderJobIds.isNotEmpty()) cur.shaderMsg ?: "Compiling shaders…" else null
                 )
-                if (shaderJobIds.isEmpty()) {
+                if (shaderJobIds.isEmpty() && ppuJobId == null) {
                     latestRuntimeEvent = null
                 }
             }
@@ -339,9 +321,19 @@ object CompileProgressBridge {
 
     fun getLatestRuntimeEvent(): NativeEvent? = latestRuntimeEvent
 
+    fun isRuntimeJobActive(domain: Int, jobId: Long): Boolean {
+        if (jobId <= 0L) return false
+        return when (domain) {
+            RPCSX.COMPILE_DOMAIN_PPU -> ppuJobId == jobId
+            RPCSX.COMPILE_DOMAIN_SHADER -> shaderJobIds.contains(jobId)
+            else -> false
+        }
+    }
+
     fun clearForTest() {
         synchronized(this) {
             registered = false
+            nativeCallback = null
             shaderJobIds.clear()
             ppuJobId = null
             installPpuJobId = null

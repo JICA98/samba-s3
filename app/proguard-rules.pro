@@ -12,6 +12,11 @@
 #   public *;
 #}
 
+# JNI CompileProgressCallback.onEvent — GetMethodID uses the exact descriptor
+# (IIIJJJLjava/lang/String;IIII)V
+-keep class com.zenithblue.sambas3.RPCSX$CompileProgressCallback { *; }
+-keep interface com.zenithblue.sambas3.RPCSX$CompileProgressCallback { *; }
+
 # Uncomment this to preserve the line number information for
 # debugging stack traces.
 #-keepattributes SourceFile,LineNumberTable

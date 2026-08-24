@@ -10,26 +10,8 @@ import android.view.ViewGroup.MarginLayoutParams
 import android.view.WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_MODE_SHORT_EDGES
 import androidx.activity.ComponentActivity
 import androidx.activity.OnBackPressedCallback
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
-import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.LinearProgressIndicator
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Surface
-import androidx.compose.material3.Text
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.ViewCompositionStrategy
-import androidx.compose.ui.unit.dp
-import androidx.core.view.isVisible
-import androidx.lifecycle.lifecycleScope
-import kotlinx.coroutines.launch
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowCompat
 import androidx.core.view.WindowInsetsCompat
@@ -118,76 +100,6 @@ class RPCSXActivity : ComponentActivity() {
                     onOpenCoreHomeMenu = ::openCoreHomeMenu,
                     onExitConfirmed = ::exitGame
                 )
-            }
-        }
-
-        // Dedicated compile status overlay above PadOverlay but below HomeMenu (ingameOverlay 64f)
-        binding.compileStatusOverlay.translationZ = 32f
-        binding.compileStatusOverlay.setViewCompositionStrategy(
-            ViewCompositionStrategy.DisposeOnViewTreeLifecycleDestroyed
-        )
-        binding.compileStatusOverlay.setContent {
-            val s by CompileProgressBridge.state.collectAsState()
-            if (s.ppuActive || s.shaderActive) {
-                RPCSXTheme {
-                    Surface(
-                        color = MaterialTheme.colorScheme.surface.copy(alpha = 0.9f),
-                        tonalElevation = 4.dp,
-                        shape = MaterialTheme.shapes.medium,
-                        modifier = Modifier.padding(12.dp)
-                    ) {
-                        Column(
-                            modifier = Modifier.padding(horizontal = 16.dp, vertical = 10.dp),
-                            verticalArrangement = Arrangement.spacedBy(6.dp)
-                        ) {
-                            if (s.ppuActive) {
-                                LinearProgressIndicator(
-                                    progress = { (s.ppuPercent / 100f).coerceIn(0f, 1f) },
-                                    modifier = Modifier.padding(bottom = 4.dp)
-                                )
-                            } else if (s.shaderActive) {
-                                // Indeterminate for shaders
-                                CircularProgressIndicator(
-                                    modifier = Modifier.size(20.dp),
-                                    strokeWidth = 2.dp
-                                )
-                            }
-                            Row(
-                                verticalAlignment = Alignment.CenterVertically,
-                                horizontalArrangement = Arrangement.spacedBy(8.dp)
-                            ) {
-                                if (s.shaderActive && !s.ppuActive) {
-                                    // shader pulse dot is the circular indicator above; keep row simple
-                                }
-                                Text(
-                                    text = s.ppuMsg ?: s.shaderMsg ?: "Compiling…",
-                                    style = MaterialTheme.typography.bodySmall
-                                )
-                                if (s.shaderActive) {
-                                    // Pulsing dot indicator
-                                    Surface(
-                                        color = MaterialTheme.colorScheme.primary,
-                                        shape = MaterialTheme.shapes.extraSmall,
-                                        modifier = Modifier.size(8.dp)
-                                    ) {}
-                                }
-                            }
-                            if (s.ppuActive && s.fileTotal > 0) {
-                                Text(
-                                    text = "File ${s.fileDone}/${s.fileTotal} • Module ${s.moduleDone}/${s.moduleTotal}",
-                                    style = MaterialTheme.typography.labelSmall,
-                                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                                )
-                            }
-                        }
-                    }
-                }
-            }
-        }
-        // Toggle visibility based on StateFlow; keeps ComposeView gone when idle to avoid hit-testing
-        lifecycleScope.launch {
-            CompileProgressBridge.state.collect { st ->
-                binding.compileStatusOverlay.isVisible = st.ppuActive || st.shaderActive
             }
         }
 

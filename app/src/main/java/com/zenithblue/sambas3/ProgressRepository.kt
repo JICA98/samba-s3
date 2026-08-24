@@ -7,6 +7,7 @@ import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
 import android.os.Message
+import android.util.Log
 import androidx.annotation.Keep
 import androidx.compose.runtime.MutableLongState
 import androidx.compose.runtime.MutableState
@@ -36,9 +37,12 @@ data class ProgressUpdateEntry(val value: Long, val max: Long, val message: Stri
     fun isIndeterminate() = max == 0L
 }
 
+data class ForegroundCreateResult(val requestId: Long, val promoted: Boolean)
+
 private data class ProgressWithHandler(
     var handler: (ProgressUpdateEntry) -> Unit,
-    val progressEntry: MutableState<ProgressEntry>
+    val progressEntry: MutableState<ProgressEntry>,
+    val cancelOnComplete: Boolean = true
 )
 
 class ProgressRepository {
@@ -64,7 +68,11 @@ class ProgressRepository {
 
             item.handler(ProgressUpdateEntry(value, max, item.progressEntry.value.message.value))
 
-            if (item.progressEntry.value.isFinished()) {
+            val failed = item.progressEntry.value.isFailed()
+            if (failed || (item.progressEntry.value.isComplete() && item.cancelOnComplete)) {
+                if (failed) {
+                    Log.e("ProgressRepository", "progress failed id=$id message=${item.progressEntry.value.message.value}")
+                }
                 cancel(id)
             }
 
@@ -90,9 +98,17 @@ class ProgressRepository {
             title: String,
             silent: Boolean = false,
             handler: (ProgressUpdateEntry) -> Unit = { _ -> }
-        ): Long {
+        ): ForegroundCreateResult {
             val requestId = notificationId.toLong()
-            val entry = ProgressWithHandler(handler, mutableStateOf(ProgressEntry()))
+            // A foreground install reports several independent determinate phases
+            // (extracting, verifying, committing) on one request id. Keep the
+            // handler alive when a phase reaches 100%; the owning service decides
+            // when the complete job is actually finished.
+            val entry = ProgressWithHandler(
+                handler,
+                mutableStateOf(ProgressEntry()),
+                cancelOnComplete = false
+            )
             instance.progressHandlers[requestId] = entry
 
             // Ensure channel exists before startForeground (cold-start safety)
@@ -114,11 +130,17 @@ class ProgressRepository {
                 ServiceInfo.FOREGROUND_SERVICE_TYPE_SPECIAL_USE
             else ServiceInfo.FOREGROUND_SERVICE_TYPE_DATA_SYNC
 
-            try {
+            val promoted = try {
                 ServiceCompat.startForeground(service, notificationId, builder.build(), fgsType)
+                true
             } catch (e: Exception) {
-                // If startForeground fails (e.g. timeout / background restriction), caller handles fallback.
-                e.printStackTrace()
+                Log.e("ProgressRepository", "startForeground failed for id=$notificationId: ${e.message}", e)
+                false
+            }
+            if (!promoted) {
+                // Keep the progress handler so install UI still updates if the caller
+                // falls back and continues the job. Removing it made ISO import silent.
+                Log.e("ProgressRepository", "FGS not promoted for id=$notificationId — handler kept")
             }
 
             val asyncHandler = Handler.createAsync(Looper.getMainLooper()) { message ->
@@ -169,7 +191,7 @@ class ProgressRepository {
                 asyncHandler.sendMessage(message)
             }
 
-            return requestId
+            return ForegroundCreateResult(requestId, promoted)
         }
 
         /**

@@ -100,4 +100,4 @@ adb logcat -c && adb logcat | grep -E "sambas3|RPCSX|Main"
 
 | File | What |
 |---|---|
-| patches/rpcsx-submodule-changes.patch | Local changes to app/src/main/cpp/rpcsx (upstream: RPCSX/rpcsx) — patch engine API for Android. Apply with: git -C app/src/main/cpp/rpcsx apply $PWD/patches/rpcsx-submodule-changes.patch |
+| patches/rpcsx-submodule-changes.patch | Local changes to app/src/main/cpp/rpcsx (upstream: RPCSX/rpcsx) — patch engine API for Android. `./build_rpcsx.sh` applies it automatically (reverse-check if already applied, otherwise forward-apply, fail if neither is clean). Manual: git -C app/src/main/cpp/rpcsx apply $PWD/patches/rpcsx-submodule-changes.patch |
