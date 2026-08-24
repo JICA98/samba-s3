@@ -1,16 +1,25 @@
 diff --git a/rpcs3/Emu/Cell/PPUThread.cpp b/rpcs3/Emu/Cell/PPUThread.cpp
-index b1d559ef7..fcc81f408 100644
+index b1d559ef7..19d3f5c46 100644
 --- a/rpcs3/Emu/Cell/PPUThread.cpp
 +++ b/rpcs3/Emu/Cell/PPUThread.cpp
-@@ -61,6 +61,7 @@
+@@ -3,6 +3,7 @@
+ #include "util/JIT.h"
+ #include "util/StrUtil.h"
+ #include "util/serialization.hpp"
++#include "util/bin_patch.h"
+ #include "Crypto/sha1.h"
+ #include "Crypto/unself.h"
+ #include "Loader/ELF.h"
+@@ -61,6 +62,8 @@
  #include <span>
  #include <optional>
  #include <charconv>
 +#include <chrono>
++#include <nlohmann/json.hpp>
  
  #include "rx/asm.hpp"
  #include "rx/align.hpp"
-@@ -68,6 +69,7 @@
+@@ -68,6 +71,7 @@
  #include "util/v128.hpp"
  #include "util/simd.hpp"
  #include "util/sysinfo.hpp"
@@ -18,7 +27,7 @@ index b1d559ef7..fcc81f408 100644
  
  #include "util/sema.h"
  
-@@ -75,6 +77,60 @@
+@@ -75,6 +79,260 @@
  #include <libkern/OSCacheControl.h>
  #endif
  
@@ -74,12 +83,212 @@ index b1d559ef7..fcc81f408 100644
 +		const u32 policy_limit = policy == ppu_compile_policy::foreground ? foreground_candidate : max_threads;
 +		return std::min<u32>(::narrow<u32>(workload_size), std::min(max_threads, policy_limit));
 +	}
++
++	struct ppu_precompile_file_info
++	{
++		std::string path;
++		u64 offset = 0;
++		u64 file_size = 0;
++
++		ppu_precompile_file_info() noexcept = default;
++
++		ppu_precompile_file_info(std::string _path, u64 offs, u64 size) noexcept
++			: path(std::move(_path)), offset(offs), file_size(size)
++		{
++		}
++	};
++
++#ifdef ANDROID
++	constexpr std::string_view ppu_manifest_cache_abi = "v7-kusa";
++
++	static std::string ppu_manifest_file_digest(const std::string& path)
++	{
++		fs::file file(path);
++		if (!file)
++		{
++			return "missing";
++		}
++
++		usz digest = rpcs3::fnv_seed;
++		std::array<u8, 4096> buffer{};
++
++		while (const usz read = file.read(buffer.data(), buffer.size()))
++		{
++			for (usz i = 0; i < read; ++i)
++			{
++				digest = rpcs3::hash64(digest, buffer[i]);
++			}
++		}
++
++		return std::to_string(digest);
++	}
++
++	static nlohmann::json ppu_manifest_key(const std::vector<ppu_module<lv2_obj>*>* loaded_modules)
++	{
++		std::string executable_hash;
++		if (loaded_modules && !loaded_modules->empty() && loaded_modules->front())
++		{
++			executable_hash = fmt::format("%s", fmt::base57(loaded_modules->front()->sha1));
++		}
++
++#ifdef LLVM_AVAILABLE
++		const std::string llvm_cpu = jit_compiler::cpu(g_cfg.core.llvm_cpu);
++#else
++		const std::string llvm_cpu = g_cfg.core.llvm_cpu;
++#endif
++
++		nlohmann::json key = nlohmann::json::object();
++		key["cache_abi"] = std::string(ppu_manifest_cache_abi);
++		key["title_id"] = Emu.GetTitleID();
++		key["game_exe_hash"] = executable_hash;
++		key["firmware_version"] = utils::get_firmware_version();
++		key["llvm_cpu"] = llvm_cpu;
++		key["ppu_settings"] = nlohmann::json::object();
++		key["ppu_settings"]["accurate_dfma"] = g_cfg.core.use_accurate_dfma.get();
++		key["ppu_settings"]["nj_fixup"] = g_cfg.core.ppu_llvm_nj_fixup.get();
++		key["ppu_settings"]["reservations_128"] = g_cfg.core.ppu_128_reservations_loop_max_length.get();
++		key["ppu_settings"]["greedy_mode"] = g_cfg.core.ppu_llvm_greedy_mode.get();
++		key["ppu_settings"]["set_sat_bit"] = g_cfg.core.ppu_set_sat_bit.get();
++		key["ppu_settings"]["set_fpcc"] = g_cfg.core.ppu_set_fpcc.get();
++		key["ppu_settings"]["set_vnan"] = g_cfg.core.ppu_set_vnan.get();
++		key["ppu_settings"]["use_nj_bit"] = g_cfg.core.ppu_use_nj_bit.get();
++		key["patches"] = nlohmann::json::object();
++		key["patches"]["engine_version"] = patch_engine_version;
++		key["patches"]["patch_yml"] = ppu_manifest_file_digest(patch_engine::get_patches_path() + "patch.yml");
++		key["patches"]["imported_patch_yml"] = ppu_manifest_file_digest(patch_engine::get_imported_patch_path());
++		key["patches"]["patch_config_yml"] = ppu_manifest_file_digest(patch_engine::get_patch_config_path());
++		return key;
++	}
++
++	static std::string ppu_manifest_path()
++	{
++		const std::string title_id = Emu.GetTitleID();
++		if (title_id.empty())
++		{
++			return {};
++		}
++
++		const std::string directory = rpcs3::utils::get_cache_dir() + "ppu_manifest/";
++		if (!fs::create_path(directory))
++		{
++			ppu_log.error("PPU manifest: failed to create %s (%s)", directory, fs::g_tls_error);
++			return {};
++		}
++
++		return directory + vfs::escape(title_id, true) + ".json";
++	}
++
++	static bool ppu_manifest_entry_is_valid(const nlohmann::json& value, ppu_precompile_file_info& entry)
++	{
++		if (!value.is_object() || !value.contains("path") || !value.contains("offset") || !value.contains("file_size"))
++		{
++			return false;
++		}
++
++		if (!value["path"].is_string() || !value["offset"].is_number_unsigned() || !value["file_size"].is_number_unsigned())
++		{
++			return false;
++		}
++
++		entry.path = value["path"].get<std::string>();
++		entry.offset = value["offset"].get<u64>();
++		entry.file_size = value["file_size"].get<u64>();
++
++		std::error_code ec;
++		const std::filesystem::path path(entry.path);
++		if (!std::filesystem::is_regular_file(path, ec) || ec)
++		{
++			return false;
++		}
++
++		const u64 actual_size = std::filesystem::file_size(path, ec);
++		return !ec && entry.offset <= actual_size && entry.file_size <= actual_size - entry.offset;
++	}
++
++	static bool ppu_manifest_load(const std::string& path, const nlohmann::json& key, const std::vector<std::string>& roots, std::vector<ppu_precompile_file_info>& entries)
++	{
++		fs::file file(path);
++		if (!file)
++		{
++			return false;
++		}
++
++		std::string contents(file.size(), '\0');
++		if (!contents.empty() && file.read(contents.data(), contents.size()) != contents.size())
++		{
++			return false;
++		}
++
++		const auto document = nlohmann::json::parse(contents, nullptr, false);
++		if (document.is_discarded() || !document.is_object() || !document.contains("version") || !document.contains("key") || !document.contains("roots") || !document.contains("entries") ||
++			document["version"] != 1u || document["key"] != key || document["roots"] != roots)
++		{
++			return false;
++		}
++
++		const auto& manifest_entries = document["entries"];
++		if (!manifest_entries.is_array() || manifest_entries.empty())
++		{
++			return false;
++		}
++
++		entries.clear();
++		entries.reserve(manifest_entries.size());
++		for (const auto& value : manifest_entries)
++		{
++			ppu_precompile_file_info entry;
++			if (!ppu_manifest_entry_is_valid(value, entry))
++			{
++				entries.clear();
++				return false;
++			}
++			entries.emplace_back(std::move(entry));
++		}
++
++		return true;
++	}
++
++	static void ppu_manifest_save(const std::string& path, const nlohmann::json& key, const std::vector<std::string>& roots, const std::vector<ppu_precompile_file_info>& entries)
++	{
++		nlohmann::json document{
++			{"version", 1},
++			{"key", key},
++			{"roots", roots},
++			{"entries", nlohmann::json::array()},
++		};
++
++		for (const auto& entry : entries)
++		{
++			document["entries"].push_back({
++				{"path", entry.path},
++				{"offset", entry.offset},
++				{"file_size", entry.file_size},
++			});
++		}
++
++		const std::string temporary_path = path + ".tmp";
++		if (!fs::write_file(temporary_path, fs::rewrite, document.dump()))
++		{
++			ppu_log.warning("PPU manifest: failed to write %s (%s)", temporary_path, fs::g_tls_error);
++			return;
++		}
++
++		if (!fs::rename(temporary_path, path, true))
++		{
++			ppu_log.warning("PPU manifest: failed to publish %s (%s)", path, fs::g_tls_error);
++			fs::remove_file(temporary_path);
++			return;
++		}
++
++		ppu_log.notice("PPU manifest: wrote %zu entries to %s", entries.size(), path);
++	}
++#endif
 +}
 +
  extern atomic_t<u64> g_watchdog_hold_ctr;
  
  // Should be of the same type
-@@ -3820,9 +3876,6 @@ struct jit_core_allocator
+@@ -3820,9 +4078,6 @@ struct jit_core_allocator
  	// Initialize global semaphore with the max number of threads
  	::semaphore<0x7fff> sem{std::max<s16>(thread_count, 1)};
  
@@ -89,7 +298,7 @@ index b1d559ef7..fcc81f408 100644
  	static s16 limit()
  	{
  		return static_cast<s16>(std::min<s32>(0x7fff, utils::get_thread_count()));
-@@ -3848,11 +3901,28 @@ namespace
+@@ -3848,11 +4103,28 @@ namespace
  			std::unordered_map<std::string, jit_module> map;
  		};
  
@@ -120,7 +329,7 @@ index b1d559ef7..fcc81f408 100644
  		}
  
  		jit_module& get(const std::string& name)
-@@ -4058,6 +4128,8 @@ extern void ppu_finalize(const ppu_module<lv2_obj>& info, bool force_mem_release
+@@ -4058,6 +4330,8 @@ extern void ppu_finalize(const ppu_module<lv2_obj>& info, bool force_mem_release
  
  extern void ppu_precompile(std::vector<std::string>& dir_queue, std::vector<ppu_module<lv2_obj>*>* loaded_modules)
  {
@@ -129,7 +338,104 @@ index b1d559ef7..fcc81f408 100644
  	if (g_cfg.core.ppu_decoder != ppu_decoder_type::llvm_legacy)
  	{
  		return;
-@@ -4624,6 +4696,8 @@ extern void ppu_precompile(std::vector<std::string>& dir_queue, std::vector<ppu_
+@@ -4083,36 +4357,43 @@ extern void ppu_precompile(std::vector<std::string>& dir_queue, std::vector<ppu_
+ 
+ 	const std::string firmware_sprx_path = vfs::get("/dev_flash/sys/external/");
+ 
+-	struct file_info
+-	{
+-		std::string path;
+-		u64 offset;
+-		u64 file_size;
+-
+-		file_info() noexcept = default;
++	std::vector<ppu_precompile_file_info> file_queue;
++	file_queue.reserve(2000);
+ 
+-		file_info(std::string _path, u64 offs, u64 size) noexcept
+-			: path(std::move(_path)), offset(offs), file_size(size)
+-		{
+-		}
+-	};
++#ifdef ANDROID
++	const std::vector<std::string> manifest_roots = dir_queue;
++	const std::string manifest_path = ppu_manifest_path();
++	const nlohmann::json manifest_key = ppu_manifest_key(loaded_modules);
++	const bool manifest_enabled = !manifest_path.empty() && !manifest_key["game_exe_hash"].get<std::string>().empty();
++	const bool manifest_hit = manifest_enabled && ppu_manifest_load(manifest_path, manifest_key, manifest_roots, file_queue);
+ 
+-	std::vector<file_info> file_queue;
+-	file_queue.reserve(2000);
++	if (manifest_hit)
++	{
++		ppu_log.notice("PPU_MANIFEST hit path=%s entries=%zu", manifest_path, file_queue.size());
++	}
++	else if (manifest_enabled)
++	{
++		ppu_log.notice("PPU_MANIFEST miss path=%s; scanning executable directories", manifest_path);
++	}
++#else
++	constexpr bool manifest_hit = false;
++#endif
+ 
+ 	// Find all .sprx files recursively
+-	for (usz i = 0; i < dir_queue.size(); i++)
++	if (!manifest_hit)
+ 	{
+-		if (Emu.IsStopped())
++		for (usz i = 0; i < dir_queue.size(); i++)
+ 		{
+-			file_queue.clear();
+-			break;
+-		}
++			if (Emu.IsStopped())
++			{
++				file_queue.clear();
++				break;
++			}
+ 
+-		ppu_log.notice("Scanning directory: %s", dir_queue[i]);
++			ppu_log.notice("Scanning directory: %s", dir_queue[i]);
+ 
+-		for (auto&& entry : fs::dir(dir_queue[i]))
+-		{
++			for (auto&& entry : fs::dir(dir_queue[i]))
++			{
+ 			if (Emu.IsStopped())
+ 			{
+ 				file_queue.clear();
+@@ -4255,12 +4536,20 @@ extern void ppu_precompile(std::vector<std::string>& dir_queue, std::vector<ppu_
+ 			}
+ 		}
+ 	}
++	}
++
++#ifdef ANDROID
++	if (!manifest_hit && manifest_enabled && !file_queue.empty())
++	{
++		ppu_manifest_save(manifest_path, manifest_key, manifest_roots, file_queue);
++	}
++#endif
+ 
+ 	g_progr_ftotal += ::size32(file_queue);
+ 
+ 	u64 total_files_size = 0;
+ 
+-	for (const file_info& info : file_queue)
++	for (const ppu_precompile_file_info& info : file_queue)
+ 	{
+ 		total_files_size += info.file_size;
+ 	}
+@@ -4271,7 +4560,7 @@ extern void ppu_precompile(std::vector<std::string>& dir_queue, std::vector<ppu_
+ 
+ 	atomic_t<usz> fnext = 0;
+ 
+-	lf_queue<file_info> possible_exec_file_paths;
++	lf_queue<ppu_precompile_file_info> possible_exec_file_paths;
+ 
+ 	concurent_memory_limit memory_limit(utils::get_total_memory() / 3);
+ 
+@@ -4624,6 +4913,8 @@ extern void ppu_precompile(std::vector<std::string>& dir_queue, std::vector<ppu_
  
  extern void ppu_initialize()
  {
@@ -138,7 +444,7 @@ index b1d559ef7..fcc81f408 100644
  	if (!g_fxo->is_init<main_ppu_module<lv2_obj>>())
  	{
  		return;
-@@ -4768,6 +4842,8 @@ extern void ppu_initialize()
+@@ -4768,6 +5059,8 @@ extern void ppu_initialize()
  
  bool ppu_initialize(const ppu_module<lv2_obj>& info, bool check_only, u64 file_size, concurent_memory_limit& memory_limit)
  {
@@ -147,7 +453,7 @@ index b1d559ef7..fcc81f408 100644
  	if (g_cfg.core.ppu_decoder != ppu_decoder_type::llvm_legacy)
  	{
  		if (check_only || vm::base(info.segs[0].addr) != info.segs[0].ptr)
-@@ -4904,14 +4980,14 @@ bool ppu_initialize(const ppu_module<lv2_obj>& info, bool check_only, u64 file_s
+@@ -4904,14 +5197,14 @@ bool ppu_initialize(const ppu_module<lv2_obj>& info, bool check_only, u64 file_s
  	// Info to load to main JIT instance (true - compiled)
  	std::vector<std::pair<std::string, bool>> link_workload;
  
@@ -165,7 +471,7 @@ index b1d559ef7..fcc81f408 100644
  
  	const cpu_thread* cpu = cpu_thread::get_current();
  
-@@ -5509,12 +5585,24 @@ bool ppu_initialize(const ppu_module<lv2_obj>& info, bool check_only, u64 file_s
+@@ -5509,12 +5802,24 @@ bool ppu_initialize(const ppu_module<lv2_obj>& info, bool check_only, u64 file_s
  	// Create worker threads for compilation
  	if (!workload.empty())
  	{
@@ -191,7 +497,7 @@ index b1d559ef7..fcc81f408 100644
  
  		struct thread_index_allocator
  		{
-@@ -5524,24 +5612,26 @@ bool ppu_initialize(const ppu_module<lv2_obj>& info, bool check_only, u64 file_s
+@@ -5524,24 +5829,26 @@ bool ppu_initialize(const ppu_module<lv2_obj>& info, bool check_only, u64 file_s
  		struct thread_op
  		{
  			concurent_memory_limit& memory_limit;
@@ -222,7 +528,7 @@ index b1d559ef7..fcc81f408 100644
  			{
  				if (auto mtx = other.core_lock.mutex())
  				{
-@@ -5554,13 +5644,14 @@ bool ppu_initialize(const ppu_module<lv2_obj>& info, bool check_only, u64 file_s
+@@ -5554,13 +5861,14 @@ bool ppu_initialize(const ppu_module<lv2_obj>& info, bool check_only, u64 file_s
  
  			void operator()()
  			{
@@ -240,7 +546,7 @@ index b1d559ef7..fcc81f408 100644
  				{
  					if (cpu ? cpu->state.all_of(cpu_flag::exit) : Emu.IsStopped())
  					{
-@@ -5579,19 +5670,6 @@ bool ppu_initialize(const ppu_module<lv2_obj>& info, bool check_only, u64 file_s
+@@ -5579,19 +5887,6 @@ bool ppu_initialize(const ppu_module<lv2_obj>& info, bool check_only, u64 file_s
  					ppu_log.warning("LLVM: reporting used memory %u (free/total: %u/%u) by %s%s", total_fn_size * 1024 * 16, memory_limit.free_memory(), memory_limit.total_memory(), cache_path, obj_name);
  					auto used_memory = memory_limit.acquire(total_fn_size * 1024 * 16);
  
@@ -260,7 +566,7 @@ index b1d559ef7..fcc81f408 100644
  					ppu_log.warning("LLVM: Compiling module %s%s", cache_path, obj_name);
  
  					{
-@@ -5604,23 +5682,60 @@ bool ppu_initialize(const ppu_module<lv2_obj>& info, bool check_only, u64 file_s
+@@ -5604,23 +5899,60 @@ bool ppu_initialize(const ppu_module<lv2_obj>& info, bool check_only, u64 file_s
  				}
  
  				core_lock.unlock();
@@ -327,7 +633,7 @@ index b1d559ef7..fcc81f408 100644
  		g_watchdog_hold_ctr--;
  	}
  
-@@ -5795,6 +5910,15 @@ static void ppu_initialize2(jit_compiler& jit, const ppu_module<lv2_obj>& module
+@@ -5795,6 +6127,15 @@ static void ppu_initialize2(jit_compiler& jit, const ppu_module<lv2_obj>& module
  #ifdef LLVM_AVAILABLE
  	using namespace llvm;
  
@@ -343,7 +649,7 @@ index b1d559ef7..fcc81f408 100644
  	// Create LLVM module
  	std::unique_ptr<Module> _module = std::make_unique<Module>(obj_name, jit.get_context());
  
-@@ -5838,6 +5962,7 @@ static void ppu_initialize2(jit_compiler& jit, const ppu_module<lv2_obj>& module
+@@ -5838,6 +6179,7 @@ static void ppu_initialize2(jit_compiler& jit, const ppu_module<lv2_obj>& module
  			translator.build_interpreter();
  		}
  #ifdef ARCH_X64
@@ -351,7 +657,7 @@ index b1d559ef7..fcc81f408 100644
  		// Create the analysis managers.
  		// These must be declared in this order so that they are destroyed in the
  		// correct order due to inter-analysis-manager references.
-@@ -5862,11 +5987,10 @@ static void ppu_initialize2(jit_compiler& jit, const ppu_module<lv2_obj>& module
+@@ -5862,11 +6204,10 @@ static void ppu_initialize2(jit_compiler& jit, const ppu_module<lv2_obj>& module
  		FunctionPassManager fpm;
  		// Basic optimizations
  		fpm.addPass(EarlyCSEPass());
@@ -364,7 +670,7 @@ index b1d559ef7..fcc81f408 100644
  
  		// Translate functions
  		// Start with the lowest bound of the module, function list is sorted
-@@ -5886,15 +6010,20 @@ static void ppu_initialize2(jit_compiler& jit, const ppu_module<lv2_obj>& module
+@@ -5886,15 +6227,20 @@ static void ppu_initialize2(jit_compiler& jit, const ppu_module<lv2_obj>& module
  				min_addr = std::min<u32>(min_addr, mod_func.addr);
  
  				// Translate
@@ -385,7 +691,7 @@ index b1d559ef7..fcc81f408 100644
  					Emu.Pause();
  					return;
  				}
-@@ -5904,15 +6033,20 @@ static void ppu_initialize2(jit_compiler& jit, const ppu_module<lv2_obj>& module
+@@ -5904,15 +6250,20 @@ static void ppu_initialize2(jit_compiler& jit, const ppu_module<lv2_obj>& module
  		// Run this only in one module for all functions compiled
  		if (module_part.jit_bounds)
  		{
@@ -406,7 +712,7 @@ index b1d559ef7..fcc81f408 100644
  				Emu.Pause();
  				return;
  			}
-@@ -5936,7 +6070,11 @@ static void ppu_initialize2(jit_compiler& jit, const ppu_module<lv2_obj>& module
+@@ -5936,7 +6287,11 @@ static void ppu_initialize2(jit_compiler& jit, const ppu_module<lv2_obj>& module
  			result.clear();
  		}
  
@@ -419,7 +725,7 @@ index b1d559ef7..fcc81f408 100644
  		{
  			out.flush();
  			ppu_log.error("LLVM: Verification failed for %s:\n%s", obj_name, result);
-@@ -5951,6 +6089,15 @@ static void ppu_initialize2(jit_compiler& jit, const ppu_module<lv2_obj>& module
+@@ -5951,6 +6306,15 @@ static void ppu_initialize2(jit_compiler& jit, const ppu_module<lv2_obj>& module
  	}
  
  	// Load or compile module
