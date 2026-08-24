@@ -138,6 +138,13 @@ class ProgressRepository {
                     try { notificationManager.notify(notificationId, builder.build()) } catch (_: Exception) {}
                     AlertDialogQueue.showDialog(title, contentText)
                 } else {
+                    // For PrecompilerService install PPU, switch title to PPU when message indicates file/module progress
+                    if (notificationId == PrecompilerService.NOTIF_INSTALL && text != null && (text.contains("file", true) || text.contains("module", true) || text.contains("PPU", true))) {
+                        try { builder.setContentTitle(service.getString(R.string.compiling_ppu_title)) } catch (_: Exception) {}
+                        builder.setStyle(NotificationCompat.BigTextStyle().bigText(text))
+                    } else if (notificationId == PrecompilerService.NOTIF_INSTALL) {
+                        try { builder.setContentTitle(title) } catch (_: Exception) {}
+                    }
                     if (text != null) builder.setContentText(text)
                     if (max > 0) {
                         builder.setProgress(max.toInt(), value.toInt(), false)

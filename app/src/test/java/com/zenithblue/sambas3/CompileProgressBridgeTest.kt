@@ -123,12 +123,38 @@ class CompileProgressBridgeTest {
         CompileProgressBridge.injectForTest(ppuEvent(RPCSX.COMPILE_PHASE_BEGIN, 40, 10, origin = RPCSX.COMPILE_ORIGIN_INSTALL))
         assertFalse(CompileProgressBridge.state.value.ppuActive)
         assertFalse(CompileProgressBridge.state.value.isActive)
-        // Even progress suppressed
+        // Install state should be active for Kotlin UI pre-compile
+        assertTrue(CompileProgressBridge.installState.value.ppuActive)
+        assertEquals(10, CompileProgressBridge.installState.value.ppuPercent)
+        // Even progress suppressed for runtime but updates install
         CompileProgressBridge.injectForTest(ppuEvent(RPCSX.COMPILE_PHASE_PROGRESS, 40, 50, origin = RPCSX.COMPILE_ORIGIN_INSTALL))
         assertFalse(CompileProgressBridge.state.value.ppuActive)
+        assertTrue(CompileProgressBridge.installState.value.ppuActive)
+        assertEquals(50, CompileProgressBridge.installState.value.ppuPercent)
+        // Complete install PPU
+        CompileProgressBridge.injectForTest(ppuEvent(RPCSX.COMPILE_PHASE_COMPLETED, 40, origin = RPCSX.COMPILE_ORIGIN_INSTALL))
+        assertFalse(CompileProgressBridge.installState.value.ppuActive)
         // Runtime after still works
         CompileProgressBridge.injectForTest(ppuEvent(RPCSX.COMPILE_PHASE_BEGIN, 41, 0))
         assertTrue(CompileProgressBridge.state.value.ppuActive)
+    }
+
+    @Test
+    fun installPpuKotlinUiDirect() {
+        // Direct start of pre PPU via Kotlin UI — game imported
+        CompileProgressBridge.injectForTest(ppuEvent(RPCSX.COMPILE_PHASE_BEGIN, 80, 5, origin = RPCSX.COMPILE_ORIGIN_INSTALL, msg = "Progress: file 1 of 10, module 1 of 5 (2m remaining)"))
+        val install = CompileProgressBridge.installState.value
+        assertTrue(install.ppuActive)
+        assertEquals("Progress: file 1 of 10, module 1 of 5 (2m remaining)", install.ppuMsg)
+        // Simulate progress update in Kotlin install UI
+        CompileProgressBridge.injectForTest(ppuEvent(RPCSX.COMPILE_PHASE_PROGRESS, 80, 50, origin = RPCSX.COMPILE_ORIGIN_INSTALL, msg = "Progress: file 5 of 10, module 3 of 5 (1m remaining)"))
+        assertEquals(50, CompileProgressBridge.installState.value.ppuPercent)
+        assertTrue(CompileProgressBridge.installState.value.ppuActive)
+        // Runtime also can be active concurrently via separate FGS (2000 vs 3000)
+        CompileProgressBridge.injectForTest(ppuEvent(RPCSX.COMPILE_PHASE_BEGIN, 81, 0))
+        assertTrue(CompileProgressBridge.state.value.ppuActive)
+        assertTrue(CompileProgressBridge.installState.value.ppuActive)
+        assertEquals(2, CompileProgressBridge.state.value.activeDomainCount + (if (CompileProgressBridge.installState.value.ppuActive) 1 else 0))
     }
 
     @Test
