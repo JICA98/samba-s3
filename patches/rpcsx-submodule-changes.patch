@@ -1,5 +1,5 @@
 diff --git a/rpcs3/Emu/Cell/PPUThread.cpp b/rpcs3/Emu/Cell/PPUThread.cpp
-index b1d559ef7..19d3f5c46 100644
+index b1d559ef7..c100d3a07 100644
 --- a/rpcs3/Emu/Cell/PPUThread.cpp
 +++ b/rpcs3/Emu/Cell/PPUThread.cpp
 @@ -3,6 +3,7 @@
@@ -27,7 +27,7 @@ index b1d559ef7..19d3f5c46 100644
  
  #include "util/sema.h"
  
-@@ -75,6 +79,260 @@
+@@ -75,6 +79,276 @@
  #include <libkern/OSCacheControl.h>
  #endif
  
@@ -77,11 +77,26 @@ index b1d559ef7..19d3f5c46 100644
 +		// system. The final cap is always owned here and never exceeds
 +		// get_max_threads(), which already applies llvm_threads and hardware caps.
 +		const u32 hardware_threads = utils::get_thread_count();
-+		const u32 foreground_candidate = hardware_threads > 2
-+			? std::max<u32>(2, std::min<u32>(6, hardware_threads - 2))
-+			: hardware_threads;
++		const u32 configured_foreground_threads = static_cast<u32>(g_cfg.core.ppu_foreground_threads.get());
++		const u32 foreground_candidate = configured_foreground_threads
++			? std::min(hardware_threads, configured_foreground_threads)
++			: hardware_threads > 2
++				? std::max<u32>(2, std::min<u32>(6, hardware_threads - 2))
++				: hardware_threads;
 +		const u32 policy_limit = policy == ppu_compile_policy::foreground ? foreground_candidate : max_threads;
 +		return std::min<u32>(::narrow<u32>(workload_size), std::min(max_threads, policy_limit));
++	}
++
++	static jit_codegen_level ppu_jit_codegen_level()
++	{
++		switch (g_cfg.core.ppu_codegen_mode.get())
++		{
++		case ppu_codegen_mode::less: return jit_codegen_level::less;
++		case ppu_codegen_mode::normal: return jit_codegen_level::normal;
++		case ppu_codegen_mode::aggressive: return jit_codegen_level::aggressive;
++		}
++
++		return jit_codegen_level::aggressive;
 +	}
 +
 +	struct ppu_precompile_file_info
@@ -152,6 +167,7 @@ index b1d559ef7..19d3f5c46 100644
 +		key["ppu_settings"]["set_fpcc"] = g_cfg.core.ppu_set_fpcc.get();
 +		key["ppu_settings"]["set_vnan"] = g_cfg.core.ppu_set_vnan.get();
 +		key["ppu_settings"]["use_nj_bit"] = g_cfg.core.ppu_use_nj_bit.get();
++		key["ppu_settings"]["codegen_mode"] = static_cast<u32>(g_cfg.core.ppu_codegen_mode.get());
 +		key["patches"] = nlohmann::json::object();
 +		key["patches"]["engine_version"] = patch_engine_version;
 +		key["patches"]["patch_yml"] = ppu_manifest_file_digest(patch_engine::get_patches_path() + "patch.yml");
@@ -227,7 +243,7 @@ index b1d559ef7..19d3f5c46 100644
 +		}
 +
 +		const auto& manifest_entries = document["entries"];
-+		if (!manifest_entries.is_array() || manifest_entries.empty())
++		if (!manifest_entries.is_array())
 +		{
 +			return false;
 +		}
@@ -288,7 +304,7 @@ index b1d559ef7..19d3f5c46 100644
  extern atomic_t<u64> g_watchdog_hold_ctr;
  
  // Should be of the same type
-@@ -3820,9 +4078,6 @@ struct jit_core_allocator
+@@ -3820,9 +4094,6 @@ struct jit_core_allocator
  	// Initialize global semaphore with the max number of threads
  	::semaphore<0x7fff> sem{std::max<s16>(thread_count, 1)};
  
@@ -298,7 +314,7 @@ index b1d559ef7..19d3f5c46 100644
  	static s16 limit()
  	{
  		return static_cast<s16>(std::min<s32>(0x7fff, utils::get_thread_count()));
-@@ -3848,11 +4103,28 @@ namespace
+@@ -3848,11 +4119,28 @@ namespace
  			std::unordered_map<std::string, jit_module> map;
  		};
  
@@ -329,7 +345,7 @@ index b1d559ef7..19d3f5c46 100644
  		}
  
  		jit_module& get(const std::string& name)
-@@ -4058,6 +4330,8 @@ extern void ppu_finalize(const ppu_module<lv2_obj>& info, bool force_mem_release
+@@ -4058,6 +4346,8 @@ extern void ppu_finalize(const ppu_module<lv2_obj>& info, bool force_mem_release
  
  extern void ppu_precompile(std::vector<std::string>& dir_queue, std::vector<ppu_module<lv2_obj>*>* loaded_modules)
  {
@@ -338,7 +354,7 @@ index b1d559ef7..19d3f5c46 100644
  	if (g_cfg.core.ppu_decoder != ppu_decoder_type::llvm_legacy)
  	{
  		return;
-@@ -4083,36 +4357,43 @@ extern void ppu_precompile(std::vector<std::string>& dir_queue, std::vector<ppu_
+@@ -4083,36 +4373,43 @@ extern void ppu_precompile(std::vector<std::string>& dir_queue, std::vector<ppu_
  
  	const std::string firmware_sprx_path = vfs::get("/dev_flash/sys/external/");
  
@@ -404,14 +420,14 @@ index b1d559ef7..19d3f5c46 100644
  			if (Emu.IsStopped())
  			{
  				file_queue.clear();
-@@ -4255,12 +4536,20 @@ extern void ppu_precompile(std::vector<std::string>& dir_queue, std::vector<ppu_
+@@ -4255,12 +4552,20 @@ extern void ppu_precompile(std::vector<std::string>& dir_queue, std::vector<ppu_
  			}
  		}
  	}
 +	}
 +
 +#ifdef ANDROID
-+	if (!manifest_hit && manifest_enabled && !file_queue.empty())
++	if (!manifest_hit && manifest_enabled)
 +	{
 +		ppu_manifest_save(manifest_path, manifest_key, manifest_roots, file_queue);
 +	}
@@ -426,7 +442,7 @@ index b1d559ef7..19d3f5c46 100644
  	{
  		total_files_size += info.file_size;
  	}
-@@ -4271,7 +4560,7 @@ extern void ppu_precompile(std::vector<std::string>& dir_queue, std::vector<ppu_
+@@ -4271,7 +4576,7 @@ extern void ppu_precompile(std::vector<std::string>& dir_queue, std::vector<ppu_
  
  	atomic_t<usz> fnext = 0;
  
@@ -435,7 +451,7 @@ index b1d559ef7..19d3f5c46 100644
  
  	concurent_memory_limit memory_limit(utils::get_total_memory() / 3);
  
-@@ -4624,6 +4913,8 @@ extern void ppu_precompile(std::vector<std::string>& dir_queue, std::vector<ppu_
+@@ -4624,6 +4929,8 @@ extern void ppu_precompile(std::vector<std::string>& dir_queue, std::vector<ppu_
  
  extern void ppu_initialize()
  {
@@ -444,7 +460,7 @@ index b1d559ef7..19d3f5c46 100644
  	if (!g_fxo->is_init<main_ppu_module<lv2_obj>>())
  	{
  		return;
-@@ -4768,6 +5059,8 @@ extern void ppu_initialize()
+@@ -4768,6 +5075,8 @@ extern void ppu_initialize()
  
  bool ppu_initialize(const ppu_module<lv2_obj>& info, bool check_only, u64 file_size, concurent_memory_limit& memory_limit)
  {
@@ -453,7 +469,7 @@ index b1d559ef7..19d3f5c46 100644
  	if (g_cfg.core.ppu_decoder != ppu_decoder_type::llvm_legacy)
  	{
  		if (check_only || vm::base(info.segs[0].addr) != info.segs[0].ptr)
-@@ -4904,14 +5197,14 @@ bool ppu_initialize(const ppu_module<lv2_obj>& info, bool check_only, u64 file_s
+@@ -4904,14 +5213,14 @@ bool ppu_initialize(const ppu_module<lv2_obj>& info, bool check_only, u64 file_s
  	// Info to load to main JIT instance (true - compiled)
  	std::vector<std::pair<std::string, bool>> link_workload;
  
@@ -471,7 +487,21 @@ index b1d559ef7..19d3f5c46 100644
  
  	const cpu_thread* cpu = cpu_thread::get_current();
  
-@@ -5509,12 +5802,24 @@ bool ppu_initialize(const ppu_module<lv2_obj>& info, bool check_only, u64 file_s
+@@ -5453,8 +5762,11 @@ bool ppu_initialize(const ppu_module<lv2_obj>& info, bool check_only, u64 file_s
+ 			if (fpos >= info.get_funcs().size() || module_counter % c_moudles_per_jit == c_moudles_per_jit - 1)
+ 				settings += ppu_settings::contains_symbol_resolver; // Avoid invalidating all modules for this purpose
+ 
+-			// Write version, hash, CPU, settings
+-			fmt::append(obj_name, "v7-kusa-%s-%s-%s.obj", fmt::base57(output, 16), fmt::base57(settings), jit_compiler::cpu(g_cfg.core.llvm_cpu));
++			// Write version, hash, CPU, settings, and codegen mode. The codegen
++			// mode must be part of the object identity so an A/B setting change
++			// cannot reuse an object produced by a different LLVM optimization
++			// level.
++			fmt::append(obj_name, "v7-kusa-%s-%s-%s-%u.obj", fmt::base57(output, 16), fmt::base57(settings), jit_compiler::cpu(g_cfg.core.llvm_cpu), static_cast<u32>(g_cfg.core.ppu_codegen_mode.get()));
+ 		}
+ 
+ 		if (cpu ? cpu->state.all_of(cpu_flag::exit) : Emu.IsStopped())
+@@ -5509,12 +5821,24 @@ bool ppu_initialize(const ppu_module<lv2_obj>& info, bool check_only, u64 file_s
  	// Create worker threads for compilation
  	if (!workload.empty())
  	{
@@ -497,7 +527,7 @@ index b1d559ef7..19d3f5c46 100644
  
  		struct thread_index_allocator
  		{
-@@ -5524,24 +5829,26 @@ bool ppu_initialize(const ppu_module<lv2_obj>& info, bool check_only, u64 file_s
+@@ -5524,24 +5848,26 @@ bool ppu_initialize(const ppu_module<lv2_obj>& info, bool check_only, u64 file_s
  		struct thread_op
  		{
  			concurent_memory_limit& memory_limit;
@@ -528,7 +558,7 @@ index b1d559ef7..19d3f5c46 100644
  			{
  				if (auto mtx = other.core_lock.mutex())
  				{
-@@ -5554,13 +5861,14 @@ bool ppu_initialize(const ppu_module<lv2_obj>& info, bool check_only, u64 file_s
+@@ -5554,13 +5880,14 @@ bool ppu_initialize(const ppu_module<lv2_obj>& info, bool check_only, u64 file_s
  
  			void operator()()
  			{
@@ -546,7 +576,7 @@ index b1d559ef7..19d3f5c46 100644
  				{
  					if (cpu ? cpu->state.all_of(cpu_flag::exit) : Emu.IsStopped())
  					{
-@@ -5579,19 +5887,6 @@ bool ppu_initialize(const ppu_module<lv2_obj>& info, bool check_only, u64 file_s
+@@ -5579,24 +5906,11 @@ bool ppu_initialize(const ppu_module<lv2_obj>& info, bool check_only, u64 file_s
  					ppu_log.warning("LLVM: reporting used memory %u (free/total: %u/%u) by %s%s", total_fn_size * 1024 * 16, memory_limit.free_memory(), memory_limit.total_memory(), cache_path, obj_name);
  					auto used_memory = memory_limit.acquire(total_fn_size * 1024 * 16);
  
@@ -566,7 +596,13 @@ index b1d559ef7..19d3f5c46 100644
  					ppu_log.warning("LLVM: Compiling module %s%s", cache_path, obj_name);
  
  					{
-@@ -5604,23 +5899,60 @@ bool ppu_initialize(const ppu_module<lv2_obj>& info, bool check_only, u64 file_s
+ 						// Use another JIT instance
+-						jit_compiler jit2({}, g_cfg.core.llvm_cpu, 0x1);
++						jit_compiler jit2({}, g_cfg.core.llvm_cpu, 0x1, {}, ppu_jit_codegen_level());
+ 						ppu_initialize2(jit2, part, cache_path, obj_name);
+ 					}
+ 
+@@ -5604,30 +5918,79 @@ bool ppu_initialize(const ppu_module<lv2_obj>& info, bool check_only, u64 file_s
  				}
  
  				core_lock.unlock();
@@ -615,8 +651,17 @@ index b1d559ef7..19d3f5c46 100644
 +			, thread_op(memory_limit, &work_cv, &work_done, workload, cpu, info, cache_path, compile_policy, g_fxo->get<jit_core_allocator>().sem)
 +			, try_lock_thread);
 +
-+		const auto old_name = thread_ctrl::get_name();
-+		thread_ctrl::set_name(worker_group_name + std::to_string(thread_count + 1));
++		// The install queue can call this function from a Java-created thread,
++		// which is not represented by RPCS3's thread_ctrl TLS object.  The
++		// upstream caller-thread recycling path assumes a named_thread caller;
++		// guard the optional rename so Android imports do not dereference a null
++		// g_tls_this_thread.
++		const bool caller_is_named = thread_ctrl::get_current() != nullptr;
++		const auto old_name = caller_is_named ? thread_ctrl::get_name() : std::string{};
++		if (caller_is_named)
++		{
++			thread_ctrl::set_name(worker_group_name + std::to_string(thread_count + 1));
++		}
 +
 +		thread_op cur_op(memory_limit, &work_cv, &work_done, workload, cpu, info, cache_path, compile_policy, g_fxo->get<jit_core_allocator>().sem);
 +
@@ -628,12 +673,23 @@ index b1d559ef7..19d3f5c46 100644
  
  		threads.join();
  
-+		thread_ctrl::set_name(old_name);
++		if (caller_is_named)
++		{
++			thread_ctrl::set_name(old_name);
++		}
 +
  		g_watchdog_hold_ctr--;
  	}
  
-@@ -5795,6 +6127,15 @@ static void ppu_initialize2(jit_compiler& jit, const ppu_module<lv2_obj>& module
+ 	// Initialize compiler instance
+ 	while (jits.size() < rx::aligned_div<u64>(module_counter, c_moudles_per_jit) && is_being_used_in_emulation)
+ 	{
+-		jits.emplace_back(std::make_shared<jit_compiler>(s_link_table, g_cfg.core.llvm_cpu, 0, symbols_cement));
++		jits.emplace_back(std::make_shared<jit_compiler>(s_link_table, g_cfg.core.llvm_cpu, 0, symbols_cement, ppu_jit_codegen_level()));
+ 
+ 		for (const auto& [addr, func] : *shared_map)
+ 		{
+@@ -5795,6 +6158,15 @@ static void ppu_initialize2(jit_compiler& jit, const ppu_module<lv2_obj>& module
  #ifdef LLVM_AVAILABLE
  	using namespace llvm;
  
@@ -649,7 +705,7 @@ index b1d559ef7..19d3f5c46 100644
  	// Create LLVM module
  	std::unique_ptr<Module> _module = std::make_unique<Module>(obj_name, jit.get_context());
  
-@@ -5838,6 +6179,7 @@ static void ppu_initialize2(jit_compiler& jit, const ppu_module<lv2_obj>& module
+@@ -5838,6 +6210,7 @@ static void ppu_initialize2(jit_compiler& jit, const ppu_module<lv2_obj>& module
  			translator.build_interpreter();
  		}
  #ifdef ARCH_X64
@@ -657,7 +713,7 @@ index b1d559ef7..19d3f5c46 100644
  		// Create the analysis managers.
  		// These must be declared in this order so that they are destroyed in the
  		// correct order due to inter-analysis-manager references.
-@@ -5862,11 +6204,10 @@ static void ppu_initialize2(jit_compiler& jit, const ppu_module<lv2_obj>& module
+@@ -5862,11 +6235,10 @@ static void ppu_initialize2(jit_compiler& jit, const ppu_module<lv2_obj>& module
  		FunctionPassManager fpm;
  		// Basic optimizations
  		fpm.addPass(EarlyCSEPass());
@@ -670,7 +726,7 @@ index b1d559ef7..19d3f5c46 100644
  
  		// Translate functions
  		// Start with the lowest bound of the module, function list is sorted
-@@ -5886,15 +6227,20 @@ static void ppu_initialize2(jit_compiler& jit, const ppu_module<lv2_obj>& module
+@@ -5886,15 +6258,20 @@ static void ppu_initialize2(jit_compiler& jit, const ppu_module<lv2_obj>& module
  				min_addr = std::min<u32>(min_addr, mod_func.addr);
  
  				// Translate
@@ -691,7 +747,7 @@ index b1d559ef7..19d3f5c46 100644
  					Emu.Pause();
  					return;
  				}
-@@ -5904,15 +6250,20 @@ static void ppu_initialize2(jit_compiler& jit, const ppu_module<lv2_obj>& module
+@@ -5904,15 +6281,20 @@ static void ppu_initialize2(jit_compiler& jit, const ppu_module<lv2_obj>& module
  		// Run this only in one module for all functions compiled
  		if (module_part.jit_bounds)
  		{
@@ -712,7 +768,7 @@ index b1d559ef7..19d3f5c46 100644
  				Emu.Pause();
  				return;
  			}
-@@ -5936,7 +6287,11 @@ static void ppu_initialize2(jit_compiler& jit, const ppu_module<lv2_obj>& module
+@@ -5936,7 +6318,11 @@ static void ppu_initialize2(jit_compiler& jit, const ppu_module<lv2_obj>& module
  			result.clear();
  		}
  
@@ -725,7 +781,7 @@ index b1d559ef7..19d3f5c46 100644
  		{
  			out.flush();
  			ppu_log.error("LLVM: Verification failed for %s:\n%s", obj_name, result);
-@@ -5951,6 +6306,15 @@ static void ppu_initialize2(jit_compiler& jit, const ppu_module<lv2_obj>& module
+@@ -5951,6 +6337,15 @@ static void ppu_initialize2(jit_compiler& jit, const ppu_module<lv2_obj>& module
  	}
  
  	// Load or compile module
@@ -741,8 +797,102 @@ index b1d559ef7..19d3f5c46 100644
 +	}
  #endif // LLVM_AVAILABLE
  }
+diff --git a/rpcs3/Emu/system_config.h b/rpcs3/Emu/system_config.h
+index cd6299903..fc8b582f3 100644
+--- a/rpcs3/Emu/system_config.h
++++ b/rpcs3/Emu/system_config.h
+@@ -25,12 +25,14 @@ struct cfg_root : cfg::node
+ 		cfg::_int<1, 8> ppu_threads{this, "PPU Threads", 2}; // Amount of PPU threads running simultaneously (must be 2)
+ 		cfg::_bool ppu_debug{this, "PPU Debug"};
+ 		cfg::_bool ppu_call_history{this, "PPU Calling History"}; // Enable PPU calling history recording
++		cfg::_enum<ppu_codegen_mode> ppu_codegen_mode{this, "PPU LLVM Codegen Mode", ppu_codegen_mode::aggressive};
+ 		cfg::_bool llvm_logs{this, "Save LLVM logs"};
+ 		cfg::string llvm_cpu{this, "Use LLVM CPU"};
+ 		cfg::_int<0, 1024> llvm_threads{this, "Max LLVM Compile Threads", 0, false, nullptr, []
+ 			{
+ 				return std::thread::hardware_concurrency() * 2;
+ 			}};
++		cfg::_int<0, 32> ppu_foreground_threads{this, "PPU Foreground Compile Threads", 0, true};
+ 		cfg::_bool ppu_llvm_greedy_mode{this, "PPU LLVM Greedy Mode", false, false};
+ 		cfg::_bool llvm_precompilation{this, "LLVM Precompilation", true};
+ 		cfg::_enum<thread_scheduler_mode> thread_scheduler{this, "Thread Scheduler Mode", thread_scheduler_mode::os};
+diff --git a/rpcs3/Emu/system_config_types.cpp b/rpcs3/Emu/system_config_types.cpp
+index edf5e9474..a2fca1e80 100644
+--- a/rpcs3/Emu/system_config_types.cpp
++++ b/rpcs3/Emu/system_config_types.cpp
+@@ -529,6 +529,22 @@ void fmt_class_string<ppu_decoder_type>::format(std::string& out, u64 arg)
+ 		});
+ }
+ 
++template <>
++void fmt_class_string<ppu_codegen_mode>::format(std::string& out, u64 arg)
++{
++	format_enum(out, arg, [](ppu_codegen_mode mode)
++		{
++			switch (mode)
++			{
++			case ppu_codegen_mode::less: return "Less";
++			case ppu_codegen_mode::normal: return "Default";
++			case ppu_codegen_mode::aggressive: return "Aggressive";
++			}
++
++			return unknown;
++		});
++}
++
+ template <>
+ void fmt_class_string<shader_mode>::format(std::string& out, u64 arg)
+ {
+diff --git a/rpcs3/Emu/system_config_types.h b/rpcs3/Emu/system_config_types.h
+index c7610a442..128c2c6e2 100644
+--- a/rpcs3/Emu/system_config_types.h
++++ b/rpcs3/Emu/system_config_types.h
+@@ -7,6 +7,16 @@ enum class ppu_decoder_type : unsigned
+ 	interpreter,
+ };
+ 
++// LLVM code generation level used for PPU object compilation. Keep Aggressive
++// as the default; Less and Default are latency experiments and must be
++// validated against runtime performance before being selected for a build.
++enum class ppu_codegen_mode : unsigned
++{
++	less,
++	normal,
++	aggressive,
++};
++
+ enum class spu_decoder_type : unsigned
+ {
+ 	_static,
+diff --git a/rpcs3/util/JIT.h b/rpcs3/util/JIT.h
+index a43a74488..e3bfbf5e7 100644
+--- a/rpcs3/util/JIT.h
++++ b/rpcs3/util/JIT.h
+@@ -68,6 +68,13 @@ enum class jit_class
+ 	spu_data,
+ };
+ 
++enum class jit_codegen_level : unsigned
++{
++	less,
++	normal,
++	aggressive,
++};
++
+ struct jit_runtime_base
+ {
+ 	jit_runtime_base() noexcept = default;
+@@ -521,7 +528,7 @@ class jit_compiler final
+ 	atomic_t<usz> m_disk_space = umax;
+ 
+ public:
+-	jit_compiler(const std::unordered_map<std::string, u64>& _link, const std::string& _cpu, u32 flags = 0, std::function<u64(const std::string&)> symbols_cement = {}) noexcept;
++	jit_compiler(const std::unordered_map<std::string, u64>& _link, const std::string& _cpu, u32 flags = 0, std::function<u64(const std::string&)> symbols_cement = {}, jit_codegen_level codegen_level = jit_codegen_level::aggressive) noexcept;
+ 	jit_compiler& operator=(thread_state) noexcept;
+ 	~jit_compiler() noexcept;
+ 
 diff --git a/rpcs3/util/JITLLVM.cpp b/rpcs3/util/JITLLVM.cpp
-index b67d303a3..12c7c1c8f 100644
+index b67d303a3..65c9dce84 100644
 --- a/rpcs3/util/JITLLVM.cpp
 +++ b/rpcs3/util/JITLLVM.cpp
 @@ -10,8 +10,10 @@
@@ -787,6 +937,39 @@ index b67d303a3..12c7c1c8f 100644
  	}
  
  	static std::unique_ptr<llvm::MemoryBuffer> load(const std::string& path)
+@@ -642,7 +655,7 @@ bool jit_compiler::add_sub_disk_space(ssz space)
+ 	    .second;
+ }
+ 
+-jit_compiler::jit_compiler(const std::unordered_map<std::string, u64>& _link, const std::string& _cpu, u32 flags, std::function<u64(const std::string&)> symbols_cement) noexcept
++jit_compiler::jit_compiler(const std::unordered_map<std::string, u64>& _link, const std::string& _cpu, u32 flags, std::function<u64(const std::string&)> symbols_cement, jit_codegen_level codegen_level) noexcept
+ 	: m_context(new llvm::LLVMContext, [](llvm::LLVMContext* context)
+ 		  {
+ 			  delete context;
+@@ -687,6 +700,14 @@ jit_compiler::jit_compiler(const std::unordered_map<std::string, u64>& _link, co
+ 		mem = std::make_unique<MemoryManager1>(std::move(symbols_cement));
+ 	}
+ 
++	llvm::CodeGenOptLevel opt_level = llvm::CodeGenOptLevel::Aggressive;
++	switch (codegen_level)
++	{
++	case jit_codegen_level::less: opt_level = llvm::CodeGenOptLevel::Less; break;
++	case jit_codegen_level::normal: opt_level = llvm::CodeGenOptLevel::Default; break;
++	case jit_codegen_level::aggressive: break;
++	}
++
+ 	{
+ 
+ 		m_engine = std::unique_ptr<llvm::ExecutionEngine, void (*)(llvm::ExecutionEngine*)>{
+@@ -694,7 +715,7 @@ jit_compiler::jit_compiler(const std::unordered_map<std::string, u64>& _link, co
+ 				.setErrorStr(&result)
+ 				.setEngineKind(llvm::EngineKind::JIT)
+ 				.setMCJITMemoryManager(std::move(mem))
+-				.setOptLevel(llvm::CodeGenOptLevel::Aggressive)
++				.setOptLevel(opt_level)
+ 				.setCodeModel(flags & 0x2 ? llvm::CodeModel::Large : llvm::CodeModel::Small)
+ #ifdef __APPLE__
+ 		//.setCodeModel(llvm::CodeModel::Large)
 diff --git a/rpcs3/util/fnv_hash.hpp b/rpcs3/util/fnv_hash.hpp
 index f8119dd39..211a11dba 100644
 --- a/rpcs3/util/fnv_hash.hpp
