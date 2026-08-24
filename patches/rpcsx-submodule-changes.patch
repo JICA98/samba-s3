@@ -480,7 +480,19 @@ index ce38967c1..11853bbb2 100644
  #include <vector>
  
  #pragma GCC diagnostic push
-@@ -98,6 +107,12 @@ extern std::string g_android_cache_dir;
+@@ -91,6 +100,11 @@ struct AtExit {
+ static bool g_initialized;
+ static std::atomic<ANativeWindow *> g_native_window;
+ 
++// Compilation and game/install lifecycle operations all use the same global
++// Emu/fxo state. Keep them serialized: stopping a VSH precompile while a boot
++// or install starts can otherwise reset fxo underneath CompilationQueue.
++static std::mutex g_emulator_lifecycle_mutex;
++
+ extern std::string g_android_executable_dir;
+ extern std::string g_android_config_dir;
+ extern std::string g_android_cache_dir;
+@@ -98,6 +112,12 @@ extern std::string g_android_cache_dir;
  static std::mutex g_virtual_pad_mutex;
  static std::shared_ptr<Pad> g_virtual_pad;
  
@@ -540,21 +552,36 @@ index ce38967c1..11853bbb2 100644
  struct ProgressMessageDialog : MsgDialogBase {
    jlong progressId;
    jlong value = 0;
-@@ -1413,7 +1468,13 @@ private:
-       }
-     }
+@@ -1338,5 +1393,16 @@ private:
+     Emu.SetState(system_state::running);
  
--    ppu_precompile(dir_queue, mod_list.empty() ? nullptr : &mod_list);
-+    // Tag install-origin PPU so progress_dialog_server emits INSTALL and monitor can ignore it
-+    {
-+      SystemProgressContext _installCtx{CompileOrigin::INSTALL, allocate_compile_job_id()};
-+      set_system_progress_context(_installCtx);
-+      struct _InstallCtxGuard { ~_InstallCtxGuard(){ clear_system_progress_context(); } } _guard;
-+      ppu_precompile(dir_queue, mod_list.empty() ? nullptr : &mod_list);
-+    }
+     MessageDialog::pushPendingProgressId(workload.progressId);
  
-     rpcsx_android.error("Finalization");
-     g_fxo->reset();
++    // Set the origin before starting progress_dialog_server. The server
++    // captures this context when its thread starts; setting it later around
++    // ppu_precompile can misclassify install PPU work as runtime work and
++    // create the second (2000) notification.
++    SystemProgressContext installProgressContext{
++        CompileOrigin::INSTALL, allocate_compile_job_id()};
++    set_system_progress_context(installProgressContext);
++    struct InstallProgressContextGuard {
++      ~InstallProgressContextGuard() { clear_system_progress_context(); }
++    } installProgressContextGuard;
++
+     g_fxo->init<named_thread<progress_dialog_server>>();
+@@ -1422,7 +1493,11 @@ private:
+     MessageDialog::popPendingProgressId(workload.progressId);
+ 
+-    Progress(env, workload.progressId).success(0);
++    // This is the terminal event for the install progress id. The Android
++    // installer uses it to remove its foreground notification after queued
++    // PPU compilation has really finished (the ISO install itself returns
++    // before this worker runs).
++    Progress(env, workload.progressId).success(0, "PPU compilation complete");
+   }
+ } static g_compilationQueue;
+ 
+ static void setupCallbacks() {
 @@ -1878,10 +1939,6 @@ extern "C" bool _rpcsx_surfaceEvent(JNIEnv *env, jobject surface, jint event) {
        ANativeWindow_release(prevWindow);
      }
@@ -589,7 +616,7 @@ index ce38967c1..11853bbb2 100644
    return true;
  }
  
-@@ -2306,145 +2362,260 @@ static bool installRap(JNIEnv *env, fs::file &&file, jlong progressId,
+@@ -2306,145 +2362,261 @@ static bool installRap(JNIEnv *env, fs::file &&file, jlong progressId,
  }
  
  static bool installIso(JNIEnv *env, fs::file &&file, jlong progressId) {
@@ -926,6 +953,7 @@ index ce38967c1..11853bbb2 100644
  
  extern "C" bool _rpcsx_installFw(JNIEnv *env, int fd, long progressId) {
 -  return installPup(env, fs::file::from_native_handle(fd), progressId);
++  std::unique_lock lifecycleLock(g_emulator_lifecycle_mutex);
 +  return installPup(env, file_from_android_fd(fd), progressId);
  }
  
@@ -935,10 +963,12 @@ index ce38967c1..11853bbb2 100644
    AtExit atExit{[&] { file.release_handle(); }};
  
    auto type = getFileType(file);
-@@ -2466,10 +2637,11 @@ extern "C" jstring _rpcsx_getDirInstallPath(JNIEnv *env, jint fd) {
+@@ -2466,10 +2637,13 @@ extern "C" jstring _rpcsx_getDirInstallPath(JNIEnv *env, jint fd) {
  }
  
  extern "C" bool _rpcsx_install(JNIEnv *env, int fd, long progressId) {
++  std::unique_lock lifecycleLock(g_emulator_lifecycle_mutex);
++
 -  auto file = fs::file::from_native_handle(fd);
 +  auto file = file_from_android_fd(fd);
    AtExit atExit{[&] { file.release_handle(); }};
@@ -948,6 +978,15 @@ index ce38967c1..11853bbb2 100644
    file.seek(0);
  
    switch (type) {
+@@ -2501,6 +2700,8 @@ extern "C" bool _rpcsx_install(JNIEnv *env, int fd, long progressId) {
+ 
+ extern "C" bool _rpcsx_installKey(JNIEnv *env, int fd, long progressId,
+                                   std::string_view gamePath) {
++  std::unique_lock lifecycleLock(g_emulator_lifecycle_mutex);
++
+   auto file = fs::file::from_native_handle(fd);
+   AtExit atExit{[&] { file.release_handle(); }};
+ 
 @@ -2641,4 +2813,159 @@ extern "C" void *_rpcsx_setCustomDriver(void *driverHandle) {
    return prevLoader;
  }
@@ -2302,12 +2341,12 @@ index e3f001baa..8377d1e40 100644
  					native_dlg->progress_bar_set_value(0, static_cast<f32>(value));
  				}
  				else if (dlg)
-@@ -376,8 +315,10 @@ void progress_dialog_server::operator()()
- 				if (show_overlay_message)
- 				{
- 					// Make sure to update any pending messages. PPU compilation may freeze the image.
- 					rsx::overlays::refresh_message_queue();
- 				}
+@@ -373,17 +312,19 @@ void progress_dialog_server::operator()()
+ 			if (show_overlay_message)
+ 			{
+ 				// Make sure to update any pending messages. PPU compilation may freeze the image.
+ 				rsx::overlays::refresh_message_queue();
+ 			}
  
 -			// Leave only if total count is equal to done count
 -			if (ftotal == fdone && ptotal == pdone && text_new.empty())
@@ -2324,7 +2363,7 @@ index e3f001baa..8377d1e40 100644
  			wait_no_update_count++;
  		}
  
-@@ -392,6 +331,16 @@ void progress_dialog_server::operator()()
+@@ -392,6 +333,16 @@ void progress_dialog_server::operator()()
  			*ppu_cue_refs = 0;
  		}
  

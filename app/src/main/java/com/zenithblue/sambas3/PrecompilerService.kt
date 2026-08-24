@@ -231,6 +231,12 @@ class PrecompilerService : Service() {
             "onStartCommand startId=$startId jobStartId=$jobStartId uri=$uri batch=${batch?.size ?: 0} action=$action"
         )
 
+        // Install-origin PPU compilation owns the shared compiler lifecycle.
+        // Do not leave the runtime monitor (2000) beside the install card
+        // notification (3000) for the same compilation session.
+        stopService(Intent(this, CompilationMonitorService::class.java))
+        NotificationManagerCompat.from(this).cancel(CompilationMonitorService.NOTIF_FGS)
+
         // Always promote first — startForegroundService requires startForeground within ~5s,
         // including empty follow-up intents the platform may deliver.
         if (!isForeground) {
@@ -258,9 +264,13 @@ class PrecompilerService : Service() {
             ProgressRepository.createForeground(this, NOTIF_INSTALL, title) { entry ->
                 // Game installs reuse this request for staged extraction,
                 // verification, commit, and install-origin PPU compilation.
-                // Only failures (or a completed firmware install with no PPU
-                // phase) end the foreground job here.
-                if (entry.isFailed() || (isFwInstall && entry.isComplete())) {
+                // A game install returns before its queued PPU work runs. The
+                // native queue sends a distinct terminal message only after
+                // that work and teardown are complete, so the notification
+                // cannot disappear while compilation is still active.
+                val ppuComplete = !isFwInstall && entry.isComplete() &&
+                    entry.message == "PPU compilation complete"
+                if (entry.isFailed() || (isFwInstall && entry.isComplete()) || ppuComplete) {
                     if (isFwInstall) {
                         FirmwareRepository.progressChannel.value = null
                     } else {

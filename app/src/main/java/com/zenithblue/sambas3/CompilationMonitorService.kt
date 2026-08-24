@@ -219,7 +219,15 @@ class CompilationMonitorService : Service() {
     override fun onDestroy() {
         collectJob?.cancel()
         serviceScope.cancel()
-        cancelSecondaryNotifications()
+        try {
+            ServiceCompat.stopForeground(this, ServiceCompat.STOP_FOREGROUND_REMOVE)
+            NotificationManagerCompat.from(this).apply {
+                cancel(NOTIF_FGS)
+                cancelSecondaryNotifications()
+            }
+        } catch (e: Exception) {
+            Log.w(TAG, "cleanup onDestroy failed: ${e.message}")
+        }
         super.onDestroy()
         Log.i(TAG, "onDestroy")
     }
