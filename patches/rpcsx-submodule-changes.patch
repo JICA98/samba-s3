@@ -2302,6 +2302,28 @@ index e3f001baa..8377d1e40 100644
  					native_dlg->progress_bar_set_value(0, static_cast<f32>(value));
  				}
  				else if (dlg)
+@@ -376,8 +315,10 @@ void progress_dialog_server::operator()()
+ 				if (show_overlay_message)
+ 				{
+ 					// Make sure to update any pending messages. PPU compilation may freeze the image.
+ 					rsx::overlays::refresh_message_queue();
+ 				}
+ 
+-			// Leave only if total count is equal to done count
+-			if (ftotal == fdone && ptotal == pdone && text_new.empty())
++			// Leave as soon as a real progress job reaches its totals. The Android
++			// bridge keeps the descriptive message populated, so waiting for an empty
++			// text would leak the foreground notification after "done".
++			if ((ftotal || ptotal) && ftotal == fdone && ptotal == pdone)
+ 			{
+ 				// Complete state, empty message: close dialog
+ 				break;
+ 			}
+ 
+ 			sleep_for = 10'000;
+ 			wait_no_update_count++;
+ 		}
+ 
 @@ -392,6 +331,16 @@ void progress_dialog_server::operator()()
  			*ppu_cue_refs = 0;
  		}
