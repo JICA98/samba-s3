@@ -265,6 +265,15 @@ Existing behavior & constraints:
 **Long-term (phase 3):**
 - Tiered fallback: kill switch — `ppu_fallback` + `ppu_interpreter` path always correct, LLVM job atomic swap validated under ThreadSanitizer with concurrent PPU threads; overlay unload test.
 
+## Measured Device Results (2026-08-25)
+
+Measured on the strongest available tablet, a OnePlus Pad 2 (Snapdragon 8 Gen 3, Adreno 750, 8 logical CPUs), using the 71-module BLUS31584 import fixture:
+
+- The shipped foreground policy selected 6 workers (`max_threads=8`) and completed a clean fast-compression import in about 242 seconds.
+- The persistent-per-worker LLVM experiment completed in 236.071 seconds, but the approximately 2.5% cold-run gain did not justify retaining extra native compiler state and was removed from the patch.
+- A subsequent import with the generated manifest hit completed PPU initialization in 1.936 seconds and logged `PPU_MANIFEST hit`; this is the validated large improvement for repeat imports (about 99% less PPU initialization time than the cold run).
+- No crash, fatal signal, or OOM was observed during the cold or warm imports. The device did not have a PS3 PUP/firmware image, so gameplay FPS/1% lows, runtime SPU A/B testing, and actual GTA boot could not be verified. The requested MediaTek device was also unavailable during this run.
+
 ## Acceptance Criteria (objective, verifiable)
 
 - [ ] `grep -n "std::array<bucket_t, 256>" app/src/main/cpp/rpcsx/rpcs3/Emu/Cell/PPUThread.cpp` succeeds and `grep -n "buckets\[.*%.*size"` reflects new size; `jit_core_allocator` diff matches upstream #18774 3-commit chain pinned: `53fefc82c` (core_lock), `503131c8f` (30→256 + hash_array), `356a3a481` (caller recycle) via `git -C /tmp/opencode/rpcs3 show <sha> -- rpcs3/Emu/Cell/PPUThread.cpp` (Research Sources §External already lists SHAs).
