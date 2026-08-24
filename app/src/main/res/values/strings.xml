@@ -67,6 +67,11 @@
     <!-- PrecompilerService -->
     <string name="firmware_installation">Firmware Installation</string>
     <string name="package_installation">Package Installation</string>
+    <string name="compiling_ppu_title">Compiling PPU Modules</string>
+    <string name="compiling_shaders_title">Compiling shaders</string>
+    <string name="compiling_shaders_desc">Building Vulkan pipelines</string>
+    <string name="compiling_notification_desc">Compilation progress</string>
+    <string name="time_remaining_format">%1$s remaining</string>
 
     <!-- SambaS3Activity -->
     <string name="error_with_msg">Error: %1$s</string>

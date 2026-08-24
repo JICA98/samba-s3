@@ -27,21 +27,24 @@ class MainActivity : ComponentActivity() {
 
         WindowCompat.setDecorFitsSystemWindows(window, false)
 
-        if (!RPCSX.initialized) {
-            Permission.PostNotifications.requestPermission(this)
-
+        // Ensure notification channel exists for all entry points (cold RPCSXActivity safety)
+        try { NotificationChannels.ensureCreated(this) } catch (_: Exception) {
+            // Fallback to original inline creation if helper fails
             with(getSystemService(NOTIFICATION_SERVICE) as NotificationManager) {
                 val channel = NotificationChannel(
                     "rpcsx-progress",
                     getString(R.string.installation_progress),
-                    NotificationManager.IMPORTANCE_DEFAULT
+                    NotificationManager.IMPORTANCE_LOW
                 ).apply {
                     setShowBadge(false)
                     lockscreenVisibility = Notification.VISIBILITY_PUBLIC
                 }
-
                 createNotificationChannel(channel)
             }
+        }
+
+        if (!RPCSX.initialized) {
+            Permission.PostNotifications.requestPermission(this)
 
             RPCSX.rootDirectory = applicationContext.getExternalFilesDir(null).toString()
             if (!RPCSX.rootDirectory.endsWith("/")) {
@@ -79,6 +82,9 @@ class MainActivity : ComponentActivity() {
 
                 RPCSX.initialized = true
 
+                // Register compile progress bridge early (idempotent). FGS promotes only on first real event.
+                try { CompileProgressBridge.registerOnce(this@MainActivity) } catch (e: Exception) { android.util.Log.w("Main", "CompileProgressBridge register failed: ${e.message}") }
+
                 thread {
                     RPCSX.instance.startMainThreadProcessor()
                 }
@@ -86,7 +92,14 @@ class MainActivity : ComponentActivity() {
                 thread {
                     RPCSX.instance.processCompilationQueue()
                 }
+            } else {
+                // Even if already initialized (e.g., process recreation), ensure bridge registered
+                try { CompileProgressBridge.registerOnce(this@MainActivity) } catch (_: Exception) {}
             }
+        } else {
+            // Already initialized path — ensure bridge registered without re-init
+            try { NotificationChannels.ensureCreated(this) } catch (_: Exception) {}
+            try { CompileProgressBridge.registerOnce(this) } catch (_: Exception) {}
         }
 
         setContent {

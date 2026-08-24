@@ -1,6 +1,8 @@
 package com.zenithblue.sambas3
 
+import android.app.Service
 import android.content.Context
+import android.content.pm.ServiceInfo
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
@@ -12,6 +14,7 @@ import androidx.compose.runtime.mutableLongStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
+import androidx.core.app.ServiceCompat
 import com.zenithblue.sambas3.dialogs.AlertDialogQueue
 import java.util.concurrent.ConcurrentHashMap
 
@@ -71,6 +74,132 @@ class ProgressRepository {
         fun cancel(id: Long) {
             instance.progressHandlers.remove(id)
             GameRepository.clearProgress(id)
+        }
+
+        /**
+         * FGS-capable helper — builds the same rpcsx-progress notification but promotes via
+         * ServiceCompat.startForeground. Uses a fixed notificationId (anchor 2000 or 3000). The caller
+         * is responsible for stopForeground/stopSelf when work completes. Unlike [create], this does
+         * NOT gate startForeground on POST_NOTIFICATIONS — FGS can start without the permission (notification
+         * will be hidden in shade but visible in Task Manager). Updates via [onProgressEvent] with the same id
+         * will post through NotificationManagerCompat while the service stays foreground.
+         */
+        fun createForeground(
+            service: Service,
+            notificationId: Int,
+            title: String,
+            silent: Boolean = false,
+            handler: (ProgressUpdateEntry) -> Unit = { _ -> }
+        ): Long {
+            val requestId = notificationId.toLong()
+            val entry = ProgressWithHandler(handler, mutableStateOf(ProgressEntry()))
+            instance.progressHandlers[requestId] = entry
+
+            // Ensure channel exists before startForeground (cold-start safety)
+            try { NotificationChannels.ensureCreated(service) } catch (_: Exception) {}
+
+            val builder = NotificationCompat.Builder(service, NotificationChannels.RPCSX_PROGRESS).apply {
+                setContentTitle(title)
+                setSmallIcon(R.mipmap.ic_sambas3_foreground)
+                setCategory(NotificationCompat.CATEGORY_PROGRESS)
+                setPriority(NotificationCompat.PRIORITY_DEFAULT)
+                setOngoing(true)
+                setSilent(true)
+                setProgress(0, 0, true)
+            }
+
+            // For FGS anchor, always call startForeground even without POST_NOTIFICATIONS permission.
+            // Permission only affects whether the notification is visible in the shade; FGS itself is legal.
+            val fgsType = if (service is CompilationMonitorService)
+                ServiceInfo.FOREGROUND_SERVICE_TYPE_SPECIAL_USE
+            else ServiceInfo.FOREGROUND_SERVICE_TYPE_DATA_SYNC
+
+            try {
+                ServiceCompat.startForeground(service, notificationId, builder.build(), fgsType)
+            } catch (e: Exception) {
+                // If startForeground fails (e.g. timeout / background restriction), caller handles fallback.
+                e.printStackTrace()
+            }
+
+            val asyncHandler = Handler.createAsync(Looper.getMainLooper()) { message ->
+                val value = message.data.getLong("value")
+                val max = message.data.getLong("max")
+                val text = message.data.getString("message")
+
+                // For FGS anchor, never auto-cancel on value==max alone — lifecycle is explicit (COMPLETED/FAILED/CANCELED).
+                // Only terminal failure (value<0) is handled here; success is left to the owning service to stopForeground.
+                val notificationManager = NotificationManagerCompat.from(service)
+                if (value < 0) {
+                    val contentText = text ?: service.getString(R.string.unexpected_error)
+                    builder.setContentText(contentText)
+                        .setPriority(NotificationCompat.PRIORITY_HIGH)
+                        .setProgress(0, 0, false)
+                        .setOngoing(false)
+                    try { notificationManager.notify(notificationId, builder.build()) } catch (_: Exception) {}
+                    AlertDialogQueue.showDialog(title, contentText)
+                } else {
+                    if (text != null) builder.setContentText(text)
+                    if (max > 0) {
+                        builder.setProgress(max.toInt(), value.toInt(), false)
+                    } else {
+                        // indeterminate
+                        builder.setProgress(0, 0, true)
+                    }
+                    try { notificationManager.notify(notificationId, builder.build()) } catch (_: Exception) {}
+                }
+
+                handler(ProgressUpdateEntry(value, max, text))
+                true
+            }
+
+            entry.handler = { progress: ProgressUpdateEntry ->
+                val message = Message()
+                val data = Bundle()
+                data.putLong("value", progress.value)
+                data.putLong("max", progress.max)
+                data.putString("message", progress.message)
+                message.data = data
+                asyncHandler.sendMessage(message)
+            }
+
+            return requestId
+        }
+
+        /**
+         * Helper to post a one-shot notification update for secondary ongoing notifications (2001/2002)
+         * without owning a foreground. Caller must have already ensured channel exists.
+         */
+        fun notifySecondary(
+            context: Context,
+            notificationId: Int,
+            title: String,
+            message: String?,
+            value: Long,
+            max: Long
+        ) {
+            val builder = NotificationCompat.Builder(context, NotificationChannels.RPCSX_PROGRESS).apply {
+                setContentTitle(title)
+                setSmallIcon(R.mipmap.ic_sambas3_foreground)
+                setCategory(NotificationCompat.CATEGORY_PROGRESS)
+                setPriority(NotificationCompat.PRIORITY_DEFAULT)
+                setOngoing(true)
+                setSilent(true)
+                if (message != null) setContentText(message)
+                if (max > 0) setProgress(max.toInt(), value.toInt(), false) else setProgress(0, 0, true)
+            }
+            try {
+                NotificationManagerCompat.from(context).notify(notificationId, builder.build())
+            } catch (_: Exception) {}
+        }
+
+        fun updateForeground(service: Service, notificationId: Int, title: String, message: String?, value: Long, max: Long) {
+            // Convenience: delegate to onProgressEvent if handler exists, otherwise direct notifySecondary
+            val id = notificationId.toLong()
+            if (instance.progressHandlers.containsKey(id)) {
+                onProgressEvent(id, value, max, message)
+            } else {
+                notifySecondary(service, notificationId, title, message, value, max)
+            }
         }
 
         fun create(

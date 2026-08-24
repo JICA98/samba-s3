@@ -1,6 +1,7 @@
 package com.zenithblue.sambas3
 
 import android.view.Surface
+import androidx.annotation.Keep
 import androidx.compose.runtime.mutableStateOf
 
 enum class Digital1Flags(val bit: Int)
@@ -102,8 +103,37 @@ class RPCSX {
     external fun patchesList(): String
     external fun patchSetEnabled(hash: String, description: String, enabled: Boolean): Boolean
 
+    @Keep
+    fun interface CompileProgressCallback {
+        fun onEvent(
+            domain: Int,
+            phase: Int,
+            origin: Int,
+            jobId: Long,
+            value: Long,
+            max: Long,
+            message: String?,
+            fileDone: Int,
+            fileTotal: Int,
+            moduleDone: Int,
+            moduleTotal: Int
+        )
+    }
+
+    external fun setCompileProgressListener(callback: CompileProgressCallback?): Boolean
+    external fun supportsCompileProgressEvents(): Boolean
 
     companion object {
+        const val COMPILE_DOMAIN_PPU = 0
+        const val COMPILE_DOMAIN_SHADER = 1
+        const val COMPILE_PHASE_BEGIN = 0
+        const val COMPILE_PHASE_PROGRESS = 1
+        const val COMPILE_PHASE_COMPLETED = 2
+        const val COMPILE_PHASE_FAILED = 3
+        const val COMPILE_PHASE_CANCELED = 4
+        const val COMPILE_ORIGIN_INSTALL = 0
+        const val COMPILE_ORIGIN_RUNTIME = 1
+
         var initialized = false
         val instance = RPCSX()
         var rootDirectory = ""

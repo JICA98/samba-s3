@@ -21,6 +21,8 @@ struct RPCSXApi {
   bool (*initialize)(std::string_view rootDir, std::string_view user);
   bool (*processCompilationQueue)(JNIEnv *env);
   bool (*startMainThreadProcessor)(JNIEnv *env);
+  bool (*setCompileProgressListener)(JNIEnv *env, jobject callback);
+  bool (*supportsCompileProgressEvents)(JNIEnv *env, jobject thiz);
   bool (*collectGameInfo)(JNIEnv *env, std::string_view rootDir,
                           long progressId);
   void (*shutdown)();
@@ -113,6 +115,8 @@ struct RPCSXLibrary : RPCSXApi {
     result.patchesList = reinterpret_cast<decltype(patchesList)>(dlsym(handle, "_rpcsx_patchesList"));
     result.patchSetEnabled = reinterpret_cast<decltype(patchSetEnabled)>(dlsym(handle, "_rpcsx_patchSetEnabled"));
     result.setCustomDriver = reinterpret_cast<decltype(setCustomDriver)>(dlsym(handle, "_rpcsx_setCustomDriver"));
+    result.setCompileProgressListener = reinterpret_cast<decltype(setCompileProgressListener)>(dlsym(handle, "_rpcsx_setCompileProgressListener"));
+    result.supportsCompileProgressEvents = reinterpret_cast<decltype(supportsCompileProgressEvents)>(dlsym(handle, "_rpcsx_supportsCompileProgressEvents"));
     // clang-format on
 
     return result;
@@ -363,4 +367,19 @@ Java_com_zenithblue_sambas3_RPCSX_patchSetEnabled(JNIEnv *env, jobject,
   if (!rpcsxLib.patchSetEnabled) return false;
   return rpcsxLib.patchSetEnabled(unwrap(env, jhash),
                                    unwrap(env, jdescription), jenabled);
+}
+
+extern "C" JNIEXPORT jboolean JNICALL
+Java_com_zenithblue_sambas3_RPCSX_setCompileProgressListener(JNIEnv *env, jobject thiz, jobject callback) {
+  if (!rpcsxLib.setCompileProgressListener) {
+    __android_log_print(ANDROID_LOG_WARN, "RPCSX-UI", "setCompileProgressListener not available in this core (old .so)");
+    return false;
+  }
+  return rpcsxLib.setCompileProgressListener(env, callback);
+}
+
+extern "C" JNIEXPORT jboolean JNICALL
+Java_com_zenithblue_sambas3_RPCSX_supportsCompileProgressEvents(JNIEnv *env, jobject thiz) {
+  return rpcsxLib.setCompileProgressListener != nullptr && rpcsxLib.supportsCompileProgressEvents != nullptr
+      ? JNI_TRUE : JNI_FALSE;
 }

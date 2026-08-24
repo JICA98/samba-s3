@@ -1,302 +1,779 @@
-# Plan: Vortek Compatibility Layer (Vortek + System Vulkan for Mali/Xclipse/PowerVR)
+# Plan: Samba-S3 Native Vulkan Compatibility Wrapper
 
-## Task Summary
+> Historical filename: `vortek-compatibility-layer-plan.md`. The shipping feature is no longer
+> Vortek-specific; keep this path until references to the old plan have been migrated.
 
-Add a **Vortek compatibility renderer** on top of Samba-S3's system Vulkan driver, keeping the OEM driver underneath, to fix/emulate problematic Vulkan behavior for **MediaTek/Mali, Samsung Xclipse and PowerVR** without replacing the kernel driver or abusing Adreno-only tooling.
+## Status
 
-Desired final UX:
+`REVISED — READY FOR PRE-IMPORT GATES AND M0 PASS-THROUGH SPIKE`
 
+This revision replaces the original "Vortek VkLayer first" proposal with a direct, in-process
+Vulkan proxy loaded through RPCSX's existing `_rpcsx_setCustomDriver(void*)` API. It also removes
+BC1-BC7 emulation from the first milestone, prohibits DXVK-oriented feature spoofing, separates
+raw host capabilities from wrapper-effective capabilities, and makes loader lifetime safety an
+explicit invariant.
+
+Implementation beyond the pass-through spike remains gated on:
+
+1. a source-by-source license matrix;
+2. a build/size comparison between a reduced leegao/Mesa target and a smaller Samba proxy;
+3. device evidence showing which compatibility behavior RPCSX actually needs.
+
+## Decision Summary
+
+Use the architecture of
+[`leegao/bionic-vulkan-wrapper`](https://github.com/leegao/bionic-vulkan-wrapper) as the primary
+reference for a Samba-specific `libvulkan_samba_compat.so`:
+
+```text
+RPCSX Vulkan
+    |
+    v
+libvulkan_samba_compat.so
+    |
+    v
+/system/lib64/libvulkan.so
+    |
+    +-- Mali / Immortalis
+    +-- Xclipse
+    +-- PowerVR
+    +-- Adreno OEM
 ```
+
+The wrapper is a Vk-on-Vk in-process proxy. It must export the Vulkan symbols RPCSX resolves,
+load Android's system Vulkan loader itself, intercept only the calls Samba needs, and forward the
+rest to the OEM stack. `VK_LAYER_PATH`, an ICD JSON, and Android layer discovery are not the
+primary integration mechanism.
+
+Keep three distinct backends:
+
+```text
+System Direct
+    RPCSX -> Android system Vulkan -> OEM driver
+
+System Compatibility
+    RPCSX -> Samba compatibility proxy -> Android system Vulkan -> OEM driver
+
+Adreno Custom
+    RPCSX -> Adrenotools -> Turnip/custom Vulkan -> KGSL
+```
+
+Keep original Vortek client/renderer IPC as optional Phase 4 research only. It solves a guest/host
+process boundary that native Android RPCSX does not have and would add serialization, socket,
+shared-memory, presentation, and lifecycle costs to the normal path.
+
+Do not ship GameNative's precompiled wrapper archives or bundle an OEM `vulkan.samsung.so`.
+GameNative is an integration/profile reference; source used by Samba must come from an audited,
+pinned upstream or a Samba-owned implementation.
+
+## Why the Previous Architecture Changed
+
+### RPCSX already accepts a Vulkan loader handle
+
+Samba resolves `_rpcsx_setCustomDriver` in `app/src/main/cpp/native-lib.cpp`. In the current RPCSX
+submodule, `_rpcsx_setCustomDriver(void*)`:
+
+1. stores the previous `vk::instance::g_vk_loader`;
+2. clears RPCSX's Vulkan symbol cache when replacing a non-null loader;
+3. assigns the supplied handle to `g_vk_loader`;
+4. initializes the symbol cache from the new handle; and
+5. returns the previous loader handle.
+
+This directly matches a proxy shared library. A VkLayer environment is an unnecessary and less
+deterministic extra discovery path.
+
+RPCSX currently resolves roughly 125 unique `VK_GET_SYMBOL(...)` names with `dlsym()` from the
+loader handle. M0 must generate the exact required-symbol list from the pinned RPCSX source and
+compare it with `nm -D --defined-only libvulkan_samba_compat.so`; do not maintain this list by
+hand.
+
+### RPCSX already owns the Android presentation path
+
+`GraphicsFrame` forwards surface create/change/destroy events through JNI to RPCSX, which owns the
+`ANativeWindow`. Samba does not need Winlator's `XWindow`, `GPUImage`, `XConnector`, or renderer JNI
+presentation bridge.
+
+### RPCSX already has the initial BC fallback needed by PS3 textures
+
+RPCSX's PS3 Vulkan texture path uses:
+
+| PS3 format | Native Vulkan format when supported | Existing fallback |
+|---|---|---|
+| DXT1 | BC1 | `B8G8R8A8_UNORM` + CPU `bcdec_bc1` path |
+| DXT23 | BC2 | `B8G8R8A8_UNORM` + CPU `bcdec_bc2` path |
+| DXT45 | BC3 | `B8G8R8A8_UNORM` + CPU `bcdec_bc3` path |
+
+RPCSX explicitly states that BC1-BC3 are all it requires. A second wrapper-side BC1-BC7
+virtualization system could duplicate conversion, waste memory/bandwidth, or produce incorrect
+double conversion. First benchmark and validate RPCSX's current fallback.
+
+[`leegao/bcn_layer`](https://github.com/leegao/bcn_layer) remains a valuable optional reference if
+a captured RPCSX title/device failure proves the existing fallback incorrect or too slow. BC4-BC7
+support is diagnostic information, not an initial acceptance criterion.
+
+### The leegao/GameNative policy is DXVK-oriented
+
+The evaluated `leegao/bionic-vulkan-wrapper` code has the desired system-loader, dispatch, Android
+WSI, object tracking, extension filtering, pNext, image, AHardwareBuffer, device-fault, shader
+interception, and driver-workaround infrastructure. It also force-advertises features aimed at
+DXVK, including geometry shaders, BC compression, transform feedback, dual-source blend,
+multi-draw indirect, and vertex-pipeline stores/atomics.
+
+RPCSX is not DXVK. Samba may expose a capability only when:
+
+- the OEM driver supports it and the wrapper preserves it; or
+- Samba implements its complete Vulkan semantics and has conformance/targeted tests for it.
+
+Passing initialization by advertising an unsupported feature, extension, limit, or Vulkan version
+is prohibited. A workaround that drops a geometry stage, masks a create request, or changes a
+limit without implementing the observable behavior does not satisfy this rule.
+
+GameNative's `wrapper-gamenative` configuration is still useful research for Mali/Exynos controls,
+BCn CPU/GPU selection, quality, extension filters, present modes, memory limits, and packaging.
+However, current GameNative launch logic excludes wrapper-gamenative BCn compute on Xclipse. The
+plan must not require an Xclipse BC4/5/6H/7 compute success counter as proof of correctness.
+
+## Goals and Non-Goals
+
+### Goals
+
+- Preserve System Direct as the default and lowest-overhead path.
+- Add an optional in-process System Compatibility backend for proven OEM-driver issues.
+- Keep Turnip/custom Vulkan isolated to eligible Adreno/KGSL devices.
+- Preserve RPCSX's direct `ANativeWindow` ownership.
+- Probe raw OEM and wrapper-effective Vulkan capabilities independently.
+- Add only evidence-driven Mali, Xclipse, PowerVR, and Adreno OEM fixes.
+- Provide diagnostics sufficient to identify every activated workaround and its cost.
+- Keep both Standard and Play Store flavors buildable and behaviorally consistent.
+
+### Non-Goals
+
+- Porting Winlator or GameNative as an application stack.
+- Making Vortek IPC the default renderer.
+- Pretending Mali, Xclipse, or PowerVR are KGSL/Adreno devices.
+- Bundling proprietary OEM Vulkan libraries.
+- Shipping GameNative `.tzst` wrapper binaries.
+- Advertising Vulkan 1.3/1.4 or extensions merely to satisfy an application check.
+- Implementing BC4-BC7 before a real RPCSX workload requires them.
+- Hot-switching a Vulkan loader while an instance/device is alive.
+- Replacing the kernel GPU driver.
+
+## Current Samba/RPCSX Contracts
+
+The implementation must preserve these verified local behaviors:
+
+- `native-lib.cpp` loads the runtime RPCSX shared library and resolves `_rpcsx_setCustomDriver`.
+- Custom Vulkan currently uses `adrenotools_open_libvulkan(...)` on `__aarch64__`.
+- `supportsCustomDriverLoading()` currently checks `/dev/kgsl-3d0`.
+- `GpuDriverSelection` persists custom driver path/name and manages Turnip-only `TU_DEBUG=sysmem`.
+- `MainActivity` currently calls `RPCSX.openLibrary()`, then `RPCSX.initialize()`, then applies the
+  stored GPU driver asynchronously. This ordering must become deterministic.
+- `_rpcsx_initialize` initializes emulator infrastructure but the code inspected does not create
+  the persistent Vulkan renderer. `_rpcsx_systemInfo`, however, creates a temporary Vulkan
+  instance, so it is already a Vulkan consumer.
+- RPCSX loads `libvulkan.so.1`/`libvulkan.so` itself only when `g_vk_loader` is null.
+- The application targets `arm64-v8a` and `x86_64`; custom Adreno loading is arm64-only today.
+
+## Backend Model and UX
+
+Use backend terminology consistently in Kotlin, JNI, native code, settings, logs, and UI.
+
+Suggested Kotlin model:
+
+```kotlin
+enum class GraphicsBackend(val persistedValue: String) {
+    SYSTEM_DIRECT("system"),
+    SYSTEM_COMPAT("compatibility"),
+    ADRENO_CUSTOM("custom"),
+}
+```
+
+Suggested native model:
+
+```cpp
+enum class VulkanBackend {
+    SystemDirect,
+    SystemCompat,
+    AdrenoCustom,
+};
+```
+
+User-facing UI:
+
+```text
 Graphics Driver
 
-● System Vulkan              Direct OEM driver — lowest overhead (default)
-○ Vortek + System Vulkan     Compatibility layer — Mali / Xclipse / PowerVR / Adreno OEM
-○ Custom Vulkan              Turnip / custom Adreno driver — Adreno only (existing)
+System Vulkan
+  Direct OEM driver - lowest overhead
+
+Compatibility Vulkan
+  Samba compatibility wrapper over the OEM system driver
+
+Custom Vulkan
+  Turnip/custom Vulkan driver - Adreno only
 ```
 
-Why Vortek fits: current custom-driver loader is Adreno-oriented (`/dev/kgsl-3d0` + `adrenotools_open_libvulkan`, `native-lib.cpp:295-343`, `GpuDriverHelper.kt:87-104`, `GpuDriverSelection.kt:23-34`) with Turnip-specific `TU_DEBUG=sysmem` handling. Vortek's system-driver path `dlopen("libvulkan.so")` (`winlator.h: LIBVULKAN_PATH`, vortek client `main.c:createVkContext` uses socket + ashmem ring buffers) does **not** require Turnip/KGSL, and Winlator 10/11 already shipped Mali BC texture emulation, vertex explosion fixes and extension exposure fixes that align with RPCSX/PS3 renderer needs on Android system Vulkan. Baseline evidence: Dimensity 8300 Ultra / Mali-G615 MC6 Vulkan 44.1.0 already renders GTA SA correctly — so Vortek must be **optional**, not mandatory default.
+Persist the backend under one new key, for example `graphics_backend`. Existing
+`gpu_driver_path`, `gpu_driver_name`, `gpu_driver_bundled_id`, and
+`gpu_driver_force_sysmem` remain the metadata for `ADRENO_CUSTOM`. Migration rule:
 
-Two Vortek architectures exist and must be distinguished:
+- valid non-empty custom path/name -> `ADRENO_CUSTOM`;
+- otherwise -> `SYSTEM_DIRECT`.
 
-* **Vortek IPC client/server** (`brunodev85/vortek` client ICD + `brunodev85/winlator` server `libvortekrenderer.so`) — Unix socket + 2× ashmem ring buffers (`SERVER_RING_BUFFER_SIZE 4194304`, `CLIENT_RING_BUFFER_SIZE 262144`, `vortek.h: HEADER_SIZE 8`, `VORTEK_SERVER_PATH`), thread pool `THREAD_POOL_NUM_THREADS 8`, `request_codes.h:254` request codes, `vulkan_calls.c` 179k LOC wrapper. Needed in Winlator because Windows/glibc guest ≠ Bionic host.
-* **Vortek-inspired Vulkan Layer** (`WearyConcern1165/ExynosTools` `libVkLayer_VortekXclipse.so`) — in-process `VkLayer`, no IPC, BCn virtualization via CPU/compute (`layer_format_virtualization`, `layer_image_virtualization`, `layer_copy_image_routing`, compute shaders `shaders/*.comp`, `VMA` staging, `VkLayer_vortek_xclipse.json`). Correct for Samba-S3 long-term because RPCSX is already a **native Bionic process** (`GraphicsFrame.kt:8-44` → `RPCSX.surfaceEvent`, `native-lib.cpp:233-236`).
+Do not create `vortek_enabled`, `vortek_profile`, or `VortekSystem` state. Profiles are internal,
+versioned workaround sets selected from measured capabilities and driver identity, not a new family
+of user-visible drivers.
 
-Recommended Samba-S3 strategy: **build the layer first (Phase 1), keep IPC as optional research spike (Phase 2)** — see ExynosTools analysis `VORTEK_ADAPTATION_ANALYSIS.md:44-78` and `VORTEK_IPC_RESEARCH_PLAN.md:7-42` which conclude IPC adds latency/complexity/debug cost and is not justified as primary direction.
+## Backend Loading and Lifetime
 
-## Research Sources
+Create one native backend controller as the sole owner of injected loader handles. A possible API:
 
-### Local repo archaeology
+```cpp
+struct BackendSelection {
+    VulkanBackend backend;
+    std::string custom_driver_path;
+    std::string custom_driver_name;
+    std::string hooks_path;
+};
 
-* `<source: app/src/main/cpp/native-lib.cpp:295-298>` — `supportsCustomDriverLoading()` is `access("/dev/kgsl-3d0", F_OK)==0`.
-* `<source: app/src/main/cpp/native-lib.cpp:304-344>` — `setCustomDriver(path, libraryName, hookDir)` → `adrenotools_open_libvulkan(RTLD_NOW, ADRENOTOOLS_DRIVER_CUSTOM, nullptr, hookDir+"/", path+"/", libraryName, ...)` then `_rpcsx_setCustomDriver(loader)`; x86_64 stub returns false.
-* `<source: app/src/main/cpp/CMakeLists.txt:7-19>` — `arm64→ add_subdirectory(libadrenotools)` else `INTERFACE`; `sambas3-android SHARED native-lib.cpp` links `android log adrenotools`.
-* `<source: app/src/main/java/com/zenithblue/sambas3/RPCSX.kt:96,100,146>` — `supportsCustomDriverLoading():Boolean`, `setCustomDriver(String,String,String):Boolean`, `System.loadLibrary("sambas3-android")`.
-* `<source: app/src/main/java/com/zenithblue/sambas3/utils/GpuDriverHelper.kt:31-81,87-104,250-265>` — install/enumerate drivers, `Default` synthetic entry at `/system/vendor`, `validateInstalledLibrary`, `ALLOW_EXTERNAL_GPU_DRIVERS` gate.
-* `<source: app/src/main/java/com/zenithblue/sambas3/utils/GpuDriverSelection.kt:17-35,44-80>` — `applyStoredSelection` clears/sets `TU_DEBUG=sysmem` via `Os.setenv`, `selectDriver` → `RPCSX.setCustomDriver`, `shouldForceSysmemForSelection`.
-* `<source: app/src/main/java/com/zenithblue/sambas3/utils/AdrenoGpuDetector.kt:14-40>` — `gpu_model` sysfs paths, `extractGpuId`, `familyFromGpuId`, `isAdreno` via `adreno/kgsl` or `/dev/kgsl-3d0`, `FILE.exists()`.
-* `<source: app/src/main/java/com/zenithblue/sambas3/GraphicsFrame.kt:34-44>` — `surfaceCreated/Changed/Destroyed → RPCSX.surfaceEvent(surface, event)`.
-* `<source: app/src/main/java/com/zenithblue/sambas3/RPCSXActivity.kt:49-171>` — cold init, `GraphicsFrame` + overlay, `bootThread` → `RPCSX.boot(gamePath)` after `GameSettingsOverrides.applyForGame`.
-* `<source: app/src/main/java/com/zenithblue/sambas3/MainActivity.kt:60-74>` — `RPCSX.openLibrary() → initialize() → syncBundledDrivers → ensureValidSelection → applyStoredSelection` off IO dispatcher.
-* `<source: app/build.gradle.kts:11-14,60-75,94-123>` — `ndkVersion 30.0.14904198`, `abiFilters arm64-v8a, x86_64`, `flavorDimensions distribution` (standard/playstore), `BuildConfig ALLOW_EXTERNAL_GPU_DRIVERS / INCLUDE_BUNDLED_TURNIP_DRIVERS`, `externalNativeBuild cmake path src/main/cpp/CMakeLists.txt`, `jniLibs.useLegacyPackaging=true`.
-* `<source: app/src/standard/java/com/zenithblue/sambas3/ui/drivers/GpuDriversScreen.kt:86-275>` + `<source: app/src/playstore/java/.../GpuDriversScreen.kt>` — driver list UI, `DeletableListItem`, `GpuDriverSelection.selectDriver`.
-* `<source: docs/BUNDLED_TURNIP_DRIVERS.md>` — bundled Turnip packaging and Play flavors.
-* `<source: patches/rpcsx-submodule-changes.patch:38-42>` — `android/CMakeLists.txt` adds `atomic-file-copier`/`iso-install-manifest`/`staged-game-installer` to `rpcsx-android` lib.
-* `git log --oneline -20` — last 20 commits show recent driver overhauls and ISO install hardening.
-
-### Cloned reference repos (`/tmp/opencode/`)
-
-* `<source: /tmp/opencode/vortek>` — `brunodev85/vortek` (`git clone https://github.com/brunodev85/vortek`, HEAD `b1730c5`): client ICD `src/main.c: vortekServerConnect() → socket AF_UNIX SOCK_STREAM VORTEK_SERVER_PATH "/data/data/com.winlator/files/rootfs/tmp/.vortek/V0" → write HEADER_SIZE(8) REQUEST_CODE_CREATE_CONTEXT → recv_fds 2 ashmem FDs → RingBuffer_create SERVER_RING 4MiB / CLIENT_RING 256KiB`, `include/vortek.h: VORTEK_H defines MEMORY_POOL_MAX_SIZE 65536, THREAD_POOL_NUM_THREADS 8, findNextVkStructure/invertVkStructuresChain/removeNextVkStructure, vt_alloc`, `include/request_codes.h: 254 codes REQUEST_CODE_VK_CALL_START 100 … 354`, `src/vulkan_calls.c: 179897 LOC, findVkDispatchFuncWithName, VT_CALL_LOCK/UNLOCK, waitForPipelineCreation recv_fds`, `CMakeLists.txt: add_library(vulkan_vortek SHARED src/main.c src/vulkan_calls.c src/vk_object.c src/vk_object_pool.c src/ring_buffer.c src/arrays.c)`.
-* `<source: /tmp/opencode/winlator>` — `brunodev85/winlator` empty `vortek/` in current shallow clone but vortek client confirmed via `/tmp/opencode/vortek/src/main.c`; Winlator XServerDisplayActivity vortek env `GALLIUM_DRIVER=zink, ZINK_CONTEXT_THREADED=1, MESA_GL_VERSION_OVERRIDE=3.3, VORTEK_SERVER_PATH` per leegao deep-dive.
-* `<source: /tmp/opencode/exynostools>` — `WearyConcern1165/ExynosTools` (`git clone https://github.com/WearyConcern1165/ExynosTools`): `src/layer/` 30 files — `layer_entry.cpp` (layer negotiation `vkNegotiateLoaderLayerInterfaceVersion`), `layer_format_virtualization.cpp/h` (BC1..BC7, `R8G8B8A8_*`→`R16G16B16A16_SFLOAT` for BC6H, `ImageFormatListCreateInfo` patching), `layer_image_virtualization`, `layer_copy_image_routing` (intercept `vkCmdCopyBufferToImage*`, decode via `layer_compute_runtime`/`layer_bcn_cpu_decoder`), `layer_command_buffer_hooks/ownership/resources`, `layer_descriptor_write_builder`, `layer_staging_allocations`, `layer_vma_runtime`, `layer_temp_arena`, `layer_vk_struct_clone`, `layer_vk_struct_utils`, `layer_telemetry`, `VkLayer_vortek_xclipse.json.in`, `shaders/*.comp` (s3tc, rgtc, bc6, bc7 with IV variants), `CMakeLists.txt: add_library(VkLayer_VortekXclipse SHARED ...)`, `docs/VORTEK_ADAPTATION_ANALYSIS.md:44-78` (IPC not worth it, serializer knowledge is), `docs/VORTEK_IPC_RESEARCH_PLAN.md:7-42` (phase-gated IPC validation), `docs/XCLIPSE_COMPAT_MATRIX.md:2.15-8.2` (runtime probe > model name), `docs/ANDROID_VALIDATION.md`.
-
-### Web / official docs
-
-* `<source: https://github.com/brunodev85/vortek>` — "Vulkan wrapper on top of the host … Format emulation, SPIR-V inspection, texture decoding".
-* `<source: https://leegao.github.io/winlator-internals/2025/06/01/Vortek1.html>` — 1000-ft overview, IPC ring buffers, `vt_call_*` → `vt_handle_*` dispatch, `vortek_renderer_thread_main_loop` JNI `getWindowWidth/getWindowHeight/getWindowHardwareBuffer/updateWindowContent`.
-* `<source: https://leegao.github.io/winlator-internals/2025/06/02/Vortek2.html>` — BCn emulation (replace `VK_FORMAT_BC* → VK_FORMAT_B8G8R8A8_UNORM`, `VK_IMAGE_CREATE_BLOCK_TEXEL_VIEW_COMPATIBLE_BIT` unset, `TextureDecoder::decodeAll` at `vkQueueSubmit`, `ShaderInspector::inspectShaderStages` for `gl_ClipDistance` removal and `_SCALED` emulation via `OpConvertUToF`).
-* `<source: https://github.com/WearyConcern1165/ExynosTools>` — layer README: keeps `vulkan.samsung.so` backend, `libVkLayer_VortekXclipse.so` intercepts selected calls, BC4/5/6H/7 paths, driver bundle layout `meta.json + VkLayer_vortek_xclipse.json + vulkan.samsung.so + libVkLayer`.
-* `<source: https://vulkan.lunarg.com/doc/view/1.4.313.0/windows/LoaderLayerInterface.html>` — Vulkan Loader layer interface spec (implicit vs explicit layers).
-* `<source: https://github.com/brunodev85/winlator/releases>` — Winlator 10 Mali support, 11.1 extension filtering referenced in task.
-* `npx ctx7` not required for this plan; Vulkan loader/layer docs fetched via webfetch above. If ctx7 quota hit, note fallback in NEW_RISKS.
-
-## Current Architecture
-
-```
-Kotlin Compose UI (MainActivity, RPCSXActivity, GraphicsFrame)
-        │ JNI (native-lib.cpp → libsambas3-android.so)
-        │  RPCSXLibrary::Open dlopen(RPCSX .so) + dlsym 25 funcs (boot/kill/resume/surface/usb/settings/systemInfo/patches/setCustomDriver…)
-        ▼
-Runtime-loaded RPCSX emulator .so (librpcsx-android.so from nativeLibraryDir)
-        │  Vulkan path:
-        │   if Custom path non-empty → adrenotools_open_libvulkan(CUSTOM, hookDir, driverDir, libName) → dlopen hooks
-        │   else System libvulkan.so (dlopen)
-        ▼
-Android system libvulkan.so → OEM Vulkan driver
- ├─ Adreno (Turnip custom path via adrenotools)
- └─ Mali / Xclipse / PowerVR → direct system path (no compat layer)
-        ▼
-GPU
+BackendResult configureVulkanBackend(const BackendSelection& selection);
+BackendState getVulkanBackendState();
 ```
 
-Key constraints:
+Backend behavior:
 
-* `supportsCustomDriverLoading` gated on `/dev/kgsl-3d0` (`native-lib.cpp:297`) — Mali/Xclipse/PowerVR falsely report "unsupported" even though their *system* driver is usable; Turnip `TU_DEBUG=sysmem` is Adreno-only (`GpuDriverSelection.kt:123-138`).
-* Driver selection persisted as `GeneralSettings["gpu_driver_path"/"gpu_driver_name"/"gpu_driver_bundled_id"/"selected_gpu_driver"/"gpu_driver_force_sysmem"]` → `RPCSX.setCustomDriver` (`GpuDriverSelection.kt:17-34,66-71`).
-* Emulator owns `ANativeWindow` directly (`GraphicsFrame.surfaceEvent` → `rpcsx-android.cpp _rpcsx_surfaceEvent ANativeWindow_fromSurface`), so Winlator's `XWindow/GPUImage/XConnector` presentation bridge is unnecessary.
-* No Vulkan capability probe exists; `AdrenoGpuDetector.detect()` only inspects `gpu_model` sysfs/build props, not `vkEnumeratePhysicalDevices`/`vkGetPhysicalDeviceProperties2`/`vkGetPhysicalDeviceFormatProperties2`.
-* NDK 30, compileSdk 36, ABIs arm64-v8a+x86_64, `jniLibs.useLegacyPackaging true`, playstore flavor forbids external driver install (`ALLOW_EXTERNAL_GPU_DRIVERS false`).
-
-## Affected Components & Dependencies
-
-| Component | Impact | Notes |
+| Backend | Handle passed to RPCSX | Host loader |
 |---|---|---|
-| `app/src/main/cpp/CMakeLists.txt` | MODIFY | Add `vortek`/`VkLayer` target, Vulkan headers, shader embedding |
-| `app/src/main/cpp/native-lib.cpp` | MAJOR MODIFY | Add `HostVulkanDriver {System, AdrenoCustom}` abstraction, `VortekMode` plumbing, capability probe JNI, keep KGSL gate only for Custom path |
-| NEW `app/src/main/cpp/vortek/` | NEW | Vulkan layer (`VkLayer_VortekS3.so`) + optional IPC client/server stub; mirrors ExynosTools `src/layer/` |
-| `app/src/main/java/com/zenithblue/sambas3/RPCSX.kt` | MODIFY | New externs: `getVulkanCapabilities():String`, `setVortekMode(String):Boolean`, `supportsVortek():Boolean` |
-| `app/src/main/java/com/zenithblue/sambas3/utils/GpuDriverHelper.kt` | MODIFY | Introduce `GraphicsDriverMode` enum, persist vortek selection, keep Custom validation |
-| `app/src/main/java/com/zenithblue/sambas3/utils/GpuDriverSelection.kt` | MODIFY | Branch System vs VortekSystem vs Custom; host driver abstraction |
-| NEW `app/src/main/java/com/zenithblue/sambas3/utils/VortekManager.kt` | NEW | Lifecycle: start/stop layer, probe, profile selection |
-| NEW `app/src/main/java/com/zenithblue/sambas3/utils/GpuCapabilityProbe.kt` | NEW | Vulkan probe (physical device props, formats, extensions, memory) |
-| NEW `app/src/main/java/com/zenithblue/sambas3/utils/GpuProfile.kt` | NEW | `Generic/Mali/PowerVR/Xclipse/AdrenoOEM` + extension/format masks |
-| `app/src/main/java/com/zenithblue/sambas3/ui/drivers/GpuDriversScreen.kt` (both flavors) | MODIFY | 3-mode radio: System / Vortek+System / Custom (Custom hidden on non-Adreno & playstore filtered) |
-| `app/src/main/java/com/zenithblue/sambas3/MainActivity.kt` | MODIFY | Initialize probe + apply stored Vortek mode before `RPCSX.initialize` |
-| `app/src/main/java/com/zenithblue/sambas3/RPCSXActivity.kt` | MODIFY | Ensure vortek mode applied pre-boot, pass-through ANativeWindow path |
-| `app/build.gradle.kts` + `gradle/libs.versions.toml` | MODIFY | Add Vulkan headers path, shader codegen, optional VMA dep; no ABI change |
-| `app/src/main/AndroidManifest.xml` | NO CHANGE | — |
-| `drivers/input/` + `scripts/package-bundled-turnip-drivers.sh` | NO CHANGE | Keep bundled Turnip flow distinct |
-| Tests `app/src/test/**` | ADD | New unit tests for helper logic; existing tests untouched |
+| `SystemDirect` | `nullptr` | RPCSX opens Android `libvulkan.so` |
+| `SystemCompat` | `dlopen(libvulkan_samba_compat.so)` | wrapper opens absolute system `libvulkan.so` |
+| `AdrenoCustom` | result of `adrenotools_open_libvulkan(...)` | custom Turnip/Adreno driver |
 
-Dependencies: Khronos `Vulkan-Headers` (via `external/` or `EXYNOS_VULKAN_REPOS_ROOT`), `Vulkan-Utility-Libraries` (pNext utils), `VulkanMemoryAllocator` (staging), Android NDK `libvulkan.so`, `libadrenotools` (Adreno only).
+Deterministic startup sequence:
 
-## Implementation Steps (ordered, smallest correct change)
+```text
+RPCSX.openLibrary()
+sync/validate bundled custom-driver files if required (no Vulkan calls)
+load and validate persisted GraphicsBackend
+configure the selected loader handle
+run the independent raw host probe if needed
+RPCSX.initialize()
+allow systemInfo, effective probing, or game boot
+```
 
-### Phase 0 — Scaffolding & policy (no user-visible behavior yet)
+The file sync/validation may run off the UI thread, but backend configuration must no longer be a
+detached coroutine that can race the first Vulkan consumer.
 
-1. **Add Vulkan header dep plumbing.** Add `external/Vulkan-Headers` as git submodule (pin commit) or reuse `EXYNOS_VULKAN_REPOS_ROOT` env. Expose `Vulkan-Headers/include` to `native-lib.cpp` and new vortek target. Verify `./gradlew assembleStandardDebug` still builds — no code change yet.
-2. **Introduce `GraphicsDriverMode` & persistence.** In `GpuDriverHelper.kt` add:
-   ```kotlin
-   enum class GraphicsDriverMode { System, VortekSystem, Custom }
-   ```
-   Persist under new keys: `graphics_driver_mode` (string), `vortek_enabled` (bool legacy compat), `vortek_profile` (string). Migrate existing `gpu_driver_*` keys: `Custom` iff path+name non-empty, else `System`. `VortekSystem` means path/name cleared but vortek flag true. Helpers `getGraphicsDriverMode()`, `setGraphicsDriverMode()`. Unit-test migration. No UI yet.
-3. **Split `supportsCustomDriverLoading` from `supportsVortek`.** Keep `native-lib.cpp:295` KGSL check for Custom only. Add new JNI:
-   ```cpp
-   JNIEXPORT jboolean Java_com_zenithblue_sambas3_RPCSX_supportsVortek(JNIEnv*, jobject) { return true; } // always available; capability decides recommendation
-   JNIEXPORT jstring Java_com_zenithblue_sambas3_RPCSX_getVulkanCapabilities(JNIEnv*, jobject)
-   ```
-   Capabilities as JSON (vendorID/deviceID/deviceName/apiVersion/driverVersion + booleans `textureCompressionBC`, `descriptorIndexing`, `timelineSemaphore`, `bufferDeviceAddress`, etc., + `supportedFormats`, `deviceExtensions`, `queueFamilies`, `memoryTypes/Heaps`). Probe via `vkEnumerateInstanceVersion + vkEnumeratePhysicalDevices + vkGetPhysicalDeviceProperties2 + vkGetPhysicalDeviceFeatures2 + vkGetPhysicalDeviceFormatProperties2 + vkEnumerateDeviceExtensionProperties`. Return empty JSON if probe before `RPCSX.initialize` Vulkan instance. Kotlin `GpuCapabilityProbe.parse(json)` typed data class with safe defaults.
+Safety invariants:
 
-### Phase 1 — Vortek Layer (in-process, recommended primary)
+1. Configure the selected backend after `RPCSX.openLibrary()` and any non-Vulkan file prerequisites,
+   but before every Vulkan consumer, including `RPCSX.systemInfo()`, capability probes routed
+   through RPCSX, or game boot.
+2. Do not define correctness as merely "before `RPCSX.initialize()`". The actual invariant is
+   before the first persistent or temporary RPCSX Vulkan instance.
+3. Never replace the loader while a `VkInstance`, `VkDevice`, RPCSX `render_device`, swapchain, or
+   Vulkan worker is alive.
+4. Backend changes in settings take effect only after emulator stop and verified Vulkan teardown;
+   require an app/emulator restart if teardown state cannot be proven.
+5. Close the previous injected handle only after RPCSX has released all objects and symbol-cache
+   users. Never `dlclose()` the system loader owned internally by RPCSX.
+6. The controller must serialize configure/teardown operations and reject re-entry.
+7. On compatibility-wrapper load failure, log the reason and fall back to System Direct only before
+   Vulkan creation. Never silently switch underneath a running emulator.
 
-4. **Import & adapt ExynosTools layer skeleton.** Create `app/src/main/cpp/vortek/` with structure:
-   ```
-   app/src/main/cpp/vortek/
-     CMakeLists.txt
-     include/               # borrowed vortek.h pNext helpers (findNext/invert/remove), struct clone utils
-     src/
-       layer_entry.cpp      # vkNegotiateLoaderLayerInterfaceVersion + GetInstanceProcAddr/GetDeviceProcAddr trampolines
-       layer_global_state.cpp/h
-       layer_dispatch_types.h / layer_device_dispatch_types.h / layer_dispatch_key.h
-       layer_format_virtualization.cpp/h
-       layer_image_virtualization.cpp/h
-       layer_copy_image_routing.cpp/h
-       layer_command_buffer_hooks.cpp/h
-       layer_command_buffer_ownership.cpp/h
-       layer_bcn_cpu_decoder.cpp/h   # bcdec CPU path
-       layer_compute_runtime.cpp/h   # BCn compute decode + pipelines
-       layer_descriptor_write_builder.cpp/h
-       layer_staging_allocations.cpp/h
-       layer_vma_runtime.cpp/h
-       layer_telemetry.cpp/h
-       layer_vk_struct_clone.cpp/h
-       layer_settings_runtime.cpp/h
-     shaders/               # s3tc.comp, rgtc.comp, bc6.comp, bc7.comp + IV variants + include/
-     VkLayer_VortekS3.json.in
-   ```
-   Start from ExynosTools `src/layer/` exactly; rename `VkLayer_VortekXclipse` → `VkLayer_VortekS3` (layer name `VK_LAYER_VORTEK_S3_compat`). Keep same CMake pattern (`add_library(VkLayer_VortekS3 SHARED ...)`), shader embedding via `GenerateEmbeddedSpirvHeader.cmake`. Strip Xclipse-only quirk that hides `VK_KHR_shader_float_controls`/`VK_EXT_extended_dynamic_state*` unless profile is Xclipse — make it profile-gated.
+Before implementing this controller, document and test ownership of `g_vk_loader`, RPCSX's
+`instance::owns_loader`, and Samba's current `dlclose(prevLoader)` behavior. Add a regression test
+for repeated cold selection of System -> Compat -> System and Custom -> System without gameplay
+hot-swaps.
 
-5. **Wire layer loading without adrenotools.** Two load options (pick one, document the other as fallback):
-   * **A — Loader layer (preferred if loader respects `VK_LAYER_PATH`):** Ship `VkLayer_VortekS3.json` in `assets/vulkan_layers/` or `jniLibs/arm64-v8a/`, set env `VK_LAYER_PATH=<nativeLibraryDir>` + `VK_INSTANCE_LAYERS=VK_LAYER_VORTEK_S3_compat` via `Os.setenv` in `VortekManager.enable()` before `RPCSX.initialize`. Verify `vkEnumerateInstanceLayerProperties` sees it.
-   * **B — Explicit `vkCreateInstance` hook via emulator:** If loader env not honored under NDK 30, add minimal hook in `native-lib.cpp` that `dlopen("libVortekS3.so")` and interposes `vkCreateInstance`/`vkCreateDevice` via `vkLayer` trampolines, then forwards to real `libvulkan.so`. This keeps `libvulkan.so` as host regardless.
-   For Mali/PowerVR/Xclipse/AdrenoOEM → `HostVulkanDriver::System` (`dlopen("libvulkan.so", RTLD_NOW|RTLD_LOCAL)`). For Adreno Custom → `HostVulkanDriver::AdrenoCustom` via `adrenotools_open_libvulkan` (keep existing path untouched).
+## Hardware Eligibility vs Distribution Policy
 
-6. **Implement minimal viable BCn virtualization.** Forward ExynosTools Rules R1-R4: per-format `vkGetPhysicalDeviceFormatProperties2` probe, `vkCreateImage` format substitution (`BC* → R8G8B8A8_*` / `R16G16B16A16_SFLOAT` for BC6H), `VkImageFormatListCreateInfo` patching, `vkCmdCopyBufferToImage*` decode dispatch (CPU fallback if compute unavailable), `vkCreateImageView` remap, `vkCmdClearDepthStencilImage` aspect fix. Add pNext sanitization (`layer_vk_struct_utils.h`). Keep `Generic` profile conservative (no model-name hard-coding); only probe results drive virtualization. Unit-test struct clone + format logic with off-device JVM mocks.
+Keep these concepts separate:
 
-7. **Add GPU profiles & extension masks.** `enum class VortekGpuProfile { Generic, Mali, PowerVR, Xclipse, AdrenoOEM }`. Map from capability probe: `vendorID` (ARM 0x13B5, Samsung 0x144D, Imagination 0x1010, Qualcomm 0x5143) + `deviceName` contains `Mali`/`Immortalis`/`Xclipse`/`PowerVR`. Profiles control: BCn whitelist, `VK_EXT_transform_feedback`/`VK_KHR_dynamic_rendering`/`VK_KHR_synchronization2` exposure, `VK_KHR_timeline_semaphore` emulation depth, shader patchers (`gl_ClipDistance` strip on Mali, `_SCALED` emulation). No per-game hack table.
+```text
+supportsAdrenoCustom =
+    arm64
+    AND detected Adreno
+    AND /dev/kgsl-3d0 exists
 
-8. **Storage & lifecycle.** Vortek layer `.so` + `.json` live alongside `libsambas3-android.so` (no `/files/gpu_drivers/` install dance). `VortekManager.applyStoredMode(nativeLibDir)` called from `MainActivity.onCreate` before `RPCSX.initialize` (same dispatcher as `GpuDriverSelection.applyStoredSelection`) and again in `RPCSXActivity.onCreate` cold path before `RPCSX.openLibrary`. Switching mode requires activity restart (same as Custom driver — kill+reinit). Provide `resetToSystemVortek()` / `isVortekActive()`.
+mayInstallExternalDrivers =
+    BuildConfig.ALLOW_EXTERNAL_GPU_DRIVERS
 
-9. **UI — three modes.** Refactor `GpuDriversScreen.kt` (both flavors):
-   ```kotlin
-   enum class GraphicsDriverOption { System, VortekSystem, Custom }
-   ```
-   * System — subtitle "Direct OEM driver — lowest overhead". Clears `vortek_enabled` + Custom path, calls `RPCSX.setCustomDriver("", "", hookDir)` + `VortekManager.disable()`.
-   * Vortek+System — subtitle "Compatibility layer — Mali / Xclipse / PowerVR / Adreno OEM". Enables layer, clears Custom path, shows detected `GpuProfile` badge + probe summary (BC formats missing, driver version). Available on all devices (never gated by `/dev/kgsl-3d0`), but recommend via probe: if `textureCompressionBC==true` AND no known missing extension → show "System recommended" chip.
-   * Custom — visible/enabled only when `isAdreno && isArm64 && fileExists("/dev/kgsl-3d0") || BuildConfig.ALLOW_EXTERNAL_GPU_DRIVERS` and pre-filtered Turnip catalog entries. Keep exact existing Turnip list behavior; do not merge Vortek entries into `GpuDriverHelper.getInstalledDrivers()`.
-   Selection persists via `GeneralSettings` + immediate `VortekManager`/`GpuDriverSelection` apply; failure → `AlertDialogQueue.showDialog` + reset to System.
+hasBundledCustomDrivers =
+    BuildConfig.INCLUDE_BUNDLED_TURNIP_DRIVERS
+```
 
-10. **Driver Bundle alternative (optional, Play-safe).** Allow Vortek variant as bundled ZIP (`meta.json` + `VkLayer` + optional `vulkan.samsung.so` passthrough) matching ExynosTools layout, discovered via `BundledGpuDriverCatalog` with new `role="vortek-compat"` — but default Vortek ships *inside* APK (no download), so Playstore `ALLOW_EXTERNAL_GPU_DRIVERS=false` still permits Vortek+System.
+`ALLOW_EXTERNAL_GPU_DRIVERS` controls how a package may obtain driver files. It is not evidence that
+the hardware can load an Adreno driver. Play Store builds with bundled Turnip still require
+`supportsAdrenoCustom`. Never expose Custom Vulkan to Mali/Xclipse/PowerVR because a distribution
+allows downloads.
 
-### Phase 2 — IPC research spike (optional, not on critical path)
+System Compatibility is an app-provided backend and is independent of KGSL and external-driver
+download policy.
 
-11. **Pin Vortek client at known-good commit.** Add submodule `app/src/main/cpp/vortek-client` pointing at `brunodev85/vortek` at commit `b1730c5` (HEAD at plan time). Build `libvulkan_vortek.so` ICD (`vortek_icd.aarch64.json` → `VK_ICD_FILENAMES` env). Keep strictly separate from Phase 1 layer — do not link both active at once.
+## Capability Probing
 
-12. **Port `vortekrenderer` server stub (spike-only).** Clone desired server files into `app/src/main/cpp/vortek/renderer/` (reference list from `leegao/vortek-deep-dive`): `request_handler.c`, `shader_inspector.c`, `texture_decoder.c`, `resource_memory.c`, `async_pipeline_creator.c`, `timeline_semaphore.c`, `vk_context.c`, `vulkan_helper.c`, swapchain. Replace Winlator `VortekRendererComponent` JNI (`getWindowWidth/Height/HardwareBuffer/updateWindowContent`) with RPCSX `ANativeWindow` path (`GraphicsFrame` surface). Replace `VORTEK_SERVER_PATH "/data/data/com.winlator/..."` with `context.getFilesDir()+"/tmp/.vortek/V0"` abstract-namespace socket.
+Create two separately named and separately serialized capability reports.
 
-13. **Host driver abstraction in renderer.** As proposed in task:
-    ```cpp
-    enum class HostVulkanDriver { System, AdrenoCustom };
-    void* openHostVulkan(HostVulkanDriver t, const char* hookDir, const char* driverDir, const char* libName) {
-      if (t==System) return dlopen("libvulkan.so", RTLD_NOW|RTLD_LOCAL);
-      else return adrenotools_open_libvulkan(RTLD_NOW, ADRENOTOOLS_DRIVER_CUSTOM, nullptr, hookDir, driverDir, libName, nullptr, nullptr);
-    }
-    ```
-    Mali/PowerVR/Xclipse/AdrenoOEM → System; Adreno Turnip → AdrenoCustom.
+### `HostVulkanCapabilities`
 
-14. **Measure IPC cost.** Benchmark `vkQueueSubmit` + `vkCmdCopyBufferToImage` + `vkCreateGraphicsPipelines` under IPC vs in-process layer on same device (Mali-G615/G710, Adreno 8 Gen 3). If overhead > 15% frame time or > 2 ms p95 `vkQueueSubmit` or stability regressions, **close IPC line** per `VORTEK_IPC_RESEARCH_PLAN.md:4.50-78` (`Experimento` backlog) and keep layer only. Document in `docs/generated/vortek-ipc-benchmark.md`.
+The host probe directly opens the absolute Android loader (`/system/lib64/libvulkan.so` on arm64),
+creates its own temporary instance, enumerates the OEM physical device, records raw values, then
+destroys everything. It must not depend on `RPCSX.initialize()` or mutate RPCSX's loader handle.
 
-### Phase 3 — Telemetry, docs, hardening
+### `EffectiveVulkanCapabilities`
 
-15. **Telemetry & validation.** Expose `VortekManager.getStats(): VortekStats` (virtualized image count, decode success/fallback/fail, descriptor pool exhaustion, `VK_TIMEOUT` events, `VK_ERROR_DEVICE_LOST`). Surface in Log Monitor (`LogMonitorScreen`) and logcat tag `VORTEK`. Add Vulkan validation layer CI path (`ENABLE_VALIDATION_LAYER` toggle, `libVkLayer_khronos_validation.so`).
+The effective probe opens the selected compatibility wrapper as a client would and records what
+RPCSX would see after filtering/emulation. It must use its own temporary lifetime or run only when
+RPCSX has no live Vulkan objects.
 
-16. **Compat matrix update & targeted testing.** Update `docs/` compat matrix: keep G615 baseline as System-preferred; recommend VortekSystem for G57/G68/G77/G78, G610/G710/G615/G715/G720/G925 and Xclipse 920/530/540/550/940/950/960 where probe shows missing BC or problematic `extended_dynamic_state`. No change for older weak Mali/old PowerVR 8XE/9XE beyond "candidate".
+Store enough identity to join reports:
 
-## File-Level Change Map
+- vendor ID, device ID, device name;
+- driver ID, driver name, driver version;
+- Vulkan API version;
+- OS/build fingerprint only in privacy-safe local diagnostics;
+- compatibility-wrapper version and workaround-set version.
 
-| File | Change | Rationale |
+Probe fields should follow RPCSX's actual contract rather than a generic DXVK checklist:
+
+- `shaderFloat16`, `shaderInt8`, `shaderFloat64`;
+- descriptor indexing and each update-after-bind feature RPCSX queries;
+- `maxUpdateAfterBindDescriptorsInAllPools` and relevant descriptor limits;
+- custom border color and border-color swizzle behavior;
+- attachment feedback loop layout;
+- fragment shader barycentric;
+- device fault;
+- shader stencil export;
+- conditional rendering;
+- external memory host;
+- sampler mirror clamp to edge;
+- synchronization2;
+- unrestricted depth range;
+- BC1, BC2, and BC3 features/properties individually plus aggregate `textureCompressionBC`;
+- depth formats `D16_UNORM`, `D24_UNORM_S8_UINT`, `D32_SFLOAT`,
+  `D32_SFLOAT_S8_UINT`;
+- color/texture formats used by RPCSX, including `B8G8R8A8_UNORM`, `R8G8_UNORM`,
+  `R8G8_SNORM`, and relevant R16/RG16/RGBA16F variants;
+- extensions, queue families, memory heaps, and memory types.
+
+BC4-BC7 may be logged for research but must not select the initial backend or activate emulation.
+
+For every field changed by the wrapper, emit a machine-readable reason:
+
+```json
+{
+  "field": "VK_EXT_extended_dynamic_state",
+  "host": true,
+  "effective": false,
+  "action": "hidden",
+  "rule": "mali-rNN-known-driver-bug",
+  "evidence": "issue-or-trace-id"
+}
+```
+
+## Source Strategy
+
+### Primary scaffold: leegao bionic Vulkan wrapper
+
+Evaluate and selectively reuse:
+
+- proxy/ICD entrypoint generation and dispatch;
+- absolute Android system Vulkan loading;
+- Android WSI forwarding;
+- wrapper object and queue state;
+- extension enumeration/filtering;
+- pNext traversal/cloning/sanitization;
+- format/image/depth interception;
+- AHardwareBuffer and external-memory safety;
+- device-fault and diagnostics infrastructure;
+- SPIR-V interception framework only when a captured RPCSX shader requires it;
+- optional Adrenotools concepts, while Samba retains its existing custom-driver owner.
+
+Do not copy the wrapper's force-enable feature table or DXVK-specific engine policies. The initial
+Samba wrapper must report the same capabilities as the system driver.
+
+### Selective Xclipse source: ExynosTools
+
+Use [`WearyConcern1165/ExynosTools`](https://github.com/WearyConcern1165/ExynosTools) selectively for:
+
+- safe pNext cloning/sanitization patterns;
+- image-format and image-view remapping patterns;
+- depth/stencil safety;
+- AHardwareBuffer/external-memory safety;
+- staging/VMA patterns if later required;
+- telemetry;
+- Xclipse-specific, evidence-backed workarounds.
+
+Do not generalize the full layer to every GPU and do not package its `vulkan.samsung.so` bundle.
+The project describes itself as experimental and Xclipse-focused.
+
+### Optional BCn source
+
+Track [`leegao/bcn_layer`](https://github.com/leegao/bcn_layer) and the BC decoder infrastructure
+in the bionic wrapper, but add neither to M0. A later BC implementation needs a failing RPCSX trace,
+before/after correctness captures, memory and frame-time data, and proof that RPCSX's existing
+BC1-BC3 fallback is insufficient.
+
+### Integration/profile reference: GameNative
+
+Use [`utkarshdalal/GameNative`](https://github.com/utkarshdalal/GameNative) for comparison of:
+
+- wrapper selection and configuration UI;
+- capability/extension controls;
+- present/resource/memory controls;
+- wrapper package provenance and duplicate identification;
+- Mali/Xclipse/PowerVR integration experiments.
+
+Do not port all five wrapper archive choices. Do not infer RPCSX correctness from DXVK/vkd3d
+success. Do not treat GameNative-hosted Adreno packages as universal wrappers.
+
+### Optional Vortek research
+
+Use [`brunodev85/vortek`](https://github.com/brunodev85/vortek) only for serializer, shader
+inspection, texture decoder, and comparative IPC research. Do not port its X server or presentation
+stack.
+
+## Pre-Import Gates
+
+### Gate A: license and provenance
+
+Create `docs/third-party/vulkan-compat-license-matrix.md` before copying source or shaders. For each
+candidate file/module record:
+
+- repository and exact commit;
+- source path;
+- SPDX/license and copyright owner;
+- whether it is original, modified, generated, or vendored;
+- notice/source-offer obligations;
+- intended Samba destination;
+- decision: import, reimplement, reference only, or reject.
+
+Audit at minimum: Mesa-derived wrapper code, leegao changes, ExynosTools, Vortek, Granite-derived
+shaders, bcdec, VMA, Vulkan-Headers, Vulkan-Utility-Libraries, SPIRV-Tools, and Adrenotools. Replace
+all informal labels such as "MIT-ish" with file-level conclusions. Samba-S3 is GPL-2.0; the matrix
+must still preserve all third-party notices and identify any incompatible or unclear component.
+
+### Gate B: build architecture
+
+Compare two prototypes before vendoring a large Mesa tree:
+
+**A. Reduced upstream target**
+
+- pin an audited `leegao/bionic-vulkan-wrapper` commit;
+- build only the wrapper and required Mesa Vulkan common/WSI/generated dependencies;
+- strip DXVK policy and all unused decoder/shader paths.
+
+**B. Small Samba proxy**
+
+- generate/export RPCSX-required Vulkan entrypoints;
+- implement a small dispatch/object layer;
+- selectively port audited modules only as failures require them.
+
+Record for both:
+
+- clean and incremental native build time;
+- checked-out and compiled source size;
+- stripped/unstripped `.so` size;
+- APK/AAB size delta for both flavors;
+- dynamic symbol count and dependency count;
+- startup time and pass-through CPU overhead;
+- maintenance cost of syncing Vulkan headers and RPCSX symbol use.
+
+Choose A or B in a short architecture decision record. Do not vendor the full wrapper repository by
+default.
+
+## Implementation Phases
+
+### Phase 0: pass-through proxy spike (M0)
+
+Build `libvulkan_samba_compat.so` for arm64 with no compatibility policy:
+
+- export every Vulkan entrypoint RPCSX resolves from the loader handle;
+- load `/system/lib64/libvulkan.so` with `RTLD_NOW | RTLD_LOCAL`;
+- forward instance/device/queue/WSI calls;
+- preserve physical-device identity, features, extensions, properties, formats, limits, and return
+  codes;
+- perform no shader edits, BC emulation, format remapping, feature spoofing, or version override;
+- add only lifecycle/error logs and opt-in call counters;
+- keep `ANativeWindow` handling unchanged.
+
+Add backend persistence/migration, deterministic startup application, hardware eligibility fixes,
+and loader-lifetime guards in the same milestone. On x86_64, either build a verified pass-through
+proxy or expose only System Direct; never show a backend that cannot load.
+
+M0 is an architectural equivalence test, not a compatibility release.
+
+### Phase 1: safe compatibility infrastructure (M1)
+
+After M0 passes, add infrastructure without claiming new GPU features:
+
+- extension hiding/blacklisting;
+- pNext validation and safe cloning/sanitization;
+- safe format query interception;
+- host/effective capability diffing;
+- telemetry and workaround activation reasons;
+- depth/stencil remaps only for a reproduced failure;
+- AHardwareBuffer/external-memory guards only for a reproduced failure.
+
+Every rule must include vendor/driver/capability predicates, a linked issue/trace, a focused test,
+and an off switch. Rules default to inactive on unknown drivers.
+
+### Phase 2: device-driven fixes (M2+)
+
+**Mali / Immortalis**
+
+- keep known-good G615 devices on System Direct by default;
+- port a SPIR-V pass only after capturing the failing shader and validating unchanged semantics;
+- evaluate extended-dynamic-state filtering only against affected driver revisions;
+- never blanket-enable missing features.
+
+**Xclipse**
+
+- prioritize proven pNext, format-query, image-view, depth/stencil, and AHB safety;
+- A/B test System Direct against System Compatibility;
+- add BC compute only if an RPCSX workload reaches an unsupported operation and the existing
+  fallback cannot handle it correctly or efficiently.
+
+**PowerVR**
+
+- use conservative extension/feature exposure;
+- add format/depth/shader fixes only from real traces;
+- never convert a Vulkan 1.0/1.1 device into a reported 1.3 device;
+- do not call geometry-stage removal geometry-shader emulation.
+
+**Adreno OEM**
+
+- keep System Direct, System Compatibility, and Adreno Custom independently testable;
+- prefer Turnip only when it is available, compatible, and selected/recommended by evidence;
+- never route System Compatibility through KGSL-specific custom loading.
+
+### Phase 3: performance and recommendations
+
+Build a versioned compatibility database keyed by raw capabilities plus vendor/device/driver ID and
+driver version. GPU marketing name alone is insufficient.
+
+Recommendation order is evidence-driven, not a permanent hard-coded ranking:
+
+```text
+Known-good system driver
+    -> System Direct
+
+Known system-driver issue fixed by an audited Samba rule
+    -> recommend System Compatibility
+
+Eligible Adreno with validated Turnip package
+    -> optionally recommend Adreno Custom
+
+Unknown device/driver
+    -> System Direct; collect diagnostics; do not auto-enable workarounds
+```
+
+Compatibility mode may be slower when it fixes a game that otherwise fails, but it must not become
+the default on a known-good device merely because of GPU family.
+
+### Phase 4: optional Vortek IPC research
+
+Benchmark Vortek IPC only if an important compatibility feature cannot be safely implemented
+in-process. Compare end-to-end frame time, submission CPU time, memory, shader/pipeline creation,
+surface lifecycle, and crash behavior. Stop the spike if the missing feature is unrelated to RPCSX
+or if an in-process implementation remains feasible.
+
+## File-Level Implementation Map
+
+Final paths depend on Gate B, but the preferred ownership is:
+
+```text
+app/src/main/cpp/
+  gpu/
+    VulkanBackend.cpp
+    VulkanBackend.h
+    VulkanCapabilityProbe.cpp
+    VulkanCapabilityProbe.h
+    VulkanCompatRules.cpp
+    VulkanCompatRules.h
+  vulkan_compat/
+    CMakeLists.txt
+    dispatch/                 # generated entrypoints/trampolines
+    proxy/                    # system loader + wrapped object dispatch
+    diagnostics/
+    rules/                    # only evidence-backed rules
+
+app/src/main/java/com/zenithblue/sambas3/utils/
+  GraphicsBackend.kt
+  GraphicsBackendManager.kt
+  GpuCapabilityReport.kt
+```
+
+Expected modifications:
+
+| Component | Change |
+|---|---|
+| `app/src/main/cpp/CMakeLists.txt` | Add selected proxy target and generated-symbol audit |
+| `app/src/main/cpp/native-lib.cpp` | Replace path-only custom selection with serialized backend controller; preserve Adrenotools path |
+| `app/src/main/java/com/zenithblue/sambas3/RPCSX.kt` | Add backend configure/state and capability probe JNI methods |
+| `GpuDriverSelection.kt` | Apply one backend model; keep Turnip env only in custom path |
+| `GpuDriverHelper.kt` | Persist/migrate backend separately from custom package metadata |
+| `MainActivity.kt` | Sync/validate files, then apply backend after `openLibrary()` and before any Vulkan consumer |
+| both `GpuDriversScreen.kt` flavors | Show System, Compatibility, and eligible Custom choices |
+| `SettingsScreen.kt` | Report backend availability separately from custom-driver install support |
+| unit/native tests | Migration, gates, loader lifetime, capability diff, symbol/export, rule tests |
+| `docs/third-party/` | License/provenance matrix and required notices |
+
+`RPCSXActivity` should not independently reapply the backend if `MainActivity` owns initialization.
+If cold activity launch can bypass that path, factor one idempotent application routine used before
+RPCSX initialization in both entry paths; do not race two backend writes.
+
+## Test and Validation Strategy
+
+### Build and static checks
+
+Run for every milestone:
+
+```bash
+./gradlew assembleStandardDebug assemblePlaystoreDebug
+./gradlew :app:testStandardDebugUnitTest :app:testPlaystoreDebugUnitTest
+```
+
+Add native/static checks for:
+
+- generated RPCSX `VK_GET_SYMBOL` list is a subset of wrapper exports;
+- wrapper host path is the absolute Android system Vulkan loader;
+- wrapper has no dependency on a bundled OEM Vulkan blob;
+- no `VK_LAYER_PATH`/`VK_INSTANCE_LAYERS` requirement in the shipping path;
+- no force-enabled features in M0;
+- x86_64 UI/backend availability matches the built native capability;
+- backend configure is rejected while the emulator/Vulkan state is live.
+
+### Baseline matrix
+
+Compare:
+
+- System Direct;
+- System Compatibility pass-through;
+- Adreno Custom where eligible.
+
+Minimum physical coverage before recommending compatibility mode:
+
+- known-good Mali-G615 baseline;
+- at least one additional Mali/Immortalis driver revision;
+- Xclipse target hardware;
+- PowerVR target hardware;
+- Adreno OEM and Turnip on one eligible device;
+- Standard and Play Store distributions.
+
+### Correctness and lifecycle
+
+- same GPU and driver identity in HostCaps, System Direct, and M0 System Compatibility;
+- same raw/effective features, extensions, properties, formats, and limits in M0;
+- GTA known-good checkpoint renders identically on G615;
+- surface create/change/destroy, rotation, background/foreground, pause/resume, and activity
+  recreation work;
+- no stale dispatch pointers, use-after-`dlclose`, double-close, `VK_ERROR_DEVICE_LOST`, or crash;
+- failed compatibility load falls back before Vulkan creation and is visible in logs/UI;
+- Custom remains unavailable on non-Adreno devices regardless of flavor policy;
+- existing Turnip install, bundled-driver, and `TU_DEBUG=sysmem` behavior remains unchanged.
+
+### Performance measurements
+
+Record:
+
+- average FPS and p50/p95/p99 frame time;
+- process CPU and GPU time where available;
+- resident memory and native heap;
+- shader compilation and pipeline creation time;
+- `vkQueueSubmit` CPU overhead;
+- startup/backend initialization time;
+- timeouts, device-lost events, crashes, and activated workaround counters.
+
+M0 pass-through gate:
+
+- target: <=5% frame-time regression;
+- investigate: >5% and <=10%;
+- reject/rework as a default-capable path: >10%.
+
+Measure multiple warmed runs and retain raw samples. A compatibility fix may exceed the transparent
+wrapper gate only when it makes a title/device work that fails under System Direct, and the UI/logs
+must make that trade-off explicit.
+
+## Milestone M0 Acceptance Checklist
+
+- [ ] License/provenance matrix covers every M0 imported/generated component.
+- [ ] Gate B records reduced-upstream versus small-proxy decision.
+- [ ] System Direct behavior is unchanged.
+- [ ] Adrenotools/Turnip behavior is unchanged.
+- [ ] KGSL/Adreno hardware eligibility protects only Adreno Custom.
+- [ ] Distribution install policy cannot make Custom appear on Mali/Xclipse/PowerVR.
+- [ ] `libvulkan_samba_compat.so` loads through `_rpcsx_setCustomDriver`.
+- [ ] The wrapper opens `/system/lib64/libvulkan.so` itself on arm64.
+- [ ] All RPCSX-required Vulkan symbols are exported and audited automatically.
+- [ ] No `VK_LAYER_PATH`, layer manifest, or bundled OEM Vulkan blob is required.
+- [ ] M0 advertises no capability absent from the raw host report.
+- [ ] Host and Effective capability reports can be diffed field-by-field.
+- [ ] Backend is selected before `systemInfo`, probe-through-RPCSX, or renderer creation.
+- [ ] Backend cannot switch while any Vulkan/emulator object is live.
+- [ ] Previous loader ownership and close behavior pass cold-switch lifecycle tests.
+- [ ] Known-good G615 GTA baseline reaches its existing checkpoint under both System Direct and M0.
+- [ ] GPU/driver identity is the same under System Direct and M0.
+- [ ] Surface and activity lifecycle tests pass.
+- [ ] Standard and Play Store debug builds/tests pass.
+- [ ] x86_64 has a verified Compatibility build or a clean System Direct-only fallback.
+- [ ] M0 performance meets the pass-through gate.
+
+Only after all applicable M0 checks pass may compatibility rules enter M1/M2.
+
+## Risks and Mitigations
+
+| ID | Risk | Mitigation |
 |---|---|---|
-| `app/src/main/cpp/CMakeLists.txt` | MODIFY — add `add_subdirectory(vortek)` when `ANDROID_ABI=="arm64-v8a"`, link `VortekS3`/`Vulkan::Headers` | Build new layer |
-| `app/src/main/cpp/native-lib.cpp` | MODIFY — add `supportsVortek`, `getVulkanCapabilities`, `setVortekMode`, `HostVulkanDriver` enum + `openHostVulkan`, keep KGSL gate only for Custom | Host abstraction + probe |
-| `app/src/main/cpp/vortek/CMakeLists.txt` | NEW — `add_library(VkLayer_VortekS3 SHARED ...)` + shader codegen, VMA, Vulkan-Utility-Libraries | Layer build |
-| `app/src/main/cpp/vortek/src/*` | NEW — ~20 files ported from ExynosTools `src/layer/` (entry, global_state, dispatch, format/image virtualization, copy routing, command_buffer_*, bcn decoders, compute/VMA/staging) | BCn compat core |
-| `app/src/main/cpp/vortek/shaders/*` | NEW — `s3tc.comp, rgtc.comp, bc6.comp, bc7.comp` + IV variants | GPU decode |
-| `app/src/main/cpp/vortek/VkLayer_VortekS3.json.in` | NEW — layer manifest | Loader discovery |
-| `app/src/main/java/com/zenithblue/sambas3/RPCSX.kt` | MODIFY — externs `supportsVortek():Boolean`, `getVulkanCapabilities():String`, `setVortekMode(String):Boolean` | Kotlin bridge |
-| `app/src/main/java/com/zenithblue/sambas3/utils/GpuDriverHelper.kt` | MODIFY — `GraphicsDriverMode`, migration, `getGraphicsDriverMode/set` | Persist 3 modes |
-| `app/src/main/java/com/zenithblue/sambas3/utils/GpuDriverSelection.kt` | MODIFY — branch on `GraphicsDriverMode`, keep `adrenotools` only for Custom | Selection logic |
-| `app/src/main/java/com/zenithblue/sambas3/utils/VortekManager.kt` | NEW — `applyStoredMode`, `enable/disable`, `isActive`, env/LAYER_PATH handling | Lifecycle |
-| `app/src/main/java/com/zenithblue/sambas3/utils/GpuCapabilityProbe.kt` | NEW — probe JSON → typed `VulkanCapabilities` + `formatSupportsBC` helpers | Capability detection |
-| `app/src/main/java/com/zenithblue/sambas3/utils/GpuProfile.kt` | NEW — `VortekGpuProfile` + `profileFromCaps` | Per-vendor policy |
-| `app/src/main/java/com/zenithblue/sambas3/utils/AdrenoGpuDetector.kt` | MODIFY (minor) — add `isGenericMali/Xclipse/PowerVR` helpers via `Build.*` + `vendorID` fallback | Profile helpers |
-| `app/src/main/java/com/zenithblue/sambas3/ui/drivers/GpuDriversScreen.kt` (standard) | MODIFY — 3-mode Card list, probe badge, recommendation chip | UX |
-| `app/src/playstore/java/com/zenithblue/sambas3/ui/drivers/GpuDriversScreen.kt` | MODIFY — same 3 modes but Custom filtered to bundled Turnip only (unchanged gate) | UX parity |
-| `app/src/main/java/com/zenithblue/sambas3/MainActivity.kt` | MODIFY — probe + `VortekManager.applyStoredMode` before `RPCSX.initialize`, alongside `GpuDriverSelection` | Boot order |
-| `app/src/main/java/com/zenithblue/sambas3/RPCSXActivity.kt` | MODIFY — ensure vortek mode applied in cold init path | Cold entry |
-| `app/build.gradle.kts` | MODIFY — add `external/Vulkan-Headers` include, shader compile task, `packaging.jniLibs` layer exception | Build plumbing |
-| `gradle/libs.versions.toml` | MAYBE — add `vma = "3.1.0"` version pin | VMA dep |
-| `external/Vulkan-Headers` | NEW submodule @ pinned commit | Headers |
-| `docs/BUNDLED_TURNIP_DRIVERS.md` | MODIFY — note Vortek coexistence + `role=vortek-compat` bundle | Docs |
-| `app/src/test/.../GpuDriverHelperTest.kt` + `VortekManagerTest.kt` + `GpuCapabilityProbeTest.kt` + `GpuProfileTest.kt` | NEW | Unit coverage |
-| `app/src/main/cpp/vortek-client/` (optional spike) | NEW submodule `brunodev85/vortek@b1730c5` | IPC PoC only |
+| R1 | DXVK-oriented wrapper fabricates capabilities inappropriate for RPCSX | Strip force-enable policy; compare HostCaps and EffectiveCaps; require full semantics and tests |
+| R2 | Duplicate BC decode reduces performance or corrupts textures | Keep BC out of M0/M1; measure RPCSX BC1-3 fallback first |
+| R3 | Loader hot-swap leaves stale dispatch pointers or closes a live library | Serialized backend owner; hard no-live-Vulkan invariant; restart when uncertain |
+| R4 | Full Mesa-derived import inflates source, build, and APK | Gate B prototype comparison; pin/build only necessary target or use small proxy |
+| R5 | License/provenance is unclear across copied modules and shaders | File-level matrix before import; preserve notices and exact commits |
+| R6 | Raw host and wrapper-advertised capabilities are conflated | Separate probe implementations and explicit field-level diffs |
+| R7 | GameNative/Winlator success is assumed to transfer from DXVK to RPCSX | Require RPCSX reproduction, trace, test, and device evidence for every rule |
+| R8 | Xclipse BCn compute is treated as universally correct | No BC acceptance requirement; note GameNative's Xclipse exclusion; device-driven tests only |
+| R9 | Distribution permission is confused with Adreno eligibility | Separate hardware, external-install, and bundled-package predicates |
+| R10 | Bundled OEM Vulkan blob causes licensing/ABI/firmware problems | Always use installed Android system Vulkan; never package vendor ICD blobs |
+| R11 | Wrapper cannot satisfy RPCSX's dlsym symbol model | Generate required-symbol list and export audit in M0; fail build on missing symbols |
+| R12 | Backend is applied after a temporary Vulkan consumer such as `systemInfo` | Central deterministic startup sequence immediately after `openLibrary()` |
+| R13 | x86_64 exposes an arm64-only backend | Build/test proxy for x86_64 or hide it and retain System Direct |
+| R14 | Rules selected by GPU name regress unknown driver versions | Key on capabilities plus IDs/version; unknown drivers default to no rules |
+| R15 | In-process wrapper adds unacceptable overhead | M0 <=5% target, detailed frame/submit profiling, System Direct remains default |
 
-No changes to: `GameRepository.kt`, `PatchRepository.kt`, `overlay/*`, `GraphicsFrame.kt` surface plumbing (reused as-is), `design/design.md`.
+## Research Snapshot and Pinning Rules
 
-## Testing Strategy
+Research reviewed for this revision on 2026-08-24:
 
-### Unit (JVM, `./gradlew :app:testStandardDebugUnitTest :app:testPlaystoreDebugUnitTest` — `unitTests.isReturnDefaultValues true` already)
+| Project | Evaluated ref | Role |
+|---|---|---|
+| Samba RPCSX submodule | `e8ae1481ab7ba04d5c6bef89dd852aabba2c88ff` | loader API, symbol cache, BC fallback, Vulkan contract |
+| `leegao/bionic-vulkan-wrapper` `wrapper` branch | `c8baafbd4f4835ca103acb55ec3ac13642b6b7e3` | primary architectural scaffold/reference |
+| `leegao/bcn_layer` | `50993a2d51772567de9c36de4d523652773f0899` | optional BC research |
+| `leegao/vulkan_wrapper_termux-packages` | `c5c45d88a5f5c403bbe9f4c436139433628210de` | Android/Bionic build reference |
+| `utkarshdalal/GameNative` | `504ee7345d8ee86b6db4632e984efcb6097b594e` | integration/profile/package comparison |
+| `WearyConcern1165/ExynosTools` | `3dcdbcb2034e5f19a1606e54668e6a87f92476c6` | selective Xclipse reference |
+| `brunodev85/vortek` | `b1730c5def9b575672e671aee11d79ae7adc63d1` | optional IPC/serializer research |
 
-* `GpuDriverHelperTest` — `GraphicsDriverMode` migration (`gpu_driver_path` non-empty → Custom, empty+vortekEnabled→VortekSystem else System), `validateInstalledLibrary` still rejects `..`/`/` listings, playstore `ALLOW_EXTERNAL` gate unchanged for Custom.
-* `GpuCapabilityProbeTest` — parse synthetic Vulkan caps JSON (Mali-G615 with `textureCompressionBC false`, Xclipse 940 with missing `BC7`, PowerVR with old `apiVersion 1.0`); assert `isFormatSupported(VK_FORMAT_BC7_UNORM_BLOCK, sampled=true)` false → virtualized, `descriptorIndexing` false → hidden extension.
-* `GpuProfileTest` — `profileFromCaps(vendor=0x13B5, name="Mali-G615")→Mali`, `0x144D Xclipse 940→Xclipse`, `0x1010→PowerVR`, `0x5143→AdrenoOEM`, unknown→Generic; ensure profile does not alter probe result, only mask.
-* `VortekManagerTest` — `applyStoredMode` with mocked `RPCSX.setVortekMode` records correct env (`VK_LAYER_PATH`/`VK_INSTANCE_LAYERS`) and calls count; `disable()` clears env.
-* `layer_vk_struct_clone` native gtest (under `app/src/main/cpp/vortek/tests/`) — clone `VkImageCreateInfo+pNext ImageFormatListCreateInfo` + `VkBufferImageCopy2` round-trip size-correct.
+These are research snapshots, not automatic dependency selections. Before importing code, recheck
+the chosen upstream ref, record it in the license matrix/lock mechanism, and do not track a moving
+branch or a GameNative binary archive.
 
-Build gates: `./gradlew assembleStandardDebug assemblePlaystoreDebug` must pass both flavors; `abiFilters` still includes `x86_64` (layer no-op shim on x86_64 returns System).
+## Final Architecture
 
-### Integration (on-device, `adb`)
+```text
+                              +-- Android System Vulkan ------------------+
+                              |                                           |
+RPCSX -- GraphicsBackend -----+-- Samba In-Process Compatibility Proxy ---+--> OEM GPU driver
+                              |      + optional proven fixes              |
+                              |      + optional BC only if measured       |
+                              |                                           |
+                              +-- Adrenotools / Turnip --------------------+
 
-* Probe smoke: install `samba-s3-standard-debug.apk`, launch, `adb logcat -s VORTEK:V RPCSX-UI:V` shows `VulkanCapabilities vendor=... device=... api=1.3.x BC=false/true` for test devices.
-* Modes switching: System→VortekSystem→System toggle persists after kill+relaunch; `getInstalledDrivers` still lists Default + Turnip on Adreno; Vortek not in that map.
-* Presentation: `GraphicsFrame` surface recreated (rotate/split) while Vortek active — no `VK_ERROR_DEVICE_LOST`, swapchain via `ANativeWindow` still works.
+Optional research only:
+RPCSX -> Vortek client -> IPC/shared memory -> Vortek renderer -> system Vulkan
+```
 
-### Manual device matrix (requires hardware lab)
-
-| Device | GPU | Vulkan | Expected default | Vortek opt check |
-|---|---|---|---|---|
-| Poco X6 Pro (Dimensity 8300 Ultra) | Mali-G615 MC6 | 44.1.0 | System (already correct GTA SA Grove Street) | Compare frame time / artifact check; should be identical or slightly slower with Vortek |
-| Mid Mali (e.g. G57/G68) | Mali-G57 | 1.3.x, BC missing | Vortek recommended | BC1-7 game boots where System shows black/pink textures or vkCreateImage EINVAL |
-| Xclipse 940 (S24) | Xclipse 940 | 1.3.279 | System first, Vortek if BC missing | BC4/5/6H/7 virtualization success telemetry >0 |
-| PowerVR A/B-series | PowerVR BXM | 1.3.x | System | Probe shows PowerVR caps accurately; graceful fallback if BC missing and staging VMA fails |
-| Adreno 830 / 740 | Adreno 8xx/7xx | Turnip optional | System or Custom Turnip | Vortek+System fallback path distinct from Turnip; no KGSL false-negative |
-
-For each: boot GTA SA (or other BC-heavy title) 2 min, capture `VORTEK` log stats + fps via `GPUImage` (if available) + `dumpsys meminfo`, check `vkCmdCopyBufferToImage` decode count and `VkTimeout` 0.
-
-## Acceptance Criteria (objective, verifiable)
-
-* [ ] `grep -rn "supportsCustomDriverLoading\|adrenotools_open_libvulkan" app/src/main/cpp app/src/main/java` shows KGSL gate only guards Custom path; new symbols `supportsVortek`, `getVulkanCapabilities`, `setVortekMode`, `HostVulkanDriver` exist and are tested.
-* [ ] Three modes persist: `GraphicsDriverMode` enum stored under `graphics_driver_mode`; `getInstalledDrivers()` still returns exactly `Default + Custom(Turnip)` on Adreno; Vortek is NOT counted as a driver directory.
-* [ ] `Vortek + System Vulkan` loads `libvulkan.so` via System host on Mali/Xclipse/PowerVR/AdrenoOEM (`openHostVulkan(System)`), and `AdrenoCustom` still routes through `adrenotools_open_libvulkan` only for Turnip (`native-lib.cpp` branch covered by `__aarch64__` guard).
-* [ ] Capability probe returns non-empty JSON on arm64 device with ≥1 physical device, containing `vendorID, deviceID, deviceName, apiVersion, driverVersion, textureCompressionBC, descriptorIndexing, timelineSemaphore, bufferDeviceAddress, supportedFormats, deviceExtensions, queueFamilies`; `VortekGpuProfile` derived from it without hard-coding game hacks.
-* [ ] Layer `libVkLayer_VortekS3.so` + `VkLayer_VortekS3.json` shipped in APK (`jniLibs` or `assets`) and appears in `aapt dump`/`apk analyzer`; `VK_LAYER_PATH` set before `RPCSX.initialize` on arm64, no-op on x86_64.
-* [ ] BCn virtualization functional: on a BC-missing device, `vkGetPhysicalDeviceFormatProperties2(BC7)` false → `vkCreateImage(BC7)` virtualizes to `R8G8B8A8_*` and `vkCmdCopyBufferToImage2` routes through compute/CPU decode (telemetry `decodeSuccess>0`), while on BC-present G615 device System path shows `decodeSuccess==0`.
-* [ ] `GraphicsFrame` ANativeWindow presentation works under Vortek (game renders, no black screen after surfaceCreated/Changed/Destroyed cycle, logcat `VORTEK` no `DEVICE_LOST`).
-* [ ] GpuDriversScreen shows 3 cards: System (lowest overhead chip), Vortek+System (compatibility badge + profile name), Custom (only when `isAdreno && isArm64 && /dev/kgsl-3d0` or playstore bundled catalog non-empty); selection survives `kill`+relaunch.
-* [ ] Both flavors assemble clean: `./gradlew assembleStandardDebug assemblePlaystoreDebug` and `./gradlew :app:testStandardDebugUnitTest :app:testPlaystoreDebugUnitTest` pass.
-* [ ] No emoji in new Kotlin/XML strings; icons via `painterResource(R.drawable.*)` only (grep audit `grep -rP "[\x{1F000}-\x{1FAFF}]" app/src/main/java/com/zenithblue/sambas3/utils/Vortek* app/src/main/java/.../GpuDriversScreen.kt` empty).
-* [ ] If IPC spike built, benchmark doc `docs/generated/vortek-ipc-benchmark.md` exists with p50/p95 `vkQueueSubmit` and frame-time delta vs layer; decision (keep layer only or dual) recorded.
-
-## Risks & Mitigations (NEW_RISKS)
-
-* **R1 Vortek ≠ turnkey library.** `brunodev85/vortek` client alone is insufficient; full server (`request_handler.c`, `shader_inspector.c`, etc.) is large and Winlator-specific (XWindow/GPUImage/JNI). Mitigation: **avoid IPC as primary**, reuse ExynosTools layer skeleton which already removed Winlator X dependencies and targets `ANativeWindow` directly; IPC kept as isolated optional spike.
-* **R2 IPC overhead unsuitable for PS3 emulator.** Draw-call and synchronization heavy RPCSX may not tolerate ring-buffer + socket + thread-pool hops (`leegao Part 1` notes command-buffer batching only at `vkQueueSubmit`). Mitigation: layer-first, measure before merging IPC; if p95 overhead >2 ms, drop IPC line.
-* **R3 Layer loader env not honored.** `VK_LAYER_PATH`/`VK_INSTANCE_LAYERS` via `Os.setenv` may be ignored if loader was already initialized before `RPCSX.initialize`, or under certain vendor loaders. Mitigation: set env in `MainActivity.onCreate` *and* `RPCSXActivity` cold path before any Vulkan `dlopen`; fallback hook in `native-lib.cpp` interposing `vkCreateInstance`.
-* **R4 Vulkan probe before instance.** `getVulkanCapabilities` called too early → empty JSON → profile falls to Generic. Mitigation: probe lazily after `RPCSX.initialize` and cache; UI shows "probe pending" until first success; Vortek enable defers to next launch if probe empty.
-* **R5 BCn decode cost on weak Mali.** Compute shaders for BC6H/BC7 may be slower than System path on G615 where BC already works. Mitigation: default System for G615-proven devices, Vortek only when probe shows missing format; telemetry exposes `decodeFallback` to guide auto-recommendation later.
-* **R6 PowerVR old driver caps too low.** `apiVersion 1.0`, no `descriptorIndexing`/`timelineSemaphore` — cannot emulate to 1.3. Mitigation: document as "candidate but driver-limited"; vortek hides missing extensions rather than fabricating them; manual matrix marks older 8XE/9XE as low feasibility.
-* **R7 NDK/VMA/shader toolchain version drift.** `Vulkan-Utility-Libraries`/`VMA` APIs change across releases; shader `glslc` vs `glslangValidator` version matters. Mitigation: pin Vulkan-Headers/VMA commits in `libs.versions.toml` and CI `gradle/libs.versions.toml` bump policy; shader embedding build fails fast if NDK missing.
-* **R8 Play Store policy on external drivers.** `ALLOW_EXTERNAL_GPU_DRIVERS=false` must still allow Vortek+System (which is in-APK, not external). Mitigation: Vortek binaries shipped in APK are not subject to external-install gate; Custom path gate unchanged.
-* **R9 Submodule + licensing divergence.** `brunodev85/vortek` (MIT-ish) vs `ExynosTools` (own) vs Samba-S3 Apache-2. Mitigation: keep Vortek client pins at commit `b1730c5` with LICENSE notice; layer from ExynosTools credited per its Credits (Mesa/Granite/bionic-vulkan-wrapper).
-* **R10 ctx7 quota / Vulkan spec drift.** If `npx ctx7` unavailable, Vulkan loader docs fallback is `vulkan.lunarg.com` + Khronos specs. Mitigation: record fallback in build log; no code depends on ctx7 at runtime.
-
-## Handoff to Plan Reviewer
-
-Validate:
-
-1. Architecture choice — **layer-first, IPC-spike-second** — correctly maps RPCSX being Bionic-native (unlike Winlator glibc), and that file-level map reuses ExynosTools `src/layer` without pulling `vulkan_calls.c` IPC serializer wholesale (per `VORTEK_ADAPTATION_ANALYSIS.md` 5-15% reuse guidance).
-2. `HostVulkanDriver` split cleanly isolates `adrenotools_open_libvulkan` to Adreno Custom only, while `System` path is pure `dlopen("libvulkan.so")` for Mali/Xclipse/PowerVR/AdrenoOEM — check `native-lib.cpp` edit preserves `__aarch64__` guards and `jniLibs.useLegacyPackaging`.
-3. Three-mode persistence (`GraphicsDriverMode`) migration does not break existing `gpu_driver_path/name` keys or Play flavor `INCLUDE_BUNDLED_TURNIP_DRIVERS` flow; `getInstalledDrivers` not polluted by Vortek entries.
-4. Capability probe JSON shape covers minimum required fields (`textureCompressionBC`, `descriptorIndexing`, `timelineSemaphore`, `bufferDeviceAddress`, `shaderFloat16`, `storageBuffer16BitAccess`, `transformFeedback`, `dynamicRendering`, `synchronization2`, `memory types/heaps`, `supported formats`, `device extensions`, `queue families`) and is invoked after `RPCSX.initialize` so it never races with `MainActivity.kt:60-74` init order.
-5. Layer load order `MainActivity.onCreate → VortekManager.applyStoredMode → RPCSX.initialize → startMainThreadProcessor/processCompilationQueue` and cold `RPCSXActivity` path both set `VK_LAYER_PATH` before first `vkCreateInstance`; fallback interpose via `native-lib.cpp` is documented if loader env ignored.
-6. BCn virtualization scope (R1-R4, Xclipse matrix rules) is probe-driven not model-name-driven; no per-game hack table; Xclipse/Mali/PowerVR feasibility tiers match baseline G615 evidence.
-7. No native surface/presentation regression: `GraphicsFrame → ANativeWindow` path unchanged, Winlator `XWindow/GPUImage/XConnector` correctly deleted from port.
-8. Build/test gates for both flavors and acceptance greps are objective and cover the "not replace system driver" invariant.
+The project should proceed with a transparent in-process proxy first, not a Vortek layer and not a
+BCn subsystem. System Direct remains the default, Turnip remains an Adreno-only custom driver, and
+every compatibility behavior must be justified by a reproduced RPCSX failure.
