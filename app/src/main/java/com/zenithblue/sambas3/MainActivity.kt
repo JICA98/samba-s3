@@ -44,8 +44,6 @@ class MainActivity : ComponentActivity() {
         }
 
         if (!RPCSX.initialized) {
-            Permission.PostNotifications.requestPermission(this)
-
             RPCSX.rootDirectory = applicationContext.getExternalFilesDir(null).toString()
             if (!RPCSX.rootDirectory.endsWith("/")) {
                 RPCSX.rootDirectory += "/"

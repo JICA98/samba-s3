@@ -21,7 +21,9 @@ import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -54,6 +56,7 @@ import coil3.compose.AsyncImage
 import com.zenithblue.sambas3.*
 import com.zenithblue.sambas3.R
 import com.zenithblue.sambas3.utils.FileUtil
+import com.zenithblue.sambas3.utils.GameFolderMatch
 import kotlin.math.abs
 import kotlin.concurrent.thread
 import java.text.SimpleDateFormat
@@ -115,6 +118,9 @@ fun GamesScreen(
     var focusedIndex by remember { mutableStateOf(if (games.isNotEmpty()) 0 else -1) }
     var bootingGame by remember { mutableStateOf<Game?>(null) }
     var showImportDialog by remember { mutableStateOf(false) }
+    var scannedFolderGames by remember { mutableStateOf<List<GameFolderMatch>?>(null) }
+    var scannedFolderUri by remember { mutableStateOf<Uri?>(null) }
+    var scanningFolder by remember { mutableStateOf(false) }
     var configureGameTarget by remember { mutableStateOf<Game?>(null) }
     var configuringGame by remember { mutableStateOf(false) }
     val isRunning = emulatorState.value == EmulatorState.Running || emulatorState.value == EmulatorState.Paused
@@ -149,9 +155,24 @@ fun GamesScreen(
         contract = ActivityResultContracts.OpenDocumentTree()
     ) { uri: Uri? ->
         if (uri != null) {
-            val takeFlags = Intent.FLAG_GRANT_READ_URI_PERMISSION
-            context.contentResolver.takePersistableUriPermission(uri, takeFlags)
-            FileUtil.installPackages(context, uri)
+            try {
+                context.contentResolver.takePersistableUriPermission(
+                    uri,
+                    Intent.FLAG_GRANT_READ_URI_PERMISSION,
+                )
+            } catch (_: SecurityException) {
+                // Some providers return a readable tree without persistable access.
+            }
+            scannedFolderUri = uri
+            scannedFolderGames = null
+            scanningFolder = true
+            thread(name = "sambas3-folder-scan") {
+                val matches = FileUtil.scanGameFolder(context, uri)
+                context.mainExecutor.execute {
+                    scannedFolderGames = matches
+                    scanningFolder = false
+                }
+            }
         }
     }
 
@@ -265,7 +286,27 @@ fun GamesScreen(
 
             if (games.isEmpty()) {
                 Box(modifier = Modifier.fillMaxWidth().weight(1f), contentAlignment = Alignment.Center) {
-                    Text("No games yet.\nSelect Add Game from the carousel to import.", style = AppTypography.bodyLarge, textAlign = TextAlign.Center, color = RPCSXColors.textSecondary)
+                    Column(
+                        horizontalAlignment = Alignment.CenterHorizontally,
+                        verticalArrangement = Arrangement.spacedBy(16.dp),
+                        modifier = Modifier.padding(horizontal = 24.dp),
+                    ) {
+                        Text(
+                            text = stringResource(R.string.no_games_yet),
+                            style = AppTypography.bodyLarge,
+                            textAlign = TextAlign.Center,
+                            color = RPCSXColors.textSecondary,
+                        )
+                        Button(
+                            onClick = { folderPickerLauncher.launch(null) },
+                            colors = ButtonDefaults.buttonColors(
+                                containerColor = RPCSXColors.primary,
+                                contentColor = RPCSXColors.background,
+                            ),
+                        ) {
+                            Text(stringResource(R.string.game_folder_scan_action))
+                        }
+                    }
                 }
             } else {
                 BoxWithConstraints(modifier = Modifier.fillMaxWidth().weight(1f)) {
@@ -625,7 +666,101 @@ fun GamesScreen(
                 }
             )
         }
+
+        if (scanningFolder) {
+            AlertDialog(
+                onDismissRequest = {},
+                title = { Text(stringResource(R.string.game_folder_scan_title)) },
+                text = {
+                    Row(
+                        horizontalArrangement = Arrangement.spacedBy(12.dp),
+                        verticalAlignment = Alignment.CenterVertically,
+                    ) {
+                        CircularProgressIndicator(
+                            modifier = Modifier.size(24.dp),
+                            color = RPCSXColors.primary,
+                        )
+                        Text(stringResource(R.string.game_folder_scanning))
+                    }
+                },
+                confirmButton = {},
+            )
+        }
+
+        scannedFolderGames?.let { matches ->
+            GameFolderScanDialog(
+                matches = matches,
+                onDismiss = {
+                    scannedFolderGames = null
+                    scannedFolderUri = null
+                },
+                onImport = {
+                    scannedFolderUri?.let { FileUtil.installPackages(context, it) }
+                    scannedFolderGames = null
+                    scannedFolderUri = null
+                },
+            )
+        }
     }
+}
+
+@Composable
+private fun GameFolderScanDialog(
+    matches: List<GameFolderMatch>,
+    onDismiss: () -> Unit,
+    onImport: () -> Unit,
+) {
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = { Text(stringResource(R.string.game_folder_scan_title)) },
+        text = {
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .heightIn(max = 420.dp)
+                    .verticalScroll(rememberScrollState()),
+                verticalArrangement = Arrangement.spacedBy(8.dp),
+            ) {
+                if (matches.isEmpty()) {
+                    Text(stringResource(R.string.game_folder_no_games))
+                } else {
+                    Text(stringResource(R.string.game_folder_found_count, matches.size))
+                    matches.forEach { match ->
+                        Surface(
+                            color = RPCSXColors.surfaceElevated,
+                            shape = RoundedCornerShape(6.dp),
+                            modifier = Modifier.fillMaxWidth(),
+                        ) {
+                            Column(modifier = Modifier.padding(10.dp)) {
+                                Text(
+                                    text = match.folderName,
+                                    style = AppTypography.bodyLarge,
+                                    color = RPCSXColors.textPrimary,
+                                )
+                                match.titleId?.let {
+                                    Text(
+                                        text = it,
+                                        style = AppTypography.labelMedium,
+                                        color = RPCSXColors.textSecondary,
+                                    )
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        confirmButton = {
+            TextButton(onClick = onImport, enabled = matches.isNotEmpty()) {
+                Text(stringResource(R.string.game_folder_import_found))
+            }
+        },
+        dismissButton = {
+            TextButton(onClick = onDismiss) {
+                Text(stringResource(android.R.string.cancel))
+            }
+        },
+    )
 }
 
 @Composable

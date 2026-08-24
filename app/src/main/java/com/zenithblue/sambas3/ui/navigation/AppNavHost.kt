@@ -89,6 +89,10 @@ import com.zenithblue.sambas3.ui.settings.getNestedSettings
 import com.zenithblue.sambas3.ui.settings.isAdvancedSettingsRoute
 import com.zenithblue.sambas3.ui.settings.normalizeAdvancedSettingsPath
 import com.zenithblue.sambas3.ui.user.UsersScreen
+import com.zenithblue.sambas3.ui.onboarding.ONBOARDING_ROUTE
+import com.zenithblue.sambas3.ui.onboarding.OnboardingDestination
+import com.zenithblue.sambas3.ui.onboarding.OnboardingEntry
+import com.zenithblue.sambas3.ui.onboarding.OnboardingPrefs
 import com.zenithblue.sambas3.utils.FileUtil
 import androidx.navigation.NavType
 import androidx.navigation.navArgument
@@ -101,6 +105,9 @@ fun AppNavHost() {
     val navController = rememberNavController()
     val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
     val scope = rememberCoroutineScope()
+    var needsFirstRunOnboarding by remember {
+        mutableStateOf(!OnboardingPrefs.isCompleted())
+    }
     val rpcsxLibrary by remember { RPCSX.activeLibrary }
 
     val navigateTo: (String) -> Unit = { route ->
@@ -124,6 +131,18 @@ fun AppNavHost() {
     }
 
     AlertDialogQueue.AlertDialog()
+
+    if (needsFirstRunOnboarding) {
+        OnboardingDestination(
+            entry = OnboardingEntry.FirstRun,
+            onFinished = {
+                OnboardingPrefs.markCompleted()
+                needsFirstRunOnboarding = false
+            },
+            onExitAtFirstPage = null,
+        )
+        return
+    }
 
     if (rpcsxLibrary == null) {
         GamesDestination(
@@ -186,6 +205,24 @@ fun AppNavHost() {
                 navigateBack = navController::navigateUp,
                 navigateTo = navigateTo,
                 onRefresh = refreshSettings
+            )
+        }
+
+        composable(
+            route = ONBOARDING_ROUTE,
+        ) {
+            OnboardingDestination(
+                entry = OnboardingEntry.Replay,
+                onFinished = {
+                    if (!navController.navigateUp()) {
+                        navController.navigate("settings") { launchSingleTop = true }
+                    }
+                },
+                onExitAtFirstPage = {
+                    if (!navController.navigateUp()) {
+                        navController.navigate("settings") { launchSingleTop = true }
+                    }
+                },
             )
         }
 

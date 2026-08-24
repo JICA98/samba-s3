@@ -33,6 +33,11 @@ private data class InstallableFolder(
     val uri: Uri, val targetPath: String
 )
 
+data class GameFolderMatch(
+    val folderName: String,
+    val titleId: String?,
+)
+
 object FileUtil {
     /**
      * Self-healing: fixes historical nested path bug where an absolute install
@@ -96,6 +101,46 @@ object FileUtil {
                 }
             } catch (_: Exception) {}
         } catch (_: Exception) {}
+    }
+
+    /**
+     * Finds every PS3 game directory below a selected SAF tree without copying
+     * or indexing anything. The result is used as a preview before the caller
+     * decides whether to import it.
+     */
+    fun scanGameFolder(context: Context, rootFolderUri: Uri): List<GameFolderMatch> {
+        return try {
+            val rootName = DocumentFile.fromTreeUri(context, rootFolderUri)?.name
+                ?: context.getString(R.string.onboarding_selected_folder)
+            val workList = ArrayDeque<Pair<Uri, String>>()
+            val matches = LinkedHashMap<String, GameFolderMatch>()
+            workList.add(rootFolderUri to rootName)
+
+            while (workList.isNotEmpty()) {
+                val (folderUri, folderName) = workList.removeFirst()
+                val hasParam = uriOpenFile(context, folderUri, "PS3_GAME/PARAM.SFO")?.use { true }
+                    ?: uriOpenFile(context, folderUri, "PARAM.SFO")?.use { true }
+                    ?: false
+                if (hasParam) {
+                    val titleId = Regex("(?i)([A-Z]{4}[0-9]{5})")
+                        .find(folderName)
+                        ?.groupValues
+                        ?.getOrNull(1)
+                        ?.uppercase()
+                    val key = titleId ?: folderName.lowercase()
+                    matches[key] = GameFolderMatch(folderName, titleId)
+                    continue
+                }
+
+                listFilesStrict(folderUri, context)
+                    .filter { it.isDirectory }
+                    .forEach { child -> workList.add(child.uri to child.filename) }
+            }
+            matches.values.toList()
+        } catch (e: Exception) {
+            Log.e("FileUtil", "Cannot scan selected game folder $rootFolderUri", e)
+            emptyList()
+        }
     }
 
     fun installPackages(context: Context, rootFolderUri: Uri) {

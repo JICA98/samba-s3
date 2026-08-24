@@ -83,6 +83,7 @@ import com.zenithblue.sambas3.ui.settings.components.preference.RegularPreferenc
 import com.zenithblue.sambas3.ui.settings.components.preference.SingleSelectionDialog
 import com.zenithblue.sambas3.ui.settings.components.preference.SliderPreference
 import com.zenithblue.sambas3.ui.settings.components.preference.SwitchPreference
+import com.zenithblue.sambas3.ui.onboarding.ONBOARDING_ROUTE
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -221,6 +222,12 @@ fun SettingsDetailPane(
             }
             status = if (com.zenithblue.sambas3.RPCSX.instance.supportsCustomDriverLoading()) "SUPPORTED" else "UNSUPPORTED"
             backend = "VULKAN 1.3"
+        }
+        "onboarding" -> {
+            title = stringResource(R.string.onboarding_replay_title)
+            description = stringResource(R.string.onboarding_replay_description)
+            status = stringResource(R.string.onboarding_ready)
+            backend = stringResource(R.string.onboarding_setup_guide)
         }
         "controls" -> {
             title = "Controller Bindings"
@@ -1174,6 +1181,16 @@ fun SettingsScreen(
                             else navigateTo("users")
                         },
                         onFocusChanged = { if (it) focusedKey = "users" }
+                    )
+                }
+
+                item(key = "onboarding") {
+                    HomePreference(
+                        title = stringResource(R.string.onboarding_replay_title),
+                        description = stringResource(R.string.onboarding_replay_description),
+                        icon = { Icon(painterResource(R.drawable.ic_refresh), contentDescription = null) },
+                        onClick = { navigateTo(ONBOARDING_ROUTE) },
+                        onFocusChanged = { if (it) focusedKey = "onboarding" },
                     )
                 }
 
