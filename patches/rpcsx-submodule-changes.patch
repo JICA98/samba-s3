@@ -19,11 +19,542 @@ index 67174c58e..aba8b3a79 100644
  	else()
  		message(WARNING "Vulkan not found, using submodule")
  		set(COMPILE_VULKAN_LOADER on)
+diff --git a/android/CMakeLists.txt b/android/CMakeLists.txt
+index b834c0fe7..84128a3e8 100644
+--- a/android/CMakeLists.txt
++++ b/android/CMakeLists.txt
+@@ -110,6 +110,9 @@ set(COMPILE_FFMPEG off)
+ add_subdirectory(${CMAKE_SOURCE_DIR}/.. rpcsx EXCLUDE_FROM_ALL)
+ 
+ add_library(${CMAKE_PROJECT_NAME} SHARED
++    src/atomic-file-copier.cpp
++    src/iso-install-manifest.cpp
++    src/staged-game-installer.cpp
+     src/rpcsx-android.cpp
+ )
+ 
+diff --git a/android/src/atomic-file-copier.cpp b/android/src/atomic-file-copier.cpp
+new file mode 100644
+index 000000000..68c28d41f
+--- /dev/null
++++ b/android/src/atomic-file-copier.cpp
+@@ -0,0 +1,112 @@
++#include "atomic-file-copier.hpp"
++
++#include "util/StrFmt.h"
++
++#include <algorithm>
++#include <vector>
++
++namespace rpcsx::android {
++namespace {
++constexpr u64 kCopyBufferSize = 8 * 1024 * 1024;
++CopyTestHooks g_testHooks;
++} // namespace
++
++void setCopyTestHooks(CopyTestHooks hooks) { g_testHooks = std::move(hooks); }
++void clearCopyTestHooks() { g_testHooks = CopyTestHooks{}; }
++
++AtomicFileCopyResult copyFileAtomically(fs::file &source,
++                                        const std::string &destination,
++                                        u64 expectedSize) {
++  AtomicFileCopyResult result;
++
++  if (source.size() != expectedSize) {
++    result.error =
++        fmt::format("Source size mismatch for %s: expected %llu, got %llu",
++                    destination, expectedSize, source.size());
++    return result;
++  }
++
++  fs::pending_file pending(destination);
++  if (!pending.file) {
++    result.error =
++        fmt::format("Failed to create pending file for %s", destination);
++    return result;
++  }
++
++  // Zero-byte files are valid; no buffer needed and no read/write
++  if (expectedSize == 0) {
++    if (pending.file.size() != 0) {
++      result.error = fmt::format("Final size mismatch for %s: expected 0, wrote %llu", destination, pending.file.size());
++      return result;
++    }
++    if (g_testHooks.onCommit && !g_testHooks.onCommit(destination)) {
++      result.error = fmt::format("Injected commit failure for %s", destination);
++      return result;
++    }
++    if (!pending.commit()) {
++      result.error = fmt::format("Failed to commit completed file %s", destination);
++    }
++    return result;
++  }
++
++  std::vector<u8> buffer(
++      static_cast<std::size_t>(std::min(expectedSize, kCopyBufferSize)));
++  if (buffer.empty()) {
++    buffer.resize(4096);
++  }
++
++  while (result.bytesCopied < expectedSize) {
++    const u64 requested =
++        std::min<u64>(buffer.size(), expectedSize - result.bytesCopied);
++    u64 bytesRead = source.read(buffer.data(), requested);
++    if (g_testHooks.onRead) {
++      u64 injected = bytesRead;
++      if (!g_testHooks.onRead(result.bytesCopied, requested, injected)) {
++        bytesRead = injected; // allow hook to modify bytesRead to simulate short read
++      }
++    }
++    if (bytesRead != requested) {
++      result.error =
++          fmt::format("Incomplete read for %s: expected %llu, read %llu",
++                      destination, expectedSize,
++                      result.bytesCopied + bytesRead);
++      return result;
++    }
++
++    u64 bytesWritten = pending.file.write(buffer.data(), bytesRead);
++    if (g_testHooks.onWrite) {
++      u64 injected = bytesWritten;
++      if (!g_testHooks.onWrite(result.bytesCopied, bytesRead, injected)) {
++        bytesWritten = injected;
++      }
++    }
++    result.bytesCopied += bytesWritten;
++    if (bytesWritten != bytesRead) {
++      result.error =
++          fmt::format("Incomplete write for %s: expected %llu, wrote %llu",
++                      destination, expectedSize, result.bytesCopied);
++      return result;
++    }
++  }
++
++  const u64 finalSize = pending.file.size();
++  if (finalSize != expectedSize) {
++    result.error =
++        fmt::format("Final size mismatch for %s: expected %llu, wrote %llu",
++                    destination, expectedSize, finalSize);
++    return result;
++  }
++
++  if (g_testHooks.onCommit && !g_testHooks.onCommit(destination)) {
++    result.error = fmt::format("Injected commit failure for %s", destination);
++    return result;
++  }
++
++  if (!pending.commit()) {
++    result.error =
++        fmt::format("Failed to commit completed file %s", destination);
++  }
++
++  return result;
++}
++} // namespace rpcsx::android
+diff --git a/android/src/atomic-file-copier.hpp b/android/src/atomic-file-copier.hpp
+new file mode 100644
+index 000000000..4876c7aaf
+--- /dev/null
++++ b/android/src/atomic-file-copier.hpp
+@@ -0,0 +1,30 @@
++#pragma once
++
++#include "util/File.h"
++
++#include <atomic>
++#include <functional>
++#include <string>
++
++namespace rpcsx::android {
++struct AtomicFileCopyResult {
++  u64 bytesCopied = 0;
++  std::string error;
++
++  explicit operator bool() const { return error.empty(); }
++};
++
++// Test seam: inject failures for regression tests. Only active when set.
++struct CopyTestHooks {
++  std::function<bool(u64 bytesCopied, u64 requested, u64& bytesRead)> onRead; // return false to simulate short read
++  std::function<bool(u64 bytesCopied, u64 bytesRead, u64& bytesWritten)> onWrite; // return false to simulate short write
++  std::function<bool(const std::string& destination)> onCommit; // return false to simulate commit failure
++};
++
++void setCopyTestHooks(CopyTestHooks hooks);
++void clearCopyTestHooks();
++
++AtomicFileCopyResult copyFileAtomically(fs::file &source,
++                                        const std::string &destination,
++                                        u64 expectedSize);
++} // namespace rpcsx::android
+diff --git a/android/src/iso-install-manifest.cpp b/android/src/iso-install-manifest.cpp
+new file mode 100644
+index 000000000..e467e02b5
+--- /dev/null
++++ b/android/src/iso-install-manifest.cpp
+@@ -0,0 +1,297 @@
++#include "iso-install-manifest.hpp"
++
++#include "util/File.h"
++#include "util/StrFmt.h"
++
++#include <algorithm>
++#include <cctype>
++#include <filesystem>
++#include <unordered_set>
++#include <unordered_map>
++#include <regex>
++
++namespace rpcsx::android {
++
++namespace {
++bool equalsIgnoreCase(std::string_view a, std::string_view b) {
++  if (a.size() != b.size()) return false;
++  for (size_t i = 0; i < a.size(); ++i) {
++    if (std::tolower((unsigned char)a[i]) != std::tolower((unsigned char)b[i])) return false;
++  }
++  return true;
++}
++
++std::string toLower(std::string s) {
++  for (auto& c : s) c = std::tolower((unsigned char)c);
++  return s;
++}
++} // namespace
++
++bool IsoInstallManifest::isValidTitleId(std::string_view titleId) {
++  static const std::regex re("^[A-Z]{4}[0-9]{5}$");
++  return std::regex_match(std::string(titleId), re);
++}
++
++bool IsoInstallManifest::isValidPathComponent(std::string_view comp) {
++  if (comp.empty()) return false;
++  if (comp == "." || comp == "..") return false;
++  // Reject embedded NUL, '/', '\', absolute/root, drive names
++  for (char c : comp) {
++    if (c == '\0' || c == '/' || c == '\\') return false;
++  }
++  // Reject rooted/absolute: leading '/', leading '\', drive like "C:", or containing ":"
++  if (comp.find(':') != std::string_view::npos) return false;
++  if (comp[0] == '/' || comp[0] == '\\') return false;
++  // Reject components that after normalization would be empty or escape - also check for control?
++  return true;
++}
++
++std::optional<std::string> IsoInstallManifest::normalizeAndValidateRelativePath(const std::string& relativePath, std::string& error) {
++  if (relativePath.empty()) {
++    error = "Empty relative path";
++    return std::nullopt;
++  }
++  // Reject absolute or rooted
++  if (relativePath[0] == '/' || relativePath[0] == '\\' ) {
++    error = fmt::format("Absolute path rejected: %s", relativePath);
++    return std::nullopt;
++  }
++  if (relativePath.find(':') != std::string::npos) {
++    error = fmt::format("Drive/path with colon rejected: %s", relativePath);
++    return std::nullopt;
++  }
++  if (relativePath.find('\0') != std::string::npos) {
++    error = fmt::format("NUL in path rejected: %s", relativePath);
++    return std::nullopt;
++  }
++
++  std::filesystem::path p(relativePath);
++  // Ensure no component is "..", "." or invalid
++  for (auto comp : p) {
++    std::string s = comp.string();
++    if (s == "." || s == "..") {
++      error = fmt::format("Path escapes with dot component: %s", relativePath);
++      return std::nullopt;
++    }
++    if (!isValidPathComponent(s)) {
++      error = fmt::format("Invalid component '%s' in path %s", s, relativePath);
++      return std::nullopt;
++    }
++  }
++
++  auto normalized = p.lexically_normal();
++  std::string normStr = normalized.string();
++  // lexically_normal may produce empty for "." etc., but we already checked
++  if (normStr.empty()) {
++    error = fmt::format("Normalized empty path from %s", relativePath);
++    return std::nullopt;
++  }
++  // Ensure normalized does not start with "/" or ".."
++  if (normStr[0] == '/' || normStr[0] == '\\') {
++    error = fmt::format("Normalized absolute path rejected: %s -> %s", relativePath, normStr);
++    return std::nullopt;
++  }
++  if (normStr == ".." || normStr.rfind("../",0)==0 || normStr.rfind("..\\",0)==0 || normStr.find("/../") != std::string::npos || normStr.find("\\..\\") != std::string::npos) {
++    error = fmt::format("Normalized escapes root: %s -> %s", relativePath, normStr);
++    return std::nullopt;
++  }
++  // Replace backslashes with slashes for consistency
++  std::replace(normStr.begin(), normStr.end(), '\\', '/');
++  return normStr;
++}
++
++bool isPathWithinRoot(const std::string& root, const std::string& candidate) {
++  try {
++    std::filesystem::path rootP(root);
++    std::filesystem::path candP(candidate);
++    rootP = rootP.lexically_normal();
++    candP = candP.lexically_normal();
++    std::string rootS = rootP.string();
++    std::string candS = candP.string();
++    if (rootS.empty() || candS.empty()) return false;
++    // Ensure trailing slash for root
++    if (!rootS.ends_with('/')) rootS += '/';
++    if (candS.size() <= rootS.size()) return false;
++    if (candS.rfind(rootS, 0) != 0) return false;
++    // Ensure the character after root prefix is not escaping
++    return true;
++  } catch (...) {
++    return false;
++  }
++}
++
++std::optional<IsoInstallManifest> IsoInstallManifest::build(iso_dev& iso, std::string& error) {
++  IsoInstallManifest manifest;
++
++  // BFS traversal of ISO directory tree
++  std::vector<std::filesystem::path> workList;
++  std::vector<std::filesystem::path> allDirs; // for later maybe
++  workList.emplace_back("");
++  allDirs.emplace_back("");
++
++  std::unordered_set<std::string> seenNormalized; // lowercased normalized relativePath for duplicate detection
++  std::unordered_set<std::string> seenExact; // exact normalized
++
++  size_t filesCount = 0;
++
++  // We need to track visited iso paths to avoid loops, but ISO tree is acyclic
++
++  // First pass: collect directories and files via BFS
++  struct PendingDir {
++    std::filesystem::path isoPath; // path inside ISO for open_dir
++  };
++
++  std::vector<std::filesystem::path> dirsToProcess;
++  dirsToProcess.emplace_back("");
++
++  // Use index for BFS
++  size_t dirIndex = 0;
++  // Keep list of all relative paths encountered (both dirs and files)
++  // For manifest we need entries for directories (to create) and files
++  std::vector<std::filesystem::path> discoveredDirs;
++  discoveredDirs.emplace_back("");
++
++  while (dirIndex < dirsToProcess.size()) {
++    auto cur = dirsToProcess[dirIndex++];
++
++    fs::dir dir;
++    auto raw = iso.open_dir(cur.string());
++    if (!raw) {
++      // Distinguish between empty directory (valid) vs failed read (invalid)
++      // iso_dev::open_dir returns nullptr on failure; for valid empty dir, it returns virtual_dir with 0 entries (still non-null)
++      // So nullptr indicates failure
++      error = fmt::format("Failed to read ISO directory: %s", cur.string().empty() ? "/" : cur.string());
++      // Propagate underlying fs error if available
++      if (fs::g_tls_error != fs::error::ok) {
++        error += fmt::format(" (%s)", fmt::format("%s", fs::g_tls_error));
++      }
++      return std::nullopt;
++    }
++    dir.reset(std::move(raw));
++
++    for (auto &entry : dir) {
++      if (entry.name == "." || entry.name == "..") {
++        continue;
++      }
++
++      // Validate component
++      if (!isValidPathComponent(entry.name)) {
++        error = fmt::format("Invalid path component '%s' in directory %s", entry.name, cur.string());
++        return std::nullopt;
++      }
++
++      // Skip PS3_UPDATE only at root (cur empty) case-insensitive
++      if (cur.empty() && equalsIgnoreCase(entry.name, "PS3_UPDATE")) {
++        if (entry.is_directory) {
++          // Skip entire subtree: do not add to manifest and do not traverse
++          continue;
++        } else {
++          // Single file PS3_UPDATE at root? skip as well per spec (only directory)
++          continue;
++        }
++      }
++
++      std::filesystem::path rel = cur.empty() ? std::filesystem::path(entry.name) : cur / entry.name;
++      std::string relStr = rel.string();
++      // Normalize '/' separators (filesystem path may use platform sep)
++      std::replace(relStr.begin(), relStr.end(), '\\', '/');
++
++      // Normalize and validate
++      std::string normErr;
++      auto normOpt = normalizeAndValidateRelativePath(relStr, normErr);
++      if (!normOpt) {
++        error = fmt::format("Invalid relative path %s: %s", relStr, normErr);
++        return std::nullopt;
++      }
++      std::string normalized = *normOpt;
++      // Replace back slash with slash
++      std::replace(normalized.begin(), normalized.end(), '\\', '/');
++
++      // Duplicate detection: normalized destination paths
++      std::string lower = toLower(normalized);
++      if (seenNormalized.find(lower) != seenNormalized.end()) {
++        error = fmt::format("Duplicate normalized destination path: %s (from %s)", normalized, relStr);
++        return std::nullopt;
++      }
++      // Also check exact duplicate
++      if (seenExact.find(normalized) != seenExact.end()) {
++        error = fmt::format("Duplicate destination path: %s", normalized);
++        return std::nullopt;
++      }
++      seenNormalized.insert(lower);
++      seenExact.insert(normalized);
++
++      ManifestEntry me;
++      me.relativePath = normalized;
++      if (entry.is_directory) {
++        me.type = ManifestEntryType::Directory;
++        me.expectedSize = 0;
++        manifest.dirEntries.push_back(me);
++        manifest.entries.push_back(me);
++        dirsToProcess.push_back(rel);
++        discoveredDirs.push_back(rel);
++      } else {
++        // For files, expected size is already validated total size (multi-extent summed)
++        // Validate size not overflow? Already checked in iso_dev
++        me.type = ManifestEntryType::File;
++        me.expectedSize = entry.size;
++        manifest.fileEntries.push_back(me);
++        manifest.entries.push_back(me);
++        filesCount++;
++      }
++    }
++  }
++
++  // Verify manifest has at least one file? Not required but ensure not empty
++  // Detect required PARAM.SFO and EBOOT.BIN invariants (but not fail yet; installer will verify after extraction)
++  // However if manifest has no files, treat as error (likely invalid ISO)
++  if (manifest.entries.empty()) {
++    error = "ISO contains no files or directories after filtering";
++    return std::nullopt;
++  }
++
++  // Optional: ensure PARAM.SFO exists in manifest (for early failure)
++  // But spec says installer must fail if missing PARAM.SFO before commit, so we can allow build to succeed
++  // and let verify stage catch missing. We'll just build.
++
++  return manifest;
++}
++
++bool IsoInstallManifest::hasParamSfo() const {
++  for (auto &e : fileEntries) {
++    if (equalsIgnoreCase(e.relativePath, "PS3_GAME/PARAM.SFO")) return true;
++  }
++  return false;
++}
++bool IsoInstallManifest::hasEboot() const {
++  static const std::vector<std::string> candidates = {
++    "EBOOT.BIN",
++    "USRDIR/EBOOT.BIN",
++    "PS3_GAME/USRDIR/EBOOT.BIN",
++    "PS3_GAME/USRDIR/ISO.BIN.EDAT"
++  };
++  for (auto &e : fileEntries) {
++    for (auto &c : candidates) {
++      if (equalsIgnoreCase(e.relativePath, c)) return true;
++    }
++  }
++  return false;
++}
++std::string IsoInstallManifest::paramSfoPath() const {
++  for (auto &e : fileEntries) if (equalsIgnoreCase(e.relativePath, "PS3_GAME/PARAM.SFO")) return e.relativePath;
++  return {};
++}
++std::string IsoInstallManifest::ebootPath() const {
++  static const std::vector<std::string> candidates = {
++    "EBOOT.BIN",
++    "USRDIR/EBOOT.BIN",
++    "USRDIR/ISO.BIN.EDAT",
++    "PS3_GAME/USRDIR/EBOOT.BIN"
++  };
++  for (auto &c : candidates) {
++    for (auto &e : fileEntries) if (equalsIgnoreCase(e.relativePath, c)) return e.relativePath;
++  }
++  return {};
++}
++
++} // namespace rpcsx::android
+diff --git a/android/src/iso-install-manifest.hpp b/android/src/iso-install-manifest.hpp
+new file mode 100644
+index 000000000..eef008649
+--- /dev/null
++++ b/android/src/iso-install-manifest.hpp
+@@ -0,0 +1,47 @@
++#pragma once
++
++#include "util/File.h"
++#include "dev/iso.hpp"
++
++#include <string>
++#include <vector>
++#include <optional>
++#include <unordered_set>
++
++namespace rpcsx::android {
++
++enum class ManifestEntryType {
++  Directory,
++  File
++};
++
++struct ManifestEntry {
++  ManifestEntryType type;
++  std::string relativePath; // e.g. "PS3_GAME/USRDIR/EBOOT.BIN" lexically normalized with '/'
++  u64 expectedSize = 0; // for files; 0 for directories
++};
++
++struct IsoInstallManifest {
++  std::vector<ManifestEntry> entries; // includes both files and directories
++  std::vector<ManifestEntry> fileEntries; // subset for progress counting
++  std::vector<ManifestEntry> dirEntries;
++
++  // Validates and builds manifest from iso_dev. Returns error string on failure.
++  static std::optional<IsoInstallManifest> build(iso_dev& iso, std::string& error);
++
++  bool hasParamSfo() const;
++  bool hasEboot() const;
++  std::string paramSfoPath() const; // relative path to PARAM.SFO if found
++  std::string ebootPath() const;    // relative path to EBOOT.BIN if found
++
++  // Validation helpers exposed for tests
++  static bool isValidTitleId(std::string_view titleId);
++  static bool isValidPathComponent(std::string_view component);
++  static std::optional<std::string> normalizeAndValidateRelativePath(const std::string& relativePath, std::string& error);
++};
++
++// Checks that destination `candidate` is within `root` after lexical normalization.
++// Both must be absolute or both relative with consistent handling.
++bool isPathWithinRoot(const std::string& root, const std::string& candidate);
++
++} // namespace rpcsx::android
 diff --git a/android/src/rpcsx-android.cpp b/android/src/rpcsx-android.cpp
-index ce38967c1..57455c776 100644
+index ce38967c1..d6b98a4be 100644
 --- a/android/src/rpcsx-android.cpp
 +++ b/android/src/rpcsx-android.cpp
-@@ -52,6 +52,7 @@
+@@ -1,3 +1,6 @@
++#include "atomic-file-copier.hpp"
++#include "iso-install-manifest.hpp"
++#include "staged-game-installer.hpp"
+ #include "Crypto/unpkg.h"
+ #include "Crypto/unself.h"
+ #include "Emu/Audio/Cubeb/CubebBackend.h"
+@@ -52,6 +55,7 @@
  #include "util/fixed_typemap.hpp"
  #include "util/logs.hpp"
  #include "util/serialization.hpp"
@@ -31,7 +562,7 @@ index ce38967c1..57455c776 100644
  #include "util/sysinfo.hpp"
  #include <Emu/Io/pad_config.h>
  #include <Emu/RSX/GSFrameBase.h>
-@@ -1878,10 +1879,6 @@ extern "C" bool _rpcsx_surfaceEvent(JNIEnv *env, jobject surface, jint event) {
+@@ -1878,10 +1882,6 @@ extern "C" bool _rpcsx_surfaceEvent(JNIEnv *env, jobject surface, jint event) {
        ANativeWindow_release(prevWindow);
      }
  
@@ -42,7 +573,7 @@ index ce38967c1..57455c776 100644
      Emu.Pause();
    } else {
      auto newWindow = ANativeWindow_fromSurface(env, surface);
-@@ -2071,8 +2068,6 @@ static bool installPup(JNIEnv *env, fs::file &&pup_f, jlong progressId) {
+@@ -2071,8 +2071,6 @@ static bool installPup(JNIEnv *env, fs::file &&pup_f, jlong progressId) {
      return false;
    }
  
@@ -51,7 +582,7 @@ index ce38967c1..57455c776 100644
    jlong processed = 0;
    for (const auto &update_filename : update_filenames) {
      auto update_file_stream = update_files.get_file(update_filename);
-@@ -2120,9 +2115,10 @@ static bool installPup(JNIEnv *env, fs::file &&pup_f, jlong progressId) {
+@@ -2120,9 +2118,10 @@ static bool installPup(JNIEnv *env, fs::file &&pup_f, jlong progressId) {
    }
  
    sendFirmwareInstalled(env, utils::get_firmware_version());
@@ -65,7 +596,234 @@ index ce38967c1..57455c776 100644
    return true;
  }
  
-@@ -2641,4 +2637,106 @@ extern "C" void *_rpcsx_setCustomDriver(void *driverHandle) {
+@@ -2306,135 +2305,134 @@ static bool installRap(JNIEnv *env, fs::file &&file, jlong progressId,
+ }
+ 
+ static bool installIso(JNIEnv *env, fs::file &&file, jlong progressId) {
+-  auto optIso = iso_dev::open(std::make_unique<file_view_block_dev>(file));
+   Progress progress(env, progressId);
+ 
++  // Recovery for stale transactions from previous crashes
++  rpcsx::android::StagedGameInstaller::recoverStaleTransactions(fs::get_config_dir());
++
++  auto optIso = iso_dev::open(std::make_unique<file_view_block_dev>(file));
+   if (!optIso) {
+     progress.failure("Failed to read ISO");
+     return false;
+   }
+-
+   auto iso = std::move(*optIso);
+-  auto sfo_raw_file = iso.open("PS3_GAME/PARAM.SFO", fs::read);
+ 
++  // Phase: Scanning - report indeterminate scanning
++  progress.report(0, 0, "Scanning ISO");
++
++  auto sfo_raw_file = iso.open("PS3_GAME/PARAM.SFO", fs::read);
+   if (!sfo_raw_file) {
+     progress.failure("Failed to locate PARAM.SFO in ISO");
+     return false;
+   }
+-
+   fs::file sfo_file;
+   sfo_file.reset(std::move(sfo_raw_file));
+-
+   auto sfo = psf::load_object(sfo_file, "iso://PS3_GAME/PARAM.SFO");
+   auto title_id = psf::get_string(sfo, "TITLE_ID");
+-
+   if (title_id.empty()) {
+     progress.failure("Failed to fetch TITLE_ID from PARAM.SFO in ISO");
+     return false;
+   }
+-
+-  if (auto gameInfo = fetchGameInfo(sfo)) {
+-    sendGameInfo(env, progressId, {{*gameInfo}});
++  if (!rpcsx::android::isValidTitleIdForPath(title_id)) {
++    progress.failure(fmt::format("Invalid TITLE_ID from ISO: %s", title_id));
++    return false;
+   }
+ 
+-  std::filesystem::path destinationPath =
+-      fs::get_config_dir() + "games/" + std::string(title_id);
+-  std::size_t filesCount = 0;
+-
+-  auto roots = [&] {
+-    std::vector<std::filesystem::path> result;
+-    std::vector<std::filesystem::path> workList;
+-    workList.push_back({});
+-    result.push_back({});
+-
+-    while (!workList.empty()) {
+-      auto path = std::move(workList.back());
+-      workList.pop_back();
++  // Build validated manifest (strict path, duplicate, PS3_UPDATE skip, multi-extent checks)
++  progress.report(0, 0, "Building manifest");
++  std::string manifestError;
++  auto manifestOpt = rpcsx::android::IsoInstallManifest::build(iso, manifestError);
++  if (!manifestOpt) {
++    progress.failure(manifestError.empty() ? "Failed to build ISO manifest" : manifestError);
++    return false;
++  }
++  auto manifest = *manifestOpt;
+ 
+-      fs::dir dir;
+-      dir.reset(iso.open_dir(path));
++  // Adapter to bridge Progress to StagedGameInstaller reporter with distinct phase messages
++  class JniReporter : public rpcsx::android::ProgressReporter {
++    Progress& p;
++  public:
++    explicit JniReporter(Progress& pr) : p(pr) {}
++    bool report(long v, long m, const std::string& msg) override { return p.report(v, m, msg); }
++    void failure(const std::string& msg) override { p.failure(msg); }
++    void success(long v, const std::string& msg) override { p.success(v, msg); }
++  };
++  JniReporter reporter(progress);
+ 
+-      for (auto &entry : dir) {
+-        if (entry.name == "." || entry.name == "..") {
+-          continue;
+-        }
+-        if (entry.name == "PS3_UPDATE" && path.empty()) {
+-          continue;
+-        }
++  rpcsx::android::StagedGameInstaller installer(fs::get_config_dir(), std::string(title_id), manifest);
+ 
+-        if (entry.is_directory) {
+-          result.push_back(path / entry.name);
+-          workList.push_back(path / entry.name);
+-        } else {
+-          filesCount++;
+-        }
+-      }
+-    }
++  // Extract
++  reporter.report(0, static_cast<long>(manifest.fileEntries.size()), "Preparing staging");
++  if (auto err = installer.prepare()) {
++    progress.failure(*err);
++    return false;
++  }
+ 
+-    return result;
+-  }();
++  reporter.report(0, static_cast<long>(manifest.fileEntries.size()), "Extracting");
++  if (auto err = installer.extract(iso, reporter)) {
++    progress.failure(*err);
++    return false;
++  }
+ 
+-  progress.report(0, filesCount);
++  reporter.report(0, 0, "Verifying");
++  if (auto err = installer.verify(&reporter)) {
++    progress.failure(*err);
++    return false;
++  }
+ 
+-  std::size_t processedFiles = 0;
+-  std::error_code ec;
++  reporter.report(0, 0, "Committing");
++  if (auto err = installer.commit(&reporter)) {
++    progress.failure(*err);
++    return false;
++  }
+ 
+-  for (auto &root : roots) {
+-    auto rootDestPath = root.empty() ? destinationPath : destinationPath / root;
++  // After commit, finalPath is the committed game directory
++  std::string finalPath = installer.finalPath();
+ 
+-    std::filesystem::create_directories(rootDestPath, ec);
+-    if (ec) {
+-      progress.failure(fmt::format("Failed to create dir %s: %s",
+-                                   rootDestPath.string(), ec.message()));
++  // Verify required EBOOT.BIN is present and readable non-empty
++  auto ebootPath = locateEbootPath(finalPath);
++  if (ebootPath.empty()) {
++    progress.failure("Missing EBOOT.BIN after commit");
++    return false;
++  }
++  {
++    fs::file ebootFile(ebootPath, fs::read);
++    if (!ebootFile || ebootFile.size() == 0) {
++      progress.failure("EBOOT.BIN not readable or empty after commit");
+       return false;
+     }
++    // Ensure staged EBOOT is regular non-empty file
++    std::error_code ec;
++    if (!std::filesystem::is_regular_file(ebootPath, ec) || std::filesystem::file_size(ebootPath, ec) == 0) {
++      progress.failure("EBOOT.BIN is not a regular non-empty file after commit");
++      return false;
++    }
++  }
+ 
+-    fs::dir dir;
+-    dir.reset(iso.open_dir(root));
+-
+-    for (auto &entry : dir) {
+-      if (entry.name == "." || entry.name == "..") {
+-        continue;
+-      }
+-
+-      auto entryDestPath = rootDestPath / entry.name;
+-
+-      if (entry.is_directory) {
+-        std::filesystem::create_directories(entryDestPath, ec);
+-        if (ec) {
+-          progress.failure(fmt::format("Failed to create dir %s: %s",
+-                                       entryDestPath.string(), ec.message()));
+-          return false;
+-        }
+-
+-        continue;
+-      }
+-      auto raw_file = iso.open(root / entry.name, fs::read);
+-
+-      if (!raw_file) {
+-        progress.failure(fmt::format("Failed to open file in ISO: %s",
+-                                     (root / entry.name).string()));
+-        return false;
+-      }
+-
+-      fs::file file;
+-      file.reset(std::move(raw_file));
++  auto sfoPath = locateParamSfoPath(finalPath);
++  if (sfoPath.empty() || !std::filesystem::is_regular_file(sfoPath)) {
++    progress.failure("PARAM.SFO missing after commit");
++    return false;
++  }
++  {
++    fs::file sfoCheck(sfoPath, fs::read);
++    if (!sfoCheck || sfoCheck.size() == 0) {
++      progress.failure("PARAM.SFO not readable or empty after commit");
++      return false;
++    }
++  }
+ 
+-      if (!fs::write_file(entryDestPath,
+-                          fs::open_mode::create + fs::open_mode::trunc,
+-                          file.to_vector<std::uint8_t>())) {
+-        progress.failure(fmt::format("Failed to write file: %s, dest %s",
+-                                     entryDestPath.string(),
+-                                     destinationPath.string()));
+-        return false;
+-      }
++  // Publish game info only after successful commit
++  reporter.report(0, 0, "Finalizing");
++  collectGameInfo(env, progressId, {finalPath});
+ 
+-      progress.report(processedFiles++, filesCount);
+-    }
++  // Validate EBOOT path not empty before queuing compilation (P0)
++  if (ebootPath.empty()) {
++    progress.failure("Empty EBOOT path cannot be queued for compilation");
++    return false;
+   }
+ 
+-  collectGameInfo(env, -1, {destinationPath});
+-  auto ebootPath = locateEbootPath(destinationPath.string());
++  // Queue PPU compilation for committed final path; compilation queue will handle its own progress completion
+   g_compilationQueue.push(progress, std::move(ebootPath));
+   return true;
+ }
+@@ -2641,4 +2639,106 @@ extern "C" void *_rpcsx_setCustomDriver(void *driverHandle) {
    return prevLoader;
  }
  
@@ -172,6 +930,1623 @@ index ce38967c1..57455c776 100644
 +}
 +
  #pragma GCC diagnostic pop
+diff --git a/android/src/staged-game-installer.cpp b/android/src/staged-game-installer.cpp
+new file mode 100644
+index 000000000..afcaf467d
+--- /dev/null
++++ b/android/src/staged-game-installer.cpp
+@@ -0,0 +1,557 @@
++#include "staged-game-installer.hpp"
++#include "atomic-file-copier.hpp"
++#include "util/File.h"
++#include "util/StrFmt.h"
++
++#include <filesystem>
++#include <fstream>
++#include <chrono>
++#include <random>
++#include <algorithm>
++
++namespace rpcsx::android {
++
++namespace {
++std::string uniqueSuffix() {
++  // Use timestamp + random
++  auto now = std::chrono::steady_clock::now().time_since_epoch().count();
++  std::random_device rd;
++  std::mt19937_64 gen(rd());
++  uint64_t r = gen();
++  return fmt::format("{}_{}", now, r);
++}
++
++bool ensureDir(const std::string& path, std::string& err) {
++  std::error_code ec;
++  std::filesystem::create_directories(path, ec);
++  if (ec) {
++    err = fmt::format("Failed to create dir %s: %s", path, ec.message());
++    return false;
++  }
++  return true;
++}
++
++bool pathExists(const std::string& p) {
++  std::error_code ec;
++  return std::filesystem::exists(p, ec);
++}
++
++bool isRegularFile(const std::string& p) {
++  std::error_code ec;
++  return std::filesystem::is_regular_file(p, ec);
++}
++
++bool isDirectory(const std::string& p) {
++  std::error_code ec;
++  return std::filesystem::is_directory(p, ec);
++}
++
++u64 fileSizeOnDisk(const std::string& p) {
++  std::error_code ec;
++  auto sz = std::filesystem::file_size(p, ec);
++  if (ec) return static_cast<u64>(-1);
++  return sz;
++}
++
++} // namespace
++
++bool isValidTitleIdForPath(std::string_view titleId) {
++  return IsoInstallManifest::isValidTitleId(titleId);
++}
++
++StagedGameInstaller::StagedGameInstaller(const std::string& configDir,
++                                         const std::string& titleId,
++                                         const IsoInstallManifest& manifest)
++  : m_configDir(configDir), m_titleId(titleId), m_manifest(manifest) {
++  // configDir is expected to end with '/'
++  std::string base = m_configDir;
++  if (!base.ends_with("/")) base += "/";
++  m_finalPath = base + "games/" + std::string(titleId);
++  // staging outside games tree but same filesystem: base + ".staging/<title>_<unique>"
++  // We'll generate unique in prepare()
++  m_markerPath = base + "games/.install_" + std::string(titleId) + ".transaction";
++}
++
++StagedGameInstaller::~StagedGameInstaller() {
++  // Do not auto-remove on destruction; caller must explicitly cleanup or commit
++}
++
++std::string StagedGameInstaller::generateUniqueStagingPath() {
++  std::string base = m_configDir;
++  if (!base.ends_with("/")) base += "/";
++  // Use .staging under config dir (sibling to games, same FS)
++  return base + ".staging/" + m_titleId + "_" + uniqueSuffix();
++}
++
++std::string StagedGameInstaller::generateUniqueBackupPath() {
++  // backup is sibling to final: finalPath + ".backup.<unique>"
++  return m_finalPath + ".backup." + uniqueSuffix();
++}
++
++bool StagedGameInstaller::isOwnedPath(const std::string& path) const {
++  // Owned paths are exactly stagingPath, backupPath, markerPath, or children thereof
++  // And must be within configDir
++  if (path.empty()) return false;
++  std::string cfg = m_configDir;
++  if (!cfg.ends_with("/")) cfg += "/";
++  // Must be under cfg
++  if (path.rfind(cfg, 0) != 0) return false;
++  // Check is staging, backup, marker, or inside staging
++  if (path == m_stagingPath) return true;
++  if (path == m_backupPath) return true;
++  if (path == m_markerPath) return true;
++  if (!m_stagingPath.empty() && path.rfind(m_stagingPath + "/", 0) == 0) return true;
++  if (!m_backupPath.empty() && path.rfind(m_backupPath + "/", 0) == 0) return true;
++  return false;
++}
++
++std::optional<std::string> StagedGameInstaller::prepare() {
++  if (!isValidTitleIdForPath(m_titleId)) {
++    return fmt::format("Invalid TITLE_ID for path: %s", m_titleId);
++  }
++
++  m_stagingPath = generateUniqueStagingPath();
++
++  // Ensure parent .staging exists
++  std::string stagingParent = std::filesystem::path(m_stagingPath).parent_path().string();
++  std::string err;
++  if (!ensureDir(stagingParent, err)) return err;
++
++  // Ensure staging does not already exist (unique)
++  if (pathExists(m_stagingPath)) {
++    return fmt::format("Staging path already exists: %s", m_stagingPath);
++  }
++
++  std::error_code ec;
++  std::filesystem::create_directories(m_stagingPath, ec);
++  if (ec) {
++    return fmt::format("Failed to create staging %s: %s", m_stagingPath, ec.message());
++  }
++
++  if (shouldInject(InjectPoint::AfterStagingCreate)) {
++    return "Injected failure after staging create";
++  }
++
++  // Verify staging is on same filesystem as final's parent? We rely on same configDir parent being same FS.
++  // Could check device id via stat, but not needed.
++
++  m_prepared = true;
++  return std::nullopt;
++}
++
++std::optional<std::string> StagedGameInstaller::writeMarker() {
++  // Marker contains staging, backup, final for recovery
++  // Write to markerPath atomically via pending_file? Use simple file write
++  std::string content = fmt::format("staging=%s\nbackup=%s\nfinal=%s\ntitle=%s\n", m_stagingPath, m_backupPath, m_finalPath, m_titleId);
++  // Use pending_file for atomic
++  fs::pending_file pending(m_markerPath);
++  if (!pending.file) {
++    return fmt::format("Failed to create marker %s", m_markerPath);
++  }
++  pending.file.write(content.data(), content.size());
++  pending.file.sync();
++  if (!pending.commit()) {
++    return fmt::format("Failed to commit marker %s", m_markerPath);
++  }
++  return std::nullopt;
++}
++
++void StagedGameInstaller::removeMarker() {
++  if (!m_markerPath.empty() && pathExists(m_markerPath)) {
++    std::error_code ec;
++    std::filesystem::remove(m_markerPath, ec);
++  }
++}
++
++std::optional<std::string> StagedGameInstaller::extract(iso_dev& iso, ProgressReporter& reporter) {
++  if (!m_prepared) {
++    return "Installer not prepared";
++  }
++
++  // Phase: extracting
++  // Ensure we account for progress reporting distinct phases
++  // Caller will have reported scanning; we report extracting
++
++  // Create directories first
++  for (auto& e : m_manifest.dirEntries) {
++    // Construct destination inside staging
++    std::filesystem::path dest = std::filesystem::path(m_stagingPath) / e.relativePath;
++    std::string destStr = dest.string();
++    // Containment check
++    if (!isPathWithinRoot(m_stagingPath, destStr)) {
++      return fmt::format("Directory destination escapes staging: %s", destStr);
++    }
++    std::string err;
++    if (!ensureDir(destStr, err)) return err;
++  }
++
++  size_t totalFiles = m_manifest.fileEntries.size();
++  size_t processed = 0;
++
++  // Report initial extracting progress
++  reporter.report(0, totalFiles, "Extracting");
++
++  for (auto& e : m_manifest.fileEntries) {
++    if (shouldInject(InjectPoint::DuringExtract) && processed == totalFiles/2) {
++      return "Injected failure during extraction";
++    }
++
++    std::filesystem::path dest = std::filesystem::path(m_stagingPath) / e.relativePath;
++    std::string destStr = dest.string();
++
++    if (!isPathWithinRoot(m_stagingPath, destStr)) {
++      return fmt::format("File destination escapes staging: %s", destStr);
++    }
++
++    // Ensure parent dir exists
++    std::string parent = std::filesystem::path(destStr).parent_path().string();
++    if (!parent.empty()) {
++      std::string err;
++      if (!ensureDir(parent, err)) return err;
++    }
++
++    // Open file from ISO
++    auto raw_file = iso.open(e.relativePath, fs::read);
++    if (!raw_file) {
++      return fmt::format("Failed to open file in ISO: %s", e.relativePath);
++    }
++    fs::file file;
++    file.reset(std::move(raw_file));
++
++    // Validate source size matches expected (iso parser already sums)
++    if (file.size() != e.expectedSize) {
++      return fmt::format("Source size mismatch for %s: expected %llu got %llu", e.relativePath, e.expectedSize, file.size());
++    }
++
++    auto copyRes = copyFileAtomically(file, destStr, e.expectedSize);
++    if (!copyRes) {
++      return copyRes.error;
++    }
++
++    processed++;
++    // Report with ++processed to ensure final reaches N/N per plan P1
++    if (!reporter.report(processed, totalFiles, "Extracting")) {
++      // Reporter returns false if cancelled? Our Progress wrapper returns bool from onProgressEvent
++      // If cancelled, treat as failure and preserve old title (staging cleanup)
++      return "Cancelled during extraction";
++    }
++  }
++
++  // Ensure final report is N/N
++  reporter.report(totalFiles, totalFiles, "Extracting complete");
++  return std::nullopt;
++}
++
++std::optional<std::string> StagedGameInstaller::verify(ProgressReporter* reporter) {
++  if (reporter) reporter->report(0, 1, "Verifying");
++
++  // Verify every staged file against manifest expected size
++  for (auto& e : m_manifest.fileEntries) {
++    std::filesystem::path dest = std::filesystem::path(m_stagingPath) / e.relativePath;
++    std::string destStr = dest.string();
++    if (!isPathWithinRoot(m_stagingPath, destStr)) {
++      return fmt::format("Verify: destination escapes staging: %s", destStr);
++    }
++    if (!pathExists(destStr)) {
++      return fmt::format("Verify: missing staged file %s", e.relativePath);
++    }
++    if (!isRegularFile(destStr)) {
++      return fmt::format("Verify: not a regular file %s", e.relativePath);
++    }
++    u64 sz = fileSizeOnDisk(destStr);
++    if (sz != e.expectedSize) {
++      return fmt::format("Verify: size mismatch for %s: expected %llu got %llu", e.relativePath, e.expectedSize, sz);
++    }
++  }
++
++  // Verify directories exist? Could check
++  for (auto& e : m_manifest.dirEntries) {
++    std::filesystem::path dest = std::filesystem::path(m_stagingPath) / e.relativePath;
++    std::string destStr = dest.string();
++    if (!pathExists(destStr) || !isDirectory(destStr)) {
++      return fmt::format("Verify: missing staged directory %s", e.relativePath);
++    }
++  }
++
++  // Require readable PARAM.SFO and EBOOT.BIN before commit
++  // Find PARAM.SFO
++  std::string sfoRel = m_manifest.paramSfoPath();
++  if (sfoRel.empty()) {
++    return "Verify: PARAM.SFO not found in manifest";
++  }
++  std::string sfoStaged = (std::filesystem::path(m_stagingPath) / sfoRel).string();
++  if (!isRegularFile(sfoStaged)) {
++    return fmt::format("Verify: PARAM.SFO not a regular file: %s", sfoStaged);
++  }
++  {
++    fs::file f(sfoStaged, fs::read);
++    if (!f || f.size() == 0) {
++      return fmt::format("Verify: PARAM.SFO not readable or empty: %s", sfoStaged);
++    }
++  }
++
++  // EBOOT.BIN
++  std::string ebootRel = m_manifest.ebootPath();
++  if (ebootRel.empty()) {
++    return "Verify: EBOOT.BIN not found in manifest";
++  }
++  std::string ebootStaged = (std::filesystem::path(m_stagingPath) / ebootRel).string();
++  if (!isRegularFile(ebootStaged)) {
++    return fmt::format("Verify: EBOOT.BIN not a regular file: %s", ebootStaged);
++  }
++  {
++    fs::file f(ebootStaged, fs::read);
++    if (!f || f.size() == 0) {
++      return fmt::format("Verify: EBOOT.BIN not readable or empty: %s", ebootStaged);
++    }
++  }
++
++  if (reporter) reporter->report(1, 1, "Verifying complete");
++  return std::nullopt;
++}
++
++std::optional<std::string> StagedGameInstaller::commit(ProgressReporter* reporter) {
++  if (shouldInject(InjectPoint::BeforeCommit)) {
++    return "Injected failure before commit";
++  }
++
++  // Determine if final exists
++  bool finalExists = pathExists(m_finalPath);
++
++  if (finalExists) {
++    // Create backup path unique
++    m_backupPath = generateUniqueBackupPath();
++    // Ensure backup parent exists (games dir)
++    std::string err;
++    // No need to create backup parent separately; final's parent is games, which exists
++
++    // Write marker before any rename for recovery
++    if (auto errOpt = writeMarker()) return errOpt;
++
++    // Rename final -> backup
++    std::error_code ec;
++    // Use fs::rename which is atomic if same FS
++    if (!fs::rename(m_finalPath, m_backupPath, true)) {
++      removeMarker();
++      return fmt::format("Failed to backup existing title %s -> %s: %s", m_finalPath, m_backupPath, fmt::format("%s", fs::g_tls_error));
++    }
++
++    if (shouldInject(InjectPoint::AfterBackupRename)) {
++      // Simulate failure after first rename, before second
++      // Leave system in state: backup exists, final missing, staging exists, marker exists
++      // Recovery should handle
++      return "Injected failure after backup rename";
++    }
++
++    // Rename staging -> final
++    if (!fs::rename(m_stagingPath, m_finalPath, true)) {
++      // Second rename failed, restore backup
++      std::string restoreErr = "";
++      if (!fs::rename(m_backupPath, m_finalPath, true)) {
++        restoreErr = fmt::format(" and failed to restore backup: %s", fmt::format("%s", fs::g_tls_error));
++      }
++      removeMarker();
++      return fmt::format("Failed to commit staging %s -> %s: %s%s", m_stagingPath, m_finalPath, fmt::format("%s", fs::g_tls_error), restoreErr);
++    }
++
++    if (shouldInject(InjectPoint::AfterStagingRename)) {
++      // Injected after staging rename but before backup removal/marker cleanup
++      // This simulates crash after second rename; recovery should clean backup
++      return "Injected failure after staging rename";
++    }
++
++    // Verify final exists
++    if (!pathExists(m_finalPath) || !isDirectory(m_finalPath)) {
++      // Try restore?
++      fs::rename(m_backupPath, m_finalPath, true);
++      removeMarker();
++      return "Commit verification failed: final not found after rename";
++    }
++
++    // Remove backup only after confirming final
++    if (isOwnedPath(m_backupPath)) {
++      std::error_code ec2;
++      std::filesystem::remove_all(m_backupPath, ec2);
++      if (ec2) {
++        // Non-fatal but warn; don't fail commit
++      }
++    } else {
++      // Never remove not owned
++    }
++
++    removeMarker();
++    m_committed = true;
++    if (reporter) reporter->report(1,1,"Committing complete");
++    return std::nullopt;
++
++  } else {
++    // No existing final, simple rename staging -> final
++    if (auto errOpt = writeMarker()) return errOpt;
++
++    if (!fs::rename(m_stagingPath, m_finalPath, true)) {
++      removeMarker();
++      return fmt::format("Failed to commit staging %s -> %s: %s", m_stagingPath, m_finalPath, fmt::format("%s", fs::g_tls_error));
++    }
++
++    // Verify
++    if (!pathExists(m_finalPath)) {
++      removeMarker();
++      return "Commit verification failed: final missing after rename";
++    }
++
++    removeMarker();
++    m_committed = true;
++    if (reporter) reporter->report(1,1,"Committing complete");
++    return std::nullopt;
++  }
++}
++
++void StagedGameInstaller::cleanupStaging() {
++  if (!m_stagingPath.empty() && isOwnedPath(m_stagingPath) && pathExists(m_stagingPath)) {
++    std::error_code ec;
++    std::filesystem::remove_all(m_stagingPath, ec);
++  }
++  removeMarker();
++  // Do not touch backup or final
++}
++
++bool StagedGameInstaller::finalExists() const {
++  return pathExists(m_finalPath);
++}
++
++std::optional<std::string> StagedGameInstaller::install(iso_dev& iso, ProgressReporter& reporter) {
++  if (auto err = prepare()) return err;
++  if (auto err = extract(iso, reporter)) {
++    cleanupStaging();
++    return err;
++  }
++  if (auto err = verify(&reporter)) {
++    cleanupStaging();
++    return err;
++  }
++  if (auto err = commit(&reporter)) {
++    // If commit failed after staging rename, staging may be gone; but backup may remain
++    // Cleanup staging if still exists (owned)
++    if (pathExists(m_stagingPath)) cleanupStaging();
++    return err;
++  }
++  return std::nullopt;
++}
++
++void StagedGameInstaller::recoverStaleTransactions(const std::string& configDir) {
++  std::string base = configDir;
++  if (!base.ends_with("/")) base += "/";
++  std::string gamesDir = base + "games";
++  std::string stagingRoot = base + ".staging";
++
++  // Clean stale .staging directories older than maybe? For now clean all staging for which no marker?
++  // Scan for transaction markers: games/.install_*.transaction
++  std::error_code ec;
++  if (!std::filesystem::exists(gamesDir, ec)) return;
++
++  for (auto& entry : std::filesystem::directory_iterator(gamesDir, ec)) {
++    if (ec) break;
++    std::string name = entry.path().filename().string();
++    if (name.rfind(".install_", 0) == 0 && name.ends_with(".transaction")) {
++      // Marker file indicates incomplete transaction
++      std::ifstream in(entry.path());
++      std::string line, staging, backup, final;
++      while (std::getline(in, line)) {
++        if (line.rfind("staging=",0)==0) staging = line.substr(8);
++        else if (line.rfind("backup=",0)==0) backup = line.substr(7);
++        else if (line.rfind("final=",0)==0) final = line.substr(6);
++      }
++      in.close();
++      // Determine state
++      bool finalExists = std::filesystem::exists(final, ec);
++      bool stagingExists = !staging.empty() && std::filesystem::exists(staging, ec);
++      bool backupExists = !backup.empty() && std::filesystem::exists(backup, ec);
++
++      // If final exists and staging not exists, transaction likely completed but marker left: remove backup and marker
++      if (finalExists && !stagingExists) {
++        if (backupExists) {
++          // Backup is owned backup that should have been removed
++          // Only remove if path looks like backup (contains .backup.)
++          if (backup.find(".backup.") != std::string::npos) {
++            std::error_code ec2;
++            std::filesystem::remove_all(backup, ec2);
++          }
++        }
++        std::error_code ec2;
++        std::filesystem::remove(entry.path(), ec2);
++      } else if (!finalExists && stagingExists && backupExists) {
++        // Failed after backup rename: staging exists, backup exists, final missing -> restore backup
++        std::error_code ec2;
++        // Only restore if backup is owned (contains .backup.)
++        if (backup.find(".backup.") != std::string::npos) {
++          fs::rename(backup, final, true);
++        }
++        // Remove staging (incomplete new) and marker
++        if (staging.rfind(base,0)==0) {
++          std::error_code ec3;
++          std::filesystem::remove_all(staging, ec3);
++        }
++        std::filesystem::remove(entry.path(), ec2);
++      } else if (!finalExists && stagingExists && !backupExists) {
++        // Failed before commit or after staging rename where final missing?
++        // If final missing and staging exists, but no backup, could be first install that failed
++        // Just remove staging and marker
++        if (staging.rfind(base,0)==0) {
++          std::error_code ec3;
++          std::filesystem::remove_all(staging, ec3);
++        }
++        std::error_code ec2;
++        std::filesystem::remove(entry.path(), ec2);
++      } else if (finalExists && stagingExists) {
++        // Both exist -> incomplete commit where staging rename failed? Remove staging
++        if (staging.rfind(base,0)==0) {
++          std::error_code ec3;
++          std::filesystem::remove_all(staging, ec3);
++        }
++        std::error_code ec2;
++        std::filesystem::remove(entry.path(), ec2);
++      } else {
++        // No staging, no final, just marker leftover -> remove marker
++        std::error_code ec2;
++        std::filesystem::remove(entry.path(), ec2);
++      }
++    }
++  }
++
++  // Also clean orphaned staging directories without marker (e.g., crash before marker write or leftover)
++  // We keep conservative: only remove staging dirs that are older than 1 hour? For now do not auto-remove without marker to be safe.
++  // But plan says "Add an incomplete/transaction marker and startup recovery if process death between renames can otherwise strand title."
++  // So marker covers rename window; staging orphan before marker is not between renames, can be cleaned on next prepare.
++
++  // Clean stale backup directories that look like .backup.<unique> and have no marker referencing them
++  // This handles case where backup was not removed due to crash after commit
++  for (auto& entry : std::filesystem::directory_iterator(gamesDir, ec)) {
++    if (ec) break;
++    std::string name = entry.path().filename().string();
++    if (name.find(".backup.") != std::string::npos) {
++      // This is a backup; check if any marker references it
++      bool referenced = false;
++      // Scan markers again
++      for (auto& m : std::filesystem::directory_iterator(gamesDir, ec)) {
++        if (m.path().extension() == ".transaction") {
++          std::ifstream in(m.path());
++          std::string content((std::istreambuf_iterator<char>(in)), std::istreambuf_iterator<char>());
++          if (content.find(entry.path().string()) != std::string::npos) {
++            referenced = true; break;
++          }
++        }
++      }
++      if (!referenced) {
++        // Orphaned backup: if final exists, safe to remove
++        std::string titlePart = name.substr(0, name.find(".backup."));
++        std::string finalPath = gamesDir + "/" + titlePart;
++        if (std::filesystem::exists(finalPath, ec)) {
++          std::error_code ec2;
++          std::filesystem::remove_all(entry.path(), ec2);
++        }
++      }
++    }
++  }
++}
++
++} // namespace rpcsx::android
+diff --git a/android/src/staged-game-installer.hpp b/android/src/staged-game-installer.hpp
+new file mode 100644
+index 000000000..1c5eb8177
+--- /dev/null
++++ b/android/src/staged-game-installer.hpp
+@@ -0,0 +1,93 @@
++#pragma once
++
++#include "iso-install-manifest.hpp"
++#include "dev/iso.hpp"
++#include "util/File.h"
++
++#include <string>
++#include <optional>
++#include <functional>
++
++namespace rpcsx::android {
++
++class ProgressReporter {
++public:
++  virtual ~ProgressReporter() = default;
++  virtual bool report(long value, long max, const std::string& message) = 0;
++  virtual void failure(const std::string& message) = 0;
++  virtual void success(long value, const std::string& message) = 0;
++};
++
++// StagedGameInstaller owns staging and backup paths and implements transactional install
++class StagedGameInstaller {
++public:
++  StagedGameInstaller(const std::string& configDir,
++                      const std::string& titleId,
++                      const IsoInstallManifest& manifest);
++
++  ~StagedGameInstaller();
++
++  // Accessors for testing and cleanup verification
++  const std::string& stagingPath() const { return m_stagingPath; }
++  const std::string& finalPath() const { return m_finalPath; }
++  const std::string& backupPath() const { return m_backupPath; }
++  const std::string& markerPath() const { return m_markerPath; }
++
++  // Prepare staging directory (outside games tree, same filesystem). Returns error on failure.
++  std::optional<std::string> prepare();
++
++  // Extract all manifest entries into staging. Validates containment, creates dirs, copies files.
++  // Reports progress via reporter: scanning/extracting/verifying phases use distinct messages.
++  // Returns error string on failure; on failure staging remains for caller to cleanup but final untouched.
++  std::optional<std::string> extract(iso_dev& iso, ProgressReporter& reporter);
++
++  // Verify staged tree against manifest and required files. Returns error on mismatch.
++  std::optional<std::string> verify(ProgressReporter* reporter = nullptr);
++
++  // Commit staged to final with backup/rollback/marker protocol. Returns error on failure.
++  // On success, backup is removed, marker removed, staging is now final.
++  std::optional<std::string> commit(ProgressReporter* reporter = nullptr);
++
++  // Cleanup staging (and marker) without touching final/backup. Used on failure.
++  void cleanupStaging();
++
++  // Full transactional helper: prepare + extract + verify + commit
++  std::optional<std::string> install(iso_dev& iso, ProgressReporter& reporter);
++
++  // For tests: inject failure at specific points
++  enum class InjectPoint { None, AfterStagingCreate, DuringExtract, BeforeCommit, AfterBackupRename, AfterStagingRename };
++  void setInjectFailure(InjectPoint point, bool enable) { m_injectPoint = point; m_injectEnabled = enable; }
++
++  // Recovery: scan configDir for stale staging/backup/marker left by crashed installer and clean owned paths.
++  static void recoverStaleTransactions(const std::string& configDir);
++
++  // Utility: check if final exists and is valid
++  bool finalExists() const;
++
++private:
++  std::string m_configDir;
++  std::string m_titleId;
++  std::string m_finalPath;
++  std::string m_stagingPath;
++  std::string m_backupPath;
++  std::string m_markerPath; // transaction marker file
++  IsoInstallManifest m_manifest;
++
++  bool m_prepared = false;
++  bool m_committed = false;
++
++  InjectPoint m_injectPoint = InjectPoint::None;
++  bool m_injectEnabled = false;
++
++  bool shouldInject(InjectPoint p) const { return m_injectEnabled && m_injectPoint == p; }
++
++  std::string generateUniqueStagingPath();
++  std::string generateUniqueBackupPath();
++  std::optional<std::string> writeMarker();
++  void removeMarker();
++  bool isOwnedPath(const std::string& path) const;
++};
++
++bool isValidTitleIdForPath(std::string_view titleId);
++
++} // namespace rpcsx::android
+diff --git a/rpcs3/dev/iso.cpp b/rpcs3/dev/iso.cpp
+index 4303403e8..d94e828e0 100644
+--- a/rpcs3/dev/iso.cpp
++++ b/rpcs3/dev/iso.cpp
+@@ -1,7 +1,7 @@
+-
+ #include "iso.hpp"
+ #include "util/File.h"
+ #include "util/types.hpp"
++#include <algorithm>
+ #include <bit>
+ #include <cctype>
+ #include <codecvt>
+@@ -12,6 +12,129 @@
+ #include <memory>
+ #include <string>
+ 
++namespace
++{
++bool is_string_equal_ignore_case(std::string_view lhs, std::string_view rhs)
++{
++	return lhs.size() == rhs.size() && std::equal(lhs.begin(), lhs.end(), rhs.begin(), [](char l, char r)
++	{
++		return std::tolower(static_cast<unsigned char>(l)) == std::tolower(static_cast<unsigned char>(r));
++	});
++}
++
++class iso_extent_file final : public fs::file_base
++{
++	block_dev* m_device;
++	std::size_t m_first_block;
++	u64 m_length;
++	u64 m_pos = 0;
++	fs::stat_t m_stat;
++
++public:
++	iso_extent_file(block_dev* device, const iso::DirEntry& entry)
++		: m_device(device)
++		, m_first_block(entry.lba.value())
++		, m_length(entry.length.value())
++		, m_stat(entry.to_fs_stat())
++	{
++	}
++
++	fs::stat_t get_stat() override
++	{
++		return m_stat;
++	}
++
++	bool trunc(u64) override
++	{
++		fs::g_tls_error = fs::error::readonly;
++		return false;
++	}
++
++	u64 read(void* buffer, u64 count) override
++	{
++		const u64 result = read_at(m_pos, buffer, count);
++		m_pos += result;
++		return result;
++	}
++
++	u64 read_at(u64 offset, void* buffer, u64 count) override
++	{
++		if (offset >= m_length || count == 0)
++		{
++			return 0;
++		}
++
++		const u64 block_size = m_device->block_size();
++		const u64 requested = std::min(count, m_length - offset);
++		u64 copied = 0;
++		auto* output = static_cast<u8*>(buffer);
++
++		while (copied < requested)
++		{
++			const u64 extent_offset = offset + copied;
++			const u64 block_offset = extent_offset % block_size;
++			const std::size_t block_index = m_first_block + static_cast<std::size_t>(extent_offset / block_size);
++			const u64 remaining = requested - copied;
++
++			if (block_offset == 0 && remaining >= block_size)
++			{
++				constexpr std::size_t max_blocks_per_read = 16 * 1024;
++				const std::size_t block_count = static_cast<std::size_t>(
++					std::min<u64>(remaining / block_size, max_blocks_per_read));
++				const std::size_t blocks_read = m_device->read(block_index, output + copied, block_count);
++				const u64 bytes_read = blocks_read * block_size;
++				copied += bytes_read;
++
++				if (blocks_read != block_count)
++				{
++					break;
++				}
++				continue;
++			}
++
++			std::vector<u8> block(static_cast<std::size_t>(block_size));
++			if (m_device->read(block_index, block.data(), 1) != 1)
++			{
++				break;
++			}
++
++			const u64 bytes_read = std::min(remaining, block_size - block_offset);
++			std::memcpy(output + copied, block.data() + block_offset, static_cast<std::size_t>(bytes_read));
++			copied += bytes_read;
++		}
++
++		return copied;
++	}
++
++	u64 write(const void*, u64) override
++	{
++		fs::g_tls_error = fs::error::readonly;
++		return 0;
++	}
++
++	u64 seek(s64 offset, fs::seek_mode whence) override
++	{
++		const s64 next = whence == fs::seek_set ? offset :
++			whence == fs::seek_cur ? static_cast<s64>(m_pos) + offset :
++			whence == fs::seek_end ? static_cast<s64>(m_length) + offset : -1;
++
++		if (next < 0)
++		{
++			fs::g_tls_error = fs::error::inval;
++			return umax;
++		}
++
++		m_pos = static_cast<u64>(next);
++		return m_pos;
++	}
++
++	u64 size() override
++	{
++		return m_length;
++	}
++};
++} // namespace
++
+ static std::string u16_ne_to_string(const char16_t* bytes, std::size_t count)
+ {
+ 	std::wstring_convert<std::codecvt_utf8_utf16<char16_t>, char16_t> convert;
+@@ -58,10 +181,63 @@ static std::string decodeString(std::string_view data,
+ 	return std::string(data);
+ }
+ 
++bool iso_dev::checkedAddU64(u64 a, u64 b, u64& out) const
++{
++	if (a > std::numeric_limits<u64>::max() - b)
++	{
++		return false;
++	}
++	out = a + b;
++	return true;
++}
++
++bool iso_dev::validateExtentRange(const iso::DirEntry& entry) const
++{
++	const std::size_t block_size = m_dev->block_size();
++	if (block_size == 0)
++	{
++		return false;
++	}
++	const u64 length = entry.length.value();
++	const std::size_t first_block = entry.lba.value();
++	const std::size_t block_count = static_cast<std::size_t>((length + block_size - 1) / block_size);
++	// Empty files have 0 blocks and do not need range check beyond LBA sanity
++	if (length == 0)
++	{
++		// Even zero-length should have LBA within device if non-zero? But many ISOs set LBA 0 for zero files.
++		// Allow any LBA for zero length as it will not be read.
++		return true;
++	}
++	if (first_block >= m_dev->block_count())
++	{
++		return false;
++	}
++	if (block_count > m_dev->block_count() - first_block)
++	{
++		return false;
++	}
++	if (first_block >= m_volume_block_count)
++	{
++		return false;
++	}
++	if (block_count > m_volume_block_count - first_block)
++	{
++		return false;
++	}
++	return true;
++}
++
+ bool iso_dev::initialize()
+ {
+ 	constexpr std::size_t primaryVolumeDescOffset = 16;
+-	ensure(m_dev->block_size() >= sizeof(iso::VolumeHeader));
++	if (!m_dev || m_dev->block_size() < sizeof(iso::PrimaryVolumeDescriptor) ||
++		m_dev->block_size() == 0 ||
++		m_dev->block_count() <= primaryVolumeDescOffset)
++	{
++		fs::g_tls_error = fs::error::inval;
++		return false;
++	}
++
+ 	std::vector<std::byte> block(m_dev->block_size());
+ 
+ 	std::optional<iso::PrimaryVolumeDescriptor> primaryVolume;
+@@ -108,22 +284,78 @@ bool iso_dev::initialize()
+ 	}
+ 
+ 	auto& pvd = supplementaryVolume ? *supplementaryVolume : *primaryVolume;
++	if (pvd.block_size.value() != m_dev->block_size() ||
++		pvd.block_size.value() == 0 ||
++		pvd.block_count.value() > m_dev->block_count() ||
++		pvd.block_count.value() == 0)
++	{
++		fs::g_tls_error = fs::error::inval;
++		return false;
++	}
++
+ 	m_encoding = supplementaryVolume ? iso::StringEncoding::utf16_be : iso::StringEncoding::ascii;
+ 	m_root_dir = pvd.root;
++	m_volume_block_count = pvd.block_count.value();
++
++	const u64 root_blocks = (m_root_dir.length.value() + m_dev->block_size() - 1) / m_dev->block_size();
++	if (m_root_dir.length.value() != 0)
++	{
++		if (m_root_dir.lba.value() >= m_dev->block_count() ||
++			root_blocks > m_dev->block_count() - m_root_dir.lba.value() ||
++			m_root_dir.lba.value() >= m_volume_block_count ||
++			root_blocks > m_volume_block_count - m_root_dir.lba.value())
++		{
++			fs::g_tls_error = fs::error::inval;
++			return false;
++		}
++	}
++	else
++	{
++		// Empty root is still checked for LBA validity if not zero
++		if (m_root_dir.lba.value() != 0 && m_root_dir.lba.value() >= m_dev->block_count())
++		{
++			fs::g_tls_error = fs::error::inval;
++			return false;
++		}
++	}
++
++	// Validate root directory can be parsed (detects malformed early)
++	if ((m_root_dir.flags & iso::DirEntryFlags::Directory) != iso::DirEntryFlags::Directory)
++	{
++		fs::g_tls_error = fs::error::inval;
++		return false;
++	}
+ 
+ 	return true;
+ }
+ 
+ bool iso_dev::stat(const std::string& path, fs::stat_t& info)
+ {
+-	auto optEntry = open_entry(path);
+-	if (!optEntry)
++	auto entries = open_file_entries(path);
++	if (entries.empty())
+ 	{
+-		fs::g_tls_error = fs::error::noent;
++		// open_file_entries sets g_tls_error appropriately; ensure noent for missing
++		if (fs::g_tls_error == fs::error::ok)
++			fs::g_tls_error = fs::error::noent;
+ 		return false;
+ 	}
+ 
+-	info = optEntry->to_fs_stat();
++	info = entries.front().to_fs_stat();
++	if (!info.is_directory)
++	{
++		u64 total = 0;
++		for (const auto& entry : entries)
++		{
++			u64 next = 0;
++			if (!checkedAddU64(total, entry.length.value(), next))
++			{
++				fs::g_tls_error = fs::error::inval;
++				return false;
++			}
++			total = next;
++		}
++		info.size = total;
++	}
+ 	return true;
+ }
+ 
+@@ -154,20 +386,39 @@ std::unique_ptr<fs::file_base> iso_dev::open(const std::string& path, rx::EnumBi
+ 		return {};
+ 	}
+ 
+-	auto optEntry = open_entry(path);
+-	if (!optEntry)
++	auto entries = open_file_entries(path);
++	if (entries.empty())
+ 	{
+-		fs::g_tls_error = fs::error::noent;
++		if (fs::g_tls_error == fs::error::ok)
++			fs::g_tls_error = fs::error::noent;
+ 		return {};
+ 	}
+ 
+-	if ((optEntry->flags & iso::DirEntryFlags::Directory) == iso::DirEntryFlags::Directory)
++	if ((entries.front().flags & iso::DirEntryFlags::Directory) == iso::DirEntryFlags::Directory)
+ 	{
+ 		fs::g_tls_error = fs::error::isdir;
+ 		return {};
+ 	}
+ 
+-	return read_file(*optEntry).release();
++	if (entries.size() == 1)
++	{
++		auto file = read_file(entries.front());
++		return file ? file.release() : nullptr;
++	}
++
++	std::vector<fs::file> extents;
++	extents.reserve(entries.size());
++	for (const auto& entry : entries)
++	{
++		auto extent = read_file(entry);
++		if (!extent)
++		{
++			return {};
++		}
++		extents.emplace_back(std::move(extent));
++	}
++
++	return fs::make_gather(std::move(extents)).release();
+ }
+ 
+ std::unique_ptr<fs::dir_base> iso_dev::open_dir(const std::string& path)
+@@ -185,12 +436,147 @@ std::unique_ptr<fs::dir_base> iso_dev::open_dir(const std::string& path)
+ 		return {};
+ 	}
+ 
+-	auto items = read_dir(*optEntry);
+-	std::vector<fs::dir_entry> result_items(items.first.size());
++	auto itemsOpt = read_dir(*optEntry);
++	if (!itemsOpt)
++	{
++		return {};
++	}
++	auto& items = *itemsOpt;
++
++	std::vector<fs::dir_entry> result_items;
++	result_items.reserve(items.size());
+ 
+-	for (std::size_t i = 0; i < result_items.size(); ++i)
++	for (std::size_t i = 0; i < items.size();)
+ 	{
+-		result_items[i] = items.first[i].to_fs_entry(items.second[i]);
++		const auto& rec = items[i];
++
++		// Reject invalid directory multi-extent (directories must not be multi-extent chains)
++		if ((rec.entry.flags & iso::DirEntryFlags::Directory) == iso::DirEntryFlags::Directory &&
++			(rec.entry.flags & iso::DirEntryFlags::MultiExtent) == iso::DirEntryFlags::MultiExtent)
++		{
++			fs::g_tls_error = fs::error::inval;
++			return {};
++		}
++
++		if ((rec.entry.flags & iso::DirEntryFlags::MultiExtent) == iso::DirEntryFlags::MultiExtent)
++		{
++			// Start of multi-extent chain: validate strict chain
++			const std::string rawId = rec.rawName;
++			// Raw identifier must be non-empty for files; empty already filtered earlier but check
++			if (rawId.empty())
++			{
++				fs::g_tls_error = fs::error::inval;
++				return {};
++			}
++
++			// Directory flag already checked above, but also ensure not directory
++			// Need to find consecutive records with exact same rawId
++			std::vector<iso::DirEntry> chain;
++			u64 totalSize = 0;
++			std::size_t j = i;
++			bool terminated = false;
++
++			for (; j < items.size(); ++j)
++			{
++				const auto& cur = items[j];
++				if (cur.rawName != rawId)
++				{
++					// Mismatched or interleaved: if we have started chain and next differs, chain is missing terminator
++					// Since we require immediately consecutive same rawId, any different raw means break without terminator
++					break;
++				}
++
++				// Validate not directory for chain extents
++				if ((cur.entry.flags & iso::DirEntryFlags::Directory) == iso::DirEntryFlags::Directory)
++				{
++					fs::g_tls_error = fs::error::inval;
++					return {};
++				}
++
++				if (!validateExtentRange(cur.entry))
++				{
++					fs::g_tls_error = fs::error::inval;
++					return {};
++				}
++
++				u64 nextTotal = 0;
++				if (!checkedAddU64(totalSize, cur.entry.length.value(), nextTotal))
++				{
++					fs::g_tls_error = fs::error::inval;
++					return {};
++				}
++				totalSize = nextTotal;
++				chain.push_back(cur.entry);
++
++				const bool isMulti = (cur.entry.flags & iso::DirEntryFlags::MultiExtent) == iso::DirEntryFlags::MultiExtent;
++				if (!isMulti)
++				{
++					terminated = true;
++					// Ensure no further extents with same raw after terminator (duplicate chain)
++					if (j + 1 < items.size() && items[j + 1].rawName == rawId)
++					{
++						fs::g_tls_error = fs::error::inval;
++						return {};
++					}
++					break;
++				}
++				// isMulti true, continue; but if this is last record without terminator -> error
++				if (j + 1 == items.size())
++				{
++					// Missing final extent
++					fs::g_tls_error = fs::error::inval;
++					return {};
++				}
++			}
++
++			if (!terminated)
++			{
++				// Missing terminator (also covers mismatched/interleaved case where we broke early)
++				fs::g_tls_error = fs::error::inval;
++				return {};
++			}
++
++			// Build directory entry for this file with summed size and display name
++			auto entry = chain.front().to_fs_entry(rec.displayName);
++			entry.size = totalSize;
++			result_items.emplace_back(std::move(entry));
++			i = j + 1; // advance past chain
++		}
++		else
++		{
++			// Single extent file or directory: validate extent range for files
++			if ((rec.entry.flags & iso::DirEntryFlags::Directory) != iso::DirEntryFlags::Directory)
++			{
++				if (!validateExtentRange(rec.entry))
++				{
++					fs::g_tls_error = fs::error::inval;
++					return {};
++				}
++			}
++			else
++			{
++				// For directories, validate its own extent range (directory data)
++				const std::size_t block_size = m_dev->block_size();
++				const std::size_t total_block_count = (rec.entry.length.value() + block_size - 1) / block_size;
++				const std::size_t first_block = rec.entry.lba.value();
++				if (rec.entry.length.value() != 0)
++				{
++					if (first_block >= m_dev->block_count() ||
++						total_block_count > m_dev->block_count() - first_block ||
++						first_block >= m_volume_block_count ||
++						total_block_count > m_volume_block_count - first_block)
++					{
++						fs::g_tls_error = fs::error::inval;
++						return {};
++					}
++				}
++			}
++
++			auto entry = rec.entry.to_fs_entry(rec.displayName);
++			// For consistency with multi-extent, single file size is already entry.length
++			result_items.emplace_back(std::move(entry));
++			++i;
++		}
+ 	}
+ 
+ 	return std::make_unique<fs::virtual_dir>(std::move(result_items));
+@@ -206,24 +592,6 @@ iso_dev::open_entry(std::string_view path)
+ 
+ 	auto item = m_root_dir;
+ 
+-	auto isStringEqNoCase = [](std::string_view lhs, std::string_view rhs)
+-	{
+-		if (lhs.size() != rhs.size())
+-		{
+-			return false;
+-		}
+-
+-		for (std::size_t i = 0; i < lhs.size(); ++i)
+-		{
+-			if (std::tolower(lhs[i]) != std::tolower(rhs[i]))
+-			{
+-				return false;
+-			}
+-		}
+-
+-		return true;
+-	};
+-
+ 	while (!path.empty())
+ 	{
+ 		auto sepPos = path.find_first_of("/\\");
+@@ -249,17 +617,29 @@ iso_dev::open_entry(std::string_view path)
+ 			path.remove_prefix(sepPos);
+ 		}
+ 
+-		auto items = read_dir(item);
++		auto itemsOpt = read_dir(item);
++		if (!itemsOpt)
++		{
++			return {};
++		}
++		auto& items = *itemsOpt;
+ 
+ 		bool found = false;
+-		for (std::size_t i = 0; i < items.first.size(); ++i)
++		for (std::size_t i = 0; i < items.size(); ++i)
+ 		{
+-			if (!isStringEqNoCase(items.second[i], dirName))
++			// Lookup uses displayName caseless
++			if (!is_string_equal_ignore_case(items[i].displayName, dirName))
+ 			{
+ 				continue;
+ 			}
+ 
+-			item = items.first[i];
++			// If this record is start of multi-extent chain, we need to return the first entry
++			// but also ensure chain valid? open_entry for directory traversal should not need to validate whole chain,
++			// yet we must not return an invalid multi-extent directory entry.
++			// For files, open_entry returns first extent only; chain assembly happens in open_file_entries.
++			// For directories, multi-extent is invalid, but read_dir already would have failed if directory entry had MultiExtent.
++			// So we can just return first entry.
++			item = items[i].entry;
+ 			found = true;
+ 			break;
+ 		}
+@@ -273,30 +653,200 @@ iso_dev::open_entry(std::string_view path)
+ 	return item;
+ }
+ 
+-std::pair<std::vector<iso::DirEntry>, std::vector<std::string>>
++std::vector<iso::DirEntry> iso_dev::open_file_entries(std::string_view path)
++{
++	auto first = open_entry(path);
++	if (!first)
++	{
++		return {};
++	}
++
++	if ((first->flags & iso::DirEntryFlags::Directory) == iso::DirEntryFlags::Directory)
++	{
++		// Path is a directory, not a file; return single to allow caller to detect is_directory
++		// But directories should not be multi-extent; we already ensure read_dir would have rejected invalid dir chain.
++		return {*first};
++	}
++
++	if ((first->flags & iso::DirEntryFlags::MultiExtent) != iso::DirEntryFlags::MultiExtent)
++	{
++		// Single extent file: validate range and overflow not needed
++		if (!validateExtentRange(*first))
++		{
++			fs::g_tls_error = fs::error::inval;
++			return {};
++		}
++		return {*first};
++	}
++
++	// Multi-extent: need to locate parent directory and assemble chain strictly
++	const auto separator = path.find_last_of("/\\");
++	const std::string_view parent = separator == std::string_view::npos ? std::string_view{} : path.substr(0, separator);
++	const std::string_view filename = separator == std::string_view::npos ? path : path.substr(separator + 1);
++
++	// Filename for lookup is normalized (without ;version). But we need to find chain using raw identity.
++	auto parent_entry = open_entry(parent);
++	if (!parent_entry)
++	{
++		if (fs::g_tls_error == fs::error::ok)
++			fs::g_tls_error = fs::error::noent;
++		return {};
++	}
++
++	auto itemsOpt = read_dir(*parent_entry);
++	if (!itemsOpt)
++	{
++		return {};
++	}
++	auto& items = *itemsOpt;
++
++	// Locate start index by displayName caseless match
++	std::size_t startIdx = static_cast<std::size_t>(-1);
++	for (std::size_t idx = 0; idx < items.size(); ++idx)
++	{
++		if (is_string_equal_ignore_case(items[idx].displayName, filename))
++		{
++			startIdx = idx;
++			break;
++		}
++	}
++	if (startIdx == static_cast<std::size_t>(-1))
++	{
++		fs::g_tls_error = fs::error::noent;
++		return {};
++	}
++
++	const std::string rawId = items[startIdx].rawName;
++	if (rawId.empty())
++	{
++		fs::g_tls_error = fs::error::inval;
++		return {};
++	}
++	if ((items[startIdx].entry.flags & iso::DirEntryFlags::MultiExtent) != iso::DirEntryFlags::MultiExtent)
++	{
++		// First found is not multi, but open_entry said first was multi; this indicates inconsistency (maybe duplicate names)
++		fs::g_tls_error = fs::error::inval;
++		return {};
++	}
++
++	std::vector<iso::DirEntry> result;
++	u64 totalSize = 0;
++	bool terminated = false;
++
++	for (std::size_t j = startIdx; j < items.size(); ++j)
++	{
++		const auto& cur = items[j];
++		if (cur.rawName != rawId)
++		{
++			// Mismatched name or interleaved -> missing final or invalid chain
++			fs::g_tls_error = fs::error::inval;
++			return {};
++		}
++		if ((cur.entry.flags & iso::DirEntryFlags::Directory) == iso::DirEntryFlags::Directory)
++		{
++			fs::g_tls_error = fs::error::inval;
++			return {};
++		}
++		if (!validateExtentRange(cur.entry))
++		{
++			fs::g_tls_error = fs::error::inval;
++			return {};
++		}
++		u64 nextTotal = 0;
++		if (!checkedAddU64(totalSize, cur.entry.length.value(), nextTotal))
++		{
++			fs::g_tls_error = fs::error::inval;
++			return {};
++		}
++		totalSize = nextTotal;
++		result.emplace_back(cur.entry);
++
++		const bool isMulti = (cur.entry.flags & iso::DirEntryFlags::MultiExtent) == iso::DirEntryFlags::MultiExtent;
++		if (!isMulti)
++		{
++			terminated = true;
++			// Check for extra same-raw after terminator
++			if (j + 1 < items.size() && items[j + 1].rawName == rawId)
++			{
++				fs::g_tls_error = fs::error::inval;
++				return {};
++			}
++			break;
++		}
++		if (j + 1 == items.size())
++		{
++			fs::g_tls_error = fs::error::inval;
++			return {};
++		}
++	}
++
++	if (!terminated)
++	{
++		fs::g_tls_error = fs::error::inval;
++		return {};
++	}
++
++	return result;
++}
++
++std::optional<std::vector<IsoDirRecord>>
+ iso_dev::read_dir(const iso::DirEntry& entry)
+ {
+ 	if ((entry.flags & iso::DirEntryFlags::Directory) !=
+ 		iso::DirEntryFlags::Directory)
+ 	{
+-		return {};
++		fs::g_tls_error = fs::error::inval;
++		return std::nullopt;
+ 	}
+ 
+-	auto block_size = m_dev->block_size();
+-	auto total_block_count = (entry.length.value() + block_size - 1) / block_size;
+-	auto total_buffer_block_count = std::min<std::size_t>(total_block_count, 10);
++	const std::size_t block_size = m_dev->block_size();
++	if (block_size == 0)
++	{
++		fs::g_tls_error = fs::error::inval;
++		return std::nullopt;
++	}
++	const std::size_t total_block_count = (entry.length.value() + block_size - 1) / block_size;
++	const std::size_t first_block = entry.lba.value();
++
++	if (entry.length.value() != 0)
++	{
++		if (first_block >= m_dev->block_count() ||
++			total_block_count > m_dev->block_count() - first_block ||
++			first_block >= m_volume_block_count ||
++			total_block_count > m_volume_block_count - first_block)
++		{
++			fs::g_tls_error = fs::error::inval;
++			return std::nullopt;
++		}
++	}
++	else
++	{
++		// Empty directory: no blocks to read, return empty list immediately (valid empty directory)
++		if (first_block != 0 && first_block >= m_dev->block_count())
++		{
++			fs::g_tls_error = fs::error::inval;
++			return std::nullopt;
++		}
++		return std::vector<IsoDirRecord>{};
++	}
++
++	const std::size_t total_buffer_block_count = std::min<std::size_t>(total_block_count, 10);
+ 
+ 	std::vector<std::byte> buffer(total_buffer_block_count * block_size);
+-	auto first_block = entry.lba.value();
+ 
+-	std::vector<iso::DirEntry> isoEntries;
+-	std::vector<std::string> names;
++	std::vector<IsoDirRecord> records;
++	records.reserve(32);
+ 
+ 	for (std::size_t block = first_block, end = first_block + total_block_count;
+ 		block < end;)
+ 	{
+-		auto block_count =
+-			m_dev->read(block, buffer.data(), total_buffer_block_count);
++		const std::size_t requested_blocks = std::min(total_buffer_block_count, end - block);
++		const std::size_t block_count = m_dev->read(block, buffer.data(), requested_blocks);
++		if (block_count != requested_blocks)
++		{
++			fs::g_tls_error = fs::error::unknown;
++			return std::nullopt;
++		}
+ 		block += block_count;
+ 
+ 		std::size_t buffer_offset = 0;
+@@ -304,65 +854,102 @@ iso_dev::read_dir(const iso::DirEntry& entry)
+ 
+ 		while (buffer_offset < buffer_size)
+ 		{
+-			auto item = reinterpret_cast<const iso::DirEntry*>(buffer.data() +
+-															   buffer_offset);
+-			if (item->entry_length == 0)
++			const u8 entry_length = static_cast<u8>(buffer[buffer_offset]);
++			if (entry_length == 0)
+ 			{
+-				buffer_offset += block_size;
+-				buffer_offset &= ~(block_size - 1);
++				// Advance to next block boundary without assuming power-of-two
++				const std::size_t current_block_index = buffer_offset / block_size;
++				buffer_offset = (current_block_index + 1) * block_size;
+ 				continue;
+ 			}
+ 
+-			auto filename_end =
+-				sizeof(iso::DirEntry) +
+-				((item->filename_length + 1) & ~static_cast<std::size_t>(1));
+-
+-			if (item->entry_length < filename_end)
++			const std::size_t bytes_left = buffer_size - buffer_offset;
++			const std::size_t bytes_left_in_block = block_size - (buffer_offset % block_size);
++			if (entry_length < sizeof(iso::DirEntry) || entry_length > bytes_left ||
++				entry_length > bytes_left_in_block)
+ 			{
+-				buffer_offset += item->entry_length;
+-				continue;
++				fs::g_tls_error = fs::error::inval;
++				return std::nullopt;
+ 			}
+ 
+-			buffer_offset += item->entry_length;
++			const auto* item = reinterpret_cast<const iso::DirEntry*>(buffer.data() + buffer_offset);
+ 
+ 			if (item->filename_length == 0 ||
+-				item->filename_length + sizeof(iso::DirEntry) > item->entry_length)
++				item->filename_length + sizeof(iso::DirEntry) > entry_length)
+ 			{
+-				continue;
++				fs::g_tls_error = fs::error::inval;
++				return std::nullopt;
+ 			}
+ 
+-			auto filename =
+-				item->filename_length > 1 ? decodeString({reinterpret_cast<const char*>(item + 1),
+-															 item->filename_length},
+-												m_encoding) :
+-											std::string{};
++			// Validate fixed header fields: ensure entry_length matches at least header + filename
++			// Already checked above; additional checks for zero block size etc done.
++
++			buffer_offset += entry_length;
++
++			std::string rawName;
++			std::string displayName;
+ 
+ 			if (item->filename_length == 1)
+ 			{
+ 				char c = *reinterpret_cast<const char*>(item + 1);
+-				// can be special name
+ 				if (c == 0)
+ 				{
+-					filename = ".";
++					rawName = ".";
++					displayName = ".";
+ 				}
+ 				else if (c == 1)
+ 				{
+-					filename = "..";
++					rawName = "..";
++					displayName = "..";
++				}
++				else
++				{
++					// Should not happen for length 1 but treat as raw
++					rawName = std::string(1, c);
++					displayName = rawName.substr(0, rawName.find(';'));
++				}
++			}
++			else
++			{
++				rawName = decodeString({reinterpret_cast<const char*>(item + 1),
++														 item->filename_length},
++												m_encoding);
++				// rawName includes ;version for files
++				auto semi = rawName.find(';');
++				if (semi != std::string::npos)
++				{
++					displayName = rawName.substr(0, semi);
++				}
++				else
++				{
++					displayName = rawName;
+ 				}
+ 			}
+ 
+-			filename = filename.substr(0, filename.find(';'));
+-			if (filename.empty())
++			// Preserve raw for chain identity; for display we use stripped version
++			// Validate raw not containing embedded NUL (already string may contain but we can check)
++			if (rawName.find('\0') != std::string::npos)
+ 			{
+-				continue;
++				fs::g_tls_error = fs::error::inval;
++				return std::nullopt;
+ 			}
+ 
+-			isoEntries.push_back(*item);
+-			names.emplace_back(filename);
++			// Empty displayName after stripping (and not "." "..") is considered invalid ISO
++			// We treat it as parse failure to ensure explicit failure rather than silent skip
++			if (displayName.empty() && rawName != "." && rawName != "..")
++			{
++				// File with empty name after stripping is invalid
++				fs::g_tls_error = fs::error::inval;
++				return std::nullopt;
++			}
++
++			// Skip intentionally hidden empty after stripping? Previously skipped, now we error above.
++			// But for "." and ".." we keep; for others empty we error.
++			records.push_back(IsoDirRecord{*item, rawName, displayName});
+ 		}
+ 	}
+ 
+-	return {std::move(isoEntries), std::move(names)};
++	return records;
+ }
+ 
+ fs::file iso_dev::read_file(const iso::DirEntry& entry)
+@@ -378,16 +965,13 @@ fs::file iso_dev::read_file(const iso::DirEntry& entry)
+ 		return fs::make_stream<std::vector<std::uint8_t>>();
+ 	}
+ 
+-	auto block_size = m_dev->block_size();
+-	auto block_count = (entry.length.value() + block_size - 1) / block_size;
+-
+-	std::vector<std::uint8_t> data;
+-	data.resize(block_count * block_size);
+-	if (!m_dev->read(entry.lba.value(), data.data(), block_count))
++	if (!validateExtentRange(entry))
+ 	{
++		fs::g_tls_error = fs::error::inval;
+ 		return {};
+ 	}
+ 
+-	data.resize(entry.length.value());
+-	return fs::make_stream(std::move(data), entry.to_fs_stat());
++	fs::file result;
++	result.reset(std::make_unique<iso_extent_file>(m_dev.get(), entry));
++	return result;
+ }
+diff --git a/rpcs3/dev/iso.hpp b/rpcs3/dev/iso.hpp
+index 7879252f7..e1f067fe8 100644
+--- a/rpcs3/dev/iso.hpp
++++ b/rpcs3/dev/iso.hpp
+@@ -96,6 +96,7 @@ namespace iso
+ 		File = 1 << 2,
+ 		ExtAttr = 1 << 3,
+ 		Permissions = 1 << 4,
++		MultiExtent = 1 << 7,
+ 	};
+ 
+ 	constexpr DirEntryFlags operator&(DirEntryFlags lhs, DirEntryFlags rhs)
+@@ -206,11 +207,19 @@ namespace iso
+ #pragma pack(pop)
+ } // namespace iso
+ 
++struct IsoDirRecord
++{
++	iso::DirEntry entry{};
++	std::string rawName;        // exact decoded identifier including ";version"
++	std::string displayName;    // normalized name up to ';' for UI/path
++};
++
+ class iso_dev final : public fs::device_base
+ {
+ 	std::unique_ptr<block_dev> m_dev;
+ 	iso::DirEntry m_root_dir;
+ 	iso::StringEncoding m_encoding = iso::StringEncoding::ascii;
++	u32 m_volume_block_count = 0;
+ 
+ public:
+ 	iso_dev() = default;
+@@ -237,6 +246,9 @@ private:
+ 	bool initialize();
+ 
+ 	std::optional<iso::DirEntry> open_entry(std::string_view path);
+-	std::pair<std::vector<iso::DirEntry>, std::vector<std::string>> read_dir(const iso::DirEntry& entry);
++	std::vector<iso::DirEntry> open_file_entries(std::string_view path);
++	std::optional<std::vector<IsoDirRecord>> read_dir(const iso::DirEntry& entry);
+ 	fs::file read_file(const iso::DirEntry& entry);
++	bool validateExtentRange(const iso::DirEntry& entry) const;
++	bool checkedAddU64(u64 a, u64 b, u64& out) const;
+ };
 diff --git a/rx/include/rx/types.hpp b/rx/include/rx/types.hpp
 index ae4298642..eef6d549c 100644
 --- a/rx/include/rx/types.hpp

@@ -1,9 +1,11 @@
 # SambaS3 — Android GPU Compatibility Matrix
 
 **Last updated:** 2026-08-24  
-**Verified device:** MediaTek Dimensity 8300 Ultra (`MT6897Z_A/ZA`), Arm Mali-G615 MC6, Valhall generation 4, vendor Vulkan driver `44.1.0`  
+**Verified devices:** 
+- MediaTek Dimensity 8300 Ultra (`MT6897Z_A/ZA`), Arm Mali-G615 MC6, Valhall generation 4, vendor Vulkan driver `44.1.0` — Grove Street verified 2026-08-24 (Y5WWBMJVOZSK4HU8)
+- Qualcomm Snapdragon 8 Gen 3 (`SM8650`), Adreno (TM) 750, driver `512.762.41` — GTA intro-to-Ballas verified 2026-08-24 (OPD2403 7d6afed8, staged ISO import with verified `PS3DataMain.obb` 1,479,813,213 bytes)  
 **Current validation workload:** GTA San Andreas (`BLUS31584`)  
-**Verified result:** in-game at Grove Street with correct world geometry, HUD and collision; performance optimization and shader-cache work remain open
+**Verified result:** in-game at Grove Street (Mali) and intro-to-Ballas territory with correct world geometry, HUD and collision on both verified GPUs; performance optimization and shader-cache work remain open
 
 This is the global GPU-family matrix for SambaS3. It provides complete **family coverage for the requested Android GPU ranges**, not a promise that every phone using that IP will run every PS3 title. SoC memory bandwidth, GPU core count, Android vendor driver, RPCSX core build, game workload and device firmware matter as much as the architecture name. Only Mali-G615 MC6 has completed the current GTA validation workload.
 
@@ -26,7 +28,7 @@ This is the global GPU-family matrix for SambaS3. It provides complete **family 
 | Adreno 6xx low/mid | 610, 612, 615, 616, 618, 619/619L, 620 | OEM Vulkan or device-compatible Turnip package in the SambaS3 standard flavor. | **Borderline/candidate.** Backend should be possible; GTA performance likely limited. |
 | Adreno 6xx high | 630, 640, 642/642L, 644, 650, 660, 680, 685, 690 | OEM Vulkan or device-compatible Turnip. | **Candidate.** 650/660 and above are stronger; the available Adreno 640 control device has not completed this exact checkpoint yet. |
 | Adreno 7xx low/mid | 702, 710, 720, 725 | OEM Vulkan or compatible Turnip. | **Candidate.** 702/710 are likely CPU/GPU constrained; 720/725 are better test targets. |
-| Adreno 7xx high | 730, 735, 740, 750 | OEM Vulkan or compatible Turnip. | **Expected.** Adreno 750 / Snapdragon 8 Gen 3 is the primary cross-vendor control still to test. |
+| Adreno 7xx high | 730, 735, 740, 750 | OEM Vulkan or compatible Turnip. | **Verified on Adreno (TM) 750 / Snapdragon 8 Gen 3 (OPD2403, SM8650, driver 512.762.41) — 2026-08-24 GTA SM8650 pass with staged import.** |
 | Adreno 8xx | 825, 830, 840 and later public 8xx variants | Current OEM Vulkan; Turnip support depends on the Mesa build and exact GPU. | **Expected.** Highest-priority Qualcomm targets, currently unverified for this title. |
 
 The upstream Linux MSM catalog confirms separate 5xx, 6xx, 7xx and 8xx families, while Mesa documents Turnip Vulkan support as 6xx onward. Model suffixes and OEM-reported names can vary; validate the actual Vulkan physical-device string from the RPCSX log rather than relying on the phone marketing name.

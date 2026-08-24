@@ -13,9 +13,27 @@
 | Controller | `PadOverlay.kt:172 faceX=1430 faceY=576 btnSize=135 → Cross 1632,873`; agent `input tap 1632 873` ×3 (EULA→Start→New Game) or `adb broadcast DEBUG_PAD_CROSS` (new debug feature) |
 | Logs | `LogMonitor.kt:298 logcat -v threadtime -b main,crash,system → classifyTag → rpcsx_backend.log` (see `rpcsx-android.cpp:107 LogListener`); triage `grep -E 'modelinfo\|Access violation\|Emulation.*frozen\|pamf\|vdec'` |
 
-## Current Result — In-Game Pass, Low FPS Under Investigation
+## Snapdragon 8 Gen 3 (SM8650 / Adreno 750) — 2026-08-24 Staged-Import Pass
 
-The 2026-08-24 run reaches the first Grove Street mission with correct scene rendering and collision. The active patch configuration has `Skip null modelinfo crash: Enabled: false`; the current backend log contains **no** `Access violation` and no `Emulation has been frozen` event. The formerly truncated archive is now complete:
+**Device:** `7d6afed8` — `OPD2403`, Qualcomm Snapdragon 8 Gen 3 (`SM8650`), Adreno (TM) 750, Vulkan driver `512.762.41` (Android 16). Originating ISO `GTA-San-Andreas-BLUS31584.iso` 2,489,647,104 bytes SHA256 `7c85be6c8652e9ec2e0915a0e5aa5b72464b75660ef383a2bdc310c6ce7084bd` validated on device before import.
+
+**Importer:** new fail-safe path — strict raw-identifier multi-extent chain (`351720:1,073,739,776 0x80` + `876007:406,073,437 0x00` = 1,479,813,213), bounded directory parser, `^[A-Z]{4}[0-9]{5}$` title check, per-component path validation, duplicate detection, `PS3_UPDATE` skip only at root, whole-title staging outside `config/games` on the same filesystem, manifest `stat`/`open`/`open_dir` size coherence, `PARAM.SFO`/`EBOOT.BIN` readable-non-empty pre-commit gate, backup/rename/rollback + transaction marker, and publish/PPU-queue only after commit.
+
+**Installed result (on-device `stat` + `sha256sum`):** `PS3DataMain.obb` 1,479,813,213 `8cdcca8047ce083b4cf27316f266affebc7c565ccee38642029ff327397f680f`, `PS3Data.obb` 708,640,703 `484b4fd07331d00ca6aeea6758772d848e166ee45bb885ba17a2dc115e58d905`, `EBOOT.BIN` 8,113,656, `PARAM.SFO` 1,040; no staging `.staging/` residue, no `.backup.` left, no `.transaction` marker, no pending `＄*.tmp`, and `games.json` contains exactly the committed final path.
+
+**Firmware:** 4.92 `PS3UPDAT.PUP` (206,177,436 bytes) installed via app UI; `Firmware installation complete` with automatic VSH PPU compilation intentionally disabled (`sendVshBootable -1`).
+
+**Vulkan:** global `config.yml` `Renderer: Vulkan`; backend `Found Vulkan-compatible GPU: 'Adreno (TM) 750' running on driver 512.762.41` and `Vulkan: Renderer initialized on device 'Adreno (TM) 750'`; `RSX: Renderer: Vulkan` present before RSX resume. No `VK_ERROR_DEVICE_LOST` or `rsx::thread is too sleepy` fatal.
+
+**Patches:** `Skip null modelinfo crash` remains disabled (leave disabled with complete data). First-run PPU compilation for `BLUS31584` (71 modules, `LLVM Recompiler Legacy` `cortex-a34`) ran to `Finalization` without error.
+
+**Intro-to-Ballas checkpoint (DebugPad broadcast, no coordinate tap):** `BROADCAST DEBUG_PAD_CROSS` / `DEBUG_PAD_START` loop progressed through EULA, `Start Game`, `New Game`, and the intro cutscene (`After five years...`, `Welcome home, Carl...`, `This is a weapon, Officer Pulaski...`) without `Access violation`, `Emulation has been frozen`, or `modelinfo` signatures. Screenshots show airport (`JUANK AIR`), police stop, train yard, and the post-cutscene Ballas alley with CJ, bike, HUD and radar — world geometry and collision intact and controller input accepted after the transition. Overhead `PWR: +0.86 – 3.16 W` is for reference only.
+
+**Evidence bundle:** `/tmp/gta-sm8650-pass-20260824-152523/` (APK identity, ISO/PUP/OBB sizes/hashes, `games.json`, Vulkan log lines, `rpcsx_backend.log` PPU window, and screenshots at cutscene / police / train / Ballas checkpoint). The same regression also passes `IsoImportValidationTest` (28 tests, `AtomicFileCopier`, `StagedGameInstaller`, and strict ISO parser cases) and both standard/playstore unit-test tasks. `patches/rpcsx-submodule-changes.patch` was regenerated and reverse-apply checked; final commit stays local.
+
+## Current Result — In-Game Pass, Low FPS Under Investigation (MediaTek Baseline)
+
+The 2026-08-24 run on `Y5WWBMJVOZSK4HU8` reaches the first Grove Street mission with correct scene rendering and collision. The active patch configuration has `Skip null modelinfo crash: Enabled: false`; the current backend log contains **no** `Access violation` and no `Emulation has been frozen` event. The formerly truncated archive is now complete:
 
 | Archive | Current bytes | Earlier bad copy |
 |---|---:|---:|
