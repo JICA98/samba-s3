@@ -53,37 +53,96 @@ data class GameLibraryCandidate(
     val sizeBytes: Long?,
 )
 
+@kotlinx.serialization.Serializable
+data class PersistedLibraryCandidate(
+    val schemaVersion: Int = 1,
+    val sourceUri: String,
+    val sourceKind: String,
+    val displayName: String,
+    val titleId: String? = null,
+    val sizeBytes: Long? = null
+)
+
 object LibraryCandidatesRepository {
-    private const val PREF_KEY = "selected_game_folder_candidates"
+    private const val PREF_KEY = "selected_game_folder_candidates_v2"
     private const val PREF_TREE_URI = "selected_game_folder_tree"
+    private const val PREF_KEY_LEGACY = "selected_game_folder_candidates"
+    private val json = kotlinx.serialization.json.Json { ignoreUnknownKeys = true }
+    private val _candidatesFlow = kotlinx.coroutines.flow.MutableStateFlow<List<GameFolderMatch>>(emptyList())
+    val candidatesFlow: kotlinx.coroutines.flow.StateFlow<List<GameFolderMatch>> = _candidatesFlow
+    // Legacy alias for older code paths
+    val candidates: kotlinx.coroutines.flow.StateFlow<List<GameFolderMatch>> get() = candidatesFlow
 
     fun save(context: Context, treeUri: Uri, candidates: List<GameFolderMatch>) {
         try {
             val prefs = context.getSharedPreferences("app_prefs", Context.MODE_PRIVATE)
             prefs.edit().putString(PREF_TREE_URI, treeUri.toString()).apply()
-            // Persist minimal candidate data (not full URIs for privacy, but needed for restore)
-            val json = candidates.joinToString("|") { "${it.folderName}::${it.titleId ?: ""}::${it.sourceKind}::${it.sizeBytes ?: -1}::${it.sourceUri}" }
-            prefs.edit().putString(PREF_KEY, json).apply()
-        } catch (_: Exception) {}
+            val persisted = candidates.map {
+                PersistedLibraryCandidate(
+                    schemaVersion = 1,
+                    sourceUri = it.sourceUri?.toString() ?: "",
+                    sourceKind = it.sourceKind.name,
+                    displayName = it.folderName,
+                    titleId = it.titleId,
+                    sizeBytes = it.sizeBytes
+                )
+            }
+            val encoded = json.encodeToString(persisted)
+            prefs.edit().putString(PREF_KEY, encoded).apply()
+            // Clear legacy key to avoid confusion
+            prefs.edit().remove(PREF_KEY_LEGACY).apply()
+            _candidatesFlow.value = candidates
+        } catch (e: Exception) {
+            android.util.Log.w("LibraryCandidates", "save failed: ${e.message}")
+        }
     }
 
     fun load(context: Context): List<GameFolderMatch> {
+        // Prefer v2 JSON, fallback to legacy delimiter format and migrate
         return try {
             val prefs = context.getSharedPreferences("app_prefs", Context.MODE_PRIVATE)
-            val raw = prefs.getString(PREF_KEY, null) ?: return emptyList()
-            if (raw.isEmpty()) return emptyList()
-            raw.split("|").mapNotNull { entry ->
-                val parts = entry.split("::")
-                if (parts.size < 2) return@mapNotNull null
-                val folderName = parts[0]
-                val titleId = parts[1].ifEmpty { null }
-                val kind = try { GameSourceKind.valueOf(parts.getOrNull(2) ?: "DIRECTORY") } catch (_: Exception) { GameSourceKind.DIRECTORY }
-                val size = parts.getOrNull(3)?.toLongOrNull()?.takeIf { it >= 0 }
-                val uriStr = parts.getOrNull(4)
-                val uri = try { if (uriStr != null && uriStr != "null" && uriStr.isNotEmpty()) Uri.parse(uriStr) else null } catch (_: Exception) { null }
-                GameFolderMatch(folderName, titleId, uri, kind, size)
+            val rawV2 = prefs.getString(PREF_KEY, null)
+            if (!rawV2.isNullOrEmpty()) {
+                val decoded = json.decodeFromString<List<PersistedLibraryCandidate>>(rawV2)
+                val result = decoded.mapNotNull { p ->
+                    val uri = try { if (p.sourceUri.isNotEmpty()) Uri.parse(p.sourceUri) else null } catch (_: Exception) { null }
+                    val kind = try { GameSourceKind.valueOf(p.sourceKind) } catch (_: Exception) { GameSourceKind.DIRECTORY }
+                    GameFolderMatch(p.displayName, p.titleId, uri, kind, p.sizeBytes)
+                }
+                _candidatesFlow.value = result
+                return result
             }
-        } catch (_: Exception) { emptyList() }
+            // Legacy migration
+            val rawLegacy = prefs.getString(PREF_KEY_LEGACY, null)
+            if (!rawLegacy.isNullOrEmpty()) {
+                val legacy = rawLegacy.split("|").mapNotNull { entry ->
+                    val parts = entry.split("::")
+                    if (parts.size < 2) return@mapNotNull null
+                    val folderName = parts[0]
+                    val titleId = parts[1].ifEmpty { null }
+                    val kind = try { GameSourceKind.valueOf(parts.getOrNull(2) ?: "DIRECTORY") } catch (_: Exception) { GameSourceKind.DIRECTORY }
+                    val size = parts.getOrNull(3)?.toLongOrNull()?.takeIf { it >= 0 }
+                    val uriStr = parts.getOrNull(4)
+                    val uri = try { if (uriStr != null && uriStr != "null" && uriStr.isNotEmpty()) Uri.parse(uriStr) else null } catch (_: Exception) { null }
+                    GameFolderMatch(folderName, titleId, uri, kind, size)
+                }
+                if (legacy.isNotEmpty()) {
+                    // Migrate to v2
+                    save(context, Uri.parse(prefs.getString(PREF_TREE_URI, "") ?: ""), legacy)
+                }
+                _candidatesFlow.value = legacy
+                return legacy
+            }
+            _candidatesFlow.value = emptyList()
+            emptyList()
+        } catch (e: Exception) {
+            android.util.Log.w("LibraryCandidates", "load failed: ${e.message}")
+            emptyList()
+        }
+    }
+
+    fun refresh(context: Context) {
+        load(context)
     }
 }
 
@@ -291,7 +350,19 @@ object FileUtil {
                         context.getString(R.string.installing_dir),
                     )
                     GameRepository.activeInstallProgress.value = progress
-                    GameRepository.add(arrayOf(GameInfo("$")), progress)
+                    // BLOCKER D: prefer ImportSession over visible "$" placeholder; keep Game entry hidden.
+                    val provTid = Regex("(?i)([A-Z]{4}[0-9]{5})").find(it.targetPath)?.groupValues?.getOrNull(1)?.uppercase()
+                    com.zenithblue.sambas3.ImportSessionStore.createOrUpdate(
+                        com.zenithblue.sambas3.ImportSession(
+                            progressId = progress,
+                            sourceUri = it.uri,
+                            sourceName = it.targetPath.substringAfterLast("/"),
+                            provisionalTitleId = provTid,
+                            phase = com.zenithblue.sambas3.ImportPhase.COPYING
+                        )
+                    )
+                    // Legacy placeholder kept hidden via GamesScreen filter; do not rely on it for UI.
+                    // GameRepository.add(arrayOf(GameInfo("$")), progress)
                     try {
                         val completionStep = copyDirUriToInternalStorage(
                             context,
@@ -307,6 +378,7 @@ object FileUtil {
                             completionStep,
                             completionStep,
                         )
+                        com.zenithblue.sambas3.ImportSessionStore.updatePhase(progress, com.zenithblue.sambas3.ImportPhase.INDEXING, provTid)
                     } catch (e: Exception) {
                         Log.e("FileUtil", "Game directory import failed: ${it.targetPath}", e)
                         val detail = e.message ?: context.getString(R.string.unexpected_error)
@@ -316,6 +388,13 @@ object FileUtil {
                             0,
                             context.getString(R.string.game_import_failed, detail),
                         )
+                        com.zenithblue.sambas3.ImportSessionStore.updatePhase(progress, com.zenithblue.sambas3.ImportPhase.FAILED, provTid)
+                    } finally {
+                        // Let installed Game card (via collectGameInfo) win; hide pending after short delay
+                        val tid = provTid
+                        android.os.Handler(android.os.Looper.getMainLooper()).postDelayed({
+                            com.zenithblue.sambas3.ImportSessionStore.remove(progress)
+                        }, 1500)
                     }
                 }
 
@@ -497,44 +576,116 @@ object FileUtil {
      * directories owned by the app are accepted; an arbitrary external game
      * path is never deleted from this action.
      */
+    /**
+     * BLOCKER F fix: transactional, main-thread repository mutation, strict path, no JNI on remove.
+     * - Strict managed path: <root>/config/games/<TITLE_ID> or <root>/config/dev_hdd0/game/<TITLE_ID> exactly.
+     * - Rename to trash before mutating observable state; delete tombstone asynchronously after UI update.
+     * - Repository + PpuReadinessStore mutations happen on Main; filesystem on IO.
+     * - Running-state gate: refuse if emulator is actively running this title.
+     */
     fun removeGame(context: Context, game: com.zenithblue.sambas3.Game, onComplete: (Boolean) -> Unit) {
+        // Running-state gate (F7) — check before IO
+        try {
+            val activePath = com.zenithblue.sambas3.RPCSX.activeGame.value
+            val state = com.zenithblue.sambas3.RPCSX.state.value
+            val isRunning = state == com.zenithblue.sambas3.EmulatorState.Running || state == com.zenithblue.sambas3.EmulatorState.Paused
+            if (isRunning && activePath != null && activePath == game.info.path) {
+                Log.w("FileUtil", "removeGame blocked: title is currently running $activePath")
+                CoroutineScope(Dispatchers.Main).launch { onComplete(false) }
+                return
+            }
+        } catch (_: Exception) {}
+
         CoroutineScope(Dispatchers.IO).launch {
-            val result = runCatching {
-                val root = File(RPCSX.rootDirectory).canonicalFile
-                val gameRoot = File(game.info.path).canonicalFile
-                val managedRoots = listOf(
-                    File(root, "config/games").canonicalFile,
-                    File(root, "config/dev_hdd0/game").canonicalFile,
-                )
-                val titleId = gameRoot.name.takeIf { TITLE_ID_PATTERN.matches(it) }
-                    ?: throw IOException("The game title ID could not be determined")
-                // Robust check: allow exact parent or any descendant of managed root (handles symlinks/canonical differences)
-                val isManaged = managedRoots.any { managedRoot ->
-                    val parent = gameRoot.parentFile?.canonicalFile
-                    parent == managedRoot || gameRoot.canonicalPath.startsWith(managedRoot.canonicalPath + "/")
+            var tombstone: File? = null
+            var titleId: String? = null
+            var root: File? = null
+            val ioResult: Boolean = runCatching {
+                val r = File(RPCSX.rootDirectory).canonicalFile
+                root = r
+                val rawPath = game.info.path
+                // Never delete external/source URIs or placeholder
+                if (rawPath == "$" || rawPath.startsWith("content://") || rawPath.startsWith("content:")) {
+                    throw IOException("Only imported games can be removed (external/source path not removable)")
                 }
-                if (!isManaged) {
-                    Log.w("FileUtil", "removeGame not managed: gameRoot=${gameRoot.canonicalPath} parents=${managedRoots.joinToString { it.canonicalPath }}")
+                val gameRoot = File(rawPath).canonicalFile
+                val managedRoots = listOf(
+                    File(r, "config/games").canonicalFile,
+                    File(r, "config/dev_hdd0/game").canonicalFile,
+                )
+                val tid = gameRoot.name.takeIf { TITLE_ID_PATTERN.matches(it) }
+                    ?: throw IOException("The game title ID could not be determined")
+                titleId = tid
+                // F4: strict exact title root, not arbitrary nested descendant
+                val parent = gameRoot.parentFile?.canonicalFile
+                val isExactManaged = managedRoots.any { it == parent }
+                if (!isExactManaged) {
+                    Log.w("FileUtil", "removeGame not exact managed: gameRoot=${gameRoot.canonicalPath} parent=${parent?.canonicalPath} roots=${managedRoots.joinToString { it.canonicalPath }}")
                     throw IOException("Only imported games can be removed from the library")
                 }
-                Log.i("FileUtil", "Removing game ${gameRoot.canonicalPath} titleId=$titleId")
-                if (gameRoot.exists() && !gameRoot.deleteRecursively()) {
-                    throw IOException("The game files could not be removed (deleteRecursively returned false)")
+                Log.i("FileUtil", "Removing game ${gameRoot.canonicalPath} titleId=$tid")
+                // Prefer rename-to-trash transaction (F6)
+                val trashRoot = File(r, "config/trash").apply { if (!exists()) mkdirs() }
+                val ts = System.currentTimeMillis()
+                val dest = File(trashRoot, "${tid}_$ts")
+                val renamed = if (gameRoot.exists()) {
+                    try { gameRoot.renameTo(dest) } catch (_: Exception) { false }
+                } else true
+                if (renamed && dest.exists()) {
+                    tombstone = dest
+                    Log.i("FileUtil", "Renamed to tombstone ${dest.canonicalPath}")
+                } else if (gameRoot.exists()) {
+                    // Fallback: direct delete if rename failed
+                    Log.w("FileUtil", "Rename to trash failed, attempting direct delete")
+                    if (!gameRoot.deleteRecursively()) {
+                        throw IOException("The game files could not be removed (deleteRecursively returned false)")
+                    }
                 }
-                val cacheDeleted = File(root, "cache/cache/$titleId").deleteRecursively()
-                val manifestDeleted = File(root, "cache/cache/ppu_manifest/$titleId.json").delete()
-                Log.i("FileUtil", "Removed cache $cacheDeleted manifest $manifestDeleted for $titleId")
-                removeNativeGameIndexEntry(root, titleId)
-                GameRepository.remove(game)
-                PpuReadinessStore.setPreRuntimeState(context, titleId, PreRuntimePpuState.NOT_DONE)
+                // Clear cache/manifest (best effort)
+                val cacheDeleted = File(r, "cache/cache/$tid").deleteRecursively()
+                val manifestDeleted = File(r, "cache/cache/ppu_manifest/$tid.json").delete()
+                Log.i("FileUtil", "Removed cache $cacheDeleted manifest $manifestDeleted for $tid")
+                removeNativeGameIndexEntry(r, tid)
                 true
             }.getOrElse {
                 Log.e("FileUtil", "Game removal failed: ${game.info.path}", it)
                 false
             }
-            withContext(Dispatchers.Main) {
-                onComplete(result)
+
+            // F2: observable repository mutation on Main, not inside IO filesystem block
+            val mainResult = withContext(Dispatchers.Main) {
+                if (ioResult) {
+                    try {
+                        GameRepository.remove(game)
+                    } catch (e: Exception) {
+                        Log.e("FileUtil", "GameRepository.remove failed", e)
+                    }
+                    // F3: remove PpuReadinessStore entry without JNI/fingerprint call
+                    try {
+                        val tid = titleId
+                        if (tid != null) PpuReadinessStore.removeEntry(context, tid)
+                    } catch (e: Exception) {
+                        Log.e("FileUtil", "PpuReadinessStore.removeEntry failed", e)
+                    }
+                }
+                ioResult
             }
+
+            // Asynchronously delete tombstone after UI committed (F6)
+            tombstone?.let { tsFile ->
+                CoroutineScope(Dispatchers.IO).launch {
+                    try {
+                        if (tsFile.exists()) {
+                            val deleted = tsFile.deleteRecursively()
+                            Log.i("FileUtil", "Tombstone delete $deleted for ${tsFile.canonicalPath}")
+                        }
+                    } catch (e: Exception) {
+                        Log.w("FileUtil", "Tombstone delete failed: ${e.message}")
+                    }
+                }
+            }
+
+            withContext(Dispatchers.Main) { onComplete(mainResult) }
         }
     }
 

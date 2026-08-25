@@ -1,6 +1,6 @@
 Samba S3 Play Store builds may include Mesa Turnip Vulkan drivers:
 
-- Mesa Turnip 26.1.4
+- Mesa 26.3
 - Mesa Turnip 25.3.4
 - Turnip A8XX v29 (experimental)
 

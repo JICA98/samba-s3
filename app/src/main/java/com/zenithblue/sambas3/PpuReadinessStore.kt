@@ -150,6 +150,22 @@ object PpuReadinessStore {
         setPreRuntimeState(context, key, PreRuntimePpuState.READY)
     }
 
+    /**
+     * BLOCKER F3: remove entry without JNI/fingerprint call.
+     * Used by transactional removal — deleting a title must not call
+     * getPpuManifestKey (global emulator state) for the removed title.
+     */
+    @Synchronized
+    fun removeEntry(context: Context, key: String): Boolean {
+        ensureLoaded(context)
+        val existed = cache.remove(key) != null
+        if (existed) {
+            save(context)
+            if (Telemetry.isEnabled) Telemetry.emitPpuStateChange(key, "preruntime", "REMOVED", "REMOVED")
+        }
+        return existed
+    }
+
     @Synchronized
     fun allEntries(context: Context): Map<String, PpuStateEntry> {
         ensureLoaded(context)

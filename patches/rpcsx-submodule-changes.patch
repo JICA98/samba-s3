@@ -20,16 +20,17 @@ index 67174c58e..aba8b3a79 100644
  		message(WARNING "Vulkan not found, using submodule")
  		set(COMPILE_VULKAN_LOADER on)
 diff --git a/android/CMakeLists.txt b/android/CMakeLists.txt
-index b834c0fe7..84128a3e8 100644
+index b834c0fe7..131c0d88e 100644
 --- a/android/CMakeLists.txt
 +++ b/android/CMakeLists.txt
-@@ -110,6 +110,9 @@ set(COMPILE_FFMPEG off)
+@@ -110,6 +110,10 @@ set(COMPILE_FFMPEG off)
  add_subdirectory(${CMAKE_SOURCE_DIR}/.. rpcsx EXCLUDE_FROM_ALL)
  
  add_library(${CMAKE_PROJECT_NAME} SHARED
 +    src/atomic-file-copier.cpp
 +    src/iso-install-manifest.cpp
 +    src/staged-game-installer.cpp
++    src/samba-build-id.cpp
      src/rpcsx-android.cpp
  )
  
@@ -1309,6 +1310,22 @@ index ce38967c1..8d5dc06b7 100644
 +}
 +
  #pragma GCC diagnostic pop
+diff --git a/android/src/samba-build-id.cpp b/android/src/samba-build-id.cpp
+new file mode 100644
+index 000000000..e75a116af
+--- /dev/null
++++ b/android/src/samba-build-id.cpp
+@@ -0,0 +1,10 @@
++#include <string>
++
++// Samba S3 core build identity — overwritten by build_rpcsx.sh at build time.
++// Fallback placeholder ensures old binaries are detectable.
++static std::string g_samba_build_id =
++    "rpcsx=e8ae1481ab7ba04d5c6bef89dd852aabba2c88ff samba=unknown patch_sha256=unknown build_type=release";
++
++extern "C" const char* _rpcsx_sambaBuildId() {
++    return g_samba_build_id.c_str();
++}
 diff --git a/android/src/staged-game-installer.cpp b/android/src/staged-game-installer.cpp
 new file mode 100644
 index 000000000..4ad8ddd31

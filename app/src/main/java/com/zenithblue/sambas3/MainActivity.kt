@@ -52,6 +52,9 @@ class MainActivity : ComponentActivity() {
             // Fix historical nested path bug before loading games.json
             try { com.zenithblue.sambas3.utils.FileUtil.fixNestedGameDirs(RPCSX.rootDirectory) } catch (_: Exception) {}
 
+            // Restore persisted ISO candidates (folder scan) without creating fake Games.
+            try { com.zenithblue.sambas3.utils.LibraryCandidatesRepository.load(this@MainActivity) } catch (_: Exception) {}
+
             lifecycleScope.launch {
                 GameRepository.load()
             }
@@ -63,6 +66,16 @@ class MainActivity : ComponentActivity() {
             RPCSX.nativeLibDirectory = nativeLibraryDir
 
             RPCSX.openLibrary()
+            // S3CORE build ID — must log after dlopen so stale cores are immediately visible in logcat
+            try {
+                val coreId = RPCSX.instance.getCoreBuildId() ?: "unknown"
+                android.util.Log.i("S3CORE", "core_build_id=$coreId")
+                android.util.Log.i("S3LIFE", "core_build_id=$coreId session=${com.zenithblue.sambas3.utils.Telemetry.sessionId}")
+                // Expose patch SHA for quick grep
+                if (coreId.contains("patch_sha256=")) {
+                    android.util.Log.i("S3CORE", "patch_sha256=${coreId.substringAfter("patch_sha256=").substringBefore(" ").take(16)}")
+                }
+            } catch (_: Exception) {}
 
             if (RPCSX.activeLibrary.value != null) {
                 RPCSX.instance.initialize(RPCSX.rootDirectory, UserRepository.getUserFromSettings())

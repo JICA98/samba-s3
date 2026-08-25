@@ -13,12 +13,12 @@ class GpuDriverPolicyTest {
 
     @Test
     fun buildconfig_flags_are_consistent() {
-        // Mutual exclusion: Play bundles drivers and forbids external acquisition.
+        // Both flavors now bundle Turnip 26.3 (shared assets), but only standard allows external acquisition.
         if (BuildConfig.IS_PLAYSTORE_BUILD) {
             assertTrue(BuildConfig.INCLUDE_BUNDLED_TURNIP_DRIVERS)
             assertFalse(BuildConfig.ALLOW_EXTERNAL_GPU_DRIVERS)
         } else {
-            assertFalse(BuildConfig.INCLUDE_BUNDLED_TURNIP_DRIVERS)
+            assertTrue(BuildConfig.INCLUDE_BUNDLED_TURNIP_DRIVERS)
             assertTrue(BuildConfig.ALLOW_EXTERNAL_GPU_DRIVERS)
         }
     }

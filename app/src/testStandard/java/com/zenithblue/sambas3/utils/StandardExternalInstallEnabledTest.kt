@@ -14,7 +14,7 @@ class StandardExternalInstallEnabledTest {
     fun standard_allows_external_gpu_drivers() {
         assertFalse(BuildConfig.IS_PLAYSTORE_BUILD)
         assertTrue(BuildConfig.ALLOW_EXTERNAL_GPU_DRIVERS)
-        assertFalse(BuildConfig.INCLUDE_BUNDLED_TURNIP_DRIVERS)
+        assertTrue(BuildConfig.INCLUDE_BUNDLED_TURNIP_DRIVERS)
     }
 
     @Test

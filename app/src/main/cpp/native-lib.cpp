@@ -50,6 +50,7 @@ struct RPCSXApi {
   std::string (*patchesList)();
   bool (*patchSetEnabled)(std::string_view hash, std::string_view description, bool enabled);
   const char* (*getPpuManifestKey)();
+  const char* (*getSambaBuildId)();
   void *(*setCustomDriver)(void *driverHandle);
 };
 
@@ -116,6 +117,7 @@ struct RPCSXLibrary : RPCSXApi {
     result.patchesList = reinterpret_cast<decltype(patchesList)>(dlsym(handle, "_rpcsx_patchesList"));
     result.patchSetEnabled = reinterpret_cast<decltype(patchSetEnabled)>(dlsym(handle, "_rpcsx_patchSetEnabled"));
     result.getPpuManifestKey = reinterpret_cast<decltype(getPpuManifestKey)>(dlsym(handle, "_rpcsx_getPpuManifestKey"));
+    result.getSambaBuildId = reinterpret_cast<decltype(getSambaBuildId)>(dlsym(handle, "_rpcsx_sambaBuildId"));
     result.setCustomDriver = reinterpret_cast<decltype(setCustomDriver)>(dlsym(handle, "_rpcsx_setCustomDriver"));
     result.setCompileProgressListener = reinterpret_cast<decltype(setCompileProgressListener)>(dlsym(handle, "_rpcsx_setCompileProgressListener"));
     result.supportsCompileProgressEvents = reinterpret_cast<decltype(supportsCompileProgressEvents)>(dlsym(handle, "_rpcsx_supportsCompileProgressEvents"));
@@ -387,8 +389,22 @@ Java_com_zenithblue_sambas3_RPCSX_supportsCompileProgressEvents(JNIEnv *env, job
 }
 
 extern "C" JNIEXPORT jstring JNICALL
-Java_com_zenithblue_sambas3_RPCSX_getPpuManifestKey(JNIEnv *env, jobject, jstring) {
+Java_com_zenithblue_sambas3_RPCSX_getPpuManifestKey(JNIEnv *env, jobject, jstring jtitleId) {
   if (!rpcsxLib.getPpuManifestKey) return wrap(env, std::string{});
+  // Current core export is global (no title arg); log misuse but return global key.
+  // Per-title identity is validated in Kotlin via cache check; do not crash on null title.
+  if (jtitleId != nullptr) {
+    // Keep title for diagnostics; core key still global — caller must not use this
+    // to fingerprint a removed/unrelated title (see PpuReadinessStore.removeEntry).
+    (void)unwrap(env, jtitleId);
+  }
   const char* key = rpcsxLib.getPpuManifestKey();
   return wrap(env, key ? std::string(key) : std::string{});
+}
+
+extern "C" JNIEXPORT jstring JNICALL
+Java_com_zenithblue_sambas3_RPCSX_getCoreBuildId(JNIEnv *env, jobject) {
+  if (!rpcsxLib.getSambaBuildId) return wrap(env, std::string{});
+  const char* id = rpcsxLib.getSambaBuildId();
+  return wrap(env, id ? std::string(id) : std::string{});
 }

@@ -69,7 +69,9 @@ jobs:
       uses: android-actions/setup-android@v3
 
     - name: Install packages
-      run: yes | sdkmanager "cmake;3.31.6"
+      run: |
+        yes | sdkmanager "cmake;3.31.6" "ndk;30.0.14904198"
+        echo "NDK installed: $(ls -d $ANDROID_HOME/ndk/30.0* | head -1)"
 
     - name: Export Variables (Draft)
       if: github.event_name != 'workflow_dispatch' || inputs.releaseTag == 'Draft'
@@ -82,6 +84,16 @@ jobs:
       run: |
         echo RX_VERSION=`git log --date=format:%Y%m%d --pretty=format:'%cd' -n 1` >> "${{ github.env }}"
 
+    - name: Build RPCSX core (deterministic, patches + S3CORE)
+      env:
+        CMAKE_C_COMPILER_LAUNCHER: "ccache"
+        CMAKE_CXX_COMPILER_LAUNCHER: "ccache"
+      run: |
+        ./build_rpcsx.sh release
+        ls -lh app/src/main/jniLibs/*/*.so
+        sha256sum app/src/main/jniLibs/*/*.so || true
+        strings app/src/main/jniLibs/arm64-v8a/librpcsx-android.so | grep -E "rpcsx=.*samba=.*patch_sha256=" | head -1 || echo "S3CORE build ID not found (fallback core?)"
+
     - name: Build with Gradle
       env: 
         KEYSTORE_PATH: "ks.jks"
@@ -91,6 +103,14 @@ jobs:
         CMAKE_CXX_COMPILER_LAUNCHER: "ccache"
       run: |
         ./gradlew assembleStandardRelease assemblePlaystoreRelease
+
+    - name: Verify APK core matches local build
+      run: |
+        for apk in app/build/outputs/apk/standard/release/*.apk app/build/outputs/apk/playstore/release/*.apk; do
+          [ -f "$apk" ] || continue
+          echo "=== Verifying $apk ==="
+          ./scripts/verify-apk-core.sh "$apk"
+        done
   
     - name: Build release artifacts
       uses: actions/upload-artifact@v4

@@ -102,7 +102,10 @@ class RPCSX {
     external fun patchEngineVersion(): String
     external fun patchesList(): String
     external fun patchSetEnabled(hash: String, description: String, enabled: Boolean): Boolean
+    // Current core export is global; titleId param is kept for future per-title identity
+    // but is currently ignored in native-lib. Do not use to fingerprint a removed title.
     external fun getPpuManifestKey(titleId: String): String?
+    external fun getCoreBuildId(): String?
 
     @Keep
     fun interface CompileProgressCallback {

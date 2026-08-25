@@ -64,9 +64,53 @@ import java.util.Date
 import java.util.Locale
 
 sealed class PagerItem {
-    data class GameItem(val game: Game) : PagerItem()
-    data class AddGame(val disabled: Boolean = false) : PagerItem()
-    data object FirmwareCard : PagerItem()
+    abstract val stableKey: String
+    data class GameItem(val game: Game) : PagerItem() {
+        override val stableKey: String get() = "game:${com.zenithblue.sambas3.GameIdentity.key(game.info.path, game.info.name.value)}"
+    }
+    data class AddGame(val disabled: Boolean = false) : PagerItem() {
+        override val stableKey: String get() = if (disabled) "add:disabled" else "add"
+    }
+    data object FirmwareCard : PagerItem() {
+        override val stableKey: String get() = "firmware"
+    }
+    // Phases 3-4 will add SourceCandidate/PendingImport; keep keys stable when merging later.
+    data class SourceCandidate(val titleId: String?, val displayName: String, val sourceUri: String) : PagerItem() {
+        override val stableKey: String get() = "source:${titleId ?: displayName.lowercase()}"
+    }
+    data class PendingImport(val progressId: Long, val provisionalTitleId: String?, val displayName: String?) : PagerItem() {
+        override val stableKey: String get() = "import:$progressId"
+    }
+}
+
+/** Pure function for library pager derivation — unit-testable. */
+fun buildLibraryPagerItems(
+    visibleGames: List<Game>,
+    sourceCandidates: List<PagerItem.SourceCandidate> = emptyList(),
+    pendingImports: List<PagerItem.PendingImport> = emptyList(),
+    hasFw: Boolean,
+    isFwInstalling: Boolean,
+    showBothEnds: Boolean
+): List<PagerItem> = buildList {
+    val hasLibrary = visibleGames.isNotEmpty() || sourceCandidates.isNotEmpty() || pendingImports.isNotEmpty()
+    if (!hasLibrary) {
+        if (!hasFw) add(PagerItem.FirmwareCard)
+        else if (isFwInstalling) add(PagerItem.AddGame(disabled = true))
+        else add(PagerItem.AddGame())
+    } else {
+        if (showBothEnds) {
+            add(PagerItem.AddGame())
+            addAll(visibleGames.map { PagerItem.GameItem(it) })
+            addAll(pendingImports)
+            addAll(sourceCandidates)
+            add(PagerItem.AddGame())
+        } else {
+            addAll(visibleGames.map { PagerItem.GameItem(it) })
+            addAll(pendingImports)
+            addAll(sourceCandidates)
+            add(PagerItem.AddGame())
+        }
+    }
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -188,36 +232,50 @@ fun GamesScreen(
     val activeInstallEntry = ProgressRepository.getItem(activeInstallId)?.value
     val isPackageInstalling = activeInstallId != null
 
-    // Hide the provisional "$" placeholder when a real game already exists (prevents two-cards duplicate during PPU compile)
-    val visibleGames = remember(games) {
-        val hasReal = games.any { it.info.path != "$" }
-        if (hasReal) games.filterNot { it.info.path == "$" } else games
+    // BLOCKER C: observe persisted ISO candidates as StateFlow (JSON) and merge with Home
+    val candidateList by com.zenithblue.sambas3.utils.LibraryCandidatesRepository.candidatesFlow.collectAsState()
+    LaunchedEffect(Unit) { com.zenithblue.sambas3.utils.LibraryCandidatesRepository.refresh(context) }
+
+    // BLOCKER D: observe pending import sessions — one stable card per import
+    val importSessions by com.zenithblue.sambas3.ImportSessionStore.sessions.collectAsState()
+
+    // BLOCKER B fix: do not memoize mutable SnapshotStateList with remember(games) or remember(size).
+    // Derive directly during composition so placeholder add/remove/replace is observed.
+    // Hide legacy "$" placeholder entirely — pending UI is now ImportSession/PendingImport, not a fake Game.
+    val visibleGames: List<Game> = games.filterNot { it.info.path == "$" }
+    // Merge source ISO candidates (folder scan) — installed wins over duplicate titleId
+    val installedTitleIds = visibleGames.mapNotNull { com.zenithblue.sambas3.GameIdentity.titleIdOrNull(it.info.path, it.info.name.value) }.map { it.uppercase() }.toSet()
+    // Dedupe: hide source candidate if same titleId already installed or currently importing (pending)
+    val pendingTitleIds = (importSessions.mapNotNull { it.provisionalTitleId?.uppercase() } + importSessions.mapNotNull { it.resolvedTitleId?.uppercase() }).toSet()
+    val allInstalledOrPendingIds = installedTitleIds + pendingTitleIds
+    val sourceCandidateItems: List<PagerItem.SourceCandidate> = candidateList.mapNotNull { cand ->
+        val tid = cand.titleId?.uppercase()
+        if (tid != null && tid in allInstalledOrPendingIds) return@mapNotNull null
+        PagerItem.SourceCandidate(cand.titleId, cand.folderName, cand.sourceUri?.toString() ?: cand.folderName)
     }
-    val showBothEnds = visibleGames.size > 5
-    val pagerItems = remember(visibleGames.size, hasFw, isFwInstalling) {
-        buildList {
-            if (visibleGames.isEmpty()) {
-                if (!hasFw) {
-                    add(PagerItem.FirmwareCard)
-                } else if (isFwInstalling) {
-                    add(PagerItem.AddGame(disabled = true))
-                } else {
-                    add(PagerItem.AddGame())
-                }
-            } else {
-                if (showBothEnds) {
-                    add(PagerItem.AddGame())
-                    addAll(visibleGames.map { PagerItem.GameItem(it) })
-                    add(PagerItem.AddGame())
-                } else {
-                    addAll(visibleGames.map { PagerItem.GameItem(it) })
-                    add(PagerItem.AddGame())
-                }
+    // Pending imports — hide if same title already installed (installed wins, PPU shows on Game card via installPpu)
+    val pendingItems: List<PagerItem.PendingImport> = importSessions.mapNotNull { sess ->
+        val prov = sess.provisionalTitleId?.uppercase()
+        val resolved = sess.resolvedTitleId?.uppercase()
+        if ((prov != null && prov in installedTitleIds) || (resolved != null && resolved in installedTitleIds)) {
+            // Already installed — let Game card show PPU, not duplicate pending
+            return@mapNotNull null
+        }
+        PagerItem.PendingImport(sess.progressId, prov ?: resolved, sess.sourceName)
+    }
+    val showBothEnds = (visibleGames.size + sourceCandidateItems.size + pendingItems.size) > 5
+    val pagerItems: List<PagerItem> = buildLibraryPagerItems(visibleGames, sourceCandidateItems, pendingItems, hasFw, isFwInstalling, showBothEnds)
+    val initialPage = if (showBothEnds) 1 else 0
+    val pagerState = rememberPagerState(initialPage = initialPage, pageCount = { pagerItems.size })
+    // Clamp pager when list shrinks (removal crash safety — F1)
+    LaunchedEffect(pagerItems.size) {
+        if (pagerItems.isNotEmpty()) {
+            val target = pagerState.currentPage.coerceAtMost(pagerItems.lastIndex)
+            if (target != pagerState.currentPage) {
+                try { pagerState.scrollToPage(target) } catch (_: Exception) {}
             }
         }
     }
-    val initialPage = if (showBothEnds) 1 else 0
-    val pagerState = rememberPagerState(pageCount = { pagerItems.size }, initialPage = initialPage)
     val currentItem = pagerItems.getOrNull(pagerState.currentPage)
     val selectedIconPath = (currentItem as? PagerItem.GameItem)?.game?.info?.iconPath?.value
 
@@ -292,7 +350,7 @@ fun GamesScreen(
                 }
             }
 
-            if (games.isEmpty()) {
+            if (visibleGames.isEmpty()) {
                 Box(modifier = Modifier.fillMaxWidth().weight(1f), contentAlignment = Alignment.Center) {
                     Column(
                         horizontalAlignment = Alignment.CenterHorizontally,
@@ -351,10 +409,12 @@ fun GamesScreen(
                             vertical = if (isLandscape) 8.dp else 32.dp
                         ),
                         pageSpacing = 16.dp,
-                        verticalAlignment = Alignment.CenterVertically
+                        verticalAlignment = Alignment.CenterVertically,
+                        key = { idx -> pagerItems.getOrNull(idx)?.stableKey ?: "page:$idx" }
                     ) { page ->
                         val distance = abs(page - pagerState.currentPage)
-                        when (val item = pagerItems[page]) {
+                        val item = pagerItems.getOrNull(page) ?: return@HorizontalPager
+                        when (item) {
                             is PagerItem.GameItem -> {
                                 GameCard(
                                     game = item.game,
@@ -382,6 +442,29 @@ fun GamesScreen(
                                 FirmwareCard(
                                     distance = distance,
                                     onClick = { installFwLauncher?.launch("*/*") }
+                                )
+                            }
+                            is PagerItem.SourceCandidate -> {
+                                SourceCandidateCard(
+                                    item = item,
+                                    distance = distance,
+                                    onClick = { coroutineScope.launch { pagerState.animateScrollToPage(page) } },
+                                    onImport = {
+                                        val uri = try { android.net.Uri.parse(item.sourceUri) } catch (_: Exception) { null }
+                                        if (uri != null) {
+                                            try {
+                                                context.contentResolver.takePersistableUriPermission(uri, android.content.Intent.FLAG_GRANT_READ_URI_PERMISSION)
+                                            } catch (_: Exception) {}
+                                            PrecompilerService.start(context, PrecompilerServiceAction.Install, uri)
+                                        }
+                                    }
+                                )
+                            }
+                            is PagerItem.PendingImport -> {
+                                PendingImportCard(
+                                    item = item,
+                                    distance = distance,
+                                    onClick = { coroutineScope.launch { pagerState.animateScrollToPage(page) } }
                                 )
                             }
                         }
@@ -441,6 +524,44 @@ fun GamesScreen(
                             style = AppTypography.headlineMedium.copy(letterSpacing = 2.sp),
                             color = RPCSXColors.textSecondary
                         )
+                    }
+                } else if (currentItem is PagerItem.SourceCandidate) {
+                    Column(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .alpha(bootAlpha)
+                            .padding(top = 16.dp, bottom = 16.dp),
+                        horizontalAlignment = Alignment.CenterHorizontally
+                    ) {
+                        Text(
+                            text = currentItem.displayName.uppercase(),
+                            style = AppTypography.headlineMedium.copy(letterSpacing = 2.sp),
+                            color = RPCSXColors.primary
+                        )
+                        Row(horizontalArrangement = Arrangement.spacedBy(8.dp), modifier = Modifier.padding(top = 8.dp)) {
+                            InfoBadge(text = "ISO", color = RPCSXColors.textSecondary)
+                            InfoBadge(text = "Not installed")
+                            if (currentItem.titleId != null) InfoBadge(text = currentItem.titleId!!)
+                        }
+                        Text(
+                            text = "Pre-runtime PPU: Not done  •  Runtime PPU: Not started",
+                            style = AppTypography.labelSmall,
+                            color = RPCSXColors.textSecondary,
+                            modifier = Modifier.padding(top = 4.dp)
+                        )
+                    }
+                } else if (currentItem is PagerItem.PendingImport) {
+                    Column(
+                        modifier = Modifier.fillMaxWidth().alpha(bootAlpha).padding(top = 16.dp, bottom = 16.dp),
+                        horizontalAlignment = Alignment.CenterHorizontally
+                    ) {
+                        Text(text = (currentItem.displayName ?: "IMPORTING...").uppercase(), style = AppTypography.headlineMedium.copy(letterSpacing = 2.sp), color = RPCSXColors.primary)
+                        if (currentItem.provisionalTitleId != null) {
+                            Box(modifier = Modifier.padding(top = 4.dp)) {
+                                InfoBadge(text = currentItem.provisionalTitleId!!)
+                            }
+                        }
+                        Text(text = "Import in progress — same card will show PPU", style = AppTypography.labelSmall, color = RPCSXColors.textSecondary, modifier = Modifier.padding(top = 4.dp))
                     }
                 }
             }
@@ -1369,6 +1490,128 @@ fun bootGame(context: android.content.Context, game: Game) {
     val emulatorWindow = Intent(context, RPCSXActivity::class.java)
     emulatorWindow.putExtra("path", game.info.path)
     context.startActivity(emulatorWindow)
+}
+
+@Composable
+fun SourceCandidateCard(
+    item: PagerItem.SourceCandidate,
+    distance: Int,
+    onClick: () -> Unit,
+    onImport: () -> Unit
+) {
+    val isFocused = distance == 0
+    val targetScale = if (isFocused) 1.12f else if (distance == 1) 0.95f else 0.85f
+    val targetAlpha = if (isFocused) 1.0f else if (distance == 1) 0.6f else 0.4f
+    val scale by animateFloatAsState(targetScale, animationSpec = tween(300))
+    val alpha by animateFloatAsState(targetAlpha, animationSpec = tween(300))
+    val infiniteTransition = rememberInfiniteTransition()
+    val glowIntensity by infiniteTransition.animateFloat(
+        initialValue = 15f,
+        targetValue = 35f,
+        animationSpec = infiniteRepeatable(
+            animation = tween(1000, easing = androidx.compose.animation.core.FastOutSlowInEasing),
+            repeatMode = RepeatMode.Reverse
+        )
+    )
+    BoxWithConstraints(
+        modifier = Modifier
+            .fillMaxSize()
+            .scale(scale)
+            .alpha(alpha)
+            .combinedClickable(onClick = { if (isFocused) onImport() else onClick() })
+            .shadow(
+                elevation = if (isFocused) glowIntensity.dp else 0.dp,
+                spotColor = RPCSXColors.focusGlow,
+                ambientColor = RPCSXColors.focusGlow,
+                shape = RoundedCornerShape(8.dp)
+            )
+            .border(
+                width = if (isFocused) 2.dp else 1.dp,
+                color = if (isFocused) RPCSXColors.focusRing else RPCSXColors.surfaceOverlay,
+                shape = RoundedCornerShape(8.dp)
+            )
+    ) {
+        Surface(shape = RoundedCornerShape(8.dp), color = RPCSXColors.surface, modifier = Modifier.fillMaxSize()) {
+            Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                Column(horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(10.dp), modifier = Modifier.padding(16.dp)) {
+                    Text(
+                        text = item.displayName.uppercase().take(28),
+                        style = AppTypography.headlineMedium.copy(letterSpacing = 1.sp),
+                        color = RPCSXColors.primary,
+                        textAlign = TextAlign.Center,
+                        maxLines = 2
+                    )
+                    Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+                        InfoBadge(text = "ISO", color = RPCSXColors.textSecondary)
+                        if (item.titleId != null) InfoBadge(text = item.titleId!!)
+                    }
+                    Text("Not installed", style = AppTypography.labelSmall, color = RPCSXColors.textSecondary)
+                    Column(horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(2.dp)) {
+                        Text("Pre-runtime PPU: Not done", style = AppTypography.labelSmall.copy(fontSize = 10.sp), color = RPCSXColors.textSecondary)
+                        Text("Runtime PPU: Not started", style = AppTypography.labelSmall.copy(fontSize = 10.sp), color = RPCSXColors.textSecondary)
+                    }
+                    if (isFocused) {
+                        Button(
+                            onClick = onImport,
+                            colors = ButtonDefaults.buttonColors(containerColor = RPCSXColors.primary, contentColor = RPCSXColors.background),
+                            shape = RoundedCornerShape(4.dp)
+                        ) { Text("IMPORT", style = AppTypography.labelSmall) }
+                    }
+                }
+            }
+        }
+        if (isFocused) {
+            Box(modifier = Modifier.fillMaxSize().background(Brush.linearGradient(listOf(Color.White.copy(alpha = 0.1f), Color.Transparent))))
+        }
+    }
+}
+
+@Composable
+fun PendingImportCard(
+    item: PagerItem.PendingImport,
+    distance: Int,
+    onClick: () -> Unit
+) {
+    val isFocused = distance == 0
+    val targetScale = if (isFocused) 1.12f else if (distance == 1) 0.95f else 0.85f
+    val targetAlpha = if (isFocused) 1.0f else if (distance == 1) 0.6f else 0.4f
+    val scale by animateFloatAsState(targetScale, animationSpec = tween(300))
+    val alpha by animateFloatAsState(targetAlpha, animationSpec = tween(300))
+    val infiniteTransition = rememberInfiniteTransition()
+    val glowIntensity by infiniteTransition.animateFloat(
+        initialValue = 15f, targetValue = 35f,
+        animationSpec = infiniteRepeatable(animation = tween(1000, easing = androidx.compose.animation.core.FastOutSlowInEasing), repeatMode = RepeatMode.Reverse)
+    )
+    // Observe install PPU + generic install progress for same progressId
+    val installPpu by CompileProgressBridge.installState.collectAsState()
+    val progressEntry = ProgressRepository.getItem(item.progressId)?.value
+    val isPpu = installPpu.ppuActive && (item.provisionalTitleId == null || installPpu.titleId?.equals(item.provisionalTitleId, ignoreCase = true) == true)
+    val progressVal = if (isPpu) installPpu.ppuPercent.toLong() else progressEntry?.value?.longValue ?: 0L
+    val progressMax = if (isPpu) installPpu.ppuMax.toLong() else progressEntry?.max?.longValue ?: 0L
+    val msg = if (isPpu) installPpu.ppuMsg else progressEntry?.message?.value
+    val title = if (isPpu) "COMPILING PPU" else "IMPORTING..."
+    BoxWithConstraints(
+        modifier = Modifier.fillMaxSize().scale(scale).alpha(alpha).combinedClickable(onClick = onClick)
+            .shadow(elevation = if (isFocused) glowIntensity.dp else 0.dp, spotColor = RPCSXColors.focusGlow, ambientColor = RPCSXColors.focusGlow, shape = RoundedCornerShape(8.dp))
+            .border(width = if (isFocused) 2.dp else 1.dp, color = if (isFocused) RPCSXColors.focusRing else RPCSXColors.surfaceOverlay, shape = RoundedCornerShape(8.dp))
+    ) {
+        Surface(shape = RoundedCornerShape(8.dp), color = RPCSXColors.surface, modifier = Modifier.fillMaxSize()) {
+            Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                Column(horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(10.dp), modifier = Modifier.padding(16.dp)) {
+                    Text(text = (item.displayName ?: "IMPORTING...").uppercase().take(28), style = AppTypography.headlineMedium.copy(letterSpacing = 1.sp), color = RPCSXColors.primary, textAlign = TextAlign.Center, maxLines = 2)
+                    if (item.provisionalTitleId != null) InfoBadge(text = item.provisionalTitleId!!)
+                    Text(title, style = AppTypography.labelSmall, color = RPCSXColors.primary)
+                    if (progressMax > 0) {
+                        LinearProgressIndicator(progress = { (progressVal.toFloat() / progressMax.toFloat()).coerceIn(0f, 1f) }, modifier = Modifier.fillMaxWidth().clip(RoundedCornerShape(4.dp)), color = RPCSXColors.primary, trackColor = RPCSXColors.surfaceOverlay)
+                    } else {
+                        CircularProgressIndicator(color = RPCSXColors.primary, modifier = Modifier.size(28.dp), strokeWidth = 3.dp)
+                    }
+                    Text(msg ?: "Preparing...", style = AppTypography.labelSmall.copy(fontSize = 10.sp), color = RPCSXColors.textSecondary, textAlign = TextAlign.Center, maxLines = 2)
+                }
+            }
+        }
+        if (isFocused) Box(modifier = Modifier.fillMaxSize().background(Brush.linearGradient(listOf(Color.White.copy(alpha = 0.1f), Color.Transparent))))
+    }
 }
 
 @Composable

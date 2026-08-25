@@ -206,7 +206,10 @@ main() {
 
   local missing=0
   local z2614 z2534 za8xx
-  z2614="$(require_input "Turnip 26.1.4" "turnip-26.1.4.zip" "*26.1.4*.zip" "*turnip*26.1.4*.zip")" || missing=1
+  # Prefer 26.3 (latest) over 26.1.4; support both for backward compat
+  if ! z2614="$(require_input "Turnip 26.3" "turnip-26.3.zip" "*26.3*.zip" "*turnip*26.3*.zip")" 2>/dev/null; then
+    z2614="$(require_input "Turnip 26.1.4" "turnip-26.1.4.zip" "*26.1.4*.zip" "*turnip*26.1.4*.zip")" || missing=1
+  fi
   z2534="$(require_input "Turnip 25.3.4" "turnip-25.3.4.zip" "*25.3.4*.zip" "*turnip*25.3.4*.zip")" || missing=1
   za8xx="$(require_input "Turnip A8XX v29" "a8xx-turnip-gen8-V29.zip" "*a8xx*V29*.zip" "*a8xx-turnip*V29*.zip" "*gen8*V29*.zip")" || missing=1
 
@@ -224,16 +227,27 @@ main() {
   fi
 
   local p2614 p2534 pa8xx
+  # Detect whether we are packaging 26.3 or fallback 26.1.4 for correct catalog metadata
+  local ver2614="26.3"
+  local id2614="turnip-26.3"
+  local disp2614="Turnip 26.3 — Recommended"
+  local pkg2614="turnip-26.3-sambas3.zip"
+  if [[ "$(basename "$z2614")" == *"26.1.4"* ]]; then
+    ver2614="26.1.4"
+    id2614="turnip-26.1.4"
+    disp2614="Turnip 26.1.4 — Recommended"
+    pkg2614="turnip-26.1.4-sambas3.zip"
+  fi
   p2614="$(package_one \
-    "turnip-26.1.4" \
-    "Turnip 26.1.4" \
+    "$id2614" \
+    "$disp2614" \
     "Included with Samba S3. Recommended Turnip for Adreno 6xx and 7xx." \
-    "26.1.4" \
-    "turnip-26.1.4-sambas3.zip" \
+    "$ver2614" \
+    "$pkg2614" \
     "$z2614" \
     "https://gitlab.freedesktop.org/mesa/mesa" \
     "$MESA_COMMIT" \
-    "Mesa Turnip 26.1.4 — recommended")"
+    "Mesa Turnip $ver2614 — recommended")"
 
   p2534="$(package_one \
     "turnip-25.3.4" \
@@ -262,20 +276,31 @@ main() {
   h2534="$(sha256_file "$p2534")"
   ha8xx="$(sha256_file "$pa8xx")"
 
+  # Determine 26.3 vs 26.1.4 catalog fields based on which zip was used
+  local catId2614="turnip-26.3"
+  local catDisp2614="Turnip 26.3 — Recommended"
+  local catPkg2614="turnip-26.3-sambas3.zip"
+  local catVer2614="Mesa 26.3"
+  if [[ "$(basename "$z2614")" == *"26.1.4"* ]]; then
+    catId2614="turnip-26.1.4"
+    catDisp2614="Turnip 26.1.4 — Recommended"
+    catPkg2614="turnip-26.1.4-sambas3.zip"
+    catVer2614="Mesa 26.1.4"
+  fi
   cat >"${OUT_DIR}/catalog.json" <<EOF
 {
   "schemaVersion": 1,
   "drivers": [
     {
-      "id": "turnip-26.1.4",
-      "displayName": "Turnip 26.1.4 — Recommended",
+      "id": "${catId2614}",
+      "displayName": "${catDisp2614}",
       "role": "recommended",
-      "packageFile": "turnip-26.1.4-sambas3.zip",
+      "packageFile": "${catPkg2614}",
       "libraryName": "libvulkan_freedreno.so",
       "supportedGpuFamilies": ["adreno6xx", "adreno7xx"],
       "experimental": false,
       "sha256": "${h2614}",
-      "sourceVersion": "Mesa 26.1.4",
+      "sourceVersion": "${catVer2614}",
       "sourceCommit": "${MESA_COMMIT}",
       "sourceRepo": "https://gitlab.freedesktop.org/mesa/mesa",
       "notes": "Default recommended Turnip for Adreno 6xx/7xx. Not auto-selected on first launch."
@@ -292,7 +317,7 @@ main() {
       "sourceVersion": "Mesa 25.3.4",
       "sourceCommit": "${MESA_COMMIT}",
       "sourceRepo": "https://gitlab.freedesktop.org/mesa/mesa",
-      "notes": "Fallback when 26.1.4 regresses."
+      "notes": "Fallback when ${catVer2614#Mesa } regresses."
     },
     {
       "id": "turnip-a8xx-v29",
@@ -317,7 +342,7 @@ EOF
   cat >"${LIC_DIR}/mesa-turnip-NOTICE.txt" <<EOF
 Samba S3 Play Store builds may include Mesa Turnip Vulkan drivers:
 
-- Mesa Turnip 26.1.4
+- ${catVer2614}
 - Mesa Turnip 25.3.4
 - Turnip A8XX v29 (experimental)
 

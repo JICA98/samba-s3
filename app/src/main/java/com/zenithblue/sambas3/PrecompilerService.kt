@@ -298,7 +298,34 @@ class PrecompilerService : Service() {
             FirmwareRepository.progressChannel.value = installProgress
         } else {
             GameRepository.activeInstallProgress.value = installProgress
-            GameRepository.createGameInstallEntry(installProgress)
+            // BLOCKER D: create stable ImportSession immediately before heavy native work.
+            // Do NOT create a visible "$" fake Game — the session drives the pending card.
+            val displayName = uri?.let { u ->
+                try {
+                    contentResolver.query(u, arrayOf(android.provider.OpenableColumns.DISPLAY_NAME), null, null, null)?.use { c ->
+                        if (c.moveToFirst()) c.getString(0) else u.lastPathSegment
+                    } ?: u.lastPathSegment
+                } catch (_: Exception) { u.lastPathSegment }
+            } ?: batch?.firstOrNull()?.let { b ->
+                try {
+                    contentResolver.query(b, arrayOf(android.provider.OpenableColumns.DISPLAY_NAME), null, null, null)?.use { c ->
+                        if (c.moveToFirst()) c.getString(0) else b.lastPathSegment
+                    } ?: b.lastPathSegment
+                } catch (_: Exception) { b.lastPathSegment }
+            }
+            val provTid = ImportSessionStore.provisionalTitleIdFromName(displayName)
+            ImportSessionStore.createOrUpdate(
+                ImportSession(
+                    progressId = installProgress,
+                    sourceUri = uri ?: batch?.firstOrNull(),
+                    sourceName = displayName,
+                    provisionalTitleId = provTid,
+                    phase = ImportPhase.PREPARING
+                )
+            )
+            // Keep placeholder for backward compat but do not rely on it for UI;
+            // new code hides "$" when ImportSession is present. Remove eventually.
+            // GameRepository.createGameInstallEntry(installProgress)
         }
 
         thread(name = "sambas3-install") {
@@ -365,6 +392,11 @@ class PrecompilerService : Service() {
                     FirmwareRepository.progressChannel.value = null
                 } else {
                     GameRepository.activeInstallProgress.value = null
+                    // Import session reached Ready — keep one stable card through READY then remove session,
+                    // letting the real Game (merged via progressId) remain as sole card.
+                    ImportSessionStore.updatePhase(NOTIF_INSTALL.toLong(), ImportPhase.READY, resolvedTitleId = st.titleId)
+                    // Delay removal so GamesScreen can merge before session disappears
+                    mainHandler.postDelayed({ ImportSessionStore.remove(NOTIF_INSTALL.toLong()) }, 1200)
                 }
                 jobStartId?.let { stopForegroundAndSelf(it) }
             }
@@ -385,6 +417,8 @@ class PrecompilerService : Service() {
             st.ppuPercent.toLong(),
             st.ppuMax.toLong()
         )
+        // Update ImportSession to COMPILING_PPU with resolved titleId so same card shows PPU
+        ImportSessionStore.updatePhase(NOTIF_INSTALL.toLong(), ImportPhase.COMPILING_PPU, resolvedTitleId = st.titleId)
         if (Telemetry.isEnabled) {
             Telemetry.logS3Ppu("event=install_ppu_active progress_id=${NOTIF_INSTALL} msg=${msg.take(40)} percent=${st.ppuPercent} max=${st.ppuMax} session=${Telemetry.sessionId}")
         }
@@ -395,6 +429,10 @@ class PrecompilerService : Service() {
             FirmwareRepository.progressChannel.value = null
         } else if (jobStartId != null) {
             GameRepository.activeInstallProgress.value = null
+            // If we never entered PPU (failed/canceled before compile), clear pending session
+            if (!installPpuSeen) {
+                ImportSessionStore.remove(NOTIF_INSTALL.toLong())
+            }
         }
         try {
             ServiceCompat.stopForeground(this, ServiceCompat.STOP_FOREGROUND_REMOVE)

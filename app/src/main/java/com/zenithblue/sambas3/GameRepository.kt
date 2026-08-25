@@ -91,9 +91,18 @@ internal object GameIdentity {
         return titleId ?: "path:${path.trimEnd('/').lowercase()}"
     }
 
+    fun titleIdOrNull(path: String, name: String?): String? {
+        return titleIdPattern.find("$path ${name.orEmpty()}")
+            ?.groupValues?.getOrNull(1)?.uppercase()
+    }
+
     fun preferPath(candidate: String, existing: String): Boolean {
         val candidateIsIso = candidate.endsWith(".iso", ignoreCase = true)
         val existingIsIso = existing.endsWith(".iso", ignoreCase = true)
+        // Also treat content:// URIs as iso-like provisional (they should be replaced by directory)
+        val candidateIsContent = candidate.startsWith("content://")
+        val existingIsContent = existing.startsWith("content://")
+        if (existingIsContent && !candidateIsContent) return true
         return existingIsIso && !candidateIsIso
     }
 }
@@ -204,6 +213,42 @@ class GameRepository {
 
         private fun addOrUpdateLocked(info: GameInfo, progressId: Long) {
             val identity = GameIdentity.key(info.path, info.name)
+            // BLOCKER E: progressId owner must win before title/path fallback.
+            // A content:// provisional created via createGameInstallEntry must merge
+            // into the real installed path by progressId, not remain as duplicate.
+            if (progressId >= 0) {
+                val owner = instance.games.firstOrNull { game ->
+                    game.findProgress(GameProgressType.Install)?.any { it.id == progressId } == true
+                }
+                if (owner != null) {
+                    // Merge real GameInfo into the placeholder/owner session.
+                    if (owner.info.path == "$" || owner.info.path.startsWith("content://")) {
+                        val replacement = Game(toStore(info))
+                        copyProgress(owner, replacement)
+                        addInstallProgressIfNeeded(replacement, progressId)
+                        instance.games.remove(owner)
+                        instance.games.add(0, replacement)
+                        if (Telemetry.isEnabled) Telemetry.emitIdentityMerge(GameIdentity.key(owner.info.path, owner.info.name.value), identity, progressId)
+                        return
+                    } else if (owner.info.path != info.path) {
+                        // Owner already has real path but incoming is preferred (iso -> dir)
+                        if (GameIdentity.preferPath(info.path, owner.info.path)) {
+                            val replacement = Game(toStore(info))
+                            copyProgress(owner, replacement)
+                            addInstallProgressIfNeeded(replacement, progressId)
+                            instance.games.remove(owner)
+                            instance.games.add(0, replacement)
+                            if (Telemetry.isEnabled) Telemetry.emitIdentityMerge(GameIdentity.key(owner.info.path, owner.info.name.value), identity, progressId)
+                            return
+                        }
+                    }
+                    // Owner exists and path matches — update in place
+                    owner.info.name.value = info.name ?: owner.info.name.value
+                    owner.info.iconPath.value = info.iconPath ?: owner.info.iconPath.value
+                    owner.info.gameFlags.intValue = info.gameFlags
+                    return
+                }
+            }
             val existsGame = instance.games.find { game ->
                 game.info.path == info.path ||
                     (game.info.path != "$" && !game.info.path.startsWith("content://") &&
