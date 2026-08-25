@@ -10,6 +10,8 @@ import android.content.ActivityNotFoundException
 import android.provider.DocumentsContract
 import androidx.core.content.edit
 import androidx.documentfile.provider.DocumentFile
+import com.zenithblue.sambas3.PpuReadinessStore
+import com.zenithblue.sambas3.PreRuntimePpuState
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -297,7 +299,7 @@ object FileUtil {
                             it.targetPath,
                             progress,
                         )
-                        if (!RPCSX.instance.collectGameInfo(it.targetPath, -1L)) {
+                        if (!RPCSX.instance.collectGameInfo(it.targetPath, progress)) {
                             throw IOException("The imported game could not be indexed")
                         }
                         ProgressRepository.onProgressEvent(
@@ -506,19 +508,25 @@ object FileUtil {
                 )
                 val titleId = gameRoot.name.takeIf { TITLE_ID_PATTERN.matches(it) }
                     ?: throw IOException("The game title ID could not be determined")
+                // Robust check: allow exact parent or any descendant of managed root (handles symlinks/canonical differences)
                 val isManaged = managedRoots.any { managedRoot ->
-                    gameRoot.parentFile == managedRoot
+                    val parent = gameRoot.parentFile?.canonicalFile
+                    parent == managedRoot || gameRoot.canonicalPath.startsWith(managedRoot.canonicalPath + "/")
                 }
                 if (!isManaged) {
+                    Log.w("FileUtil", "removeGame not managed: gameRoot=${gameRoot.canonicalPath} parents=${managedRoots.joinToString { it.canonicalPath }}")
                     throw IOException("Only imported games can be removed from the library")
                 }
+                Log.i("FileUtil", "Removing game ${gameRoot.canonicalPath} titleId=$titleId")
                 if (gameRoot.exists() && !gameRoot.deleteRecursively()) {
-                    throw IOException("The game files could not be removed")
+                    throw IOException("The game files could not be removed (deleteRecursively returned false)")
                 }
-                File(root, "cache/cache/$titleId").deleteRecursively()
-                File(root, "cache/cache/ppu_manifest/$titleId.json").delete()
+                val cacheDeleted = File(root, "cache/cache/$titleId").deleteRecursively()
+                val manifestDeleted = File(root, "cache/cache/ppu_manifest/$titleId.json").delete()
+                Log.i("FileUtil", "Removed cache $cacheDeleted manifest $manifestDeleted for $titleId")
                 removeNativeGameIndexEntry(root, titleId)
                 GameRepository.remove(game)
+                PpuReadinessStore.setPreRuntimeState(context, titleId, PreRuntimePpuState.NOT_DONE)
                 true
             }.getOrElse {
                 Log.e("FileUtil", "Game removal failed: ${game.info.path}", it)

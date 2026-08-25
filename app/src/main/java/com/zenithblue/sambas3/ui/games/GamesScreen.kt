@@ -188,13 +188,10 @@ fun GamesScreen(
     val activeInstallEntry = ProgressRepository.getItem(activeInstallId)?.value
     val isPackageInstalling = activeInstallId != null
 
-    val visibleGames = remember(games) {
-        games.filter { it.info.path != "$" && !it.info.path.startsWith("content://") }
-    }
-    val showBothEnds = visibleGames.size > 5
-    val pagerItems = remember(visibleGames.size, hasFw, isFwInstalling) {
+    val showBothEnds = games.size > 5
+    val pagerItems = remember(games.size, hasFw, isFwInstalling) {
         buildList {
-            if (visibleGames.isEmpty()) {
+            if (games.isEmpty()) {
                 if (!hasFw) {
                     add(PagerItem.FirmwareCard)
                 } else if (isFwInstalling) {
@@ -205,10 +202,10 @@ fun GamesScreen(
             } else {
                 if (showBothEnds) {
                     add(PagerItem.AddGame())
-                    addAll(visibleGames.map { PagerItem.GameItem(it) })
+                    addAll(games.map { PagerItem.GameItem(it) })
                     add(PagerItem.AddGame())
                 } else {
-                    addAll(visibleGames.map { PagerItem.GameItem(it) })
+                    addAll(games.map { PagerItem.GameItem(it) })
                     add(PagerItem.AddGame())
                 }
             }

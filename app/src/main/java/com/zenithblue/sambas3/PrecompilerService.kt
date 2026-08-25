@@ -19,6 +19,7 @@ import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
+import com.zenithblue.sambas3.utils.Telemetry
 import kotlin.concurrent.thread
 
 enum class PrecompilerServiceAction {
@@ -357,18 +358,21 @@ class PrecompilerService : Service() {
     }
 
     private fun onInstallPpuState(st: CompileProgressBridge.CompileState) {
-        if (!isForeground) return
         if (!st.ppuActive) {
-                if (installPpuSeen) {
-                    installPpuSeen = false
-                    if (currentInstallIsFirmware) {
-                        FirmwareRepository.progressChannel.value = null
-                    } else {
-                        GameRepository.activeInstallProgress.value = null
-                    }
-                    jobStartId?.let { stopForegroundAndSelf(it) }
+            if (installPpuSeen) {
+                installPpuSeen = false
+                if (currentInstallIsFirmware) {
+                    FirmwareRepository.progressChannel.value = null
+                } else {
+                    GameRepository.activeInstallProgress.value = null
                 }
+                jobStartId?.let { stopForegroundAndSelf(it) }
+            }
             return
+        }
+        // PPU active - ensure FGS is present
+        if (!isForeground) {
+            promoteForeground(getString(R.string.compiling_ppu_title))
         }
         installPpuSeen = true
         val title = getString(R.string.compiling_ppu_title)
@@ -381,6 +385,9 @@ class PrecompilerService : Service() {
             st.ppuPercent.toLong(),
             st.ppuMax.toLong()
         )
+        if (Telemetry.isEnabled) {
+            Telemetry.logS3Ppu("event=install_ppu_active progress_id=${NOTIF_INSTALL} msg=${msg.take(40)} percent=${st.ppuPercent} max=${st.ppuMax} session=${Telemetry.sessionId}")
+        }
     }
 
     private fun stopForegroundAndSelf(startId: Int) {

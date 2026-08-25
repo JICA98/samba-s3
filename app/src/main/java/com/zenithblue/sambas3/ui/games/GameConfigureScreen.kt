@@ -205,7 +205,7 @@ fun GameConfigureScreen(
                 maxLines = 1,
                 modifier = Modifier.weight(1f)
             )
-            if (titleId != null) {
+            if (titleId != null || (onRemove != null && !isInGame)) {
                 Box {
                     IconButton(onClick = { resetAllMenuOpen = true }) {
                         Icon(
@@ -218,19 +218,21 @@ fun GameConfigureScreen(
                         expanded = resetAllMenuOpen,
                         onDismissRequest = { resetAllMenuOpen = false }
                     ) {
-                        DropdownMenuItem(
-                            text = { Text(stringResource(R.string.reset_all_game)) },
-                            leadingIcon = {
-                                Icon(
-                                    painter = painterResource(id = R.drawable.ic_restore),
-                                    contentDescription = null
-                                )
-                            },
-                            onClick = {
-                                resetAllMenuOpen = false
-                                showResetAllConfirm = true
-                            }
-                        )
+                        if (titleId != null) {
+                            DropdownMenuItem(
+                                text = { Text(stringResource(R.string.reset_all_game)) },
+                                leadingIcon = {
+                                    Icon(
+                                        painter = painterResource(id = R.drawable.ic_restore),
+                                        contentDescription = null
+                                    )
+                                },
+                                onClick = {
+                                    resetAllMenuOpen = false
+                                    showResetAllConfirm = true
+                                }
+                            )
+                        }
                         if (onRemove != null && !isInGame) {
                             DropdownMenuItem(
                                 text = { Text(stringResource(R.string.remove_game)) },
