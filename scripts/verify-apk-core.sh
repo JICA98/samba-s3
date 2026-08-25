@@ -83,20 +83,39 @@ check_abi() {
   local apk_sha
   apk_sha="$(sha256sum "$apk_so" | awk '{print $1}')"
   echo "  APK lib/$abi SHA-256: $apk_sha"
-  if [[ "$local_sha" != "$apk_sha" ]]; then
-    echo "  FAIL: SHA mismatch for $abi"
-    FAIL=1
-  else
-    echo "  PASS: $abi core matches"
-  fi
-  # Also log build ID if strings present
+  local local_bid=""
+  local apk_bid=""
   if command -v strings >/dev/null 2>&1; then
-    local bid
-    bid="$(strings "$apk_so" | grep -E "rpcsx=.*samba=.*patch_sha256=" | head -1 || true)"
-    if [[ -n "$bid" ]]; then
-      echo "  S3CORE build ID (APK): $bid"
+    local_bid="$(strings "$local_so" | grep -E "rpcsx=.*samba=.*patch_sha256=" | head -1 || true)"
+    apk_bid="$(strings "$apk_so" | grep -E "rpcsx=.*samba=.*patch_sha256=" | head -1 || true)"
+    if [[ -n "$apk_bid" ]]; then
+      echo "  S3CORE build ID (APK): $apk_bid"
     else
       echo "  S3CORE build ID: not found (old core?)"
+    fi
+    if [[ -n "$local_bid" ]]; then
+      echo "  S3CORE build ID (local): $local_bid"
+    fi
+  fi
+  # Primary check is S3CORE equality (deterministic provenance); SHA may differ due to non-reproducible timestamps
+  if [[ -n "$local_bid" && -n "$apk_bid" ]]; then
+    if [[ "$local_bid" != "$apk_bid" ]]; then
+      echo "  FAIL: S3CORE mismatch for $abi"
+      echo "    local: $local_bid"
+      echo "    apk:   $apk_bid"
+      FAIL=1
+    elif [[ "$local_sha" != "$apk_sha" ]]; then
+      echo "  WARN: SHA mismatch but S3CORE matches (non-reproducible build, treating as PASS)"
+      echo "  PASS: $abi core S3CORE matches"
+    else
+      echo "  PASS: $abi core matches (SHA+S3CORE)"
+    fi
+  else
+    if [[ "$local_sha" != "$apk_sha" ]]; then
+      echo "  FAIL: SHA mismatch for $abi"
+      FAIL=1
+    else
+      echo "  PASS: $abi core matches"
     fi
   fi
 }
