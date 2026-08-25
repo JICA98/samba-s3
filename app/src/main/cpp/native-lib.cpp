@@ -49,9 +49,10 @@ struct RPCSXApi {
   std::string (*patchEngineVersion)();
   std::string (*patchesList)();
   bool (*patchSetEnabled)(std::string_view hash, std::string_view description, bool enabled);
-  const char* (*getPpuManifestKey)();
-  const char* (*getSambaBuildId)();
-  void *(*setCustomDriver)(void *driverHandle);
+   const char* (*getPpuManifestKey)();
+   const char* (*getPpuManifestKeyForTitle)(const char* titleId);
+   const char* (*getSambaBuildId)();
+   void *(*setCustomDriver)(void *driverHandle);
 };
 
 struct RPCSXLibrary : RPCSXApi {
@@ -117,6 +118,7 @@ struct RPCSXLibrary : RPCSXApi {
     result.patchesList = reinterpret_cast<decltype(patchesList)>(dlsym(handle, "_rpcsx_patchesList"));
     result.patchSetEnabled = reinterpret_cast<decltype(patchSetEnabled)>(dlsym(handle, "_rpcsx_patchSetEnabled"));
     result.getPpuManifestKey = reinterpret_cast<decltype(getPpuManifestKey)>(dlsym(handle, "_rpcsx_getPpuManifestKey"));
+    result.getPpuManifestKeyForTitle = reinterpret_cast<decltype(getPpuManifestKeyForTitle)>(dlsym(handle, "_rpcsx_getPpuManifestKeyForTitle"));
     result.getSambaBuildId = reinterpret_cast<decltype(getSambaBuildId)>(dlsym(handle, "_rpcsx_sambaBuildId"));
     result.setCustomDriver = reinterpret_cast<decltype(setCustomDriver)>(dlsym(handle, "_rpcsx_setCustomDriver"));
     result.setCompileProgressListener = reinterpret_cast<decltype(setCompileProgressListener)>(dlsym(handle, "_rpcsx_setCompileProgressListener"));
@@ -390,13 +392,18 @@ Java_com_zenithblue_sambas3_RPCSX_supportsCompileProgressEvents(JNIEnv *env, job
 
 extern "C" JNIEXPORT jstring JNICALL
 Java_com_zenithblue_sambas3_RPCSX_getPpuManifestKey(JNIEnv *env, jobject, jstring jtitleId) {
+  std::string title = jtitleId ? unwrap(env, jtitleId) : std::string{};
+  if (rpcsxLib.getPpuManifestKeyForTitle) {
+    const char* key = rpcsxLib.getPpuManifestKeyForTitle(title.c_str());
+    if (key && key[0] != '\0') {
+      __android_log_print(ANDROID_LOG_INFO, "RPCSX-UI", "getPpuManifestKey per-title title='%s' hit", title.c_str());
+      return wrap(env, std::string(key));
+    }
+  }
   if (!rpcsxLib.getPpuManifestKey) return wrap(env, std::string{});
-  // Current core export is global (no title arg); log misuse but return global key.
-  // Per-title identity is validated in Kotlin via cache check; do not crash on null title.
-  if (jtitleId != nullptr) {
-    // Keep title for diagnostics; core key still global — caller must not use this
-    // to fingerprint a removed/unrelated title (see PpuReadinessStore.removeEntry).
-    (void)unwrap(env, jtitleId);
+  // Fallback: global export (old core); log and return global key.
+  if (!title.empty()) {
+    __android_log_print(ANDROID_LOG_WARN, "RPCSX-UI", "getPpuManifestKey per-title not available, falling back to global for title='%s'", title.c_str());
   }
   const char* key = rpcsxLib.getPpuManifestKey();
   return wrap(env, key ? std::string(key) : std::string{});

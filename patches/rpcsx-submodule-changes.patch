@@ -1884,7 +1884,7 @@ index a58ab0694..ae3a9e006 100644
      IdManager.cpp
      localized_string.cpp
 diff --git a/rpcs3/Emu/Cell/PPUThread.cpp b/rpcs3/Emu/Cell/PPUThread.cpp
-index b1d559ef7..adc34b0b1 100644
+index b1d559ef7..826777f05 100644
 --- a/rpcs3/Emu/Cell/PPUThread.cpp
 +++ b/rpcs3/Emu/Cell/PPUThread.cpp
 @@ -3,6 +3,7 @@
@@ -1912,7 +1912,7 @@ index b1d559ef7..adc34b0b1 100644
  
  #include "util/sema.h"
  
-@@ -75,6 +79,379 @@
+@@ -75,6 +79,391 @@
  #include <libkern/OSCacheControl.h>
  #endif
  
@@ -2163,6 +2163,18 @@ index b1d559ef7..adc34b0b1 100644
 +	return last.c_str();
 +}
 +
++extern "C" const char* _rpcsx_getPpuManifestKeyForTitle(const char* titleId)
++{
++	static thread_local std::string lastForTitle;
++	nlohmann::json key = ppu_manifest_key(nullptr);
++	if (titleId && titleId[0] != '\0')
++	{
++		key["title_id"] = std::string(titleId);
++	}
++	lastForTitle = key.dump();
++	return lastForTitle.c_str();
++}
++
 +static std::string ppu_manifest_path()
 +	{
 +		const std::string title_id = Emu.GetTitleID();
@@ -2292,7 +2304,7 @@ index b1d559ef7..adc34b0b1 100644
  extern atomic_t<u64> g_watchdog_hold_ctr;
  
  // Should be of the same type
-@@ -3820,9 +4197,6 @@ struct jit_core_allocator
+@@ -3820,9 +4209,6 @@ struct jit_core_allocator
  	// Initialize global semaphore with the max number of threads
  	::semaphore<0x7fff> sem{std::max<s16>(thread_count, 1)};
  
@@ -2302,7 +2314,7 @@ index b1d559ef7..adc34b0b1 100644
  	static s16 limit()
  	{
  		return static_cast<s16>(std::min<s32>(0x7fff, utils::get_thread_count()));
-@@ -3848,11 +4222,28 @@ namespace
+@@ -3848,11 +4234,28 @@ namespace
  			std::unordered_map<std::string, jit_module> map;
  		};
  
@@ -2333,7 +2345,7 @@ index b1d559ef7..adc34b0b1 100644
  		}
  
  		jit_module& get(const std::string& name)
-@@ -4058,6 +4449,8 @@ extern void ppu_finalize(const ppu_module<lv2_obj>& info, bool force_mem_release
+@@ -4058,6 +4461,8 @@ extern void ppu_finalize(const ppu_module<lv2_obj>& info, bool force_mem_release
  
  extern void ppu_precompile(std::vector<std::string>& dir_queue, std::vector<ppu_module<lv2_obj>*>* loaded_modules)
  {
@@ -2342,7 +2354,7 @@ index b1d559ef7..adc34b0b1 100644
  	if (g_cfg.core.ppu_decoder != ppu_decoder_type::llvm_legacy)
  	{
  		return;
-@@ -4083,36 +4476,44 @@ extern void ppu_precompile(std::vector<std::string>& dir_queue, std::vector<ppu_
+@@ -4083,36 +4488,44 @@ extern void ppu_precompile(std::vector<std::string>& dir_queue, std::vector<ppu_
  
  	const std::string firmware_sprx_path = vfs::get("/dev_flash/sys/external/");
  
@@ -2409,7 +2421,7 @@ index b1d559ef7..adc34b0b1 100644
  			if (Emu.IsStopped())
  			{
  				file_queue.clear();
-@@ -4255,12 +4656,20 @@ extern void ppu_precompile(std::vector<std::string>& dir_queue, std::vector<ppu_
+@@ -4255,12 +4668,20 @@ extern void ppu_precompile(std::vector<std::string>& dir_queue, std::vector<ppu_
  			}
  		}
  	}
@@ -2431,7 +2443,7 @@ index b1d559ef7..adc34b0b1 100644
  	{
  		total_files_size += info.file_size;
  	}
-@@ -4271,7 +4680,7 @@ extern void ppu_precompile(std::vector<std::string>& dir_queue, std::vector<ppu_
+@@ -4271,7 +4692,7 @@ extern void ppu_precompile(std::vector<std::string>& dir_queue, std::vector<ppu_
  
  	atomic_t<usz> fnext = 0;
  
@@ -2440,7 +2452,7 @@ index b1d559ef7..adc34b0b1 100644
  
  	concurent_memory_limit memory_limit(utils::get_total_memory() / 3);
  
-@@ -4624,6 +5033,8 @@ extern void ppu_precompile(std::vector<std::string>& dir_queue, std::vector<ppu_
+@@ -4624,6 +5045,8 @@ extern void ppu_precompile(std::vector<std::string>& dir_queue, std::vector<ppu_
  
  extern void ppu_initialize()
  {
@@ -2449,7 +2461,7 @@ index b1d559ef7..adc34b0b1 100644
  	if (!g_fxo->is_init<main_ppu_module<lv2_obj>>())
  	{
  		return;
-@@ -4768,6 +5179,8 @@ extern void ppu_initialize()
+@@ -4768,6 +5191,8 @@ extern void ppu_initialize()
  
  bool ppu_initialize(const ppu_module<lv2_obj>& info, bool check_only, u64 file_size, concurent_memory_limit& memory_limit)
  {
@@ -2458,7 +2470,7 @@ index b1d559ef7..adc34b0b1 100644
  	if (g_cfg.core.ppu_decoder != ppu_decoder_type::llvm_legacy)
  	{
  		if (check_only || vm::base(info.segs[0].addr) != info.segs[0].ptr)
-@@ -4904,14 +5317,14 @@ bool ppu_initialize(const ppu_module<lv2_obj>& info, bool check_only, u64 file_s
+@@ -4904,14 +5329,14 @@ bool ppu_initialize(const ppu_module<lv2_obj>& info, bool check_only, u64 file_s
  	// Info to load to main JIT instance (true - compiled)
  	std::vector<std::pair<std::string, bool>> link_workload;
  
@@ -2476,7 +2488,7 @@ index b1d559ef7..adc34b0b1 100644
  
  	const cpu_thread* cpu = cpu_thread::get_current();
  
-@@ -5453,8 +5866,11 @@ bool ppu_initialize(const ppu_module<lv2_obj>& info, bool check_only, u64 file_s
+@@ -5453,8 +5878,11 @@ bool ppu_initialize(const ppu_module<lv2_obj>& info, bool check_only, u64 file_s
  			if (fpos >= info.get_funcs().size() || module_counter % c_moudles_per_jit == c_moudles_per_jit - 1)
  				settings += ppu_settings::contains_symbol_resolver; // Avoid invalidating all modules for this purpose
  
@@ -2490,7 +2502,7 @@ index b1d559ef7..adc34b0b1 100644
  		}
  
  		if (cpu ? cpu->state.all_of(cpu_flag::exit) : Emu.IsStopped())
-@@ -5509,12 +5925,24 @@ bool ppu_initialize(const ppu_module<lv2_obj>& info, bool check_only, u64 file_s
+@@ -5509,12 +5937,24 @@ bool ppu_initialize(const ppu_module<lv2_obj>& info, bool check_only, u64 file_s
  	// Create worker threads for compilation
  	if (!workload.empty())
  	{
@@ -2516,7 +2528,7 @@ index b1d559ef7..adc34b0b1 100644
  
  		struct thread_index_allocator
  		{
-@@ -5524,24 +5952,26 @@ bool ppu_initialize(const ppu_module<lv2_obj>& info, bool check_only, u64 file_s
+@@ -5524,24 +5964,26 @@ bool ppu_initialize(const ppu_module<lv2_obj>& info, bool check_only, u64 file_s
  		struct thread_op
  		{
  			concurent_memory_limit& memory_limit;
@@ -2547,7 +2559,7 @@ index b1d559ef7..adc34b0b1 100644
  			{
  				if (auto mtx = other.core_lock.mutex())
  				{
-@@ -5554,13 +5984,14 @@ bool ppu_initialize(const ppu_module<lv2_obj>& info, bool check_only, u64 file_s
+@@ -5554,13 +5996,14 @@ bool ppu_initialize(const ppu_module<lv2_obj>& info, bool check_only, u64 file_s
  
  			void operator()()
  			{
@@ -2565,7 +2577,7 @@ index b1d559ef7..adc34b0b1 100644
  				{
  					if (cpu ? cpu->state.all_of(cpu_flag::exit) : Emu.IsStopped())
  					{
-@@ -5579,24 +6010,11 @@ bool ppu_initialize(const ppu_module<lv2_obj>& info, bool check_only, u64 file_s
+@@ -5579,24 +6022,11 @@ bool ppu_initialize(const ppu_module<lv2_obj>& info, bool check_only, u64 file_s
  					ppu_log.warning("LLVM: reporting used memory %u (free/total: %u/%u) by %s%s", total_fn_size * 1024 * 16, memory_limit.free_memory(), memory_limit.total_memory(), cache_path, obj_name);
  					auto used_memory = memory_limit.acquire(total_fn_size * 1024 * 16);
  
@@ -2591,7 +2603,7 @@ index b1d559ef7..adc34b0b1 100644
  						ppu_initialize2(jit2, part, cache_path, obj_name);
  					}
  
-@@ -5604,30 +6022,79 @@ bool ppu_initialize(const ppu_module<lv2_obj>& info, bool check_only, u64 file_s
+@@ -5604,30 +6034,79 @@ bool ppu_initialize(const ppu_module<lv2_obj>& info, bool check_only, u64 file_s
  				}
  
  				core_lock.unlock();
@@ -2678,7 +2690,7 @@ index b1d559ef7..adc34b0b1 100644
  
  		for (const auto& [addr, func] : *shared_map)
  		{
-@@ -5795,6 +6262,19 @@ static void ppu_initialize2(jit_compiler& jit, const ppu_module<lv2_obj>& module
+@@ -5795,6 +6274,19 @@ static void ppu_initialize2(jit_compiler& jit, const ppu_module<lv2_obj>& module
  #ifdef LLVM_AVAILABLE
  	using namespace llvm;
  
@@ -2698,7 +2710,7 @@ index b1d559ef7..adc34b0b1 100644
  	// Create LLVM module
  	std::unique_ptr<Module> _module = std::make_unique<Module>(obj_name, jit.get_context());
  
-@@ -5838,6 +6318,7 @@ static void ppu_initialize2(jit_compiler& jit, const ppu_module<lv2_obj>& module
+@@ -5838,6 +6330,7 @@ static void ppu_initialize2(jit_compiler& jit, const ppu_module<lv2_obj>& module
  			translator.build_interpreter();
  		}
  #ifdef ARCH_X64
@@ -2706,7 +2718,7 @@ index b1d559ef7..adc34b0b1 100644
  		// Create the analysis managers.
  		// These must be declared in this order so that they are destroyed in the
  		// correct order due to inter-analysis-manager references.
-@@ -5862,11 +6343,13 @@ static void ppu_initialize2(jit_compiler& jit, const ppu_module<lv2_obj>& module
+@@ -5862,11 +6355,13 @@ static void ppu_initialize2(jit_compiler& jit, const ppu_module<lv2_obj>& module
  		FunctionPassManager fpm;
  		// Basic optimizations
  		fpm.addPass(EarlyCSEPass());
@@ -2722,7 +2734,7 @@ index b1d559ef7..adc34b0b1 100644
  
  		// Translate functions
  		// Start with the lowest bound of the module, function list is sorted
-@@ -5886,15 +6369,29 @@ static void ppu_initialize2(jit_compiler& jit, const ppu_module<lv2_obj>& module
+@@ -5886,15 +6381,29 @@ static void ppu_initialize2(jit_compiler& jit, const ppu_module<lv2_obj>& module
  				min_addr = std::min<u32>(min_addr, mod_func.addr);
  
  				// Translate
@@ -2752,7 +2764,7 @@ index b1d559ef7..adc34b0b1 100644
  					Emu.Pause();
  					return;
  				}
-@@ -5904,15 +6401,29 @@ static void ppu_initialize2(jit_compiler& jit, const ppu_module<lv2_obj>& module
+@@ -5904,15 +6413,29 @@ static void ppu_initialize2(jit_compiler& jit, const ppu_module<lv2_obj>& module
  		// Run this only in one module for all functions compiled
  		if (module_part.jit_bounds)
  		{
@@ -2782,7 +2794,7 @@ index b1d559ef7..adc34b0b1 100644
  				Emu.Pause();
  				return;
  			}
-@@ -5936,7 +6447,14 @@ static void ppu_initialize2(jit_compiler& jit, const ppu_module<lv2_obj>& module
+@@ -5936,7 +6459,14 @@ static void ppu_initialize2(jit_compiler& jit, const ppu_module<lv2_obj>& module
  			result.clear();
  		}
  
@@ -2798,7 +2810,7 @@ index b1d559ef7..adc34b0b1 100644
  		{
  			out.flush();
  			ppu_log.error("LLVM: Verification failed for %s:\n%s", obj_name, result);
-@@ -5951,6 +6469,15 @@ static void ppu_initialize2(jit_compiler& jit, const ppu_module<lv2_obj>& module
+@@ -5951,6 +6481,15 @@ static void ppu_initialize2(jit_compiler& jit, const ppu_module<lv2_obj>& module
  	}
  
  	// Load or compile module

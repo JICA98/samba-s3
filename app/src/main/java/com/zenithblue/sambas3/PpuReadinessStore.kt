@@ -73,12 +73,12 @@ object PpuReadinessStore {
 
     private fun fingerprint(context: Context, titleId: String?): String? {
         return try {
-            val key = try { RPCSX.instance.getPpuManifestKey(titleId ?: "") } catch (_: Exception) { null }
+            val key = try { RPCSX.instance.getPpuManifestKey(titleId ?: "") } catch (_: Throwable) { null }
             if (!key.isNullOrEmpty() && key != "unknown") return key
             val abi = "v7-kusa"
-            val llvmCpu = try { RPCSX.instance.settingsGet("Core llvm_cpu") } catch (_: Exception) { "unknown" }
+            val llvmCpu = try { RPCSX.instance.settingsGet("Core llvm_cpu") } catch (_: Throwable) { "unknown" }
             "$abi|$llvmCpu|${titleId ?: "unknown"}"
-        } catch (_: Exception) { null }
+        } catch (_: Throwable) { null }
     }
 
     @Synchronized
