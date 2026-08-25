@@ -404,6 +404,46 @@ object FileUtil {
         }
     }
 
+    /**
+     * Removes an imported title and its generated PPU/cache data. Only title
+     * directories owned by the app are accepted; an arbitrary external game
+     * path is never deleted from this action.
+     */
+    fun removeGame(context: Context, game: com.zenithblue.sambas3.Game, onComplete: (Boolean) -> Unit) {
+        CoroutineScope(Dispatchers.IO).launch {
+            val result = runCatching {
+                val root = File(RPCSX.rootDirectory).canonicalFile
+                val gameRoot = File(game.info.path).canonicalFile
+                val managedRoots = listOf(
+                    File(root, "config/games").canonicalFile,
+                    File(root, "config/dev_hdd0/game").canonicalFile,
+                )
+                val titleId = gameRoot.name.takeIf { TITLE_ID_PATTERN.matches(it) }
+                    ?: throw IOException("The game title ID could not be determined")
+                val isManaged = managedRoots.any { managedRoot ->
+                    gameRoot.parentFile == managedRoot
+                }
+                if (!isManaged) {
+                    throw IOException("Only imported games can be removed from the library")
+                }
+                if (gameRoot.exists() && !gameRoot.deleteRecursively()) {
+                    throw IOException("The game files could not be removed")
+                }
+                File(root, "cache/cache/$titleId").deleteRecursively()
+                File(root, "cache/cache/ppu_manifest/$titleId.json").delete()
+                removeNativeGameIndexEntry(root, titleId)
+                GameRepository.remove(game)
+                true
+            }.getOrElse {
+                Log.e("FileUtil", "Game removal failed: ${game.info.path}", it)
+                false
+            }
+            withContext(Dispatchers.Main) {
+                onComplete(result)
+            }
+        }
+    }
+
     fun importConfig(ctx: Context, uri: Uri): Boolean {
         return try {
             val docFile = DocumentFile.fromSingleUri(ctx, uri)
@@ -433,6 +473,20 @@ object FileUtil {
         } catch (e: Exception) {
             e.printStackTrace()
             false
+        }
+    }
+
+    private val TITLE_ID_PATTERN = Regex("[A-Za-z]{4}\\d{5}")
+
+    private fun removeNativeGameIndexEntry(root: File, titleId: String) {
+        val gamesIndex = File(root, "config/games.yml")
+        if (!gamesIndex.isFile) return
+
+        val linePattern = Regex("(?m)^${Regex.escape(titleId)}:[^\\r\\n]*(?:\\r?\\n|$)")
+        val contents = gamesIndex.readText()
+        val updated = contents.replace(linePattern, "")
+        if (updated != contents) {
+            gamesIndex.writeText(updated)
         }
     }
 

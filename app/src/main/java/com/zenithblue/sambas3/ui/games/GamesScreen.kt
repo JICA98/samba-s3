@@ -123,6 +123,9 @@ fun GamesScreen(
     var scanningFolder by remember { mutableStateOf(false) }
     var configureGameTarget by remember { mutableStateOf<Game?>(null) }
     var configuringGame by remember { mutableStateOf(false) }
+    var removeGameTarget by remember { mutableStateOf<Game?>(null) }
+    var removingGame by remember { mutableStateOf(false) }
+    var removeGameFailed by remember { mutableStateOf(false) }
     val isRunning = emulatorState.value == EmulatorState.Running || emulatorState.value == EmulatorState.Paused
 
     val bootScale by animateFloatAsState(if (bootingGame != null) 5f else 1f, animationSpec = tween(700))
@@ -297,14 +300,24 @@ fun GamesScreen(
                             textAlign = TextAlign.Center,
                             color = RPCSXColors.textSecondary,
                         )
-                        Button(
-                            onClick = { folderPickerLauncher.launch(null) },
-                            colors = ButtonDefaults.buttonColors(
-                                containerColor = RPCSXColors.primary,
-                                contentColor = RPCSXColors.background,
-                            ),
-                        ) {
-                            Text(stringResource(R.string.game_folder_scan_action))
+                        Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+                            Button(
+                                onClick = { showImportDialog = true },
+                                colors = ButtonDefaults.buttonColors(
+                                    containerColor = RPCSXColors.primary,
+                                    contentColor = RPCSXColors.background,
+                                ),
+                            ) {
+                                Text(stringResource(R.string.import_game_action))
+                            }
+                            OutlinedButton(
+                                onClick = { folderPickerLauncher.launch(null) },
+                                colors = ButtonDefaults.outlinedButtonColors(
+                                    contentColor = RPCSXColors.primary,
+                                ),
+                            ) {
+                                Text(stringResource(R.string.game_folder_scan_action))
+                            }
                         }
                     }
                 }
@@ -582,7 +595,20 @@ fun GamesScreen(
                             }
                         })
                     } else {
-                        HintButton(text = "PLAY", icon = "X", color = RPCSXColors.primary, onClick = { })
+                        HintButton(
+                            text = "PLAY",
+                            icon = "X",
+                            color = RPCSXColors.primary,
+                            onClick = {
+                                val game = (currentItem as? PagerItem.GameItem)?.game
+                                if (game != null &&
+                                    game.info.path != "$" &&
+                                    game.findProgress(GameProgressType.Install) == null
+                                ) {
+                                    bootingGame = game
+                                }
+                            },
+                        )
                     }
                     HintButton(text = "OPTIONS", icon = "△", color = RPCSXColors.textSecondary, onClick = { navigateToSettings?.invoke() })
                 }
@@ -647,10 +673,76 @@ fun GamesScreen(
                         onClose = {
                             configuringGame = false
                             configureGameTarget = null
-                        }
+                        },
+                        onRemove = {
+                            removeGameTarget = configureGameTarget
+                            configuringGame = false
+                            configureGameTarget = null
+                        },
                     )
                 }
             }
+        }
+
+        if (removeGameTarget != null) {
+            val target = removeGameTarget
+            AlertDialog(
+                onDismissRequest = { if (!removingGame) removeGameTarget = null },
+                title = { Text(stringResource(R.string.remove_game)) },
+                text = {
+                    Text(
+                        stringResource(
+                            R.string.remove_game_confirmation,
+                            target?.info?.name?.value
+                                ?: target?.info?.path?.substringAfterLast('/')
+                                ?: "game",
+                        )
+                    )
+                },
+                confirmButton = {
+                    TextButton(
+                        enabled = !removingGame,
+                        onClick = {
+                            val game = removeGameTarget ?: return@TextButton
+                            removingGame = true
+                            FileUtil.removeGame(context, game) { success ->
+                                removingGame = false
+                                removeGameTarget = null
+                                if (!success) removeGameFailed = true
+                            }
+                        },
+                    ) {
+                        if (removingGame) {
+                            CircularProgressIndicator(
+                                modifier = Modifier.size(18.dp),
+                                color = RPCSXColors.primary,
+                                strokeWidth = 2.dp,
+                            )
+                        } else {
+                            Text(stringResource(R.string.remove_game))
+                        }
+                    }
+                },
+                dismissButton = {
+                    TextButton(
+                        enabled = !removingGame,
+                        onClick = { removeGameTarget = null },
+                    ) { Text(stringResource(android.R.string.cancel)) }
+                },
+            )
+        }
+
+        if (removeGameFailed) {
+            AlertDialog(
+                onDismissRequest = { removeGameFailed = false },
+                title = { Text(stringResource(R.string.error)) },
+                text = { Text(stringResource(R.string.remove_game_failed)) },
+                confirmButton = {
+                    TextButton(onClick = { removeGameFailed = false }) {
+                        Text(stringResource(android.R.string.ok))
+                    }
+                },
+            )
         }
 
         if (showImportDialog) {

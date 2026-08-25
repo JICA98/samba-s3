@@ -22,12 +22,16 @@
     <string name="game_import_failed">Game import failed: %1$s</string>
     <string name="game_folder_scan_title">Games found in folder</string>
     <string name="game_folder_scan_action">Scan game folder</string>
+    <string name="import_game_action">Import game</string>
     <string name="no_games_yet">No games yet. Select a folder to find PS3 game directories.</string>
     <string name="game_folder_scanning">Scanning the selected folder…</string>
     <string name="game_folder_no_games">No PS3 game directories were found.</string>
     <string name="game_folder_found_count">Found %1$d game(s). Review the list before importing.</string>
     <string name="game_folder_import_found">Import found games</string>
     <string name="installing_dir">Installing directory</string>
+    <string name="remove_game">Remove game</string>
+    <string name="remove_game_confirmation">Remove %1$s and its generated cache from this device? You can import it again later.</string>
+    <string name="remove_game_failed">The game could not be removed. Only games imported into SambaS3 storage can be removed here.</string>
 
     <!-- GamesScreen -->
     <string name="deleting_game">Deleting Game</string>

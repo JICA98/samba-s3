@@ -114,7 +114,8 @@ fun GameConfigureScreen(
     gamePath: String?,
     modifier: Modifier = Modifier,
     isInGame: Boolean = false,
-    onClose: (() -> Unit)? = null
+    onClose: (() -> Unit)? = null,
+    onRemove: (() -> Unit)? = null,
 ) {
     val context = LocalContext.current
     var tree by remember { mutableStateOf<JSONObject?>(null) }
@@ -230,6 +231,21 @@ fun GameConfigureScreen(
                                 showResetAllConfirm = true
                             }
                         )
+                        if (onRemove != null && !isInGame) {
+                            DropdownMenuItem(
+                                text = { Text(stringResource(R.string.remove_game)) },
+                                leadingIcon = {
+                                    Icon(
+                                        painter = painterResource(R.drawable.ic_delete),
+                                        contentDescription = null,
+                                    )
+                                },
+                                onClick = {
+                                    resetAllMenuOpen = false
+                                    onRemove()
+                                }
+                            )
+                        }
                     }
                 }
             }

@@ -87,6 +87,7 @@ class PrecompilerService : Service() {
     private var collectJob: Job? = null
     private var isForeground = false
     private var installPpuSeen = false
+    private var currentInstallIsFirmware = false
     @Volatile private var jobStartId: Int? = null
     private val mainHandler = android.os.Handler(android.os.Looper.getMainLooper())
 
@@ -259,6 +260,7 @@ class PrecompilerService : Service() {
         }
         jobStartId = startId
         installPpuSeen = false
+        currentInstallIsFirmware = isFwInstall
 
         val created = try {
             ProgressRepository.createForeground(this, NOTIF_INSTALL, title) { entry ->
@@ -357,10 +359,15 @@ class PrecompilerService : Service() {
     private fun onInstallPpuState(st: CompileProgressBridge.CompileState) {
         if (!isForeground) return
         if (!st.ppuActive) {
-            if (installPpuSeen) {
-                installPpuSeen = false
-                jobStartId?.let { stopForegroundAndSelf(it) }
-            }
+                if (installPpuSeen) {
+                    installPpuSeen = false
+                    if (currentInstallIsFirmware) {
+                        FirmwareRepository.progressChannel.value = null
+                    } else {
+                        GameRepository.activeInstallProgress.value = null
+                    }
+                    jobStartId?.let { stopForegroundAndSelf(it) }
+                }
             return
         }
         installPpuSeen = true
@@ -377,6 +384,11 @@ class PrecompilerService : Service() {
     }
 
     private fun stopForegroundAndSelf(startId: Int) {
+        if (currentInstallIsFirmware) {
+            FirmwareRepository.progressChannel.value = null
+        } else if (jobStartId != null) {
+            GameRepository.activeInstallProgress.value = null
+        }
         try {
             ServiceCompat.stopForeground(this, ServiceCompat.STOP_FOREGROUND_REMOVE)
             NotificationManagerCompat.from(this).cancel(NOTIF_INSTALL)
@@ -389,6 +401,7 @@ class PrecompilerService : Service() {
         }
         isForeground = false
         jobStartId = null
+        currentInstallIsFirmware = false
         stopSelf(startId)
     }
 

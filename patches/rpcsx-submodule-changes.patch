@@ -1,3 +1,50 @@
+diff --git a/android/src/rpcsx-android.cpp b/android/src/rpcsx-android.cpp
+index 2f8a25fc8..6afcec5c9 100644
+--- a/android/src/rpcsx-android.cpp
++++ b/android/src/rpcsx-android.cpp
+@@ -1962,11 +1962,12 @@ extern "C" void _rpcsx_openHomeMenu() {
+ extern "C" std::string _rpcsx_getTitleId() { return Emu.GetTitleID(); }
+ 
+ extern "C" bool _rpcsx_surfaceEvent(JNIEnv *env, jobject surface, jint event) {
+-  std::unique_lock lifecycleLock(g_emulator_lifecycle_mutex);
+-
+   rpcsx_android.warning("surface event %p, %d", surface, event);
+ 
+   if (event == 2) {
++    // Stop/pause the emulator before releasing the window it may still be
++    // using. Boot/kill and renderer teardown share this lifecycle gate.
++    std::unique_lock lifecycleLock(g_emulator_lifecycle_mutex);
+     auto prevWindow = g_native_window.exchange(nullptr);
+     if (prevWindow != nullptr) {
+       ANativeWindow_release(prevWindow);
+@@ -1992,6 +1993,10 @@ extern "C" bool _rpcsx_surfaceEvent(JNIEnv *env, jobject surface, jint event) {
+       }
+     }
+ 
++    // BootGame holds the lifecycle mutex while the renderer waits for this
++    // window. Publish the window before taking that mutex so SurfaceView
++    // creation can release the renderer without deadlocking boot.
++    std::unique_lock lifecycleLock(g_emulator_lifecycle_mutex);
+     if (event == 0 && Emu.IsPaused()) {
+       Emu.Resume();
+     }
+@@ -2208,10 +2213,12 @@ static bool installPup(JNIEnv *env, fs::file &&pup_f, jlong progressId) {
+   }
+ 
+   sendFirmwareInstalled(env, utils::get_firmware_version());
+-  sendVshBootable(env, -1);
+-  rpcsx_android.notice(
+-      "Firmware installed; automatic VSH PPU precompilation is disabled");
+-  progress.success(update_filenames.size(), "Firmware installation complete");
++  sendVshBootable(env, progressId);
++  // Build the firmware PPU cache as part of the firmware job. This keeps the
++  // first game launch out of the runtime compile overlay and leaves progress
++  // ownership with the existing install card/service.
++  g_compilationQueue.push(progress,
++                          g_cfg_vfs.get_dev_flash() + "/vsh/module/vsh.self");
+   return true;
+ }
+ 
 diff --git a/rpcs3/Crypto/unzip.cpp b/rpcs3/Crypto/unzip.cpp
 index 2de74313e..281162f76 100644
 --- a/rpcs3/Crypto/unzip.cpp
@@ -34,7 +81,7 @@ index 58de49ca0..0e9064de4 100644
  template <typename T>
  inline bool zip(const T& src, fs::file& out)
 diff --git a/rpcs3/Emu/Cell/PPUThread.cpp b/rpcs3/Emu/Cell/PPUThread.cpp
-index b1d559ef7..c100d3a07 100644
+index b1d559ef7..eed6e7e6b 100644
 --- a/rpcs3/Emu/Cell/PPUThread.cpp
 +++ b/rpcs3/Emu/Cell/PPUThread.cpp
 @@ -3,6 +3,7 @@
@@ -62,7 +109,7 @@ index b1d559ef7..c100d3a07 100644
  
  #include "util/sema.h"
  
-@@ -75,6 +79,276 @@
+@@ -75,6 +79,371 @@
  #include <libkern/OSCacheControl.h>
  #endif
  
@@ -78,18 +125,18 @@ index b1d559ef7..c100d3a07 100644
 +	{
 +		const char* name;
 +		const bool enabled;
-+		const std::chrono::steady_clock::time_point start = std::chrono::steady_clock::now();
++		const std::optional<std::chrono::steady_clock::time_point> start;
 +
 +		ppu_profile_scope(const char* _name, bool _enabled)
-+			: name(_name), enabled(_enabled)
++			: name(_name), enabled(_enabled), start(_enabled ? std::optional{std::chrono::steady_clock::now()} : std::nullopt)
 +		{
 +		}
 +
 +		~ppu_profile_scope()
 +		{
-+			if (enabled)
++			if (enabled && start)
 +			{
-+				const auto elapsed = std::chrono::duration<double, std::milli>(std::chrono::steady_clock::now() - start).count();
++				const auto elapsed = std::chrono::duration<double, std::milli>(std::chrono::steady_clock::now() - *start).count();
 +				ppu_log.notice("PPU_PROFILE stage=%s elapsed_ms=%.3f", name, elapsed);
 +			}
 +		}
@@ -170,6 +217,100 @@ index b1d559ef7..c100d3a07 100644
 +			}
 +		}
 +
++		return std::to_string(digest);
++	}
++
++	static bool ppu_manifest_is_candidate(const std::string& name)
++	{
++		const std::string upper = fmt::to_upper(name);
++		return upper.ends_with(".PRX") || upper.ends_with(".SPRX") || upper.ends_with(".ELF") || upper.ends_with(".SELF") || upper.ends_with(".MSELF");
++	}
++
++	static std::string ppu_manifest_source_inventory(const std::vector<std::string>& roots)
++	{
++		struct source_directory
++		{
++			std::string root;
++			std::string path;
++			usz root_index = 0;
++		};
++
++		std::vector<source_directory> directories;
++		directories.reserve(roots.size());
++		for (std::string root : roots)
++		{
++			if (!root.empty())
++			{
++				root = std::filesystem::path(root).lexically_normal().generic_string();
++				if (!root.ends_with('/'))
++				{
++					root += '/';
++				}
++				directories.push_back({std::move(root), {}, 0});
++			}
++		}
++
++		std::sort(directories.begin(), directories.end(), [](const source_directory& left, const source_directory& right)
++			{
++				return left.root < right.root;
++			});
++		directories.erase(std::unique(directories.begin(), directories.end(), [](const source_directory& left, const source_directory& right)
++			{
++				return left.root == right.root;
++			}), directories.end());
++		for (usz i = 0; i < directories.size(); ++i)
++		{
++			directories[i].path = directories[i].root;
++			directories[i].root_index = i;
++		}
++
++		std::vector<std::string> records;
++		for (usz i = 0; i < directories.size(); ++i)
++		{
++			for (const auto& entry : fs::dir(directories[i].path))
++			{
++				if (entry.is_directory)
++				{
++					if (entry.name != "." && entry.name != "..")
++					{
++						directories.push_back({directories[i].root, directories[i].path + entry.name + '/', directories[i].root_index});
++					}
++					continue;
++				}
++
++				if (!ppu_manifest_is_candidate(entry.name))
++				{
++					continue;
++				}
++
++				const std::string path = directories[i].path + entry.name;
++				const std::filesystem::path normalized_path = std::filesystem::path(path).lexically_normal();
++				const std::string relative_path = normalized_path.lexically_relative(std::filesystem::path(directories[i].root)).generic_string();
++				if (relative_path.empty() || relative_path == "." || relative_path == ".." || relative_path.starts_with("../"))
++				{
++					continue;
++				}
++				std::string record = std::to_string(directories[i].root_index) + ':' + relative_path + '|' + std::to_string(entry.size) + '|' + std::to_string(entry.mtime);
++				if (fmt::to_upper(entry.name).ends_with(".MSELF"))
++				{
++					// MSELF records can change without changing the container's metadata.
++					record += '|';
++					record += ppu_manifest_file_digest(path);
++				}
++				records.emplace_back(std::move(record));
++			}
++		}
++
++		std::sort(records.begin(), records.end());
++		usz digest = rpcs3::fnv_seed;
++		for (const std::string& record : records)
++		{
++			for (const unsigned char byte : record)
++			{
++				digest = rpcs3::hash64(digest, byte);
++			}
++			digest = rpcs3::hash64(digest, static_cast<u8>('\n'));
++		}
 +		return std::to_string(digest);
 +	}
 +
@@ -256,7 +397,7 @@ index b1d559ef7..c100d3a07 100644
 +		return !ec && entry.offset <= actual_size && entry.file_size <= actual_size - entry.offset;
 +	}
 +
-+	static bool ppu_manifest_load(const std::string& path, const nlohmann::json& key, const std::vector<std::string>& roots, std::vector<ppu_precompile_file_info>& entries)
++	static bool ppu_manifest_load(const std::string& path, const nlohmann::json& key, const std::vector<std::string>& roots, const std::string& inventory, std::vector<ppu_precompile_file_info>& entries)
 +	{
 +		fs::file file(path);
 +		if (!file)
@@ -271,8 +412,8 @@ index b1d559ef7..c100d3a07 100644
 +		}
 +
 +		const auto document = nlohmann::json::parse(contents, nullptr, false);
-+		if (document.is_discarded() || !document.is_object() || !document.contains("version") || !document.contains("key") || !document.contains("roots") || !document.contains("entries") ||
-+			document["version"] != 1u || document["key"] != key || document["roots"] != roots)
++		if (document.is_discarded() || !document.is_object() || !document.contains("version") || !document.contains("key") || !document.contains("roots") || !document.contains("inventory") || !document.contains("entries") ||
++			document["version"] != 2u || document["key"] != key || document["roots"] != roots || document["inventory"] != inventory)
 +		{
 +			return false;
 +		}
@@ -299,12 +440,13 @@ index b1d559ef7..c100d3a07 100644
 +		return true;
 +	}
 +
-+	static void ppu_manifest_save(const std::string& path, const nlohmann::json& key, const std::vector<std::string>& roots, const std::vector<ppu_precompile_file_info>& entries)
++	static void ppu_manifest_save(const std::string& path, const nlohmann::json& key, const std::vector<std::string>& roots, const std::string& inventory, const std::vector<ppu_precompile_file_info>& entries)
 +	{
 +		nlohmann::json document{
-+			{"version", 1},
++			{"version", 2},
 +			{"key", key},
 +			{"roots", roots},
++			{"inventory", inventory},
 +			{"entries", nlohmann::json::array()},
 +		};
 +
@@ -339,7 +481,7 @@ index b1d559ef7..c100d3a07 100644
  extern atomic_t<u64> g_watchdog_hold_ctr;
  
  // Should be of the same type
-@@ -3820,9 +4094,6 @@ struct jit_core_allocator
+@@ -3820,9 +4189,6 @@ struct jit_core_allocator
  	// Initialize global semaphore with the max number of threads
  	::semaphore<0x7fff> sem{std::max<s16>(thread_count, 1)};
  
@@ -349,7 +491,7 @@ index b1d559ef7..c100d3a07 100644
  	static s16 limit()
  	{
  		return static_cast<s16>(std::min<s32>(0x7fff, utils::get_thread_count()));
-@@ -3848,11 +4119,28 @@ namespace
+@@ -3848,11 +4214,28 @@ namespace
  			std::unordered_map<std::string, jit_module> map;
  		};
  
@@ -380,7 +522,7 @@ index b1d559ef7..c100d3a07 100644
  		}
  
  		jit_module& get(const std::string& name)
-@@ -4058,6 +4346,8 @@ extern void ppu_finalize(const ppu_module<lv2_obj>& info, bool force_mem_release
+@@ -4058,6 +4441,8 @@ extern void ppu_finalize(const ppu_module<lv2_obj>& info, bool force_mem_release
  
  extern void ppu_precompile(std::vector<std::string>& dir_queue, std::vector<ppu_module<lv2_obj>*>* loaded_modules)
  {
@@ -389,7 +531,7 @@ index b1d559ef7..c100d3a07 100644
  	if (g_cfg.core.ppu_decoder != ppu_decoder_type::llvm_legacy)
  	{
  		return;
-@@ -4083,36 +4373,43 @@ extern void ppu_precompile(std::vector<std::string>& dir_queue, std::vector<ppu_
+@@ -4083,36 +4468,44 @@ extern void ppu_precompile(std::vector<std::string>& dir_queue, std::vector<ppu_
  
  	const std::string firmware_sprx_path = vfs::get("/dev_flash/sys/external/");
  
@@ -398,23 +540,24 @@ index b1d559ef7..c100d3a07 100644
 -		std::string path;
 -		u64 offset;
 -		u64 file_size;
--
--		file_info() noexcept = default;
 +	std::vector<ppu_precompile_file_info> file_queue;
 +	file_queue.reserve(2000);
+ 
+-		file_info() noexcept = default;
++#ifdef ANDROID
++	const std::vector<std::string> manifest_roots = dir_queue;
++	const std::string manifest_path = ppu_manifest_path();
++	const nlohmann::json manifest_key = ppu_manifest_key(loaded_modules);
++	const std::string manifest_inventory = ppu_manifest_source_inventory(manifest_roots);
++	const bool manifest_enabled = !manifest_path.empty() && !manifest_roots.empty() && !manifest_key["game_exe_hash"].get<std::string>().empty();
++	const bool manifest_hit = manifest_enabled && ppu_manifest_load(manifest_path, manifest_key, manifest_roots, manifest_inventory, file_queue);
  
 -		file_info(std::string _path, u64 offs, u64 size) noexcept
 -			: path(std::move(_path)), offset(offs), file_size(size)
 -		{
 -		}
 -	};
-+#ifdef ANDROID
-+	const std::vector<std::string> manifest_roots = dir_queue;
-+	const std::string manifest_path = ppu_manifest_path();
-+	const nlohmann::json manifest_key = ppu_manifest_key(loaded_modules);
-+	const bool manifest_enabled = !manifest_path.empty() && !manifest_key["game_exe_hash"].get<std::string>().empty();
-+	const bool manifest_hit = manifest_enabled && ppu_manifest_load(manifest_path, manifest_key, manifest_roots, file_queue);
- 
+-
 -	std::vector<file_info> file_queue;
 -	file_queue.reserve(2000);
 +	if (manifest_hit)
@@ -455,7 +598,7 @@ index b1d559ef7..c100d3a07 100644
  			if (Emu.IsStopped())
  			{
  				file_queue.clear();
-@@ -4255,12 +4552,20 @@ extern void ppu_precompile(std::vector<std::string>& dir_queue, std::vector<ppu_
+@@ -4255,12 +4648,20 @@ extern void ppu_precompile(std::vector<std::string>& dir_queue, std::vector<ppu_
  			}
  		}
  	}
@@ -464,7 +607,7 @@ index b1d559ef7..c100d3a07 100644
 +#ifdef ANDROID
 +	if (!manifest_hit && manifest_enabled)
 +	{
-+		ppu_manifest_save(manifest_path, manifest_key, manifest_roots, file_queue);
++		ppu_manifest_save(manifest_path, manifest_key, manifest_roots, manifest_inventory, file_queue);
 +	}
 +#endif
  
@@ -477,7 +620,7 @@ index b1d559ef7..c100d3a07 100644
  	{
  		total_files_size += info.file_size;
  	}
-@@ -4271,7 +4576,7 @@ extern void ppu_precompile(std::vector<std::string>& dir_queue, std::vector<ppu_
+@@ -4271,7 +4672,7 @@ extern void ppu_precompile(std::vector<std::string>& dir_queue, std::vector<ppu_
  
  	atomic_t<usz> fnext = 0;
  
@@ -486,7 +629,7 @@ index b1d559ef7..c100d3a07 100644
  
  	concurent_memory_limit memory_limit(utils::get_total_memory() / 3);
  
-@@ -4624,6 +4929,8 @@ extern void ppu_precompile(std::vector<std::string>& dir_queue, std::vector<ppu_
+@@ -4624,6 +5025,8 @@ extern void ppu_precompile(std::vector<std::string>& dir_queue, std::vector<ppu_
  
  extern void ppu_initialize()
  {
@@ -495,7 +638,7 @@ index b1d559ef7..c100d3a07 100644
  	if (!g_fxo->is_init<main_ppu_module<lv2_obj>>())
  	{
  		return;
-@@ -4768,6 +5075,8 @@ extern void ppu_initialize()
+@@ -4768,6 +5171,8 @@ extern void ppu_initialize()
  
  bool ppu_initialize(const ppu_module<lv2_obj>& info, bool check_only, u64 file_size, concurent_memory_limit& memory_limit)
  {
@@ -504,7 +647,7 @@ index b1d559ef7..c100d3a07 100644
  	if (g_cfg.core.ppu_decoder != ppu_decoder_type::llvm_legacy)
  	{
  		if (check_only || vm::base(info.segs[0].addr) != info.segs[0].ptr)
-@@ -4904,14 +5213,14 @@ bool ppu_initialize(const ppu_module<lv2_obj>& info, bool check_only, u64 file_s
+@@ -4904,14 +5309,14 @@ bool ppu_initialize(const ppu_module<lv2_obj>& info, bool check_only, u64 file_s
  	// Info to load to main JIT instance (true - compiled)
  	std::vector<std::pair<std::string, bool>> link_workload;
  
@@ -522,7 +665,7 @@ index b1d559ef7..c100d3a07 100644
  
  	const cpu_thread* cpu = cpu_thread::get_current();
  
-@@ -5453,8 +5762,11 @@ bool ppu_initialize(const ppu_module<lv2_obj>& info, bool check_only, u64 file_s
+@@ -5453,8 +5858,11 @@ bool ppu_initialize(const ppu_module<lv2_obj>& info, bool check_only, u64 file_s
  			if (fpos >= info.get_funcs().size() || module_counter % c_moudles_per_jit == c_moudles_per_jit - 1)
  				settings += ppu_settings::contains_symbol_resolver; // Avoid invalidating all modules for this purpose
  
@@ -536,7 +679,7 @@ index b1d559ef7..c100d3a07 100644
  		}
  
  		if (cpu ? cpu->state.all_of(cpu_flag::exit) : Emu.IsStopped())
-@@ -5509,12 +5821,24 @@ bool ppu_initialize(const ppu_module<lv2_obj>& info, bool check_only, u64 file_s
+@@ -5509,12 +5917,24 @@ bool ppu_initialize(const ppu_module<lv2_obj>& info, bool check_only, u64 file_s
  	// Create worker threads for compilation
  	if (!workload.empty())
  	{
@@ -562,7 +705,7 @@ index b1d559ef7..c100d3a07 100644
  
  		struct thread_index_allocator
  		{
-@@ -5524,24 +5848,26 @@ bool ppu_initialize(const ppu_module<lv2_obj>& info, bool check_only, u64 file_s
+@@ -5524,24 +5944,26 @@ bool ppu_initialize(const ppu_module<lv2_obj>& info, bool check_only, u64 file_s
  		struct thread_op
  		{
  			concurent_memory_limit& memory_limit;
@@ -593,7 +736,7 @@ index b1d559ef7..c100d3a07 100644
  			{
  				if (auto mtx = other.core_lock.mutex())
  				{
-@@ -5554,13 +5880,14 @@ bool ppu_initialize(const ppu_module<lv2_obj>& info, bool check_only, u64 file_s
+@@ -5554,13 +5976,14 @@ bool ppu_initialize(const ppu_module<lv2_obj>& info, bool check_only, u64 file_s
  
  			void operator()()
  			{
@@ -611,7 +754,7 @@ index b1d559ef7..c100d3a07 100644
  				{
  					if (cpu ? cpu->state.all_of(cpu_flag::exit) : Emu.IsStopped())
  					{
-@@ -5579,24 +5906,11 @@ bool ppu_initialize(const ppu_module<lv2_obj>& info, bool check_only, u64 file_s
+@@ -5579,24 +6002,11 @@ bool ppu_initialize(const ppu_module<lv2_obj>& info, bool check_only, u64 file_s
  					ppu_log.warning("LLVM: reporting used memory %u (free/total: %u/%u) by %s%s", total_fn_size * 1024 * 16, memory_limit.free_memory(), memory_limit.total_memory(), cache_path, obj_name);
  					auto used_memory = memory_limit.acquire(total_fn_size * 1024 * 16);
  
@@ -637,7 +780,7 @@ index b1d559ef7..c100d3a07 100644
  						ppu_initialize2(jit2, part, cache_path, obj_name);
  					}
  
-@@ -5604,30 +5918,79 @@ bool ppu_initialize(const ppu_module<lv2_obj>& info, bool check_only, u64 file_s
+@@ -5604,30 +6014,79 @@ bool ppu_initialize(const ppu_module<lv2_obj>& info, bool check_only, u64 file_s
  				}
  
  				core_lock.unlock();
@@ -724,12 +867,16 @@ index b1d559ef7..c100d3a07 100644
  
  		for (const auto& [addr, func] : *shared_map)
  		{
-@@ -5795,6 +6158,15 @@ static void ppu_initialize2(jit_compiler& jit, const ppu_module<lv2_obj>& module
+@@ -5795,6 +6254,19 @@ static void ppu_initialize2(jit_compiler& jit, const ppu_module<lv2_obj>& module
  #ifdef LLVM_AVAILABLE
  	using namespace llvm;
  
 +	const bool profile_enabled = static_cast<bool>(g_cfg.core.llvm_logs);
-+	const auto profile_start = std::chrono::steady_clock::now();
++	const auto profile_now = [profile_enabled]() -> std::optional<std::chrono::steady_clock::time_point>
++	{
++		return profile_enabled ? std::optional{std::chrono::steady_clock::now()} : std::nullopt;
++	};
++	const auto profile_start = profile_now();
 +	double translation_ms = 0.0;
 +	double pass_setup_ms = 0.0;
 +	double fpm_run_ms = 0.0;
@@ -740,19 +887,22 @@ index b1d559ef7..c100d3a07 100644
  	// Create LLVM module
  	std::unique_ptr<Module> _module = std::make_unique<Module>(obj_name, jit.get_context());
  
-@@ -5838,6 +6210,7 @@ static void ppu_initialize2(jit_compiler& jit, const ppu_module<lv2_obj>& module
+@@ -5838,6 +6310,7 @@ static void ppu_initialize2(jit_compiler& jit, const ppu_module<lv2_obj>& module
  			translator.build_interpreter();
  		}
  #ifdef ARCH_X64
-+		const auto pass_setup_start = std::chrono::steady_clock::now();
++		const auto pass_setup_start = profile_now();
  		// Create the analysis managers.
  		// These must be declared in this order so that they are destroyed in the
  		// correct order due to inter-analysis-manager references.
-@@ -5862,11 +6235,10 @@ static void ppu_initialize2(jit_compiler& jit, const ppu_module<lv2_obj>& module
+@@ -5862,11 +6335,13 @@ static void ppu_initialize2(jit_compiler& jit, const ppu_module<lv2_obj>& module
  		FunctionPassManager fpm;
  		// Basic optimizations
  		fpm.addPass(EarlyCSEPass());
-+		pass_setup_ms = ppu_profile_elapsed_ms(pass_setup_start);
++		if (pass_setup_start)
++		{
++			pass_setup_ms = ppu_profile_elapsed_ms(*pass_setup_start);
++		}
  #endif
 -		u32 guest_code_size = 0;
  		u32 min_addr = umax;
@@ -761,74 +911,95 @@ index b1d559ef7..c100d3a07 100644
  
  		// Translate functions
  		// Start with the lowest bound of the module, function list is sorted
-@@ -5886,15 +6258,20 @@ static void ppu_initialize2(jit_compiler& jit, const ppu_module<lv2_obj>& module
+@@ -5886,15 +6361,29 @@ static void ppu_initialize2(jit_compiler& jit, const ppu_module<lv2_obj>& module
  				min_addr = std::min<u32>(min_addr, mod_func.addr);
  
  				// Translate
-+				const auto translation_start = std::chrono::steady_clock::now();
++				const auto translation_start = profile_now();
  				if ([[maybe_unused]] const auto func = translator.Translate(mod_func))
  				{
-+					translation_ms += ppu_profile_elapsed_ms(translation_start);
++					if (translation_start)
++					{
++						translation_ms += ppu_profile_elapsed_ms(*translation_start);
++					}
  #ifdef ARCH_X64 // TODO
                  // Run optimization passes
-+					const auto fpm_start = std::chrono::steady_clock::now();
++					const auto fpm_start = profile_now();
  					fpm.run(*func, fam);
-+					fpm_run_ms += ppu_profile_elapsed_ms(fpm_start);
++					if (fpm_start)
++					{
++						fpm_run_ms += ppu_profile_elapsed_ms(*fpm_start);
++					}
  #endif // ARCH_X64
  				}
  				else
  				{
-+					translation_ms += ppu_profile_elapsed_ms(translation_start);
++					if (translation_start)
++					{
++						translation_ms += ppu_profile_elapsed_ms(*translation_start);
++					}
  					Emu.Pause();
  					return;
  				}
-@@ -5904,15 +6281,20 @@ static void ppu_initialize2(jit_compiler& jit, const ppu_module<lv2_obj>& module
+@@ -5904,15 +6393,29 @@ static void ppu_initialize2(jit_compiler& jit, const ppu_module<lv2_obj>& module
  		// Run this only in one module for all functions compiled
  		if (module_part.jit_bounds)
  		{
-+			const auto translation_start = std::chrono::steady_clock::now();
++			const auto translation_start = profile_now();
  			if ([[maybe_unused]] const auto func = translator.GetSymbolResolver(module_part))
  			{
-+				translation_ms += ppu_profile_elapsed_ms(translation_start);
++				if (translation_start)
++				{
++					translation_ms += ppu_profile_elapsed_ms(*translation_start);
++				}
  #ifdef ARCH_X64 // TODO
                  // Run optimization passes
-+				const auto fpm_start = std::chrono::steady_clock::now();
++				const auto fpm_start = profile_now();
  				fpm.run(*func, fam);
-+				fpm_run_ms += ppu_profile_elapsed_ms(fpm_start);
++				if (fpm_start)
++				{
++					fpm_run_ms += ppu_profile_elapsed_ms(*fpm_start);
++				}
  #endif // ARCH_X64
  			}
  			else
  			{
-+				translation_ms += ppu_profile_elapsed_ms(translation_start);
++				if (translation_start)
++				{
++					translation_ms += ppu_profile_elapsed_ms(*translation_start);
++				}
  				Emu.Pause();
  				return;
  			}
-@@ -5936,7 +6318,11 @@ static void ppu_initialize2(jit_compiler& jit, const ppu_module<lv2_obj>& module
+@@ -5936,7 +6439,14 @@ static void ppu_initialize2(jit_compiler& jit, const ppu_module<lv2_obj>& module
  			result.clear();
  		}
  
 -		if (verifyModule(*_module, &out))
-+		const auto verify_start = std::chrono::steady_clock::now();
++		const auto verify_start = profile_now();
 +		const bool verification_failed = verifyModule(*_module, &out);
-+		verify_ms = ppu_profile_elapsed_ms(verify_start);
++		if (verify_start)
++		{
++			verify_ms = ppu_profile_elapsed_ms(*verify_start);
++		}
 +
 +		if (verification_failed)
  		{
  			out.flush();
  			ppu_log.error("LLVM: Verification failed for %s:\n%s", obj_name, result);
-@@ -5951,6 +6337,15 @@ static void ppu_initialize2(jit_compiler& jit, const ppu_module<lv2_obj>& module
+@@ -5951,6 +6461,15 @@ static void ppu_initialize2(jit_compiler& jit, const ppu_module<lv2_obj>& module
  	}
  
  	// Load or compile module
-+	const auto codegen_start = std::chrono::steady_clock::now();
++	const auto codegen_start = profile_now();
  	jit.add(std::move(_module), cache_path);
-+	const double codegen_cache_ms = ppu_profile_elapsed_ms(codegen_start);
++	const double codegen_cache_ms = codegen_start ? ppu_profile_elapsed_ms(*codegen_start) : 0.0;
 +
 +	if (profile_enabled)
 +	{
 +		ppu_log.notice("PPU_PROFILE module=%s funcs=%u guest_code_size=%u translation_ms=%.3f pass_setup_ms=%.3f fpm_run_ms=%.3f verify_ms=%.3f codegen_cache_ms=%.3f total_ms=%.3f",
 +			obj_name, num_func, guest_code_size, translation_ms, pass_setup_ms, fpm_run_ms, verify_ms, codegen_cache_ms,
-+			ppu_profile_elapsed_ms(profile_start));
++			ppu_profile_elapsed_ms(*profile_start));
 +	}
  #endif // LLVM_AVAILABLE
  }
@@ -927,10 +1098,10 @@ index a43a74488..e3bfbf5e7 100644
  	~jit_compiler() noexcept;
  
 diff --git a/rpcs3/util/JITLLVM.cpp b/rpcs3/util/JITLLVM.cpp
-index b67d303a3..f5dc0fc90 100644
+index b67d303a3..80d6608de 100644
 --- a/rpcs3/util/JITLLVM.cpp
 +++ b/rpcs3/util/JITLLVM.cpp
-@@ -10,8 +10,10 @@
+@@ -10,8 +10,11 @@
  #include "rx/asm.hpp"
  #include "rx/align.hpp"
  #include "Crypto/unzip.h"
@@ -938,25 +1109,31 @@ index b67d303a3..f5dc0fc90 100644
  
  #include <charconv>
 +#include <chrono>
++#include <optional>
  
  LOG_CHANNEL(jit_log, "JIT");
  
-@@ -444,17 +446,32 @@ public:
+@@ -444,17 +447,37 @@ public:
  			return;
  		}
  
 -		if (!zip(obj.getBufferStart(), obj.getBufferSize(), module_file.file))
-+		const auto compress_start = std::chrono::steady_clock::now();
++		const bool profile_enabled = static_cast<bool>(g_cfg.core.llvm_logs);
++		const auto profile_now = [profile_enabled]() -> std::optional<std::chrono::steady_clock::time_point>
++		{
++			return profile_enabled ? std::optional{std::chrono::steady_clock::now()} : std::nullopt;
++		};
++		const auto compress_start = profile_now();
 +		// PPU objects are generated again when their cache identity changes, so
 +		// compile latency matters more than squeezing the last bytes from them.
 +		// Keep the established high-compression policy for all other archives.
 +		constexpr int ppu_cache_compression_level = 1;
-+		if (!zip(obj.getBufferStart(), obj.getBufferSize(), module_file.file, true, ppu_cache_compression_level))
++		if (!zip(obj.getBufferStart(), obj.getBufferSize(), module_file.file, false, ppu_cache_compression_level))
  		{
  			jit_log.error("LLVM: Failed to compress module: %s", std::string(_module->getName()));
  			return;
  		}
-+		const double compress_ms = std::chrono::duration<double, std::milli>(std::chrono::steady_clock::now() - compress_start).count();
++		const double compress_ms = compress_start ? std::chrono::duration<double, std::milli>(std::chrono::steady_clock::now() - *compress_start).count() : 0.0;
 +		const usz compressed_size = module_file.file.size();
  
  		jit_log.trace("LLVM: Created module: %s", std::string(_module->getName()));
@@ -965,19 +1142,19 @@ index b67d303a3..f5dc0fc90 100644
 -		ensure(m_compiler->add_sub_disk_space(max_size - module_file.file.size()));
 -		module_file.commit();
 +		ensure(m_compiler->add_sub_disk_space(max_size - compressed_size));
-+		const auto write_start = std::chrono::steady_clock::now();
++		const auto write_start = profile_now();
 +		const bool committed = module_file.commit();
-+		const double write_ms = std::chrono::duration<double, std::milli>(std::chrono::steady_clock::now() - write_start).count();
++		const double write_ms = write_start ? std::chrono::duration<double, std::milli>(std::chrono::steady_clock::now() - *write_start).count() : 0.0;
 +
-+		if (g_cfg.core.llvm_logs)
++		if (profile_enabled)
 +		{
-+			jit_log.notice("PPU_PROFILE stage=cache_write module=%s object_bytes=%zu compressed_bytes=%zu compression_level=1 compress_ms=%.3f write_ms=%.3f committed=%s",
++			jit_log.notice("PPU_PROFILE stage=cache_write module=%s object_bytes=%zu compressed_bytes=%zu compression_level=1 multi_thread=false compress_ms=%.3f write_ms=%.3f committed=%s",
 +				_module->getName().data(), obj.getBufferSize(), compressed_size, compress_ms, write_ms, committed ? "true" : "false");
 +		}
  	}
  
  	static std::unique_ptr<llvm::MemoryBuffer> load(const std::string& path)
-@@ -642,7 +659,7 @@ bool jit_compiler::add_sub_disk_space(ssz space)
+@@ -642,7 +665,7 @@ bool jit_compiler::add_sub_disk_space(ssz space)
  	    .second;
  }
  
@@ -986,7 +1163,7 @@ index b67d303a3..f5dc0fc90 100644
  	: m_context(new llvm::LLVMContext, [](llvm::LLVMContext* context)
  		  {
  			  delete context;
-@@ -687,6 +704,14 @@ jit_compiler::jit_compiler(const std::unordered_map<std::string, u64>& _link, co
+@@ -687,6 +710,14 @@ jit_compiler::jit_compiler(const std::unordered_map<std::string, u64>& _link, co
  		mem = std::make_unique<MemoryManager1>(std::move(symbols_cement));
  	}
  
@@ -1001,7 +1178,7 @@ index b67d303a3..f5dc0fc90 100644
  	{
  
  		m_engine = std::unique_ptr<llvm::ExecutionEngine, void (*)(llvm::ExecutionEngine*)>{
-@@ -694,7 +719,7 @@ jit_compiler::jit_compiler(const std::unordered_map<std::string, u64>& _link, co
+@@ -694,7 +725,7 @@ jit_compiler::jit_compiler(const std::unordered_map<std::string, u64>& _link, co
  				.setErrorStr(&result)
  				.setEngineKind(llvm::EngineKind::JIT)
  				.setMCJITMemoryManager(std::move(mem))
