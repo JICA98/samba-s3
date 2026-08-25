@@ -1,13 +1,642 @@
+diff --git a/3rdparty/CMakeLists.txt b/3rdparty/CMakeLists.txt
+index 67174c58e..aba8b3a79 100644
+--- a/3rdparty/CMakeLists.txt
++++ b/3rdparty/CMakeLists.txt
+@@ -266,12 +266,14 @@ add_library(3rdparty_vulkan INTERFACE)
+ target_compile_definitions(3rdparty_vulkan INTERFACE -DHAVE_VULKAN)
+ 
+ if (NOT COMPILE_VULKAN_LOADER OR ANDROID OR APPLE)
+-	find_package(Vulkan 1.3 GLOBAL)
++	find_package(Vulkan)
+ 
+ 	if (Vulkan_FOUND)
+ 		message(STATUS "Using system Vulkan Loader")
+ 		target_link_libraries(3rdparty_vulkan INTERFACE Vulkan::Vulkan)
+-		add_library(Vulkan::Loader ALIAS Vulkan::Vulkan)
++		if (NOT TARGET Vulkan::Loader)
++			add_library(Vulkan::Loader ALIAS Vulkan::Vulkan)
++		endif()
+ 	else()
+ 		message(WARNING "Vulkan not found, using submodule")
+ 		set(COMPILE_VULKAN_LOADER on)
+diff --git a/android/CMakeLists.txt b/android/CMakeLists.txt
+index b834c0fe7..84128a3e8 100644
+--- a/android/CMakeLists.txt
++++ b/android/CMakeLists.txt
+@@ -110,6 +110,9 @@ set(COMPILE_FFMPEG off)
+ add_subdirectory(${CMAKE_SOURCE_DIR}/.. rpcsx EXCLUDE_FROM_ALL)
+ 
+ add_library(${CMAKE_PROJECT_NAME} SHARED
++    src/atomic-file-copier.cpp
++    src/iso-install-manifest.cpp
++    src/staged-game-installer.cpp
+     src/rpcsx-android.cpp
+ )
+ 
+diff --git a/android/src/atomic-file-copier.cpp b/android/src/atomic-file-copier.cpp
+new file mode 100644
+index 000000000..00a3f8aa5
+--- /dev/null
++++ b/android/src/atomic-file-copier.cpp
+@@ -0,0 +1,117 @@
++#include "atomic-file-copier.hpp"
++
++#include "util/StrFmt.h"
++
++#include <algorithm>
++#include <vector>
++
++namespace rpcsx::android {
++namespace {
++constexpr u64 kCopyBufferSize = 8 * 1024 * 1024;
++thread_local CopyTestHooks g_testHooks;
++} // namespace
++
++void setCopyTestHooks(CopyTestHooks hooks) { g_testHooks = std::move(hooks); }
++void clearCopyTestHooks() { g_testHooks = CopyTestHooks{}; }
++
++AtomicFileCopyResult copyFileAtomically(fs::file &source,
++                                        const std::string &destination,
++                                        u64 expectedSize) {
++  AtomicFileCopyResult result;
++
++  if (source.seek(0, fs::seek_set) != 0) {
++    result.error = fmt::format("Failed to rewind source for %s", destination);
++    return result;
++  }
++
++  if (source.size() != expectedSize) {
++    result.error =
++        fmt::format("Source size mismatch for %s: expected %llu, got %llu",
++                    destination, expectedSize, source.size());
++    return result;
++  }
++
++  fs::pending_file pending(destination);
++  if (!pending.file) {
++    result.error =
++        fmt::format("Failed to create pending file for %s", destination);
++    return result;
++  }
++
++  // Zero-byte files are valid; no buffer needed and no read/write
++  if (expectedSize == 0) {
++    if (pending.file.size() != 0) {
++      result.error = fmt::format("Final size mismatch for %s: expected 0, wrote %llu", destination, pending.file.size());
++      return result;
++    }
++    if (g_testHooks.onCommit && !g_testHooks.onCommit(destination)) {
++      result.error = fmt::format("Injected commit failure for %s", destination);
++      return result;
++    }
++    if (!pending.commit()) {
++      result.error = fmt::format("Failed to commit completed file %s", destination);
++    }
++    return result;
++  }
++
++  std::vector<u8> buffer(
++      static_cast<std::size_t>(std::min(expectedSize, kCopyBufferSize)));
++  if (buffer.empty()) {
++    buffer.resize(4096);
++  }
++
++  while (result.bytesCopied < expectedSize) {
++    const u64 requested =
++        std::min<u64>(buffer.size(), expectedSize - result.bytesCopied);
++    u64 bytesRead = source.read(buffer.data(), requested);
++    if (g_testHooks.onRead) {
++      u64 injected = bytesRead;
++      if (!g_testHooks.onRead(result.bytesCopied, requested, injected)) {
++        bytesRead = injected; // allow hook to modify bytesRead to simulate short read
++      }
++    }
++    if (bytesRead != requested) {
++      result.error =
++          fmt::format("Incomplete read for %s: expected %llu, read %llu",
++                      destination, expectedSize,
++                      result.bytesCopied + bytesRead);
++      return result;
++    }
++
++    u64 bytesWritten = pending.file.write(buffer.data(), bytesRead);
++    if (g_testHooks.onWrite) {
++      u64 injected = bytesWritten;
++      if (!g_testHooks.onWrite(result.bytesCopied, bytesRead, injected)) {
++        bytesWritten = injected;
++      }
++    }
++    result.bytesCopied += bytesWritten;
++    if (bytesWritten != bytesRead) {
++      result.error =
++          fmt::format("Incomplete write for %s: expected %llu, wrote %llu",
++                      destination, expectedSize, result.bytesCopied);
++      return result;
++    }
++  }
++
++  const u64 finalSize = pending.file.size();
++  if (finalSize != expectedSize) {
++    result.error =
++        fmt::format("Final size mismatch for %s: expected %llu, wrote %llu",
++                    destination, expectedSize, finalSize);
++    return result;
++  }
++
++  if (g_testHooks.onCommit && !g_testHooks.onCommit(destination)) {
++    result.error = fmt::format("Injected commit failure for %s", destination);
++    return result;
++  }
++
++  if (!pending.commit()) {
++    result.error =
++        fmt::format("Failed to commit completed file %s", destination);
++  }
++
++  return result;
++}
++} // namespace rpcsx::android
+diff --git a/android/src/atomic-file-copier.hpp b/android/src/atomic-file-copier.hpp
+new file mode 100644
+index 000000000..4876c7aaf
+--- /dev/null
++++ b/android/src/atomic-file-copier.hpp
+@@ -0,0 +1,30 @@
++#pragma once
++
++#include "util/File.h"
++
++#include <atomic>
++#include <functional>
++#include <string>
++
++namespace rpcsx::android {
++struct AtomicFileCopyResult {
++  u64 bytesCopied = 0;
++  std::string error;
++
++  explicit operator bool() const { return error.empty(); }
++};
++
++// Test seam: inject failures for regression tests. Only active when set.
++struct CopyTestHooks {
++  std::function<bool(u64 bytesCopied, u64 requested, u64& bytesRead)> onRead; // return false to simulate short read
++  std::function<bool(u64 bytesCopied, u64 bytesRead, u64& bytesWritten)> onWrite; // return false to simulate short write
++  std::function<bool(const std::string& destination)> onCommit; // return false to simulate commit failure
++};
++
++void setCopyTestHooks(CopyTestHooks hooks);
++void clearCopyTestHooks();
++
++AtomicFileCopyResult copyFileAtomically(fs::file &source,
++                                        const std::string &destination,
++                                        u64 expectedSize);
++} // namespace rpcsx::android
+diff --git a/android/src/iso-install-manifest.cpp b/android/src/iso-install-manifest.cpp
+new file mode 100644
+index 000000000..a99a18839
+--- /dev/null
++++ b/android/src/iso-install-manifest.cpp
+@@ -0,0 +1,189 @@
++#include "iso-install-manifest.hpp"
++
++#include "util/StrFmt.h"
++
++#include <algorithm>
++#include <cctype>
++#include <filesystem>
++#include <unordered_set>
++
++namespace rpcsx::android {
++namespace {
++bool equalsIgnoreCase(std::string_view lhs, std::string_view rhs) {
++  return lhs.size() == rhs.size() &&
++         std::equal(lhs.begin(), lhs.end(), rhs.begin(), [](char left, char right) {
++           return std::tolower(static_cast<unsigned char>(left)) ==
++                  std::tolower(static_cast<unsigned char>(right));
++         });
++}
++
++std::string foldAscii(std::string value) {
++  std::transform(value.begin(), value.end(), value.begin(), [](char character) {
++    return static_cast<char>(std::tolower(static_cast<unsigned char>(character)));
++  });
++  return value;
++}
++
++std::string appendComponent(std::string_view parent, std::string_view component) {
++  if (parent.empty()) return std::string(component);
++  return fmt::format("%s/%s", parent, component);
++}
++} // namespace
++
++bool IsoInstallManifest::isValidTitleId(std::string_view titleId) {
++  if (titleId.size() != 9) return false;
++  for (std::size_t index = 0; index < titleId.size(); ++index) {
++    const unsigned char character = static_cast<unsigned char>(titleId[index]);
++    if (index < 4 ? !std::isupper(character) : !std::isdigit(character)) return false;
++  }
++  return true;
++}
++
++bool IsoInstallManifest::isValidPathComponent(std::string_view component) {
++  if (component.empty() || component == "." || component == "..") return false;
++  for (const unsigned char character : component) {
++    if (character == 0 || character == '/' || character == '\\' ||
++        character == ':' || character < 0x20 || character == 0x7f) {
++      return false;
++    }
++  }
++  return true;
++}
++
++std::optional<std::string> IsoInstallManifest::normalizeAndValidateRelativePath(
++    const std::string& relativePath, std::string& error) {
++  if (relativePath.empty() || relativePath.front() == '/' || relativePath.front() == '\\') {
++    error = fmt::format("Path must be non-empty and relative: %s", relativePath);
++    return std::nullopt;
++  }
++
++  std::string normalized;
++  std::size_t begin = 0;
++  while (begin <= relativePath.size()) {
++    const std::size_t separator = relativePath.find_first_of("/\\", begin);
++    const std::size_t end = separator == std::string::npos ? relativePath.size() : separator;
++    const std::string_view component(relativePath.data() + begin, end - begin);
++    if (!isValidPathComponent(component)) {
++      error = fmt::format("Invalid path component in %s", relativePath);
++      return std::nullopt;
++    }
++    if (!normalized.empty()) normalized += '/';
++    normalized.append(component);
++    if (separator == std::string::npos) break;
++    begin = separator + 1;
++  }
++
++  return normalized;
++}
++
++bool isPathWithinRoot(const std::string& root, const std::string& candidate) {
++  const std::filesystem::path normalizedRoot = std::filesystem::path(root).lexically_normal();
++  const std::filesystem::path normalizedCandidate = std::filesystem::path(candidate).lexically_normal();
++  if (normalizedRoot.empty() || normalizedCandidate.empty() ||
++      normalizedRoot.root_name() != normalizedCandidate.root_name() ||
++      normalizedRoot.root_directory() != normalizedCandidate.root_directory()) {
++    return false;
++  }
++
++  auto rootPart = normalizedRoot.begin();
++  auto candidatePart = normalizedCandidate.begin();
++  for (; rootPart != normalizedRoot.end(); ++rootPart, ++candidatePart) {
++    if (candidatePart == normalizedCandidate.end() || *rootPart != *candidatePart) return false;
++  }
++  return candidatePart != normalizedCandidate.end();
++}
++
++std::optional<IsoInstallManifest> IsoInstallManifest::build(iso_dev& iso, std::string& error) {
++  IsoInstallManifest manifest;
++  std::vector<std::string> directories{std::string{}};
++  std::unordered_set<std::string> destinations;
++
++  for (std::size_t directoryIndex = 0; directoryIndex < directories.size(); ++directoryIndex) {
++    const std::string current = directories[directoryIndex];
++    auto directoryHandle = iso.open_dir(current);
++    if (!directoryHandle) {
++      error = fmt::format("Failed to read ISO directory: %s", current.empty() ? "/" : current);
++      return std::nullopt;
++    }
++
++    fs::dir directory;
++    directory.reset(std::move(directoryHandle));
++    for (const fs::dir_entry& source : directory) {
++      if (source.name == "." || source.name == "..") continue;
++      if (!isValidPathComponent(source.name)) {
++        error = fmt::format("Invalid ISO path component: %s", source.name);
++        return std::nullopt;
++      }
++      if (current.empty() && source.is_directory && equalsIgnoreCase(source.name, "PS3_UPDATE")) {
++        continue;
++      }
++
++      std::string validationError;
++      const auto relativePath = normalizeAndValidateRelativePath(
++          appendComponent(current, source.name), validationError);
++      if (!relativePath) {
++        error = std::move(validationError);
++        return std::nullopt;
++      }
++
++      if (!destinations.emplace(foldAscii(*relativePath)).second) {
++        error = fmt::format("Duplicate normalized ISO destination: %s", *relativePath);
++        return std::nullopt;
++      }
++
++      ManifestEntry entry{
++          .type = source.is_directory ? ManifestEntryType::Directory : ManifestEntryType::File,
++          .relativePath = *relativePath,
++          .expectedSize = source.is_directory ? 0 : source.size,
++      };
++      manifest.entries.push_back(entry);
++      if (source.is_directory) {
++        manifest.dirEntries.push_back(entry);
++        directories.push_back(entry.relativePath);
++      } else {
++        manifest.fileEntries.push_back(entry);
++      }
++    }
++  }
++
++  if (manifest.fileEntries.empty()) {
++    error = "ISO contains no installable files";
++    return std::nullopt;
++  }
++  if (!manifest.hasParamSfo()) {
++    error = "ISO manifest is missing PS3_GAME/PARAM.SFO";
++    return std::nullopt;
++  }
++  if (!manifest.hasEboot()) {
++    error = "ISO manifest is missing a supported EBOOT executable";
++    return std::nullopt;
++  }
++  return manifest;
++}
++
++bool IsoInstallManifest::hasParamSfo() const { return !paramSfoPath().empty(); }
++
++bool IsoInstallManifest::hasEboot() const { return !ebootPath().empty(); }
++
++std::string IsoInstallManifest::paramSfoPath() const {
++  for (const ManifestEntry& entry : fileEntries) {
++    if (equalsIgnoreCase(entry.relativePath, "PS3_GAME/PARAM.SFO")) return entry.relativePath;
++  }
++  return {};
++}
++
++std::string IsoInstallManifest::ebootPath() const {
++  static constexpr std::string_view candidates[] = {
++      "EBOOT.BIN",
++      "USRDIR/EBOOT.BIN",
++      "USRDIR/ISO.BIN.EDAT",
++      "PS3_GAME/USRDIR/EBOOT.BIN",
++  };
++  for (const std::string_view candidate : candidates) {
++    for (const ManifestEntry& entry : fileEntries) {
++      if (equalsIgnoreCase(entry.relativePath, candidate)) return entry.relativePath;
++    }
++  }
++  return {};
++}
++} // namespace rpcsx::android
+diff --git a/android/src/iso-install-manifest.hpp b/android/src/iso-install-manifest.hpp
+new file mode 100644
+index 000000000..18a8dfeb0
+--- /dev/null
++++ b/android/src/iso-install-manifest.hpp
+@@ -0,0 +1,43 @@
++#pragma once
++
++#include "dev/iso.hpp"
++#include "util/File.h"
++
++#include <optional>
++#include <string>
++#include <string_view>
++#include <vector>
++
++namespace rpcsx::android {
++
++enum class ManifestEntryType {
++  Directory,
++  File
++};
++
++struct ManifestEntry {
++  ManifestEntryType type;
++  std::string relativePath;
++  u64 expectedSize = 0;
++};
++
++struct IsoInstallManifest {
++  std::vector<ManifestEntry> entries;
++  std::vector<ManifestEntry> fileEntries;
++  std::vector<ManifestEntry> dirEntries;
++
++  static std::optional<IsoInstallManifest> build(iso_dev& iso, std::string& error);
++
++  bool hasParamSfo() const;
++  bool hasEboot() const;
++  std::string paramSfoPath() const;
++  std::string ebootPath() const;
++
++  static bool isValidTitleId(std::string_view titleId);
++  static bool isValidPathComponent(std::string_view component);
++  static std::optional<std::string> normalizeAndValidateRelativePath(const std::string& relativePath, std::string& error);
++};
++
++bool isPathWithinRoot(const std::string& root, const std::string& candidate);
++
++} // namespace rpcsx::android
 diff --git a/android/src/rpcsx-android.cpp b/android/src/rpcsx-android.cpp
-index 2f8a25fc8..6afcec5c9 100644
+index ce38967c1..7bc9a05e6 100644
 --- a/android/src/rpcsx-android.cpp
 +++ b/android/src/rpcsx-android.cpp
-@@ -1962,11 +1962,12 @@ extern "C" void _rpcsx_openHomeMenu() {
- extern "C" std::string _rpcsx_getTitleId() { return Emu.GetTitleID(); }
+@@ -1,3 +1,6 @@
++#include "atomic-file-copier.hpp"
++#include "iso-install-manifest.hpp"
++#include "staged-game-installer.hpp"
+ #include "Crypto/unpkg.h"
+ #include "Crypto/unself.h"
+ #include "Emu/Audio/Cubeb/CubebBackend.h"
+@@ -22,6 +25,7 @@
+ #include "Emu/system_config.h"
+ #include "Emu/system_config_types.h"
+ #include "Emu/system_progress.hpp"
++#include "Emu/compile_progress.hpp"
+ #include "Emu/system_utils.hpp"
+ #include "Emu/vfs_config.h"
+ #include "Input/ds3_pad_handler.h"
+@@ -52,6 +56,7 @@
+ #include "util/fixed_typemap.hpp"
+ #include "util/logs.hpp"
+ #include "util/serialization.hpp"
++#include "util/bin_patch.h"
+ #include "util/sysinfo.hpp"
+ #include <Emu/Io/pad_config.h>
+ #include <Emu/RSX/GSFrameBase.h>
+@@ -72,12 +77,16 @@
+ #include <filesystem>
+ #include <functional>
+ #include <iterator>
++#include <cerrno>
+ #include <jni.h>
++#include <mutex>
+ #include <optional>
+ #include <span>
+ #include <string>
+ #include <sys/resource.h>
++#include <sys/stat.h>
+ #include <thread>
++#include <unistd.h>
+ #include <vector>
  
- extern "C" bool _rpcsx_surfaceEvent(JNIEnv *env, jobject surface, jint event) {
--  std::unique_lock lifecycleLock(g_emulator_lifecycle_mutex);
--
+ #pragma GCC diagnostic push
+@@ -91,6 +100,11 @@ struct AtExit {
+ static bool g_initialized;
+ static std::atomic<ANativeWindow *> g_native_window;
+ 
++// Compilation and game/install lifecycle operations all use the same global
++// Emu/fxo state. Keep them serialized: stopping a VSH precompile while a boot
++// or install starts can otherwise reset fxo underneath CompilationQueue.
++static std::mutex g_emulator_lifecycle_mutex;
++
+ extern std::string g_android_executable_dir;
+ extern std::string g_android_config_dir;
+ extern std::string g_android_cache_dir;
+@@ -98,6 +112,12 @@ extern std::string g_android_cache_dir;
+ static std::mutex g_virtual_pad_mutex;
+ static std::shared_ptr<Pad> g_virtual_pad;
+ 
++// Compile progress JNI bridge — process singleton, owns the one JNI listener
++static JavaVM* g_compile_jvm = nullptr;
++static jobject g_compile_callback = nullptr;
++static jmethodID g_compile_callback_method = nullptr;
++static std::mutex g_compile_callback_mutex;
++
+ std::string g_input_config_override;
+ cfg_input_configurations g_cfg_input_configs;
+ 
+@@ -990,6 +1010,46 @@ static void invokeSync(std::function<void(JNIEnv *)> cb) {
+   }
+ }
+ 
++// Must match RPCSX.COMPILE_PROGRESS_ON_EVENT_JNI_DESCRIPTOR /
++// CompileProgressCallback.onEvent(Int, Int, Int, Long, Long, Long, String?, Int, Int, Int, Int)
++static constexpr const char* kCompileProgressOnEventDescriptor =
++    "(IIIJJJLjava/lang/String;IIII)V";
++
++static void dispatchCompileEventToJava(const CompileEvent& ev)
++{
++  CompileEvent copy = ev;
++  g_mainThreadProcessor.push([copy](JNIEnv* env) {
++    std::lock_guard<std::mutex> lock(g_compile_callback_mutex);
++    if (!g_compile_callback || !g_compile_callback_method) return;
++    jstring jmsg = nullptr;
++    jlong value = 0;
++    jlong max = 0;
++    jint fileDone = 0, fileTotal = 0, modDone = 0, modTotal = 0;
++    if (copy.ppu)
++    {
++      value = copy.ppu->percentValue;
++      max = copy.ppu->percentMax;
++      fileDone = copy.ppu->fileDone;
++      fileTotal = copy.ppu->fileTotal;
++      modDone = copy.ppu->moduleDone;
++      modTotal = copy.ppu->moduleTotal;
++      if (!copy.ppu->message.empty()) jmsg = env->NewStringUTF(copy.ppu->message.c_str());
++    }
++    if (copy.domain == CompileDomain::SHADER)
++    {
++      value = 0;
++      max = 0;
++      if (!jmsg) jmsg = env->NewStringUTF("Compiling shaders");
++    }
++    // Args: domain, phase, origin, jobId, value, max, message, fileDone, fileTotal, moduleDone, moduleTotal
++    env->CallVoidMethod(g_compile_callback, g_compile_callback_method,
++      (jint)copy.domain, (jint)copy.phase, (jint)copy.origin, (jlong)copy.jobId,
++      value, max, jmsg, fileDone, fileTotal, modDone, modTotal);
++    if (jmsg) env->DeleteLocalRef(jmsg);
++    if (env->ExceptionCheck()) env->ExceptionClear();
++  });
++}
++
+ struct ProgressMessageDialog : MsgDialogBase {
+   jlong progressId;
+   jlong value = 0;
+@@ -1314,6 +1374,11 @@ public:
+ 
+ private:
+   void impl(JNIEnv *env, CompilationWorkload workload) {
++    // A queued PPU job owns the emulator object graph until its teardown has
++    // completed. Boot/kill/install take the same gate below, so they wait for
++    // this whole scope instead of racing g_fxo->reset().
++    std::unique_lock lifecycleLock(g_emulator_lifecycle_mutex);
++
+     if (workload.path.empty()) {
+       Progress(env, workload.progressId).success(0);
+       return;
+@@ -1339,6 +1404,17 @@ private:
+ 
+     MessageDialog::pushPendingProgressId(workload.progressId);
+ 
++    // Set the origin before starting progress_dialog_server. The server
++    // captures this context when its thread starts; setting it later around
++    // ppu_precompile can misclassify install PPU work as runtime work and
++    // create the second (2000) notification.
++    SystemProgressContext installProgressContext{
++        CompileOrigin::INSTALL, allocate_compile_job_id()};
++    set_system_progress_context(installProgressContext);
++    struct InstallProgressContextGuard {
++      ~InstallProgressContextGuard() { clear_system_progress_context(); }
++    } installProgressContextGuard;
++
+     g_fxo->init<named_thread<progress_dialog_server>>();
+     g_fxo->init<main_ppu_module<lv2_obj>>();
+     g_fxo->init(false, nullptr);
+@@ -1421,7 +1497,11 @@ private:
+ 
+     MessageDialog::popPendingProgressId(workload.progressId);
+ 
+-    Progress(env, workload.progressId).success(0);
++    // This is the terminal event for the install progress id. The Android
++    // installer uses it to remove its foreground notification after queued
++    // PPU compilation has really finished (the ISO install itself returns
++    // before this worker runs).
++    Progress(env, workload.progressId).success(0, "PPU compilation complete");
+   }
+ } static g_compilationQueue;
+ 
+@@ -1833,6 +1913,7 @@ extern "C" bool _rpcsx_startMainThreadProcessor(JNIEnv *env) {
+ 
+ extern "C" bool _rpcsx_collectGameInfo(JNIEnv *env, std::string_view rootDir,
+                                        long progressId) {
++  std::unique_lock lifecycleLock(g_emulator_lifecycle_mutex);
+ 
+   if (std::filesystem::is_regular_file(g_cfg_vfs.get_dev_flash() +
+                                        "/vsh/module/vsh.self")) {
+@@ -1843,9 +1924,14 @@ extern "C" bool _rpcsx_collectGameInfo(JNIEnv *env, std::string_view rootDir,
+   return true;
+ }
+ 
+-extern "C" void _rpcsx_shutdown() { Emu.Kill(); }
++extern "C" void _rpcsx_shutdown() {
++  std::unique_lock lifecycleLock(g_emulator_lifecycle_mutex);
++  Emu.Kill();
++}
+ 
+ extern "C" int _rpcsx_boot(std::string_view path_) {
++  std::unique_lock lifecycleLock(g_emulator_lifecycle_mutex);
++
+   Emu.SetForceBoot(true);
+   std::string path = std::string(path_);
+   while (path.ends_with('/')) {
+@@ -1858,8 +1944,14 @@ extern "C" int _rpcsx_boot(std::string_view path_) {
+ extern "C" int _rpcsx_getState() {
+   return static_cast<int>(Emu.GetStatus(false));
+ }
+-extern "C" void _rpcsx_kill() { Emu.Kill(); }
+-extern "C" void _rpcsx_resume() { Emu.Resume(); }
++extern "C" void _rpcsx_kill() {
++  std::unique_lock lifecycleLock(g_emulator_lifecycle_mutex);
++  Emu.Kill();
++}
++extern "C" void _rpcsx_resume() {
++  std::unique_lock lifecycleLock(g_emulator_lifecycle_mutex);
++  Emu.Resume();
++}
+ 
+ extern "C" void _rpcsx_openHomeMenu() {
+   if (auto padThread = pad::get_pad_thread(true)) {
+@@ -1873,15 +1965,14 @@ extern "C" bool _rpcsx_surfaceEvent(JNIEnv *env, jobject surface, jint event) {
    rpcsx_android.warning("surface event %p, %d", surface, event);
  
    if (event == 2) {
@@ -17,7 +646,16 @@ index 2f8a25fc8..6afcec5c9 100644
      auto prevWindow = g_native_window.exchange(nullptr);
      if (prevWindow != nullptr) {
        ANativeWindow_release(prevWindow);
-@@ -1992,6 +1993,10 @@ extern "C" bool _rpcsx_surfaceEvent(JNIEnv *env, jobject surface, jint event) {
+     }
+ 
+-    if (auto padThread = pad::get_pad_thread()) {
+-      padThread->open_home_menu();
+-    }
+-
+     Emu.Pause();
+   } else {
+     auto newWindow = ANativeWindow_fromSurface(env, surface);
+@@ -1902,6 +1993,10 @@ extern "C" bool _rpcsx_surfaceEvent(JNIEnv *env, jobject surface, jint event) {
        }
      }
  
@@ -28,23 +666,1069 @@ index 2f8a25fc8..6afcec5c9 100644
      if (event == 0 && Emu.IsPaused()) {
        Emu.Resume();
      }
-@@ -2208,10 +2213,12 @@ static bool installPup(JNIEnv *env, fs::file &&pup_f, jlong progressId) {
+@@ -2071,8 +2166,6 @@ static bool installPup(JNIEnv *env, fs::file &&pup_f, jlong progressId) {
+     return false;
+   }
+ 
+-  sendVshBootable(env, progressId);
+-
+   jlong processed = 0;
+   for (const auto &update_filename : update_filenames) {
+     auto update_file_stream = update_files.get_file(update_filename);
+@@ -2120,9 +2213,8 @@ static bool installPup(JNIEnv *env, fs::file &&pup_f, jlong progressId) {
    }
  
    sendFirmwareInstalled(env, utils::get_firmware_version());
--  sendVshBootable(env, -1);
--  rpcsx_android.notice(
--      "Firmware installed; automatic VSH PPU precompilation is disabled");
--  progress.success(update_filenames.size(), "Firmware installation complete");
-+  sendVshBootable(env, progressId);
-+  // Build the firmware PPU cache as part of the firmware job. This keeps the
-+  // first game launch out of the runtime compile overlay and leaves progress
-+  // ownership with the existing install card/service.
-+  g_compilationQueue.push(progress,
-+                          g_cfg_vfs.get_dev_flash() + "/vsh/module/vsh.self");
+-
+-  g_compilationQueue.push(progress,
+-                          g_cfg_vfs.get_dev_flash() + "/vsh/module/vsh.self");
++  sendVshBootable(env, -1);
++  progress.success(update_filenames.size(), "Firmware installation complete");
    return true;
  }
  
+@@ -2306,145 +2398,261 @@ static bool installRap(JNIEnv *env, fs::file &&file, jlong progressId,
+ }
+ 
+ static bool installIso(JNIEnv *env, fs::file &&file, jlong progressId) {
+-  auto optIso = iso_dev::open(std::make_unique<file_view_block_dev>(file));
+   Progress progress(env, progressId);
+ 
++  if (auto error = rpcsx::android::StagedGameInstaller::recoverStaleTransactions(
++          fs::get_config_dir())) {
++    progress.failure(*error);
++    return false;
++  }
++
++  progress.report(0, 0, "Scanning ISO");
++  auto optIso = iso_dev::open(std::make_unique<file_view_block_dev>(file));
+   if (!optIso) {
+     progress.failure("Failed to read ISO");
+     return false;
+   }
+-
+   auto iso = std::move(*optIso);
+-  auto sfo_raw_file = iso.open("PS3_GAME/PARAM.SFO", fs::read);
+ 
++  auto sfo_raw_file = iso.open("PS3_GAME/PARAM.SFO", fs::read);
+   if (!sfo_raw_file) {
+     progress.failure("Failed to locate PARAM.SFO in ISO");
+     return false;
+   }
+-
+   fs::file sfo_file;
+   sfo_file.reset(std::move(sfo_raw_file));
+-
+   auto sfo = psf::load_object(sfo_file, "iso://PS3_GAME/PARAM.SFO");
+   auto title_id = psf::get_string(sfo, "TITLE_ID");
+-
+   if (title_id.empty()) {
+     progress.failure("Failed to fetch TITLE_ID from PARAM.SFO in ISO");
+     return false;
+   }
++  if (!rpcsx::android::isValidTitleIdForPath(title_id)) {
++    progress.failure(fmt::format("Invalid TITLE_ID from ISO: %s", title_id));
++    return false;
++  }
+ 
+-  if (auto gameInfo = fetchGameInfo(sfo)) {
+-    sendGameInfo(env, progressId, {{*gameInfo}});
++  progress.report(0, 0, "Building manifest");
++  std::string manifestError;
++  auto manifestOpt = rpcsx::android::IsoInstallManifest::build(iso, manifestError);
++  if (!manifestOpt) {
++    progress.failure(manifestError.empty() ? "Failed to build ISO manifest" : manifestError);
++    return false;
+   }
++  auto manifest = std::move(*manifestOpt);
+ 
+-  std::filesystem::path destinationPath =
+-      fs::get_config_dir() + "games/" + std::string(title_id);
+-  std::size_t filesCount = 0;
++  class JniReporter : public rpcsx::android::ProgressReporter {
++    Progress& p;
++  public:
++    explicit JniReporter(Progress& pr) : p(pr) {}
++    bool report(long v, long m, const std::string& msg) override { return p.report(v, m, msg); }
++  };
++  JniReporter reporter(progress);
+ 
+-  auto roots = [&] {
+-    std::vector<std::filesystem::path> result;
+-    std::vector<std::filesystem::path> workList;
+-    workList.push_back({});
+-    result.push_back({});
++  rpcsx::android::StagedGameInstaller installer(
++      fs::get_config_dir(), std::string(title_id), std::move(manifest));
++  if (auto error = installer.install(iso, reporter)) {
++    progress.failure(*error);
++    return false;
++  }
+ 
+-    while (!workList.empty()) {
+-      auto path = std::move(workList.back());
+-      workList.pop_back();
++  const std::string finalPath = installer.finalPath();
+ 
+-      fs::dir dir;
+-      dir.reset(iso.open_dir(path));
++  auto ebootPath = locateEbootPath(finalPath);
++  if (ebootPath.empty()) {
++    progress.failure("Missing EBOOT.BIN after commit");
++    return false;
++  }
++  {
++    fs::file ebootFile(ebootPath, fs::read);
++    if (!ebootFile || ebootFile.size() == 0) {
++      progress.failure("EBOOT.BIN not readable or empty after commit");
++      return false;
++    }
++    std::error_code ec;
++    if (!std::filesystem::is_regular_file(ebootPath, ec) || ec ||
++        std::filesystem::file_size(ebootPath, ec) == 0 || ec) {
++      progress.failure("EBOOT.BIN is not a regular non-empty file after commit");
++      return false;
++    }
++  }
+ 
+-      for (auto &entry : dir) {
+-        if (entry.name == "." || entry.name == "..") {
+-          continue;
+-        }
+-        if (entry.name == "PS3_UPDATE" && path.empty()) {
+-          continue;
+-        }
++  auto sfoPath = locateParamSfoPath(finalPath);
++  if (sfoPath.empty() || !std::filesystem::is_regular_file(sfoPath)) {
++    progress.failure("PARAM.SFO missing after commit");
++    return false;
++  }
++  {
++    fs::file sfoCheck(sfoPath, fs::read);
++    if (!sfoCheck || sfoCheck.size() == 0) {
++      progress.failure("PARAM.SFO not readable or empty after commit");
++      return false;
++    }
++  }
+ 
+-        if (entry.is_directory) {
+-          result.push_back(path / entry.name);
+-          workList.push_back(path / entry.name);
+-        } else {
+-          filesCount++;
++  progress.report(0, 0, "Publishing installed game");
++  collectGameInfo(env, -1, {finalPath});
++  progress.report(0, 0, "Preparing PPU compilation");
++  g_compilationQueue.push(progress, std::move(ebootPath));
++  return true;
++}
++
++// SAF / DocumentsProvider fds often implement read()+lseek() but not pread().
++// iso_dev uses read_at → pread; a broken pread returns 0 and ISO install fails
++// as "Unsupported file type". pread errno used to SIGTRAP via unix_file::ensure.
++class android_fd_file final : public fs::file_base {
++  int m_fd = -1;
++  u64 m_size = 0;
++  bool m_pread_broken = false;
++  std::mutex m_mutex;
++
++  u64 read_via_seek(u64 offset, void *buffer, u64 count) {
++    std::lock_guard lock(m_mutex);
++    if (::lseek64(m_fd, static_cast<off64_t>(offset), SEEK_SET) < 0) {
++      return 0;
++    }
++    u64 result = 0;
++    while (count) {
++      const auto r = ::read(m_fd, buffer, count);
++      if (r < 0) {
++        if (errno == EINTR) {
++          continue;
+         }
++        break;
+       }
++      if (r == 0) {
++        break;
++      }
++      count -= static_cast<u64>(r);
++      result += static_cast<u64>(r);
++      buffer = static_cast<u8 *>(buffer) + r;
+     }
+-
+     return result;
+-  }();
+-
+-  progress.report(0, filesCount);
++  }
+ 
+-  std::size_t processedFiles = 0;
+-  std::error_code ec;
++public:
++  explicit android_fd_file(int fd) : m_fd(fd) {
++    struct ::stat st {};
++    if (::fstat(m_fd, &st) == 0) {
++      m_size = static_cast<u64>(st.st_size);
++    }
++    std::byte probe[8]{};
++    const auto r = ::pread64(m_fd, probe, sizeof(probe), 0);
++    if (r <= 0 && m_size > 0) {
++      m_pread_broken = true;
++      rpcsx_android.notice(
++          "android_fd_file: pread unavailable; using lseek+read (fd=%d errno=%d)",
++          m_fd, errno);
++    }
++  }
+ 
+-  for (auto &root : roots) {
+-    auto rootDestPath = root.empty() ? destinationPath : destinationPath / root;
++  void release() override { m_fd = -1; }
+ 
+-    std::filesystem::create_directories(rootDestPath, ec);
+-    if (ec) {
+-      progress.failure(fmt::format("Failed to create dir %s: %s",
+-                                   rootDestPath.string(), ec.message()));
+-      return false;
++  fs::stat_t get_stat() override {
++    struct ::stat st {};
++    fs::stat_t info{};
++    if (::fstat(m_fd, &st) != 0) {
++      info.size = m_size;
++      return info;
+     }
++    info.is_directory = S_ISDIR(st.st_mode);
++    info.is_writable = false;
++    info.size = static_cast<u64>(st.st_size);
++    info.atime = st.st_atime;
++    info.mtime = st.st_mtime;
++    info.ctime = st.st_mtime;
++    return info;
++  }
+ 
+-    fs::dir dir;
+-    dir.reset(iso.open_dir(root));
+-
+-    for (auto &entry : dir) {
+-      if (entry.name == "." || entry.name == "..") {
+-        continue;
+-      }
++  void sync() override {}
+ 
+-      auto entryDestPath = rootDestPath / entry.name;
++  bool trunc(u64) override { return false; }
+ 
+-      if (entry.is_directory) {
+-        std::filesystem::create_directories(entryDestPath, ec);
+-        if (ec) {
+-          progress.failure(fmt::format("Failed to create dir %s: %s",
+-                                       entryDestPath.string(), ec.message()));
+-          return false;
++  u64 read(void *buffer, u64 count) override {
++    u64 result = 0;
++    while (count) {
++      const auto r = ::read(m_fd, buffer, count);
++      if (r < 0) {
++        if (errno == EINTR) {
++          continue;
+         }
+-
+-        continue;
++        break;
+       }
+-      auto raw_file = iso.open(root / entry.name, fs::read);
+-
+-      if (!raw_file) {
+-        progress.failure(fmt::format("Failed to open file in ISO: %s",
+-                                     (root / entry.name).string()));
+-        return false;
++      if (r == 0) {
++        break;
+       }
++      count -= static_cast<u64>(r);
++      result += static_cast<u64>(r);
++      buffer = static_cast<u8 *>(buffer) + r;
++    }
++    return result;
++  }
+ 
+-      fs::file file;
+-      file.reset(std::move(raw_file));
+-
+-      if (!fs::write_file(entryDestPath,
+-                          fs::open_mode::create + fs::open_mode::trunc,
+-                          file.to_vector<std::uint8_t>())) {
+-        progress.failure(fmt::format("Failed to write file: %s, dest %s",
+-                                     entryDestPath.string(),
+-                                     destinationPath.string()));
+-        return false;
++  u64 read_at(u64 offset, void *buffer, u64 count) override {
++    if (!m_pread_broken) {
++      u64 result = 0;
++      u64 off = offset;
++      u64 remaining = count;
++      void *buf = buffer;
++      while (remaining) {
++        const auto r =
++            ::pread64(m_fd, buf, remaining, static_cast<off64_t>(off));
++        if (r < 0) {
++          if (errno == EINTR) {
++            continue;
++          }
++          m_pread_broken = true;
++          break;
++        }
++        if (r == 0) {
++          if (result == 0 && off < m_size) {
++            m_pread_broken = true;
++          }
++          break;
++        }
++        remaining -= static_cast<u64>(r);
++        off += static_cast<u64>(r);
++        result += static_cast<u64>(r);
++        buf = static_cast<u8 *>(buf) + r;
+       }
++      if (!m_pread_broken) {
++        return result;
++      }
++    }
++    return read_via_seek(offset, buffer, count);
++  }
++
++  u64 write(const void *, u64) override { return 0; }
+ 
+-      progress.report(processedFiles++, filesCount);
++  u64 seek(s64 offset, fs::seek_mode whence) override {
++    int w = SEEK_SET;
++    if (whence == fs::seek_cur) {
++      w = SEEK_CUR;
++    } else if (whence == fs::seek_end) {
++      w = SEEK_END;
+     }
++    const auto r = ::lseek64(m_fd, static_cast<off64_t>(offset), w);
++    return r < 0 ? static_cast<u64>(-1) : static_cast<u64>(r);
+   }
+ 
+-  collectGameInfo(env, -1, {destinationPath});
+-  auto ebootPath = locateEbootPath(destinationPath.string());
+-  g_compilationQueue.push(progress, std::move(ebootPath));
+-  return true;
++  u64 size() override { return m_size; }
++
++  fs::native_handle get_handle() override { return m_fd; }
++};
++
++static fs::file file_from_android_fd(int fd) {
++  fs::file result;
++  result.reset(std::make_unique<android_fd_file>(fd));
++  return result;
+ }
+ 
+ extern "C" bool _rpcsx_installFw(JNIEnv *env, int fd, long progressId) {
+-  return installPup(env, fs::file::from_native_handle(fd), progressId);
++  std::unique_lock lifecycleLock(g_emulator_lifecycle_mutex);
++  return installPup(env, file_from_android_fd(fd), progressId);
+ }
+ 
+ extern "C" bool _rpcsx_isInstallableFile(jint fd) {
+-  auto file = fs::file::from_native_handle(fd);
++  auto file = file_from_android_fd(fd);
+   AtExit atExit{[&] { file.release_handle(); }};
+ 
+   auto type = getFileType(file);
+@@ -2466,10 +2674,13 @@ extern "C" jstring _rpcsx_getDirInstallPath(JNIEnv *env, jint fd) {
+ }
+ 
+ extern "C" bool _rpcsx_install(JNIEnv *env, int fd, long progressId) {
+-  auto file = fs::file::from_native_handle(fd);
++  std::unique_lock lifecycleLock(g_emulator_lifecycle_mutex);
++
++  auto file = file_from_android_fd(fd);
+   AtExit atExit{[&] { file.release_handle(); }};
+ 
+   auto type = getFileType(file);
++  rpcsx_android.notice("install: fd=%d type=%d", fd, static_cast<int>(type));
+   file.seek(0);
+ 
+   switch (type) {
+@@ -2501,6 +2712,8 @@ extern "C" bool _rpcsx_install(JNIEnv *env, int fd, long progressId) {
+ 
+ extern "C" bool _rpcsx_installKey(JNIEnv *env, int fd, long progressId,
+                                   std::string_view gamePath) {
++  std::unique_lock lifecycleLock(g_emulator_lifecycle_mutex);
++
+   auto file = fs::file::from_native_handle(fd);
+   AtExit atExit{[&] { file.release_handle(); }};
+ 
+@@ -2641,4 +2854,159 @@ extern "C" void *_rpcsx_setCustomDriver(void *driverHandle) {
+   return prevLoader;
+ }
+ 
++extern "C" bool _rpcsx_setCompileProgressListener(JNIEnv* env, jobject callback)
++{
++  std::lock_guard<std::mutex> lock(g_compile_callback_mutex);
++  if (g_compile_callback)
++  {
++    env->DeleteGlobalRef(g_compile_callback);
++    g_compile_callback = nullptr;
++    g_compile_callback_method = nullptr;
++  }
++
++  if (!callback)
++  {
++    set_compile_event_sink(nullptr);
++    return true;
++  }
++
++  env->GetJavaVM(&g_compile_jvm);
++  g_compile_callback = env->NewGlobalRef(callback);
++
++  // Look the method up on the fun-interface class so a Kotlin SAM lambda still
++  // resolves. Descriptor must include both Longs (jobId AND max): III J J J String IIII.
++  jclass iface = env->FindClass("com/zenithblue/sambas3/RPCSX$CompileProgressCallback");
++  if (env->ExceptionCheck()) env->ExceptionClear();
++  jclass cls = iface ? iface : env->GetObjectClass(callback);
++  g_compile_callback_method = env->GetMethodID(cls, "onEvent", kCompileProgressOnEventDescriptor);
++  if (!g_compile_callback_method)
++  {
++    __android_log_print(ANDROID_LOG_ERROR, "RPCSX-UI",
++        "setCompileProgressListener: onEvent method not found (descriptor %s)",
++        kCompileProgressOnEventDescriptor);
++    env->DeleteGlobalRef(g_compile_callback);
++    g_compile_callback = nullptr;
++    if (iface) env->DeleteLocalRef(iface);
++    if (env->ExceptionCheck()) env->ExceptionClear();
++    set_compile_event_sink(nullptr);
++    return false;
++  }
++  if (iface) env->DeleteLocalRef(iface);
++  if (env->ExceptionCheck()) env->ExceptionClear();
++
++  set_compile_event_sink([](const CompileEvent& ev) {
++    dispatchCompileEventToJava(ev);
++  });
++
++  __android_log_print(ANDROID_LOG_INFO, "RPCSX-UI", "CompileProgressListener registered domain=%d phase=%d", 0, 0);
++  return true;
++}
++
++extern "C" jboolean _rpcsx_supportsCompileProgressEvents(JNIEnv* /*env*/, jobject /*thiz*/)
++{
++  return JNI_TRUE;
++}
++
++extern "C" std::string _rpcsx_patchEngineVersion() { return patch_engine_version; }
++
++extern "C" std::string _rpcsx_patchesList() {
++  nlohmann::json arr = nlohmann::json::array();
++
++  patch_engine::patch_map full_patches;
++  const std::string patches_dir = patch_engine::get_patches_path();
++  patch_engine::load(full_patches, patches_dir + "patch.yml");
++  patch_engine::load(full_patches, patch_engine::get_imported_patch_path());
++
++  const auto config_map = patch_engine::load_config();
++
++  for (const auto &[hash, container] : full_patches) {
++    for (const auto &[description, patch] : container.patch_info_map) {
++
++      bool enabled = false;
++      if (auto hash_it = config_map.find(hash);
++          hash_it != config_map.end()) {
++        if (auto desc_it = hash_it->second.patch_info_map.find(description);
++            desc_it != hash_it->second.patch_info_map.end()) {
++          for (const auto &[title, serials] : desc_it->second.titles) {
++            for (const auto &[serial, app_versions] : serials) {
++              for (const auto &[app_ver, cv] : app_versions) {
++                if (cv.enabled) {
++                  enabled = true;
++                  break;
++                }
++              }
++              if (enabled) break;
++            }
++            if (enabled) break;
++          }
++        }
++      }
++
++      std::vector<std::string> serials_list;
++      std::vector<std::string> titles_list;
++      for (const auto &[title, serials] : patch.titles) {
++        titles_list.push_back(title);
++        for (const auto &[serial, app_versions] : serials) {
++          serials_list.push_back(serial);
++        }
++      }
++
++      nlohmann::json entry;
++      entry["hash"] = hash;
++      entry["name"] = description;
++      entry["author"] = patch.author;
++      entry["version"] = patch.patch_version;
++      entry["notes"] = patch.notes;
++      entry["serials"] = serials_list;
++      entry["titles"] = titles_list;
++      entry["enabled"] = enabled;
++      arr.push_back(entry);
++    }
++  }
++
++  return arr.dump();
++}
++
++extern "C" bool _rpcsx_patchSetEnabled(std::string_view hash,
++                                       std::string_view description,
++                                       bool enabled) {
++  patch_engine::patch_map full_patches;
++  const std::string patches_dir = patch_engine::get_patches_path();
++  patch_engine::load(full_patches, patches_dir + "patch.yml");
++  patch_engine::load(full_patches, patch_engine::get_imported_patch_path());
++
++  auto hash_it = full_patches.find(std::string(hash));
++  if (hash_it == full_patches.end()) {
++    rpcsx_android.error("patchSetEnabled: hash %s not found", hash);
++    return false;
++  }
++
++  auto desc_it = hash_it->second.patch_info_map.find(std::string(description));
++  if (desc_it == hash_it->second.patch_info_map.end()) {
++    rpcsx_android.error("patchSetEnabled: description %s not found under hash %s",
++                        description, hash);
++    return false;
++  }
++
++  auto config_map = patch_engine::load_config();
++  auto &cfg_container = config_map[std::string(hash)];
++  auto &cfg_patch = cfg_container.patch_info_map[std::string(description)];
++
++  for (const auto &[title, serials] : desc_it->second.titles) {
++    for (const auto &[serial, app_versions] : serials) {
++      for (const auto &[app_ver, cv] : app_versions) {
++        auto &leaf =
++            cfg_patch.titles[title][serial][app_ver];
++        leaf.enabled = enabled;
++        if (!enabled) {
++          leaf.config_values.clear();
++        }
++      }
++    }
++  }
++
++  patch_engine::save_config(config_map);
++  return true;
++}
++
+ #pragma GCC diagnostic pop
+diff --git a/android/src/staged-game-installer.cpp b/android/src/staged-game-installer.cpp
+new file mode 100644
+index 000000000..4ad8ddd31
+--- /dev/null
++++ b/android/src/staged-game-installer.cpp
+@@ -0,0 +1,415 @@
++#include "staged-game-installer.hpp"
++
++#include "atomic-file-copier.hpp"
++#include "util/File.h"
++#include "util/StrFmt.h"
++
++#include <atomic>
++#include <chrono>
++#include <filesystem>
++#include <string_view>
++
++namespace rpcsx::android {
++namespace {
++std::atomic<u64> s_transactionCounter = 0;
++
++std::filesystem::path normalize(const std::string& path) {
++  return std::filesystem::path(path).lexically_normal();
++}
++
++std::string join(const std::string& root, std::string_view child) {
++  return (normalize(root) / child).lexically_normal().string();
++}
++
++bool exists(const std::string& path) {
++  std::error_code error;
++  const bool result = std::filesystem::exists(path, error);
++  return !error && result;
++}
++
++bool isDirectory(const std::string& path) {
++  std::error_code error;
++  const bool result = std::filesystem::is_directory(path, error);
++  return !error && result;
++}
++
++bool isRegularFile(const std::string& path) {
++  std::error_code error;
++  const bool result = std::filesystem::is_regular_file(path, error);
++  return !error && result;
++}
++
++std::optional<std::string> ensureDirectory(const std::string& path) {
++  std::error_code error;
++  std::filesystem::create_directories(path, error);
++  if (error || !isDirectory(path)) {
++    return fmt::format("Failed to create directory %s: %s", path, error.message());
++  }
++  return std::nullopt;
++}
++
++std::optional<std::string> removeTree(const std::string& path) {
++  if (!exists(path)) return std::nullopt;
++  std::error_code error;
++  std::filesystem::remove_all(path, error);
++  if (error) return fmt::format("Failed to remove owned path %s: %s", path, error.message());
++  return std::nullopt;
++}
++
++std::optional<std::string> removeFile(const std::string& path) {
++  if (!exists(path)) return std::nullopt;
++  std::error_code error;
++  std::filesystem::remove(path, error);
++  if (error) return fmt::format("Failed to remove marker %s: %s", path, error.message());
++  return std::nullopt;
++}
++
++std::string makeToken() {
++  const u64 ticks = static_cast<u64>(
++      std::chrono::steady_clock::now().time_since_epoch().count());
++  const u64 counter = s_transactionCounter.fetch_add(1, std::memory_order_relaxed);
++  return fmt::format("%llu-%llu", ticks, counter);
++}
++
++bool isValidToken(std::string_view token) {
++  if (token.empty() || token.size() > 64) return false;
++  for (const char character : token) {
++    if ((character < '0' || character > '9') && character != '-') return false;
++  }
++  return true;
++}
++
++std::string phaseName(StagedGameInstaller::TransactionPhase phase) {
++  switch (phase) {
++  case StagedGameInstaller::TransactionPhase::Prepared:
++    return "prepared";
++  case StagedGameInstaller::TransactionPhase::BackupMoved:
++    return "backup_moved";
++  case StagedGameInstaller::TransactionPhase::NewTitleMoved:
++    return "new_title_moved";
++  }
++  return "invalid";
++}
++
++struct Marker {
++  std::string titleId;
++  std::string token;
++};
++
++std::optional<Marker> readMarker(const std::string& path) {
++  fs::file file(path, fs::read);
++  if (!file || file.size() == 0 || file.size() > 4096) return std::nullopt;
++  const std::string content = file.to_string();
++  Marker marker;
++  std::size_t begin = 0;
++  while (begin < content.size()) {
++    const std::size_t end = content.find('\n', begin);
++    const std::string_view line(content.data() + begin,
++        (end == std::string::npos ? content.size() : end) - begin);
++    if (line.starts_with("title=")) marker.titleId = line.substr(6);
++    if (line.starts_with("token=")) marker.token = line.substr(6);
++    if (end == std::string::npos) break;
++    begin = end + 1;
++  }
++  if (!IsoInstallManifest::isValidTitleId(marker.titleId) || !isValidToken(marker.token)) {
++    return std::nullopt;
++  }
++  return marker;
++}
++} // namespace
++
++bool isValidTitleIdForPath(std::string_view titleId) {
++  return IsoInstallManifest::isValidTitleId(titleId);
++}
++
++StagedGameInstaller::StagedGameInstaller(std::string configDir, std::string titleId,
++                                         IsoInstallManifest manifest)
++    : m_configDir(normalize(configDir).string()),
++      m_titleId(std::move(titleId)),
++      m_manifest(std::move(manifest)) {
++  m_gamesRoot = join(m_configDir, "games");
++  m_stagingRoot = join(m_configDir, ".install-staging");
++  m_backupRoot = join(m_configDir, ".install-backups");
++  m_transactionRoot = join(m_configDir, ".install-transactions");
++  m_finalPath = join(m_gamesRoot, m_titleId);
++}
++
++StagedGameInstaller::~StagedGameInstaller() {
++  if (!m_committed) cleanupStaging();
++}
++
++std::optional<std::string> StagedGameInstaller::prepare() {
++  if (m_prepared) return "Installer was prepared more than once";
++  if (!isValidTitleIdForPath(m_titleId)) {
++    return fmt::format("Invalid TITLE_ID for install path: %s", m_titleId);
++  }
++
++  for (const std::string* root : {&m_gamesRoot, &m_stagingRoot, &m_backupRoot,
++                                  &m_transactionRoot}) {
++    if (auto error = ensureDirectory(*root)) return error;
++  }
++
++  for (unsigned attempt = 0; attempt < 64; ++attempt) {
++    m_token = makeToken();
++    m_stagingPath = join(m_stagingRoot, fmt::format("%s.%s", m_titleId, m_token));
++    m_backupPath = join(m_backupRoot, fmt::format("%s.%s", m_titleId, m_token));
++    m_markerPath = join(m_transactionRoot, fmt::format("%s.%s.txn", m_titleId, m_token));
++
++    std::error_code error;
++    if (std::filesystem::create_directory(m_stagingPath, error)) break;
++    if (error && error != std::errc::file_exists) {
++      return fmt::format("Failed to create staging directory %s: %s",
++                         m_stagingPath, error.message());
++    }
++    m_stagingPath.clear();
++  }
++  if (m_stagingPath.empty()) return "Failed to allocate a unique staging directory";
++
++  m_prepared = true;
++  if (auto error = writeMarker(TransactionPhase::Prepared)) {
++    cleanupStaging();
++    return error;
++  }
++  if (shouldInject(InjectPoint::AfterStagingCreate)) {
++    return "Injected failure after staging creation";
++  }
++  return std::nullopt;
++}
++
++std::optional<std::string> StagedGameInstaller::writeMarker(TransactionPhase phase) {
++  const std::string content = fmt::format(
++      "version=1\ntitle=%s\ntoken=%s\nphase=%s\n", m_titleId, m_token,
++      phaseName(phase));
++  fs::file source(content.data(), content.size());
++  const auto result = copyFileAtomically(source, m_markerPath, content.size());
++  if (!result) return result.error;
++  return std::nullopt;
++}
++
++bool StagedGameInstaller::removeMarker() {
++  return !removeFile(m_markerPath).has_value();
++}
++
++bool StagedGameInstaller::restoreBackup() {
++  if (!m_backupMoved || exists(m_finalPath) || !exists(m_backupPath)) return true;
++  if (!fs::rename(m_backupPath, m_finalPath, false)) return false;
++  m_backupMoved = false;
++  return true;
++}
++
++std::optional<std::string> StagedGameInstaller::extract(iso_dev& iso,
++                                                        ProgressReporter& reporter) {
++  if (!m_prepared || !isDirectory(m_stagingPath)) return "Installer is not prepared";
++
++  for (const ManifestEntry& entry : m_manifest.dirEntries) {
++    const std::string destination = join(m_stagingPath, entry.relativePath);
++    if (!isPathWithinRoot(m_stagingPath, destination)) {
++      return fmt::format("Directory escapes staging root: %s", entry.relativePath);
++    }
++    if (auto error = ensureDirectory(destination)) return error;
++  }
++
++  const long total = static_cast<long>(m_manifest.fileEntries.size());
++  long processed = 0;
++  if (!reporter.report(0, total, "Extracting files")) return "ISO extraction was cancelled";
++
++  for (const ManifestEntry& entry : m_manifest.fileEntries) {
++    if (shouldInject(InjectPoint::DuringExtract) && processed == total / 2) {
++      return "Injected failure during extraction";
++    }
++
++    const std::string destination = join(m_stagingPath, entry.relativePath);
++    if (!isPathWithinRoot(m_stagingPath, destination)) {
++      return fmt::format("File escapes staging root: %s", entry.relativePath);
++    }
++    if (auto error = ensureDirectory(normalize(destination).parent_path().string())) return error;
++
++    auto sourceHandle = iso.open(entry.relativePath, fs::read);
++    if (!sourceHandle) return fmt::format("Failed to open ISO file: %s", entry.relativePath);
++    fs::file source;
++    source.reset(std::move(sourceHandle));
++    const auto copy = copyFileAtomically(source, destination, entry.expectedSize);
++    if (!copy) return copy.error;
++
++    if (!reporter.report(++processed, total, "Extracting files")) {
++      return "ISO extraction was cancelled";
++    }
++  }
++  return std::nullopt;
++}
++
++std::optional<std::string> StagedGameInstaller::verify(ProgressReporter* reporter) {
++  if (!m_prepared || !isDirectory(m_stagingPath)) return "Staging directory is unavailable";
++  if (reporter && !reporter->report(0, 1, "Verifying staged game")) {
++    return "ISO verification was cancelled";
++  }
++
++  for (const ManifestEntry& entry : m_manifest.dirEntries) {
++    const std::string path = join(m_stagingPath, entry.relativePath);
++    if (!isPathWithinRoot(m_stagingPath, path) || !isDirectory(path)) {
++      return fmt::format("Missing staged directory: %s", entry.relativePath);
++    }
++  }
++  for (const ManifestEntry& entry : m_manifest.fileEntries) {
++    const std::string path = join(m_stagingPath, entry.relativePath);
++    if (!isPathWithinRoot(m_stagingPath, path) || !isRegularFile(path)) {
++      return fmt::format("Missing staged file: %s", entry.relativePath);
++    }
++    std::error_code error;
++    const auto size = std::filesystem::file_size(path, error);
++    if (error || size != entry.expectedSize) {
++      return fmt::format("Staged size mismatch for %s", entry.relativePath);
++    }
++  }
++
++  for (const std::string required : {m_manifest.paramSfoPath(), m_manifest.ebootPath()}) {
++    if (required.empty()) return "Required PARAM.SFO or EBOOT is absent from manifest";
++    const std::string path = join(m_stagingPath, required);
++    fs::file file(path, fs::read);
++    if (!isPathWithinRoot(m_stagingPath, path) || !isRegularFile(path) || !file ||
++        file.size() == 0) {
++      return fmt::format("Required staged file is missing, empty, or unreadable: %s", required);
++    }
++  }
++
++  if (reporter && !reporter->report(1, 1, "Staged game verified")) {
++    return "ISO verification was cancelled";
++  }
++  return std::nullopt;
++}
++
++std::optional<std::string> StagedGameInstaller::commit(ProgressReporter* reporter) {
++  if (!m_prepared || !isDirectory(m_stagingPath)) return "Verified staging directory is unavailable";
++  if (shouldInject(InjectPoint::BeforeCommit)) return "Injected failure before commit";
++  if (reporter && !reporter->report(0, 1, "Committing game")) return "Commit was cancelled";
++
++  if (exists(m_finalPath)) {
++    if (!isDirectory(m_finalPath) || exists(m_backupPath)) {
++      return "Final title or backup path is not in a committable state";
++    }
++    if (!fs::rename(m_finalPath, m_backupPath, false)) {
++      return fmt::format("Failed to move existing title to owned backup: %s", fs::g_tls_error);
++    }
++    m_backupMoved = true;
++    if (auto error = writeMarker(TransactionPhase::BackupMoved)) {
++      if (!restoreBackup()) return fmt::format("%s; backup restoration also failed", *error);
++      return error;
++    }
++    if (shouldInject(InjectPoint::AfterBackupRename)) {
++      return "Injected failure after backup rename";
++    }
++  }
++
++  if (!fs::rename(m_stagingPath, m_finalPath, false)) {
++    const bool restored = restoreBackup();
++    return fmt::format("Failed to move staged title into place%s: %s",
++                       restored ? "" : " and failed to restore backup", fs::g_tls_error);
++  }
++  m_newTitleMoved = true;
++
++  if (shouldInject(InjectPoint::AfterStagingRename)) {
++    return "Injected failure after staging rename";
++  }
++  if (!isDirectory(m_finalPath)) {
++    return "Committed title directory could not be verified";
++  }
++
++  if (auto error = writeMarker(TransactionPhase::NewTitleMoved)) return error;
++  if (m_backupMoved) {
++    if (auto error = removeTree(m_backupPath)) return error;
++    m_backupMoved = false;
++  }
++  if (!removeMarker()) return "Committed title but failed to remove transaction marker";
++
++  m_committed = true;
++  if (reporter) reporter->report(1, 1, "Game committed");
++  return std::nullopt;
++}
++
++std::optional<std::string> StagedGameInstaller::install(iso_dev& iso,
++                                                        ProgressReporter& reporter) {
++  if (auto error = prepare()) return error;
++  if (auto error = extract(iso, reporter)) return error;
++  if (auto error = verify(&reporter)) return error;
++  return commit(&reporter);
++}
++
++void StagedGameInstaller::cleanupStaging() {
++  if (m_committed) return;
++
++  if (m_newTitleMoved) {
++    // The new title reached its final name. Leave the marker and backup for the
++    // validated recovery state machine; deleting either here could lose data.
++    return;
++  }
++
++  restoreBackup();
++  if (!m_stagingPath.empty() && isPathWithinRoot(m_stagingRoot, m_stagingPath)) {
++    removeTree(m_stagingPath);
++  }
++  if (!m_backupMoved) removeMarker();
++}
++
++bool StagedGameInstaller::finalExists() const { return isDirectory(m_finalPath); }
++
++std::optional<std::string> StagedGameInstaller::recoverStaleTransactions(
++    const std::string& configDir) {
++  const std::string base = normalize(configDir).string();
++  const std::string gamesRoot = join(base, "games");
++  const std::string stagingRoot = join(base, ".install-staging");
++  const std::string backupRoot = join(base, ".install-backups");
++  const std::string transactionRoot = join(base, ".install-transactions");
++  if (!exists(transactionRoot)) return std::nullopt;
++
++  std::error_code iterationError;
++  for (const auto& entry : std::filesystem::directory_iterator(transactionRoot, iterationError)) {
++    if (iterationError) return fmt::format("Failed to scan transaction markers: %s", iterationError.message());
++    if (!entry.is_regular_file()) return "Unexpected non-file in transaction marker directory";
++
++    const auto marker = readMarker(entry.path().string());
++    if (!marker) return fmt::format("Invalid transaction marker: %s", entry.path().string());
++
++    const std::string expectedMarker = join(transactionRoot,
++        fmt::format("%s.%s.txn", marker->titleId, marker->token));
++    if (normalize(expectedMarker) != normalize(entry.path().string())) {
++      return fmt::format("Transaction marker name/content mismatch: %s", entry.path().string());
++    }
++
++    const std::string finalPath = join(gamesRoot, marker->titleId);
++    const std::string stagingPath = join(stagingRoot,
++        fmt::format("%s.%s", marker->titleId, marker->token));
++    const std::string backupPath = join(backupRoot,
++        fmt::format("%s.%s", marker->titleId, marker->token));
++    if (!isPathWithinRoot(gamesRoot, finalPath) ||
++        !isPathWithinRoot(stagingRoot, stagingPath) ||
++        !isPathWithinRoot(backupRoot, backupPath)) {
++      return "Validated transaction paths failed containment checks";
++    }
++
++    const bool hasFinal = exists(finalPath);
++    const bool hasStaging = exists(stagingPath);
++    const bool hasBackup = exists(backupPath);
++    if (!hasFinal && hasBackup) {
++      if (!fs::rename(backupPath, finalPath, false)) {
++        return fmt::format("Failed to restore stale title backup: %s", fs::g_tls_error);
++      }
++      if (hasStaging) {
++        if (auto error = removeTree(stagingPath)) return error;
++      }
++    } else if (hasFinal && !hasStaging) {
++      if (hasBackup) {
++        if (auto error = removeTree(backupPath)) return error;
++      }
++    } else if (hasFinal && hasStaging && !hasBackup) {
++      if (auto error = removeTree(stagingPath)) return error;
++    } else if (!hasFinal && hasStaging && !hasBackup) {
++      if (auto error = removeTree(stagingPath)) return error;
++    } else if (hasFinal && hasStaging && hasBackup) {
++      return "Ambiguous transaction state; refusing destructive recovery";
++    }
++
++    if (auto error = removeFile(entry.path().string())) return error;
++  }
++  return std::nullopt;
++}
++} // namespace rpcsx::android
+diff --git a/android/src/staged-game-installer.hpp b/android/src/staged-game-installer.hpp
+new file mode 100644
+index 000000000..131a9d55f
+--- /dev/null
++++ b/android/src/staged-game-installer.hpp
+@@ -0,0 +1,84 @@
++#pragma once
++
++#include "dev/iso.hpp"
++#include "iso-install-manifest.hpp"
++
++#include <optional>
++#include <string>
++#include <string_view>
++
++namespace rpcsx::android {
++class ProgressReporter {
++public:
++  virtual ~ProgressReporter() = default;
++  virtual bool report(long value, long max, const std::string& message) = 0;
++};
++
++class StagedGameInstaller {
++public:
++  enum class InjectPoint {
++    None,
++    AfterStagingCreate,
++    DuringExtract,
++    BeforeCommit,
++    AfterBackupRename,
++    AfterStagingRename,
++  };
++  enum class TransactionPhase {
++    Prepared,
++    BackupMoved,
++    NewTitleMoved,
++  };
++
++  StagedGameInstaller(std::string configDir, std::string titleId,
++                      IsoInstallManifest manifest);
++  ~StagedGameInstaller();
++
++  StagedGameInstaller(const StagedGameInstaller&) = delete;
++  StagedGameInstaller& operator=(const StagedGameInstaller&) = delete;
++
++  const std::string& stagingPath() const { return m_stagingPath; }
++  const std::string& finalPath() const { return m_finalPath; }
++  const std::string& backupPath() const { return m_backupPath; }
++  const std::string& markerPath() const { return m_markerPath; }
++
++  std::optional<std::string> prepare();
++  std::optional<std::string> extract(iso_dev& iso, ProgressReporter& reporter);
++  std::optional<std::string> verify(ProgressReporter* reporter = nullptr);
++  std::optional<std::string> commit(ProgressReporter* reporter = nullptr);
++  std::optional<std::string> install(iso_dev& iso, ProgressReporter& reporter);
++
++  void cleanupStaging();
++  bool finalExists() const;
++  void setInjectFailure(InjectPoint point) { m_injectPoint = point; }
++
++  static std::optional<std::string> recoverStaleTransactions(
++      const std::string& configDir);
++
++private:
++  std::string m_configDir;
++  std::string m_titleId;
++  std::string m_token;
++  std::string m_gamesRoot;
++  std::string m_stagingRoot;
++  std::string m_backupRoot;
++  std::string m_transactionRoot;
++  std::string m_finalPath;
++  std::string m_stagingPath;
++  std::string m_backupPath;
++  std::string m_markerPath;
++  IsoInstallManifest m_manifest;
++  InjectPoint m_injectPoint = InjectPoint::None;
++  bool m_prepared = false;
++  bool m_committed = false;
++  bool m_backupMoved = false;
++  bool m_newTitleMoved = false;
++
++  bool shouldInject(InjectPoint point) const { return m_injectPoint == point; }
++  std::optional<std::string> writeMarker(TransactionPhase phase);
++  bool removeMarker();
++  bool restoreBackup();
++};
++
++bool isValidTitleIdForPath(std::string_view titleId);
++} // namespace rpcsx::android
 diff --git a/rpcs3/Crypto/unzip.cpp b/rpcs3/Crypto/unzip.cpp
 index 2de74313e..281162f76 100644
 --- a/rpcs3/Crypto/unzip.cpp
@@ -80,8 +1764,19 @@ index 58de49ca0..0e9064de4 100644
  
  template <typename T>
  inline bool zip(const T& src, fs::file& out)
+diff --git a/rpcs3/Emu/CMakeLists.txt b/rpcs3/Emu/CMakeLists.txt
+index a58ab0694..ae3a9e006 100644
+--- a/rpcs3/Emu/CMakeLists.txt
++++ b/rpcs3/Emu/CMakeLists.txt
+@@ -1,5 +1,6 @@
+ add_library(rpcs3_emu STATIC
+     cache_utils.cpp
++    compile_progress.cpp
+     games_config.cpp
+     IdManager.cpp
+     localized_string.cpp
 diff --git a/rpcs3/Emu/Cell/PPUThread.cpp b/rpcs3/Emu/Cell/PPUThread.cpp
-index b1d559ef7..eed6e7e6b 100644
+index b1d559ef7..adc34b0b1 100644
 --- a/rpcs3/Emu/Cell/PPUThread.cpp
 +++ b/rpcs3/Emu/Cell/PPUThread.cpp
 @@ -3,6 +3,7 @@
@@ -109,7 +1804,7 @@ index b1d559ef7..eed6e7e6b 100644
  
  #include "util/sema.h"
  
-@@ -75,6 +79,371 @@
+@@ -75,6 +79,379 @@
  #include <libkern/OSCacheControl.h>
  #endif
  
@@ -350,9 +2045,17 @@ index b1d559ef7..eed6e7e6b 100644
 +		key["patches"]["imported_patch_yml"] = ppu_manifest_file_digest(patch_engine::get_imported_patch_path());
 +		key["patches"]["patch_config_yml"] = ppu_manifest_file_digest(patch_engine::get_patch_config_path());
 +		return key;
-+	}
++}
 +
-+	static std::string ppu_manifest_path()
++extern "C" const char* _rpcsx_getPpuManifestKey()
++{
++	static thread_local std::string last;
++	nlohmann::json key = ppu_manifest_key(nullptr);
++	last = key.dump();
++	return last.c_str();
++}
++
++static std::string ppu_manifest_path()
 +	{
 +		const std::string title_id = Emu.GetTitleID();
 +		if (title_id.empty())
@@ -481,7 +2184,7 @@ index b1d559ef7..eed6e7e6b 100644
  extern atomic_t<u64> g_watchdog_hold_ctr;
  
  // Should be of the same type
-@@ -3820,9 +4189,6 @@ struct jit_core_allocator
+@@ -3820,9 +4197,6 @@ struct jit_core_allocator
  	// Initialize global semaphore with the max number of threads
  	::semaphore<0x7fff> sem{std::max<s16>(thread_count, 1)};
  
@@ -491,7 +2194,7 @@ index b1d559ef7..eed6e7e6b 100644
  	static s16 limit()
  	{
  		return static_cast<s16>(std::min<s32>(0x7fff, utils::get_thread_count()));
-@@ -3848,11 +4214,28 @@ namespace
+@@ -3848,11 +4222,28 @@ namespace
  			std::unordered_map<std::string, jit_module> map;
  		};
  
@@ -522,7 +2225,7 @@ index b1d559ef7..eed6e7e6b 100644
  		}
  
  		jit_module& get(const std::string& name)
-@@ -4058,6 +4441,8 @@ extern void ppu_finalize(const ppu_module<lv2_obj>& info, bool force_mem_release
+@@ -4058,6 +4449,8 @@ extern void ppu_finalize(const ppu_module<lv2_obj>& info, bool force_mem_release
  
  extern void ppu_precompile(std::vector<std::string>& dir_queue, std::vector<ppu_module<lv2_obj>*>* loaded_modules)
  {
@@ -531,7 +2234,7 @@ index b1d559ef7..eed6e7e6b 100644
  	if (g_cfg.core.ppu_decoder != ppu_decoder_type::llvm_legacy)
  	{
  		return;
-@@ -4083,36 +4468,44 @@ extern void ppu_precompile(std::vector<std::string>& dir_queue, std::vector<ppu_
+@@ -4083,36 +4476,44 @@ extern void ppu_precompile(std::vector<std::string>& dir_queue, std::vector<ppu_
  
  	const std::string firmware_sprx_path = vfs::get("/dev_flash/sys/external/");
  
@@ -540,10 +2243,16 @@ index b1d559ef7..eed6e7e6b 100644
 -		std::string path;
 -		u64 offset;
 -		u64 file_size;
+-
+-		file_info() noexcept = default;
 +	std::vector<ppu_precompile_file_info> file_queue;
 +	file_queue.reserve(2000);
  
--		file_info() noexcept = default;
+-		file_info(std::string _path, u64 offs, u64 size) noexcept
+-			: path(std::move(_path)), offset(offs), file_size(size)
+-		{
+-		}
+-	};
 +#ifdef ANDROID
 +	const std::vector<std::string> manifest_roots = dir_queue;
 +	const std::string manifest_path = ppu_manifest_path();
@@ -552,12 +2261,6 @@ index b1d559ef7..eed6e7e6b 100644
 +	const bool manifest_enabled = !manifest_path.empty() && !manifest_roots.empty() && !manifest_key["game_exe_hash"].get<std::string>().empty();
 +	const bool manifest_hit = manifest_enabled && ppu_manifest_load(manifest_path, manifest_key, manifest_roots, manifest_inventory, file_queue);
  
--		file_info(std::string _path, u64 offs, u64 size) noexcept
--			: path(std::move(_path)), offset(offs), file_size(size)
--		{
--		}
--	};
--
 -	std::vector<file_info> file_queue;
 -	file_queue.reserve(2000);
 +	if (manifest_hit)
@@ -598,7 +2301,7 @@ index b1d559ef7..eed6e7e6b 100644
  			if (Emu.IsStopped())
  			{
  				file_queue.clear();
-@@ -4255,12 +4648,20 @@ extern void ppu_precompile(std::vector<std::string>& dir_queue, std::vector<ppu_
+@@ -4255,12 +4656,20 @@ extern void ppu_precompile(std::vector<std::string>& dir_queue, std::vector<ppu_
  			}
  		}
  	}
@@ -620,7 +2323,7 @@ index b1d559ef7..eed6e7e6b 100644
  	{
  		total_files_size += info.file_size;
  	}
-@@ -4271,7 +4672,7 @@ extern void ppu_precompile(std::vector<std::string>& dir_queue, std::vector<ppu_
+@@ -4271,7 +4680,7 @@ extern void ppu_precompile(std::vector<std::string>& dir_queue, std::vector<ppu_
  
  	atomic_t<usz> fnext = 0;
  
@@ -629,7 +2332,7 @@ index b1d559ef7..eed6e7e6b 100644
  
  	concurent_memory_limit memory_limit(utils::get_total_memory() / 3);
  
-@@ -4624,6 +5025,8 @@ extern void ppu_precompile(std::vector<std::string>& dir_queue, std::vector<ppu_
+@@ -4624,6 +5033,8 @@ extern void ppu_precompile(std::vector<std::string>& dir_queue, std::vector<ppu_
  
  extern void ppu_initialize()
  {
@@ -638,7 +2341,7 @@ index b1d559ef7..eed6e7e6b 100644
  	if (!g_fxo->is_init<main_ppu_module<lv2_obj>>())
  	{
  		return;
-@@ -4768,6 +5171,8 @@ extern void ppu_initialize()
+@@ -4768,6 +5179,8 @@ extern void ppu_initialize()
  
  bool ppu_initialize(const ppu_module<lv2_obj>& info, bool check_only, u64 file_size, concurent_memory_limit& memory_limit)
  {
@@ -647,7 +2350,7 @@ index b1d559ef7..eed6e7e6b 100644
  	if (g_cfg.core.ppu_decoder != ppu_decoder_type::llvm_legacy)
  	{
  		if (check_only || vm::base(info.segs[0].addr) != info.segs[0].ptr)
-@@ -4904,14 +5309,14 @@ bool ppu_initialize(const ppu_module<lv2_obj>& info, bool check_only, u64 file_s
+@@ -4904,14 +5317,14 @@ bool ppu_initialize(const ppu_module<lv2_obj>& info, bool check_only, u64 file_s
  	// Info to load to main JIT instance (true - compiled)
  	std::vector<std::pair<std::string, bool>> link_workload;
  
@@ -665,7 +2368,7 @@ index b1d559ef7..eed6e7e6b 100644
  
  	const cpu_thread* cpu = cpu_thread::get_current();
  
-@@ -5453,8 +5858,11 @@ bool ppu_initialize(const ppu_module<lv2_obj>& info, bool check_only, u64 file_s
+@@ -5453,8 +5866,11 @@ bool ppu_initialize(const ppu_module<lv2_obj>& info, bool check_only, u64 file_s
  			if (fpos >= info.get_funcs().size() || module_counter % c_moudles_per_jit == c_moudles_per_jit - 1)
  				settings += ppu_settings::contains_symbol_resolver; // Avoid invalidating all modules for this purpose
  
@@ -679,7 +2382,7 @@ index b1d559ef7..eed6e7e6b 100644
  		}
  
  		if (cpu ? cpu->state.all_of(cpu_flag::exit) : Emu.IsStopped())
-@@ -5509,12 +5917,24 @@ bool ppu_initialize(const ppu_module<lv2_obj>& info, bool check_only, u64 file_s
+@@ -5509,12 +5925,24 @@ bool ppu_initialize(const ppu_module<lv2_obj>& info, bool check_only, u64 file_s
  	// Create worker threads for compilation
  	if (!workload.empty())
  	{
@@ -705,7 +2408,7 @@ index b1d559ef7..eed6e7e6b 100644
  
  		struct thread_index_allocator
  		{
-@@ -5524,24 +5944,26 @@ bool ppu_initialize(const ppu_module<lv2_obj>& info, bool check_only, u64 file_s
+@@ -5524,24 +5952,26 @@ bool ppu_initialize(const ppu_module<lv2_obj>& info, bool check_only, u64 file_s
  		struct thread_op
  		{
  			concurent_memory_limit& memory_limit;
@@ -736,7 +2439,7 @@ index b1d559ef7..eed6e7e6b 100644
  			{
  				if (auto mtx = other.core_lock.mutex())
  				{
-@@ -5554,13 +5976,14 @@ bool ppu_initialize(const ppu_module<lv2_obj>& info, bool check_only, u64 file_s
+@@ -5554,13 +5984,14 @@ bool ppu_initialize(const ppu_module<lv2_obj>& info, bool check_only, u64 file_s
  
  			void operator()()
  			{
@@ -754,7 +2457,7 @@ index b1d559ef7..eed6e7e6b 100644
  				{
  					if (cpu ? cpu->state.all_of(cpu_flag::exit) : Emu.IsStopped())
  					{
-@@ -5579,24 +6002,11 @@ bool ppu_initialize(const ppu_module<lv2_obj>& info, bool check_only, u64 file_s
+@@ -5579,24 +6010,11 @@ bool ppu_initialize(const ppu_module<lv2_obj>& info, bool check_only, u64 file_s
  					ppu_log.warning("LLVM: reporting used memory %u (free/total: %u/%u) by %s%s", total_fn_size * 1024 * 16, memory_limit.free_memory(), memory_limit.total_memory(), cache_path, obj_name);
  					auto used_memory = memory_limit.acquire(total_fn_size * 1024 * 16);
  
@@ -780,7 +2483,7 @@ index b1d559ef7..eed6e7e6b 100644
  						ppu_initialize2(jit2, part, cache_path, obj_name);
  					}
  
-@@ -5604,30 +6014,79 @@ bool ppu_initialize(const ppu_module<lv2_obj>& info, bool check_only, u64 file_s
+@@ -5604,30 +6022,79 @@ bool ppu_initialize(const ppu_module<lv2_obj>& info, bool check_only, u64 file_s
  				}
  
  				core_lock.unlock();
@@ -867,7 +2570,7 @@ index b1d559ef7..eed6e7e6b 100644
  
  		for (const auto& [addr, func] : *shared_map)
  		{
-@@ -5795,6 +6254,19 @@ static void ppu_initialize2(jit_compiler& jit, const ppu_module<lv2_obj>& module
+@@ -5795,6 +6262,19 @@ static void ppu_initialize2(jit_compiler& jit, const ppu_module<lv2_obj>& module
  #ifdef LLVM_AVAILABLE
  	using namespace llvm;
  
@@ -887,7 +2590,7 @@ index b1d559ef7..eed6e7e6b 100644
  	// Create LLVM module
  	std::unique_ptr<Module> _module = std::make_unique<Module>(obj_name, jit.get_context());
  
-@@ -5838,6 +6310,7 @@ static void ppu_initialize2(jit_compiler& jit, const ppu_module<lv2_obj>& module
+@@ -5838,6 +6318,7 @@ static void ppu_initialize2(jit_compiler& jit, const ppu_module<lv2_obj>& module
  			translator.build_interpreter();
  		}
  #ifdef ARCH_X64
@@ -895,7 +2598,7 @@ index b1d559ef7..eed6e7e6b 100644
  		// Create the analysis managers.
  		// These must be declared in this order so that they are destroyed in the
  		// correct order due to inter-analysis-manager references.
-@@ -5862,11 +6335,13 @@ static void ppu_initialize2(jit_compiler& jit, const ppu_module<lv2_obj>& module
+@@ -5862,11 +6343,13 @@ static void ppu_initialize2(jit_compiler& jit, const ppu_module<lv2_obj>& module
  		FunctionPassManager fpm;
  		// Basic optimizations
  		fpm.addPass(EarlyCSEPass());
@@ -911,7 +2614,7 @@ index b1d559ef7..eed6e7e6b 100644
  
  		// Translate functions
  		// Start with the lowest bound of the module, function list is sorted
-@@ -5886,15 +6361,29 @@ static void ppu_initialize2(jit_compiler& jit, const ppu_module<lv2_obj>& module
+@@ -5886,15 +6369,29 @@ static void ppu_initialize2(jit_compiler& jit, const ppu_module<lv2_obj>& module
  				min_addr = std::min<u32>(min_addr, mod_func.addr);
  
  				// Translate
@@ -941,7 +2644,7 @@ index b1d559ef7..eed6e7e6b 100644
  					Emu.Pause();
  					return;
  				}
-@@ -5904,15 +6393,29 @@ static void ppu_initialize2(jit_compiler& jit, const ppu_module<lv2_obj>& module
+@@ -5904,15 +6401,29 @@ static void ppu_initialize2(jit_compiler& jit, const ppu_module<lv2_obj>& module
  		// Run this only in one module for all functions compiled
  		if (module_part.jit_bounds)
  		{
@@ -971,7 +2674,7 @@ index b1d559ef7..eed6e7e6b 100644
  				Emu.Pause();
  				return;
  			}
-@@ -5936,7 +6439,14 @@ static void ppu_initialize2(jit_compiler& jit, const ppu_module<lv2_obj>& module
+@@ -5936,7 +6447,14 @@ static void ppu_initialize2(jit_compiler& jit, const ppu_module<lv2_obj>& module
  			result.clear();
  		}
  
@@ -987,7 +2690,7 @@ index b1d559ef7..eed6e7e6b 100644
  		{
  			out.flush();
  			ppu_log.error("LLVM: Verification failed for %s:\n%s", obj_name, result);
-@@ -5951,6 +6461,15 @@ static void ppu_initialize2(jit_compiler& jit, const ppu_module<lv2_obj>& module
+@@ -5951,6 +6469,15 @@ static void ppu_initialize2(jit_compiler& jit, const ppu_module<lv2_obj>& module
  	}
  
  	// Load or compile module
@@ -1003,6 +2706,516 @@ index b1d559ef7..eed6e7e6b 100644
 +	}
  #endif // LLVM_AVAILABLE
  }
+diff --git a/rpcs3/Emu/RSX/Overlays/overlay_compile_notification.cpp b/rpcs3/Emu/RSX/Overlays/overlay_compile_notification.cpp
+index 328b8ffdc..78daa120d 100644
+--- a/rpcs3/Emu/RSX/Overlays/overlay_compile_notification.cpp
++++ b/rpcs3/Emu/RSX/Overlays/overlay_compile_notification.cpp
+@@ -26,7 +26,7 @@ namespace rsx
+ 				true);
+ 		}
+ 
+-		std::shared_ptr<atomic_t<u32>> show_ppu_compile_notification()
++		std::shared_ptr<atomic_t<u32>> show_ppu_compile_notification(const std::string& detailed_message)
+ 		{
+ 			if (!s_ppu_loading_icon24)
+ 			{
+@@ -36,15 +36,41 @@ namespace rsx
+ 
+ 			std::shared_ptr<atomic_t<u32>> refs = std::make_shared<atomic_t<u32>>(1);
+ 
++			if (detailed_message.empty())
++			{
++				queue_message(
++					localized_string_id::RSX_OVERLAYS_COMPILING_PPU_MODULES,
++					20'000'000,
++					refs,
++					message_pin_location::bottom_left,
++					s_ppu_loading_icon24,
++					true);
++			}
++			else
++			{
++				queue_message(
++					detailed_message,
++					20'000'000,
++					refs,
++					message_pin_location::bottom_left,
++					s_ppu_loading_icon24,
++					true);
++			}
++
++			return refs;
++		}
++
++		void update_ppu_compile_notification(const std::string& detailed_message)
++		{
++			if (detailed_message.empty()) return;
+ 			queue_message(
+-				localized_string_id::RSX_OVERLAYS_COMPILING_PPU_MODULES,
++				detailed_message,
+ 				20'000'000,
+-				refs,
++				{},
+ 				message_pin_location::bottom_left,
+ 				s_ppu_loading_icon24,
+ 				true);
+-
+-			return refs;
++			refresh_message_queue();
+ 		}
+ 	} // namespace overlays
+ } // namespace rsx
+diff --git a/rpcs3/Emu/RSX/Overlays/overlay_compile_notification.h b/rpcs3/Emu/RSX/Overlays/overlay_compile_notification.h
+index 5af7ed3ca..47f8a0894 100644
+--- a/rpcs3/Emu/RSX/Overlays/overlay_compile_notification.h
++++ b/rpcs3/Emu/RSX/Overlays/overlay_compile_notification.h
+@@ -2,12 +2,14 @@
+ 
+ #include "util/types.hpp"
+ #include "util/atomic.hpp"
++#include <string>
+ 
+ namespace rsx
+ {
+ 	namespace overlays
+ 	{
+ 		void show_shader_compile_notification();
+-		std::shared_ptr<atomic_t<u32>> show_ppu_compile_notification();
++		std::shared_ptr<atomic_t<u32>> show_ppu_compile_notification(const std::string& detailed_message = {});
++		void update_ppu_compile_notification(const std::string& detailed_message);
+ 	} // namespace overlays
+ } // namespace rsx
+diff --git a/rpcs3/Emu/RSX/Program/ProgramStateCache.h b/rpcs3/Emu/RSX/Program/ProgramStateCache.h
+index 32b4f3185..bb902f2d7 100644
+--- a/rpcs3/Emu/RSX/Program/ProgramStateCache.h
++++ b/rpcs3/Emu/RSX/Program/ProgramStateCache.h
+@@ -2,6 +2,7 @@
+ 
+ #include "RSXFragmentProgram.h"
+ #include "RSXVertexProgram.h"
++#include "../../compile_progress.hpp"
+ 
+ #include "util/mutex.h"
+ #include "util/logs.hpp"
+@@ -9,6 +10,10 @@
+ #include "util/v128.hpp"
+ #include <util/bless.hpp>
+ 
++#include <atomic>
++#include <functional>
++#include <memory>
++#include <optional>
+ #include <span>
+ #include <unordered_map>
+ 
+@@ -395,41 +400,73 @@ public:
+ 
+ 		rsx_log.notice("Add program (vp id = %d, fp id = %d)", vertex_program.id, fragment_program.id);
+ 
+-		std::function<pipeline_type*(pipeline_storage_type&)> callback;
++		// --- Shader compile progress: BEGIN at first placeholder insertion (shared VK/GL hook) ---
++		// Deferred contract (VK/GL pipe_compiler):
++		//   1. build_pipeline immediately invokes the callback with an empty unique_ptr (not terminal)
++		//   2. the worker later invokes it with the real pipeline (COMPLETED) OR another empty / exception (FAILED)
++		// Inline compiles never emit FGS events (HUD-only).
++		struct ShaderCompileTracker
++		{
++			u64 jobId = 0;
++			bool deferred = false;
++			std::atomic<bool> sawEmpty{false};
++			std::atomic<bool> terminalEmitted{false};
++		};
++		const u64 shaderJobId = allocate_compile_job_id();
++		const bool shaderDeferred = compile_async;
++		auto tracker = std::make_shared<ShaderCompileTracker>();
++		tracker->jobId = shaderJobId;
++		tracker->deferred = shaderDeferred;
++		if (shaderDeferred)
++		{
++			emit_compile_event(CompileEvent{CompileDomain::SHADER, CompilePhase::BEGIN, CompileOrigin::RUNTIME, shaderJobId, std::nullopt});
++		}
+ 
+-		if (allow_notification)
++		auto emit_shader_terminal = [tracker](CompilePhase phase)
+ 		{
+-			callback = [this, vertex_shader, fragment_shader_ = RSXFragmentProgram::clone(fragment_shader), key](pipeline_storage_type& pipeline) -> pipeline_type*
++			if (!tracker->deferred) return;
++			bool expected = false;
++			if (tracker->terminalEmitted.compare_exchange_strong(expected, true))
+ 			{
+-				if (!pipeline)
+-				{
+-					return nullptr;
+-				}
+-
+-				rsx_log.success("Program compiled successfully");
+-				notify_pipeline_compiled(key.properties, vertex_shader, fragment_shader_);
++				emit_compile_event(CompileEvent{CompileDomain::SHADER, phase, CompileOrigin::RUNTIME, tracker->jobId, std::nullopt});
++			}
++		};
+ 
+-				std::lock_guard lock(m_pipeline_mutex);
+-				auto& pipe_result = m_storage[key];
+-				pipe_result = std::move(pipeline);
+-				return pipe_result.get();
+-			};
++		std::function<pipeline_type*(pipeline_storage_type&)> callback;
++		const bool notify = allow_notification;
++		std::optional<RSXFragmentProgram> fragment_clone;
++		if (notify)
++		{
++			fragment_clone = RSXFragmentProgram::clone(fragment_shader);
+ 		}
+-		else
++
++		callback = [this, vertex_shader, fragment_clone, key, tracker, emit_shader_terminal, notify](pipeline_storage_type& pipeline) -> pipeline_type*
+ 		{
+-			callback = [this, key](pipeline_storage_type& pipeline) -> pipeline_type*
++			// Exceptions are disabled in this tree. Failure is a second empty callback
++			// (or cache.clear() CANCELED jobId=0 on shutdown).
++			if (!pipeline)
+ 			{
+-				if (!pipeline)
++				// First empty callback of a deferred job is the enqueue placeholder, not a failure.
++				if (tracker->deferred && !tracker->sawEmpty.exchange(true))
+ 				{
+ 					return nullptr;
+ 				}
++				emit_shader_terminal(CompilePhase::FAILED);
++				return nullptr;
++			}
+ 
+-				std::lock_guard lock(m_pipeline_mutex);
+-				auto& pipe_result = m_storage[key];
+-				pipe_result = std::move(pipeline);
+-				return pipe_result.get();
+-			};
+-		}
++			if (notify && fragment_clone)
++			{
++				rsx_log.success("Program compiled successfully");
++				notify_pipeline_compiled(key.properties, vertex_shader, *fragment_clone);
++			}
++
++			std::lock_guard lock(m_pipeline_mutex);
++			auto& pipe_result = m_storage[key];
++			pipe_result = std::move(pipeline);
++			emit_shader_terminal(CompilePhase::COMPLETED);
++			return pipe_result.get();
++		};
+ 
+ 		auto result = backend_traits::build_pipeline(
+ 			vertex_program,               // VS, must already be decompiled and recompiled above
+@@ -439,6 +476,8 @@ public:
+ 			callback,                     // Insertion and notification callback
+ 			std::forward<Args>(args)...); // Other arguments
+ 
++		// Inline compilation that completes within the same renderer call stays HUD-only
++		// (BEGIN was not emitted). Deferred jobs emit COMPLETED/FAILED from the callback.
+ 		return {result, &vertex_program, &fragment_program};
+ 	}
+ 
+@@ -462,5 +501,7 @@ public:
+ 		m_fragment_shader_cache.clear();
+ 		m_vertex_shader_cache.clear();
+ 		m_storage.clear();
++		// Explicit terminal for any pending shader jobs so FGS pending counter cannot leak
++		emit_compile_event(CompileEvent{CompileDomain::SHADER, CompilePhase::CANCELED, CompileOrigin::RUNTIME, 0, std::nullopt});
+ 	}
+ };
+diff --git a/rpcs3/Emu/compile_progress.cpp b/rpcs3/Emu/compile_progress.cpp
+new file mode 100644
+index 000000000..03f55c519
+--- /dev/null
++++ b/rpcs3/Emu/compile_progress.cpp
+@@ -0,0 +1,190 @@
++#include "stdafx.h"
++#include "compile_progress.hpp"
++#include "localized_string.h"
++#include "Emu/Cell/timers.hpp"
++#include "util/logs.hpp"
++#include "rx/asm.hpp"
++
++#include <mutex>
++#include <atomic>
++
++LOG_CHANNEL(sys_log, "SYS");
++
++// --- Event sink (thread-safe copy-then-invoke) ---
++static std::mutex g_compile_sink_mutex;
++static compile_event_sink_t g_compile_sink;
++static std::atomic<u64> g_next_job_id{1};
++
++void set_compile_event_sink(compile_event_sink_t sink)
++{
++    std::lock_guard<std::mutex> lock(g_compile_sink_mutex);
++    g_compile_sink = std::move(sink);
++}
++
++compile_event_sink_t get_compile_event_sink()
++{
++    std::lock_guard<std::mutex> lock(g_compile_sink_mutex);
++    return g_compile_sink;
++}
++
++void emit_compile_event(const CompileEvent& ev)
++{
++    compile_event_sink_t sink;
++    {
++        std::lock_guard<std::mutex> lock(g_compile_sink_mutex);
++        sink = g_compile_sink;
++    }
++    if (sink)
++    {
++        // Exceptions are disabled in the Android engine build.
++        sink(ev);
++    }
++}
++
++u64 allocate_compile_job_id()
++{
++    return g_next_job_id.fetch_add(1, std::memory_order_relaxed);
++}
++
++// --- System progress origin context ---
++static std::mutex g_ctx_mutex;
++static SystemProgressContext g_current_ctx{CompileOrigin::RUNTIME, 0};
++static bool g_has_ctx = false;
++
++void set_system_progress_context(const SystemProgressContext& ctx)
++{
++    std::lock_guard<std::mutex> lock(g_ctx_mutex);
++    if (g_has_ctx && g_current_ctx.origin != ctx.origin)
++    {
++        sys_log.warning("set_system_progress_context: overriding existing context origin=%d with %d (jobId %llu->%llu)",
++            (int)g_current_ctx.origin, (int)ctx.origin, g_current_ctx.jobId, ctx.jobId);
++    }
++    g_current_ctx = ctx;
++    g_has_ctx = true;
++}
++
++SystemProgressContext get_system_progress_context()
++{
++    std::lock_guard<std::mutex> lock(g_ctx_mutex);
++    if (!g_has_ctx)
++        return SystemProgressContext{CompileOrigin::RUNTIME, 0};
++    return g_current_ctx;
++}
++
++void clear_system_progress_context()
++{
++    std::lock_guard<std::mutex> lock(g_ctx_mutex);
++    g_current_ctx = SystemProgressContext{CompileOrigin::RUNTIME, 0};
++    g_has_ctx = false;
++}
++
++// --- Snapshot builder ---
++// This mirrors the logic in system_progress.cpp:260-341 — compute progr, percent, ETA
++// with time_left_queue smoothing. Extracted so both RSX UI and Android bridge share
++// the exact same string and percentValue.
++
++PpuProgressSnapshot build_system_progress_snapshot(
++    u32 fdone, u32 ftotal,
++    u32 pdone, u32 ptotal,
++    u64 fknown_bits, u64 ftotal_bits,
++    const std::string& text1,
++    u64 start_time,
++    std::vector<std::pair<u64, u64>>& time_left_queue,
++    usz& time_left_queue_idx,
++    const std::string& /*base_progr_prefix*/)
++{
++    PpuProgressSnapshot snap;
++    snap.fileDone = static_cast<int>(fdone);
++    snap.fileTotal = static_cast<int>(ftotal);
++    snap.moduleDone = static_cast<int>(pdone);
++    snap.moduleTotal = static_cast<int>(ptotal);
++
++    // Compute progress in percents — same as original system_progress.cpp
++    const bool use_bits = fknown_bits && ftotal_bits;
++    const u64 known_files = use_bits ? fknown_bits : ftotal;
++    const u64 total = rx::rational_mul<u64>(std::max<u64>(ptotal, 1), std::max<u64>(use_bits ? ftotal_bits : ftotal, 1), std::max<u64>(known_files, 1));
++    const u64 done = pdone;
++    const u32 value = static_cast<u32>(done >= total ? 100 : done * 100 / total);
++    snap.percentValue = static_cast<int>(value);
++    snap.percentMax = 100;
++
++    std::string progr;
++    if (ftotal || ptotal)
++    {
++        progr = get_localized_string(localized_string_id::PROGRESS_DIALOG_PROGRESS);
++        if (ftotal)
++            fmt::append(progr, " %s %u %s %u%s", get_localized_string(localized_string_id::PROGRESS_DIALOG_FILE), fdone, get_localized_string(localized_string_id::PROGRESS_DIALOG_OF), ftotal, ptotal ? "," : "");
++        if (ptotal)
++            fmt::append(progr, " %s %u %s %u", get_localized_string(localized_string_id::PROGRESS_DIALOG_MODULE), pdone, get_localized_string(localized_string_id::PROGRESS_DIALOG_OF), ptotal);
++
++        const u32 of_1000 = static_cast<u32>(done >= total ? 1000 : done * 1000 / total);
++        if (of_1000 >= 2)
++        {
++            const u64 passed = (get_system_time() - start_time);
++            const u64 total_t = rx::rational_mul<u64>(passed, 1000, of_1000);
++            const u64 remaining = total_t - passed;
++
++            u64 max_remaining = remaining;
++            for (usz i = 0; i < time_left_queue.size(); i++)
++            {
++                const auto& sample = time_left_queue[(time_left_queue.size() + time_left_queue_idx - i) % time_left_queue.size()];
++                const u64 sample_age = passed - sample.first;
++                if (passed - sample.first >= 4'000'000)
++                    break;
++                max_remaining = std::max<u64>(max_remaining, sample.second >= sample_age ? sample.second - sample_age : 0);
++            }
++
++            if (auto new_val = std::make_pair(passed, remaining); time_left_queue[time_left_queue_idx] != new_val)
++            {
++                time_left_queue_idx = (time_left_queue_idx + 1) % time_left_queue.size();
++                time_left_queue[time_left_queue_idx] = new_val;
++            }
++
++            const u64 max_seconds_remaining = max_remaining / 1'000'000;
++            const u64 seconds = max_seconds_remaining % 60;
++            const u64 minutes = (max_seconds_remaining / 60) % 60;
++            const u64 hours = (max_seconds_remaining / 3600);
++
++            if (passed < 4'000'000)
++            {
++            }
++            else if (done >= total)
++            {
++                fmt::append(progr, " (%s)", get_localized_string(localized_string_id::PROGRESS_DIALOG_DONE));
++            }
++            else if (hours)
++            {
++                fmt::append(progr, " (%uh %2um %s)", hours, minutes, get_localized_string(localized_string_id::PROGRESS_DIALOG_REMAINING));
++            }
++            else if (minutes >= 2)
++            {
++                fmt::append(progr, " (%um %s)", minutes, get_localized_string(localized_string_id::PROGRESS_DIALOG_REMAINING));
++            }
++            else if (minutes == 0)
++            {
++                fmt::append(progr, " (%us %s)", std::max<u64>(seconds, 1), get_localized_string(localized_string_id::PROGRESS_DIALOG_REMAINING));
++            }
++            else
++            {
++                fmt::append(progr, " (%um %2us %s)", minutes, seconds, get_localized_string(localized_string_id::PROGRESS_DIALOG_REMAINING));
++            }
++        }
++    }
++    else
++    {
++        progr = get_localized_string(localized_string_id::PROGRESS_DIALOG_PROGRESS_ANALYZING);
++    }
++
++    snap.message = std::move(progr);
++    return snap;
++}
++
++// For tests / callers that don't have state unpacked yet — placeholder
++PpuProgressSnapshot build_system_progress_snapshot_from_state(
++    const std::string& /*text1*/,
++    u64 /*start_time*/,
++    std::vector<std::pair<u64, u64>>& /*time_left_queue*/,
++    usz& /*time_left_queue_idx*/)
++{
++    return PpuProgressSnapshot{};
++}
+diff --git a/rpcs3/Emu/compile_progress.hpp b/rpcs3/Emu/compile_progress.hpp
+new file mode 100644
+index 000000000..f8476e6c1
+--- /dev/null
++++ b/rpcs3/Emu/compile_progress.hpp
+@@ -0,0 +1,91 @@
++#pragma once
++
++#include "util/types.hpp"
++
++#include <functional>
++#include <optional>
++#include <string>
++
++enum class CompileDomain : int
++{
++    PPU = 0,
++    SHADER = 1,
++};
++
++enum class CompilePhase : int
++{
++    BEGIN = 0,
++    PROGRESS = 1,
++    COMPLETED = 2,
++    FAILED = 3,
++    CANCELED = 4,
++};
++
++enum class CompileOrigin : int
++{
++    INSTALL = 0,
++    RUNTIME = 1,
++};
++
++struct PpuProgressSnapshot
++{
++    int percentValue = 0; // 0..100 — same value driving the RSX progress bar
++    int percentMax = 100;
++    std::string message; // verbatim progr — e.g. "Progress: file 21 of 78, module 24 of 33 (10m remaining)"
++    int fileDone = 0;
++    int fileTotal = 0;
++    int moduleDone = 0;
++    int moduleTotal = 0;
++};
++
++struct CompileEvent
++{
++    CompileDomain domain;
++    CompilePhase phase;
++    CompileOrigin origin;
++    u64 jobId = 0; // stable per PPU session or pipeline job
++    std::optional<PpuProgressSnapshot> ppu;
++};
++
++// Global event sink — platform neutral, thread-safe copy-then-invoke
++using compile_event_sink_t = std::function<void(const CompileEvent&)>;
++
++void set_compile_event_sink(compile_event_sink_t sink);
++compile_event_sink_t get_compile_event_sink();
++void emit_compile_event(const CompileEvent& ev);
++u64 allocate_compile_job_id();
++
++// System-progress origin context (install vs runtime). Process-wide, mutex protected
++// because CompilationQueue and progress_dialog_server run on different threads.
++// Default origin is RUNTIME. CompilationQueue::impl sets INSTALL immediately before
++// ppu_precompile and clears it after.
++struct SystemProgressContext
++{
++    CompileOrigin origin = CompileOrigin::RUNTIME;
++    u64 jobId = 0;
++};
++
++void set_system_progress_context(const SystemProgressContext& ctx);
++SystemProgressContext get_system_progress_context();
++void clear_system_progress_context();
++
++// Helper that computes PpuProgressSnapshot exactly once, preserving time_left_queue
++// smoothing state. Both the RSX UI and the Android bridge consume the same snapshot.
++// Must be called before the show_overlay_message early-continue so the Android path
++// still receives the update.
++PpuProgressSnapshot build_system_progress_snapshot(
++    u32 fdone, u32 ftotal,
++    u32 pdone, u32 ptotal,
++    u64 fknown_bits, u64 ftotal_bits,
++    const std::string& text1,
++    u64 start_time,
++    std::vector<std::pair<u64, u64>>& time_left_queue,
++    usz& time_left_queue_idx,
++    const std::string& base_progr_prefix);
++
++// Convenience that builds snapshot with current g_progr_* state. Exposed for testing.
++PpuProgressSnapshot build_system_progress_snapshot_from_state(
++    const std::string& text1,
++    u64 start_time,
++    std::vector<std::pair<u64, u64>>& time_left_queue,
++    usz& time_left_queue_idx);
 diff --git a/rpcs3/Emu/system_config.h b/rpcs3/Emu/system_config.h
 index cd6299903..fc8b582f3 100644
 --- a/rpcs3/Emu/system_config.h
@@ -1070,6 +3283,1371 @@ index c7610a442..128c2c6e2 100644
  enum class spu_decoder_type : unsigned
  {
  	_static,
+diff --git a/rpcs3/Emu/system_progress.cpp b/rpcs3/Emu/system_progress.cpp
+index e3f001baa..c23b7f79e 100644
+--- a/rpcs3/Emu/system_progress.cpp
++++ b/rpcs3/Emu/system_progress.cpp
+@@ -1,5 +1,6 @@
+ #include "stdafx.h"
+ #include "system_progress.hpp"
++#include "compile_progress.hpp"
+ #include "rpcsx/fw/ps3/cellMsgDialog.h"
+ #include "Emu/RSX/RSXThread.h"
+ #include "Emu/RSX/Overlays/overlay_manager.h"
+@@ -189,6 +190,21 @@ void progress_dialog_server::operator()()
+ 		std::vector<std::pair<u64, u64>> time_left_queue(1024);
+ 		usz time_left_queue_idx = 0;
+ 
++		// PPU compile progress — explicit lifecycle for Android FGS (compile_progress.hpp)
++		SystemProgressContext _ppu_ctx = get_system_progress_context();
++		CompileOrigin _ppu_origin = _ppu_ctx.origin;
++		u64 _ppu_jobId = _ppu_ctx.jobId != 0 ? _ppu_ctx.jobId : allocate_compile_job_id();
++		bool _ppu_begin_emitted = false;
++		bool _ppu_terminal_emitted = false;
++		auto _ppu_emit = [&](CompilePhase phase, const std::optional<PpuProgressSnapshot>& snap) {
++			if (_ppu_terminal_emitted) return;
++			if (phase != CompilePhase::BEGIN && !_ppu_begin_emitted) return;
++			if (phase == CompilePhase::BEGIN) _ppu_begin_emitted = true;
++			if (phase == CompilePhase::COMPLETED || phase == CompilePhase::FAILED || phase == CompilePhase::CANCELED) _ppu_terminal_emitted = true;
++			CompileEvent ev{CompileDomain::PPU, phase, _ppu_origin, _ppu_jobId, snap};
++			emit_compile_event(ev);
++		};
++
+ 		// Update progress
+ 		for (u64 sleep_until = get_system_time(), sleep_for = 500;
+ 			!g_system_progress_stopping && thread_ctrl::state() != thread_state::aborting;
+@@ -222,6 +238,10 @@ void progress_dialog_server::operator()()
+ 
+ 				if (show_overlay_message)
+ 				{
++					// Build shared snapshot even for overlay path so Android FGS gets verbatim progr + ETA
++					auto _snap_overlay = build_system_progress_snapshot(fdone, ftotal, pdone, ptotal, fknown_bits, ftotal_bits, text1, start_time, time_left_queue, time_left_queue_idx, text1);
++					if (!_ppu_begin_emitted) _ppu_emit(CompilePhase::BEGIN, _snap_overlay);
++					_ppu_emit(CompilePhase::PROGRESS, _snap_overlay);
+ 					// Show a message instead (if compilation period is estimated to be lengthy)
+ 					if (pdone < ptotal && g_cfg.misc.show_ppu_compilation_hint)
+ 					{
+@@ -233,7 +253,7 @@ void progress_dialog_server::operator()()
+ 						{
+ 							if (!ppu_cue_refs || !*ppu_cue_refs)
+ 							{
+-								ppu_cue_refs = rsx::overlays::show_ppu_compile_notification();
++								ppu_cue_refs = rsx::overlays::show_ppu_compile_notification(_snap_overlay.message);
+ 							}
+ 
+ 							// Make sure to update any pending messages. PPU compilation may freeze the image.
+@@ -256,93 +276,12 @@ void progress_dialog_server::operator()()
+ 					continue;
+ 				}
+ 
+-				// Compute new progress in percents
+-				// Assume not all programs were found if files were not compiled (as it may contain more)
+-				const bool use_bits = fknown_bits && ftotal_bits;
+-				const u64 known_files = use_bits ? fknown_bits : ftotal;
+-				const u64 total = rx::rational_mul<u64>(std::max<u64>(ptotal, 1), std::max<u64>(use_bits ? ftotal_bits : ftotal, 1), std::max<u64>(known_files, 1));
+-				const u64 done = pdone;
+-				const u32 value = static_cast<u32>(done >= total ? 100 : done * 100 / total);
+-
+-				std::string progr;
+-
+-				if (ftotal || ptotal)
+-				{
+-					progr = get_localized_string(localized_string_id::PROGRESS_DIALOG_PROGRESS);
+-
+-					if (ftotal)
+-						fmt::append(progr, " %s %u %s %u%s", get_localized_string(localized_string_id::PROGRESS_DIALOG_FILE), fdone, get_localized_string(localized_string_id::PROGRESS_DIALOG_OF), ftotal, ptotal ? "," : "");
+-					if (ptotal)
+-						fmt::append(progr, " %s %u %s %u", get_localized_string(localized_string_id::PROGRESS_DIALOG_MODULE), pdone, get_localized_string(localized_string_id::PROGRESS_DIALOG_OF), ptotal);
+-
+-					const u32 of_1000 = static_cast<u32>(done >= total ? 1000 : done * 1000 / total);
+-
+-					if (of_1000 >= 2)
+-					{
+-						const u64 passed = (get_system_time() - start_time);
+-						const u64 total = rx::rational_mul<u64>(passed, 1000, of_1000);
+-						const u64 remaining = total - passed;
+-
+-						// Stabilize the result by using the maximum one from the recent history
+-						// This is a very simple approach yet appears to solve most inconsistencies
+-						u64 max_remaining = remaining;
+-
+-						for (usz i = 0; i < time_left_queue.size(); i++)
+-						{
+-							const auto& sample = time_left_queue[(time_left_queue.size() + time_left_queue_idx - i) % time_left_queue.size()];
+-
+-							const u64 sample_age = passed - sample.first;
+-
+-							if (passed - sample.first >= 4'000'000)
+-							{
+-								// Ignore old samples
+-								break;
+-							}
+-
+-							max_remaining = std::max<u64>(max_remaining, sample.second >= sample_age ? sample.second - sample_age : 0);
+-						}
+-
+-						if (auto new_val = std::make_pair(passed, remaining); time_left_queue[time_left_queue_idx] != new_val)
+-						{
+-							time_left_queue_idx = (time_left_queue_idx + 1) % time_left_queue.size();
+-							time_left_queue[time_left_queue_idx] = new_val;
+-						}
+-
+-						const u64 max_seconds_remaining = max_remaining / 1'000'000;
+-						const u64 seconds = max_seconds_remaining % 60;
+-						const u64 minutes = (max_seconds_remaining / 60) % 60;
+-						const u64 hours = (max_seconds_remaining / 3600);
+-
+-						if (passed < 4'000'000)
+-						{
+-							// Cannot rely on such small duration of time for estimation
+-						}
+-						else if (done >= total)
+-						{
+-							fmt::append(progr, " (%s)", get_localized_string(localized_string_id::PROGRESS_DIALOG_DONE));
+-						}
+-						else if (hours)
+-						{
+-							fmt::append(progr, " (%uh %2um %s)", hours, minutes, get_localized_string(localized_string_id::PROGRESS_DIALOG_REMAINING));
+-						}
+-						else if (minutes >= 2)
+-						{
+-							fmt::append(progr, " (%um %s)", minutes, get_localized_string(localized_string_id::PROGRESS_DIALOG_REMAINING));
+-						}
+-						else if (minutes == 0)
+-						{
+-							fmt::append(progr, " (%us %s)", std::max<u64>(seconds, 1), get_localized_string(localized_string_id::PROGRESS_DIALOG_REMAINING));
+-						}
+-						else
+-						{
+-							fmt::append(progr, " (%um %2us %s)", minutes, seconds, get_localized_string(localized_string_id::PROGRESS_DIALOG_REMAINING));
+-						}
+-					}
+-				}
+-				else
+-				{
+-					progr = get_localized_string(localized_string_id::PROGRESS_DIALOG_PROGRESS_ANALYZING);
+-				}
++				// Shared snapshot — same percent/progr/ETA as the overlay path and Android FGS
++				auto _snap = build_system_progress_snapshot(fdone, ftotal, pdone, ptotal, fknown_bits, ftotal_bits, text1, start_time, time_left_queue, time_left_queue_idx, text1);
++				if (!_ppu_begin_emitted) _ppu_emit(CompilePhase::BEGIN, _snap);
++				_ppu_emit(CompilePhase::PROGRESS, _snap);
++				const u32 value = static_cast<u32>(_snap.percentValue);
++				const std::string progr = _snap.message;
+ 
+ 				// Changes detected, send update
+ 				if (native_dlg)
+@@ -352,7 +291,7 @@ void progress_dialog_server::operator()()
+ 						native_dlg->set_text(text1);
+ 					}
+ 
+-					native_dlg->progress_bar_set_message(0, std::move(progr));
++					native_dlg->progress_bar_set_message(0, progr);
+ 					native_dlg->progress_bar_set_value(0, static_cast<f32>(value));
+ 				}
+ 				else if (dlg)
+@@ -376,8 +315,10 @@ void progress_dialog_server::operator()()
+ 				rsx::overlays::refresh_message_queue();
+ 			}
+ 
+-			// Leave only if total count is equal to done count
+-			if (ftotal == fdone && ptotal == pdone && text_new.empty())
++			// Leave as soon as a real progress job reaches its totals. The Android
++			// bridge keeps the descriptive message populated, so waiting for an empty
++			// text would leak the foreground notification after "done".
++			if ((ftotal || ptotal) && ftotal == fdone && ptotal == pdone)
+ 			{
+ 				// Complete state, empty message: close dialog
+ 				break;
+@@ -392,6 +333,16 @@ void progress_dialog_server::operator()()
+ 			*ppu_cue_refs = 0;
+ 		}
+ 
++		// Emit explicit terminal event for this PPU session (never infer from 100%).
++		if (!_ppu_terminal_emitted && _ppu_begin_emitted)
++		{
++			CompilePhase term = CompilePhase::COMPLETED;
++			if (g_system_progress_canceled) term = CompilePhase::CANCELED;
++			else if (g_system_progress_stopping || thread_ctrl::state() == thread_state::aborting) term = CompilePhase::CANCELED;
++			else if (!(ftotal == fdone && ptotal == pdone)) term = CompilePhase::FAILED;
++			_ppu_emit(term, std::nullopt);
++		}
++
+ 		if (g_system_progress_stopping || thread_ctrl::state() == thread_state::aborting)
+ 		{
+ 			break;
+diff --git a/rpcs3/dev/iso.cpp b/rpcs3/dev/iso.cpp
+index 4303403e8..a7282347a 100644
+--- a/rpcs3/dev/iso.cpp
++++ b/rpcs3/dev/iso.cpp
+@@ -1,393 +1,861 @@
+-
+ #include "iso.hpp"
++
+ #include "util/File.h"
+ #include "util/types.hpp"
++
++#include <algorithm>
+ #include <bit>
+ #include <cctype>
+-#include <codecvt>
+ #include <cstddef>
+ #include <cstdint>
+-#include <cstdio>
++#include <cstring>
+ #include <ctime>
++#include <limits>
+ #include <memory>
+ #include <string>
++#include <unordered_set>
++#include <utility>
+ 
+-static std::string u16_ne_to_string(const char16_t* bytes, std::size_t count)
++namespace
+ {
+-	std::wstring_convert<std::codecvt_utf8_utf16<char16_t>, char16_t> convert;
+-	return convert.to_bytes(bytes, bytes + count);
++bool equals_ignore_case(std::string_view lhs, std::string_view rhs)
++{
++	return lhs.size() == rhs.size() && std::equal(lhs.begin(), lhs.end(), rhs.begin(), [](char left, char right)
++	{
++		return std::tolower(static_cast<unsigned char>(left)) == std::tolower(static_cast<unsigned char>(right));
++	});
+ }
+ 
+-static std::string u16_se_to_string(const char16_t* bytes, std::size_t count)
++std::string case_fold_ascii(std::string value)
+ {
+-	auto seBytes = reinterpret_cast<const se_t<char16_t, true, alignof(char16_t)>*>(bytes);
++	std::transform(value.begin(), value.end(), value.begin(), [](char value)
++	{
++		return static_cast<char>(std::tolower(static_cast<unsigned char>(value)));
++	});
++	return value;
++}
+ 
+-	std::vector<char16_t> neBytes(count);
+-	for (std::size_t i = 0; i < count; ++i)
++bool checked_add(u64 lhs, u64 rhs, u64& result)
++{
++	if (lhs > std::numeric_limits<u64>::max() - rhs)
+ 	{
+-		neBytes[i] = seBytes[i];
++		return false;
+ 	}
+ 
+-	return u16_ne_to_string(neBytes.data(), neBytes.size());
++	result = lhs + rhs;
++	return true;
+ }
+ 
+-static std::string u16_be_to_string(const char16_t* bytes, std::size_t count)
++bool apply_seek_offset(u64 base, s64 offset, u64& result)
+ {
+-	if constexpr (std::endian::native == std::endian::big)
++	if (offset >= 0)
++	{
++		return checked_add(base, static_cast<u64>(offset), result);
++	}
++
++	const u64 magnitude = static_cast<u64>(-(offset + 1)) + 1;
++	if (magnitude > base)
++	{
++		return false;
++	}
++
++	result = base - magnitude;
++	return true;
++}
++
++std::string display_identifier(std::string_view raw_name)
++{
++	const std::size_t separator = raw_name.rfind(';');
++	if (separator == std::string_view::npos || separator + 1 == raw_name.size())
++	{
++		return std::string(raw_name);
++	}
++
++	const std::string_view version = raw_name.substr(separator + 1);
++	if (!std::all_of(version.begin(), version.end(), [](char value)
++	{
++		return std::isdigit(static_cast<unsigned char>(value));
++	}))
++	{
++		return std::string(raw_name);
++	}
++
++	return std::string(raw_name.substr(0, separator));
++}
++
++void append_utf8(std::string& output, u32 codepoint)
++{
++	if (codepoint <= 0x7f)
++	{
++		output.push_back(static_cast<char>(codepoint));
++	}
++	else if (codepoint <= 0x7ff)
++	{
++		output.push_back(static_cast<char>(0xc0 | (codepoint >> 6)));
++		output.push_back(static_cast<char>(0x80 | (codepoint & 0x3f)));
++	}
++	else if (codepoint <= 0xffff)
+ 	{
+-		return u16_ne_to_string(bytes, count);
++		output.push_back(static_cast<char>(0xe0 | (codepoint >> 12)));
++		output.push_back(static_cast<char>(0x80 | ((codepoint >> 6) & 0x3f)));
++		output.push_back(static_cast<char>(0x80 | (codepoint & 0x3f)));
+ 	}
+ 	else
+ 	{
+-		return u16_se_to_string(bytes, count);
++		output.push_back(static_cast<char>(0xf0 | (codepoint >> 18)));
++		output.push_back(static_cast<char>(0x80 | ((codepoint >> 12) & 0x3f)));
++		output.push_back(static_cast<char>(0x80 | ((codepoint >> 6) & 0x3f)));
++		output.push_back(static_cast<char>(0x80 | (codepoint & 0x3f)));
+ 	}
+ }
+ 
+-static std::string decodeString(std::string_view data,
+-	iso::StringEncoding encoding)
++std::optional<std::string> decode_string(std::string_view data, iso::StringEncoding encoding)
+ {
+-	switch (encoding)
++	if (encoding == iso::StringEncoding::ascii)
+ 	{
+-	case iso::StringEncoding::ascii:
+-		break;
++		return std::string(data);
++	}
+ 
+-	case iso::StringEncoding::utf16_be:
+-		return u16_be_to_string(reinterpret_cast<const char16_t*>(data.data()), data.size() / 2);
++	if (data.size() % 2 != 0)
++	{
++		return std::nullopt;
++	}
++
++	std::string output;
++	output.reserve(data.size());
++	for (std::size_t offset = 0; offset < data.size(); offset += 2)
++	{
++		const auto high_byte = static_cast<u8>(data[offset]);
++		const auto low_byte = static_cast<u8>(data[offset + 1]);
++		const u32 first = static_cast<u32>(high_byte) << 8 | low_byte;
++
++		if (first >= 0xd800 && first <= 0xdbff)
++		{
++			if (offset + 3 >= data.size())
++			{
++				return std::nullopt;
++			}
++
++			const auto next_high_byte = static_cast<u8>(data[offset + 2]);
++			const auto next_low_byte = static_cast<u8>(data[offset + 3]);
++			const u32 second = static_cast<u32>(next_high_byte) << 8 | next_low_byte;
++			if (second < 0xdc00 || second > 0xdfff)
++			{
++				return std::nullopt;
++			}
++
++			append_utf8(output, 0x10000 + ((first - 0xd800) << 10) + (second - 0xdc00));
++			offset += 2;
++		}
++		else if (first >= 0xdc00 && first <= 0xdfff)
++		{
++			return std::nullopt;
++		}
++		else
++		{
++			append_utf8(output, first);
++		}
+ 	}
+ 
+-	return std::string(data);
++	return output;
+ }
+ 
+-bool iso_dev::initialize()
++bool is_joliet_descriptor(const iso::PrimaryVolumeDescriptor& descriptor)
+ {
+-	constexpr std::size_t primaryVolumeDescOffset = 16;
+-	ensure(m_dev->block_size() >= sizeof(iso::VolumeHeader));
+-	std::vector<std::byte> block(m_dev->block_size());
++	return std::memcmp(descriptor.pad2, "%/@", 3) == 0 ||
++		std::memcmp(descriptor.pad2, "%/C", 3) == 0 ||
++		std::memcmp(descriptor.pad2, "%/E", 3) == 0;
++}
++
++class iso_file final : public fs::file_base
++{
++	struct extent
++	{
++		std::size_t first_block = 0;
++		u64 start = 0;
++		u64 length = 0;
++	};
+ 
+-	std::optional<iso::PrimaryVolumeDescriptor> primaryVolume;
+-	std::optional<iso::PrimaryVolumeDescriptor> supplementaryVolume;
++	block_dev* m_device = nullptr;
++	std::vector<extent> m_extents;
++	u64 m_length = 0;
++	u64 m_pos = 0;
++	fs::stat_t m_stat{};
+ 
+-	for (std::size_t i = 0; i < 256; ++i)
++	u64 read_extent(const extent& source, u64 offset, void* buffer, u64 count) const
+ 	{
+-		if (m_dev->read(primaryVolumeDescOffset + i, block.data(), 1) != 1)
++		const u64 block_size = m_device->block_size();
++		const u64 requested = std::min(count, source.length - offset);
++		u64 copied = 0;
++		auto* output = static_cast<u8*>(buffer);
++
++		while (copied < requested)
+ 		{
+-			break;
++			const u64 extent_offset = offset + copied;
++			const u64 block_offset = extent_offset % block_size;
++			const std::size_t block_index = source.first_block + static_cast<std::size_t>(extent_offset / block_size);
++			const u64 remaining = requested - copied;
++
++			if (block_offset == 0 && remaining >= block_size)
++			{
++				constexpr std::size_t max_blocks_per_read = 16 * 1024;
++				const std::size_t block_count = static_cast<std::size_t>(
++					std::min<u64>(remaining / block_size, max_blocks_per_read));
++				const std::size_t blocks_read = m_device->read(block_index, output + copied, block_count);
++				copied += blocks_read * block_size;
++
++				if (blocks_read != block_count)
++				{
++					break;
++				}
++
++				continue;
++			}
++
++			std::vector<u8> block(static_cast<std::size_t>(block_size));
++			if (m_device->read(block_index, block.data(), 1) != 1)
++			{
++				break;
++			}
++
++			const u64 bytes_read = std::min(remaining, block_size - block_offset);
++			std::memcpy(output + copied, block.data() + block_offset, static_cast<std::size_t>(bytes_read));
++			copied += bytes_read;
+ 		}
+ 
+-		auto header = reinterpret_cast<iso::VolumeHeader*>(block.data());
++		return copied;
++	}
+ 
+-		if (header->type == 255)
++public:
++	iso_file(block_dev* device, const IsoLogicalEntry& logical_entry)
++		: m_device(device)
++		, m_length(logical_entry.size)
++		, m_stat(logical_entry.entry.to_fs_stat())
++	{
++		m_stat.size = logical_entry.size;
++		m_extents.reserve(logical_entry.extents.size());
++
++		u64 start = 0;
++		for (const iso::DirEntry& entry : logical_entry.extents)
+ 		{
++			m_extents.push_back({
++				.first_block = static_cast<std::size_t>(entry.lba.value()) + entry.ext_attr_length,
++				.start = start,
++				.length = entry.length.value(),
++			});
++			start += entry.length.value();
++		}
++	}
++
++	fs::stat_t get_stat() override
++	{
++		return m_stat;
++	}
++
++	bool trunc(u64) override
++	{
++		fs::g_tls_error = fs::error::readonly;
++		return false;
++	}
++
++	u64 read(void* buffer, u64 count) override
++	{
++		const u64 result = read_at(m_pos, buffer, count);
++		m_pos += result;
++		return result;
++	}
++
++	u64 read_at(u64 offset, void* buffer, u64 count) override
++	{
++		if (offset >= m_length || count == 0)
++		{
++			return 0;
++		}
++
++		if (!buffer)
++		{
++			fs::g_tls_error = fs::error::inval;
++			return 0;
++		}
++
++		const u64 requested = std::min(count, m_length - offset);
++		u64 copied = 0;
++		auto* output = static_cast<u8*>(buffer);
++
++		for (const extent& source : m_extents)
++		{
++			if (source.length == 0 || offset >= source.start + source.length)
++			{
++				continue;
++			}
++
++			if (offset + copied < source.start)
++			{
++				continue;
++			}
++
++			const u64 extent_offset = offset + copied - source.start;
++			const u64 read = read_extent(source, extent_offset, output + copied, requested - copied);
++			copied += read;
++
++			if (read == 0 || copied == requested)
++			{
++				break;
++			}
++		}
++
++		return copied;
++	}
++
++	u64 write(const void*, u64) override
++	{
++		fs::g_tls_error = fs::error::readonly;
++		return 0;
++	}
++
++	u64 seek(s64 offset, fs::seek_mode whence) override
++	{
++		u64 base = 0;
++		switch (whence)
++		{
++		case fs::seek_set:
++			base = 0;
+ 			break;
++		case fs::seek_cur:
++			base = m_pos;
++			break;
++		case fs::seek_end:
++			base = m_length;
++			break;
++		default:
++			fs::g_tls_error = fs::error::inval;
++			return umax;
++		}
++
++		u64 next = 0;
++		if (!apply_seek_offset(base, offset, next))
++		{
++			fs::g_tls_error = fs::error::inval;
++			return umax;
+ 		}
+ 
++		m_pos = next;
++		return m_pos;
++	}
++
++	u64 size() override
++	{
++		return m_length;
++	}
++};
++} // namespace
++
++bool iso_dev::checked_add_u64(u64 lhs, u64 rhs, u64& result) const
++{
++	return checked_add(lhs, rhs, result);
++}
++
++std::optional<std::size_t> iso_dev::first_data_block(const iso::DirEntry& entry) const
++{
++	const u64 first = static_cast<u64>(entry.lba.value()) + entry.ext_attr_length;
++	if (first > std::numeric_limits<std::size_t>::max())
++	{
++		return std::nullopt;
++	}
++
++	return static_cast<std::size_t>(first);
++}
++
++bool iso_dev::validate_dir_entry(const iso::DirEntry& entry) const
++{
++	return entry.lba.valid() && entry.length.valid() && entry.sequence.valid() &&
++		entry.interleave_unit_size == 0 && entry.interleave_gap_size == 0;
++}
++
++bool iso_dev::validate_extent_range(const iso::DirEntry& entry) const
++{
++	if (!validate_dir_entry(entry) || !m_dev || m_dev->block_size() == 0 ||
++		m_dev->block_count() == 0 || m_volume_block_count == 0)
++	{
++		return false;
++	}
++
++	const auto first = first_data_block(entry);
++	if (!first || *first >= m_dev->block_count() || *first >= m_volume_block_count)
++	{
++		return false;
++	}
++
++	const u64 length = entry.length.value();
++	const u64 block_size = m_dev->block_size();
++	const u64 block_count = length / block_size + (length % block_size != 0);
++
++	return block_count <= m_dev->block_count() - *first &&
++		block_count <= static_cast<u64>(m_volume_block_count) - *first;
++}
++
++bool iso_dev::initialize()
++{
++	constexpr std::size_t descriptor_start = 16;
++	if (!m_dev || m_dev->block_size() < sizeof(iso::PrimaryVolumeDescriptor) ||
++		m_dev->block_count() <= descriptor_start)
++	{
++		fs::g_tls_error = fs::error::inval;
++		return false;
++	}
++
++	std::vector<std::byte> block(m_dev->block_size());
++	std::optional<iso::PrimaryVolumeDescriptor> primary;
++	std::optional<iso::PrimaryVolumeDescriptor> joliet;
++	bool terminated = false;
++
++	const std::size_t descriptor_count = std::min<std::size_t>(256, m_dev->block_count() - descriptor_start);
++	for (std::size_t index = 0; index < descriptor_count; ++index)
++	{
++		if (m_dev->read(descriptor_start + index, block.data(), 1) != 1)
++		{
++			fs::g_tls_error = fs::error::unknown;
++			return false;
++		}
++
++		const auto* header = reinterpret_cast<const iso::VolumeHeader*>(block.data());
+ 		if (std::memcmp(header->standard_id, "CD001", 5) != 0)
+ 		{
+ 			continue;
+ 		}
+ 
+-		if (header->type == 1)
++		if (header->type == 255)
+ 		{
+-			primaryVolume =
+-				*reinterpret_cast<iso::PrimaryVolumeDescriptor*>(block.data());
+-			continue;
++			terminated = true;
++			break;
+ 		}
+ 
+-		if (header->type == 2)
++		if (header->version != 1 || (header->type != 1 && header->type != 2))
+ 		{
+-			std::printf("found supplementary volume\n");
+-			supplementaryVolume =
+-				*reinterpret_cast<iso::PrimaryVolumeDescriptor*>(block.data());
+ 			continue;
+ 		}
++
++		const auto descriptor = *reinterpret_cast<const iso::PrimaryVolumeDescriptor*>(block.data());
++		if (header->type == 1)
++		{
++			primary = descriptor;
++		}
++		else if (is_joliet_descriptor(descriptor))
++		{
++			joliet = descriptor;
++		}
++	}
++
++	if (!terminated || !primary)
++	{
++		fs::g_tls_error = fs::error::inval;
++		return false;
+ 	}
+ 
+-	if (!primaryVolume)
++	const iso::PrimaryVolumeDescriptor& descriptor = joliet ? *joliet : *primary;
++	if (!descriptor.block_size.valid() || !descriptor.block_count.valid() ||
++		descriptor.block_size.value() != m_dev->block_size() ||
++		descriptor.block_count.value() == 0 ||
++		descriptor.block_count.value() > m_dev->block_count())
+ 	{
++		fs::g_tls_error = fs::error::inval;
+ 		return false;
+ 	}
+ 
+-	auto& pvd = supplementaryVolume ? *supplementaryVolume : *primaryVolume;
+-	m_encoding = supplementaryVolume ? iso::StringEncoding::utf16_be : iso::StringEncoding::ascii;
+-	m_root_dir = pvd.root;
++	m_encoding = joliet ? iso::StringEncoding::utf16_be : iso::StringEncoding::ascii;
++	m_root_dir = descriptor.root;
++	m_volume_block_count = descriptor.block_count.value();
+ 
++	if (m_root_dir.entry_length < sizeof(iso::DirEntry) + 1 ||
++		m_root_dir.filename_length != 1 ||
++		(m_root_dir.flags & iso::DirEntryFlags::Directory) != iso::DirEntryFlags::Directory ||
++		(m_root_dir.flags & iso::DirEntryFlags::MultiExtent) == iso::DirEntryFlags::MultiExtent ||
++		!validate_extent_range(m_root_dir))
++	{
++		fs::g_tls_error = fs::error::inval;
++		return false;
++	}
++
++	fs::g_tls_error = fs::error::ok;
+ 	return true;
+ }
+ 
+ bool iso_dev::stat(const std::string& path, fs::stat_t& info)
+ {
+-	auto optEntry = open_entry(path);
+-	if (!optEntry)
++	fs::g_tls_error = fs::error::ok;
++	const auto logical = open_logical_entry(path);
++	if (!logical)
+ 	{
+-		fs::g_tls_error = fs::error::noent;
+ 		return false;
+ 	}
+ 
+-	info = optEntry->to_fs_stat();
++	info = logical->entry.to_fs_stat();
++	info.size = logical->size;
+ 	return true;
+ }
+ 
+ bool iso_dev::statfs(const std::string& path, fs::device_stat& info)
+ {
+-	auto optEntry = open_entry(path);
+-	if (!optEntry)
++	fs::g_tls_error = fs::error::ok;
++	if (!open_logical_entry(path))
+ 	{
+-		fs::g_tls_error = fs::error::noent;
+ 		return false;
+ 	}
+ 
+ 	info = {
+ 		.block_size = m_dev->block_size(),
+-		.total_size = m_dev->size(),
++		.total_size = static_cast<u64>(m_volume_block_count) * m_dev->block_size(),
+ 		.total_free = 0,
+ 		.avail_free = 0,
+ 	};
+-
+ 	return true;
+ }
+ 
+ std::unique_ptr<fs::file_base> iso_dev::open(const std::string& path, rx::EnumBitSet<fs::open_mode> mode)
+ {
++	fs::g_tls_error = fs::error::ok;
+ 	if (mode & fs::write)
+ 	{
+ 		fs::g_tls_error = fs::error::acces;
+ 		return {};
+ 	}
+ 
+-	auto optEntry = open_entry(path);
+-	if (!optEntry)
++	const auto logical = open_logical_entry(path);
++	if (!logical)
+ 	{
+-		fs::g_tls_error = fs::error::noent;
+ 		return {};
+ 	}
+ 
+-	if ((optEntry->flags & iso::DirEntryFlags::Directory) == iso::DirEntryFlags::Directory)
++	if ((logical->entry.flags & iso::DirEntryFlags::Directory) == iso::DirEntryFlags::Directory)
+ 	{
+ 		fs::g_tls_error = fs::error::isdir;
+ 		return {};
+ 	}
+ 
+-	return read_file(*optEntry).release();
++	auto file = read_file(*logical);
++	return file ? file.release() : nullptr;
+ }
+ 
+ std::unique_ptr<fs::dir_base> iso_dev::open_dir(const std::string& path)
+ {
+-	auto optEntry = open_entry(path);
+-	if (!optEntry)
++	fs::g_tls_error = fs::error::ok;
++	const auto logical = open_logical_entry(path);
++	if (!logical)
+ 	{
+-		fs::g_tls_error = fs::error::noent;
+ 		return {};
+ 	}
+ 
+-	if ((optEntry->flags & iso::DirEntryFlags::Directory) != iso::DirEntryFlags::Directory)
++	if ((logical->entry.flags & iso::DirEntryFlags::Directory) != iso::DirEntryFlags::Directory)
+ 	{
+ 		fs::g_tls_error = fs::error::exist;
+ 		return {};
+ 	}
+ 
+-	auto items = read_dir(*optEntry);
+-	std::vector<fs::dir_entry> result_items(items.first.size());
++	const auto entries = read_logical_dir(logical->entry);
++	if (!entries)
++	{
++		return {};
++	}
+ 
+-	for (std::size_t i = 0; i < result_items.size(); ++i)
++	std::vector<fs::dir_entry> result;
++	result.reserve(entries->size());
++	for (const IsoLogicalEntry& logical_entry : *entries)
+ 	{
+-		result_items[i] = items.first[i].to_fs_entry(items.second[i]);
++		auto entry = logical_entry.entry.to_fs_entry(logical_entry.display_name);
++		entry.size = logical_entry.size;
++		result.emplace_back(std::move(entry));
+ 	}
+ 
+-	return std::make_unique<fs::virtual_dir>(std::move(result_items));
++	return std::make_unique<fs::virtual_dir>(std::move(result));
+ }
+ 
+-std::optional<iso::DirEntry>
+-iso_dev::open_entry(std::string_view path)
++std::optional<IsoLogicalEntry> iso_dev::open_logical_entry(std::string_view path)
+ {
+-	if (path == "/" || path == "\\" || path.empty())
+-	{
+-		return m_root_dir;
+-	}
+-
+-	auto item = m_root_dir;
++	IsoLogicalEntry current{
++		.entry = m_root_dir,
++		.extents = {m_root_dir},
++		.size = m_root_dir.length.value(),
++	};
+ 
+-	auto isStringEqNoCase = [](std::string_view lhs, std::string_view rhs)
++	while (!path.empty())
+ 	{
+-		if (lhs.size() != rhs.size())
++		if (path.front() == '/' || path.front() == '\\')
+ 		{
+-			return false;
++			path.remove_prefix(1);
++			continue;
+ 		}
+ 
+-		for (std::size_t i = 0; i < lhs.size(); ++i)
++		const std::size_t separator = path.find_first_of("/\\");
++		const std::string_view component = path.substr(0, separator);
++		if (separator == std::string_view::npos)
+ 		{
+-			if (std::tolower(lhs[i]) != std::tolower(rhs[i]))
+-			{
+-				return false;
+-			}
++			path = {};
++		}
++		else
++		{
++			path.remove_prefix(separator);
+ 		}
+ 
+-		return true;
+-	};
++		if ((current.entry.flags & iso::DirEntryFlags::Directory) != iso::DirEntryFlags::Directory)
++		{
++			fs::g_tls_error = fs::error::noent;
++			return std::nullopt;
++		}
+ 
+-	while (!path.empty())
+-	{
+-		auto sepPos = path.find_first_of("/\\");
+-		if (sepPos == 0)
++		const auto entries = read_logical_dir(current.entry);
++		if (!entries)
+ 		{
+-			path.remove_prefix(1);
+-			continue;
++			return std::nullopt;
+ 		}
+ 
+-		if ((item.flags & iso::DirEntryFlags::Directory) !=
+-			iso::DirEntryFlags::Directory)
++		const auto found = std::find_if(entries->begin(), entries->end(), [&](const IsoLogicalEntry& entry)
+ 		{
+-			return {};
++			return equals_ignore_case(entry.display_name, component);
++		});
++		if (found == entries->end())
++		{
++			fs::g_tls_error = fs::error::noent;
++			return std::nullopt;
+ 		}
+ 
+-		auto dirName = path.substr(0, sepPos);
+-		if (sepPos == std::string_view::npos)
++		current = *found;
++	}
++
++	return current;
++}
++
++std::optional<std::vector<IsoLogicalEntry>> iso_dev::read_logical_dir(const iso::DirEntry& entry)
++{
++	const auto records = read_dir_records(entry);
++	if (!records)
++	{
++		return std::nullopt;
++	}
++
++	std::vector<IsoLogicalEntry> logical_entries;
++	logical_entries.reserve(records->size());
++	std::unordered_set<std::string> exposed_names;
++
++	for (std::size_t index = 0; index < records->size();)
++	{
++		const IsoDirRecord& first = (*records)[index];
++		const bool directory = (first.entry.flags & iso::DirEntryFlags::Directory) == iso::DirEntryFlags::Directory;
++		const bool continued = (first.entry.flags & iso::DirEntryFlags::MultiExtent) == iso::DirEntryFlags::MultiExtent;
++
++		if (directory && continued)
+ 		{
+-			path = {};
++			fs::g_tls_error = fs::error::inval;
++			return std::nullopt;
+ 		}
+-		else
++
++		IsoLogicalEntry logical{
++			.entry = first.entry,
++			.raw_name = first.raw_name,
++			.display_name = first.display_name,
++		};
++
++		const std::string destination_key = case_fold_ascii(logical.display_name);
++		if (!exposed_names.emplace(destination_key).second)
+ 		{
+-			path.remove_prefix(sepPos);
++			fs::g_tls_error = fs::error::inval;
++			return std::nullopt;
+ 		}
+ 
+-		auto items = read_dir(item);
++		if (!continued)
++		{
++			if (!validate_extent_range(first.entry))
++			{
++				fs::g_tls_error = fs::error::inval;
++				return std::nullopt;
++			}
+ 
+-		bool found = false;
+-		for (std::size_t i = 0; i < items.first.size(); ++i)
++			logical.extents.push_back(first.entry);
++			logical.size = first.entry.length.value();
++			logical_entries.emplace_back(std::move(logical));
++			++index;
++			continue;
++		}
++
++		const u16 sequence = first.entry.sequence.value();
++		bool terminated = false;
++		while (index < records->size())
+ 		{
+-			if (!isStringEqNoCase(items.second[i], dirName))
++			const IsoDirRecord& extent = (*records)[index];
++			if (extent.raw_name != first.raw_name || extent.entry.sequence.value() != sequence ||
++				(extent.entry.flags & iso::DirEntryFlags::Directory) == iso::DirEntryFlags::Directory ||
++				!validate_extent_range(extent.entry))
+ 			{
+-				continue;
++				fs::g_tls_error = fs::error::inval;
++				return std::nullopt;
+ 			}
+ 
+-			item = items.first[i];
+-			found = true;
+-			break;
++			u64 total = 0;
++			if (!checked_add_u64(logical.size, extent.entry.length.value(), total))
++			{
++				fs::g_tls_error = fs::error::inval;
++				return std::nullopt;
++			}
++
++			logical.size = total;
++			logical.extents.push_back(extent.entry);
++			++index;
++
++			const bool has_more = (extent.entry.flags & iso::DirEntryFlags::MultiExtent) == iso::DirEntryFlags::MultiExtent;
++			if (!has_more)
++			{
++				terminated = true;
++				break;
++			}
++
++			if (extent.entry.length.value() == 0 || extent.entry.length.value() % m_dev->block_size() != 0)
++			{
++				fs::g_tls_error = fs::error::inval;
++				return std::nullopt;
++			}
+ 		}
+ 
+-		if (!found)
++		if (!terminated)
+ 		{
+-			return {};
++			fs::g_tls_error = fs::error::inval;
++			return std::nullopt;
+ 		}
++
++		logical_entries.emplace_back(std::move(logical));
+ 	}
+ 
+-	return item;
++	return logical_entries;
+ }
+ 
+-std::pair<std::vector<iso::DirEntry>, std::vector<std::string>>
+-iso_dev::read_dir(const iso::DirEntry& entry)
++std::optional<std::vector<IsoDirRecord>> iso_dev::read_dir_records(const iso::DirEntry& entry)
+ {
+-	if ((entry.flags & iso::DirEntryFlags::Directory) !=
+-		iso::DirEntryFlags::Directory)
++	if ((entry.flags & iso::DirEntryFlags::Directory) != iso::DirEntryFlags::Directory ||
++		!validate_extent_range(entry))
+ 	{
+-		return {};
++		fs::g_tls_error = fs::error::inval;
++		return std::nullopt;
+ 	}
+ 
+-	auto block_size = m_dev->block_size();
+-	auto total_block_count = (entry.length.value() + block_size - 1) / block_size;
+-	auto total_buffer_block_count = std::min<std::size_t>(total_block_count, 10);
++	const std::size_t block_size = m_dev->block_size();
++	const u64 directory_size = entry.length.value();
++	if (directory_size == 0)
++	{
++		return std::vector<IsoDirRecord>{};
++	}
+ 
+-	std::vector<std::byte> buffer(total_buffer_block_count * block_size);
+-	auto first_block = entry.lba.value();
++	const auto first = first_data_block(entry);
++	if (!first)
++	{
++		fs::g_tls_error = fs::error::inval;
++		return std::nullopt;
++	}
+ 
+-	std::vector<iso::DirEntry> isoEntries;
+-	std::vector<std::string> names;
++	const std::size_t total_blocks = static_cast<std::size_t>(
++		directory_size / block_size + (directory_size % block_size != 0));
++	const std::size_t buffer_blocks = std::min<std::size_t>(total_blocks, 10);
++	std::vector<std::byte> buffer(buffer_blocks * block_size);
++	std::vector<IsoDirRecord> records;
++	std::size_t completed_blocks = 0;
+ 
+-	for (std::size_t block = first_block, end = first_block + total_block_count;
+-		block < end;)
++	while (completed_blocks < total_blocks)
+ 	{
+-		auto block_count =
+-			m_dev->read(block, buffer.data(), total_buffer_block_count);
+-		block += block_count;
++		const std::size_t requested_blocks = std::min(buffer_blocks, total_blocks - completed_blocks);
++		const std::size_t blocks_read = m_dev->read(*first + completed_blocks, buffer.data(), requested_blocks);
++		if (blocks_read != requested_blocks)
++		{
++			fs::g_tls_error = fs::error::unknown;
++			return std::nullopt;
++		}
+ 
+-		std::size_t buffer_offset = 0;
+-		std::size_t buffer_size = block_count * block_size;
++		const u64 bytes_before = static_cast<u64>(completed_blocks) * block_size;
++		const std::size_t valid_bytes = static_cast<std::size_t>(
++			std::min<u64>(static_cast<u64>(blocks_read) * block_size, directory_size - bytes_before));
++		completed_blocks += blocks_read;
+ 
+-		while (buffer_offset < buffer_size)
++		std::size_t offset = 0;
++		while (offset < valid_bytes)
+ 		{
+-			auto item = reinterpret_cast<const iso::DirEntry*>(buffer.data() +
+-															   buffer_offset);
+-			if (item->entry_length == 0)
++			const u8 entry_length = std::to_integer<u8>(buffer[offset]);
++			if (entry_length == 0)
+ 			{
+-				buffer_offset += block_size;
+-				buffer_offset &= ~(block_size - 1);
++				offset = std::min(valid_bytes, (offset / block_size + 1) * block_size);
+ 				continue;
+ 			}
+ 
+-			auto filename_end =
+-				sizeof(iso::DirEntry) +
+-				((item->filename_length + 1) & ~static_cast<std::size_t>(1));
+-
+-			if (item->entry_length < filename_end)
++			const std::size_t bytes_left = valid_bytes - offset;
++			const std::size_t bytes_left_in_block = block_size - offset % block_size;
++			if (entry_length < sizeof(iso::DirEntry) || entry_length > bytes_left || entry_length > bytes_left_in_block)
+ 			{
+-				buffer_offset += item->entry_length;
+-				continue;
++				fs::g_tls_error = fs::error::inval;
++				return std::nullopt;
+ 			}
+ 
+-			buffer_offset += item->entry_length;
+-
+-			if (item->filename_length == 0 ||
+-				item->filename_length + sizeof(iso::DirEntry) > item->entry_length)
++			const auto* item = reinterpret_cast<const iso::DirEntry*>(buffer.data() + offset);
++			const std::size_t filename_size = item->filename_length;
++			const std::size_t minimum_size = sizeof(iso::DirEntry) + filename_size + (filename_size % 2 == 0);
++			if (filename_size == 0 || minimum_size > entry_length || !validate_dir_entry(*item))
+ 			{
+-				continue;
++				fs::g_tls_error = fs::error::inval;
++				return std::nullopt;
+ 			}
+ 
+-			auto filename =
+-				item->filename_length > 1 ? decodeString({reinterpret_cast<const char*>(item + 1),
+-															 item->filename_length},
+-												m_encoding) :
+-											std::string{};
+-
+-			if (item->filename_length == 1)
++			const auto* filename = reinterpret_cast<const char*>(item + 1);
++			IsoDirRecord record{.entry = *item};
++			if (filename_size == 1 && (filename[0] == 0 || filename[0] == 1))
+ 			{
+-				char c = *reinterpret_cast<const char*>(item + 1);
+-				// can be special name
+-				if (c == 0)
+-				{
+-					filename = ".";
+-				}
+-				else if (c == 1)
++				record.is_special = true;
++				record.raw_name = filename[0] == 0 ? "." : "..";
++				record.display_name = record.raw_name;
++			}
++			else
++			{
++				const auto decoded = decode_string({filename, filename_size}, m_encoding);
++				if (!decoded)
+ 				{
+-					filename = "..";
++					fs::g_tls_error = fs::error::inval;
++					return std::nullopt;
+ 				}
++
++				record.raw_name = *decoded;
++
++				record.display_name = display_identifier(record.raw_name);
+ 			}
+ 
+-			filename = filename.substr(0, filename.find(';'));
+-			if (filename.empty())
++			if (record.raw_name.empty() || record.display_name.empty() ||
++				record.raw_name.find('\0') != std::string::npos ||
++				record.raw_name.find('/') != std::string::npos ||
++				record.raw_name.find('\\') != std::string::npos ||
++				(!record.is_special && (record.display_name == "." || record.display_name == "..")))
+ 			{
+-				continue;
++				fs::g_tls_error = fs::error::inval;
++				return std::nullopt;
+ 			}
+ 
+-			isoEntries.push_back(*item);
+-			names.emplace_back(filename);
++			records.emplace_back(std::move(record));
++			offset += entry_length;
+ 		}
+ 	}
+ 
+-	return {std::move(isoEntries), std::move(names)};
++	return records;
+ }
+ 
+-fs::file iso_dev::read_file(const iso::DirEntry& entry)
++fs::file iso_dev::read_file(const IsoLogicalEntry& entry)
+ {
+-	if ((entry.flags & iso::DirEntryFlags::Directory) ==
+-		iso::DirEntryFlags::Directory)
++	if ((entry.entry.flags & iso::DirEntryFlags::Directory) == iso::DirEntryFlags::Directory || entry.extents.empty())
+ 	{
++		fs::g_tls_error = fs::error::isdir;
+ 		return {};
+ 	}
+ 
+-	if (entry.length.value() == 0)
++	for (const iso::DirEntry& extent : entry.extents)
+ 	{
+-		return fs::make_stream<std::vector<std::uint8_t>>();
+-	}
+-
+-	auto block_size = m_dev->block_size();
+-	auto block_count = (entry.length.value() + block_size - 1) / block_size;
+-
+-	std::vector<std::uint8_t> data;
+-	data.resize(block_count * block_size);
+-	if (!m_dev->read(entry.lba.value(), data.data(), block_count))
+-	{
+-		return {};
++		if (!validate_extent_range(extent))
++		{
++			fs::g_tls_error = fs::error::inval;
++			return {};
++		}
+ 	}
+ 
+-	data.resize(entry.length.value());
+-	return fs::make_stream(std::move(data), entry.to_fs_stat());
++	fs::file result;
++	result.reset(std::make_unique<iso_file>(m_dev.get(), entry));
++	return result;
+ }
+diff --git a/rpcs3/dev/iso.hpp b/rpcs3/dev/iso.hpp
+index 7879252f7..1520e4ac3 100644
+--- a/rpcs3/dev/iso.hpp
++++ b/rpcs3/dev/iso.hpp
+@@ -6,7 +6,9 @@
+ #include "util/types.hpp"
+ #include <bit>
+ #include <optional>
++#include <string>
+ #include <string_view>
++#include <vector>
+ 
+ namespace iso
+ {
+@@ -28,6 +30,11 @@ namespace iso
+ 				return be;
+ 			}
+ 		}
++
++		bool valid() const
++		{
++			return static_cast<T>(le) == static_cast<T>(be);
++		}
+ 	};
+ 
+ 	struct PrimaryVolumeDescriptorDateTime
+@@ -96,6 +103,7 @@ namespace iso
+ 		File = 1 << 2,
+ 		ExtAttr = 1 << 3,
+ 		Permissions = 1 << 4,
++		MultiExtent = 1 << 7,
+ 	};
+ 
+ 	constexpr DirEntryFlags operator&(DirEntryFlags lhs, DirEntryFlags rhs)
+@@ -206,11 +214,29 @@ namespace iso
+ #pragma pack(pop)
+ } // namespace iso
+ 
++struct IsoDirRecord
++{
++	iso::DirEntry entry{};
++	std::string raw_name;
++	std::string display_name;
++	bool is_special = false;
++};
++
++struct IsoLogicalEntry
++{
++	iso::DirEntry entry{};
++	std::string raw_name;
++	std::string display_name;
++	std::vector<iso::DirEntry> extents;
++	u64 size = 0;
++};
++
+ class iso_dev final : public fs::device_base
+ {
+ 	std::unique_ptr<block_dev> m_dev;
+ 	iso::DirEntry m_root_dir;
+ 	iso::StringEncoding m_encoding = iso::StringEncoding::ascii;
++	u32 m_volume_block_count = 0;
+ 
+ public:
+ 	iso_dev() = default;
+@@ -236,7 +262,12 @@ public:
+ private:
+ 	bool initialize();
+ 
+-	std::optional<iso::DirEntry> open_entry(std::string_view path);
+-	std::pair<std::vector<iso::DirEntry>, std::vector<std::string>> read_dir(const iso::DirEntry& entry);
+-	fs::file read_file(const iso::DirEntry& entry);
++	std::optional<IsoLogicalEntry> open_logical_entry(std::string_view path);
++	std::optional<std::vector<IsoLogicalEntry>> read_logical_dir(const iso::DirEntry& entry);
++	std::optional<std::vector<IsoDirRecord>> read_dir_records(const iso::DirEntry& entry);
++	fs::file read_file(const IsoLogicalEntry& entry);
++	bool validate_extent_range(const iso::DirEntry& entry) const;
++	bool validate_dir_entry(const iso::DirEntry& entry) const;
++	bool checked_add_u64(u64 lhs, u64 rhs, u64& result) const;
++	std::optional<std::size_t> first_data_block(const iso::DirEntry& entry) const;
+ };
+diff --git a/rpcs3/util/File.cpp b/rpcs3/util/File.cpp
+index c41e82ebf..6db9f2e65 100644
+--- a/rpcs3/util/File.cpp
++++ b/rpcs3/util/File.cpp
+@@ -706,16 +706,26 @@ namespace fs
+ 		{
+ 			u64 result = 0;
+ 
+-			// For safety; see read()
+-			while (auto r = ::pread(m_fd, buffer, count, offset))
++			while (count)
+ 			{
+-				ensure(r > 0); // "file::read_at"
+-				count -= r;
+-				offset += r;
+-				result += r;
+-				buffer = static_cast<u8*>(buffer) + r;
+-				if (!count)
++				const auto r = ::pread(m_fd, buffer, count, static_cast<off_t>(offset));
++				if (r < 0)
++				{
++					if (errno == EINTR)
++					{
++						continue;
++					}
++					g_tls_error = to_error(errno);
+ 					break;
++				}
++				if (r == 0)
++				{
++					break;
++				}
++				count -= static_cast<u64>(r);
++				offset += static_cast<u64>(r);
++				result += static_cast<u64>(r);
++				buffer = static_cast<u8*>(buffer) + r;
+ 			}
+ 
+ 			return result;
 diff --git a/rpcs3/util/JIT.h b/rpcs3/util/JIT.h
 index a43a74488..e3bfbf5e7 100644
 --- a/rpcs3/util/JIT.h
@@ -1269,3 +4847,15 @@ index 60cbeba84..7fd826ad9 100644
  }
  
  struct compressed_zstd_stream_data;
+diff --git a/rx/include/rx/types.hpp b/rx/include/rx/types.hpp
+index ae4298642..eef6d549c 100644
+--- a/rx/include/rx/types.hpp
++++ b/rx/include/rx/types.hpp
+@@ -8,6 +8,7 @@
+ #include <cstdint>
+ #include <cstring>
+ #include <memory>
++#include <new>
+ #include <source_location>
+ #include <string>
+ #include <tuple>

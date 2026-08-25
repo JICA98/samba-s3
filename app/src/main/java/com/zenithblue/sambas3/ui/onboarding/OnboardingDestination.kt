@@ -36,6 +36,7 @@ import com.zenithblue.sambas3.utils.BundledDriverVisibility
 import com.zenithblue.sambas3.utils.GpuDriverSelection
 import com.zenithblue.sambas3.utils.FileUtil
 import com.zenithblue.sambas3.utils.GameFolderMatch
+import com.zenithblue.sambas3.utils.Telemetry
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -266,10 +267,13 @@ private suspend fun loadDriverInfo(
     runtimeAvailable: Boolean,
 ): LoadedDriverInfo {
     val selected = GeneralSettings["selected_gpu_driver"].string("Default")
-    if (BuildConfig.IS_PLAYSTORE_BUILD) {
+    if (BuildConfig.INCLUDE_BUNDLED_TURNIP_DRIVERS) {
         try {
+            if (Telemetry.isEnabled) Telemetry.logS3Drv("event=catalog_load result=attempt session=${Telemetry.sessionId}")
             GpuDriverHelper.syncBundledDrivers(context)
-        } catch (_: Exception) {
+            if (Telemetry.isEnabled) Telemetry.logS3Drv("event=bundled_sync result=ok session=${Telemetry.sessionId}")
+        } catch (e: Exception) {
+            if (Telemetry.isEnabled) Telemetry.logS3Drv("event=bundled_sync result=failed error=${e.message} session=${Telemetry.sessionId}")
             // The existing Play Store driver screen remains authoritative if
             // bundled synchronization is temporarily unavailable.
         }
@@ -302,7 +306,7 @@ private suspend fun loadDriverInfo(
         else -> context.getString(R.string.onboarding_driver_system_fallback)
     }
     val selectableDrivers = if (gpu.isAdreno && gpu.isArm64 && customSupported) {
-        val visible = if (BuildConfig.IS_PLAYSTORE_BUILD) {
+        val visible = if (BuildConfig.INCLUDE_BUNDLED_TURNIP_DRIVERS) {
             val catalog = GpuDriverHelper.loadBundledCatalog(context)?.drivers.orEmpty()
             BundledDriverVisibility.filterForDevice(
                 installed = installed,

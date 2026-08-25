@@ -49,6 +49,7 @@ struct RPCSXApi {
   std::string (*patchEngineVersion)();
   std::string (*patchesList)();
   bool (*patchSetEnabled)(std::string_view hash, std::string_view description, bool enabled);
+  const char* (*getPpuManifestKey)();
   void *(*setCustomDriver)(void *driverHandle);
 };
 
@@ -114,6 +115,7 @@ struct RPCSXLibrary : RPCSXApi {
     result.patchEngineVersion = reinterpret_cast<decltype(patchEngineVersion)>(dlsym(handle, "_rpcsx_patchEngineVersion"));
     result.patchesList = reinterpret_cast<decltype(patchesList)>(dlsym(handle, "_rpcsx_patchesList"));
     result.patchSetEnabled = reinterpret_cast<decltype(patchSetEnabled)>(dlsym(handle, "_rpcsx_patchSetEnabled"));
+    result.getPpuManifestKey = reinterpret_cast<decltype(getPpuManifestKey)>(dlsym(handle, "_rpcsx_getPpuManifestKey"));
     result.setCustomDriver = reinterpret_cast<decltype(setCustomDriver)>(dlsym(handle, "_rpcsx_setCustomDriver"));
     result.setCompileProgressListener = reinterpret_cast<decltype(setCompileProgressListener)>(dlsym(handle, "_rpcsx_setCompileProgressListener"));
     result.supportsCompileProgressEvents = reinterpret_cast<decltype(supportsCompileProgressEvents)>(dlsym(handle, "_rpcsx_supportsCompileProgressEvents"));
@@ -382,4 +384,11 @@ extern "C" JNIEXPORT jboolean JNICALL
 Java_com_zenithblue_sambas3_RPCSX_supportsCompileProgressEvents(JNIEnv *env, jobject thiz) {
   return rpcsxLib.setCompileProgressListener != nullptr && rpcsxLib.supportsCompileProgressEvents != nullptr
       ? JNI_TRUE : JNI_FALSE;
+}
+
+extern "C" JNIEXPORT jstring JNICALL
+Java_com_zenithblue_sambas3_RPCSX_getPpuManifestKey(JNIEnv *env, jobject, jstring) {
+  if (!rpcsxLib.getPpuManifestKey) return wrap(env, std::string{});
+  const char* key = rpcsxLib.getPpuManifestKey();
+  return wrap(env, key ? std::string(key) : std::string{});
 }

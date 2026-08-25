@@ -6,11 +6,22 @@ import android.content.SharedPreferences
 
 object GeneralSettings {
 
+    const val ENABLE_PERF_CAPTURE = "enablePerfCapture"
+    const val FIRMWARE_PPU_WARMUP = "firmwarePpuWarmup"
+
     private lateinit var prefs: SharedPreferences
 
     fun init(context: Context) {
         prefs = context.getSharedPreferences("app_prefs", Context.MODE_PRIVATE)
     }
+
+    var enablePerfCapture: Boolean
+        get() = prefs.getBoolean(ENABLE_PERF_CAPTURE, try { com.zenithblue.sambas3.BuildConfig.DEBUG } catch (_: Exception) { false })
+        set(value) { prefs.edit().putBoolean(ENABLE_PERF_CAPTURE, value).apply() }
+
+    var firmwarePpuWarmup: Boolean
+        get() = prefs.getBoolean(FIRMWARE_PPU_WARMUP, false)
+        set(value) { prefs.edit().putBoolean(FIRMWARE_PPU_WARMUP, value).apply() }
 
     operator fun get(key: String): Any? = with(prefs) {
         when {

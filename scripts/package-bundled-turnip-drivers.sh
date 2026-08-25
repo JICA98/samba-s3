@@ -9,6 +9,12 @@ OUT_DIR="${ROOT}/app/src/playstore/assets/bundled_gpu_drivers"
 LIC_DIR="${ROOT}/app/src/playstore/assets/licenses"
 WORKDIR="$(mktemp -d)"
 trap 'rm -rf "$WORKDIR"' EXIT
+# Allow pinned Mesa commit injection for reproducible provenance
+MESA_COMMIT="${MESA_COMMIT:-unknown}"
+if [[ "${1:-}" == "--mesa-commit" && -n "${2:-}" ]]; then
+  MESA_COMMIT="$2"
+  shift 2
+fi
 
 mkdir -p "$OUT_DIR" "$LIC_DIR"
 
@@ -226,7 +232,7 @@ main() {
     "turnip-26.1.4-sambas3.zip" \
     "$z2614" \
     "https://gitlab.freedesktop.org/mesa/mesa" \
-    "unknown" \
+    "$MESA_COMMIT" \
     "Mesa Turnip 26.1.4 — recommended")"
 
   p2534="$(package_one \
@@ -237,7 +243,7 @@ main() {
     "turnip-25.3.4-sambas3.zip" \
     "$z2534" \
     "https://gitlab.freedesktop.org/mesa/mesa" \
-    "unknown" \
+    "$MESA_COMMIT" \
     "Mesa Turnip 25.3.4 — compatibility")"
 
   pa8xx="$(package_one \
@@ -248,7 +254,7 @@ main() {
     "turnip-a8xx-v29-sambas3.zip" \
     "$za8xx" \
     "upstream A8XX Turnip package (a8xx-turnip-gen8-V29)" \
-    "unknown" \
+    "$MESA_COMMIT" \
     "Turnip A8XX v29 normal/non-sync — experimental")"
 
   local h2614 h2534 ha8xx
@@ -270,7 +276,7 @@ main() {
       "experimental": false,
       "sha256": "${h2614}",
       "sourceVersion": "Mesa 26.1.4",
-      "sourceCommit": "unknown",
+      "sourceCommit": "${MESA_COMMIT}",
       "sourceRepo": "https://gitlab.freedesktop.org/mesa/mesa",
       "notes": "Default recommended Turnip for Adreno 6xx/7xx. Not auto-selected on first launch."
     },
@@ -284,7 +290,7 @@ main() {
       "experimental": false,
       "sha256": "${h2534}",
       "sourceVersion": "Mesa 25.3.4",
-      "sourceCommit": "unknown",
+      "sourceCommit": "${MESA_COMMIT}",
       "sourceRepo": "https://gitlab.freedesktop.org/mesa/mesa",
       "notes": "Fallback when 26.1.4 regresses."
     },
@@ -299,7 +305,7 @@ main() {
       "experimental": true,
       "sha256": "${ha8xx}",
       "sourceVersion": "A8XX v29",
-      "sourceCommit": "unknown",
+      "sourceCommit": "${MESA_COMMIT}",
       "sourceRepo": "upstream a8xx-turnip-gen8-V29 (normal/non-sync)",
       "notes": "Experimental. Never auto-selected. Adreno 830 uses SYSMEM when selected."
     }

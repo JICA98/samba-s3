@@ -12,6 +12,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
+import com.zenithblue.sambas3.utils.Telemetry
 import java.io.File
 import java.security.InvalidParameterException
 import kotlin.concurrent.thread
@@ -116,7 +117,7 @@ class GameRepository {
                     File(RPCSX.rootDirectory + "games.json").writeText(
                         Json.encodeToString(instance.games.map { game ->
                             toInfo(game.info)
-                        }.filter { info -> info.path != "$" })
+                        }.filter { info -> info.path != "$" && !info.path.startsWith("content://") })
                     )
                 }
             } catch (e: Exception) {
@@ -205,7 +206,7 @@ class GameRepository {
             val identity = GameIdentity.key(info.path, info.name)
             val existsGame = instance.games.find { game ->
                 game.info.path == info.path ||
-                    (game.info.path != "$" &&
+                    (game.info.path != "$" && !game.info.path.startsWith("content://") &&
                         GameIdentity.key(game.info.path, game.info.name.value) == identity)
             }
 
@@ -213,6 +214,9 @@ class GameRepository {
                 val newGame = Game(toStore(info))
                 addInstallProgressIfNeeded(newGame, progressId)
                 instance.games.add(0, newGame)
+                if (progressId >= 0 && Telemetry.isEnabled) {
+                    Telemetry.emitProgressAttach(progressId, identity, if (info.path.startsWith("content://")) "source" else "installed")
+                }
                 return
             }
 
@@ -224,13 +228,18 @@ class GameRepository {
                 addInstallProgressIfNeeded(replacement, progressId)
                 instance.games.remove(existsGame)
                 instance.games.add(0, replacement)
+                if (Telemetry.isEnabled) Telemetry.emitIdentityMerge(GameIdentity.key(existsGame.info.path, existsGame.info.name.value), identity, progressId)
                 return
             }
 
             existsGame.info.name.value = info.name ?: existsGame.info.name.value
             existsGame.info.iconPath.value = info.iconPath ?: existsGame.info.iconPath.value
             existsGame.info.gameFlags.intValue = info.gameFlags
+            val hadProgress = existsGame.findProgress(GameProgressType.Install) != null
             addInstallProgressIfNeeded(existsGame, progressId)
+            if (progressId >= 0 && !hadProgress && existsGame.findProgress(GameProgressType.Install) != null && Telemetry.isEnabled) {
+                Telemetry.emitProgressAttach(progressId, identity, "installed")
+            }
         }
 
         private fun addInstallProgressIfNeeded(game: Game, progressId: Long) {
@@ -248,8 +257,14 @@ class GameRepository {
         }
 
         private fun deduplicateGamesLocked() {
+            // Debug invariant: visible cards with same key <=1
+            if (Telemetry.isEnabled) {
+                val counts = instance.games.groupingBy { GameIdentity.key(it.info.path, it.info.name.value) }.eachCount()
+                for ((k, c) in counts) if (c > 1) Telemetry.emitDuplicateCardError(k, c)
+            }
             val unique = LinkedHashMap<String, Game>()
             instance.games.toList().forEach { game ->
+                // Filter out content:// provisional from save but keep for dedupe check
                 val key = GameIdentity.key(game.info.path, game.info.name.value)
                 val existing = unique[key]
                 if (existing == null) {
@@ -291,13 +306,21 @@ class GameRepository {
                 val game = Game(GameInfoStore("$"))
                 game.addProgress(GameProgress(progressId, GameProgressType.Install))
                 instance.games.add(0, game)
+                if (Telemetry.isEnabled) Telemetry.emitPlaceholderCreated(progressId)
             }
         }
 
         fun clearProgress(progressId: Long) {
             synchronized(instance) {
+                val affected = instance.games.filter { g -> g.findProgress(GameProgressType.Install)?.any { it.id == progressId } == true }
                 instance.games.forEach { game -> game.progressList.removeIf { progress -> progress.id == progressId } }
                 instance.games.removeIf { game -> game.info.path == "$" && game.progressList.isEmpty() }
+                if (Telemetry.isEnabled) {
+                    for (g in affected) {
+                        val key = GameIdentity.key(g.info.path, g.info.name.value)
+                        Telemetry.emitProgressDetach(progressId, key, "complete")
+                    }
+                }
             }
         }
 

@@ -102,6 +102,7 @@ class RPCSX {
     external fun patchEngineVersion(): String
     external fun patchesList(): String
     external fun patchSetEnabled(hash: String, description: String, enabled: Boolean): Boolean
+    external fun getPpuManifestKey(titleId: String): String?
 
     @Keep
     fun interface CompileProgressCallback {

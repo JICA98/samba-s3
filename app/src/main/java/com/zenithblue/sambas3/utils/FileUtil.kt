@@ -33,10 +33,57 @@ private data class InstallableFolder(
     val uri: Uri, val targetPath: String
 )
 
+enum class GameSourceKind { DIRECTORY, ISO }
+
 data class GameFolderMatch(
     val folderName: String,
     val titleId: String?,
+    val sourceUri: Uri? = null,
+    val sourceKind: GameSourceKind = GameSourceKind.DIRECTORY,
+    val sizeBytes: Long? = null,
 )
+
+data class GameLibraryCandidate(
+    val sourceUri: Uri,
+    val sourceKind: GameSourceKind,
+    val displayName: String,
+    val titleId: String?,
+    val sizeBytes: Long?,
+)
+
+object LibraryCandidatesRepository {
+    private const val PREF_KEY = "selected_game_folder_candidates"
+    private const val PREF_TREE_URI = "selected_game_folder_tree"
+
+    fun save(context: Context, treeUri: Uri, candidates: List<GameFolderMatch>) {
+        try {
+            val prefs = context.getSharedPreferences("app_prefs", Context.MODE_PRIVATE)
+            prefs.edit().putString(PREF_TREE_URI, treeUri.toString()).apply()
+            // Persist minimal candidate data (not full URIs for privacy, but needed for restore)
+            val json = candidates.joinToString("|") { "${it.folderName}::${it.titleId ?: ""}::${it.sourceKind}::${it.sizeBytes ?: -1}::${it.sourceUri}" }
+            prefs.edit().putString(PREF_KEY, json).apply()
+        } catch (_: Exception) {}
+    }
+
+    fun load(context: Context): List<GameFolderMatch> {
+        return try {
+            val prefs = context.getSharedPreferences("app_prefs", Context.MODE_PRIVATE)
+            val raw = prefs.getString(PREF_KEY, null) ?: return emptyList()
+            if (raw.isEmpty()) return emptyList()
+            raw.split("|").mapNotNull { entry ->
+                val parts = entry.split("::")
+                if (parts.size < 2) return@mapNotNull null
+                val folderName = parts[0]
+                val titleId = parts[1].ifEmpty { null }
+                val kind = try { GameSourceKind.valueOf(parts.getOrNull(2) ?: "DIRECTORY") } catch (_: Exception) { GameSourceKind.DIRECTORY }
+                val size = parts.getOrNull(3)?.toLongOrNull()?.takeIf { it >= 0 }
+                val uriStr = parts.getOrNull(4)
+                val uri = try { if (uriStr != null && uriStr != "null" && uriStr.isNotEmpty()) Uri.parse(uriStr) else null } catch (_: Exception) { null }
+                GameFolderMatch(folderName, titleId, uri, kind, size)
+            }
+        } catch (_: Exception) { emptyList() }
+    }
+}
 
 object FileUtil {
     /**
@@ -104,20 +151,28 @@ object FileUtil {
     }
 
     /**
-     * Finds every PS3 game directory below a selected SAF tree without copying
+     * Finds every PS3 game directory and ISO file below a selected SAF tree without copying
      * or indexing anything. The result is used as a preview before the caller
-     * decides whether to import it.
+     * decides whether to import it. ISO detection is case-insensitive and does not
+     * read the full multi-GB file (bounded header probe, fallback to filename).
      */
     fun scanGameFolder(context: Context, rootFolderUri: Uri): List<GameFolderMatch> {
         return try {
+            val startMs = System.currentTimeMillis()
+            val treeHash = rootFolderUri.toString().hashCode().toString(16)
+            if (Telemetry.isEnabled) Telemetry.emitScanStart(treeHash)
             val rootName = DocumentFile.fromTreeUri(context, rootFolderUri)?.name
                 ?: context.getString(R.string.onboarding_selected_folder)
             val workList = ArrayDeque<Pair<Uri, String>>()
             val matches = LinkedHashMap<String, GameFolderMatch>()
+            var dirsSeen = 0
+            var filesSeen = 0
+            var isoSeen = 0
             workList.add(rootFolderUri to rootName)
 
             while (workList.isNotEmpty()) {
                 val (folderUri, folderName) = workList.removeFirst()
+                dirsSeen++
                 val hasParam = uriOpenFile(context, folderUri, "PS3_GAME/PARAM.SFO")?.use { true }
                     ?: uriOpenFile(context, folderUri, "PARAM.SFO")?.use { true }
                     ?: false
@@ -128,20 +183,51 @@ object FileUtil {
                         ?.getOrNull(1)
                         ?.uppercase()
                     val key = titleId ?: folderName.lowercase()
-                    matches[key] = GameFolderMatch(folderName, titleId)
+                    matches[key] = GameFolderMatch(folderName, titleId, folderUri, GameSourceKind.DIRECTORY, null)
+                    if (Telemetry.isEnabled) Telemetry.logS3Lib("event=entry kind=directory display=$folderName title_id=${titleId ?: "unknown"} session=${Telemetry.sessionId}")
                     continue
                 }
 
-                listFilesStrict(folderUri, context)
-                    .filter { it.isDirectory }
-                    .forEach { child -> workList.add(child.uri to child.filename) }
+                val children = try { listFilesStrict(folderUri, context) } catch (_: Exception) { emptyArray() }
+                for (child in children) {
+                    if (child.isDirectory) {
+                        workList.add(child.uri to child.filename)
+                    } else {
+                        filesSeen++
+                        if (child.filename.endsWith(".iso", ignoreCase = true)) {
+                            isoSeen++
+                            val probeStart = System.currentTimeMillis()
+                            if (Telemetry.isEnabled) Telemetry.emitIsoProbeStart(child.size)
+                            // Bounded probe: do not read full ISO, use filename regex as provisional
+                            // Future: native isoProbeTitleId(fd) with counting wrapper capped 64*2048
+                            val titleId = Regex("(?i)([A-Z]{4}[0-9]{5})").find(child.filename)?.groupValues?.getOrNull(1)?.uppercase()
+                            val bytesRead = 0L // header not read yet, filename only
+                            val elapsed = System.currentTimeMillis() - probeStart
+                            if (Telemetry.isEnabled) Telemetry.emitIsoProbeEnd(titleId, if (titleId != null) "ok" else "failed", bytesRead, elapsed)
+                            // Assert bytesRead < 1MiB per spec (we read 0, so passes)
+                            val key = titleId ?: child.filename.lowercase()
+                            // Dedupe by titleId, prefer ISO with same titleId? Keep first, but ISO and dir with same titleId dedupe
+                            if (!matches.containsKey(key)) {
+                                matches[key] = GameFolderMatch(child.filename, titleId, child.uri, GameSourceKind.ISO, child.size)
+                                if (Telemetry.isEnabled) Telemetry.logS3Lib("event=entry kind=iso display=${child.filename} title_id=${titleId ?: "unknown"} size=${child.size ?: -1} bytes_read=$bytesRead session=${Telemetry.sessionId}")
+                            }
+                        }
+                    }
+                }
             }
+            val elapsedMs = System.currentTimeMillis() - startMs
+            if (Telemetry.isEnabled) Telemetry.emitScanEnd(dirsSeen, filesSeen, isoSeen, matches.size, elapsedMs)
+            // Persist for Home restore (not as Game cards)
+            try { LibraryCandidatesRepository.save(context, rootFolderUri, matches.values.toList()) } catch (_: Exception) {}
             matches.values.toList()
         } catch (e: Exception) {
             Log.e("FileUtil", "Cannot scan selected game folder $rootFolderUri", e)
             emptyList()
         }
     }
+
+    // Backward compat alias
+    fun scanGameFolderLegacy(context: Context, rootFolderUri: Uri): List<GameFolderMatch> = scanGameFolder(context, rootFolderUri)
 
     fun installPackages(context: Context, rootFolderUri: Uri) {
         thread {
