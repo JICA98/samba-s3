@@ -188,10 +188,15 @@ fun GamesScreen(
     val activeInstallEntry = ProgressRepository.getItem(activeInstallId)?.value
     val isPackageInstalling = activeInstallId != null
 
-    val showBothEnds = games.size > 5
-    val pagerItems = remember(games.size, hasFw, isFwInstalling) {
+    // Hide the provisional "$" placeholder when a real game already exists (prevents two-cards duplicate during PPU compile)
+    val visibleGames = remember(games) {
+        val hasReal = games.any { it.info.path != "$" }
+        if (hasReal) games.filterNot { it.info.path == "$" } else games
+    }
+    val showBothEnds = visibleGames.size > 5
+    val pagerItems = remember(visibleGames.size, hasFw, isFwInstalling) {
         buildList {
-            if (games.isEmpty()) {
+            if (visibleGames.isEmpty()) {
                 if (!hasFw) {
                     add(PagerItem.FirmwareCard)
                 } else if (isFwInstalling) {
@@ -202,10 +207,10 @@ fun GamesScreen(
             } else {
                 if (showBothEnds) {
                     add(PagerItem.AddGame())
-                    addAll(games.map { PagerItem.GameItem(it) })
+                    addAll(visibleGames.map { PagerItem.GameItem(it) })
                     add(PagerItem.AddGame())
                 } else {
-                    addAll(games.map { PagerItem.GameItem(it) })
+                    addAll(visibleGames.map { PagerItem.GameItem(it) })
                     add(PagerItem.AddGame())
                 }
             }
@@ -1095,7 +1100,14 @@ fun GameCard(
         runtimeCompile.isActive
     val usingRuntimePpu = isRuntimeGameCompile && runtimeCompile.ppuActive
     val usingRuntimeShader = isRuntimeGameCompile && runtimeCompile.shaderActive && !usingRuntimePpu
-    val usingInstallPpu = isImporting && installPpu.ppuActive
+    // Per-game PPU binding: prefer titleId match when available; fallback to placeholder progress for legacy/untagged installs.
+    val gameKey = try { com.zenithblue.sambas3.GameIdentity.key(game.info.path, game.info.name.value) } catch (_: Exception) { "" }
+    val installPpuTitle = installPpu.titleId?.uppercase()
+    val isPlaceholder = game.info.path == "$"
+    val usingInstallPpu = installPpu.ppuActive && when {
+        installPpuTitle != null -> !isPlaceholder && gameKey.equals(installPpuTitle, ignoreCase = true)
+        else -> isImporting && !isPlaceholder || (isPlaceholder && gameKey == "path:$")
+    }
     val showCompileOverlay = isImporting || isRuntimeGameCompile
     val progressValue = when {
         usingRuntimePpu -> runtimeCompile.ppuPercent.toLong()

@@ -6,11 +6,11 @@ import org.junit.Test
 
 class CompileProgressBridgeTest {
 
-    private fun ppuEvent(phase: Int, jobId: Long, value: Long = 0, max: Long = 100, msg: String? = "Progress: file 1 of 2, module 1 of 3 (1m remaining)", origin: Int = RPCSX.COMPILE_ORIGIN_RUNTIME, fileDone: Int = 1, fileTotal: Int = 2, moduleDone: Int = 1, moduleTotal: Int = 3) =
-        CompileProgressBridge.NativeEvent(RPCSX.COMPILE_DOMAIN_PPU, phase, origin, jobId, value, max, msg, fileDone, fileTotal, moduleDone, moduleTotal)
+    private fun ppuEvent(phase: Int, jobId: Long, value: Long = 0, max: Long = 100, msg: String? = "Progress: file 1 of 2, module 1 of 3 (1m remaining)", origin: Int = RPCSX.COMPILE_ORIGIN_RUNTIME, titleId: String? = null, fileDone: Int = 1, fileTotal: Int = 2, moduleDone: Int = 1, moduleTotal: Int = 3) =
+        CompileProgressBridge.NativeEvent(RPCSX.COMPILE_DOMAIN_PPU, phase, origin, jobId, value, max, msg, titleId, fileDone, fileTotal, moduleDone, moduleTotal)
 
-    private fun shaderEvent(phase: Int, jobId: Long, origin: Int = RPCSX.COMPILE_ORIGIN_RUNTIME) =
-        CompileProgressBridge.NativeEvent(RPCSX.COMPILE_DOMAIN_SHADER, phase, origin, jobId, 0, 0, "Compiling shaders", 0, 0, 0, 0)
+    private fun shaderEvent(phase: Int, jobId: Long, origin: Int = RPCSX.COMPILE_ORIGIN_RUNTIME, titleId: String? = null) =
+        CompileProgressBridge.NativeEvent(RPCSX.COMPILE_DOMAIN_SHADER, phase, origin, jobId, 0, 0, "Compiling shaders", titleId, 0, 0, 0, 0)
 
     @Before
     fun setUp() {

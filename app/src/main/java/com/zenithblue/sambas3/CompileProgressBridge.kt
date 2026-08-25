@@ -20,6 +20,7 @@ object CompileProgressBridge {
         val ppuMax: Int = 100,
         val ppuMsg: String? = null,
         val ppuActive: Boolean = false,
+        val titleId: String? = null,
         val shaderActive: Boolean = false,
         val shaderMsg: String? = null,
         val fileDone: Int = 0,
@@ -67,6 +68,7 @@ object CompileProgressBridge {
         val value: Long,
         val max: Long,
         val message: String?,
+        val titleId: String?,
         val fileDone: Int,
         val fileTotal: Int,
         val moduleDone: Int,
@@ -90,8 +92,8 @@ object CompileProgressBridge {
         }
 
         val appCtx = context.applicationContext
-        val callback = RPCSX.CompileProgressCallback { domain, phase, origin, jobId, value, max, message, fileDone, fileTotal, moduleDone, moduleTotal ->
-            val ev = NativeEvent(domain, phase, origin, jobId, value, max, message, fileDone, fileTotal, moduleDone, moduleTotal)
+        val callback = RPCSX.CompileProgressCallback { domain, phase, origin, jobId, value, max, message, titleId, fileDone, fileTotal, moduleDone, moduleTotal ->
+            val ev = NativeEvent(domain, phase, origin, jobId, value, max, message, titleId, fileDone, fileTotal, moduleDone, moduleTotal)
             // Ensure reducer runs on main looper (bridge is main-handler reducer)
             if (Looper.myLooper() == Looper.getMainLooper()) {
                 onNativeEventInternal(ev, appCtx)
@@ -146,6 +148,7 @@ object CompileProgressBridge {
                 installPpuJobId = ev.jobId
                 _installState.value = cur.copy(
                     ppuActive = true,
+                    titleId = ev.titleId ?: cur.titleId,
                     ppuPercent = ev.value.toInt().coerceIn(0, 100),
                     ppuMax = if (ev.max > 0) ev.max.toInt() else 100,
                     ppuMsg = ev.message ?: cur.ppuMsg,
@@ -160,6 +163,7 @@ object CompileProgressBridge {
                 if (installPpuJobId != ev.jobId) return
                 _installState.value = cur.copy(
                     ppuActive = true,
+                    titleId = ev.titleId ?: cur.titleId,
                     ppuPercent = ev.value.toInt().coerceIn(0, 100),
                     ppuMax = if (ev.max > 0) ev.max.toInt() else 100,
                     ppuMsg = ev.message ?: cur.ppuMsg,
@@ -172,7 +176,7 @@ object CompileProgressBridge {
             RPCSX.COMPILE_PHASE_COMPLETED, RPCSX.COMPILE_PHASE_FAILED, RPCSX.COMPILE_PHASE_CANCELED -> {
                 if (installPpuJobId == null || installPpuJobId != ev.jobId) return
                 installPpuJobId = null
-                _installState.value = cur.copy(ppuActive = false)
+                _installState.value = cur.copy(ppuActive = false, titleId = null)
             }
         }
         // PrecompilerService observes installState and updates FGS 3000. Do not notify() here —
@@ -191,6 +195,7 @@ object CompileProgressBridge {
                 latestRuntimeEvent = ev
                 _state.value = cur.copy(
                     ppuActive = true,
+                    titleId = ev.titleId ?: cur.titleId,
                     ppuPercent = ev.value.toInt().coerceIn(0, 100),
                     ppuMax = if (ev.max > 0) ev.max.toInt() else 100,
                     ppuMsg = ev.message ?: cur.ppuMsg,
@@ -212,6 +217,7 @@ object CompileProgressBridge {
                 latestRuntimeEvent = ev
                 _state.value = cur.copy(
                     ppuActive = true,
+                    titleId = ev.titleId ?: cur.titleId,
                     ppuPercent = ev.value.toInt().coerceIn(0, 100),
                     ppuMax = if (ev.max > 0) ev.max.toInt() else 100,
                     ppuMsg = ev.message ?: cur.ppuMsg,
@@ -233,6 +239,7 @@ object CompileProgressBridge {
                 if (shaderJobIds.isEmpty()) latestRuntimeEvent = null
                 _state.value = cur.copy(
                     ppuActive = false,
+                    titleId = null,
                 )
             }
         }

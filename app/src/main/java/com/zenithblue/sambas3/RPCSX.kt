@@ -114,6 +114,7 @@ class RPCSX {
             value: Long,
             max: Long,
             message: String?,
+            titleId: String?,
             fileDone: Int,
             fileTotal: Int,
             moduleDone: Int,
@@ -140,7 +141,7 @@ class RPCSX {
          * `kCompileProgressOnEventDescriptor` in rpcsx-android.cpp.
          * jobId, value and max are all `J` (long).
          */
-        const val COMPILE_PROGRESS_ON_EVENT_JNI_DESCRIPTOR = "(IIIJJJLjava/lang/String;IIII)V"
+        const val COMPILE_PROGRESS_ON_EVENT_JNI_DESCRIPTOR = "(IIIJJJLjava/lang/String;Ljava/lang/String;IIII)V"
 
         var initialized = false
         val instance = RPCSX()

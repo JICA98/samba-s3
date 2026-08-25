@@ -437,7 +437,7 @@ index 000000000..18a8dfeb0
 +
 +} // namespace rpcsx::android
 diff --git a/android/src/rpcsx-android.cpp b/android/src/rpcsx-android.cpp
-index ce38967c1..7bc9a05e6 100644
+index ce38967c1..8d5dc06b7 100644
 --- a/android/src/rpcsx-android.cpp
 +++ b/android/src/rpcsx-android.cpp
 @@ -1,3 +1,6 @@
@@ -505,14 +505,14 @@ index ce38967c1..7bc9a05e6 100644
  std::string g_input_config_override;
  cfg_input_configurations g_cfg_input_configs;
  
-@@ -990,6 +1010,46 @@ static void invokeSync(std::function<void(JNIEnv *)> cb) {
+@@ -990,6 +1010,51 @@ static void invokeSync(std::function<void(JNIEnv *)> cb) {
    }
  }
  
 +// Must match RPCSX.COMPILE_PROGRESS_ON_EVENT_JNI_DESCRIPTOR /
-+// CompileProgressCallback.onEvent(Int, Int, Int, Long, Long, Long, String?, Int, Int, Int, Int)
++// CompileProgressCallback.onEvent(Int, Int, Int, Long, Long, Long, String?, String?, Int, Int, Int, Int)
 +static constexpr const char* kCompileProgressOnEventDescriptor =
-+    "(IIIJJJLjava/lang/String;IIII)V";
++    "(IIIJJJLjava/lang/String;Ljava/lang/String;IIII)V";
 +
 +static void dispatchCompileEventToJava(const CompileEvent& ev)
 +{
@@ -521,6 +521,7 @@ index ce38967c1..7bc9a05e6 100644
 +    std::lock_guard<std::mutex> lock(g_compile_callback_mutex);
 +    if (!g_compile_callback || !g_compile_callback_method) return;
 +    jstring jmsg = nullptr;
++    jstring jTitleId = nullptr;
 +    jlong value = 0;
 +    jlong max = 0;
 +    jint fileDone = 0, fileTotal = 0, modDone = 0, modTotal = 0;
@@ -540,11 +541,15 @@ index ce38967c1..7bc9a05e6 100644
 +      max = 0;
 +      if (!jmsg) jmsg = env->NewStringUTF("Compiling shaders");
 +    }
-+    // Args: domain, phase, origin, jobId, value, max, message, fileDone, fileTotal, moduleDone, moduleTotal
++    // TitleId for per-game binding (from CompileEvent or current Emu title)
++    std::string titleIdStr = !copy.titleId.empty() ? copy.titleId : Emu.GetTitleID();
++    if (!titleIdStr.empty()) jTitleId = env->NewStringUTF(titleIdStr.c_str());
++    // Args: domain, phase, origin, jobId, value, max, message, titleId, fileDone, fileTotal, moduleDone, moduleTotal
 +    env->CallVoidMethod(g_compile_callback, g_compile_callback_method,
 +      (jint)copy.domain, (jint)copy.phase, (jint)copy.origin, (jlong)copy.jobId,
-+      value, max, jmsg, fileDone, fileTotal, modDone, modTotal);
++      value, max, jmsg, jTitleId, fileDone, fileTotal, modDone, modTotal);
 +    if (jmsg) env->DeleteLocalRef(jmsg);
++    if (jTitleId) env->DeleteLocalRef(jTitleId);
 +    if (env->ExceptionCheck()) env->ExceptionClear();
 +  });
 +}
@@ -552,7 +557,7 @@ index ce38967c1..7bc9a05e6 100644
  struct ProgressMessageDialog : MsgDialogBase {
    jlong progressId;
    jlong value = 0;
-@@ -1314,6 +1374,11 @@ public:
+@@ -1314,6 +1379,11 @@ public:
  
  private:
    void impl(JNIEnv *env, CompilationWorkload workload) {
@@ -564,25 +569,95 @@ index ce38967c1..7bc9a05e6 100644
      if (workload.path.empty()) {
        Progress(env, workload.progressId).success(0);
        return;
-@@ -1339,6 +1404,17 @@ private:
+@@ -1339,36 +1409,68 @@ private:
  
      MessageDialog::pushPendingProgressId(workload.progressId);
  
-+    // Set the origin before starting progress_dialog_server. The server
+-    g_fxo->init<named_thread<progress_dialog_server>>();
+-    g_fxo->init<main_ppu_module<lv2_obj>>();
+-    g_fxo->init(false, nullptr);
+-    auto rootPath = std::filesystem::path(workload.path);
+-
++    // Pre-resolve install titleId + rootPath before starting progress_dialog_server
++    // so the PPU progress context carries the correct titleId for per-game UI binding.
++    auto earlyRootPath = std::filesystem::path(workload.path);
+     if (is_vsh) {
+-      rootPath = g_cfg_vfs.get_dev_flash() + "sys/external/";
++      earlyRootPath = g_cfg_vfs.get_dev_flash() + "sys/external/";
+     } else {
+-      if (!std::filesystem::is_directory(rootPath)) {
+-        rootPath = rootPath.parent_path();
+-        if (rootPath.filename() == "USRDIR") {
+-          rootPath = rootPath.parent_path();
++      if (!std::filesystem::is_directory(earlyRootPath)) {
++        earlyRootPath = earlyRootPath.parent_path();
++        if (earlyRootPath.filename() == "USRDIR") {
++          earlyRootPath = earlyRootPath.parent_path();
+         }
+       }
+     }
++    std::string pendingInstallTitleId;
++    if (!is_vsh) {
++      auto earlySfo = locateParamSfoPath(std::string(earlyRootPath));
++      if (!earlySfo.empty()) {
++        const auto earlyPsf = psf::load_object(earlySfo);
++        pendingInstallTitleId = std::string(psf::get_string(earlyPsf, "TITLE_ID"));
++        if (!pendingInstallTitleId.empty()) Emu.SetTitleID(pendingInstallTitleId);
++      }
++    }
++
++    // Set the origin (and titleId) before starting progress_dialog_server. The server
 +    // captures this context when its thread starts; setting it later around
 +    // ppu_precompile can misclassify install PPU work as runtime work and
 +    // create the second (2000) notification.
 +    SystemProgressContext installProgressContext{
-+        CompileOrigin::INSTALL, allocate_compile_job_id()};
++        CompileOrigin::INSTALL, allocate_compile_job_id(), pendingInstallTitleId};
 +    set_system_progress_context(installProgressContext);
 +    struct InstallProgressContextGuard {
 +      ~InstallProgressContextGuard() { clear_system_progress_context(); }
 +    } installProgressContextGuard;
 +
-     g_fxo->init<named_thread<progress_dialog_server>>();
-     g_fxo->init<main_ppu_module<lv2_obj>>();
-     g_fxo->init(false, nullptr);
-@@ -1421,7 +1497,11 @@ private:
++    g_fxo->init<named_thread<progress_dialog_server>>();
++    g_fxo->init<main_ppu_module<lv2_obj>>();
++    g_fxo->init(false, nullptr);
++    auto rootPath = earlyRootPath;
+ 
+     auto &_main = *ensure(g_fxo->try_get<main_ppu_module<lv2_obj>>());
+ 
+     if (fs::is_file(workload.path)) {
+       if (!is_vsh) {
+-        auto sfoPath = locateParamSfoPath(std::string(rootPath));
+-
+-        if (!sfoPath.empty()) {
+-          const auto psf = psf::load_object(sfoPath);
+-          rpcsx_android.warning("title id is %s",
+-                                psf::get_string(psf, "TITLE_ID"));
+-
+-          Emu.SetTitleID(std::string(psf::get_string(psf, "TITLE_ID")));
++        // TitleId already resolved before progress_dialog_server start (pendingInstallTitleId).
++        // Only re-probe if early probe missed it, and update the progress context so the
++        // in-flight PPU session carries the correct title.
++        if (pendingInstallTitleId.empty()) {
++          auto sfoPath = locateParamSfoPath(std::string(rootPath));
++          if (!sfoPath.empty()) {
++            const auto psf = psf::load_object(sfoPath);
++            rpcsx_android.warning("title id is %s", psf::get_string(psf, "TITLE_ID"));
++            std::string lateTitle = std::string(psf::get_string(psf, "TITLE_ID"));
++            Emu.SetTitleID(lateTitle);
++            if (!lateTitle.empty()) {
++              installProgressContext.titleId = lateTitle;
++              set_system_progress_context(installProgressContext);
++            }
++          } else {
++            rpcsx_android.warning("param.sfo not found");
++          }
+         } else {
+-          rpcsx_android.warning("param.sfo not found");
++          rpcsx_android.warning("title id is %s", pendingInstallTitleId);
+         }
+       }
+ 
+@@ -1421,7 +1523,11 @@ private:
  
      MessageDialog::popPendingProgressId(workload.progressId);
  
@@ -595,7 +670,7 @@ index ce38967c1..7bc9a05e6 100644
    }
  } static g_compilationQueue;
  
-@@ -1833,6 +1913,7 @@ extern "C" bool _rpcsx_startMainThreadProcessor(JNIEnv *env) {
+@@ -1833,6 +1939,7 @@ extern "C" bool _rpcsx_startMainThreadProcessor(JNIEnv *env) {
  
  extern "C" bool _rpcsx_collectGameInfo(JNIEnv *env, std::string_view rootDir,
                                         long progressId) {
@@ -603,7 +678,7 @@ index ce38967c1..7bc9a05e6 100644
  
    if (std::filesystem::is_regular_file(g_cfg_vfs.get_dev_flash() +
                                         "/vsh/module/vsh.self")) {
-@@ -1843,9 +1924,14 @@ extern "C" bool _rpcsx_collectGameInfo(JNIEnv *env, std::string_view rootDir,
+@@ -1843,9 +1950,14 @@ extern "C" bool _rpcsx_collectGameInfo(JNIEnv *env, std::string_view rootDir,
    return true;
  }
  
@@ -619,7 +694,7 @@ index ce38967c1..7bc9a05e6 100644
    Emu.SetForceBoot(true);
    std::string path = std::string(path_);
    while (path.ends_with('/')) {
-@@ -1858,8 +1944,14 @@ extern "C" int _rpcsx_boot(std::string_view path_) {
+@@ -1858,8 +1970,14 @@ extern "C" int _rpcsx_boot(std::string_view path_) {
  extern "C" int _rpcsx_getState() {
    return static_cast<int>(Emu.GetStatus(false));
  }
@@ -636,7 +711,7 @@ index ce38967c1..7bc9a05e6 100644
  
  extern "C" void _rpcsx_openHomeMenu() {
    if (auto padThread = pad::get_pad_thread(true)) {
-@@ -1873,15 +1965,14 @@ extern "C" bool _rpcsx_surfaceEvent(JNIEnv *env, jobject surface, jint event) {
+@@ -1873,15 +1991,14 @@ extern "C" bool _rpcsx_surfaceEvent(JNIEnv *env, jobject surface, jint event) {
    rpcsx_android.warning("surface event %p, %d", surface, event);
  
    if (event == 2) {
@@ -655,7 +730,7 @@ index ce38967c1..7bc9a05e6 100644
      Emu.Pause();
    } else {
      auto newWindow = ANativeWindow_fromSurface(env, surface);
-@@ -1902,6 +1993,10 @@ extern "C" bool _rpcsx_surfaceEvent(JNIEnv *env, jobject surface, jint event) {
+@@ -1902,6 +2019,10 @@ extern "C" bool _rpcsx_surfaceEvent(JNIEnv *env, jobject surface, jint event) {
        }
      }
  
@@ -666,7 +741,7 @@ index ce38967c1..7bc9a05e6 100644
      if (event == 0 && Emu.IsPaused()) {
        Emu.Resume();
      }
-@@ -2071,8 +2166,6 @@ static bool installPup(JNIEnv *env, fs::file &&pup_f, jlong progressId) {
+@@ -2071,8 +2192,6 @@ static bool installPup(JNIEnv *env, fs::file &&pup_f, jlong progressId) {
      return false;
    }
  
@@ -675,7 +750,7 @@ index ce38967c1..7bc9a05e6 100644
    jlong processed = 0;
    for (const auto &update_filename : update_filenames) {
      auto update_file_stream = update_files.get_file(update_filename);
-@@ -2120,9 +2213,8 @@ static bool installPup(JNIEnv *env, fs::file &&pup_f, jlong progressId) {
+@@ -2120,9 +2239,8 @@ static bool installPup(JNIEnv *env, fs::file &&pup_f, jlong progressId) {
    }
  
    sendFirmwareInstalled(env, utils::get_firmware_version());
@@ -687,7 +762,23 @@ index ce38967c1..7bc9a05e6 100644
    return true;
  }
  
-@@ -2306,145 +2398,261 @@ static bool installRap(JNIEnv *env, fs::file &&file, jlong progressId,
+@@ -2186,7 +2304,7 @@ static bool installPkg(JNIEnv *env, fs::file &&file, jlong progressId) {
+ 
+   if (worker()) {
+     auto paths = std::vector(bootable_paths.begin(), bootable_paths.end());
+-    collectGameInfo(env, -1, paths);
++    collectGameInfo(env, progress.getProgressId(), paths);
+ 
+     for (auto &path : paths) {
+       g_compilationQueue.push(progress, std::move(path));
+@@ -2300,151 +2418,267 @@ static bool installRap(JNIEnv *env, fs::file &&file, jlong progressId,
+     return false;
+   }
+ 
+-  collectGameInfo(env, -1, {std::string(rootPath)});
++  collectGameInfo(env, progress.getProgressId(), {std::string(rootPath)});
+   g_compilationQueue.push(progress, std::move(ebootPath));
+   return true;
  }
  
  static bool installIso(JNIEnv *env, fs::file &&file, jlong progressId) {
@@ -817,7 +908,7 @@ index ce38967c1..7bc9a05e6 100644
 -        } else {
 -          filesCount++;
 +  progress.report(0, 0, "Publishing installed game");
-+  collectGameInfo(env, -1, {finalPath});
++  collectGameInfo(env, progress.getProgressId(), {finalPath});
 +  progress.report(0, 0, "Preparing PPU compilation");
 +  g_compilationQueue.push(progress, std::move(ebootPath));
 +  return true;
@@ -985,10 +1076,10 @@ index ce38967c1..7bc9a05e6 100644
 +        off += static_cast<u64>(r);
 +        result += static_cast<u64>(r);
 +        buf = static_cast<u8 *>(buf) + r;
-       }
++      }
 +      if (!m_pread_broken) {
 +        return result;
-+      }
+       }
 +    }
 +    return read_via_seek(offset, buffer, count);
 +  }
@@ -1034,7 +1125,7 @@ index ce38967c1..7bc9a05e6 100644
    AtExit atExit{[&] { file.release_handle(); }};
  
    auto type = getFileType(file);
-@@ -2466,10 +2674,13 @@ extern "C" jstring _rpcsx_getDirInstallPath(JNIEnv *env, jint fd) {
+@@ -2466,10 +2700,13 @@ extern "C" jstring _rpcsx_getDirInstallPath(JNIEnv *env, jint fd) {
  }
  
  extern "C" bool _rpcsx_install(JNIEnv *env, int fd, long progressId) {
@@ -1049,7 +1140,7 @@ index ce38967c1..7bc9a05e6 100644
    file.seek(0);
  
    switch (type) {
-@@ -2501,6 +2712,8 @@ extern "C" bool _rpcsx_install(JNIEnv *env, int fd, long progressId) {
+@@ -2501,6 +2738,8 @@ extern "C" bool _rpcsx_install(JNIEnv *env, int fd, long progressId) {
  
  extern "C" bool _rpcsx_installKey(JNIEnv *env, int fd, long progressId,
                                    std::string_view gamePath) {
@@ -1058,7 +1149,7 @@ index ce38967c1..7bc9a05e6 100644
    auto file = fs::file::from_native_handle(fd);
    AtExit atExit{[&] { file.release_handle(); }};
  
-@@ -2641,4 +2854,159 @@ extern "C" void *_rpcsx_setCustomDriver(void *driverHandle) {
+@@ -2641,4 +2880,159 @@ extern "C" void *_rpcsx_setCustomDriver(void *driverHandle) {
    return prevLoader;
  }
  
@@ -2786,7 +2877,7 @@ index 5af7ed3ca..47f8a0894 100644
  	} // namespace overlays
  } // namespace rsx
 diff --git a/rpcs3/Emu/RSX/Program/ProgramStateCache.h b/rpcs3/Emu/RSX/Program/ProgramStateCache.h
-index 32b4f3185..bb902f2d7 100644
+index 32b4f3185..453c7c7ba 100644
 --- a/rpcs3/Emu/RSX/Program/ProgramStateCache.h
 +++ b/rpcs3/Emu/RSX/Program/ProgramStateCache.h
 @@ -2,6 +2,7 @@
@@ -2832,7 +2923,7 @@ index 32b4f3185..bb902f2d7 100644
 +		tracker->deferred = shaderDeferred;
 +		if (shaderDeferred)
 +		{
-+			emit_compile_event(CompileEvent{CompileDomain::SHADER, CompilePhase::BEGIN, CompileOrigin::RUNTIME, shaderJobId, std::nullopt});
++			emit_compile_event(CompileEvent{CompileDomain::SHADER, CompilePhase::BEGIN, CompileOrigin::RUNTIME, shaderJobId, "", std::nullopt});
 +		}
  
 -		if (allow_notification)
@@ -2850,7 +2941,7 @@ index 32b4f3185..bb902f2d7 100644
 -
 -				rsx_log.success("Program compiled successfully");
 -				notify_pipeline_compiled(key.properties, vertex_shader, fragment_shader_);
-+				emit_compile_event(CompileEvent{CompileDomain::SHADER, phase, CompileOrigin::RUNTIME, tracker->jobId, std::nullopt});
++				emit_compile_event(CompileEvent{CompileDomain::SHADER, phase, CompileOrigin::RUNTIME, tracker->jobId, "", std::nullopt});
 +			}
 +		};
  
@@ -2920,12 +3011,12 @@ index 32b4f3185..bb902f2d7 100644
  		m_vertex_shader_cache.clear();
  		m_storage.clear();
 +		// Explicit terminal for any pending shader jobs so FGS pending counter cannot leak
-+		emit_compile_event(CompileEvent{CompileDomain::SHADER, CompilePhase::CANCELED, CompileOrigin::RUNTIME, 0, std::nullopt});
++		emit_compile_event(CompileEvent{CompileDomain::SHADER, CompilePhase::CANCELED, CompileOrigin::RUNTIME, 0, "", std::nullopt});
  	}
  };
 diff --git a/rpcs3/Emu/compile_progress.cpp b/rpcs3/Emu/compile_progress.cpp
 new file mode 100644
-index 000000000..03f55c519
+index 000000000..dc7a56339
 --- /dev/null
 +++ b/rpcs3/Emu/compile_progress.cpp
 @@ -0,0 +1,190 @@
@@ -2979,7 +3070,7 @@ index 000000000..03f55c519
 +
 +// --- System progress origin context ---
 +static std::mutex g_ctx_mutex;
-+static SystemProgressContext g_current_ctx{CompileOrigin::RUNTIME, 0};
++static SystemProgressContext g_current_ctx{CompileOrigin::RUNTIME, 0, ""};
 +static bool g_has_ctx = false;
 +
 +void set_system_progress_context(const SystemProgressContext& ctx)
@@ -2998,14 +3089,14 @@ index 000000000..03f55c519
 +{
 +    std::lock_guard<std::mutex> lock(g_ctx_mutex);
 +    if (!g_has_ctx)
-+        return SystemProgressContext{CompileOrigin::RUNTIME, 0};
++        return SystemProgressContext{CompileOrigin::RUNTIME, 0, ""};
 +    return g_current_ctx;
 +}
 +
 +void clear_system_progress_context()
 +{
 +    std::lock_guard<std::mutex> lock(g_ctx_mutex);
-+    g_current_ctx = SystemProgressContext{CompileOrigin::RUNTIME, 0};
++    g_current_ctx = SystemProgressContext{CompileOrigin::RUNTIME, 0, ""};
 +    g_has_ctx = false;
 +}
 +
@@ -3121,10 +3212,10 @@ index 000000000..03f55c519
 +}
 diff --git a/rpcs3/Emu/compile_progress.hpp b/rpcs3/Emu/compile_progress.hpp
 new file mode 100644
-index 000000000..f8476e6c1
+index 000000000..e49170ba4
 --- /dev/null
 +++ b/rpcs3/Emu/compile_progress.hpp
-@@ -0,0 +1,91 @@
+@@ -0,0 +1,93 @@
 +#pragma once
 +
 +#include "util/types.hpp"
@@ -3171,6 +3262,7 @@ index 000000000..f8476e6c1
 +    CompilePhase phase;
 +    CompileOrigin origin;
 +    u64 jobId = 0; // stable per PPU session or pipeline job
++    std::string titleId; // associated titleId for per-game UI binding
 +    std::optional<PpuProgressSnapshot> ppu;
 +};
 +
@@ -3190,6 +3282,7 @@ index 000000000..f8476e6c1
 +{
 +    CompileOrigin origin = CompileOrigin::RUNTIME;
 +    u64 jobId = 0;
++    std::string titleId; // associated title for install jobs; empty => Emu.GetTitleID() fallback
 +};
 +
 +void set_system_progress_context(const SystemProgressContext& ctx);
@@ -3284,7 +3377,7 @@ index c7610a442..128c2c6e2 100644
  {
  	_static,
 diff --git a/rpcs3/Emu/system_progress.cpp b/rpcs3/Emu/system_progress.cpp
-index e3f001baa..c23b7f79e 100644
+index e3f001baa..7d55a2033 100644
 --- a/rpcs3/Emu/system_progress.cpp
 +++ b/rpcs3/Emu/system_progress.cpp
 @@ -1,5 +1,6 @@
@@ -3294,7 +3387,7 @@ index e3f001baa..c23b7f79e 100644
  #include "rpcsx/fw/ps3/cellMsgDialog.h"
  #include "Emu/RSX/RSXThread.h"
  #include "Emu/RSX/Overlays/overlay_manager.h"
-@@ -189,6 +190,21 @@ void progress_dialog_server::operator()()
+@@ -189,6 +190,22 @@ void progress_dialog_server::operator()()
  		std::vector<std::pair<u64, u64>> time_left_queue(1024);
  		usz time_left_queue_idx = 0;
  
@@ -3302,6 +3395,7 @@ index e3f001baa..c23b7f79e 100644
 +		SystemProgressContext _ppu_ctx = get_system_progress_context();
 +		CompileOrigin _ppu_origin = _ppu_ctx.origin;
 +		u64 _ppu_jobId = _ppu_ctx.jobId != 0 ? _ppu_ctx.jobId : allocate_compile_job_id();
++		std::string _ppu_titleId = _ppu_ctx.titleId;
 +		bool _ppu_begin_emitted = false;
 +		bool _ppu_terminal_emitted = false;
 +		auto _ppu_emit = [&](CompilePhase phase, const std::optional<PpuProgressSnapshot>& snap) {
@@ -3309,14 +3403,14 @@ index e3f001baa..c23b7f79e 100644
 +			if (phase != CompilePhase::BEGIN && !_ppu_begin_emitted) return;
 +			if (phase == CompilePhase::BEGIN) _ppu_begin_emitted = true;
 +			if (phase == CompilePhase::COMPLETED || phase == CompilePhase::FAILED || phase == CompilePhase::CANCELED) _ppu_terminal_emitted = true;
-+			CompileEvent ev{CompileDomain::PPU, phase, _ppu_origin, _ppu_jobId, snap};
++			CompileEvent ev{CompileDomain::PPU, phase, _ppu_origin, _ppu_jobId, _ppu_titleId, snap};
 +			emit_compile_event(ev);
 +		};
 +
  		// Update progress
  		for (u64 sleep_until = get_system_time(), sleep_for = 500;
  			!g_system_progress_stopping && thread_ctrl::state() != thread_state::aborting;
-@@ -222,6 +238,10 @@ void progress_dialog_server::operator()()
+@@ -222,6 +239,10 @@ void progress_dialog_server::operator()()
  
  				if (show_overlay_message)
  				{
@@ -3327,7 +3421,7 @@ index e3f001baa..c23b7f79e 100644
  					// Show a message instead (if compilation period is estimated to be lengthy)
  					if (pdone < ptotal && g_cfg.misc.show_ppu_compilation_hint)
  					{
-@@ -233,7 +253,7 @@ void progress_dialog_server::operator()()
+@@ -233,7 +254,7 @@ void progress_dialog_server::operator()()
  						{
  							if (!ppu_cue_refs || !*ppu_cue_refs)
  							{
@@ -3336,7 +3430,7 @@ index e3f001baa..c23b7f79e 100644
  							}
  
  							// Make sure to update any pending messages. PPU compilation may freeze the image.
-@@ -256,93 +276,12 @@ void progress_dialog_server::operator()()
+@@ -256,93 +277,12 @@ void progress_dialog_server::operator()()
  					continue;
  				}
  
@@ -3436,7 +3530,7 @@ index e3f001baa..c23b7f79e 100644
  
  				// Changes detected, send update
  				if (native_dlg)
-@@ -352,7 +291,7 @@ void progress_dialog_server::operator()()
+@@ -352,7 +292,7 @@ void progress_dialog_server::operator()()
  						native_dlg->set_text(text1);
  					}
  
@@ -3445,7 +3539,7 @@ index e3f001baa..c23b7f79e 100644
  					native_dlg->progress_bar_set_value(0, static_cast<f32>(value));
  				}
  				else if (dlg)
-@@ -376,8 +315,10 @@ void progress_dialog_server::operator()()
+@@ -376,8 +316,10 @@ void progress_dialog_server::operator()()
  				rsx::overlays::refresh_message_queue();
  			}
  
@@ -3458,7 +3552,7 @@ index e3f001baa..c23b7f79e 100644
  			{
  				// Complete state, empty message: close dialog
  				break;
-@@ -392,6 +333,16 @@ void progress_dialog_server::operator()()
+@@ -392,6 +334,16 @@ void progress_dialog_server::operator()()
  			*ppu_cue_refs = 0;
  		}
  

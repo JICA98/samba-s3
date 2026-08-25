@@ -27,7 +27,7 @@ class CompilationMonitorLogicTest {
                 RPCSX.COMPILE_PHASE_BEGIN,
                 RPCSX.COMPILE_ORIGIN_RUNTIME,
                 9,
-                0, 0, "Compiling shaders", 0, 0, 0, 0
+                0, 0, "Compiling shaders", null, 0, 0, 0, 0
             )
         )
         CompileProgressBridge.injectForTest(
@@ -36,7 +36,7 @@ class CompilationMonitorLogicTest {
                 RPCSX.COMPILE_PHASE_COMPLETED,
                 RPCSX.COMPILE_ORIGIN_RUNTIME,
                 9,
-                0, 0, null, 0, 0, 0, 0
+                0, 0, null, null, 0, 0, 0, 0
             )
         )
         assertFalse(CompileProgressBridge.state.value.isActive)
