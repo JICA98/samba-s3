@@ -90,12 +90,44 @@ class GpuDriverPackageValidationTest {
         assertFalse(GpuDriverHelper.validateInstalledLibrary(dir, "libvulkan_freedreno.so"))
     }
 
+    private fun makeValidElf(size: Int = 600 * 1024): ByteArray {
+        val data = ByteArray(size)
+        // ELF magic
+        data[0] = 0x7F.toByte(); data[1] = 0x45.toByte(); data[2] = 0x4C.toByte(); data[3] = 0x46.toByte()
+        data[4] = 2 // ELF64
+        data[5] = 1 // LE
+        data[6] = 1
+        // e_machine at offset 18 little endian 183 = 0xB7 0x00
+        data[18] = 0xB7.toByte(); data[19] = 0x00.toByte()
+        return data
+    }
+
     @Test
     fun present_library_passes_validator() {
         val dir = tmp.newFolder("drv3")
         File(dir, "meta.json").writeText(validMeta)
-        File(dir, "libvulkan_freedreno.so").writeBytes(ByteArray(32) { 2 })
+        File(dir, "libvulkan_freedreno.so").writeBytes(makeValidElf())
         assertTrue(GpuDriverHelper.validateInstalledLibrary(dir, "libvulkan_freedreno.so"))
+    }
+
+    @Test
+    fun small_library_rejected_by_validator() {
+        val dir = tmp.newFolder("drvSmall")
+        File(dir, "meta.json").writeText(validMeta)
+        File(dir, "libvulkan_freedreno.so").writeBytes(ByteArray(32) { 2 })
+        assertFalse(GpuDriverHelper.validateInstalledLibrary(dir, "libvulkan_freedreno.so"))
+    }
+
+    @Test
+    fun stub_library_rejected() {
+        val dir = tmp.newFolder("drvStub")
+        File(dir, "meta.json").writeText(validMeta)
+        val stub = makeValidElf().also {
+            val marker = "stub libvulkan".toByteArray()
+            System.arraycopy(marker, 0, it, 100, marker.size)
+        }
+        File(dir, "libvulkan_freedreno.so").writeBytes(stub)
+        assertFalse(GpuDriverHelper.validateInstalledLibrary(dir, "libvulkan_freedreno.so"))
     }
 
     @Test

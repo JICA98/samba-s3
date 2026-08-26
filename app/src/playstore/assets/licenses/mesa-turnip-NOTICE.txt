@@ -1,8 +1,10 @@
-Samba S3 Play Store builds may include Mesa Turnip Vulkan drivers:
+Samba S3 Play Store builds include Mesa Turnip Vulkan driver:
 
-- Mesa 26.3
-- Mesa Turnip 25.3.4
-- Turnip A8XX v29 (experimental)
+- Mesa Turnip 26.3.0 (v26.3.0-20260826-r3, Vulkan 1.4.359)
+  Source: https://github.com/The412Banner/Banners-Turnip
+  Upstream ZIP SHA-256: 94641a7e496f5d1f21d92d587d2f9336c0773582f38601e9d666b44240e3c8b8
+  Wrapped ZIP SHA-256: d0b0e1e923d42813751aa8ed96d4a6059137782f6a3901563efd9fdd847b6322
+  Vulkan .so SHA-256: fb0e7e155e003bb3edf8595386be2502a1b15ca632a48ae00a72222d930ed182 (byte-identical to upstream)
 
 Mesa is available from https://gitlab.freedesktop.org/mesa/mesa and is licensed
 under MIT and other permissive licenses. Corresponding source offers follow the

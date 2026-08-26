@@ -3,46 +3,22 @@
   "drivers": [
     {
       "id": "turnip-26.3",
-      "displayName": "Turnip 26.3 — Recommended",
+      "displayName": "Turnip 26.3 — Latest",
       "role": "recommended",
       "packageFile": "turnip-26.3-sambas3.zip",
       "libraryName": "libvulkan_freedreno.so",
       "supportedGpuFamilies": ["adreno6xx", "adreno7xx"],
       "experimental": false,
-      "sha256": "0ab3743274e85fa44ff2fbbae062c0527718d3be654baef314526b1f16d880e9",
-      "sourceVersion": "Mesa 26.3",
-      "sourceCommit": "74030424e6ed5cc404055bb1afb3221bdec07897",
-      "sourceRepo": "https://gitlab.freedesktop.org/mesa/mesa",
-      "notes": "Default recommended Turnip for Adreno 6xx/7xx. Not auto-selected on first launch."
-    },
-    {
-      "id": "turnip-25.3.4",
-      "displayName": "Turnip 25.3.4 — Compatibility",
-      "role": "compatibility",
-      "packageFile": "turnip-25.3.4-sambas3.zip",
-      "libraryName": "libvulkan_freedreno.so",
-      "supportedGpuFamilies": ["adreno6xx", "adreno7xx"],
-      "experimental": false,
-      "sha256": "ede8d8648a6e77ad9152b7142abebc1062dee39d8682195ac1c23c08d338a7de",
-      "sourceVersion": "Mesa 25.3.4",
-      "sourceCommit": "74030424e6ed5cc404055bb1afb3221bdec07897",
-      "sourceRepo": "https://gitlab.freedesktop.org/mesa/mesa",
-      "notes": "Fallback when 26.3 regresses."
-    },
-    {
-      "id": "turnip-a8xx-v29",
-      "displayName": "Turnip A8XX v29 — Experimental",
-      "role": "experimental",
-      "packageFile": "turnip-a8xx-v29-sambas3.zip",
-      "libraryName": "libvulkan_freedreno.so",
-      "supportedGpuIds": ["810", "825", "829", "830", "840"],
-      "forceSysmemGpuIds": ["830"],
-      "experimental": true,
-      "sha256": "bbe5610a3a23536cb5572ccab08b602e22dcee9aed51e39410f6ef095b5cfe27",
-      "sourceVersion": "A8XX v29",
-      "sourceCommit": "74030424e6ed5cc404055bb1afb3221bdec07897",
-      "sourceRepo": "upstream a8xx-turnip-gen8-V29 (normal/non-sync)",
-      "notes": "Experimental. Never auto-selected. Adreno 830 uses SYSMEM when selected."
+      "sha256": "d0b0e1e923d42813751aa8ed96d4a6059137782f6a3901563efd9fdd847b6322",
+      "sourceVersion": "Mesa 26.3.0",
+      "sourceCommit": "bb63b1797b657b64dac605391d251a22e1c9cefc",
+      "sourceRepo": "https://github.com/The412Banner/Banners-Turnip",
+      "notes": "Prebaked latest Turnip for Adreno 6xx/7xx. System Vulkan remains default; not auto-selected. Wrapper .so SHA fb0e7e155e003bb3edf8595386be2502a1b15ca632a48ae00a72222d930ed182 matches upstream.",
+      "upstreamZipSha256": "94641a7e496f5d1f21d92d587d2f9336c0773582f38601e9d666b44240e3c8b8",
+      "upstreamSoSha256": "fb0e7e155e003bb3edf8595386be2502a1b15ca632a48ae00a72222d930ed182",
+      "wrapperSoSha256": "fb0e7e155e003bb3edf8595386be2502a1b15ca632a48ae00a72222d930ed182",
+      "vulkanVersion": "1.4.359",
+      "releaseTag": "v26.3.0-20260826-r3"
     }
   ]
 }

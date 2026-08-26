@@ -445,13 +445,10 @@ object GpuDriverHelper {
     }
 
     fun validateInstalledLibrary(driverDir: File, libraryName: String): Boolean {
-        if (libraryName.isBlank()) return false
-        if (libraryName.contains("..") || libraryName.contains('/') || libraryName.contains('\\')) {
-            return false
-        }
-        val lib = File(driverDir, libraryName)
+        // Delegate to strict validator — ensures ELF64 LE AArch64 + size + stub checks.
+        // Keep helper as single integration seam; new logic lives in drivers/DriverBinaryValidator.
         return try {
-            lib.isFile && lib.canonicalFile.toPath().startsWith(driverDir.canonicalFile.toPath())
+            com.zenithblue.sambas3.drivers.DriverBinaryValidator.isValid(driverDir, libraryName)
         } catch (_: Exception) {
             false
         }
