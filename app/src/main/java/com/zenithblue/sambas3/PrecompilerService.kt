@@ -88,6 +88,7 @@ class PrecompilerService : Service() {
     private var collectJob: Job? = null
     private var isForeground = false
     private var installPpuSeen = false
+    private var lastInstallTitleId: String? = null
     private var currentInstallIsFirmware = false
     @Volatile private var jobStartId: Int? = null
     private val mainHandler = android.os.Handler(android.os.Looper.getMainLooper())
@@ -388,15 +389,25 @@ class PrecompilerService : Service() {
         if (!st.ppuActive) {
             if (installPpuSeen) {
                 installPpuSeen = false
+                val terminalTitleId = lastInstallTitleId ?: st.titleId
+                lastInstallTitleId = null
                 if (currentInstallIsFirmware) {
                     FirmwareRepository.progressChannel.value = null
                 } else {
                     GameRepository.activeInstallProgress.value = null
                     // Import session reached Ready — keep one stable card through READY then remove session,
                     // letting the real Game (merged via progressId) remain as sole card.
-                    ImportSessionStore.updatePhase(NOTIF_INSTALL.toLong(), ImportPhase.READY, resolvedTitleId = st.titleId)
+                    ImportSessionStore.updatePhase(NOTIF_INSTALL.toLong(), ImportPhase.READY, resolvedTitleId = terminalTitleId)
                     // Delay removal so GamesScreen can merge before session disappears
                     mainHandler.postDelayed({ ImportSessionStore.remove(NOTIF_INSTALL.toLong()) }, 1200)
+                    // Chain to headless prelaunch preparation on Home (no Activity, no Surface)
+                    if (terminalTitleId != null) {
+                        try {
+                            com.zenithblue.sambas3.ppu.ImportPpuPreparationCoordinator.onInstallPpuSuccess(this@PrecompilerService, terminalTitleId)
+                        } catch (e: Exception) {
+                            Log.w(TAG, "Coordinator trigger failed: ${e.message}")
+                        }
+                    }
                 }
                 jobStartId?.let { stopForegroundAndSelf(it) }
             }
@@ -407,6 +418,7 @@ class PrecompilerService : Service() {
             promoteForeground(getString(R.string.compiling_ppu_title))
         }
         installPpuSeen = true
+        if (st.titleId != null) lastInstallTitleId = st.titleId
         val title = getString(R.string.compiling_ppu_title)
         val msg = st.ppuMsg ?: title
         ProgressRepository.updateForeground(

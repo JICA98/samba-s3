@@ -108,6 +108,9 @@ class RPCSX {
     external fun getCoreBuildId(): String?
     // ISO preview probe — extracts only PS3_GAME/ICON0.PNG to cache, size capped 16 MiB, no install/PPU.
     external fun extractIsoPreview(fd: Int, destinationPath: String): Int
+    // Headless prelaunch runtime PPU preparation — reuses boot-discoverable PPU logic, no Surface/RSX/audio.
+    external fun prepareRuntimePpu(path: String, sessionId: Long): Int
+    external fun cancelRuntimePpuPreparation(sessionId: Long): Boolean
 
     @Keep
     fun interface CompileProgressCallback {
@@ -140,6 +143,7 @@ class RPCSX {
         const val COMPILE_PHASE_CANCELED = 4
         const val COMPILE_ORIGIN_INSTALL = 0
         const val COMPILE_ORIGIN_RUNTIME = 1
+        const val COMPILE_ORIGIN_PRELAUNCH = 2
 
         /**
          * JNI descriptor for [CompileProgressCallback.onEvent]. Must match

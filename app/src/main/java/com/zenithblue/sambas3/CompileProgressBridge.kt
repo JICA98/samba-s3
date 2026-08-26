@@ -50,6 +50,11 @@ object CompileProgressBridge {
     val installState: StateFlow<CompileState> = _installState.asStateFlow()
     private var installPpuJobId: Long? = null
 
+    // Prelaunch-origin PPU state — headless preparation on Home, no RPCSXActivity
+    private val _prelaunchState = MutableStateFlow(CompileState())
+    val prelaunchState: StateFlow<CompileState> = _prelaunchState.asStateFlow()
+    private var prelaunchPpuJobId: Long? = null
+
     // Keep latest runtime event for service cold start promotion
     @Volatile
     private var latestRuntimeEvent: NativeEvent? = null
@@ -131,6 +136,15 @@ object CompileProgressBridge {
             }
             return
         }
+        // Prelaunch-origin PPU — isolate to prelaunchState for Home coordinator, no FGS monitor.
+        if (ev.origin == RPCSX.COMPILE_ORIGIN_PRELAUNCH) {
+            if (ev.domain == RPCSX.COMPILE_DOMAIN_PPU) {
+                handlePrelaunchPpu(ev)
+            } else {
+                Log.d(TAG, "Ignoring PRELAUNCH-origin shader event job=${ev.jobId}")
+            }
+            return
+        }
 
         // Reducer keyed by domain/jobId
         when (ev.domain) {
@@ -181,6 +195,47 @@ object CompileProgressBridge {
         }
         // PrecompilerService observes installState and updates FGS 3000. Do not notify() here —
         // racing the service's startForeground with a plain notify can hide the FGS notification.
+    }
+
+    private fun handlePrelaunchPpu(ev: NativeEvent) {
+        val cur = _prelaunchState.value
+        when (ev.phase) {
+            RPCSX.COMPILE_PHASE_BEGIN -> {
+                if (prelaunchPpuJobId != null && prelaunchPpuJobId == ev.jobId) return
+                prelaunchPpuJobId = ev.jobId
+                _prelaunchState.value = cur.copy(
+                    ppuActive = true,
+                    titleId = ev.titleId ?: cur.titleId,
+                    ppuPercent = ev.value.toInt().coerceIn(0, 100),
+                    ppuMax = if (ev.max > 0) ev.max.toInt() else 100,
+                    ppuMsg = ev.message ?: cur.ppuMsg,
+                    fileDone = ev.fileDone,
+                    fileTotal = ev.fileTotal,
+                    moduleDone = ev.moduleDone,
+                    moduleTotal = ev.moduleTotal
+                )
+            }
+            RPCSX.COMPILE_PHASE_PROGRESS -> {
+                if (prelaunchPpuJobId == null) prelaunchPpuJobId = ev.jobId
+                if (prelaunchPpuJobId != ev.jobId) return
+                _prelaunchState.value = cur.copy(
+                    ppuActive = true,
+                    titleId = ev.titleId ?: cur.titleId,
+                    ppuPercent = ev.value.toInt().coerceIn(0, 100),
+                    ppuMax = if (ev.max > 0) ev.max.toInt() else 100,
+                    ppuMsg = ev.message ?: cur.ppuMsg,
+                    fileDone = ev.fileDone,
+                    fileTotal = ev.fileTotal,
+                    moduleDone = ev.moduleDone,
+                    moduleTotal = ev.moduleTotal
+                )
+            }
+            RPCSX.COMPILE_PHASE_COMPLETED, RPCSX.COMPILE_PHASE_FAILED, RPCSX.COMPILE_PHASE_CANCELED -> {
+                if (prelaunchPpuJobId == null || prelaunchPpuJobId != ev.jobId) return
+                prelaunchPpuJobId = null
+                _prelaunchState.value = cur.copy(ppuActive = false, titleId = null)
+            }
+        }
     }
 
     private fun handlePpu(ev: NativeEvent, appCtx: Context?) {
@@ -344,10 +399,12 @@ object CompileProgressBridge {
             shaderJobIds.clear()
             ppuJobId = null
             installPpuJobId = null
+            prelaunchPpuJobId = null
             latestRuntimeEvent = null
             fgsStartDenied = false
             _state.value = CompileState()
             _installState.value = CompileState()
+            _prelaunchState.value = CompileState()
         }
     }
 

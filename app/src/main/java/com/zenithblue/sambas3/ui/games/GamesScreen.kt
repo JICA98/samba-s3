@@ -236,6 +236,7 @@ fun GamesScreen(
     val isFwInstalling = fwProgressId != null
     val hasFw = fwVersion != null
     val installPpu by CompileProgressBridge.installState.collectAsState()
+    val prelaunchPpu by CompileProgressBridge.prelaunchState.collectAsState()
     val activeInstallId by GameRepository.activeInstallProgress
     val activeInstallEntry = ProgressRepository.getItem(activeInstallId)?.value
     val isPackageInstalling = activeInstallId != null
@@ -440,10 +441,21 @@ fun GamesScreen(
                                     distance = distance,
                                     onClick = { coroutineScope.launch { pagerState.animateScrollToPage(page) } },
                                     onPlay = {
-                                        if (item.game.info.path != "$" &&
-                                            item.game.findProgress(GameProgressType.Install) == null
-                                        ) {
-                                            bootingGame = item.game
+                                        val g = item.game
+                                        if (g.info.path == "$" || g.findProgress(GameProgressType.Install) != null) return@GameCard
+                                        // Gate via PpuReadinessStore + prelaunch active (pure helper, no Activity)
+                                        val key = try {
+                                            com.zenithblue.sambas3.GameIdentity.titleIdOrNull(g.info.path, g.info.name.value) ?: com.zenithblue.sambas3.GameIdentity.key(g.info.path, g.info.name.value)
+                                        } catch (_: Exception) { g.info.path }
+                                        val pre = try { com.zenithblue.sambas3.PpuReadinessStore.getPreRuntimeState(context, key) } catch (_: Exception) { com.zenithblue.sambas3.PreRuntimePpuState.NOT_DONE }
+                                        val rt = try { com.zenithblue.sambas3.PpuReadinessStore.getRuntimeState(context, key) } catch (_: Exception) { com.zenithblue.sambas3.RuntimePpuState.NOT_STARTED }
+                                        val canRunLegacy = pre == com.zenithblue.sambas3.PreRuntimePpuState.NOT_DONE && rt == com.zenithblue.sambas3.RuntimePpuState.NOT_STARTED
+                                        val canRun = canRunLegacy || (pre == com.zenithblue.sambas3.PreRuntimePpuState.READY && rt == com.zenithblue.sambas3.RuntimePpuState.IDLE_AFTER_COMPILE)
+                                        val prelaunchActiveForThis = prelaunchPpu.ppuActive && prelaunchPpu.titleId?.equals(key, ignoreCase = true) == true
+                                        if (canRun && !prelaunchActiveForThis) {
+                                            bootingGame = g
+                                        } else {
+                                            android.util.Log.d("GameRun", "Play gated for ${g.info.name.value} key=$key pre=$pre rt=$rt prelaunch=$prelaunchActiveForThis")
                                         }
                                     },
                                     isRunning = isRunning && emulatorActiveGame.value == item.game.info.path,
@@ -633,6 +645,29 @@ fun GamesScreen(
                                 overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis
                             )
                         }
+                    } else if (prelaunchPpu.ppuActive) {
+                        Text(
+                            text = "Preparing PPU",
+                            style = AppTypography.labelSmall,
+                            color = RPCSXColors.primary
+                        )
+                        LinearProgressIndicator(
+                            progress = { (prelaunchPpu.ppuPercent / 100f).coerceIn(0f, 1f) },
+                            modifier = Modifier
+                                .widthIn(min = 80.dp, max = 200.dp)
+                                .clip(RoundedCornerShape(4.dp)),
+                            color = RPCSXColors.primary,
+                            trackColor = RPCSXColors.surfaceOverlay,
+                        )
+                        prelaunchPpu.ppuMsg?.let {
+                            Text(
+                                text = it,
+                                style = AppTypography.labelSmall,
+                                color = RPCSXColors.textSecondary,
+                                maxLines = 1,
+                                overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis
+                            )
+                        }
                     } else if (isPackageInstalling) {
                         Text(
                             text = stringResource(R.string.package_installation),
@@ -740,20 +775,45 @@ fun GamesScreen(
                             }
                         })
                     } else {
-                        HintButton(
-                            text = "PLAY",
-                            icon = "X",
-                            color = RPCSXColors.primary,
-                            onClick = {
-                                val game = (currentItem as? PagerItem.GameItem)?.game
-                                if (game != null &&
-                                    game.info.path != "$" &&
-                                    game.findProgress(GameProgressType.Install) == null
-                                ) {
-                                    bootingGame = game
-                                }
-                            },
-                        )
+                        // Gate PLAY via same pure helper as card onPlay
+                        val hintGame = (currentItem as? PagerItem.GameItem)?.game
+                        val hintCanRun = hintGame?.let { g ->
+                            if (g.info.path == "$" || g.findProgress(GameProgressType.Install) != null) false
+                            else {
+                                val key = try { com.zenithblue.sambas3.GameIdentity.titleIdOrNull(g.info.path, g.info.name.value) ?: com.zenithblue.sambas3.GameIdentity.key(g.info.path, g.info.name.value) } catch (_: Exception) { g.info.path }
+                                val pre = try { com.zenithblue.sambas3.PpuReadinessStore.getPreRuntimeState(context, key) } catch (_: Exception) { com.zenithblue.sambas3.PreRuntimePpuState.NOT_DONE }
+                                val rt = try { com.zenithblue.sambas3.PpuReadinessStore.getRuntimeState(context, key) } catch (_: Exception) { com.zenithblue.sambas3.RuntimePpuState.NOT_STARTED }
+                                val canRunLegacy = pre == com.zenithblue.sambas3.PreRuntimePpuState.NOT_DONE && rt == com.zenithblue.sambas3.RuntimePpuState.NOT_STARTED
+                                val canRun = canRunLegacy || (pre == com.zenithblue.sambas3.PreRuntimePpuState.READY && rt == com.zenithblue.sambas3.RuntimePpuState.IDLE_AFTER_COMPILE)
+                                val prelaunchActiveForThis = prelaunchPpu.ppuActive && prelaunchPpu.titleId?.equals(key, ignoreCase = true) == true
+                                canRun && !prelaunchActiveForThis
+                            }
+                        } ?: false
+                        val hintIsPrelaunch = hintGame != null && run {
+                            val key = try { com.zenithblue.sambas3.GameIdentity.titleIdOrNull(hintGame.info.path, hintGame.info.name.value) ?: com.zenithblue.sambas3.GameIdentity.key(hintGame.info.path, hintGame.info.name.value) } catch (_: Exception) { hintGame.info.path }
+                            prelaunchPpu.ppuActive && prelaunchPpu.titleId?.equals(key, ignoreCase = true) == true
+                        }
+                        if (hintIsPrelaunch) {
+                            HintButton(text = "PREPARING", icon = "X", color = RPCSXColors.textDisabled, onClick = { })
+                        } else {
+                            HintButton(
+                                text = "PLAY",
+                                icon = "X",
+                                color = if (hintCanRun || hintGame == null) RPCSXColors.primary else RPCSXColors.textDisabled,
+                                onClick = {
+                                    val game = (currentItem as? PagerItem.GameItem)?.game
+                                    if (game != null && game.info.path != "$" && game.findProgress(GameProgressType.Install) == null) {
+                                        val key = try { com.zenithblue.sambas3.GameIdentity.titleIdOrNull(game.info.path, game.info.name.value) ?: com.zenithblue.sambas3.GameIdentity.key(game.info.path, game.info.name.value) } catch (_: Exception) { game.info.path }
+                                        val pre = try { com.zenithblue.sambas3.PpuReadinessStore.getPreRuntimeState(context, key) } catch (_: Exception) { com.zenithblue.sambas3.PreRuntimePpuState.NOT_DONE }
+                                        val rt = try { com.zenithblue.sambas3.PpuReadinessStore.getRuntimeState(context, key) } catch (_: Exception) { com.zenithblue.sambas3.RuntimePpuState.NOT_STARTED }
+                                        val canRunLegacy = pre == com.zenithblue.sambas3.PreRuntimePpuState.NOT_DONE && rt == com.zenithblue.sambas3.RuntimePpuState.NOT_STARTED
+                                        val canRun = canRunLegacy || (pre == com.zenithblue.sambas3.PreRuntimePpuState.READY && rt == com.zenithblue.sambas3.RuntimePpuState.IDLE_AFTER_COMPILE)
+                                        val prelaunchActiveForThis = prelaunchPpu.ppuActive && prelaunchPpu.titleId?.equals(key, ignoreCase = true) == true
+                                        if (canRun && !prelaunchActiveForThis) bootingGame = game
+                                    }
+                                },
+                            )
+                        }
                     }
                     HintButton(text = "OPTIONS", icon = "△", color = RPCSXColors.textSecondary, onClick = { navigateToSettings?.invoke() })
                 }
@@ -1235,6 +1295,7 @@ fun GameCard(
     val progressEntry = ProgressRepository.getItem(installProgressId)?.value
     val runtimeCompile by CompileProgressBridge.state.collectAsState()
     val installPpu by CompileProgressBridge.installState.collectAsState()
+    val prelaunchPpu by CompileProgressBridge.prelaunchState.collectAsState()
     val isImporting = progressEntry != null
     val isRuntimeGameCompile = RPCSX.activeGame.value == game.info.path &&
         runtimeCompile.isActive
@@ -1243,36 +1304,44 @@ fun GameCard(
     // Per-game PPU binding: prefer titleId match when available; fallback to placeholder progress for legacy/untagged installs.
     val gameKey = try { com.zenithblue.sambas3.GameIdentity.key(game.info.path, game.info.name.value) } catch (_: Exception) { "" }
     val installPpuTitle = installPpu.titleId?.uppercase()
+    val prelaunchTitle = prelaunchPpu.titleId?.uppercase()
     val isPlaceholder = game.info.path == "$"
     val usingInstallPpu = installPpu.ppuActive && when {
         installPpuTitle != null -> !isPlaceholder && gameKey.equals(installPpuTitle, ignoreCase = true)
         else -> isImporting && !isPlaceholder || (isPlaceholder && gameKey == "path:$")
     }
-    val showCompileOverlay = isImporting || isRuntimeGameCompile
+    val usingPrelaunchPpu = prelaunchPpu.ppuActive && when {
+        prelaunchTitle != null -> !isPlaceholder && gameKey.equals(prelaunchTitle, ignoreCase = true)
+        else -> false
+    }
+    val showCompileOverlay = isImporting || isRuntimeGameCompile || usingPrelaunchPpu
     val progressValue = when {
         usingRuntimePpu -> runtimeCompile.ppuPercent.toLong()
         usingInstallPpu -> installPpu.ppuPercent.toLong()
+        usingPrelaunchPpu -> prelaunchPpu.ppuPercent.toLong()
         else -> progressEntry?.value?.longValue ?: 0
     }
     val progressMax = when {
         usingRuntimePpu -> runtimeCompile.ppuMax.toLong()
         usingInstallPpu -> installPpu.ppuMax.toLong()
+        usingPrelaunchPpu -> prelaunchPpu.ppuMax.toLong()
         else -> progressEntry?.max?.longValue ?: 0
     }
     val progressMessage = when {
         usingRuntimePpu -> runtimeCompile.ppuMsg ?: stringResource(R.string.compiling_ppu_title)
         usingRuntimeShader -> runtimeCompile.shaderMsg ?: stringResource(R.string.compiling_shaders_desc)
         usingInstallPpu -> installPpu.ppuMsg ?: stringResource(R.string.compiling_ppu_title)
+        usingPrelaunchPpu -> prelaunchPpu.ppuMsg ?: "Preparing PPU"
         else -> progressEntry?.message?.value
     }
     val isIndeterminate = when {
         usingRuntimeShader -> true
-        usingRuntimePpu || usingInstallPpu -> progressMax <= 0L
+        usingRuntimePpu || usingInstallPpu || usingPrelaunchPpu -> progressMax <= 0L
         else -> progressMax == 0L
     }
     val compileTitle = when {
         usingRuntimeShader -> stringResource(R.string.compiling_shaders_title)
-        usingRuntimePpu || usingInstallPpu -> stringResource(R.string.compiling_ppu_title)
+        usingRuntimePpu || usingInstallPpu || usingPrelaunchPpu -> stringResource(R.string.compiling_ppu_title)
         else -> null
     }
 

@@ -54,6 +54,8 @@ struct RPCSXApi {
     const char* (*getSambaBuildId)();
     void *(*setCustomDriver)(void *driverHandle);
     int (*extractIsoPreview)(int fd, const char* destPath);
+    int (*prepareRuntimePpu)(const char* path, unsigned long long sessionId);
+    bool (*cancelRuntimePpuPreparation)(unsigned long long sessionId);
 };
 
 struct RPCSXLibrary : RPCSXApi {
@@ -123,6 +125,8 @@ struct RPCSXLibrary : RPCSXApi {
     result.getSambaBuildId = reinterpret_cast<decltype(getSambaBuildId)>(dlsym(handle, "_rpcsx_sambaBuildId"));
     result.setCustomDriver = reinterpret_cast<decltype(setCustomDriver)>(dlsym(handle, "_rpcsx_setCustomDriver"));
     result.extractIsoPreview = reinterpret_cast<decltype(extractIsoPreview)>(dlsym(handle, "_rpcsx_extractIsoPreview"));
+    result.prepareRuntimePpu = reinterpret_cast<decltype(prepareRuntimePpu)>(dlsym(handle, "_rpcsx_prepareRuntimePpu"));
+    result.cancelRuntimePpuPreparation = reinterpret_cast<decltype(cancelRuntimePpuPreparation)>(dlsym(handle, "_rpcsx_cancelRuntimePpuPreparation"));
     result.setCompileProgressListener = reinterpret_cast<decltype(setCompileProgressListener)>(dlsym(handle, "_rpcsx_setCompileProgressListener"));
     result.supportsCompileProgressEvents = reinterpret_cast<decltype(supportsCompileProgressEvents)>(dlsym(handle, "_rpcsx_supportsCompileProgressEvents"));
     // clang-format on
@@ -426,4 +430,23 @@ Java_com_zenithblue_sambas3_RPCSX_extractIsoPreview(JNIEnv *env, jobject, jint f
   }
   std::string dest = unwrap(env, jDest);
   return rpcsxLib.extractIsoPreview(fd, dest.c_str());
+}
+
+extern "C" JNIEXPORT jint JNICALL
+Java_com_zenithblue_sambas3_RPCSX_prepareRuntimePpu(JNIEnv *env, jobject, jstring jPath, jlong sessionId) {
+  if (!rpcsxLib.prepareRuntimePpu) {
+    __android_log_print(ANDROID_LOG_WARN, "RPCSX-UI", "prepareRuntimePpu not available in core (old .so)");
+    return -999;
+  }
+  std::string path = unwrap(env, jPath);
+  return rpcsxLib.prepareRuntimePpu(path.c_str(), static_cast<unsigned long long>(sessionId));
+}
+
+extern "C" JNIEXPORT jboolean JNICALL
+Java_com_zenithblue_sambas3_RPCSX_cancelRuntimePpuPreparation(JNIEnv *env, jobject, jlong sessionId) {
+  if (!rpcsxLib.cancelRuntimePpuPreparation) {
+    __android_log_print(ANDROID_LOG_WARN, "RPCSX-UI", "cancelRuntimePpuPreparation not available");
+    return false;
+  }
+  return rpcsxLib.cancelRuntimePpuPreparation(static_cast<unsigned long long>(sessionId));
 }
