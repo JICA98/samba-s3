@@ -3356,10 +3356,10 @@ index 32b4f3185..453c7c7ba 100644
  	}
  };
 diff --git a/rpcs3/Emu/System.cpp b/rpcs3/Emu/System.cpp
-index b30a6dad3..a02253bee 100644
+index b30a6dad3..757cac3a3 100644
 --- a/rpcs3/Emu/System.cpp
 +++ b/rpcs3/Emu/System.cpp
-@@ -266,56 +266,493 @@ void Emulator::BlockingCallFromMainThread(std::function<void()>&& func, std::sou
+@@ -266,56 +266,514 @@ void Emulator::BlockingCallFromMainThread(std::function<void()>&& func, std::sou
  	}
  }
  
@@ -3511,9 +3511,30 @@ index b30a6dad3..a02253bee 100644
 +
 +    if (plan.eboot_path.empty())
 +    {
-+        plan.eboot_path =
-+            plan.effective_path +
-+            "/USRDIR/EBOOT.BIN";
++        static const char* candidates[] = {
++            "/USRDIR/EBOOT.BIN",
++            "/PS3_GAME/USRDIR/EBOOT.BIN",
++            "/EBOOT.BIN",
++            "/PS3_GAME/EBOOT.BIN",
++            "/USRDIR/ISO.BIN.EDAT",
++            "/PS3_GAME/USRDIR/ISO.BIN.EDAT",
++        };
++        for (auto suffix : candidates)
++        {
++            std::string cand = plan.effective_path + suffix;
++            if (fs::is_file(cand))
++            {
++                plan.eboot_path = std::move(cand);
++                break;
++            }
++        }
++        if (plan.eboot_path.empty())
++        {
++            // Fallback to original single candidate for logging
++            plan.eboot_path =
++                plan.effective_path +
++                "/USRDIR/EBOOT.BIN";
++        }
 +    }
 +
 +    return plan;
@@ -3881,7 +3902,7 @@ index b30a6dad3..a02253bee 100644
  // Some settings are not allowed in certain PPU decoders
  static void fixup_settings(const psf::registry* _psf)
  {
-@@ -1780,37 +2217,11 @@ game_boot_result Emulator::Load(const std::string& title_id, bool is_disc_patch,
+@@ -1780,37 +2238,11 @@ game_boot_result Emulator::Load(const std::string& title_id, bool is_disc_patch,
  
  			g_fxo->init<named_thread>("SPRX Loader"sv, [this, dir_queue]() mutable
  				{
