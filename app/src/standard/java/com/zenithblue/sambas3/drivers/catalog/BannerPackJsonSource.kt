@@ -1,6 +1,8 @@
 package com.zenithblue.sambas3.drivers.catalog
 
 import android.util.Log
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
 import okhttp3.OkHttpClient
@@ -37,26 +39,31 @@ class BannerPackJsonSource(
 
     private val json = Json { ignoreUnknownKeys = true; isLenient = true }
 
-    override suspend fun fetch(): List<RemoteDriverPackage> {
+    override suspend fun fetch(): List<RemoteDriverPackage> = withContext(Dispatchers.IO) {
         for (url in urls) {
+            var packs: List<RemoteDriverPackage>? = null
             try {
                 val req = Request.Builder().url(url).get().build()
-                client.newCall(req).execute().use { resp ->
+                val resp = client.newCall(req).execute()
+                try {
                     if (!resp.isSuccessful) {
                         Log.w("DriverSource", "ARIHANY $url http=${resp.code}")
-                        return@use
+                    } else {
+                        val body = resp.body.string()
+                        if (body != null) {
+                            packs = tryParse(body)
+                        }
                     }
-                    val body = resp.body.string() ?: return@use
-                    // Try to parse as list or object with "drivers" key
-                    val packages = tryParse(body) ?: return@use
-                    if (packages.isNotEmpty()) return packages
+                } finally {
+                    resp.close()
                 }
             } catch (e: Exception) {
                 Log.w("DriverSource", "ARIHANY $url exception ${e.message}")
             }
+            if (packs != null && packs.isNotEmpty()) return@withContext packs
         }
         Log.w("DriverSource", "ARIHANY all URLs failed, returning empty (isolated failure)")
-        return emptyList()
+        emptyList()
     }
 
     private fun tryParse(body: String): List<RemoteDriverPackage>? {

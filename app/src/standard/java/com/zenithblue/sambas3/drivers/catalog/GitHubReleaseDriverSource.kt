@@ -1,6 +1,8 @@
 package com.zenithblue.sambas3.drivers.catalog
 
 import android.util.Log
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
 import okhttp3.OkHttpClient
@@ -33,16 +35,17 @@ class GitHubReleaseDriverSource(
 
     private val json = Json { ignoreUnknownKeys = true; isLenient = true }
 
-    override suspend fun fetch(): List<RemoteDriverPackage> {
-        return try {
+    override suspend fun fetch(): List<RemoteDriverPackage> = withContext(Dispatchers.IO) {
+        try {
             val url = "https://api.github.com/repos/$repo/releases?per_page=20"
             val req = Request.Builder().url(url).header("Accept", "application/vnd.github+json").get().build()
-            client.newCall(req).execute().use { resp ->
+            val resp = client.newCall(req).execute()
+            try {
                 if (!resp.isSuccessful) {
                     Log.w("DriverSource", "BANNERS_TURNIP http=${resp.code}")
-                    return emptyList()
+                    return@withContext emptyList()
                 }
-                val body = resp.body.string() ?: return emptyList()
+                val body = resp.body.string() ?: return@withContext emptyList()
                 val releases = json.decodeFromString<List<Release>>(body)
                 val out = mutableListOf<RemoteDriverPackage>()
                 for (rel in releases) {
@@ -50,7 +53,6 @@ class GitHubReleaseDriverSource(
                     for (asset in rel.assets) {
                         val dl = asset.browser_download_url ?: continue
                         val name = asset.name ?: dl.substringAfterLast("/")
-                        // Only .zip assets
                         if (!name.endsWith(".zip", ignoreCase = true)) continue
                         val idStr = "banners_${tag}_${name}".replace(Regex("[^A-Za-z0-9._-]"), "_")
                         out.add(
@@ -62,12 +64,16 @@ class GitHubReleaseDriverSource(
                                 downloadUrl = dl,
                                 sha256 = null,
                                 experimental = name.contains("a8xx", ignoreCase = true) || name.contains("experimental", ignoreCase = true),
-                                gpuHint = if (name.contains("a8xx", ignoreCase = true)) "adreno8xx" else "adreno6xx"
+                                gpuHint = if (name.contains("a8xx", ignoreCase = true)) "adreno8xx" else "adreno6xx",
+                                checksum = null,
+                                variant = if (name.lowercase().contains("turnip")) "Turnip" else null
                             )
                         )
                     }
                 }
-                out
+                return@withContext out
+            } finally {
+                resp.close()
             }
         } catch (e: Exception) {
             Log.w("DriverSource", "BANNERS_TURNIP exception ${e.message}")

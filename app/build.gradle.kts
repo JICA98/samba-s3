@@ -213,4 +213,7 @@ dependencies {
     implementation(libs.squareup.okhttp3)
     implementation(libs.androidx.documentfile)
     implementation(libs.materialswitch)
+    // Standard flavor only archive deps for .tzst support
+    add("standardImplementation", libs.zstd.jni)
+    add("standardImplementation", libs.commons.compress)
 }

@@ -178,7 +178,9 @@ fun GamesScreen(
     var removeGameTarget by remember { mutableStateOf<Game?>(null) }
     var removingGame by remember { mutableStateOf(false) }
     var removeGameFailed by remember { mutableStateOf(false) }
-    val isRunning = emulatorState.value == EmulatorState.Running || emulatorState.value == EmulatorState.Paused
+    // Gameplay ownership — STOP only when actual game is running/paused, not compile-only engine busy
+    val gameplayRunning = emulatorActiveGame.value != null && (emulatorState.value == EmulatorState.Running || emulatorState.value == EmulatorState.Paused)
+    val isRunning = gameplayRunning // legacy alias, but STOP must use gameplayRunning
 
     val bootScale by animateFloatAsState(if (bootingGame != null) 5f else 1f, animationSpec = tween(700))
     val bootAlpha by animateFloatAsState(if (bootingGame != null) 0f else 1f, animationSpec = tween(500))
@@ -443,22 +445,24 @@ fun GamesScreen(
                                     onPlay = {
                                         val g = item.game
                                         if (g.info.path == "$" || g.findProgress(GameProgressType.Install) != null) return@GameCard
-                                        // Gate via PpuReadinessStore + prelaunch active (pure helper, no Activity)
-                                        val key = try {
-                                            com.zenithblue.sambas3.GameIdentity.titleIdOrNull(g.info.path, g.info.name.value) ?: com.zenithblue.sambas3.GameIdentity.key(g.info.path, g.info.name.value)
-                                        } catch (_: Exception) { g.info.path }
-                                        val pre = try { com.zenithblue.sambas3.PpuReadinessStore.getPreRuntimeState(context, key) } catch (_: Exception) { com.zenithblue.sambas3.PreRuntimePpuState.NOT_DONE }
-                                        val rt = try { com.zenithblue.sambas3.PpuReadinessStore.getRuntimeState(context, key) } catch (_: Exception) { com.zenithblue.sambas3.RuntimePpuState.NOT_STARTED }
-                                        val canRunLegacy = pre == com.zenithblue.sambas3.PreRuntimePpuState.NOT_DONE && rt == com.zenithblue.sambas3.RuntimePpuState.NOT_STARTED
-                                        val canRun = canRunLegacy || (pre == com.zenithblue.sambas3.PreRuntimePpuState.READY && rt == com.zenithblue.sambas3.RuntimePpuState.IDLE_AFTER_COMPILE)
-                                        val prelaunchActiveForThis = prelaunchPpu.ppuActive && prelaunchPpu.titleId?.equals(key, ignoreCase = true) == true
-                                        if (canRun && !prelaunchActiveForThis) {
-                                            bootingGame = g
-                                        } else {
-                                            android.util.Log.d("GameRun", "Play gated for ${g.info.name.value} key=$key pre=$pre rt=$rt prelaunch=$prelaunchActiveForThis")
+                                        val availability = com.zenithblue.sambas3.ppu.GameRunEligibilityHelper.evaluateAvailability(
+                                            context, g, installPpu.ppuActive, prelaunchPpu, emulatorState.value, emulatorActiveGame.value
+                                        )
+                                        when (availability) {
+                                            is com.zenithblue.sambas3.ppu.GameLaunchAvailability.Ready -> bootingGame = g
+                                            is com.zenithblue.sambas3.ppu.GameLaunchAvailability.NeedsPreparation -> {
+                                                // Old install with no PPU state — trigger headless preparation, then Run after
+                                                android.util.Log.i("GameRun", "NeedsPreparation for ${g.info.name.value}, triggering headless")
+                                                com.zenithblue.sambas3.ppu.ImportPpuPreparationCoordinator.requestPreparation(context, g)
+                                            }
+                                            is com.zenithblue.sambas3.ppu.GameLaunchAvailability.Failed -> {
+                                                android.util.Log.w("GameRun", "Failed state for ${g.info.name.value}, retrying")
+                                                com.zenithblue.sambas3.ppu.ImportPpuPreparationCoordinator.requestPreparation(context, g)
+                                            }
+                                            else -> android.util.Log.d("GameRun", "Play gated availability=$availability for ${g.info.name.value}")
                                         }
                                     },
-                                    isRunning = isRunning && emulatorActiveGame.value == item.game.info.path,
+                                    isRunning = gameplayRunning && emulatorActiveGame.value == item.game.info.path,
                                     onConfigure = { configureGameTarget = item.game }
                                 )
                             }
@@ -766,7 +770,7 @@ fun GamesScreen(
                         } else {
                             HintButton(text = "ADD", icon = "X", color = RPCSXColors.primary, onClick = { showImportDialog = true })
                         }
-                    } else if (isRunning) {
+                    } else if (gameplayRunning) {
                         HintButton(text = "STOP", icon = "■", color = RPCSXColors.errorColor, onClick = {
                             thread {
                                 RPCSX.instance.kill()
@@ -775,44 +779,44 @@ fun GamesScreen(
                             }
                         })
                     } else {
-                        // Gate PLAY via same pure helper as card onPlay
                         val hintGame = (currentItem as? PagerItem.GameItem)?.game
-                        val hintCanRun = hintGame?.let { g ->
-                            if (g.info.path == "$" || g.findProgress(GameProgressType.Install) != null) false
-                            else {
-                                val key = try { com.zenithblue.sambas3.GameIdentity.titleIdOrNull(g.info.path, g.info.name.value) ?: com.zenithblue.sambas3.GameIdentity.key(g.info.path, g.info.name.value) } catch (_: Exception) { g.info.path }
-                                val pre = try { com.zenithblue.sambas3.PpuReadinessStore.getPreRuntimeState(context, key) } catch (_: Exception) { com.zenithblue.sambas3.PreRuntimePpuState.NOT_DONE }
-                                val rt = try { com.zenithblue.sambas3.PpuReadinessStore.getRuntimeState(context, key) } catch (_: Exception) { com.zenithblue.sambas3.RuntimePpuState.NOT_STARTED }
-                                val canRunLegacy = pre == com.zenithblue.sambas3.PreRuntimePpuState.NOT_DONE && rt == com.zenithblue.sambas3.RuntimePpuState.NOT_STARTED
-                                val canRun = canRunLegacy || (pre == com.zenithblue.sambas3.PreRuntimePpuState.READY && rt == com.zenithblue.sambas3.RuntimePpuState.IDLE_AFTER_COMPILE)
-                                val prelaunchActiveForThis = prelaunchPpu.ppuActive && prelaunchPpu.titleId?.equals(key, ignoreCase = true) == true
-                                canRun && !prelaunchActiveForThis
-                            }
-                        } ?: false
-                        val hintIsPrelaunch = hintGame != null && run {
-                            val key = try { com.zenithblue.sambas3.GameIdentity.titleIdOrNull(hintGame.info.path, hintGame.info.name.value) ?: com.zenithblue.sambas3.GameIdentity.key(hintGame.info.path, hintGame.info.name.value) } catch (_: Exception) { hintGame.info.path }
-                            prelaunchPpu.ppuActive && prelaunchPpu.titleId?.equals(key, ignoreCase = true) == true
-                        }
-                        if (hintIsPrelaunch) {
-                            HintButton(text = "PREPARING", icon = "X", color = RPCSXColors.textDisabled, onClick = { })
-                        } else {
-                            HintButton(
-                                text = "PLAY",
-                                icon = "X",
-                                color = if (hintCanRun || hintGame == null) RPCSXColors.primary else RPCSXColors.textDisabled,
-                                onClick = {
-                                    val game = (currentItem as? PagerItem.GameItem)?.game
-                                    if (game != null && game.info.path != "$" && game.findProgress(GameProgressType.Install) == null) {
-                                        val key = try { com.zenithblue.sambas3.GameIdentity.titleIdOrNull(game.info.path, game.info.name.value) ?: com.zenithblue.sambas3.GameIdentity.key(game.info.path, game.info.name.value) } catch (_: Exception) { game.info.path }
-                                        val pre = try { com.zenithblue.sambas3.PpuReadinessStore.getPreRuntimeState(context, key) } catch (_: Exception) { com.zenithblue.sambas3.PreRuntimePpuState.NOT_DONE }
-                                        val rt = try { com.zenithblue.sambas3.PpuReadinessStore.getRuntimeState(context, key) } catch (_: Exception) { com.zenithblue.sambas3.RuntimePpuState.NOT_STARTED }
-                                        val canRunLegacy = pre == com.zenithblue.sambas3.PreRuntimePpuState.NOT_DONE && rt == com.zenithblue.sambas3.RuntimePpuState.NOT_STARTED
-                                        val canRun = canRunLegacy || (pre == com.zenithblue.sambas3.PreRuntimePpuState.READY && rt == com.zenithblue.sambas3.RuntimePpuState.IDLE_AFTER_COMPILE)
-                                        val prelaunchActiveForThis = prelaunchPpu.ppuActive && prelaunchPpu.titleId?.equals(key, ignoreCase = true) == true
-                                        if (canRun && !prelaunchActiveForThis) bootingGame = game
-                                    }
-                                },
+                        val hintAvailability = hintGame?.let {
+                            com.zenithblue.sambas3.ppu.GameRunEligibilityHelper.evaluateAvailability(
+                                context, it, installPpu.ppuActive, prelaunchPpu, emulatorState.value, emulatorActiveGame.value
                             )
+                        }
+                        when (hintAvailability) {
+                            is com.zenithblue.sambas3.ppu.GameLaunchAvailability.PreparingPpu, is com.zenithblue.sambas3.ppu.GameLaunchAvailability.WaitingForEngineIdle, is com.zenithblue.sambas3.ppu.GameLaunchAvailability.Importing -> {
+                                HintButton(text = "PREPARING", icon = "X", color = RPCSXColors.textDisabled, onClick = { })
+                            }
+                            is com.zenithblue.sambas3.ppu.GameLaunchAvailability.NeedsPreparation -> {
+                                HintButton(text = "PREPARE", icon = "X", color = RPCSXColors.primary, onClick = {
+                                    hintGame?.let { com.zenithblue.sambas3.ppu.ImportPpuPreparationCoordinator.requestPreparation(context, it) }
+                                })
+                            }
+                            is com.zenithblue.sambas3.ppu.GameLaunchAvailability.Failed -> {
+                                HintButton(text = "RETRY", icon = "X", color = RPCSXColors.errorColor, onClick = {
+                                    hintGame?.let { com.zenithblue.sambas3.ppu.ImportPpuPreparationCoordinator.requestPreparation(context, it) }
+                                })
+                            }
+                            is com.zenithblue.sambas3.ppu.GameLaunchAvailability.Ready -> {
+                                HintButton(text = "PLAY", icon = "X", color = RPCSXColors.primary, onClick = { bootingGame = hintGame })
+                            }
+                            else -> {
+                                // No game or import required -> still show PLAY disabled or ADD?
+                                val isPlayable = hintAvailability == null || hintAvailability is com.zenithblue.sambas3.ppu.GameLaunchAvailability.Ready
+                                HintButton(
+                                    text = "PLAY",
+                                    icon = "X",
+                                    color = if (isPlayable || hintGame == null) RPCSXColors.primary else RPCSXColors.textDisabled,
+                                    onClick = {
+                                        if (hintGame != null && hintAvailability is com.zenithblue.sambas3.ppu.GameLaunchAvailability.Ready) bootingGame = hintGame
+                                        else if (hintAvailability is com.zenithblue.sambas3.ppu.GameLaunchAvailability.NeedsPreparation) {
+                                            com.zenithblue.sambas3.ppu.ImportPpuPreparationCoordinator.requestPreparation(context, hintGame!!)
+                                        }
+                                    }
+                                )
+                            }
                         }
                     }
                     HintButton(text = "OPTIONS", icon = "△", color = RPCSXColors.textSecondary, onClick = { navigateToSettings?.invoke() })

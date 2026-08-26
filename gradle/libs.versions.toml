@@ -18,6 +18,8 @@ activity = "1.13.0"
 uiToolingPreviewAndroid = "1.11.1"
 uiTooling = "1.11.1"
 materialSwitch = "1.0.1"
+zstdJni = "1.5.6-7"
+commonsCompress = "1.26.1"
 
 [libraries]
 androidx-activity-compose = { module = "androidx.activity:activity-compose", version.ref = "activityCompose" }
@@ -38,6 +40,8 @@ androidx-navigation-compose = { group = "androidx.navigation", name = "navigatio
 androidx-ui-tooling-preview-android = { group = "androidx.compose.ui", name = "ui-tooling-preview-android", version.ref = "uiToolingPreviewAndroid" }
 androidx-ui-tooling = { group = "androidx.compose.ui", name = "ui-tooling", version.ref = "uiTooling" }
 materialswitch = { group = "com.github.Ishan09811", name = "materialswitch", version.ref = "materialSwitch" }
+zstd-jni = { module = "com.github.luben:zstd-jni", version.ref = "zstdJni" }
+commons-compress = { group = "org.apache.commons", name = "commons-compress", version.ref = "commonsCompress" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }

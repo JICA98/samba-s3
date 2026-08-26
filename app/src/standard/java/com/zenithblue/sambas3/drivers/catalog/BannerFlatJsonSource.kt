@@ -1,6 +1,8 @@
 package com.zenithblue.sambas3.drivers.catalog
 
 import android.util.Log
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
 import okhttp3.OkHttpClient
@@ -28,23 +30,22 @@ class BannerFlatJsonSource(
 
     private val json = Json { ignoreUnknownKeys = true; isLenient = true }
 
-    override suspend fun fetch(): List<RemoteDriverPackage> {
-        return try {
+    override suspend fun fetch(): List<RemoteDriverPackage> = withContext(Dispatchers.IO) {
+        try {
             val req = Request.Builder().url(url).get().build()
-            client.newCall(req).execute().use { resp ->
+            val resp = client.newCall(req).execute()
+            try {
                 if (!resp.isSuccessful) {
                     Log.w("DriverSource", "$id fetch failed http=${resp.code}")
-                    return emptyList()
+                    return@withContext emptyList()
                 }
-                val body = resp.body.string() ?: return emptyList()
+                val body = resp.body.string() ?: return@withContext emptyList()
                 val entries = json.decodeFromString<List<Entry>>(body)
-                entries.mapNotNull { e ->
+                return@withContext entries.mapNotNull { e ->
                     if (e.remoteUrl.isNullOrBlank() || e.verName.isNullOrBlank()) return@mapNotNull null
                     if (filterGpuOnly && e.type != "GpuDriver") return@mapNotNull null
-                    // Filter out non-GpuDriver for nightlies, but for other sources type may be GpuDriver anyway
                     val name = e.verName!!.trim()
                     val url = e.remoteUrl!!.trim()
-                    // Create stable id from source + name + url hash
                     val idStr = "${id.name.lowercase()}_${name.hashCode().toString(16)}_${url.hashCode().toString(16)}"
                     RemoteDriverPackage(
                         id = idStr,
@@ -54,9 +55,13 @@ class BannerFlatJsonSource(
                         downloadUrl = url,
                         sha256 = null,
                         experimental = isExperimental(name),
-                        gpuHint = guessGpuHint(name)
+                        gpuHint = guessGpuHint(name),
+                        checksum = null,
+                        variant = guessVariant(name)
                     )
                 }
+            } finally {
+                resp.close()
             }
         } catch (e: Exception) {
             Log.w("DriverSource", "$id fetch exception: ${e.message}")
@@ -81,6 +86,18 @@ class BannerFlatJsonSource(
             n.contains("a8xx") || n.contains("840") || n.contains("830") -> "adreno8xx"
             n.contains("a7xx") || n.contains("740") || n.contains("730") -> "adreno7xx"
             n.contains("a6xx") -> "adreno6xx"
+            n.contains("qualcomm") || n.contains("adpkg") -> "qualcomm"
+            else -> null
+        }
+    }
+
+    private fun guessVariant(name: String): String? {
+        val n = name.lowercase()
+        return when {
+            n.contains("gmem") -> "GMEM"
+            n.contains("sysmem") -> "SYSMEM"
+            n.contains("turnip") -> "Turnip"
+            n.contains("qualcomm") -> "Qualcomm"
             else -> null
         }
     }

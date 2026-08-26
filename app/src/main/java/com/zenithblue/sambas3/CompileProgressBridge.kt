@@ -190,7 +190,7 @@ object CompileProgressBridge {
             RPCSX.COMPILE_PHASE_COMPLETED, RPCSX.COMPILE_PHASE_FAILED, RPCSX.COMPILE_PHASE_CANCELED -> {
                 if (installPpuJobId == null || installPpuJobId != ev.jobId) return
                 installPpuJobId = null
-                _installState.value = cur.copy(ppuActive = false, titleId = null)
+                _installState.value = CompileState() // clear stale percent/max/msg/file counts/module counts/title
             }
         }
         // PrecompilerService observes installState and updates FGS 3000. Do not notify() here —
@@ -233,7 +233,7 @@ object CompileProgressBridge {
             RPCSX.COMPILE_PHASE_COMPLETED, RPCSX.COMPILE_PHASE_FAILED, RPCSX.COMPILE_PHASE_CANCELED -> {
                 if (prelaunchPpuJobId == null || prelaunchPpuJobId != ev.jobId) return
                 prelaunchPpuJobId = null
-                _prelaunchState.value = cur.copy(ppuActive = false, titleId = null)
+                _prelaunchState.value = CompileState()
             }
         }
     }
@@ -292,9 +292,12 @@ object CompileProgressBridge {
                 }
                 ppuJobId = null
                 if (shaderJobIds.isEmpty()) latestRuntimeEvent = null
-                _state.value = cur.copy(
+                // Clear stale PPU state fully (A11)
+                _state.value = CompileState(
                     ppuActive = false,
-                    titleId = null,
+                    shaderActive = cur.shaderActive,
+                    shaderMsg = cur.shaderMsg,
+                    titleId = null
                 )
             }
         }

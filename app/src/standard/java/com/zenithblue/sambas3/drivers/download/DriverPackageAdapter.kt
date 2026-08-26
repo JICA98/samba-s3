@@ -24,7 +24,26 @@ object DriverPackageAdapter {
         data class Error(val message: String) : Result()
     }
 
-    fun adapt(sourceZip: File, destZip: File): Result {
+    fun adapt(sourceFile: File, destZip: File, expectedChecksum: com.zenithblue.sambas3.drivers.catalog.RemoteChecksum? = null): Result {
+        val format = DriverArchiveFormat.detect(sourceFile)
+        return when (format) {
+            ArchiveFormat.TZST -> {
+                val md5 = if (expectedChecksum?.algorithm == com.zenithblue.sambas3.drivers.catalog.ChecksumAlgorithm.MD5) expectedChecksum.value else null
+                TarZstdDriverArchiveAdapter.adapt(sourceFile, destZip, md5)
+            }
+            ArchiveFormat.ZIP -> adaptZip(sourceFile, destZip)
+            else -> {
+                // Try zip as fallback, then tzst
+                val zipTry = adaptZip(sourceFile, destZip)
+                if (zipTry is Result.Success) zipTry else {
+                    val md5 = if (expectedChecksum?.algorithm == com.zenithblue.sambas3.drivers.catalog.ChecksumAlgorithm.MD5) expectedChecksum.value else null
+                    TarZstdDriverArchiveAdapter.adapt(sourceFile, destZip, md5)
+                }
+            }
+        }
+    }
+
+    private fun adaptZip(sourceZip: File, destZip: File): Result {
         return try {
             // Basic checks
             if (!sourceZip.isFile) return Result.Error("Source not a file")

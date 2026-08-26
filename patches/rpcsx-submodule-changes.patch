@@ -438,7 +438,7 @@ index 000000000..18a8dfeb0
 +
 +} // namespace rpcsx::android
 diff --git a/android/src/rpcsx-android.cpp b/android/src/rpcsx-android.cpp
-index ce38967c1..dcb988a14 100644
+index ce38967c1..8c5a8706d 100644
 --- a/android/src/rpcsx-android.cpp
 +++ b/android/src/rpcsx-android.cpp
 @@ -1,3 +1,6 @@
@@ -848,21 +848,26 @@ index ce38967c1..dcb988a14 100644
 +    bool report(long v, long m, const std::string& msg) override { return p.report(v, m, msg); }
 +  };
 +  JniReporter reporter(progress);
-+
-+  rpcsx::android::StagedGameInstaller installer(
-+      fs::get_config_dir(), std::string(title_id), std::move(manifest));
-+  if (auto error = installer.install(iso, reporter)) {
-+    progress.failure(*error);
-+    return false;
-+  }
-+
-+  const std::string finalPath = installer.finalPath();
  
 -  auto roots = [&] {
 -    std::vector<std::filesystem::path> result;
 -    std::vector<std::filesystem::path> workList;
 -    workList.push_back({});
 -    result.push_back({});
++  rpcsx::android::StagedGameInstaller installer(
++      fs::get_config_dir(), std::string(title_id), std::move(manifest));
++  if (auto error = installer.install(iso, reporter)) {
++    progress.failure(*error);
++    return false;
++  }
+ 
+-    while (!workList.empty()) {
+-      auto path = std::move(workList.back());
+-      workList.pop_back();
++  const std::string finalPath = installer.finalPath();
+ 
+-      fs::dir dir;
+-      dir.reset(iso.open_dir(path));
 +  auto ebootPath = locateEbootPath(finalPath);
 +  if (ebootPath.empty()) {
 +    progress.failure("Missing EBOOT.BIN after commit");
@@ -882,9 +887,13 @@ index ce38967c1..dcb988a14 100644
 +    }
 +  }
  
--    while (!workList.empty()) {
--      auto path = std::move(workList.back());
--      workList.pop_back();
+-      for (auto &entry : dir) {
+-        if (entry.name == "." || entry.name == "..") {
+-          continue;
+-        }
+-        if (entry.name == "PS3_UPDATE" && path.empty()) {
+-          continue;
+-        }
 +  auto sfoPath = locateParamSfoPath(finalPath);
 +  if (sfoPath.empty() || !std::filesystem::is_regular_file(sfoPath)) {
 +    progress.failure("PARAM.SFO missing after commit");
@@ -898,17 +907,18 @@ index ce38967c1..dcb988a14 100644
 +    }
 +  }
  
--      fs::dir dir;
--      dir.reset(iso.open_dir(path));
+-        if (entry.is_directory) {
+-          result.push_back(path / entry.name);
+-          workList.push_back(path / entry.name);
+-        } else {
+-          filesCount++;
 +  progress.report(0, 0, "Publishing installed game");
 +  collectGameInfo(env, progress.getProgressId(), {finalPath});
 +  progress.report(0, 0, "Preparing PPU compilation");
 +  g_compilationQueue.push(progress, std::move(ebootPath));
 +  return true;
 +}
- 
--      for (auto &entry : dir) {
--        if (entry.name == "." || entry.name == "..") {
++
 +// SAF / DocumentsProvider fds often implement read()+lseek() but not pread().
 +// iso_dev uses read_at → pread; a broken pread returns 0 and ISO install fails
 +// as "Unsupported file type". pread errno used to SIGTRAP via unix_file::ensure.
@@ -928,23 +938,13 @@ index ce38967c1..dcb988a14 100644
 +      const auto r = ::read(m_fd, buffer, count);
 +      if (r < 0) {
 +        if (errno == EINTR) {
-           continue;
++          continue;
          }
--        if (entry.name == "PS3_UPDATE" && path.empty()) {
--          continue;
--        }
--
--        if (entry.is_directory) {
--          result.push_back(path / entry.name);
--          workList.push_back(path / entry.name);
--        } else {
--          filesCount++;
--        }
-+        break;
-       }
-+      if (r == 0) {
 +        break;
 +      }
++      if (r == 0) {
++        break;
+       }
 +      count -= static_cast<u64>(r);
 +      result += static_cast<u64>(r);
 +      buffer = static_cast<u8 *>(buffer) + r;
@@ -1081,17 +1081,17 @@ index ce38967c1..dcb988a14 100644
 +        off += static_cast<u64>(r);
 +        result += static_cast<u64>(r);
 +        buf = static_cast<u8 *>(buf) + r;
-       }
++      }
 +      if (!m_pread_broken) {
 +        return result;
-+      }
+       }
 +    }
 +    return read_via_seek(offset, buffer, count);
 +  }
-+
-+  u64 write(const void *, u64) override { return 0; }
  
 -      progress.report(processedFiles++, filesCount);
++  u64 write(const void *, u64) override { return 0; }
++
 +  u64 seek(s64 offset, fs::seek_mode whence) override {
 +    int w = SEEK_SET;
 +    if (whence == fs::seek_cur) {
@@ -1154,7 +1154,7 @@ index ce38967c1..dcb988a14 100644
    auto file = fs::file::from_native_handle(fd);
    AtExit atExit{[&] { file.release_handle(); }};
  
-@@ -2519,6 +2762,188 @@ extern "C" bool _rpcsx_installKey(JNIEnv *env, int fd, long progressId,
+@@ -2519,6 +2762,274 @@ extern "C" bool _rpcsx_installKey(JNIEnv *env, int fd, long progressId,
    return false;
  }
  
@@ -1249,7 +1249,6 @@ index ce38967c1..dcb988a14 100644
 +    __android_log_print(ANDROID_LOG_WARN, "RPCSX-UI", "prepareRuntimePpu: emulator busy, reject session %llu", (unsigned long long)sessionId);
 +    return -2;
 +  }
-+  // Must be Stopped
 +  auto state = Emu.GetStatus(false);
 +  if (state != system_state::stopped) {
 +    __android_log_print(ANDROID_LOG_WARN, "RPCSX-UI", "prepareRuntimePpu: not Stopped state=%d session %llu", (int)state, (unsigned long long)sessionId);
@@ -1265,65 +1264,152 @@ index ce38967c1..dcb988a14 100644
 +  g_prelaunch_session = sessionId;
 +  __android_log_print(ANDROID_LOG_INFO, "RPCSX-UI", "prepareRuntimePpu: start session %llu path %s", (unsigned long long)sessionId, path);
 +
-+  // Reuse existing PPU module discovery helper would be ideal; for this worker we emit synthetic PRELAUNCH progress
-+  // to prove isolation without RSX/Surface/audio. Real module discovery is preserved in the existing PPU cache; this stub
-+  // simulates the headless phase that would discover EBOOT/PRX/SPRX/self via the same inventory.
++  auto t0 = std::chrono::steady_clock::now();
 +  u64 jobId = sessionId ? sessionId : allocate_compile_job_id();
 +  std::string titleId = Emu.GetTitleID();
-+  // If titleId empty, try to derive from path's PARAM.SFO or use path hash; fallback to path basename
++  std::string rootPathStr;
++  std::filesystem::path fsPath(spath);
++  bool isDir = std::filesystem::is_directory(fsPath, ec);
++  if (!ec && isDir) {
++    rootPathStr = fsPath.string();
++    if (!rootPathStr.empty() && rootPathStr.back() != '/') rootPathStr += "/";
++    if (titleId.empty()) {
++      auto sfo = locateParamSfoPath(rootPathStr);
++      if (!sfo.empty()) {
++        auto psf = psf::load_object(sfo);
++        std::string tid(psf::get_string(psf, "TITLE_ID"));
++        if (!tid.empty()) { titleId = tid; Emu.SetTitleID(titleId); }
++      }
++    }
++  } else {
++    // file path (EBOOT.BIN)
++    auto parent = fsPath.parent_path();
++    if (parent.filename() == "USRDIR") parent = parent.parent_path();
++    rootPathStr = parent.string();
++    if (!rootPathStr.empty() && rootPathStr.back() != '/') rootPathStr += "/";
++    if (titleId.empty()) {
++      auto sfo = locateParamSfoPath(rootPathStr);
++      if (!sfo.empty()) {
++        auto psf = psf::load_object(sfo);
++        std::string tid(psf::get_string(psf, "TITLE_ID"));
++        if (!tid.empty()) { titleId = tid; Emu.SetTitleID(titleId); }
++      }
++    }
++  }
 +  if (titleId.empty()) {
-+    // Try to get title from path's titleId pattern
-+    auto m = std::string(path);
-+    auto pos = m.find_last_of("/\\");
-+    std::string base = (pos == std::string::npos) ? m : m.substr(pos+1);
-+    // Simple titleId extraction
++    auto base = fsPath.filename().string();
 +    if (base.size() >= 9) {
-+      // Assume if base looks like titleId, use it
-+      bool looksLikeTitle = true;
-+      for (size_t i=0;i<4;i++) if (!isalpha(base[i])) looksLikeTitle=false;
-+      for (size_t i=4;i<9;i++) if (!isdigit(base[i])) looksLikeTitle=false;
-+      if (looksLikeTitle) titleId = base.substr(0,9);
++      bool looks = true;
++      for (size_t i=0;i<4;i++) if (!isalpha((unsigned char)base[i])) looks=false;
++      for (size_t i=4;i<9;i++) if (!isdigit((unsigned char)base[i])) looks=false;
++      if (looks) { titleId = base.substr(0,9); Emu.SetTitleID(titleId); }
 +    }
 +    if (titleId.empty()) titleId = "UNKNOWN";
 +  }
 +
-+  auto emit = [&](CompilePhase phase, int percent, const char* msg, int fileDone, int fileTotal, int modDone, int modTotal){
-+    CompileEvent ev{};
-+    ev.domain = CompileDomain::PPU;
-+    ev.phase = phase;
-+    ev.origin = CompileOrigin::PRELAUNCH;
-+    ev.jobId = jobId;
-+    ev.titleId = titleId;
-+    PpuProgressSnapshot snap{};
-+    snap.percentValue = percent;
-+    snap.percentMax = 100;
-+    snap.message = msg ? msg : "";
-+    snap.fileDone = fileDone;
-+    snap.fileTotal = fileTotal;
-+    snap.moduleDone = modDone;
-+    snap.moduleTotal = modTotal;
-+    ev.ppu = snap;
-+    emit_compile_event(ev);
-+  };
++  __android_log_print(ANDROID_LOG_INFO, "RPCSX-UI", "prepareRuntimePpu: resolved titleId=%s root=%s jobId=%llu", titleId.c_str(), rootPathStr.c_str(), (unsigned long long)jobId);
 +
-+  emit(CompilePhase::BEGIN, 0, "Preparing PPU (headless)", 0, 10, 0, 5);
-+  // Simulate progress steps without gameplay; check cancellation each step
-+  for (int i=1; i<=10; ++i) {
-+    if (g_prelaunch_canceled && g_prelaunch_session == sessionId) {
-+      __android_log_print(ANDROID_LOG_INFO, "RPCSX-UI", "prepareRuntimePpu: canceled session %llu at %d/10", (unsigned long long)sessionId, i);
-+      emit(CompilePhase::CANCELED, (i*10), "Canceled", i, 10, i/2, 5);
-+      g_prelaunch_canceled = false;
-+      return -5;
++  // Headless lifecycle: Running state while compiling, no Surface/RSX/audio
++  Emu.SetState(system_state::running);
++  SystemProgressContext prelaunchCtx{ CompileOrigin::PRELAUNCH, jobId, titleId };
++  set_system_progress_context(prelaunchCtx);
++  struct PrelaunchCtxGuard { ~PrelaunchCtxGuard(){ clear_system_progress_context(); } } ctxGuard;
++
++  // Init compilation fxo — mirrors CompilationQueue::impl but with PRELAUNCH origin
++  g_fxo->init<named_thread<progress_dialog_server>>();
++  g_fxo->init<main_ppu_module<lv2_obj>>();
++  g_fxo->init(false, nullptr);
++  auto rootPath = std::filesystem::path(rootPathStr);
++  std::vector<std::string> dir_queue;
++  dir_queue.reserve(1024);
++  dir_queue.push_back(rootPath.string());
++  // Build dir_queue via recursive scan (same as ppu_precompile's own scan, but we provide initial queue)
++  // We use filesystem recursive scan to populate queue; ppu_precompile will also expand it, but we provide at least root
++  // For accuracy, mimic CompilationQueue: push all subdirectories
++  try {
++    for (auto &entry : std::filesystem::recursive_directory_iterator(rootPath, ec)) {
++      if (ec) break;
++      if (g_prelaunch_canceled && g_prelaunch_session == sessionId) break;
++      if (entry.is_directory(ec) && !ec) {
++        dir_queue.push_back(entry.path().string() + "/");
++      }
 +    }
-+    // Sleep short to simulate work without blocking UI thread too long (this runs on calling thread which is IO pool)
-+    std::this_thread::sleep_for(std::chrono::milliseconds(80));
-+    char msg[64];
-+    snprintf(msg, sizeof(msg), "Progress %d/10", i);
-+    emit(CompilePhase::PROGRESS, i*10, msg, i, 10, i/2, 5);
++  } catch (const std::exception& e) {
++    __android_log_print(ANDROID_LOG_WARN, "RPCSX-UI", "prepareRuntimePpu: dir scan exception %s", e.what());
 +  }
-+  emit(CompilePhase::COMPLETED, 100, "PPU preparation complete", 10, 10, 5, 5);
-+  __android_log_print(ANDROID_LOG_INFO, "RPCSX-UI", "prepareRuntimePpu: success session %llu title %s", (unsigned long long)sessionId, titleId.c_str());
-+  // Ensure engine remains Stopped; do not start RSX/audio/Surface
++  __android_log_print(ANDROID_LOG_INFO, "RPCSX-UI", "prepareRuntimePpu: dir_queue roots=%zu for title %s", dir_queue.size(), titleId.c_str());
++
++  if (g_prelaunch_canceled && g_prelaunch_session == sessionId) {
++    __android_log_print(ANDROID_LOG_INFO, "RPCSX-UI", "prepareRuntimePpu: canceled before ppu_precompile session %llu", (unsigned long long)sessionId);
++    g_fxo->reset();
++    Emu.SetState(system_state::stopped);
++    CompileEvent ev{}; ev.domain=CompileDomain::PPU; ev.phase=CompilePhase::CANCELED; ev.origin=CompileOrigin::PRELAUNCH; ev.jobId=jobId; ev.titleId=titleId;
++    PpuProgressSnapshot snap{}; snap.percentValue=0; snap.percentMax=100; snap.message="Canceled"; ev.ppu=snap;
++    emit_compile_event(ev);
++    g_prelaunch_canceled = false;
++    return -5;
++  }
++
++  std::string ebootPath = locateEbootPath(rootPathStr);
++  std::vector<ppu_module<lv2_obj>*> mod_list;
++  auto &_main = *ensure(g_fxo->try_get<main_ppu_module<lv2_obj>>());
++  bool mainLoaded = false;
++  if (!ebootPath.empty() && fs::is_file(ebootPath)) {
++    fs::file src{ebootPath};
++    src = decrypt_self(src);
++    const ppu_exec_object obj = src;
++    if (obj == elf_error::ok && ppu_load_exec(obj, true, ebootPath)) {
++      _main.path = ebootPath;
++      mainLoaded = true;
++      __android_log_print(ANDROID_LOG_INFO, "RPCSX-UI", "prepareRuntimePpu: loaded EBOOT %s", ebootPath.c_str());
++    } else {
++      __android_log_print(ANDROID_LOG_WARN, "RPCSX-UI", "prepareRuntimePpu: failed to load EBOOT %s (%s)", ebootPath.c_str(), obj.get_error());
++    }
++  } else {
++    __android_log_print(ANDROID_LOG_WARN, "RPCSX-UI", "prepareRuntimePpu: EBOOT not found for %s", rootPathStr.c_str());
++  }
++
++  if (mainLoaded) {
++    bool analysed = _main.analyse(0, _main.elf_entry, _main.seg0_code_end, _main.applied_patches, std::vector<u32>{}, [&](){ return Emu.IsStopped() || (g_prelaunch_canceled && g_prelaunch_session.load()==sessionId); });
++    if (!analysed) {
++      __android_log_print(ANDROID_LOG_WARN, "RPCSX-UI", "prepareRuntimePpu: main analyse failed for %s", ebootPath.c_str());
++    } else {
++      Emu.ConfigurePPUCache();
++      ppu_initialize(_main);
++      mod_list.emplace_back(&_main);
++      __android_log_print(ANDROID_LOG_INFO, "RPCSX-UI", "prepareRuntimePpu: main initialized mod_list=%zu", mod_list.size());
++    }
++    if (Emu.IsStopped() || (g_prelaunch_canceled && g_prelaunch_session.load()==sessionId)) {
++      __android_log_print(ANDROID_LOG_INFO, "RPCSX-UI", "prepareRuntimePpu: aborted after analyse session %llu", (unsigned long long)sessionId);
++      g_fxo->reset();
++      Emu.SetState(system_state::stopped);
++      if (g_prelaunch_canceled) {
++        CompileEvent ev{}; ev.domain=CompileDomain::PPU; ev.phase=CompilePhase::CANCELED; ev.origin=CompileOrigin::PRELAUNCH; ev.jobId=jobId; ev.titleId=titleId; emit_compile_event(ev);
++        g_prelaunch_canceled=false;
++        return -5;
++      }
++      return -1;
++    }
++  }
++
++  __android_log_print(ANDROID_LOG_INFO, "RPCSX-UI", "prepareRuntimePpu: calling real ppu_precompile title=%s eboot=%s dir_queue=%zu mod_list=%zu", titleId.c_str(), ebootPath.c_str(), dir_queue.size(), mod_list.size());
++  // Real PPU compilation — drives real PRELAUNCH progress events (no synthetic timer)
++  ppu_precompile(dir_queue, mod_list.empty() ? nullptr : &mod_list);
++
++  if (g_prelaunch_canceled && g_prelaunch_session.load()==sessionId) {
++    __android_log_print(ANDROID_LOG_INFO, "RPCSX-UI", "prepareRuntimePpu: canceled after ppu_precompile session %llu", (unsigned long long)sessionId);
++    g_fxo->reset();
++    Emu.SetState(system_state::stopped);
++    CompileEvent ev{}; ev.domain=CompileDomain::PPU; ev.phase=CompilePhase::CANCELED; ev.origin=CompileOrigin::PRELAUNCH; ev.jobId=jobId; ev.titleId=titleId; emit_compile_event(ev);
++    g_prelaunch_canceled=false;
++    return -5;
++  }
++
++  g_fxo->reset();
++  Emu.SetState(system_state::stopped);
++  auto t1 = std::chrono::steady_clock::now();
++  auto elapsed = std::chrono::duration_cast<std::chrono::seconds>(t1 - t0).count();
++  __android_log_print(ANDROID_LOG_INFO, "RPCSX-UI", "prepareRuntimePpu: real ppu_precompile completed session %llu title %s elapsed %llds", (unsigned long long)sessionId, titleId.c_str(), (long long)elapsed);
 +  if (Emu.GetStatus(false) != system_state::stopped) {
 +    __android_log_print(ANDROID_LOG_WARN, "RPCSX-UI", "prepareRuntimePpu: after state %d not Stopped, killing", (int)Emu.GetStatus(false));
 +    Emu.Kill();
@@ -1343,7 +1429,7 @@ index ce38967c1..dcb988a14 100644
  extern "C" std::string _rpcsx_systemInfo() {
    std::string result;
  
-@@ -2641,4 +3066,159 @@ extern "C" void *_rpcsx_setCustomDriver(void *driverHandle) {
+@@ -2641,4 +3152,159 @@ extern "C" void *_rpcsx_setCustomDriver(void *driverHandle) {
    return prevLoader;
  }
  
