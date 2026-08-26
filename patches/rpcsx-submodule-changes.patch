@@ -438,7 +438,7 @@ index 000000000..18a8dfeb0
 +
 +} // namespace rpcsx::android
 diff --git a/android/src/rpcsx-android.cpp b/android/src/rpcsx-android.cpp
-index ce38967c1..8d5dc06b7 100644
+index ce38967c1..632e874c6 100644
 --- a/android/src/rpcsx-android.cpp
 +++ b/android/src/rpcsx-android.cpp
 @@ -1,3 +1,6 @@
@@ -822,21 +822,16 @@ index ce38967c1..8d5dc06b7 100644
 +    progress.failure(fmt::format("Invalid TITLE_ID from ISO: %s", title_id));
 +    return false;
 +  }
- 
--  if (auto gameInfo = fetchGameInfo(sfo)) {
--    sendGameInfo(env, progressId, {{*gameInfo}});
++
 +  progress.report(0, 0, "Building manifest");
 +  std::string manifestError;
 +  auto manifestOpt = rpcsx::android::IsoInstallManifest::build(iso, manifestError);
 +  if (!manifestOpt) {
 +    progress.failure(manifestError.empty() ? "Failed to build ISO manifest" : manifestError);
 +    return false;
-   }
++  }
 +  auto manifest = std::move(*manifestOpt);
- 
--  std::filesystem::path destinationPath =
--      fs::get_config_dir() + "games/" + std::string(title_id);
--  std::size_t filesCount = 0;
++
 +  class JniReporter : public rpcsx::android::ProgressReporter {
 +    Progress& p;
 +  public:
@@ -845,25 +840,25 @@ index ce38967c1..8d5dc06b7 100644
 +  };
 +  JniReporter reporter(progress);
  
--  auto roots = [&] {
--    std::vector<std::filesystem::path> result;
--    std::vector<std::filesystem::path> workList;
--    workList.push_back({});
--    result.push_back({});
+-  if (auto gameInfo = fetchGameInfo(sfo)) {
+-    sendGameInfo(env, progressId, {{*gameInfo}});
 +  rpcsx::android::StagedGameInstaller installer(
 +      fs::get_config_dir(), std::string(title_id), std::move(manifest));
 +  if (auto error = installer.install(iso, reporter)) {
 +    progress.failure(*error);
 +    return false;
-+  }
+   }
  
--    while (!workList.empty()) {
--      auto path = std::move(workList.back());
--      workList.pop_back();
+-  std::filesystem::path destinationPath =
+-      fs::get_config_dir() + "games/" + std::string(title_id);
+-  std::size_t filesCount = 0;
 +  const std::string finalPath = installer.finalPath();
  
--      fs::dir dir;
--      dir.reset(iso.open_dir(path));
+-  auto roots = [&] {
+-    std::vector<std::filesystem::path> result;
+-    std::vector<std::filesystem::path> workList;
+-    workList.push_back({});
+-    result.push_back({});
 +  auto ebootPath = locateEbootPath(finalPath);
 +  if (ebootPath.empty()) {
 +    progress.failure("Missing EBOOT.BIN after commit");
@@ -883,13 +878,9 @@ index ce38967c1..8d5dc06b7 100644
 +    }
 +  }
  
--      for (auto &entry : dir) {
--        if (entry.name == "." || entry.name == "..") {
--          continue;
--        }
--        if (entry.name == "PS3_UPDATE" && path.empty()) {
--          continue;
--        }
+-    while (!workList.empty()) {
+-      auto path = std::move(workList.back());
+-      workList.pop_back();
 +  auto sfoPath = locateParamSfoPath(finalPath);
 +  if (sfoPath.empty() || !std::filesystem::is_regular_file(sfoPath)) {
 +    progress.failure("PARAM.SFO missing after commit");
@@ -903,18 +894,20 @@ index ce38967c1..8d5dc06b7 100644
 +    }
 +  }
  
--        if (entry.is_directory) {
--          result.push_back(path / entry.name);
--          workList.push_back(path / entry.name);
--        } else {
--          filesCount++;
+-      fs::dir dir;
+-      dir.reset(iso.open_dir(path));
 +  progress.report(0, 0, "Publishing installed game");
 +  collectGameInfo(env, progress.getProgressId(), {finalPath});
 +  progress.report(0, 0, "Preparing PPU compilation");
 +  g_compilationQueue.push(progress, std::move(ebootPath));
 +  return true;
 +}
-+
+ 
+-      for (auto &entry : dir) {
+-        if (entry.name == "." || entry.name == "..") {
+-          continue;
+-        }
+-        if (entry.name == "PS3_UPDATE" && path.empty()) {
 +// SAF / DocumentsProvider fds often implement read()+lseek() but not pread().
 +// iso_dev uses read_at → pread; a broken pread returns 0 and ISO install fails
 +// as "Unsupported file type". pread errno used to SIGTRAP via unix_file::ensure.
@@ -934,13 +927,20 @@ index ce38967c1..8d5dc06b7 100644
 +      const auto r = ::read(m_fd, buffer, count);
 +      if (r < 0) {
 +        if (errno == EINTR) {
-+          continue;
+           continue;
          }
-+        break;
-       }
-+      if (r == 0) {
+-
+-        if (entry.is_directory) {
+-          result.push_back(path / entry.name);
+-          workList.push_back(path / entry.name);
+-        } else {
+-          filesCount++;
+-        }
 +        break;
 +      }
++      if (r == 0) {
++        break;
+       }
 +      count -= static_cast<u64>(r);
 +      result += static_cast<u64>(r);
 +      buffer = static_cast<u8 *>(buffer) + r;
@@ -1084,10 +1084,10 @@ index ce38967c1..8d5dc06b7 100644
 +    }
 +    return read_via_seek(offset, buffer, count);
 +  }
-+
-+  u64 write(const void *, u64) override { return 0; }
  
 -      progress.report(processedFiles++, filesCount);
++  u64 write(const void *, u64) override { return 0; }
++
 +  u64 seek(s64 offset, fs::seek_mode whence) override {
 +    int w = SEEK_SET;
 +    if (whence == fs::seek_cur) {
@@ -1150,7 +1150,95 @@ index ce38967c1..8d5dc06b7 100644
    auto file = fs::file::from_native_handle(fd);
    AtExit atExit{[&] { file.release_handle(); }};
  
-@@ -2641,4 +2880,159 @@ extern "C" void *_rpcsx_setCustomDriver(void *driverHandle) {
+@@ -2519,6 +2758,87 @@ extern "C" bool _rpcsx_installKey(JNIEnv *env, int fd, long progressId,
+   return false;
+ }
+ 
++extern "C" int _rpcsx_extractIsoPreview(int fd, const char* destPath) {
++  if (fd < 0 || !destPath || !*destPath) {
++    __android_log_print(ANDROID_LOG_WARN, "RPCSX-UI", "extractIsoPreview: invalid args fd=%d dest=%s", fd, destPath ? destPath : "null");
++    return -1;
++  }
++  // Open source ISO via android fd (handles SAF pread fallback)
++  auto srcFile = file_from_android_fd(fd);
++  AtExit atExitSrc{[&] { srcFile.release_handle(); }};
++  if (!srcFile) {
++    __android_log_print(ANDROID_LOG_WARN, "RPCSX-UI", "extractIsoPreview: srcFile invalid fd=%d", fd);
++    return 1;
++  }
++  // Use file_view_block_dev wrapping srcFile
++  auto optIso = iso_dev::open(std::make_unique<file_view_block_dev>(srcFile));
++  if (!optIso) {
++    __android_log_print(ANDROID_LOG_WARN, "RPCSX-UI", "extractIsoPreview: not an ISO fd=%d", fd);
++    return 2;
++  }
++  auto iso = std::move(*optIso);
++  // Try PS3_GAME/ICON0.PNG then ICON0.PNG
++  const char* candidates[] = {"PS3_GAME/ICON0.PNG", "ICON0.PNG"};
++  fs::file iconFile;
++  for (auto cand : candidates) {
++    if (auto raw = iso.open(cand, fs::read)) {
++      iconFile.reset(std::move(raw));
++      __android_log_print(ANDROID_LOG_INFO, "RPCSX-UI", "extractIsoPreview: found %s fd=%d", cand, fd);
++      break;
++    }
++  }
++  if (!iconFile) {
++    __android_log_print(ANDROID_LOG_INFO, "RPCSX-UI", "extractIsoPreview: ICON0.PNG not found fd=%d", fd);
++    return 3;
++  }
++  const u64 sz = iconFile.size();
++  const u64 MAX_ICON = 16ULL * 1024ULL * 1024ULL;
++  if (sz == 0 || sz > MAX_ICON) {
++    __android_log_print(ANDROID_LOG_WARN, "RPCSX-UI", "extractIsoPreview: icon size %llu invalid fd=%d", (unsigned long long)sz, fd);
++    return 4;
++  }
++  // Read icon bytes
++  std::vector<u8> data(static_cast<size_t>(sz));
++  if (iconFile.read_at(0, data.data(), sz) != sz) {
++    __android_log_print(ANDROID_LOG_WARN, "RPCSX-UI", "extractIsoPreview: read failed fd=%d", fd);
++    return 5;
++  }
++  // Ensure parent dir exists
++  std::string dest(destPath);
++  auto slash = dest.rfind('/');
++  if (slash != std::string::npos) {
++    std::string parent = dest.substr(0, slash);
++    std::error_code ec;
++    std::filesystem::create_directories(parent, ec);
++  }
++  // Write atomically via tmp + rename
++  std::string tmp = dest + ".tmp";
++  {
++    fs::file out(tmp, fs::write + fs::create);
++    if (!out) {
++      __android_log_print(ANDROID_LOG_WARN, "RPCSX-UI", "extractIsoPreview: cannot create dest %s", tmp.c_str());
++      return 6;
++    }
++    if (out.write(data.data(), sz) != sz) {
++      __android_log_print(ANDROID_LOG_WARN, "RPCSX-UI", "extractIsoPreview: write failed %s", tmp.c_str());
++      return 7;
++    }
++  }
++  std::error_code ec;
++  std::filesystem::rename(tmp, dest, ec);
++  if (ec) {
++    // Fallback: try remove dest then rename
++    std::filesystem::remove(dest, ec);
++    std::filesystem::rename(tmp, dest, ec);
++    if (ec) {
++      __android_log_print(ANDROID_LOG_WARN, "RPCSX-UI", "extractIsoPreview: rename failed %s -> %s: %s", tmp.c_str(), dest.c_str(), ec.message().c_str());
++      return 8;
++    }
++  }
++  __android_log_print(ANDROID_LOG_INFO, "RPCSX-UI", "extractIsoPreview: success %llu bytes -> %s fd=%d", (unsigned long long)sz, dest.c_str(), fd);
++  return 0;
++}
++
+ extern "C" std::string _rpcsx_systemInfo() {
+   std::string result;
+ 
+@@ -2641,4 +2961,159 @@ extern "C" void *_rpcsx_setCustomDriver(void *driverHandle) {
    return prevLoader;
  }
  

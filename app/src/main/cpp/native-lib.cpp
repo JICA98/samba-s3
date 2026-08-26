@@ -49,10 +49,11 @@ struct RPCSXApi {
   std::string (*patchEngineVersion)();
   std::string (*patchesList)();
   bool (*patchSetEnabled)(std::string_view hash, std::string_view description, bool enabled);
-   const char* (*getPpuManifestKey)();
-   const char* (*getPpuManifestKeyForTitle)(const char* titleId);
-   const char* (*getSambaBuildId)();
-   void *(*setCustomDriver)(void *driverHandle);
+    const char* (*getPpuManifestKey)();
+    const char* (*getPpuManifestKeyForTitle)(const char* titleId);
+    const char* (*getSambaBuildId)();
+    void *(*setCustomDriver)(void *driverHandle);
+    int (*extractIsoPreview)(int fd, const char* destPath);
 };
 
 struct RPCSXLibrary : RPCSXApi {
@@ -121,6 +122,7 @@ struct RPCSXLibrary : RPCSXApi {
     result.getPpuManifestKeyForTitle = reinterpret_cast<decltype(getPpuManifestKeyForTitle)>(dlsym(handle, "_rpcsx_getPpuManifestKeyForTitle"));
     result.getSambaBuildId = reinterpret_cast<decltype(getSambaBuildId)>(dlsym(handle, "_rpcsx_sambaBuildId"));
     result.setCustomDriver = reinterpret_cast<decltype(setCustomDriver)>(dlsym(handle, "_rpcsx_setCustomDriver"));
+    result.extractIsoPreview = reinterpret_cast<decltype(extractIsoPreview)>(dlsym(handle, "_rpcsx_extractIsoPreview"));
     result.setCompileProgressListener = reinterpret_cast<decltype(setCompileProgressListener)>(dlsym(handle, "_rpcsx_setCompileProgressListener"));
     result.supportsCompileProgressEvents = reinterpret_cast<decltype(supportsCompileProgressEvents)>(dlsym(handle, "_rpcsx_supportsCompileProgressEvents"));
     // clang-format on
@@ -414,4 +416,14 @@ Java_com_zenithblue_sambas3_RPCSX_getCoreBuildId(JNIEnv *env, jobject) {
   if (!rpcsxLib.getSambaBuildId) return wrap(env, std::string{});
   const char* id = rpcsxLib.getSambaBuildId();
   return wrap(env, id ? std::string(id) : std::string{});
+}
+
+extern "C" JNIEXPORT jint JNICALL
+Java_com_zenithblue_sambas3_RPCSX_extractIsoPreview(JNIEnv *env, jobject, jint fd, jstring jDest) {
+  if (!rpcsxLib.extractIsoPreview) {
+    __android_log_print(ANDROID_LOG_WARN, "RPCSX-UI", "extractIsoPreview not available in core (old .so)");
+    return -999;
+  }
+  std::string dest = unwrap(env, jDest);
+  return rpcsxLib.extractIsoPreview(fd, dest.c_str());
 }

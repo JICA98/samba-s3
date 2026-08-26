@@ -106,6 +106,8 @@ class RPCSX {
     // Native now supports _rpcsx_getPpuManifestKeyForTitle(titleId) with global fallback.
     external fun getPpuManifestKey(titleId: String): String?
     external fun getCoreBuildId(): String?
+    // ISO preview probe — extracts only PS3_GAME/ICON0.PNG to cache, size capped 16 MiB, no install/PPU.
+    external fun extractIsoPreview(fd: Int, destinationPath: String): Int
 
     @Keep
     fun interface CompileProgressCallback {

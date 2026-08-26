@@ -52,9 +52,12 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import android.util.Log
 import coil3.compose.AsyncImage
 import com.zenithblue.sambas3.*
 import com.zenithblue.sambas3.R
+import com.zenithblue.sambas3.ui.games.preview.GamePreviewModel
+import com.zenithblue.sambas3.ui.games.preview.GamePreviewRepository
 import com.zenithblue.sambas3.utils.FileUtil
 import com.zenithblue.sambas3.utils.GameFolderMatch
 import kotlin.math.abs
@@ -75,7 +78,12 @@ sealed class PagerItem {
         override val stableKey: String get() = "firmware"
     }
     // Phases 3-4 will add SourceCandidate/PendingImport; keep keys stable when merging later.
-    data class SourceCandidate(val titleId: String?, val displayName: String, val sourceUri: String) : PagerItem() {
+    data class SourceCandidate(
+        val titleId: String?,
+        val displayName: String,
+        val sourceUri: String,
+        val sourceKind: com.zenithblue.sambas3.utils.GameSourceKind? = null
+    ) : PagerItem() {
         override val stableKey: String get() = "source:${titleId ?: displayName.lowercase()}"
     }
     data class PendingImport(val progressId: Long, val provisionalTitleId: String?, val displayName: String?) : PagerItem() {
@@ -251,7 +259,7 @@ fun GamesScreen(
     val sourceCandidateItems: List<PagerItem.SourceCandidate> = candidateList.mapNotNull { cand ->
         val tid = cand.titleId?.uppercase()
         if (tid != null && tid in allInstalledOrPendingIds) return@mapNotNull null
-        PagerItem.SourceCandidate(cand.titleId, cand.folderName, cand.sourceUri?.toString() ?: cand.folderName)
+        PagerItem.SourceCandidate(cand.titleId, cand.folderName, cand.sourceUri?.toString() ?: cand.folderName, cand.sourceKind)
     }
     // Pending imports — hide if same title already installed (installed wins, PPU shows on Game card via installPpu)
     val pendingItems: List<PagerItem.PendingImport> = importSessions.mapNotNull { sess ->
@@ -278,6 +286,12 @@ fun GamesScreen(
     }
     val currentItem = pagerItems.getOrNull(pagerState.currentPage)
     val selectedIconPath = (currentItem as? PagerItem.GameItem)?.game?.info?.iconPath?.value
+    val selectedPreview = remember(selectedIconPath) { GamePreviewRepository.resolveInstalledPreview(selectedIconPath) }
+    val selectedCoilModel: Any? = when (selectedPreview) {
+        is GamePreviewModel.LocalFile -> selectedPreview.file
+        is GamePreviewModel.ContentUri -> selectedPreview.uri
+        is GamePreviewModel.None -> null
+    }
 
     Box(
         modifier = Modifier
@@ -285,16 +299,21 @@ fun GamesScreen(
             .background(RPCSXColors.background)
     ) {
         // Frosted enlarged cover of focused game
-        if (selectedIconPath != null) {
+        if (selectedCoilModel != null) {
             AsyncImage(
-                model = selectedIconPath,
+                model = selectedCoilModel,
                 contentDescription = null,
                 contentScale = ContentScale.Crop,
                 modifier = Modifier
                     .fillMaxSize()
                     .scale(1.45f)
                     .blur(radius = 36.dp)
-                    .alpha(0.55f)
+                    .alpha(0.55f),
+                onError = { err ->
+                    val title = (currentItem as? PagerItem.GameItem)?.game?.info?.name?.value
+                    val path = (currentItem as? PagerItem.GameItem)?.game?.info?.path
+                    Log.w("GamePreview", "frosted preview error title=$title path=$path err=${err.result.throwable?.message}")
+                }
             )
             Box(
                 modifier = Modifier
@@ -1301,11 +1320,18 @@ fun GameCard(
             color = RPCSXColors.surface,
             modifier = Modifier.fillMaxSize()
         ) {
-            if (game.info.iconPath.value != null) {
+            val rawIconPath = game.info.iconPath.value
+            val installedPreview = remember(rawIconPath) { GamePreviewRepository.resolveInstalledPreview(rawIconPath) }
+            val coilModel: Any? = when (installedPreview) {
+                is GamePreviewModel.LocalFile -> installedPreview.file
+                is GamePreviewModel.ContentUri -> installedPreview.uri
+                is GamePreviewModel.None -> null
+            }
+            if (coilModel != null) {
                 Box(modifier = Modifier.fillMaxSize()) {
                     // Blurred ambient background
                     AsyncImage(
-                        model = game.info.iconPath.value,
+                        model = coilModel,
                         contentDescription = null,
                         contentScale = ContentScale.Crop,
                         colorFilter = ColorFilter.colorMatrix(colorMatrix),
@@ -1313,7 +1339,12 @@ fun GameCard(
                             .fillMaxSize()
                             .scale(1.3f)
                             .blur(radius = 16.dp)
-                            .alpha(0.5f)
+                            .alpha(0.5f),
+                        onError = { err ->
+                            val exists = if (installedPreview is GamePreviewModel.LocalFile) installedPreview.file.exists() else false
+                            val len = if (installedPreview is GamePreviewModel.LocalFile && exists) installedPreview.file.length() else -1L
+                            Log.e("GamePreview", "installed AsyncImage error title=${game.info.name.value} path=${game.info.path} raw=$rawIconPath model=$installedPreview exists=$exists len=$len err=${err.result.throwable?.message}")
+                        }
                     )
 
                     // Dark overlay
@@ -1325,15 +1356,22 @@ fun GameCard(
 
                     // Crisp foreground image
                     AsyncImage(
-                        model = game.info.iconPath.value,
+                        model = coilModel,
                         contentDescription = null,
                         contentScale = ContentScale.Fit,
                         colorFilter = ColorFilter.colorMatrix(colorMatrix),
                         modifier = Modifier
                             .fillMaxSize()
-                            .padding(if (isCompact) 8.dp else 16.dp)
+                            .padding(if (isCompact) 8.dp else 16.dp),
+                        onError = { err ->
+                            val exists = if (installedPreview is GamePreviewModel.LocalFile) installedPreview.file.exists() else false
+                            val len = if (installedPreview is GamePreviewModel.LocalFile && exists) installedPreview.file.length() else -1L
+                            Log.e("GamePreview", "installed AsyncImage error title=${game.info.name.value} path=${game.info.path} raw=$rawIconPath model=$installedPreview exists=$exists len=$len err=${err.result.throwable?.message}")
+                        }
                     )
                 }
+            } else if (rawIconPath != null) {
+                Log.w("GamePreview", "installed preview None title=${game.info.name.value} path=${game.info.path} raw=$rawIconPath model=$installedPreview")
             }
 
             if (showCompileOverlay) {
@@ -1513,6 +1551,29 @@ fun SourceCandidateCard(
             repeatMode = RepeatMode.Reverse
         )
     )
+    val context = LocalContext.current
+    var preview by remember(item.sourceUri) { mutableStateOf<GamePreviewModel>(GamePreviewModel.None) }
+    LaunchedEffect(item.sourceUri, item.sourceKind) {
+        try {
+            val uri = try { Uri.parse(item.sourceUri) } catch (_: Exception) { null }
+            if (uri != null) {
+                val kind = item.sourceKind ?: if (item.sourceUri.endsWith(".iso", ignoreCase = true) || item.displayName.endsWith(".iso", ignoreCase = true)) com.zenithblue.sambas3.utils.GameSourceKind.ISO else com.zenithblue.sambas3.utils.GameSourceKind.DIRECTORY
+                val result = GamePreviewRepository.resolvePreview(context, uri, kind)
+                preview = result
+                if (result is GamePreviewModel.None) {
+                    Log.d("GamePreview", "candidate preview None for ${item.displayName} uri=${item.sourceUri} kind=$kind")
+                }
+            }
+        } catch (e: Exception) {
+            Log.w("GamePreview", "candidate preview failed ${item.displayName}: ${e.message}")
+            preview = GamePreviewModel.None
+        }
+    }
+    val coilModel: Any? = when (preview) {
+        is GamePreviewModel.LocalFile -> (preview as GamePreviewModel.LocalFile).file
+        is GamePreviewModel.ContentUri -> (preview as GamePreviewModel.ContentUri).uri
+        is GamePreviewModel.None -> null
+    }
     BoxWithConstraints(
         modifier = Modifier
             .fillMaxSize()
@@ -1533,6 +1594,30 @@ fun SourceCandidateCard(
     ) {
         Surface(shape = RoundedCornerShape(8.dp), color = RPCSXColors.surface, modifier = Modifier.fillMaxSize()) {
             Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                // Preview artwork — blurred background + crisp foreground, fallback to text-only if None
+                if (coilModel != null) {
+                    AsyncImage(
+                        model = coilModel,
+                        contentDescription = null,
+                        contentScale = ContentScale.Crop,
+                        modifier = Modifier.fillMaxSize().blur(radius = 16.dp).alpha(0.55f),
+                        onError = { err ->
+                            Log.w("GamePreview", "candidate preview load failed ${item.displayName} uri=${item.sourceUri} err=${err.result.throwable?.message}")
+                        }
+                    )
+                    Box(modifier = Modifier.fillMaxSize().background(Color.Black.copy(alpha = 0.35f)))
+                    AsyncImage(
+                        model = coilModel,
+                        contentDescription = null,
+                        contentScale = ContentScale.Fit,
+                        modifier = Modifier.fillMaxSize().padding(12.dp),
+                        onError = { err ->
+                            Log.w("GamePreview", "candidate preview load failed fg ${item.displayName} err=${err.result.throwable?.message}")
+                        }
+                    )
+                    // Dark scrim for text readability
+                    Box(modifier = Modifier.fillMaxSize().background(Color.Black.copy(alpha = 0.25f)))
+                }
                 Column(horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(10.dp), modifier = Modifier.padding(16.dp)) {
                     Text(
                         text = item.displayName.uppercase().take(28),
