@@ -11,6 +11,7 @@ import com.zenithblue.sambas3.PreRuntimePpuState
 import com.zenithblue.sambas3.RPCSX
 import com.zenithblue.sambas3.RuntimePpuState
 import com.zenithblue.sambas3.gameconfig.GameSettingsOverrides
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
@@ -168,8 +169,26 @@ object ImportPpuPreparationCoordinator {
     }
 
     private fun startHeadless(appCtx: Context, titleId: String, path: String) {
-        currentJob?.cancel()
-        currentJob = scope.launch(Dispatchers.IO) {
+        val existing =
+            currentJob
+
+        if (
+            existing != null &&
+            existing.isActive
+        ) {
+            Log.i(
+                TAG,
+                "Headless PPU already active; " +
+                    "ignoring duplicate request " +
+                    "title=$titleId"
+            )
+            return
+        }
+
+        currentJob =
+            scope.launch(
+                Dispatchers.IO
+            ) {
             val sessionId = System.currentTimeMillis()
             lastSessionId = sessionId
             try {
@@ -348,10 +367,42 @@ object ImportPpuPreparationCoordinator {
                     }
                     Log.w(TAG, "Headless prelaunch failed $titleId ret=$ret")
                 }
-            } catch (e: Exception) {
-                Log.e(TAG, "Coordinator job failed for $titleId: ${e.message}", e)
+            } catch (
+                e: CancellationException
+            ) {
                 waitingForIdle = false
-                PpuReadinessStore.setRuntimeState(appCtx, titleId, RuntimePpuState.FAILED)
+
+                Log.i(
+                    TAG,
+                    "Headless coordinator canceled " +
+                        "title=$titleId " +
+                        "session=$sessionId"
+                )
+
+                throw e
+            } catch (
+                e: Exception
+            ) {
+                Log.e(
+                    TAG,
+                    "Coordinator failed for $titleId",
+                    e
+                )
+
+                waitingForIdle = false
+
+                PpuReadinessStore.setRuntimeState(
+                    appCtx,
+                    titleId,
+                    RuntimePpuState.FAILED
+                )
+            } finally {
+                if (
+                    lastSessionId ==
+                    sessionId
+                ) {
+                    waitingForIdle = false
+                }
             }
         }
     }
