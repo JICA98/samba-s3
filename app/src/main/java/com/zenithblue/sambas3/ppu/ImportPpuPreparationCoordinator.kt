@@ -105,7 +105,6 @@ object ImportPpuPreparationCoordinator {
             lastSessionId = sessionId
             try {
                 // Idle barrier: wait for install compile queue idle + engine Stopped
-                // Bounded polling, off Main, cancellation-aware, small delay, do not mark FAILED on first busy
                 waitingForIdle = true
                 val idleOk = waitForEngineIdle(titleId, sessionId)
                 waitingForIdle = false
@@ -116,43 +115,75 @@ object ImportPpuPreparationCoordinator {
                     }
                     return@launch
                 }
-                // Now invoke native real preparation
+                // Now invoke native real preparation — NO fake success (BUG E)
                 val ret = try {
-                    if (!isNativeAvailable()) {
-                        Log.w(TAG, "Native prepareRuntimePpu not available, faking success for $titleId")
-                        delay(800)
-                        0
-                    } else {
-                        RPCSX.instance.prepareRuntimePpu(path, sessionId)
-                    }
+                    RPCSX.instance.prepareRuntimePpu(path, sessionId)
                 } catch (e: UnsatisfiedLinkError) {
-                    Log.w(TAG, "prepareRuntimePpu UnsatisfiedLinkError, faking: ${e.message}")
-                    delay(500)
-                    0
+                    Log.e(TAG, "prepareRuntimePpu NOT_SUPPORTED UnsatisfiedLinkError: ${e.message}", e)
+                    withContext(Dispatchers.Main) {
+                        PpuReadinessStore.setRuntimeState(appCtx, titleId, RuntimePpuState.FAILED)
+                    }
+                    return@launch
                 } catch (e: Exception) {
                     Log.e(TAG, "prepareRuntimePpu threw: ${e.message}", e)
                     -1
                 }
 
-                withContext(Dispatchers.Main) {
-                    if (ret == 0) {
-                        PpuReadinessStore.setRuntimeState(appCtx, titleId, RuntimePpuState.IDLE_AFTER_COMPILE)
-                        Log.i(TAG, "Headless prelaunch success $titleId -> IDLE_AFTER_COMPILE")
-                        try {
-                            val after = RPCSX.getState()
-                            if (after != com.zenithblue.sambas3.EmulatorState.Stopped) {
-                                Log.w(TAG, "Engine not Stopped after prelaunch: $after, killing")
-                                RPCSX.instance.kill()
-                            }
-                        } catch (_: Exception) {}
-                    } else if (ret == -2 || ret == -3) {
-                        // Transient busy - should not have happened after idle wait, but treat as retryable
-                        Log.w(TAG, "Headless prelaunch transient busy $titleId ret=$ret, marking FAILED retryable")
-                        PpuReadinessStore.setRuntimeState(appCtx, titleId, RuntimePpuState.FAILED)
-                    } else {
-                        PpuReadinessStore.setRuntimeState(appCtx, titleId, RuntimePpuState.FAILED)
-                        Log.w(TAG, "Headless prelaunch failed $titleId ret=$ret")
+                if (ret == 0) {
+                    // BUG B+D ordering: verify native quiescence BEFORE publishing readiness
+                    Log.i(TAG, "prepareRuntimePpu returned 0 for $titleId, waiting for native Stopped quiescence")
+                    var nativeStopped = false
+                    var attempts = 0
+                    while (attempts < 50) { // 5s max, 100ms each
+                        if (lastSessionId != sessionId) {
+                            Log.w(TAG, "prepare canceled mid-quiescence $titleId")
+                            return@launch
+                        }
+                        val st = try { RPCSX.getState() } catch (_: Exception) { com.zenithblue.sambas3.EmulatorState.Stopped }
+                        if (st == com.zenithblue.sambas3.EmulatorState.Stopped) {
+                            nativeStopped = true
+                            break
+                        }
+                        Log.d(TAG, "waiting for Stopped after prepare $titleId state=$st attempt=$attempts")
+                        delay(100)
+                        attempts++
                     }
+                    if (!nativeStopped) {
+                        Log.e(TAG, "prepareRuntimePpu quiescence timeout $titleId state=${try { RPCSX.getState() } catch (_: Exception) { "unknown" }}, marking FAILED")
+                        withContext(Dispatchers.Main) {
+                            PpuReadinessStore.setRuntimeState(appCtx, titleId, RuntimePpuState.FAILED)
+                        }
+                        return@launch
+                    }
+                    // Native is Stopped, clear stale compile-only activeGame ownership (BUG A)
+                    withContext(Dispatchers.Main) {
+                        try {
+                            val curActive = RPCSX.activeGame.value
+                            if (curActive != null) {
+                                // If activeGame was set for this title but we never reached gameplay, clear it.
+                                // For headless, activeGame should already be null, but be defensive.
+                                Log.i(TAG, "Headless terminal clearing stale activeGame=$curActive for $titleId")
+                                RPCSX.activeGame.value = null
+                            }
+                            RPCSX.state.value = com.zenithblue.sambas3.EmulatorState.Stopped
+                            Log.i("S3PPU", "prepare_terminal session=$sessionId title=$titleId compile_finished=1 workers_idle=1 fxo_clean=1 emu_state=stopped will_resume_game=0")
+                        } catch (e: Exception) {
+                            Log.w(TAG, "failed to sync state after prepare: ${e.message}")
+                        }
+                        PpuReadinessStore.setRuntimeState(appCtx, titleId, RuntimePpuState.IDLE_AFTER_COMPILE)
+                        Log.i(TAG, "Headless prelaunch success $titleId -> IDLE_AFTER_COMPILE (after Stopped verified)")
+                    }
+                } else if (ret == -2 || ret == -3) {
+                    // Transient busy - should not have happened after idle wait, but treat as retryable
+                    Log.w(TAG, "Headless prelaunch transient busy $titleId ret=$ret, marking FAILED retryable")
+                    withContext(Dispatchers.Main) {
+                        PpuReadinessStore.setRuntimeState(appCtx, titleId, RuntimePpuState.FAILED)
+                    }
+                } else {
+                    withContext(Dispatchers.Main) {
+                        PpuReadinessStore.setRuntimeState(appCtx, titleId, RuntimePpuState.FAILED)
+                    }
+                    Log.w(TAG, "Headless prelaunch failed $titleId ret=$ret")
                 }
             } catch (e: Exception) {
                 Log.e(TAG, "Coordinator job failed for $titleId: ${e.message}", e)
@@ -196,10 +227,6 @@ object ImportPpuPreparationCoordinator {
         }
         Log.w(TAG, "waitForIdle timeout $titleId after $attempts attempts")
         return false
-    }
-
-    private fun isNativeAvailable(): Boolean {
-        return try { true } catch (_: Exception) { false }
     }
 
     private fun resolveGameForTitle(titleId: String): Game? {

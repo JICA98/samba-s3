@@ -771,11 +771,10 @@ fun GamesScreen(
                             HintButton(text = "ADD", icon = "X", color = RPCSXColors.primary, onClick = { showImportDialog = true })
                         }
                     } else if (gameplayRunning) {
+                        val stopScope = rememberCoroutineScope()
                         HintButton(text = "STOP", icon = "■", color = RPCSXColors.errorColor, onClick = {
-                            thread {
-                                RPCSX.instance.kill()
-                                RPCSX.state.value = EmulatorState.Stopped
-                                RPCSX.activeGame.value = null
+                            stopScope.launch {
+                                com.zenithblue.sambas3.ppu.GameStopHelper.stopGameplay()
                             }
                         })
                     } else {

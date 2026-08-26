@@ -155,7 +155,8 @@ class RPCSXActivity : ComponentActivity() {
             }
 
             Log.w("RPCSX State", RPCSX.getState().name)
-            RPCSX.activeGame.value = gamePath
+            // activeGame ownership: only set AFTER successful boot that will own rendering.
+            // Do NOT claim ownership before boot, otherwise compile-only handoff leaves stale activeGame.
 
             // Pre-boot override replay (P4): full ladder defaults -> baseline ->
             // global -> per-title, executed while Emu.IsStopped() so restart-required
@@ -166,12 +167,18 @@ class RPCSXActivity : ComponentActivity() {
 
             val bootResult = RPCSX.boot(gamePath)
             if (bootResult != BootResult.NoErrors) {
+                Log.w("S3LIFE", "boot failed game=$gamePath result=$bootResult clearing activeGame")
+                RPCSX.activeGame.value = null
+                try { RPCSX.state.value = RPCSX.getState() } catch (_: Exception) {}
                 AlertDialogQueue.showDialog(
                     getString(R.string.failed_to_boot),
                     getString(R.string.error_with_msg, bootResult.name)
                 )
                 finish()
             } else {
+                // Successful boot now owns rendering — publish ownership after boot.
+                RPCSX.activeGame.value = gamePath
+                Log.i("S3LIFE", "boot success game=$gamePath activeGame set, state=${RPCSX.getState()}")
                 pollAndLearnTitleId(gamePath)
             }
         }
@@ -204,7 +211,22 @@ class RPCSXActivity : ComponentActivity() {
         thread {
             try {
                 RPCSX.instance.kill()
-                RPCSX.state.value = EmulatorState.Stopped
+                // Wait for real native Stopped before publishing, off Main (BUG G)
+                var attempts = 0
+                while (attempts < 50) {
+                    val s = try { RPCSX.getState() } catch (_: Exception) { EmulatorState.Stopped }
+                    if (s == EmulatorState.Stopped) break
+                    Thread.sleep(100)
+                    attempts++
+                }
+                val finalState = try { RPCSX.getState() } catch (_: Exception) { EmulatorState.Stopped }
+                RPCSX.state.value = finalState
+                if (finalState == EmulatorState.Stopped) {
+                    RPCSX.activeGame.value = null
+                    Log.i("S3LIFE", "exitGame reached Stopped, cleared activeGame")
+                } else {
+                    Log.w("S3LIFE", "exitGame timeout state=$finalState")
+                }
             } catch (e: Exception) {
                 Log.w("RPCSX State", "kill failed: ${e.message}")
             }
@@ -246,11 +268,37 @@ class RPCSXActivity : ComponentActivity() {
     override fun onDestroy() {
         super.onDestroy()
         AlertDialogQueue.hostsSuppressed = false
-        RPCSX.state.value = EmulatorState.Paused
+        // BUG A fix: never fabricate Paused just because Activity died. Native is source of truth.
+        try {
+            val nativeState = RPCSX.getState()
+            Log.i("S3LIFE", "RPCSXActivity.onDestroy nativeState=$nativeState activeGame=${RPCSX.activeGame.value}")
+            RPCSX.state.value = nativeState
+            // Clear stale compile-only ownership: if native is Stopped, this activity never owned gameplay.
+            if (nativeState == EmulatorState.Stopped) {
+                val myPath = try { intent.getStringExtra("path") } catch (_: Exception) { null }
+                if (myPath != null && RPCSX.activeGame.value == myPath) {
+                    // If we are Stopped, check whether gameplay ever reached Running — if not, this was compile-only handoff.
+                    // Safer: if native Stopped, clear ownership so Home does not think gameplay owns engine.
+                    // Genuine paused game would have nativeState == Paused, not Stopped, so not cleared here.
+                    Log.i("S3LIFE", "onDestroy Stopped clearing stale activeGame=$myPath")
+                    RPCSX.activeGame.value = null
+                } else if (RPCSX.activeGame.value != null && RPCSX.activeGame.value != myPath) {
+                    // Another game owns it — leave alone
+                } else if (myPath == null && RPCSX.activeGame.value != null) {
+                    // Defensive: no path extra but Stopped — clear to avoid stale STOP button
+                    Log.w("S3LIFE", "onDestroy Stopped with activeGame=${RPCSX.activeGame.value} but no path, clearing")
+                    RPCSX.activeGame.value = null
+                }
+            }
+        } catch (e: Exception) {
+            Log.w("S3LIFE", "onDestroy state sync failed: ${e.message}")
+        }
         unregisterUsbEventListener()
         try { debugPadReceiver?.let { unregisterReceiver(it) } } catch (_: Exception) {}
         bootThread?.interrupt()
-        bootThread?.join()
+        try { bootThread?.join(2000) } catch (_: Exception) {}
+        // Ensure we don't leave thread dangling beyond 2s; if still alive, let it timeout.
+        try { if (bootThread?.isAlive == true) Log.w("S3LIFE", "bootThread still alive after onDestroy join timeout") } catch (_: Exception) {}
     }
 
 

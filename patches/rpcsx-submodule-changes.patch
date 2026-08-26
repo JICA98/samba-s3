@@ -438,7 +438,7 @@ index 000000000..18a8dfeb0
 +
 +} // namespace rpcsx::android
 diff --git a/android/src/rpcsx-android.cpp b/android/src/rpcsx-android.cpp
-index ce38967c1..8c5a8706d 100644
+index ce38967c1..dc4b5ade2 100644
 --- a/android/src/rpcsx-android.cpp
 +++ b/android/src/rpcsx-android.cpp
 @@ -1,3 +1,6 @@
@@ -826,21 +826,18 @@ index ce38967c1..8c5a8706d 100644
 +    progress.failure(fmt::format("Invalid TITLE_ID from ISO: %s", title_id));
 +    return false;
 +  }
- 
--  if (auto gameInfo = fetchGameInfo(sfo)) {
--    sendGameInfo(env, progressId, {{*gameInfo}});
++
 +  progress.report(0, 0, "Building manifest");
 +  std::string manifestError;
 +  auto manifestOpt = rpcsx::android::IsoInstallManifest::build(iso, manifestError);
 +  if (!manifestOpt) {
 +    progress.failure(manifestError.empty() ? "Failed to build ISO manifest" : manifestError);
 +    return false;
-   }
++  }
 +  auto manifest = std::move(*manifestOpt);
  
--  std::filesystem::path destinationPath =
--      fs::get_config_dir() + "games/" + std::string(title_id);
--  std::size_t filesCount = 0;
+-  if (auto gameInfo = fetchGameInfo(sfo)) {
+-    sendGameInfo(env, progressId, {{*gameInfo}});
 +  class JniReporter : public rpcsx::android::ProgressReporter {
 +    Progress& p;
 +  public:
@@ -848,26 +845,24 @@ index ce38967c1..8c5a8706d 100644
 +    bool report(long v, long m, const std::string& msg) override { return p.report(v, m, msg); }
 +  };
 +  JniReporter reporter(progress);
++
++  rpcsx::android::StagedGameInstaller installer(
++      fs::get_config_dir(), std::string(title_id), std::move(manifest));
++  if (auto error = installer.install(iso, reporter)) {
++    progress.failure(*error);
++    return false;
+   }
+ 
+-  std::filesystem::path destinationPath =
+-      fs::get_config_dir() + "games/" + std::string(title_id);
+-  std::size_t filesCount = 0;
++  const std::string finalPath = installer.finalPath();
  
 -  auto roots = [&] {
 -    std::vector<std::filesystem::path> result;
 -    std::vector<std::filesystem::path> workList;
 -    workList.push_back({});
 -    result.push_back({});
-+  rpcsx::android::StagedGameInstaller installer(
-+      fs::get_config_dir(), std::string(title_id), std::move(manifest));
-+  if (auto error = installer.install(iso, reporter)) {
-+    progress.failure(*error);
-+    return false;
-+  }
- 
--    while (!workList.empty()) {
--      auto path = std::move(workList.back());
--      workList.pop_back();
-+  const std::string finalPath = installer.finalPath();
- 
--      fs::dir dir;
--      dir.reset(iso.open_dir(path));
 +  auto ebootPath = locateEbootPath(finalPath);
 +  if (ebootPath.empty()) {
 +    progress.failure("Missing EBOOT.BIN after commit");
@@ -887,13 +882,9 @@ index ce38967c1..8c5a8706d 100644
 +    }
 +  }
  
--      for (auto &entry : dir) {
--        if (entry.name == "." || entry.name == "..") {
--          continue;
--        }
--        if (entry.name == "PS3_UPDATE" && path.empty()) {
--          continue;
--        }
+-    while (!workList.empty()) {
+-      auto path = std::move(workList.back());
+-      workList.pop_back();
 +  auto sfoPath = locateParamSfoPath(finalPath);
 +  if (sfoPath.empty() || !std::filesystem::is_regular_file(sfoPath)) {
 +    progress.failure("PARAM.SFO missing after commit");
@@ -907,18 +898,17 @@ index ce38967c1..8c5a8706d 100644
 +    }
 +  }
  
--        if (entry.is_directory) {
--          result.push_back(path / entry.name);
--          workList.push_back(path / entry.name);
--        } else {
--          filesCount++;
+-      fs::dir dir;
+-      dir.reset(iso.open_dir(path));
 +  progress.report(0, 0, "Publishing installed game");
 +  collectGameInfo(env, progress.getProgressId(), {finalPath});
 +  progress.report(0, 0, "Preparing PPU compilation");
 +  g_compilationQueue.push(progress, std::move(ebootPath));
 +  return true;
 +}
-+
+ 
+-      for (auto &entry : dir) {
+-        if (entry.name == "." || entry.name == "..") {
 +// SAF / DocumentsProvider fds often implement read()+lseek() but not pread().
 +// iso_dev uses read_at → pread; a broken pread returns 0 and ISO install fails
 +// as "Unsupported file type". pread errno used to SIGTRAP via unix_file::ensure.
@@ -938,8 +928,18 @@ index ce38967c1..8c5a8706d 100644
 +      const auto r = ::read(m_fd, buffer, count);
 +      if (r < 0) {
 +        if (errno == EINTR) {
-+          continue;
+           continue;
          }
+-        if (entry.name == "PS3_UPDATE" && path.empty()) {
+-          continue;
+-        }
+-
+-        if (entry.is_directory) {
+-          result.push_back(path / entry.name);
+-          workList.push_back(path / entry.name);
+-        } else {
+-          filesCount++;
+-        }
 +        break;
 +      }
 +      if (r == 0) {
@@ -1088,10 +1088,10 @@ index ce38967c1..8c5a8706d 100644
 +    }
 +    return read_via_seek(offset, buffer, count);
 +  }
++
++  u64 write(const void *, u64) override { return 0; }
  
 -      progress.report(processedFiles++, filesCount);
-+  u64 write(const void *, u64) override { return 0; }
-+
 +  u64 seek(s64 offset, fs::seek_mode whence) override {
 +    int w = SEEK_SET;
 +    if (whence == fs::seek_cur) {
@@ -1154,7 +1154,7 @@ index ce38967c1..8c5a8706d 100644
    auto file = fs::file::from_native_handle(fd);
    AtExit atExit{[&] { file.release_handle(); }};
  
-@@ -2519,6 +2762,274 @@ extern "C" bool _rpcsx_installKey(JNIEnv *env, int fd, long progressId,
+@@ -2519,6 +2762,289 @@ extern "C" bool _rpcsx_installKey(JNIEnv *env, int fd, long progressId,
    return false;
  }
  
@@ -1401,18 +1401,33 @@ index ce38967c1..8c5a8706d 100644
 +    g_fxo->reset();
 +    Emu.SetState(system_state::stopped);
 +    CompileEvent ev{}; ev.domain=CompileDomain::PPU; ev.phase=CompilePhase::CANCELED; ev.origin=CompileOrigin::PRELAUNCH; ev.jobId=jobId; ev.titleId=titleId; emit_compile_event(ev);
++    __android_log_print(ANDROID_LOG_INFO, "S3PPU", "prepare_terminal session=%llu title=%s compile_finished=0 workers_idle=1 fxo_clean=1 emu_state=%d will_resume_game=0", (unsigned long long)sessionId, titleId.c_str(), (int)Emu.GetStatus(false));
 +    g_prelaunch_canceled=false;
 +    return -5;
 +  }
 +
++  // BUG D: Ensure quiescence before returning — workers already joined inside ppu_precompile, now teardown fxo and confirm Stopped
 +  g_fxo->reset();
 +  Emu.SetState(system_state::stopped);
-+  auto t1 = std::chrono::steady_clock::now();
-+  auto elapsed = std::chrono::duration_cast<std::chrono::seconds>(t1 - t0).count();
-+  __android_log_print(ANDROID_LOG_INFO, "RPCSX-UI", "prepareRuntimePpu: real ppu_precompile completed session %llu title %s elapsed %llds", (unsigned long long)sessionId, titleId.c_str(), (long long)elapsed);
++  // Synchronously ensure Stopped (Emu.Kill joins any remaining lifecycle threads if needed)
 +  if (Emu.GetStatus(false) != system_state::stopped) {
 +    __android_log_print(ANDROID_LOG_WARN, "RPCSX-UI", "prepareRuntimePpu: after state %d not Stopped, killing", (int)Emu.GetStatus(false));
 +    Emu.Kill();
++    // Wait briefly for Kill to settle
++    for (int i=0;i<20 && Emu.GetStatus(false)!=system_state::stopped;i++) {
++      std::this_thread::sleep_for(std::chrono::milliseconds(50));
++    }
++  }
++  auto t1 = std::chrono::steady_clock::now();
++  auto elapsed = std::chrono::duration_cast<std::chrono::seconds>(t1 - t0).count();
++  bool workersIdle = true; // ppu_precompile joins workers before return
++  bool fxoClean = !g_fxo->is_init<main_ppu_module<lv2_obj>>() && !g_fxo->is_init<named_thread<progress_dialog_server>>();
++  int emuState = (int)Emu.GetStatus(false);
++  __android_log_print(ANDROID_LOG_INFO, "RPCSX-UI", "prepareRuntimePpu: real ppu_precompile completed session %llu title %s elapsed %llds", (unsigned long long)sessionId, titleId.c_str(), (long long)elapsed);
++  __android_log_print(ANDROID_LOG_INFO, "S3PPU", "prepare_terminal session=%llu title=%s compile_finished=1 workers_idle=%d fxo_clean=%d emu_state=%d will_resume_game=0", (unsigned long long)sessionId, titleId.c_str(), workersIdle?1:0, fxoClean?1:0, emuState);
++  if (emuState != (int)system_state::stopped) {
++    __android_log_print(ANDROID_LOG_ERROR, "S3PPU", "prepare_terminal session=%llu title=%s quiescence_failed emu_state=%d", (unsigned long long)sessionId, titleId.c_str(), emuState);
++    return -6;
 +  }
 +  return 0;
 +}
@@ -1429,7 +1444,7 @@ index ce38967c1..8c5a8706d 100644
  extern "C" std::string _rpcsx_systemInfo() {
    std::string result;
  
-@@ -2641,4 +3152,159 @@ extern "C" void *_rpcsx_setCustomDriver(void *driverHandle) {
+@@ -2641,4 +3167,159 @@ extern "C" void *_rpcsx_setCustomDriver(void *driverHandle) {
    return prevLoader;
  }
  
