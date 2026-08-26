@@ -134,8 +134,16 @@ object DriverDownloader {
                     }
                 }
 
-                // Always send one final progress update.
-                progress?.invoke(bytesRead, total ?: bytesRead)
+                if (
+                    bytesRead !=
+                    lastProgressBytes ||
+                    total == null
+                ) {
+                    progress?.invoke(
+                        bytesRead,
+                        total ?: bytesRead
+                    )
+                }
 
                 if (
                     expectedSha256 != null &&
