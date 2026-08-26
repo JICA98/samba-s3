@@ -58,6 +58,15 @@ data class DriverSourceSnapshot(
 data class DriverCatalogSnapshot(
     val sources: List<DriverSourceSnapshot>
 ) {
-    val packages: List<RemoteDriverPackage> get() = sources.flatMap { it.packages }
-    val totalCount: Int get() = packages.size
+    /**
+     * Flatten ONCE.
+     *
+     * Do not make this a custom getter. Browse can recompose many times while
+     * typing/searching/downloading and should never repeatedly allocate the
+     * entire catalog.
+     */
+    val packages: List<RemoteDriverPackage> =
+        sources.flatMap { it.packages }
+
+    val totalCount: Int = packages.size
 }

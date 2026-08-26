@@ -239,6 +239,7 @@ fun GamesScreen(
     val hasFw = fwVersion != null
     val installPpu by CompileProgressBridge.installState.collectAsState()
     val prelaunchPpu by CompileProgressBridge.prelaunchState.collectAsState()
+    val runtimePpu by CompileProgressBridge.state.collectAsState()
     val activeInstallId by GameRepository.activeInstallProgress
     val activeInstallEntry = ProgressRepository.getItem(activeInstallId)?.value
     val isPackageInstalling = activeInstallId != null
@@ -446,7 +447,7 @@ fun GamesScreen(
                                         val g = item.game
                                         if (g.info.path == "$" || g.findProgress(GameProgressType.Install) != null) return@GameCard
                                         val availability = com.zenithblue.sambas3.ppu.GameRunEligibilityHelper.evaluateAvailability(
-                                            context, g, installPpu.ppuActive, prelaunchPpu, emulatorState.value, emulatorActiveGame.value
+                                            context, g, installPpu.ppuActive, prelaunchPpu, runtimePpu, emulatorState.value, emulatorActiveGame.value
                                         )
                                         when (availability) {
                                             is com.zenithblue.sambas3.ppu.GameLaunchAvailability.Ready -> bootingGame = g
@@ -781,7 +782,7 @@ fun GamesScreen(
                         val hintGame = (currentItem as? PagerItem.GameItem)?.game
                         val hintAvailability = hintGame?.let {
                             com.zenithblue.sambas3.ppu.GameRunEligibilityHelper.evaluateAvailability(
-                                context, it, installPpu.ppuActive, prelaunchPpu, emulatorState.value, emulatorActiveGame.value
+                                context, it, installPpu.ppuActive, prelaunchPpu, runtimePpu, emulatorState.value, emulatorActiveGame.value
                             )
                         }
                         when (hintAvailability) {

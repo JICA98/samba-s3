@@ -2,26 +2,25 @@ package com.zenithblue.sambas3.drivers.download
 
 import android.util.Log
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.isActive
+import kotlinx.coroutines.ensureActive
 import kotlinx.coroutines.withContext
+import okhttp3.Call
 import okhttp3.OkHttpClient
 import okhttp3.Request
 import java.io.File
 import java.io.FileOutputStream
 import java.security.MessageDigest
 import java.util.concurrent.TimeUnit
+import kotlin.coroutines.coroutineContext
 import kotlin.coroutines.cancellation.CancellationException
 
-/**
- * Robust streaming GET downloader.
- * - No mandatory HEAD
- * - No mandatory Content-Length
- * - No mandatory Accept-Ranges
- * - Uses .part file + atomic rename
- * - Verifies SHA256 when provided
- * - Supports cancellation
- */
 object DriverDownloader {
+
+    private const val TAG = "DriverDownloader"
+
+    // UI does not need one Compose update for every network buffer.
+    private const val PROGRESS_INTERVAL_NS = 120_000_000L // ~8.3 Hz
+    private const val PROGRESS_BYTES_STEP = 256L * 1024L
 
     private val client = OkHttpClient.Builder()
         .connectTimeout(15, TimeUnit.SECONDS)
@@ -33,7 +32,10 @@ object DriverDownloader {
 
     sealed class Result {
         data class Success(val file: File) : Result()
-        data class Error(val message: String, val cause: Throwable? = null) : Result()
+        data class Error(
+            val message: String,
+            val cause: Throwable? = null
+        ) : Result()
         data object Canceled : Result()
     }
 
@@ -41,78 +43,172 @@ object DriverDownloader {
         url: String,
         destFile: File,
         expectedSha256: String? = null,
-        progress: ((bytesRead: Long, totalBytes: Long?) -> Unit)? = null
+        progress: ((bytesRead: Long, totalBytes: Long?) -> Unit)? = null,
+        onCallCreated: ((Call) -> Unit)? = null,
     ): Result = withContext(Dispatchers.IO) {
-        val partFile = File(destFile.parentFile, destFile.name + ".part")
+
+        val partFile =
+            File(destFile.parentFile, destFile.name + ".part")
+
         try {
-            // Ensure parent exists
             destFile.parentFile?.mkdirs()
             partFile.delete()
 
-            val request = Request.Builder().url(url).get().build()
-            client.newCall(request).execute().use { resp ->
-                if (!isActive) {
-                    partFile.delete()
-                    return@withContext Result.Canceled
+            val request =
+                Request.Builder()
+                    .url(url)
+                    .get()
+                    .build()
+
+            val call = client.newCall(request)
+            onCallCreated?.invoke(call)
+
+            call.execute().use { response ->
+                coroutineContext.ensureActive()
+
+                if (!response.isSuccessful) {
+                    return@withContext Result.Error(
+                        "HTTP ${response.code} ${response.message}"
+                    )
                 }
-                if (!resp.isSuccessful) {
-                    return@withContext Result.Error("HTTP ${resp.code} ${resp.message}")
-                }
-                val body = resp.body ?: return@withContext Result.Error("Empty body")
-                val total = resp.header("Content-Length")?.toLongOrNull() // optional
-                val input = body.byteStream()
-                val digest = if (expectedSha256 != null) MessageDigest.getInstance("SHA-256") else null
+
+                val body =
+                    response.body
+                        ?: return@withContext Result.Error("Empty body")
+
+                val total =
+                    response.header("Content-Length")
+                        ?.toLongOrNull()
+
+                val digest =
+                    expectedSha256?.let {
+                        MessageDigest.getInstance("SHA-256")
+                    }
+
                 var bytesRead = 0L
-                FileOutputStream(partFile).use { out ->
-                    val buffer = ByteArray(32 * 1024)
-                    var read: Int
-                    while (input.read(buffer).also { read = it } != -1) {
-                        if (!isActive) {
-                            input.close()
-                            out.close()
-                            partFile.delete()
-                            throw CancellationException("Download canceled")
+                var lastProgressBytes = 0L
+                var lastProgressNs = 0L
+
+                body.byteStream().use { input ->
+                    FileOutputStream(partFile).use { output ->
+
+                        // Larger IO buffer reduces callback/loop overhead.
+                        val buffer = ByteArray(256 * 1024)
+
+                        while (true) {
+                            coroutineContext.ensureActive()
+
+                            val read = input.read(buffer)
+                            if (read < 0) break
+
+                            output.write(buffer, 0, read)
+                            digest?.update(buffer, 0, read)
+
+                            bytesRead += read
+
+                            val now = System.nanoTime()
+                            val byteStepReached =
+                                bytesRead - lastProgressBytes >=
+                                    PROGRESS_BYTES_STEP
+
+                            val timeStepReached =
+                                now - lastProgressNs >=
+                                    PROGRESS_INTERVAL_NS
+
+                            val finalChunk =
+                                total != null &&
+                                    bytesRead >= total
+
+                            if (
+                                byteStepReached ||
+                                timeStepReached ||
+                                finalChunk
+                            ) {
+                                progress?.invoke(bytesRead, total)
+                                lastProgressBytes = bytesRead
+                                lastProgressNs = now
+                            }
                         }
-                        out.write(buffer, 0, read)
-                        digest?.update(buffer, 0, read)
-                        bytesRead += read
-                        try { progress?.invoke(bytesRead, total) } catch (_: Exception) {}
+
+                        output.fd.sync()
                     }
                 }
-                input.close()
 
-                // Verify SHA if provided
-                if (expectedSha256 != null && digest != null) {
-                    val actual = digest.digest().joinToString("") { "%02x".format(it) }
-                    if (!actual.equals(expectedSha256, ignoreCase = true)) {
+                // Always send one final progress update.
+                progress?.invoke(bytesRead, total ?: bytesRead)
+
+                if (
+                    expectedSha256 != null &&
+                    digest != null
+                ) {
+                    val actual =
+                        digest.digest()
+                            .joinToString("") {
+                                "%02x".format(it)
+                            }
+
+                    if (
+                        !actual.equals(
+                            expectedSha256,
+                            ignoreCase = true
+                        )
+                    ) {
                         partFile.delete()
-                        return@withContext Result.Error("SHA256 mismatch expected=$expectedSha256 actual=$actual")
+
+                        return@withContext Result.Error(
+                            "SHA256 mismatch " +
+                                "expected=$expectedSha256 " +
+                                "actual=$actual"
+                        )
                     }
                 }
 
-                // Atomic rename
-                if (destFile.exists()) destFile.delete()
-                val renamed = partFile.renameTo(destFile)
-                if (!renamed) {
-                    // Fallback copy
+                if (destFile.exists()) {
+                    destFile.delete()
+                }
+
+                if (!partFile.renameTo(destFile)) {
                     try {
-                        partFile.copyTo(destFile, overwrite = true)
+                        partFile.copyTo(
+                            destFile,
+                            overwrite = true
+                        )
                         partFile.delete()
                     } catch (e: Exception) {
                         partFile.delete()
-                        return@withContext Result.Error("Atomic rename failed: ${e.message}", e)
+
+                        return@withContext Result.Error(
+                            "Atomic rename failed: ${e.message}",
+                            e
+                        )
                     }
                 }
-                Log.i("DriverDownloader", "Download success $url -> ${destFile.path} bytes=$bytesRead total=$total")
+
+                Log.i(
+                    TAG,
+                    "success url=$url " +
+                        "bytes=$bytesRead " +
+                        "dest=${destFile.path}"
+                )
+
                 Result.Success(destFile)
             }
         } catch (e: CancellationException) {
             partFile.delete()
             Result.Canceled
         } catch (e: Exception) {
-            Log.e("DriverDownloader", "Download failed $url: ${e.message}", e)
-            try { partFile.delete() } catch (_: Exception) {}
-            Result.Error(e.message ?: "Unknown error", e)
+            Log.e(
+                TAG,
+                "failed url=$url: ${e.message}",
+                e
+            )
+
+            runCatching { partFile.delete() }
+
+            Result.Error(
+                e.message ?: "Unknown error",
+                e
+            )
         }
     }
 }

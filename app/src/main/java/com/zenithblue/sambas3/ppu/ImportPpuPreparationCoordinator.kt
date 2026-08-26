@@ -10,6 +10,7 @@ import com.zenithblue.sambas3.PpuReadinessStore
 import com.zenithblue.sambas3.PreRuntimePpuState
 import com.zenithblue.sambas3.RPCSX
 import com.zenithblue.sambas3.RuntimePpuState
+import com.zenithblue.sambas3.gameconfig.GameSettingsOverrides
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
@@ -115,18 +116,81 @@ object ImportPpuPreparationCoordinator {
                     }
                     return@launch
                 }
+                val resolvedTitleId =
+                    GameSettingsOverrides
+                        .resolveTitleId(
+                            path,
+                            appCtx
+                        )
+                        ?: titleId
+
+                Log.i(
+                    TAG,
+                    "Applying normal pre-boot settings " +
+                        "before headless PPU " +
+                        "title=$resolvedTitleId"
+                )
+
+                // This is the same ladder the normal boot activity applies before normal boot.
+                //
+                // Engine is fully Stopped here.
+                // Keep a single serialized config writer.
+                GameSettingsOverrides.applyForGame(
+                    appCtx,
+                    resolvedTitleId
+                )
+
+                val manifestBefore =
+                    try {
+                        RPCSX.instance
+                            .getPpuManifestKey(
+                                resolvedTitleId
+                            )
+                    } catch (t: Throwable) {
+                        Log.w(
+                            TAG,
+                            "manifestBefore unavailable: " +
+                                t.message
+                        )
+                        null
+                    }
+
+                Log.i(
+                    "S3PPU",
+                    "headless_preflight_begin " +
+                        "title=$resolvedTitleId " +
+                        "manifest=$manifestBefore " +
+                        "path=$path"
+                )
+
                 // Now invoke native real preparation — NO fake success (BUG E)
-                val ret = try {
-                    RPCSX.instance.prepareRuntimePpu(path, sessionId)
-                } catch (e: UnsatisfiedLinkError) {
-                    Log.e(TAG, "prepareRuntimePpu NOT_SUPPORTED UnsatisfiedLinkError: ${e.message}", e)
+                val ret =
+                    try {
+                        RPCSX.instance.prepareRuntimePpu(
+                            path,
+                            sessionId
+                        )
+                    } catch (e: UnsatisfiedLinkError) {
+                        Log.e(
+                            TAG,
+                            "prepareRuntimePpu not supported",
+                            e
+                        )
+                        -1000
+                    } catch (t: Throwable) {
+                        Log.e(
+                            TAG,
+                            "prepareRuntimePpu failed",
+                            t
+                        )
+                        -1
+                    }
+
+                if (ret == -1000) {
                     withContext(Dispatchers.Main) {
                         PpuReadinessStore.setRuntimeState(appCtx, titleId, RuntimePpuState.FAILED)
                     }
                     return@launch
-                } catch (e: Exception) {
-                    Log.e(TAG, "prepareRuntimePpu threw: ${e.message}", e)
-                    -1
                 }
 
                 if (ret == 0) {
@@ -153,6 +217,37 @@ object ImportPpuPreparationCoordinator {
                         withContext(Dispatchers.Main) {
                             PpuReadinessStore.setRuntimeState(appCtx, titleId, RuntimePpuState.FAILED)
                         }
+                        return@launch
+                    }
+                    val manifestAfter =
+                        try {
+                            RPCSX.instance
+                                .getPpuManifestKey(
+                                    resolvedTitleId
+                                )
+                        } catch (_: Throwable) {
+                            null
+                        }
+
+                    if (
+                        manifestBefore != null &&
+                        manifestAfter != null &&
+                        manifestBefore !=
+                            manifestAfter
+                    ) {
+                        Log.e(
+                            "S3PPU",
+                            "manifest identity changed during " +
+                                "preflight: before=$manifestBefore " +
+                                "after=$manifestAfter"
+                        )
+
+                        PpuReadinessStore.setRuntimeState(
+                            appCtx,
+                            titleId,
+                            RuntimePpuState.FAILED
+                        )
+
                         return@launch
                     }
                     // Native is Stopped, clear stale compile-only activeGame ownership (BUG A)

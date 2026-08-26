@@ -8,6 +8,13 @@ import kotlinx.serialization.json.Json
 import java.io.File
 
 enum class PreRuntimePpuState { NOT_DONE, IN_PROGRESS, READY, INVALIDATED, FAILED }
+/**
+ * Runtime PPU readiness.
+ * IDLE_AFTER_COMPILE now means: the shared boot-equivalent headless PPU preflight
+ * succeeded under the same per-title config/cache identity normal boot will use,
+ * and the engine is fully Stopped. Do not write it merely because some
+ * ppu_precompile() call returned.
+ */
 enum class RuntimePpuState { NOT_STARTED, COMPILING, IDLE_AFTER_COMPILE, FAILED }
 
 @Serializable

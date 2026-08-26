@@ -86,6 +86,7 @@ object GameRunEligibilityHelper {
         game: Game?,
         installPpuActive: Boolean,
         prelaunchState: com.zenithblue.sambas3.CompileProgressBridge.CompileState?,
+        runtimeState: com.zenithblue.sambas3.CompileProgressBridge.CompileState?,
         emulatorState: com.zenithblue.sambas3.EmulatorState,
         activeGame: String?
     ): GameLaunchAvailability {
@@ -102,6 +103,12 @@ object GameRunEligibilityHelper {
         val key = try { GameIdentity.titleIdOrNull(game.info.path, game.info.name.value) ?: GameIdentity.key(game.info.path, game.info.name.value) } catch (_: Exception) { game.info.path }
         val isPrelaunchForThis = prelaunchState?.ppuActive == true && prelaunchState.titleId?.equals(key, ignoreCase = true) == true
         if (isPrelaunchForThis) return GameLaunchAvailability.PreparingPpu(prelaunchState)
+        if (
+            runtimeState?.ppuActive == true
+        ) {
+            return GameLaunchAvailability
+                .PreparingPpu(runtimeState)
+        }
         val pre = try { PpuReadinessStore.getPreRuntimeState(context, key) } catch (_: Exception) { PreRuntimePpuState.NOT_DONE }
         val rt = try { PpuReadinessStore.getRuntimeState(context, key) } catch (_: Exception) { RuntimePpuState.NOT_STARTED }
         return when {

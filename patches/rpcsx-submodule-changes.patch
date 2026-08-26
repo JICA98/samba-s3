@@ -438,7 +438,7 @@ index 000000000..18a8dfeb0
 +
 +} // namespace rpcsx::android
 diff --git a/android/src/rpcsx-android.cpp b/android/src/rpcsx-android.cpp
-index ce38967c1..dc4b5ade2 100644
+index ce38967c1..2f5cff739 100644
 --- a/android/src/rpcsx-android.cpp
 +++ b/android/src/rpcsx-android.cpp
 @@ -1,3 +1,6 @@
@@ -835,9 +835,7 @@ index ce38967c1..dc4b5ade2 100644
 +    return false;
 +  }
 +  auto manifest = std::move(*manifestOpt);
- 
--  if (auto gameInfo = fetchGameInfo(sfo)) {
--    sendGameInfo(env, progressId, {{*gameInfo}});
++
 +  class JniReporter : public rpcsx::android::ProgressReporter {
 +    Progress& p;
 +  public:
@@ -845,7 +843,9 @@ index ce38967c1..dc4b5ade2 100644
 +    bool report(long v, long m, const std::string& msg) override { return p.report(v, m, msg); }
 +  };
 +  JniReporter reporter(progress);
-+
+ 
+-  if (auto gameInfo = fetchGameInfo(sfo)) {
+-    sendGameInfo(env, progressId, {{*gameInfo}});
 +  rpcsx::android::StagedGameInstaller installer(
 +      fs::get_config_dir(), std::string(title_id), std::move(manifest));
 +  if (auto error = installer.install(iso, reporter)) {
@@ -941,10 +941,10 @@ index ce38967c1..dc4b5ade2 100644
 -          filesCount++;
 -        }
 +        break;
-+      }
+       }
 +      if (r == 0) {
 +        break;
-       }
++      }
 +      count -= static_cast<u64>(r);
 +      result += static_cast<u64>(r);
 +      buffer = static_cast<u8 *>(buffer) + r;
@@ -1001,13 +1001,13 @@ index ce38967c1..dc4b5ade2 100644
  
 -    fs::dir dir;
 -    dir.reset(iso.open_dir(root));
--
++  void sync() override {}
+ 
 -    for (auto &entry : dir) {
 -      if (entry.name == "." || entry.name == "..") {
 -        continue;
 -      }
-+  void sync() override {}
- 
+-
 -      auto entryDestPath = rootDestPath / entry.name;
 +  bool trunc(u64) override { return false; }
  
@@ -1154,7 +1154,7 @@ index ce38967c1..dc4b5ade2 100644
    auto file = fs::file::from_native_handle(fd);
    AtExit atExit{[&] { file.release_handle(); }};
  
-@@ -2519,6 +2762,289 @@ extern "C" bool _rpcsx_installKey(JNIEnv *env, int fd, long progressId,
+@@ -2519,6 +2762,216 @@ extern "C" bool _rpcsx_installKey(JNIEnv *env, int fd, long progressId,
    return false;
  }
  
@@ -1239,197 +1239,124 @@ index ce38967c1..dc4b5ade2 100644
 +  return 0;
 +}
 +
-+extern "C" int _rpcsx_prepareRuntimePpu(const char* path, u64 sessionId) {
-+  if (!path || !*path) {
-+    __android_log_print(ANDROID_LOG_WARN, "RPCSX-UI", "prepareRuntimePpu: invalid path");
-+    return -1;
-+  }
-+  std::unique_lock lock(g_emulator_lifecycle_mutex, std::try_to_lock);
-+  if (!lock.owns_lock()) {
-+    __android_log_print(ANDROID_LOG_WARN, "RPCSX-UI", "prepareRuntimePpu: emulator busy, reject session %llu", (unsigned long long)sessionId);
-+    return -2;
-+  }
-+  auto state = Emu.GetStatus(false);
-+  if (state != system_state::stopped) {
-+    __android_log_print(ANDROID_LOG_WARN, "RPCSX-UI", "prepareRuntimePpu: not Stopped state=%d session %llu", (int)state, (unsigned long long)sessionId);
-+    return -3;
-+  }
-+  std::string spath(path);
-+  std::error_code ec;
-+  if (!std::filesystem::exists(spath, ec) || ec) {
-+    __android_log_print(ANDROID_LOG_WARN, "RPCSX-UI", "prepareRuntimePpu: path invalid %s", path);
-+    return -4;
-+  }
-+  g_prelaunch_canceled = false;
-+  g_prelaunch_session = sessionId;
-+  __android_log_print(ANDROID_LOG_INFO, "RPCSX-UI", "prepareRuntimePpu: start session %llu path %s", (unsigned long long)sessionId, path);
-+
-+  auto t0 = std::chrono::steady_clock::now();
-+  u64 jobId = sessionId ? sessionId : allocate_compile_job_id();
-+  std::string titleId = Emu.GetTitleID();
-+  std::string rootPathStr;
-+  std::filesystem::path fsPath(spath);
-+  bool isDir = std::filesystem::is_directory(fsPath, ec);
-+  if (!ec && isDir) {
-+    rootPathStr = fsPath.string();
-+    if (!rootPathStr.empty() && rootPathStr.back() != '/') rootPathStr += "/";
-+    if (titleId.empty()) {
-+      auto sfo = locateParamSfoPath(rootPathStr);
-+      if (!sfo.empty()) {
-+        auto psf = psf::load_object(sfo);
-+        std::string tid(psf::get_string(psf, "TITLE_ID"));
-+        if (!tid.empty()) { titleId = tid; Emu.SetTitleID(titleId); }
-+      }
++extern "C" int _rpcsx_prepareRuntimePpu(const char* path, u64 sessionId)
++{
++    if (!path || !*path)
++    {
++        return -1;
 +    }
-+  } else {
-+    // file path (EBOOT.BIN)
-+    auto parent = fsPath.parent_path();
-+    if (parent.filename() == "USRDIR") parent = parent.parent_path();
-+    rootPathStr = parent.string();
-+    if (!rootPathStr.empty() && rootPathStr.back() != '/') rootPathStr += "/";
-+    if (titleId.empty()) {
-+      auto sfo = locateParamSfoPath(rootPathStr);
-+      if (!sfo.empty()) {
-+        auto psf = psf::load_object(sfo);
-+        std::string tid(psf::get_string(psf, "TITLE_ID"));
-+        if (!tid.empty()) { titleId = tid; Emu.SetTitleID(titleId); }
-+      }
++
++    std::unique_lock lifecycle_lock(g_emulator_lifecycle_mutex, std::try_to_lock);
++
++    if (!lifecycle_lock.owns_lock())
++    {
++        return -2;
 +    }
-+  }
-+  if (titleId.empty()) {
-+    auto base = fsPath.filename().string();
-+    if (base.size() >= 9) {
-+      bool looks = true;
-+      for (size_t i=0;i<4;i++) if (!isalpha((unsigned char)base[i])) looks=false;
-+      for (size_t i=4;i<9;i++) if (!isdigit((unsigned char)base[i])) looks=false;
-+      if (looks) { titleId = base.substr(0,9); Emu.SetTitleID(titleId); }
++
++    if (!Emu.IsStopped(true))
++    {
++        return -3;
 +    }
-+    if (titleId.empty()) titleId = "UNKNOWN";
-+  }
 +
-+  __android_log_print(ANDROID_LOG_INFO, "RPCSX-UI", "prepareRuntimePpu: resolved titleId=%s root=%s jobId=%llu", titleId.c_str(), rootPathStr.c_str(), (unsigned long long)jobId);
-+
-+  // Headless lifecycle: Running state while compiling, no Surface/RSX/audio
-+  Emu.SetState(system_state::running);
-+  SystemProgressContext prelaunchCtx{ CompileOrigin::PRELAUNCH, jobId, titleId };
-+  set_system_progress_context(prelaunchCtx);
-+  struct PrelaunchCtxGuard { ~PrelaunchCtxGuard(){ clear_system_progress_context(); } } ctxGuard;
-+
-+  // Init compilation fxo — mirrors CompilationQueue::impl but with PRELAUNCH origin
-+  g_fxo->init<named_thread<progress_dialog_server>>();
-+  g_fxo->init<main_ppu_module<lv2_obj>>();
-+  g_fxo->init(false, nullptr);
-+  auto rootPath = std::filesystem::path(rootPathStr);
-+  std::vector<std::string> dir_queue;
-+  dir_queue.reserve(1024);
-+  dir_queue.push_back(rootPath.string());
-+  // Build dir_queue via recursive scan (same as ppu_precompile's own scan, but we provide initial queue)
-+  // We use filesystem recursive scan to populate queue; ppu_precompile will also expand it, but we provide at least root
-+  // For accuracy, mimic CompilationQueue: push all subdirectories
-+  try {
-+    for (auto &entry : std::filesystem::recursive_directory_iterator(rootPath, ec)) {
-+      if (ec) break;
-+      if (g_prelaunch_canceled && g_prelaunch_session == sessionId) break;
-+      if (entry.is_directory(ec) && !ec) {
-+        dir_queue.push_back(entry.path().string() + "/");
-+      }
-+    }
-+  } catch (const std::exception& e) {
-+    __android_log_print(ANDROID_LOG_WARN, "RPCSX-UI", "prepareRuntimePpu: dir scan exception %s", e.what());
-+  }
-+  __android_log_print(ANDROID_LOG_INFO, "RPCSX-UI", "prepareRuntimePpu: dir_queue roots=%zu for title %s", dir_queue.size(), titleId.c_str());
-+
-+  if (g_prelaunch_canceled && g_prelaunch_session == sessionId) {
-+    __android_log_print(ANDROID_LOG_INFO, "RPCSX-UI", "prepareRuntimePpu: canceled before ppu_precompile session %llu", (unsigned long long)sessionId);
-+    g_fxo->reset();
-+    Emu.SetState(system_state::stopped);
-+    CompileEvent ev{}; ev.domain=CompileDomain::PPU; ev.phase=CompilePhase::CANCELED; ev.origin=CompileOrigin::PRELAUNCH; ev.jobId=jobId; ev.titleId=titleId;
-+    PpuProgressSnapshot snap{}; snap.percentValue=0; snap.percentMax=100; snap.message="Canceled"; ev.ppu=snap;
-+    emit_compile_event(ev);
++    g_prelaunch_session = sessionId;
 +    g_prelaunch_canceled = false;
-+    return -5;
-+  }
 +
-+  std::string ebootPath = locateEbootPath(rootPathStr);
-+  std::vector<ppu_module<lv2_obj>*> mod_list;
-+  auto &_main = *ensure(g_fxo->try_get<main_ppu_module<lv2_obj>>());
-+  bool mainLoaded = false;
-+  if (!ebootPath.empty() && fs::is_file(ebootPath)) {
-+    fs::file src{ebootPath};
-+    src = decrypt_self(src);
-+    const ppu_exec_object obj = src;
-+    if (obj == elf_error::ok && ppu_load_exec(obj, true, ebootPath)) {
-+      _main.path = ebootPath;
-+      mainLoaded = true;
-+      __android_log_print(ANDROID_LOG_INFO, "RPCSX-UI", "prepareRuntimePpu: loaded EBOOT %s", ebootPath.c_str());
-+    } else {
-+      __android_log_print(ANDROID_LOG_WARN, "RPCSX-UI", "prepareRuntimePpu: failed to load EBOOT %s (%s)", ebootPath.c_str(), obj.get_error());
++    // Resolve titleId for progress context (reuse existing PARAM.SFO logic)
++    std::string title_id;
++    {
++        std::string spath(path);
++        std::error_code ec;
++        std::filesystem::path fsPath(spath);
++        std::string rootPathStr;
++        bool isDir = std::filesystem::is_directory(fsPath, ec);
++        if (!ec && isDir)
++        {
++            rootPathStr = fsPath.string();
++            if (!rootPathStr.empty() && rootPathStr.back() != '/') rootPathStr += "/";
++        }
++        else
++        {
++            auto parent = fsPath.parent_path();
++            if (parent.filename() == "USRDIR") parent = parent.parent_path();
++            rootPathStr = parent.string();
++            if (!rootPathStr.empty() && rootPathStr.back() != '/') rootPathStr += "/";
++        }
++        // Try locateParamSfoPath
++        auto sfo = locateParamSfoPath(rootPathStr);
++        if (!sfo.empty())
++        {
++            const auto psf = psf::load_object(sfo);
++            std::string tid(psf::get_string(psf, "TITLE_ID"));
++            if (!tid.empty()) title_id = tid;
++        }
++        if (title_id.empty())
++        {
++            title_id = Emu.GetTitleID();
++        }
++        if (title_id.empty())
++        {
++            // fallback: try filename heuristic
++            auto base = fsPath.filename().string();
++            if (base.size() >= 9)
++            {
++                bool looks = true;
++                for (size_t i=0;i<4;i++) if (!isalpha((unsigned char)base[i])) looks=false;
++                for (size_t i=4;i<9;i++) if (!isdigit((unsigned char)base[i])) looks=false;
++                if (looks) title_id = base.substr(0,9);
++            }
++        }
++        if (title_id.empty()) title_id = "UNKNOWN";
 +    }
-+  } else {
-+    __android_log_print(ANDROID_LOG_WARN, "RPCSX-UI", "prepareRuntimePpu: EBOOT not found for %s", rootPathStr.c_str());
-+  }
 +
-+  if (mainLoaded) {
-+    bool analysed = _main.analyse(0, _main.elf_entry, _main.seg0_code_end, _main.applied_patches, std::vector<u32>{}, [&](){ return Emu.IsStopped() || (g_prelaunch_canceled && g_prelaunch_session.load()==sessionId); });
-+    if (!analysed) {
-+      __android_log_print(ANDROID_LOG_WARN, "RPCSX-UI", "prepareRuntimePpu: main analyse failed for %s", ebootPath.c_str());
-+    } else {
-+      Emu.ConfigurePPUCache();
-+      ppu_initialize(_main);
-+      mod_list.emplace_back(&_main);
-+      __android_log_print(ANDROID_LOG_INFO, "RPCSX-UI", "prepareRuntimePpu: main initialized mod_list=%zu", mod_list.size());
++    const u64 job_id = sessionId != 0 ? sessionId : allocate_compile_job_id();
++
++    SystemProgressContext context { CompileOrigin::PRELAUNCH, job_id, title_id };
++
++    set_system_progress_context(context);
++
++    struct ContextGuard
++    {
++        ~ContextGuard()
++        {
++            clear_system_progress_context();
++        }
++    } context_guard;
++
++    __android_log_print(
++        ANDROID_LOG_INFO,
++        "S3PPU",
++        "headless_boot_preflight_begin session=%llu title=%s path=%s",
++        static_cast<unsigned long long>(sessionId),
++        title_id.c_str(),
++        path);
++
++    const auto result =
++        Emu.PreparePpuOnly(
++            path,
++            [sessionId]()
++            {
++                return g_prelaunch_canceled && g_prelaunch_session == sessionId;
++            });
++
++    const bool stopped = Emu.IsStopped(true);
++
++    __android_log_print(
++        stopped ? ANDROID_LOG_INFO : ANDROID_LOG_ERROR,
++        "S3PPU",
++        "headless_boot_preflight_terminal session=%llu title=%s result=%d stopped=%d will_resume_game=0",
++        static_cast<unsigned long long>(sessionId),
++        title_id.c_str(),
++        static_cast<int>(result),
++        stopped ? 1 : 0);
++
++    g_prelaunch_canceled = false;
++
++    if (!stopped)
++    {
++        return -6;
 +    }
-+    if (Emu.IsStopped() || (g_prelaunch_canceled && g_prelaunch_session.load()==sessionId)) {
-+      __android_log_print(ANDROID_LOG_INFO, "RPCSX-UI", "prepareRuntimePpu: aborted after analyse session %llu", (unsigned long long)sessionId);
-+      g_fxo->reset();
-+      Emu.SetState(system_state::stopped);
-+      if (g_prelaunch_canceled) {
-+        CompileEvent ev{}; ev.domain=CompileDomain::PPU; ev.phase=CompilePhase::CANCELED; ev.origin=CompileOrigin::PRELAUNCH; ev.jobId=jobId; ev.titleId=titleId; emit_compile_event(ev);
-+        g_prelaunch_canceled=false;
-+        return -5;
-+      }
-+      return -1;
-+    }
-+  }
 +
-+  __android_log_print(ANDROID_LOG_INFO, "RPCSX-UI", "prepareRuntimePpu: calling real ppu_precompile title=%s eboot=%s dir_queue=%zu mod_list=%zu", titleId.c_str(), ebootPath.c_str(), dir_queue.size(), mod_list.size());
-+  // Real PPU compilation — drives real PRELAUNCH progress events (no synthetic timer)
-+  ppu_precompile(dir_queue, mod_list.empty() ? nullptr : &mod_list);
-+
-+  if (g_prelaunch_canceled && g_prelaunch_session.load()==sessionId) {
-+    __android_log_print(ANDROID_LOG_INFO, "RPCSX-UI", "prepareRuntimePpu: canceled after ppu_precompile session %llu", (unsigned long long)sessionId);
-+    g_fxo->reset();
-+    Emu.SetState(system_state::stopped);
-+    CompileEvent ev{}; ev.domain=CompileDomain::PPU; ev.phase=CompilePhase::CANCELED; ev.origin=CompileOrigin::PRELAUNCH; ev.jobId=jobId; ev.titleId=titleId; emit_compile_event(ev);
-+    __android_log_print(ANDROID_LOG_INFO, "S3PPU", "prepare_terminal session=%llu title=%s compile_finished=0 workers_idle=1 fxo_clean=1 emu_state=%d will_resume_game=0", (unsigned long long)sessionId, titleId.c_str(), (int)Emu.GetStatus(false));
-+    g_prelaunch_canceled=false;
-+    return -5;
-+  }
-+
-+  // BUG D: Ensure quiescence before returning — workers already joined inside ppu_precompile, now teardown fxo and confirm Stopped
-+  g_fxo->reset();
-+  Emu.SetState(system_state::stopped);
-+  // Synchronously ensure Stopped (Emu.Kill joins any remaining lifecycle threads if needed)
-+  if (Emu.GetStatus(false) != system_state::stopped) {
-+    __android_log_print(ANDROID_LOG_WARN, "RPCSX-UI", "prepareRuntimePpu: after state %d not Stopped, killing", (int)Emu.GetStatus(false));
-+    Emu.Kill();
-+    // Wait briefly for Kill to settle
-+    for (int i=0;i<20 && Emu.GetStatus(false)!=system_state::stopped;i++) {
-+      std::this_thread::sleep_for(std::chrono::milliseconds(50));
-+    }
-+  }
-+  auto t1 = std::chrono::steady_clock::now();
-+  auto elapsed = std::chrono::duration_cast<std::chrono::seconds>(t1 - t0).count();
-+  bool workersIdle = true; // ppu_precompile joins workers before return
-+  bool fxoClean = !g_fxo->is_init<main_ppu_module<lv2_obj>>() && !g_fxo->is_init<named_thread<progress_dialog_server>>();
-+  int emuState = (int)Emu.GetStatus(false);
-+  __android_log_print(ANDROID_LOG_INFO, "RPCSX-UI", "prepareRuntimePpu: real ppu_precompile completed session %llu title %s elapsed %llds", (unsigned long long)sessionId, titleId.c_str(), (long long)elapsed);
-+  __android_log_print(ANDROID_LOG_INFO, "S3PPU", "prepare_terminal session=%llu title=%s compile_finished=1 workers_idle=%d fxo_clean=%d emu_state=%d will_resume_game=0", (unsigned long long)sessionId, titleId.c_str(), workersIdle?1:0, fxoClean?1:0, emuState);
-+  if (emuState != (int)system_state::stopped) {
-+    __android_log_print(ANDROID_LOG_ERROR, "S3PPU", "prepare_terminal session=%llu title=%s quiescence_failed emu_state=%d", (unsigned long long)sessionId, titleId.c_str(), emuState);
-+    return -6;
-+  }
-+  return 0;
++    return static_cast<int>(result);
 +}
 +
 +extern "C" bool _rpcsx_cancelRuntimePpuPreparation(u64 sessionId) {
@@ -1444,7 +1371,7 @@ index ce38967c1..dc4b5ade2 100644
  extern "C" std::string _rpcsx_systemInfo() {
    std::string result;
  
-@@ -2641,4 +3167,159 @@ extern "C" void *_rpcsx_setCustomDriver(void *driverHandle) {
+@@ -2641,4 +3094,159 @@ extern "C" void *_rpcsx_setCustomDriver(void *driverHandle) {
    return prevLoader;
  }
  
@@ -1606,17 +1533,13 @@ index ce38967c1..dc4b5ade2 100644
  #pragma GCC diagnostic pop
 diff --git a/android/src/samba-build-id.cpp b/android/src/samba-build-id.cpp
 new file mode 100644
-index 000000000..e75a116af
+index 000000000..b76578ae8
 --- /dev/null
 +++ b/android/src/samba-build-id.cpp
-@@ -0,0 +1,10 @@
+@@ -0,0 +1,6 @@
 +#include <string>
-+
-+// Samba S3 core build identity — overwritten by build_rpcsx.sh at build time.
-+// Fallback placeholder ensures old binaries are detectable.
 +static std::string g_samba_build_id =
-+    "rpcsx=e8ae1481ab7ba04d5c6bef89dd852aabba2c88ff samba=unknown patch_sha256=unknown build_type=release";
-+
++    "rpcsx=e8ae1481ab7ba04d5c6bef89dd852aabba2c88ff samba=3cc376b3be09132d6d066fdaab5ff01019a37abd patch_sha256=f740ee5bb5d9cd234652aa250a29fa2be6dbc3aacd4f2f6b1041c6012abcf8ec build_type=RelWithDebInfo";
 +extern "C" const char* _rpcsx_sambaBuildId() {
 +    return g_samba_build_id.c_str();
 +}
@@ -3337,6 +3260,503 @@ index 32b4f3185..453c7c7ba 100644
 +		emit_compile_event(CompileEvent{CompileDomain::SHADER, CompilePhase::CANCELED, CompileOrigin::RUNTIME, 0, "", std::nullopt});
  	}
  };
+diff --git a/rpcs3/Emu/System.cpp b/rpcs3/Emu/System.cpp
+index b30a6dad3..0f3a8f710 100644
+--- a/rpcs3/Emu/System.cpp
++++ b/rpcs3/Emu/System.cpp
+@@ -266,12 +266,11 @@ void Emulator::BlockingCallFromMainThread(std::function<void()>&& func, std::sou
+ 	}
+ }
+ 
+-// This function ensures constant initialization order between different compilers and builds
+-void init_fxo_for_exec(utils::serial* ar, bool full = false)
++void init_fxo_for_ppu_precompile(utils::serial* ar, bool full)
+ {
+ 	g_fxo->init<main_ppu_module<lv2_obj>>();
+ 
+-	void init_ppu_functions(utils::serial * ar, bool full);
++	void init_ppu_functions(utils::serial*, bool);
+ 
+ 	if (full)
+ 	{
+@@ -285,9 +284,34 @@ void init_fxo_for_exec(utils::serial* ar, bool full = false)
+ 			Emu.ExecPostponedInitCode();
+ 		});
+ 
++	usz pos = 0;
++
++	if (ar)
++	{
++		pos = ar->pos;
++	}
++
++	// TODO: Remove second call when possible
++	Emu.ExecPostponedInitCode();
++
++	if (ar)
++	{
++		ensure(pos == ar->pos);
++	}
++}
++
++// This function ensures constant initialization order between different compilers and builds
++// This function ensures constant initialization order between different compilers and builds
++void init_fxo_for_exec(utils::serial* ar, bool full = false)
++{
++	init_fxo_for_ppu_precompile(ar, full);
++
+ 	Emu.GetCallbacks().init_gs_render(ar);
++
+ 	Emu.GetCallbacks().init_pad_handler(Emu.GetTitleID());
++
+ 	Emu.GetCallbacks().init_kb_handler();
++
+ 	Emu.GetCallbacks().init_mouse_handler();
+ 
+ 	usz pos = 0;
+@@ -298,8 +322,6 @@ void init_fxo_for_exec(utils::serial* ar, bool full = false)
+ 	}
+ 
+ 	// TODO: Remove second call when possible
+-	Emu.ExecPostponedInitCode();
+-
+ 	if (ar)
+ 	{
+ 		ensure(pos == ar->pos);
+@@ -316,6 +338,362 @@ void init_fxo_for_exec(utils::serial* ar, bool full = false)
+ 	}
+ }
+ 
++struct ppu_preflight_plan
++{
++	std::string eboot_path;
++	std::vector<std::string> directories;
++};
++
++static ppu_preflight_plan
++build_ppu_preflight_plan(
++	Emulator& emu,
++	const std::string& initial_path)
++{
++	ppu_preflight_plan plan;
++
++	plan.directories.emplace_back(
++		initial_path + '/');
++
++	if (emu.GetTitleID().empty())
++	{
++		const std::string vsh_path =
++			g_cfg_vfs.get_dev_flash() +
++			"vsh/module";
++
++		if (
++			emu.IsPathInsideDir(
++				initial_path,
++				vsh_path)
++		)
++		{
++			plan.eboot_path =
++				vsh_path +
++				"/vsh.self";
++
++			return plan;
++		}
++	}
++	else if (
++		emu.GetCat() == "DG")
++	{
++		const std::string hdd0_path =
++			vfs::get(
++				"/dev_hdd0/game/") +
++			emu.GetTitleID();
++
++		if (
++			fs::is_file(
++				hdd0_path +
++				"/USRDIR/EBOOT.BIN")
++		)
++		{
++			plan.eboot_path =
++				hdd0_path +
++				"/USRDIR/EBOOT.BIN";
++		}
++
++		plan.directories.emplace_back(
++			hdd0_path + '/');
++	}
++
++	if (plan.eboot_path.empty())
++	{
++		plan.eboot_path =
++			initial_path +
++			"/USRDIR/EBOOT.BIN";
++	}
++
++	const std::set<std::string> related =
++		emu.GetGameDirs();
++
++	plan.directories.insert(
++		plan.directories.end(),
++		related.begin(),
++		related.end());
++
++	// Exact-string dedupe.
++	std::sort(
++		plan.directories.begin(),
++		plan.directories.end());
++
++	plan.directories.erase(
++		std::unique(
++			plan.directories.begin(),
++			plan.directories.end()),
++		plan.directories.end());
++
++	return plan;
++}
++
++static bool run_ppu_precompile_stage(
++	Emulator& emu,
++	std::vector<std::string> dir_queue,
++	const std::function<bool()>& canceled)
++{
++	std::vector<
++		ppu_module<lv2_obj>*
++	> mod_list;
++
++	auto& main =
++		*ensure(
++			g_fxo->try_get<
++				main_ppu_module<lv2_obj>
++			>());
++
++	if (!main.path.empty())
++	{
++		if (
++			!main.analyse(
++				0,
++				main.elf_entry,
++				main.seg0_code_end,
++				main.applied_patches,
++				std::vector<u32>{},
++				[&]()
++				{
++					return
++						Emu.IsStopped() ||
++						canceled();
++				})
++		)
++		{
++			return false;
++		}
++
++		Emu.ConfigurePPUCache();
++
++		ppu_initialize(main);
++
++		mod_list.emplace_back(
++			&main);
++	}
++
++	if (
++		Emu.IsStopped() ||
++		canceled()
++	)
++	{
++		return false;
++	}
++
++	ppu_precompile(
++		dir_queue,
++		mod_list.empty()
++			? nullptr
++			: &mod_list);
++
++	if (
++		Emu.IsStopped() ||
++		canceled()
++	)
++	{
++		return false;
++	}
++
++	// Keep parity with the existing directory-precompile path.
++	spu_cache::initialize(false);
++
++	return true;
++}
++
++Emulator::ppu_preflight_result
++Emulator::PreparePpuOnly(
++	const std::string& game_path,
++	const std::function<bool()>& canceled)
++{
++	if (
++		game_path.empty() ||
++		!fs::is_dir(game_path))
++	{
++		return
++			ppu_preflight_result::
++				invalid_path;
++	}
++
++	if (!IsStopped(true))
++	{
++		return
++			ppu_preflight_result::busy;
++	}
++
++	// Preserve path for later normal boot.
++	const std::string old_path =
++		m_path;
++
++	const std::string old_path_original =
++		m_path_original;
++
++	struct RestorePath
++	{
++		Emulator& emu;
++		std::string path;
++		std::string original;
++
++		~RestorePath()
++		{
++			emu.m_path =
++				std::move(path);
++
++			emu.m_path_original =
++				std::move(original);
++		}
++	} restore {
++		*this,
++		old_path,
++		old_path_original
++	};
++
++	m_path = game_path;
++	m_path_original = game_path;
++
++	// Resolve title/category like Load() does for directory scan
++	{
++		m_sfo_dir = rpcs3::utils::get_sfo_dir_from_game_path(m_path, m_title_id);
++		psf::registry _psf = psf::load_object(m_sfo_dir + "/PARAM.SFO");
++		if (_psf.empty())
++		{
++			std::string alt = game_path + "/PS3_GAME/PARAM.SFO";
++			if (!fs::is_file(alt)) alt = game_path + "/PARAM.SFO";
++			_psf = psf::load_object(alt);
++		}
++		if (!_psf.empty())
++		{
++			m_title = std::string(psf::get_string(_psf, "TITLE", std::string_view(m_path).substr(m_path.find_last_of(fs::delim) + 1)));
++			m_title_id = std::string(psf::get_string(_psf, "TITLE_ID"));
++			m_cat = std::string(psf::get_string(_psf, "CATEGORY"));
++			m_app_version = std::string(psf::get_string(_psf, "APP_VER", std::string(psf::get_string(_psf, "VERSION", "Unknown"))));
++		}
++	}
++
++	m_state =
++		system_state::ready;
++
++	vm::init();
++
++	// PPU ONLY. No GS, no input.
++	init_fxo_for_ppu_precompile(
++		nullptr,
++		true);
++
++	if (canceled())
++	{
++		g_fxo->reset();
++		vm::close();
++		m_state =
++			system_state::stopped;
++
++		return
++			ppu_preflight_result::
++				canceled;
++	}
++
++	const auto plan =
++		build_ppu_preflight_plan(
++			*this,
++			m_path);
++
++	if (
++		!fs::is_file(
++			plan.eboot_path)
++	)
++	{
++		g_fxo->reset();
++		vm::close();
++		m_state =
++			system_state::stopped;
++
++		return
++			ppu_preflight_result::
++				invalid_path;
++	}
++
++	ppu_log.notice(
++		"S3 preflight main binary: %s",
++		plan.eboot_path);
++
++	fs::file source{
++		plan.eboot_path
++	};
++
++	source =
++		decrypt_self(source);
++
++	const ppu_exec_object object =
++		source;
++
++	if (
++		object != elf_error::ok ||
++		!ppu_load_exec(
++			object,
++			true,
++			plan.eboot_path)
++	)
++	{
++		g_fxo->reset();
++		vm::close();
++		m_state =
++			system_state::stopped;
++
++		return
++			ppu_preflight_result::
++				failed;
++	}
++
++	ensure(
++		g_fxo->try_get<
++			main_ppu_module<lv2_obj>
++		>()
++	)->path =
++		plan.eboot_path;
++
++	m_state =
++		system_state::running;
++
++	const bool ok =
++		run_ppu_precompile_stage(
++			*this,
++			plan.directories,
++			canceled);
++
++	//
++	// This is a temporary PPU-only process.
++	//
++	// It owns no gameplay.
++	//
++	g_fxo->reset();
++
++	vm::close();
++
++	m_state =
++		system_state::stopped;
++
++	if (canceled())
++	{
++		return
++			ppu_preflight_result::
++				canceled;
++	}
++
++	if (!ok)
++	{
++		return
++			ppu_preflight_result::
++				failed;
++	}
++
++	if (!IsStopped(true))
++	{
++		return
++			ppu_preflight_result::
++				failed;
++	}
++
++	return
++		ppu_preflight_result::
++			success;
++}
++
++
+ // Some settings are not allowed in certain PPU decoders
+ static void fixup_settings(const psf::registry* _psf)
+ {
+@@ -1780,37 +2158,11 @@ game_boot_result Emulator::Load(const std::string& title_id, bool is_disc_patch,
+ 
+ 			g_fxo->init<named_thread>("SPRX Loader"sv, [this, dir_queue]() mutable
+ 				{
+-					std::vector<ppu_module<lv2_obj>*> mod_list;
+-
+-					if (auto& _main = *ensure(g_fxo->try_get<main_ppu_module<lv2_obj>>()); !_main.path.empty())
+-					{
+-						if (!_main.analyse(0, _main.elf_entry, _main.seg0_code_end, _main.applied_patches, std::vector<u32>{}, []()
+-								{
+-									return Emu.IsStopped();
+-								}))
+-						{
+-							return;
+-						}
+-
+-						Emu.ConfigurePPUCache();
+-						ppu_initialize(_main);
+-						mod_list.emplace_back(&_main);
+-					}
+-
+-					if (Emu.IsStopped())
++					if (!run_ppu_precompile_stage(*this, dir_queue, [](){ return Emu.IsStopped(); }))
+ 					{
+ 						return;
+ 					}
+ 
+-					ppu_precompile(dir_queue, mod_list.empty() ? nullptr : &mod_list);
+-
+-					if (Emu.IsStopped())
+-					{
+-						return;
+-					}
+-
+-					spu_cache::initialize(false);
+-
+ 					// Exit "process"
+ 					CallFromMainThread([this]
+ 						{
+diff --git a/rpcs3/Emu/System.h b/rpcs3/Emu/System.h
+index dc329dda0..be6887180 100644
+--- a/rpcs3/Emu/System.h
++++ b/rpcs3/Emu/System.h
+@@ -507,6 +507,19 @@ public:
+ 	void ConfigurePPUCache() const;
+ 
+ 	std::set<std::string> GetGameDirs() const;
++
++	enum class ppu_preflight_result : s32
++	{
++		success = 0,
++		invalid_path = -1,
++		busy = -2,
++		canceled = -5,
++		failed = -6,
++	};
++
++	ppu_preflight_result PreparePpuOnly(
++		const std::string& game_path,
++		const std::function<bool()>& canceled);
+ 	u32 AddGamesFromDir(const std::string& path);
+ 	game_boot_result AddGame(const std::string& path);
+ 	game_boot_result AddGameToYml(const std::string& path);
+@@ -523,6 +536,7 @@ public:
+ 	static game_boot_result GetElfPathFromDir(std::string& elf_path, const std::string& path);
+ 	static void GetBdvdDir(std::string& bdvd_dir, std::string& sfb_dir, std::string& game_dir, const std::string& elf_dir);
+ 	friend void init_fxo_for_exec(utils::serial*, bool);
++	friend void init_fxo_for_ppu_precompile(utils::serial*, bool);
+ 
+ 	static bool IsVsh();
+ 	static bool IsValidSfb(const std::string& path);
 diff --git a/rpcs3/Emu/compile_progress.cpp b/rpcs3/Emu/compile_progress.cpp
 new file mode 100644
 index 000000000..dc7a56339
