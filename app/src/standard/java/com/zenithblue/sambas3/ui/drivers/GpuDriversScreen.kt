@@ -69,6 +69,10 @@ import kotlinx.coroutines.withContext
 import com.zenithblue.sambas3.R
 import com.zenithblue.sambas3.RPCSX
 import com.zenithblue.sambas3.dialogs.AlertDialogQueue
+import com.zenithblue.sambas3.drivers.catalog.DriverCatalogRepository
+import com.zenithblue.sambas3.drivers.catalog.RemoteDriverPackage
+import com.zenithblue.sambas3.drivers.download.DriverDownloader
+import com.zenithblue.sambas3.drivers.download.DriverPackageAdapter
 import com.zenithblue.sambas3.utils.DefaultGpuDriverChannel
 import com.zenithblue.sambas3.utils.GeneralSettings
 import com.zenithblue.sambas3.utils.GeneralSettings.string
@@ -348,40 +352,60 @@ fun FetchAndShowDrivers(
     onDownloadDriver: (String, String) -> Unit
 ) {
     var isLoading by remember { mutableStateOf(true) }
-    var fetchResult by remember { mutableStateOf<GitHub.FetchResult?>(null) }
-    var fetchedDrivers by remember { mutableStateOf<List<Pair<String, String?>>>(emptyList()) }
+    var fetchError by remember { mutableStateOf<String?>(null) }
+    var fetchedDrivers by remember { mutableStateOf<List<RemoteDriverPackage>>(emptyList()) }
     var chosenIndex by remember { mutableIntStateOf(0) }
+    var searchQuery by remember { mutableStateOf("") }
     val scrollState = rememberScrollState()
     val hasScrolled = remember { derivedStateOf { scrollState.value > 0 } }
 
     LaunchedEffect(Unit) {
-        val fetchOutput = GitHub.fetchReleases(repoUrl)
-        isLoading = false
-
-        if (fetchOutput is GitHub.FetchResult.Success<*>) {
-            fetchedDrivers = fetchOutput.content as List<Pair<String, String?>>
-            fetchResult = null
-        } else {
-            fetchResult = fetchOutput
+        try {
+            val all = DriverCatalogRepository.fetchAll()
+            fetchedDrivers = all
+            if (all.isEmpty()) {
+                fetchError = "No drivers found. Check network or try again."
+            }
+        } catch (e: Exception) {
+            Log.e("DriverCatalog", "fetchAll failed: ${e.message}", e)
+            fetchError = e.message ?: "Failed to fetch drivers"
+            // Fallback to legacy GitHub single repo if catalog fails completely
+            try {
+                val fallback = GitHub.fetchReleases(repoUrl)
+                if (fallback is GitHub.FetchResult.Success<*>) {
+                    val legacy = (fallback.content as List<Pair<String, String?>>).mapNotNull { (name, url) ->
+                        if (url == null) null else RemoteDriverPackage(
+                            id = "legacy_${name.hashCode()}",
+                            source = com.zenithblue.sambas3.drivers.catalog.DriverSourceId.ARIHANY,
+                            displayName = name,
+                            version = null,
+                            downloadUrl = url
+                        )
+                    }
+                    if (legacy.isNotEmpty()) {
+                        fetchedDrivers = legacy
+                        fetchError = null
+                    }
+                }
+            } catch (_: Exception) {}
         }
+        isLoading = false
     }
 
-    fetchResult?.let {
-        val errorMessage = when (it) {
-            is GitHub.FetchResult.Error -> it.message
-            else -> "Something unexpected occurred while fetching $repoUrl drivers"
+    fetchError?.let { msg ->
+        // Only show error if no drivers loaded at all
+        if (fetchedDrivers.isEmpty()) {
+            AlertDialog(
+                onDismissRequest = onDismiss,
+                title = { Text(stringResource(R.string.error)) },
+                text = { Text(msg) },
+                confirmButton = {
+                    TextButton(onClick = onDismiss) {
+                        Text(text = stringResource(android.R.string.ok))
+                    }
+                })
+            return
         }
-
-        AlertDialog(
-            onDismissRequest = onDismiss,
-            title = { Text(stringResource(R.string.error)) },
-            text = { Text(errorMessage) },
-            confirmButton = {
-                TextButton(onClick = onDismiss) {
-                    Text(text = stringResource(android.R.string.ok))
-                }
-            })
-        return
     }
 
     if (isLoading) {
@@ -393,6 +417,7 @@ fun FetchAndShowDrivers(
                 LinearProgressIndicator(modifier = Modifier.fillMaxWidth())
                 Spacer(modifier = Modifier.height(8.dp))
                 Text(stringResource(R.string.please_wait))
+                Text("Aggregating community catalogs...", style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
             }
         }, confirmButton = {})
         return
@@ -400,6 +425,18 @@ fun FetchAndShowDrivers(
 
     val isLandscape = LocalConfiguration.current.orientation == Configuration.ORIENTATION_LANDSCAPE
     val maxHeight = if (isLandscape) 168.dp else 300.dp
+
+    val filtered = remember(fetchedDrivers, searchQuery) {
+        if (searchQuery.isBlank()) fetchedDrivers else fetchedDrivers.filter {
+            it.displayName.contains(searchQuery, ignoreCase = true) ||
+            it.source.name.contains(searchQuery, ignoreCase = true) ||
+            (it.version?.contains(searchQuery, ignoreCase = true) == true)
+        }
+    }
+    // Keep chosenIndex in bounds after filter
+    LaunchedEffect(filtered.size) {
+        if (chosenIndex >= filtered.size) chosenIndex = 0
+    }
 
     BasicAlertDialog(
         onDismissRequest = onDismiss, content = {
@@ -416,7 +453,21 @@ fun FetchAndShowDrivers(
                         modifier = Modifier.padding(horizontal = 16.dp),
                         style = MaterialTheme.typography.headlineSmall
                     )
-                    Spacer(modifier = Modifier.height(8.dp))
+                    Text(
+                        text = "${filtered.size} drivers (of ${fetchedDrivers.size} total) • search to filter 100+ entries",
+                        modifier = Modifier.padding(horizontal = 16.dp, vertical = 4.dp),
+                        style = MaterialTheme.typography.labelSmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                    androidx.compose.material3.OutlinedTextField(
+                        value = searchQuery,
+                        onValueChange = { searchQuery = it },
+                        label = { Text("Search") },
+                        placeholder = { Text("e.g. Turnip 26.3, a7xx, Kimchi") },
+                        singleLine = true,
+                        modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 4.dp)
+                    )
+                    Spacer(modifier = Modifier.height(4.dp))
 
                     if (hasScrolled.value) {
                         HorizontalDivider()
@@ -428,7 +479,7 @@ fun FetchAndShowDrivers(
                             .heightIn(max = maxHeight)
                             .verticalScroll(scrollState)
                     ) {
-                        fetchedDrivers.forEachIndexed { index, driver ->
+                        filtered.forEachIndexed { index, driver ->
                             Row(
                                 verticalAlignment = Alignment.CenterVertically,
                                 modifier = Modifier
@@ -438,8 +489,18 @@ fun FetchAndShowDrivers(
                                 RadioButton(
                                     selected = chosenIndex == index,
                                     onClick = { chosenIndex = index })
-                                Text(text = driver.first, modifier = Modifier.padding(start = 8.dp))
+                                Column(modifier = Modifier.padding(start = 8.dp).weight(1f)) {
+                                    Text(text = driver.displayName, style = MaterialTheme.typography.bodyMedium)
+                                    Text(
+                                        text = "${driver.source.name} ${if (driver.experimental) "• Experimental" else ""} ${driver.gpuHint ?: ""}".trim(),
+                                        style = MaterialTheme.typography.labelSmall,
+                                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                                    )
+                                }
                             }
+                        }
+                        if (filtered.isEmpty()) {
+                            Text("No matches for \"$searchQuery\"", modifier = Modifier.padding(16.dp), style = MaterialTheme.typography.bodyMedium)
                         }
                     }
 
@@ -456,9 +517,10 @@ fun FetchAndShowDrivers(
                         }
                         Spacer(modifier = Modifier.width(8.dp))
                         TextButton(
+                            enabled = filtered.isNotEmpty(),
                             onClick = {
-                                val chosenDriver = fetchedDrivers[chosenIndex]
-                                onDownloadDriver(chosenDriver.second!!, chosenDriver.first)
+                                val chosenDriver = filtered[chosenIndex]
+                                onDownloadDriver(chosenDriver.downloadUrl, chosenDriver.displayName)
                                 onDismiss()
                             }, modifier = Modifier.padding(end = 16.dp)
                         ) {
@@ -477,77 +539,104 @@ fun DownloadDriver(
     var progress by remember { mutableFloatStateOf(0f) }
     var isIndeterminate by remember { mutableStateOf(true) }
     var downloadCompleted by remember { mutableStateOf(false) }
+    var statusText by remember { mutableStateOf("Downloading...") }
     val context = LocalContext.current
 
     LaunchedEffect(Unit) {
         withContext(Dispatchers.IO) {
-            val driverFile =
-                File("${context.getExternalFilesDir(null)!!.absolutePath}/cache/$chosenName.zip")
-            if (!driverFile.exists()) driverFile.createNewFile()
+            val safeName = chosenName.replace(Regex("[^A-Za-z0-9._-]"), "_").take(64)
+            val cacheDir = File(context.cacheDir, "driver_downloads").apply { mkdirs() }
+            val driverFile = File(cacheDir, "$safeName.zip")
+            if (driverFile.exists()) driverFile.delete()
+            val tmpAdapted = File(cacheDir, "$safeName.adapted.zip")
 
-            val result =
-                GitHub.downloadAsset(
-                    chosenUrl, 
-                    driverFile,       
-                    { downloadedBytes, totalBytes ->
-                        if (totalBytes > 0) {
-                            isIndeterminate = false
-                            progress = downloadedBytes.toFloat() / totalBytes
-                        }
-                    },
-                    4 // threads
-                ) 
-
-            if (result is GitHub.DownloadStatus.Success) {
-                withContext(Dispatchers.Main) {
-                    val installResult = withContext(Dispatchers.IO) {
-                        GpuDriverHelper.installDriver(context, FileInputStream(driverFile))
+            // Robust streaming GET without HEAD/Content-Length/Range requirements
+            val dlResult = DriverDownloader.download(
+                url = chosenUrl,
+                destFile = driverFile,
+                expectedSha256 = null, // catalog may provide sha, but we don't have it here; verification after adapt
+                progress = { bytesRead, total ->
+                    if (total != null && total > 0) {
+                        isIndeterminate = false
+                        progress = (bytesRead.toFloat() / total.toFloat()).coerceIn(0f, 1f)
+                    } else {
+                        isIndeterminate = true
                     }
-                    Toast.makeText(
-                        context,
-                        GpuDriverHelper.resolveInstallResultToString(installResult),
-                        Toast.LENGTH_LONG
-                    ).show()
-                    downloadCompleted = true
-                    if (installResult == GpuDriverInstallResult.Success) {
+                    statusText = if (total != null && total > 0) "${bytesRead / 1024} KiB / ${total / 1024} KiB" else "${bytesRead / 1024} KiB"
+                }
+            )
+
+            when (dlResult) {
+                is DriverDownloader.Result.Success -> {
+                    statusText = "Adapting package..."
+                    // Adapt community ZIP layout without mutating .so bytes
+                    val adaptResult = DriverPackageAdapter.adapt(driverFile, tmpAdapted)
+                    val fileToInstall = when (adaptResult) {
+                        is DriverPackageAdapter.Result.Success -> {
+                            Log.i("DriverDownload", "Adapt success $chosenName")
+                            adaptResult.adaptedFile
+                        }
+                        is DriverPackageAdapter.Result.Error -> {
+                            Log.w("DriverDownload", "Adapt failed for $chosenName: ${adaptResult.message}, trying original")
+                            // If adapt fails due to already valid Samba format, try original
+                            driverFile
+                        }
+                    }
+                    withContext(Dispatchers.Main) {
+                        val installResult = withContext(Dispatchers.IO) {
+                            GpuDriverHelper.installDriver(context, FileInputStream(fileToInstall))
+                        }
+                        // Validation already runs inside installDriver via DriverBinaryValidator
+                        Toast.makeText(
+                            context,
+                            GpuDriverHelper.resolveInstallResultToString(installResult),
+                            Toast.LENGTH_LONG
+                        ).show()
+                        downloadCompleted = true
+                        if (installResult == GpuDriverInstallResult.Success) {
+                            onDismiss()
+                        } else {
+                            statusText = GpuDriverHelper.resolveInstallResultToString(installResult)
+                        }
+                    }
+                    try { driverFile.delete() } catch (_: Exception) {}
+                    try { tmpAdapted.delete() } catch (_: Exception) {}
+                }
+                is DriverDownloader.Result.Error -> {
+                    withContext(Dispatchers.Main) {
+                        Toast.makeText(
+                            context,
+                            context.getString(R.string.error_with_msg, dlResult.message),
+                            Toast.LENGTH_SHORT
+                        ).show()
+                        statusText = dlResult.message ?: "Download failed"
                         onDismiss()
                     }
+                    try { driverFile.delete() } catch (_: Exception) {}
+                    try { tmpAdapted.delete() } catch (_: Exception) {}
                 }
-            } else if (result is GitHub.DownloadStatus.Error) {
-                withContext(Dispatchers.Main) {
-                    Toast.makeText(
-                        context,
-                        context.getString(R.string.error_with_msg, result.message),
-                        Toast.LENGTH_SHORT
-                    ).show()
-                    onDismiss()
+                is DriverDownloader.Result.Canceled -> {
+                    withContext(Dispatchers.Main) { onDismiss() }
+                    try { driverFile.delete() } catch (_: Exception) {}
                 }
             }
-
-            driverFile.delete()
         }
     }
 
     AlertDialog(
-        onDismissRequest = { if (!isIndeterminate) onDismiss() },
+        onDismissRequest = { if (!isIndeterminate || downloadCompleted) onDismiss() },
         title = { Text(stringResource(R.string.downloading)) },
         text = {
             Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                // we can't set indeterminate explicitly so.
                 if (isIndeterminate) {
-                    LinearProgressIndicator(
-                        modifier = Modifier.fillMaxWidth()
-                    )
+                    LinearProgressIndicator(modifier = Modifier.fillMaxWidth())
                 } else {
-                    LinearProgressIndicator(
-                        progress = { progress },
-                        modifier = Modifier.fillMaxWidth(),
-                    )
+                    LinearProgressIndicator(progress = { progress }, modifier = Modifier.fillMaxWidth())
                 }
                 Spacer(modifier = Modifier.height(8.dp))
-                if (!isIndeterminate) {
-                    Text(text = "${(progress * 100).toInt()}%")
-                }
+                if (!isIndeterminate) Text(text = "${(progress * 100).toInt()}%")
+                Text(text = statusText, style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                Text(text = chosenName, style = MaterialTheme.typography.labelSmall, maxLines = 2)
             }
         },
         confirmButton = {
