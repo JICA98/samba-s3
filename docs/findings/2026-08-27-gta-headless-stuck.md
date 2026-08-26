@@ -42,3 +42,22 @@
 
 ## Next Test Plan
 - Patch EBOOT resolution + added logs, rebuild core (`./build_rpcsx.sh release`), reinstall, re-import GTA, wait for `headless_boot_preflight_terminal result=0 stopped=1` + `PRELAUNCH COMPLETED` + `ppu_state IDLE_AFTER_COMPILE` + focused card `PLAY` enables. Then test PLAY → no extra `RUNTIME PPU BEGIN` before first frame, force-stop recovery, and driver concurrency.
+
+## Update 2026-08-27 00:22 — Fix Verified
+- Patched `build_ppu_preflight_plan` to try `/PS3_GAME/USRDIR/EBOOT.BIN` fallback. Rebuilt core (`bb8d16d`), reinstalled APK.
+- Force-stop during stuck COMPILING → on next launch `PpuReadinessStore` correctly recovered: `[BLUS31584] COMPILING → FAILED` (`W/PpuReadinessStore Recovered interrupted runtime PPU preparations` + `W/PpuCoordinator Recovered stale headless PPU state`).
+- Tapped GTA card (center 1500,600) → `W/GameRun Failed state for GTA San Andreas, retrying` → `Manual headless request for BLUS31584`
+- **Second headless with fix succeeded in 1s**:
+  ```
+  S3 preflight plan: title=BLUS31584 cat=DG effective=.../BLUS31584 eboot=.../BLUS31584/PS3_GAME/USRDIR/EBOOT.BIN dirs=3
+  S3 preflight main binary: .../PS3_GAME/USRDIR/EBOOT.BIN
+  headless_boot_preflight_terminal session=1787769995345 result=0 stopped=1
+  Headless prelaunch success BLUS31584 -> IDLE_AFTER_COMPILE
+  ```
+  `ppu_state.json` now `{"BLUS31584":{"preRuntime":"READY","runtime":"IDLE_AFTER_COMPILE"}}`
+- After `am force-stop` + relaunch, Home correctly shows **`X PLAY`** (2527,2067) for GTA SAN ANDREAS (gold border, `BLUS31584`), no `RPCSXActivity`, no Surface, MainActivity remains resumed — focused tap now routes to `onPlay()` as designed.
+
+### Remaining for full acceptance
+- 5 fresh headless runs not yet done (only 1 full install→headless + 1 retry with fix)
+- Normal-boot no-extra `RUNTIME PPU BEGIN` before first frame not yet proven (needs `PLAY` → `RPCSXActivity` + log check)
+- Process-death recovery proven `COMPILING→FAILED` (done) but 20-cycle driver stress and DG+hdd0 update test not yet done
