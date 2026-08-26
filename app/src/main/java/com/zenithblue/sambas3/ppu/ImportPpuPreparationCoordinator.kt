@@ -93,9 +93,77 @@ object ImportPpuPreparationCoordinator {
     }
 
     fun cancel(sessionId: Long) {
-        if (lastSessionId == sessionId) {
-            currentJob?.cancel()
-            try { RPCSX.instance.cancelRuntimePpuPreparation(sessionId) } catch (_: Exception) {}
+        if (lastSessionId != sessionId) {
+            return
+        }
+
+        try {
+            RPCSX.instance
+                .cancelRuntimePpuPreparation(
+                    sessionId
+                )
+        } catch (
+            _: Exception
+        ) {
+        }
+
+        currentJob?.cancel()
+    }
+
+    fun reconcileInterruptedState(
+        context: Context
+    ) {
+        val appCtx =
+            context.applicationContext
+
+        if (
+            currentJob?.isActive ==
+            true
+        ) {
+            return
+        }
+
+        if (
+            CompileProgressBridge
+                .prelaunchState
+                .value
+                .ppuActive
+        ) {
+            return
+        }
+
+        val state =
+            runCatching {
+                RPCSX.getState()
+            }.getOrDefault(
+                com.zenithblue.sambas3
+                    .EmulatorState
+                    .Stopped
+            )
+
+        if (
+            state !=
+            com.zenithblue.sambas3
+                .EmulatorState
+                .Stopped
+        ) {
+            return
+        }
+
+        val recovered =
+            PpuReadinessStore
+                .recoverInterruptedRuntimePreparations(
+                    appCtx
+                )
+
+        if (
+            recovered.isNotEmpty()
+        ) {
+            Log.w(
+                TAG,
+                "Recovered stale headless PPU " +
+                    "state: $recovered"
+            )
         }
     }
 

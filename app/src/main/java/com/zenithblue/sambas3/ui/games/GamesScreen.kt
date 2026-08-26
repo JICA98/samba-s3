@@ -132,6 +132,12 @@ fun GamesScreen(
     emulatorActiveGame: State<String?> = mutableStateOf(null)
 ) {
     val context = LocalContext.current
+    LaunchedEffect(Unit) {
+        com.zenithblue.sambas3.ppu.ImportPpuPreparationCoordinator
+            .reconcileInterruptedState(
+                context
+            )
+    }
     val games = remember { GameRepository.list() }
     val rpcsxLibrary by remember { RPCSX.activeLibrary }
 

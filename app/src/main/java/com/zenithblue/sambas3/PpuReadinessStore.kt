@@ -178,4 +178,62 @@ object PpuReadinessStore {
         ensureLoaded(context)
         return cache.toMap()
     }
+
+    @Synchronized
+    fun recoverInterruptedRuntimePreparations(
+        context: Context
+    ): List<String> {
+        ensureLoaded(context)
+
+        val recovered =
+            mutableListOf<String>()
+
+        val updated =
+            cache.mapValues {
+                    (key, entry) ->
+
+                val runtime =
+                    runCatching {
+                        RuntimePpuState.valueOf(
+                            entry.runtime
+                        )
+                    }.getOrDefault(
+                        RuntimePpuState.NOT_STARTED
+                    )
+
+                if (
+                    runtime ==
+                    RuntimePpuState.COMPILING
+                ) {
+                    recovered += key
+
+                    entry.copy(
+                        runtime =
+                            RuntimePpuState
+                                .FAILED
+                                .name,
+                        updatedMs =
+                            System.currentTimeMillis()
+                    )
+                } else {
+                    entry
+                }
+            }.toMutableMap()
+
+        if (
+            recovered.isNotEmpty()
+        ) {
+            cache = updated
+
+            save(context)
+
+            Log.w(
+                "PpuReadinessStore",
+                "Recovered interrupted runtime PPU " +
+                    "preparations: $recovered"
+            )
+        }
+
+        return recovered
+    }
 }
