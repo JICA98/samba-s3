@@ -24,22 +24,19 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.zenithblue.sambas3.R
-import com.zenithblue.sambas3.RPCSX
 import com.zenithblue.sambas3.RPCSXColors
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 
 @Composable
-fun InGameTrophiesPage(onBack: () -> Unit) {
+fun InGameTrophiesPage(core: InGameMenuCoreGateway, onBack: () -> Unit) {
     var data by remember { mutableStateOf<TrophiesData?>(null) }
     var loading by remember { mutableStateOf(true) }
     var showHidden by remember { mutableStateOf(false) }
 
     LaunchedEffect(Unit) {
         loading = true
-        data = withContext(Dispatchers.IO) {
-            TrophiesData.fromJson(try { RPCSX.instance.getCurrentTrophies() } catch (_: Exception) { null })
-        }
+        data = core.trophies().getOrNull()
         loading = false
     }
 

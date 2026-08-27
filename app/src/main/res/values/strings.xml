@@ -101,6 +101,8 @@
     <string name="ingame_friends">Friends</string>
     <string name="ingame_trophies">Trophies</string>
     <string name="ingame_take_screenshot">Take Screenshot</string>
+    <string name="screenshot_saved">Screenshot saved: %1$s</string>
+    <string name="screenshot_failed">Screenshot failed</string>
     <string name="ingame_start_recording">Start Recording</string>
     <string name="ingame_stop_recording">Stop Recording</string>
     <string name="ingame_save_state">Save State</string>

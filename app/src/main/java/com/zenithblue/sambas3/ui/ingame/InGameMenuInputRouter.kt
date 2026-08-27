@@ -5,111 +5,148 @@ import android.view.KeyEvent
 import android.view.MotionEvent
 import kotlin.math.abs
 
-sealed interface MenuInput {
-    data object Up : MenuInput
-    data object Down : MenuInput
-    data object Left : MenuInput
-    data object Right : MenuInput
-    data object Confirm : MenuInput       // Cross / A
-    data object Back : MenuInput          // Circle / B
-    data object Square : MenuInput
-    data object Triangle : MenuInput
-    data object PageUp : MenuInput        // L1
-    data object PageDown : MenuInput      // R1
-    data object Home : MenuInput
+/** Semantic menu commands — the router maps raw Android events to these only. */
+sealed interface MenuCommand {
+    data object Previous : MenuCommand
+    data object Next : MenuCommand
+    data object Activate : MenuCommand
+    data object Back : MenuCommand
+    data object PageAction1 : MenuCommand // Square
+    data object PageAction2 : MenuCommand // Triangle
+    data object PageUp : MenuCommand      // L1
+    data object PageDown : MenuCommand    // R1
+    data object Left : MenuCommand
+    data object Right : MenuCommand
+    data object HomeToggle : MenuCommand
 }
 
+/**
+ * Maps Android key/motion events to [MenuCommand]s. Does NOT consume inputs
+ * twice: it either maps and reports a command, or reports not-handled.
+ * Implements real analog edge/repeat: deadzone, initial edge, repeat delay,
+ * repeat interval, and re-edge only after the stick returns inside the
+ * deadzone.
+ */
 class InGameMenuInputRouter(
-    private val controller: InGameMenuController,
-    private val onInput: (MenuInput) -> Boolean = { false }
+    private val onCommand: (MenuCommand) -> Boolean,
+    private val clockMs: () -> Long = System::currentTimeMillis,
+    private val deadzone: Float = 0.5f,
+    private val repeatDelayMs: Long = 300,
+    private val repeatIntervalMs: Long = 100
 ) {
-    private var repeatJob: Runnable? = null
-    private val deadzone = 0.5f
+    private enum class AxisState { Neutral, EdgePending, Repeating }
 
-    fun handleKeyDown(keyCode: Int, event: KeyEvent?): Boolean {
-        if (event == null) return false
-        // Map known keys to menu inputs
-        val input = mapKeyCode(keyCode, event) ?: return false
-        return dispatch(input)
+    private var vertical = AxisState.Neutral
+    private var verticalValue = 0f
+    private var nextRepeatAt = 0L
+
+    fun handleKey(keyCode: Int, action: Int, event: KeyEvent?): Boolean {
+        if (event == null || action != KeyEvent.ACTION_DOWN) return false
+        if (event.repeatCount > 0) return isMenuInputKey(keyCode) // consume auto-repeat, no new command
+        val command = mapKeyCode(keyCode) ?: return false
+        return onCommand(command)
     }
 
-    fun handleKeyUp(keyCode: Int, event: KeyEvent?): Boolean {
-        // For menu we consume key up as well to avoid leak
-        val input = mapKeyCode(keyCode, event) ?: return false
-        // Only handle back on up? But we handle on down for responsiveness.
-        return true
-    }
-
-    fun handleGenericMotion(event: MotionEvent?): Boolean {
+    fun handleMotion(event: MotionEvent?): Boolean {
         if (event == null) return false
         if (event.source and InputDevice.SOURCE_JOYSTICK != InputDevice.SOURCE_JOYSTICK) return false
         if (event.action != MotionEvent.ACTION_MOVE) return false
-        val x = event.getAxisValue(MotionEvent.AXIS_X)
-        val y = event.getAxisValue(MotionEvent.AXIS_Y)
-        // Left stick deadzone
         var handled = false
-        if (abs(y) > deadzone) {
-            if (y < 0) dispatch(MenuInput.Up) else dispatch(MenuInput.Down)
-            handled = true
-        }
-        if (abs(x) > deadzone) {
-            if (x < 0) dispatch(MenuInput.Left) else dispatch(MenuInput.Right)
-            handled = true
-        }
-        // Hat for dpad via motion is handled via key events, but also handle here
-        val hatX = event.getAxisValue(MotionEvent.AXIS_HAT_X)
+
+        val y = event.getAxisValue(MotionEvent.AXIS_Y)
+        handled = trackAxis(y) { if (y < 0) MenuCommand.Previous else MenuCommand.Next } || handled
+
         val hatY = event.getAxisValue(MotionEvent.AXIS_HAT_Y)
-        if (abs(hatY) > deadzone) {
-            if (hatY < 0) dispatch(MenuInput.Up) else dispatch(MenuInput.Down)
-            handled = true
+        val hatX = event.getAxisValue(MotionEvent.AXIS_HAT_X)
+        val hatYActive = abs(hatY) > deadzone
+        val hatXActive = abs(hatX) > deadzone
+        if (hatYActive) {
+            handled = onCommand(if (hatY < 0) MenuCommand.Previous else MenuCommand.Next) || handled
         }
-        if (abs(hatX) > deadzone) {
-            if (hatX < 0) dispatch(MenuInput.Left) else dispatch(MenuInput.Right)
-            handled = true
+        if (hatXActive) {
+            handled = onCommand(if (hatX < 0) MenuCommand.Left else MenuCommand.Right) || handled
+        }
+        if (!hatYActive && !hatXActive) {
+            val x = event.getAxisValue(MotionEvent.AXIS_X)
+            handled = trackHorizontal(x, y) || handled
         }
         return handled
     }
 
-    private fun mapKeyCode(keyCode: Int, event: KeyEvent?): MenuInput? {
-        return when (keyCode) {
-            KeyEvent.KEYCODE_DPAD_UP -> MenuInput.Up
-            KeyEvent.KEYCODE_DPAD_DOWN -> MenuInput.Down
-            KeyEvent.KEYCODE_DPAD_LEFT -> MenuInput.Left
-            KeyEvent.KEYCODE_DPAD_RIGHT -> MenuInput.Right
-            KeyEvent.KEYCODE_BUTTON_A, KeyEvent.KEYCODE_DPAD_CENTER, KeyEvent.KEYCODE_ENTER -> MenuInput.Confirm
-            KeyEvent.KEYCODE_BUTTON_B, KeyEvent.KEYCODE_BACK, KeyEvent.KEYCODE_ESCAPE -> MenuInput.Back
-            KeyEvent.KEYCODE_BUTTON_X -> MenuInput.Square
-            KeyEvent.KEYCODE_BUTTON_Y -> MenuInput.Triangle
-            KeyEvent.KEYCODE_BUTTON_L1 -> MenuInput.PageUp
-            KeyEvent.KEYCODE_BUTTON_R1 -> MenuInput.PageDown
-            KeyEvent.KEYCODE_BUTTON_START -> MenuInput.Confirm
-            KeyEvent.KEYCODE_BUTTON_SELECT -> MenuInput.Back
-            KeyEvent.KEYCODE_HOME, KeyEvent.KEYCODE_BUTTON_MODE -> MenuInput.Home
-            else -> null
+    private var horizontal = AxisState.Neutral
+
+    private fun trackHorizontal(x: Float, y: Float): Boolean {
+        val active = abs(x) > deadzone && abs(y) <= deadzone
+        val now = clockMs()
+        when (horizontal) {
+            AxisState.Neutral -> if (active) {
+                horizontal = AxisState.EdgePending
+                nextRepeatAt = now + repeatDelayMs
+                return onCommand(if (x < 0) MenuCommand.Left else MenuCommand.Right)
+            }
+
+            AxisState.EdgePending, AxisState.Repeating -> {
+                if (!active) {
+                    horizontal = AxisState.Neutral
+                    return false
+                }
+                if (now >= nextRepeatAt) {
+                    nextRepeatAt = now + repeatIntervalMs
+                    horizontal = AxisState.Repeating
+                    return onCommand(if (x < 0) MenuCommand.Left else MenuCommand.Right)
+                }
+            }
         }
+        return false
     }
 
-    private fun dispatch(input: MenuInput): Boolean {
-        // First try custom handler
-        if (onInput(input)) return true
-        // Default handling: navigation
-        when (input) {
-            is MenuInput.Up -> controller.moveSelection(-1, 20) // max will be clamped by UI layer
-            is MenuInput.Down -> controller.moveSelection(1, 20)
-            is MenuInput.Back -> { controller.back(); }
-            is MenuInput.Confirm -> { /* let UI confirm */ }
-            else -> {}
+    private fun trackAxis(value: Float, emit: () -> MenuCommand): Boolean {
+        val active = abs(value) > deadzone
+        val now = clockMs()
+        when (vertical) {
+            AxisState.Neutral -> if (active) {
+                vertical = AxisState.EdgePending
+                verticalValue = value
+                nextRepeatAt = now + repeatDelayMs
+                return onCommand(emit())
+            }
+
+            AxisState.EdgePending, AxisState.Repeating -> {
+                if (!active) {
+                    vertical = AxisState.Neutral
+                    return false
+                }
+                if (now >= nextRepeatAt) {
+                    nextRepeatAt = now + repeatIntervalMs
+                    vertical = AxisState.Repeating
+                    return onCommand(emit())
+                }
+            }
         }
-        return true
+        return false
     }
 
-    fun isMenuInputKey(keyCode: Int): Boolean {
-        return when (keyCode) {
-            KeyEvent.KEYCODE_DPAD_UP, KeyEvent.KEYCODE_DPAD_DOWN, KeyEvent.KEYCODE_DPAD_LEFT, KeyEvent.KEYCODE_DPAD_RIGHT,
-            KeyEvent.KEYCODE_BUTTON_A, KeyEvent.KEYCODE_BUTTON_B, KeyEvent.KEYCODE_BUTTON_X, KeyEvent.KEYCODE_BUTTON_Y,
-            KeyEvent.KEYCODE_BUTTON_L1, KeyEvent.KEYCODE_BUTTON_R1, KeyEvent.KEYCODE_DPAD_CENTER, KeyEvent.KEYCODE_BACK,
-            KeyEvent.KEYCODE_BUTTON_START, KeyEvent.KEYCODE_BUTTON_SELECT, KeyEvent.KEYCODE_HOME, KeyEvent.KEYCODE_BUTTON_MODE -> true
-            else -> false
-        }
+    /** Menu closes / Activity stops — cancel any pending repeat. */
+    fun cancelRepeat() {
+        vertical = AxisState.Neutral
+        horizontal = AxisState.Neutral
+        nextRepeatAt = 0L
     }
+
+    private fun mapKeyCode(keyCode: Int): MenuCommand? = when (keyCode) {
+        KeyEvent.KEYCODE_DPAD_UP -> MenuCommand.Previous
+        KeyEvent.KEYCODE_DPAD_DOWN -> MenuCommand.Next
+        KeyEvent.KEYCODE_DPAD_LEFT -> MenuCommand.Left
+        KeyEvent.KEYCODE_DPAD_RIGHT -> MenuCommand.Right
+        KeyEvent.KEYCODE_BUTTON_A, KeyEvent.KEYCODE_DPAD_CENTER, KeyEvent.KEYCODE_ENTER -> MenuCommand.Activate
+        KeyEvent.KEYCODE_BUTTON_B, KeyEvent.KEYCODE_BACK, KeyEvent.KEYCODE_ESCAPE -> MenuCommand.Back
+        KeyEvent.KEYCODE_BUTTON_X -> MenuCommand.PageAction1
+        KeyEvent.KEYCODE_BUTTON_Y -> MenuCommand.PageAction2
+        KeyEvent.KEYCODE_BUTTON_L1 -> MenuCommand.PageUp
+        KeyEvent.KEYCODE_BUTTON_R1 -> MenuCommand.PageDown
+        else -> null
+    }
+
+    fun isMenuInputKey(keyCode: Int): Boolean = mapKeyCode(keyCode) != null ||
+        keyCode == KeyEvent.KEYCODE_HOME || keyCode == KeyEvent.KEYCODE_BUTTON_MODE
 }

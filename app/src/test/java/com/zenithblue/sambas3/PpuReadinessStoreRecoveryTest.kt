@@ -28,7 +28,7 @@ class PpuReadinessStoreRecoveryTest {
         RPCSX.rootDirectory = tmpRoot
         PpuReadinessStore.load(ctx)
         // clear any existing entries for our test keys
-        listOf("TEST_COMP", "TEST_IDLE", "TEST_NOTSTARTED", "TEST_FAILED", "TEST_RECOVERY").forEach {
+        listOf("TEST_COMP", "TEST_IDLE", "TEST_NOTSTARTED", "TEST_FAILED", "TEST_RECOVERY", "BLUS99999").forEach {
             PpuReadinessStore.removeEntry(ctx, it)
         }
     }
@@ -75,7 +75,8 @@ class PpuReadinessStoreRecoveryTest {
 
     @Test
     fun stale_compiling_after_reconciliation_is_failed_not_preparing() {
-        val key = "TEST_RECOVERY"
+        // Key must match the BLxx##### title-id pattern so GameIdentity resolves it
+        val key = "BLUS99999"
         // simulate fresh game with BLUS style key via direct store
         PpuReadinessStore.setPreRuntimeState(ctx, key, PreRuntimePpuState.READY)
         PpuReadinessStore.setRuntimeState(ctx, key, RuntimePpuState.COMPILING)

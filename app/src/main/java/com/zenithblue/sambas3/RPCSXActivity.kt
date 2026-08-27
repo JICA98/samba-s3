@@ -10,6 +10,7 @@ import android.view.ViewGroup.MarginLayoutParams
 import android.view.WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_MODE_SHORT_EDGES
 import androidx.activity.ComponentActivity
 import androidx.activity.OnBackPressedCallback
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.platform.ViewCompositionStrategy
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowCompat
@@ -18,22 +19,35 @@ import androidx.core.view.WindowInsetsControllerCompat
 import androidx.core.view.isInvisible
 import androidx.core.view.updateLayoutParams
 import androidx.lifecycle.lifecycleScope
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.zenithblue.sambas3.databinding.ActivityRpcs3Binding
 import com.zenithblue.sambas3.dialogs.AlertDialogQueue
 import com.zenithblue.sambas3.gameconfig.GameSettingsOverrides
 import com.zenithblue.sambas3.overlay.State
-import com.zenithblue.sambas3.ui.ingame.EmulationOverlayHost
-import com.zenithblue.sambas3.ui.ingame.InGameMenuController
+import com.zenithblue.sambas3.ui.ingame.CloseReason
+import com.zenithblue.sambas3.ui.ingame.GameplayInputGate
+import com.zenithblue.sambas3.ui.ingame.InGameMenuCoordinator
+import com.zenithblue.sambas3.ui.ingame.InGameMenuCoreGateway
+import com.zenithblue.sambas3.ui.ingame.InGameMenuHost
+import com.zenithblue.sambas3.ui.ingame.InGameMenuIntent
 import com.zenithblue.sambas3.ui.ingame.InGameMenuInputRouter
-import com.zenithblue.sambas3.ui.ingame.MenuInput
+import com.zenithblue.sambas3.ui.ingame.MenuCommand
+import com.zenithblue.sambas3.ui.ingame.PhysicalInputTracker
+import com.zenithblue.sambas3.ui.ingame.RpcsxInGameMenuCoreGateway
+import com.zenithblue.sambas3.ui.ingame.RpcsxBridgeAdapter
 import com.zenithblue.sambas3.debug.DebugPadReceiver
 import com.zenithblue.sambas3.utils.InputBindingPrefs
+import kotlinx.coroutines.flow.launchIn
+import kotlinx.coroutines.flow.onEach
+import kotlinx.coroutines.launch
 import kotlin.concurrent.thread
 import kotlin.math.abs
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 
+/**
+ * Android host adapter only: lifecycle, views, surface, frontend-listener
+ * registration, physical input forwarding, and game boot ownership. All menu
+ * session/state decisions live in [InGameMenuCoordinator].
+ */
 class RPCSXActivity : ComponentActivity() {
     private lateinit var binding: ActivityRpcs3Binding
     private lateinit var unregisterUsbEventListener: () -> Unit
@@ -44,9 +58,11 @@ class RPCSXActivity : ComponentActivity() {
     private var debugPadReceiver: DebugPadReceiver? = null
     private val inputBindings by lazy { InputBindingPrefs.loadBindings() }
 
-    private val inGameMenuController = InGameMenuController()
+    private val physicalTracker = PhysicalInputTracker()
+    private val inputGate = GameplayInputGate(physicalTracker)
+    private val coreGateway: InGameMenuCoreGateway by lazy { RpcsxInGameMenuCoreGateway(RpcsxBridgeAdapter()) }
+    private lateinit var coordinator: InGameMenuCoordinator
     private lateinit var menuInputRouter: InGameMenuInputRouter
-    private var gameplayInputArmed = true
 
     private lateinit var backCallback: OnBackPressedCallback
 
@@ -82,23 +98,11 @@ class RPCSXActivity : ComponentActivity() {
             Log.w("RPCSX-UI", "CompileProgressBridge register failed: ${e.message}")
         }
 
-        // Frontend Home Menu ownership: register listener to route PS/Home to Kotlin
-        try {
-            RPCSX.instance.setFrontendEventListener { type, _ ->
-                if (type == RPCSX.FRONTEND_EVENT_HOME_REQUESTED) {
-                    runOnUiThread {
-                        handleFrontendHomeRequest()
-                    }
-                }
-            }
-            Log.i("RPCSX-UI", "FrontendEventListener registered")
-        } catch (e: Exception) {
-            Log.w("RPCSX-UI", "FrontendEventListener failed ${e.message}")
-        }
-
-        menuInputRouter = InGameMenuInputRouter(inGameMenuController) { input ->
-            handleMenuInput(input)
-        }
+        coordinator = InGameMenuCoordinator(
+            scope = lifecycleScope,
+            core = coreGateway
+        )
+        menuInputRouter = InGameMenuInputRouter(onCommand = { command -> handleMenuCommand(command) })
 
         binding = ActivityRpcs3Binding.inflate(layoutInflater)
         setContentView(binding.root)
@@ -112,34 +116,65 @@ class RPCSXActivity : ComponentActivity() {
         binding.ingameOverlay.translationZ = 64f
         binding.ingameOverlay.setContent {
             RPCSXTheme {
-                EmulationOverlayHost(
-                    controller = inGameMenuController,
+                val uiState by coordinator.state.collectAsStateWithLifecycle()
+                InGameMenuHost(
+                    uiState = uiState,
                     gamePath = intent.getStringExtra("path"),
-                    onExitConfirmed = ::exitGame,
-                    onRequestScreenshot = { requestScreenshot() },
-                    onToggleRecording = { toggleRecording() },
-                    onSaveState = { slot -> saveState(slot) },
-                    onLoadState = { slot -> loadState(slot) }
+                    core = coreGateway,
+                    onIntent = coordinator::dispatch
                 )
             }
         }
 
+        // Host effects: coordinator decides, Activity only applies Android-side changes.
+        coordinator.effects
+            .onEach { effect ->
+                when (effect) {
+                    is com.zenithblue.sambas3.ui.ingame.InGameMenuHostEffect.ShowOverlay -> {
+                        binding.ingameOverlay.visibility = View.VISIBLE
+                    }
+
+                    is com.zenithblue.sambas3.ui.ingame.InGameMenuHostEffect.HideOverlay -> {
+                        binding.ingameOverlay.visibility = View.GONE
+                    }
+
+                    is com.zenithblue.sambas3.ui.ingame.InGameMenuHostEffect.EnterPadMenuMode -> {
+                        binding.padOverlay.setMenuMode(true)
+                        backCallback.isEnabled = true
+                    }
+
+                    is com.zenithblue.sambas3.ui.ingame.InGameMenuHostEffect.ExitPadMenuMode -> {
+                        binding.padOverlay.setMenuMode(false)
+                        backCallback.isEnabled = false
+                    }
+
+                    is com.zenithblue.sambas3.ui.ingame.InGameMenuHostEffect.WaitForPhysicalNeutralThenArmGameplay -> {
+                        neutralizeForwardedPad()
+                        inputGate.waitForNeutral()
+                        menuInputRouter.cancelRepeat()
+                    }
+
+                    is com.zenithblue.sambas3.ui.ingame.InGameMenuHostEffect.ArmGameplayNow -> inputGate.arm()
+
+                    is com.zenithblue.sambas3.ui.ingame.InGameMenuHostEffect.FinishGameActivity -> {
+                        thread {
+                            var attempts = 0
+                            while (attempts < 100) {
+                                val s = try { RPCSX.getState() } catch (_: Exception) { EmulatorState.Stopped }
+                                if (s == EmulatorState.Stopped) break
+                                Thread.sleep(100)
+                                attempts++
+                            }
+                            runOnUiThread { finish() }
+                        }
+                    }
+                }
+            }
+            .launchIn(lifecycleScope)
+
         backCallback = object : OnBackPressedCallback(false) {
             override fun handleOnBackPressed() {
-                if (inGameMenuController.isOpen) {
-                    // Let controller decide: if on Settings dirty, it will signal via back() returning false -> keep open, UI will show dialog
-                    val consumed = inGameMenuController.back()
-                    if (!consumed) {
-                        // dirty dialog is shown inside Settings page; keep overlay visible
-                    } else if (!inGameMenuController.isOpen) {
-                        closeInGameMenu(resume = true)
-                    }
-                } else {
-                    // No menu open, let system handle (or open menu?)
-                    isEnabled = false
-                    onBackPressedDispatcher.onBackPressed()
-                    isEnabled = true
-                }
+                coordinator.dispatch(InGameMenuIntent.Back)
             }
         }
         onBackPressedDispatcher.addCallback(this, backCallback)
@@ -152,20 +187,20 @@ class RPCSXActivity : ComponentActivity() {
         }
 
         binding.menuToggle.setOnClickListener {
-            if (inGameMenuController.isOpen) {
-                inGameMenuController.resume()
-                closeInGameMenu(resume = true)
-                return@setOnClickListener
+            if (coordinator.state.value.isOpen) {
+                coordinator.dispatch(InGameMenuIntent.Resume)
+            } else if (RPCSX.getState() == EmulatorState.Running || RPCSX.getState() == EmulatorState.Paused) {
+                coordinator.dispatch(InGameMenuIntent.Open)
+            } else {
+                Log.w("RPCSX State", "Cannot open in-game menu in state ${RPCSX.getState().name}")
             }
-            if (RPCSX.getState() != EmulatorState.Running) {
-                Log.w("RPCSX State", "Cannot open home menu in state ${RPCSX.getState().name}")
-                return@setOnClickListener
-            }
-            openInGameMenu()
         }
 
         val gamePath = intent.getStringExtra("path")!!
         RPCSX.lastPlayedGame = gamePath
+
+        // Frontend listener registered only after binding + content are ready (§16).
+        registerFrontendListener()
 
         bootThread = thread {
             if (RPCSX.getState() != EmulatorState.Stopped) {
@@ -211,186 +246,97 @@ class RPCSXActivity : ComponentActivity() {
         }
     }
 
-    // ── In-game Compose overlay pages ──────────────────────────────────────
+    private fun registerFrontendListener() {
+        try {
+            RPCSX.instance.setFrontendEventListener { type, payload ->
+                when (type) {
+                    RPCSX.FRONTEND_EVENT_HOME_REQUESTED -> runOnUiThread {
+                        // Queued until host is ready; binding is guaranteed here (§16).
+                        handleFrontendHomeRequest()
+                    }
 
-    private fun openInGameMenu() {
-        // Order per plan Phase 15: verify Running, neutralize, beginFrontendMenu, capabilities, enter overlay mode
-        if (RPCSX.getState() != EmulatorState.Running && RPCSX.getState() != EmulatorState.Paused) {
-            Log.w("InGameMenu", "openInGameMenu rejected state=${RPCSX.getState()}")
-            return
-        }
-        neutralizePhysicalPad()
-        binding.padOverlay.cancelActiveInputsAndNeutralize()
-        lifecycleScope.launch {
-            try {
-                inGameMenuController.openMain()
-                binding.ingameOverlay.visibility = View.VISIBLE
-                binding.padOverlay.setMenuMode(true)
-                backCallback.isEnabled = true
-                gameplayInputArmed = false
-            } catch (e: Exception) {
-                Log.w("InGameMenu", "openMain failed ${e.message}")
+                    RPCSX.FRONTEND_EVENT_SCREENSHOT_RESULT -> runOnUiThread {
+                        val msg = if (payload.isNullOrBlank()) {
+                            getString(R.string.screenshot_failed)
+                        } else {
+                            getString(R.string.screenshot_saved, payload.substringAfterLast('/'))
+                        }
+                        android.widget.Toast.makeText(this, msg, android.widget.Toast.LENGTH_SHORT).show()
+                    }
+                }
             }
-        }
-    }
-
-    private fun closeInGameMenu(resume: Boolean) {
-        binding.ingameOverlay.visibility = View.GONE
-        binding.padOverlay.setMenuMode(false)
-        backCallback.isEnabled = inGameMenuController.isOpen
-        if (resume) {
-            // Wait for neutral before re-arming
-            gameplayInputArmed = false
-        } else {
-            gameplayInputArmed = false
-        }
-        // If controller still open (e.g. back from subpage), keep overlay visible
-        if (inGameMenuController.isOpen) {
-            binding.ingameOverlay.visibility = View.VISIBLE
-            binding.padOverlay.setMenuMode(true)
-            backCallback.isEnabled = true
+            Log.i("RPCSX-UI", "FrontendEventListener registered")
+        } catch (e: Exception) {
+            Log.w("RPCSX-UI", "FrontendEventListener failed ${e.message}")
         }
     }
 
     private fun handleFrontendHomeRequest() {
-        if (inGameMenuController.isOpen) {
-            inGameMenuController.resume()
-            closeInGameMenu(resume = true)
-        } else {
-            if (RPCSX.getState() == EmulatorState.Running || RPCSX.getState() == EmulatorState.Paused) {
-                openInGameMenu()
-            }
+        if (coordinator.state.value.isOpen) {
+            coordinator.dispatch(InGameMenuIntent.Resume)
+        } else if (RPCSX.getState() == EmulatorState.Running || RPCSX.getState() == EmulatorState.Paused) {
+            coordinator.dispatch(InGameMenuIntent.Open)
         }
     }
 
-    private fun handleMenuInput(input: MenuInput): Boolean {
-        // Route to controller navigation or page-specific handlers
-        when (input) {
-            is MenuInput.Back -> {
-                val wasOpen = inGameMenuController.isOpen
-                val consumed = inGameMenuController.back()
-                if (!consumed) {
-                    // Dirty settings: stay open, dialog will show
-                    return true
+    /** Map a semantic menu command to coordinator intents. Returns true if consumed. */
+    private fun handleMenuCommand(command: MenuCommand): Boolean {
+        return when (command) {
+            is MenuCommand.Previous -> coordinator.moveSelection(-1)
+            is MenuCommand.Next -> coordinator.moveSelection(1)
+            is MenuCommand.PageUp -> coordinator.jumpSelection(-10)
+            is MenuCommand.PageDown -> coordinator.jumpSelection(10)
+            is MenuCommand.Activate -> {
+                val intent = coordinator.activateSelectedIntent()
+                if (intent != null) {
+                    coordinator.dispatch(intent)
+                    true
+                } else {
+                    false
                 }
-                if (!inGameMenuController.isOpen && wasOpen) {
-                    closeInGameMenu(resume = true)
-                }
-                return true
             }
-            is MenuInput.Home -> {
+
+            is MenuCommand.Back -> {
+                coordinator.dispatch(InGameMenuIntent.Back)
+                true
+            }
+
+            is MenuCommand.HomeToggle -> {
                 handleFrontendHomeRequest()
-                return true
+                true
             }
-            is MenuInput.Up -> {
-                // Let LazyColumn handle? Controller already moves selection via router default
-                return true
+
+            // Page actions: SAVE (Square) / DISCARD (Triangle) on Settings; otherwise unconsumed.
+            is MenuCommand.PageAction1 -> {
+                if (coordinator.state.value.currentPage == com.zenithblue.sambas3.ui.ingame.InGamePage.Settings) {
+                    coordinator.dispatch(InGameMenuIntent.SettingsSave)
+                    true
+                } else {
+                    false
+                }
             }
-            is MenuInput.Down -> return true
-            else -> return true
+
+            is MenuCommand.PageAction2 -> {
+                if (coordinator.state.value.currentPage == com.zenithblue.sambas3.ui.ingame.InGamePage.Settings) {
+                    coordinator.dispatch(InGameMenuIntent.SettingsDiscard)
+                    true
+                } else {
+                    false
+                }
+            }
+
+            is MenuCommand.Left -> false
+            is MenuCommand.Right -> false
         }
     }
 
-    private fun neutralizePhysicalPad() {
+    private fun neutralizeForwardedPad() {
         gamePadState = State()
         usesAxisL2 = false
         usesAxisR2 = false
         try {
             RPCSX.instance.overlayPadData(0, 0, 127, 127, 127, 127)
         } catch (_: Exception) {}
-    }
-
-    private fun requestScreenshot() {
-        lifecycleScope.launch(Dispatchers.IO) {
-            try { RPCSX.instance.requestScreenshot() } catch (e: Exception) { Log.w("InGameMenu", "screenshot failed ${e.message}") }
-        }
-    }
-
-    private fun toggleRecording() {
-        lifecycleScope.launch(Dispatchers.IO) {
-            try { RPCSX.instance.toggleRecording() } catch (e: Exception) { Log.w("InGameMenu", "recording failed ${e.message}") }
-        }
-    }
-
-    private fun saveState(slot: Int) {
-        lifecycleScope.launch(Dispatchers.IO) {
-            try {
-                val ok = RPCSX.instance.saveState(slot)
-                withContext(Dispatchers.Main) {
-                    if (ok) {
-                        // For suspend mode, activity will finish after kill; for normal, resume is handled by restart
-                        if (inGameMenuController.capabilities.savestate?.suspendMode == true) {
-                            inGameMenuController.closeWithoutResume()
-                            closeInGameMenu(resume = false)
-                            // Wait for kill then finish
-                            thread {
-                                var attempts = 0
-                                while (attempts < 50) {
-                                    val s = try { RPCSX.getState() } catch (_: Exception) { EmulatorState.Stopped }
-                                    if (s == EmulatorState.Stopped) break
-                                    Thread.sleep(100)
-                                    attempts++
-                                }
-                                runOnUiThread { finish() }
-                            }
-                        }
-                    }
-                }
-            } catch (e: Exception) { Log.w("InGameMenu", "saveState failed ${e.message}") }
-        }
-    }
-
-    private fun loadState(slot: Int) {
-        lifecycleScope.launch(Dispatchers.IO) {
-            try {
-                val ok = RPCSX.instance.loadSaveState(slot)
-                withContext(Dispatchers.Main) {
-                    if (ok) {
-                        inGameMenuController.closeWithoutResume()
-                        closeInGameMenu(resume = false)
-                    }
-                }
-            } catch (e: Exception) { Log.w("InGameMenu", "loadState failed ${e.message}") }
-        }
-    }
-
-    /** Exit Game confirm -> graceful shutdown, then finish back to the launcher. */
-    private fun exitGame() {
-        thread {
-            try {
-                val ok = try { RPCSX.instance.gracefulShutdown() } catch (_: Exception) { false }
-                if (!ok) {
-                    // Fallback kill if graceful not available (old core)
-                    try { RPCSX.instance.kill() } catch (_: Exception) {}
-                }
-                var attempts = 0
-                while (attempts < 50) {
-                    val s = try { RPCSX.getState() } catch (_: Exception) { EmulatorState.Stopped }
-                    if (s == EmulatorState.Stopped) break
-                    Thread.sleep(100)
-                    attempts++
-                }
-                val finalState = try { RPCSX.getState() } catch (_: Exception) { EmulatorState.Stopped }
-                RPCSX.state.value = finalState
-                if (finalState == EmulatorState.Stopped) {
-                    RPCSX.activeGame.value = null
-                    Log.i("S3LIFE", "exitGame graceful reached Stopped, cleared activeGame")
-                } else {
-                    Log.w("S3LIFE", "exitGame timeout state=$finalState")
-                    // Fallback kill
-                    try { RPCSX.instance.kill() } catch (_: Exception) {}
-                    Thread.sleep(500)
-                    RPCSX.state.value = try { RPCSX.getState() } catch (_: Exception) { EmulatorState.Stopped }
-                    if (RPCSX.state.value == EmulatorState.Stopped) RPCSX.activeGame.value = null
-                }
-                try { RPCSX.instance.setFrontendEventListener(null) } catch (_: Exception) {}
-                try { RPCSX.instance.endInGameSettingsSession() } catch (_: Exception) {}
-            } catch (e: Exception) {
-                Log.w("RPCSX State", "gracefulShutdown failed: ${e.message}")
-                try { RPCSX.instance.kill() } catch (_: Exception) {}
-            }
-            runOnUiThread { finish() }
-        }
     }
 
     private fun pollAndLearnTitleId(gamePath: String) {
@@ -419,9 +365,10 @@ class RPCSXActivity : ComponentActivity() {
     override fun onDestroy() {
         super.onDestroy()
         AlertDialogQueue.hostsSuppressed = false
+        try { coordinator.closeForActivityDestroy() } catch (e: Exception) {
+            Log.w("InGameMenu", "closeForActivityDestroy failed ${e.message}")
+        }
         try { RPCSX.instance.setFrontendEventListener(null) } catch (_: Exception) {}
-        try { if (inGameMenuController.isOpen) RPCSX.instance.endFrontendMenu(false) } catch (_: Exception) {}
-        try { RPCSX.instance.endInGameSettingsSession() } catch (_: Exception) {}
         try {
             val nativeState = RPCSX.getState()
             Log.i("S3LIFE", "RPCSXActivity.onDestroy nativeState=$nativeState activeGame=${RPCSX.activeGame.value}")
@@ -431,7 +378,6 @@ class RPCSXActivity : ComponentActivity() {
                 if (myPath != null && RPCSX.activeGame.value == myPath) {
                     Log.i("S3LIFE", "onDestroy Stopped clearing stale activeGame=$myPath")
                     RPCSX.activeGame.value = null
-                } else if (RPCSX.activeGame.value != null && RPCSX.activeGame.value != myPath) {
                 } else if (myPath == null && RPCSX.activeGame.value != null) {
                     Log.w("S3LIFE", "onDestroy Stopped with activeGame=${RPCSX.activeGame.value} but no path, clearing")
                     RPCSX.activeGame.value = null
@@ -458,29 +404,22 @@ class RPCSXActivity : ComponentActivity() {
         return event
     }
 
-    private fun isGameplayInputNeutral(): Boolean {
-        return gamePadState.digital[0] == 0 && gamePadState.digital[1] == 0 &&
-               abs(gamePadState.leftStickX - 127) < 20 && abs(gamePadState.leftStickY - 127) < 20 &&
-               abs(gamePadState.rightStickX - 127) < 20 && abs(gamePadState.rightStickY - 127) < 20
-    }
+    private fun isMenuOpen(): Boolean = coordinator.state.value.isOpen
 
     override fun onKeyDown(keyCode: Int, event: KeyEvent?): Boolean {
-        if (inGameMenuController.isOpen) {
-            // Route exclusively to menu
-            if (menuInputRouter.handleKeyDown(keyCode, event)) return true
-            // Also handle confirm/back that controller may not have handled via router default?
-            // Ensure menu consumes all gamepad/dpad keys while open
+        physicalTracker.onKeyEvent(keyCode, event?.action ?: KeyEvent.ACTION_UP)
+        if (isMenuOpen()) {
+            if (event != null && keyCode == KeyEvent.KEYCODE_HOME || keyCode == KeyEvent.KEYCODE_BUTTON_MODE) {
+                return handleMenuCommand(MenuCommand.HomeToggle)
+            }
+            if (menuInputRouter.handleKey(keyCode, event?.action ?: -1, event)) return true
             if (event != null && (event.source and (InputDevice.SOURCE_GAMEPAD or InputDevice.SOURCE_JOYSTICK or InputDevice.SOURCE_DPAD)) != 0) {
                 return true
             }
         }
-        // Gameplay re-arm gate: if not armed, only allow neutral transition to re-arm, otherwise drop
-        if (!gameplayInputArmed) {
-            if (isGameplayInputNeutral()) gameplayInputArmed = true else {
-                // Still waiting for neutral; drop this input but still neutralize to avoid stuck
-                // Don't send to core
-                return true
-            }
+        // Gameplay re-arm gate: while waiting, consume until a physical event proves neutrality.
+        if (!inputGate.onPhysicalEvent()) {
+            return true
         }
         if (event == null || (event.source and (InputDevice.SOURCE_GAMEPAD or InputDevice.SOURCE_JOYSTICK or InputDevice.SOURCE_DPAD)) == 0 || event.repeatCount != 0) {
             return super.onKeyDown(keyCode, event)
@@ -495,15 +434,14 @@ class RPCSXActivity : ComponentActivity() {
     }
 
     override fun onKeyUp(keyCode: Int, event: KeyEvent?): Boolean {
-        if (inGameMenuController.isOpen) {
-            menuInputRouter.handleKeyUp(keyCode, event)
+        physicalTracker.onKeyEvent(keyCode, event?.action ?: KeyEvent.ACTION_UP)
+        if (isMenuOpen()) {
+            if (menuInputRouter.isMenuInputKey(keyCode)) return true
             if (event != null && event.source and (InputDevice.SOURCE_GAMEPAD or InputDevice.SOURCE_JOYSTICK or InputDevice.SOURCE_DPAD) != 0) {
                 return true
             }
         }
-        if (!gameplayInputArmed) {
-            // Allow re-arm check on key up
-            if (isGameplayInputNeutral()) gameplayInputArmed = true
+        if (!inputGate.onPhysicalEvent()) {
             return true
         }
         if (event == null || event.source and (InputDevice.SOURCE_GAMEPAD or InputDevice.SOURCE_JOYSTICK or InputDevice.SOURCE_DPAD) == 0) {
@@ -516,19 +454,17 @@ class RPCSXActivity : ComponentActivity() {
         gamePadState.digital[padBit.second] =
             gamePadState.digital[padBit.second] and padBit.first.inv()
         sendGamepadData()
-        // Check if now neutral, re-arm
-        if (!gameplayInputArmed && isGameplayInputNeutral()) gameplayInputArmed = true
         return true
     }
 
     override fun onGenericMotionEvent(event: MotionEvent?): Boolean {
-        if (inGameMenuController.isOpen) {
-            if (menuInputRouter.handleGenericMotion(event)) return true
-            // Consume all joystick motion while menu open, send neutral only
+        if (event != null) physicalTracker.onMotionEvent(event)
+        if (isMenuOpen()) {
+            menuInputRouter.handleMotion(event)
             return true
         }
-        if (!gameplayInputArmed) {
-            if (isGameplayInputNeutral()) gameplayInputArmed = true else return true
+        if (!inputGate.onPhysicalEvent()) {
+            return true
         }
         if (event == null || event.source and InputDevice.SOURCE_JOYSTICK != InputDevice.SOURCE_JOYSTICK || event.action != MotionEvent.ACTION_MOVE) {
             return super.onGenericMotionEvent(event)
@@ -589,9 +525,8 @@ class RPCSXActivity : ComponentActivity() {
     }
 
     private fun sendGamepadData() {
-        // Only gameplay mode calls this; menu mode sends neutral separately
-        if (inGameMenuController.isOpen) return
-        if (!gameplayInputArmed) return
+        if (isMenuOpen()) return
+        if (!inputGate.onPhysicalEvent()) return
         RPCSX.instance.overlayPadData(
             gamePadState.digital[0],
             gamePadState.digital[1],
@@ -636,20 +571,13 @@ class RPCSXActivity : ComponentActivity() {
 
     override fun onPause() {
         super.onPause()
-        // Surface loss will handle pause ownership; do not open native menu
+        // Surface loss handles pause ownership; never open a menu from here (§17).
     }
 
     override fun onResume() {
         super.onResume()
-        // Re-query frontend menu state if activity recreated while menu open
-        try {
-            val isOpen = RPCSX.instance.isFrontendMenuOpen()
-            if (isOpen && !inGameMenuController.isOpen) {
-                // Stale session: end without resume to clear backend state
-                RPCSX.instance.endFrontendMenu(false)
-                Log.w("InGameMenu", "onResume cleared stale frontend menu session")
-            }
-        } catch (_: Exception) {}
+        // Menu re-arming/stale sessions are owned by the coordinator via state;
+        // no blind native calls here (§17 rule 8).
     }
 
     companion object {

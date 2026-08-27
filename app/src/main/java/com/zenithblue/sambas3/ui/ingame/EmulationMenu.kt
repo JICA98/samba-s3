@@ -3,14 +3,12 @@ package com.zenithblue.sambas3.ui.ingame
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.detectTapGestures
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -49,191 +47,69 @@ import com.zenithblue.sambas3.R
 import com.zenithblue.sambas3.RPCSXColors
 import com.zenithblue.sambas3.ui.games.GameConfigureOverlay
 
-/** Legacy alias for transitional compilation — new sealed interface is InGamePage (sealed). */
-@Deprecated("Use sealed InGamePage")
-enum class LegacyInGamePage { Closed, Menu, GlobalSettings, ConfigureGame }
-
 /**
- * Legacy InGameUiState kept for incremental migration; RPCSXActivity now prefers InGameMenuController.
- * This class remains for tests that import it, but overlay host now uses controller.
- */
-class InGameUiState {
-    val page = mutableStateOf(LegacyInGamePage.Closed)
-    val settingsBackstack = mutableListOf<String>()
-
-    fun open(target: LegacyInGamePage) {
-        settingsBackstack.clear()
-        settingsBackstack.add("")
-        page.value = target
-    }
-
-    fun popSubPage(): Boolean {
-        if (page.value != LegacyInGamePage.GlobalSettings) return false
-        if (settingsBackstack.size <= 1) return false
-        settingsBackstack.removeAt(settingsBackstack.lastIndex)
-        return true
-    }
-
-    fun close() {
-        page.value = LegacyInGamePage.Closed
-        settingsBackstack.clear()
-        settingsBackstack.add("")
-    }
-}
-
-private data class MenuRowSpec(
-    val labelRes: Int,
-    val iconRes: Int,
-    val showArrow: Boolean,
-    val enabled: Boolean = true,
-    val onClick: () -> Unit
-)
-
-/**
- * Full-screen Compose overlay host rendered inside RPCSXActivity's ComposeView.
- * Uses InGameMenuController as source of truth; falls back to legacy InGameUiState if controller not open.
+ * Presentational in-game menu host: state in, intents out. No native calls,
+ * no session ownership, no duplicated state.
  */
 @Composable
-fun EmulationOverlayHost(
-    controller: InGameMenuController,
+fun InGameMenuHost(
+    uiState: InGameMenuUiState,
     gamePath: String?,
-    onExitConfirmed: () -> Unit,
-    onRequestScreenshot: () -> Unit = {},
-    onToggleRecording: () -> Unit = {},
-    onSaveState: (Int) -> Unit = {},
-    onLoadState: (Int) -> Unit = {}
+    core: InGameMenuCoreGateway,
+    onIntent: (InGameMenuIntent) -> Unit
 ) {
-    val current = controller.stack.lastOrNull()
-    when (current) {
+    when (uiState.currentPage) {
         null -> Unit
-        is InGamePage.Main -> EmulationMenuPanel(
-            controller = controller,
-            gamePath = gamePath,
-            onExitConfirmed = onExitConfirmed,
-            onRequestScreenshot = onRequestScreenshot,
-            onToggleRecording = onToggleRecording
-        )
-        is InGamePage.Settings -> InGameSettingsPage(
-            controller = controller,
-            gamePath = gamePath
-        )
-        is InGamePage.ConfigureGame -> GameConfigureOverlay(
-            gamePath = gamePath,
-            onBackToMenu = { controller.back() }
-        )
-        is InGamePage.Trophies -> InGameTrophiesPage(
-            onBack = { controller.back() }
-        )
-        is InGamePage.Friends -> InGameFriendsPage(
-            onBack = { controller.back() }
-        )
-        is InGamePage.SaveStates -> InGameSaveStatePage(
-            capabilities = controller.capabilities.savestate,
-            onBack = { controller.back() },
-            onSave = onSaveState,
-            onLoad = onLoadState
+        InGamePage.Main -> InGameMainPanel(uiState, gamePath, onIntent)
+        InGamePage.Settings -> InGameSettingsPage(uiState, core, onIntent)
+        InGamePage.ConfigureGame -> GameConfigureOverlayRoute(uiState, gamePath, onIntent)
+        InGamePage.Trophies -> InGameTrophiesPage(core = core, onBack = { onIntent(InGameMenuIntent.Back) })
+        InGamePage.Friends -> InGameFriendsPage(core = core, onBack = { onIntent(InGameMenuIntent.Back) })
+        InGamePage.SaveStates -> InGameSaveStatePage(
+            capabilities = uiState.capabilities.savestate,
+            onBack = { onIntent(InGameMenuIntent.Back) },
+            onSave = { onIntent(InGameMenuIntent.SaveState(it)) },
+            onLoad = { onIntent(InGameMenuIntent.LoadState(it)) }
         )
     }
 }
 
-// Legacy overload for tests (renamed to avoid retired API string)
 @Composable
-fun EmulationOverlayHost(
-    uiState: InGameUiState,
-    gamePath: String?,
-    onCloseRequest: () -> Unit,
-    onLegacyMenu: () -> Unit,
-    onExitConfirmed: () -> Unit
-) {
-    // No longer used for core home menu; redirect to legacy menu
-    Box(
-        modifier = Modifier
-            .fillMaxSize()
-            .background(Color.Black.copy(alpha = 0.55f))
-            .pointerInput(Unit) { detectTapGestures { onCloseRequest() } },
-        contentAlignment = Alignment.Center
-    ) {
-        Surface(
-            shape = RoundedCornerShape(20.dp),
-            color = RPCSXColors.surfaceElevated,
-            border = androidx.compose.foundation.BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant),
-            modifier = Modifier.widthIn(max = 420.dp).fillMaxWidth(0.92f).heightIn(max = 480.dp).shadow(elevation = 16.dp, shape = RoundedCornerShape(20.dp))
-        ) {
-            Column(modifier = Modifier.padding(vertical = 8.dp)) {
-                Text(
-                    text = runningGameLabel(gamePath),
-                    color = RPCSXColors.primary,
-                    fontFamily = FontFamily.Monospace,
-                    fontWeight = FontWeight.Bold,
-                    fontSize = 14.sp,
-                    letterSpacing = 2.sp,
-                    maxLines = 1,
-                    modifier = Modifier.padding(horizontal = 20.dp, vertical = 16.dp)
-                )
-                HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
-                MenuRow(label = stringResource(R.string.ingame_resume), iconRes = R.drawable.ic_play, selected = false, showArrow = false) { onCloseRequest() }
-                HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.4f))
-                MenuRow(label = stringResource(R.string.configure_game), iconRes = R.drawable.tune, selected = false) { uiState.open(LegacyInGamePage.ConfigureGame) }
-                HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.4f))
-                MenuRow(label = stringResource(R.string.ingame_exit_game), iconRes = R.drawable.ic_stop, selected = false, showArrow = false) { onCloseRequest() }
-            }
-        }
-    }
+private fun GameConfigureOverlayRoute(uiState: InGameMenuUiState, gamePath: String?, onIntent: (InGameMenuIntent) -> Unit) {
+    GameConfigureOverlay(gamePath = gamePath, onBackToMenu = { onIntent(InGameMenuIntent.Back) })
 }
 
 @Composable
-private fun EmulationMenuPanel(
-    controller: InGameMenuController,
+private fun InGameMainPanel(
+    uiState: InGameMenuUiState,
     gamePath: String?,
-    onExitConfirmed: () -> Unit,
-    onRequestScreenshot: () -> Unit,
-    onToggleRecording: () -> Unit
+    onIntent: (InGameMenuIntent) -> Unit
 ) {
     var showExitConfirm by remember { mutableStateOf(false) }
     var showRestartConfirm by remember { mutableStateOf(false) }
-    val cap = controller.capabilities
+    val cap = uiState.capabilities
     val listState = rememberLazyListState()
+    val selected = uiState.selectedIndex
 
-    // Auto-scroll selected row into view
-    LaunchedEffect(controller.selectedIndex) {
-        if (controller.selectedIndex in 0..20) {
-            try { listState.animateScrollToItem(controller.selectedIndex) } catch (_: Exception) {}
-        }
+    val rows = remember(cap) { mainRowDescriptors(cap) }
+
+    // Exact actionable item count -> coordinator (never hard-coded).
+    LaunchedEffect(rows.size) {
+        onIntent(InGameMenuIntent.ReportItemCount(InGamePage.Main, rows.size))
     }
 
-    val rows = buildList {
-        add(MenuRowSpec(R.string.ingame_resume, R.drawable.ic_play, false) { controller.resume() })
-        add(MenuRowSpec(R.string.configure_game, R.drawable.tune, true) { controller.push(InGamePage.ConfigureGame) })
-        add(MenuRowSpec(R.string.ingame_settings, R.drawable.ic_settings, true) { controller.push(InGamePage.Settings) })
-        if (cap.friendsAvailable) {
-            add(MenuRowSpec(R.string.ingame_friends, R.drawable.ic_settings, true) { controller.push(InGamePage.Friends) })
+    // Bring selected row into view.
+    LaunchedEffect(selected) {
+        if (selected in rows.indices) {
+            runCatching { listState.animateScrollToItem(selected) }
         }
-        if (cap.trophiesAvailable) {
-            add(MenuRowSpec(R.string.ingame_trophies, R.drawable.ic_star, true) { controller.push(InGamePage.Trophies) })
-        }
-        add(MenuRowSpec(R.string.ingame_take_screenshot, R.drawable.ic_video, false, enabled = cap.screenshot) {
-            controller.closeWithoutResume()
-            onRequestScreenshot()
-        })
-        if (cap.recordingSupported) {
-            val recLabel = if (cap.recordingActive == true) R.string.ingame_stop_recording else R.string.ingame_start_recording
-            add(MenuRowSpec(recLabel, R.drawable.ic_video, false) {
-                controller.closeWithoutResume()
-                onToggleRecording()
-            })
-        }
-        if (cap.savestate?.supported == true) {
-            add(MenuRowSpec(R.string.ingame_save_state, R.drawable.ic_save, true) { controller.push(InGamePage.SaveStates) })
-        }
-        add(MenuRowSpec(R.string.ingame_restart_game, R.drawable.ic_restore, false) { showRestartConfirm = true })
-        add(MenuRowSpec(R.string.ingame_exit_game, R.drawable.ic_stop, false) { showExitConfirm = true })
     }
 
     Box(
         modifier = Modifier
             .fillMaxSize()
             .background(Color.Black.copy(alpha = 0.55f))
-            .pointerInput(Unit) { detectTapGestures { controller.resume() } },
+            .pointerInput(Unit) { detectTapGestures { onIntent(InGameMenuIntent.DismissOutside) } },
         contentAlignment = Alignment.Center
     ) {
         Surface(
@@ -260,24 +136,20 @@ private fun EmulationMenuPanel(
                 HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
                 LazyColumn(state = listState, modifier = Modifier.weight(1f, fill = false)) {
                     itemsIndexed(rows) { index, row ->
-                        val selected = index == controller.selectedIndex
+                        val isSelected = index == selected
                         MenuRow(
                             label = stringResource(row.labelRes),
                             iconRes = row.iconRes,
-                            selected = selected,
+                            selected = isSelected,
                             enabled = row.enabled,
                             showArrow = row.showArrow,
-                            onClick = {
-                                controller.setSelected(index)
-                                row.onClick()
-                            }
+                            onClick = { onIntent(row.intent) }
                         )
                         if (index < rows.lastIndex) {
                             HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.4f))
                         }
                     }
-                }
-            }
+                }            }
         }
     }
 
@@ -289,8 +161,7 @@ private fun EmulationMenuPanel(
             confirmButton = {
                 TextButton(onClick = {
                     showExitConfirm = false
-                    controller.closeWithoutResume()
-                    onExitConfirmed()
+                    onIntent(InGameMenuIntent.Exit)
                 }) { Text(stringResource(R.string.exit_game_confirm_yes)) }
             },
             dismissButton = {
@@ -304,17 +175,15 @@ private fun EmulationMenuPanel(
         AlertDialog(
             onDismissRequest = { showRestartConfirm = false },
             title = { Text(stringResource(R.string.ingame_restart_game)) },
-            text = { Text("Restart the game?") },
+            text = { Text(stringResource(R.string.ingame_restart_game) + "?") },
             confirmButton = {
                 TextButton(onClick = {
                     showRestartConfirm = false
-                    // Close without resume then restart via RPCSX
-                    controller.closeWithoutResume()
-                    try { com.zenithblue.sambas3.RPCSX.instance.restartGame() } catch (_: Exception) {}
-                }) { Text("Restart") }
+                    onIntent(InGameMenuIntent.Restart)
+                }) { Text(stringResource(R.string.ingame_restart_game)) }
             },
             dismissButton = {
-                TextButton(onClick = { showRestartConfirm = false }) { Text("Cancel") }
+                TextButton(onClick = { showRestartConfirm = false }) { Text(stringResource(R.string.exit_game_confirm_no)) }
             }
         )
     }

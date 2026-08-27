@@ -42,36 +42,48 @@ fun InGameSaveStatePage(
                 val slots = capabilities?.slots ?: emptyList()
                 val suspendMode = capabilities?.suspendMode == true
                 val canSave = capabilities?.canSave != false
-                // Save button
-                TextButton(
-                    onClick = {
-                        pendingSlot = 0
-                        showSaveConfirm = true
-                    },
-                    enabled = canSave,
-                    modifier = Modifier.fillMaxWidth().padding(horizontal = 20.dp, vertical = 8.dp)
-                ) {
-                    Text((if (suspendMode) "SAVE STATE AND EXIT" else "SAVE STATE").uppercase(), color = if (canSave) RPCSXColors.primary else Color.Gray)
-                }
-                HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.4f))
-                // Load slots
-                if (slots.isEmpty() || slots.none { it.exists }) {
-                    Box(modifier = Modifier.fillMaxWidth().padding(24.dp), contentAlignment = Alignment.Center) {
-                        Text("No saved states", color = RPCSXColors.textSecondary)
+                if (suspendMode) {
+                    // Suspend mode: single save-and-exit action, no slot grid.
+                    TextButton(
+                        onClick = {
+                            pendingSlot = 0
+                            showSaveConfirm = true
+                        },
+                        enabled = canSave,
+                        modifier = Modifier.fillMaxWidth().padding(horizontal = 20.dp, vertical = 8.dp)
+                    ) {
+                        Text("SAVE STATE AND EXIT", color = if (canSave) RPCSXColors.primary else Color.Gray)
                     }
                 } else {
+                    // Multi-slot grid: SAVE + LOAD per slot (backend renames the
+                    // fresh id-0 state into the requested slot after saving).
                     LazyColumn(modifier = Modifier.fillMaxSize()) {
-                        items(slots.filter { it.exists }) { slot ->
+                        items(slots) { slot ->
                             Row(
                                 modifier = Modifier.fillMaxWidth().heightIn(min = 56.dp).padding(horizontal = 20.dp, vertical = 12.dp),
                                 verticalAlignment = Alignment.CenterVertically,
                                 horizontalArrangement = Arrangement.SpaceBetween
                             ) {
-                                Column {
+                                Column(modifier = Modifier.weight(1f)) {
                                     Text(slot.label, color = RPCSXColors.textPrimary, fontSize = 14.sp, fontWeight = FontWeight.Bold)
-                                    Text("Slot ${slot.slot}", color = RPCSXColors.textSecondary, fontSize = 12.sp)
+                                    Text(
+                                        if (slot.exists) "Tap LOAD to restore" else "Empty",
+                                        color = RPCSXColors.textSecondary,
+                                        fontSize = 12.sp
+                                    )
                                 }
-                                TextButton(onClick = { onLoad(slot.slot) }) { Text("LOAD") }
+                                TextButton(
+                                    onClick = {
+                                        pendingSlot = slot.slot
+                                        showSaveConfirm = true
+                                    },
+                                    enabled = canSave
+                                ) {
+                                    Text("SAVE", color = if (canSave) RPCSXColors.primary else Color.Gray)
+                                }
+                                TextButton(onClick = { onLoad(slot.slot) }, enabled = slot.exists) {
+                                    Text("LOAD", color = if (slot.exists) RPCSXColors.textPrimary else Color.Gray)
+                                }
                             }
                             HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.3f))
                         }
@@ -85,7 +97,7 @@ fun InGameSaveStatePage(
         AlertDialog(
             onDismissRequest = { showSaveConfirm = false },
             title = { Text("Save State?") },
-            text = { Text(if (capabilities?.suspendMode == true) "Save and exit the game?" else "Save current emulation state? Note: will restart.") },
+            text = { Text(if (capabilities?.suspendMode == true) "Save and exit the game?" else "Save current emulation state to slot ${pendingSlot ?: 0}? Note: will restart.") },
             confirmButton = {
                 TextButton(onClick = {
                     showSaveConfirm = false

@@ -14,33 +14,33 @@ import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.zenithblue.sambas3.RPCSX
 import com.zenithblue.sambas3.RPCSXColors
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.withContext
+import kotlinx.coroutines.launch
+import androidx.compose.runtime.rememberCoroutineScope
 
 enum class FriendsTab { Friends, Requests, Blocked }
 
 @Composable
-fun InGameFriendsPage(onBack: () -> Unit) {
+fun InGameFriendsPage(core: InGameMenuCoreGateway, onBack: () -> Unit) {
     var data by remember { mutableStateOf<FriendsData?>(null) }
     var loading by remember { mutableStateOf(true) }
     var tab by remember { mutableStateOf(FriendsTab.Friends) }
     var actionMessage by remember { mutableStateOf<String?>(null) }
+    var reloadKey by remember { mutableStateOf(0) }
+    val scope = rememberCoroutineScope()
 
-    LaunchedEffect(Unit) {
-        loading = true
-        data = withContext(Dispatchers.IO) {
-            FriendsData.fromJson(try { RPCSX.instance.getFriends() } catch (_: Exception) { null })
+    fun friendActionAsync(action: String, username: String, okMsg: String) {
+        scope.launch {
+            val ok = runCatching { core.friendAction(action, username) }.getOrNull()?.getOrDefault(false) == true
+            actionMessage = if (ok) okMsg else "Failed"
+            if (ok) reloadKey++
         }
-        loading = false
     }
 
-    fun refresh() {
-        // Trigger reload
+    LaunchedEffect(reloadKey) {
         loading = true
-        data = null
-        // Use wrapper coroutine via LaunchedEffect key toggle? Simpler: launch again
+        data = core.friends().getOrNull()
+        loading = false
     }
 
     Box(modifier = Modifier.fillMaxSize().background(Color.Black.copy(alpha = 0.70f)), contentAlignment = Alignment.Center) {
@@ -99,8 +99,7 @@ fun InGameFriendsPage(onBack: () -> Unit) {
                                     when (tab) {
                                         FriendsTab.Friends -> {
                                             TextButton(onClick = {
-                                                val ok = try { RPCSX.instance.friendAction("remove_friend", username) } catch (_: Exception) { false }
-                                                actionMessage = if (ok) "Removed $username" else "Failed"
+                                                friendActionAsync("remove_friend", username, "Removed $username")
                                             }) { Text("Remove") }
                                         }
                                         FriendsTab.Requests -> {
@@ -108,18 +107,15 @@ fun InGameFriendsPage(onBack: () -> Unit) {
                                             if (isReceived) {
                                                 Row {
                                                     TextButton(onClick = {
-                                                        val ok = try { RPCSX.instance.friendAction("accept_request", username) } catch (_: Exception) { false }
-                                                        actionMessage = if (ok) "Accepted $username" else "Failed"
+                                                        friendActionAsync("accept_request", username, "Accepted $username")
                                                     }) { Text("Accept") }
                                                     TextButton(onClick = {
-                                                        val ok = try { RPCSX.instance.friendAction("reject_request", username) } catch (_: Exception) { false }
-                                                        actionMessage = if (ok) "Rejected $username" else "Failed"
+                                                        friendActionAsync("reject_request", username, "Rejected $username")
                                                     }) { Text("Reject") }
                                                 }
                                             } else {
                                                 TextButton(onClick = {
-                                                    val ok = try { RPCSX.instance.friendAction("cancel_request", username) } catch (_: Exception) { false }
-                                                    actionMessage = if (ok) "Canceled $username" else "Failed"
+                                                    friendActionAsync("cancel_request", username, "Canceled $username")
                                                 }) { Text("Cancel") }
                                             }
                                         }
