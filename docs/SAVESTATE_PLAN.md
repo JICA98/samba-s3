@@ -95,6 +95,18 @@ LOAD from menu SIGABRTs with `Scudo invalid chunk state` (allocator corruption
 in the shutdown path) killing the process. Restart Game reboots cleanly but
 skips its confirm dialog. Fix B before resuming A.
 
+**UPDATE — root cause found & patched, awaiting device retest**: the Android
+`call_from_main_thread` callback stub executed tasks inline on the calling
+thread, so destructive transitions tore down an emulator generation on a
+gateway/JNI thread while live threads still used it. The LOAD tombstone shows
+the load lambda unwinding `BootGame → Init → typemap reset →
+MCJIT/Module/DataLayout dtor` on the gateway thread with a double-free; the
+SAVE auto-restart hang is the same overlapping-generations fault. Fixed in
+submodule `1ae66db06` (serialized CoreDispatchWorker + transition gate +
+S3SSTATE tracing) and parent `b937fb0` (LOAD no longer resumes pre-kill,
+duplicate-action rejection, restart confirm dialog now reachable). Filter
+device logs with `grep S3SSTATE` for phase evidence.
+
 ---
 
 ## 2. Multi-Slot Savestate — Design
