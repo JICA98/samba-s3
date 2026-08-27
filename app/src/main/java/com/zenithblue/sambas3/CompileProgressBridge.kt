@@ -64,6 +64,27 @@ object CompileProgressBridge {
 
     private val shaderJobIds = mutableSetOf<Long>()
     private var ppuJobId: Long? = null
+    private var ppuDoneWatchdog: Runnable? = null
+    // If runtime PPU stays at 100% moduleDone==moduleTotal for >30s without terminal, force-clear so PREPARING does not stick forever (first-time LLVM hang)
+    private fun schedulePpuDoneWatchdog(jobId: Long) {
+        ppuDoneWatchdog?.let { mainHandler?.removeCallbacks(it) }
+        val r = Runnable {
+            if (ppuJobId == jobId && _state.value.ppuActive && _state.value.ppuPercent == 100 && _state.value.moduleDone == _state.value.moduleTotal && _state.value.moduleTotal > 0) {
+                Log.w(TAG, "PPU watchdog: job=$jobId stuck at 100% ${ _state.value.moduleDone}/${ _state.value.moduleTotal} for 30s – forcing clear so PLAY is not blocked")
+                val cur = _state.value
+                ppuJobId = null
+                ppuDoneWatchdog = null
+                if (shaderJobIds.isEmpty()) latestRuntimeEvent = null
+                _state.value = CompileState(ppuActive = false, shaderActive = cur.shaderActive, shaderMsg = cur.shaderMsg, titleId = null)
+            }
+        }
+        ppuDoneWatchdog = r
+        mainHandler?.postDelayed(r, 30_000)
+    }
+    private fun cancelPpuDoneWatchdog() {
+        ppuDoneWatchdog?.let { mainHandler?.removeCallbacks(it) }
+        ppuDoneWatchdog = null
+    }
 
     data class NativeEvent(
         val domain: Int,
@@ -281,11 +302,18 @@ object CompileProgressBridge {
                     moduleDone = ev.moduleDone,
                     moduleTotal = ev.moduleTotal
                 )
+                // If at 100% done, schedule watchdog to auto-clear stuck PREPARING (first-time 9/9 hang)
+                if (ev.moduleTotal > 0 && ev.moduleDone == ev.moduleTotal && ev.value == 100L) {
+                    schedulePpuDoneWatchdog(ev.jobId)
+                } else {
+                    cancelPpuDoneWatchdog()
+                }
                 // If monitor already running, service will observe StateFlow; no need to re-start
                 // But ensure FGS started if not yet
                 if (!cur.ppuActive) requestMonitorStart(appCtx, ev)
             }
             RPCSX.COMPILE_PHASE_COMPLETED, RPCSX.COMPILE_PHASE_FAILED, RPCSX.COMPILE_PHASE_CANCELED -> {
+                cancelPpuDoneWatchdog()
                 if (ppuJobId == null || ppuJobId != ev.jobId) {
                     Log.d(TAG, "PPU terminal for unknown job ${ev.jobId} vs $ppuJobId ignored")
                     return
@@ -405,6 +433,7 @@ object CompileProgressBridge {
             prelaunchPpuJobId = null
             latestRuntimeEvent = null
             fgsStartDenied = false
+            cancelPpuDoneWatchdog()
             _state.value = CompileState()
             _installState.value = CompileState()
             _prelaunchState.value = CompileState()

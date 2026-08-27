@@ -16,9 +16,11 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.TimeoutCancellationException
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import kotlinx.coroutines.withTimeout
 import java.io.File
 
 /**
@@ -251,12 +253,28 @@ object ImportPpuPreparationCoordinator {
                 )
 
                 // Now invoke native real preparation — NO fake success (BUG E)
+                // First-time PPU cold compile can hang at 9/9 done on some devices (LLVM deadlock).
+                // Guard with 10 min timeout so UI never stays PREPARING forever; user can retry.
                 val ret =
                     try {
-                        RPCSX.instance.prepareRuntimePpu(
-                            path,
-                            sessionId
+                        withTimeout(10 * 60 * 1000L) {
+                            RPCSX.instance.prepareRuntimePpu(
+                                path,
+                                sessionId
+                            )
+                        }
+                    } catch (e: TimeoutCancellationException) {
+                        Log.e(
+                            TAG,
+                            "prepareRuntimePpu timeout (10min) for $titleId session=$sessionId, canceling native",
+                            e
                         )
+                        try {
+                            RPCSX.instance.cancelRuntimePpuPreparation(sessionId)
+                        } catch (_: Exception) {}
+                        // Give native a moment to unwind fxo/vm
+                        delay(500)
+                        -1
                     } catch (e: UnsatisfiedLinkError) {
                         Log.e(
                             TAG,
