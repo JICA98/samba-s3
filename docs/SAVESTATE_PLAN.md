@@ -86,6 +86,17 @@ failure. The `Load()` fix covers it; needs on-device re-validation.
 
 ---
 
+## Device Validation (2026-08-27)
+
+Full matrix + evidence: `docs/testers/2026-08-27-ingame-menu-savestate-device-validation.md`.
+Summary: save-to-slot works (slots 1/3 written); auto-boot restore hangs at
+"Linking PPU Modules" (§1.4 cascade confirmed on device twice); **NEW Issue B**:
+LOAD from menu SIGABRTs with `Scudo invalid chunk state` (allocator corruption
+in the shutdown path) killing the process. Restart Game reboots cleanly but
+skips its confirm dialog. Fix B before resuming A.
+
+---
+
 ## 2. Multi-Slot Savestate — Design
 
 ### 2.1 File layout (core scheme, unchanged)
