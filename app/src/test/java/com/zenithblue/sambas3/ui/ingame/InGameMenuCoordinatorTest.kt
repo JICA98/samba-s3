@@ -24,6 +24,10 @@ private class FakeGateway : InGameMenuCoreGateway {
     var discardCount = 0
     var transientCount = 0
     var dirty = false
+    var loadCalls = mutableListOf<Int>()
+    var saveCalls = mutableListOf<Int>()
+    var restartCalls = 0
+    var shutdownCalls = 0
     var caps = InGameMenuCapabilities.EMPTY.copy(
         frontendOwnsHomeMenu = true,
         screenshot = true,
@@ -47,11 +51,25 @@ private class FakeGateway : InGameMenuCoreGateway {
     override suspend fun capabilities(): Result<InGameMenuCapabilities> = Result.success(caps)
     override suspend fun requestScreenshot(): Result<Boolean> = Result.success(true)
     override suspend fun toggleRecording(): Result<Boolean> = Result.success(true)
-    override suspend fun restart(): Result<Boolean> = Result.success(true)
-    override suspend fun gracefulShutdown(): Result<Boolean> = Result.success(true)
+    override suspend fun restart(): Result<Boolean> {
+        restartCalls++
+        return Result.success(true)
+    }
+
+    override suspend fun gracefulShutdown(): Result<Boolean> {
+        shutdownCalls++
+        return Result.success(true)
+    }
     override suspend fun saveStateInfo(): Result<SaveStateCapabilities?> = Result.success(caps.savestate)
-    override suspend fun saveState(slot: Int): Result<Boolean> = Result.success(true)
-    override suspend fun loadState(slot: Int): Result<Boolean> = Result.success(true)
+    override suspend fun saveState(slot: Int): Result<Boolean> {
+        saveCalls.add(slot)
+        return Result.success(true)
+    }
+
+    override suspend fun loadState(slot: Int): Result<Boolean> {
+        loadCalls.add(slot)
+        return Result.success(true)
+    }
     override suspend fun trophies(): Result<TrophiesData?> = Result.success(null)
     override suspend fun friends(): Result<FriendsData?> = Result.success(null)
     override suspend fun friendAction(action: String, username: String): Result<Boolean> = Result.success(true)
@@ -192,12 +210,67 @@ class InGameMenuCoordinatorTest {
         assertEquals(listOf(false), gateway.endResumes)
     }
 
+    // ── Destructive savestate lifecycle (one core-owned transition) ────────
+
     @Test
-    fun load_state_resumes_like_native_home_menu() {
+    fun load_closes_menu_without_resume_and_dispatches_once() {
+        openMain()
+        coordinator.dispatch(InGameMenuIntent.LoadState(3))
+        awaitCondition { coordinator.state.value.session is MenuSessionState.Closed }
+        assertEquals(listOf(false), gateway.endResumes)
+        assertEquals(listOf(3), gateway.loadCalls)
+    }
+
+    @Test
+    fun load_never_calls_graceful_shutdown_separately() {
         openMain()
         coordinator.dispatch(InGameMenuIntent.LoadState(0))
+        awaitCondition { gateway.loadCalls.size == 1 }
+        Thread.sleep(50)
+        assertEquals("native load service owns shutdown", 0, gateway.shutdownCalls)
+    }
+
+    @Test
+    fun load_duplicate_while_pending_is_rejected() {
+        openMain()
+        coordinator.dispatch(InGameMenuIntent.LoadState(2))
         awaitCondition { coordinator.state.value.session is MenuSessionState.Closed }
-        assertEquals(listOf(true), gateway.endResumes)
+        coordinator.dispatch(InGameMenuIntent.LoadState(2))
+        Thread.sleep(50)
+        assertEquals(1, gateway.loadCalls.size)
+    }
+
+    @Test
+    fun save_dispatches_once_without_resume() {
+        openMain()
+        coordinator.dispatch(InGameMenuIntent.SaveState(1))
+        awaitCondition { gateway.saveCalls.isNotEmpty() }
+        awaitCondition { coordinator.state.value.session is MenuSessionState.Closed }
+        assertEquals(listOf(1), gateway.saveCalls)
+        assertEquals(listOf(false), gateway.endResumes)
+        assertEquals(0, gateway.shutdownCalls)
+    }
+
+    @Test
+    fun restart_rejects_duplicate_after_dispatch() {
+        openMain()
+        coordinator.dispatch(InGameMenuIntent.Restart)
+        awaitCondition { gateway.restartCalls == 1 }
+        coordinator.dispatch(InGameMenuIntent.Restart)
+        Thread.sleep(50)
+        assertEquals(1, gateway.restartCalls)
+    }
+
+    @Test
+    fun destructive_gate_resets_on_next_open() {
+        openMain()
+        coordinator.dispatch(InGameMenuIntent.SaveState(0))
+        awaitCondition { gateway.saveCalls.size == 1 }
+        // Re-opening the menu resets the destructive gate.
+        coordinator.dispatch(InGameMenuIntent.Open)
+        awaitCondition { coordinator.state.value.session is MenuSessionState.Open }
+        coordinator.dispatch(InGameMenuIntent.LoadState(0))
+        awaitCondition { gateway.loadCalls.size == 1 }
     }
 
     // ── Navigation ─────────────────────────────────────────────────────────
@@ -364,14 +437,14 @@ class InGameMenuCoordinatorTest {
 class ClosePolicyTest {
     @Test
     fun `resume-like reasons resume the owned pause`() {
-        for (r in listOf(CloseReason.Resume, CloseReason.OutsideDismiss, CloseReason.HomeToggle, CloseReason.Screenshot, CloseReason.Recording, CloseReason.LoadState)) {
+        for (r in listOf(CloseReason.Resume, CloseReason.OutsideDismiss, CloseReason.HomeToggle, CloseReason.Screenshot, CloseReason.Recording)) {
             assertTrue("reason=$r", ClosePolicy.forReason(r).resumePause)
         }
     }
 
     @Test
     fun `actions owning kill-restart never resume`() {
-        for (r in listOf(CloseReason.Restart, CloseReason.Exit, CloseReason.SaveState, CloseReason.ActivityDestroyed)) {
+        for (r in listOf(CloseReason.Restart, CloseReason.Exit, CloseReason.SaveState, CloseReason.LoadState, CloseReason.ActivityDestroyed)) {
             assertFalse("reason=$r", ClosePolicy.forReason(r).resumePause)
         }
     }
