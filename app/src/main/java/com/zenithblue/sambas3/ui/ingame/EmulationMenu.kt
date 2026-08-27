@@ -143,7 +143,13 @@ private fun InGameMainPanel(
                             selected = isSelected,
                             enabled = row.enabled,
                             showArrow = row.showArrow,
-                            onClick = { onIntent(row.intent) }
+                            onClick = {
+                                if (row.intent == InGameMenuIntent.Restart) {
+                                    showRestartConfirm = true
+                                } else {
+                                    onIntent(row.intent)
+                                }
+                            }
                         )
                         if (index < rows.lastIndex) {
                             HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.4f))

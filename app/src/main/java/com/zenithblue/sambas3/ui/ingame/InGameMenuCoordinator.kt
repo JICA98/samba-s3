@@ -109,10 +109,11 @@ internal data class ClosePolicy(
             CloseReason.HomeToggle -> ClosePolicy(resumePause = true)
 
             CloseReason.Screenshot,
-            CloseReason.Recording,
-            CloseReason.LoadState -> ClosePolicy(resumePause = true)
+            CloseReason.Recording -> ClosePolicy(resumePause = true)
 
-            // Actions owning kill/restart must never resume the old execution.
+            // Destructive core transitions must never resume the old
+            // execution before the native shutdown runs.
+            CloseReason.LoadState,
             CloseReason.Restart,
             CloseReason.Exit,
             CloseReason.SaveState,
@@ -174,7 +175,10 @@ class InGameMenuCoordinator(
     val effects: SharedFlow<InGameMenuHostEffect> = _effects.asSharedFlow()
 
     // Internal quick-lookup mirrors (authoritative state lives in _state).
-    private var busy = false
+    // A destructive core transition (restart/exit/save/load) is pending;
+    // duplicates are rejected until the menu is re-opened.
+    @Volatile
+    private var destructivePending = false
 
     fun dispatch(intent: InGameMenuIntent) {
         when (intent) {
@@ -231,6 +235,7 @@ class InGameMenuCoordinator(
             session = MenuSessionState.Open(pauseOwned = began, pageStack = listOf(InGamePage.Main), capabilities = caps),
             settingsBackstack = listOf("")
         )
+        destructivePending = false
         _effects.emit(InGameMenuHostEffect.ShowOverlay)
         _effects.emit(InGameMenuHostEffect.EnterPadMenuMode)
     }
@@ -276,6 +281,13 @@ class InGameMenuCoordinator(
     private fun closeAndRun(reason: CloseReason, action: suspend () -> Result<Boolean>) {
         val s = _state.value
         if (s.session !is MenuSessionState.Open && s.session !is MenuSessionState.Opening) return
+        val destructive = reason == CloseReason.Restart ||
+            reason == CloseReason.Exit ||
+            reason == CloseReason.SaveState ||
+            reason == CloseReason.LoadState
+        // Exactly one destructive core action per user-confirmed action.
+        if (destructive && destructivePending) return
+        if (destructive) destructivePending = true
         scope.launch {
             closeInternal(reason)
             val ok = action().getOrDefault(false)
