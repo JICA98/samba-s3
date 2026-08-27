@@ -72,7 +72,11 @@ extern "C" const char* _rpcsx_sambaBuildId() {
 EOF_PLACEHOLDER
 fi
 PATCH_FILE="$SCRIPT_DIR/patches/rpcsx-submodule-changes.patch"
-if [ -f "$PATCH_FILE" ]; then
+if [ -f "$PATCH_FILE" ] && [ ! -s "$PATCH_FILE" ]; then
+    # Empty patch: local engine edits are already pinned inside the submodule
+    # commit (rpcsx >= 5629c55 squashed the former patch content). No-op.
+    echo "RPCSX submodule patch is empty (edits pinned in submodule commit) — skipping"
+elif [ -f "$PATCH_FILE" ]; then
     if git -C "$RPCSX_DIR" apply --check --reverse "$PATCH_FILE" >/dev/null 2>&1; then
         echo "RPCSX submodule patch already applied"
     elif git -C "$RPCSX_DIR" apply --check "$PATCH_FILE" >/dev/null 2>&1; then
