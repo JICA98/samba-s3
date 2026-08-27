@@ -468,9 +468,11 @@ fun AdvancedSettingsScreen(
     settings: JSONObject,
     path: String = "",
     isInSplitPane: Boolean = false,
-    onValueCommitted: ((path: String, value: String) -> Unit)? = null
+    onValueCommitted: ((path: String, value: String) -> Unit)? = null,
+    settingsSetter: ((path: String, value: String) -> Boolean)? = null
 ) {
     val context = LocalContext.current
+    val setter: (String, String) -> Boolean = settingsSetter ?: { p, v -> RPCSX.instance.settingsSet(p, v) }
     val settingValue = remember(settings) { mutableStateOf(settings) }
     var searchQuery by remember { mutableStateOf("") }
     var isSearching by remember { mutableStateOf(false) }
@@ -547,7 +549,7 @@ fun AdvancedSettingsScreen(
                                 },
                                 leadingIcon = { SettingLeadingIcon(key, itemPath) },
                                 onClick = { value ->
-                                    if (!RPCSX.instance.settingsSet(
+                                    if (!setter(
                                             itemPath, if (value) "true" else "false"
                                         )
                                     ) {
@@ -572,7 +574,7 @@ fun AdvancedSettingsScreen(
                                         title = context.getString(R.string.reset_setting),
                                         message = context.getString(R.string.ask_if_reset_key, key),
                                         onConfirm = {
-                                            if (RPCSX.instance.settingsSet(
+                                            if (setter(
                                                     itemPath, def.toString()
                                                 )
                                             ) {
@@ -611,7 +613,7 @@ fun AdvancedSettingsScreen(
                                     )
                                 },
                                 onValueChange = { value ->
-                                    if (!RPCSX.instance.settingsSet(
+                                    if (!setter(
                                             itemPath, "\"" + value + "\""
                                         )
                                     ) {
@@ -634,7 +636,7 @@ fun AdvancedSettingsScreen(
                                         title = context.getString(R.string.reset_setting),
                                         message = context.getString(R.string.ask_if_reset_key, key),
                                         onConfirm = {
-                                            if (RPCSX.instance.settingsSet(
+                                            if (setter(
                                                     itemPath, "\"" + def + "\""
                                                 )
                                             ) {
@@ -678,7 +680,7 @@ fun AdvancedSettingsScreen(
                                     leadingIcon = { SettingLeadingIcon(key, itemPath) },
                                     steps = (max - min).toInt() - 1,
                                     onValueChange = { value ->
-                                        if (!RPCSX.instance.settingsSet(
+                                        if (!setter(
                                                 itemPath, value.toLong().toString()
                                             )
                                         ) {
@@ -709,7 +711,7 @@ fun AdvancedSettingsScreen(
                                                 key
                                             ),
                                             onConfirm = {
-                                                if (RPCSX.instance.settingsSet(
+                                                if (setter(
                                                         itemPath, def.toString()
                                                     )
                                                 ) {
@@ -754,7 +756,7 @@ fun AdvancedSettingsScreen(
                                     leadingIcon = { SettingLeadingIcon(key, itemPath) },
                                     steps = ceil(max - min).toInt() - 1,
                                     onValueChange = { value ->
-                                        if (!RPCSX.instance.settingsSet(
+                                        if (!setter(
                                                 itemPath, value.toString()
                                             )
                                         ) {
@@ -783,7 +785,7 @@ fun AdvancedSettingsScreen(
                                                 key
                                             ),
                                             onConfirm = {
-                                                if (RPCSX.instance.settingsSet(
+                                                if (setter(
                                                         itemPath, def.toString()
                                                     )
                                                 ) {

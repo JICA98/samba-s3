@@ -24,13 +24,12 @@ struct RPCSXApi {
   bool (*setCompileProgressListener)(JNIEnv *env, jobject callback);
   bool (*supportsCompileProgressEvents)(JNIEnv *env, jobject thiz);
   bool (*collectGameInfo)(JNIEnv *env, std::string_view rootDir,
-                          long progressId);
+                           long progressId);
   void (*shutdown)();
   int (*boot)(std::string_view path_);
   int (*getState)();
   void (*kill)();
   void (*resume)();
-  void (*openHomeMenu)();
   std::string (*getTitleId)();
   bool (*surfaceEvent)(JNIEnv *env, jobject surface, jint event);
   bool (*usbDeviceEvent)(int fd, int vendorId, int productId, int event);
@@ -39,7 +38,7 @@ struct RPCSXApi {
   jstring (*getDirInstallPath)(JNIEnv *env, jint fd);
   bool (*install)(JNIEnv *env, int fd, long progressId);
   bool (*installKey)(JNIEnv *env, int fd, long progressId,
-                     std::string_view gamePath);
+                      std::string_view gamePath);
   std::string (*systemInfo)();
   void (*loginUser)(std::string_view userId);
   std::string (*getUser)();
@@ -49,13 +48,35 @@ struct RPCSXApi {
   std::string (*patchEngineVersion)();
   std::string (*patchesList)();
   bool (*patchSetEnabled)(std::string_view hash, std::string_view description, bool enabled);
-    const char* (*getPpuManifestKey)();
+     const char* (*getPpuManifestKey)();
     const char* (*getPpuManifestKeyForTitle)(const char* titleId);
     const char* (*getSambaBuildId)();
     void *(*setCustomDriver)(void *driverHandle);
     int (*extractIsoPreview)(int fd, const char* destPath);
     int (*prepareRuntimePpu)(const char* path, unsigned long long sessionId);
     bool (*cancelRuntimePpuPreparation)(unsigned long long sessionId);
+  // Frontend Home Menu ownership — optional symbols
+  bool (*beginFrontendMenu)();
+  void (*endFrontendMenu)(bool resumeIfOwned);
+  bool (*isFrontendMenuOpen)();
+  bool (*setFrontendEventListener)(JNIEnv *env, jobject callback);
+  std::string (*inGameMenuCapabilities)();
+  bool (*requestScreenshot)();
+  bool (*toggleRecording)();
+  bool (*restartGame)();
+  bool (*gracefulShutdown)();
+  std::string (*getSaveStateInfo)();
+  bool (*saveState)(int slot);
+  bool (*loadSaveState)(int slot);
+  std::string (*getCurrentTrophies)();
+  std::string (*getFriends)();
+  bool (*friendAction)(std::string_view action, std::string_view username);
+  bool (*beginInGameSettingsSession)();
+  bool (*settingsSetTransient)(std::string_view path, std::string_view valueString);
+  bool (*commitInGameSettingsSession)();
+  bool (*discardInGameSettingsSession)();
+  bool (*hasDirtyInGameSettings)();
+  void (*endInGameSettingsSession)();
 };
 
 struct RPCSXLibrary : RPCSXApi {
@@ -102,7 +123,6 @@ struct RPCSXLibrary : RPCSXApi {
     result.getState = reinterpret_cast<decltype(getState)>(dlsym(handle, "_rpcsx_getState"));
     result.kill = reinterpret_cast<decltype(kill)>(dlsym(handle, "_rpcsx_kill"));
     result.resume = reinterpret_cast<decltype(resume)>(dlsym(handle, "_rpcsx_resume"));
-    result.openHomeMenu = reinterpret_cast<decltype(openHomeMenu)>(dlsym(handle, "_rpcsx_openHomeMenu"));
     result.getTitleId = reinterpret_cast<decltype(getTitleId)>(dlsym(handle, "_rpcsx_getTitleId"));
     result.surfaceEvent = reinterpret_cast<decltype(surfaceEvent)>(dlsym(handle, "_rpcsx_surfaceEvent"));
     result.usbDeviceEvent = reinterpret_cast<decltype(usbDeviceEvent)>(dlsym(handle, "_rpcsx_usbDeviceEvent"));
@@ -129,6 +149,27 @@ struct RPCSXLibrary : RPCSXApi {
     result.cancelRuntimePpuPreparation = reinterpret_cast<decltype(cancelRuntimePpuPreparation)>(dlsym(handle, "_rpcsx_cancelRuntimePpuPreparation"));
     result.setCompileProgressListener = reinterpret_cast<decltype(setCompileProgressListener)>(dlsym(handle, "_rpcsx_setCompileProgressListener"));
     result.supportsCompileProgressEvents = reinterpret_cast<decltype(supportsCompileProgressEvents)>(dlsym(handle, "_rpcsx_supportsCompileProgressEvents"));
+    result.beginFrontendMenu = reinterpret_cast<decltype(beginFrontendMenu)>(dlsym(handle, "_rpcsx_beginFrontendMenu"));
+    result.endFrontendMenu = reinterpret_cast<decltype(endFrontendMenu)>(dlsym(handle, "_rpcsx_endFrontendMenu"));
+    result.isFrontendMenuOpen = reinterpret_cast<decltype(isFrontendMenuOpen)>(dlsym(handle, "_rpcsx_isFrontendMenuOpen"));
+    result.setFrontendEventListener = reinterpret_cast<decltype(setFrontendEventListener)>(dlsym(handle, "_rpcsx_setFrontendEventListener"));
+    result.inGameMenuCapabilities = reinterpret_cast<decltype(inGameMenuCapabilities)>(dlsym(handle, "_rpcsx_inGameMenuCapabilities"));
+    result.requestScreenshot = reinterpret_cast<decltype(requestScreenshot)>(dlsym(handle, "_rpcsx_requestScreenshot"));
+    result.toggleRecording = reinterpret_cast<decltype(toggleRecording)>(dlsym(handle, "_rpcsx_toggleRecording"));
+    result.restartGame = reinterpret_cast<decltype(restartGame)>(dlsym(handle, "_rpcsx_restartGame"));
+    result.gracefulShutdown = reinterpret_cast<decltype(gracefulShutdown)>(dlsym(handle, "_rpcsx_gracefulShutdown"));
+    result.getSaveStateInfo = reinterpret_cast<decltype(getSaveStateInfo)>(dlsym(handle, "_rpcsx_getSaveStateInfo"));
+    result.saveState = reinterpret_cast<decltype(saveState)>(dlsym(handle, "_rpcsx_saveState"));
+    result.loadSaveState = reinterpret_cast<decltype(loadSaveState)>(dlsym(handle, "_rpcsx_loadSaveState"));
+    result.getCurrentTrophies = reinterpret_cast<decltype(getCurrentTrophies)>(dlsym(handle, "_rpcsx_getCurrentTrophies"));
+    result.getFriends = reinterpret_cast<decltype(getFriends)>(dlsym(handle, "_rpcsx_getFriends"));
+    result.friendAction = reinterpret_cast<decltype(friendAction)>(dlsym(handle, "_rpcsx_friendAction"));
+    result.beginInGameSettingsSession = reinterpret_cast<decltype(beginInGameSettingsSession)>(dlsym(handle, "_rpcsx_beginInGameSettingsSession"));
+    result.settingsSetTransient = reinterpret_cast<decltype(settingsSetTransient)>(dlsym(handle, "_rpcsx_settingsSetTransient"));
+    result.commitInGameSettingsSession = reinterpret_cast<decltype(commitInGameSettingsSession)>(dlsym(handle, "_rpcsx_commitInGameSettingsSession"));
+    result.discardInGameSettingsSession = reinterpret_cast<decltype(discardInGameSettingsSession)>(dlsym(handle, "_rpcsx_discardInGameSettingsSession"));
+    result.hasDirtyInGameSettings = reinterpret_cast<decltype(hasDirtyInGameSettings)>(dlsym(handle, "_rpcsx_hasDirtyInGameSettings"));
+    result.endInGameSettingsSession = reinterpret_cast<decltype(endInGameSettingsSession)>(dlsym(handle, "_rpcsx_endInGameSettingsSession"));
     // clang-format on
 
     return result;
@@ -230,14 +271,101 @@ extern "C" JNIEXPORT void JNICALL Java_com_zenithblue_sambas3_RPCSX_resume(JNIEn
   return rpcsxLib.resume();
 }
 
-extern "C" JNIEXPORT void JNICALL Java_com_zenithblue_sambas3_RPCSX_openHomeMenu(JNIEnv *env,
-                                                                    jobject) {
-  if (!rpcsxLib.openHomeMenu) {
-    __android_log_print(ANDROID_LOG_ERROR, "RPCSX-UI",
-                        "openHomeMenu unavailable");
-    return;
+extern "C" JNIEXPORT jboolean JNICALL
+Java_com_zenithblue_sambas3_RPCSX_beginFrontendMenu(JNIEnv*, jobject) {
+  return rpcsxLib.beginFrontendMenu ? rpcsxLib.beginFrontendMenu() : false;
+}
+extern "C" JNIEXPORT void JNICALL
+Java_com_zenithblue_sambas3_RPCSX_endFrontendMenu(JNIEnv*, jobject, jboolean resumeIfOwned) {
+  if (!rpcsxLib.endFrontendMenu) return;
+  rpcsxLib.endFrontendMenu(resumeIfOwned);
+}
+extern "C" JNIEXPORT jboolean JNICALL
+Java_com_zenithblue_sambas3_RPCSX_isFrontendMenuOpen(JNIEnv*, jobject) {
+  return rpcsxLib.isFrontendMenuOpen ? rpcsxLib.isFrontendMenuOpen() : false;
+}
+extern "C" JNIEXPORT jboolean JNICALL
+Java_com_zenithblue_sambas3_RPCSX_setFrontendEventListener(JNIEnv* env, jobject thiz, jobject callback) {
+  if (!rpcsxLib.setFrontendEventListener) {
+    __android_log_print(ANDROID_LOG_WARN, "RPCSX-UI", "setFrontendEventListener not available in this core (old .so)");
+    return false;
   }
-  return rpcsxLib.openHomeMenu();
+  return rpcsxLib.setFrontendEventListener(env, callback);
+}
+extern "C" JNIEXPORT jstring JNICALL
+Java_com_zenithblue_sambas3_RPCSX_inGameMenuCapabilities(JNIEnv* env, jobject) {
+  if (!rpcsxLib.inGameMenuCapabilities) return wrap(env, std::string(R"({"apiVersion":1,"frontendOwnsHomeMenu":false})"));
+  return wrap(env, rpcsxLib.inGameMenuCapabilities());
+}
+extern "C" JNIEXPORT jboolean JNICALL
+Java_com_zenithblue_sambas3_RPCSX_requestScreenshot(JNIEnv*, jobject) {
+  return rpcsxLib.requestScreenshot ? rpcsxLib.requestScreenshot() : false;
+}
+extern "C" JNIEXPORT jboolean JNICALL
+Java_com_zenithblue_sambas3_RPCSX_toggleRecording(JNIEnv*, jobject) {
+  return rpcsxLib.toggleRecording ? rpcsxLib.toggleRecording() : false;
+}
+extern "C" JNIEXPORT jboolean JNICALL
+Java_com_zenithblue_sambas3_RPCSX_restartGame(JNIEnv*, jobject) {
+  return rpcsxLib.restartGame ? rpcsxLib.restartGame() : false;
+}
+extern "C" JNIEXPORT jboolean JNICALL
+Java_com_zenithblue_sambas3_RPCSX_gracefulShutdown(JNIEnv*, jobject) {
+  return rpcsxLib.gracefulShutdown ? rpcsxLib.gracefulShutdown() : false;
+}
+extern "C" JNIEXPORT jstring JNICALL
+Java_com_zenithblue_sambas3_RPCSX_getSaveStateInfo(JNIEnv* env, jobject) {
+  if (!rpcsxLib.getSaveStateInfo) return wrap(env, std::string(R"({"supported":false})"));
+  return wrap(env, rpcsxLib.getSaveStateInfo());
+}
+extern "C" JNIEXPORT jboolean JNICALL
+Java_com_zenithblue_sambas3_RPCSX_saveState(JNIEnv*, jobject, jint slot) {
+  return rpcsxLib.saveState ? rpcsxLib.saveState(slot) : false;
+}
+extern "C" JNIEXPORT jboolean JNICALL
+Java_com_zenithblue_sambas3_RPCSX_loadSaveState(JNIEnv*, jobject, jint slot) {
+  return rpcsxLib.loadSaveState ? rpcsxLib.loadSaveState(slot) : false;
+}
+extern "C" JNIEXPORT jstring JNICALL
+Java_com_zenithblue_sambas3_RPCSX_getCurrentTrophies(JNIEnv* env, jobject) {
+  if (!rpcsxLib.getCurrentTrophies) return wrap(env, std::string(R"({"available":false})"));
+  return wrap(env, rpcsxLib.getCurrentTrophies());
+}
+extern "C" JNIEXPORT jstring JNICALL
+Java_com_zenithblue_sambas3_RPCSX_getFriends(JNIEnv* env, jobject) {
+  if (!rpcsxLib.getFriends) return wrap(env, std::string(R"({"available":false})"));
+  return wrap(env, rpcsxLib.getFriends());
+}
+extern "C" JNIEXPORT jboolean JNICALL
+Java_com_zenithblue_sambas3_RPCSX_friendAction(JNIEnv* env, jobject, jstring jaction, jstring juser) {
+  if (!rpcsxLib.friendAction) return false;
+  return rpcsxLib.friendAction(unwrap(env, jaction), unwrap(env, juser));
+}
+extern "C" JNIEXPORT jboolean JNICALL
+Java_com_zenithblue_sambas3_RPCSX_beginInGameSettingsSession(JNIEnv*, jobject) {
+  return rpcsxLib.beginInGameSettingsSession ? rpcsxLib.beginInGameSettingsSession() : false;
+}
+extern "C" JNIEXPORT jboolean JNICALL
+Java_com_zenithblue_sambas3_RPCSX_settingsSetTransient(JNIEnv* env, jobject, jstring jpath, jstring jvalue) {
+  if (!rpcsxLib.settingsSetTransient) return false;
+  return rpcsxLib.settingsSetTransient(unwrap(env, jpath), unwrap(env, jvalue));
+}
+extern "C" JNIEXPORT jboolean JNICALL
+Java_com_zenithblue_sambas3_RPCSX_commitInGameSettingsSession(JNIEnv*, jobject) {
+  return rpcsxLib.commitInGameSettingsSession ? rpcsxLib.commitInGameSettingsSession() : false;
+}
+extern "C" JNIEXPORT jboolean JNICALL
+Java_com_zenithblue_sambas3_RPCSX_discardInGameSettingsSession(JNIEnv*, jobject) {
+  return rpcsxLib.discardInGameSettingsSession ? rpcsxLib.discardInGameSettingsSession() : false;
+}
+extern "C" JNIEXPORT jboolean JNICALL
+Java_com_zenithblue_sambas3_RPCSX_hasDirtyInGameSettings(JNIEnv*, jobject) {
+  return rpcsxLib.hasDirtyInGameSettings ? rpcsxLib.hasDirtyInGameSettings() : false;
+}
+extern "C" JNIEXPORT void JNICALL
+Java_com_zenithblue_sambas3_RPCSX_endInGameSettingsSession(JNIEnv*, jobject) {
+  if (!rpcsxLib.endInGameSettingsSession) return;
+  rpcsxLib.endInGameSettingsSession();
 }
 
 extern "C" JNIEXPORT jstring JNICALL

@@ -97,9 +97,21 @@
     <!-- In-game menu / Configure Game -->
     <string name="ingame_menu_title">SambaS3</string>
     <string name="ingame_resume">Resume</string>
-    <string name="ingame_global_settings">Global Settings</string>
-    <string name="ingame_core_home_menu">Core Home Menu</string>
+    <string name="ingame_settings">Settings</string>
+    <string name="ingame_friends">Friends</string>
+    <string name="ingame_trophies">Trophies</string>
+    <string name="ingame_take_screenshot">Take Screenshot</string>
+    <string name="ingame_start_recording">Start Recording</string>
+    <string name="ingame_stop_recording">Stop Recording</string>
+    <string name="ingame_save_state">Save State</string>
+    <string name="ingame_restart_game">Restart Game</string>
     <string name="ingame_exit_game">Exit Game</string>
+    <string name="ingame_save">Save</string>
+    <string name="ingame_discard">Discard</string>
+    <string name="ingame_show_hidden_trophies">Show Hidden Trophies</string>
+    <string name="ingame_hide_hidden_trophies">Hide Hidden Trophies</string>
+    <string name="ingame_save_changes">Save changes?</string>
+    <string name="ingame_save_changes_message">You have unsaved changes. Save or discard?</string>
     <string name="configure_game">Configure Game</string>
     <string name="configure_game_gate_description">Requires the emulator engine to be initialized and idle.</string>
     <string name="configure_game_unresolved_id">Cannot determine a title ID for this game; per-title overrides are unavailable.</string>

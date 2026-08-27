@@ -506,24 +506,39 @@ class PadOverlay(context: Context?, attrs: AttributeSet?) : SurfaceView(context,
         ObjectAnimator.ofFloat(this, "alpha", 0f, 1f).apply { duration = fadeDuration; start() }
     }
 
+    fun cancelActiveInputsAndNeutralize() {
+        // Cancel all touch buttons/sticks
+        state.digital[0] = 0
+        state.digital[1] = 0
+        state.leftStickX = 127
+        state.leftStickY = 127
+        state.rightStickX = 127
+        state.rightStickY = 127
+        for (i in floatingSticks.indices) {
+            floatingSticks[i]?.let { stick ->
+                val cancel = MotionEvent.obtain(SystemClock.uptimeMillis(), SystemClock.uptimeMillis(), MotionEvent.ACTION_CANCEL, 0f, 0f, 0)
+                stick.onTouch(cancel, 0, state)
+                cancel.recycle()
+                floatingSticks[i] = null
+            }
+        }
+        sticks.forEach { stick ->
+            val cancel = MotionEvent.obtain(SystemClock.uptimeMillis(), SystemClock.uptimeMillis(), MotionEvent.ACTION_CANCEL, 0f, 0f, 0)
+            stick.onTouch(cancel, 0, state)
+            cancel.recycle()
+        }
+        // Send neutral frame to backend
+        try { RPCSX.instance.overlayPadData(0, 0, 127, 127, 127, 127) } catch (_: Exception) {}
+        invalidate()
+    }
+
     // ── Menu mode ──────────────────────────────────────────────────────────
     fun setMenuMode(on: Boolean) {
         if (isMenuMode == on) return
         isMenuMode = on
 
         if (on) {
-            val downTime = SystemClock.uptimeMillis()
-            for (i in floatingSticks.indices) {
-                val stick = floatingSticks[i] ?: continue
-                val cancel = MotionEvent.obtain(
-                    downTime, SystemClock.uptimeMillis(),
-                    MotionEvent.ACTION_CANCEL, 0f, 0f, 0
-                )
-                stick.onTouch(cancel, 0, state)
-                cancel.recycle()
-                floatingSticks[i] = null
-            }
-
+            cancelActiveInputsAndNeutralize()
             preMenuModeAlpha = alpha
             preMenuModeOverlayVisible = isOverlayVisible
             isOverlayVisible = true

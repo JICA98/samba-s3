@@ -90,7 +90,6 @@ class RPCSX {
     external fun getState() : Int
     external fun kill()
     external fun resume()
-    external fun openHomeMenu()
     external fun loginUser(userId: String)
     external fun getUser(): String
     external fun getTitleId(): String
@@ -111,6 +110,33 @@ class RPCSX {
     // Headless prelaunch runtime PPU preparation — reuses boot-discoverable PPU logic, no Surface/RSX/audio.
     external fun prepareRuntimePpu(path: String, sessionId: Long): Int
     external fun cancelRuntimePpuPreparation(sessionId: Long): Boolean
+
+    // ── Frontend Home Menu — Kotlin owns presentation ──────────────────────
+    @Keep
+    fun interface FrontendEventCallback {
+        fun onEvent(type: Int, payload: String?)
+    }
+    external fun setFrontendEventListener(callback: FrontendEventCallback?): Boolean
+    external fun beginFrontendMenu(): Boolean
+    external fun endFrontendMenu(resumeIfOwned: Boolean)
+    external fun isFrontendMenuOpen(): Boolean
+    external fun inGameMenuCapabilities(): String
+    external fun requestScreenshot(): Boolean
+    external fun toggleRecording(): Boolean
+    external fun restartGame(): Boolean
+    external fun gracefulShutdown(): Boolean
+    external fun getSaveStateInfo(): String
+    external fun saveState(slot: Int): Boolean
+    external fun loadSaveState(slot: Int): Boolean
+    external fun getCurrentTrophies(): String
+    external fun getFriends(): String
+    external fun friendAction(action: String, username: String): Boolean
+    external fun beginInGameSettingsSession(): Boolean
+    external fun settingsSetTransient(path: String, value: String): Boolean
+    external fun commitInGameSettingsSession(): Boolean
+    external fun discardInGameSettingsSession(): Boolean
+    external fun hasDirtyInGameSettings(): Boolean
+    external fun endInGameSettingsSession()
 
     @Keep
     fun interface CompileProgressCallback {
@@ -145,12 +171,18 @@ class RPCSX {
         const val COMPILE_ORIGIN_RUNTIME = 1
         const val COMPILE_ORIGIN_PRELAUNCH = 2
 
+        const val FRONTEND_EVENT_HOME_REQUESTED = 1
+        const val FRONTEND_EVENT_RECORDING_CHANGED = 2
+        const val FRONTEND_EVENT_SCREENSHOT_RESULT = 3
+        const val FRONTEND_EVENT_EMULATOR_ACTION_ERROR = 4
+
         /**
          * JNI descriptor for [CompileProgressCallback.onEvent]. Must match
          * `kCompileProgressOnEventDescriptor` in rpcsx-android.cpp.
          * jobId, value and max are all `J` (long).
          */
         const val COMPILE_PROGRESS_ON_EVENT_JNI_DESCRIPTOR = "(IIIJJJLjava/lang/String;Ljava/lang/String;IIII)V"
+        const val FRONTEND_EVENT_JNI_DESCRIPTOR = "(ILjava/lang/String;)V"
 
         var initialized = false
         val instance = RPCSX()
