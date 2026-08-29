@@ -29,15 +29,23 @@ after the critical section is released.
 - Cold launch reached the GTA EULA/title flow.
 - SAVE auto-restart returned to rendered GTA gameplay with HUD and responsive
   scene, instead of staying black in `Starting`.
-- Direct LOAD of slot 3 returned to rendered GTA gameplay. The captured
-  screenshot is `/tmp/samba-s3-tablet-load3-fix2-95s.png`.
-- PPU link/apply/JIT stages completed with `failed=0`; no Scudo invalid-chunk,
-  SIGABRT, or fatal exception appeared in the tested log window.
+- Direct LOAD of slot 4 returned to rendered GTA gameplay. The final capture
+  is `/tmp/samba-s3-tablet-load10-final.png`.
+- The extended tablet gate completed 10 LOAD requests (`S3LIFE` ids 14–23),
+  10 `boot_returned` events, PPU link stages with `failed=0`, and zero
+  `FATAL`, `SIGABRT`, `SIGSEGV`, Scudo invalid-chunk, access-violation, or
+  `VK_ERROR_DEVICE_LOST` signatures in the 14:40–14:59 test window.
+- The 10x SAVE gate also completed earlier on slot 4; every cycle returned to
+  the in-game menu with the process alive and the saved slot updated.
+- The old “Applying PPU Code…” label can remain over rendered gameplay after
+  restore; backend PPU link/JIT completion and responsive gameplay show this
+  is stale UI progress text, not an active PPU-link deadlock.
+- Settings opened and returned successfully after the repeated LOAD gate.
 
 ## Build and publication
 
 - Submodule commit: `74b0da9a8`.
-- Root pin commit: `660168a`.
+- Root pin commit used for the tested native artifact: `95ddc70`.
 - Root branch push: `origin/recovery/ingame-menu-fix` succeeded.
 - RPCSX submodule push remains blocked: configured upstream
   `RPCSX/rpcsx.git` returns GitHub HTTP 403 for this account. The root pin is
@@ -46,7 +54,8 @@ after the critical section is released.
 
 ## Remaining validation
 
-The extended repeated SAVE/LOAD matrix, explicit restart, suspend-mode, and
-double-tap stress cases remain follow-up work. The diagnostic build identity
-string also predates `74b0da9a8`; it must be regenerated when the core is
-rebuilt for a publishable artifact.
+The required cold launch, explicit restart, repeated SAVE/LOAD, and settings
+gates pass on the tablet. Native debuggerd stack capture remains unavailable
+on this non-rooted device (`debuggerd: root is required`); the conclusion is
+based on lifecycle/PPU logs and screenshots. A writable RPCSX fork is still
+needed before a clean external clone can fetch submodule commit `74b0da9a8`.

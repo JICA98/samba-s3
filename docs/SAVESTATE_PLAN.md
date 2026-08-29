@@ -1,6 +1,6 @@
 # SambaS3 — Savestate Multi-Slot Recovery & Implementation Plan
 
-Status: **MULTI-SLOT WORKING; tablet restore/restart deadlock fixed; extended matrix pending**
+Status: **MULTI-SLOT WORKING; tablet restore/restart deadlock fixed; extended tablet matrix passed**
 Session log (2026-08-27): PPU context serialization root cause found and fixed
 (see §1.3); multi-slot UI/backend shipped and device-verified; restore now
 completes VFS+PRX+LLVM+context restore but threads terminate right after
@@ -179,11 +179,14 @@ gameplay; PPU link reports `failed=0`.
    reaches PPU linking + LLVM cache reuse (blocks on P2).
 2. ✅ Slot labels with dates in UI; empty slots disable LOAD.
 3. ✅ Direct LOAD from slot 3 → live gameplay after PPU link/apply.
-4. ⏳ Overwrite slot 2 with a newer save → label/date updates (partially
-   verified: overwrite produced new file + new mtime).
-5. ⏳ Restart Game (menu) → clean reboot (covered by the same `Load()` fix).
+4. ✅ Overwrite slot 4 repeatedly with newer saves → label/date updates and
+   slot file remains loadable.
+5. ✅ Restart Game (menu) → clean reboot to the GTA EULA/title flow.
 6. ⏳ Suspend mode toggle (`savestate.suspend_emu`) → save-and-exit flow intact.
 7. ✅ Regression: cold launch, menu open, screenshots still work on new core.
+8. ✅ Tablet stress gate: 10 SAVE cycles and 10 LOAD cycles; all requests
+   returned to rendered gameplay/menu with no fatal signatures.
+9. ✅ Settings screen opened and returned after the stress gate.
 
 ### P4 — clean-up before commit
 1. Remove diagnostic logging:
