@@ -1,10 +1,14 @@
 package com.zenithblue.sambas3
 
+import android.graphics.Bitmap
+import android.os.Handler
+import android.os.Looper
 import android.os.Bundle
 import android.util.Log
 import android.view.InputDevice
 import android.view.KeyEvent
 import android.view.MotionEvent
+import android.view.PixelCopy
 import android.view.View
 import android.view.ViewGroup.MarginLayoutParams
 import android.view.WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_MODE_SHORT_EDGES
@@ -42,6 +46,8 @@ import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
 import kotlin.concurrent.thread
 import kotlin.math.abs
+import java.util.concurrent.CountDownLatch
+import java.util.concurrent.TimeUnit
 
 /**
  * Android host adapter only: lifecycle, views, surface, frontend-listener
@@ -60,6 +66,12 @@ class RPCSXActivity : ComponentActivity() {
     private lateinit var originalGamePath: String
     private var recoverySavestatePath: String? = null
     private var recoveryTransitionActive = false
+    private var recoveryRecreateRequested = false
+    // Activity.recreate() is an internal recovery handoff, not a user exit.
+    // Keep the durable marker and library identity intact across that destroy.
+    private var isRecoveryRecreate = false
+    private var transitionBitmap: Bitmap? = null
+    private val transitionController = SavestateTransitionController()
     private val bootMutex = Any()
     private val inputBindings by lazy { InputBindingPrefs.loadBindings() }
 
@@ -113,6 +125,12 @@ class RPCSXActivity : ComponentActivity() {
         binding = ActivityRpcs3Binding.inflate(layoutInflater)
         setContentView(binding.root)
         surfaceLeaseManager = SurfaceLeaseManager(binding.surfaceHost)
+        surfaceLeaseManager.onFailure = { reason ->
+            runOnUiThread {
+                if (recoveryTransitionActive) requestRecoveryRecreate(reason)
+                else Log.e("S3SURFACE", "native surface lifecycle failed reason=$reason")
+            }
+        }
         surfaceLeaseManager.installInitial()
 
         unregisterUsbEventListener = listenUsbEvents(this)
@@ -179,27 +197,32 @@ class RPCSXActivity : ComponentActivity() {
 
                     is com.zenithblue.sambas3.ui.ingame.InGameMenuHostEffect.BeginSavestateTransition -> {
                         if (!effect.suspendMode) {
-                            PendingSavestateRecoveryStore.request(
+                            val titleId = runCatching { RPCSX.instance.getTitleId() }.getOrDefault("")
+                            val requestId = PendingSavestateRecoveryStore.request(
                                 this@RPCSXActivity,
                                 effect.slot,
                                 originalGamePath,
                                 effect.preSaveMtimeMs,
                                 effect.preSaveSizeBytes,
-                                effect.savestatePath
+                                effect.savestatePath,
+                                titleId
                             )
+                            if (!transitionController.begin(requestId, effect.slot)) {
+                                PendingSavestateRecoveryStore.markRequestFailure(this@RPCSXActivity, "transition-busy")
+                                Log.e("S3SAVE", "transition controller rejected requestId=$requestId slot=${effect.slot}")
+                                return@onEach
+                            }
                             recoveryTransitionActive = true
-                            binding.transitionLabel.text = "Saving..."
-                            binding.transitionOverlay.alpha = 1f
-                            binding.transitionOverlay.visibility = View.VISIBLE
+                            showTransitionOverlay("Saving...")
+                            captureTransitionFrame()
                             neutralizeForwardedPad()
-                            Log.i("S3SAVE", "transition begin slot=${effect.slot} original=$originalGamePath")
+                            Log.i("S3SAVE", "transition begin requestId=$requestId slot=${effect.slot} original=$originalGamePath")
                         }
                     }
 
                     is com.zenithblue.sambas3.ui.ingame.InGameMenuHostEffect.SavestateTransitionFailed -> {
                         PendingSavestateRecoveryStore.markRequestFailure(this@RPCSXActivity, effect.reason)
-                        binding.transitionOverlay.visibility = View.GONE
-                        recoveryTransitionActive = false
+                        failTransition(effect.reason)
                         Log.e("S3SAVE", "request failed reason=${effect.reason}")
                     }
                 }
@@ -239,9 +262,11 @@ class RPCSXActivity : ComponentActivity() {
         val gamePath = originalGamePath
         RPCSX.lastPlayedGame = gamePath
         if (recoverySavestatePath != null) {
+            pendingRecovery?.let {
+                transitionController.beginRecoveryBoot(it.requestId, it.slot, it.savestatePath)
+            }
             recoveryTransitionActive = true
-            binding.transitionLabel.text = "Restoring..."
-            binding.transitionOverlay.visibility = View.VISIBLE
+            showTransitionOverlay("Restoring...")
         }
 
         // Frontend listener registered only after binding + content are ready (§16).
@@ -252,7 +277,7 @@ class RPCSXActivity : ComponentActivity() {
                 val state = RPCSX.getState()
                 Log.w("RPCSX State", state.name)
 
-                if (state == EmulatorState.Paused && RPCSX.activeGame.value == gamePath) {
+                if (recoverySavestatePath == null && state == EmulatorState.Paused && RPCSX.activeGame.value == gamePath) {
                     RPCSX.instance.resume()
                     return@thread
                 }
@@ -273,8 +298,16 @@ class RPCSXActivity : ComponentActivity() {
             var isRecoveryBoot = recoverySavestatePath != null
             if (isRecoveryBoot && !PendingSavestateRecoveryStore.markBooting(this@RPCSXActivity)) {
                 Log.e("S3SAVE", "recovery boot refused after retry limit")
-                recoverySavestatePath = null
-                isRecoveryBoot = false
+                PendingSavestateRecoveryStore.markFailure(this@RPCSXActivity, "retry-limit")
+                runOnUiThread {
+                    AlertDialogQueue.showDialog(
+                        "Saved-state recovery stopped",
+                        "The saved slot was kept, but automatic recovery stopped after repeated failures. " +
+                            "You can load it manually from the save-state menu."
+                    )
+                    finish()
+                }
+                return@thread
             }
             val bootPath = recoverySavestatePath ?: gamePath
             val preBootTitleId = GameSettingsOverrides.resolveTitleId(gamePath, this@RPCSXActivity)
@@ -331,9 +364,17 @@ class RPCSXActivity : ComponentActivity() {
 
                     RPCSX.FRONTEND_EVENT_SAVESTATE_FAILED -> runOnUiThread {
                         PendingSavestateRecoveryStore.markRequestFailure(this, payload ?: "native-save-failed")
-                        binding.transitionOverlay.visibility = View.GONE
-                        recoveryTransitionActive = false
+                        failTransition(payload ?: "native-save-failed")
                         Log.e("S3SAVE", "completion failed payload=$payload")
+                    }
+
+                    RPCSX.FRONTEND_EVENT_RENDERER_ERROR,
+                    RPCSX.FRONTEND_EVENT_EMULATOR_ACTION_ERROR -> runOnUiThread {
+                        if (recoveryTransitionActive) {
+                            requestRecoveryRecreate(payload ?: "renderer-error")
+                        } else {
+                            Log.e("S3RENDER", "native renderer/action error payload=$payload")
+                        }
                     }
                 }
             }
@@ -366,16 +407,27 @@ class RPCSXActivity : ComponentActivity() {
             Log.w("S3SAVE", "completion arrived without active transition requestId=${record.requestId}")
             return
         }
+        if (!transitionController.committed(record.requestId, record.slot, path)) {
+            Log.w("S3SAVE", "completion rejected by transition controller requestId=${record.requestId} slot=${record.slot}")
+            return
+        }
+        if (!transitionController.surfaceResetStarted()) {
+            Log.w("S3SURFACE", "surface reset rejected requestId=${record.requestId}")
+            return
+        }
         binding.transitionLabel.text = "Restoring..."
         Log.i("S3RENDER", "old surface replacement requested requestId=${record.requestId} slot=${record.slot} path=$path")
         runCatching {
             surfaceLeaseManager.replace {
+                if (!transitionController.surfaceReady(record.requestId, record.slot)) {
+                    Log.w("S3SURFACE", "fresh surface ready rejected requestId=${record.requestId} generation=${surfaceLeaseManager.currentGeneration}")
+                    return@replace
+                }
                 bootExactSavestate(record)
             }
         }.onFailure {
             PendingSavestateRecoveryStore.markFailure(this, it.message ?: "surface-replace-failed")
-            binding.transitionOverlay.visibility = View.GONE
-            recoveryTransitionActive = false
+            failTransition(it.message ?: "surface-replace-failed")
             Log.e("S3SURFACE", "surface replacement failed", it)
         }
     }
@@ -383,8 +435,13 @@ class RPCSXActivity : ComponentActivity() {
     private fun bootExactSavestate(record: PendingSavestateRecovery) {
         if (!PendingSavestateRecoveryStore.markBooting(this)) {
             Log.e("S3SAVE", "saved-slot boot skipped after retry limit requestId=${record.requestId}")
-            binding.transitionOverlay.visibility = View.GONE
-            recoveryTransitionActive = false
+            failTransition("retry-limit")
+            return
+        }
+        if (!transitionController.bootStarted(record.requestId, record.slot)) {
+            Log.e("S3SAVE", "saved-slot boot rejected by transition controller requestId=${record.requestId}")
+            PendingSavestateRecoveryStore.markFailure(this, "controller-boot-rejected")
+            failTransition("controller-boot-rejected")
             return
         }
         bootThread?.interrupt()
@@ -396,8 +453,7 @@ class RPCSXActivity : ComponentActivity() {
             if (result != BootResult.NoErrors) {
                 PendingSavestateRecoveryStore.markFailure(this@RPCSXActivity, result.name)
                 runOnUiThread {
-                    binding.transitionOverlay.visibility = View.GONE
-                    recoveryTransitionActive = false
+                    failTransition(result.name)
                 }
                 Log.e("S3RENDER", "boot-savestate-return failed requestId=${record.requestId} result=$result")
                 return@thread
@@ -411,9 +467,11 @@ class RPCSXActivity : ComponentActivity() {
     private fun confirmRecoveryFrameAndClear() {
         thread(name = "S3 Saved-state Frame Confirm") {
             var stable = 0
+            val expectedGeneration = surfaceLeaseManager.currentGeneration
             val deadline = System.currentTimeMillis() + 30_000L
             while (stable < 6 && System.currentTimeMillis() < deadline && !Thread.interrupted()) {
-                if (RPCSX.getState() == EmulatorState.Running) stable++ else stable = 0
+                val copied = probeCurrentFrame(expectedGeneration)
+                if (RPCSX.getState() == EmulatorState.Running && copied) stable++ else stable = 0
                 try {
                     Thread.sleep(150)
                 } catch (_: InterruptedException) {
@@ -422,14 +480,18 @@ class RPCSXActivity : ComponentActivity() {
             }
             if (stable < 6) {
                 Log.e("S3RENDER", "first-frame-confirm-timeout generation=${surfaceLeaseManager.currentGeneration}")
-                PendingSavestateRecoveryStore.markFailure(this@RPCSXActivity, "first-frame-timeout")
                 runOnUiThread {
-                    binding.transitionOverlay.visibility = View.GONE
-                    recoveryTransitionActive = false
+                    requestRecoveryRecreate("first-frame-timeout")
                 }
                 return@thread
             }
+            val record = PendingSavestateRecoveryStore.read(this@RPCSXActivity)
+            if (record != null && !transitionController.firstFrameConfirmed(record.requestId, record.slot)) {
+                Log.e("S3RENDER", "first-frame confirmation rejected by transition controller")
+                return@thread
+            }
             Log.i("S3RENDER", "first-frame-confirmed generation=${surfaceLeaseManager.currentGeneration}")
+            runCatching { RPCSX.instance.clearSavestateProgress() }
             PendingSavestateRecoveryStore.clear(this@RPCSXActivity)
             runOnUiThread {
                 binding.transitionOverlay.animate()
@@ -438,6 +500,10 @@ class RPCSXActivity : ComponentActivity() {
                     .withEndAction {
                         binding.transitionOverlay.visibility = View.GONE
                         binding.transitionOverlay.alpha = 1f
+                        binding.transitionFrame.setImageDrawable(null)
+                        binding.transitionFrame.visibility = View.GONE
+                        transitionBitmap?.recycle()
+                        transitionBitmap = null
                         recoveryTransitionActive = false
                         inputGate.waitForNeutral()
                         Log.i("S3RENDER", "transition-overlay-hidden")
@@ -445,6 +511,114 @@ class RPCSXActivity : ComponentActivity() {
                     .start()
             }
         }
+    }
+
+    private fun showTransitionOverlay(label: String) {
+        binding.transitionLabel.text = label
+        binding.transitionOverlay.alpha = 1f
+        binding.transitionOverlay.visibility = View.VISIBLE
+    }
+
+    /** Capture the currently displayed game frame before the old surface is released. */
+    private fun captureTransitionFrame() {
+        val frame = surfaceLeaseManager.currentFrame ?: return
+        requestFrameCopy(frame) { bitmap, success ->
+            if (success && bitmap != null && recoveryTransitionActive) {
+                transitionBitmap?.recycle()
+                transitionBitmap = bitmap
+                binding.transitionFrame.setImageBitmap(bitmap)
+                binding.transitionFrame.visibility = View.VISIBLE
+                Log.i("S3RENDER", "transition-frame-captured generation=${frame.generation} ${bitmap.width}x${bitmap.height}")
+            } else {
+                bitmap?.recycle()
+                Log.w("S3RENDER", "transition-frame-capture-fallback generation=${frame.generation}")
+            }
+        }
+    }
+
+    /**
+     * PixelCopy is also the first-frame proof: Running alone can be true while
+     * the renderer thread has already lost its BufferQueue.
+     */
+    private fun probeCurrentFrame(expectedGeneration: Long): Boolean {
+        val latch = CountDownLatch(1)
+        var success = false
+        runOnUiThread {
+            val frame = surfaceLeaseManager.currentFrame
+            if (frame == null || frame.generation != expectedGeneration) {
+                latch.countDown()
+            } else {
+                requestFrameCopy(frame) { bitmap, copied ->
+                    bitmap?.recycle()
+                    success = copied && frame.generation == surfaceLeaseManager.currentGeneration
+                    latch.countDown()
+                }
+            }
+        }
+        return try {
+            latch.await(FRAME_COPY_TIMEOUT_MS, TimeUnit.MILLISECONDS) && success
+        } catch (_: InterruptedException) {
+            false
+        }
+    }
+
+    private fun requestFrameCopy(frame: GraphicsFrame, callback: (Bitmap?, Boolean) -> Unit) {
+        runOnUiThread {
+            if (frame !== surfaceLeaseManager.currentFrame || frame.width <= 0 || frame.height <= 0) {
+                callback(null, false)
+                return@runOnUiThread
+            }
+            val maxLongEdge = 1920
+            val scale = minOf(1f, maxLongEdge.toFloat() / maxOf(frame.width, frame.height).toFloat())
+            val width = maxOf(1, (frame.width * scale).toInt())
+            val height = maxOf(1, (frame.height * scale).toInt())
+            val bitmap = try {
+                Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888)
+            } catch (e: OutOfMemoryError) {
+                Log.e("S3RENDER", "transition-frame allocation failed", e)
+                callback(null, false)
+                return@runOnUiThread
+            }
+            PixelCopy.request(
+                frame,
+                bitmap,
+                { result ->
+                    if (result == PixelCopy.SUCCESS) {
+                        callback(bitmap, true)
+                    } else {
+                        bitmap.recycle()
+                        callback(null, false)
+                    }
+                },
+                Handler(Looper.getMainLooper())
+            )
+        }
+    }
+
+    private fun failTransition(reason: String) {
+        transitionController.fail(reason)
+        transitionBitmap?.recycle()
+        transitionBitmap = null
+        binding.transitionFrame.setImageDrawable(null)
+        binding.transitionFrame.visibility = View.GONE
+        binding.transitionOverlay.visibility = View.GONE
+        recoveryTransitionActive = false
+    }
+
+    /** One bounded Activity recreation is the last-resort recovery for a dead BufferQueue. */
+    private fun requestRecoveryRecreate(reason: String) {
+        if (!recoveryTransitionActive) return
+        if (recoveryRecreateRequested) {
+            PendingSavestateRecoveryStore.markFailure(this, reason)
+            failTransition(reason)
+            return
+        }
+        recoveryRecreateRequested = true
+        isRecoveryRecreate = true
+        PendingSavestateRecoveryStore.markFailure(this, reason)
+        Log.e("S3RENDER", "recovery recreate requested reason=$reason")
+        binding.transitionLabel.text = "Restoring..."
+        recreate()
     }
 
     private fun bootSerialized(path: String): Int = synchronized(bootMutex) {
@@ -540,6 +714,8 @@ class RPCSXActivity : ComponentActivity() {
     }
 
     override fun onDestroy() {
+        transitionBitmap?.recycle()
+        transitionBitmap = null
         try { surfaceLeaseManager.destroy() } catch (_: Exception) {}
         super.onDestroy()
         AlertDialogQueue.hostsSuppressed = false
@@ -551,7 +727,7 @@ class RPCSXActivity : ComponentActivity() {
             val nativeState = RPCSX.getState()
             Log.i("S3LIFE", "RPCSXActivity.onDestroy nativeState=$nativeState activeGame=${RPCSX.activeGame.value}")
             RPCSX.state.value = nativeState
-            if (nativeState == EmulatorState.Stopped) {
+            if (nativeState == EmulatorState.Stopped && !isRecoveryRecreate) {
                 val myPath = try { intent.getStringExtra("path") } catch (_: Exception) { null }
                 if (myPath != null && RPCSX.activeGame.value == myPath) {
                     Log.i("S3LIFE", "onDestroy Stopped clearing stale activeGame=$myPath")
@@ -763,5 +939,6 @@ class RPCSXActivity : ComponentActivity() {
         const val EXTRA_RECOVERY_REQUEST_ID = "recoveryRequestId"
         private const val TITLE_ID_POLL_INTERVAL_MS = 250L
         private const val TITLE_ID_POLL_TIMEOUT_MS = 10_000L
+        private const val FRAME_COPY_TIMEOUT_MS = 2_000L
     }
 }

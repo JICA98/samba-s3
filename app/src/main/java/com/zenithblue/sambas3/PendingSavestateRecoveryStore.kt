@@ -16,7 +16,8 @@ data class PendingSavestateRecovery(
     val requestedAtMs: Long,
     val committedAtMs: Long,
     val retryCount: Int,
-    val lastFailure: String = ""
+    val lastFailure: String = "",
+    val titleId: String = ""
 )
 
 /** Durable one-shot recovery record for a save committed before a crash. */
@@ -35,7 +36,8 @@ object PendingSavestateRecoveryStore {
         originalGamePath: String,
         preSaveMtimeMs: Long = 0L,
         preSaveSizeBytes: Long = 0L,
-        savestatePath: String? = null
+        savestatePath: String? = null,
+        titleId: String = ""
     ): Long {
         val id = System.currentTimeMillis()
         write(context, JSONObject().apply {
@@ -49,6 +51,7 @@ object PendingSavestateRecoveryStore {
             put("requestedAtMs", id)
             put("committedAtMs", 0L)
             put("retryCount", 0)
+            put("titleId", titleId)
         })
         Log.i(TAG, "S3SAVE pending state=REQUESTED requestId=$id slot=$slot")
         return id
@@ -82,6 +85,7 @@ object PendingSavestateRecoveryStore {
                 put("requestedAtMs", old.requestedAtMs)
                 put("committedAtMs", System.currentTimeMillis())
                 put("retryCount", old.retryCount)
+                put("titleId", old.titleId)
             }
             write(context, record)
             read(context)
@@ -102,7 +106,8 @@ object PendingSavestateRecoveryStore {
             requestedAtMs = j.optLong("requestedAtMs"),
             committedAtMs = j.optLong("committedAtMs"),
             retryCount = j.optInt("retryCount"),
-            lastFailure = j.optString("lastFailure")
+            lastFailure = j.optString("lastFailure"),
+            titleId = j.optString("titleId")
         )
     }.getOrNull()
 
@@ -132,6 +137,16 @@ object PendingSavestateRecoveryStore {
         return record
     }
 
+    /** A bounded recovery failure is surfaced to the launcher while the slot remains intact. */
+    fun exhausted(context: Context): PendingSavestateRecovery? {
+        val record = read(context) ?: return null
+        return record.takeIf {
+            it.retryCount >= MAX_RETRIES &&
+                (it.state == COMMITTED || it.state == BOOTING || it.state == FAILED) &&
+                File(it.savestatePath).isFile && File(it.savestatePath).length() > 0L
+        }
+    }
+
     fun markBooting(context: Context): Boolean {
         val record = read(context) ?: return false
         if (record.retryCount >= MAX_RETRIES) {
@@ -151,7 +166,11 @@ object PendingSavestateRecoveryStore {
     fun markFailure(context: Context, reason: String) {
         // A boot/surface failure must remain recoverable until the bounded
         // retry count is exhausted. The slot is intentionally never deleted.
-        update(context) { it.put("lastFailure", reason).put("state", COMMITTED) }
+        update(context) {
+            val retries = it.optInt("retryCount", 0)
+            it.put("lastFailure", reason)
+                .put("state", if (retries >= MAX_RETRIES) FAILED else COMMITTED)
+        }
         Log.e(TAG, "S3SAVE recovery failure reason=$reason")
     }
 

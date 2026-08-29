@@ -32,6 +32,7 @@ struct RPCSXApi {
   void (*resume)();
   std::string (*getTitleId)();
   int (*bootSavestate)(std::string_view savestatePath, std::string_view originalGamePath);
+  void (*clearSavestateProgress)();
   bool (*surfaceEvent)(JNIEnv *env, jobject surface, jint event);
   bool (*surfaceEventV2)(JNIEnv *env, jobject surface, jint event, jlong generation);
   bool (*usbDeviceEvent)(int fd, int vendorId, int productId, int event);
@@ -127,6 +128,7 @@ struct RPCSXLibrary : RPCSXApi {
     result.resume = reinterpret_cast<decltype(resume)>(dlsym(handle, "_rpcsx_resume"));
     result.getTitleId = reinterpret_cast<decltype(getTitleId)>(dlsym(handle, "_rpcsx_getTitleId"));
     result.bootSavestate = reinterpret_cast<decltype(bootSavestate)>(dlsym(handle, "_rpcsx_bootSavestate"));
+    result.clearSavestateProgress = reinterpret_cast<decltype(clearSavestateProgress)>(dlsym(handle, "_rpcsx_clearSavestateProgress"));
     result.surfaceEvent = reinterpret_cast<decltype(surfaceEvent)>(dlsym(handle, "_rpcsx_surfaceEvent"));
     result.surfaceEventV2 = reinterpret_cast<decltype(surfaceEventV2)>(dlsym(handle, "_rpcsx_surfaceEventV2"));
     result.usbDeviceEvent = reinterpret_cast<decltype(usbDeviceEvent)>(dlsym(handle, "_rpcsx_usbDeviceEvent"));
@@ -262,6 +264,11 @@ extern "C" JNIEXPORT jint JNICALL Java_com_zenithblue_sambas3_RPCSX_bootSavestat
   if (!rpcsxLib.bootSavestate) return 1; // GenericError
   return rpcsxLib.bootSavestate(unwrap(env, jsavestatePath),
                                 unwrap(env, joriginalGamePath));
+}
+
+extern "C" JNIEXPORT void JNICALL Java_com_zenithblue_sambas3_RPCSX_clearSavestateProgress(
+    JNIEnv *, jobject) {
+  if (rpcsxLib.clearSavestateProgress) rpcsxLib.clearSavestateProgress();
 }
 
 extern "C" JNIEXPORT jint JNICALL Java_com_zenithblue_sambas3_RPCSX_getState(JNIEnv *env,

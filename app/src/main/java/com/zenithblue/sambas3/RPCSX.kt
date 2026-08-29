@@ -79,6 +79,7 @@ class RPCSX {
     external fun installKey(fd: Int, requestId: Long, gamePath: String): Boolean
     external fun boot(path: String): Int
     external fun bootSavestate(savestatePath: String, originalGamePath: String): Int
+    external fun clearSavestateProgress()
     external fun surfaceEvent(surface: Surface, event: Int): Boolean
     external fun surfaceEventV2(surface: Surface, event: Int, generation: Long): Boolean
     external fun usbDeviceEvent(fd: Int, vendorId: Int, productId: Int, event: Int): Boolean
@@ -179,6 +180,7 @@ class RPCSX {
         const val FRONTEND_EVENT_EMULATOR_ACTION_ERROR = 4
         const val FRONTEND_EVENT_SAVESTATE_COMMITTED = 5
         const val FRONTEND_EVENT_SAVESTATE_FAILED = 6
+        const val FRONTEND_EVENT_RENDERER_ERROR = 7
 
         /**
          * JNI descriptor for [CompileProgressCallback.onEvent]. Must match

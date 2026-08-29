@@ -11,6 +11,7 @@ import androidx.core.view.WindowCompat
 import androidx.lifecycle.lifecycleScope
 import kotlinx.coroutines.launch
 import com.zenithblue.sambas3.debug.DebugPadReceiver
+import com.zenithblue.sambas3.dialogs.AlertDialogQueue
 import com.zenithblue.sambas3.ui.navigation.AppNavHost
 import com.zenithblue.sambas3.utils.GeneralSettings
 import com.zenithblue.sambas3.utils.GpuDriverHelper
@@ -129,6 +130,14 @@ class MainActivity : ComponentActivity() {
                 finish()
                 return
             }
+        }
+
+        PendingSavestateRecoveryStore.exhausted(this)?.let { failed ->
+            AlertDialogQueue.showDialog(
+                "Saved-state recovery stopped",
+                "The saved slot was kept, but automatic recovery stopped after repeated failures. " +
+                    "You can load slot ${failed.slot} manually."
+            )
         }
 
         setContent {

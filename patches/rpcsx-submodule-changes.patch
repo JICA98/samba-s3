@@ -1,8 +1,16 @@
 diff --git a/android/src/rpcsx-android.cpp b/android/src/rpcsx-android.cpp
-index 8a9f42810..78d2b61ba 100644
+index 8a9f42810..9e650e6e6 100644
 --- a/android/src/rpcsx-android.cpp
 +++ b/android/src/rpcsx-android.cpp
-@@ -117,6 +117,7 @@ struct AtExit {
+@@ -19,6 +19,7 @@
+ #include "Emu/RSX/Overlays/overlay_manager.h"
+ #include "Emu/RSX/Overlays/overlay_save_dialog.h"
+ #include "Emu/RSX/Overlays/overlay_trophy_notification.h"
++#include "Emu/RSX/Overlays/overlay_compile_notification.h"
+ #include "Emu/RSX/RSXThread.h"
+ #include "Emu/RSX/VK/VKGSRender.h"
+ #include "Emu/localized_string_id.h"
+@@ -117,6 +118,7 @@ struct AtExit {
  
  static bool g_initialized;
  static std::atomic<ANativeWindow *> g_native_window;
@@ -10,16 +18,33 @@ index 8a9f42810..78d2b61ba 100644
  
  // Compilation and game/install lifecycle operations all use the same global
  // Emu/fxo state. Keep them serialized: stopping a VSH precompile while a boot
-@@ -150,6 +151,8 @@ static constexpr int FRONTEND_EVENT_HOME_REQUESTED = 1;
+@@ -150,6 +152,9 @@ static constexpr int FRONTEND_EVENT_HOME_REQUESTED = 1;
  static constexpr int FRONTEND_EVENT_RECORDING_CHANGED = 2;
  static constexpr int FRONTEND_EVENT_SCREENSHOT_RESULT = 3;
  static constexpr int FRONTEND_EVENT_EMULATOR_ACTION_ERROR = 4;
 +static constexpr int FRONTEND_EVENT_SAVESTATE_COMMITTED = 5;
 +static constexpr int FRONTEND_EVENT_SAVESTATE_FAILED = 6;
++static constexpr int FRONTEND_EVENT_RENDERER_ERROR = 7;
  
  static atomic_t<bool> g_frontend_menu_active{false};
  static atomic_t<bool> g_frontend_menu_paused_emu{false};
-@@ -2296,6 +2299,30 @@ extern "C" int _rpcsx_boot(std::string_view path_) {
+@@ -1305,6 +1310,15 @@ static void emit_frontend_event(int type, const std::string* payload)
+     });
+ }
+ 
++// Vulkan's unrecoverable Android surface errors are surfaced to Kotlin so a
++// single Activity recreation can recover the durable savestate transition.
++extern "C" void _rpcsx_android_renderer_error(int error_code, const char* message)
++{
++  const std::string detail = fmt::format("renderer-error code={} message={}",
++                                         error_code, message ? message : "");
++  emit_frontend_event(FRONTEND_EVENT_RENDERER_ERROR, &detail);
++}
++
+ 
+ static void invokeAsync(std::function<void(JNIEnv *)> cb) {
+   g_mainThreadProcessor.push(std::move(cb));
+@@ -2296,6 +2310,30 @@ extern "C" int _rpcsx_boot(std::string_view path_) {
    return static_cast<int>(Emu.BootGame(path, "", false, cfg_mode::global));
  }
  
@@ -50,12 +75,22 @@ index 8a9f42810..78d2b61ba 100644
  extern "C" int _rpcsx_getState() {
    return static_cast<int>(Emu.GetStatus(false));
  }
-@@ -2318,18 +2345,27 @@ extern "C" void _rpcsx_resume() {
+@@ -2318,18 +2356,37 @@ extern "C" void _rpcsx_resume() {
  
  extern "C" std::string _rpcsx_getTitleId() { return Emu.GetTitleID(); }
  
 -extern "C" bool _rpcsx_surfaceEvent(JNIEnv *env, jobject surface, jint event) {
 -  rpcsx_android.warning("surface event %p, %d", surface, event);
++// Clear only the compile-origin context after a recovered frame is proven.
++// scoped_progress_dialog owns its own visible lifetime; this does not erase
++// unrelated install progress.
++extern "C" void _rpcsx_clearSavestateProgress()
++{
++  clear_system_progress_context();
++  rsx::overlays::clear_ppu_compile_notification();
++  rpcsx_android.notice("S3PPU savestate-progress-cleared");
++}
++
 +static bool surface_event_impl(JNIEnv *env, jobject surface, jint event,
 +                               u64 generation) {
 +  const u64 current_generation = g_surface_generation.load(std::memory_order_acquire);
@@ -84,7 +119,7 @@ index 8a9f42810..78d2b61ba 100644
  
      if (Emu.IsRunning())
      {
-@@ -2337,6 +2373,14 @@ extern "C" bool _rpcsx_surfaceEvent(JNIEnv *env, jobject surface, jint event) {
+@@ -2337,23 +2394,32 @@ extern "C" bool _rpcsx_surfaceEvent(JNIEnv *env, jobject surface, jint event) {
        g_surface_pause_owned = true;
        rpcsx_android.notice("surfaceEvent detach paused, owned=true frontendActive=%d", g_frontend_menu_active.load());
      }
@@ -99,7 +134,12 @@ index 8a9f42810..78d2b61ba 100644
    } else {
      auto newWindow = ANativeWindow_fromSurface(env, surface);
  
-@@ -2346,14 +2390,12 @@ extern "C" bool _rpcsx_surfaceEvent(JNIEnv *env, jobject surface, jint event) {
+     if (newWindow == nullptr) {
++      const std::string error = fmt::format("surface-window-null event={} generation={}",
++                                            (int)event, generation);
++      emit_frontend_event(FRONTEND_EVENT_RENDERER_ERROR, &error);
+       rpcsx_android.fatal("returned native window is null, surface %p",
+                           surface);
        return false;
      }
  
@@ -119,7 +159,7 @@ index 8a9f42810..78d2b61ba 100644
      }
  
      // BootGame holds the lifecycle mutex while the renderer waits for this
-@@ -2374,6 +2416,15 @@ extern "C" bool _rpcsx_surfaceEvent(JNIEnv *env, jobject surface, jint event) {
+@@ -2374,6 +2440,15 @@ extern "C" bool _rpcsx_surfaceEvent(JNIEnv *env, jobject surface, jint event) {
    return true;
  }
  
@@ -135,7 +175,7 @@ index 8a9f42810..78d2b61ba 100644
  // ── Frontend Home Menu ownership — Kotlin owns presentation ──────────────
  extern "C" bool _rpcsx_beginFrontendMenu()
  {
-@@ -3918,19 +3969,21 @@ static nlohmann::json saveStateSlotsJson()
+@@ -3918,19 +3993,25 @@ static nlohmann::json saveStateSlotsJson()
              nlohmann::json slot;
              slot["slot"] = i;
              const std::string path = slotSavestatePathCompressed(i);
@@ -143,8 +183,12 @@ index 8a9f42810..78d2b61ba 100644
 +            fs::stat_t info{};
 +            const bool exists = !path.empty() && fs::get_stat(path, info);
              slot["exists"] = exists;
-+            if (!path.empty())
-+                slot["path"] = path;
++            // A requested empty slot still needs a durable recovery path if
++            // the process dies after the native commit and before the
++            // frontend event is delivered.  Android always writes the
++            // temporary frontend savestate as zstd; an existing gzip file is
++            // retained for backwards-compatible LOADs.
++            slot["path"] = !path.empty() ? path : slotSavestatePath(i) + ".zst";
              if (exists)
              {
 -                if (fs::stat_t info{}; fs::get_stat(path, info))
@@ -166,16 +210,30 @@ index 8a9f42810..78d2b61ba 100644
                  }
                  if (!slot.contains("label"))
                      slot["label"] = fmt::format("Slot %d", i);
-@@ -3989,7 +4042,7 @@ extern "C" bool _rpcsx_saveState(int slot)
+@@ -3981,16 +4062,17 @@ extern "C" bool _rpcsx_saveState(int slot)
+     g_frontend_menu_paused_emu = false;
+     g_coreDispatch.push([slot, suspendMode, id]()
+     {
+-        // The core owns the entire save -> kill -> post-kill restart
+-        // lifecycle on this single serialized thread. The frontend never
+-        // starts a second boot.
+-        const destructive_guard clear_busy;
++        // The save is asynchronous: Emu.Kill(false, true) returns before
++        // serialization and final cleanup complete. Keep the native gate
++        // held until the post-kill callback has validated the durable slot
++        // and emitted the completion event.
+         sstate_log(id, "save", "main_enter",
                     fmt::format(" emu_stopped=%d suspend=%d",
                                 (int)Emu.IsStopped(), (int)suspendMode)
                         .c_str());
 -        Emu.after_kill_callback = [slot, id]()
 +        Emu.after_kill_callback = [slot, suspendMode, id]()
          {
++            const destructive_guard clear_busy;
              const std::string fresh = slotSavestatePathCompressed(0);
              if (slot > 0 && !fresh.empty())
-@@ -4007,19 +4060,54 @@ extern "C" bool _rpcsx_saveState(int slot)
+             {
+@@ -4007,19 +4089,54 @@ extern "C" bool _rpcsx_saveState(int slot)
                  slot > 0 ? slotSavestatePathCompressed(slot) : fresh;
              if (boot_path.empty())
              {
@@ -240,3 +298,165 @@ index 8a9f42810..78d2b61ba 100644
          };
          sstate_log(id, "save", "kill_begin");
          if (!suspendMode)
+diff --git a/rpcs3/Emu/RSX/Overlays/overlay_compile_notification.cpp b/rpcs3/Emu/RSX/Overlays/overlay_compile_notification.cpp
+index 78daa120d..75975964f 100644
+--- a/rpcs3/Emu/RSX/Overlays/overlay_compile_notification.cpp
++++ b/rpcs3/Emu/RSX/Overlays/overlay_compile_notification.cpp
+@@ -8,6 +8,7 @@ namespace rsx
+ 	{
+ 		static std::shared_ptr<loading_icon24> s_shader_loading_icon24;
+ 		static std::shared_ptr<loading_icon24> s_ppu_loading_icon24;
++		static std::shared_ptr<atomic_t<u32>> s_ppu_compile_refs;
+ 
+ 		void show_shader_compile_notification()
+ 		{
+@@ -35,6 +36,7 @@ namespace rsx
+ 			}
+ 
+ 			std::shared_ptr<atomic_t<u32>> refs = std::make_shared<atomic_t<u32>>(1);
++			std::atomic_store_explicit(&s_ppu_compile_refs, refs, std::memory_order_release);
+ 
+ 			if (detailed_message.empty())
+ 			{
+@@ -60,6 +62,23 @@ namespace rsx
+ 			return refs;
+ 		}
+ 
++		void clear_ppu_compile_notification()
++		{
++			if (auto refs = std::atomic_load_explicit(&s_ppu_compile_refs, std::memory_order_acquire))
++			{
++				*refs = 0;
++			}
++
++			if (auto manager = g_fxo->try_get<rsx::overlays::display_manager>())
++			{
++				if (auto msg_overlay = manager->get<rsx::overlays::message>())
++				{
++					msg_overlay->expire_messages(s_ppu_loading_icon24);
++					msg_overlay->refresh();
++				}
++			}
++		}
++
+ 		void update_ppu_compile_notification(const std::string& detailed_message)
+ 		{
+ 			if (detailed_message.empty()) return;
+diff --git a/rpcs3/Emu/RSX/Overlays/overlay_compile_notification.h b/rpcs3/Emu/RSX/Overlays/overlay_compile_notification.h
+index 47f8a0894..918f7767a 100644
+--- a/rpcs3/Emu/RSX/Overlays/overlay_compile_notification.h
++++ b/rpcs3/Emu/RSX/Overlays/overlay_compile_notification.h
+@@ -11,5 +11,6 @@ namespace rsx
+ 		void show_shader_compile_notification();
+ 		std::shared_ptr<atomic_t<u32>> show_ppu_compile_notification(const std::string& detailed_message = {});
+ 		void update_ppu_compile_notification(const std::string& detailed_message);
++		void clear_ppu_compile_notification();
+ 	} // namespace overlays
+ } // namespace rsx
+diff --git a/rpcs3/Emu/RSX/Overlays/overlay_message.cpp b/rpcs3/Emu/RSX/Overlays/overlay_message.cpp
+index 810ddda9e..4417edc8a 100644
+--- a/rpcs3/Emu/RSX/Overlays/overlay_message.cpp
++++ b/rpcs3/Emu/RSX/Overlays/overlay_message.cpp
+@@ -75,6 +75,11 @@ namespace rsx
+ 			}
+ 		}
+ 
++		bool message_item::has_icon(const std::shared_ptr<overlay_element>& icon) const
++		{
++			return m_icon == icon;
++		}
++
+ 		bool message_item::text_matches(const std::u32string& text) const
+ 		{
+ 			return m_text.text == text;
+@@ -318,6 +323,35 @@ namespace rsx
+ 			return false;
+ 		}
+ 
++		void message::expire_messages(const std::shared_ptr<overlay_element>& icon)
++		{
++			if (!icon)
++			{
++				return;
++			}
++
++			std::lock_guard lock(m_mutex_queue);
++			auto expire = [&icon](std::deque<message_item>& items)
++			{
++				for (auto& item : items)
++				{
++					if (item.has_icon(icon))
++					{
++						item.ensure_expired();
++					}
++				}
++			};
++
++			expire(m_ready_queue_bottom_right);
++			expire(m_ready_queue_bottom_left);
++			expire(m_ready_queue_top_right);
++			expire(m_ready_queue_top_left);
++			expire(m_visible_items_bottom_right);
++			expire(m_visible_items_bottom_left);
++			expire(m_visible_items_top_right);
++			expire(m_visible_items_top_left);
++		}
++
+ 		void refresh_message_queue()
+ 		{
+ 			if (auto manager = g_fxo->try_get<rsx::overlays::display_manager>())
+diff --git a/rpcs3/Emu/RSX/Overlays/overlay_message.h b/rpcs3/Emu/RSX/Overlays/overlay_message.h
+index 9d3e10d35..5d85b8e96 100644
+--- a/rpcs3/Emu/RSX/Overlays/overlay_message.h
++++ b/rpcs3/Emu/RSX/Overlays/overlay_message.h
+@@ -28,6 +28,7 @@ namespace rsx
+ 			void reset_expiration();
+ 			u64 get_expiration() const;
+ 			void ensure_expired();
++			bool has_icon(const std::shared_ptr<overlay_element>& icon) const;
+ 			compiled_resource& get_compiled() override;
+ 
+ 			bool text_matches(const std::u32string& text) const;
+@@ -100,6 +101,11 @@ namespace rsx
+ 				refresh();
+ 			}
+ 
++			// Expire only messages associated with a specific icon. This is used by
++			// Android savestate recovery to remove the boot-owned PPU notification
++			// without touching unrelated progress or user-facing messages.
++			void expire_messages(const std::shared_ptr<overlay_element>& icon);
++
+ 		private:
+ 			const u32 max_visible_items = 3;
+ 			shared_mutex m_mutex_queue;
+diff --git a/rpcs3/Emu/RSX/VK/vkutils/shared.cpp b/rpcs3/Emu/RSX/VK/vkutils/shared.cpp
+index 67b45be0a..6e26e0541 100644
+--- a/rpcs3/Emu/RSX/VK/vkutils/shared.cpp
++++ b/rpcs3/Emu/RSX/VK/vkutils/shared.cpp
+@@ -6,6 +6,10 @@
+ #include <signal.h>
+ #endif
+ 
++#ifdef __ANDROID__
++extern "C" void _rpcsx_android_renderer_error(int error_code, const char* message);
++#endif
++
+ namespace vk
+ {
+ 	extern void print_debug_markers();
+@@ -192,6 +196,15 @@ namespace vk
+ 			break;
+ 		}
+ 
++#ifdef __ANDROID__
++		if (error_code == VK_ERROR_NATIVE_WINDOW_IN_USE_KHR ||
++			error_code == VK_ERROR_DEVICE_LOST ||
++			error_code == VK_ERROR_SURFACE_LOST_KHR)
++		{
++			_rpcsx_android_renderer_error(static_cast<int>(error_code), error_message.c_str());
++		}
++#endif
++
+ 		if (!extra_info.empty())
+ 		{
+ 			error_message = fmt::format("%s\n---------------- EXTRA INFORMATION --------------------\n%s", error_message, extra_info);

@@ -9,13 +9,25 @@ import android.widget.FrameLayout
  * A replacement is created only after the old SurfaceHolder has delivered
  * surfaceDestroyed and native surface release has returned.
  */
-class SurfaceLeaseManager(private val host: FrameLayout) : GraphicsFrame.Listener {
+fun interface SurfaceLeaseBridge {
+    fun event(surface: Surface, event: Int, generation: Long): Boolean
+}
+
+class SurfaceLeaseManager(
+    private val host: FrameLayout,
+    private val bridge: SurfaceLeaseBridge = SurfaceLeaseBridge { surface, event, generation ->
+        RPCSX.instance.surfaceEventV2(surface, event, generation)
+    }
+) : GraphicsFrame.Listener {
+    var onFailure: ((String) -> Unit)? = null
     private var nextGeneration = 0L
     private var current: GraphicsFrame? = null
+    private var currentSurfaceCreated = false
     private var pendingReady: (() -> Unit)? = null
     private var destroying = false
 
     val currentGeneration: Long get() = current?.generation ?: 0L
+    val currentFrame: GraphicsFrame? get() = current
 
     fun installInitial() {
         destroying = false
@@ -31,10 +43,11 @@ class SurfaceLeaseManager(private val host: FrameLayout) : GraphicsFrame.Listene
             pendingReady = null
             readyCallbacks += onReady
             createGeneration()
-        } else if (!old.hasCreatedSurface) {
+        } else if (!currentSurfaceCreated) {
             // No native surface was ever attached, so there is no destroy
             // callback to await.
             current = null
+            currentSurfaceCreated = false
             pendingReady = null
             readyCallbacks += onReady
             createGeneration()
@@ -52,7 +65,7 @@ class SurfaceLeaseManager(private val host: FrameLayout) : GraphicsFrame.Listene
         // Keep current until surfaceDestroyed arrives so that callback still
         // releases the native window. Clearing it here used to turn the
         // terminal callback into a stale event and leak the old ANativeWindow.
-        if (!old.hasCreatedSurface) current = null
+        if (!currentSurfaceCreated) current = null
     }
 
     private fun createGeneration() {
@@ -73,10 +86,15 @@ class SurfaceLeaseManager(private val host: FrameLayout) : GraphicsFrame.Listene
             Log.w(TAG, "S3SURFACE stale-created generation=$generation current=$currentGeneration")
             return
         }
-        val accepted = RPCSX.instance.surfaceEventV2(surface, 0, generation)
+        val accepted = bridge.event(surface, 0, generation)
         Log.i(TAG, "S3SURFACE created generation=$generation accepted=$accepted")
+        if (!accepted) {
+            onFailure?.invoke("native-create-failed-generation-$generation")
+            return
+        }
+        currentSurfaceCreated = true
         if (destroying) {
-            RPCSX.instance.surfaceEventV2(surface, 2, generation)
+            bridge.event(surface, 2, generation)
             current = null
             Log.i(TAG, "S3SURFACE destroyed-before-ready generation=$generation")
             return
@@ -89,8 +107,9 @@ class SurfaceLeaseManager(private val host: FrameLayout) : GraphicsFrame.Listene
             Log.w(TAG, "S3SURFACE stale-changed generation=$generation current=$currentGeneration")
             return
         }
-        RPCSX.instance.surfaceEventV2(surface, 1, generation)
-        Log.i(TAG, "S3SURFACE changed generation=$generation")
+        val accepted = bridge.event(surface, 1, generation)
+        Log.i(TAG, "S3SURFACE changed generation=$generation accepted=$accepted")
+        if (!accepted) onFailure?.invoke("native-change-failed-generation-$generation")
     }
 
     override fun onSurfaceDestroyed(frame: GraphicsFrame, generation: Long, surface: Surface) {
@@ -98,8 +117,13 @@ class SurfaceLeaseManager(private val host: FrameLayout) : GraphicsFrame.Listene
             Log.w(TAG, "S3SURFACE stale-destroyed generation=$generation current=$currentGeneration")
             return
         }
-        RPCSX.instance.surfaceEventV2(surface, 2, generation)
-        Log.i(TAG, "S3SURFACE destroyed generation=$generation native-release-return")
+        val released = bridge.event(surface, 2, generation)
+        Log.i(TAG, "S3SURFACE destroyed generation=$generation native-release-return=$released")
+        if (!released) {
+            onFailure?.invoke("native-destroy-failed-generation-$generation")
+            return
+        }
+        currentSurfaceCreated = false
         current = null
         if (destroying) return
         val ready = pendingReady
