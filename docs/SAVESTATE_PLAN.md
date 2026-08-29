@@ -1,6 +1,6 @@
 # SambaS3 — Savestate Multi-Slot Recovery & Implementation Plan
 
-Status: **MULTI-SLOT WORKING; restore reaches final resume step, one gap left**
+Status: **MULTI-SLOT WORKING; tablet restore/restart deadlock fixed; extended matrix pending**
 Session log (2026-08-27): PPU context serialization root cause found and fixed
 (see §1.3); multi-slot UI/backend shipped and device-verified; restore now
 completes VFS+PRX+LLVM+context restore but threads terminate right after
@@ -156,7 +156,7 @@ device logs with `grep S3SSTATE` for phase evidence.
    slots 1–4 show "Empty" with LOAD disabled; saving to slot 2 produced
    `BLUS31584_1_2.SAVESTAT.zst` (41–52MB) and auto-rebooted from that file.
 
-### P2 — fix the last restore step: thread-exit cascade (§1.4) — OPEN
+### P2 — fix the last restore step: thread-exit cascade (§1.4) — FIXED ON TABLET
 1. Add temporary notices: `sys_process_exit` caller, `FinalizeRunRequest`
    awake-count, `ensure(prev + 1 == ppu.first)` result in `PostponeInitCode`.
 2. Verify lv2 kernel-object restore (event queues/flags, sleepers,
@@ -165,12 +165,20 @@ device logs with `grep S3SSTATE` for phase evidence.
 3. Once fixed: full save→restore round trip must show live gameplay
    (clock advancing, input responsive).
 
-### P3 — validation matrix (device `7d6afed8`, wifi serial
+The remaining `Starting` stall was reproduced after PPU link/apply had already
+completed. `lv2_obj::sleep_unlocked()` called `FinalizeRunRequest()` through
+Android's intentionally-inline `CallFromMainThread` while `lv2_obj::g_mutex`
+was held. Commit `74b0da9a8` routes this one callback through the explicit
+`post_core_lifecycle` queue, so it runs after the scheduler critical section.
+Tablet evidence shows SAVE auto-restart and direct LOAD return to live GTA
+gameplay; PPU link reports `failed=0`.
+
+### P3 — validation matrix (tablet device `7d6afed8`, wifi serial
 `adb-7d6afed8-mU47CV._adb-tls-connect._tcp`)
 1. ✅ Save slot 2 → rename to slot file verified; auto-boot from slot file
    reaches PPU linking + LLVM cache reuse (blocks on P2).
 2. ✅ Slot labels with dates in UI; empty slots disable LOAD.
-3. ⏳ Load each slot → blocked on P2.
+3. ✅ Direct LOAD from slot 3 → live gameplay after PPU link/apply.
 4. ⏳ Overwrite slot 2 with a newer save → label/date updates (partially
    verified: overwrite produced new file + new mtime).
 5. ⏳ Restart Game (menu) → clean reboot (covered by the same `Load()` fix).
