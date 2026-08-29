@@ -58,6 +58,8 @@ import com.zenithblue.sambas3.*
 import com.zenithblue.sambas3.R
 import com.zenithblue.sambas3.ui.games.preview.GamePreviewModel
 import com.zenithblue.sambas3.ui.games.preview.GamePreviewRepository
+import com.zenithblue.sambas3.ui.games.launch.GameLaunchCenter
+import com.zenithblue.sambas3.ui.games.launch.GameLaunchRepository
 import com.zenithblue.sambas3.utils.FileUtil
 import com.zenithblue.sambas3.utils.GameFolderMatch
 import kotlin.math.abs
@@ -128,6 +130,8 @@ fun GamesScreen(
     gameFolderPickerLauncher: ActivityResultLauncher<Uri?>? = null,
     installFwLauncher: ActivityResultLauncher<String>? = null,
     navigateToSettings: (() -> Unit)? = null,
+    navigateToDrivers: (() -> Unit)? = null,
+    navigateToPatches: (() -> Unit)? = null,
     emulatorState: State<EmulatorState> = mutableStateOf(EmulatorState.Stopped),
     emulatorActiveGame: State<String?> = mutableStateOf(null)
 ) {
@@ -175,6 +179,7 @@ fun GamesScreen(
 
     var focusedIndex by remember { mutableStateOf(if (games.isNotEmpty()) 0 else -1) }
     var bootingGame by remember { mutableStateOf<Game?>(null) }
+    var launchCenterGame by remember { mutableStateOf<Game?>(null) }
     var showImportDialog by remember { mutableStateOf(false) }
     var scannedFolderGames by remember { mutableStateOf<List<GameFolderMatch>?>(null) }
     var scannedFolderUri by remember { mutableStateOf<Uri?>(null) }
@@ -452,22 +457,7 @@ fun GamesScreen(
                                     onPlay = {
                                         val g = item.game
                                         if (g.info.path == "$" || g.findProgress(GameProgressType.Install) != null) return@GameCard
-                                        val availability = com.zenithblue.sambas3.ppu.GameRunEligibilityHelper.evaluateAvailability(
-                                            context, g, installPpu.ppuActive, prelaunchPpu, runtimePpu, emulatorState.value, emulatorActiveGame.value
-                                        )
-                                        when (availability) {
-                                            is com.zenithblue.sambas3.ppu.GameLaunchAvailability.Ready -> bootingGame = g
-                                            is com.zenithblue.sambas3.ppu.GameLaunchAvailability.NeedsPreparation -> {
-                                                // Old install with no PPU state — trigger headless preparation, then Run after
-                                                android.util.Log.i("GameRun", "NeedsPreparation for ${g.info.name.value}, triggering headless")
-                                                com.zenithblue.sambas3.ppu.ImportPpuPreparationCoordinator.requestPreparation(context, g)
-                                            }
-                                            is com.zenithblue.sambas3.ppu.GameLaunchAvailability.Failed -> {
-                                                android.util.Log.w("GameRun", "Failed state for ${g.info.name.value}, retrying")
-                                                com.zenithblue.sambas3.ppu.ImportPpuPreparationCoordinator.requestPreparation(context, g)
-                                            }
-                                            else -> android.util.Log.d("GameRun", "Play gated availability=$availability for ${g.info.name.value}")
-                                        }
+                                        launchCenterGame = g
                                     },
                                     isRunning = gameplayRunning && emulatorActiveGame.value == item.game.info.path,
                                     onConfigure = { configureGameTarget = item.game }
@@ -781,7 +771,7 @@ fun GamesScreen(
                         val stopScope = rememberCoroutineScope()
                         HintButton(text = "STOP", icon = "■", color = RPCSXColors.errorColor, onClick = {
                             stopScope.launch {
-                                com.zenithblue.sambas3.ppu.GameStopHelper.stopGameplay()
+                                com.zenithblue.sambas3.ppu.GameStopHelper.stopGameplay(context)
                             }
                         })
                     } else {
@@ -806,7 +796,7 @@ fun GamesScreen(
                                 })
                             }
                             is com.zenithblue.sambas3.ppu.GameLaunchAvailability.Ready -> {
-                                HintButton(text = "PLAY", icon = "X", color = RPCSXColors.primary, onClick = { bootingGame = hintGame })
+                                HintButton(text = "PLAY", icon = "X", color = RPCSXColors.primary, onClick = { launchCenterGame = hintGame })
                             }
                             else -> {
                                 // No game or import required -> still show PLAY disabled or ADD?
@@ -816,7 +806,7 @@ fun GamesScreen(
                                     icon = "X",
                                     color = if (isPlayable || hintGame == null) RPCSXColors.primary else RPCSXColors.textDisabled,
                                     onClick = {
-                                        if (hintGame != null && hintAvailability is com.zenithblue.sambas3.ppu.GameLaunchAvailability.Ready) bootingGame = hintGame
+                                        if (hintGame != null && hintAvailability is com.zenithblue.sambas3.ppu.GameLaunchAvailability.Ready) launchCenterGame = hintGame
                                         else if (hintAvailability is com.zenithblue.sambas3.ppu.GameLaunchAvailability.NeedsPreparation) {
                                             com.zenithblue.sambas3.ppu.ImportPpuPreparationCoordinator.requestPreparation(context, hintGame!!)
                                         }
@@ -828,6 +818,37 @@ fun GamesScreen(
                     HintButton(text = "OPTIONS", icon = "△", color = RPCSXColors.textSecondary, onClick = { navigateToSettings?.invoke() })
                 }
             }
+        }
+
+        launchCenterGame?.let { game ->
+            GameLaunchCenter(
+                snapshot = GameLaunchRepository.snapshot(context, game),
+                onDismiss = { launchCenterGame = null },
+                onFreshPlay = {
+                    launchCenterGame = null
+                    bootingGame = game
+                },
+                onContinue = { slot ->
+                    launchCenterGame = null
+                    bootGame(context, game, slot.path?.takeIf { slot.exists }, slot.slot)
+                },
+                onLoad = { slot ->
+                    launchCenterGame = null
+                    bootGame(context, game, slot.path?.takeIf { slot.exists }, slot.slot)
+                },
+                onConfigure = {
+                    launchCenterGame = null
+                    configureGameTarget = game
+                },
+                onDriver = {
+                    launchCenterGame = null
+                    (navigateToDrivers ?: navigateToSettings)?.invoke()
+                },
+                onPatches = {
+                    launchCenterGame = null
+                    (navigateToPatches ?: navigateToSettings)?.invoke()
+                }
+            )
         }
 
         if (configureGameTarget != null) {
@@ -1599,13 +1620,15 @@ fun GameCard(
     }
 }
 
-fun bootGame(context: android.content.Context, game: Game) {
+fun bootGame(context: android.content.Context, game: Game, savestatePath: String? = null, savestateSlot: Int? = null) {
     if (game.hasFlag(GameFlag.Locked)) {
         return
     }
     GameRepository.onBoot(game)
     val emulatorWindow = Intent(context, RPCSXActivity::class.java)
     emulatorWindow.putExtra("path", game.info.path)
+    savestatePath?.let { emulatorWindow.putExtra(RPCSXActivity.EXTRA_USER_SAVESTATE, it) }
+    savestateSlot?.let { emulatorWindow.putExtra(RPCSXActivity.EXTRA_USER_SAVESTATE_SLOT, it) }
     context.startActivity(emulatorWindow)
 }
 

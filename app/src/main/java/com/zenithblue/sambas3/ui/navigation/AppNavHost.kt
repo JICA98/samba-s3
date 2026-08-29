@@ -147,6 +147,8 @@ fun AppNavHost() {
     if (rpcsxLibrary == null) {
         GamesDestination(
             navigateToSettings = { },
+            navigateToDrivers = { },
+            navigateToPatches = { },
             drawerState
         )
 
@@ -167,6 +169,8 @@ fun AppNavHost() {
         ) {
             GamesDestination(
                 navigateToSettings = { navigateTo("settings") },
+                navigateToDrivers = { navigateTo("drivers") },
+                navigateToPatches = { navigateTo("patches") },
                 drawerState
             )
         }
@@ -269,6 +273,8 @@ fun AppNavHost() {
 @Composable
 fun GamesDestination(
     navigateToSettings: () -> Unit,
+    navigateToDrivers: () -> Unit,
+    navigateToPatches: () -> Unit,
     drawerState: androidx.compose.material3.DrawerState
 ) {
     val context = LocalContext.current
@@ -324,6 +330,8 @@ fun GamesDestination(
         gameFolderPickerLauncher = gameFolderPickerLauncher,
         installFwLauncher = installFwLauncher,
         navigateToSettings = navigateToSettings,
+        navigateToDrivers = navigateToDrivers,
+        navigateToPatches = navigateToPatches,
         emulatorState = RPCSX.state,
         emulatorActiveGame = RPCSX.activeGame
     )

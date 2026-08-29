@@ -238,7 +238,11 @@ object LogMonitor {
         logDir?.resolve(category.filename)
 
     fun getAllLogFiles(): List<File> =
-        LogFileCategory.entries.mapNotNull { getLogFile(it)?.takeIf { f -> f.exists() } }
+        LogFileCategory.entries.flatMap { category ->
+            val current = getLogFile(category) ?: return@flatMap emptyList()
+            listOf(current, File("${current.path}.1"), File("${current.path}.2"))
+                .filter(File::exists)
+        }
 
     /** Flush open writers so share/export sees latest lines. */
     fun flushWriters() {

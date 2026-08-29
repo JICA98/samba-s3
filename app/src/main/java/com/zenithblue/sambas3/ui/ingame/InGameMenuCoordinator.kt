@@ -60,6 +60,11 @@ sealed interface InGameMenuHostEffect {
         val suspendMode: Boolean
     ) : InGameMenuHostEffect
     data class SavestateRequestAccepted(val slot: Int) : InGameMenuHostEffect
+    data class BeginSavestateLoadTransition(
+        val slot: Int,
+        val savestatePath: String,
+        val previewPath: String?
+    ) : InGameMenuHostEffect
     data class SavestateLoadAccepted(val slot: Int, val savestatePath: String) : InGameMenuHostEffect
     data class SavestateTransitionFailed(val reason: String) : InGameMenuHostEffect
 }
@@ -311,6 +316,13 @@ class InGameMenuCoordinator(
                     slotInfo?.sizeBytes ?: 0L,
                     slotInfo?.path,
                     save?.suspendMode == true
+                ))
+            }
+            if (reason == CloseReason.LoadState && slotInfo?.path != null) {
+                _effects.emit(InGameMenuHostEffect.BeginSavestateLoadTransition(
+                    slotInfo.slot,
+                    slotInfo.path,
+                    slotInfo.previewPath
                 ))
             }
             closeInternal(reason)

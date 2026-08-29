@@ -9,10 +9,16 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.core.view.WindowCompat
 import androidx.lifecycle.lifecycleScope
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.setValue
 import kotlinx.coroutines.launch
 import com.zenithblue.sambas3.debug.DebugPadReceiver
 import com.zenithblue.sambas3.dialogs.AlertDialogQueue
 import com.zenithblue.sambas3.ui.navigation.AppNavHost
+import com.zenithblue.sambas3.crash.CrashEvidenceCollector
+import com.zenithblue.sambas3.session.EmulationSessionJournal
+import com.zenithblue.sambas3.ui.crash.GameCrashScreen
+import com.zenithblue.sambas3.ui.games.launch.GameSavestateRepository
 import com.zenithblue.sambas3.utils.GeneralSettings
 import com.zenithblue.sambas3.utils.GpuDriverHelper
 import com.zenithblue.sambas3.utils.GpuDriverSelection
@@ -140,9 +146,50 @@ class MainActivity : ComponentActivity() {
             )
         }
 
+        val unfinishedSession = EmulationSessionJournal.unfinished(this)
+        val previousReport = unfinishedSession?.let { CrashEvidenceCollector.collect(this, it) }
         setContent {
             RPCSXTheme {
-                AppNavHost()
+                var showPreviousFailure by androidx.compose.runtime.remember { androidx.compose.runtime.mutableStateOf(previousReport != null) }
+                if (showPreviousFailure && previousReport != null && unfinishedSession != null) {
+                    GameCrashScreen(
+                        report = previousReport,
+                        onRetry = {
+                            EmulationSessionJournal.clear(this@MainActivity)
+                            startActivity(Intent(this@MainActivity, RPCSXActivity::class.java).putExtra("path", unfinishedSession.gamePath))
+                            handingOffToRecovery = true
+                            finish()
+                        },
+                        onSafeRetry = {
+                            EmulationSessionJournal.clear(this@MainActivity)
+                            startActivity(Intent(this@MainActivity, RPCSXActivity::class.java).apply {
+                                putExtra("path", unfinishedSession.gamePath)
+                                putExtra(RPCSXActivity.EXTRA_SAFE_RETRY, true)
+                            })
+                            handingOffToRecovery = true
+                            finish()
+                        },
+                        onContinue = {
+                            val game = com.zenithblue.sambas3.GameRepository.list().firstOrNull { it.info.path == unfinishedSession.gamePath }
+                            val slot = game?.let { GameSavestateRepository.slots(this@MainActivity, it).filter { s -> s.exists }.maxByOrNull { s -> s.mtimeMs } }
+                            if (slot?.path != null) {
+                                EmulationSessionJournal.clear(this@MainActivity)
+                                startActivity(Intent(this@MainActivity, RPCSXActivity::class.java).apply {
+                                    putExtra("path", unfinishedSession.gamePath)
+                                    putExtra(RPCSXActivity.EXTRA_USER_SAVESTATE, slot.path)
+                                    putExtra(RPCSXActivity.EXTRA_USER_SAVESTATE_SLOT, slot.slot)
+                                })
+                                handingOffToRecovery = true
+                                finish()
+                            }
+                        },
+                        onChooseSave = { showPreviousFailure = false },
+                        onConfigure = { showPreviousFailure = false },
+                        onExit = { EmulationSessionJournal.clear(this@MainActivity); showPreviousFailure = false }
+                    )
+                } else {
+                    AppNavHost()
+                }
             }
         }
 
