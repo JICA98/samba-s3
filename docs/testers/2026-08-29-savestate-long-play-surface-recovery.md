@@ -78,6 +78,26 @@ The tablet did emit harmless 4x4 `AHardwareBuffer` allocation warnings during
 surface recreation; they did not prevent first-frame confirmation. Historical
 Vulkan `dequeueBuffer -19` entries predate this validation window.
 
+### Fresh controlled interruption
+
+The final tablet-only interruption test saved Slot 4, observed the savestate
+mtime/size change seven seconds after confirmation, and immediately stopped the
+tablet process before the in-app recovery could finish. On the next
+`MainActivity` launch, the fallback selected the exact committed file:
+
+```text
+S3SAVE recovery-register-game .../games/BLUS31584 result=0
+S3SAVE recovery-boot .../BLUS31584_1_4.SAVESTAT.zst result=0
+S3PPU stage=link-end ... failed=0
+S3PPU savestate-progress-cleared
+S3RENDER first-frame-confirmed generation=1
+S3SAVE pending recovery cleared
+```
+
+The final screenshot `/tmp/samba-tablet-controlled-recovery-33s.png` shows
+rendered GTA gameplay with no `Restoring...` overlay. The corresponding pulled
+logs are under `/tmp/samba-tablet-interruption-window/`.
+
 ## Build
 
 - `./gradlew :app:testStandardDebugUnitTest :app:assembleStandardDebug` —
