@@ -103,7 +103,6 @@ class PadOverlayButton(
     override fun onTouch(event: MotionEvent, pointerIndex: Int, padState: State): Boolean {
         val action = event.actionMasked
         var hit = false
-        val origAlpha = _alpha
         if (action == MotionEvent.ACTION_DOWN || action == MotionEvent.ACTION_POINTER_DOWN) {
             if (locked == -1) {
                 locked = event.getPointerId(pointerIndex)
@@ -115,10 +114,7 @@ class PadOverlayButton(
             if (locked != -1 && (action == MotionEvent.ACTION_CANCEL || event.getPointerId(pointerIndex) == locked)) {
                 pressed = false
                 locked = -1
-                _alpha = origAlpha.coerceAtMost((0.3f * 255).toInt()).coerceAtLeast(
-                    (GeneralSettings["button_${digital1}_${digital2}_opacity"] as Int? ?: 50)
-                        .let { (255 * it / 100) }
-                )
+                restoreIdleAlpha()
                 hit = true
             }
         }
@@ -132,6 +128,22 @@ class PadOverlayButton(
         }
 
         return hit
+    }
+
+    override fun cancelInteraction(padState: State) {
+        pressed = false
+        locked = -1
+        padState.digital[0] = padState.digital[0] and digital1.inv()
+        padState.digital[1] = padState.digital[1] and digital2.inv()
+        restoreIdleAlpha()
+    }
+
+    internal val isPressedForTest: Boolean get() = pressed
+    internal val lockedPointerForTest: Int get() = locked
+
+    private fun restoreIdleAlpha() {
+        val opacity = (GeneralSettings["button_${digital1}_${digital2}_opacity"] as? Int ?: 50)
+        _alpha = (255 * opacity / 100f).roundToInt()
     }
 
     override fun startDragging(startX: Int, startY: Int) {

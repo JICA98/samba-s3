@@ -243,6 +243,17 @@ class PadOverlayDpad(
         return hit || area.contains(event.getX(pointerIndex).toInt(), event.getY(pointerIndex).toInt())
     }
 
+    override fun cancelInteraction(padState: State) {
+        padState.digital[digitalIndex] = padState.digital[digitalIndex] and
+            (topBit or leftBit or rightBit or bottomBit).inv()
+        locked[0] = -1
+        locked[1] = -1
+        digitalBits[0] = 0
+        digitalBits[1] = 0
+        btnState[0].clear()
+        btnState[1].clear()
+    }
+
     override fun bounds(): Rect = area
 
     override fun draw(canvas: Canvas) {

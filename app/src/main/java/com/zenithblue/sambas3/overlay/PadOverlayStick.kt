@@ -154,6 +154,24 @@ class PadOverlayStick(
         return 0
     }
 
+    fun cancelInteraction(padState: State) {
+        locked = -1
+        pressX = -1
+        pressY = -1
+        ringBounds.offset(bgOffsetX, bgOffsetY)
+        bgOffsetX = 0
+        bgOffsetY = 0
+        centreNub()
+        padState.digital[pressDigitalIndex] = padState.digital[pressDigitalIndex] and pressBit.inv()
+        if (isLeft) {
+            padState.leftStickX = 127
+            padState.leftStickY = 127
+        } else {
+            padState.rightStickX = 127
+            padState.rightStickY = 127
+        }
+    }
+
     fun draw(canvas: Canvas) {
         GlassButtonRenderer.drawStickRing(canvas, ringBounds, alpha)
         GlassButtonRenderer.drawStickNub(canvas, nubBounds, if (isLeft) "L3" else "R3", alpha)

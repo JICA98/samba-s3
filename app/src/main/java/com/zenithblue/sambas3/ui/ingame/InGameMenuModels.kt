@@ -1,6 +1,7 @@
 package com.zenithblue.sambas3.ui.ingame
 
 import org.json.JSONObject
+import com.zenithblue.sambas3.SavestateThumbnailStore
 
 data class InGameMenuCapabilities(
     val apiVersion: Int,
@@ -68,13 +69,21 @@ data class SaveStateCapabilities(
             if (slotsArr != null) {
                 for (i in 0 until slotsArr.length()) {
                     val o = slotsArr.optJSONObject(i) ?: continue
+                    val path = o.optString("path", "").ifBlank { null }
+                    val preview = if (o.optBoolean("exists", false)) {
+                        SavestateThumbnailStore.metadataForPath(path)
+                    } else {
+                        null
+                    }
                     slots.add(SaveSlot(
                         slot = o.optInt("slot", i),
                         exists = o.optBoolean("exists", false),
                         label = o.optString("label", "Slot $i"),
-                        path = o.optString("path", "").ifBlank { null },
+                        path = path,
                         mtimeMs = o.optLong("mtimeMs", 0L),
-                        sizeBytes = o.optLong("sizeBytes", 0L)
+                        sizeBytes = o.optLong("sizeBytes", 0L),
+                        previewPath = preview?.path,
+                        previewMtimeMs = preview?.mtimeMs ?: 0L
                     ))
                 }
             }
@@ -94,7 +103,9 @@ data class SaveSlot(
     val label: String,
     val path: String? = null,
     val mtimeMs: Long = 0L,
-    val sizeBytes: Long = 0L
+    val sizeBytes: Long = 0L,
+    val previewPath: String? = null,
+    val previewMtimeMs: Long = 0L
 )
 
 data class TrophyEntry(

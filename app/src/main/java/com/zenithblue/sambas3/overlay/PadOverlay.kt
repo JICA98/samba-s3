@@ -11,7 +11,6 @@ import android.graphics.Rect
 import android.os.Build
 import android.os.Handler
 import android.os.Looper
-import android.os.SystemClock
 import android.os.VibrationEffect
 import android.os.Vibrator
 import android.os.VibratorManager
@@ -50,6 +49,8 @@ interface PadOverlayItem {
     fun setOpacity(percent: Int)
     fun resetConfigs()
     fun onTouch(event: MotionEvent, pointerIndex: Int, padState: State): Boolean
+    /** Clear all pointer ownership, visual pressed state, and forwarded bits. */
+    fun cancelInteraction(padState: State)
     fun contains(x: Int, y: Int): Boolean
     fun bounds(): Rect
     var dragging: Boolean
@@ -507,27 +508,21 @@ class PadOverlay(context: Context?, attrs: AttributeSet?) : SurfaceView(context,
     }
 
     fun cancelActiveInputsAndNeutralize() {
-        // Cancel all touch buttons/sticks
+        // Reset the owner-side interaction state first. A synthetic neutral
+        // frame alone is insufficient: a later ACTION_MOVE must not resurrect
+        // a stale button that still owns an old pointer id.
+        editables.forEach { it.cancelInteraction(state) }
+        sticks.forEach { it.cancelInteraction(state) }
+        floatingSticks.forEach { it?.cancelInteraction(state) }
+        floatingSticks.fill(null)
+
         state.digital[0] = 0
         state.digital[1] = 0
         state.leftStickX = 127
         state.leftStickY = 127
         state.rightStickX = 127
         state.rightStickY = 127
-        for (i in floatingSticks.indices) {
-            floatingSticks[i]?.let { stick ->
-                val cancel = MotionEvent.obtain(SystemClock.uptimeMillis(), SystemClock.uptimeMillis(), MotionEvent.ACTION_CANCEL, 0f, 0f, 0)
-                stick.onTouch(cancel, 0, state)
-                cancel.recycle()
-                floatingSticks[i] = null
-            }
-        }
-        sticks.forEach { stick ->
-            val cancel = MotionEvent.obtain(SystemClock.uptimeMillis(), SystemClock.uptimeMillis(), MotionEvent.ACTION_CANCEL, 0f, 0f, 0)
-            stick.onTouch(cancel, 0, state)
-            cancel.recycle()
-        }
-        // Send neutral frame to backend
+
         try { RPCSX.instance.overlayPadData(0, 0, 127, 127, 127, 127) } catch (_: Exception) {}
         invalidate()
     }

@@ -36,6 +36,7 @@ import com.zenithblue.sambas3.ui.ingame.InGameMenuHost
 import com.zenithblue.sambas3.ui.ingame.InGameMenuIntent
 import com.zenithblue.sambas3.ui.ingame.InGameMenuInputRouter
 import com.zenithblue.sambas3.ui.ingame.MenuCommand
+import com.zenithblue.sambas3.ui.ingame.MenuSessionState
 import com.zenithblue.sambas3.ui.ingame.PhysicalInputTracker
 import com.zenithblue.sambas3.ui.ingame.RpcsxInGameMenuCoreGateway
 import com.zenithblue.sambas3.ui.ingame.RpcsxBridgeAdapter
@@ -48,6 +49,22 @@ import kotlin.concurrent.thread
 import kotlin.math.abs
 import java.util.concurrent.CountDownLatch
 import java.util.concurrent.TimeUnit
+
+private enum class EmulatorActivityFinishReason {
+    None,
+    ExplicitExit,
+    RecoveryRecreate,
+    BootFailure,
+    SystemLifecycle
+}
+
+private enum class FrontendHomeInputSource {
+    TouchPs,
+    PhysicalGuide,
+    NativeFrontendEvent,
+    ToolbarHome,
+    MenuCommand
+}
 
 /**
  * Android host adapter only: lifecycle, views, surface, frontend-listener
@@ -70,12 +87,15 @@ class RPCSXActivity : ComponentActivity() {
     // Activity.recreate() is an internal recovery handoff, not a user exit.
     // Keep the durable marker and library identity intact across that destroy.
     private var isRecoveryRecreate = false
+    private var finishReason = EmulatorActivityFinishReason.None
     private var transitionBitmap: Bitmap? = null
     private val transitionController = SavestateTransitionController()
+    private lateinit var thumbnailStore: SavestateThumbnailStore
     private val bootMutex = Any()
     private val inputBindings by lazy { InputBindingPrefs.loadBindings() }
 
     private val physicalTracker = PhysicalInputTracker()
+    private val frontendHomeKeyGate = FrontendHomeKeyGate()
     private val inputGate = GameplayInputGate(physicalTracker)
     private val coreGateway: InGameMenuCoreGateway by lazy { RpcsxInGameMenuCoreGateway(RpcsxBridgeAdapter()) }
     private lateinit var coordinator: InGameMenuCoordinator
@@ -120,6 +140,7 @@ class RPCSXActivity : ComponentActivity() {
             scope = lifecycleScope,
             core = coreGateway
         )
+        thumbnailStore = SavestateThumbnailStore(this, lifecycleScope)
         menuInputRouter = InGameMenuInputRouter(onCommand = { command -> handleMenuCommand(command) })
 
         binding = ActivityRpcs3Binding.inflate(layoutInflater)
@@ -166,12 +187,10 @@ class RPCSXActivity : ComponentActivity() {
 
                     is com.zenithblue.sambas3.ui.ingame.InGameMenuHostEffect.EnterPadMenuMode -> {
                         binding.padOverlay.setMenuMode(true)
-                        backCallback.isEnabled = true
                     }
 
                     is com.zenithblue.sambas3.ui.ingame.InGameMenuHostEffect.ExitPadMenuMode -> {
                         binding.padOverlay.setMenuMode(false)
-                        backCallback.isEnabled = false
                     }
 
                     is com.zenithblue.sambas3.ui.ingame.InGameMenuHostEffect.WaitForPhysicalNeutralThenArmGameplay -> {
@@ -183,6 +202,7 @@ class RPCSXActivity : ComponentActivity() {
                     is com.zenithblue.sambas3.ui.ingame.InGameMenuHostEffect.ArmGameplayNow -> inputGate.arm()
 
                     is com.zenithblue.sambas3.ui.ingame.InGameMenuHostEffect.FinishGameActivity -> {
+                        finishReason = EmulatorActivityFinishReason.ExplicitExit
                         thread {
                             var attempts = 0
                             while (attempts < 100) {
@@ -208,13 +228,15 @@ class RPCSXActivity : ComponentActivity() {
                                 titleId
                             )
                             if (!transitionController.begin(requestId, effect.slot)) {
+                                thumbnailStore.discard(requestId)
                                 PendingSavestateRecoveryStore.markRequestFailure(this@RPCSXActivity, "transition-busy")
                                 Log.e("S3SAVE", "transition controller rejected requestId=$requestId slot=${effect.slot}")
                                 return@onEach
                             }
                             recoveryTransitionActive = true
+                            thumbnailStore.begin(requestId, effect.slot, effect.savestatePath)
                             showTransitionOverlay("Saving...")
-                            captureTransitionFrame()
+                            captureTransitionFrame(requestId, effect.slot)
                             neutralizeForwardedPad()
                             Log.i("S3SAVE", "transition begin requestId=$requestId slot=${effect.slot} original=$originalGamePath")
                         }
@@ -254,9 +276,9 @@ class RPCSXActivity : ComponentActivity() {
             }
             .launchIn(lifecycleScope)
 
-        backCallback = object : OnBackPressedCallback(false) {
+        backCallback = object : OnBackPressedCallback(true) {
             override fun handleOnBackPressed() {
-                coordinator.dispatch(InGameMenuIntent.Back)
+                handleAndroidBack()
             }
         }
         onBackPressedDispatcher.addCallback(this, backCallback)
@@ -269,16 +291,13 @@ class RPCSXActivity : ComponentActivity() {
         }
 
         binding.menuToggle.setOnClickListener {
-            if (coordinator.state.value.isOpen) {
-                coordinator.dispatch(InGameMenuIntent.Resume)
-            } else if (RPCSX.getState() == EmulatorState.Running || RPCSX.getState() == EmulatorState.Paused) {
-                coordinator.dispatch(InGameMenuIntent.Open)
-            } else {
-                Log.w("RPCSX State", "Cannot open in-game menu in state ${RPCSX.getState().name}")
-            }
+            requestHomeToggle(FrontendHomeInputSource.ToolbarHome)
         }
 
         val pendingRecovery = PendingSavestateRecoveryStore.validForLaunch(this)
+        pendingRecovery?.let {
+            thumbnailStore.recoverCommitted(it.requestId, it.slot, it.savestatePath)
+        }
         originalGamePath = intent.getStringExtra("path")
             ?: pendingRecovery?.originalGamePath
             ?: error("RPCSXActivity requires an original game path")
@@ -330,6 +349,7 @@ class RPCSXActivity : ComponentActivity() {
                         "The saved slot was kept, but automatic recovery stopped after repeated failures. " +
                             "You can load it manually from the save-state menu."
                     )
+                    finishReason = EmulatorActivityFinishReason.BootFailure
                     finish()
                 }
                 return@thread
@@ -355,6 +375,7 @@ class RPCSXActivity : ComponentActivity() {
                     getString(R.string.failed_to_boot),
                     getString(R.string.error_with_msg, bootResult.name)
                 )
+                finishReason = EmulatorActivityFinishReason.BootFailure
                 finish()
             } else {
                 RPCSX.activeGame.value = gamePath
@@ -410,10 +431,54 @@ class RPCSXActivity : ComponentActivity() {
     }
 
     private fun handleFrontendHomeRequest() {
-        if (coordinator.state.value.isOpen) {
-            coordinator.dispatch(InGameMenuIntent.Resume)
-        } else if (RPCSX.getState() == EmulatorState.Running || RPCSX.getState() == EmulatorState.Paused) {
-            coordinator.dispatch(InGameMenuIntent.Open)
+        requestHomeToggle(FrontendHomeInputSource.NativeFrontendEvent)
+    }
+
+    private fun requestHomeToggle(source: FrontendHomeInputSource) {
+        if (recoveryTransitionActive) {
+            Log.i("S3HOME", "ignored source=$source reason=recovery-transition")
+            return
+        }
+
+        when (val session = coordinator.state.value.session) {
+            MenuSessionState.Opening,
+            is MenuSessionState.Closing -> {
+                Log.i("S3HOME", "duplicate ignored source=$source session=$session")
+                return
+            }
+            MenuSessionState.Closed -> {
+                val state = runCatching { RPCSX.getState() }.getOrDefault(EmulatorState.Stopped)
+                if (state != EmulatorState.Running && state != EmulatorState.Paused) {
+                    Log.w("S3HOME", "ignored source=$source state=$state")
+                    return
+                }
+                Log.i("S3HOME", "source=$source edge=down action=open state=$state")
+                coordinator.dispatch(InGameMenuIntent.Open)
+            }
+            is MenuSessionState.Open -> {
+                Log.i("S3HOME", "source=$source edge=down action=resume")
+                coordinator.dispatch(InGameMenuIntent.Resume)
+            }
+        }
+    }
+
+    private fun handleAndroidBack() {
+        val state = runCatching { RPCSX.getState() }.getOrDefault(EmulatorState.Stopped)
+        when (resolveAndroidBackAction(recoveryTransitionActive, coordinator.state.value.isOpen, state)) {
+            AndroidBackAction.Consume -> Log.i("S3BACK", "consumed recovery=$recoveryTransitionActive state=$state")
+            AndroidBackAction.DispatchMenuBack -> {
+                Log.i("S3BACK", "menu -> coordinator.Back")
+                coordinator.dispatch(InGameMenuIntent.Back)
+            }
+            AndroidBackAction.OpenMenu -> {
+                Log.i("S3BACK", "gameplay -> open-menu state=$state")
+                coordinator.dispatch(InGameMenuIntent.Open)
+            }
+            AndroidBackAction.FinishActivity -> {
+                finishReason = EmulatorActivityFinishReason.SystemLifecycle
+                Log.i("S3BACK", "stopped -> finish")
+                finish()
+            }
         }
     }
 
@@ -438,6 +503,7 @@ class RPCSXActivity : ComponentActivity() {
             Log.w("S3SAVE", "completion rejected by transition controller requestId=${record.requestId} slot=${record.slot}")
             return
         }
+        thumbnailStore.commit(record.requestId, record.slot, path)
         if (!transitionController.surfaceResetStarted()) {
             Log.w("S3SURFACE", "surface reset rejected requestId=${record.requestId}")
             return
@@ -594,18 +660,24 @@ class RPCSXActivity : ComponentActivity() {
     }
 
     /** Capture the currently displayed game frame before the old surface is released. */
-    private fun captureTransitionFrame() {
-        val frame = surfaceLeaseManager.currentFrame ?: return
+    private fun captureTransitionFrame(requestId: Long, slot: Int) {
+        val frame = surfaceLeaseManager.currentFrame ?: run {
+            thumbnailStore.captureFailed(requestId, slot)
+            Log.w("S3THUMB", "capture-failed request=$requestId reason=no-frame")
+            return
+        }
         requestFrameCopy(frame) { bitmap, success ->
             if (success && bitmap != null && recoveryTransitionActive) {
+                thumbnailStore.stage(requestId, slot, bitmap)
                 transitionBitmap?.recycle()
                 transitionBitmap = bitmap
                 binding.transitionFrame.setImageBitmap(bitmap)
                 binding.transitionFrame.visibility = View.VISIBLE
                 Log.i("S3RENDER", "transition-frame-captured generation=${frame.generation} ${bitmap.width}x${bitmap.height}")
             } else {
+                thumbnailStore.captureFailed(requestId, slot)
                 bitmap?.recycle()
-                Log.w("S3RENDER", "transition-frame-capture-fallback generation=${frame.generation}")
+                Log.w("S3THUMB", "capture-failed request=$requestId generation=${frame.generation}")
             }
         }
     }
@@ -670,6 +742,10 @@ class RPCSXActivity : ComponentActivity() {
     }
 
     private fun failTransition(reason: String) {
+        val transitionState = transitionController.state
+        if (transitionState.phase == SavestateTransitionController.Phase.Saving) {
+            thumbnailStore.discard(transitionState.requestId)
+        }
         transitionController.fail(reason)
         transitionBitmap?.recycle()
         transitionBitmap = null
@@ -689,6 +765,7 @@ class RPCSXActivity : ComponentActivity() {
         }
         recoveryRecreateRequested = true
         isRecoveryRecreate = true
+        finishReason = EmulatorActivityFinishReason.RecoveryRecreate
         PendingSavestateRecoveryStore.markFailure(this, reason)
         Log.e("S3RENDER", "recovery recreate requested reason=$reason")
         binding.transitionLabel.text = "Restoring..."
@@ -727,7 +804,7 @@ class RPCSXActivity : ComponentActivity() {
             }
 
             is MenuCommand.HomeToggle -> {
-                handleFrontendHomeRequest()
+                requestHomeToggle(FrontendHomeInputSource.MenuCommand)
                 true
             }
 
@@ -799,7 +876,19 @@ class RPCSXActivity : ComponentActivity() {
         try { RPCSX.instance.setFrontendEventListener(null) } catch (_: Exception) {}
         try {
             val nativeState = RPCSX.getState()
-            Log.i("S3LIFE", "RPCSXActivity.onDestroy nativeState=$nativeState activeGame=${RPCSX.activeGame.value}")
+            Log.i(
+                "S3LIFE",
+                "RPCSXActivity.onDestroy isFinishing=$isFinishing " +
+                    "isChangingConfigurations=$isChangingConfigurations finishReason=$finishReason " +
+                    "nativeState=$nativeState activeGame=${RPCSX.activeGame.value} " +
+                    "recoveryTransitionActive=$recoveryTransitionActive"
+            )
+            if (isFinishing &&
+                finishReason == EmulatorActivityFinishReason.None &&
+                (nativeState == EmulatorState.Running || nativeState == EmulatorState.Paused)
+            ) {
+                Log.e("S3LIFE", "S3LIFE unexpected Activity finish while emulator is alive")
+            }
             RPCSX.state.value = nativeState
             if (nativeState == EmulatorState.Stopped && !isRecoveryRecreate) {
                 val myPath = try { intent.getStringExtra("path") } catch (_: Exception) { null }
@@ -834,12 +923,18 @@ class RPCSXActivity : ComponentActivity() {
 
     private fun isMenuOpen(): Boolean = coordinator.state.value.isOpen
 
+    private fun isFrontendHomeKey(keyCode: Int): Boolean =
+        keyCode == KeyEvent.KEYCODE_HOME || keyCode == KeyEvent.KEYCODE_BUTTON_MODE
+
     override fun onKeyDown(keyCode: Int, event: KeyEvent?): Boolean {
         physicalTracker.onKeyEvent(keyCode, event?.action ?: KeyEvent.ACTION_UP)
-        if (isMenuOpen()) {
-            if (event != null && keyCode == KeyEvent.KEYCODE_HOME || keyCode == KeyEvent.KEYCODE_BUTTON_MODE) {
-                return handleMenuCommand(MenuCommand.HomeToggle)
+        if (isFrontendHomeKey(keyCode)) {
+            if (event == null || frontendHomeKeyGate.acceptDown(event.repeatCount)) {
+                requestHomeToggle(FrontendHomeInputSource.PhysicalGuide)
             }
+            return true
+        }
+        if (isMenuOpen()) {
             if (menuInputRouter.handleKey(keyCode, event?.action ?: -1, event)) return true
             if (event != null && (event.source and (InputDevice.SOURCE_GAMEPAD or InputDevice.SOURCE_JOYSTICK or InputDevice.SOURCE_DPAD)) != 0) {
                 return true
@@ -863,6 +958,10 @@ class RPCSXActivity : ComponentActivity() {
 
     override fun onKeyUp(keyCode: Int, event: KeyEvent?): Boolean {
         physicalTracker.onKeyEvent(keyCode, event?.action ?: KeyEvent.ACTION_UP)
+        if (isFrontendHomeKey(keyCode)) {
+            frontendHomeKeyGate.acceptUp()
+            return true
+        }
         if (isMenuOpen()) {
             if (menuInputRouter.isMenuInputKey(keyCode)) return true
             if (event != null && event.source and (InputDevice.SOURCE_GAMEPAD or InputDevice.SOURCE_JOYSTICK or InputDevice.SOURCE_DPAD) != 0) {
