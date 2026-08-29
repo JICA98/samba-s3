@@ -45,7 +45,9 @@ after the critical section is released.
 ## Build and publication
 
 - Submodule commit: `74b0da9a8`.
-- Root pin commit used for the tested native artifact: `95ddc70`.
+- The installed artifact reports root source `a4ee22a` in its runtime
+  `S3CORE` build stamp (the final documentation-only commit does not change
+  native sources).
 - Root branch push: `origin/recovery/ingame-menu-fix` succeeded.
 - RPCSX submodule push remains blocked: configured upstream
   `RPCSX/rpcsx.git` returns GitHub HTTP 403 for this account. The root pin is
