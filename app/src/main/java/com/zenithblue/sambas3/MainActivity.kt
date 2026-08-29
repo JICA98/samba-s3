@@ -3,6 +3,7 @@ package com.zenithblue.sambas3
 import android.app.Notification
 import android.app.NotificationChannel
 import android.app.NotificationManager
+import android.content.Intent
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -17,8 +18,9 @@ import com.zenithblue.sambas3.utils.GpuDriverSelection
 import kotlin.concurrent.thread
 
 class MainActivity : ComponentActivity() {
-    private lateinit var unregisterUsbEventListener: () -> Unit
+    private var unregisterUsbEventListener: () -> Unit = {}
     private var debugPadReceiver: DebugPadReceiver? = null
+    private var handingOffToRecovery = false
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
@@ -113,6 +115,22 @@ class MainActivity : ComponentActivity() {
             try { CompileProgressBridge.registerOnce(this) } catch (_: Exception) {}
         }
 
+        // A save can be committed after the renderer/activity is interrupted.
+        // Resume the exact durable slot before showing the library, while
+        // keeping the original game path as the activity/library identity.
+        PendingSavestateRecoveryStore.validForLaunch(this)?.let { pending ->
+            if (pending.originalGamePath.isNotBlank()) {
+                handingOffToRecovery = true
+                startActivity(Intent(this, RPCSXActivity::class.java).apply {
+                    putExtra("path", pending.originalGamePath)
+                    putExtra(RPCSXActivity.EXTRA_RECOVERY_SAVESTATE, pending.savestatePath)
+                    putExtra(RPCSXActivity.EXTRA_RECOVERY_REQUEST_ID, pending.requestId)
+                })
+                finish()
+                return
+            }
+        }
+
         setContent {
             RPCSXTheme {
                 AppNavHost()
@@ -131,6 +149,6 @@ class MainActivity : ComponentActivity() {
         super.onDestroy()
         unregisterUsbEventListener()
         try { debugPadReceiver?.let { unregisterReceiver(it) } } catch (_: Exception) {}
-        LogMonitor.stop()
+        if (!handingOffToRecovery) LogMonitor.stop()
     }
 }

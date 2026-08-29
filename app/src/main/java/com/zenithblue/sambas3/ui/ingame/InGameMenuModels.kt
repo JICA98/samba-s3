@@ -71,7 +71,10 @@ data class SaveStateCapabilities(
                     slots.add(SaveSlot(
                         slot = o.optInt("slot", i),
                         exists = o.optBoolean("exists", false),
-                        label = o.optString("label", "Slot $i")
+                        label = o.optString("label", "Slot $i"),
+                        path = o.optString("path", "").ifBlank { null },
+                        mtimeMs = o.optLong("mtimeMs", 0L),
+                        sizeBytes = o.optLong("sizeBytes", 0L)
                     ))
                 }
             }
@@ -88,7 +91,10 @@ data class SaveStateCapabilities(
 data class SaveSlot(
     val slot: Int,
     val exists: Boolean,
-    val label: String
+    val label: String,
+    val path: String? = null,
+    val mtimeMs: Long = 0L,
+    val sizeBytes: Long = 0L
 )
 
 data class TrophyEntry(

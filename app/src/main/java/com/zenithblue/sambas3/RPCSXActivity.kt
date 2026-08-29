@@ -56,6 +56,11 @@ class RPCSXActivity : ComponentActivity() {
     private var usesAxisR2 = false
     private var bootThread: Thread? = null
     private var debugPadReceiver: DebugPadReceiver? = null
+    private lateinit var surfaceLeaseManager: SurfaceLeaseManager
+    private lateinit var originalGamePath: String
+    private var recoverySavestatePath: String? = null
+    private var recoveryTransitionActive = false
+    private val bootMutex = Any()
     private val inputBindings by lazy { InputBindingPrefs.loadBindings() }
 
     private val physicalTracker = PhysicalInputTracker()
@@ -69,6 +74,7 @@ class RPCSXActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         AlertDialogQueue.hostsSuppressed = true
+        try { LogMonitor.start(this) } catch (_: Exception) {}
         try { com.zenithblue.sambas3.utils.GeneralSettings.init(this) } catch (_: Exception) {}
         if (RPCSX.rootDirectory.isEmpty()) {
             RPCSX.rootDirectory = applicationContext.getExternalFilesDir(null)?.toString()?.let { if (it.endsWith("/")) it else "$it/" } ?: ""
@@ -106,6 +112,8 @@ class RPCSXActivity : ComponentActivity() {
 
         binding = ActivityRpcs3Binding.inflate(layoutInflater)
         setContentView(binding.root)
+        surfaceLeaseManager = SurfaceLeaseManager(binding.surfaceHost)
+        surfaceLeaseManager.installInitial()
 
         unregisterUsbEventListener = listenUsbEvents(this)
         enableFullScreenImmersive()
@@ -168,6 +176,32 @@ class RPCSXActivity : ComponentActivity() {
                             runOnUiThread { finish() }
                         }
                     }
+
+                    is com.zenithblue.sambas3.ui.ingame.InGameMenuHostEffect.BeginSavestateTransition -> {
+                        if (!effect.suspendMode) {
+                            PendingSavestateRecoveryStore.request(
+                                this@RPCSXActivity,
+                                effect.slot,
+                                originalGamePath,
+                                effect.preSaveMtimeMs,
+                                effect.preSaveSizeBytes,
+                                effect.savestatePath
+                            )
+                            recoveryTransitionActive = true
+                            binding.transitionLabel.text = "Saving..."
+                            binding.transitionOverlay.alpha = 1f
+                            binding.transitionOverlay.visibility = View.VISIBLE
+                            neutralizeForwardedPad()
+                            Log.i("S3SAVE", "transition begin slot=${effect.slot} original=$originalGamePath")
+                        }
+                    }
+
+                    is com.zenithblue.sambas3.ui.ingame.InGameMenuHostEffect.SavestateTransitionFailed -> {
+                        PendingSavestateRecoveryStore.markRequestFailure(this@RPCSXActivity, effect.reason)
+                        binding.transitionOverlay.visibility = View.GONE
+                        recoveryTransitionActive = false
+                        Log.e("S3SAVE", "request failed reason=${effect.reason}")
+                    }
                 }
             }
             .launchIn(lifecycleScope)
@@ -196,8 +230,19 @@ class RPCSXActivity : ComponentActivity() {
             }
         }
 
-        val gamePath = intent.getStringExtra("path")!!
+        val pendingRecovery = PendingSavestateRecoveryStore.validForLaunch(this)
+        originalGamePath = intent.getStringExtra("path")
+            ?: pendingRecovery?.originalGamePath
+            ?: error("RPCSXActivity requires an original game path")
+        recoverySavestatePath = intent.getStringExtra(EXTRA_RECOVERY_SAVESTATE)
+            ?: pendingRecovery?.takeIf { it.originalGamePath == originalGamePath }?.savestatePath
+        val gamePath = originalGamePath
         RPCSX.lastPlayedGame = gamePath
+        if (recoverySavestatePath != null) {
+            recoveryTransitionActive = true
+            binding.transitionLabel.text = "Restoring..."
+            binding.transitionOverlay.visibility = View.VISIBLE
+        }
 
         // Frontend listener registered only after binding + content are ready (§16).
         registerFrontendListener()
@@ -225,13 +270,28 @@ class RPCSXActivity : ComponentActivity() {
             }
 
             Log.w("RPCSX State", RPCSX.getState().name)
+            var isRecoveryBoot = recoverySavestatePath != null
+            if (isRecoveryBoot && !PendingSavestateRecoveryStore.markBooting(this@RPCSXActivity)) {
+                Log.e("S3SAVE", "recovery boot refused after retry limit")
+                recoverySavestatePath = null
+                isRecoveryBoot = false
+            }
+            val bootPath = recoverySavestatePath ?: gamePath
             val preBootTitleId = GameSettingsOverrides.resolveTitleId(gamePath, this@RPCSXActivity)
             GameSettingsOverrides.applyForGame(this@RPCSXActivity, preBootTitleId)
 
-            val bootResult = RPCSX.boot(gamePath)
+            Log.i("S3RENDER", "boot-savestate-begin=${isRecoveryBoot} source=$bootPath original=$gamePath")
+            val bootResult = BootResult.fromInt(
+                if (isRecoveryBoot) {
+                    bootSavestateSerialized(bootPath, gamePath)
+                } else {
+                    bootSerialized(bootPath)
+                }
+            )
             if (bootResult != BootResult.NoErrors) {
-                Log.w("S3LIFE", "boot failed game=$gamePath result=$bootResult clearing activeGame")
-                RPCSX.activeGame.value = null
+                Log.w("S3RENDER", "boot failed source=$bootPath result=$bootResult")
+                if (isRecoveryBoot) PendingSavestateRecoveryStore.markFailure(this@RPCSXActivity, bootResult.name)
+                else RPCSX.activeGame.value = null
                 try { RPCSX.state.value = RPCSX.getState() } catch (_: Exception) {}
                 AlertDialogQueue.showDialog(
                     getString(R.string.failed_to_boot),
@@ -240,7 +300,8 @@ class RPCSXActivity : ComponentActivity() {
                 finish()
             } else {
                 RPCSX.activeGame.value = gamePath
-                Log.i("S3LIFE", "boot success game=$gamePath activeGame set, state=${RPCSX.getState()}")
+                Log.i("S3RENDER", "boot-savestate-return source=$bootPath state=${RPCSX.getState()}")
+                if (isRecoveryBoot) confirmRecoveryFrameAndClear()
                 pollAndLearnTitleId(gamePath)
             }
         }
@@ -263,6 +324,17 @@ class RPCSXActivity : ComponentActivity() {
                         }
                         android.widget.Toast.makeText(this, msg, android.widget.Toast.LENGTH_SHORT).show()
                     }
+
+                    RPCSX.FRONTEND_EVENT_SAVESTATE_COMMITTED -> runOnUiThread {
+                        handleSavestateCommitted(payload)
+                    }
+
+                    RPCSX.FRONTEND_EVENT_SAVESTATE_FAILED -> runOnUiThread {
+                        PendingSavestateRecoveryStore.markRequestFailure(this, payload ?: "native-save-failed")
+                        binding.transitionOverlay.visibility = View.GONE
+                        recoveryTransitionActive = false
+                        Log.e("S3SAVE", "completion failed payload=$payload")
+                    }
                 }
             }
             Log.i("RPCSX-UI", "FrontendEventListener registered")
@@ -278,6 +350,111 @@ class RPCSXActivity : ComponentActivity() {
             coordinator.dispatch(InGameMenuIntent.Open)
         }
     }
+
+    private fun handleSavestateCommitted(payload: String?) {
+        val committed = payload ?: return
+        val record = PendingSavestateRecoveryStore.commit(this, committed)
+        val path = record?.savestatePath ?: run {
+            Log.e("S3SAVE", "completion rejected: missing record payload=$payload")
+            return
+        }
+        if (path.isBlank() || !java.io.File(path).isFile) {
+            Log.e("S3SAVE", "completion rejected: invalid committed payload=$payload")
+            return
+        }
+        if (!recoveryTransitionActive) {
+            Log.w("S3SAVE", "completion arrived without active transition requestId=${record.requestId}")
+            return
+        }
+        binding.transitionLabel.text = "Restoring..."
+        Log.i("S3RENDER", "old surface replacement requested requestId=${record.requestId} slot=${record.slot} path=$path")
+        runCatching {
+            surfaceLeaseManager.replace {
+                bootExactSavestate(record)
+            }
+        }.onFailure {
+            PendingSavestateRecoveryStore.markFailure(this, it.message ?: "surface-replace-failed")
+            binding.transitionOverlay.visibility = View.GONE
+            recoveryTransitionActive = false
+            Log.e("S3SURFACE", "surface replacement failed", it)
+        }
+    }
+
+    private fun bootExactSavestate(record: PendingSavestateRecovery) {
+        if (!PendingSavestateRecoveryStore.markBooting(this)) {
+            Log.e("S3SAVE", "saved-slot boot skipped after retry limit requestId=${record.requestId}")
+            binding.transitionOverlay.visibility = View.GONE
+            recoveryTransitionActive = false
+            return
+        }
+        bootThread?.interrupt()
+        bootThread = thread(name = "S3 Saved-state Boot") {
+            Log.i("S3RENDER", "boot-savestate-begin requestId=${record.requestId} generation=${surfaceLeaseManager.currentGeneration} path=${record.savestatePath}")
+            val result = BootResult.fromInt(
+                bootSavestateSerialized(record.savestatePath, originalGamePath)
+            )
+            if (result != BootResult.NoErrors) {
+                PendingSavestateRecoveryStore.markFailure(this@RPCSXActivity, result.name)
+                runOnUiThread {
+                    binding.transitionOverlay.visibility = View.GONE
+                    recoveryTransitionActive = false
+                }
+                Log.e("S3RENDER", "boot-savestate-return failed requestId=${record.requestId} result=$result")
+                return@thread
+            }
+            RPCSX.activeGame.value = originalGamePath
+            Log.i("S3RENDER", "boot-savestate-return requestId=${record.requestId} state=${RPCSX.getState()}")
+            runOnUiThread { confirmRecoveryFrameAndClear() }
+        }
+    }
+
+    private fun confirmRecoveryFrameAndClear() {
+        thread(name = "S3 Saved-state Frame Confirm") {
+            var stable = 0
+            val deadline = System.currentTimeMillis() + 30_000L
+            while (stable < 6 && System.currentTimeMillis() < deadline && !Thread.interrupted()) {
+                if (RPCSX.getState() == EmulatorState.Running) stable++ else stable = 0
+                try {
+                    Thread.sleep(150)
+                } catch (_: InterruptedException) {
+                    return@thread
+                }
+            }
+            if (stable < 6) {
+                Log.e("S3RENDER", "first-frame-confirm-timeout generation=${surfaceLeaseManager.currentGeneration}")
+                PendingSavestateRecoveryStore.markFailure(this@RPCSXActivity, "first-frame-timeout")
+                runOnUiThread {
+                    binding.transitionOverlay.visibility = View.GONE
+                    recoveryTransitionActive = false
+                }
+                return@thread
+            }
+            Log.i("S3RENDER", "first-frame-confirmed generation=${surfaceLeaseManager.currentGeneration}")
+            PendingSavestateRecoveryStore.clear(this@RPCSXActivity)
+            runOnUiThread {
+                binding.transitionOverlay.animate()
+                    .alpha(0f)
+                    .setDuration(160L)
+                    .withEndAction {
+                        binding.transitionOverlay.visibility = View.GONE
+                        binding.transitionOverlay.alpha = 1f
+                        recoveryTransitionActive = false
+                        inputGate.waitForNeutral()
+                        Log.i("S3RENDER", "transition-overlay-hidden")
+                    }
+                    .start()
+            }
+        }
+    }
+
+    private fun bootSerialized(path: String): Int = synchronized(bootMutex) {
+        RPCSX.instance.boot(path)
+    }
+
+    private fun bootSavestateSerialized(savestatePath: String, originalGamePath: String): Int =
+        synchronized(bootMutex) {
+            RPCSX.instance.bootSavestate(savestatePath, originalGamePath)
+        }
 
     /** Map a semantic menu command to coordinator intents. Returns true if consumed. */
     private fun handleMenuCommand(command: MenuCommand): Boolean {
@@ -363,6 +540,7 @@ class RPCSXActivity : ComponentActivity() {
     }
 
     override fun onDestroy() {
+        try { surfaceLeaseManager.destroy() } catch (_: Exception) {}
         super.onDestroy()
         AlertDialogQueue.hostsSuppressed = false
         try { coordinator.closeForActivityDestroy() } catch (e: Exception) {
@@ -581,6 +759,8 @@ class RPCSXActivity : ComponentActivity() {
     }
 
     companion object {
+        const val EXTRA_RECOVERY_SAVESTATE = "recoverySavestatePath"
+        const val EXTRA_RECOVERY_REQUEST_ID = "recoveryRequestId"
         private const val TITLE_ID_POLL_INTERVAL_MS = 250L
         private const val TITLE_ID_POLL_TIMEOUT_MS = 10_000L
     }

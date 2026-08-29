@@ -97,7 +97,7 @@ fun InGameSaveStatePage(
         AlertDialog(
             onDismissRequest = { showSaveConfirm = false },
             title = { Text("Save State?") },
-            text = { Text(if (capabilities?.suspendMode == true) "Save and exit the game?" else "Save current emulation state to slot ${pendingSlot ?: 0}? Note: will restart.") },
+            text = { Text(if (capabilities?.suspendMode == true) "Save and exit the game?" else "Save current emulation state to slot ${pendingSlot ?: 0}? The game will briefly pause while the state is saved.") },
             confirmButton = {
                 TextButton(onClick = {
                     showSaveConfirm = false

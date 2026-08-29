@@ -52,6 +52,14 @@ sealed interface InGameMenuHostEffect {
     data object WaitForPhysicalNeutralThenArmGameplay : InGameMenuHostEffect
     data object ArmGameplayNow : InGameMenuHostEffect
     data object FinishGameActivity : InGameMenuHostEffect
+    data class BeginSavestateTransition(
+        val slot: Int,
+        val preSaveMtimeMs: Long,
+        val preSaveSizeBytes: Long,
+        val savestatePath: String?,
+        val suspendMode: Boolean
+    ) : InGameMenuHostEffect
+    data class SavestateTransitionFailed(val reason: String) : InGameMenuHostEffect
 }
 
 enum class CloseReason {
@@ -195,7 +203,7 @@ class InGameMenuCoordinator(
             is InGameMenuIntent.ToggleRecording -> closeAndRun(CloseReason.Recording) { core.toggleRecording() }
             is InGameMenuIntent.Restart -> closeAndRun(CloseReason.Restart) { core.restart() }
             is InGameMenuIntent.Exit -> closeAndRun(CloseReason.Exit) { core.gracefulShutdown() }
-            is InGameMenuIntent.SaveState -> closeAndRun(CloseReason.SaveState) { core.saveState(intent.slot) }
+            is InGameMenuIntent.SaveState -> closeAndRun(CloseReason.SaveState, intent.slot) { core.saveState(intent.slot) }
             is InGameMenuIntent.LoadState -> closeAndRun(CloseReason.LoadState) { core.loadState(intent.slot) }
 
             is InGameMenuIntent.SettingsSave -> scope.launch { settingsSave() }
@@ -278,7 +286,7 @@ class InGameMenuCoordinator(
         }
     }
 
-    private fun closeAndRun(reason: CloseReason, action: suspend () -> Result<Boolean>) {
+    private fun closeAndRun(reason: CloseReason, saveSlot: Int? = null, action: suspend () -> Result<Boolean>) {
         val s = _state.value
         if (s.session !is MenuSessionState.Open && s.session !is MenuSessionState.Opening) return
         val destructive = reason == CloseReason.Restart ||
@@ -289,8 +297,22 @@ class InGameMenuCoordinator(
         if (destructive && destructivePending) return
         if (destructive) destructivePending = true
         scope.launch {
+            if (reason == CloseReason.SaveState && saveSlot != null) {
+                val save = (s.session as? MenuSessionState.Open)?.capabilities?.savestate
+                val slotInfo = save?.slots?.firstOrNull { it.slot == saveSlot }
+                _effects.emit(InGameMenuHostEffect.BeginSavestateTransition(
+                    saveSlot,
+                    slotInfo?.mtimeMs ?: 0L,
+                    slotInfo?.sizeBytes ?: 0L,
+                    slotInfo?.path,
+                    save?.suspendMode == true
+                ))
+            }
             closeInternal(reason)
             val ok = action().getOrDefault(false)
+            if (reason == CloseReason.SaveState && !ok) {
+                _effects.emit(InGameMenuHostEffect.SavestateTransitionFailed("request-rejected"))
+            }
             // Host follow-ups that need the Activity:
             //  - Exit: finish once shutdown completes
             //  - Suspend-mode SaveState: backend owns kill; finish when stopped

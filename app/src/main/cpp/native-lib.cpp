@@ -31,7 +31,9 @@ struct RPCSXApi {
   void (*kill)();
   void (*resume)();
   std::string (*getTitleId)();
+  int (*bootSavestate)(std::string_view savestatePath, std::string_view originalGamePath);
   bool (*surfaceEvent)(JNIEnv *env, jobject surface, jint event);
+  bool (*surfaceEventV2)(JNIEnv *env, jobject surface, jint event, jlong generation);
   bool (*usbDeviceEvent)(int fd, int vendorId, int productId, int event);
   bool (*installFw)(JNIEnv *env, int fd, long progressId);
   bool (*isInstallableFile)(jint fd);
@@ -124,7 +126,9 @@ struct RPCSXLibrary : RPCSXApi {
     result.kill = reinterpret_cast<decltype(kill)>(dlsym(handle, "_rpcsx_kill"));
     result.resume = reinterpret_cast<decltype(resume)>(dlsym(handle, "_rpcsx_resume"));
     result.getTitleId = reinterpret_cast<decltype(getTitleId)>(dlsym(handle, "_rpcsx_getTitleId"));
+    result.bootSavestate = reinterpret_cast<decltype(bootSavestate)>(dlsym(handle, "_rpcsx_bootSavestate"));
     result.surfaceEvent = reinterpret_cast<decltype(surfaceEvent)>(dlsym(handle, "_rpcsx_surfaceEvent"));
+    result.surfaceEventV2 = reinterpret_cast<decltype(surfaceEventV2)>(dlsym(handle, "_rpcsx_surfaceEventV2"));
     result.usbDeviceEvent = reinterpret_cast<decltype(usbDeviceEvent)>(dlsym(handle, "_rpcsx_usbDeviceEvent"));
     result.installFw = reinterpret_cast<decltype(installFw)>(dlsym(handle, "_rpcsx_installFw"));
     result.isInstallableFile = reinterpret_cast<decltype(isInstallableFile)>(dlsym(handle, "_rpcsx_isInstallableFile"));
@@ -253,6 +257,13 @@ extern "C" JNIEXPORT jint JNICALL Java_com_zenithblue_sambas3_RPCSX_boot(JNIEnv 
   return rpcsxLib.boot(unwrap(env, jpath));
 }
 
+extern "C" JNIEXPORT jint JNICALL Java_com_zenithblue_sambas3_RPCSX_bootSavestate(
+    JNIEnv *env, jobject, jstring jsavestatePath, jstring joriginalGamePath) {
+  if (!rpcsxLib.bootSavestate) return 1; // GenericError
+  return rpcsxLib.bootSavestate(unwrap(env, jsavestatePath),
+                                unwrap(env, joriginalGamePath));
+}
+
 extern "C" JNIEXPORT jint JNICALL Java_com_zenithblue_sambas3_RPCSX_getState(JNIEnv *env,
                                                                 jobject) {
   if (!rpcsxLib.getState) return 0; // Stopped — library not yet dlopened (cold RPCSXActivity after force-stop)
@@ -376,6 +387,15 @@ Java_com_zenithblue_sambas3_RPCSX_getTitleId(JNIEnv *env, jobject) {
 
 extern "C" JNIEXPORT jboolean JNICALL Java_com_zenithblue_sambas3_RPCSX_surfaceEvent(
     JNIEnv *env, jobject, jobject surface, jint event) {
+  if (!rpcsxLib.surfaceEvent) return false;
+  return rpcsxLib.surfaceEvent(env, surface, event);
+}
+
+extern "C" JNIEXPORT jboolean JNICALL Java_com_zenithblue_sambas3_RPCSX_surfaceEventV2(
+    JNIEnv *env, jobject, jobject surface, jint event, jlong generation) {
+  if (rpcsxLib.surfaceEventV2) {
+    return rpcsxLib.surfaceEventV2(env, surface, event, generation);
+  }
   if (!rpcsxLib.surfaceEvent) return false;
   return rpcsxLib.surfaceEvent(env, surface, event);
 }

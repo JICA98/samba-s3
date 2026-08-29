@@ -8,8 +8,8 @@
     android:keepScreenOn="true"
     tools:context=".RPCSXActivity">
 
-    <com.zenithblue.sambas3.GraphicsFrame
-        android:id="@+id/surfaceView"
+    <FrameLayout
+        android:id="@+id/surfaceHost"
         android:layout_width="match_parent"
         android:layout_height="match_parent" />
 
@@ -49,5 +49,24 @@
         app:layout_constraintBottom_toTopOf="@id/osc_toggle"
         app:layout_constraintEnd_toEndOf="parent"
         android:layout_marginEnd="10dp" />
+
+    <FrameLayout
+        android:id="@+id/transitionOverlay"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="#FF000000"
+        android:clickable="true"
+        android:focusable="true"
+        android:visibility="gone">
+
+        <TextView
+            android:id="@+id/transitionLabel"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:text="Saving..."
+            android:textColor="#FFFFFFFF"
+            android:textSize="16sp" />
+    </FrameLayout>
 
 </androidx.constraintlayout.widget.ConstraintLayout>

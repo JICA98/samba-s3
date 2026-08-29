@@ -1,0 +1,242 @@
+diff --git a/android/src/rpcsx-android.cpp b/android/src/rpcsx-android.cpp
+index 8a9f42810..78d2b61ba 100644
+--- a/android/src/rpcsx-android.cpp
++++ b/android/src/rpcsx-android.cpp
+@@ -117,6 +117,7 @@ struct AtExit {
+ 
+ static bool g_initialized;
+ static std::atomic<ANativeWindow *> g_native_window;
++static std::atomic<u64> g_surface_generation{0};
+ 
+ // Compilation and game/install lifecycle operations all use the same global
+ // Emu/fxo state. Keep them serialized: stopping a VSH precompile while a boot
+@@ -150,6 +151,8 @@ static constexpr int FRONTEND_EVENT_HOME_REQUESTED = 1;
+ static constexpr int FRONTEND_EVENT_RECORDING_CHANGED = 2;
+ static constexpr int FRONTEND_EVENT_SCREENSHOT_RESULT = 3;
+ static constexpr int FRONTEND_EVENT_EMULATOR_ACTION_ERROR = 4;
++static constexpr int FRONTEND_EVENT_SAVESTATE_COMMITTED = 5;
++static constexpr int FRONTEND_EVENT_SAVESTATE_FAILED = 6;
+ 
+ static atomic_t<bool> g_frontend_menu_active{false};
+ static atomic_t<bool> g_frontend_menu_paused_emu{false};
+@@ -2296,6 +2299,30 @@ extern "C" int _rpcsx_boot(std::string_view path_) {
+   return static_cast<int>(Emu.BootGame(path, "", false, cfg_mode::global));
+ }
+ 
++// Recovery boot for a savestate created by Android.  A savestate stores the
++// disc title ID, but a fresh process may not have that title in games.yml's
++// in-memory map yet.  Register the durable original game directory before
++// opening the archive so Load() can resolve /dev_bdvd after process death.
++extern "C" int _rpcsx_bootSavestate(std::string_view savestate_path_,
++                                    std::string_view original_game_path_) {
++  std::unique_lock lifecycleLock(g_emulator_lifecycle_mutex);
++
++  const std::string original_game_path(original_game_path_);
++  if (!original_game_path.empty()) {
++    const auto registration = Emu.AddGame(original_game_path);
++    rpcsx_android.notice("S3SAVE recovery-register-game path='%s' result=%d",
++                         original_game_path.c_str(), static_cast<int>(registration));
++  }
++
++  Emu.SetContinuousMode(true);
++  Emu.SetForceBoot(true);
++  const std::string savestate_path(savestate_path_);
++  const auto result = Emu.BootGame(savestate_path, "", true, cfg_mode::global);
++  rpcsx_android.notice("S3SAVE recovery-boot path='%s' result=%d",
++                       savestate_path.c_str(), static_cast<int>(result));
++  return static_cast<int>(result);
++}
++
+ extern "C" int _rpcsx_getState() {
+   return static_cast<int>(Emu.GetStatus(false));
+ }
+@@ -2318,18 +2345,27 @@ extern "C" void _rpcsx_resume() {
+ 
+ extern "C" std::string _rpcsx_getTitleId() { return Emu.GetTitleID(); }
+ 
+-extern "C" bool _rpcsx_surfaceEvent(JNIEnv *env, jobject surface, jint event) {
+-  rpcsx_android.warning("surface event %p, %d", surface, event);
++static bool surface_event_impl(JNIEnv *env, jobject surface, jint event,
++                               u64 generation) {
++  const u64 current_generation = g_surface_generation.load(std::memory_order_acquire);
++  if (generation != 0 && current_generation != 0 && generation < current_generation) {
++    rpcsx_android.notice("S3SURFACE stale event=%d generation=%llu current=%llu",
++                         (int)event, generation, current_generation);
++    return true;
++  }
++  if (generation != 0 && event == 0) {
++    g_surface_generation.store(generation, std::memory_order_release);
++  }
++  rpcsx_android.notice("S3SURFACE event=%d generation=%llu current=%llu tid=%d state=%d",
++                       (int)event, generation,
++                       g_surface_generation.load(std::memory_order_relaxed),
++                       (int)::gettid(), (int)Emu.GetStatus(false));
+ 
+   if (event == 2) {
+     // Stop/pause the emulator before releasing the window it may still be
+     // using. Boot/kill and renderer teardown share this lifecycle gate.
+     // Do NOT open native home menu on surface detach — Kotlin owns menu.
+     std::unique_lock lifecycleLock(g_emulator_lifecycle_mutex);
+-    auto prevWindow = g_native_window.exchange(nullptr);
+-    if (prevWindow != nullptr) {
+-      ANativeWindow_release(prevWindow);
+-    }
+ 
+     if (Emu.IsRunning())
+     {
+@@ -2337,6 +2373,14 @@ extern "C" bool _rpcsx_surfaceEvent(JNIEnv *env, jobject surface, jint event) {
+       g_surface_pause_owned = true;
+       rpcsx_android.notice("surfaceEvent detach paused, owned=true frontendActive=%d", g_frontend_menu_active.load());
+     }
++
++    auto prevWindow = g_native_window.exchange(nullptr);
++    if (prevWindow != nullptr) {
++      ANativeWindow_release(prevWindow);
++    }
++    rpcsx_android.notice("S3SURFACE native-release-return generation=%llu tid=%d",
++                         generation, (int)::gettid());
++
+   } else {
+     auto newWindow = ANativeWindow_fromSurface(env, surface);
+ 
+@@ -2346,14 +2390,12 @@ extern "C" bool _rpcsx_surfaceEvent(JNIEnv *env, jobject surface, jint event) {
+       return false;
+     }
+ 
++    // ANativeWindow_fromSurface returns one owned reference. Transfer that
++    // reference to g_native_window; do not acquire another reference on each
++    // CREATE/CHANGE (the old code leaked one reference per event).
+     auto prevWindow = g_native_window.exchange(newWindow);
+-
+-    if (newWindow != prevWindow) {
+-      ANativeWindow_acquire(newWindow);
+-
+-      if (prevWindow != nullptr) {
+-        ANativeWindow_release(prevWindow);
+-      }
++    if (prevWindow != nullptr) {
++      ANativeWindow_release(prevWindow);
+     }
+ 
+     // BootGame holds the lifecycle mutex while the renderer waits for this
+@@ -2374,6 +2416,15 @@ extern "C" bool _rpcsx_surfaceEvent(JNIEnv *env, jobject surface, jint event) {
+   return true;
+ }
+ 
++extern "C" bool _rpcsx_surfaceEvent(JNIEnv *env, jobject surface, jint event) {
++  return surface_event_impl(env, surface, event, 0);
++}
++
++extern "C" bool _rpcsx_surfaceEventV2(JNIEnv *env, jobject surface, jint event,
++                                       u64 generation) {
++  return surface_event_impl(env, surface, event, generation);
++}
++
+ // ── Frontend Home Menu ownership — Kotlin owns presentation ──────────────
+ extern "C" bool _rpcsx_beginFrontendMenu()
+ {
+@@ -3918,19 +3969,21 @@ static nlohmann::json saveStateSlotsJson()
+             nlohmann::json slot;
+             slot["slot"] = i;
+             const std::string path = slotSavestatePathCompressed(i);
+-            const bool exists = !path.empty();
++            fs::stat_t info{};
++            const bool exists = !path.empty() && fs::get_stat(path, info);
+             slot["exists"] = exists;
++            if (!path.empty())
++                slot["path"] = path;
+             if (exists)
+             {
+-                if (fs::stat_t info{}; fs::get_stat(path, info))
++                slot["mtimeMs"] = static_cast<u64>(info.mtime) * 1000;
++                slot["sizeBytes"] = static_cast<u64>(info.size);
++                std::time_t mtime = static_cast<std::time_t>(info.mtime);
++                char buf[32]{};
++                if (std::tm* tm = std::localtime(&mtime);
++                    tm && std::strftime(buf, sizeof(buf), "%d %b %H:%M", tm))
+                 {
+-                    std::time_t mtime = static_cast<std::time_t>(info.mtime);
+-                    char buf[32]{};
+-                    if (std::tm* tm = std::localtime(&mtime);
+-                        tm && std::strftime(buf, sizeof(buf), "%d %b %H:%M", tm))
+-                    {
+-                        slot["label"] = fmt::format("Slot %d — %s", i, buf);
+-                    }
++                    slot["label"] = fmt::format("Slot %d — %s", i, buf);
+                 }
+                 if (!slot.contains("label"))
+                     slot["label"] = fmt::format("Slot %d", i);
+@@ -3989,7 +4042,7 @@ extern "C" bool _rpcsx_saveState(int slot)
+                    fmt::format(" emu_stopped=%d suspend=%d",
+                                (int)Emu.IsStopped(), (int)suspendMode)
+                        .c_str());
+-        Emu.after_kill_callback = [slot, id]()
++        Emu.after_kill_callback = [slot, suspendMode, id]()
+         {
+             const std::string fresh = slotSavestatePathCompressed(0);
+             if (slot > 0 && !fresh.empty())
+@@ -4007,19 +4060,54 @@ extern "C" bool _rpcsx_saveState(int slot)
+                 slot > 0 ? slotSavestatePathCompressed(slot) : fresh;
+             if (boot_path.empty())
+             {
+-                rpcsx_android.error("S3LIFE id=%llu action=save phase=restart_error reason=missing_slot_file slot=%d",
++                rpcsx_android.error("S3SAVE id=%llu phase=failed slot=%d reason=missing_slot_file",
+                                     (u64)id, slot);
++                const std::string failure = fmt::format(
++                    R"({{"requestId":{},"slot":{},"reason":"missing_slot_file"}})",
++                    id, slot);
++                emit_frontend_event(FRONTEND_EVENT_SAVESTATE_FAILED, &failure);
+                 return;
+             }
+-            const u64 new_gen = g_emu_generation.fetch_add(1) + 1;
+-            const std::string boot_extra =
+-                fmt::format(" path='{}' new_gen={}", boot_path, new_gen);
+-            sstate_log(id, "save", "restart_callback_boot_begin",
+-                       boot_extra.c_str());
+-            Emu.SetContinuousMode(true);
+-            Emu.SetForceBoot(true);
+-            Emu.BootGame(boot_path, "", true);
+-            sstate_log(id, "save", "restart_boot_returned");
++
++            fs::stat_t info{};
++            if (!fs::get_stat(boot_path, info) || info.size == 0)
++            {
++                rpcsx_android.error("S3SAVE id=%llu phase=failed slot=%d reason=invalid_final_file path='%s'",
++                                    (u64)id, slot, boot_path);
++                const std::string failure = fmt::format(
++                    R"({{"requestId":{},"slot":{},"path":"{}","reason":"invalid_final_file"}})",
++                    id, slot, boot_path);
++                emit_frontend_event(FRONTEND_EVENT_SAVESTATE_FAILED, &failure);
++                return;
++            }
++
++            sstate_log(id, "save", "core_stopped");
++            rpcsx_android.notice("S3SAVE id=%llu phase=file-committed slot=%d path='%s' size=%llu",
++                                 (u64)id, slot, boot_path, (u64)info.size);
++
++            // Suspend mode remains save-and-exit. Normal frontend saves stop
++            // at a durable slot and let Android replace the SurfaceView before
++            // booting the exact committed file. Reusing the old surface here
++            // caused VK_ERROR_NATIVE_WINDOW_IN_USE_KHR.
++            if (suspendMode)
++            {
++                sstate_log(id, "save", "slot_finalized");
++                return;
++            }
++
++            nlohmann::json payload{
++                {"requestId", id},
++                {"slot", slot},
++                {"path", boot_path},
++                {"titleId", Emu.GetTitleID()},
++                {"mtimeMs", static_cast<u64>(info.mtime) * 1000},
++                {"sizeBytes", static_cast<u64>(info.size)}
++            };
++            const std::string committed = payload.dump();
++            sstate_log(id, "save", "slot_finalized");
++            rpcsx_android.notice("S3SAVE id=%llu phase=completion-event slot=%d path='%s'",
++                                 (u64)id, slot, boot_path);
++            emit_frontend_event(FRONTEND_EVENT_SAVESTATE_COMMITTED, &committed);
+         };
+         sstate_log(id, "save", "kill_begin");
+         if (!suspendMode)
