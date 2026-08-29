@@ -153,6 +153,45 @@ tablet log. The final screenshot is
 No fresh Scudo, SIGABRT/SIGSEGV, `VK_ERROR_DEVICE_LOST`, or PPU link failure
 was observed in this verification window.
 
+### Fresh 20-minute long-play SAVE and same-slot LOAD
+
+On 29 Aug, the tablet ran GTA San Andreas in live free-roam for 20 minutes
+with periodic movement input. The 20-minute frame is captured at
+`/tmp/samba-tablet-longplay-60-20260829.png` and shows the player, HUD, and
+minimap with no PPU progress overlay.
+
+Slot 0 was then overwritten from the in-game menu. The save file became
+`63,618,632` bytes and the transition log recorded the complete sequence:
+
+```text
+S3SAVE ... phase=file-committed slot=0 ... size=63618632
+S3SAVE ... phase=completion-event slot=0
+S3RENDER old surface replacement requested ... slot=0
+S3RENDER boot-savestate-begin ... BLUS31584_1_0.SAVESTAT.zst
+S3PPU stage=link-end ... failed=0
+S3RENDER running generation=2
+S3RENDER first-frame-confirmed generation=2
+S3PPU savestate-progress-cleared
+S3SAVE pending recovery cleared
+```
+
+The save-start and post-transition frames are
+`/tmp/samba-tablet-longplay-save-start-20260829.png` and
+`/tmp/samba-tablet-longplay-save-after30-20260829.png`; the filtered log is
+`/tmp/samba-tablet-longplay-save-log-20260829.txt`.
+
+The newly saved Slot 0 was immediately loaded from the same exact path. The
+tablet displayed the updated `Slot 0 — 29 Aug 23:24` entry, and LOAD completed
+with `failed=0`, `manual-load first-frame-confirmed slot=0 generation=2`, and
+`S3SAVE pending recovery cleared`. The final restored gameplay frame is
+`/tmp/samba-tablet-longplay-load-after30-20260829.png`; the filtered log is
+`/tmp/samba-tablet-longplay-load-log-20260829.txt`.
+
+The load log also exposed one benign late completion from the preceding save
+being ignored because its pending request had already been consumed. The
+fresh load itself completed normally and no PPU, Vulkan, Scudo, or signal
+failure appeared in either filtered window.
+
 ## Build
 
 - `./gradlew test :app:assembleStandardDebug --no-daemon` — passed.
@@ -170,7 +209,7 @@ was observed in this verification window.
 
 ## Limitations
 
-This report records the completed normal-save, exact-slot manual LOAD, and
-forced-interruption recovery gates. A fresh 20–30 minute uninterrupted
-long-play run was not repeated in this final install window; the prior tablet
-long-play evidence remains in `2026-08-29-savestate-recovery-followup.md`.
+The broader lifecycle stress matrix and second long-save-on-another-slot gate
+remain outside this run. The required 20-minute long-play, exact Slot 0 SAVE,
+and same-slot LOAD were completed on the final tablet install and are recorded
+above.
