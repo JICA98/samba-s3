@@ -225,8 +225,24 @@ class RPCSXActivity : ComponentActivity() {
                         Log.i(
                             "S3SAVE",
                             "native-accepted requestId=${pending?.requestId ?: 0L} slot=${effect.slot} " +
-                                "state=${pending?.state ?: "missing"}"
+                            "state=${pending?.state ?: "missing"}"
                         )
+                    }
+
+                    is com.zenithblue.sambas3.ui.ingame.InGameMenuHostEffect.SavestateLoadAccepted -> {
+                        val titleId = runCatching { RPCSX.instance.getTitleId() }.getOrDefault("")
+                        val record = PendingSavestateRecoveryStore.armCommitted(
+                            this@RPCSXActivity,
+                            effect.slot,
+                            originalGamePath,
+                            effect.savestatePath,
+                            titleId
+                        )
+                        if (record == null) {
+                            Log.w("S3SAVE", "manual-load recovery marker not armed slot=${effect.slot}")
+                        } else {
+                            watchManualLoad(record)
+                        }
                     }
 
                     is com.zenithblue.sambas3.ui.ingame.InGameMenuHostEffect.SavestateTransitionFailed -> {
@@ -405,7 +421,9 @@ class RPCSXActivity : ComponentActivity() {
         val committed = payload ?: return
         val record = PendingSavestateRecoveryStore.commit(this, committed)
         val path = record?.savestatePath ?: run {
-            Log.e("S3SAVE", "completion rejected: missing record payload=$payload")
+            // Native completion can arrive late after the transition already
+            // cleared its marker.  It is stale, not a new save failure.
+            Log.w("S3SAVE", "completion ignored: no matching pending request payload=$payload")
             return
         }
         if (path.isBlank() || !java.io.File(path).isFile) {
@@ -499,6 +517,7 @@ class RPCSXActivity : ComponentActivity() {
                 Log.e("S3RENDER", "first-frame confirmation rejected by transition controller")
                 return@thread
             }
+            Log.i("S3RENDER", "running generation=${surfaceLeaseManager.currentGeneration}")
             Log.i("S3RENDER", "first-frame-confirmed generation=${surfaceLeaseManager.currentGeneration}")
             runCatching { RPCSX.instance.clearSavestateProgress() }
             PendingSavestateRecoveryStore.clear(this@RPCSXActivity)
@@ -518,6 +537,52 @@ class RPCSXActivity : ComponentActivity() {
                         Log.i("S3RENDER", "transition-overlay-hidden")
                     }
                     .start()
+            }
+        }
+    }
+
+    /**
+     * Manual LOAD uses the existing native transition, but still needs the
+     * same durable recovery guarantee and boot-owned progress cleanup as the
+     * automatic save->restore path.  Running plus a stable PixelCopy frame is
+     * the completion gate; a process death before that gate leaves COMMITTED
+     * armed for the next Activity launch.
+     */
+    private fun watchManualLoad(record: PendingSavestateRecovery) {
+        bootThread?.interrupt()
+        bootThread = thread(name = "S3 Manual Savestate Confirm") {
+            val expectedGeneration = surfaceLeaseManager.currentGeneration
+            val deadline = System.currentTimeMillis() + 60_000L
+            val notBefore = System.currentTimeMillis() + 3_000L
+            var stable = 0
+            while (System.currentTimeMillis() < deadline && !Thread.interrupted()) {
+                val running = runCatching { RPCSX.getState() == EmulatorState.Running }.getOrDefault(false)
+                val copied = if (running && System.currentTimeMillis() >= notBefore) {
+                    probeCurrentFrame(expectedGeneration)
+                } else {
+                    false
+                }
+                if (running && copied) stable++ else stable = 0
+                if (stable >= 6) {
+                    runCatching { RPCSX.instance.clearSavestateProgress() }
+                    PendingSavestateRecoveryStore.clear(this@RPCSXActivity)
+                    Log.i(
+                        "S3SAVE",
+                        "manual-load first-frame-confirmed slot=${record.slot} generation=$expectedGeneration"
+                    )
+                    return@thread
+                }
+                try {
+                    Thread.sleep(150L)
+                } catch (_: InterruptedException) {
+                    return@thread
+                }
+            }
+            if (!Thread.interrupted()) {
+                Log.e(
+                    "S3SAVE",
+                    "manual-load confirmation timeout slot=${record.slot}; exact slot kept for recovery"
+                )
             }
         }
     }

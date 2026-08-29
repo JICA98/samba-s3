@@ -104,6 +104,41 @@ object PendingSavestateRecoveryStore {
         }.getOrNull()
     }
 
+    /**
+     * Arms recovery for an explicitly requested manual LOAD.  Unlike SAVE,
+     * the slot is already durable, so it must be recorded directly as
+     * COMMITTED instead of waiting for an mtime change.
+     */
+    fun armCommitted(
+        context: Context,
+        slot: Int,
+        originalGamePath: String,
+        savestatePath: String,
+        titleId: String = ""
+    ): PendingSavestateRecovery? {
+        val file = File(savestatePath)
+        if (savestatePath.isBlank() || !file.isFile || file.length() <= 0L) {
+            Log.w(TAG, "S3SAVE manual-load marker rejected path=$savestatePath")
+            return null
+        }
+        val now = System.currentTimeMillis()
+        write(context, JSONObject().apply {
+            put("requestId", now)
+            put("slot", slot)
+            put("originalGamePath", originalGamePath)
+            put("savestatePath", savestatePath)
+            put("state", COMMITTED)
+            put("preSaveMtimeMs", file.lastModified())
+            put("preSaveSizeBytes", file.length())
+            put("requestedAtMs", now)
+            put("committedAtMs", now)
+            put("retryCount", 0)
+            put("titleId", titleId)
+        })
+        Log.i(TAG, "S3SAVE manual-load marker armed requestId=$now slot=$slot path=$savestatePath")
+        return read(context)
+    }
+
     fun read(context: Context): PendingSavestateRecovery? = runCatching {
         val j = context.getSharedPreferences(PREFS, Context.MODE_PRIVATE)
             .getString(KEY_RECORD, null)?.let(::JSONObject) ?: return null

@@ -2,8 +2,9 @@
 
 ## Scope
 
-Validation was performed only on Android tablet serial `7d6afed8`; the phone
-serial was not used. Game: GTA San Andreas (`BLUS31584`).
+Validation was performed only on Android tablet `OPD2403`, serial
+`adb-7d6afed8-mU47CV._adb-tls-connect._tcp`; the phone was not used. Game:
+GTA San Andreas (`BLUS31584`).
 
 ## Implemented recovery behavior
 
@@ -15,6 +16,9 @@ serial was not used. Game: GTA San Andreas (`BLUS31584`).
 - A process interruption after commit is recovered on the next `MainActivity`
   launch. Recovery re-registers the original game and boots the committed
   savestate path, with bounded retry handling.
+- Manual LOAD now arms the exact selected existing slot as `COMMITTED` before
+  confirmation. If the process terminates during restore, the next launch
+  uses that same slot instead of a generic game boot.
 - PPU compile progress is explicitly cleared after savestate restore so the
   old “Applying PPU Code…” message does not remain over live gameplay.
 - Surface events are generation-checked; one bounded `Activity.recreate()` is
@@ -69,14 +73,46 @@ S3SAVE pending recovery cleared
 
 The same Slot 4 was then loaded from the in-game save menu; after the PPU
 link/apply sequence completed, the screenshot showed live gameplay again:
-`/tmp/samba-tablet-load-final.png`. A duplicate completion event was rejected
-with `completion rejected: missing record`, confirming stale-event protection.
+`/tmp/samba-tablet-load-final.png`. A duplicate completion event was ignored
+with a warning for a missing record, confirming stale-event protection.
 
 The backend and app logs for the run contain no fresh `VK_ERROR_DEVICE_LOST`,
 Scudo invalid-chunk, `SIGABRT`, `SIGSEGV`, access-violation, or PPU link failure.
 The tablet did emit harmless 4x4 `AHardwareBuffer` allocation warnings during
 surface recreation; they did not prevent first-frame confirmation. Historical
 Vulkan `dequeueBuffer -19` entries predate this validation window.
+
+### Final exact Slot 3 manual LOAD
+
+The rebuilt Standard Debug APK was installed on the tablet and launched GTA
+normally. `/tmp/samba-tablet-final-installed-gameplay2.png` shows rendered
+gameplay after installation with no stale restore overlay.
+
+The existing exact Slot 3 file was present:
+
+```text
+/storage/emulated/0/Android/data/com.zenithblue.sambas3/files/config//savestates/BLUS31584/BLUS31584_1_3.SAVESTAT.zst
+size=67358041 bytes, mtime=2026-08-29 21:24
+```
+
+The tablet selected `Slot 3 — 29 Aug 21:24` and tapped LOAD. The final log
+recorded:
+
+```text
+S3SAVE manual-load marker armed ... slot=3 ... BLUS31584_1_3.SAVESTAT.zst
+S3LIFE ... action=load phase=shutdown_end ... is_stopped=1
+S3LIFE ... action=load phase=boot_begin new_gen=1 ... BLUS31584_1_3.SAVESTAT.zst
+S3PPU stage=link-end ... failed=0
+S3PPU savestate-progress-cleared
+S3SAVE pending recovery cleared
+S3SAVE manual-load first-frame-confirmed slot=3 generation=1
+```
+
+`/tmp/samba-tablet-manual-load-after-final.png` captured the transitional PPU
+linking screen at module 3/71. The completion capture
+`/tmp/samba-tablet-manual-load-confirmed-final.png` shows live restored GTA
+gameplay with HUD and no PPU overlay. The complete filtered log is
+`/tmp/samba-tablet-manual-load-final.log`.
 
 ### Fresh controlled interruption
 
@@ -100,18 +136,21 @@ logs are under `/tmp/samba-tablet-interruption-window/`.
 
 ## Build
 
-- `./gradlew :app:testStandardDebugUnitTest :app:assembleStandardDebug` —
-  passed.
+- `./gradlew test :app:assembleStandardDebug --no-daemon` — passed.
 - ARM64 RPCSX core rebuilt incrementally and copied into the APK inputs.
+- RPCSX build ID: `8ec572bdac5ad7d3b176748a0a3070534841b429`.
+- Patch SHA-256:
+  `6468572dbc6dec3ea7d0ad996adeb57dffd96a090d10482ea04d7013abecd5f0`.
 - ARM64 core SHA-256:
-  `6a1ed8c8a4db409460945788686ef0b7c5c7362188f734f0d68771878fe5dda7`
+  `5fa8de22a3a6271dd238141db84d5717a2f29d683c0385888bf5de2a56080a55`
 - Installed APK SHA-256:
-  `1639dd196cc9277fed5b341bf6909fa5c32e723e7371c4d38c37a7fcdf092296`
-- Installed only with `adb -s 7d6afed8 install -r -d`.
+  `b7b519ba4236209cd347e973968656296b4f67e0bd208b7c589442f50982e9cd`
+- Installed only with
+  `adb -s adb-7d6afed8-mU47CV._adb-tls-connect._tcp install -r -d`.
 
 ## Limitations
 
-This report records the completed normal-save and forced-interruption recovery
-gates. A fresh 20–30 minute uninterrupted long-play run was not repeated in
-this final install window; the prior repeated tablet SAVE/LOAD evidence remains
-in `2026-08-29-savestate-recovery-followup.md`.
+This report records the completed normal-save, exact-slot manual LOAD, and
+forced-interruption recovery gates. A fresh 20–30 minute uninterrupted
+long-play run was not repeated in this final install window; the prior tablet
+long-play evidence remains in `2026-08-29-savestate-recovery-followup.md`.

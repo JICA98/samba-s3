@@ -60,6 +60,7 @@ sealed interface InGameMenuHostEffect {
         val suspendMode: Boolean
     ) : InGameMenuHostEffect
     data class SavestateRequestAccepted(val slot: Int) : InGameMenuHostEffect
+    data class SavestateLoadAccepted(val slot: Int, val savestatePath: String) : InGameMenuHostEffect
     data class SavestateTransitionFailed(val reason: String) : InGameMenuHostEffect
 }
 
@@ -205,7 +206,7 @@ class InGameMenuCoordinator(
             is InGameMenuIntent.Restart -> closeAndRun(CloseReason.Restart) { core.restart() }
             is InGameMenuIntent.Exit -> closeAndRun(CloseReason.Exit) { core.gracefulShutdown() }
             is InGameMenuIntent.SaveState -> closeAndRun(CloseReason.SaveState, intent.slot) { core.saveState(intent.slot) }
-            is InGameMenuIntent.LoadState -> closeAndRun(CloseReason.LoadState) { core.loadState(intent.slot) }
+            is InGameMenuIntent.LoadState -> closeAndRun(CloseReason.LoadState, intent.slot) { core.loadState(intent.slot) }
 
             is InGameMenuIntent.SettingsSave -> scope.launch { settingsSave() }
             is InGameMenuIntent.SettingsDiscard -> scope.launch { settingsDiscard() }
@@ -298,9 +299,12 @@ class InGameMenuCoordinator(
         if (destructive && destructivePending) return
         if (destructive) destructivePending = true
         scope.launch {
+            val slotInfo = saveSlot?.let { slot ->
+                (s.session as? MenuSessionState.Open)?.capabilities?.savestate
+                    ?.slots?.firstOrNull { it.slot == slot }
+            }
             if (reason == CloseReason.SaveState && saveSlot != null) {
                 val save = (s.session as? MenuSessionState.Open)?.capabilities?.savestate
-                val slotInfo = save?.slots?.firstOrNull { it.slot == saveSlot }
                 _effects.emit(InGameMenuHostEffect.BeginSavestateTransition(
                     saveSlot,
                     slotInfo?.mtimeMs ?: 0L,
@@ -313,6 +317,11 @@ class InGameMenuCoordinator(
             val ok = action().getOrDefault(false)
             if (reason == CloseReason.SaveState && ok) {
                 _effects.emit(InGameMenuHostEffect.SavestateRequestAccepted(saveSlot ?: 0))
+            }
+            if (reason == CloseReason.LoadState && ok) {
+                slotInfo?.path?.takeIf { it.isNotBlank() }?.let { path ->
+                    _effects.emit(InGameMenuHostEffect.SavestateLoadAccepted(slotInfo.slot, path))
+                }
             }
             if (reason == CloseReason.SaveState && !ok) {
                 _effects.emit(InGameMenuHostEffect.SavestateTransitionFailed("request-rejected"))

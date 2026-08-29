@@ -115,4 +115,24 @@ class PendingSavestateRecoveryStoreTest {
         assertNull(PendingSavestateRecoveryStore.validForLaunch(context))
         assertTrue(stateFile.isFile)
     }
+
+    @Test
+    fun manual_load_arms_exact_existing_slot_for_process_recovery() {
+        stateFile.writeBytes(ByteArray(8) { 9 })
+
+        val record = PendingSavestateRecoveryStore.armCommitted(
+            context,
+            3,
+            "/games/BLUS31584",
+            stateFile.path,
+            "BLUS31584"
+        )
+
+        assertNotNull(record)
+        assertEquals("COMMITTED", record!!.state)
+        assertEquals(3, record.slot)
+        assertEquals(stateFile.path, record.savestatePath)
+        assertEquals("BLUS31584", record.titleId)
+        assertEquals(stateFile.path, PendingSavestateRecoveryStore.validForLaunch(context)!!.savestatePath)
+    }
 }
