@@ -134,17 +134,37 @@ The final screenshot `/tmp/samba-tablet-controlled-recovery-33s.png` shows
 rendered GTA gameplay with no `Restoring...` overlay. The corresponding pulled
 logs are under `/tmp/samba-tablet-interruption-window/`.
 
+### Fresh Slot 0 load/save verification
+
+After installing the targeted progress-dialog fix on the same tablet, the
+existing exact Slot 0 (`BLUS31584_1_0.SAVESTAT.zst`) was loaded successfully.
+The PPU link completed with `failed=0`, followed by
+`manual-load first-frame-confirmed slot=0`; the final screenshot
+`/tmp/samba-tablet-slot0-load-current-20260829.png` shows the GTA menu without
+the stale `Applying PPU Code...` dialog.
+
+The same Slot 0 was then overwritten through the in-game menu. The save
+completed and restarted the exact slot, with `first-frame-confirmed`,
+`S3PPU savestate-progress-cleared`, and `transition-overlay-hidden` in the
+tablet log. The final screenshot is
+`/tmp/samba-tablet-save-slot0-after30-20260829.png`; the filtered log is
+`/tmp/samba-tablet-save-slot0-logcat-20260829.txt`.
+
+No fresh Scudo, SIGABRT/SIGSEGV, `VK_ERROR_DEVICE_LOST`, or PPU link failure
+was observed in this verification window.
+
 ## Build
 
 - `./gradlew test :app:assembleStandardDebug --no-daemon` — passed.
 - ARM64 RPCSX core rebuilt incrementally and copied into the APK inputs.
-- RPCSX build ID: `8ec572bdac5ad7d3b176748a0a3070534841b429`.
+- Native recovery commit: `657b26a0d197c29d42cdcf3b3f6e8ad5c6765bbc`.
+- Embedded RPCSX build ID source revision: `27441815c12cca1a4dcb3daec82b513b1a35eed7`.
 - Patch SHA-256:
   `6468572dbc6dec3ea7d0ad996adeb57dffd96a090d10482ea04d7013abecd5f0`.
 - ARM64 core SHA-256:
-  `5fa8de22a3a6271dd238141db84d5717a2f29d683c0385888bf5de2a56080a55`
+  `8f1090150729cce876e09e0a7b68086efdf1de89d40224b30994145f919be0ed`
 - Installed APK SHA-256:
-  `b7b519ba4236209cd347e973968656296b4f67e0bd208b7c589442f50982e9cd`
+  `a72761845a0ec5d30d223c8b0b89b5301d90aaffed9a24c169512a4768042799`
 - Installed only with
   `adb -s adb-7d6afed8-mU47CV._adb-tls-connect._tcp install -r -d`.
 
