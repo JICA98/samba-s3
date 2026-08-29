@@ -273,6 +273,37 @@ class InGameMenuCoordinatorTest {
     }
 
     @Test
+    fun accepted_load_emits_exact_slot_path_after_request_returns_true() = runBlocking {
+        val path = "/states/BLUS31584_1_3.SAVESTAT.zst"
+        gateway.caps = gateway.caps.copy(
+            savestate = SaveStateCapabilities(
+                supported = true,
+                suspendMode = false,
+                canSave = true,
+                slots = listOf(SaveSlot(3, true, "Slot 3", path, 123L, 456L))
+            )
+        )
+        val effects = mutableListOf<InGameMenuHostEffect>()
+        val job = launch {
+            coordinator.effects.collect { effects.add(it) }
+        }
+        openMain()
+        coordinator.dispatch(InGameMenuIntent.LoadState(3))
+        awaitCondition { gateway.loadCalls == listOf(3) }
+        withTimeout(2000) {
+            while (effects.none { it is InGameMenuHostEffect.SavestateLoadAccepted }) {
+                kotlinx.coroutines.delay(10)
+            }
+        }
+        val accepted = effects.first {
+            it is InGameMenuHostEffect.SavestateLoadAccepted
+        } as InGameMenuHostEffect.SavestateLoadAccepted
+        assertEquals(3, accepted.slot)
+        assertEquals(path, accepted.savestatePath)
+        job.cancel()
+    }
+
+    @Test
     fun restart_rejects_duplicate_after_dispatch() {
         openMain()
         coordinator.dispatch(InGameMenuIntent.Restart)

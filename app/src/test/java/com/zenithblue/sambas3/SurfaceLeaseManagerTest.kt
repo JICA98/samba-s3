@@ -78,4 +78,67 @@ class SurfaceLeaseManagerTest {
         assertEquals(old, manager.currentFrame)
         assertTrue(failure?.startsWith("native-destroy-failed") == true)
     }
+
+    @Test
+    fun stale_create_and_change_are_ignored_after_replacement() {
+        val host = FrameLayout(ApplicationProvider.getApplicationContext())
+        val events = mutableListOf<Pair<Int, Long>>()
+        val manager = SurfaceLeaseManager(host, SurfaceLeaseBridge { _, event, generation ->
+            events += event to generation
+            true
+        })
+        manager.installInitial()
+        val old = manager.currentFrame!!
+        manager.onSurfaceCreated(old, old.generation, testSurface())
+        manager.replace {}
+        manager.onSurfaceDestroyed(old, old.generation, testSurface())
+        val fresh = manager.currentFrame!!
+
+        manager.onSurfaceCreated(old, old.generation, testSurface())
+        manager.onSurfaceChanged(old, old.generation, testSurface())
+
+        assertEquals(fresh, manager.currentFrame)
+        assertEquals(listOf(0 to old.generation, 2 to old.generation), events)
+    }
+
+    @Test
+    fun duplicate_destroy_is_forwarded_once_and_does_not_recreate() {
+        val host = FrameLayout(ApplicationProvider.getApplicationContext())
+        val events = mutableListOf<Pair<Int, Long>>()
+        val manager = SurfaceLeaseManager(host, SurfaceLeaseBridge { _, event, generation ->
+            events += event to generation
+            true
+        })
+        manager.installInitial()
+        val frame = manager.currentFrame!!
+        manager.onSurfaceCreated(frame, frame.generation, testSurface())
+        manager.onSurfaceDestroyed(frame, frame.generation, testSurface())
+        manager.onSurfaceDestroyed(frame, frame.generation, testSurface())
+
+        assertEquals(null, manager.currentFrame)
+        assertEquals(listOf(0 to frame.generation, 2 to frame.generation), events)
+    }
+
+    @Test
+    fun replacement_without_surface_waits_for_fresh_surface_only() {
+        val host = FrameLayout(ApplicationProvider.getApplicationContext())
+        val events = mutableListOf<Pair<Int, Long>>()
+        val manager = SurfaceLeaseManager(host, SurfaceLeaseBridge { _, event, generation ->
+            events += event to generation
+            true
+        })
+        manager.installInitial()
+        val old = manager.currentFrame!!
+        var ready = 0
+        manager.replace { ready++ }
+
+        val fresh = manager.currentFrame!!
+        assertNotEquals(old.generation, fresh.generation)
+        assertEquals(0, ready)
+        assertEquals(emptyList<Pair<Int, Long>>(), events)
+
+        manager.onSurfaceCreated(fresh, fresh.generation, testSurface())
+        assertEquals(1, ready)
+        assertEquals(listOf(0 to fresh.generation), events)
+    }
 }

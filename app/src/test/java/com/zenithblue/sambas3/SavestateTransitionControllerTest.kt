@@ -32,6 +32,19 @@ class SavestateTransitionControllerTest {
     }
 
     @Test
+    fun boot_cannot_start_before_fresh_surface_is_ready() {
+        val controller = SavestateTransitionController()
+        assertTrue(controller.begin(22L, 2))
+        assertTrue(controller.committed(22L, 2, "/state"))
+        assertFalse(controller.bootStarted(22L, 2))
+        assertFalse(controller.surfaceReady(22L, 2))
+        assertTrue(controller.surfaceResetStarted())
+        assertFalse(controller.bootStarted(22L, 2))
+        assertTrue(controller.surfaceReady(22L, 2))
+        assertTrue(controller.bootStarted(22L, 2))
+    }
+
+    @Test
     fun recovery_boot_starts_waiting_for_first_frame() {
         val controller = SavestateTransitionController()
         assertTrue(controller.beginRecoveryBoot(31L, 7, "/saved-slot"))
