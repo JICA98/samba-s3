@@ -86,6 +86,25 @@ class PendingSavestateRecoveryStoreTest {
     }
 
     @Test
+    fun commit_rejects_same_slot_event_for_different_path() {
+        PendingSavestateRecoveryStore.request(
+            context, 2, "/games/original", 0L, 0L, stateFile.path
+        )
+        stateFile.writeBytes(ByteArray(4) { 1 })
+        val other = File(context.cacheDir, "other-${System.nanoTime()}.SAVESTAT.zst")
+        other.writeBytes(ByteArray(4) { 2 })
+        try {
+            assertNull(PendingSavestateRecoveryStore.commit(
+                context,
+                JSONObject().put("slot", 2).put("path", other.path).toString()
+            ))
+            assertEquals("REQUESTED", PendingSavestateRecoveryStore.read(context)?.state)
+        } finally {
+            other.delete()
+        }
+    }
+
+    @Test
     fun boot_retries_are_bounded_without_deleting_slot() {
         PendingSavestateRecoveryStore.request(context, 1, "/games/original", 0L, 0L, stateFile.path)
         stateFile.writeBytes(ByteArray(4) { 2 })

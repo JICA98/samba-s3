@@ -220,6 +220,15 @@ class RPCSXActivity : ComponentActivity() {
                         }
                     }
 
+                    is com.zenithblue.sambas3.ui.ingame.InGameMenuHostEffect.SavestateRequestAccepted -> {
+                        val pending = PendingSavestateRecoveryStore.read(this@RPCSXActivity)
+                        Log.i(
+                            "S3SAVE",
+                            "native-accepted requestId=${pending?.requestId ?: 0L} slot=${effect.slot} " +
+                                "state=${pending?.state ?: "missing"}"
+                        )
+                    }
+
                     is com.zenithblue.sambas3.ui.ingame.InGameMenuHostEffect.SavestateTransitionFailed -> {
                         PendingSavestateRecoveryStore.markRequestFailure(this@RPCSXActivity, effect.reason)
                         failTransition(effect.reason)

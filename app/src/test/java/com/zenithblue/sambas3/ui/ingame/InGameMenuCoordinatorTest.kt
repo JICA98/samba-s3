@@ -252,6 +252,27 @@ class InGameMenuCoordinatorTest {
     }
 
     @Test
+    fun accepted_save_emits_native_accepted_after_request_returns_true() = runBlocking {
+        val effects = mutableListOf<InGameMenuHostEffect>()
+        val job = launch {
+            coordinator.effects.collect { effects.add(it) }
+        }
+        openMain()
+        coordinator.dispatch(InGameMenuIntent.SaveState(1))
+        awaitCondition { gateway.saveCalls.size == 1 }
+        withTimeout(2000) {
+            while (effects.none { it is InGameMenuHostEffect.SavestateRequestAccepted }) {
+                kotlinx.coroutines.delay(10)
+            }
+        }
+        val accepted = effects.first {
+            it is InGameMenuHostEffect.SavestateRequestAccepted
+        } as InGameMenuHostEffect.SavestateRequestAccepted
+        assertEquals(1, accepted.slot)
+        job.cancel()
+    }
+
+    @Test
     fun restart_rejects_duplicate_after_dispatch() {
         openMain()
         coordinator.dispatch(InGameMenuIntent.Restart)

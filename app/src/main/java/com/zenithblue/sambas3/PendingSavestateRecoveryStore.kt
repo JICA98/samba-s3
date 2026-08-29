@@ -68,6 +68,18 @@ object PendingSavestateRecoveryStore {
                 return@runCatching null
             }
             val path = event.optString("path", old.savestatePath)
+            // Completion is asynchronous. Reject a stale event for the same
+            // slot if it names a different file; only the path captured when
+            // this request was accepted may be restored.
+            if (old.savestatePath.isNotBlank() &&
+                normalizedPath(path) != normalizedPath(old.savestatePath)
+            ) {
+                Log.w(
+                    TAG,
+                    "S3SAVE completion rejected path=$path expected=${old.savestatePath}"
+                )
+                return@runCatching null
+            }
             val file = File(path)
             if (path.isBlank() || !file.isFile || file.length() <= 0L) {
                 Log.e(TAG, "S3SAVE completion rejected: invalid durable file path=$path")
@@ -189,6 +201,10 @@ object PendingSavestateRecoveryStore {
         context.getSharedPreferences(PREFS, Context.MODE_PRIVATE).edit()
             .putString(KEY_RECORD, value.toString()).commit()
     }
+
+    private fun normalizedPath(path: String): String = runCatching {
+        File(path).canonicalFile.path
+    }.getOrDefault(File(path).absolutePath)
 
     private const val TAG = "S3SAVE"
 }

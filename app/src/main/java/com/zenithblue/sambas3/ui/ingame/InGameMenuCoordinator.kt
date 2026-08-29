@@ -59,6 +59,7 @@ sealed interface InGameMenuHostEffect {
         val savestatePath: String?,
         val suspendMode: Boolean
     ) : InGameMenuHostEffect
+    data class SavestateRequestAccepted(val slot: Int) : InGameMenuHostEffect
     data class SavestateTransitionFailed(val reason: String) : InGameMenuHostEffect
 }
 
@@ -310,6 +311,9 @@ class InGameMenuCoordinator(
             }
             closeInternal(reason)
             val ok = action().getOrDefault(false)
+            if (reason == CloseReason.SaveState && ok) {
+                _effects.emit(InGameMenuHostEffect.SavestateRequestAccepted(saveSlot ?: 0))
+            }
             if (reason == CloseReason.SaveState && !ok) {
                 _effects.emit(InGameMenuHostEffect.SavestateTransitionFailed("request-rejected"))
             }
