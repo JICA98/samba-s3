@@ -49,10 +49,18 @@ import com.zenithblue.sambas3.session.EmulationSessionJournal
 import com.zenithblue.sambas3.session.EmulationSessionState
 import com.zenithblue.sambas3.session.SessionStatePairing
 import com.zenithblue.sambas3.session.SessionStateReconciliation
+import com.zenithblue.sambas3.session.CoreRecoveryCoordinator
+import com.zenithblue.sambas3.session.StopResult
 import com.zenithblue.sambas3.crash.CrashEvidenceCollector
 import com.zenithblue.sambas3.crash.CrashReport
 import com.zenithblue.sambas3.ui.crash.GameCrashScreen
 import com.zenithblue.sambas3.ui.games.launch.GameSavestateRepository
+import com.zenithblue.sambas3.monitoring.MonitoringOverlaySettings
+import com.zenithblue.sambas3.monitoring.MonitoringRepository
+import com.zenithblue.sambas3.ui.monitoring.MonitoringOverlay
+import com.zenithblue.sambas3.input.ControllerInputMonitor
+import com.zenithblue.sambas3.input.ControllerProfileRepository
+import com.zenithblue.sambas3.input.GamepadMapper
 import com.zenithblue.sambas3.utils.InputBindingPrefs
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
@@ -113,6 +121,7 @@ class RPCSXActivity : ComponentActivity() {
     private lateinit var thumbnailStore: SavestateThumbnailStore
     private val bootMutex = Any()
     private val inputBindings by lazy { InputBindingPrefs.loadBindings() }
+    private val gamepadMapper by lazy { GamepadMapper(ControllerProfileRepository.load()) }
 
     private val physicalTracker = PhysicalInputTracker()
     private val frontendHomeKeyGate = FrontendHomeKeyGate()
@@ -120,6 +129,7 @@ class RPCSXActivity : ComponentActivity() {
     private val coreGateway: InGameMenuCoreGateway by lazy { RpcsxInGameMenuCoreGateway(RpcsxBridgeAdapter()) }
     private lateinit var coordinator: InGameMenuCoordinator
     private lateinit var menuInputRouter: InGameMenuInputRouter
+    private lateinit var monitoringRepository: MonitoringRepository
 
     private lateinit var backCallback: OnBackPressedCallback
 
@@ -173,6 +183,19 @@ class RPCSXActivity : ComponentActivity() {
             }
         }
         surfaceLeaseManager.installInitial()
+
+        monitoringRepository = MonitoringRepository(this)
+        monitoringRepository.start(lifecycleScope)
+        binding.monitoringOverlay.setViewCompositionStrategy(
+            ViewCompositionStrategy.DisposeOnViewTreeLifecycleDestroyed
+        )
+        val monitorSettings = MonitoringOverlaySettings.read(this)
+        binding.monitoringOverlay.setContent {
+            RPCSXTheme {
+                val menuState by coordinator.state.collectAsStateWithLifecycle()
+                MonitoringOverlay(monitoringRepository, monitorSettings, menuState.isOpen)
+            }
+        }
 
         unregisterUsbEventListener = listenUsbEvents(this)
         enableFullScreenImmersive()
@@ -391,24 +414,25 @@ class RPCSXActivity : ComponentActivity() {
 
         bootThread = thread {
             EmulationSessionJournal.update(this@RPCSXActivity, EmulationSessionState.BOOTING, surfaceLeaseManager.currentGeneration)
-            if (RPCSX.getState() != EmulatorState.Stopped) {
-                val state = RPCSX.getState()
-                Log.w("RPCSX State", state.name)
-
-                if (recoverySavestatePath == null && state == EmulatorState.Paused && RPCSX.activeGame.value == gamePath) {
-                    RPCSX.instance.resume()
-                    return@thread
+            val stateBeforeBoot = runCatching { RPCSX.getState() }.getOrDefault(EmulatorState.Stopped)
+            Log.i("S3RECOVERY", "preflight state=$stateBeforeBoot activeGame=${RPCSX.activeGame.value} recovery=${recoverySavestatePath != null}")
+            if (recoverySavestatePath == null && stateBeforeBoot == EmulatorState.Paused && RPCSX.activeGame.value == gamePath) {
+                RPCSX.instance.resume()
+                return@thread
+            }
+            if (stateBeforeBoot != EmulatorState.Stopped) {
+                val stopResult = kotlinx.coroutines.runBlocking {
+                    CoreRecoveryCoordinator.ensureStoppedForFreshBoot(
+                        reason = "RPCSXActivity boot",
+                        state = { RPCSX.getState() },
+                        kill = { RPCSX.instance.kill() },
+                        onLog = { Log.i("S3RECOVERY", it) }
+                    )
                 }
-
-                if (RPCSX.getState() != EmulatorState.Stopping && RPCSX.getState() != EmulatorState.Stopped) {
-                    RPCSX.instance.kill()
-
-                    while (RPCSX.getState() != EmulatorState.Stopped) {
-                        Thread.sleep(300)
-                        if (Thread.interrupted()) {
-                            return@thread
-                        }
-                    }
+                if (stopResult != StopResult.AlreadyStopped && stopResult != StopResult.Stopped) {
+                    Log.e("S3RECOVERY", "preflight refused boot result=$stopResult")
+                    runOnUiThread { showInProcessFault("Core did not reach Stopped before boot ($stopResult)") }
+                    return@thread
                 }
             }
 
@@ -528,7 +552,7 @@ class RPCSXActivity : ComponentActivity() {
         EmulationSessionJournal.update(this, EmulationSessionState.FAILED)
         Log.e("S3CRASH", "in-process fault evidence=$evidence")
         lifecycleScope.launch(kotlinx.coroutines.Dispatchers.IO) {
-            val report = runCatching { CrashEvidenceCollector.collect(this@RPCSXActivity, EmulationSessionJournal.read(this@RPCSXActivity), evidence) }.getOrNull()
+            val report = runCatching { CrashEvidenceCollector.collectSummary(this@RPCSXActivity, EmulationSessionJournal.read(this@RPCSXActivity), evidence) }.getOrNull()
             runOnUiThread {
                 if (report != null) {
                     crashReportState.value = report
@@ -540,16 +564,26 @@ class RPCSXActivity : ComponentActivity() {
 
     private fun restartAfterFault(safe: Boolean) {
         val path = originalGamePath
-        EmulationSessionJournal.clear(this)
         thread {
-            runCatching { RPCSX.instance.kill() }
-            runOnUiThread {
-                finishReason = EmulatorActivityFinishReason.BootFailure
-                startActivity(Intent(this, RPCSXActivity::class.java).apply {
-                    putExtra("path", path)
-                    putExtra(EXTRA_SAFE_RETRY, safe)
-                })
-                finish()
+            val stopResult = kotlinx.coroutines.runBlocking {
+                CoreRecoveryCoordinator.ensureStoppedForFreshBoot(
+                    reason = "crash retry",
+                    state = { RPCSX.getState() },
+                    kill = { RPCSX.instance.kill() },
+                    onLog = { Log.i("S3RECOVERY", it) }
+                )
+            }
+            if (stopResult == StopResult.AlreadyStopped || stopResult == StopResult.Stopped) {
+                runOnUiThread {
+                    finishReason = EmulatorActivityFinishReason.BootFailure
+                    startActivity(Intent(this, RPCSXActivity::class.java).apply {
+                        putExtra("path", path)
+                        putExtra(EXTRA_SAFE_RETRY, safe)
+                    })
+                    finish()
+                }
+            } else {
+                Log.e("S3RECOVERY", "retry refused result=$stopResult")
             }
         }
     }
@@ -566,16 +600,27 @@ class RPCSXActivity : ComponentActivity() {
             restartAfterFault(safe = false)
             return
         }
-        EmulationSessionJournal.clear(this)
         thread {
-            runCatching { RPCSX.instance.kill() }
-            runOnUiThread {
-                finishReason = EmulatorActivityFinishReason.BootFailure
-                startActivity(Intent(this, RPCSXActivity::class.java).apply {
-                    putExtra("path", path)
-                    putExtra(EXTRA_USER_SAVESTATE, slot.path)
-                })
-                finish()
+            val stopResult = kotlinx.coroutines.runBlocking {
+                CoreRecoveryCoordinator.ensureStoppedForFreshBoot(
+                    reason = "crash continue save",
+                    state = { RPCSX.getState() },
+                    kill = { RPCSX.instance.kill() },
+                    onLog = { Log.i("S3RECOVERY", it) }
+                )
+            }
+            if (stopResult == StopResult.AlreadyStopped || stopResult == StopResult.Stopped) {
+                runOnUiThread {
+                    finishReason = EmulatorActivityFinishReason.BootFailure
+                    startActivity(Intent(this, RPCSXActivity::class.java).apply {
+                        putExtra("path", path)
+                        putExtra(EXTRA_USER_SAVESTATE, slot.path)
+                        putExtra(EXTRA_USER_SAVESTATE_SLOT, slot.slot)
+                    })
+                    finish()
+                }
+            } else {
+                Log.e("S3RECOVERY", "continue save refused result=$stopResult")
             }
         }
     }
@@ -1079,6 +1124,7 @@ class RPCSXActivity : ComponentActivity() {
     }
 
     override fun onDestroy() {
+        if (::monitoringRepository.isInitialized) monitoringRepository.stop()
         transitionBitmap?.recycle()
         transitionBitmap = null
         try { surfaceLeaseManager.destroy() } catch (_: Exception) {}
@@ -1172,7 +1218,8 @@ class RPCSXActivity : ComponentActivity() {
         if (event == null || (event.source and (InputDevice.SOURCE_GAMEPAD or InputDevice.SOURCE_JOYSTICK or InputDevice.SOURCE_DPAD)) == 0 || event.repeatCount != 0) {
             return super.onKeyDown(keyCode, event)
         }
-        val padBit = keyCodeToPadBit(keyCode)
+        ControllerInputMonitor.key(gamepadMapper, event, true)
+        val padBit = gamepadMapper.digitalBinding(keyCode)
         if (padBit.first == 0) {
             return super.onKeyDown(keyCode, event)
         }
@@ -1200,7 +1247,8 @@ class RPCSXActivity : ComponentActivity() {
         if (event == null || event.source and (InputDevice.SOURCE_GAMEPAD or InputDevice.SOURCE_JOYSTICK or InputDevice.SOURCE_DPAD) == 0) {
             return super.onKeyUp(keyCode, event)
         }
-        val padBit = keyCodeToPadBit(keyCode)
+        ControllerInputMonitor.key(gamepadMapper, event ?: KeyEvent(KeyEvent.ACTION_UP, keyCode), false)
+        val padBit = gamepadMapper.digitalBinding(keyCode)
         if (padBit.first == 0) {
             return super.onKeyUp(keyCode, event)
         }
@@ -1224,55 +1272,14 @@ class RPCSXActivity : ComponentActivity() {
             return super.onGenericMotionEvent(event)
         }
 
-        if (event.getAxisValue(MotionEvent.AXIS_LTRIGGER) > 0.1) {
-            gamePadState.digital[1] =
-                gamePadState.digital[1] or Digital2Flags.CELL_PAD_CTRL_L2.bit
-            usesAxisL2 = true
-        } else if (usesAxisL2) {
-            usesAxisL2 = false
-            gamePadState.digital[1] =
-                gamePadState.digital[1] and Digital2Flags.CELL_PAD_CTRL_L2.bit.inv()
-        }
-
-        if (event.getAxisValue(MotionEvent.AXIS_RTRIGGER) > 0.1) {
-            gamePadState.digital[1] =
-                gamePadState.digital[1] or Digital2Flags.CELL_PAD_CTRL_R2.bit
-            usesAxisR2 = true
-        } else if (usesAxisR2) {
-            usesAxisR2 = false
-            gamePadState.digital[1] =
-                gamePadState.digital[1] and Digital2Flags.CELL_PAD_CTRL_R2.bit.inv()
-        }
-
-        val dpadX = event.getAxisValue(MotionEvent.AXIS_HAT_X)
-        val dpadY = event.getAxisValue(MotionEvent.AXIS_HAT_Y)
-
-        gamePadState.digital[0] =
-            gamePadState.digital[0] and (Digital1Flags.CELL_PAD_CTRL_LEFT.bit or Digital1Flags.CELL_PAD_CTRL_RIGHT.bit or Digital1Flags.CELL_PAD_CTRL_UP.bit or Digital1Flags.CELL_PAD_CTRL_DOWN.bit).inv()
-        if (abs(dpadX) > 0.1f) {
-            if (dpadX < 0) {
-                gamePadState.digital[0] =
-                    gamePadState.digital[0] or Digital1Flags.CELL_PAD_CTRL_LEFT.bit
-            } else {
-                gamePadState.digital[0] =
-                    gamePadState.digital[0] or Digital1Flags.CELL_PAD_CTRL_RIGHT.bit
-            }
-        }
-
-        if (abs(dpadY) > 0.1f) {
-            if (dpadY < 0) {
-                gamePadState.digital[0] =
-                    gamePadState.digital[0] or Digital1Flags.CELL_PAD_CTRL_UP.bit
-            } else {
-                gamePadState.digital[0] =
-                    gamePadState.digital[0] or Digital1Flags.CELL_PAD_CTRL_DOWN.bit
-            }
-        }
-
-        gamePadState.leftStickX = (event.getAxisValue(MotionEvent.AXIS_X) * 127 + 128).toInt()
-        gamePadState.leftStickY = (event.getAxisValue(MotionEvent.AXIS_Y) * 127 + 128).toInt()
-        gamePadState.rightStickX = (event.getAxisValue(MotionEvent.AXIS_Z) * 127 + 128).toInt()
-        gamePadState.rightStickY = (event.getAxisValue(MotionEvent.AXIS_RZ) * 127 + 128).toInt()
+        val mapped = gamepadMapper.motion(event)
+        ControllerInputMonitor.motion(gamepadMapper, event)
+        gamePadState.digital[0] = mapped.digital1
+        gamePadState.digital[1] = mapped.digital2
+        gamePadState.leftStickX = mapped.leftX
+        gamePadState.leftStickY = mapped.leftY
+        gamePadState.rightStickX = mapped.rightX
+        gamePadState.rightStickY = mapped.rightY
 
         sendGamepadData()
         return true

@@ -19,6 +19,14 @@
         android:layout_height="match_parent" />
 
     <androidx.compose.ui.platform.ComposeView
+        android:id="@+id/monitoringOverlay"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:importantForAccessibility="no"
+        android:clickable="false"
+        android:focusable="false" />
+
+    <androidx.compose.ui.platform.ComposeView
         android:id="@+id/ingameOverlay"
         android:layout_width="match_parent"
         android:layout_height="match_parent"

@@ -106,6 +106,8 @@ import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.graphics.drawscope.Stroke
 import com.zenithblue.sambas3.utils.GeneralSettings
 import com.zenithblue.sambas3.utils.InputBindingPrefs
+import com.zenithblue.sambas3.ui.monitoring.MonitoringSettingsScreen
+import com.zenithblue.sambas3.ui.controller.ControllerSettingsScreen
 import org.json.JSONObject
 import java.io.File
 import kotlin.math.ceil
@@ -246,6 +248,12 @@ fun SettingsDetailPane(
             description = "Live streaming log viewer capturing RPCSX backend, kernel syscalls, Cell modules, Vulkan, GPU driver, and Android app logs in real-time. Logs are saved to separate files per category."
             status = "LIVE"
             backend = "LOGCAT"
+        }
+        "monitoring" -> {
+            title = "Performance Monitor"
+            description = "Configure the in-game FPS, frametime, RPCSX CPU, Android system, memory, thermal and battery overlay. Values unavailable on this device remain hidden."
+            status = "OPTIONAL"
+            backend = "COMPOSE / RPCSX"
         }
         "debug_controller" -> {
             title = "Debug Controller"
@@ -1299,6 +1307,18 @@ fun SettingsScreen(
                     )
                 }
 
+                item(key = "monitoring") {
+                    HomePreference(
+                        title = "Performance Monitor",
+                        icon = { Icon(painterResource(R.drawable.ic_video), null) },
+                        description = "In-game FPS, CPU/GPU, RAM, thermal and power telemetry.",
+                        onClick = {
+                            if (isWideScreen) activeSettingKey = "monitoring" else navigateTo("monitoring")
+                        },
+                        onFocusChanged = { if (it) focusedKey = "monitoring" }
+                    )
+                }
+
                 item(key = "debug_controller") {
                     HomePreference(
                         title = "Debug — Controller",
@@ -1383,13 +1403,19 @@ fun SettingsScreen(
                             )
                         }
                         "controls" -> {
-                            ControllerSettings(
+                            ControllerSettingsScreen(
                                 navigateBack = { activeSettingKey = null },
                                 isInSplitPane = true
                             )
                         }
                         "logs" -> {
                             LogMonitorScreen(
+                                navigateBack = { activeSettingKey = null },
+                                isInSplitPane = true
+                            )
+                        }
+                        "monitoring" -> {
+                            MonitoringSettingsScreen(
                                 navigateBack = { activeSettingKey = null },
                                 isInSplitPane = true
                             )

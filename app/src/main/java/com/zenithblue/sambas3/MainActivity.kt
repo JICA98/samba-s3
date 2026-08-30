@@ -10,13 +10,28 @@ import androidx.activity.compose.setContent
 import androidx.core.view.WindowCompat
 import androidx.lifecycle.lifecycleScope
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.Text
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.unit.dp
+import androidx.compose.foundation.layout.padding
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 import kotlinx.coroutines.launch
 import com.zenithblue.sambas3.debug.DebugPadReceiver
 import com.zenithblue.sambas3.dialogs.AlertDialogQueue
 import com.zenithblue.sambas3.ui.navigation.AppNavHost
 import com.zenithblue.sambas3.crash.CrashEvidenceCollector
 import com.zenithblue.sambas3.session.EmulationSessionJournal
+import com.zenithblue.sambas3.session.ProcessInstance
+import com.zenithblue.sambas3.input.ControllerInputMonitor
 import com.zenithblue.sambas3.ui.crash.GameCrashScreen
 import com.zenithblue.sambas3.ui.games.launch.GameSavestateRepository
 import com.zenithblue.sambas3.utils.GeneralSettings
@@ -147,21 +162,41 @@ class MainActivity : ComponentActivity() {
         }
 
         val unfinishedSession = EmulationSessionJournal.unfinished(this)
-        val previousReport = unfinishedSession?.let { CrashEvidenceCollector.collect(this, it) }
+        val sameProcessLiveSession = unfinishedSession != null &&
+            unfinishedSession.processInstanceId == ProcessInstance.id &&
+            runCatching { RPCSX.getState() }.getOrDefault(EmulatorState.Stopped) in
+            setOf(EmulatorState.Running, EmulatorState.Paused)
+        if (sameProcessLiveSession) {
+            android.util.Log.w("S3RECOVERY", "same-process live session retained; showing library instead of false crash")
+        }
         setContent {
             RPCSXTheme {
-                var showPreviousFailure by androidx.compose.runtime.remember { androidx.compose.runtime.mutableStateOf(previousReport != null) }
-                if (showPreviousFailure && previousReport != null && unfinishedSession != null) {
+                var showPreviousFailure by androidx.compose.runtime.remember { mutableStateOf(unfinishedSession != null && !sameProcessLiveSession) }
+                var previousReport by androidx.compose.runtime.remember { mutableStateOf<com.zenithblue.sambas3.crash.CrashReport?>(null) }
+                if (showPreviousFailure && unfinishedSession != null && previousReport == null) {
+                    androidx.compose.runtime.LaunchedEffect(unfinishedSession.sessionId) {
+                        previousReport = withContext(Dispatchers.IO) {
+                            runCatching { CrashEvidenceCollector.collectSummary(this@MainActivity, unfinishedSession) }.getOrNull()
+                        }
+                    }
+                    Column(
+                        Modifier.fillMaxSize(),
+                        horizontalAlignment = Alignment.CenterHorizontally,
+                        verticalArrangement = Arrangement.Center
+                    ) {
+                        CircularProgressIndicator(color = com.zenithblue.sambas3.RPCSXColors.primary)
+                        Text("Previous game session ended unexpectedly", color = Color.White, modifier = Modifier.padding(top = 16.dp))
+                        Text("Collecting diagnostics...", color = com.zenithblue.sambas3.RPCSXColors.textSecondary)
+                    }
+                } else if (showPreviousFailure && previousReport != null && unfinishedSession != null) {
                     GameCrashScreen(
-                        report = previousReport,
+                        report = previousReport!!,
                         onRetry = {
-                            EmulationSessionJournal.clear(this@MainActivity)
                             startActivity(Intent(this@MainActivity, RPCSXActivity::class.java).putExtra("path", unfinishedSession.gamePath))
                             handingOffToRecovery = true
                             finish()
                         },
                         onSafeRetry = {
-                            EmulationSessionJournal.clear(this@MainActivity)
                             startActivity(Intent(this@MainActivity, RPCSXActivity::class.java).apply {
                                 putExtra("path", unfinishedSession.gamePath)
                                 putExtra(RPCSXActivity.EXTRA_SAFE_RETRY, true)
@@ -173,7 +208,6 @@ class MainActivity : ComponentActivity() {
                             val game = com.zenithblue.sambas3.GameRepository.list().firstOrNull { it.info.path == unfinishedSession.gamePath }
                             val slot = game?.let { GameSavestateRepository.slots(this@MainActivity, it).filter { s -> s.exists }.maxByOrNull { s -> s.mtimeMs } }
                             if (slot?.path != null) {
-                                EmulationSessionJournal.clear(this@MainActivity)
                                 startActivity(Intent(this@MainActivity, RPCSXActivity::class.java).apply {
                                     putExtra("path", unfinishedSession.gamePath)
                                     putExtra(RPCSXActivity.EXTRA_USER_SAVESTATE, slot.path)
@@ -206,5 +240,17 @@ class MainActivity : ComponentActivity() {
         unregisterUsbEventListener()
         try { debugPadReceiver?.let { unregisterReceiver(it) } } catch (_: Exception) {}
         if (!handingOffToRecovery) LogMonitor.stop()
+    }
+
+    override fun dispatchKeyEvent(event: android.view.KeyEvent): Boolean {
+        if (event.source and (android.view.InputDevice.SOURCE_GAMEPAD or android.view.InputDevice.SOURCE_JOYSTICK) != 0) {
+            ControllerInputMonitor.observeKey(event, event.action == android.view.KeyEvent.ACTION_DOWN)
+        }
+        return super.dispatchKeyEvent(event)
+    }
+
+    override fun dispatchGenericMotionEvent(event: android.view.MotionEvent): Boolean {
+        if (event.source and (android.view.InputDevice.SOURCE_GAMEPAD or android.view.InputDevice.SOURCE_JOYSTICK) != 0) ControllerInputMonitor.observeMotion(event)
+        return super.dispatchGenericMotionEvent(event)
     }
 }

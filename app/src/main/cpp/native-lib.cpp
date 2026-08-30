@@ -48,6 +48,7 @@ struct RPCSXApi {
   std::string (*settingsGet)(std::string_view path);
   bool (*settingsSet)(std::string_view path, std::string_view valueString);
   std::string (*getVersion)();
+  std::string (*getPerfMetricsJson)();
   std::string (*patchEngineVersion)();
   std::string (*patchesList)();
   bool (*patchSetEnabled)(std::string_view hash, std::string_view description, bool enabled);
@@ -143,6 +144,7 @@ struct RPCSXLibrary : RPCSXApi {
     result.settingsGet = reinterpret_cast<decltype(settingsGet)>(dlsym(handle, "_rpcsx_settingsGet"));
     result.settingsSet = reinterpret_cast<decltype(settingsSet)>(dlsym(handle, "_rpcsx_settingsSet"));
     result.getVersion = reinterpret_cast<decltype(getVersion)>(dlsym(handle, "_rpcsx_getVersion"));
+    result.getPerfMetricsJson = reinterpret_cast<decltype(getPerfMetricsJson)>(dlsym(handle, "_rpcsx_getPerfMetricsJson"));
     result.patchEngineVersion = reinterpret_cast<decltype(patchEngineVersion)>(dlsym(handle, "_rpcsx_patchEngineVersion"));
     result.patchesList = reinterpret_cast<decltype(patchesList)>(dlsym(handle, "_rpcsx_patchesList"));
     result.patchSetEnabled = reinterpret_cast<decltype(patchSetEnabled)>(dlsym(handle, "_rpcsx_patchSetEnabled"));
@@ -575,6 +577,12 @@ Java_com_zenithblue_sambas3_RPCSX_getCoreBuildId(JNIEnv *env, jobject) {
   if (!rpcsxLib.getSambaBuildId) return wrap(env, std::string{});
   const char* id = rpcsxLib.getSambaBuildId();
   return wrap(env, id ? std::string(id) : std::string{});
+}
+
+extern "C" JNIEXPORT jstring JNICALL
+Java_com_zenithblue_sambas3_RPCSX_getPerfMetricsJson(JNIEnv *env, jobject) {
+  if (!rpcsxLib.getPerfMetricsJson) return nullptr;
+  return wrap(env, rpcsxLib.getPerfMetricsJson());
 }
 
 extern "C" JNIEXPORT jint JNICALL

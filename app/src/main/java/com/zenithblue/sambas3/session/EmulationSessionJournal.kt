@@ -18,7 +18,10 @@ data class EmulationSessionRecord(
     val activityInstanceId: Long,
     val surfaceGeneration: Long,
     val driverLabel: String?,
-    val cleanTermination: Boolean
+    val cleanTermination: Boolean,
+    val processInstanceId: String = ProcessInstance.id,
+    val processStartedElapsedRealtimeMs: Long = ProcessInstance.startedElapsedRealtimeMs,
+    val pidAtSessionStart: Int = ProcessInstance.pid
 )
 
 /** Small durable marker. It is deliberately independent of the emulator core. */
@@ -42,7 +45,10 @@ object EmulationSessionJournal {
             activityInstanceId = activityInstanceId,
             surfaceGeneration = surfaceGeneration,
             driverLabel = null,
-            cleanTermination = false
+            cleanTermination = false,
+            processInstanceId = ProcessInstance.id,
+            processStartedElapsedRealtimeMs = ProcessInstance.startedElapsedRealtimeMs,
+            pidAtSessionStart = ProcessInstance.pid
         ).also { write(context, it) }
     }
 
@@ -66,7 +72,13 @@ object EmulationSessionJournal {
     }
 
     fun read(context: Context): EmulationSessionRecord? {
-        val json = context.getSharedPreferences(PREFS, Context.MODE_PRIVATE).getString(ACTIVE, null) ?: return cached
+        val json = context.getSharedPreferences(PREFS, Context.MODE_PRIVATE).getString(ACTIVE, null)
+        if (json == null) {
+            // The durable marker is authoritative. Never resurrect an old
+            // process-local record after the marker has been cleared.
+            cached = null
+            return null
+        }
         return runCatching {
             JSONObject(json).let { j ->
                 EmulationSessionRecord(
@@ -80,7 +92,10 @@ object EmulationSessionJournal {
                     activityInstanceId = j.optLong("activityInstanceId"),
                     surfaceGeneration = j.optLong("surfaceGeneration"),
                     driverLabel = j.optString("driverLabel").ifBlank { null },
-                    cleanTermination = j.optBoolean("cleanTermination")
+                    cleanTermination = j.optBoolean("cleanTermination"),
+                    processInstanceId = j.optString("processInstanceId").ifBlank { "legacy" },
+                    processStartedElapsedRealtimeMs = j.optLong("processStartedElapsedRealtimeMs"),
+                    pidAtSessionStart = j.optInt("pidAtSessionStart", -1)
                 )
             }
         }.onSuccess { cached = it }.getOrNull()
@@ -107,6 +122,9 @@ object EmulationSessionJournal {
             put("surfaceGeneration", record.surfaceGeneration)
             put("driverLabel", record.driverLabel ?: "")
             put("cleanTermination", record.cleanTermination)
+            put("processInstanceId", record.processInstanceId)
+            put("processStartedElapsedRealtimeMs", record.processStartedElapsedRealtimeMs)
+            put("pidAtSessionStart", record.pidAtSessionStart)
         }
         context.getSharedPreferences(PREFS, Context.MODE_PRIVATE).edit().putString(ACTIVE, j.toString()).apply()
         Log.i(TAG, "journal state=${record.state} session=${record.sessionId} game=${record.gamePath} clean=${record.cleanTermination}")

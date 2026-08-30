@@ -19,6 +19,29 @@ data class CrashReport(
 )
 
 object CrashEvidenceCollector {
+    /** Fast startup path: bounded tails only, no report directory or large copies. */
+    fun collectSummary(context: Context, session: EmulationSessionRecord?, evidenceHint: String = ""): CrashReport {
+        LogMonitor.flushWriters()
+        val sourceFiles = LogMonitor.getAllLogFiles().associateBy { it.name }
+        val evidence = buildString {
+            if (evidenceHint.isNotBlank()) append(evidenceHint).append('\n')
+            sourceFiles.values.forEach { file ->
+                if (file.isFile) append(file.readTail(256 * 1024)).append('\n')
+            }
+        }
+        val classification = CrashClassifier.classify(evidence, session != null)
+        val id = session?.sessionId ?: "report-${System.currentTimeMillis()}"
+        val dir = File(context.filesDir, "crash_reports/$id")
+        return CrashReport(
+            directory = dir,
+            classification = classification,
+            summary = classification.name.replace('_', ' '),
+            cause = CrashClassifier.likelyCause(evidence),
+            sources = sourceFiles
+        )
+    }
+
+    /** Explicit user export path. It is intentionally never called during startup rendering. */
     fun collect(context: Context, session: EmulationSessionRecord?, evidenceHint: String = ""): CrashReport {
         LogMonitor.flushWriters()
         val sourceFiles = LogMonitor.getAllLogFiles().associateBy { it.name }
@@ -69,6 +92,23 @@ object CrashEvidenceCollector {
             }
         }
         return lines.toString().take(maxBytes)
+    }
+
+    private fun File.readTail(maxBytes: Int): String {
+        if (!isFile || maxBytes <= 0) return ""
+        return runCatching {
+            java.io.RandomAccessFile(this, "r").use { raf ->
+                val start = (raf.length() - maxBytes).coerceAtLeast(0L)
+                raf.seek(start)
+                if (start > 0) raf.readLine()
+                val out = StringBuilder()
+                var line: String?
+                while (raf.readLine().also { line = it } != null && out.length < maxBytes) {
+                    out.append(line).append('\n')
+                }
+                out.toString().take(maxBytes)
+            }
+        }.getOrDefault("")
     }
 
     private fun File.readPrefix(maxBytes: Int): String = inputStream().use { stream ->
