@@ -189,9 +189,9 @@ class RPCSXActivity : ComponentActivity() {
         binding.monitoringOverlay.setViewCompositionStrategy(
             ViewCompositionStrategy.DisposeOnViewTreeLifecycleDestroyed
         )
-        val monitorSettings = MonitoringOverlaySettings.read(this)
         binding.monitoringOverlay.setContent {
             RPCSXTheme {
+                val monitorSettings by MonitoringOverlaySettings.state(this@RPCSXActivity).collectAsStateWithLifecycle()
                 val menuState by coordinator.state.collectAsStateWithLifecycle()
                 MonitoringOverlay(monitoringRepository, monitorSettings, menuState.isOpen)
             }

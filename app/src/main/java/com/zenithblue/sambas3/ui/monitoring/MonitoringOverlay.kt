@@ -6,6 +6,7 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.material3.MaterialTheme
@@ -39,7 +40,7 @@ fun MonitoringOverlay(repository: MonitoringRepository, settings: MonitoringSett
         MonitoringPosition.BottomCenter -> Alignment.BottomCenter
         MonitoringPosition.BottomRight -> Alignment.BottomEnd
     }
-    Box(Modifier.padding(12.dp), contentAlignment = alignment) {
+    Box(Modifier.fillMaxSize().padding(12.dp), contentAlignment = alignment) {
         MetricPanel(snapshot.emulator, snapshot.android, settings)
     }
 }

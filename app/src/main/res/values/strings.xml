@@ -98,7 +98,10 @@
     <string name="ingame_menu_title">SambaS3</string>
     <string name="ingame_resume">Resume</string>
     <string name="ingame_settings">Settings</string>
+    <string name="ingame_monitoring">Performance Monitor</string>
+    <string name="ingame_controller">Controller</string>
     <string name="ingame_friends">Friends</string>
+    <string name="ingame_achievements">Achievements</string>
     <string name="ingame_trophies">Trophies</string>
     <string name="ingame_take_screenshot">Take Screenshot</string>
     <string name="screenshot_saved">Screenshot saved: %1$s</string>

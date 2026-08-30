@@ -62,6 +62,14 @@ fun InGameMenuHost(
         null -> Unit
         InGamePage.Main -> InGameMainPanel(uiState, gamePath, onIntent)
         InGamePage.Settings -> InGameSettingsPage(uiState, core, onIntent)
+        InGamePage.Monitoring -> com.zenithblue.sambas3.ui.monitoring.MonitoringSettingsScreen(
+            navigateBack = { onIntent(InGameMenuIntent.Back) },
+            isInSplitPane = true
+        )
+        InGamePage.Controller -> com.zenithblue.sambas3.ui.controller.ControllerSettingsScreen(
+            navigateBack = { onIntent(InGameMenuIntent.Back) },
+            isInSplitPane = true
+        )
         InGamePage.ConfigureGame -> GameConfigureOverlayRoute(uiState, gamePath, onIntent)
         InGamePage.Trophies -> InGameTrophiesPage(core = core, onBack = { onIntent(InGameMenuIntent.Back) })
         InGamePage.Friends -> InGameFriendsPage(core = core, onBack = { onIntent(InGameMenuIntent.Back) })

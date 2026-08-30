@@ -2,6 +2,8 @@ package com.zenithblue.sambas3.monitoring
 
 import android.content.Context
 import androidx.core.content.edit
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
 
 enum class MonitoringPreset { Minimal, Performance, Developer }
 enum class MonitoringPosition { TopLeft, TopCenter, TopRight, BottomLeft, BottomCenter, BottomRight }
@@ -18,6 +20,11 @@ data class MonitoringSettings(
 
 object MonitoringOverlaySettings {
     private const val PREFS = "monitoring_overlay"
+    private val changes = MutableStateFlow(MonitoringSettings())
+    fun state(context: Context): StateFlow<MonitoringSettings> {
+        changes.value = read(context)
+        return changes
+    }
     fun read(context: Context): MonitoringSettings {
         val p = context.getSharedPreferences(PREFS, Context.MODE_PRIVATE)
         return MonitoringSettings(
@@ -28,8 +35,11 @@ object MonitoringOverlaySettings {
             showGraphs = p.getBoolean("graphs", false), hideWithMenu = p.getBoolean("hideWithMenu", true)
         )
     }
-    fun write(context: Context, settings: MonitoringSettings) = context.getSharedPreferences(PREFS, Context.MODE_PRIVATE).edit {
+    fun write(context: Context, settings: MonitoringSettings) {
+        changes.value = settings
+        context.getSharedPreferences(PREFS, Context.MODE_PRIVATE).edit {
         putBoolean("enabled", settings.enabled).putString("preset", settings.preset.name).putString("position", settings.position.name)
             .putLong("updateMs", settings.updateMs).putFloat("opacity", settings.opacity).putBoolean("graphs", settings.showGraphs).putBoolean("hideWithMenu", settings.hideWithMenu)
+        }
     }
 }

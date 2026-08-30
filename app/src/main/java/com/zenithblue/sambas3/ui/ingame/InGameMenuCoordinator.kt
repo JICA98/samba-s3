@@ -19,6 +19,8 @@ sealed interface InGameMenuIntent {
     data object DismissOutside : InGameMenuIntent
 
     data object OpenSettings : InGameMenuIntent
+    data object OpenMonitoring : InGameMenuIntent
+    data object OpenController : InGameMenuIntent
     data object OpenConfigureGame : InGameMenuIntent
     data object OpenTrophies : InGameMenuIntent
     data object OpenFriends : InGameMenuIntent
@@ -150,12 +152,15 @@ fun mainRowDescriptors(cap: InGameMenuCapabilities): List<MainRowDescriptor> = b
     add(MainRowDescriptor(com.zenithblue.sambas3.R.string.ingame_resume, com.zenithblue.sambas3.R.drawable.ic_play, false, true, InGameMenuIntent.Resume))
     add(MainRowDescriptor(com.zenithblue.sambas3.R.string.configure_game, com.zenithblue.sambas3.R.drawable.tune, true, true, InGameMenuIntent.OpenConfigureGame))
     add(MainRowDescriptor(com.zenithblue.sambas3.R.string.ingame_settings, com.zenithblue.sambas3.R.drawable.ic_settings, true, true, InGameMenuIntent.OpenSettings))
+    add(MainRowDescriptor(com.zenithblue.sambas3.R.string.ingame_monitoring, com.zenithblue.sambas3.R.drawable.ic_video, true, true, InGameMenuIntent.OpenMonitoring))
+    add(MainRowDescriptor(com.zenithblue.sambas3.R.string.ingame_controller, com.zenithblue.sambas3.R.drawable.tune, true, true, InGameMenuIntent.OpenController))
     if (cap.friendsAvailable) {
         add(MainRowDescriptor(com.zenithblue.sambas3.R.string.ingame_friends, com.zenithblue.sambas3.R.drawable.ic_settings, true, true, InGameMenuIntent.OpenFriends))
     }
-    if (cap.trophiesAvailable) {
-        add(MainRowDescriptor(com.zenithblue.sambas3.R.string.ingame_trophies, com.zenithblue.sambas3.R.drawable.ic_star, true, true, InGameMenuIntent.OpenTrophies))
-    }
+    // Keep Achievements visible even when the current core/game has no trophy
+    // data. The page reports that state explicitly; hiding the entry made the
+    // feature appear to be missing from the in-game settings menu.
+    add(MainRowDescriptor(com.zenithblue.sambas3.R.string.ingame_achievements, com.zenithblue.sambas3.R.drawable.ic_star, true, true, InGameMenuIntent.OpenTrophies))
     add(
         MainRowDescriptor(
             com.zenithblue.sambas3.R.string.ingame_take_screenshot, com.zenithblue.sambas3.R.drawable.ic_video,
@@ -202,6 +207,8 @@ class InGameMenuCoordinator(
             is InGameMenuIntent.DismissOutside -> close(CloseReason.OutsideDismiss)
             is InGameMenuIntent.Back -> handleBackInternal()
             is InGameMenuIntent.OpenSettings -> pushPage(InGamePage.Settings)
+            is InGameMenuIntent.OpenMonitoring -> pushPage(InGamePage.Monitoring)
+            is InGameMenuIntent.OpenController -> pushPage(InGamePage.Controller)
             is InGameMenuIntent.OpenConfigureGame -> pushPage(InGamePage.ConfigureGame)
             is InGameMenuIntent.OpenTrophies -> pushPage(InGamePage.Trophies)
             is InGameMenuIntent.OpenFriends -> pushPage(InGamePage.Friends)

@@ -463,7 +463,7 @@ class InGameMenuCoordinatorTest {
     @Test
     fun conditional_rows_follow_capabilities() {
         val rows = mainRowDescriptors(InGameMenuCapabilities.EMPTY.copy(trophiesAvailable = false, friendsAvailable = false))
-        assertTrue(rows.none { it.labelRes == com.zenithblue.sambas3.R.string.ingame_trophies })
+        assertTrue(rows.any { it.labelRes == com.zenithblue.sambas3.R.string.ingame_achievements })
         assertTrue(rows.none { it.labelRes == com.zenithblue.sambas3.R.string.ingame_friends })
     }
 
