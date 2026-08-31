@@ -135,4 +135,18 @@ class PendingSavestateRecoveryStoreTest {
         assertEquals("BLUS31584", record.titleId)
         assertEquals(stateFile.path, PendingSavestateRecoveryStore.validForLaunch(context)!!.savestatePath)
     }
+
+    @Test
+    fun explicit_stop_cancels_marker_but_preserves_save_file() {
+        stateFile.writeBytes(ByteArray(8) { 5 })
+        PendingSavestateRecoveryStore.armCommitted(
+            context, 0, "/games/BLUS31584", stateFile.path, "BLUS31584"
+        )
+
+        PendingSavestateRecoveryStore.cancelAutomaticRecovery(context, "explicit-home-stop")
+
+        assertNull(PendingSavestateRecoveryStore.read(context))
+        assertTrue(stateFile.isFile)
+        assertEquals(8L, stateFile.length())
+    }
 }

@@ -15,5 +15,6 @@ data class GameLaunchSnapshot(
     val saveSlots: List<SaveSlot>,
     val latestSave: SaveSlot?,
     val canPlayFresh: Boolean,
+    val canLoadSave: Boolean,
     val blockReason: String? = null
 )

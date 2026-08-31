@@ -16,7 +16,7 @@ import android.os.Vibrator
 import android.os.VibratorManager
 import android.util.AttributeSet
 import android.view.MotionEvent
-import android.view.SurfaceView
+import android.view.View
 import androidx.core.content.ContextCompat
 import androidx.core.graphics.drawable.toBitmap
 import android.graphics.drawable.BitmapDrawable
@@ -67,7 +67,7 @@ interface PadOverlayItem {
  * All touch logic, floating sticks, edit mode, fade behaviour, and SharedPrefs
  * persistence are preserved from the original implementation.
  */
-class PadOverlay(context: Context?, attrs: AttributeSet?) : SurfaceView(context, attrs) {
+class PadOverlay(context: Context?, attrs: AttributeSet?) : View(context, attrs) {
 
     private val buttons: Array<PadOverlayButton>
     private val dpad: PadOverlayDpad

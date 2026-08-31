@@ -102,6 +102,7 @@ import org.json.JSONObject
 
 @Preview
 @Composable
+@OptIn(ExperimentalMaterial3Api::class)
 fun AppNavHost() {
     val context = LocalContext.current
     val navController = rememberNavController()
@@ -151,6 +152,7 @@ fun AppNavHost() {
             navigateToSettings = { },
             navigateToDrivers = { },
             navigateToPatches = { },
+            navigateToLogs = { },
             drawerState
         )
 
@@ -173,6 +175,7 @@ fun AppNavHost() {
                 navigateToSettings = { navigateTo("settings") },
                 navigateToDrivers = { navigateTo("drivers") },
                 navigateToPatches = { navigateTo("patches") },
+                navigateToLogs = { navigateTo("logs") },
                 drawerState
             )
         }
@@ -281,6 +284,7 @@ fun GamesDestination(
     navigateToSettings: () -> Unit,
     navigateToDrivers: () -> Unit,
     navigateToPatches: () -> Unit,
+    navigateToLogs: () -> Unit,
     drawerState: androidx.compose.material3.DrawerState
 ) {
     val context = LocalContext.current
@@ -338,6 +342,7 @@ fun GamesDestination(
         navigateToSettings = navigateToSettings,
         navigateToDrivers = navigateToDrivers,
         navigateToPatches = navigateToPatches,
+        navigateToLogs = navigateToLogs,
         emulatorState = RPCSX.state,
         emulatorActiveGame = RPCSX.activeGame
     )

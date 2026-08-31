@@ -19,6 +19,7 @@ import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -52,6 +53,7 @@ import com.zenithblue.sambas3.ui.games.GameConfigureOverlay
  * no session ownership, no duplicated state.
  */
 @Composable
+@OptIn(ExperimentalMaterial3Api::class)
 fun InGameMenuHost(
     uiState: InGameMenuUiState,
     gamePath: String?,

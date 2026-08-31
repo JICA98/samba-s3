@@ -210,6 +210,18 @@ object PendingSavestateRecoveryStore {
         Log.i(TAG, "S3SAVE pending recovery cleared")
     }
 
+    /** Cancel only the automatic recovery intent; the durable save and preview remain untouched. */
+    fun cancelAutomaticRecovery(context: Context, reason: String) {
+        val record = read(context)
+        if (record != null) {
+            context.getSharedPreferences(PREFS, Context.MODE_PRIVATE).edit()
+                .remove(KEY_RECORD).apply()
+            Log.i(TAG, "S3SAVE automatic recovery cancelled reason=$reason requestId=${record.requestId} slot=${record.slot}")
+        } else {
+            Log.i(TAG, "S3SAVE automatic recovery cancel no-marker reason=$reason")
+        }
+    }
+
     fun markFailure(context: Context, reason: String) {
         // A boot/surface failure must remain recoverable until the bounded
         // retry count is exhausted. The slot is intentionally never deleted.

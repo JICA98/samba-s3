@@ -91,7 +91,7 @@ fun GameLaunchCenter(
                 Text("SAVES", color = RPCSXColors.primary, style = MaterialTheme.typography.titleMedium)
                 LazyVerticalGrid(columns = GridCells.Adaptive(220.dp), contentPadding = PaddingValues(top = 8.dp), horizontalArrangement = Arrangement.spacedBy(8.dp), verticalArrangement = Arrangement.spacedBy(8.dp), modifier = Modifier.height(180.dp)) {
                     items(snapshot.saveSlots.filter { it.exists }, key = { it.slot }) { slot ->
-                        LaunchSaveCard(slot, onClick = { onLoad(slot) })
+                        LaunchSaveCard(slot, enabled = snapshot.canLoadSave, onClick = { onLoad(slot) })
                     }
                 }
                 if (snapshot.saveSlots.none { it.exists }) Text("No saved states yet", color = RPCSXColors.textSecondary, modifier = Modifier.padding(vertical = 8.dp))
@@ -101,7 +101,7 @@ fun GameLaunchCenter(
                     OutlinedButton(onClick = onPatches) { Text("PATCHES") }
                 }
                 Row(Modifier.fillMaxWidth().padding(top = 14.dp), horizontalArrangement = Arrangement.spacedBy(12.dp, Alignment.End)) {
-                    snapshot.latestSave?.let { Button(onClick = { onContinue(it) }) { Text("CONTINUE SLOT ${it.slot}") } }
+                    snapshot.latestSave?.let { Button(onClick = { onContinue(it) }, enabled = snapshot.canLoadSave) { Text("CONTINUE SLOT ${it.slot}") } }
                     Button(onClick = onFreshPlay, enabled = snapshot.canPlayFresh) { Text("PLAY FRESH") }
                 }
                 snapshot.blockReason?.let { Text(it, color = RPCSXColors.errorColor, modifier = Modifier.padding(top = 8.dp)) }
@@ -111,9 +111,9 @@ fun GameLaunchCenter(
 }
 
 @Composable
-private fun LaunchSaveCard(slot: SaveSlot, onClick: () -> Unit) {
+private fun LaunchSaveCard(slot: SaveSlot, enabled: Boolean, onClick: () -> Unit) {
     val context = LocalContext.current
-    Card(onClick = onClick, colors = CardDefaults.cardColors(containerColor = RPCSXColors.surface), border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant)) {
+    Card(onClick = onClick, enabled = enabled, colors = CardDefaults.cardColors(containerColor = RPCSXColors.surface), border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant)) {
         Row(Modifier.padding(8.dp), verticalAlignment = Alignment.CenterVertically) {
             Box(Modifier.width(86.dp).aspectRatio(16f / 9f).clip(RoundedCornerShape(6.dp)).background(RPCSXColors.surfaceOverlay), contentAlignment = Alignment.Center) {
                 if (slot.previewPath != null) AsyncImage(model = ImageRequest.Builder(context).data(File(slot.previewPath)).memoryCacheKey("${slot.previewPath}:${slot.previewMtimeMs}").build(), contentDescription = "Saved game preview for Slot ${slot.slot}", contentScale = ContentScale.Crop, modifier = Modifier.fillMaxSize()) else Icon(painterResource(R.drawable.ic_save), "Slot ${slot.slot} placeholder", tint = RPCSXColors.textSecondary)

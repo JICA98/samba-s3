@@ -39,4 +39,18 @@ class PerformanceMetricsParserTest {
         assertEquals(41f, samples.first())
         assertEquals(100f, samples.last())
     }
+
+    @Test
+    fun only_versioned_emu_flip_payload_can_supply_fps() {
+        val old = PerformanceMetricsParser.parse("{\"version\":1,\"fps\":60,\"frametimeMs\":16.7}")!!
+        assertNull(old.metrics.fps)
+        val current = PerformanceMetricsParser.parse(
+            "{\"version\":2,\"timestampUs\":1000,\"fpsSource\":\"emu_flip\",\"frameSampleFresh\":true," +
+                "\"fps\":30,\"frametimeMs\":33.3,\"frametimeSamples\":[{" +
+                "\"timestampUs\":900,\"value\":16},{\"timestampUs\":916,\"value\":52}]}"
+        )!!
+        assertEquals(30f, current.metrics.fps)
+        assertEquals(listOf(16f, 52f), current.metrics.frameTimeTimedSamples.map { it.value })
+        assertEquals(listOf(900L, 916L), current.metrics.frameTimeTimedSamples.map { it.timestampUs })
+    }
 }

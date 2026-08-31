@@ -13,13 +13,9 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent" />
 
-    <com.zenithblue.sambas3.overlay.PadOverlay
-        android:id="@+id/padOverlay"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent" />
-
     <!-- The monitor is visual-only. Its custom host rejects the entire touch
-         dispatch so PadOverlay remains the gameplay target even when visible. -->
+         dispatch so the controller remains the gameplay target even when visible.
+         It intentionally precedes PadOverlay so controller controls draw above it. -->
     <com.zenithblue.sambas3.ui.TouchThroughComposeView
         android:id="@+id/monitoringOverlay"
         android:layout_width="match_parent"
@@ -27,6 +23,11 @@
         android:importantForAccessibility="no"
         android:clickable="false"
         android:focusable="false" />
+
+    <com.zenithblue.sambas3.overlay.PadOverlay
+        android:id="@+id/padOverlay"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent" />
 
     <androidx.compose.ui.platform.ComposeView
         android:id="@+id/ingameOverlay"

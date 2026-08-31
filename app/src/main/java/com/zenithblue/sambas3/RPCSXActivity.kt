@@ -52,11 +52,13 @@ import com.zenithblue.sambas3.session.EmulationSessionState
 import com.zenithblue.sambas3.session.SessionStatePairing
 import com.zenithblue.sambas3.session.SessionStateReconciliation
 import com.zenithblue.sambas3.session.CoreRecoveryCoordinator
+import com.zenithblue.sambas3.session.EmulationHost
+import com.zenithblue.sambas3.session.EmulationHostRegistry
+import com.zenithblue.sambas3.session.EmulatorStopCoordinator
+import com.zenithblue.sambas3.session.EmulatorStopReason
 import com.zenithblue.sambas3.session.StopResult
 import com.zenithblue.sambas3.crash.CrashEvidenceCollector
-import com.zenithblue.sambas3.crash.CrashReport
-import com.zenithblue.sambas3.ui.crash.GameCrashScreen
-import com.zenithblue.sambas3.ui.games.launch.GameSavestateRepository
+import com.zenithblue.sambas3.crash.HomeRecoveryRepository
 import com.zenithblue.sambas3.monitoring.MonitoringOverlaySettings
 import com.zenithblue.sambas3.monitoring.MonitoringRepository
 import com.zenithblue.sambas3.ui.monitoring.MonitoringOverlay
@@ -72,14 +74,14 @@ import kotlin.math.abs
 import java.util.concurrent.CountDownLatch
 import java.util.concurrent.TimeUnit
 import java.util.concurrent.atomic.AtomicLong
-import androidx.compose.runtime.mutableStateOf
 
 private enum class EmulatorActivityFinishReason {
     None,
     ExplicitExit,
     RecoveryRecreate,
     BootFailure,
-    SystemLifecycle
+    SystemLifecycle,
+    HomeStop
 }
 
 private enum class FrontendHomeInputSource {
@@ -95,7 +97,7 @@ private enum class FrontendHomeInputSource {
  * registration, physical input forwarding, and game boot ownership. All menu
  * session/state decisions live in [InGameMenuCoordinator].
  */
-class RPCSXActivity : ComponentActivity() {
+class RPCSXActivity : ComponentActivity(), EmulationHost {
     private lateinit var binding: ActivityRpcs3Binding
     private lateinit var unregisterUsbEventListener: () -> Unit
     private var gamePadState: State = State()
@@ -109,22 +111,27 @@ class RPCSXActivity : ComponentActivity() {
     private var userSavestatePath: String? = null
     private var userSavestateSlot: Int? = null
     private var bootMode: EmulatorBootMode = EmulatorBootMode.FreshGame
+    private lateinit var bootRequest: EmulatorBootRequest
     private var recoveryTransitionActive = false
     private var recoveryRecreateRequested = false
     // Activity.recreate() is an internal recovery handoff, not a user exit.
     // Keep the durable marker and library identity intact across that destroy.
     private var isRecoveryRecreate = false
     private var finishReason = EmulatorActivityFinishReason.None
+    private var externalStopReason: EmulatorStopReason? = null
     private val interactionLock = InteractionLock()
     private var operationUiState: SavestateOperationUiState = SavestateOperationUiState.Hidden
-    private val activityInstanceId = NEXT_ACTIVITY_ID.incrementAndGet()
-    private val crashReportState = mutableStateOf<CrashReport?>(null)
+    override val activityInstanceId = NEXT_ACTIVITY_ID.incrementAndGet()
     private var transitionBitmap: Bitmap? = null
     private val transitionController = SavestateTransitionController()
     private lateinit var thumbnailStore: SavestateThumbnailStore
     private val bootMutex = Any()
+    private val terminalFailure = java.util.concurrent.atomic.AtomicBoolean(false)
     private val inputBindings by lazy { InputBindingPrefs.loadBindings() }
     private val gamepadMapper by lazy { GamepadMapper(ControllerProfileRepository.load()) }
+
+    override val currentSurfaceGeneration: Long
+        get() = if (::surfaceLeaseManager.isInitialized) surfaceLeaseManager.currentGeneration else 0L
 
     private val physicalTracker = PhysicalInputTracker()
     private val frontendHomeKeyGate = FrontendHomeKeyGate()
@@ -178,14 +185,25 @@ class RPCSXActivity : ComponentActivity() {
 
         binding = ActivityRpcs3Binding.inflate(layoutInflater)
         setContentView(binding.root)
+        // SurfaceView composition can ignore XML sibling order on some Android
+        // GPUs. Keep the intended visual stack explicit: surface < monitor <
+        // pad < utility buttons < in-game/transition overlays.
+        binding.surfaceHost.translationZ = 0f
+        binding.monitoringOverlay.translationZ = 1f
+        binding.padOverlay.translationZ = 2f
+        binding.menuToggle.translationZ = 3f
+        binding.oscToggle.translationZ = 3f
+        binding.transitionOverlay.translationZ = 100f
         surfaceLeaseManager = SurfaceLeaseManager(binding.surfaceHost)
         surfaceLeaseManager.onFailure = { reason ->
             runOnUiThread {
-                if (recoveryTransitionActive) requestRecoveryRecreate(reason)
+                if (bootMode != EmulatorBootMode.FreshGame && recoveryTransitionActive) failBootAndReturnHome(reason)
+                else if (recoveryTransitionActive) requestRecoveryRecreate(reason)
                 else Log.e("S3SURFACE", "native surface lifecycle failed reason=$reason")
             }
         }
         surfaceLeaseManager.installInitial()
+        EmulationHostRegistry.register(this)
 
         monitoringRepository = MonitoringRepository(this)
         binding.monitoringOverlay.visibility = View.GONE
@@ -217,30 +235,13 @@ class RPCSXActivity : ComponentActivity() {
         binding.ingameOverlay.translationZ = 64f
         binding.ingameOverlay.setContent {
             RPCSXTheme {
-                val report = crashReportState.value
-                if (report != null) {
-                    GameCrashScreen(
-                        report = report,
-                        onRetry = { restartAfterFault(false) },
-                        onSafeRetry = { restartAfterFault(true) },
-                        onContinue = { restartAfterFaultFromLatestSave() },
-                        onChooseSave = { restartAfterFaultFromLatestSave() },
-                        onConfigure = { crashReportState.value = null; interactionLock.unlock() },
-                        onExit = {
-                            EmulationSessionJournal.clear(this@RPCSXActivity)
-                            finishReason = EmulatorActivityFinishReason.BootFailure
-                            finish()
-                        }
-                    )
-                } else {
-                    val uiState by coordinator.state.collectAsStateWithLifecycle()
-                    InGameMenuHost(
-                        uiState = uiState,
-                        gamePath = intent.getStringExtra("path"),
-                        core = coreGateway,
-                        onIntent = coordinator::dispatch
-                    )
-                }
+                val uiState by coordinator.state.collectAsStateWithLifecycle()
+                InGameMenuHost(
+                    uiState = uiState,
+                    gamePath = intent.getStringExtra("path"),
+                    core = coreGateway,
+                    onIntent = coordinator::dispatch
+                )
             }
         }
 
@@ -273,19 +274,8 @@ class RPCSXActivity : ComponentActivity() {
                     is com.zenithblue.sambas3.ui.ingame.InGameMenuHostEffect.ArmGameplayNow -> inputGate.arm()
 
                     is com.zenithblue.sambas3.ui.ingame.InGameMenuHostEffect.FinishGameActivity -> {
-                        finishReason = EmulatorActivityFinishReason.ExplicitExit
-                        thread {
-                            var attempts = 0
-                            while (attempts < 100) {
-                                val s = try { RPCSX.getState() } catch (_: Exception) { EmulatorState.Stopped }
-                                if (s == EmulatorState.Stopped) break
-                                Thread.sleep(100)
-                                attempts++
-                            }
-                            RPCSX.state.value = EmulatorState.Stopped
-                            RPCSX.activeGame.value = null
-                            EmulationSessionJournal.markCleanStop(this@RPCSXActivity)
-                            runOnUiThread { finish() }
+                        lifecycleScope.launch {
+                            EmulatorStopCoordinator.stop(this@RPCSXActivity, EmulatorStopReason.InGameExit)
                         }
                     }
 
@@ -390,28 +380,16 @@ class RPCSXActivity : ComponentActivity() {
         pendingRecovery?.let {
             thumbnailStore.recoverCommitted(it.requestId, it.slot, it.savestatePath)
         }
-        bootMode = intent.getStringExtra(EXTRA_BOOT_MODE)?.let {
-            runCatching { EmulatorBootMode.valueOf(it) }.getOrNull()
-        } ?: EmulatorBootMode.FreshGame
-        originalGamePath = intent.getStringExtra(EXTRA_ORIGINAL_GAME_PATH)
-            ?: intent.getStringExtra("path")
-            ?: pendingRecovery?.originalGamePath
-            ?: error("RPCSXActivity requires an original game path")
-        recoverySavestatePath = intent.getStringExtra(EXTRA_SAVESTATE_PATH)
-            ?.takeIf { bootMode == EmulatorBootMode.DurableRecovery }
-            ?: intent.getStringExtra(EXTRA_RECOVERY_SAVESTATE)
-            ?: pendingRecovery?.takeIf { it.originalGamePath == originalGamePath }?.savestatePath
-        userSavestatePath = intent.getStringExtra(EXTRA_SAVESTATE_PATH)
-            ?.takeIf { bootMode == EmulatorBootMode.UserSelectedSavestate }
-            ?: intent.getStringExtra(EXTRA_USER_SAVESTATE)
-            ?.takeIf { it.isNotBlank() && java.io.File(it).isFile }
-        userSavestateSlot = intent.getIntExtra(EXTRA_SAVESTATE_SLOT,
-            intent.getIntExtra(EXTRA_USER_SAVESTATE_SLOT, -1))
-            .takeIf { it >= 0 }
-        if (bootMode == EmulatorBootMode.FreshGame && recoverySavestatePath != null) {
-            bootMode = EmulatorBootMode.DurableRecovery
-        } else if (bootMode == EmulatorBootMode.FreshGame && userSavestatePath != null) {
-            bootMode = EmulatorBootMode.UserSelectedSavestate
+        bootRequest = EmulatorBootRequest.fromIntent(intent, pendingRecovery)
+        bootMode = bootRequest.mode
+        originalGamePath = bootRequest.originalGamePath
+        recoverySavestatePath = bootRequest.savestatePath.takeIf { bootMode == EmulatorBootMode.DurableRecovery }
+        userSavestatePath = bootRequest.savestatePath.takeIf { bootMode == EmulatorBootMode.UserSelectedSavestate }
+        userSavestateSlot = bootRequest.slot
+        if (originalGamePath.isBlank()) {
+            finishReason = EmulatorActivityFinishReason.BootFailure
+            finish()
+            return
         }
         val gamePath = originalGamePath
         RPCSX.lastPlayedGame = gamePath
@@ -424,7 +402,7 @@ class RPCSXActivity : ComponentActivity() {
             surfaceLeaseManager.currentGeneration
         )
         logSessionSnapshot("activity-created")
-        if (recoverySavestatePath != null) {
+        if (bootMode != EmulatorBootMode.FreshGame) {
             pendingRecovery?.let {
                 transitionController.beginRecoveryBoot(it.requestId, it.slot, it.savestatePath)
             }
@@ -439,8 +417,13 @@ class RPCSXActivity : ComponentActivity() {
 
         bootThread = thread {
             EmulationSessionJournal.update(this@RPCSXActivity, EmulationSessionState.BOOTING, surfaceLeaseManager.currentGeneration)
-            val stateBeforeBoot = runCatching { RPCSX.getState() }.getOrDefault(EmulatorState.Stopped)
-            Log.i("S3HOMELOAD", "preflight mode=$bootMode state=$stateBeforeBoot original=$gamePath savestate=${userSavestatePath ?: recoverySavestatePath}")
+            val stateBeforeBoot = runCatching { RPCSX.getState() }.getOrElse {
+                Log.e("S3HOMELOAD", "preflight state-read-failed error=${it.message}")
+                runOnUiThread { failBootAndReturnHome("state-read-failed") }
+                return@thread
+            }
+            Log.i("S3HOMELOAD", "request mode=$bootMode original=$gamePath savestate=${userSavestatePath ?: recoverySavestatePath}")
+            Log.i("S3HOMELOAD", "preflight state=$stateBeforeBoot")
             Log.i("S3RECOVERY", "preflight state=$stateBeforeBoot activeGame=${RPCSX.activeGame.value} recovery=${recoverySavestatePath != null}")
             if (recoverySavestatePath == null && stateBeforeBoot == EmulatorState.Paused && RPCSX.activeGame.value == gamePath) {
                 RPCSX.instance.resume()
@@ -457,51 +440,65 @@ class RPCSXActivity : ComponentActivity() {
                 }
                 if (stopResult != StopResult.AlreadyStopped && stopResult != StopResult.Stopped) {
                     Log.e("S3RECOVERY", "preflight refused boot result=$stopResult")
-                    runOnUiThread { showInProcessFault("Core did not reach Stopped before boot ($stopResult)") }
+                    runOnUiThread { failBootAndReturnHome("core-stop-$stopResult") }
                     return@thread
                 }
             }
-            Log.i("S3HOMELOAD", "stopped mode=$bootMode state=${runCatching { RPCSX.getState() }.getOrDefault(EmulatorState.Stopped)}")
+            val stoppedState = runCatching { RPCSX.getState() }.getOrElse {
+                Log.e("S3HOMELOAD", "post-stop state-read-failed error=${it.message}")
+                runOnUiThread { failBootAndReturnHome("state-read-failed") }
+                return@thread
+            }
+            if (stoppedState != EmulatorState.Stopped) {
+                Log.e("S3HOMELOAD", "post-stop state was $stoppedState")
+                runOnUiThread { failBootAndReturnHome("core-not-stopped") }
+                return@thread
+            }
+            Log.i("S3HOMELOAD", "stopped mode=$bootMode state=$stoppedState")
 
             Log.i("S3HOMELOAD", "surface-ready-wait mode=$bootMode")
             val surfaceReady = kotlinx.coroutines.runBlocking {
-                surfaceLeaseManager.awaitReady()
+                surfaceLeaseManager.awaitInitialReady()
             }
             if (surfaceReady != SurfaceReadyResult.Ready) {
                 Log.e("S3HOMELOAD", "surface-ready failed result=$surfaceReady generation=${surfaceLeaseManager.currentGeneration}")
-                runOnUiThread { showInProcessFault("surface-ready-$surfaceReady") }
+                runOnUiThread { failBootAndReturnHome("surface-ready-$surfaceReady") }
                 return@thread
             }
             if (bootMode == EmulatorBootMode.UserSelectedSavestate) {
                 Log.i("S3HOMELOAD", "surface-ready gen=${surfaceLeaseManager.currentGeneration}")
             }
 
-            Log.w("RPCSX State", RPCSX.getState().name)
-            val isRecoveryBoot = bootMode == EmulatorBootMode.DurableRecovery
-            if (isRecoveryBoot && !PendingSavestateRecoveryStore.markBooting(this@RPCSXActivity)) {
-                Log.e("S3SAVE", "recovery boot refused after retry limit")
-                PendingSavestateRecoveryStore.markFailure(this@RPCSXActivity, "retry-limit")
-                runOnUiThread {
-                    AlertDialogQueue.showDialog(
-                        "Saved-state recovery stopped",
-                        "The saved slot was kept, but automatic recovery stopped after repeated failures. " +
-                            "You can load it manually from the save-state menu."
-                    )
-                    finishReason = EmulatorActivityFinishReason.BootFailure
-                    finish()
-                }
+            val capabilityError = bootRequest.validationError(
+                hasBootSavestateExport = bootMode == EmulatorBootMode.FreshGame ||
+                    runCatching { RPCSX.instance.hasBootSavestateExport() }.getOrDefault(false)
+            )
+            if (capabilityError != null) {
+                Log.e("S3HOMELOAD", "direct-boot refused reason=$capabilityError mode=$bootMode")
+                runOnUiThread { failBootAndReturnHome(capabilityError) }
                 return@thread
             }
-            val bootPath = when (bootMode) {
-                EmulatorBootMode.DurableRecovery -> recoverySavestatePath
-                EmulatorBootMode.UserSelectedSavestate -> userSavestatePath
-                EmulatorBootMode.FreshGame -> gamePath
-            } ?: gamePath
-            if (bootMode != EmulatorBootMode.FreshGame &&
-                (bootPath.isBlank() || !java.io.File(bootPath).isFile)
-            ) {
-                Log.e("S3HOMELOAD", "direct-boot failed reason=missing-savestate path=$bootPath")
-                runOnUiThread { showInProcessFault("missing-savestate-$bootPath") }
+            val bootPath = bootRequest.savestatePath ?: gamePath
+            if (bootMode == EmulatorBootMode.UserSelectedSavestate) {
+                // A manual load is also durable: a process death before the
+                // first frame leaves the exact selected slot for Home retry.
+                val existing = PendingSavestateRecoveryStore.read(this@RPCSXActivity)
+                if (existing == null || existing.savestatePath != bootPath) {
+                    PendingSavestateRecoveryStore.armCommitted(
+                        this@RPCSXActivity,
+                        bootRequest.slot ?: -1,
+                        gamePath,
+                        bootPath,
+                        GameSettingsOverrides.resolveTitleId(gamePath, this@RPCSXActivity) ?: ""
+                    )
+                }
+            }
+            Log.w("RPCSX State", RPCSX.getState().name)
+            val hasDurableSavestate = bootMode != EmulatorBootMode.FreshGame
+            if (hasDurableSavestate && !PendingSavestateRecoveryStore.markBooting(this@RPCSXActivity)) {
+                Log.e("S3SAVE", "recovery boot refused after retry limit")
+                PendingSavestateRecoveryStore.markFailure(this@RPCSXActivity, "retry-limit")
+                runOnUiThread { failBootAndReturnHome("retry-limit") }
                 return@thread
             }
             val preBootTitleId = GameSettingsOverrides.resolveTitleId(gamePath, this@RPCSXActivity)
@@ -515,6 +512,9 @@ class RPCSXActivity : ComponentActivity() {
             }
 
             Log.i("S3HOMELOAD", "direct-boot-begin mode=$bootMode source=$bootPath original=$gamePath")
+            if (bootMode != EmulatorBootMode.FreshGame) {
+                Log.i("S3HOMELOAD", "boot-savestate-begin path=$bootPath original=$gamePath")
+            }
             val bootResult = BootResult.fromInt(
                 if (bootMode != EmulatorBootMode.FreshGame) {
                     bootSavestateSerialized(bootPath, gamePath)
@@ -524,20 +524,21 @@ class RPCSXActivity : ComponentActivity() {
             )
             if (bootResult != BootResult.NoErrors) {
                 Log.w("S3HOMELOAD", "direct-boot-return result=$bootResult source=$bootPath")
-                if (isRecoveryBoot) PendingSavestateRecoveryStore.markFailure(this@RPCSXActivity, bootResult.name)
-                else RPCSX.activeGame.value = null
+                if (bootMode != EmulatorBootMode.FreshGame) {
+                    Log.w("S3HOMELOAD", "boot-savestate-return result=$bootResult")
+                }
+                if (hasDurableSavestate) PendingSavestateRecoveryStore.markFailure(this@RPCSXActivity, bootResult.name)
                 try { RPCSX.state.value = RPCSX.getState() } catch (_: Exception) {}
-                AlertDialogQueue.showDialog(
-                    getString(R.string.failed_to_boot),
-                    getString(R.string.error_with_msg, bootResult.name)
-                )
-                finishReason = EmulatorActivityFinishReason.BootFailure
-                finish()
+                runOnUiThread { failBootAndReturnHome("boot-result-$bootResult") }
             } else {
                 RPCSX.activeGame.value = gamePath
                 EmulationSessionJournal.update(this@RPCSXActivity, EmulationSessionState.RUNNING, surfaceLeaseManager.currentGeneration)
                 logSessionSnapshot("boot-return")
                 Log.i("S3HOMELOAD", "direct-boot-return result=NoErrors state=${RPCSX.getState()}")
+                if (bootMode != EmulatorBootMode.FreshGame) {
+                    Log.i("S3HOMELOAD", "boot-savestate-return result=NoErrors")
+                    Log.i("S3HOMELOAD", "state=${RPCSX.getState()}")
+                }
                 if (bootMode != EmulatorBootMode.FreshGame) confirmRecoveryFrameAndClear()
                 pollAndLearnTitleId(gamePath)
             }
@@ -576,7 +577,9 @@ class RPCSXActivity : ComponentActivity() {
 
                     RPCSX.FRONTEND_EVENT_RENDERER_ERROR,
                     RPCSX.FRONTEND_EVENT_EMULATOR_ACTION_ERROR -> runOnUiThread {
-                        if (recoveryTransitionActive) {
+                        if (recoveryTransitionActive && bootMode != EmulatorBootMode.FreshGame) {
+                            failBootAndReturnHome(payload ?: "renderer-error")
+                        } else if (recoveryTransitionActive) {
                             requestRecoveryRecreate(payload ?: "renderer-error")
                         } else {
                             showInProcessFault(payload ?: "native renderer/action error")
@@ -595,82 +598,52 @@ class RPCSXActivity : ComponentActivity() {
     }
 
     private fun showInProcessFault(evidence: String) {
-        if (crashReportState.value != null) return
+        if (!terminalFailure.compareAndSet(false, true)) return
         interactionLock.lock(EmulatorInteractionLock.CrashView)
         EmulationSessionJournal.update(this, EmulationSessionState.FAILED)
         Log.e("S3CRASH", "in-process fault evidence=$evidence")
         lifecycleScope.launch(kotlinx.coroutines.Dispatchers.IO) {
-            val report = runCatching { CrashEvidenceCollector.collectSummary(this@RPCSXActivity, EmulationSessionJournal.read(this@RPCSXActivity), evidence) }.getOrNull()
+            val session = EmulationSessionJournal.read(this@RPCSXActivity)
+            val report = runCatching {
+                CrashEvidenceCollector.collectSummary(this@RPCSXActivity, session, evidence)
+            }.getOrNull()
+            HomeRecoveryRepository.recordCrashFailure(this@RPCSXActivity, session, report)
+            stopAndFinishAfterFailure()
+        }
+    }
+
+    /** Boot/load failures return to Home; RPCSXActivity never owns recovery presentation. */
+    private fun failBootAndReturnHome(reason: String) {
+        if (!terminalFailure.compareAndSet(false, true)) return
+        interactionLock.lock(EmulatorInteractionLock.CrashView)
+        EmulationSessionJournal.update(this, EmulationSessionState.FAILED)
+        Log.e("S3HOMELOAD", "boot failed reason=$reason mode=$bootMode")
+        lifecycleScope.launch(kotlinx.coroutines.Dispatchers.IO) {
+            HomeRecoveryRepository.recordLoadFailure(
+                this@RPCSXActivity,
+                originalGamePath,
+                bootRequest.savestatePath,
+                bootRequest.slot,
+                reason,
+            )
+            stopAndFinishAfterFailure()
+        }
+    }
+
+    private fun stopAndFinishAfterFailure() {
+        val stopped = kotlinx.coroutines.runBlocking {
+            EmulatorStopCoordinator.stop(this@RPCSXActivity, EmulatorStopReason.BootFailureCleanup)
+        }
+        Log.i("S3RECOVERY", "failure return stop=$stopped")
+        if (!stopped) {
             runOnUiThread {
-                if (report != null) {
-                    crashReportState.value = report
-                    binding.ingameOverlay.visibility = View.VISIBLE
-                }
+                Log.e("S3RECOVERY", "failure return retained Activity because native Stopped was not proven")
             }
         }
     }
 
-    private fun restartAfterFault(safe: Boolean) {
-        val path = originalGamePath
-        thread {
-            val stopResult = kotlinx.coroutines.runBlocking {
-                CoreRecoveryCoordinator.ensureStoppedForFreshBoot(
-                    reason = "crash retry",
-                    state = { RPCSX.getState() },
-                    kill = { RPCSX.instance.kill() },
-                    onLog = { Log.i("S3RECOVERY", it) }
-                )
-            }
-            if (stopResult == StopResult.AlreadyStopped || stopResult == StopResult.Stopped) {
-                runOnUiThread {
-                    finishReason = EmulatorActivityFinishReason.BootFailure
-                    startActivity(Intent(this, RPCSXActivity::class.java).apply {
-                        putExtra("path", path)
-                        putExtra(EXTRA_SAFE_RETRY, safe)
-                    })
-                    finish()
-                }
-            } else {
-                Log.e("S3RECOVERY", "retry refused result=$stopResult")
-            }
-        }
-    }
-
-    private fun restartAfterFaultFromLatestSave() {
-        val path = originalGamePath
-        val game = com.zenithblue.sambas3.GameRepository.list().firstOrNull { it.info.path == path }
-        val slot = game?.let {
-            GameSavestateRepository.slots(this, it)
-                .filter { save -> save.exists && save.path != null }
-                .maxByOrNull { save -> save.mtimeMs }
-        }
-        if (slot?.path == null) {
-            restartAfterFault(safe = false)
-            return
-        }
-        thread {
-            val stopResult = kotlinx.coroutines.runBlocking {
-                CoreRecoveryCoordinator.ensureStoppedForFreshBoot(
-                    reason = "crash continue save",
-                    state = { RPCSX.getState() },
-                    kill = { RPCSX.instance.kill() },
-                    onLog = { Log.i("S3RECOVERY", it) }
-                )
-            }
-            if (stopResult == StopResult.AlreadyStopped || stopResult == StopResult.Stopped) {
-                runOnUiThread {
-                    finishReason = EmulatorActivityFinishReason.BootFailure
-                    startActivity(Intent(this, RPCSXActivity::class.java).apply {
-                        putExtra("path", path)
-                        putExtra(EXTRA_USER_SAVESTATE, slot.path)
-                        putExtra(EXTRA_USER_SAVESTATE_SLOT, slot.slot)
-                    })
-                    finish()
-                }
-            } else {
-                Log.e("S3RECOVERY", "continue save refused result=$stopResult")
-            }
-        }
+    private fun clearLoadRecoveryAfterFirstFrame() {
+        HomeRecoveryRepository.clearAfterSuccessfulRecovery(this)
     }
 
     private fun requestHomeToggle(source: FrontendHomeInputSource) {
@@ -686,9 +659,9 @@ class RPCSXActivity : ComponentActivity() {
                 return
             }
             MenuSessionState.Closed -> {
-                val state = runCatching { RPCSX.getState() }.getOrDefault(EmulatorState.Stopped)
+                val state = runCatching { RPCSX.getState() }.getOrNull()
                 if (state != EmulatorState.Running && state != EmulatorState.Paused) {
-                    Log.w("S3HOME", "ignored source=$source state=$state")
+                    Log.w("S3HOME", "ignored source=$source state=${state ?: "Unknown"}")
                     return
                 }
                 Log.i("S3HOME", "source=$source edge=down action=open state=$state")
@@ -701,8 +674,77 @@ class RPCSXActivity : ComponentActivity() {
         }
     }
 
+    override fun onNewIntent(intent: Intent) {
+        super.onNewIntent(intent)
+        val incoming = EmulatorBootRequest.fromIntent(intent)
+        val currentPath = if (::originalGamePath.isInitialized) originalGamePath else null
+        val nativeState = runCatching { RPCSX.getState() }.getOrNull()
+        Log.i(
+            "S3INTENT",
+            "activity=$activityInstanceId oldMode=$bootMode oldPath=$currentPath newMode=${incoming.mode} newPath=${incoming.originalGamePath} nativeState=$nativeState activeGame=${RPCSX.activeGame.value} action=pending"
+        )
+        if (incoming.originalGamePath.isBlank()) {
+            Log.w("S3INTENT", "activity=$activityInstanceId action=reject-invalid")
+            return
+        }
+        if ((nativeState == EmulatorState.Running || nativeState == EmulatorState.Paused) &&
+            RPCSX.activeGame.value == incoming.originalGamePath &&
+            currentPath == incoming.originalGamePath
+        ) {
+            setIntent(intent)
+            Log.i("S3INTENT", "activity=$activityInstanceId action=reuse-current")
+            return
+        }
+        if (nativeState == EmulatorState.Stopped) {
+            setIntent(intent)
+            isRecoveryRecreate = true
+            finishReason = EmulatorActivityFinishReason.RecoveryRecreate
+            Log.i("S3INTENT", "activity=$activityInstanceId action=recreate-stopped")
+            recreate()
+            return
+        }
+        Log.w("S3INTENT", "activity=$activityInstanceId action=reject-busy nativeState=$nativeState")
+    }
+
+    override fun prepareForExternalStop(reason: EmulatorStopReason) {
+        if (Looper.myLooper() != Looper.getMainLooper()) {
+            Log.w("S3HOST", "prepare-external-stop off-main activity=$activityInstanceId")
+        }
+        externalStopReason = reason
+        finishReason = if (reason == EmulatorStopReason.HomeStop) {
+            EmulatorActivityFinishReason.HomeStop
+        } else {
+            EmulatorActivityFinishReason.ExplicitExit
+        }
+        interactionLock.forceLock(EmulatorInteractionLock.ExternalStop)
+        neutralizeForwardedPad()
+        menuInputRouter.cancelRepeat()
+        if (::monitoringRepository.isInitialized) monitoringRepository.stop()
+        val menuOpen = runCatching { RPCSX.instance.isFrontendMenuOpen() }.getOrDefault(false)
+        if (menuOpen) {
+            runCatching { RPCSX.instance.endFrontendMenu(false) }
+                .onSuccess { Log.i("S3STOP", "frontend-menu-ended activity=$activityInstanceId") }
+                .onFailure { Log.w("S3STOP", "frontend-menu-end-failed activity=$activityInstanceId error=${it.message}") }
+        }
+        Log.i("S3HOST", "prepare-external-stop activity=$activityInstanceId reason=$reason surface=$currentSurfaceGeneration")
+    }
+
+    override fun finishAfterExternalStop(requestId: Long) {
+        finishReason = if (externalStopReason == EmulatorStopReason.HomeStop) {
+            EmulatorActivityFinishReason.HomeStop
+        } else {
+            EmulatorActivityFinishReason.ExplicitExit
+        }
+        Log.i("S3HOST", "finish-external-stop activity=$activityInstanceId requestId=$requestId")
+        finish()
+    }
+
     private fun handleAndroidBack() {
-        val state = runCatching { RPCSX.getState() }.getOrDefault(EmulatorState.Stopped)
+        val state = runCatching { RPCSX.getState() }.getOrNull()
+        if (state == null) {
+            Log.e("S3BACK", "state-read-failed; consuming Back")
+            return
+        }
         when (resolveAndroidBackAction(recoveryTransitionActive, coordinator.state.value.isOpen, state)) {
             AndroidBackAction.Consume -> Log.i("S3BACK", "consumed recovery=$recoveryTransitionActive state=$state")
             AndroidBackAction.DispatchMenuBack -> {
@@ -803,7 +845,7 @@ class RPCSXActivity : ComponentActivity() {
         thread(name = "S3 Saved-state Frame Confirm") {
             var stable = 0
             val expectedGeneration = surfaceLeaseManager.currentGeneration
-            val deadline = System.currentTimeMillis() + 30_000L
+            val deadline = System.currentTimeMillis() + FIRST_FRAME_TIMEOUT_MS
             while (stable < 6 && System.currentTimeMillis() < deadline && !Thread.interrupted()) {
                 val copied = probeCurrentFrame(expectedGeneration)
                 if (RPCSX.getState() == EmulatorState.Running && copied) stable++ else stable = 0
@@ -816,12 +858,16 @@ class RPCSXActivity : ComponentActivity() {
             if (stable < 6) {
                 Log.e("S3RENDER", "first-frame-confirm-timeout generation=${surfaceLeaseManager.currentGeneration}")
                 runOnUiThread {
-                    requestRecoveryRecreate("first-frame-timeout")
+                    if (bootMode != EmulatorBootMode.FreshGame) failBootAndReturnHome("first-frame-timeout")
+                    else requestRecoveryRecreate("first-frame-timeout")
                 }
                 return@thread
             }
             val record = PendingSavestateRecoveryStore.read(this@RPCSXActivity)
-            if (record != null && !transitionController.firstFrameConfirmed(record.requestId, record.slot)) {
+            if (record != null &&
+                transitionController.state.phase != SavestateTransitionController.Phase.Idle &&
+                !transitionController.firstFrameConfirmed(record.requestId, record.slot)
+            ) {
                 Log.e("S3RENDER", "first-frame confirmation rejected by transition controller")
                 return@thread
             }
@@ -831,6 +877,7 @@ class RPCSXActivity : ComponentActivity() {
             Log.i("S3HOMELOAD", "first-frame-confirmed mode=$bootMode generation=${surfaceLeaseManager.currentGeneration}")
             runCatching { RPCSX.instance.clearSavestateProgress() }
             PendingSavestateRecoveryStore.clear(this@RPCSXActivity)
+            clearLoadRecoveryAfterFirstFrame()
             runOnUiThread {
                 binding.transitionOverlay.animate()
                     .alpha(0f)
@@ -1038,11 +1085,13 @@ class RPCSXActivity : ComponentActivity() {
     }
 
     private fun bootSerialized(path: String): Int = synchronized(bootMutex) {
+        Log.i("S3BOOT", "owner=${Thread.currentThread().name} operation=boot path=$path")
         RPCSX.instance.boot(path)
     }
 
     private fun bootSavestateSerialized(savestatePath: String, originalGamePath: String): Int =
         synchronized(bootMutex) {
+            Log.i("S3BOOT", "owner=${Thread.currentThread().name} operation=boot-savestate path=$savestatePath original=$originalGamePath")
             RPCSX.instance.bootSavestate(savestatePath, originalGamePath)
         }
 
@@ -1130,6 +1179,7 @@ class RPCSXActivity : ComponentActivity() {
     }
 
     override fun onDestroy() {
+        EmulationHostRegistry.unregister(this)
         if (::monitoringRepository.isInitialized) monitoringRepository.stop()
         transitionBitmap?.recycle()
         transitionBitmap = null
@@ -1191,12 +1241,14 @@ class RPCSXActivity : ComponentActivity() {
     private fun isMenuOpen(): Boolean = coordinator.state.value.isOpen
 
     private fun logSessionSnapshot(reason: String) {
-        val nativeState = runCatching { RPCSX.getState() }.getOrDefault(EmulatorState.Stopped)
+        val nativeState = runCatching { RPCSX.getState() }.getOrNull()
         val active = RPCSX.activeGame.value
-        SessionStateReconciliation.invalidPairing(SessionStatePairing(nativeState, active))?.let {
+        nativeState?.let { state ->
+            SessionStateReconciliation.invalidPairing(SessionStatePairing(state, active))?.let {
             Log.w("S3SESSION", "invalid-pairing=$it reason=$reason native=$nativeState activeGame=$active")
+            }
         }
-        Log.i("S3SESSION", "activity=$activityInstanceId reason=$reason native=$nativeState mirrored=${RPCSX.state.value} activeGame=$active surfaceGen=${runCatching { surfaceLeaseManager.currentGeneration }.getOrDefault(-1L)} recovery=$recoveryTransitionActive menu=${coordinator.state.value.session}")
+        Log.i("S3SESSION", "activity=$activityInstanceId reason=$reason native=${nativeState ?: "Unknown"} mirrored=${RPCSX.state.value} activeGame=$active surfaceGen=${runCatching { surfaceLeaseManager.currentGeneration }.getOrDefault(-1L)} recovery=$recoveryTransitionActive menu=${coordinator.state.value.session}")
     }
 
     private fun isFrontendHomeKey(keyCode: Int): Boolean =
@@ -1368,6 +1420,7 @@ class RPCSXActivity : ComponentActivity() {
         private const val TITLE_ID_POLL_INTERVAL_MS = 250L
         private const val TITLE_ID_POLL_TIMEOUT_MS = 10_000L
         private const val FRAME_COPY_TIMEOUT_MS = 2_000L
+        private const val FIRST_FRAME_TIMEOUT_MS = 120_000L
         private val NEXT_ACTIVITY_ID = AtomicLong(0L)
     }
 }

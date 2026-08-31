@@ -590,6 +590,21 @@ Java_com_zenithblue_sambas3_RPCSX_getCoreBuildId(JNIEnv *env, jobject) {
 }
 
 extern "C" JNIEXPORT jboolean JNICALL
+Java_com_zenithblue_sambas3_RPCSX_hasBootSavestateExport(JNIEnv *, jobject) {
+  return rpcsxLib.bootSavestate ? JNI_TRUE : JNI_FALSE;
+}
+
+extern "C" JNIEXPORT jboolean JNICALL
+Java_com_zenithblue_sambas3_RPCSX_hasLoadSaveStateExport(JNIEnv *, jobject) {
+  return rpcsxLib.loadSaveState ? JNI_TRUE : JNI_FALSE;
+}
+
+extern "C" JNIEXPORT jboolean JNICALL
+Java_com_zenithblue_sambas3_RPCSX_hasSurfaceEventV2Export(JNIEnv *, jobject) {
+  return rpcsxLib.surfaceEventV2 ? JNI_TRUE : JNI_FALSE;
+}
+
+extern "C" JNIEXPORT jboolean JNICALL
 Java_com_zenithblue_sambas3_RPCSX_hasPerfMetricsExport(JNIEnv *, jobject) {
   return rpcsxLib.getPerfMetricsJson && rpcsxLib.setPerfMetricsEnabled ? JNI_TRUE : JNI_FALSE;
 }

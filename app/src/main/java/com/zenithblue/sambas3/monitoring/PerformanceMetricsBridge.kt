@@ -27,6 +27,7 @@ object PerformanceMetricsBridge : MonitoringPerfSource {
                     android.util.Log.i(
                         "S3PERF",
                         "export=1 payload_length=${raw.length} version=${parsed.version} " +
+                            "source=${metrics.fpsSource ?: "unknown"} presented=${metrics.presentedFrameCount ?: "null"} " +
                             "fps=${metrics.fps ?: "null"} frametime_ms=${metrics.frameTimeMs ?: "null"} " +
                             "fps_samples=${metrics.fpsSamples.size} frametime_samples=${metrics.frameTimeSamples.size} " +
                             "ppu=${metrics.ppuCpuPercent ?: "null"} spu=${metrics.spuCpuPercent ?: "null"} " +
@@ -48,7 +49,9 @@ object PerformanceMetricsBridge : MonitoringPerfSource {
                     lastJsonCrossCheckMs = nowMs
                     android.util.Log.d(
                         "S3PERF",
-                        "crosscheck json_fps=${metrics.fps} json_frametime_ms=${metrics.frameTimeMs}"
+                        "crosscheck source=${metrics.fpsSource ?: "unknown"} " +
+                            "presented=${metrics.presentedFrameCount ?: "null"} " +
+                            "json_fps=${metrics.fps} json_frametime_ms=${metrics.frameTimeMs}"
                     )
                 }
             }

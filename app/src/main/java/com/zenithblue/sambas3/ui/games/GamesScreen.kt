@@ -62,8 +62,16 @@ import com.zenithblue.sambas3.ui.games.preview.GamePreviewModel
 import com.zenithblue.sambas3.ui.games.preview.GamePreviewRepository
 import com.zenithblue.sambas3.ui.games.launch.GameLaunchCenter
 import com.zenithblue.sambas3.ui.games.launch.GameLaunchRepository
+import com.zenithblue.sambas3.ui.games.launch.GameSavestateRepository
 import com.zenithblue.sambas3.ui.games.launch.StoppedTrophiesDialog
 import com.zenithblue.sambas3.ui.ingame.TrophiesData
+import com.zenithblue.sambas3.crash.HomeRecoveryRepository
+import com.zenithblue.sambas3.crash.HomeRecoveryState
+import com.zenithblue.sambas3.crash.RecoveryAction
+import com.zenithblue.sambas3.ui.crash.CrashDetailsSheet
+import com.zenithblue.sambas3.ui.crash.CrashRecoveryCard
+import com.zenithblue.sambas3.ui.crash.StopFailureCard
+import com.zenithblue.sambas3.session.EmulatorStopCoordinator
 import com.zenithblue.sambas3.utils.FileUtil
 import com.zenithblue.sambas3.utils.GameFolderMatch
 import kotlin.math.abs
@@ -136,6 +144,7 @@ fun GamesScreen(
     navigateToSettings: (() -> Unit)? = null,
     navigateToDrivers: (() -> Unit)? = null,
     navigateToPatches: (() -> Unit)? = null,
+    navigateToLogs: (() -> Unit)? = null,
     emulatorState: State<EmulatorState> = mutableStateOf(EmulatorState.Stopped),
     emulatorActiveGame: State<String?> = mutableStateOf(null)
 ) {
@@ -148,6 +157,10 @@ fun GamesScreen(
     }
     val games = remember { GameRepository.list() }
     val rpcsxLibrary by remember { RPCSX.activeLibrary }
+    val recoveryState by HomeRecoveryRepository.state.collectAsState()
+    val stopState by EmulatorStopCoordinator.state.collectAsState()
+    var detailsState by remember { mutableStateOf<HomeRecoveryState?>(null) }
+    LaunchedEffect(Unit) { HomeRecoveryRepository.refresh(context) }
 
     if (rpcsxLibrary == null) {
         // Loading screen while library is missing
@@ -187,6 +200,7 @@ fun GamesScreen(
     var stoppedTrophies by remember { mutableStateOf<TrophiesData?>(null) }
     var stoppedTrophiesLoading by remember { mutableStateOf(false) }
     val trophiesScope = rememberCoroutineScope()
+    val recoveryScope = rememberCoroutineScope()
     var showImportDialog by remember { mutableStateOf(false) }
     var scannedFolderGames by remember { mutableStateOf<List<GameFolderMatch>?>(null) }
     var scannedFolderUri by remember { mutableStateOf<Uri?>(null) }
@@ -199,6 +213,47 @@ fun GamesScreen(
     // Gameplay ownership — STOP only when actual game is running/paused, not compile-only engine busy
     val gameplayRunning = emulatorActiveGame.value != null && (emulatorState.value == EmulatorState.Running || emulatorState.value == EmulatorState.Paused)
     val isRunning = gameplayRunning // legacy alias, but STOP must use gameplayRunning
+    val stopInProgress = stopState is com.zenithblue.sambas3.session.EmulatorStopState.Stopping
+
+    LaunchedEffect(stopInProgress) {
+        if (stopInProgress) launchCenterGame = null
+    }
+
+    val recoverySession = when (val value = recoveryState) {
+        is HomeRecoveryState.ConfirmedCrash -> value.session
+        is HomeRecoveryState.Interrupted -> value.session
+        is HomeRecoveryState.ActionFailed -> value.session
+        else -> null
+    }
+    val recoveryGamePath = when (val value = recoveryState) {
+        is HomeRecoveryState.LoadFailure -> value.gamePath
+        else -> recoverySession?.gamePath
+    }
+    val recoveryGame = games.firstOrNull { it.info.path == recoveryGamePath }
+
+    fun launchRecovery(game: Game?, savePath: String?, slot: Int?, action: RecoveryAction) {
+        if (game == null) {
+            HomeRecoveryRepository.markActionFailed(context, recoverySession, "Game is no longer in the library")
+            return
+        }
+        HomeRecoveryRepository.markActionRunning(action)
+        recoveryScope.launch(Dispatchers.IO) {
+            val stop = com.zenithblue.sambas3.session.CoreRecoveryCoordinator.ensureStoppedForFreshBoot(
+                reason = "Home recovery $action",
+                state = { RPCSX.getState() },
+                kill = { RPCSX.instance.kill() },
+                onLog = { Log.i("S3RECOVERY", it) },
+            )
+            if (stop != com.zenithblue.sambas3.session.StopResult.AlreadyStopped &&
+                stop != com.zenithblue.sambas3.session.StopResult.Stopped
+            ) {
+                HomeRecoveryRepository.markActionFailed(context, recoverySession, "Core did not stop ($stop)")
+                return@launch
+            }
+            if (savePath != null) PendingSavestateRecoveryStore.clear(context)
+            withContext(Dispatchers.Main) { bootGame(context, game, savePath, slot) }
+        }
+    }
 
     val bootScale by animateFloatAsState(if (bootingGame != null) 5f else 1f, animationSpec = tween(700))
     val bootAlpha by animateFloatAsState(if (bootingGame != null) 0f else 1f, animationSpec = tween(500))
@@ -361,6 +416,51 @@ fun GamesScreen(
         )
 
         Column(modifier = Modifier.fillMaxSize()) {
+            if (recoveryState !is HomeRecoveryState.None) {
+                CrashRecoveryCard(
+                    state = recoveryState,
+                    onContinueSave = {
+                        val latest = recoveryGame?.let {
+                            GameSavestateRepository.slots(context, it)
+                                .filter { save -> save.exists && save.path != null }
+                                .maxByOrNull { save -> save.mtimeMs }
+                        }
+                        launchRecovery(recoveryGame, latest?.path, latest?.slot, RecoveryAction.ContinueSave)
+                    },
+                    onRetry = {
+                        val failure = recoveryState as? HomeRecoveryState.LoadFailure
+                        launchRecovery(
+                            recoveryGame,
+                            failure?.savestatePath,
+                            failure?.slot,
+                            if (failure != null) RecoveryAction.Retry else RecoveryAction.Retry,
+                        )
+                    },
+                    onPlayFresh = { launchRecovery(recoveryGame, null, null, RecoveryAction.PlayFresh) },
+                    onChooseSave = {
+                        if (recoveryGame != null) launchCenterGame = recoveryGame
+                        else HomeRecoveryRepository.markActionFailed(context, recoverySession, "Choose a save from the library")
+                    },
+                    onDetails = { detailsState = recoveryState },
+                    onViewLogs = { navigateToLogs?.invoke() },
+                    onDismiss = { HomeRecoveryRepository.dismiss(context) },
+                )
+            }
+            (stopState as? com.zenithblue.sambas3.session.EmulatorStopState.Failed)?.let { failedStop ->
+                StopFailureCard(
+                    state = failedStop,
+                    onRecheck = {
+                        recoveryScope.launch {
+                            EmulatorStopCoordinator.stop(context, failedStop.reason)
+                        }
+                    },
+                    onViewLogs = { navigateToLogs?.invoke() },
+                    onForceClose = {
+                        Log.e("S3STOP", "user requested force-close requestId=${failedStop.requestId}")
+                        android.os.Process.killProcess(android.os.Process.myPid())
+                    },
+                )
+            }
             // Top Nav Bar
             Row(
                 modifier = Modifier
@@ -774,6 +874,11 @@ fun GamesScreen(
                         } else {
                             HintButton(text = "ADD", icon = "X", color = RPCSXColors.primary, onClick = { showImportDialog = true })
                         }
+                    } else if (stopInProgress) {
+                        Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                            CircularProgressIndicator(modifier = Modifier.size(16.dp), color = RPCSXColors.errorColor, strokeWidth = 2.dp)
+                            HintButton(text = "STOPPING...", icon = "■", color = RPCSXColors.textDisabled, onClick = { })
+                        }
                     } else if (gameplayRunning) {
                         val stopScope = rememberCoroutineScope()
                         HintButton(text = "STOP", icon = "■", color = RPCSXColors.errorColor, onClick = {
@@ -789,7 +894,7 @@ fun GamesScreen(
                             )
                         }
                         when (hintAvailability) {
-                            is com.zenithblue.sambas3.ppu.GameLaunchAvailability.PreparingPpu, is com.zenithblue.sambas3.ppu.GameLaunchAvailability.WaitingForEngineIdle, is com.zenithblue.sambas3.ppu.GameLaunchAvailability.Importing -> {
+                            is com.zenithblue.sambas3.ppu.GameLaunchAvailability.PreparingPpu, is com.zenithblue.sambas3.ppu.GameLaunchAvailability.WaitingForEngineIdle, is com.zenithblue.sambas3.ppu.GameLaunchAvailability.Importing, is com.zenithblue.sambas3.ppu.GameLaunchAvailability.EngineBusy -> {
                                 HintButton(text = "PREPARING", icon = "X", color = RPCSXColors.textDisabled, onClick = { })
                             }
                             is com.zenithblue.sambas3.ppu.GameLaunchAvailability.NeedsPreparation -> {
@@ -870,6 +975,23 @@ fun GamesScreen(
             )
         }
 
+        detailsState?.let { state ->
+            val session = when (state) {
+                is HomeRecoveryState.ConfirmedCrash -> state.session
+                is HomeRecoveryState.Interrupted -> state.session
+                is HomeRecoveryState.ActionFailed -> state.session
+                else -> null
+            }
+            val report = when (state) {
+                is HomeRecoveryState.ConfirmedCrash -> state.report
+                is HomeRecoveryState.Interrupted -> state.report
+                is HomeRecoveryState.LoadFailure -> state.report
+                else -> null
+            }
+            val failure = (state as? HomeRecoveryState.LoadFailure)?.reason
+            CrashDetailsSheet(session, report, failure) { detailsState = null }
+        }
+
         if (stoppedTrophiesLoading || stoppedTrophies != null) {
             StoppedTrophiesDialog(
                 data = stoppedTrophies,
@@ -885,7 +1007,7 @@ fun GamesScreen(
             // Engine gate (review F7): reading/editing the config tree requires a
             // live initialized engine that is NOT running a game.
             val engineIdle = RPCSX.activeLibrary.value != null &&
-                RPCSX.getState() == EmulatorState.Stopped
+                runCatching { RPCSX.getState() == EmulatorState.Stopped }.getOrDefault(false)
             ModalBottomSheet(
                 onDismissRequest = {
                     configureGameTarget = null
@@ -1652,6 +1774,11 @@ fun GameCard(
 
 fun bootGame(context: android.content.Context, game: Game, savestatePath: String? = null, savestateSlot: Int? = null) {
     if (game.hasFlag(GameFlag.Locked)) {
+        return
+    }
+    val nativeState = runCatching { RPCSX.getState() }.getOrNull()
+    if (nativeState != EmulatorState.Stopped) {
+        Log.w("S3STOP", "boot blocked nativeState=${nativeState ?: "Unknown"} game=${game.info.path}")
         return
     }
     GameRepository.onBoot(game)

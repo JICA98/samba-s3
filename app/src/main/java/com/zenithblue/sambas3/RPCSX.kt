@@ -109,6 +109,9 @@ class RPCSX {
     external fun getPpuManifestKey(titleId: String): String?
     external fun getCoreBuildId(): String?
     /** Runtime capability probes used to reject stale packaged cores. */
+    external fun hasBootSavestateExport(): Boolean
+    external fun hasLoadSaveStateExport(): Boolean
+    external fun hasSurfaceEventV2Export(): Boolean
     external fun hasPerfMetricsExport(): Boolean
     external fun hasTrophyExports(): Boolean
     /** Optional structured performance snapshot from newer runtime cores. */
@@ -239,7 +242,10 @@ class RPCSX {
             runCatching {
                 android.util.Log.i(
                     "S3CAP",
-                    "perf_export=${if (instance.hasPerfMetricsExport()) 1 else 0} " +
+                    "boot_savestate=${if (instance.hasBootSavestateExport()) 1 else 0} " +
+                        "load_state=${if (instance.hasLoadSaveStateExport()) 1 else 0} " +
+                        "surface_v2=${if (instance.hasSurfaceEventV2Export()) 1 else 0} " +
+                        "perf_export=${if (instance.hasPerfMetricsExport()) 1 else 0} " +
                         "trophy_export=${if (instance.hasTrophyExports()) 1 else 0}"
                 )
             }

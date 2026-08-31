@@ -73,6 +73,9 @@ class SurfaceLeaseManager(
         return result ?: SurfaceReadyResult.TimedOut
     }
 
+    /** Named API for boot code; readiness includes the generation accepted by native CREATE. */
+    suspend fun awaitInitialReady(timeoutMs: Long = 10_000L): SurfaceReadyResult = awaitReady(timeoutMs)
+
     fun replace(onReady: () -> Unit) {
         check(!destroying) { "surface host is being destroyed" }
         check(pendingReady == null) { "surface replacement already pending" }

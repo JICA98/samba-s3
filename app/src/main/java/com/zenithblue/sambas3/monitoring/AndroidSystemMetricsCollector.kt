@@ -9,21 +9,26 @@ import android.os.BatteryManager
 import android.os.Debug
 import android.os.PowerManager
 import android.os.SystemClock
+import android.system.Os
+import android.system.OsConstants
 import androidx.core.content.ContextCompat
 import java.io.File
 import kotlin.math.abs
 
 /** Multi-rate telemetry; the repository may sample quickly without re-reading expensive sources. */
 class AndroidSystemMetricsCollector(private val context: Context) : MonitoringSystemSource {
-    private val activityManager = context.getSystemService(ActivityManager::class.java)
-    private val batteryManager = context.getSystemService(BatteryManager::class.java)
-    private val powerManager = context.getSystemService(PowerManager::class.java)
+    private val activityManager: ActivityManager? = context.getSystemService(ActivityManager::class.java)
+    private val batteryManager: BatteryManager? = context.getSystemService(BatteryManager::class.java)
+    private val powerManager: PowerManager? = context.getSystemService(PowerManager::class.java)
     private val cpuFrequencyFiles = File("/sys/devices/system/cpu").listFiles().orEmpty()
         .filter { it.name.matches(Regex("cpu\\d+")) }
         .map { File(it, "cpufreq/scaling_cur_freq") }
         .filter { it.isFile }
     private val gpuFiles = discoverGpuFiles()
     private val zramFile = File("/sys/block/zram0/mm_stat")
+    private val clockTicksPerSecond = runCatching { Os.sysconf(OsConstants._SC_CLK_TCK) }
+        .getOrDefault(100L)
+        .coerceAtLeast(1L)
     private var active = false
     private var battery: BatterySample? = null
     private var receiver: BroadcastReceiver? = null
@@ -48,18 +53,25 @@ class AndroidSystemMetricsCollector(private val context: Context) : MonitoringSy
     override fun start() {
         if (active) return
         active = true
-        lastCpuMs = Long.MIN_VALUE
-        lastMemoryMs = Long.MIN_VALUE
-        lastPssMs = Long.MIN_VALUE
-        lastRssMs = Long.MIN_VALUE
-        lastPowerMs = Long.MIN_VALUE
-        lastFreqMs = Long.MIN_VALUE
-        lastSwapMs = Long.MIN_VALUE
+        // Zero is safe because elapsedRealtime() is positive. Long.MIN_VALUE
+        // would make `now - lastRead` overflow and suppress every refresh.
+        lastCpuMs = 0L
+        lastMemoryMs = 0L
+        lastPssMs = 0L
+        lastRssMs = 0L
+        lastPowerMs = 0L
+        lastFreqMs = 0L
+        lastSwapMs = 0L
         receiver = object : BroadcastReceiver() {
             override fun onReceive(context: Context, intent: Intent) { battery = BatterySample.from(intent) }
         }.also {
             ContextCompat.registerReceiver(context, it, IntentFilter(Intent.ACTION_BATTERY_CHANGED), ContextCompat.RECEIVER_NOT_EXPORTED)
         }
+        // ACTION_BATTERY_CHANGED is sticky; seed the first sample immediately
+        // instead of waiting for a level/charge transition broadcast.
+        battery = runCatching {
+            context.registerReceiver(null, IntentFilter(Intent.ACTION_BATTERY_CHANGED))?.let(BatterySample::from)
+        }.getOrNull()
     }
 
     override fun stop() {
@@ -78,8 +90,10 @@ class AndroidSystemMetricsCollector(private val context: Context) : MonitoringSy
             lastCpuMs = now
         }
         if (now - lastMemoryMs >= 1_000L) {
-            val memory = ActivityManager.MemoryInfo().also { activityManager.getMemoryInfo(it) }
-            lastMemory = MemorySample(memory.totalMem - memory.availMem, memory.totalMem, memory.availMem)
+            val memory = ActivityManager.MemoryInfo()
+            if (runCatching { activityManager?.getMemoryInfo(memory) }.getOrNull() != null) {
+                lastMemory = MemorySample(memory.totalMem - memory.availMem, memory.totalMem, memory.availMem)
+            }
             lastMemoryMs = now
         }
         if (now - lastPssMs >= 3_000L) {
@@ -92,14 +106,19 @@ class AndroidSystemMetricsCollector(private val context: Context) : MonitoringSy
         }
         if (now - lastPowerMs >= 1_000L) {
             val sample = battery
-            val currentUa = runCatching { batteryManager.getLongProperty(BatteryManager.BATTERY_PROPERTY_CURRENT_NOW) }.getOrNull()?.takeIf { it != 0L }
+            val currentUa = runCatching { batteryManager?.getLongProperty(BatteryManager.BATTERY_PROPERTY_CURRENT_NOW) }.getOrNull()?.takeIf { it != 0L }
             val voltageMv = sample?.voltageMv?.takeIf { it > 0 }
             lastPower = PowerSample(
                 temperatureC = sample?.temperatureC,
-                powerW = if (voltageMv != null && currentUa != null) abs(voltageMv * currentUa / 1_000_000_000f) else null,
+                // Some Android builds expose a placeholder/quantized current
+                // value that formats to 0.0 W. Treat that as unavailable so
+                // the overlay never presents a fabricated power reading.
+                powerW = if (voltageMv != null && currentUa != null) {
+                    abs(voltageMv * currentUa / 1_000_000_000f).takeIf { it >= 0.1f }
+                } else null,
                 percent = sample?.percent, charging = sample?.charging,
-                thermalStatus = if (android.os.Build.VERSION.SDK_INT >= 29) powerManager.currentThermalStatus else null,
-                thermalHeadroom = if (android.os.Build.VERSION.SDK_INT >= 30) runCatching { powerManager.getThermalHeadroom(0) }.getOrNull() else null
+                thermalStatus = if (android.os.Build.VERSION.SDK_INT >= 29) runCatching { powerManager?.currentThermalStatus }.getOrNull() else null,
+                thermalHeadroom = if (android.os.Build.VERSION.SDK_INT >= 30) runCatching { powerManager?.getThermalHeadroom(0) }.getOrNull() else null
             )
             lastPowerMs = now
         }
@@ -144,7 +163,8 @@ class AndroidSystemMetricsCollector(private val context: Context) : MonitoringSy
         val previous = processCpu
         processCpu = ticks to now
         if (previous == null || now <= previous.second) return null
-        return ((ticks - previous.first).toDouble() / 100.0 / ((now - previous.second) / 1000.0) * 100.0).toFloat().coerceAtLeast(0f)
+        return ((ticks - previous.first).toDouble() / clockTicksPerSecond / ((now - previous.second) / 1000.0) * 100.0)
+            .toFloat().coerceAtLeast(0f)
     }
 
     private fun readMemInfo(): Map<String, Long> = runCatching {

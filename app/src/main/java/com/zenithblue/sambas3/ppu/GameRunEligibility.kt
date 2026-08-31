@@ -35,6 +35,7 @@ sealed interface GameLaunchAvailability {
     data object Ready : GameLaunchAvailability
     data object GameplayRunning : GameLaunchAvailability
     data object NeedsPreparation : GameLaunchAvailability
+    data class EngineBusy(val state: com.zenithblue.sambas3.EmulatorState, val activeGame: String?) : GameLaunchAvailability
 }
 
 object GameRunEligibilityHelper {
@@ -96,6 +97,11 @@ object GameRunEligibilityHelper {
         // Gameplay running takes precedence over compile
         if (activeGame != null && (emulatorState == com.zenithblue.sambas3.EmulatorState.Running || emulatorState == com.zenithblue.sambas3.EmulatorState.Paused)) {
             return GameLaunchAvailability.GameplayRunning
+        }
+        // Native state is authoritative: every non-terminal state occupies the
+        // core, even when the mirrored active-game value is temporarily null.
+        if (emulatorState != com.zenithblue.sambas3.EmulatorState.Stopped) {
+            return GameLaunchAvailability.EngineBusy(emulatorState, activeGame)
         }
         // Install PPU active
         if (installPpuActive) return GameLaunchAvailability.PreparingPpu(null)

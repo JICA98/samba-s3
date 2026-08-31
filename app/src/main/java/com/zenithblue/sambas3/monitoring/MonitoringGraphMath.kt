@@ -2,6 +2,7 @@ package com.zenithblue.sambas3.monitoring
 
 import kotlin.math.ceil
 import kotlin.math.max
+import kotlin.math.roundToInt
 
 data class GraphScale(val lower: Float, val upper: Float)
 
@@ -28,5 +29,37 @@ object MonitoringGraphMath {
     fun mapToUnit(values: List<Float>, scale: GraphScale): List<Float> {
         val range = (scale.upper - scale.lower).coerceAtLeast(.001f)
         return validSamples(values).map { ((it - scale.lower) / range).coerceIn(0f, 1f) }
+    }
+
+    fun rightAnchoredSlots(sampleCount: Int, capacity: Int): List<Int> {
+        if (sampleCount <= 0 || capacity <= 0) return emptyList()
+        val count = sampleCount.coerceAtMost(capacity)
+        return (capacity - count until capacity).toList()
+    }
+
+    fun timestampX(timestampUs: Long, nowUs: Long, historySeconds: Int): Float {
+        val window = historySeconds.coerceAtLeast(1) * 1_000_000L
+        return ((timestampUs - (nowUs - window)).toFloat() / window).coerceIn(0f, 1f)
+    }
+
+    fun fpsScale(values: List<Float>, mode: FpsGraphScale, target: Float = 60f): GraphScale = when (mode) {
+        FpsGraphScale.ZeroBased -> autoScale(values, fallbackUpper = target)
+        FpsGraphScale.TargetWindow -> {
+            val center = if (target >= 50f) 60f else 30f
+            GraphScale(if (center >= 50f) 40f else 20f, if (center >= 50f) 65f else 35f)
+        }
+        FpsGraphScale.StableAuto -> {
+            val valid = validSamples(values)
+            if (valid.isEmpty()) GraphScale(0f, target) else {
+                val low = (valid.minOrNull()!! - 5f).coerceAtLeast(0f).let { (it / 5f).roundToInt() * 5f }
+                val high = (valid.maxOrNull()!! + 5f).let { (it / 5f).roundToInt() * 5f }
+                GraphScale(low, max(low + 5f, high))
+            }
+        }
+    }
+
+    fun frameTimeScale(values: List<Float>, targetFps: Float = 60f): GraphScale {
+        val reference = 1000f / targetFps.coerceAtLeast(1f)
+        return GraphScale(0f, if (reference <= 20f) 33.3f else 50f)
     }
 }

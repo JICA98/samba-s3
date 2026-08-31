@@ -1,0 +1,106 @@
+To honour the JVM settings for this build a single-use Daemon process will be forked. For more on this, please refer to https://docs.gradle.org/8.13/userguide/gradle_daemon.html#sec:disabling_the_daemon in the Gradle documentation.
+Daemon will be stopped at the end of the build 
+> Task :app:checkKotlinGradlePluginConfigurationErrors SKIPPED
+> Task :app:preBuild UP-TO-DATE
+> Task :app:preStandardDebugBuild UP-TO-DATE
+> Task :app:dataBindingMergeDependencyArtifactsStandardDebug UP-TO-DATE
+> Task :app:generateStandardDebugResValues UP-TO-DATE
+> Task :app:generateStandardDebugResources UP-TO-DATE
+> Task :app:mergeStandardDebugResources UP-TO-DATE
+> Task :app:buildRpcsxCore SKIPPED
+
+> Task :app:verifyRpcsxCore
+RPCSX core present: d564036b arm64, bce1c81b x86_64
+
+> Task :app:packageStandardDebugResources UP-TO-DATE
+> Task :app:processStandardDebugNavigationResources UP-TO-DATE
+> Task :app:parseStandardDebugLocalResources UP-TO-DATE
+> Task :app:dataBindingGenBaseClassesStandardDebug UP-TO-DATE
+> Task :app:generateStandardDebugBuildConfig UP-TO-DATE
+> Task :app:checkStandardDebugAarMetadata UP-TO-DATE
+> Task :app:compileStandardDebugNavigationResources UP-TO-DATE
+> Task :app:mapStandardDebugSourceSetPaths UP-TO-DATE
+> Task :app:createStandardDebugCompatibleScreenManifests UP-TO-DATE
+> Task :app:extractDeepLinksStandardDebug UP-TO-DATE
+> Task :app:processStandardDebugMainManifest UP-TO-DATE
+> Task :app:processStandardDebugManifest UP-TO-DATE
+> Task :app:processStandardDebugManifestForPackage UP-TO-DATE
+> Task :app:processStandardDebugResources UP-TO-DATE
+> Task :app:compileStandardDebugKotlin UP-TO-DATE
+> Task :app:javaPreCompileStandardDebug UP-TO-DATE
+> Task :app:compileStandardDebugJavaWithJavac UP-TO-DATE
+> Task :app:bundleStandardDebugClassesToRuntimeJar UP-TO-DATE
+> Task :app:bundleStandardDebugClassesToCompileJar UP-TO-DATE
+> Task :app:compileStandardDebugUnitTestKotlin UP-TO-DATE
+> Task :app:preStandardDebugUnitTestBuild UP-TO-DATE
+> Task :app:javaPreCompileStandardDebugUnitTest UP-TO-DATE
+> Task :app:compileStandardDebugUnitTestJavaWithJavac NO-SOURCE
+> Task :app:processStandardDebugJavaRes UP-TO-DATE
+> Task :app:processStandardDebugUnitTestJavaRes UP-TO-DATE
+> Task :app:testStandardDebugUnitTest UP-TO-DATE
+> Task :app:prePlaystoreDebugBuild UP-TO-DATE
+> Task :app:dataBindingMergeDependencyArtifactsPlaystoreDebug UP-TO-DATE
+> Task :app:generatePlaystoreDebugResValues UP-TO-DATE
+> Task :app:generatePlaystoreDebugResources UP-TO-DATE
+> Task :app:mergePlaystoreDebugResources UP-TO-DATE
+> Task :app:packagePlaystoreDebugResources UP-TO-DATE
+> Task :app:processPlaystoreDebugNavigationResources UP-TO-DATE
+> Task :app:parsePlaystoreDebugLocalResources UP-TO-DATE
+> Task :app:dataBindingGenBaseClassesPlaystoreDebug UP-TO-DATE
+> Task :app:generatePlaystoreDebugBuildConfig UP-TO-DATE
+> Task :app:checkPlaystoreDebugAarMetadata UP-TO-DATE
+> Task :app:compilePlaystoreDebugNavigationResources UP-TO-DATE
+> Task :app:mapPlaystoreDebugSourceSetPaths UP-TO-DATE
+> Task :app:createPlaystoreDebugCompatibleScreenManifests UP-TO-DATE
+> Task :app:extractDeepLinksPlaystoreDebug UP-TO-DATE
+> Task :app:processPlaystoreDebugMainManifest UP-TO-DATE
+> Task :app:processPlaystoreDebugManifest UP-TO-DATE
+> Task :app:processPlaystoreDebugManifestForPackage UP-TO-DATE
+> Task :app:processPlaystoreDebugResources UP-TO-DATE
+> Task :app:compilePlaystoreDebugKotlin UP-TO-DATE
+> Task :app:javaPreCompilePlaystoreDebug UP-TO-DATE
+> Task :app:compilePlaystoreDebugJavaWithJavac UP-TO-DATE
+> Task :app:bundlePlaystoreDebugClassesToRuntimeJar UP-TO-DATE
+> Task :app:bundlePlaystoreDebugClassesToCompileJar UP-TO-DATE
+> Task :app:compilePlaystoreDebugUnitTestKotlin UP-TO-DATE
+> Task :app:prePlaystoreDebugUnitTestBuild UP-TO-DATE
+> Task :app:javaPreCompilePlaystoreDebugUnitTest UP-TO-DATE
+> Task :app:compilePlaystoreDebugUnitTestJavaWithJavac NO-SOURCE
+> Task :app:processPlaystoreDebugJavaRes UP-TO-DATE
+> Task :app:processPlaystoreDebugUnitTestJavaRes UP-TO-DATE
+> Task :app:testPlaystoreDebugUnitTest UP-TO-DATE
+> Task :app:mergeStandardDebugNativeDebugMetadata NO-SOURCE
+> Task :app:mergeStandardDebugShaders UP-TO-DATE
+> Task :app:compileStandardDebugShaders NO-SOURCE
+> Task :app:generateStandardDebugAssets UP-TO-DATE
+> Task :app:mergeStandardDebugAssets UP-TO-DATE
+> Task :app:compressStandardDebugAssets UP-TO-DATE
+> Task :app:checkStandardDebugDuplicateClasses UP-TO-DATE
+> Task :app:desugarStandardDebugFileDependencies UP-TO-DATE
+> Task :app:mergeExtDexStandardDebug UP-TO-DATE
+> Task :app:mergeLibDexStandardDebug UP-TO-DATE
+> Task :app:dexBuilderStandardDebug UP-TO-DATE
+> Task :app:mergeProjectDexStandardDebug UP-TO-DATE
+> Task :app:mergeStandardDebugJavaResource UP-TO-DATE
+
+> Task :app:configureCMakeDebug[arm64-v8a]
+[CXX5304] This version only understands SDK XML versions up to 3 but an SDK XML file of version 4 was encountered. This can happen if you use versions of Android Studio and the command-line tools that were released at different times.
+[CXX5304] This version only understands SDK XML versions up to 3 but an SDK XML file of version 4 was encountered. This can happen if you use versions of Android Studio and the command-line tools that were released at different times.
+[CXX5304] Observed package id 'platforms;android-37.0' in inconsistent location '/opt/android-sdk/platforms/android-37' (Expected '/opt/android-sdk/platforms/android-37.0')
+[CXX5304] Observed package id 'platforms;android-37.0' in inconsistent location '/opt/android-sdk/platforms/android-37' (Expected '/opt/android-sdk/platforms/android-37.0')
+
+> Task :app:buildCMakeDebug[arm64-v8a]
+> Task :app:configureCMakeDebug[x86_64]
+> Task :app:buildCMakeDebug[x86_64]
+> Task :app:mergeStandardDebugJniLibFolders UP-TO-DATE
+> Task :app:mergeStandardDebugNativeLibs UP-TO-DATE
+> Task :app:stripStandardDebugDebugSymbols UP-TO-DATE
+> Task :app:validateSigningStandardDebug UP-TO-DATE
+> Task :app:writeStandardDebugAppMetadata UP-TO-DATE
+> Task :app:writeStandardDebugSigningConfigVersions UP-TO-DATE
+> Task :app:packageStandardDebug UP-TO-DATE
+> Task :app:createStandardDebugApkListingFileRedirect UP-TO-DATE
+> Task :app:assembleStandardDebug
+
+BUILD SUCCESSFUL in 20s
+79 actionable tasks: 5 executed, 74 up-to-date

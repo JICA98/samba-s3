@@ -1,5 +1,5 @@
 diff --git a/android/src/rpcsx-android.cpp b/android/src/rpcsx-android.cpp
-index 8308a4798..8c5556091 100644
+index 8308a4798..b6bed240b 100644
 --- a/android/src/rpcsx-android.cpp
 +++ b/android/src/rpcsx-android.cpp
 @@ -7,6 +7,8 @@
@@ -27,7 +27,7 @@ index 8308a4798..8c5556091 100644
  
  static atomic_t<bool> g_frontend_menu_active{false};
  static atomic_t<bool> g_frontend_menu_paused_emu{false};
-@@ -164,6 +168,39 @@ static std::mutex g_ingame_settings_mutex;
+@@ -164,6 +168,77 @@ static std::mutex g_ingame_settings_mutex;
  static std::optional<std::string> g_ingame_settings_backup;
  static bool g_ingame_settings_dirty = false;
  
@@ -41,9 +41,12 @@ index 8308a4798..8c5556091 100644
 +    u32 interval_ms = 300;
 +    u64 last_update_us = 0;
 +    u64 last_crosscheck_log_us = 0;
-+    u64 last_vblank = 0;
 +    u64 last_timestamp_us = 0;
++    u64 last_presented_frame_count = 0;
++    u64 last_present_timestamp_us = 0;
 +    bool sample_ready = false;
++    bool frame_sample_ready = false;
++    bool was_paused = false;
 +    u64 ppu_cycles = 0;
 +    u64 spu_cycles = 0;
 +    u64 rsx_cycles = 0;
@@ -57,17 +60,52 @@ index 8308a4798..8c5556091 100644
 +    u32 ppu_threads = 0;
 +    u32 spu_threads = 0;
 +    u32 rsx_load = 0;
-+    std::deque<f32> fps_samples;
-+    std::deque<f32> frametime_samples;
++    struct timed_sample
++    {
++        u64 timestamp_us = 0;
++        f32 value = 0.f;
++    };
++
++    u64 presented_frame_count = 0;
++    u64 vblank_count = 0;
++    u64 vblank_delta = 0;
++    std::deque<timed_sample> fps_samples;
++    std::deque<timed_sample> frametime_samples;
++    std::deque<timed_sample> pending_frametime_samples;
 +    utils::cpu_stats cpu_stats{};
 +};
 +
 +static android_perf_metrics_state g_android_perf;
++// The RSX flip path is hot. Keep the disabled path to one relaxed atomic
++// load, and only take the telemetry mutex while the monitor is subscribed.
++static std::atomic<bool> g_android_perf_frame_sampling_enabled{false};
++
++extern "C" void _rpcsx_android_perf_frame_presented(u64 timestamp_us)
++{
++    if (!g_android_perf_frame_sampling_enabled.load(std::memory_order_relaxed))
++        return;
++
++    std::lock_guard lock(g_android_perf.mutex);
++    if (!g_android_perf.enabled)
++        return;
++
++    if (g_android_perf.last_present_timestamp_us != 0 && timestamp_us > g_android_perf.last_present_timestamp_us)
++    {
++        const f32 frame_time_ms = static_cast<f32>(timestamp_us - g_android_perf.last_present_timestamp_us) / 1000.f;
++        g_android_perf.frametime_samples.push_back({timestamp_us, frame_time_ms});
++        g_android_perf.pending_frametime_samples.push_back({timestamp_us, frame_time_ms});
++        while (g_android_perf.frametime_samples.size() > 240)
++            g_android_perf.frametime_samples.pop_front();
++    }
++
++    g_android_perf.last_present_timestamp_us = timestamp_us;
++    ++g_android_perf.presented_frame_count;
++}
 +
  static void emit_prelaunch_ppu_event(
      CompilePhase phase,
      u64 job_id,
-@@ -1293,6 +1330,9 @@ struct destructive_guard {
+@@ -1293,6 +1368,9 @@ struct destructive_guard {
    ~destructive_guard() { end_destructive(); }
  };
  
@@ -77,7 +115,7 @@ index 8308a4798..8c5556091 100644
  static void emit_frontend_event(int type, const std::string* payload)
  {
      // Dispatch via main thread processor to ensure JNI env is valid.
-@@ -1319,6 +1359,32 @@ extern "C" void _rpcsx_android_renderer_error(int error_code, const char* messag
+@@ -1319,6 +1397,32 @@ extern "C" void _rpcsx_android_renderer_error(int error_code, const char* messag
    emit_frontend_event(FRONTEND_EVENT_RENDERER_ERROR, &detail);
  }
  
@@ -110,32 +148,73 @@ index 8308a4798..8c5556091 100644
  
  static void invokeAsync(std::function<void(JNIEnv *)> cb) {
    g_mainThreadProcessor.push(std::move(cb));
-@@ -4199,145 +4265,301 @@ extern "C" bool _rpcsx_loadSaveState(int slot)
+@@ -2331,6 +2435,34 @@ extern "C" int _rpcsx_bootSavestate(std::string_view savestate_path_,
+   const auto result = Emu.BootGame(savestate_path, "", true, cfg_mode::global);
+   rpcsx_android.notice("S3SAVE recovery-boot path='%s' result=%d",
+                        savestate_path.c_str(), static_cast<int>(result));
++
++  // A restored PPU normally releases the boot handoff after all restored
++  // threads enter the scheduler.  On Android, some restores can leave one
++  // thread in the savestate bootstrap path indefinitely: BootGame() has
++  // returned successfully, but the emulator remains in Starting and no
++  // thread emits the normal "Final Thread" handoff.  Keep the normal path
++  // intact, but give it a bounded recovery path through the serialized core
++  // lifecycle worker.  The emulation identifier prevents a late watchdog
++  // from touching a subsequent boot after this one was stopped.
++  if (result == game_boot_result::no_errors && Emu.IsStarting()) {
++    const auto emu_id = Emu.GetEmulationIdentifier();
++    std::thread([emu_id, savestate_path]() {
++      std::this_thread::sleep_for(std::chrono::seconds(30));
++      g_coreDispatch.push([emu_id, savestate_path]() {
++        if (Emu.GetEmulationIdentifier() != emu_id || !Emu.IsStarting()) {
++          return;
++        }
++
++        rpcsx_android.warning(
++            "S3SAVE recovery-finalize watchdog path='%s' emu_id=%llu",
++            savestate_path.c_str(), static_cast<unsigned long long>(emu_id));
++        Emu.FinalizeRunRequest();
++        rpcsx_android.notice("S3SAVE recovery-finalize state=%d",
++                             static_cast<int>(Emu.GetStatus(false)));
++      });
++    }).detach();
++  }
++
+   return static_cast<int>(result);
+ }
+ 
+@@ -4199,145 +4331,389 @@ extern "C" bool _rpcsx_loadSaveState(int slot)
      return true;
  }
  
 -extern "C" std::string _rpcsx_getCurrentTrophies()
 +extern "C" bool _rpcsx_setPerfMetricsEnabled(bool enabled, int interval_ms)
- {
--    nlohmann::json j;
--    std::string tropName;
--    try {
--        if (auto* cur = g_fxo->try_get<current_trophy_name>()) {
--            std::lock_guard lock(cur->mtx);
--            tropName = cur->name;
++{
 +    std::lock_guard lock(g_android_perf.mutex);
 +    const bool was_enabled = g_android_perf.enabled;
 +    g_android_perf.enabled = enabled;
 +    g_android_perf.interval_ms = std::clamp<u32>(interval_ms > 0 ? static_cast<u32>(interval_ms) : 300u, 250u, 1000u);
 +    if (!enabled)
 +    {
++        g_android_perf_frame_sampling_enabled.store(false, std::memory_order_relaxed);
 +        g_android_perf.last_update_us = 0;
 +        g_android_perf.last_crosscheck_log_us = 0;
-+        g_android_perf.last_vblank = 0;
 +        g_android_perf.last_timestamp_us = 0;
++        g_android_perf.last_presented_frame_count = 0;
++        g_android_perf.last_present_timestamp_us = 0;
 +        g_android_perf.fps_samples.clear();
 +        g_android_perf.frametime_samples.clear();
++        g_android_perf.pending_frametime_samples.clear();
++        g_android_perf.presented_frame_count = 0;
++        g_android_perf.vblank_count = 0;
++        g_android_perf.vblank_delta = 0;
 +        g_android_perf.sample_ready = false;
++        g_android_perf.frame_sample_ready = false;
++        g_android_perf.was_paused = false;
++        g_android_perf.ppu_cycles = 0;
++        g_android_perf.spu_cycles = 0;
++        g_android_perf.rsx_cycles = 0;
++        g_android_perf.cpu_stats.reset();
 +        rpcsx_android.notice("S3PERF native_export=1 enabled=0");
 +    }
 +    else
@@ -143,27 +222,47 @@ index 8308a4798..8c5556091 100644
 +        if (!was_enabled) {
 +            g_android_perf.last_update_us = 0;
 +            g_android_perf.last_crosscheck_log_us = 0;
-+            g_android_perf.last_vblank = 0;
 +            g_android_perf.last_timestamp_us = 0;
++            g_android_perf.last_presented_frame_count = 0;
++            g_android_perf.last_present_timestamp_us = 0;
 +            g_android_perf.sample_ready = false;
++            g_android_perf.frame_sample_ready = false;
 +            g_android_perf.fps_samples.clear();
 +            g_android_perf.frametime_samples.clear();
-         }
--    } catch (...) {}
-+        rpcsx_android.notice("S3PERF native_export=1 version=1 interval_ms=%u", g_android_perf.interval_ms);
++            g_android_perf.pending_frametime_samples.clear();
++            g_android_perf.presented_frame_count = 0;
++            g_android_perf.vblank_count = 0;
++            g_android_perf.vblank_delta = 0;
++            g_android_perf.was_paused = false;
++            g_android_perf.ppu_cycles = 0;
++            g_android_perf.spu_cycles = 0;
++            g_android_perf.rsx_cycles = 0;
++            g_android_perf.cpu_stats.reset();
++        }
++        g_android_perf_frame_sampling_enabled.store(true, std::memory_order_relaxed);
++        rpcsx_android.notice("S3PERF native_export=1 version=2 interval_ms=%u source=emu_flip", g_android_perf.interval_ms);
 +    }
 +    return true;
 +}
 +
 +static nlohmann::json android_perf_snapshot_json()
-+{
-+    nlohmann::json j;
-+    j["version"] = 1;
+ {
+     nlohmann::json j;
+-    std::string tropName;
+-    try {
+-        if (auto* cur = g_fxo->try_get<current_trophy_name>()) {
+-            std::lock_guard lock(cur->mtx);
+-            tropName = cur->name;
++    j["version"] = 2;
 +    j["enabled"] = g_android_perf.enabled;
 +    j["timestampUs"] = g_android_perf.last_update_us;
++    j["presentedFrameCount"] = g_android_perf.presented_frame_count;
++    j["vblankCount"] = g_android_perf.vblank_count;
++    j["vblankDelta"] = g_android_perf.vblank_delta;
++    j["frameSampleFresh"] = g_android_perf.frame_sample_ready;
++    j["fpsSource"] = "emu_flip";
++    j["frameTimeSource"] = "emu_flip_intervals";
 +    if (g_android_perf.sample_ready) {
-+        j["fps"] = g_android_perf.fps;
-+        j["frametimeMs"] = g_android_perf.frametime_ms;
 +        j["hostCpu"] = g_android_perf.host_cpu;
 +        j["ppuCpu"] = g_android_perf.ppu_cpu;
 +        j["spuCpu"] = g_android_perf.spu_cpu;
@@ -173,20 +272,28 @@ index 8308a4798..8c5556091 100644
 +        j["hostThreads"] = g_android_perf.total_threads;
 +        j["rsxLoad"] = g_android_perf.rsx_load;
 +    }
-+    j["fpsSamples"] = g_android_perf.fps_samples;
-+    j["frametimeSamples"] = g_android_perf.frametime_samples;
++    if (g_android_perf.frame_sample_ready) {
++        j["fps"] = g_android_perf.fps;
++        j["frametimeMs"] = g_android_perf.frametime_ms;
++    }
++    j["fpsSamples"] = nlohmann::json::array();
++    for (const auto& sample : g_android_perf.fps_samples)
++        j["fpsSamples"].push_back({{"timestampUs", sample.timestamp_us}, {"value", sample.value}});
++    j["frametimeSamples"] = nlohmann::json::array();
++    for (const auto& sample : g_android_perf.frametime_samples)
++        j["frametimeSamples"].push_back({{"timestampUs", sample.timestamp_us}, {"value", sample.value}});
 +    return j;
 +}
 +
 +static void android_perf_log_crosscheck_locked(u64 now_us)
 +{
-+    if (!g_android_perf.sample_ready || g_android_perf.last_crosscheck_log_us != 0 &&
++    if (!g_android_perf.frame_sample_ready || g_android_perf.last_crosscheck_log_us != 0 &&
 +        now_us - g_android_perf.last_crosscheck_log_us < 1'000'000ull)
 +        return;
 +
 +    g_android_perf.last_crosscheck_log_us = now_us;
-+    rpcsx_android.notice("S3PERF crosscheck native_fps=%.3f native_frametime_ms=%.3f",
-+                         g_android_perf.fps, g_android_perf.frametime_ms);
++    rpcsx_android.notice("S3PERF crosscheck source=emu_flip presented=%llu native_fps=%.3f native_frametime_ms=%.3f",
++                         (u64)g_android_perf.presented_frame_count, g_android_perf.fps, g_android_perf.frametime_ms);
 +}
 +
 +extern "C" std::string _rpcsx_getPerfMetricsJson()
@@ -210,21 +317,75 @@ index 8308a4798..8c5556091 100644
 +    }
 +
 +    const u64 vblank = rsx->vblank_count.load();
-+    if (g_android_perf.last_timestamp_us != 0 && now > g_android_perf.last_timestamp_us)
++    g_android_perf.vblank_delta = vblank >= g_android_perf.vblank_count ? vblank - g_android_perf.vblank_count : 0;
++    g_android_perf.vblank_count = vblank;
++
++    // A paused emulator must not keep reporting the last running FPS. Drop
++    // the pending frame interval so the first frame after resume cannot turn
++    // the pause duration into a fabricated frametime spike.
++    if (Emu.IsPaused())
++    {
++        g_android_perf.last_presented_frame_count = g_android_perf.presented_frame_count;
++        g_android_perf.last_present_timestamp_us = 0;
++        g_android_perf.last_timestamp_us = now;
++        g_android_perf.pending_frametime_samples.clear();
++        g_android_perf.fps_samples.clear();
++        g_android_perf.frametime_samples.clear();
++        g_android_perf.frame_sample_ready = false;
++        g_android_perf.was_paused = true;
++    }
++    else if (g_android_perf.was_paused)
++    {
++        // Establish a new baseline after pause. The next polling interval
++        // will contain only frames presented after this reset.
++        g_android_perf.last_presented_frame_count = g_android_perf.presented_frame_count;
++        g_android_perf.last_present_timestamp_us = 0;
++        g_android_perf.last_timestamp_us = now;
++        g_android_perf.pending_frametime_samples.clear();
++        g_android_perf.frame_sample_ready = false;
++        g_android_perf.was_paused = false;
++    }
++    else if (g_android_perf.last_timestamp_us != 0 && now > g_android_perf.last_timestamp_us)
 +    {
 +        const u64 elapsed = now - g_android_perf.last_timestamp_us;
-+        const u64 frames = vblank >= g_android_perf.last_vblank ? vblank - g_android_perf.last_vblank : 0;
-+        g_android_perf.fps = static_cast<f32>(frames) * 1'000'000.f / static_cast<f32>(elapsed);
-+        g_android_perf.frametime_ms = frames ? static_cast<f32>(elapsed) / static_cast<f32>(frames) / 1000.f : g_android_perf.frametime_ms;
-+        g_android_perf.fps_samples.push_back(g_android_perf.fps);
-+        g_android_perf.frametime_samples.push_back(g_android_perf.frametime_ms);
-+        while (g_android_perf.fps_samples.size() > 60) g_android_perf.fps_samples.pop_front();
-+        while (g_android_perf.frametime_samples.size() > 60) g_android_perf.frametime_samples.pop_front();
++        const u64 frames = g_android_perf.presented_frame_count >= g_android_perf.last_presented_frame_count
++            ? g_android_perf.presented_frame_count - g_android_perf.last_presented_frame_count
++            : 0;
++
++        g_android_perf.frame_sample_ready = frames > 0;
++        if (frames > 0)
++        {
++            g_android_perf.fps = static_cast<f32>(frames) * 1'000'000.f / static_cast<f32>(elapsed);
++
++            f32 interval_sum = 0.f;
++            u32 interval_count = 0;
++            while (!g_android_perf.pending_frametime_samples.empty())
++            {
++                interval_sum += g_android_perf.pending_frametime_samples.front().value;
++                g_android_perf.pending_frametime_samples.pop_front();
++                ++interval_count;
++            }
++            if (interval_count > 0)
++                g_android_perf.frametime_ms = interval_sum / static_cast<f32>(interval_count);
++
++            g_android_perf.fps_samples.push_back({now, g_android_perf.fps});
++            while (g_android_perf.fps_samples.size() > 60)
++                g_android_perf.fps_samples.pop_front();
+         }
+-    } catch (...) {}
 +    }
-+    g_android_perf.last_vblank = vblank;
++    else
++    {
++        g_android_perf.pending_frametime_samples.clear();
++        g_android_perf.frame_sample_ready = false;
++    }
++    g_android_perf.last_presented_frame_count = g_android_perf.presented_frame_count;
 +    g_android_perf.last_timestamp_us = now;
 +    g_android_perf.last_update_us = now;
 +    g_android_perf.total_threads = utils::cpu_stats::get_current_thread_count();
++    g_android_perf.ppu_cycles = 0;
++    g_android_perf.spu_cycles = 0;
++    g_android_perf.rsx_cycles = rsx->get_cycles();
 +    g_android_perf.ppu_threads = idm::select<named_thread<ppu_thread>>([&](u32, named_thread<ppu_thread>& ppu)
 +    {
 +        g_android_perf.ppu_cycles += thread_ctrl::get_cycles(ppu);
@@ -233,14 +394,13 @@ index 8308a4798..8c5556091 100644
 +    {
 +        g_android_perf.spu_cycles += thread_ctrl::get_cycles(spu);
 +    });
-+    g_android_perf.rsx_cycles += rsx->get_cycles();
 +    const u64 total_cycles = std::max<u64>(1, g_android_perf.ppu_cycles + g_android_perf.spu_cycles + g_android_perf.rsx_cycles);
 +    g_android_perf.host_cpu = static_cast<f32>(g_android_perf.cpu_stats.get_usage());
 +    g_android_perf.ppu_cpu = std::clamp(g_android_perf.host_cpu * g_android_perf.ppu_cycles / total_cycles, 0.f, 100.f);
 +    g_android_perf.spu_cpu = std::clamp(g_android_perf.host_cpu * g_android_perf.spu_cycles / total_cycles, 0.f, 100.f);
 +    g_android_perf.rsx_cpu = std::clamp(g_android_perf.host_cpu * g_android_perf.rsx_cycles / total_cycles, 0.f, 100.f);
 +    g_android_perf.rsx_load = rsx->get_load();
-+    g_android_perf.sample_ready = g_android_perf.last_timestamp_us != 0 && g_android_perf.frametime_ms > 0.f;
++    g_android_perf.sample_ready = g_android_perf.last_timestamp_us != 0;
 +    android_perf_log_crosscheck_locked(now);
 +    return android_perf_snapshot_json().dump();
 +}
@@ -547,4 +707,90 @@ index b6f295e4c..f4048c7e2 100644
 +			_rpcsx_android_trophy_unlocked(unlocked_platinum_id, ctxt->trp_name.c_str());
  		}
  	}
+ 
+diff --git a/rpcs3/Emu/RSX/RSXThread.cpp b/rpcs3/Emu/RSX/RSXThread.cpp
+index adbf67a19..dfc4a1f55 100644
+--- a/rpcs3/Emu/RSX/RSXThread.cpp
++++ b/rpcs3/Emu/RSX/RSXThread.cpp
+@@ -49,6 +49,10 @@ extern CellGcmOffsetTable offsetTable;
+ extern thread_local std::string (*g_tls_log_prefix)();
+ extern atomic_t<u32> g_lv2_preempts_taken;
+ 
++#if defined(__ANDROID__)
++extern "C" void _rpcsx_android_perf_frame_presented(u64 timestamp_us);
++#endif
++
+ LOG_CHANNEL(perf_log, "PERF");
+ 
+ template <>
+@@ -2398,6 +2402,16 @@ namespace rsx
+ 		}
+ 
+ 		last_host_flip_timestamp = get_system_time();
++
++#if defined(__ANDROID__)
++		// This is the same guest emu_flip event used by RPCS3's performance
++		// counters. It represents a rendered/presented emulator frame, unlike
++		// vblank_count, which is only a display timing counter.
++		if (info.emu_flip)
++		{
++			_rpcsx_android_perf_frame_presented(last_host_flip_timestamp);
++		}
++#endif
+ 	}
+ 
+ 	void thread::check_zcull_status(bool framebuffer_swap)
+diff --git a/rpcs3/util/cpu_stats.cpp b/rpcs3/util/cpu_stats.cpp
+index 69814e65f..38d808393 100644
+--- a/rpcs3/util/cpu_stats.cpp
++++ b/rpcs3/util/cpu_stats.cpp
+@@ -97,6 +97,36 @@ namespace utils
+ #endif
+ 	}
+ 
++	void cpu_stats::reset()
++	{
++#ifdef _WIN32
++		if (m_cpu_query)
++		{
++			PdhCloseQuery(m_cpu_query);
++			m_cpu_query = nullptr;
++			m_cpu_cores = nullptr;
++		}
++
++		FILETIME ftime, fsys, fuser;
++		GetSystemTimeAsFileTime(&ftime);
++		memcpy(&m_last_cpu, &ftime, sizeof(FILETIME));
++		GetProcessTimes(GetCurrentProcess(), &ftime, &ftime, &fsys, &fuser);
++		memcpy(&m_sys_cpu, &fsys, sizeof(FILETIME));
++		memcpy(&m_usr_cpu, &fuser, sizeof(FILETIME));
++#else
++		struct tms timeSample;
++		m_last_cpu = times(&timeSample);
++		m_sys_cpu = timeSample.tms_stime;
++		m_usr_cpu = timeSample.tms_utime;
++#ifdef __linux__
++		m_previous_idle_time_total = 0;
++		m_previous_total_time_total = 0;
++		m_previous_idle_times_per_cpu.clear();
++		m_previous_total_times_per_cpu.clear();
++#endif
++#endif
++	}
++
+ 	void cpu_stats::init_cpu_query()
+ 	{
+ #ifdef _WIN32
+diff --git a/rpcs3/util/cpu_stats.hpp b/rpcs3/util/cpu_stats.hpp
+index 260e88a35..93320a76c 100644
+--- a/rpcs3/util/cpu_stats.hpp
++++ b/rpcs3/util/cpu_stats.hpp
+@@ -29,6 +29,8 @@ namespace utils
+ 	public:
+ 		cpu_stats();
+ 		~cpu_stats();
++		// Restart the sampling baseline without reallocating the collector.
++		void reset();
+ 
+ 		double get_usage();
  

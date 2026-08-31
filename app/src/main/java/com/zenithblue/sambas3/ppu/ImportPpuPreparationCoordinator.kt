@@ -308,7 +308,13 @@ object ImportPpuPreparationCoordinator {
                             Log.w(TAG, "prepare canceled mid-quiescence $titleId")
                             return@launch
                         }
-                        val st = try { RPCSX.getState() } catch (_: Exception) { com.zenithblue.sambas3.EmulatorState.Stopped }
+                        val st = runCatching { RPCSX.getState() }.getOrElse {
+                            Log.e(TAG, "state-read-failed after prepare $titleId: ${it.message}")
+                            withContext(Dispatchers.Main) {
+                                PpuReadinessStore.setRuntimeState(appCtx, titleId, RuntimePpuState.FAILED)
+                            }
+                            return@launch
+                        }
                         if (st == com.zenithblue.sambas3.EmulatorState.Stopped) {
                             nativeStopped = true
                             break
@@ -445,7 +451,10 @@ object ImportPpuPreparationCoordinator {
                 continue
             }
             // Check engine state
-            val state = try { RPCSX.getState() } catch (_: Exception) { com.zenithblue.sambas3.EmulatorState.Stopped }
+            val state = runCatching { RPCSX.getState() }.getOrElse {
+                Log.e(TAG, "waitForIdle state-read-failed title=$titleId error=${it.message}")
+                return false
+            }
             if (state == com.zenithblue.sambas3.EmulatorState.Stopped) {
                 // Also check that native compilation queue is not still holding lock? Try to check if we can acquire?
                 // For now, if Stopped, consider idle

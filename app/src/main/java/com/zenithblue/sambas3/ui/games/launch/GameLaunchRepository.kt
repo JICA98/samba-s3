@@ -35,6 +35,7 @@ object GameLaunchRepository {
         val blocked = when {
             otherRunning -> "Another game is already running"
             availability is GameLaunchAvailability.GameplayRunning && !sameRunning -> "An emulator session is already running"
+            availability is GameLaunchAvailability.EngineBusy -> "Emulator busy (${availability.state})"
             availability is GameLaunchAvailability.PreparingPpu -> "Preparing PPU"
             availability is GameLaunchAvailability.Importing -> "Import still in progress"
             availability is GameLaunchAvailability.NeedsPreparation -> "PPU preparation required"
@@ -63,7 +64,8 @@ object GameLaunchRepository {
             },
             saveSlots = slots,
             latestSave = latest,
-            canPlayFresh = !otherRunning && (sameRunning || availability is GameLaunchAvailability.Ready),
+            canPlayFresh = availability is GameLaunchAvailability.Ready,
+            canLoadSave = availability is GameLaunchAvailability.Ready,
             blockReason = blocked
         )
     }
