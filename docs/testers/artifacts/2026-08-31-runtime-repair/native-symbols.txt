@@ -1,0 +1,7 @@
+Artifact: app/src/main/jniLibs/arm64-v8a/librpcsx-android.so
+Command: llvm-readelf -Ws app/src/main/jniLibs/arm64-v8a/librpcsx-android.so
+
+20736: 0000000003c6fca8   720 FUNC    GLOBAL DEFAULT    15 _rpcsx_setPerfMetricsEnabled
+141474: 0000000003c70170  2868 FUNC    GLOBAL DEFAULT    15 _rpcsx_getPerfMetricsJson
+142734: 0000000003c71cd8  4896 FUNC    GLOBAL DEFAULT    15 _rpcsx_getTrophiesForTitle
+148134: 0000000003c71828  1136 FUNC    GLOBAL DEFAULT    15 _rpcsx_getCurrentTrophies

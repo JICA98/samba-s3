@@ -1,0 +1,87 @@
+08-31 07:27:42.183 21843 21865 D RPCS3   : S3PERF crosscheck native_fps=59.429 native_frametime_ms=16.827
+08-31 07:27:42.184 21843 21865 D S3PERF  : crosscheck json_fps=59.42928 json_frametime_ms=16.826723
+08-31 07:27:42.185 21843 21865 D S3PERF  : crosscheck ui_snapshot_fps=59.42928 ui_snapshot_frametime_ms=16.826723
+08-31 07:27:43.394 21843 21865 D RPCS3   : S3PERF crosscheck native_fps=59.252 native_frametime_ms=16.877
+08-31 07:27:43.396 21843 21865 D S3PERF  : crosscheck json_fps=59.25243 json_frametime_ms=16.876945
+08-31 07:27:43.397 21843 21865 D S3PERF  : crosscheck ui_snapshot_fps=59.25243 ui_snapshot_frametime_ms=16.876945
+08-31 07:27:44.609 21843 21864 D RPCS3   : S3PERF crosscheck native_fps=59.454 native_frametime_ms=16.820
+08-31 07:27:44.610 21843 21864 D S3PERF  : crosscheck json_fps=59.454212 json_frametime_ms=16.819666
+08-31 07:27:44.610 21843 21864 D S3PERF  : crosscheck ui_snapshot_fps=59.454212 ui_snapshot_frametime_ms=16.819666
+08-31 07:27:45.822 21843 21867 D RPCS3   : S3PERF crosscheck native_fps=59.315 native_frametime_ms=16.859
+08-31 07:27:45.823 21843 21867 D S3PERF  : crosscheck json_fps=59.3155 json_frametime_ms=16.859
+08-31 07:27:45.824 21843 21867 D S3PERF  : crosscheck ui_snapshot_fps=59.3155 ui_snapshot_frametime_ms=16.859
+08-31 07:27:47.038 21843 21864 D RPCS3   : S3PERF crosscheck native_fps=59.458 native_frametime_ms=16.819
+08-31 07:27:47.040 21843 21864 D S3PERF  : crosscheck json_fps=59.458336 json_frametime_ms=16.8185
+08-31 07:27:47.040 21843 21864 D S3PERF  : crosscheck ui_snapshot_fps=59.458336 ui_snapshot_frametime_ms=16.8185
+08-31 07:27:48.250 21843 22382 D RPCS3   : S3PERF crosscheck native_fps=59.215 native_frametime_ms=16.888
+08-31 07:27:48.251 21843 22382 D S3PERF  : crosscheck json_fps=59.215397 json_frametime_ms=16.8875
+08-31 07:27:48.251 21843 22382 D S3PERF  : crosscheck ui_snapshot_fps=59.215397 ui_snapshot_frametime_ms=16.8875
+08-31 07:27:49.462 21843 21867 D RPCS3   : S3PERF crosscheck native_fps=59.285 native_frametime_ms=16.868
+08-31 07:27:49.464 21843 21867 D S3PERF  : crosscheck json_fps=59.285217 json_frametime_ms=16.86761
+08-31 07:27:49.464 21843 21867 D S3PERF  : crosscheck ui_snapshot_fps=59.285217 ui_snapshot_frametime_ms=16.86761
+08-31 07:27:50.674 21843 21865 D RPCS3   : S3PERF crosscheck native_fps=59.204 native_frametime_ms=16.891
+08-31 07:27:50.676 21843 21865 D S3PERF  : crosscheck json_fps=59.20449 json_frametime_ms=16.890612
+08-31 07:27:50.676 21843 21865 D S3PERF  : crosscheck ui_snapshot_fps=59.20449 ui_snapshot_frametime_ms=16.890612
+08-31 07:27:51.887 21843 21865 D RPCS3   : S3PERF crosscheck native_fps=62.844 native_frametime_ms=15.912
+08-31 07:27:51.889 21843 21865 D S3PERF  : crosscheck json_fps=62.844402 json_frametime_ms=15.912315
+08-31 07:27:51.889 21843 21865 D S3PERF  : crosscheck ui_snapshot_fps=62.844402 ui_snapshot_frametime_ms=15.912315
+08-31 07:27:53.101 21843 21867 D RPCS3   : S3PERF crosscheck native_fps=59.517 native_frametime_ms=16.802
+08-31 07:27:53.103 21843 21867 D S3PERF  : crosscheck json_fps=59.517117 json_frametime_ms=16.80189
+08-31 07:27:53.103 21843 21867 D S3PERF  : crosscheck ui_snapshot_fps=59.517117 ui_snapshot_frametime_ms=16.80189
+08-31 07:27:54.315 21843 21865 D RPCS3   : S3PERF crosscheck native_fps=59.240 native_frametime_ms=16.881
+08-31 07:27:54.316 21843 21865 D S3PERF  : crosscheck json_fps=59.239758 json_frametime_ms=16.880554
+08-31 07:27:54.316 21843 21865 D S3PERF  : crosscheck ui_snapshot_fps=59.239758 ui_snapshot_frametime_ms=16.880554
+08-31 07:27:55.526 21843 22384 D RPCS3   : S3PERF crosscheck native_fps=59.593 native_frametime_ms=16.781
+08-31 07:27:55.528 21843 22384 D S3PERF  : crosscheck json_fps=59.59298 json_frametime_ms=16.7805
+08-31 07:27:55.528 21843 22384 D S3PERF  : crosscheck ui_snapshot_fps=59.59298 ui_snapshot_frametime_ms=16.7805
+08-31 07:27:56.736 21843 21867 D RPCS3   : S3PERF crosscheck native_fps=59.683 native_frametime_ms=16.755
+08-31 07:27:56.738 21843 21867 D S3PERF  : crosscheck json_fps=59.682686 json_frametime_ms=16.755278
+08-31 07:27:56.738 21843 21867 D S3PERF  : crosscheck ui_snapshot_fps=59.682686 ui_snapshot_frametime_ms=16.755278
+08-31 07:27:57.947 21843 21867 D RPCS3   : S3PERF crosscheck native_fps=59.328 native_frametime_ms=16.855
+08-31 07:27:57.949 21843 21867 D S3PERF  : crosscheck json_fps=59.32801 json_frametime_ms=16.855446
+08-31 07:27:57.950 21843 21867 D S3PERF  : crosscheck ui_snapshot_fps=59.32801 ui_snapshot_frametime_ms=16.855446
+08-31 07:27:59.158 21843 21867 D RPCS3   : S3PERF crosscheck native_fps=59.583 native_frametime_ms=16.783
+08-31 07:27:59.160 21843 21867 D S3PERF  : crosscheck json_fps=59.58292 json_frametime_ms=16.783335
+08-31 07:27:59.160 21843 21867 D S3PERF  : crosscheck ui_snapshot_fps=59.58292 ui_snapshot_frametime_ms=16.783335
+08-31 07:28:00.369 21843 21867 D RPCS3   : S3PERF crosscheck native_fps=62.870 native_frametime_ms=15.906
+08-31 07:28:00.370 21843 21867 D S3PERF  : crosscheck json_fps=62.869564 json_frametime_ms=15.905948
+08-31 07:28:00.371 21843 21867 D S3PERF  : crosscheck ui_snapshot_fps=62.869564 ui_snapshot_frametime_ms=15.905948
+08-31 07:28:01.580 21843 22382 D RPCS3   : S3PERF crosscheck native_fps=59.552 native_frametime_ms=16.792
+08-31 07:28:01.583 21843 22382 D S3PERF  : crosscheck json_fps=59.55197 json_frametime_ms=16.792055
+08-31 07:28:01.583 21843 22382 D S3PERF  : crosscheck ui_snapshot_fps=59.55197 ui_snapshot_frametime_ms=16.792055
+08-31 07:28:02.795 21843 22384 D RPCS3   : S3PERF crosscheck native_fps=59.283 native_frametime_ms=16.868
+08-31 07:28:02.796 21843 22384 D S3PERF  : crosscheck json_fps=59.28307 json_frametime_ms=16.868223
+08-31 07:28:02.797 21843 22384 D S3PERF  : crosscheck ui_snapshot_fps=59.28307 ui_snapshot_frametime_ms=16.868223
+08-31 07:28:04.008 21843 21867 D RPCS3   : S3PERF crosscheck native_fps=59.169 native_frametime_ms=16.901
+08-31 07:28:04.011 21843 21867 D S3PERF  : crosscheck json_fps=59.169456 json_frametime_ms=16.900612
+08-31 07:28:04.011 21843 21867 D S3PERF  : crosscheck ui_snapshot_fps=59.169456 ui_snapshot_frametime_ms=16.900612
+08-31 07:28:05.223 21843 21864 D RPCS3   : S3PERF crosscheck native_fps=59.234 native_frametime_ms=16.882
+08-31 07:28:05.225 21843 21864 D S3PERF  : crosscheck json_fps=59.234104 json_frametime_ms=16.882166
+08-31 07:28:05.226 21843 21864 D S3PERF  : crosscheck ui_snapshot_fps=59.234104 ui_snapshot_frametime_ms=16.882166
+08-31 07:28:06.437 21843 22382 D RPCS3   : S3PERF crosscheck native_fps=62.697 native_frametime_ms=15.950
+08-31 07:28:06.439 21843 22382 D S3PERF  : crosscheck json_fps=62.697166 json_frametime_ms=15.949684
+08-31 07:28:06.440 21843 22382 D S3PERF  : crosscheck ui_snapshot_fps=62.697166 ui_snapshot_frametime_ms=15.949684
+08-31 07:28:07.649 21843 22382 D RPCS3   : S3PERF crosscheck native_fps=59.278 native_frametime_ms=16.870
+08-31 07:28:07.650 21843 22382 D S3PERF  : crosscheck json_fps=59.277603 json_frametime_ms=16.869778
+08-31 07:28:07.650 21843 22382 D S3PERF  : crosscheck ui_snapshot_fps=59.277603 ui_snapshot_frametime_ms=16.869778
+08-31 07:28:08.859 21843 21866 D RPCS3   : S3PERF crosscheck native_fps=59.604 native_frametime_ms=16.777
+08-31 07:28:08.861 21843 21866 D S3PERF  : crosscheck json_fps=59.60403 json_frametime_ms=16.77739
+08-31 07:28:08.861 21843 21866 D S3PERF  : crosscheck ui_snapshot_fps=59.60403 ui_snapshot_frametime_ms=16.77739
+08-31 07:28:10.071 21843 21867 D RPCS3   : S3PERF crosscheck native_fps=59.493 native_frametime_ms=16.809
+08-31 07:28:10.072 21843 21867 D S3PERF  : crosscheck json_fps=59.492725 json_frametime_ms=16.808777
+08-31 07:28:10.072 21843 21867 D S3PERF  : crosscheck ui_snapshot_fps=59.492725 ui_snapshot_frametime_ms=16.808777
+08-31 07:28:11.280 21843 21866 D RPCS3   : S3PERF crosscheck native_fps=59.622 native_frametime_ms=16.772
+08-31 07:28:11.281 21843 21866 D S3PERF  : crosscheck json_fps=59.62239 json_frametime_ms=16.772223
+08-31 07:28:11.281 21843 21866 D S3PERF  : crosscheck ui_snapshot_fps=59.62239 ui_snapshot_frametime_ms=16.772223
+08-31 07:28:12.493 21843 21866 D RPCS3   : S3PERF crosscheck native_fps=59.316 native_frametime_ms=16.859
+08-31 07:28:12.494 21843 21866 D S3PERF  : crosscheck json_fps=59.316475 json_frametime_ms=16.858723
+08-31 07:28:12.494 21843 21866 D S3PERF  : crosscheck ui_snapshot_fps=59.316475 ui_snapshot_frametime_ms=16.858723
+08-31 07:28:13.701 21843 22384 D RPCS3   : S3PERF crosscheck native_fps=62.934 native_frametime_ms=15.890
+08-31 07:28:13.702 21843 22384 D S3PERF  : crosscheck json_fps=62.933914 json_frametime_ms=15.889685
+08-31 07:28:13.702 21843 22384 D S3PERF  : crosscheck ui_snapshot_fps=62.933914 ui_snapshot_frametime_ms=15.889685
+08-31 07:28:14.911 21843 22384 D RPCS3   : S3PERF crosscheck native_fps=59.555 native_frametime_ms=16.791
+08-31 07:28:14.912 21843 22384 D S3PERF  : crosscheck json_fps=59.55453 json_frametime_ms=16.791334
+08-31 07:28:14.912 21843 22384 D S3PERF  : crosscheck ui_snapshot_fps=59.55453 ui_snapshot_frametime_ms=16.791334
+08-31 07:28:16.121 21843 21866 D RPCS3   : S3PERF crosscheck native_fps=59.528 native_frametime_ms=16.799
+08-31 07:28:16.122 21843 21866 D S3PERF  : crosscheck json_fps=59.52775 json_frametime_ms=16.79889
+08-31 07:28:16.122 21843 21866 D S3PERF  : crosscheck ui_snapshot_fps=59.52775 ui_snapshot_frametime_ms=16.79889

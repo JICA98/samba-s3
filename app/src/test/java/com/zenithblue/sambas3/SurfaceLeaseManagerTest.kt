@@ -10,6 +10,8 @@ import org.junit.Assert.assertTrue
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
+import kotlinx.coroutines.async
+import kotlinx.coroutines.runBlocking
 
 @RunWith(RobolectricTestRunner::class)
 class SurfaceLeaseManagerTest {
@@ -140,5 +142,31 @@ class SurfaceLeaseManagerTest {
         manager.onSurfaceCreated(fresh, fresh.generation, testSurface())
         assertEquals(1, ready)
         assertEquals(listOf(0 to fresh.generation), events)
+    }
+
+    @Test
+    fun await_ready_requires_native_create_and_surface_generation() = runBlocking {
+        val host = FrameLayout(ApplicationProvider.getApplicationContext())
+        val manager = SurfaceLeaseManager(host, SurfaceLeaseBridge { _, _, _ -> true })
+        manager.installInitial()
+        val frame = manager.currentFrame!!
+        val waiter = async { manager.awaitReady(1_000L) }
+        kotlinx.coroutines.yield()
+        assertTrue(!waiter.isCompleted)
+
+        manager.onSurfaceCreated(frame, frame.generation, testSurface())
+        assertEquals(SurfaceReadyResult.Ready, waiter.await())
+    }
+
+    @Test
+    fun await_ready_reports_native_create_failure() = runBlocking {
+        val host = FrameLayout(ApplicationProvider.getApplicationContext())
+        val manager = SurfaceLeaseManager(host, SurfaceLeaseBridge { _, _, _ -> false })
+        manager.installInitial()
+        val frame = manager.currentFrame!!
+        val waiter = async { manager.awaitReady(1_000L) }
+        kotlinx.coroutines.yield()
+        manager.onSurfaceCreated(frame, frame.generation, testSurface())
+        assertEquals(SurfaceReadyResult.Failed, waiter.await())
     }
 }

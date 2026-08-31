@@ -1,0 +1,66 @@
+[08-31 03:16:14.968] D/ApplicationLoaders: Returning zygote-cached class loader: /system_ext/framework/androidx.window.sidecar.jar
+[08-31 03:16:15.080] D/nativeloader: Configuring clns-9 for other apk /data/app/~~LCKMQp1gsqxoWgiO3xGAzg==/com.zenithblue.sambas3-cl9nLXOqyJB07O4L6wibtw==/base.apk. target_sdk_version=35, uses_libraries=, library_path=/data/app/~~LCKMQp1gsqxoWgiO3xGAzg==/com.zenithblue.sambas3-cl9nLXOqyJB07O4L6wibtw==/lib/arm64:/data/app/~~LCKMQp1gsqxoWgiO3xGAzg==/com.zenithblue.sambas3-cl9nLXOqyJB07O4L6wibtw==/base.apk!/lib/arm64-v8a, permitted_path=/data:/mnt/expand:/data/user/0/com.zenithblue.sambas3
+[08-31 03:16:15.081] D/CompatChangeReporter: Compat change id reported: 202956589; UID 10243; state: ENABLED
+[08-31 03:16:15.084] V/GraphicsEnvironment: Currently set values for:
+[08-31 03:16:15.084] V/GraphicsEnvironment: angle_gl_driver_selection_pkgs=[]
+[08-31 03:16:15.084] V/GraphicsEnvironment: angle_gl_driver_selection_values=[]
+[08-31 03:16:15.084] V/GraphicsEnvironment: com.zenithblue.sambas3 is not listed in per-application setting
+[08-31 03:16:15.084] V/GraphicsEnvironment: ANGLE allowlist from config: 
+[08-31 03:16:15.084] V/GraphicsEnvironment: No special selections for ANGLE, returning default driver choice
+[08-31 03:16:15.084] V/GraphicsEnvironment: Neither updatable production driver nor prerelease driver is supported.
+[08-31 03:16:15.106] I/DisplayManager: Choreographer implicitly registered for the refresh rate.
+[08-31 03:16:15.112] I/AdrenoVK-0: ===== BEGIN DUMP OF OVERRIDDEN SETTINGS =====
+[08-31 03:16:15.112] I/AdrenoVK-0: ===== END DUMP OF OVERRIDDEN SETTINGS =====
+[08-31 03:16:15.113] D/DesktopExperienceFlags: Toggle override initialized to: false
+[08-31 03:16:15.115] I/AdrenoVK-0: QUALCOMM build          : f6b5df5188, I29aebc4401
+[08-31 03:16:15.115] I/AdrenoVK-0: Build Date              : 09/19/25
+[08-31 03:16:15.115] I/AdrenoVK-0: Shader Compiler Version : E031.45.02.26
+[08-31 03:16:15.115] I/AdrenoVK-0: Local Branch            : 
+[08-31 03:16:15.115] I/AdrenoVK-0: Remote Branch           : refs/tags/AU_LINUX_ANDROID_LA.VENDOR.14.3.0.11.00.00.974.010
+[08-31 03:16:15.115] I/AdrenoVK-0: Remote Branch           : NONE
+[08-31 03:16:15.115] I/AdrenoVK-0: Reconstruct Branch      : NOTHING
+[08-31 03:16:15.115] I/AdrenoVK-0: Build Config            : S P 16.1.2 AArch64
+[08-31 03:16:15.115] I/AdrenoVK-0: Driver Path             : /vendor/lib64/hw/vulkan.adreno.so
+[08-31 03:16:15.115] I/AdrenoVK-0: Driver Version          : 0762.41
+[08-31 03:16:15.115] I/AdrenoVK-0: PFP                     : 0x01520181
+[08-31 03:16:15.115] I/AdrenoVK-0: ME                      : 0x01520023
+[08-31 03:16:15.115] I/AdrenoVK-0: Application Name    : android framework
+[08-31 03:16:15.115] I/AdrenoVK-0: Application Version : 0x00000000
+[08-31 03:16:15.115] I/AdrenoVK-0: Engine Name         : android framework
+[08-31 03:16:15.115] I/AdrenoVK-0: Engine Version      : 0x00000000
+[08-31 03:16:15.115] I/AdrenoVK-0: Api Version         : 0x00401000
+[08-31 03:16:15.115] E/ashmem: Pinning is deprecated since Android Q. Please use trim or other methods.
+[08-31 03:16:15.131] I/LogMonitor: LogMonitor started — log dir: /storage/emulated/0/Android/data/com.zenithblue.sambas3/files/logs
+[08-31 03:16:15.140] D/nativeloader: Load /data/app/~~LCKMQp1gsqxoWgiO3xGAzg==/com.zenithblue.sambas3-cl9nLXOqyJB07O4L6wibtw==/lib/arm64/libsambas3-android.so using class loader ns clns-9 (caller=/data/app/~~LCKMQp1gsqxoWgiO3xGAzg==/com.zenithblue.sambas3-cl9nLXOqyJB07O4L6wibtw==/base.apk!classes9.dex): ok
+[08-31 03:16:15.135] W/ithblue.sambas3: type=1400 audit(0.0:838159): avc:  denied  { execstack } for  scontext=u:r:untrusted_app:s0:c243,c256,c512,c768 tcontext=u:r:untrusted_app:s0:c243,c256,c512,c768 tclass=process permissive=0 app=com.zenithblue.sambas3
+[08-31 03:16:15.247] I/S3CAP: perf_export=1 trophy_export=1
+[08-31 03:16:15.247] I/S3CORE: core_build_id=rpcsx=657b26a0d197c29d42cdcf3b3f6e8ad5c6765bbc samba=6392c3522cae3634ab4833c6e7d33b167bdb6e22 patch_sha256=92b7ff2c77ae7c6942fa572f3bf5f60c250ee914b81098fbe32931015877b0f7 build_type=Debug
+[08-31 03:16:15.248] I/S3LIFE: core_build_id=rpcsx=657b26a0d197c29d42cdcf3b3f6e8ad5c6765bbc samba=6392c3522cae3634ab4833c6e7d33b167bdb6e22 patch_sha256=92b7ff2c77ae7c6942fa572f3bf5f60c250ee914b81098fbe32931015877b0f7 build_type=Debug session=S3-1788126375247-2abc
+[08-31 03:16:15.248] I/S3CORE: patch_sha256=92b7ff2c77ae7c69
+[08-31 03:16:15.260] I/S3DISPATCH: CoreDispatchWorker owner registered tid=4535
+[08-31 03:16:15.394] I/CompileBridge: CompileProgressListener registered
+[08-31 03:16:15.394] I/S3DISPATCH: MainThreadProcessor owner registered tid=4537
+[08-31 03:16:15.395] D/CompatChangeReporter: Compat change id reported: 312399441; UID 10243; state: ENABLED
+[08-31 03:16:15.400] D/CompatChangeReporter: Compat change id reported: 309578419; UID 10243; state: ENABLED
+[08-31 03:16:15.400] D/DesktopModeFlags: Toggle override initialized to: OVERRIDE_UNSET
+[08-31 03:16:15.405] I/DebugPad: registered
+[08-31 03:16:15.414] D/CompatChangeReporter: Compat change id reported: 349153669; UID 10243; state: ENABLED
+[08-31 03:16:15.427] I/AdrenoGpuDetector: GPU detect raw=Adreno750v2 id=750 family=ADRENO_7XX adreno=true arm64=true
+[08-31 03:16:15.486] I/ithblue.sambas3: hiddenapi: Accessing hidden method Landroid/os/SystemProperties;->addChangeCallback(Ljava/lang/Runnable;)V (runtime_flags=0, domain=platform, api=unsupported) from Landroidx/compose/ui/platform/AndroidComposeView$Companion; (domain=app, TargetSdkVersion=35) using reflection: allowed
+[08-31 03:16:15.514] D/InsetsController: Setting requestedVisibleTypes to 502 (was 503)
+[08-31 03:16:15.515] D/VRI[MainActivity]: WindowInsets changed: 3000x2120 statusBars:[0,100,0,0] navigationBars:[0,0,0,84] mandatorySystemGestures:[0,100,0,84] 
+[08-31 03:16:15.516] D/WindowOnBackDispatcher: setTopOnBackInvokedCallback (unwrapped): android.view.ViewRootImpl$$ExternalSyntheticLambda12@c5d1c42
+[08-31 03:16:15.521] I/HWUI: Using FreeType backend (prop=Auto)
+[08-31 03:16:15.526] D/VRI[MainActivity]: WindowInsets changed: statusBars:null 
+[08-31 03:16:15.527] I/Gralloc4: Adding additional valid usage bits: 0x8202000
+[08-31 03:16:15.533] I/AdrenoUtils: <ReadGpuID:357>: Reading chip ID through GSL
+[08-31 03:16:15.533] W/qdgralloc: getInterlacedFlag: getMetaData returned 3, defaulting to interlaced_flag = 0
+[08-31 03:16:15.552] W/qdgralloc: getInterlacedFlag: getMetaData returned 3, defaulting to interlaced_flag = 0
+[08-31 03:16:15.560] W/qdgralloc: getInterlacedFlag: getMetaData returned 3, defaulting to interlaced_flag = 0
+[08-31 03:16:15.560] D/InsetsController: hide(ime())
+[08-31 03:16:15.561] I/ImeTracker: com.zenithblue.sambas3:ab62d0c8: onCancelled at PHASE_CLIENT_ALREADY_HIDDEN
+[08-31 03:16:15.568] W/qdgralloc: getInterlacedFlag: getMetaData returned 3, defaulting to interlaced_flag = 0
+[08-31 03:16:15.576] W/qdgralloc: getInterlacedFlag: getMetaData returned 3, defaulting to interlaced_flag = 0
+[08-31 03:16:15.899] W/InteractionJankMonitor: Initializing without READ_DEVICE_CONFIG permission. enabled=false, interval=1, missedFrameThreshold=3, frameTimeThreshold=64, package=com.zenithblue.sambas3
+[08-31 03:16:20.871] D/ProfileInstaller: Installing profile for com.zenithblue.sambas3
+[08-31 03:16:33.187] W/ithblue.sambas3: userfaultfd: MOVE ioctl seems unsupported: Connection timed out

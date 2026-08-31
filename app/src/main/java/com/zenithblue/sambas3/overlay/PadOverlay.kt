@@ -318,6 +318,9 @@ class PadOverlay(context: Context?, attrs: AttributeSet?) : SurfaceView(context,
             }
 
             val action = motionEvent.actionMasked
+            if (action == MotionEvent.ACTION_DOWN) {
+                android.util.Log.i("S3TOUCH", "pad action=down menu=$menuMode")
+            }
             val pointerIndex =
                 if (action == MotionEvent.ACTION_POINTER_DOWN || action == MotionEvent.ACTION_POINTER_UP)
                     motionEvent.actionIndex else 0

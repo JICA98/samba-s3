@@ -9,10 +9,14 @@ import kotlin.math.pow
 
 data class LogicalPadState(val digital1: Int = 0, val digital2: Int = 0, val leftX: Int = 127, val leftY: Int = 127, val rightX: Int = 127, val rightY: Int = 127)
 
-class GamepadMapper(private val profile: ControllerProfile) {
+class GamepadMapper(private var profile: ControllerProfile) {
     private var state = LogicalPadState()
     fun current() = state
     fun profile() = profile
+    fun reload(newProfile: ControllerProfile) {
+        profile = newProfile
+        state = LogicalPadState()
+    }
     fun digitalBinding(keyCode: Int): Pair<Int, Int> = profile.digitalBindings.entries.firstOrNull { it.value == keyCode }?.let { it.key.bit to it.key.bank } ?: 0 to 0
     fun keyDown(keyCode: Int): LogicalPadState? = applyKey(keyCode, true)
     fun keyUp(keyCode: Int): LogicalPadState? = applyKey(keyCode, false)

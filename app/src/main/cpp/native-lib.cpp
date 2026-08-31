@@ -49,6 +49,7 @@ struct RPCSXApi {
   bool (*settingsSet)(std::string_view path, std::string_view valueString);
   std::string (*getVersion)();
   std::string (*getPerfMetricsJson)();
+  bool (*setPerfMetricsEnabled)(bool enabled, int intervalMs);
   std::string (*patchEngineVersion)();
   std::string (*patchesList)();
   bool (*patchSetEnabled)(std::string_view hash, std::string_view description, bool enabled);
@@ -73,6 +74,7 @@ struct RPCSXApi {
   bool (*saveState)(int slot);
   bool (*loadSaveState)(int slot);
   std::string (*getCurrentTrophies)();
+  std::string (*getTrophiesForTitle)(const char* titleId);
   std::string (*getFriends)();
   bool (*friendAction)(std::string_view action, std::string_view username);
   bool (*beginInGameSettingsSession)();
@@ -145,6 +147,7 @@ struct RPCSXLibrary : RPCSXApi {
     result.settingsSet = reinterpret_cast<decltype(settingsSet)>(dlsym(handle, "_rpcsx_settingsSet"));
     result.getVersion = reinterpret_cast<decltype(getVersion)>(dlsym(handle, "_rpcsx_getVersion"));
     result.getPerfMetricsJson = reinterpret_cast<decltype(getPerfMetricsJson)>(dlsym(handle, "_rpcsx_getPerfMetricsJson"));
+    result.setPerfMetricsEnabled = reinterpret_cast<decltype(setPerfMetricsEnabled)>(dlsym(handle, "_rpcsx_setPerfMetricsEnabled"));
     result.patchEngineVersion = reinterpret_cast<decltype(patchEngineVersion)>(dlsym(handle, "_rpcsx_patchEngineVersion"));
     result.patchesList = reinterpret_cast<decltype(patchesList)>(dlsym(handle, "_rpcsx_patchesList"));
     result.patchSetEnabled = reinterpret_cast<decltype(patchSetEnabled)>(dlsym(handle, "_rpcsx_patchSetEnabled"));
@@ -170,6 +173,7 @@ struct RPCSXLibrary : RPCSXApi {
     result.saveState = reinterpret_cast<decltype(saveState)>(dlsym(handle, "_rpcsx_saveState"));
     result.loadSaveState = reinterpret_cast<decltype(loadSaveState)>(dlsym(handle, "_rpcsx_loadSaveState"));
     result.getCurrentTrophies = reinterpret_cast<decltype(getCurrentTrophies)>(dlsym(handle, "_rpcsx_getCurrentTrophies"));
+    result.getTrophiesForTitle = reinterpret_cast<decltype(getTrophiesForTitle)>(dlsym(handle, "_rpcsx_getTrophiesForTitle"));
     result.getFriends = reinterpret_cast<decltype(getFriends)>(dlsym(handle, "_rpcsx_getFriends"));
     result.friendAction = reinterpret_cast<decltype(friendAction)>(dlsym(handle, "_rpcsx_friendAction"));
     result.beginInGameSettingsSession = reinterpret_cast<decltype(beginInGameSettingsSession)>(dlsym(handle, "_rpcsx_beginInGameSettingsSession"));
@@ -350,6 +354,12 @@ extern "C" JNIEXPORT jstring JNICALL
 Java_com_zenithblue_sambas3_RPCSX_getCurrentTrophies(JNIEnv* env, jobject) {
   if (!rpcsxLib.getCurrentTrophies) return wrap(env, std::string(R"({"available":false})"));
   return wrap(env, rpcsxLib.getCurrentTrophies());
+}
+extern "C" JNIEXPORT jstring JNICALL
+Java_com_zenithblue_sambas3_RPCSX_getTrophiesForTitle(JNIEnv* env, jobject, jstring jtitle_id) {
+  if (!rpcsxLib.getTrophiesForTitle) return wrap(env, std::string(R"({"available":false,"status":"unsupported"})"));
+  const std::string title_id = unwrap(env, jtitle_id);
+  return wrap(env, rpcsxLib.getTrophiesForTitle(title_id.c_str()));
 }
 extern "C" JNIEXPORT jstring JNICALL
 Java_com_zenithblue_sambas3_RPCSX_getFriends(JNIEnv* env, jobject) {
@@ -579,10 +589,26 @@ Java_com_zenithblue_sambas3_RPCSX_getCoreBuildId(JNIEnv *env, jobject) {
   return wrap(env, id ? std::string(id) : std::string{});
 }
 
+extern "C" JNIEXPORT jboolean JNICALL
+Java_com_zenithblue_sambas3_RPCSX_hasPerfMetricsExport(JNIEnv *, jobject) {
+  return rpcsxLib.getPerfMetricsJson && rpcsxLib.setPerfMetricsEnabled ? JNI_TRUE : JNI_FALSE;
+}
+
+extern "C" JNIEXPORT jboolean JNICALL
+Java_com_zenithblue_sambas3_RPCSX_hasTrophyExports(JNIEnv *, jobject) {
+  return rpcsxLib.getCurrentTrophies && rpcsxLib.getTrophiesForTitle ? JNI_TRUE : JNI_FALSE;
+}
+
 extern "C" JNIEXPORT jstring JNICALL
 Java_com_zenithblue_sambas3_RPCSX_getPerfMetricsJson(JNIEnv *env, jobject) {
   if (!rpcsxLib.getPerfMetricsJson) return nullptr;
   return wrap(env, rpcsxLib.getPerfMetricsJson());
+}
+
+extern "C" JNIEXPORT jboolean JNICALL
+Java_com_zenithblue_sambas3_RPCSX_setPerfMetricsEnabled(JNIEnv *, jobject, jboolean enabled, jint intervalMs) {
+  if (!rpcsxLib.setPerfMetricsEnabled) return JNI_FALSE;
+  return rpcsxLib.setPerfMetricsEnabled(enabled == JNI_TRUE, intervalMs) ? JNI_TRUE : JNI_FALSE;
 }
 
 extern "C" JNIEXPORT jint JNICALL

@@ -1,0 +1,19 @@
+Log: pass2-long-play.log
+Pass 2 long-play duration: 22 minutes
+Scudo: 0
+invalid chunk: 0
+SIGABRT: 0
+SIGSEGV: 0
+FATAL EXCEPTION: 0
+ANR: 0
+OutOfMemoryError: 0
+VK_ERROR_DEVICE_LOST: 0
+VK_ERROR_NATIVE_WINDOW_IN_USE_KHR: 0
+native_window_api_connect: 0
+dequeueBuffer failed: 0
+PPU failed: 0
+first-frame-confirm-timeout: 0
+S3RECOVERY timeout: 0
+S3HOMELOAD failed: 0
+S3PERF error: 0
+S3TROPHY error: 0

@@ -3,6 +3,9 @@ package com.zenithblue.sambas3
 import android.util.Log
 import android.view.Surface
 import android.widget.FrameLayout
+import kotlinx.coroutines.suspendCancellableCoroutine
+import kotlinx.coroutines.withTimeoutOrNull
+import kotlin.coroutines.resume
 
 /**
  * Owns the short-lived Android SurfaceView generations used by RPCSX.
@@ -11,6 +14,13 @@ import android.widget.FrameLayout
  */
 fun interface SurfaceLeaseBridge {
     fun event(surface: Surface, event: Int, generation: Long): Boolean
+}
+
+enum class SurfaceReadyResult {
+    Ready,
+    TimedOut,
+    Failed,
+    Destroying
 }
 
 class SurfaceLeaseManager(
@@ -25,6 +35,7 @@ class SurfaceLeaseManager(
     private var currentSurfaceCreated = false
     private var pendingReady: (() -> Unit)? = null
     private var destroying = false
+    private val readyWaiters = mutableListOf<(SurfaceReadyResult) -> Unit>()
 
     val currentGeneration: Long get() = current?.generation ?: 0L
     val currentFrame: GraphicsFrame? get() = current
@@ -32,6 +43,34 @@ class SurfaceLeaseManager(
     fun installInitial() {
         destroying = false
         if (current == null) createGeneration()
+    }
+
+    /**
+     * Waits for the current generation to have both an Android surface and an
+     * accepted native CREATE event.  A non-null GraphicsFrame alone is not
+     * sufficient: SurfaceView creation is asynchronous.
+     */
+    suspend fun awaitReady(timeoutMs: Long = 10_000L): SurfaceReadyResult {
+        val result = withTimeoutOrNull(timeoutMs.coerceAtLeast(1L)) {
+            suspendCancellableCoroutine { continuation ->
+                val immediate = synchronized(this@SurfaceLeaseManager) {
+                    when {
+                        destroying -> SurfaceReadyResult.Destroying
+                        current != null && currentSurfaceCreated -> SurfaceReadyResult.Ready
+                        else -> {
+                            val waiter: (SurfaceReadyResult) -> Unit = { result ->
+                                if (continuation.isActive) continuation.resume(result)
+                            }
+                            readyWaiters += waiter
+                            continuation.invokeOnCancellation { synchronized(this@SurfaceLeaseManager) { readyWaiters.remove(waiter) } }
+                            null
+                        }
+                    }
+                }
+                if (immediate != null && continuation.isActive) continuation.resume(immediate)
+            }
+        }
+        return result ?: SurfaceReadyResult.TimedOut
     }
 
     fun replace(onReady: () -> Unit) {
@@ -89,6 +128,7 @@ class SurfaceLeaseManager(
         val accepted = bridge.event(surface, 0, generation)
         Log.i(TAG, "S3SURFACE created generation=$generation accepted=$accepted")
         if (!accepted) {
+            completeReady(SurfaceReadyResult.Failed)
             onFailure?.invoke("native-create-failed-generation-$generation")
             return
         }
@@ -99,6 +139,7 @@ class SurfaceLeaseManager(
             Log.i(TAG, "S3SURFACE destroyed-before-ready generation=$generation")
             return
         }
+        completeReady(SurfaceReadyResult.Ready)
         readyCallbacks.removeFirstOrNull()?.invoke()
     }
 
@@ -120,6 +161,7 @@ class SurfaceLeaseManager(
         val released = bridge.event(surface, 2, generation)
         Log.i(TAG, "S3SURFACE destroyed generation=$generation native-release-return=$released")
         if (!released) {
+            completeReady(SurfaceReadyResult.Failed)
             onFailure?.invoke("native-destroy-failed-generation-$generation")
             return
         }
@@ -132,6 +174,14 @@ class SurfaceLeaseManager(
             readyCallbacks += ready
             createGeneration()
         }
+    }
+
+    private fun completeReady(result: SurfaceReadyResult) {
+        val waiters = synchronized(this) {
+            if (readyWaiters.isEmpty()) return
+            readyWaiters.toList().also { readyWaiters.clear() }
+        }
+        waiters.forEach { it(result) }
     }
 
     private val readyCallbacks = ArrayDeque<() -> Unit>()

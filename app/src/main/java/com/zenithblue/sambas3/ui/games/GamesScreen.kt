@@ -42,7 +42,9 @@ import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.graphics.ColorMatrix
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.rememberCoroutineScope
@@ -60,6 +62,8 @@ import com.zenithblue.sambas3.ui.games.preview.GamePreviewModel
 import com.zenithblue.sambas3.ui.games.preview.GamePreviewRepository
 import com.zenithblue.sambas3.ui.games.launch.GameLaunchCenter
 import com.zenithblue.sambas3.ui.games.launch.GameLaunchRepository
+import com.zenithblue.sambas3.ui.games.launch.StoppedTrophiesDialog
+import com.zenithblue.sambas3.ui.ingame.TrophiesData
 import com.zenithblue.sambas3.utils.FileUtil
 import com.zenithblue.sambas3.utils.GameFolderMatch
 import kotlin.math.abs
@@ -180,6 +184,9 @@ fun GamesScreen(
     var focusedIndex by remember { mutableStateOf(if (games.isNotEmpty()) 0 else -1) }
     var bootingGame by remember { mutableStateOf<Game?>(null) }
     var launchCenterGame by remember { mutableStateOf<Game?>(null) }
+    var stoppedTrophies by remember { mutableStateOf<TrophiesData?>(null) }
+    var stoppedTrophiesLoading by remember { mutableStateOf(false) }
+    val trophiesScope = rememberCoroutineScope()
     var showImportDialog by remember { mutableStateOf(false) }
     var scannedFolderGames by remember { mutableStateOf<List<GameFolderMatch>?>(null) }
     var scannedFolderUri by remember { mutableStateOf<Uri?>(null) }
@@ -847,6 +854,29 @@ fun GamesScreen(
                 onPatches = {
                     launchCenterGame = null
                     (navigateToPatches ?: navigateToSettings)?.invoke()
+                },
+                onAchievements = {
+                    stoppedTrophiesLoading = true
+                    stoppedTrophies = null
+                    trophiesScope.launch {
+                        val titleId = GameIdentity.titleIdOrNull(game.info.path, game.info.name.value)
+                        val json = withContext(Dispatchers.IO) {
+                            titleId?.let { runCatching { RPCSX.instance.getTrophiesForTitle(it) }.getOrNull() }
+                        }
+                        stoppedTrophies = TrophiesData.fromJson(json)
+                        stoppedTrophiesLoading = false
+                    }
+                }
+            )
+        }
+
+        if (stoppedTrophiesLoading || stoppedTrophies != null) {
+            StoppedTrophiesDialog(
+                data = stoppedTrophies,
+                loading = stoppedTrophiesLoading,
+                onDismiss = {
+                    stoppedTrophiesLoading = false
+                    stoppedTrophies = null
                 }
             )
         }
@@ -1627,8 +1657,14 @@ fun bootGame(context: android.content.Context, game: Game, savestatePath: String
     GameRepository.onBoot(game)
     val emulatorWindow = Intent(context, RPCSXActivity::class.java)
     emulatorWindow.putExtra("path", game.info.path)
-    savestatePath?.let { emulatorWindow.putExtra(RPCSXActivity.EXTRA_USER_SAVESTATE, it) }
-    savestateSlot?.let { emulatorWindow.putExtra(RPCSXActivity.EXTRA_USER_SAVESTATE_SLOT, it) }
+    emulatorWindow.putExtra(RPCSXActivity.EXTRA_ORIGINAL_GAME_PATH, game.info.path)
+    if (savestatePath != null) {
+        emulatorWindow.putExtra(RPCSXActivity.EXTRA_BOOT_MODE, EmulatorBootMode.UserSelectedSavestate.name)
+        emulatorWindow.putExtra(RPCSXActivity.EXTRA_SAVESTATE_PATH, savestatePath)
+        savestateSlot?.let { emulatorWindow.putExtra(RPCSXActivity.EXTRA_SAVESTATE_SLOT, it) }
+    } else {
+        emulatorWindow.putExtra(RPCSXActivity.EXTRA_BOOT_MODE, EmulatorBootMode.FreshGame.name)
+    }
     context.startActivity(emulatorWindow)
 }
 

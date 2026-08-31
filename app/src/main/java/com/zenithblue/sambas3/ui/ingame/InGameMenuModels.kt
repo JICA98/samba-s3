@@ -2,6 +2,8 @@ package com.zenithblue.sambas3.ui.ingame
 
 import org.json.JSONObject
 import com.zenithblue.sambas3.SavestateThumbnailStore
+import kotlinx.coroutines.flow.MutableSharedFlow
+import kotlinx.coroutines.flow.SharedFlow
 
 data class InGameMenuCapabilities(
     val apiVersion: Int,
@@ -121,6 +123,7 @@ data class TrophyEntry(
 
 data class TrophiesData(
     val available: Boolean,
+    val status: String = "ready",
     val gameName: String,
     val trophySet: String,
     val total: Int,
@@ -133,7 +136,7 @@ data class TrophiesData(
             if (jsonStr.isNullOrBlank()) return null
             return try {
                 val j = JSONObject(jsonStr)
-                if (!j.optBoolean("available", false)) return TrophiesData(false, "", "", 0, 0, 0, emptyList())
+                if (!j.optBoolean("available", false)) return TrophiesData(false, j.optString("status", "unavailable"), "", "", 0, 0, 0, emptyList())
                 val arr = j.optJSONArray("trophies")
                 val list = mutableListOf<TrophyEntry>()
                 if (arr != null) {
@@ -153,6 +156,7 @@ data class TrophiesData(
                 }
                 TrophiesData(
                     available = true,
+                    status = j.optString("status", "ready"),
                     gameName = j.optString("gameName", ""),
                     trophySet = j.optString("trophySet", ""),
                     total = j.optInt("total", list.size),
@@ -163,6 +167,12 @@ data class TrophiesData(
             } catch (_: Exception) { null }
         }
     }
+}
+
+object TrophyEvents {
+    private val _refreshes = MutableSharedFlow<Unit>(extraBufferCapacity = 8)
+    val refreshes: SharedFlow<Unit> = _refreshes
+    fun notifyUnlocked() { _refreshes.tryEmit(Unit) }
 }
 
 data class FriendsData(

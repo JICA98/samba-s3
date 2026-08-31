@@ -1,0 +1,861 @@
+--------- beginning of main
+08-31 07:14:32.142 27566 11291 I NetworkScheduler.Stats: Task com.google.android.gms/com.google.android.gms.auth.account.be.accountstate.GcmTaskService finished executing. cause:5 result: 1 elapsed_millis: 18 uptime_millis: 18 exec_start_elapsed_seconds: 292407 [CONTEXT service_id=218 ]
+08-31 07:14:32.287  3141  3141 D TaskbarManager: dispatchTouchEvent:  displayId=0 isDefaultDisplay=true
+08-31 07:14:32.288  1514  1514 I android.hardware.power-service-qti: Power setBoost: 0, duration: 0
+08-31 07:14:32.289  1514  1514 E QTI PowerHAL: Failed to acquire lock.
+08-31 07:14:32.289  1514  1514 E QTI PowerHAL: Failed process_boost for boost_handle
+08-31 07:14:32.292  3141  3141 D OtherActivityInputConsumer: ACTION_DOWN: mIsDeferredDownTarget=false
+08-31 07:14:32.297  3141  3141 D b/417220811: getTasks - mResultsUi still valid: 1556
+08-31 07:14:32.297  3141  3141 D ContextTracker: Registering callback: callback=com.android.launcher3.LauncherInitListener@709df4, context=com.android.launcher3.uioverrides.QuickstepLauncher@794c277, reason=OtherActivityInputConsumer.startTouchTrackingForWindowAnimation
+08-31 07:14:32.298  3141  3141 D RecentsView: onGestureAnimationStart - groupedTaskInfo: Desk ID= -1, Desk Display ID=-1, Tasks=[id=515 winMode=fullscreen visReq=true vis=true excluded=false baseIntent=com.zenithblue.sambas3/.MainActivity], Type=FULLSCREEN, Minimized Task IDs=null
+08-31 07:14:32.298  3141  3141 D RecentsView: updateTaskStackListenerState: true
+08-31 07:14:32.298  3141  3141 D b/417220811: getTasks - mResultsUi still valid: 1556
+08-31 07:14:32.298  3141  3141 D RecentsView: reloadIfNeeded - getTasks: 1539
+08-31 07:14:32.298  3141  3141 D b/417220811: getTasks - mResultsUi still valid: 1556
+08-31 07:14:32.299  3141  3141 D RecentsView: showCurrentTask(onGestureAnimationStart) - groupedTaskInfo: Desk ID= -1, Desk Display ID=-1, Tasks=[id=515 winMode=fullscreen visReq=true vis=true excluded=false baseIntent=com.zenithblue.sambas3/.MainActivity], Type=FULLSCREEN, Minimized Task IDs=null
+08-31 07:14:32.299  3141  3141 D TaskView: onBind com.android.launcher3.uioverrides.QuickstepLauncher@794c277 com.android.quickstep.LauncherActivityInterface@91e12a1
+08-31 07:14:32.299  3141  3141 D TaskViewModel: bind com.android.quickstep.recents.ui.viewmodel.TaskViewModel@fde0e88 as SINGLE to taskIds: [515]
+08-31 07:14:32.300  3141  3141 D OtherActivityInputConsumer: startTouchTrackingForWindowAnimation: isRecentsAnimationRunning=false
+08-31 07:14:32.300  3141  3141 D TaskAnimationManager: startRecentsAnimation - running TaskAnimationMnaager count: 0
+08-31 07:14:32.301  3141  3141 I NavHandleLongPressHandler: Contextual Search invocation: touch finished with reason: touch action up
+08-31 07:14:32.301  3141  3141 D OtherActivityInputConsumer: finishTouchTracking: mPassedWindowMoveSlop=false
+08-31 07:14:32.301  3141  3141 D OtherActivityInputConsumer: finishTouchTracking: mInteractionHandler=com.android.quickstep.LauncherSwipeHandlerV2@66b3f87
+08-31 07:14:32.301  3141  3141 D OtherActivityInputConsumer: finishTouchTracking: ev=MotionEvent { action=ACTION_UP, actionButton=0, id[0]=0, x[0]=2540.0, y[0]=2070.0, toolType[0]=TOOL_TYPE_FINGER, buttonState=0, classification=NONE, metaState=0, flags=0x0, edgeFlags=0x0, pointerCount=1, historySize=0, eventTime=243035047, downTime=243035047, deviceId=-1, source=0x1002, displayId=0, eventId=-27983635 }
+08-31 07:14:32.301  3141  3141 D OtherActivityInputConsumer: finishTouchTracking: mActiveCallbacks=com.android.quickstep.RecentsAnimationCallbacks@b7e5add
+08-31 07:14:32.301  3141  3141 D OtherActivityInputConsumer: finishTouchTracking: isRecentsAnimationRunning=false
+08-31 07:14:32.301  3141  3141 D ContextTracker: Unregistering callback: com.android.launcher3.LauncherInitListener@709df4, reason=AbsSwipeUpHandler.invalidateHandler
+08-31 07:14:32.301  3141  3141 D RecentsView: updateTaskStackListenerState: false
+08-31 07:14:32.301  3141  3141 D OverviewActionsView: updateForGroupedTask() called with: isGroupedTask = [false], canSaveAppPair = [false]
+08-31 07:14:32.301  3141  3141 D OverviewActionsView: updateActionButtonsVisibility() called: showSingleTaskActions = [true], showGroupActions = [false]
+08-31 07:14:32.302  3141  3141 D OverviewActionsView: updateForGroupedTask() called with: isGroupedTask = [false], canSaveAppPair = [false]
+08-31 07:14:32.302  3141  3141 D OverviewActionsView: updateActionButtonsVisibility() called: showSingleTaskActions = [true], showGroupActions = [false]
+08-31 07:14:32.302  3141  3141 D RecentsView: onGestureAnimationEnd - mEnableDrawingLiveTile: false
+08-31 07:14:32.302  3141  3141 D LauncherStateManager: StateManager.goToState: fromState: Normal, toState: Normal, partial trace:
+08-31 07:14:32.302  3141  3141 D LauncherStateManager: 	at com.android.quickstep.BaseContainerInterface.onTransitionCancelled(BaseContainerInterface.java:375)
+08-31 07:14:32.302  3141  3141 D LauncherStateManager: 	at com.android.quickstep.AbsSwipeUpHandler.resetStateForAnimationCancel(AbsSwipeUpHandler.java:2492)
+08-31 07:14:32.302  3141  3141 D LauncherStateManager: 	at com.android.quickstep.AbsSwipeUpHandler.$r8$lambda$s_iy00q_MLF376WYEIsuL6mPQbs(AbsSwipeUpHandler.java:0)
+08-31 07:14:32.302  3141  3141 D LauncherStateManager: StateManager.onRepeatStateSetAborted: state: Normal
+08-31 07:14:32.302  3141  3141 D RecentsView: applyLoadPlan - taskGroups: [type=SINGLE task=[id=515 windowingMode=1 user=0 lastActiveTime=292281108] null], taskListChangeId: 1556
+08-31 07:14:32.302  3141  3141 D TaskThumbnailView: [TaskThumbnailView@6cb7a2a] taskId: null - uiState changed from: BackgroundOnly(backgroundColor=-16777216) to: Uninitialized
+08-31 07:14:32.302  3141  3141 D TaskViewModel: unbind com.android.quickstep.recents.ui.viewmodel.TaskViewModel@9c4ceca
+08-31 07:14:32.303  3141  3141 D TaskViewModel: unbind com.android.quickstep.recents.ui.viewmodel.TaskViewModel@fde0e88
+08-31 07:14:32.303  3141  3141 D TaskView: onBind com.android.launcher3.uioverrides.QuickstepLauncher@794c277 com.android.quickstep.LauncherActivityInterface@91e12a1
+08-31 07:14:32.303  3141  3141 D TaskViewModel: bind com.android.quickstep.recents.ui.viewmodel.TaskViewModel@fde0e88 as SINGLE to taskIds: [515]
+08-31 07:14:32.303  3141  3141 D TasksRepository: getAllTaskData: oldTasks [513], newTasks: [515]
+--------- beginning of system
+08-31 07:14:32.304  2831  2848 V ShellRecents: startRecentsTransition
+08-31 07:14:32.304  2831  2848 V WindowManagerShell: PipDesktopState: Recents transition state changed: TRANSITION_STATE_REQUESTED
+08-31 07:14:32.304  2831  2848 V ShellDesktopMode: DesktopTasksController: Recents transition state changed: TRANSITION_STATE_REQUESTED
+08-31 07:14:32.304  2831  2848 V ShellRecents: RecentsTransitionHandler.startRealRecentsTransition(): displayId=0
+08-31 07:14:32.304  2831  2848 V WindowManagerShell:  handleRecentsRequest displayId=0 deskActive=false
+08-31 07:14:32.305  2831  2848 V WindowManagerShell: Directly starting a new transition type=START_RECENTS_TRANSITION(FIRST_CUSTOM+21) wct=WindowContainerTransaction { changes= {} hops= [{pendingIntent: options=Bundle[{android.activity.splashScreenStyle=-1, android.activity.sourceInfo=android.app.ActivityOptions$SourceInfo@50b25ab, android.pendingIntent.backgroundActivityAllowed=3, android.activity.launchDisplayId=0, android:activity.animAbortListener=null, android.activity.transientLaunch=true}]}, {setAnimationDelegate:  caller=android.os.BinderProxy@c0d33c4}] errorCallbackToken=null taskFragmentOrganizer=null } handler=com.android.wm.shell.recents.RecentsTransitionHandler@4fcf2ad
+08-31 07:14:32.305  2447 19258 V WindowManager: deferTransitionReady deferReadyDepth=1 stack=com.android.server.wm.WindowOrganizerController.applyTransaction:660 com.android.server.wm.WindowOrganizerController.applyTransaction:638 com.android.server.wm.WindowOrganizerController.lambda$startTransition$3:379 com.android.server.wm.WindowOrganizerController.$r8$lambda$PHnU0rj5Bcvaq0dL-Wi7kOJt8bo:0 com.android.server.wm.WindowOrganizerController$$ExternalSyntheticLambda5.onCollectStarted:0 
+08-31 07:14:32.306  1514  1514 I android.hardware.power-service-qti: Power setMode: 5 to: 1
+08-31 07:14:32.306  2447  2520 V GameManagerService: Game power mode OFF (first non-game in foreground)
+08-31 07:14:32.306  1514  1514 E QTI PowerHAL: Failed to acquire lock.
+08-31 07:14:32.306  1514  1514 E QTI PowerHAL: Failed process_boost for boost_handle
+08-31 07:14:32.306  1514  1514 E QTI PowerHAL: Failed to perform launch boost
+08-31 07:14:32.307  2447  2781 D BackgroundInstallControlService: Package event received: 0
+08-31 07:14:32.307  2447 19258 E WindowOrganizerController: Not a valid process token: android.os.BinderProxy@f819d0a
+08-31 07:14:32.307  2447 19258 V WindowManager: continueTransitionReady deferReadyDepth=0 stack=com.android.server.wm.WindowOrganizerController.applyTransaction:801 com.android.server.wm.WindowOrganizerController.applyTransaction:638 com.android.server.wm.WindowOrganizerController.lambda$startTransition$3:379 com.android.server.wm.WindowOrganizerController.$r8$lambda$PHnU0rj5Bcvaq0dL-Wi7kOJt8bo:0 com.android.server.wm.WindowOrganizerController$$ExternalSyntheticLambda5.onCollectStarted:0 
+08-31 07:14:32.308 27299 27299 D VRI[GoogleDiscoverWindow]: visibilityChanged oldVisibility=false newVisibility=true
+08-31 07:14:32.308  2831  2848 V ShellRecents: [105736097] RecentsController.setTransition: id=android.os.BinderProxy@87b5408
+08-31 07:14:32.309  3141  3141 D ViewRootImpl: Skipping stats log for color mode
+08-31 07:14:32.309  3141  3141 D BaseActivity: Launcher flags updated: [state_started] +[state_started]
+08-31 07:14:32.309  1696  2120 I libbinder.BpBinder: onLastStrongRef automatically unlinking death recipients for descriptor: '(not cached)'
+08-31 07:14:32.309  3141  3141 D BaseActivity: Launcher flags updated: [state_started|state_resumed|state_user_active] +[state_resumed|state_user_active]
+08-31 07:14:32.309  3141  3141 D BaseActivity: Launcher flags updated: [state_started|state_resumed|state_deferred_resumed|state_user_active] +[state_deferred_resumed]
+08-31 07:14:32.309  3141  3141 D StatsLog: LAUNCHER_ONRESUME
+08-31 07:14:32.309  2447  2781 D BackgroundInstallControlService: Package event received: 0
+08-31 07:14:32.309  2447  2781 D BackgroundInstallControlService: Package event received: 0
+08-31 07:14:32.310  2831  2848 D WindowManagerShell: setLauncherKeepClearAreaHeight: visible=true, height=263
+08-31 07:14:32.310  3141  3165 D QuickstepModelDelegate: notifyAppTargetEvent action=1 launchLocation=workspace/0/[-1,-1]/[1,1]
+08-31 07:14:32.310  1579  1653 E ANDR-PERF-UTIL: ANDR-PERF-UTIL: save_node_val() 366: Failed to read /sys/class/mmc_host/mmc0/clk_scaling/enable
+08-31 07:14:32.310  1579  1653 E ANDR-PERF-OPTSHANDLER: ANDR-PERF-OPTSHANDLER: modify_sysfsnode() 1095: Failed to read /sys/class/mmc_host/mmc0/clk_scaling/enable
+08-31 07:14:32.310  1579  1653 E ANDR-PERF-RESOURCEQS: ANDR-PERF-RESOURCEQS: AddAndApply() 167: Failed to apply optimization [11, 4]
+08-31 07:14:32.313  2447  2781 D BackgroundInstallControlService: Package event received: 0
+08-31 07:14:32.313  2447  2781 D BackgroundInstallControlService: Package event received: 0
+--------- beginning of kernel
+08-31 07:14:31.920 19863 19863 I binder_alloc: 25522: pid 2045 spamming oneway? 126 buffers allocated for a total size of 12096
+08-31 07:14:32.317 27299 27299 I cfjr    : (REDACTED) onApplyWindowInsets: systemWindowInsets=%s
+08-31 07:14:32.317 27299 27299 I cfjr    : (REDACTED) onApplyWindowInsets: systemWindowInsets=%s
+08-31 07:14:32.318  3141  3141 D VRI[QuickstepLauncher]: WindowInsets changed: statusBars:null 
+08-31 07:14:32.319 27299 25928 W qdgralloc: getInterlacedFlag: getMetaData returned 3, defaulting to interlaced_flag = 0
+08-31 07:14:32.320 27299 27299 I cfqk    : onStart
+08-31 07:14:32.320 27299 27299 I cfhw    : onStart
+08-31 07:14:32.320  3141  3141 D ShortcutAndWidgetContainer: appWidgetScale - [x,y]: [1.0,1.0]
+08-31 07:14:32.320  3141  3141 D NavigableAppWidgetHostView: updateScale - [fitScale,bounceScale]: [1.0,1.0]
+08-31 07:14:32.320  3141  3141 D ShortcutAndWidgetContainer: appWidgetScale - [x,y]: [1.0,1.0]
+08-31 07:14:32.320  3141  3141 D NavigableAppWidgetHostView: updateScale - [fitScale,bounceScale]: [1.0,1.0]
+08-31 07:14:32.320  3141  3141 D BaseDepthController: setSurface:
+08-31 07:14:32.320  3141  3141 D BaseDepthController: 	mWaitingOnSurfaceValidity: false
+08-31 07:14:32.320  3141  3141 D BaseDepthController: 	mBaseSurface: Surface(name=com.android.launcher3/com.android.launcher3.uioverrides.QuickstepLauncher#13007)/@0xbb2b394
+08-31 07:14:32.320  3141  3141 V BaseDepthController: Applying blur: 0 to Surface(name=com.android.launcher3/com.android.launcher3.uioverrides.QuickstepLauncher#13007)/@0xbb2b394 applyImmediately: false
+08-31 07:14:32.321  3141  3141 D BaseDepthController: shouldBlurWorkspace: false targetState: Normal currentStableState: Normal mCurrentBlur: 0 mLauncher.getDepthBlurTargets(): [com.android.launcher3.Workspace{645be3d V.ED..... ......ID 0,0-3000,2120 #7f090411 app:id/workspace}, com.android.launcher3.Hotseat{bd6c632 V.ED..... .......D 0,1857-3000,2120 #7f0901b7 app:id/hotseat}]
+08-31 07:14:32.321 27299 27299 I cdfi    : (REDACTED) [%s] onStart()
+08-31 07:14:32.321 27299 27299 I cdhw    : Reloading theme data
+08-31 07:14:32.321 27299 27299 E NetworkErrorMessage: (REDACTED) Invalid connectivity state: %s
+08-31 07:14:32.321 27299 27299 I cfqk    : onResume
+08-31 07:14:32.321 27299 27299 W dxpw    : missing event name
+08-31 07:14:32.321  3141  3183 W qdgralloc: getInterlacedFlag: getMetaData returned 3, defaulting to interlaced_flag = 0
+08-31 07:14:32.321 27299 27299 I cfhw    : onResume
+08-31 07:14:32.322  3141  3141 D b/417220811: invalidateLoadedTasks - previous requestLoadId: 1556
+08-31 07:14:32.322  3141  3141 V TaskbarRecentAppsController: reloadRecentTasksIfNeeded: load recents tasks
+08-31 07:14:32.322  3141  3141 D b/417220811: Task id: 515, thumbnailData: null, isLocked: false
+08-31 07:14:32.322  3141  3141 D TaskThumbnailView: [TaskThumbnailView@5d50139] taskId: 515 - uiState changed from: Uninitialized to: BackgroundOnly(backgroundColor=-16777216)
+08-31 07:14:32.322  2831  3239 D WallpaperService: onVisibilityChanged(true): com.android.systemui.wallpapers.ImageWallpaper$CanvasEngine@db67c51
+08-31 07:14:32.324  3141  3163 D b/417220811: loadTasksInBackground - isDeviceLocked(0): false
+08-31 07:14:32.324  3141  3163 D b/417220811: getTasks - loadTasksInBackground: 1557
+08-31 07:14:32.324  3141  3141 D b/417220811: getTasks - updating mResultsUi: 1557
+08-31 07:14:32.325  3141  3149 W System  : A resource failed to call release. 
+08-31 07:14:32.325  3141  3149 W System  : A resource failed to call release. 
+08-31 07:14:32.325  3141  3149 W System  : A resource failed to call release. 
+08-31 07:14:32.325  3141  3149 W System  : A resource failed to call release. 
+08-31 07:14:32.325  3141  3149 W System  : A resource failed to call release. 
+08-31 07:14:32.325  3141  3149 W System  : A resource failed to call release. 
+08-31 07:14:32.325  3141  3149 W System  : A resource failed to call HardwareBuffer.close. 
+08-31 07:14:32.326  2831  2848 D Bubbles : onLocusVisibilityChanged=Overview|DISABLED visible=true taskId=1
+08-31 07:14:32.326 27299 27304 W chbox:googleapp: Missing inline cache for void cfpt.run()
+08-31 07:14:32.326  2831  2953 V WindowManagerShell: onTransitionReady(transaction=10509785198307)
+08-31 07:14:32.326  2831  2848 V WindowManagerShell: onTransitionReady (#1086) android.os.BinderProxy@87b5408: {id=1086 t=FIRST_CUSTOM+21 f=0x80 trk=0 r=[0@Point(0, 0)] c=[
+08-31 07:14:32.326  2831  2848 V WindowManagerShell:         {m=TO_FRONT f=SHOW_WALLPAPER|MOVE_TO_TOP leash=Surface(name=Task=1#44)/@0xc0e5dc6 sb=Rect(0, 0 - 3000, 2120) eb=Rect(0, 0 - 3000, 2120) epz=Point(3000, 2120) d=0 taskParent=-1 winMode=1 userId=0},
+08-31 07:14:32.326  2831  2848 V WindowManagerShell:         {m=TO_BACK f=NONE leash=Surface(name=Task=515#12986)/@0xfd47187 sb=Rect(0, 0 - 3000, 2120) eb=Rect(0, 0 - 3000, 2120) epz=Point(3000, 2120) d=0 taskParent=-1 winMode=1 userId=0},
+08-31 07:14:32.326  2831  2848 V WindowManagerShell:         {m=TO_FRONT f=IS_WALLPAPER leash=Surface(name=WallpaperWindowToken{501d257}#78)/@0xd75a8b4 sb=Rect(0, 0 - 3000, 2120) eb=Rect(0, 0 - 3000, 2120) epz=Point(3000, 2120) d=0}
+08-31 07:14:32.326  2831  2848 V WindowManagerShell:     ]}
+08-31 07:14:32.326  2831  2848 V ShellDesktopMode: DesktopModeLogger: taskInfo map after processing changes 0
+08-31 07:14:32.326  2447  2519 V WindowManager: Sent Transition (#1086) createdAt=08-31 07:14:32.305
+08-31 07:14:32.326  2447  2519 V WindowManager:     startWCT=WindowContainerTransaction { changes= {} hops= [{pendingIntent: options=Bundle[{android.activity.splashScreenStyle=-1, android.activity.sourceInfo=android.app.ActivityOptions$SourceInfo@fbaff6, android.pendingIntent.backgroundActivityAllowed=3, android.activity.launchDisplayId=0, android:activity.animAbortListener=null, android.activity.transientLaunch=true}]}, {setAnimationDelegate:  caller=android.os.BinderProxy@f819d0a}] errorCallbackToken=null taskFragmentOrganizer=null }
+08-31 07:14:32.326  2447  2519 V WindowManager:     info={id=1086 t=FIRST_CUSTOM+21 f=0x80 trk=0 r=[0@Point(0, 0)] c=[
+08-31 07:14:32.326  2447  2519 V WindowManager:         {WCT{RemoteToken{390ab83 Task{df67b7a #1 type=home}}} m=TO_FRONT f=SHOW_WALLPAPER|MOVE_TO_TOP leash=Surface(name=Task=1#44)/@0x42836d9 sb=Rect(0, 0 - 3000, 2120) eb=Rect(0, 0 - 3000, 2120) epz=Point(3000, 2120) d=0 taskParent=-1 winMode=1 userId=0},
+08-31 07:14:32.326  2447  2519 V WindowManager:         {WCT{RemoteToken{7374d53 Task{8fac106 #515 type=standard A=10243:com.zenithblue.sambas3}}} m=TO_BACK f=NONE leash=Surface(name=Task=515#12986)/@0xd17738d sb=Rect(0, 0 - 3000, 2120) eb=Rect(0, 0 - 3000, 2120) epz=Point(3000, 2120) d=0 taskParent=-1 winMode=1 userId=0},
+08-31 07:14:32.326  2447  2519 V WindowManager:         {m=TO_FRONT f=IS_WALLPAPER leash=Surface(name=WallpaperWindowToken{501d257}#78)/@0xd394ea3 sb=Rect(0, 0 - 3000, 2120) eb=Rect(0, 0 - 3000, 2120) epz=Point(3000, 2120) d=0}
+08-31 07:14:32.326  2447  2519 V WindowManager:     ]}
+08-31 07:14:32.326  2831  2848 D ShellDesktopMode: DesktopTaskChangeListener: onTaskMovingToFront for taskId=1, displayId=0 - desktop not supported
+08-31 07:14:32.326  2831  2848 V WindowManagerShell: Playing animation for (#1086) android.os.BinderProxy@87b5408@0
+08-31 07:14:32.326  2831  2848 V WindowManagerShell:  try firstHandler com.android.wm.shell.recents.RecentsTransitionHandler@4fcf2ad
+08-31 07:14:32.326  2831  2848 V ShellRecents: [105736097] RecentsController.start
+08-31 07:14:32.327  2447  2781 D BackgroundInstallControlService: Package event received: 0
+08-31 07:14:32.327  2831  2848 V ShellRecents:   hiding home taskId=1
+08-31 07:14:32.327  2831  2848 V ShellRecents:   adding pausing leaf taskId=515 at layer=8
+08-31 07:14:32.327  2831  2848 V ShellRecents: Applying transaction=10509785198307
+08-31 07:14:32.328  2447  2781 D BackgroundInstallControlService: Package event received: 0
+08-31 07:14:32.328  2447  2781 D BackgroundInstallControlService: Package event received: 0
+08-31 07:14:32.328  2447  2781 D BackgroundInstallControlService: Package event received: 0
+08-31 07:14:32.328  2447  2781 D BackgroundInstallControlService: Package event received: 0
+08-31 07:14:32.328  2447  2781 D BackgroundInstallControlService: Package event received: 0
+08-31 07:14:32.328  2447  2781 D BackgroundInstallControlService: Package event received: 0
+08-31 07:14:32.328  2447  2781 D BackgroundInstallControlService: Package event received: 0
+08-31 07:14:32.328  2447  2781 D BackgroundInstallControlService: Package event received: 0
+08-31 07:14:32.328  2447  2781 D BackgroundInstallControlService: Package event received: 0
+08-31 07:14:32.328  2447  2781 D BackgroundInstallControlService: Package event received: 0
+08-31 07:14:32.328  2447  2781 D BackgroundInstallControlService: Package event received: 0
+08-31 07:14:32.328  2447  2781 D BackgroundInstallControlService: Package event received: 0
+08-31 07:14:32.328  2447  2781 D BackgroundInstallControlService: Package event received: 0
+08-31 07:14:32.328  2447  2781 D BackgroundInstallControlService: Package event received: 0
+08-31 07:14:32.328  2447  2781 D BackgroundInstallControlService: Package event received: 0
+08-31 07:14:32.328  2447  2781 D BackgroundInstallControlService: Package event received: 0
+08-31 07:14:32.328  2447  2781 D BackgroundInstallControlService: Package event received: 0
+08-31 07:14:32.328  2447  2781 D BackgroundInstallControlService: Package event received: 0
+08-31 07:14:32.328  2831  2848 V ShellRecents: No matching remote found to takeover (#1086)
+08-31 07:14:32.328  2447  2781 D BackgroundInstallControlService: Package event received: 0
+08-31 07:14:32.328  2447  2781 D BackgroundInstallControlService: Package event received: 0
+08-31 07:14:32.328  2831  2848 V ShellSplitScreen: getSplitBoundsForTaskId: expected split bounds for taskId=515 but not found
+08-31 07:14:32.328  2831  2848 V ShellRecents: [105736097] RecentsController.start: calling onAnimationStart with 2 apps
+08-31 07:14:32.329  2447  2781 D BackgroundInstallControlService: Package event received: 0
+08-31 07:14:32.329  2447  2781 D BackgroundInstallControlService: Package event received: 0
+08-31 07:14:32.329  2447  3140 D ConnectivityService: requestNetwork for uid/pid:10137/2831 asUid: 10144 activeRequest: null callbackRequest: 3035 [NetworkRequest [ REQUEST id=3036, [ Capabilities: INTERNET&NOT_RESTRICTED&TRUSTED&NOT_VCN_MANAGED&NOT_BANDWIDTH_CONSTRAINED Uid: 10144 RequestorUid: 10137 RequestorPkg: com.android.systemui UnderlyingNetworks: Null] ]] callback flags: 0 order: 2147483647 isUidTracked: false declaredMethods: AVAIL|BLK
+08-31 07:14:32.329  2447  2726 D WifiNetworkFactory: got request NetworkRequest [ REQUEST id=3036, [ Capabilities: INTERNET&NOT_RESTRICTED&TRUSTED&NOT_VCN_MANAGED&NOT_BANDWIDTH_CONSTRAINED Uid: 10144 RequestorUid: 10137 RequestorPkg: com.android.systemui UnderlyingNetworks: Null] ]
+08-31 07:14:32.329  2447  2726 V WifiNetworkFactory: Accepted network request NetworkRequest [ REQUEST id=3036, [ Capabilities: INTERNET&NOT_RESTRICTED&TRUSTED&NOT_VCN_MANAGED&NOT_BANDWIDTH_CONSTRAINED Uid: 10144 RequestorUid: 10137 RequestorPkg: com.android.systemui UnderlyingNetworks: Null] ]
+08-31 07:14:32.329  2447  2726 D UntrustedWifiNetworkFactory: got request NetworkRequest [ REQUEST id=3036, [ Capabilities: INTERNET&NOT_RESTRICTED&TRUSTED&NOT_VCN_MANAGED&NOT_BANDWIDTH_CONSTRAINED Uid: 10144 RequestorUid: 10137 RequestorPkg: com.android.systemui UnderlyingNetworks: Null] ]
+08-31 07:14:32.329  2447  2734 D ConnectivityService: NetReassign [3036 : null → 111] [c 0] [a 0] [i 1]
+08-31 07:14:32.330  2447  2726 D OemPaidWifiNetworkFactory: got request NetworkRequest [ REQUEST id=3036, [ Capabilities: INTERNET&NOT_RESTRICTED&TRUSTED&NOT_VCN_MANAGED&NOT_BANDWIDTH_CONSTRAINED Uid: 10144 RequestorUid: 10137 RequestorPkg: com.android.systemui UnderlyingNetworks: Null] ]
+08-31 07:14:32.330  2447  2726 D MultiInternetWifiNetworkFactory: got request NetworkRequest [ REQUEST id=3036, [ Capabilities: INTERNET&NOT_RESTRICTED&TRUSTED&NOT_VCN_MANAGED&NOT_BANDWIDTH_CONSTRAINED Uid: 10144 RequestorUid: 10137 RequestorPkg: com.android.systemui UnderlyingNetworks: Null] ]
+08-31 07:14:32.331  2831  2848 V WindowManagerShell: PipDesktopState: Recents transition state changed: TRANSITION_STATE_ANIMATING
+08-31 07:14:32.331  2831  2848 V ShellDesktopMode: DesktopTasksController: Recents transition state changed: TRANSITION_STATE_ANIMATING
+08-31 07:14:32.332  2447  4460 W ActivityTaskManager: setRunningRemoteTransition: no process for null
+08-31 07:14:32.332  2831  2848 V WindowManagerShell:  animated by firstHandler
+08-31 07:14:32.332  3141  3141 D OtherActivityInputConsumer: FinishImmediatelyHandler: queuing callback
+08-31 07:14:32.332  3141  3141 D OtherActivityInputConsumer: FinishImmediatelyHandler: running callback
+08-31 07:14:32.332  2831  2848 V ShellRecents: [105736097] RecentsController.finishInner: toHome=false userLeave=false willFinishToHome=false state=0 hasPausingTasks=true reason=requested
+08-31 07:14:32.332  2831  2848 V ShellRecents:   returning to app
+08-31 07:14:32.332  2831  2848 V ShellRecents:   reorder task#515 to top
+08-31 07:14:32.332  2831  2848 V ShellRecents: [105736097] RecentsController.finishInner: Queuing TRANSIT_END_RECENTS_TRANSITION
+08-31 07:14:32.332  2831  2848 V WindowManagerShell: Directly starting a new transition type=END_RECENTS_TRANSITION(FIRST_CUSTOM+22) wct=WindowContainerTransaction { changes= {} hops= [{reorder: android.os.BinderProxy@76bd57c to top}, {restoreTransientOrder: container=android.os.BinderProxy@1f46d48 reparent=null mToTop=false mWindowingMode=null mActivityType=null}] errorCallbackToken=null taskFragmentOrganizer=null } handler=com.android.wm.shell.recents.RecentsTransitionHandler$RecentsController$PendingFinishTransitionHandler@f00a7f
+08-31 07:14:32.333  2447  3140 V WindowManager: deferTransitionReady deferReadyDepth=1 stack=com.android.server.wm.WindowOrganizerController.applyTransaction:660 com.android.server.wm.WindowOrganizerController.applyTransaction:638 com.android.server.wm.WindowOrganizerController.lambda$startTransition$3:379 com.android.server.wm.WindowOrganizerController.$r8$lambda$PHnU0rj5Bcvaq0dL-Wi7kOJt8bo:0 com.android.server.wm.WindowOrganizerController$$ExternalSyntheticLambda5.onCollectStarted:0 
+08-31 07:14:32.333  1696  2615 I libbinder.BpBinder: onLastStrongRef automatically unlinking death recipients for descriptor: '(not cached)'
+08-31 07:14:32.333  2447  3140 V WindowManager: continueTransitionReady deferReadyDepth=0 stack=com.android.server.wm.WindowOrganizerController.applyTransaction:801 com.android.server.wm.WindowOrganizerController.applyTransaction:638 com.android.server.wm.WindowOrganizerController.lambda$startTransition$3:379 com.android.server.wm.WindowOrganizerController.$r8$lambda$PHnU0rj5Bcvaq0dL-Wi7kOJt8bo:0 com.android.server.wm.WindowOrganizerController$$ExternalSyntheticLambda5.onCollectStarted:0 
+08-31 07:14:32.335  2447  2519 V WindowManager: Sent Transition (#1087) createdAt=08-31 07:14:32.332
+08-31 07:14:32.335  2447  2519 V WindowManager:     startWCT=WindowContainerTransaction { changes= {} hops= [{reorder: RemoteToken{7374d53 Task{8fac106 #515 type=standard A=10243:com.zenithblue.sambas3}} to top}, {restoreTransientOrder: container=RemoteToken{390ab83 Task{df67b7a #1 type=home}} reparent=null mToTop=false mWindowingMode=null mActivityType=null}] errorCallbackToken=null taskFragmentOrganizer=null }
+08-31 07:14:32.335  2447  2519 V WindowManager:     info={id=1087 t=FIRST_CUSTOM+22 f=0x0 trk=0 r=[0@Point(0, 0)] c=[
+08-31 07:14:32.335  2447  2519 V WindowManager:         {WCT{RemoteToken{7374d53 Task{8fac106 #515 type=standard A=10243:com.zenithblue.sambas3}}} m=CHANGE f=MOVE_TO_TOP leash=Surface(name=Task=515#12986)/@0xd17738d sb=Rect(0, 0 - 3000, 2120) eb=Rect(0, 0 - 3000, 2120) epz=Point(3000, 2120) d=0 taskParent=-1 winMode=1 userId=0},
+08-31 07:14:32.335  2447  2519 V WindowManager:         {WCT{RemoteToken{390ab83 Task{df67b7a #1 type=home}}} m=TO_BACK f=SHOW_WALLPAPER leash=Surface(name=Task=1#44)/@0x42836d9 sb=Rect(0, 0 - 3000, 2120) eb=Rect(0, 0 - 3000, 2120) epz=Point(3000, 2120) d=0 taskParent=-1 winMode=1 userId=0},
+08-31 07:14:32.335  2447  2519 V WindowManager:         {m=TO_BACK f=IS_WALLPAPER leash=Surface(name=WallpaperWindowToken{501d257}#78)/@0xd394ea3 sb=Rect(0, 0 - 3000, 2120) eb=Rect(0, 0 - 3000, 2120) epz=Point(3000, 2120) d=0}
+08-31 07:14:32.335  2447  2519 V WindowManager:     ]}
+08-31 07:14:32.335  2447  3140 W Transition: #%d: Condition met too late, already in state=2: {start WCT appliedIGNORED}
+08-31 07:14:32.335  2831  2953 V WindowManagerShell: onTransitionReady(transaction=10509785198325)
+08-31 07:14:32.335  2831  2848 V WindowManagerShell: onTransitionReady (#1087) android.os.BinderProxy@8afcf38: {id=1087 t=FIRST_CUSTOM+22 f=0x0 trk=0 r=[0@Point(0, 0)] c=[
+08-31 07:14:32.335  2831  2848 V WindowManagerShell:         {m=CHANGE f=MOVE_TO_TOP leash=Surface(name=Task=515#12986)/@0x6a15a4c sb=Rect(0, 0 - 3000, 2120) eb=Rect(0, 0 - 3000, 2120) epz=Point(3000, 2120) d=0 taskParent=-1 winMode=1 userId=0},
+08-31 07:14:32.335  2831  2848 V WindowManagerShell:         {m=TO_BACK f=SHOW_WALLPAPER leash=Surface(name=Task=1#44)/@0xefeca95 sb=Rect(0, 0 - 3000, 2120) eb=Rect(0, 0 - 3000, 2120) epz=Point(3000, 2120) d=0 taskParent=-1 winMode=1 userId=0},
+08-31 07:14:32.335  2831  2848 V WindowManagerShell:         {m=TO_BACK f=IS_WALLPAPER leash=Surface(name=WallpaperWindowToken{501d257}#78)/@0x873d7aa sb=Rect(0, 0 - 3000, 2120) eb=Rect(0, 0 - 3000, 2120) epz=Point(3000, 2120) d=0}
+08-31 07:14:32.335  2831  2848 V WindowManagerShell:     ]}
+08-31 07:14:32.335  2831  2848 V ShellDesktopMode: DesktopModeLogger: taskInfo map after processing changes 0
+08-31 07:14:32.336  2831  2848 D ShellDesktopMode: DesktopTaskChangeListener: onTaskChanging for taskId=515, displayId=0 - desktop not supported
+08-31 07:14:32.336  2831  2848 V WindowManagerShell: Transition (#1087) android.os.BinderProxy@8afcf38@0 ready while (#1086) android.os.BinderProxy@87b5408@0 is still animating. Notify the animating transition in case they can be merged
+08-31 07:14:32.336  2831  2848 V ShellRecents: [105736097] RecentsController.merge: TRANSIT_END_RECENTS_TRANSITION
+08-31 07:14:32.336  2831  2848 V ShellRecents: [105736097] RecentsController.merge: consuming merge
+08-31 07:14:32.336  2831  2848 V WindowManagerShell: Transition was merged: (#1087) android.os.BinderProxy@8afcf38@0 into (#1086) android.os.BinderProxy@87b5408@0
+08-31 07:14:32.336  2831  2848 V ShellRecents: [105736097] PendingFinishTransitionHandler.onTransitionConsumed: Consumed pending finish transition
+08-31 07:14:32.336  2831  2848 V ShellRecents: [105736097] RecentsController.finishInner: Completing finish
+08-31 07:14:32.336  2831  2848 V ShellRecents: [105736097] RecentsController.cleanup
+08-31 07:14:32.336  2831  2848 V WindowManagerShell: PipDesktopState: Recents transition state changed: TRANSITION_STATE_NOT_RUNNING
+08-31 07:14:32.336  2831  2848 V ShellDesktopMode: DesktopTasksController: Recents transition state changed: TRANSITION_STATE_NOT_RUNNING
+08-31 07:14:32.336  2831  2848 D ShellDesktopMode: DesktopTaskChangeListener: onTaskMovingToBack for taskId=1, displayId=0 - desktop not supported
+08-31 07:14:32.336  2831  2848 V WindowManagerShell: Transition animation finished (aborted=false), notifying core (#1086) android.os.BinderProxy@87b5408@0
+08-31 07:14:32.337  2447  3140 D ConnectivityService: requestNetwork for uid/pid:10137/2831 asUid: 10243 activeRequest: null callbackRequest: 3037 [NetworkRequest [ REQUEST id=3038, [ Capabilities: INTERNET&NOT_RESTRICTED&TRUSTED&NOT_VCN_MANAGED&NOT_BANDWIDTH_CONSTRAINED Uid: 10243 RequestorUid: 10137 RequestorPkg: com.android.systemui UnderlyingNetworks: Null] ]] callback flags: 0 order: 2147483647 isUidTracked: false declaredMethods: AVAIL|BLK
+08-31 07:14:32.337  2447  2519 V WindowManager: Finish Transition (#1086): created at 08-31 07:14:32.305 collect-started=0.06ms started=0.072ms ready=2.312ms sent=19.677ms commit=5.483ms finished=32.08ms
+08-31 07:14:32.337  2447  2734 D ConnectivityService: NetReassign [3038 : null → 111] [c 0] [a 0] [i 1]
+08-31 07:14:32.338  1514  1514 I android.hardware.power-service-qti: Power setMode: 5 to: 0
+08-31 07:14:32.338  3141  3141 D VRI[QuickstepLauncher]: visibilityChanged oldVisibility=true newVisibility=false
+08-31 07:14:32.338 27299 27299 D VRI[GoogleDiscoverWindow]: visibilityChanged oldVisibility=true newVisibility=false
+08-31 07:14:32.338  2831  3239 D WallpaperService: onVisibilityChanged(false): com.android.systemui.wallpapers.ImageWallpaper$CanvasEngine@db67c51
+08-31 07:14:32.338  2447  2519 V WindowManager: Finish Transition (#1087): created at 08-31 07:14:32.332 collect-started=0.029ms started=0.038ms ready=0.959ms sent=1.662ms commit=2.716ms finished=5.712ms
+08-31 07:14:32.339  2831  2848 V WindowManagerShell: Track 0 became idle
+08-31 07:14:32.339  2831  2848 V WindowManagerShell: All active transition animations finished
+08-31 07:14:32.339  2831  2848 V ShellRecents: [105736097] RecentsController.finishInner: calling finish callback
+08-31 07:14:32.339  2831  2848 V WindowManagerShell: Track 0 became idle
+08-31 07:14:32.339  2831  2848 V WindowManagerShell: All active transition animations finished
+08-31 07:14:32.339  2447  2726 D WifiNetworkFactory: got request NetworkRequest [ REQUEST id=3038, [ Capabilities: INTERNET&NOT_RESTRICTED&TRUSTED&NOT_VCN_MANAGED&NOT_BANDWIDTH_CONSTRAINED Uid: 10243 RequestorUid: 10137 RequestorPkg: com.android.systemui UnderlyingNetworks: Null] ]
+08-31 07:14:31.943 18787 18787 I [LCD][0][INFO][dsi_display_status_check_error_flag:1212] [ESD]: first read: master=0 slave=0
+08-31 07:14:32.339  2447  2726 V WifiNetworkFactory: Accepted network request NetworkRequest [ REQUEST id=3038, [ Capabilities: INTERNET&NOT_RESTRICTED&TRUSTED&NOT_VCN_MANAGED&NOT_BANDWIDTH_CONSTRAINED Uid: 10243 RequestorUid: 10137 RequestorPkg: com.android.systemui UnderlyingNetworks: Null] ]
+08-31 07:14:32.339  2447  2726 D UntrustedWifiNetworkFactory: got request NetworkRequest [ REQUEST id=3038, [ Capabilities: INTERNET&NOT_RESTRICTED&TRUSTED&NOT_VCN_MANAGED&NOT_BANDWIDTH_CONSTRAINED Uid: 10243 RequestorUid: 10137 RequestorPkg: com.android.systemui UnderlyingNetworks: Null] ]
+08-31 07:14:32.339  2447  2726 D OemPaidWifiNetworkFactory: got request NetworkRequest [ REQUEST id=3038, [ Capabilities: INTERNET&NOT_RESTRICTED&TRUSTED&NOT_VCN_MANAGED&NOT_BANDWIDTH_CONSTRAINED Uid: 10243 RequestorUid: 10137 RequestorPkg: com.android.systemui UnderlyingNetworks: Null] ]
+08-31 07:14:32.339  2447  2726 D MultiInternetWifiNetworkFactory: got request NetworkRequest [ REQUEST id=3038, [ Capabilities: INTERNET&NOT_RESTRICTED&TRUSTED&NOT_VCN_MANAGED&NOT_BANDWIDTH_CONSTRAINED Uid: 10243 RequestorUid: 10137 RequestorPkg: com.android.systemui UnderlyingNetworks: Null] ]
+08-31 07:14:32.342  2831  2848 D Bubbles : onLocusVisibilityChanged=Overview|DISABLED visible=false taskId=1
+08-31 07:14:32.352  3141  3141 D BaseActivity: Launcher flags updated: [state_started|state_resumed|state_deferred_resumed] -[state_user_active]
+08-31 07:14:32.353  3141  3141 D BaseActivity: Launcher flags updated: [state_started] -[state_resumed|state_deferred_resumed]
+08-31 07:14:32.353  3141  3141 W SplitSelectStateCtor: Missing session instanceIds
+08-31 07:14:32.353  3141  3141 D StatsLog: LAUNCHER_SPLIT_SELECTION_EXIT_INTERRUPTED
+08-31 07:14:32.353  2831  2848 D WindowManagerShell: setLauncherKeepClearAreaHeight: visible=false, height=263
+08-31 07:14:32.354  2447  2781 D BackgroundInstallControlService: Package event received: 0
+08-31 07:14:32.354  3141  3141 D b/417220811: invalidateLoadedTasks - previous requestLoadId: 1557
+08-31 07:14:32.354  3141  3141 V TaskbarRecentAppsController: reloadRecentTasksIfNeeded: load recents tasks
+08-31 07:14:32.355  2447  2520 V GameManagerService: Game power mode ON (only games in foreground)
+08-31 07:14:32.355  3141  3163 D b/417220811: loadTasksInBackground - isDeviceLocked(0): false
+08-31 07:14:32.355  3141  3163 D b/417220811: getTasks - loadTasksInBackground: 1558
+08-31 07:14:32.355  3141  3141 D BaseActivity: Launcher flags updated: [] -[state_started]
+08-31 07:14:32.355  3141  3141 D BaseDepthController: setSurface:
+08-31 07:14:32.355  3141  3141 D BaseDepthController: 	mWaitingOnSurfaceValidity: false
+08-31 07:14:32.355  3141  3141 D BaseDepthController: 	mBaseSurface: null
+08-31 07:14:32.356  3141  3141 D BaseDepthController: mSurface is null and mCurrentBlur is: 0
+08-31 07:14:32.356  3141  3141 D LauncherStateManager: StateManager.goToState: fromState: Normal, toState: Normal, partial trace:
+08-31 07:14:32.356  3141  3141 D LauncherStateManager: 	at com.android.launcher3.statemanager.StateManager.moveToRestState(StateManager.java:469)
+08-31 07:14:32.356  3141  3141 D LauncherStateManager: 	at com.android.launcher3.statemanager.StateManager.moveToRestState(StateManager.java:460)
+08-31 07:14:32.356  3141  3141 D LauncherStateManager: 	at com.android.launcher3.statemanager.StatefulActivity.onStop(StatefulActivity.java:120)
+08-31 07:14:32.356  3141  3141 D LauncherStateManager: StateManager.onRepeatStateSetAborted: state: Normal
+08-31 07:14:31.963  2133  2133 I binder_alloc: 25522: pid 2045 spamming oneway? 127 buffers allocated for a total size of 12192
+08-31 07:14:32.357  3141  3141 D ActivityContext: hideKeyboard
+08-31 07:14:32.357  3141  3141 D ActivityContext: isImeShown: false
+08-31 07:14:32.357  3141  3141 D StatsLog: LAUNCHER_ONSTOP
+08-31 07:14:32.357 27299 27299 I cfqk    : onPause
+08-31 07:14:32.357  3141  3141 D b/417220811: getTasks - updating mResultsUi: 1558
+08-31 07:14:32.357 27299 27299 I cfhw    : onPause
+08-31 07:14:32.358 27299 27299 W dxpw    : measuring already stopped.
+08-31 07:14:32.358 27299 27299 I cfqk    : onStop
+08-31 07:14:32.358  2447  2781 D BackgroundInstallControlService: Package event received: 0
+08-31 07:14:32.359 27299 27299 I cfhw    : onStop
+08-31 07:14:32.454  3141  3141 D b/417220811: invalidateLoadedTasks - previous requestLoadId: 1558
+08-31 07:14:32.454  3141  3141 V TaskbarRecentAppsController: reloadRecentTasksIfNeeded: load recents tasks
+08-31 07:14:32.455  3141  3163 D b/417220811: loadTasksInBackground - isDeviceLocked(0): false
+08-31 07:14:32.455  3141  3163 D b/417220811: getTasks - loadTasksInBackground: 1559
+08-31 07:14:32.455  3141  3141 D b/417220811: getTasks - updating mResultsUi: 1559
+08-31 07:14:32.596 27566 11120 I NearbyMediums: Found Fast Ble Advertisements :
+08-31 07:14:32.596 27566 11120 I NearbyMediums: BleAdvertisement { version=2, socketVersion=2, isFast=true, serviceIdHash=null, data=[ 0x23 0x52 0x33 0x57 0x4f 0x11 0x32 0x01 0x16 0x13 0x95 0x5a 0x89 0x90 0xfc 0x76 0x60 0x8a 0x12 0xa5 0x11 0x79 0x95 ], deviceToken=[ 0x9d 0xa2 ], rxAdvertisement=null } : 1 times.
+08-31 07:14:32.596 27566 11120 I NearbyMediums: BleAdvertisement { version=2, socketVersion=2, isFast=true, serviceIdHash=null, data=[ 0x23 0x51 0x41 0x52 0x46 0x11 0x32 0x35 0xd6 0x37 0x60 0xf1 0xa9 0xcb 0x70 0xa8 0x14 0xaf 0xe4 0xe2 0x13 0xd4 0x4b ], deviceToken=[ 0xd0 0x61 ], rxAdvertisement=null } : 1 times.
+08-31 07:14:32.596 27566 11120 I NearbyMediums: BleAdvertisement { version=2, socketVersion=2, isFast=true, serviceIdHash=null, data=[ 0x23 0x4c 0x48 0x35 0x56 0x11 0x32 0xdc 0x70 0xff 0x22 0x75 0x2c 0x39 0x13 0xa8 0xc1 0x74 0x80 0xec 0xd9 0x3c 0x20 ], deviceToken=[ 0xe0 0xa3 ], rxAdvertisement=null } : 1 times.
+08-31 07:14:32.596 27566 11120 I NearbyMediums: Total 3 fast advertisements from 3 unique advertisers.
+08-31 07:14:32.596 27566 11120 I NearbyMediums: Current Tracked Scanning Clients are : {NearbyConnections.EnvironmentMonitor, NearbySharing, NearbyConnections.TxAdvertisement}
+08-31 07:14:32.670 27566 11291 I NetworkScheduler.Stats: Task com.google.android.gms/com.google.android.gms.clearcut.uploader.QosUploaderService finished executing. cause:3 result: 1 elapsed_millis: 639 uptime_millis: 638 exec_start_elapsed_seconds: 292407 [CONTEXT service_id=218 ]
+08-31 07:14:32.802  1579  1658 W libbinder.ServiceManagerCppClient: Waited one second for vendor.qti.qhcp.IQHDC/default (is service started? Number of threads started in the threadpool: 2. Are binder threads started and available?)
+08-31 07:14:32.408   899   899 I servicemanager: Caller(pid=1579,uid=0,sid=u:r:vendor_hal_perf_default:s0) Since 'vendor.qti.qhcp.IQHDC/default' could not be found trying to start it as a lazy AIDL service. (if it's not configured to be a lazy service, it may be stuck starting or still starting).
+08-31 07:14:32.803   899 11309 W libc    : Unable to set property "ctl.interface_start" to "aidl/vendor.qti.qhcp.IQHDC/default": PROP_ERROR_HANDLE_CONTROL_MESSAGE (0x20)
+08-31 07:14:32.409     1     1 E init    : Control message: Could not find 'aidl/vendor.qti.qhcp.IQHDC/default' for ctl.interface_start from pid: 899 (/system/bin/servicemanager)
+08-31 07:14:32.409 11309 11309 I servicemanager: Caller(pid=1579,uid=0,sid=u:r:vendor_hal_perf_default:s0) Tried to start aidl service vendor.qti.qhcp.IQHDC/default as a lazy service, but was unable to. Usually this happens when a service is not installed, but if the service is intended to be used as a lazy service, then it may be configured incorrectly.
+08-31 07:14:33.075  1502  3285 I vendor.qti.bluetooth@1.1-ibs_handler: ProcessIbsCmd: Received IBS_WAKE_IND: 0xFD
+08-31 07:14:33.075  1502  3285 D vendor.qti.bluetooth@1.1-ibs_handler: SerialClockVote: vote for UART CLK ON
+08-31 07:14:33.075  1502  3285 E vendor.qti.bluetooth@1.1-wake_lock: Acquire write to wakelock file failed -1 - Operation not permitted
+08-31 07:14:33.075  1502  3285 I vendor.qti.bluetooth@1.1-ibs_handler: ProcessIbsCmd: Writing IBS_WAKE_ACK
+08-31 07:14:32.679  4937  4937 E [TP0]touchpanel: irq gpio is 0
+08-31 07:14:33.129  1502  3285 I vendor.qti.bluetooth@1.1-ibs_handler: ProcessIbsCmd: Received IBS_SLEEP_IND: 0xFE
+08-31 07:14:33.129  1502  3285 D vendor.qti.bluetooth@1.1-ibs_handler: SerialClockVote: vote for UART CLK OFF
+08-31 07:14:32.855  6721  6721 I [kworke][0x51b31447bbf][01:44:33.249182] wlan: [6721:I:PMO] pmo_core_enable_wow_in_fw: drv wow is enabled
+08-31 07:14:33.279  1502  3136 E vendor.qti.bluetooth@1.1-wake_lock: Release wake lock not initialized/acquired
+08-31 07:14:33.223 29273 29273 E iostack : irqs = 1810828, self-block = 0
+08-31 07:14:33.225  6721  6721 I [kworke][0x51b31b0d8e1][01:44:33.619064] wlan: [6721:I:PMO] pmo_core_psoc_send_host_wakeup_ind_to_fw: Host wakeup indication sent to fw
+08-31 07:14:33.234     0     0 I [    C0] [soft_i][0x51b31b363af][01: 44:33.627741] wlan: [0:I:WMA] WLAN triggered wakeup: BPF_ALLOW (39), vdev: 0 (STA)
+08-31 07:14:33.234     0     0 I [    C0] [soft_i][0x51b31b36d01][01: 44:33.627866] wlan: [0:I:WMA] wma_wake_event_packet: Wake event packet:
+08-31 07:14:33.674  2447  2726 D WifiClientModeImpl[14183:wlan0]: updateLinkLayerStatsRssiSpeedFrequencyCapabilities rssi=-24 TxLinkspeed=234 freq=5220 RxLinkSpeed=866
+08-31 07:14:33.674  2447  2726 D WifiDataStall: tx tput in kbps: 209274
+08-31 07:14:33.674  2447  2726 D WifiDataStall: rx tput in kbps: 815257
+08-31 07:14:33.674  2447  2726 V WifiConfigManager: Updating scan detail cache freq=5220 BSSID=b4:86:18:de:39:ca RSSI=-23 for "Excitel_home_wifi_5"WPA_PSK
+08-31 07:14:33.674  2447  2726 D WifiDataStall:  ccaLevel = 15
+08-31 07:14:33.674  2447  2726 D WifiDataStall: L2 txTputKbps: 132173, rxTputKbps: 815257, L3 txTputKbps: 66, rxTputKbps: 38, TxTrafficHigh: true, RxTrafficHigh: true, Throughput Sufficient: true
+08-31 07:14:33.674  2447  2726 D WifiThroughputPredictor:  utilization (LLS) 15 isBluetoothConnected: false final utilization: 15
+08-31 07:14:33.674  2447  2726 D WifiThroughputPredictor:  BW: 2 RSSI: -24 Nss: 2 Mode: 5 symDur: 3600 snrDb 50 bitPerTone: 6667 rate: 866 throughput: 815
+08-31 07:14:33.674  2447  2726 D WifiThroughputPredictor:  utilization (LLS) 15 isBluetoothConnected: false final utilization: 15
+08-31 07:14:33.674  2447  2726 D WifiThroughputPredictor:  BW: 2 RSSI: -24 Nss: 2 Mode: 5 symDur: 3600 snrDb 50 bitPerTone: 6667 rate: 866 throughput: 815
+08-31 07:14:33.675  2447  2726 D WifiScoreCard: BSSID update SIGNAL_POLL ID: 715353381 SSID: "Excitel_home_wifi_5", BSSID: b4:86:18:de:39:ca, MAC: c6:52:65:7d:a1:b6, IP: /192.168.1.35, Security type: 2, Supplicant state: COMPLETED, Wi-Fi standard: 11ac, RSSI: -24, Link speed: 234Mbps, Tx Link speed: 234Mbps, Max Supported Tx Link speed: 866Mbps, Rx Link speed: 866Mbps, Max Supported Rx Link speed: 866Mbps, Frequency: 5220MHz, Net ID: 5, Metered hint: false, score: 106, isUsable: true, CarrierMerged: false, SubscriptionId: -1, IsPrimary: 1, Trusted: true, Restricted: false, Ephemeral: false, OEM paid: false, OEM private: false, OSU AP: false, FQDN: <none>, Provider friendly name: <none>, Requesting package name: <none>"Excitel_home_wifi_5"wpa2-pskMLO Information: , Is TID-To-Link negotiation supported by the AP: false, AP MLD Address: <none>, AP MLO Link Id: <none>, AP MLO Affiliated links: <none>, Vendor Data: <none>
+08-31 07:14:33.675  2447  2726 D WifiScoreCard: txRate: 13 txSpeed: 234
+08-31 07:14:33.675  2447  2726 D WifiScoreCard: network update SIGNAL_POLL "Excitel_home_wifi_5" ID: 1721486633 RSSI -24 txSpeed 234
+08-31 07:14:33.675  2447  2726 D WifiClientModeImpl[14183:wlan0]:  ClientModeImpl$L2ConnectedState screen=on 68 0 "Excitel_home_wifi_5" b4:86:18:de:39:ca rssi=-24 f=5220 sc=106 link=234 tx=7.5, 4.8, 0.0 rx=9.0 bcn=1882020 [on:0 tx:12 rx:4 period:3012] from screen [on:0 period:29406676] score=106
+08-31 07:14:33.802  1579  1658 W libbinder.ServiceManagerCppClient: Waited one second for vendor.qti.qhcp.IQHDC/default (is service started? Number of threads started in the threadpool: 2. Are binder threads started and available?)
+08-31 07:14:33.409   899   899 I servicemanager: Caller(pid=1579,uid=0,sid=u:r:vendor_hal_perf_default:s0) Since 'vendor.qti.qhcp.IQHDC/default' could not be found trying to start it as a lazy AIDL service. (if it's not configured to be a lazy service, it may be stuck starting or still starting).
+08-31 07:14:33.803   899 11310 W libc    : Unable to set property "ctl.interface_start" to "aidl/vendor.qti.qhcp.IQHDC/default": PROP_ERROR_HANDLE_CONTROL_MESSAGE (0x20)
+08-31 07:14:33.409     1     1 E init    : Control message: Could not find 'aidl/vendor.qti.qhcp.IQHDC/default' for ctl.interface_start from pid: 899 (/system/bin/servicemanager)
+08-31 07:14:33.409 11310 11310 I servicemanager: Caller(pid=1579,uid=0,sid=u:r:vendor_hal_perf_default:s0) Tried to start aidl service vendor.qti.qhcp.IQHDC/default as a lazy service, but was unable to. Usually this happens when a service is not installed, but if the service is intended to be used as a lazy service, then it may be configured incorrectly.
+08-31 07:14:34.149  1502  3285 I vendor.qti.bluetooth@1.1-ibs_handler: ProcessIbsCmd: Received IBS_WAKE_IND: 0xFD
+08-31 07:14:34.150  1502  3285 D vendor.qti.bluetooth@1.1-ibs_handler: SerialClockVote: vote for UART CLK ON
+08-31 07:14:34.150  1502  3285 E vendor.qti.bluetooth@1.1-wake_lock: Acquire write to wakelock file failed -1 - Operation not permitted
+08-31 07:14:34.150  1502  3285 I vendor.qti.bluetooth@1.1-ibs_handler: ProcessIbsCmd: Writing IBS_WAKE_ACK
+08-31 07:14:34.190  1502  3285 I vendor.qti.bluetooth@1.1-ibs_handler: ProcessIbsCmd: Received IBS_SLEEP_IND: 0xFE
+08-31 07:14:34.191  1502  3285 D vendor.qti.bluetooth@1.1-ibs_handler: SerialClockVote: vote for UART CLK OFF
+08-31 07:14:34.214  1502  3285 I vendor.qti.bluetooth@1.1-ibs_handler: ProcessIbsCmd: Received IBS_WAKE_IND: 0xFD
+08-31 07:14:34.214  1502  3285 D vendor.qti.bluetooth@1.1-ibs_handler: SerialClockVote: vote for UART CLK ON
+08-31 07:14:34.214  1502  3285 E vendor.qti.bluetooth@1.1-wake_lock: Acquire write to wakelock file failed -1 - Operation not permitted
+08-31 07:14:34.214  1502  3285 I vendor.qti.bluetooth@1.1-ibs_handler: ProcessIbsCmd: Writing IBS_WAKE_ACK
+08-31 07:14:33.863  6721  6721 I [kworke][0x51b326bccd0][01:44:34.257197] wlan: [6721:I:PMO] pmo_core_enable_wow_in_fw: drv wow is enabled
+08-31 07:14:34.266  1502  3285 I vendor.qti.bluetooth@1.1-ibs_handler: ProcessIbsCmd: Received IBS_SLEEP_IND: 0xFE
+08-31 07:14:34.266  1502  3285 D vendor.qti.bluetooth@1.1-ibs_handler: SerialClockVote: vote for UART CLK OFF
+08-31 07:14:34.266  1502  3285 E vendor.qti.bluetooth@1.1-wake_lock: Release wake lock not initialized/acquired
+08-31 07:14:34.416  1502  3136 E vendor.qti.bluetooth@1.1-wake_lock: Release wake lock not initialized/acquired
+08-31 07:14:34.419  5485  5485 W DefaultDispatch: type=1400 audit(0.0:895878): avc:  denied  { read } for  name="version" dev="proc" ino=4026532013 scontext=u:r:untrusted_app:s0:c224,c256,c512,c768 tcontext=u:object_r:proc_version:s0 tclass=file permissive=0 app=com.ivarna.mkm
+08-31 07:14:34.452  5485  7854 W CpuUtilizationProvider: Failed to read /proc/stat: grep: /proc/stat: Permission denied
+08-31 07:14:34.479  5485  7854 D CpuUtilizationProvider: CPU usage updated from frequency (fallback): 31%
+08-31 07:14:34.482  5485  7854 D CpuProvider: Core 0: freq=787200, usage=1.0 (hwMin=364800, hwMax=2265600)
+08-31 07:14:34.482  5485  7854 D CpuProvider: Core 1: freq=787200, usage=0.75757575 (hwMin=364800, hwMax=2265600)
+08-31 07:14:34.483  5485  7854 D CpuProvider: Core 2: freq=1920000, usage=0.13043478 (hwMin=499200, hwMax=3148800)
+08-31 07:14:34.483  5485  7854 D CpuProvider: Core 3: freq=1920000, usage=0.17391305 (hwMin=499200, hwMax=3148800)
+08-31 07:14:34.484  5485  7854 D CpuProvider: Core 4: freq=2515200, usage=0.13043478 (hwMin=499200, hwMax=3148800)
+08-31 07:14:34.485  5485  7854 D CpuProvider: Core 5: freq=614400, usage=0.0 (hwMin=499200, hwMax=2956800)
+08-31 07:14:34.485  5485  7854 D CpuProvider: Core 6: freq=614400, usage=0.0 (hwMin=499200, hwMax=2956800)
+08-31 07:14:34.486  5485  7854 D CpuProvider: Core 7: freq=902400, usage=0.14965986 (hwMin=480000, hwMax=3302400)
+08-31 07:14:34.486  5485  7854 D CpuProvider: Overall usage: 0.31195158 (from 8 cores), Avg Freq: 1055750
+08-31 07:14:34.495 11319 11319 W cat     : type=1400 audit(0.0:895879): avc:  denied  { read } for  name="governor" dev="sysfs" ino=139690 scontext=u:r:untrusted_app:s0:c224,c256,c512,c768 tcontext=u:object_r:vendor_sysfs_kgsl:s0 tclass=file permissive=0
+08-31 07:14:34.499 11321 11321 W cat     : type=1400 audit(0.0:895880): avc:  denied  { read } for  name="available_governors" dev="sysfs" ino=139691 scontext=u:r:untrusted_app:s0:c224,c256,c512,c768 tcontext=u:object_r:vendor_sysfs_kgsl:s0 tclass=file permissive=0 app=com.ivarna.mkm
+08-31 07:14:34.519 11326 11326 W cat     : type=1400 audit(0.0:895881): avc:  denied  { read } for  name="cur_freq" dev="sysfs" ino=139692 scontext=u:r:untrusted_app:s0:c224,c256,c512,c768 tcontext=u:object_r:vendor_sysfs_kgsl:s0 tclass=file permissive=0
+08-31 07:14:34.547 11332 11332 W cat     : type=1400 audit(0.0:895882): avc:  denied  { read } for  name="gpuclk" dev="sysfs" ino=139614 scontext=u:r:untrusted_app:s0:c224,c256,c512,c768 tcontext=u:object_r:vendor_sysfs_kgsl_gpuclk:s0 tclass=file permissive=0 app=com.ivarna.mkm
+08-31 07:14:34.180 11334 11334 W audit   : audit_lost=587685 audit_rate_limit=5 audit_backlog_limit=64
+08-31 07:14:34.180 11334 11334 E audit   : rate limit exceeded
+08-31 07:14:34.356  6721  6721 I [kworke][0x51b32fc16dc][01:44:34.749704] wlan: [6721:I:PMO] pmo_core_psoc_send_host_wakeup_ind_to_fw: Host wakeup indication sent to fw
+08-31 07:14:34.364     0     0 I [    C0] [soft_i][0x51b32feaeb1][01: 44:34.758555] wlan: [0:I:WMA] WLAN triggered wakeup: BPF_ALLOW (39), vdev: 0 (STA)
+08-31 07:14:34.365     0     0 I [    C0] [soft_i][0x51b32febab8][01: 44:34.758715] wlan: [0:I:WMA] wma_wake_event_packet: Wake event packet:
+08-31 07:14:34.803  1579  1658 W libbinder.ServiceManagerCppClient: Waited one second for vendor.qti.qhcp.IQHDC/default (is service started? Number of threads started in the threadpool: 2. Are binder threads started and available?)
+08-31 07:14:34.410   899   899 I servicemanager: Caller(pid=1579,uid=0,sid=u:r:vendor_hal_perf_default:s0) Since 'vendor.qti.qhcp.IQHDC/default' could not be found trying to start it as a lazy AIDL service. (if it's not configured to be a lazy service, it may be stuck starting or still starting).
+08-31 07:14:34.807   899 11358 W libc    : Unable to set property "ctl.interface_start" to "aidl/vendor.qti.qhcp.IQHDC/default": PROP_ERROR_HANDLE_CONTROL_MESSAGE (0x20)
+08-31 07:14:34.412     1     1 E init    : Control message: Could not find 'aidl/vendor.qti.qhcp.IQHDC/default' for ctl.interface_start from pid: 899 (/system/bin/servicemanager)
+08-31 07:14:34.413 11358 11358 I servicemanager: Caller(pid=1579,uid=0,sid=u:r:vendor_hal_perf_default:s0) Tried to start aidl service vendor.qti.qhcp.IQHDC/default as a lazy service, but was unable to. Usually this happens when a service is not installed, but if the service is intended to be used as a lazy service, then it may be configured incorrectly.
+08-31 07:14:34.695 20724 20724 E [TP0]touchpanel: irq gpio is 0
+08-31 07:14:35.395 11359 11359 D AndroidRuntime: >>>>>> START com.android.internal.os.RuntimeInit uid 2000 <<<<<<
+08-31 07:14:35.398 11359 11359 I AndroidRuntime: Using default boot image
+08-31 07:14:35.399 11359 11359 I AndroidRuntime: Leaving lock profiling enabled
+08-31 07:14:35.400 11359 11359 I app_process: Core platform API reporting enabled by runtime option
+08-31 07:14:35.400 11359 11359 I app_process: Using CollectorTypeCMC GC.
+08-31 07:14:35.441  1601  1667 D vendor.oplus.hardware.charger-V10-service: parallel fold conf file parse fail parallel_fold_state 2
+08-31 07:14:35.441  1601  1667 D vendor.oplus.hardware.charger-V10-service: scale_chg Start!!!
+08-31 07:14:35.442 11359 11359 D nativeloader: InitDefaultPublicLibraries for_preload=1: libandroid.so:libaaudio.so:libamidi.so:libbinder_ndk.so:libc.so:libcamera2ndk.so:libdl.so:libEGL.so:libGLESv1_CM.so:libGLESv2.so:libGLESv3.so:libicu.so:libicui18n.so:libicuuc.so:libjnigraphics.so:liblog.so:libmediandk.so:libm.so:libnativehelper.so:libnativewindow.so:libOpenMAXAL.so:libOpenSLES.so:libRS.so:libstdc++.so:libsync.so:libvulkan.so:libwebviewchromium_plat_support.so:libz.so
+08-31 07:14:35.442  1601  1667 D vendor.oplus.hardware.charger-V10-service: [0, 0, 3]
+08-31 07:14:35.442  1601  1667 D vendor.oplus.hardware.charger-V10-service: [0, 2, 9]
+08-31 07:14:35.442  1601  1667 D vendor.oplus.hardware.charger-V10-service: [0, 1, 4]
+08-31 07:14:35.442  1601  1667 D vendor.oplus.hardware.charger-V10-service: [0, 3, 3]
+08-31 07:14:35.442  1601  1667 D vendor.oplus.hardware.charger-V10-service: [0, 4, 3]
+08-31 07:14:35.442  1601  1667 D vendor.oplus.hardware.charger-V10-service: [0, 5, 4]
+08-31 07:14:35.442  1601  1667 D vendor.oplus.hardware.charger-V10-service: [0, 6, 3]
+08-31 07:14:35.443  1601  1667 D vendor.oplus.hardware.charger-V10-service: scale_chg Start!!!
+08-31 07:14:35.443  1601  1667 D vendor.oplus.hardware.charger-V10-service: [0, 0, 3]
+08-31 07:14:35.443  1601  1667 D vendor.oplus.hardware.charger-V10-service: [0, 2, 9]
+08-31 07:14:35.443  1601  1667 D vendor.oplus.hardware.charger-V10-service: [0, 1, 4]
+08-31 07:14:35.443  1601  1667 D vendor.oplus.hardware.charger-V10-service: [0, 3, 3]
+08-31 07:14:35.443  1601  1667 D vendor.oplus.hardware.charger-V10-service: [0, 4, 3]
+08-31 07:14:35.443  1601  1667 D vendor.oplus.hardware.charger-V10-service: [0, 5, 4]
+08-31 07:14:35.443  1601  1667 D vendor.oplus.hardware.charger-V10-service: [0, 6, 3]
+08-31 07:14:35.447 11359 11359 D nativeloader: Load libicu_jni.so using APEX ns com_android_art for caller /apex/com.android.art/javalib/core-oj.jar: ok
+08-31 07:14:35.447 11359 11359 D app_process: u_setTimeZoneFilesDirectory("/apex/com.android.tzdata/etc/tz/versioned/9/icu") succeeded. 
+08-31 07:14:35.447 11359 11359 D app_process: I18n APEX ICU file found: /apex/com.android.i18n/etc/icu/icudt76l.dat
+08-31 07:14:35.448 11359 11359 D nativeloader: Load libjavacore.so using APEX ns com_android_art for caller /apex/com.android.art/javalib/core-oj.jar: ok
+08-31 07:14:35.448 11359 11359 D nativeloader: Load libopenjdk.so using APEX ns com_android_art for caller /apex/com.android.art/javalib/core-oj.jar: ok
+08-31 07:14:35.449 11359 11359 I app_process: Priority-to-niceness mapping: 19, 16, 13, 10, 0, -2, -4, -5, -6, -8
+08-31 07:14:35.449 11359 11359 W app_process: ClassLoaderContext shared library size mismatch. Expected=2, found=0 (PCL[]{PCL[/system/framework/android.test.base.jar*1752668292]#PCL[/system/framework/android.test.mock.jar*506471120]} | PCL[])
+08-31 07:14:35.450 11359 11359 W app_process: ClassLoaderContext classpath size mismatch. expected=0, found=1 (PCL[]{PCL[/system/framework/android.test.runner.jar*1853607488]{PCL[/system/framework/android.test.base.jar*1752668292]#PCL[/system/framework/android.test.mock.jar*506471120]}#PCL[/system/framework/android.test.base.jar*1752668292]} | PCL[/system/framework/android.test.runner.jar*1853607488])
+08-31 07:14:35.461 11359 11359 D nativeloader: Load libframework-connectivity-tiramisu-jni.so using APEX ns com_android_tethering for caller /apex/com.android.tethering/javalib/framework-connectivity-t.jar: ok
+08-31 07:14:35.461 11359 11359 D AndroidRuntime: Calling main entry com.android.commands.uiautomator.Launcher
+08-31 07:14:35.463 11359 11359 I AconfigPackage: com.android.wifi.flags is mapped to com.android.wifi
+08-31 07:14:35.463 11359 11359 I AconfigPackage: com.android.org.conscrypt.flags is mapped to com.android.conscrypt
+08-31 07:14:35.463 11359 11359 I AconfigPackage: com.android.org.conscrypt.net.flags is mapped to com.android.conscrypt
+08-31 07:14:35.463 11359 11359 I AconfigPackage: com.android.art.flags is mapped to com.android.art
+08-31 07:14:35.463 11359 11359 I AconfigPackage: com.android.art.rw.flags is mapped to com.android.art
+08-31 07:14:35.463 11359 11359 I AconfigPackage: com.android.libcore is mapped to com.android.art
+08-31 07:14:35.463 11359 11359 I AconfigPackage: com.android.permission.flags is mapped to com.android.permission
+08-31 07:14:35.463 11359 11359 I AconfigPackage: com.android.permissioncontroller.flags is mapped to com.android.permission
+08-31 07:14:35.463 11359 11359 I AconfigPackage: android.graphics.pdf.flags is mapped to com.android.mediaprovider
+08-31 07:14:35.463 11359 11359 I AconfigPackage: com.android.providers.media.flags is mapped to com.android.mediaprovider
+08-31 07:14:35.463 11359 11359 I AconfigPackage: android.graphics.pdf.flags.readonly is mapped to com.android.mediaprovider
+08-31 07:14:35.463 11359 11359 I AconfigPackage: android.os.profiling is mapped to com.android.profiling
+08-31 07:14:35.463 11359 11359 I AconfigPackage: android.os.profiling.anomaly.flags is mapped to com.android.profiling
+08-31 07:14:35.463 11359 11359 I AconfigPackage: com.android.tethering.mainline.beta is mapped to com.android.tethering
+08-31 07:14:35.463 11359 11359 I AconfigPackage: android.net.http is mapped to com.android.tethering
+08-31 07:14:35.463 11359 11359 I AconfigPackage: com.android.tethering.readonly.flags is mapped to com.android.tethering
+08-31 07:14:35.463 11359 11359 I AconfigPackage: android.net.vcn is mapped to com.android.tethering
+08-31 07:14:35.463 11359 11359 I AconfigPackage: com.android.net.flags is mapped to com.android.tethering
+08-31 07:14:35.463 11359 11359 I AconfigPackage: com.android.tethering.beta.test is mapped to com.android.tethering
+08-31 07:14:35.463 11359 11359 I AconfigPackage: com.android.nearby.flags is mapped to com.android.tethering
+08-31 07:14:35.463 11359 11359 I AconfigPackage: com.android.net.ct.flags is mapped to com.android.tethering
+08-31 07:14:35.463 11359 11359 I AconfigPackage: com.android.net.thread.flags is mapped to com.android.tethering
+08-31 07:14:35.463 11359 11359 I AconfigPackage: com.android.healthfitness.flags is mapped to com.android.healthfitness
+08-31 07:14:35.463 11359 11359 I AconfigPackage: com.android.uwb.flags is mapped to com.android.uwb
+08-31 07:14:35.463 11359 11359 I AconfigPackage: com.android.ranging.flags is mapped to com.android.uwb
+08-31 07:14:35.463 11359 11359 I AconfigPackage: com.android.media.extractor.flags is mapped to com.android.media
+08-31 07:14:35.463 11359 11359 I AconfigPackage: com.android.media.mainline.flags is mapped to com.android.media
+08-31 07:14:35.463 11359 11359 I AconfigPackage: com.android.os.statsd.flags is mapped to com.android.os.statsd
+08-31 07:14:35.463 11359 11359 I AconfigPackage: com.android.adbd.flags is mapped to com.android.adbd
+08-31 07:14:35.463 11359 11359 I AconfigPackage: com.android.telephony.flags is mapped to com.android.telephonycore
+08-31 07:14:35.463 11359 11359 I AconfigPackage: com.android.rkpd.flags is mapped to com.android.rkpd
+08-31 07:14:35.463 11359 11359 I AconfigPackage: com.android.ipsec.flags is mapped to com.android.ipsec
+08-31 07:14:35.463 11359 11359 I AconfigPackage: android.media.swcodec.flags is mapped to com.android.media.swcodec
+08-31 07:14:35.463 11359 11359 I AconfigPackage: android.uprobestats.mainline.flags is mapped to com.android.uprobestats
+08-31 07:14:35.463 11359 11359 I AconfigPackage: com.android.appsearch.flags is mapped to com.android.appsearch
+08-31 07:14:35.464 11359 11359 I AconfigPackage: android.provider.flags is mapped to com.android.configinfrastructure
+08-31 07:14:35.464 11359 11359 I AconfigPackage: com.android.server.deviceconfig is mapped to com.android.configinfrastructure
+08-31 07:14:35.464 11359 11359 I AconfigPackage: com.android.nfc.module.flags is mapped to com.android.nfcservices
+08-31 07:14:35.464 11359 11359 I AconfigPackage: com.android.compos.flags is mapped to com.android.compos
+08-31 07:14:35.464 11359 11359 I AconfigPackage: com.android.devicelock.flags is mapped to com.android.devicelock
+08-31 07:14:35.464 11359 11359 I AconfigPackage: com.android.adservices.ondevicepersonalization.flags is mapped to com.android.ondevicepersonalization
+08-31 07:14:35.464 11359 11359 I AconfigPackage: com.android.adservices.flags is mapped to com.android.adservices
+08-31 07:14:35.464 11359 11359 I AconfigPackage: com.android.sdksandbox.flags is mapped to com.android.adservices
+08-31 07:14:35.464 11359 11359 I AconfigPackage: com.android.icu is mapped to com.android.i18n
+08-31 07:14:35.464 11359 11359 I AconfigPackage: com.android.crashrecovery.flags is mapped to com.android.crashrecovery
+08-31 07:14:35.464 11359 11359 I AconfigPackage: com.android.system.virtualmachine.flags is mapped to com.android.virt
+08-31 07:14:35.464 11359 11359 I AconfigPackage: com.android.bluetooth.flags is mapped to com.android.bt
+08-31 07:14:35.464 11359 11359 E FeatureFlagsImplExport: android.os.flagging.AconfigStorageReadException: ERROR_PACKAGE_NOT_FOUND: package android.xr cannot be found on the device
+08-31 07:14:35.465 11359 11359 D UiAutomationConnection: Created on user UserHandle{0}
+08-31 07:14:35.465 11359 11359 I UiAutomation: Initialized for user 0 on display 0
+08-31 07:14:35.465 11359 11359 W UiAutomation: Created with deprecatead constructor, assumes DEFAULT_DISPLAY
+08-31 07:14:35.465  2447  3140 D AccessibilityManagerService: changeCurrentUserForTestAutomationIfNeededLocked(0): ignoring because device doesn't support visible background users
+08-31 07:14:35.465  2447  3140 I UiAutomationManager: Registering UiTestAutomationService (id=com.android.server.accessibility/UiAutomation, flags=0x0) when called by user 0
+08-31 07:14:35.465  2447  3140 V AccessibilityManagerService: onUserStateChangedLocked for userId: 0, forceUpdate: false
+08-31 07:14:35.466  2447  3140 V AccessibilityUserState: updateShortcutTargets: type:accessibility_shortcut_target_service, current:{}, new:{}
+08-31 07:14:35.466  2447  3140 V AccessibilityUserState: updateShortcutTargets: type:accessibility_button_targets, current:{}, new:{}
+08-31 07:14:35.466  2447  3140 V AccessibilityUserState: updateShortcutTargets: type:accessibility_gesture_targets, current:{}, new:{}
+08-31 07:14:35.466  2447  3140 V AccessibilityUserState: updateShortcutTargets: type:accessibility_qs_targets, current:{}, new:{}
+08-31 07:14:35.466  2447  3140 V AccessibilityUserState: updateShortcutTargets: type:accessibility_key_gesture_targets, current:{}, new:{}
+08-31 07:14:35.466  2447  3140 W MagnificationConnectionManager: requestConnection duplicated request: connect=false, mConnectionState=DISCONNECTED
+08-31 07:14:35.075  2447  2447 I binder_alloc: 25522: pid 2447 spamming oneway? 1409 buffers allocated for a total size of 191744
+08-31 07:14:35.077  2447  2447 I binder_alloc: 25522: pid 2447 spamming oneway? 1410 buffers allocated for a total size of 191880
+08-31 07:14:35.473  2447  3140 V AccessibilityManagerService: onUserStateChangedLocked for userId: 0, forceUpdate: false
+08-31 07:14:35.474  2447  3140 V AccessibilityUserState: updateShortcutTargets: type:accessibility_shortcut_target_service, current:{}, new:{}
+08-31 07:14:35.474  2447  3140 V AccessibilityUserState: updateShortcutTargets: type:accessibility_button_targets, current:{}, new:{}
+08-31 07:14:35.474  2447  3140 V AccessibilityUserState: updateShortcutTargets: type:accessibility_gesture_targets, current:{}, new:{}
+08-31 07:14:35.474  2447  3140 V AccessibilityUserState: updateShortcutTargets: type:accessibility_qs_targets, current:{}, new:{}
+08-31 07:14:35.474  2447  3140 V AccessibilityUserState: updateShortcutTargets: type:accessibility_key_gesture_targets, current:{}, new:{}
+08-31 07:14:35.474  2447  3140 W MagnificationConnectionManager: requestConnection duplicated request: connect=false, mConnectionState=DISCONNECTED
+08-31 07:14:35.082  2447  2447 I binder_alloc: 25522: pid 2447 spamming oneway? 1411 buffers allocated for a total size of 192016
+08-31 07:14:35.083  2447  2447 I binder_alloc: 25522: pid 2447 spamming oneway? 1412 buffers allocated for a total size of 192152
+08-31 07:14:35.084  2447  2447 I binder_alloc: 25522: pid 2447 spamming oneway? 1413 buffers allocated for a total size of 192288
+08-31 07:14:35.479  2447  2447 D BatterySaverPolicy: accessibility changed to true, updating policy.
+08-31 07:14:35.483  2447 19258 D AccessibilityManagerService: .getAccessibilityShortcutTargets {shortcutType=32, userId=0}
+08-31 07:14:35.519  1502  3285 I vendor.qti.bluetooth@1.1-ibs_handler: ProcessIbsCmd: Received IBS_WAKE_IND: 0xFD
+08-31 07:14:35.520  1502  3285 D vendor.qti.bluetooth@1.1-ibs_handler: SerialClockVote: vote for UART CLK ON
+08-31 07:14:35.520  1502  3285 E vendor.qti.bluetooth@1.1-wake_lock: Acquire write to wakelock file failed -1 - Operation not permitted
+08-31 07:14:35.520  1502  3285 I vendor.qti.bluetooth@1.1-ibs_handler: ProcessIbsCmd: Writing IBS_WAKE_ACK
+08-31 07:14:35.561  1502  3285 I vendor.qti.bluetooth@1.1-ibs_handler: ProcessIbsCmd: Received IBS_SLEEP_IND: 0xFE
+08-31 07:14:35.561  1502  3285 D vendor.qti.bluetooth@1.1-ibs_handler: SerialClockVote: vote for UART CLK OFF
+08-31 07:14:35.281   794   794 I         : [INFO]: OPLUS_CHG[MMS_GAUGE]([oplus_mms_gauge_choice_fit_vol][3465]): choice cp voltage as vbat [3840, 3818]
+08-31 07:14:35.282   794   794 I         : [INFO]: OPLUS_CHG[MMS_GAUGE]([oplus_mms_gauge_choice_fit_vol][3465]): choice cp voltage as vbat [3840, 3818]
+08-31 07:14:35.291  6534  6534 I         : [INFO]: OPLUS_CHG[MSG]([oplus_msg_queue_update][227]): battery: update, gp=5000 ms
+08-31 07:14:35.291  6975  6975 I         : [INFO]: OPLUS_CHG[CHG_COMM]([oplus_comm_smooth_to_soc][3416]): soc[0 3 45 45 46 47] avg[3 1 0 0 0] fifo[46 46 46 46]
+08-31 07:14:35.292  6975  6975 I         : [INFO]: OPLUS_CHG[MSG]([oplus_msg_queue_update_work][106]): battery: update delay: 0 ms, update interval: 61444 ms
+08-31 07:14:35.307 23155 23155 I OPLUS_CHG[oplus_charge_info]: BATTERY[392 391 3840 3840 595 45 47 46 3889 8698 1 0x20 0], CHARGE[4455 600 0 0], WIRED[1 447 4969 500 1 0x0 0 0 0 2 0], WIRELESS[0 0 0 0 0 0x0 0 0 0], VOOC[0 0 0 0 0x0], UFCS[0 0 0 0x0], COMMON[6 0 0 0x0 1 0 1 8698 100 0]
+08-31 07:14:35.309  1508  1508 W healthd : battery l=47 v=3840 t=39.2 h=2 st=2 c=595 fc=9230000 cc=10 chg=u
+08-31 07:14:35.311 23155 23155 I         : [INFO]: OPLUS_CHG[ADSP]([oplus_chg_8350_reg_dump][7390]): sm8450_st_dump: [chg_en=1, suspend=0, pd_svooc=0], subtype=0x01],[oplus_UsbCommCapable=0, oplus_pd_svooc=0, typec_mode=0, cid_status=0x01, usb_in_status=1],[0x2606=0x83, 0x2607=0x19, 0x2608=0x0a, 0x2609=0x02], [0x260a=0x04, 0x260b=0x55, 0x260c=0x0a, 0x260d=0x18], [0x260e=0x0a, 0x260f=0x01, 0x2610=0x00, 0x2640=0x01], [0x2641=0x02, 0x2642=0x05, 0x2646=0x01, 0x2650=0x04], [0x2706=0x0a, 0x2707=0x0a, 0x2708=0x0a, 0x2709=0x0a], [0x270b=0xe2, 0x270c=0x48, 0x2710=0xc0, 0x280c=0x38], [0x2810=0x00, 0x2840=0x01, 0x287f=0x00, 0x2906=0x02], [0x2908=0x0f, 0x290a=0x11, 0x290b=0x01, 0x290c=0x01], [0x2910=0x11, 0x2944=0x80, 0x2950=0x02, 0x2951=0x01], [0x2952=0x0a, 0x2954=0x00, 0x2960=0xe0, 0x2b06=0x08], [0x2b07=0x00, 0x2b08=0x00, 0x2b09=0xa3, 0x2b0a=0x39], [0x2b0b=0xab, 0x2b0c=0x00, 0x29a8=0x81, 0x29a9=0x83], [0x29aa=0x00, 0x2aa2=0x00, 0x2aa8=0x87, 0x2aa9=0x00], [0x2aaa=0x00],
+08-31 07:14:35.711  1502  3136 E vendor.qti.bluetooth@1.1-wake_lock: Release wake lock not initialized/acquired
+08-31 07:14:35.806  1579  1658 W libbinder.ServiceManagerCppClient: Waited one second for vendor.qti.qhcp.IQHDC/default (is service started? Number of threads started in the threadpool: 2. Are binder threads started and available?)
+08-31 07:14:35.415   899   899 I servicemanager: Caller(pid=1579,uid=0,sid=u:r:vendor_hal_perf_default:s0) Since 'vendor.qti.qhcp.IQHDC/default' could not be found trying to start it as a lazy AIDL service. (if it's not configured to be a lazy service, it may be stuck starting or still starting).
+08-31 07:14:35.417     1     1 E init    : Control message: Could not find 'aidl/vendor.qti.qhcp.IQHDC/default' for ctl.interface_start from pid: 899 (/system/bin/servicemanager)
+08-31 07:14:35.812   899 11373 W libc    : Unable to set property "ctl.interface_start" to "aidl/vendor.qti.qhcp.IQHDC/default": PROP_ERROR_HANDLE_CONTROL_MESSAGE (0x20)
+08-31 07:14:35.418 11373 11373 I servicemanager: Caller(pid=1579,uid=0,sid=u:r:vendor_hal_perf_default:s0) Tried to start aidl service vendor.qti.qhcp.IQHDC/default as a lazy service, but was unable to. Usually this happens when a service is not installed, but if the service is intended to be used as a lazy service, then it may be configured incorrectly.
+08-31 07:14:36.479 11359 11359 W uiautomator: type=1400 audit(0.0:895892): avc:  denied  { read } for  name="u:object_r:qemu_sf_lcd_density_prop:s0" dev="tmpfs" ino=351 scontext=u:r:shell:s0 tcontext=u:object_r:qemu_sf_lcd_density_prop:s0 tclass=file permissive=0
+08-31 07:14:36.484 11359 11359 W libc    : Access denied finding property "qemu.sf.lcd_density"
+08-31 07:14:36.484 11359 11359 W libc    : Access denied finding property "qemu.sf.lcd_density"
+08-31 07:14:36.479 11359 11359 W uiautomator: type=1400 audit(0.0:895893): avc:  denied  { read } for  name="u:object_r:qemu_sf_lcd_density_prop:s0" dev="tmpfs" ino=351 scontext=u:r:shell:s0 tcontext=u:object_r:qemu_sf_lcd_density_prop:s0 tclass=file permissive=0
+08-31 07:14:36.105  6721  6721 I [kworke][0x51b34fc973a][01:44:36.499042] wlan: [6721:I:PMO] pmo_core_enable_wow_in_fw: drv wow is enabled
+08-31 07:14:36.570 11359 11359 W AccessibilityNodeInfoDumper: Fetch time: 83ms
+08-31 07:14:36.571  2447 19258 V AccessibilityManagerService: onUserStateChangedLocked for userId: 0, forceUpdate: false
+08-31 07:14:36.571  2447 19258 V AccessibilityUserState: updateShortcutTargets: type:accessibility_shortcut_target_service, current:{}, new:{}
+08-31 07:14:36.571  2447 19258 V AccessibilityUserState: updateShortcutTargets: type:accessibility_button_targets, current:{}, new:{}
+08-31 07:14:36.571  2447 19258 V AccessibilityUserState: updateShortcutTargets: type:accessibility_gesture_targets, current:{}, new:{}
+08-31 07:14:36.571  2447 19258 V AccessibilityUserState: updateShortcutTargets: type:accessibility_qs_targets, current:{}, new:{}
+08-31 07:14:36.571  2447 19258 V AccessibilityUserState: updateShortcutTargets: type:accessibility_key_gesture_targets, current:{}, new:{}
+08-31 07:14:36.571  2447 19258 W MagnificationConnectionManager: requestConnection duplicated request: connect=false, mConnectionState=DISCONNECTED
+08-31 07:14:36.571  2447 19258 D AccessibilityManagerService: restoreCurrentUserForTestAutomationIfNeededLocked(): ignoring because device doesn't support visible background users
+08-31 07:14:36.179  2447  2447 I binder_alloc: 25522: pid 2447 spamming oneway? 1414 buffers allocated for a total size of 192424
+08-31 07:14:36.181  2447  2447 I binder_alloc: 25522: pid 2447 spamming oneway? 1415 buffers allocated for a total size of 192560
+08-31 07:14:36.181  2447  2447 I binder_alloc: 25522: pid 2447 spamming oneway? 1416 buffers allocated for a total size of 192696
+08-31 07:14:36.573 11359 11368 W libbinder.IPCThreadState: call to talkWithDriver in joinThreadPool returned error: -9 (Bad file descriptor), FD: -1
+08-31 07:14:36.573 11359 11359 D AndroidRuntime: Shutting down VM
+08-31 07:14:36.573 11359 11374 W libbinder.IPCThreadState: call to talkWithDriver in joinThreadPool returned error: -9 (Bad file descriptor), FD: -1
+08-31 07:14:36.574 11359 11370 W libbinder.IPCThreadState: call to talkWithDriver in joinThreadPool returned error: -9 (Bad file descriptor), FD: -1
+08-31 07:14:36.575  2447  2447 D BatterySaverPolicy: accessibility changed to false, updating policy.
+08-31 07:14:36.706  2447  2726 D WifiClientModeImpl[14183:wlan0]: updateLinkLayerStatsRssiSpeedFrequencyCapabilities rssi=-24 TxLinkspeed=234 freq=5220 RxLinkSpeed=866
+08-31 07:14:36.706  2447  2726 D WifiDataStall: tx tput in kbps: 132173
+08-31 07:14:36.706  2447  2726 D WifiDataStall: rx tput in kbps: 815257
+08-31 07:14:36.706  2447  2726 V WifiConfigManager: Updating scan detail cache freq=5220 BSSID=b4:86:18:de:39:ca RSSI=-23 for "Excitel_home_wifi_5"WPA_PSK
+08-31 07:14:36.707  2447  2726 D WifiDataStall:  ccaLevel = 15
+08-31 07:14:36.707  2447  2726 D WifiDataStall: L2 txTputKbps: 209274, rxTputKbps: 815257, L3 txTputKbps: 0, rxTputKbps: 0, TxTrafficHigh: false, RxTrafficHigh: false, Throughput Sufficient: true
+08-31 07:14:36.707  2447  2726 D WifiThroughputPredictor:  utilization (LLS) 15 isBluetoothConnected: false final utilization: 15
+08-31 07:14:36.707  2447  2726 D WifiThroughputPredictor:  BW: 2 RSSI: -24 Nss: 2 Mode: 5 symDur: 3600 snrDb 50 bitPerTone: 6667 rate: 866 throughput: 815
+08-31 07:14:36.707  2447  2726 D WifiThroughputPredictor:  utilization (LLS) 15 isBluetoothConnected: false final utilization: 15
+08-31 07:14:36.707  2447  2726 D WifiThroughputPredictor:  BW: 2 RSSI: -24 Nss: 2 Mode: 5 symDur: 3600 snrDb 50 bitPerTone: 6667 rate: 866 throughput: 815
+08-31 07:14:36.712  2447  2726 D WifiScoreCard: BSSID update SIGNAL_POLL ID: 715353381 SSID: "Excitel_home_wifi_5", BSSID: b4:86:18:de:39:ca, MAC: c6:52:65:7d:a1:b6, IP: /192.168.1.35, Security type: 2, Supplicant state: COMPLETED, Wi-Fi standard: 11ac, RSSI: -24, Link speed: 234Mbps, Tx Link speed: 234Mbps, Max Supported Tx Link speed: 866Mbps, Rx Link speed: 866Mbps, Max Supported Rx Link speed: 866Mbps, Frequency: 5220MHz, Net ID: 5, Metered hint: false, score: 106, isUsable: true, CarrierMerged: false, SubscriptionId: -1, IsPrimary: 1, Trusted: true, Restricted: false, Ephemeral: false, OEM paid: false, OEM private: false, OSU AP: false, FQDN: <none>, Provider friendly name: <none>, Requesting package name: <none>"Excitel_home_wifi_5"wpa2-pskMLO Information: , Is TID-To-Link negotiation supported by the AP: false, AP MLD Address: <none>, AP MLO Link Id: <none>, AP MLO Affiliated links: <none>, Vendor Data: <none>
+08-31 07:14:36.712  2447  2726 D WifiScoreCard: txRate: 6 txSpeed: 234
+08-31 07:14:36.712  2447  2726 D WifiScoreCard: network update SIGNAL_POLL "Excitel_home_wifi_5" ID: 1721486633 RSSI -24 txSpeed 234
+08-31 07:14:36.712  2447  2726 D WifiClientModeImpl[14183:wlan0]:  ClientModeImpl$L2ConnectedState screen=on 68 0 "Excitel_home_wifi_5" b4:86:18:de:39:ca rssi=-24 f=5220 sc=106 link=234 tx=3.1, 1.9, 0.0 rx=3.7 bcn=1882044 [on:0 tx:1 rx:0 period:3037] from screen [on:0 period:29409713] score=106
+08-31 07:14:36.809  1579  1658 W libbinder.ServiceManagerCppClient: Waited one second for vendor.qti.qhcp.IQHDC/default (is service started? Number of threads started in the threadpool: 2. Are binder threads started and available?)
+08-31 07:14:36.418   899   899 I servicemanager: Caller(pid=1579,uid=0,sid=u:r:vendor_hal_perf_default:s0) Since 'vendor.qti.qhcp.IQHDC/default' could not be found trying to start it as a lazy AIDL service. (if it's not configured to be a lazy service, it may be stuck starting or still starting).
+08-31 07:14:36.813   899 11375 W libc    : Unable to set property "ctl.interface_start" to "aidl/vendor.qti.qhcp.IQHDC/default": PROP_ERROR_HANDLE_CONTROL_MESSAGE (0x20)
+08-31 07:14:36.419     1     1 E init    : Control message: Could not find 'aidl/vendor.qti.qhcp.IQHDC/default' for ctl.interface_start from pid: 899 (/system/bin/servicemanager)
+08-31 07:14:36.420 11375 11375 I servicemanager: Caller(pid=1579,uid=0,sid=u:r:vendor_hal_perf_default:s0) Tried to start aidl service vendor.qti.qhcp.IQHDC/default as a lazy service, but was unable to. Usually this happens when a service is not installed, but if the service is intended to be used as a lazy service, then it may be configured incorrectly.
+08-31 07:14:36.816  1502  3285 I vendor.qti.bluetooth@1.1-ibs_handler: ProcessIbsCmd: Received IBS_WAKE_IND: 0xFD
+08-31 07:14:36.816  1502  3285 D vendor.qti.bluetooth@1.1-ibs_handler: SerialClockVote: vote for UART CLK ON
+08-31 07:14:36.816  1502  3285 E vendor.qti.bluetooth@1.1-wake_lock: Acquire write to wakelock file failed -1 - Operation not permitted
+08-31 07:14:36.816  1502  3285 I vendor.qti.bluetooth@1.1-ibs_handler: ProcessIbsCmd: Writing IBS_WAKE_ACK
+08-31 07:14:36.857  1502  3285 I vendor.qti.bluetooth@1.1-ibs_handler: ProcessIbsCmd: Received IBS_SLEEP_IND: 0xFE
+08-31 07:14:36.857  1502  3285 D vendor.qti.bluetooth@1.1-ibs_handler: SerialClockVote: vote for UART CLK OFF
+08-31 07:14:36.607  6721  6721 I [kworke][0x51b358fb725][01:44:37.001228] wlan: [6721:I:PMO] pmo_core_psoc_send_host_wakeup_ind_to_fw: Host wakeup indication sent to fw
+08-31 07:14:37.007  1502  3136 E vendor.qti.bluetooth@1.1-wake_lock: Release wake lock not initialized/acquired
+08-31 07:14:36.616     0     0 I [    C0] [soft_i][0x51b359247dd][01: 44:37.009984] wlan: [0:I:WMA] WLAN triggered wakeup: BPF_ALLOW (39), vdev: 0 (STA)
+08-31 07:14:36.616     0     0 I [    C0] [soft_i][0x51b35925368][01: 44:37.010138] wlan: [0:I:WMA] wma_wake_event_packet: Wake event packet:
+08-31 07:14:36.711 20724 20724 E [TP0]touchpanel: irq gpio is 0
+08-31 07:14:37.063 18787 18787 I [LCD][0][INFO][dsi_display_status_check_error_flag:1212] [ESD]: first read: master=0 slave=0
+08-31 07:14:37.419  6721  6721 I [kworke][0x51b367d96e7][01:44:37.813171] wlan: [6721:I:PMO] pmo_core_enable_wow_in_fw: drv wow is enabled
+08-31 07:14:37.812  1579  1658 W libbinder.ServiceManagerCppClient: Waited one second for vendor.qti.qhcp.IQHDC/default (is service started? Number of threads started in the threadpool: 2. Are binder threads started and available?)
+08-31 07:14:37.423   899   899 I servicemanager: Caller(pid=1579,uid=0,sid=u:r:vendor_hal_perf_default:s0) Since 'vendor.qti.qhcp.IQHDC/default' could not be found trying to start it as a lazy AIDL service. (if it's not configured to be a lazy service, it may be stuck starting or still starting).
+08-31 07:14:37.426     1     1 E init    : Control message: Could not find 'aidl/vendor.qti.qhcp.IQHDC/default' for ctl.interface_start from pid: 899 (/system/bin/servicemanager)
+08-31 07:14:37.820   899 11379 W libc    : Unable to set property "ctl.interface_start" to "aidl/vendor.qti.qhcp.IQHDC/default": PROP_ERROR_HANDLE_CONTROL_MESSAGE (0x20)
+08-31 07:14:37.427 11379 11379 I servicemanager: Caller(pid=1579,uid=0,sid=u:r:vendor_hal_perf_default:s0) Tried to start aidl service vendor.qti.qhcp.IQHDC/default as a lazy service, but was unable to. Usually this happens when a service is not installed, but if the service is intended to be used as a lazy service, then it may be configured incorrectly.
+08-31 07:14:37.919  5485  5485 W DefaultDispatch: type=1400 audit(0.0:895894): avc:  denied  { read } for  name="version" dev="proc" ino=4026532013 scontext=u:r:untrusted_app:s0:c224,c256,c512,c768 tcontext=u:object_r:proc_version:s0 tclass=file permissive=0 app=com.ivarna.mkm
+08-31 07:14:37.966  5485  7854 W CpuUtilizationProvider: Failed to read /proc/stat: grep: /proc/stat: Permission denied
+08-31 07:14:37.980  5485  7854 D CpuUtilizationProvider: CPU usage updated from frequency (fallback): 27%
+08-31 07:14:37.981  5485  7854 D CpuProvider: Core 0: freq=787200, usage=0.22222222 (hwMin=364800, hwMax=2265600)
+08-31 07:14:37.981  5485  7854 D CpuProvider: Core 1: freq=787200, usage=0.22222222 (hwMin=364800, hwMax=2265600)
+08-31 07:14:37.983  5485  7854 D CpuProvider: Core 2: freq=2707200, usage=0.45652175 (hwMin=499200, hwMax=3148800)
+08-31 07:14:37.983  5485  7854 D CpuProvider: Core 3: freq=2707200, usage=0.45652175 (hwMin=499200, hwMax=3148800)
+08-31 07:14:37.983  5485  7854 D CpuProvider: Core 4: freq=2707200, usage=0.45652175 (hwMin=499200, hwMax=3148800)
+08-31 07:14:37.985  5485  7854 D CpuProvider: Core 5: freq=499200, usage=0.0 (hwMin=499200, hwMax=2956800)
+08-31 07:14:37.985  5485  7854 D CpuProvider: Core 6: freq=499200, usage=0.0 (hwMin=499200, hwMax=2956800)
+08-31 07:14:37.986  5485  7854 D CpuProvider: Core 7: freq=902400, usage=0.14965986 (hwMin=480000, hwMax=3302400)
+08-31 07:14:37.986  5485  7854 D CpuProvider: Overall usage: 0.2730006 (from 8 cores), Avg Freq: 1224500
+08-31 07:14:37.995 11386 11386 W cat     : type=1400 audit(0.0:895895): avc:  denied  { read } for  name="governor" dev="sysfs" ino=139690 scontext=u:r:untrusted_app:s0:c224,c256,c512,c768 tcontext=u:object_r:vendor_sysfs_kgsl:s0 tclass=file permissive=0 app=com.ivarna.mkm
+08-31 07:14:37.999 11387 11387 W cat     : type=1400 audit(0.0:895896): avc:  denied  { read } for  name="available_governors" dev="sysfs" ino=139691 scontext=u:r:untrusted_app:s0:c224,c256,c512,c768 tcontext=u:object_r:vendor_sysfs_kgsl:s0 tclass=file permissive=0 app=com.ivarna.mkm
+08-31 07:14:38.023 11392 11392 W cat     : type=1400 audit(0.0:895897): avc:  denied  { read } for  name="cur_freq" dev="sysfs" ino=139692 scontext=u:r:untrusted_app:s0:c224,c256,c512,c768 tcontext=u:object_r:vendor_sysfs_kgsl:s0 tclass=file permissive=0
+08-31 07:14:38.043 11398 11398 W cat     : type=1400 audit(0.0:895898): avc:  denied  { read } for  name="gpuclk" dev="sysfs" ino=139614 scontext=u:r:untrusted_app:s0:c224,c256,c512,c768 tcontext=u:object_r:vendor_sysfs_kgsl_gpuclk:s0 tclass=file permissive=0
+08-31 07:14:38.051 11400 11400 W cat     : type=1400 audit(0.0:895899): avc:  denied  { read } for  name="cur_freq" dev="sysfs" ino=139692 scontext=u:r:untrusted_app:s0:c224,c256,c512,c768 tcontext=u:object_r:vendor_sysfs_kgsl:s0 tclass=file permissive=0 app=com.ivarna.mkm
+08-31 07:14:38.067 11402 11402 W cat     : type=1400 audit(0.0:895900): avc:  denied  { search } for  name="devfreq" dev="sysfs" ino=52176 scontext=u:r:untrusted_app:s0:c224,c256,c512,c768 tcontext=u:object_r:vendor_sysfs_devfreq:s0 tclass=dir permissive=0
+08-31 07:14:38.089  1502  3285 I vendor.qti.bluetooth@1.1-ibs_handler: ProcessIbsCmd: Received IBS_WAKE_IND: 0xFD
+08-31 07:14:38.089  1502  3285 D vendor.qti.bluetooth@1.1-ibs_handler: SerialClockVote: vote for UART CLK ON
+08-31 07:14:38.089  1502  3285 E vendor.qti.bluetooth@1.1-wake_lock: Acquire write to wakelock file failed -1 - Operation not permitted
+08-31 07:14:38.089  1502  3285 I vendor.qti.bluetooth@1.1-ibs_handler: ProcessIbsCmd: Writing IBS_WAKE_ACK
+08-31 07:14:38.087 11404 11404 W cat     : type=1400 audit(0.0:895901): avc:  denied  { search } for  name="devfreq" dev="sysfs" ino=52176 scontext=u:r:untrusted_app:s0:c224,c256,c512,c768 tcontext=u:object_r:vendor_sysfs_devfreq:s0 tclass=dir permissive=0
+08-31 07:14:38.132  1502  3285 I vendor.qti.bluetooth@1.1-ibs_handler: ProcessIbsCmd: Received IBS_SLEEP_IND: 0xFE
+08-31 07:14:38.132  1502  3285 D vendor.qti.bluetooth@1.1-ibs_handler: SerialClockVote: vote for UART CLK OFF
+08-31 07:14:37.748 11410 11410 W audit   : audit_lost=587694 audit_rate_limit=5 audit_backlog_limit=64
+08-31 07:14:37.748 11410 11410 E audit   : rate limit exceeded
+08-31 07:14:37.838  6721  6721 I [kworke][0x51b36f84b4e][01:44:38.232003] wlan: [6721:I:PMO] pmo_core_psoc_send_host_wakeup_ind_to_fw: Host wakeup indication sent to fw
+08-31 07:14:37.847     0     0 I [    C0] [soft_i][0x51b36faea98][01: 44:38.240954] wlan: [0:I:WMA] WLAN triggered wakeup: BPF_ALLOW (39), vdev: 0 (STA)
+08-31 07:14:37.847     0     0 I [    C0] [soft_i][0x51b36fafbd1][01: 44:38.241183] wlan: [0:I:WMA] wma_wake_event_packet: Wake event packet:
+08-31 07:14:38.283  1502  3136 E vendor.qti.bluetooth@1.1-wake_lock: Release wake lock not initialized/acquired
+08-31 07:14:38.090  1099  1099 I wcd_usbss_is_in_reset_state: Exit ret = 0, cable_status = 1
+08-31 07:14:38.817  1579  1658 W libbinder.ServiceManagerCppClient: Waited one second for vendor.qti.qhcp.IQHDC/default (is service started? Number of threads started in the threadpool: 2. Are binder threads started and available?)
+08-31 07:14:38.426   899   899 I servicemanager: Caller(pid=1579,uid=0,sid=u:r:vendor_hal_perf_default:s0) Since 'vendor.qti.qhcp.IQHDC/default' could not be found trying to start it as a lazy AIDL service. (if it's not configured to be a lazy service, it may be stuck starting or still starting).
+08-31 07:14:38.428     1     1 E init    : Control message: Could not find 'aidl/vendor.qti.qhcp.IQHDC/default' for ctl.interface_start from pid: 899 (/system/bin/servicemanager)
+08-31 07:14:38.822   899 11424 W libc    : Unable to set property "ctl.interface_start" to "aidl/vendor.qti.qhcp.IQHDC/default": PROP_ERROR_HANDLE_CONTROL_MESSAGE (0x20)
+08-31 07:14:38.429 11424 11424 I servicemanager: Caller(pid=1579,uid=0,sid=u:r:vendor_hal_perf_default:s0) Tried to start aidl service vendor.qti.qhcp.IQHDC/default as a lazy service, but was unable to. Usually this happens when a service is not installed, but if the service is intended to be used as a lazy service, then it may be configured incorrectly.
+08-31 07:14:38.473  6721  6721 I [kworke][0x51b37b24d1b][01:44:38.866907] wlan: [6721:I:PMO] pmo_core_enable_wow_in_fw: drv wow is enabled
+08-31 07:14:38.727 20724 20724 E [TP0]touchpanel: irq gpio is 0
+08-31 07:14:38.967  6721  6721 I [kworke][0x51b38433384][01:44:39.361499] wlan: [6721:I:PMO] pmo_core_psoc_send_host_wakeup_ind_to_fw: Host wakeup indication sent to fw
+08-31 07:14:38.976     0     0 I [    C0] [soft_i][0x51b3845d80b][01: 44:39.370520] wlan: [0:I:WMA] WLAN triggered wakeup: BPF_ALLOW (39), vdev: 0 (STA)
+08-31 07:14:38.977     0     0 I [    C0] [soft_i][0x51b3845f07d][01: 44:39.370846] wlan: [0:I:WMA] wma_wake_event_packet: Wake event packet:
+08-31 07:14:39.391  1502  3285 I vendor.qti.bluetooth@1.1-ibs_handler: ProcessIbsCmd: Received IBS_WAKE_IND: 0xFD
+08-31 07:14:39.391  1502  3285 D vendor.qti.bluetooth@1.1-ibs_handler: SerialClockVote: vote for UART CLK ON
+08-31 07:14:39.392  1502  3285 E vendor.qti.bluetooth@1.1-wake_lock: Acquire write to wakelock file failed -1 - Operation not permitted
+08-31 07:14:39.392  1502  3285 I vendor.qti.bluetooth@1.1-ibs_handler: ProcessIbsCmd: Writing IBS_WAKE_ACK
+08-31 07:14:39.432  1502  3285 I vendor.qti.bluetooth@1.1-ibs_handler: ProcessIbsCmd: Received IBS_SLEEP_IND: 0xFE
+08-31 07:14:39.433  1502  3285 D vendor.qti.bluetooth@1.1-ibs_handler: SerialClockVote: vote for UART CLK OFF
+08-31 07:14:39.583  1502  3136 E vendor.qti.bluetooth@1.1-wake_lock: Release wake lock not initialized/acquired
+08-31 07:14:39.727  2447  2726 D WifiClientModeImpl[14183:wlan0]: updateLinkLayerStatsRssiSpeedFrequencyCapabilities rssi=-24 TxLinkspeed=234 freq=5220 RxLinkSpeed=866
+08-31 07:14:39.727  2447  2726 D WifiDataStall: tx tput in kbps: 209274
+08-31 07:14:39.727  2447  2726 D WifiDataStall: rx tput in kbps: 815257
+08-31 07:14:39.727  2447  2726 V WifiConfigManager: Updating scan detail cache freq=5220 BSSID=b4:86:18:de:39:ca RSSI=-23 for "Excitel_home_wifi_5"WPA_PSK
+08-31 07:14:39.727  2447  2726 D WifiDataStall:  ccaLevel = 15
+08-31 07:14:39.727  2447  2726 D WifiDataStall: L2 txTputKbps: 209274, rxTputKbps: 815257, L3 txTputKbps: 0, rxTputKbps: 0, TxTrafficHigh: false, RxTrafficHigh: false, Throughput Sufficient: true
+08-31 07:14:39.728  2447  2726 D WifiThroughputPredictor:  utilization (LLS) 15 isBluetoothConnected: false final utilization: 15
+08-31 07:14:39.728  2447  2726 D WifiThroughputPredictor:  BW: 2 RSSI: -24 Nss: 2 Mode: 5 symDur: 3600 snrDb 50 bitPerTone: 6667 rate: 866 throughput: 815
+08-31 07:14:39.728  2447  2726 D WifiThroughputPredictor:  utilization (LLS) 15 isBluetoothConnected: false final utilization: 15
+08-31 07:14:39.728  2447  2726 D WifiThroughputPredictor:  BW: 2 RSSI: -24 Nss: 2 Mode: 5 symDur: 3600 snrDb 50 bitPerTone: 6667 rate: 866 throughput: 815
+08-31 07:14:39.732  2447  2726 D WifiScoreCard: BSSID update SIGNAL_POLL ID: 715353381 SSID: "Excitel_home_wifi_5", BSSID: b4:86:18:de:39:ca, MAC: c6:52:65:7d:a1:b6, IP: /192.168.1.35, Security type: 2, Supplicant state: COMPLETED, Wi-Fi standard: 11ac, RSSI: -24, Link speed: 234Mbps, Tx Link speed: 234Mbps, Max Supported Tx Link speed: 866Mbps, Rx Link speed: 866Mbps, Max Supported Rx Link speed: 866Mbps, Frequency: 5220MHz, Net ID: 5, Metered hint: false, score: 106, isUsable: true, CarrierMerged: false, SubscriptionId: -1, IsPrimary: 1, Trusted: true, Restricted: false, Ephemeral: false, OEM paid: false, OEM private: false, OSU AP: false, FQDN: <none>, Provider friendly name: <none>, Requesting package name: <none>"Excitel_home_wifi_5"wpa2-pskMLO Information: , Is TID-To-Link negotiation supported by the AP: false, AP MLD Address: <none>, AP MLO Link Id: <none>, AP MLO Affiliated links: <none>, Vendor Data: <none>
+08-31 07:14:39.733  2447  2726 D WifiScoreCard: txRate: 3 txSpeed: 234
+08-31 07:14:39.733  2447  2726 D WifiScoreCard: network update SIGNAL_POLL "Excitel_home_wifi_5" ID: 1721486633 RSSI -24 txSpeed -1
+08-31 07:14:39.733  2447  2726 D WifiClientModeImpl[14183:wlan0]:  ClientModeImpl$L2ConnectedState screen=on 68 0 "Excitel_home_wifi_5" b4:86:18:de:39:ca rssi=-24 f=5220 sc=106 link=234 tx=2.2, 0.7, 0.0 rx=2.4 bcn=1882069 [on:0 tx:2 rx:1 period:3021] from screen [on:0 period:29412734] score=106
+08-31 07:14:39.821  1579  1658 W libbinder.ServiceManagerCppClient: Waited one second for vendor.qti.qhcp.IQHDC/default (is service started? Number of threads started in the threadpool: 2. Are binder threads started and available?)
+08-31 07:14:39.430   899   899 I servicemanager: Caller(pid=1579,uid=0,sid=u:r:vendor_hal_perf_default:s0) Since 'vendor.qti.qhcp.IQHDC/default' could not be found trying to start it as a lazy AIDL service. (if it's not configured to be a lazy service, it may be stuck starting or still starting).
+08-31 07:14:39.826   899 11425 W libc    : Unable to set property "ctl.interface_start" to "aidl/vendor.qti.qhcp.IQHDC/default": PROP_ERROR_HANDLE_CONTROL_MESSAGE (0x20)
+08-31 07:14:39.432     1     1 E init    : Control message: Could not find 'aidl/vendor.qti.qhcp.IQHDC/default' for ctl.interface_start from pid: 899 (/system/bin/servicemanager)
+08-31 07:14:39.432 11425 11425 I servicemanager: Caller(pid=1579,uid=0,sid=u:r:vendor_hal_perf_default:s0) Tried to start aidl service vendor.qti.qhcp.IQHDC/default as a lazy service, but was unable to. Usually this happens when a service is not installed, but if the service is intended to be used as a lazy service, then it may be configured incorrectly.
+08-31 07:14:39.955  6721  6721 I [kworke][0x51b3964ab04][01:44:40.349546] wlan: [6721:I:PMO] pmo_core_enable_wow_in_fw: drv wow is enabled
+08-31 07:14:40.443  1601  1667 D vendor.oplus.hardware.charger-V10-service: parallel fold conf file parse fail parallel_fold_state 2
+08-31 07:14:40.444  1601  1667 D vendor.oplus.hardware.charger-V10-service: scale_chg Start!!!
+08-31 07:14:40.444  1601  1667 D vendor.oplus.hardware.charger-V10-service: [0, 0, 3]
+08-31 07:14:40.444  1601  1667 D vendor.oplus.hardware.charger-V10-service: [0, 2, 9]
+08-31 07:14:40.445  1601  1667 D vendor.oplus.hardware.charger-V10-service: [0, 1, 4]
+08-31 07:14:40.445  1601  1667 D vendor.oplus.hardware.charger-V10-service: [0, 3, 3]
+08-31 07:14:40.445  1601  1667 D vendor.oplus.hardware.charger-V10-service: [0, 4, 3]
+08-31 07:14:40.445  1601  1667 D vendor.oplus.hardware.charger-V10-service: [0, 5, 4]
+08-31 07:14:40.445  1601  1667 D vendor.oplus.hardware.charger-V10-service: [0, 6, 3]
+08-31 07:14:40.445  1601  1667 D vendor.oplus.hardware.charger-V10-service: scale_chg Start!!!
+08-31 07:14:40.445  1601  1667 D vendor.oplus.hardware.charger-V10-service: [0, 0, 3]
+08-31 07:14:40.446  1601  1667 D vendor.oplus.hardware.charger-V10-service: [0, 2, 9]
+08-31 07:14:40.446  1601  1667 D vendor.oplus.hardware.charger-V10-service: [0, 1, 4]
+08-31 07:14:40.446  1601  1667 D vendor.oplus.hardware.charger-V10-service: [0, 3, 3]
+08-31 07:14:40.446  1601  1667 D vendor.oplus.hardware.charger-V10-service: [0, 4, 3]
+08-31 07:14:40.446  1601  1667 D vendor.oplus.hardware.charger-V10-service: [0, 5, 4]
+08-31 07:14:40.446  1601  1667 D vendor.oplus.hardware.charger-V10-service: [0, 6, 3]
+08-31 07:14:40.090  6721  6721 I [kworke][0x51b398c2cd5][01:44:40.484397] wlan: [6721:I:PMO] pmo_core_psoc_send_host_wakeup_ind_to_fw: Host wakeup indication sent to fw
+08-31 07:14:40.099     0     0 I [    C0] [soft_i][0x51b398ec432][01: 44:40.493242] wlan: [0:I:WMA] WLAN triggered wakeup: BPF_ALLOW (39), vdev: 0 (STA)
+08-31 07:14:40.099     0     0 I [    C0] [soft_i][0x51b398ed23e][01: 44:40.493429] wlan: [0:I:WMA] wma_wake_event_packet: Wake event packet:
+08-31 07:14:40.553  1502  3285 I vendor.qti.bluetooth@1.1-ibs_handler: ProcessIbsCmd: Received IBS_WAKE_IND: 0xFD
+08-31 07:14:40.553  1502  3285 D vendor.qti.bluetooth@1.1-ibs_handler: SerialClockVote: vote for UART CLK ON
+08-31 07:14:40.553  1502  3285 E vendor.qti.bluetooth@1.1-wake_lock: Acquire write to wakelock file failed -1 - Operation not permitted
+08-31 07:14:40.554  1502  3285 I vendor.qti.bluetooth@1.1-ibs_handler: ProcessIbsCmd: Writing IBS_WAKE_ACK
+08-31 07:14:40.595  1502  3285 I vendor.qti.bluetooth@1.1-ibs_handler: ProcessIbsCmd: Received IBS_SLEEP_IND: 0xFE
+08-31 07:14:40.595  1502  3285 D vendor.qti.bluetooth@1.1-ibs_handler: SerialClockVote: vote for UART CLK OFF
+08-31 07:14:40.745  1502  3136 E vendor.qti.bluetooth@1.1-wake_lock: Release wake lock not initialized/acquired
+08-31 07:14:40.399 13711 13711 I         : [INFO]: OPLUS_CHG[MMS_GAUGE]([oplus_mms_gauge_choice_fit_vol][3465]): choice cp voltage as vbat [3840, 3832]
+08-31 07:14:40.401 13711 13711 I         : [INFO]: OPLUS_CHG[MMS_GAUGE]([oplus_mms_gauge_choice_fit_vol][3465]): choice cp voltage as vbat [3840, 3832]
+08-31 07:14:40.411 24753 24753 I         : [INFO]: OPLUS_CHG[CHG_COMM]([oplus_comm_smooth_to_soc][3416]): soc[0 3 45 45 46 47] avg[0 1 0 0 0] fifo[46 46 46 46]
+08-31 07:14:40.421 12783 12783 I OPLUS_CHG[oplus_charge_info]: BATTERY[391 392 3840 3840 293 45 47 46 3886 8698 1 0x20 0], CHARGE[4455 600 0 0], WIRED[1 447 4988 500 1 0x0 0 0 0 2 0], WIRELESS[0 0 0 0 0 0x0 0 0 0], VOOC[0 0 0 0 0x0], UFCS[0 0 0 0x0], COMMON[6 0 0 0x0 1 0 1 8698 100 0]
+08-31 07:14:40.427 12783 12783 I         : [INFO]: OPLUS_CHG[ADSP]([oplus_chg_8350_reg_dump][7390]): sm8450_st_dump: [chg_en=1, suspend=0, pd_svooc=0], subtype=0x01],[oplus_UsbCommCapable=0, oplus_pd_svooc=0, typec_mode=0, cid_status=0x01, usb_in_status=1],[0x2606=0x83, 0x2607=0x19, 0x2608=0x0a, 0x2609=0x02], [0x260a=0x04, 0x260b=0x55, 0x260c=0x0a, 0x260d=0x18], [0x260e=0x0a, 0x260f=0x01, 0x2610=0x00, 0x2640=0x01], [0x2641=0x02, 0x2642=0x05, 0x2646=0x01, 0x2650=0x04], [0x2706=0x0a, 0x2707=0x0a, 0x2708=0x0a, 0x2709=0x0a], [0x270b=0xe2, 0x270c=0x48, 0x2710=0xc0, 0x280c=0x38], [0x2810=0x00, 0x2840=0x01, 0x287f=0x00, 0x2906=0x02], [0x2908=0x0f, 0x290a=0x11, 0x290b=0x01, 0x290c=0x01], [0x2910=0x11, 0x2944=0x80, 0x2950=0x02, 0x2951=0x01], [0x2952=0x0a, 0x2954=0x00, 0x2960=0xe0, 0x2b06=0x08], [0x2b07=0x00, 0x2b08=0x00, 0x2b09=0xa3, 0x2b0a=0x39], [0x2b0b=0xab, 0x2b0c=0x00, 0x29a8=0x81, 0x29a9=0x83], [0x29aa=0x00, 0x2aa2=0x00, 0x2aa8=0x87, 0x2aa9=0x00], [0x2aaa=0x00],
+08-31 07:14:40.825  1579  1658 W libbinder.ServiceManagerCppClient: Waited one second for vendor.qti.qhcp.IQHDC/default (is service started? Number of threads started in the threadpool: 2. Are binder threads started and available?)
+08-31 07:14:40.432   899   899 I servicemanager: Caller(pid=1579,uid=0,sid=u:r:vendor_hal_perf_default:s0) Since 'vendor.qti.qhcp.IQHDC/default' could not be found trying to start it as a lazy AIDL service. (if it's not configured to be a lazy service, it may be stuck starting or still starting).
+08-31 07:14:40.434     1     1 E init    : Control message: Could not find 'aidl/vendor.qti.qhcp.IQHDC/default' for ctl.interface_start from pid: 899 (/system/bin/servicemanager)
+08-31 07:14:40.829   899 11426 W libc    : Unable to set property "ctl.interface_start" to "aidl/vendor.qti.qhcp.IQHDC/default": PROP_ERROR_HANDLE_CONTROL_MESSAGE (0x20)
+08-31 07:14:40.435 11426 11426 I servicemanager: Caller(pid=1579,uid=0,sid=u:r:vendor_hal_perf_default:s0) Tried to start aidl service vendor.qti.qhcp.IQHDC/default as a lazy service, but was unable to. Usually this happens when a service is not installed, but if the service is intended to be used as a lazy service, then it may be configured incorrectly.
+08-31 07:14:40.675  6721  6721 I [kworke][0x51b3a3793c6][01:44:41.069449] wlan: [6721:I:PMO] pmo_core_enable_wow_in_fw: drv wow is enabled
+08-31 07:14:40.744 20724 20724 E [TP0]touchpanel: irq gpio is 0
+08-31 07:14:41.439  5485  5485 W DefaultDispatch: type=1400 audit(0.0:895908): avc:  denied  { read } for  name="version" dev="proc" ino=4026532013 scontext=u:r:untrusted_app:s0:c224,c256,c512,c768 tcontext=u:object_r:proc_version:s0 tclass=file permissive=0 app=com.ivarna.mkm
+08-31 07:14:41.469  5485  7854 W CpuUtilizationProvider: Failed to read /proc/stat: grep: /proc/stat: Permission denied
+08-31 07:14:41.490  5485  7854 D CpuUtilizationProvider: CPU usage updated from frequency (fallback): 23%
+08-31 07:14:41.492  5485  7854 D CpuProvider: Core 0: freq=1344000, usage=0.22222222 (hwMin=364800, hwMax=2265600)
+08-31 07:14:41.492  5485  7854 D CpuProvider: Core 1: freq=1344000, usage=0.4040404 (hwMin=364800, hwMax=2265600)
+08-31 07:14:41.494  5485  7854 D CpuProvider: Core 2: freq=2572800, usage=0.42028984 (hwMin=499200, hwMax=3148800)
+08-31 07:14:41.494  5485  7854 D CpuProvider: Core 3: freq=2572800, usage=0.13043478 (hwMin=499200, hwMax=3148800)
+08-31 07:14:41.494  5485  7854 D CpuProvider: Core 4: freq=2572800, usage=0.13043478 (hwMin=499200, hwMax=3148800)
+08-31 07:14:41.495  5485  7854 D CpuProvider: Core 5: freq=499200, usage=0.234375 (hwMin=499200, hwMax=2956800)
+08-31 07:14:41.495  5485  7854 D CpuProvider: Core 6: freq=499200, usage=0.234375 (hwMin=499200, hwMax=2956800)
+08-31 07:14:41.497  5485  7854 D CpuProvider: Core 7: freq=902400, usage=0.14965986 (hwMin=480000, hwMax=3302400)
+08-31 07:14:41.497  5485  7854 D CpuProvider: Overall usage: 0.23715468 (from 8 cores), Avg Freq: 1327750
+08-31 07:14:41.507 11435 11435 W cat     : type=1400 audit(0.0:895909): avc:  denied  { read } for  name="governor" dev="sysfs" ino=139690 scontext=u:r:untrusted_app:s0:c224,c256,c512,c768 tcontext=u:object_r:vendor_sysfs_kgsl:s0 tclass=file permissive=0
+08-31 07:14:41.511 11436 11436 W cat     : type=1400 audit(0.0:895910): avc:  denied  { read } for  name="available_governors" dev="sysfs" ino=139691 scontext=u:r:untrusted_app:s0:c224,c256,c512,c768 tcontext=u:object_r:vendor_sysfs_kgsl:s0 tclass=file permissive=0 app=com.ivarna.mkm
+08-31 07:14:41.535 11441 11441 W cat     : type=1400 audit(0.0:895911): avc:  denied  { read } for  name="cur_freq" dev="sysfs" ino=139692 scontext=u:r:untrusted_app:s0:c224,c256,c512,c768 tcontext=u:object_r:vendor_sysfs_kgsl:s0 tclass=file permissive=0
+08-31 07:14:41.567 11447 11447 W cat     : type=1400 audit(0.0:895912): avc:  denied  { read } for  name="gpuclk" dev="sysfs" ino=139614 scontext=u:r:untrusted_app:s0:c224,c256,c512,c768 tcontext=u:object_r:vendor_sysfs_kgsl_gpuclk:s0 tclass=file permissive=0 app=com.ivarna.mkm
+08-31 07:14:41.194 11449 11449 W audit   : audit_lost=587700 audit_rate_limit=5 audit_backlog_limit=64
+08-31 07:14:41.194 11449 11449 E audit   : rate limit exceeded
+08-31 07:14:41.217  6721  6721 I [kworke][0x51b3ad644c5][01:44:41.611116] wlan: [6721:I:PMO] pmo_core_psoc_send_host_wakeup_ind_to_fw: Host wakeup indication sent to fw
+08-31 07:14:41.226     0     0 I [    C0] [soft_i][0x51b3ad8df0d][01: 44:41.620000] wlan: [0:I:WMA] WLAN triggered wakeup: BPF_ALLOW (39), vdev: 0 (STA)
+08-31 07:14:41.226     0     0 I [    C0] [soft_i][0x51b3ad8ec17][01: 44:41.620174] wlan: [0:I:WMA] wma_wake_event_packet: Wake event packet:
+08-31 07:14:41.827  1579  1658 W libbinder.ServiceManagerCppClient: Waited one second for vendor.qti.qhcp.IQHDC/default (is service started? Number of threads started in the threadpool: 2. Are binder threads started and available?)
+08-31 07:14:41.435   899   899 I servicemanager: Caller(pid=1579,uid=0,sid=u:r:vendor_hal_perf_default:s0) Since 'vendor.qti.qhcp.IQHDC/default' could not be found trying to start it as a lazy AIDL service. (if it's not configured to be a lazy service, it may be stuck starting or still starting).
+08-31 07:14:41.439     1     1 E init    : Control message: Could not find 'aidl/vendor.qti.qhcp.IQHDC/default' for ctl.interface_start from pid: 899 (/system/bin/servicemanager)
+08-31 07:14:41.833   899 11473 W libc    : Unable to set property "ctl.interface_start" to "aidl/vendor.qti.qhcp.IQHDC/default": PROP_ERROR_HANDLE_CONTROL_MESSAGE (0x20)
+08-31 07:14:41.440 11473 11473 I servicemanager: Caller(pid=1579,uid=0,sid=u:r:vendor_hal_perf_default:s0) Tried to start aidl service vendor.qti.qhcp.IQHDC/default as a lazy service, but was unable to. Usually this happens when a service is not installed, but if the service is intended to be used as a lazy service, then it may be configured incorrectly.
+08-31 07:14:41.887  1502  3285 I vendor.qti.bluetooth@1.1-ibs_handler: ProcessIbsCmd: Received IBS_WAKE_IND: 0xFD
+08-31 07:14:41.888  1502  3285 D vendor.qti.bluetooth@1.1-ibs_handler: SerialClockVote: vote for UART CLK ON
+08-31 07:14:41.888  1502  3285 E vendor.qti.bluetooth@1.1-wake_lock: Acquire write to wakelock file failed -1 - Operation not permitted
+08-31 07:14:41.888  1502  3285 I vendor.qti.bluetooth@1.1-ibs_handler: ProcessIbsCmd: Writing IBS_WAKE_ACK
+08-31 07:14:41.941  1502  3285 I vendor.qti.bluetooth@1.1-ibs_handler: ProcessIbsCmd: Received IBS_SLEEP_IND: 0xFE
+08-31 07:14:41.941  1502  3285 D vendor.qti.bluetooth@1.1-ibs_handler: SerialClockVote: vote for UART CLK OFF
+08-31 07:14:42.091  1502  3136 E vendor.qti.bluetooth@1.1-wake_lock: Release wake lock not initialized/acquired
+08-31 07:14:42.184 13852 13852 I [LCD][0][INFO][dsi_display_status_check_error_flag:1212] [ESD]: first read: master=0 slave=0
+08-31 07:14:42.598 27566 11120 I NearbyMediums: Found Fast Ble Advertisements :
+08-31 07:14:42.598 27566 11120 I NearbyMediums: BleAdvertisement { version=2, socketVersion=2, isFast=true, serviceIdHash=null, data=[ 0x23 0x51 0x41 0x52 0x46 0x11 0x32 0x35 0xd6 0x37 0x60 0xf1 0xa9 0xcb 0x70 0xa8 0x14 0xaf 0xe4 0xe2 0x13 0xd4 0x4b ], deviceToken=[ 0xd0 0x61 ], rxAdvertisement=null } : 4 times.
+08-31 07:14:42.598 27566 11120 I NearbyMediums: BleAdvertisement { version=2, socketVersion=2, isFast=true, serviceIdHash=null, data=[ 0x23 0x55 0x4b 0x54 0x5a 0x11 0x32 0x3e 0x0d 0x82 0xa7 0x8c 0xa9 0x32 0x33 0xb0 0x31 0x1c 0x1b 0x00 0xfb 0xfe 0xd8 ], deviceToken=[ 0x9d 0xa2 ], rxAdvertisement=null } : 1 times.
+08-31 07:14:42.598 27566 11120 I NearbyMediums: Total 5 fast advertisements from 2 unique advertisers.
+08-31 07:14:42.598 27566 11120 I NearbyMediums: Current Tracked Scanning Clients are : {NearbyConnections.EnvironmentMonitor, NearbySharing, NearbyConnections.TxAdvertisement}
+08-31 07:14:42.600 27566 11475 I NearbyConnections: Processing lost BlePeripheral BlePeripheral{advertisement=BleAdvertisement { version=2, socketVersion=2, isFast=true, serviceIdHash=null, data=[ 0x23 0x52 0x33 0x57 0x4f 0x11 0x32 0x01 0x16 0x13 0x95 0x5a 0x89 0x90 0xfc 0x76 0x60 0x8a 0x12 0xa5 0x11 0x79 0x95 ], deviceToken=[ 0x9d 0xa2 ], rxAdvertisement=null }, dctAdvertisement=null, address=null, psm=0, deviceToken=<ByteString@1a103f6 size=2 contents="\235\242">, isSecondProfile=false, rxInstantConnectionAdv=null}.
+08-31 07:14:42.600 27566 11475 I NearbyConnections: Lost BleEndpoint for BlePeripheral BlePeripheral{advertisement=BleAdvertisement { version=2, socketVersion=2, isFast=true, serviceIdHash=null, data=[ 0x23 0x52 0x33 0x57 0x4f 0x11 0x32 0x01 0x16 0x13 0x95 0x5a 0x89 0x90 0xfc 0x76 0x60 0x8a 0x12 0xa5 0x11 0x79 0x95 ], deviceToken=[ 0x9d 0xa2 ], rxAdvertisement=null }, dctAdvertisement=null, address=null, psm=0, deviceToken=<ByteString@1a103f6 size=2 contents="\235\242">, isSecondProfile=false, rxInstantConnectionAdv=null} (with EndpointId R3WO and EndpointInfo [ 0x32 0x01 0x16 0x13 0x95 0x5a 0x89 0x90 0xfc 0x76 0x60 0x8a 0x12 0xa5 0x11 0x79 0x95 ]).
+08-31 07:14:42.601 27566 11475 I NearbyConnections: Unable to record lost endpoint due to null currentDiscoveryPhase
+08-31 07:14:42.601 27566 11475 I NearbyConnections: ClientProxy(53193533) reporting onEndpointLost(R3WO)
+08-31 07:14:42.601 27566 11475 I NearbyConnections: Processing lost BlePeripheral BlePeripheral{advertisement=BleAdvertisement { version=2, socketVersion=2, isFast=true, serviceIdHash=null, data=[ 0x23 0x4c 0x48 0x35 0x56 0x11 0x32 0xdc 0x70 0xff 0x22 0x75 0x2c 0x39 0x13 0xa8 0xc1 0x74 0x80 0xec 0xd9 0x3c 0x20 ], deviceToken=[ 0xe0 0xa3 ], rxAdvertisement=null }, dctAdvertisement=null, address=null, psm=0, deviceToken=<ByteString@707d3f7 size=2 contents="\340\243">, isSecondProfile=false, rxInstantConnectionAdv=null}.
+08-31 07:14:42.601 27566 11475 I NearbyConnections: Lost BleEndpoint for BlePeripheral BlePeripheral{advertisement=BleAdvertisement { version=2, socketVersion=2, isFast=true, serviceIdHash=null, data=[ 0x23 0x4c 0x48 0x35 0x56 0x11 0x32 0xdc 0x70 0xff 0x22 0x75 0x2c 0x39 0x13 0xa8 0xc1 0x74 0x80 0xec 0xd9 0x3c 0x20 ], deviceToken=[ 0xe0 0xa3 ], rxAdvertisement=null }, dctAdvertisement=null, address=null, psm=0, deviceToken=<ByteString@707d3f7 size=2 contents="\340\243">, isSecondProfile=false, rxInstantConnectionAdv=null} (with EndpointId LH5V and EndpointInfo [ 0x32 0xdc 0x70 0xff 0x22 0x75 0x2c 0x39 0x13 0xa8 0xc1 0x74 0x80 0xec 0xd9 0x3c 0x20 ]).
+08-31 07:14:42.601 27566 11475 I NearbyConnections: Unable to record lost endpoint due to null currentDiscoveryPhase
+08-31 07:14:42.601 27566 11475 I NearbyConnections: ClientProxy(53193533) reporting onEndpointLost(LH5V)
+08-31 07:14:42.602 27566 11475 I NearbySharing: NearbySharing Internal event EndpointLost(endpointId=R3WO)
+08-31 07:14:42.602 27566 11120 I NearbySharing: NearbySharing Internal event EndpointLost(endpointId=LH5V)
+08-31 07:14:42.743  2447  2726 D WifiClientModeImpl[14183:wlan0]: updateLinkLayerStatsRssiSpeedFrequencyCapabilities rssi=-24 TxLinkspeed=263 freq=5220 RxLinkSpeed=866
+08-31 07:14:42.743  2447  2726 D WifiDataStall: tx tput in kbps: 209274
+08-31 07:14:42.744  2447  2726 D WifiDataStall: rx tput in kbps: 815257
+08-31 07:14:42.744  2447  2726 V WifiConfigManager: Updating scan detail cache freq=5220 BSSID=b4:86:18:de:39:ca RSSI=-23 for "Excitel_home_wifi_5"WPA_PSK
+08-31 07:14:42.744  2447  2726 D WifiDataStall:  ccaLevel = 15
+08-31 07:14:42.744  2447  2726 D WifiDataStall: L2 txTputKbps: 235210, rxTputKbps: 815257, L3 txTputKbps: 0, rxTputKbps: 0, TxTrafficHigh: false, RxTrafficHigh: false, Throughput Sufficient: true
+08-31 07:14:42.744  2447  2726 D WifiThroughputPredictor:  utilization (LLS) 15 isBluetoothConnected: false final utilization: 15
+08-31 07:14:42.744  2447  2726 D WifiThroughputPredictor:  BW: 2 RSSI: -24 Nss: 2 Mode: 5 symDur: 3600 snrDb 50 bitPerTone: 6667 rate: 866 throughput: 815
+08-31 07:14:42.744  2447  2726 D WifiThroughputPredictor:  utilization (LLS) 15 isBluetoothConnected: false final utilization: 15
+08-31 07:14:42.744  2447  2726 D WifiThroughputPredictor:  BW: 2 RSSI: -24 Nss: 2 Mode: 5 symDur: 3600 snrDb 50 bitPerTone: 6667 rate: 866 throughput: 815
+08-31 07:14:42.749  2447  2726 D WifiScoreCard: BSSID update SIGNAL_POLL ID: 715353381 SSID: "Excitel_home_wifi_5", BSSID: b4:86:18:de:39:ca, MAC: c6:52:65:7d:a1:b6, IP: /192.168.1.35, Security type: 2, Supplicant state: COMPLETED, Wi-Fi standard: 11ac, RSSI: -24, Link speed: 263Mbps, Tx Link speed: 263Mbps, Max Supported Tx Link speed: 866Mbps, Rx Link speed: 866Mbps, Max Supported Rx Link speed: 866Mbps, Frequency: 5220MHz, Net ID: 5, Metered hint: false, score: 106, isUsable: true, CarrierMerged: false, SubscriptionId: -1, IsPrimary: 1, Trusted: true, Restricted: false, Ephemeral: false, OEM paid: false, OEM private: false, OSU AP: false, FQDN: <none>, Provider friendly name: <none>, Requesting package name: <none>"Excitel_home_wifi_5"wpa2-pskMLO Information: , Is TID-To-Link negotiation supported by the AP: false, AP MLD Address: <none>, AP MLO Link Id: <none>, AP MLO Affiliated links: <none>, Vendor Data: <none>
+08-31 07:14:42.749  2447  2726 D WifiScoreCard: txRate: 2 txSpeed: 263
+08-31 07:14:42.749  2447  2726 D WifiScoreCard: network update SIGNAL_POLL "Excitel_home_wifi_5" ID: 1721486633 RSSI -24 txSpeed -1
+08-31 07:14:42.749  2447  2726 D WifiClientModeImpl[14183:wlan0]:  ClientModeImpl$L2ConnectedState screen=on 68 0 "Excitel_home_wifi_5" b4:86:18:de:39:ca rssi=-24 f=5220 sc=106 link=263 tx=1.6, 0.2, 0.0 rx=1.7 bcn=1882097 [on:0 tx:1 rx:0 period:3016] from screen [on:0 period:29415750] score=106
+08-31 07:14:42.829  1579  1658 W libbinder.ServiceManagerCppClient: Waited one second for vendor.qti.qhcp.IQHDC/default (is service started? Number of threads started in the threadpool: 2. Are binder threads started and available?)
+08-31 07:14:42.438   899   899 I servicemanager: Caller(pid=1579,uid=0,sid=u:r:vendor_hal_perf_default:s0) Since 'vendor.qti.qhcp.IQHDC/default' could not be found trying to start it as a lazy AIDL service. (if it's not configured to be a lazy service, it may be stuck starting or still starting).
+08-31 07:14:42.834   899 11479 W libc    : Unable to set property "ctl.interface_start" to "aidl/vendor.qti.qhcp.IQHDC/default": PROP_ERROR_HANDLE_CONTROL_MESSAGE (0x20)
+08-31 07:14:42.440     1     1 E init    : Control message: Could not find 'aidl/vendor.qti.qhcp.IQHDC/default' for ctl.interface_start from pid: 899 (/system/bin/servicemanager)
+08-31 07:14:42.441 11479 11479 I servicemanager: Caller(pid=1579,uid=0,sid=u:r:vendor_hal_perf_default:s0) Tried to start aidl service vendor.qti.qhcp.IQHDC/default as a lazy service, but was unable to. Usually this happens when a service is not installed, but if the service is intended to be used as a lazy service, then it may be configured incorrectly.
+08-31 07:14:42.759  4937  4937 E [TP0]touchpanel: irq gpio is 0
+08-31 07:14:43.282  1502  3285 I vendor.qti.bluetooth@1.1-ibs_handler: ProcessIbsCmd: Received IBS_WAKE_IND: 0xFD
+08-31 07:14:43.283  1502  3285 D vendor.qti.bluetooth@1.1-ibs_handler: SerialClockVote: vote for UART CLK ON
+08-31 07:14:43.283  1502  3285 E vendor.qti.bluetooth@1.1-wake_lock: Acquire write to wakelock file failed -1 - Operation not permitted
+08-31 07:14:43.283  1502  3285 I vendor.qti.bluetooth@1.1-ibs_handler: ProcessIbsCmd: Writing IBS_WAKE_ACK
+08-31 07:14:43.324  1502  3285 I vendor.qti.bluetooth@1.1-ibs_handler: ProcessIbsCmd: Received IBS_SLEEP_IND: 0xFE
+08-31 07:14:43.324  1502  3285 D vendor.qti.bluetooth@1.1-ibs_handler: SerialClockVote: vote for UART CLK OFF
+08-31 07:14:42.973  6721  6721 I [kworke][0x51b3cd8cb87][01:44:43.367366] wlan: [6721:I:PMO] pmo_core_enable_wow_in_fw: drv wow is enabled
+08-31 07:14:43.474  1502  3136 E vendor.qti.bluetooth@1.1-wake_lock: Release wake lock not initialized/acquired
+08-31 07:14:43.833  1579  1658 W libbinder.ServiceManagerCppClient: Waited one second for vendor.qti.qhcp.IQHDC/default (is service started? Number of threads started in the threadpool: 2. Are binder threads started and available?)
+08-31 07:14:43.441   899   899 I servicemanager: Caller(pid=1579,uid=0,sid=u:r:vendor_hal_perf_default:s0) Since 'vendor.qti.qhcp.IQHDC/default' could not be found trying to start it as a lazy AIDL service. (if it's not configured to be a lazy service, it may be stuck starting or still starting).
+08-31 07:14:43.443     1     1 E init    : Control message: Could not find 'aidl/vendor.qti.qhcp.IQHDC/default' for ctl.interface_start from pid: 899 (/system/bin/servicemanager)
+08-31 07:14:43.837   899 11480 W libc    : Unable to set property "ctl.interface_start" to "aidl/vendor.qti.qhcp.IQHDC/default": PROP_ERROR_HANDLE_CONTROL_MESSAGE (0x20)
+08-31 07:14:43.444 11480 11480 I servicemanager: Caller(pid=1579,uid=0,sid=u:r:vendor_hal_perf_default:s0) Tried to start aidl service vendor.qti.qhcp.IQHDC/default as a lazy service, but was unable to. Usually this happens when a service is not installed, but if the service is intended to be used as a lazy service, then it may be configured incorrectly.
+08-31 07:14:43.463 29273 29273 E iostack : irqs = 1810840, self-block = 0
+08-31 07:14:43.468  6721  6721 I [kworke][0x51b3d69a868][01:44:43.861831] wlan: [6721:I:PMO] pmo_core_psoc_send_host_wakeup_ind_to_fw: Host wakeup indication sent to fw
+08-31 07:14:43.477     0     0 I [    C0] [soft_i][0x51b3d6c48d7][01: 44:43.870797] wlan: [0:I:WMA] WLAN triggered wakeup: BPF_ALLOW (39), vdev: 0 (STA)
+08-31 07:14:43.477     0     0 I [    C0] [soft_i][0x51b3d6c5836][01: 44:43.871002] wlan: [0:I:WMA] wma_wake_event_packet: Wake event packet:
+08-31 07:14:44.105  6721  6721 I [kworke][0x51b3e243a78][01:44:44.498659] wlan: [6721:I:PMO] pmo_core_enable_wow_in_fw: drv wow is enabled
+08-31 07:14:44.547  1502  3285 I vendor.qti.bluetooth@1.1-ibs_handler: ProcessIbsCmd: Received IBS_WAKE_IND: 0xFD
+08-31 07:14:44.547  1502  3285 D vendor.qti.bluetooth@1.1-ibs_handler: SerialClockVote: vote for UART CLK ON
+08-31 07:14:44.547  1502  3285 E vendor.qti.bluetooth@1.1-wake_lock: Acquire write to wakelock file failed -1 - Operation not permitted
+08-31 07:14:44.547  1502  3285 I vendor.qti.bluetooth@1.1-ibs_handler: ProcessIbsCmd: Writing IBS_WAKE_ACK
+08-31 07:14:44.588  1502  3285 I vendor.qti.bluetooth@1.1-ibs_handler: ProcessIbsCmd: Received IBS_SLEEP_IND: 0xFE
+08-31 07:14:44.588  1502  3285 D vendor.qti.bluetooth@1.1-ibs_handler: SerialClockVote: vote for UART CLK OFF
+08-31 07:14:44.625  1502  3285 I vendor.qti.bluetooth@1.1-ibs_handler: ProcessIbsCmd: Received IBS_WAKE_IND: 0xFD
+08-31 07:14:44.625  1502  3285 D vendor.qti.bluetooth@1.1-ibs_handler: SerialClockVote: vote for UART CLK ON
+08-31 07:14:44.626  1502  3285 E vendor.qti.bluetooth@1.1-wake_lock: Acquire write to wakelock file failed -1 - Operation not permitted
+08-31 07:14:44.626  1502  3285 I vendor.qti.bluetooth@1.1-ibs_handler: ProcessIbsCmd: Writing IBS_WAKE_ACK
+08-31 07:14:44.667  1502  3285 I vendor.qti.bluetooth@1.1-ibs_handler: ProcessIbsCmd: Received IBS_SLEEP_IND: 0xFE
+08-31 07:14:44.667  1502  3285 D vendor.qti.bluetooth@1.1-ibs_handler: SerialClockVote: vote for UART CLK OFF
+08-31 07:14:44.667  1502  3285 E vendor.qti.bluetooth@1.1-wake_lock: Release wake lock not initialized/acquired
+08-31 07:14:44.817  1502  3136 E vendor.qti.bluetooth@1.1-wake_lock: Release wake lock not initialized/acquired
+08-31 07:14:44.836  1579  1658 W libbinder.ServiceManagerCppClient: Waited one second for vendor.qti.qhcp.IQHDC/default (is service started? Number of threads started in the threadpool: 2. Are binder threads started and available?)
+08-31 07:14:44.444   899   899 I servicemanager: Caller(pid=1579,uid=0,sid=u:r:vendor_hal_perf_default:s0) Since 'vendor.qti.qhcp.IQHDC/default' could not be found trying to start it as a lazy AIDL service. (if it's not configured to be a lazy service, it may be stuck starting or still starting).
+08-31 07:14:44.446     1     1 E init    : Control message: Could not find 'aidl/vendor.qti.qhcp.IQHDC/default' for ctl.interface_start from pid: 899 (/system/bin/servicemanager)
+08-31 07:14:44.840   899 11482 W libc    : Unable to set property "ctl.interface_start" to "aidl/vendor.qti.qhcp.IQHDC/default": PROP_ERROR_HANDLE_CONTROL_MESSAGE (0x20)
+08-31 07:14:44.447 11482 11482 I servicemanager: Caller(pid=1579,uid=0,sid=u:r:vendor_hal_perf_default:s0) Tried to start aidl service vendor.qti.qhcp.IQHDC/default as a lazy service, but was unable to. Usually this happens when a service is not installed, but if the service is intended to be used as a lazy service, then it may be configured incorrectly.
+08-31 07:14:44.951  5485  5485 W DefaultDispatch: type=1400 audit(0.0:895922): avc:  denied  { read } for  name="version" dev="proc" ino=4026532013 scontext=u:r:untrusted_app:s0:c224,c256,c512,c768 tcontext=u:object_r:proc_version:s0 tclass=file permissive=0 app=com.ivarna.mkm
+08-31 07:14:44.988  5485  7854 W CpuUtilizationProvider: Failed to read /proc/stat: grep: /proc/stat: Permission denied
+08-31 07:14:44.593  6721  6721 I [kworke][0x51b3eb34bc6][01:44:44.986996] wlan: [6721:I:PMO] pmo_core_psoc_send_host_wakeup_ind_to_fw: Host wakeup indication sent to fw
+08-31 07:14:44.601     0     0 I [    C0] [soft_i][0x51b3eb5c86e][01: 44:44.995485] wlan: [0:I:WMA] WLAN triggered wakeup: BPF_ALLOW (39), vdev: 0 (STA)
+08-31 07:14:44.602     0     0 I [    C0] [soft_i][0x51b3eb5e066][01: 44:44.995804] wlan: [0:I:WMA] wma_wake_event_packet: Wake event packet:
+08-31 07:14:45.003  5485  7854 D CpuUtilizationProvider: CPU usage updated from frequency (fallback): 27%
+08-31 07:14:45.004  5485  7854 D CpuProvider: Core 0: freq=1017600, usage=0.34343433 (hwMin=364800, hwMax=2265600)
+08-31 07:14:45.004  5485  7854 D CpuProvider: Core 1: freq=1017600, usage=0.4040404 (hwMin=364800, hwMax=2265600)
+08-31 07:14:45.006  5485  7854 D CpuProvider: Core 2: freq=2707200, usage=0.5362319 (hwMin=499200, hwMax=3148800)
+08-31 07:14:45.006  5485  7854 D CpuProvider: Core 3: freq=2707200, usage=0.5362319 (hwMin=499200, hwMax=3148800)
+08-31 07:14:45.006  5485  7854 D CpuProvider: Core 4: freq=2707200, usage=0.5362319 (hwMin=499200, hwMax=3148800)
+08-31 07:14:45.007  5485  7854 D CpuProvider: Core 5: freq=499200, usage=0.0 (hwMin=499200, hwMax=2956800)
+08-31 07:14:45.008  5485  7854 D CpuProvider: Core 6: freq=499200, usage=0.0 (hwMin=499200, hwMax=2956800)
+08-31 07:14:45.009  5485  7854 D CpuProvider: Core 7: freq=902400, usage=0.14965986 (hwMin=480000, hwMax=3302400)
+08-31 07:14:45.009  5485  7854 D CpuProvider: Overall usage: 0.2710243 (from 8 cores), Avg Freq: 1282750
+08-31 07:14:45.015 11517 11517 W cat     : type=1400 audit(0.0:895923): avc:  denied  { read } for  name="governor" dev="sysfs" ino=139690 scontext=u:r:untrusted_app:s0:c224,c256,c512,c768 tcontext=u:object_r:vendor_sysfs_kgsl:s0 tclass=file permissive=0 app=com.ivarna.mkm
+08-31 07:14:45.023 11518 11518 W cat     : type=1400 audit(0.0:895924): avc:  denied  { read } for  name="available_governors" dev="sysfs" ino=139691 scontext=u:r:untrusted_app:s0:c224,c256,c512,c768 tcontext=u:object_r:vendor_sysfs_kgsl:s0 tclass=file permissive=0 app=com.ivarna.mkm
+08-31 07:14:45.047 11523 11523 W cat     : type=1400 audit(0.0:895925): avc:  denied  { read } for  name="cur_freq" dev="sysfs" ino=139692 scontext=u:r:untrusted_app:s0:c224,c256,c512,c768 tcontext=u:object_r:vendor_sysfs_kgsl:s0 tclass=file permissive=0 app=com.ivarna.mkm
+08-31 07:14:45.063 11529 11529 W cat     : type=1400 audit(0.0:895926): avc:  denied  { read } for  name="gpuclk" dev="sysfs" ino=139614 scontext=u:r:untrusted_app:s0:c224,c256,c512,c768 tcontext=u:object_r:vendor_sysfs_kgsl_gpuclk:s0 tclass=file permissive=0
+08-31 07:14:44.681 11531 11531 W audit   : audit_lost=587709 audit_rate_limit=5 audit_backlog_limit=64
+08-31 07:14:44.681 11531 11531 E audit   : rate limit exceeded
+08-31 07:14:45.142  1514  1514 I android.hardware.power-service-qti: Power setBoost: 0, duration: 0
+08-31 07:14:45.144  1514  1514 E QTI PowerHAL: Failed to acquire lock.
+08-31 07:14:45.144  1514  1514 E QTI PowerHAL: Failed process_boost for boost_handle
+08-31 07:14:45.146  3141  3141 D TaskbarManager: dispatchTouchEvent:  displayId=0 isDefaultDisplay=true
+08-31 07:14:45.150  9272  9291 D RPCS3   : S3TROPHY title=BLUS31584 set=NPWR10029_00 state=ready total=33 unlocked=0
+08-31 07:14:44.775  4937  4937 E [TP0]touchpanel: irq gpio is 0
+08-31 07:14:45.446  1601  1667 D vendor.oplus.hardware.charger-V10-service: parallel fold conf file parse fail parallel_fold_state 2
+08-31 07:14:45.447  1601  1667 D vendor.oplus.hardware.charger-V10-service: scale_chg Start!!!
+08-31 07:14:45.448  1601  1667 D vendor.oplus.hardware.charger-V10-service: [0, 0, 3]
+08-31 07:14:45.448  1601  1667 D vendor.oplus.hardware.charger-V10-service: [0, 2, 9]
+08-31 07:14:45.449  1601  1667 D vendor.oplus.hardware.charger-V10-service: [0, 1, 4]
+08-31 07:14:45.449  1601  1667 D vendor.oplus.hardware.charger-V10-service: [0, 3, 3]
+08-31 07:14:45.449  1601  1667 D vendor.oplus.hardware.charger-V10-service: [0, 4, 3]
+08-31 07:14:45.449  1601  1667 D vendor.oplus.hardware.charger-V10-service: [0, 5, 4]
+08-31 07:14:45.449  1601  1667 D vendor.oplus.hardware.charger-V10-service: [0, 6, 3]
+08-31 07:14:45.449  1601  1667 D vendor.oplus.hardware.charger-V10-service: scale_chg Start!!!
+08-31 07:14:45.449  1601  1667 D vendor.oplus.hardware.charger-V10-service: [0, 0, 3]
+08-31 07:14:45.449  1601  1667 D vendor.oplus.hardware.charger-V10-service: [0, 2, 9]
+08-31 07:14:45.450  1601  1667 D vendor.oplus.hardware.charger-V10-service: [0, 1, 4]
+08-31 07:14:45.450  1601  1667 D vendor.oplus.hardware.charger-V10-service: [0, 3, 3]
+08-31 07:14:45.450  1601  1667 D vendor.oplus.hardware.charger-V10-service: [0, 4, 3]
+08-31 07:14:45.450  1601  1667 D vendor.oplus.hardware.charger-V10-service: [0, 5, 4]
+08-31 07:14:45.450  1601  1667 D vendor.oplus.hardware.charger-V10-service: [0, 6, 3]
+08-31 07:14:45.222  6721  6721 I [kworke][0x51b3f6bb47e][01:44:45.616446] wlan: [6721:I:PMO] pmo_core_enable_wow_in_fw: drv wow is enabled
+08-31 07:14:45.719  1502  3285 I vendor.qti.bluetooth@1.1-ibs_handler: ProcessIbsCmd: Received IBS_WAKE_IND: 0xFD
+08-31 07:14:45.719  1502  3285 D vendor.qti.bluetooth@1.1-ibs_handler: SerialClockVote: vote for UART CLK ON
+08-31 07:14:45.719  1502  3285 E vendor.qti.bluetooth@1.1-wake_lock: Acquire write to wakelock file failed -1 - Operation not permitted
+08-31 07:14:45.719  1502  3285 I vendor.qti.bluetooth@1.1-ibs_handler: ProcessIbsCmd: Writing IBS_WAKE_ACK
+08-31 07:14:45.766  1502  3285 I vendor.qti.bluetooth@1.1-ibs_handler: ProcessIbsCmd: Received IBS_SLEEP_IND: 0xFE
+08-31 07:14:45.766  1502  3285 D vendor.qti.bluetooth@1.1-ibs_handler: SerialClockVote: vote for UART CLK OFF
+08-31 07:14:45.780  2447  2726 D WifiClientModeImpl[14183:wlan0]: updateLinkLayerStatsRssiSpeedFrequencyCapabilities rssi=-24 TxLinkspeed=234 freq=5220 RxLinkSpeed=866
+08-31 07:14:45.781  2447  2726 D WifiDataStall: tx tput in kbps: 235210
+08-31 07:14:45.781  2447  2726 D WifiDataStall: rx tput in kbps: 815257
+08-31 07:14:45.781  2447  2726 V WifiConfigManager: Updating scan detail cache freq=5220 BSSID=b4:86:18:de:39:ca RSSI=-23 for "Excitel_home_wifi_5"WPA_PSK
+08-31 07:14:45.781  2447  2726 D WifiDataStall:  ccaLevel = 15
+08-31 07:14:45.781  2447  2726 D WifiDataStall: L2 txTputKbps: 209274, rxTputKbps: 815257, L3 txTputKbps: 0, rxTputKbps: 0, TxTrafficHigh: false, RxTrafficHigh: false, Throughput Sufficient: true
+08-31 07:14:45.781  2447  2726 D WifiThroughputPredictor:  utilization (LLS) 15 isBluetoothConnected: false final utilization: 15
+08-31 07:14:45.781  2447  2726 D WifiThroughputPredictor:  BW: 2 RSSI: -24 Nss: 2 Mode: 5 symDur: 3600 snrDb 50 bitPerTone: 6667 rate: 866 throughput: 815
+08-31 07:14:45.781  2447  2726 D WifiThroughputPredictor:  utilization (LLS) 15 isBluetoothConnected: false final utilization: 15
+08-31 07:14:45.781  2447  2726 D WifiThroughputPredictor:  BW: 2 RSSI: -24 Nss: 2 Mode: 5 symDur: 3600 snrDb 50 bitPerTone: 6667 rate: 866 throughput: 815
+08-31 07:14:45.785  2447  2726 D WifiScoreCard: BSSID update SIGNAL_POLL ID: 715353381 SSID: "Excitel_home_wifi_5", BSSID: b4:86:18:de:39:ca, MAC: c6:52:65:7d:a1:b6, IP: /192.168.1.35, Security type: 2, Supplicant state: COMPLETED, Wi-Fi standard: 11ac, RSSI: -24, Link speed: 234Mbps, Tx Link speed: 234Mbps, Max Supported Tx Link speed: 866Mbps, Rx Link speed: 866Mbps, Max Supported Rx Link speed: 866Mbps, Frequency: 5220MHz, Net ID: 5, Metered hint: false, score: 106, isUsable: true, CarrierMerged: false, SubscriptionId: -1, IsPrimary: 1, Trusted: true, Restricted: false, Ephemeral: false, OEM paid: false, OEM private: false, OSU AP: false, FQDN: <none>, Provider friendly name: <none>, Requesting package name: <none>"Excitel_home_wifi_5"wpa2-pskMLO Information: , Is TID-To-Link negotiation supported by the AP: false, AP MLD Address: <none>, AP MLO Link Id: <none>, AP MLO Affiliated links: <none>, Vendor Data: <none>
+08-31 07:14:45.785  2447  2726 D WifiScoreCard: txRate: 2 txSpeed: 234
+08-31 07:14:45.786  2447  2726 D WifiScoreCard: network update SIGNAL_POLL "Excitel_home_wifi_5" ID: 1721486633 RSSI -24 txSpeed -1
+08-31 07:14:45.786  2447  2726 D WifiClientModeImpl[14183:wlan0]:  ClientModeImpl$L2ConnectedState screen=on 68 0 "Excitel_home_wifi_5" b4:86:18:de:39:ca rssi=-24 f=5220 sc=106 link=234 tx=1.0, 0.0, 0.0 rx=1.0 bcn=1882123 [on:0 tx:1 rx:0 period:3037] from screen [on:0 period:29418787] score=106
+08-31 07:14:45.839  1579  1658 W libbinder.ServiceManagerCppClient: Waited one second for vendor.qti.qhcp.IQHDC/default (is service started? Number of threads started in the threadpool: 2. Are binder threads started and available?)
+08-31 07:14:45.842   899 11566 W libc    : Unable to set property "ctl.interface_start" to "aidl/vendor.qti.qhcp.IQHDC/default": PROP_ERROR_HANDLE_CONTROL_MESSAGE (0x20)
+08-31 07:14:45.447   899   899 I servicemanager: Caller(pid=1579,uid=0,sid=u:r:vendor_hal_perf_default:s0) Since 'vendor.qti.qhcp.IQHDC/default' could not be found trying to start it as a lazy AIDL service. (if it's not configured to be a lazy service, it may be stuck starting or still starting).
+08-31 07:14:45.449     1     1 E init    : Control message: Could not find 'aidl/vendor.qti.qhcp.IQHDC/default' for ctl.interface_start from pid: 899 (/system/bin/servicemanager)
+08-31 07:14:45.449 11566 11566 I servicemanager: Caller(pid=1579,uid=0,sid=u:r:vendor_hal_perf_default:s0) Tried to start aidl service vendor.qti.qhcp.IQHDC/default as a lazy service, but was unable to. Usually this happens when a service is not installed, but if the service is intended to be used as a lazy service, then it may be configured incorrectly.
+08-31 07:14:45.519   794   794 I         : [INFO]: OPLUS_CHG[MMS_GAUGE]([oplus_mms_gauge_choice_fit_vol][3465]): choice cp voltage as vbat [3838, 3833]
+08-31 07:14:45.521   794   794 I         : [INFO]: OPLUS_CHG[MMS_GAUGE]([oplus_mms_gauge_choice_fit_vol][3465]): choice cp voltage as vbat [3838, 3833]
+08-31 07:14:45.916  1502  3136 E vendor.qti.bluetooth@1.1-wake_lock: Release wake lock not initialized/acquired
+08-31 07:14:45.532 24753 24753 I         : [INFO]: OPLUS_CHG[CHG_COMM]([oplus_comm_smooth_to_soc][3416]): soc[0 3 45 45 46 47] avg[1 1 0 0 0] fifo[46 46 46 46]
+08-31 07:14:45.540 12783 12783 I OPLUS_CHG[oplus_charge_info]: BATTERY[391 391 3838 3838 218 45 47 46 3886 8698 1 0x20 0], CHARGE[4455 600 0 0], WIRED[1 447 4984 500 1 0x0 0 0 0 2 0], WIRELESS[0 0 0 0 0 0x0 0 0 0], VOOC[0 0 0 0 0x0], UFCS[0 0 0 0x0], COMMON[6 0 0 0x0 1 0 1 8698 100 0]
+08-31 07:14:45.545 12783 12783 I         : [INFO]: OPLUS_CHG[ADSP]([oplus_chg_8350_reg_dump][7390]): sm8450_st_dump: [chg_en=1, suspend=0, pd_svooc=0], subtype=0x01],[oplus_UsbCommCapable=0, oplus_pd_svooc=0, typec_mode=0, cid_status=0x01, usb_in_status=1],[0x2606=0x83, 0x2607=0x19, 0x2608=0x0a, 0x2609=0x02], [0x260a=0x04, 0x260b=0x55, 0x260c=0x0a, 0x260d=0x18], [0x260e=0x0a, 0x260f=0x01, 0x2610=0x00, 0x2640=0x01], [0x2641=0x02, 0x2642=0x05, 0x2646=0x01, 0x2650=0x04], [0x2706=0x0a, 0x2707=0x0a, 0x2708=0x0a, 0x2709=0x0a], [0x270b=0xe2, 0x270c=0x48, 0x2710=0xc0, 0x280c=0x38], [0x2810=0x00, 0x2840=0x01, 0x287f=0x00, 0x2906=0x02], [0x2908=0x0f, 0x290a=0x11, 0x290b=0x01, 0x290c=0x01], [0x2910=0x11, 0x2944=0x80, 0x2950=0x02, 0x2951=0x01], [0x2952=0x0a, 0x2954=0x00, 0x2960=0xe0, 0x2b06=0x08], [0x2b07=0x00, 0x2b08=0x00, 0x2b09=0xa3, 0x2b0a=0x39], [0x2b0b=0xab, 0x2b0c=0x00, 0x29a8=0x81, 0x29a9=0x83], [0x29aa=0x00, 0x2aa2=0x00, 0x2aa8=0x87, 0x2aa9=0x00], [0x2aaa=0x00],
+08-31 07:14:45.721  6721  6721 I [kworke][0x51b3ffdca73][01:44:46.115085] wlan: [6721:I:PMO] pmo_core_psoc_send_host_wakeup_ind_to_fw: Host wakeup indication sent to fw
+08-31 07:14:45.731     0     0 I [    C0] [soft_i][0x51b40009c23][01: 44:46.124708] wlan: [0:I:WMA] WLAN triggered wakeup: BPF_ALLOW (39), vdev: 0 (STA)
+08-31 07:14:45.731     0     0 I [    C0] [soft_i][0x51b4000b6b8][01: 44:46.125062] wlan: [0:I:WMA] wma_wake_event_packet: Wake event packet:
+08-31 07:14:46.352  6721  6721 I [kworke][0x51b40b69bae][01:44:46.745928] wlan: [6721:I:PMO] pmo_core_enable_wow_in_fw: drv wow is enabled
+08-31 07:14:46.841  1579  1658 W libbinder.ServiceManagerCppClient: Waited one second for vendor.qti.qhcp.IQHDC/default (is service started? Number of threads started in the threadpool: 2. Are binder threads started and available?)
+08-31 07:14:46.450   899   899 I servicemanager: Caller(pid=1579,uid=0,sid=u:r:vendor_hal_perf_default:s0) Since 'vendor.qti.qhcp.IQHDC/default' could not be found trying to start it as a lazy AIDL service. (if it's not configured to be a lazy service, it may be stuck starting or still starting).
+08-31 07:14:46.846   899 11567 W libc    : Unable to set property "ctl.interface_start" to "aidl/vendor.qti.qhcp.IQHDC/default": PROP_ERROR_HANDLE_CONTROL_MESSAGE (0x20)
+08-31 07:14:46.452     1     1 E init    : Control message: Could not find 'aidl/vendor.qti.qhcp.IQHDC/default' for ctl.interface_start from pid: 899 (/system/bin/servicemanager)
+08-31 07:14:46.453 11567 11567 I servicemanager: Caller(pid=1579,uid=0,sid=u:r:vendor_hal_perf_default:s0) Tried to start aidl service vendor.qti.qhcp.IQHDC/default as a lazy service, but was unable to. Usually this happens when a service is not installed, but if the service is intended to be used as a lazy service, then it may be configured incorrectly.
+08-31 07:14:46.898  2447  2726 D WifiNetworkSelector: Current connected network: 5
+08-31 07:14:46.899  2447  2726 V WifiConnectivityManager: No partial scan because firmware roaming is supported.
+08-31 07:14:46.899  2447  2726 V WifiConnectivityManager: schedulePeriodicScanTimer intervalMs 20000
+08-31 07:14:46.940  1502  3285 I vendor.qti.bluetooth@1.1-ibs_handler: ProcessIbsCmd: Received IBS_WAKE_IND: 0xFD
+08-31 07:14:46.940  1502  3285 D vendor.qti.bluetooth@1.1-ibs_handler: SerialClockVote: vote for UART CLK ON
+08-31 07:14:46.940  1502  3285 E vendor.qti.bluetooth@1.1-wake_lock: Acquire write to wakelock file failed -1 - Operation not permitted
+08-31 07:14:46.940  1502  3285 I vendor.qti.bluetooth@1.1-ibs_handler: ProcessIbsCmd: Writing IBS_WAKE_ACK
+08-31 07:14:47.007  1502  3285 I vendor.qti.bluetooth@1.1-ibs_handler: ProcessIbsCmd: Received IBS_SLEEP_IND: 0xFE
+08-31 07:14:47.007  1502  3285 D vendor.qti.bluetooth@1.1-ibs_handler: SerialClockVote: vote for UART CLK OFF
+08-31 07:14:47.157  1502  3136 E vendor.qti.bluetooth@1.1-wake_lock: Release wake lock not initialized/acquired
+08-31 07:14:46.795  4937  4937 E [TP0]touchpanel: irq gpio is 0
+08-31 07:14:47.247 11570 11570 W libbinder.BackendUnifiedServiceManager: Thread Pool max thread count is 0. Cannot cache binder as linkToDeath cannot be implemented. serviceName: SurfaceFlingerAIDL
+08-31 07:14:47.247 11570 11570 W libbinder.BpBinder: Linking to death on android.gui.ISurfaceComposer but there are no threads (yet?) listening to incoming transactions. See ProcessState::startThreadPool and ProcessState::setThreadPoolMaxThreadCount. Generally you should setup the binder threadpool before other initialization steps.
+08-31 07:14:47.247 11570 11570 W libbinder.ProcessState: Extra binder thread started, but 0 threads requested. Do not use *startThreadPool when zero threads are requested.
+08-31 07:14:47.267 11570 11571 I Gralloc4: Adding additional valid usage bits: 0x8202000
+08-31 07:14:47.269 11570 11571 I AdrenoUtils: <ReadGpuID:357>: Reading chip ID through GSL
+08-31 07:14:46.955  6721  6721 I [kworke][0x51b41676792][01:44:47.349393] wlan: [6721:I:PMO] pmo_core_psoc_send_host_wakeup_ind_to_fw: Host wakeup indication sent to fw
+08-31 07:14:46.964     0     0 I [    C0] [soft_i][0x51b4169d642][01: 44:47.357696] wlan: [0:I:WMA] WLAN triggered wakeup: BPF_ALLOW (39), vdev: 0 (STA)
+08-31 07:14:46.964     0     0 I [    C0] [soft_i][0x51b4169e118][01: 44:47.357840] wlan: [0:I:WMA] wma_wake_event_packet: Wake event packet:
+08-31 07:14:47.147   943   943 I logd    : logdr: UID=2000 GID=2000 PID=11572 n tail=0 logMask=99 pid=0 start=0ns deadline=0ns

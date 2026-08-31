@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="500" viewBox="0 0 1200 500">
+  <rect width="1200" height="500" fill="#101114"/>
+  <text x="60" y="48" fill="#f0d36b" font-family="sans-serif" font-size="28" font-weight="bold">Frame-time known-series graph</text>
+  <text x="60" y="82" fill="#c8c8c8" font-family="monospace" font-size="18">samples: [33.3, 25, 20, 16.7]   scale: 0–40 ms   oldest → newest</text>
+  <rect x="80" y="115" width="1040" height="290" fill="#181a1d" stroke="#494d54" stroke-width="2"/>
+  <g stroke="#30343a" stroke-width="1"><path d="M80 405H1120M80 332.5H1120M80 260H1120M80 187.5H1120M80 115H1120"/></g>
+  <g fill="#bfc3c8" font-family="monospace" font-size="17"><text x="26" y="411">0</text><text x="18" y="338">10</text><text x="18" y="266">20</text><text x="18" y="193">30</text><text x="18" y="121">40</text></g>
+  <polyline points="120,163.08 440,223.75 760,260 1080,283.33" fill="none" stroke="#ffd268" stroke-width="6"/>
+  <g fill="#ffd268"><circle cx="120" cy="163.08" r="9"/><circle cx="440" cy="223.75" r="9"/><circle cx="760" cy="260" r="9"/><circle cx="1080" cy="283.33" r="9"/></g>
+  <g fill="#f5f5f5" font-family="monospace" font-size="20" text-anchor="middle"><text x="120" y="445">33.3</text><text x="440" y="445">25</text><text x="760" y="445">20</text><text x="1080" y="445">16.7</text></g>
+  <text x="60" y="480" fill="#9ba1a8" font-family="sans-serif" font-size="17">Unit-tested fixture: oldest→newest ordering is preserved; lower bound remains zero.</text>
+</svg>

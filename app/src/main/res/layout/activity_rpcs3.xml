@@ -18,7 +18,9 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent" />
 
-    <androidx.compose.ui.platform.ComposeView
+    <!-- The monitor is visual-only. Its custom host rejects the entire touch
+         dispatch so PadOverlay remains the gameplay target even when visible. -->
+    <com.zenithblue.sambas3.ui.TouchThroughComposeView
         android:id="@+id/monitoringOverlay"
         android:layout_width="match_parent"
         android:layout_height="match_parent"

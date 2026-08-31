@@ -1,0 +1,55 @@
+SambaS3 runtime repair evidence — 2026-08-31
+
+Root commit: 6392c3522cae3634ab4833c6e7d33b167bdb6e22
+RPCSX submodule: 657b26a0d197c29d42cdcf3b3f6e8ad5c6765bbc
+Patch SHA-256: 4c5edbe84bc8aaa9bc14b984d2be584dc359caf012dc6e404c9f2ecaff1e742a
+APK: app/build/outputs/apk/standard/debug/samba-s3-standard-debug.apk
+APK SHA-256: 82dd2588f7c630ad72e9acec92f257531b2a7787a94d96b031ad8abc2e7dcabf
+arm64 core SHA-256: 03a3dbe78a0803648a46c3023b33ac9301b02c0d6d0a9e1e4779e1631111e22e
+x86_64 core SHA-256: 3db863c3826ad7b01f13f5043a68c5a82cd0a77f9c7ce571c16b322678573c80
+Device: 7d6afed8 / OPD2403 / Vulkan / 3000x2120
+
+Images:
+- stopped-achievements-real-icons.png
+- in-game-achievements-real-icons.png
+- home-selected-savestate-vulkan-monitor.png
+- monitor-disabled-gameplay.png
+- monitor-enabled-graphs.png
+- final-current-achievements.png
+- final-current-achievements.log
+- touch-monitor-on.webp
+- touch-monitor-off.webp
+- save-load.webp
+- home-pass.webp
+- controller-settings-landscape.webp
+- controller-test.webp
+- controller-profiles.webp
+- controller-capture.webp
+- native-symbols.txt
+- home-normal-30-summary.txt
+- home-force-stop-10-summary.txt
+- home-continue-10-summary.txt
+- benchmark-A-disabled.csv / benchmark-A-disabled.log / benchmark-A-disabled-start.webp / benchmark-A-disabled-end.webp
+- benchmark-B-minimal.csv / benchmark-B-minimal.log / benchmark-B-minimal-start.webp / benchmark-B-minimal-end.webp
+- benchmark-C-developer.csv / benchmark-C-developer.log / benchmark-C-developer-start.webp / benchmark-C-developer-end.webp
+- benchmark-D-developer.csv / benchmark-D-developer.log / benchmark-D-developer-graphs-start.webp / benchmark-D-developer-end.webp
+- touch-full-correct-monitor-on.png / touch-full-correct-monitor-on.webp / touch-full-correct-monitor-on.log
+- touch-full-correct-monitor-off.png / touch-full-correct-monitor-off.webp / touch-full-correct-monitor-off.log
+- pass1-long-play-end.png / pass1-long-play.log / pass1-fatal-grep.txt
+- pass2-long-play-end.png / pass2-long-play.log / pass2-fatal-grep.txt
+- pass1-launch-center.webp / pass1-trophy-launch-center-list.webp / pass1-trophy-ingame-list.webp / pass1-perf-settings-ingame.webp / pass1-perf-minimal-landscape.webp
+- pass2-launch-center.webp / pass2-trophy-launch-center-list.webp / pass2-perf-minimal-landscape.webp / pass2-perf-developer-landscape.webp / pass2-touch-summary.txt
+- pass2-save-current.png / pass2-save-current.log
+- pass1-fps-graph-real.webp / pass1-frametime-graph-real.webp / pass2-fps-graph-real.webp / pass2-frametime-graph-real.webp
+- graph-known-fps-30-40-50-60.svg / graph-known-fps-30-40-50-60.webp
+- graph-known-frame-33-25-20-16.svg / graph-known-frame-33-25-20-16.webp
+- pass2-save-confirmed-current-begin.log / pass2-save-confirmed-current-end.log / pass2-save-confirmed-current-restored.png
+- pass2-load-current.log / pass2-load-transition.png / pass2-load-restored-current.png
+- pass2-save-10-summary.txt
+- pass3-build.log / pass3-apk-core-verify.log / pass3-apk-core-verify-rerun.log / pass3-crosscheck-30s.log / pass3-crosscheck-lines.txt / pass3-crosscheck-30s.png
+- pass3-achievements-ingame.log / pass3-achievements-ingame.png / pass3-achievements-launch-center.log / pass3-achievements-launch-center.png
+- pass4-build.log / pass4-apk-core-verify.log / pass4-crosscheck-30s.log / pass4-crosscheck-lines.txt / pass4-crosscheck-30s.png
+- pass4-achievements-ingame.log / pass4-achievements-ingame.png / pass4-achievements-launch-center.log / pass4-achievements-launch-center.png
+- pass4-direct-load.log / pass4-direct-load.png / pass4-monitoring-repository-test.log
+- pass4-monitor-disabled.log / pass4-monitor-disabled.png / pass4-monitor-minimal.log / pass4-monitor-minimal.png / pass4-monitor-developer.log / pass4-monitor-developer.png
+- SHA256SUMS.txt

@@ -1,0 +1,19 @@
+Cloning into '/tmp/samba-clean-pass4.2dMhak'...
+Submodule 'app/src/main/cpp/libadrenotools' (https://github.com/bylaws/libadrenotools.git) registered for path 'app/src/main/cpp/libadrenotools'
+Submodule 'app/src/main/cpp/rpcsx' (https://github.com/RPCSX/rpcsx.git) registered for path 'app/src/main/cpp/rpcsx'
+Cloning into '/tmp/samba-clean-pass4.2dMhak/app/src/main/cpp/libadrenotools'...
+Cloning into '/tmp/samba-clean-pass4.2dMhak/app/src/main/cpp/rpcsx'...
+Submodule path 'app/src/main/cpp/libadrenotools': checked out '8fae8ce254dfc1344527e05301e43f37dea2df80'
+Submodule 'lib/linkernsbypass' (https://github.com/bylaws/liblinkernsbypass/) registered for path 'app/src/main/cpp/libadrenotools/lib/linkernsbypass'
+Cloning into '/tmp/samba-clean-pass4.2dMhak/app/src/main/cpp/libadrenotools/lib/linkernsbypass'...
+Submodule path 'app/src/main/cpp/libadrenotools/lib/linkernsbypass': checked out 'aa3975893d83ef1bc84c321ec60c65fbf1287887'
+warning: Clone succeeded, but checkout failed.
+You can inspect what was checked out with 'git status'
+and retry with 'git restore --source=HEAD :/'
+
+clone_dir=/tmp/samba-clean-pass4.2dMhak
+clone_exit=124
+post_clone_checkout=ok
+post_clone_submodule_status=RPCSX heads/master; pinned 657b26a0d197c29d42cdcf3b3f6e8ad5c6765bbc unavailable
+submodule_update_output=fatal: remote error: upload-pack: not our ref 657b26a0d197c29d42cdcf3b3f6e8ad5c6765bbc
+submodule_update_result=128

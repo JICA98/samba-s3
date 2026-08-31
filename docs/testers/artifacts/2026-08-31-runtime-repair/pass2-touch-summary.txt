@@ -1,0 +1,6 @@
+Pass 2 touch capture: pass2-touch-monitor-on.log
+Controls exercised: 17 taps (D-pad, face buttons, shoulders, triggers, sticks, Select, PS, Start) plus 2 stick swipes
+root ACTION_DOWN traces: 19
+monitor non-consuming traces: 19
+PadOverlay traces: 19
+Note: the attempted monitor-OFF toggle did not take effect in this pass; the verified final-build OFF matrix is touch-full-correct-monitor-off.log.

@@ -1,0 +1,327 @@
+--------- beginning of main
+08-31 07:44:07.052 26020 28799 D RPCS3   : S3PERF crosscheck native_fps=59.664 native_frametime_ms=16.761
+08-31 07:44:07.054 26020 28799 D S3PERF  : crosscheck json_fps=59.663696 json_frametime_ms=16.76061
+08-31 07:44:07.054 26020 28799 D S3PERF  : crosscheck ui_snapshot_fps=59.663696 ui_snapshot_frametime_ms=16.76061
+08-31 07:44:07.136  2447  2726 D WifiNetworkSelector: Current connected network: 5
+08-31 07:44:07.136  2447  2726 V WifiConnectivityManager: No partial scan because firmware roaming is supported.
+08-31 07:44:07.137  2447  2726 V WifiConnectivityManager: schedulePeriodicScanTimer intervalMs 20000
+--------- beginning of kernel
+08-31 07:44:06.759 26237 26237 E [TP0]touchpanel: irq gpio is 0
+08-31 07:44:06.795 13711 13711 I         : [INFO]: OPLUS_CHG[MMS_GAUGE]([oplus_mms_gauge_choice_fit_vol][3465]): choice cp voltage as vbat [3783, 3779]
+08-31 07:44:06.796 13711 13711 I         : [INFO]: OPLUS_CHG[MMS_GAUGE]([oplus_mms_gauge_choice_fit_vol][3465]): choice cp voltage as vbat [3783, 3779]
+08-31 07:44:06.802 13852 13852 I         : [INFO]: OPLUS_CHG[CHG_COMM]([oplus_comm_smooth_to_soc][3416]): soc[0 3 41 41 42 43] avg[1 1 0 0 0] fifo[42 42 42 42]
+08-31 07:44:06.809 19676 19676 I OPLUS_CHG[oplus_charge_info]: BATTERY[385 384 3783 3783 1122 41 43 42 3544 8698 1 0x20 0], CHARGE[4455 600 0 0], WIRED[1 447 4975 500 1 0x0 0 0 0 2 0], WIRELESS[0 0 0 0 0 0x0 0 0 0], VOOC[0 0 0 0 0x0], UFCS[0 0 0 0x0], COMMON[6 0 0 0x0 1 0 1 8698 100 0]
+08-31 07:44:06.813 19676 19676 I         : [INFO]: OPLUS_CHG[ADSP]([oplus_chg_8350_reg_dump][7390]): sm8450_st_dump: [chg_en=1, suspend=0, pd_svooc=0], subtype=0x01],[oplus_UsbCommCapable=0, oplus_pd_svooc=0, typec_mode=0, cid_status=0x01, usb_in_status=1],[0x2606=0x83, 0x2607=0x19, 0x2608=0x0a, 0x2609=0x02], [0x260a=0x04, 0x260b=0x55, 0x260c=0x0a, 0x260d=0x18], [0x260e=0x0a, 0x260f=0x01, 0x2610=0x00, 0x2640=0x01], [0x2641=0x02, 0x2642=0x05, 0x2646=0x01, 0x2650=0x04], [0x2706=0x0a, 0x2707=0x0a, 0x2708=0x0a, 0x2709=0x0a], [0x270b=0xe2, 0x270c=0x48, 0x2710=0xc0, 0x280c=0x38], [0x2810=0x00, 0x2840=0x01, 0x287f=0x00, 0x2906=0x02], [0x2908=0x0f, 0x290a=0x11, 0x290b=0x01, 0x290c=0x01], [0x2910=0x11, 0x2944=0x80, 0x2950=0x02, 0x2951=0x01], [0x2952=0x0a, 0x2954=0x00, 0x2960=0xe0, 0x2b06=0x08], [0x2b07=0x00, 0x2b08=0x00, 0x2b09=0xa3, 0x2b0a=0x39], [0x2b0b=0xab, 0x2b0c=0x00, 0x29a8=0x81, 0x29a9=0x83], [0x29aa=0x00, 0x2aa2=0x00, 0x2aa8=0x87, 0x2aa9=0x00], [0x2aaa=0x00],
+08-31 07:44:07.359  1501  2510 I android.hardware.audio.service: [Awinic] [INF] aw_audioreach_monitor_thread: monitor->state = 3
+08-31 07:44:07.359  1501  2510 D android.hardware.audio.service: [Awinic] [DBG] aw_ar_kmsg_ctl_get_monitor_en: dev_index[0]:monitor enable:1
+08-31 07:44:06.965  2510  2510 I [Awinic][7-0034]aw882xx_monitor_get: monitor switch is 1
+08-31 07:44:07.362  1501  2510 D android.hardware.audio.service: [Awinic] [DBG] aw_ar_monitor_work_func: dev[0], vmax[0xffe0fd22] is not modified or the value is none
+08-31 07:44:07.362  1501  2510 D android.hardware.audio.service: [Awinic] [DBG] aw_ar_kmsg_ctl_get_monitor_en: dev_index[1]:monitor enable:1
+08-31 07:44:06.967  2510  2510 I [Awinic][7-0034]aw_monitor_get_voltage: chip voltage is 3769
+08-31 07:44:06.968  2510  2510 I [Awinic][7-0034]aw_monitor_get_temperature: reg val is 0x0032
+08-31 07:44:06.968  2510  2510 I [Awinic][7-0034]aw_monitor_get_temperature: chip temperature = 50
+08-31 07:44:06.968  2510  2510 I [Awinic][4-0034]aw882xx_monitor_get: monitor switch is 1
+08-31 07:44:06.970  2510  2510 I [Awinic][4-0034]aw_monitor_get_voltage: chip voltage is 3792
+08-31 07:44:06.971  2510  2510 I [Awinic][4-0034]aw_monitor_get_temperature: reg val is 0x0028
+08-31 07:44:06.971  2510  2510 I [Awinic][4-0034]aw_monitor_get_temperature: chip temperature = 40
+08-31 07:44:07.365  1501  2510 D android.hardware.audio.service: [Awinic] [DBG] aw_ar_monitor_work_func: dev[1], vmax[0xffe0fd22] is not modified or the value is none
+08-31 07:44:07.365  1501  2510 D android.hardware.audio.service: [Awinic] [DBG] aw_ar_kmsg_ctl_get_monitor_en: dev_index[2]:monitor enable:1
+08-31 07:44:07.367  1501  2510 D android.hardware.audio.service: [Awinic] [DBG] aw_ar_monitor_work_func: dev[2], vmax[0xffe0fd22] is not modified or the value is none
+08-31 07:44:07.367  1501  2510 D android.hardware.audio.service: [Awinic] [DBG] aw_ar_kmsg_ctl_get_monitor_en: dev_index[3]:monitor enable:1
+08-31 07:44:06.972  2510  2510 I [Awinic][7-0035]aw882xx_monitor_get: monitor switch is 1
+08-31 07:44:06.972  2510  2510 I [Awinic][7-0035]aw_monitor_get_voltage: chip voltage is 3781
+08-31 07:44:06.973  2510  2510 I [Awinic][7-0035]aw_monitor_get_temperature: reg val is 0x0031
+08-31 07:44:06.973  2510  2510 I [Awinic][7-0035]aw_monitor_get_temperature: chip temperature = 49
+08-31 07:44:06.974  2510  2510 I [Awinic][4-0035]aw882xx_monitor_get: monitor switch is 1
+08-31 07:44:06.974  2510  2510 I [Awinic][4-0035]aw_monitor_get_voltage: chip voltage is 3757
+08-31 07:44:06.975  2510  2510 I [Awinic][4-0035]aw_monitor_get_temperature: reg val is 0x0029
+08-31 07:44:06.975  2510  2510 I [Awinic][4-0035]aw_monitor_get_temperature: chip temperature = 41
+08-31 07:44:07.369  1501  2510 D android.hardware.audio.service: [Awinic] [DBG] aw_ar_monitor_work_func: dev[3], vmax[0xffe0fd22] is not modified or the value is none
+08-31 07:44:07.383  1579  1658 W libbinder.ServiceManagerCppClient: Waited one second for vendor.qti.qhcp.IQHDC/default (is service started? Number of threads started in the threadpool: 2. Are binder threads started and available?)
+08-31 07:44:06.991   899   899 I servicemanager: Caller(pid=1579,uid=0,sid=u:r:vendor_hal_perf_default:s0) Since 'vendor.qti.qhcp.IQHDC/default' could not be found trying to start it as a lazy AIDL service. (if it's not configured to be a lazy service, it may be stuck starting or still starting).
+08-31 07:44:06.992     1     1 E init    : Control message: Could not find 'aidl/vendor.qti.qhcp.IQHDC/default' for ctl.interface_start from pid: 899 (/system/bin/servicemanager)
+08-31 07:44:07.386   899  9082 W libc    : Unable to set property "ctl.interface_start" to "aidl/vendor.qti.qhcp.IQHDC/default": PROP_ERROR_HANDLE_CONTROL_MESSAGE (0x20)
+08-31 07:44:06.992  9082  9082 I servicemanager: Caller(pid=1579,uid=0,sid=u:r:vendor_hal_perf_default:s0) Tried to start aidl service vendor.qti.qhcp.IQHDC/default as a lazy service, but was unable to. Usually this happens when a service is not installed, but if the service is intended to be used as a lazy service, then it may be configured incorrectly.
+08-31 07:44:07.395  5485  5485 W DefaultDispatch: type=1400 audit(0.0:902955): avc:  denied  { read } for  name="version" dev="proc" ino=4026532013 scontext=u:r:untrusted_app:s0:c224,c256,c512,c768 tcontext=u:object_r:proc_version:s0 tclass=file permissive=0 app=com.ivarna.mkm
+08-31 07:44:07.432  5485  7854 W CpuUtilizationProvider: Failed to read /proc/stat: grep: /proc/stat: Permission denied
+08-31 07:44:07.450  5485  7854 D CpuUtilizationProvider: CPU usage updated from frequency (fallback): 40%
+08-31 07:44:07.453  5485  7854 D CpuProvider: Core 0: freq=1804800, usage=0.75757575 (hwMin=364800, hwMax=2265600)
+08-31 07:44:07.453  5485  7854 D CpuProvider: Core 1: freq=787200, usage=0.75757575 (hwMin=364800, hwMax=2265600)
+08-31 07:44:07.454  5485  7854 D CpuProvider: Core 2: freq=2707200, usage=0.5797101 (hwMin=499200, hwMax=3148800)
+08-31 07:44:07.454  5485  7854 D CpuProvider: Core 3: freq=2707200, usage=0.13043478 (hwMin=499200, hwMax=3148800)
+08-31 07:44:07.455  5485  7854 D CpuProvider: Core 4: freq=2707200, usage=0.5797101 (hwMin=499200, hwMax=3148800)
+08-31 07:44:07.455  5485  7854 D CpuProvider: Core 5: freq=2707200, usage=0.140625 (hwMin=499200, hwMax=2956800)
+08-31 07:44:07.456  5485  7854 D CpuProvider: Core 6: freq=2707200, usage=0.140625 (hwMin=499200, hwMax=2956800)
+08-31 07:44:07.457  5485  7854 D CpuProvider: Core 7: freq=2380800, usage=0.97959185 (hwMin=480000, hwMax=3302400)
+08-31 07:44:07.457  5485  7854 D CpuProvider: Overall usage: 0.40035886 (from 8 cores), Avg Freq: 2232500
+08-31 07:44:07.487  9088  9088 W cat     : type=1400 audit(0.0:902956): avc:  denied  { read } for  name="governor" dev="sysfs" ino=139690 scontext=u:r:untrusted_app:s0:c224,c256,c512,c768 tcontext=u:object_r:vendor_sysfs_kgsl:s0 tclass=file permissive=0 app=com.ivarna.mkm
+08-31 07:44:07.507  9089  9089 W cat     : type=1400 audit(0.0:902957): avc:  denied  { read } for  name="available_governors" dev="sysfs" ino=139691 scontext=u:r:untrusted_app:s0:c224,c256,c512,c768 tcontext=u:object_r:vendor_sysfs_kgsl:s0 tclass=file permissive=0 app=com.ivarna.mkm
+08-31 07:44:07.579  9094  9094 W cat     : type=1400 audit(0.0:902958): avc:  denied  { read } for  name="cur_freq" dev="sysfs" ino=139692 scontext=u:r:untrusted_app:s0:c224,c256,c512,c768 tcontext=u:object_r:vendor_sysfs_kgsl:s0 tclass=file permissive=0
+08-31 07:44:07.639  9100  9100 W cat     : type=1400 audit(0.0:902959): avc:  denied  { read } for  name="gpuclk" dev="sysfs" ino=139614 scontext=u:r:untrusted_app:s0:c224,c256,c512,c768 tcontext=u:object_r:vendor_sysfs_kgsl_gpuclk:s0 tclass=file permissive=0 app=com.ivarna.mkm
+08-31 07:44:07.272  9102  9102 W audit   : audit_lost=592197 audit_rate_limit=5 audit_backlog_limit=64
+08-31 07:44:07.272  9102  9102 E audit   : rate limit exceeded
+08-31 07:44:07.952  2447  2726 D WifiClientModeImpl[14183:wlan0]: updateLinkLayerStatsRssiSpeedFrequencyCapabilities rssi=-24 TxLinkspeed=526 freq=5220 RxLinkSpeed=866
+08-31 07:44:07.952  2447  2726 D WifiDataStall: tx tput in kbps: 198071
+08-31 07:44:07.953  2447  2726 D WifiDataStall: rx tput in kbps: 734296
+08-31 07:44:07.953  2447  2726 V WifiConfigManager: Updating scan detail cache freq=5220 BSSID=b4:86:18:de:39:ca RSSI=-23 for "Excitel_home_wifi_5"WPA_PSK
+08-31 07:44:07.953  2447  2726 D WifiDataStall:  ccaLevel = 15
+08-31 07:44:07.953  2447  2726 D WifiDataStall: L2 txTputKbps: 470420, rxTputKbps: 815257, L3 txTputKbps: 3, rxTputKbps: 4, TxTrafficHigh: false, RxTrafficHigh: false, Throughput Sufficient: true
+08-31 07:44:07.954  2447  2726 D WifiThroughputPredictor:  utilization (LLS) 15 isBluetoothConnected: false final utilization: 15
+08-31 07:44:07.954  2447  2726 D WifiThroughputPredictor:  BW: 2 RSSI: -24 Nss: 2 Mode: 5 symDur: 3600 snrDb 50 bitPerTone: 6667 rate: 866 throughput: 815
+08-31 07:44:07.954  2447  2726 D WifiThroughputPredictor:  utilization (LLS) 15 isBluetoothConnected: false final utilization: 15
+08-31 07:44:07.954  2447  2726 D WifiThroughputPredictor:  BW: 2 RSSI: -24 Nss: 2 Mode: 5 symDur: 3600 snrDb 50 bitPerTone: 6667 rate: 866 throughput: 815
+08-31 07:44:07.959  2447  2726 D WifiScoreCard: BSSID update SIGNAL_POLL ID: 715353381 SSID: "Excitel_home_wifi_5", BSSID: b4:86:18:de:39:ca, MAC: c6:52:65:7d:a1:b6, IP: /192.168.1.35, Security type: 2, Supplicant state: COMPLETED, Wi-Fi standard: 11ac, RSSI: -24, Link speed: 526Mbps, Tx Link speed: 526Mbps, Max Supported Tx Link speed: 866Mbps, Rx Link speed: 866Mbps, Max Supported Rx Link speed: 866Mbps, Frequency: 5220MHz, Net ID: 5, Metered hint: false, score: 106, isUsable: true, CarrierMerged: false, SubscriptionId: -1, IsPrimary: 1, Trusted: true, Restricted: false, Ephemeral: false, OEM paid: false, OEM private: false, OSU AP: false, FQDN: <none>, Provider friendly name: <none>, Requesting package name: <none>"Excitel_home_wifi_5"wpa2-pskMLO Information: , Is TID-To-Link negotiation supported by the AP: false, AP MLD Address: <none>, AP MLO Link Id: <none>, AP MLO Affiliated links: <none>, Vendor Data: <none>
+08-31 07:44:07.959  2447  2726 D WifiScoreCard: txRate: 2 txSpeed: 526
+08-31 07:44:07.959  2447  2726 D WifiScoreCard: network update SIGNAL_POLL "Excitel_home_wifi_5" ID: 1721486633 RSSI -24 txSpeed -1
+08-31 07:44:07.959  2447  2726 D WifiClientModeImpl[14183:wlan0]:  ClientModeImpl$L2ConnectedState screen=on 68 0 "Excitel_home_wifi_5" b4:86:18:de:39:ca rssi=-24 f=5220 sc=106 link=526 tx=1.2, 0.4, 0.0 rx=1.6 bcn=1897627 [on:0 tx:1 rx:1 period:3017] from screen [on:0 period:31180960] score=106
+08-31 07:44:08.261 26020 26067 D RPCS3   : S3PERF crosscheck native_fps=59.586 native_frametime_ms=16.782
+08-31 07:44:08.262 26020 26067 D S3PERF  : crosscheck json_fps=59.586075 json_frametime_ms=16.782446
+08-31 07:44:08.262 26020 26067 D S3PERF  : crosscheck ui_snapshot_fps=59.586075 ui_snapshot_frametime_ms=16.782446
+08-31 07:44:08.385  1579  1658 W libbinder.ServiceManagerCppClient: Waited one second for vendor.qti.qhcp.IQHDC/default (is service started? Number of threads started in the threadpool: 2. Are binder threads started and available?)
+08-31 07:44:08.387   899  9127 W libc    : Unable to set property "ctl.interface_start" to "aidl/vendor.qti.qhcp.IQHDC/default": PROP_ERROR_HANDLE_CONTROL_MESSAGE (0x20)
+08-31 07:44:07.992   899   899 I servicemanager: Caller(pid=1579,uid=0,sid=u:r:vendor_hal_perf_default:s0) Since 'vendor.qti.qhcp.IQHDC/default' could not be found trying to start it as a lazy AIDL service. (if it's not configured to be a lazy service, it may be stuck starting or still starting).
+08-31 07:44:07.993     1     1 E init    : Control message: Could not find 'aidl/vendor.qti.qhcp.IQHDC/default' for ctl.interface_start from pid: 899 (/system/bin/servicemanager)
+08-31 07:44:07.993  9127  9127 I servicemanager: Caller(pid=1579,uid=0,sid=u:r:vendor_hal_perf_default:s0) Tried to start aidl service vendor.qti.qhcp.IQHDC/default as a lazy service, but was unable to. Usually this happens when a service is not installed, but if the service is intended to be used as a lazy service, then it may be configured incorrectly.
+08-31 07:44:08.949  1502  3285 I vendor.qti.bluetooth@1.1-ibs_handler: ProcessIbsCmd: Received IBS_WAKE_IND: 0xFD
+08-31 07:44:08.949  1502  3285 D vendor.qti.bluetooth@1.1-ibs_handler: SerialClockVote: vote for UART CLK ON
+08-31 07:44:08.949  1502  3285 E vendor.qti.bluetooth@1.1-wake_lock: Acquire write to wakelock file failed -1 - Operation not permitted
+08-31 07:44:08.950  1502  3285 I vendor.qti.bluetooth@1.1-ibs_handler: ProcessIbsCmd: Writing IBS_WAKE_ACK
+08-31 07:44:08.583 24704 24704 I [LCD][0][INFO][dsi_display_status_check_error_flag:1212] [ESD]: first read: master=0 slave=0
+08-31 07:44:08.990  1502  3285 I vendor.qti.bluetooth@1.1-ibs_handler: ProcessIbsCmd: Received IBS_SLEEP_IND: 0xFE
+08-31 07:44:08.990  1502  3285 D vendor.qti.bluetooth@1.1-ibs_handler: SerialClockVote: vote for UART CLK OFF
+08-31 07:44:09.141  1502  3136 E vendor.qti.bluetooth@1.1-wake_lock: Release wake lock not initialized/acquired
+08-31 07:44:08.775  5559  5559 E [TP0]touchpanel: irq gpio is 0
+08-31 07:44:09.386  1579  1658 W libbinder.ServiceManagerCppClient: Waited one second for vendor.qti.qhcp.IQHDC/default (is service started? Number of threads started in the threadpool: 2. Are binder threads started and available?)
+08-31 07:44:08.994   899   899 I servicemanager: Caller(pid=1579,uid=0,sid=u:r:vendor_hal_perf_default:s0) Since 'vendor.qti.qhcp.IQHDC/default' could not be found trying to start it as a lazy AIDL service. (if it's not configured to be a lazy service, it may be stuck starting or still starting).
+08-31 07:44:09.390   899  9128 W libc    : Unable to set property "ctl.interface_start" to "aidl/vendor.qti.qhcp.IQHDC/default": PROP_ERROR_HANDLE_CONTROL_MESSAGE (0x20)
+08-31 07:44:08.995     1     1 E init    : Control message: Could not find 'aidl/vendor.qti.qhcp.IQHDC/default' for ctl.interface_start from pid: 899 (/system/bin/servicemanager)
+08-31 07:44:08.996  9128  9128 I servicemanager: Caller(pid=1579,uid=0,sid=u:r:vendor_hal_perf_default:s0) Tried to start aidl service vendor.qti.qhcp.IQHDC/default as a lazy service, but was unable to. Usually this happens when a service is not installed, but if the service is intended to be used as a lazy service, then it may be configured incorrectly.
+08-31 07:44:09.473 26020 26067 D RPCS3   : S3PERF crosscheck native_fps=59.404 native_frametime_ms=16.834
+08-31 07:44:09.474 26020 26067 D S3PERF  : crosscheck json_fps=59.403786 json_frametime_ms=16.833946
+08-31 07:44:09.474 26020 26067 D S3PERF  : crosscheck ui_snapshot_fps=59.403786 ui_snapshot_frametime_ms=16.833946
+08-31 07:44:10.037  1502  3285 I vendor.qti.bluetooth@1.1-ibs_handler: ProcessIbsCmd: Received IBS_WAKE_IND: 0xFD
+08-31 07:44:10.037  1502  3285 D vendor.qti.bluetooth@1.1-ibs_handler: SerialClockVote: vote for UART CLK ON
+08-31 07:44:10.037  1502  3285 E vendor.qti.bluetooth@1.1-wake_lock: Acquire write to wakelock file failed -1 - Operation not permitted
+08-31 07:44:10.037  1502  3285 I vendor.qti.bluetooth@1.1-ibs_handler: ProcessIbsCmd: Writing IBS_WAKE_ACK
+08-31 07:44:10.078  1502  3285 I vendor.qti.bluetooth@1.1-ibs_handler: ProcessIbsCmd: Received IBS_SLEEP_IND: 0xFE
+08-31 07:44:10.078  1502  3285 D vendor.qti.bluetooth@1.1-ibs_handler: SerialClockVote: vote for UART CLK OFF
+08-31 07:44:10.228  1502  3136 E vendor.qti.bluetooth@1.1-wake_lock: Release wake lock not initialized/acquired
+08-31 07:44:10.378 26020 28890 D RPCS3   : PPU Syscall Usage Stats:
+08-31 07:44:10.378 26020 28890 D RPCS3   : 	⁂ sys_timer_usleep [6379720]
+08-31 07:44:10.378 26020 28890 D RPCS3   : 	⁂ sys_ppu_thread_yield [1889307]
+08-31 07:44:10.378 26020 28890 D RPCS3   : 	⁂ sys_event_queue_receive [51178]
+08-31 07:44:10.378 26020 28890 D RPCS3   : 	⁂ sys_event_flag_wait [15412]
+08-31 07:44:10.378 26020 28890 D RPCS3   : 	⁂ sys_event_flag_set [15407]
+08-31 07:44:10.378 26020 28890 D RPCS3   : 	⁂ sys_rsx_context_attribute [12685]
+08-31 07:44:10.378 26020 28890 D RPCS3   : 	⁂ _sys_lwmutex_lock [11456]
+08-31 07:44:10.378 26020 28890 D RPCS3   : 	⁂ _sys_lwmutex_unlock [11456]
+08-31 07:44:10.378 26020 28890 D RPCS3   : 	⁂ sys_fs_lseek [419]
+08-31 07:44:10.378 26020 28890 D RPCS3   : 	⁂ sys_fs_read [154]
+08-31 07:44:10.378 26020 28890 D RPCS3   : 	⁂ sys_fs_open [9]
+08-31 07:44:10.378 26020 28890 D RPCS3   : 	⁂ sys_fs_close [9]
+08-31 07:44:10.378 26020 28890 D RPCS3   : 	⁂ sys_fs_fcntl [9]
+08-31 07:44:10.389  1579  1658 W libbinder.ServiceManagerCppClient: Waited one second for vendor.qti.qhcp.IQHDC/default (is service started? Number of threads started in the threadpool: 2. Are binder threads started and available?)
+08-31 07:44:09.997   899   899 I servicemanager: Caller(pid=1579,uid=0,sid=u:r:vendor_hal_perf_default:s0) Since 'vendor.qti.qhcp.IQHDC/default' could not be found trying to start it as a lazy AIDL service. (if it's not configured to be a lazy service, it may be stuck starting or still starting).
+08-31 07:44:09.999     1     1 E init    : Control message: Could not find 'aidl/vendor.qti.qhcp.IQHDC/default' for ctl.interface_start from pid: 899 (/system/bin/servicemanager)
+08-31 07:44:10.393   899  9129 W libc    : Unable to set property "ctl.interface_start" to "aidl/vendor.qti.qhcp.IQHDC/default": PROP_ERROR_HANDLE_CONTROL_MESSAGE (0x20)
+08-31 07:44:10.000  9129  9129 I servicemanager: Caller(pid=1579,uid=0,sid=u:r:vendor_hal_perf_default:s0) Tried to start aidl service vendor.qti.qhcp.IQHDC/default as a lazy service, but was unable to. Usually this happens when a service is not installed, but if the service is intended to be used as a lazy service, then it may be configured incorrectly.
+08-31 07:44:10.683 26020 28798 D RPCS3   : S3PERF crosscheck native_fps=62.830 native_frametime_ms=15.916
+08-31 07:44:10.684 26020 28798 D S3PERF  : crosscheck json_fps=62.83048 json_frametime_ms=15.915842
+08-31 07:44:10.685 26020 28798 D S3PERF  : crosscheck ui_snapshot_fps=62.83048 ui_snapshot_frametime_ms=15.915842
+08-31 07:44:10.489     0     0 W [    C0] gen7_err_callback: 90 callbacks suppressed
+08-31 07:44:10.489     0     0 F         : [    C0] kgsl kgsl-3d0: CP: AHB bus error, CP_RL_ERROR_DETAILS_0:0x10008e07 CP_RL_ERROR_DETAILS_1:0x12144
+08-31 07:44:10.540     0     0 F         : [    C0] kgsl kgsl-3d0: CP: AHB bus error, CP_RL_ERROR_DETAILS_0:0x10008e07 CP_RL_ERROR_DETAILS_1:0x12144
+08-31 07:44:10.971  2447  2726 D WifiClientModeImpl[14183:wlan0]: updateLinkLayerStatsRssiSpeedFrequencyCapabilities rssi=-24 TxLinkspeed=526 freq=5220 RxLinkSpeed=866
+08-31 07:44:10.971  2447  2726 D WifiDataStall: tx tput in kbps: 470420
+08-31 07:44:10.971  2447  2726 D WifiDataStall: rx tput in kbps: 815257
+08-31 07:44:10.972  2447  2726 V WifiConfigManager: Updating scan detail cache freq=5220 BSSID=b4:86:18:de:39:ca RSSI=-23 for "Excitel_home_wifi_5"WPA_PSK
+08-31 07:44:10.972  2447  2726 D WifiDataStall:  ccaLevel = 15
+08-31 07:44:10.972  2447  2726 D WifiDataStall: L2 txTputKbps: 470420, rxTputKbps: 815257, L3 txTputKbps: 0, rxTputKbps: 0, TxTrafficHigh: false, RxTrafficHigh: false, Throughput Sufficient: true
+08-31 07:44:10.972  2447  2726 D WifiThroughputPredictor:  utilization (LLS) 15 isBluetoothConnected: false final utilization: 15
+08-31 07:44:10.972  2447  2726 D WifiThroughputPredictor:  BW: 2 RSSI: -24 Nss: 2 Mode: 5 symDur: 3600 snrDb 50 bitPerTone: 6667 rate: 866 throughput: 815
+08-31 07:44:10.972  2447  2726 D WifiThroughputPredictor:  utilization (LLS) 15 isBluetoothConnected: false final utilization: 15
+08-31 07:44:10.972  2447  2726 D WifiThroughputPredictor:  BW: 2 RSSI: -24 Nss: 2 Mode: 5 symDur: 3600 snrDb 50 bitPerTone: 6667 rate: 866 throughput: 815
+08-31 07:44:10.975  2447  2726 D WifiScoreCard: BSSID update SIGNAL_POLL ID: 715353381 SSID: "Excitel_home_wifi_5", BSSID: b4:86:18:de:39:ca, MAC: c6:52:65:7d:a1:b6, IP: /192.168.1.35, Security type: 2, Supplicant state: COMPLETED, Wi-Fi standard: 11ac, RSSI: -24, Link speed: 526Mbps, Tx Link speed: 526Mbps, Max Supported Tx Link speed: 866Mbps, Rx Link speed: 866Mbps, Max Supported Rx Link speed: 866Mbps, Frequency: 5220MHz, Net ID: 5, Metered hint: false, score: 106, isUsable: true, CarrierMerged: false, SubscriptionId: -1, IsPrimary: 1, Trusted: true, Restricted: false, Ephemeral: false, OEM paid: false, OEM private: false, OSU AP: false, FQDN: <none>, Provider friendly name: <none>, Requesting package name: <none>"Excitel_home_wifi_5"wpa2-pskMLO Information: , Is TID-To-Link negotiation supported by the AP: false, AP MLD Address: <none>, AP MLO Link Id: <none>, AP MLO Affiliated links: <none>, Vendor Data: <none>
+08-31 07:44:10.975  2447  2726 D WifiScoreCard: txRate: 2 txSpeed: 526
+08-31 07:44:10.975  2447  2726 D WifiScoreCard: network update SIGNAL_POLL "Excitel_home_wifi_5" ID: 1721486633 RSSI -24 txSpeed -1
+08-31 07:44:10.975  2447  2726 D WifiClientModeImpl[14183:wlan0]:  ClientModeImpl$L2ConnectedState screen=on 68 0 "Excitel_home_wifi_5" b4:86:18:de:39:ca rssi=-24 f=5220 sc=106 link=526 tx=1.3, 0.1, 0.0 rx=1.6 bcn=1897653 [on:0 tx:2 rx:1 period:3016] from screen [on:0 period:31183976] score=106
+08-31 07:44:10.589     0     0 F         : [    C1] kgsl kgsl-3d0: CP: AHB bus error, CP_RL_ERROR_DETAILS_0:0x10008e07 CP_RL_ERROR_DETAILS_1:0x12144
+08-31 07:44:11.019  5485  5485 W DefaultDispatch: type=1400 audit(0.0:902969): avc:  denied  { read } for  name="version" dev="proc" ino=4026532013 scontext=u:r:untrusted_app:s0:c224,c256,c512,c768 tcontext=u:object_r:proc_version:s0 tclass=file permissive=0 app=com.ivarna.mkm
+08-31 07:44:10.639     0     0 F         : [    C0] kgsl kgsl-3d0: CP: AHB bus error, CP_RL_ERROR_DETAILS_0:0x10008e07 CP_RL_ERROR_DETAILS_1:0x12144
+08-31 07:44:11.049  5485  7854 W CpuUtilizationProvider: Failed to read /proc/stat: grep: /proc/stat: Permission denied
+08-31 07:44:11.069  5485  7854 D CpuUtilizationProvider: CPU usage updated from frequency (fallback): 53%
+08-31 07:44:11.070  5485  7854 D CpuProvider: Core 0: freq=787200, usage=0.75757575 (hwMin=364800, hwMax=2265600)
+08-31 07:44:11.071  5485  7854 D CpuProvider: Core 1: freq=787200, usage=0.75757575 (hwMin=364800, hwMax=2265600)
+08-31 07:44:11.072  5485  7854 D CpuProvider: Core 2: freq=2707200, usage=0.8333333 (hwMin=499200, hwMax=3148800)
+08-31 07:44:11.072  5485  7854 D CpuProvider: Core 3: freq=2707200, usage=0.76086956 (hwMin=499200, hwMax=3148800)
+08-31 07:44:11.072  5485  7854 D CpuProvider: Core 4: freq=2707200, usage=0.76086956 (hwMin=499200, hwMax=3148800)
+08-31 07:44:11.073  5485  7854 D CpuProvider: Core 5: freq=1920000, usage=0.8203125 (hwMin=499200, hwMax=2956800)
+08-31 07:44:11.074  5485  7854 D CpuProvider: Core 6: freq=2035200, usage=0.8203125 (hwMin=499200, hwMax=2956800)
+08-31 07:44:11.075  5485  7854 D CpuProvider: Core 7: freq=3244800, usage=0.14965986 (hwMin=480000, hwMax=3302400)
+08-31 07:44:11.075  5485  7854 D CpuProvider: Overall usage: 0.53034127 (from 8 cores), Avg Freq: 2164250
+08-31 07:44:10.706     0     0 F         : [    C0] kgsl kgsl-3d0: CP: AHB bus error, CP_RL_ERROR_DETAILS_0:0x10008e07 CP_RL_ERROR_DETAILS_1:0x12144
+08-31 07:44:11.099  9138  9138 W cat     : type=1400 audit(0.0:902970): avc:  denied  { read } for  name="governor" dev="sysfs" ino=139690 scontext=u:r:untrusted_app:s0:c224,c256,c512,c768 tcontext=u:object_r:vendor_sysfs_kgsl:s0 tclass=file permissive=0 app=com.ivarna.mkm
+08-31 07:44:11.123  9139  9139 W cat     : type=1400 audit(0.0:902971): avc:  denied  { read } for  name="available_governors" dev="sysfs" ino=139691 scontext=u:r:untrusted_app:s0:c224,c256,c512,c768 tcontext=u:object_r:vendor_sysfs_kgsl:s0 tclass=file permissive=0 app=com.ivarna.mkm
+08-31 07:44:10.756     0     0 F         : [    C1] kgsl kgsl-3d0: CP: AHB bus error, CP_RL_ERROR_DETAILS_0:0x10008e07 CP_RL_ERROR_DETAILS_1:0x12144
+08-31 07:44:10.791  5559  5559 E [TP0]touchpanel: irq gpio is 0
+08-31 07:44:11.195  9144  9144 W cat     : type=1400 audit(0.0:902972): avc:  denied  { read } for  name="cur_freq" dev="sysfs" ino=139692 scontext=u:r:untrusted_app:s0:c224,c256,c512,c768 tcontext=u:object_r:vendor_sysfs_kgsl:s0 tclass=file permissive=0 app=com.ivarna.mkm
+08-31 07:44:10.806     0     0 F         : [    C0] kgsl kgsl-3d0: CP: AHB bus error, CP_RL_ERROR_DETAILS_0:0x10008e07 CP_RL_ERROR_DETAILS_1:0x12144
+08-31 07:44:11.241  1601  1667 D vendor.oplus.hardware.charger-V10-service: parallel fold conf file parse fail parallel_fold_state 2
+08-31 07:44:11.241  1601  1667 D vendor.oplus.hardware.charger-V10-service: scale_chg Start!!!
+08-31 07:44:11.241  1601  1667 D vendor.oplus.hardware.charger-V10-service: [0, 0, 3]
+08-31 07:44:11.242  1601  1667 D vendor.oplus.hardware.charger-V10-service: [0, 2, 9]
+08-31 07:44:11.242  1601  1667 D vendor.oplus.hardware.charger-V10-service: [0, 1, 4]
+08-31 07:44:11.242  1601  1667 D vendor.oplus.hardware.charger-V10-service: [0, 3, 3]
+08-31 07:44:11.242  1601  1667 D vendor.oplus.hardware.charger-V10-service: [0, 4, 3]
+08-31 07:44:11.242  1601  1667 D vendor.oplus.hardware.charger-V10-service: [0, 5, 4]
+08-31 07:44:11.242  1601  1667 D vendor.oplus.hardware.charger-V10-service: [0, 6, 3]
+08-31 07:44:11.242  1601  1667 D vendor.oplus.hardware.charger-V10-service: scale_chg Start!!!
+08-31 07:44:11.242  1601  1667 D vendor.oplus.hardware.charger-V10-service: [0, 0, 3]
+08-31 07:44:11.242  1601  1667 D vendor.oplus.hardware.charger-V10-service: [0, 2, 9]
+08-31 07:44:11.242  1601  1667 D vendor.oplus.hardware.charger-V10-service: [0, 1, 4]
+08-31 07:44:11.242  1601  1667 D vendor.oplus.hardware.charger-V10-service: [0, 3, 3]
+08-31 07:44:11.242  1601  1667 D vendor.oplus.hardware.charger-V10-service: [0, 4, 3]
+08-31 07:44:11.242  1601  1667 D vendor.oplus.hardware.charger-V10-service: [0, 5, 4]
+08-31 07:44:11.242  1601  1667 D vendor.oplus.hardware.charger-V10-service: [0, 6, 3]
+08-31 07:44:10.856     0     0 F         : [    C1] kgsl kgsl-3d0: CP: AHB bus error, CP_RL_ERROR_DETAILS_0:0x10008e07 CP_RL_ERROR_DETAILS_1:0x12144
+08-31 07:44:11.255  9150  9150 W cat     : type=1400 audit(0.0:902973): avc:  denied  { read } for  name="gpuclk" dev="sysfs" ino=139614 scontext=u:r:untrusted_app:s0:c224,c256,c512,c768 tcontext=u:object_r:vendor_sysfs_kgsl_gpuclk:s0 tclass=file permissive=0 app=com.ivarna.mkm
+08-31 07:44:10.885  9152  9152 W audit   : audit_lost=592206 audit_rate_limit=5 audit_backlog_limit=64
+08-31 07:44:10.885  9152  9152 E audit   : rate limit exceeded
+08-31 07:44:10.906     0     0 F         : [    C0] kgsl kgsl-3d0: CP: AHB bus error, CP_RL_ERROR_DETAILS_0:0x10008e07 CP_RL_ERROR_DETAILS_1:0x12144
+08-31 07:44:11.351  1502  3285 I vendor.qti.bluetooth@1.1-ibs_handler: ProcessIbsCmd: Received IBS_WAKE_IND: 0xFD
+08-31 07:44:11.351  1502  3285 D vendor.qti.bluetooth@1.1-ibs_handler: SerialClockVote: vote for UART CLK ON
+08-31 07:44:11.351  1502  3285 E vendor.qti.bluetooth@1.1-wake_lock: Acquire write to wakelock file failed -1 - Operation not permitted
+08-31 07:44:11.351  1502  3285 I vendor.qti.bluetooth@1.1-ibs_handler: ProcessIbsCmd: Writing IBS_WAKE_ACK
+08-31 07:44:10.956     0     0 F         : [    C0] kgsl kgsl-3d0: CP: AHB bus error, CP_RL_ERROR_DETAILS_0:0x10008e07 CP_RL_ERROR_DETAILS_1:0x12144
+08-31 07:44:11.392  1502  3285 I vendor.qti.bluetooth@1.1-ibs_handler: ProcessIbsCmd: Received IBS_SLEEP_IND: 0xFE
+08-31 07:44:11.392  1579  1658 W libbinder.ServiceManagerCppClient: Waited one second for vendor.qti.qhcp.IQHDC/default (is service started? Number of threads started in the threadpool: 2. Are binder threads started and available?)
+08-31 07:44:11.392  1502  3285 D vendor.qti.bluetooth@1.1-ibs_handler: SerialClockVote: vote for UART CLK OFF
+08-31 07:44:11.395   899  9167 W libc    : Unable to set property "ctl.interface_start" to "aidl/vendor.qti.qhcp.IQHDC/default": PROP_ERROR_HANDLE_CONTROL_MESSAGE (0x20)
+08-31 07:44:11.000   899   899 I servicemanager: Caller(pid=1579,uid=0,sid=u:r:vendor_hal_perf_default:s0) Since 'vendor.qti.qhcp.IQHDC/default' could not be found trying to start it as a lazy AIDL service. (if it's not configured to be a lazy service, it may be stuck starting or still starting).
+08-31 07:44:11.001     1     1 E init    : Control message: Could not find 'aidl/vendor.qti.qhcp.IQHDC/default' for ctl.interface_start from pid: 899 (/system/bin/servicemanager)
+08-31 07:44:11.002  9167  9167 I servicemanager: Caller(pid=1579,uid=0,sid=u:r:vendor_hal_perf_default:s0) Tried to start aidl service vendor.qti.qhcp.IQHDC/default as a lazy service, but was unable to. Usually this happens when a service is not installed, but if the service is intended to be used as a lazy service, then it may be configured incorrectly.
+08-31 07:44:11.542  1502  3136 E vendor.qti.bluetooth@1.1-wake_lock: Release wake lock not initialized/acquired
+08-31 07:44:11.713  9182  9182 W libbinder.BackendUnifiedServiceManager: Thread Pool max thread count is 0. Cannot cache binder as linkToDeath cannot be implemented. serviceName: SurfaceFlingerAIDL
+08-31 07:44:11.713  9182  9182 W libbinder.BpBinder: Linking to death on android.gui.ISurfaceComposer but there are no threads (yet?) listening to incoming transactions. See ProcessState::startThreadPool and ProcessState::setThreadPoolMaxThreadCount. Generally you should setup the binder threadpool before other initialization steps.
+08-31 07:44:11.714  9182  9182 W libbinder.ProcessState: Extra binder thread started, but 0 threads requested. Do not use *startThreadPool when zero threads are requested.
+08-31 07:44:11.749  9182  9183 I Gralloc4: Adding additional valid usage bits: 0x8202000
+08-31 07:44:11.751  9182  9183 I AdrenoUtils: <ReadGpuID:357>: Reading chip ID through GSL
+08-31 07:44:11.895 26020 28798 D RPCS3   : S3PERF crosscheck native_fps=59.394 native_frametime_ms=16.837
+08-31 07:44:11.896 26020 28798 D S3PERF  : crosscheck json_fps=59.394375 json_frametime_ms=16.83661
+08-31 07:44:11.896 26020 28798 D S3PERF  : crosscheck ui_snapshot_fps=59.394375 ui_snapshot_frametime_ms=16.83661
+08-31 07:44:11.916   794   794 I         : [INFO]: OPLUS_CHG[MMS_GAUGE]([oplus_mms_gauge_choice_fit_vol][3465]): choice cp voltage as vbat [3785, 3769]
+08-31 07:44:11.916   794   794 I         : [INFO]: OPLUS_CHG[MMS_GAUGE]([oplus_mms_gauge_choice_fit_vol][3465]): choice cp voltage as vbat [3785, 3769]
+08-31 07:44:11.922 13852 13852 I         : [INFO]: OPLUS_CHG[CHG_COMM]([oplus_comm_smooth_to_soc][3416]): soc[0 3 41 41 42 43] avg[2 1 0 0 0] fifo[42 42 42 42]
+08-31 07:44:11.929 19676 19676 I OPLUS_CHG[oplus_charge_info]: BATTERY[385 385 3785 3785 1379 41 43 42 3537 8698 1 0x20 0], CHARGE[4455 600 0 0], WIRED[1 447 4973 500 1 0x0 0 0 0 2 0], WIRELESS[0 0 0 0 0 0x0 0 0 0], VOOC[0 0 0 0 0x0], UFCS[0 0 0 0x0], COMMON[6 0 0 0x0 1 0 1 8698 100 0]
+08-31 07:44:11.935 19676 19676 I         : [INFO]: OPLUS_CHG[ADSP]([oplus_chg_8350_reg_dump][7390]): sm8450_st_dump: [chg_en=1, suspend=0, pd_svooc=0], subtype=0x01],[oplus_UsbCommCapable=0, oplus_pd_svooc=0, typec_mode=0, cid_status=0x01, usb_in_status=1],[0x2606=0x83, 0x2607=0x19, 0x2608=0x0a, 0x2609=0x02], [0x260a=0x04, 0x260b=0x55, 0x260c=0x0a, 0x260d=0x18], [0x260e=0x0a, 0x260f=0x01, 0x2610=0x00, 0x2640=0x01], [0x2641=0x02, 0x2642=0x05, 0x2646=0x01, 0x2650=0x04], [0x2706=0x0a, 0x2707=0x0a, 0x2708=0x0a, 0x2709=0x0a], [0x270b=0xe2, 0x270c=0x48, 0x2710=0xc0, 0x280c=0x38], [0x2810=0x00, 0x2840=0x01, 0x287f=0x00, 0x2906=0x02], [0x2908=0x0f, 0x290a=0x11, 0x290b=0x01, 0x290c=0x01], [0x2910=0x11, 0x2944=0x80, 0x2950=0x02, 0x2951=0x01], [0x2952=0x0a, 0x2954=0x00, 0x2960=0xe0, 0x2b06=0x08], [0x2b07=0x00, 0x2b08=0x00, 0x2b09=0xa3, 0x2b0a=0x39], [0x2b0b=0xab, 0x2b0c=0x00, 0x29a8=0x81, 0x29a9=0x83], [0x29aa=0x00, 0x2aa2=0x00, 0x2aa8=0x87, 0x2aa9=0x00], [0x2aaa=0x00],
+08-31 07:44:12.369  1501  2510 I android.hardware.audio.service: [Awinic] [INF] aw_audioreach_monitor_thread: monitor->state = 3
+08-31 07:44:12.369  1501  2510 D android.hardware.audio.service: [Awinic] [DBG] aw_ar_kmsg_ctl_get_monitor_en: dev_index[0]:monitor enable:1
+08-31 07:44:12.372  1501  2510 D android.hardware.audio.service: [Awinic] [DBG] aw_ar_monitor_work_func: dev[0], vmax[0xffe0fd22] is not modified or the value is none
+08-31 07:44:12.372  1501  2510 D android.hardware.audio.service: [Awinic] [DBG] aw_ar_kmsg_ctl_get_monitor_en: dev_index[1]:monitor enable:1
+08-31 07:44:11.976  2510  2510 I [Awinic][7-0034]aw882xx_monitor_get: monitor switch is 1
+08-31 07:44:11.977  2510  2510 I [Awinic][7-0034]aw_monitor_get_voltage: chip voltage is 3757
+08-31 07:44:11.978  2510  2510 I [Awinic][7-0034]aw_monitor_get_temperature: reg val is 0x0032
+08-31 07:44:11.978  2510  2510 I [Awinic][7-0034]aw_monitor_get_temperature: chip temperature = 50
+08-31 07:44:11.979  2510  2510 I [Awinic][4-0034]aw882xx_monitor_get: monitor switch is 1
+08-31 07:44:12.375  1501  2510 D android.hardware.audio.service: [Awinic] [DBG] aw_ar_monitor_work_func: dev[1], vmax[0xffe0fd22] is not modified or the value is none
+08-31 07:44:12.375  1501  2510 D android.hardware.audio.service: [Awinic] [DBG] aw_ar_kmsg_ctl_get_monitor_en: dev_index[2]:monitor enable:1
+08-31 07:44:11.980  2510  2510 I [Awinic][4-0034]aw_monitor_get_voltage: chip voltage is 3769
+08-31 07:44:11.980  2510  2510 I [Awinic][4-0034]aw_monitor_get_temperature: reg val is 0x0028
+08-31 07:44:11.980  2510  2510 I [Awinic][4-0034]aw_monitor_get_temperature: chip temperature = 40
+08-31 07:44:11.981  2510  2510 I [Awinic][7-0035]aw882xx_monitor_get: monitor switch is 1
+08-31 07:44:11.982  2510  2510 I [Awinic][7-0035]aw_monitor_get_voltage: chip voltage is 3745
+08-31 07:44:11.982  2510  2510 I [Awinic][7-0035]aw_monitor_get_temperature: reg val is 0x0031
+08-31 07:44:11.982  2510  2510 I [Awinic][7-0035]aw_monitor_get_temperature: chip temperature = 49
+08-31 07:44:12.377  1501  2510 D android.hardware.audio.service: [Awinic] [DBG] aw_ar_monitor_work_func: dev[2], vmax[0xffe0fd22] is not modified or the value is none
+08-31 07:44:11.983  2510  2510 I [Awinic][4-0035]aw882xx_monitor_get: monitor switch is 1
+08-31 07:44:12.377  1501  2510 D android.hardware.audio.service: [Awinic] [DBG] aw_ar_kmsg_ctl_get_monitor_en: dev_index[3]:monitor enable:1
+08-31 07:44:11.984  2510  2510 I [Awinic][4-0035]aw_monitor_get_voltage: chip voltage is 3745
+08-31 07:44:11.985  2510  2510 I [Awinic][4-0035]aw_monitor_get_temperature: reg val is 0x0029
+08-31 07:44:11.985  2510  2510 I [Awinic][4-0035]aw_monitor_get_temperature: chip temperature = 41
+08-31 07:44:12.379  1501  2510 D android.hardware.audio.service: [Awinic] [DBG] aw_ar_monitor_work_func: dev[3], vmax[0xffe0fd22] is not modified or the value is none
+08-31 07:44:12.379  1501  2510 D PAL: OplusPalCommon: getActiveStreamPcmId: 2077:  dir: 1, stream: 0xb4000077e923b690, pcmDevId: 126
+08-31 07:44:12.380  1501  2510 D android.hardware.audio.service: [Awinic] [DBG] aw_ar_dsp_get_msg_num: msg num[0]
+08-31 07:44:12.380  1501  2510 D AGM: graph: graph_set_config: 1225 entry graph_handle 0x247534c
+08-31 07:44:12.381  1501  2510 D AGM: graph: graph_set_config: 1233 exit, graph handle 0x247534c, ret 0
+08-31 07:44:12.381  1501  2510 D android.hardware.audio.service: [Awinic] [DBG] aw_ar_dsp_read_msg_from_dsp: msg_id:0x7, read data[32] from dsp success
+08-31 07:44:12.381  1501  2510 D android.hardware.audio.service: [Awinic] [DBG] aw_ar_dsp_read_st: dev[0]read Re 7181 , Te 25
+08-31 07:44:12.381  1501  2510 D android.hardware.audio.service: [Awinic] [DBG] aw_ar_dsp_get_msg_num: msg num[0]
+08-31 07:44:12.381  1501  2510 D AGM: graph: graph_set_config: 1225 entry graph_handle 0x247534c
+08-31 07:44:12.382  1501  2510 D AGM: graph: graph_set_config: 1233 exit, graph handle 0x247534c, ret 0
+08-31 07:44:12.382  1501  2510 D android.hardware.audio.service: [Awinic] [DBG] aw_ar_dsp_read_msg_from_dsp: msg_id:0x7, read data[32] from dsp success
+08-31 07:44:12.382  1501  2510 D android.hardware.audio.service: [Awinic] [DBG] aw_ar_dsp_read_st: dev[1]read Re 7232 , Te 25
+08-31 07:44:12.382  1501  2510 D android.hardware.audio.service: [Awinic] [DBG] aw_ar_dsp_get_msg_num: msg num[1]
+08-31 07:44:12.382  1501  2510 D AGM: graph: graph_set_config: 1225 entry graph_handle 0x247534c
+08-31 07:44:12.382  1501  2510 D AGM: graph: graph_set_config: 1233 exit, graph handle 0x247534c, ret 0
+08-31 07:44:12.383  1501  2510 D android.hardware.audio.service: [Awinic] [DBG] aw_ar_dsp_read_msg_from_dsp: msg_id:0x7, read data[32] from dsp success
+08-31 07:44:12.383  1501  2510 D android.hardware.audio.service: [Awinic] [DBG] aw_ar_dsp_read_st: dev[2]read Re 7423 , Te 25
+08-31 07:44:12.383  1501  2510 D android.hardware.audio.service: [Awinic] [DBG] aw_ar_dsp_get_msg_num: msg num[1]
+08-31 07:44:12.383  1501  2510 D AGM: graph: graph_set_config: 1225 entry graph_handle 0x247534c
+08-31 07:44:12.383  1501  2510 D AGM: graph: graph_set_config: 1233 exit, graph handle 0x247534c, ret 0
+08-31 07:44:12.384  1501  2510 D android.hardware.audio.service: [Awinic] [DBG] aw_ar_dsp_read_msg_from_dsp: msg_id:0x7, read data[32] from dsp success
+08-31 07:44:12.384  1501  2510 D android.hardware.audio.service: [Awinic] [DBG] aw_ar_dsp_read_st: dev[3]read Re 7424 , Te 25
+08-31 07:44:12.384  1501  2510 I PAL: OplusSpeakerAwinic: checkSpeakerStatus: 1019: aw_audioreach_dsp_read_st spk0, re=7181, te=25
+08-31 07:44:12.384  1501  2510 I PAL: OplusSpeakerAwinic: checkSpeakerStatus: 1019: aw_audioreach_dsp_read_st spk1, re=7232, te=25
+08-31 07:44:12.384  1501  2510 I PAL: OplusSpeakerAwinic: checkSpeakerStatus: 1019: aw_audioreach_dsp_read_st spk2, re=7423, te=25
+08-31 07:44:12.384  1501  2510 I PAL: OplusSpeakerAwinic: checkSpeakerStatus: 1019: aw_audioreach_dsp_read_st spk3, re=7424, te=25
+08-31 07:44:12.394  1579  1658 W libbinder.ServiceManagerCppClient: Waited one second for vendor.qti.qhcp.IQHDC/default (is service started? Number of threads started in the threadpool: 2. Are binder threads started and available?)
+08-31 07:44:12.003   899   899 I servicemanager: Caller(pid=1579,uid=0,sid=u:r:vendor_hal_perf_default:s0) Since 'vendor.qti.qhcp.IQHDC/default' could not be found trying to start it as a lazy AIDL service. (if it's not configured to be a lazy service, it may be stuck starting or still starting).
+08-31 07:44:12.004     1     1 E init    : Control message: Could not find 'aidl/vendor.qti.qhcp.IQHDC/default' for ctl.interface_start from pid: 899 (/system/bin/servicemanager)
+08-31 07:44:12.398   899  9184 W libc    : Unable to set property "ctl.interface_start" to "aidl/vendor.qti.qhcp.IQHDC/default": PROP_ERROR_HANDLE_CONTROL_MESSAGE (0x20)
+08-31 07:44:12.004  9184  9184 I servicemanager: Caller(pid=1579,uid=0,sid=u:r:vendor_hal_perf_default:s0) Tried to start aidl service vendor.qti.qhcp.IQHDC/default as a lazy service, but was unable to. Usually this happens when a service is not installed, but if the service is intended to be used as a lazy service, then it may be configured incorrectly.
+08-31 07:44:12.578  1502  3285 I vendor.qti.bluetooth@1.1-ibs_handler: ProcessIbsCmd: Received IBS_WAKE_IND: 0xFD
+08-31 07:44:12.578  1502  3285 D vendor.qti.bluetooth@1.1-ibs_handler: SerialClockVote: vote for UART CLK ON
+08-31 07:44:12.578  1502  3285 E vendor.qti.bluetooth@1.1-wake_lock: Acquire write to wakelock file failed -1 - Operation not permitted
+08-31 07:44:12.578  1502  3285 I vendor.qti.bluetooth@1.1-ibs_handler: ProcessIbsCmd: Writing IBS_WAKE_ACK
+08-31 07:44:12.619  1502  3285 I vendor.qti.bluetooth@1.1-ibs_handler: ProcessIbsCmd: Received IBS_SLEEP_IND: 0xFE
+08-31 07:44:12.619  1502  3285 D vendor.qti.bluetooth@1.1-ibs_handler: SerialClockVote: vote for UART CLK OFF
+08-31 07:44:12.769  1502  3136 E vendor.qti.bluetooth@1.1-wake_lock: Release wake lock not initialized/acquired
+08-31 07:44:13.003 27566  8459 I NearbyMediums: Found Fast Ble Advertisements :
+08-31 07:44:13.003 27566  8459 I NearbyMediums: BleAdvertisement { version=2, socketVersion=2, isFast=true, serviceIdHash=null, data=[ 0x23 0x48 0x50 0x38 0x54 0x11 0x32 0x09 0x34 0x10 0x80 0x5f 0x2d 0x52 0xd9 0x69 0xdc 0x6f 0x3e 0x92 0xb1 0xe4 0x8b ], deviceToken=[ 0x67 0x36 ], rxAdvertisement=null } : 1 times.
+08-31 07:44:13.003 27566  8459 I NearbyMediums: Total 1 fast advertisements from 1 unique advertisers.
+08-31 07:44:13.003 27566  8459 I NearbyMediums: Current Tracked Scanning Clients are : {NearbyConnections.EnvironmentMonitor, NearbySharing, NearbyConnections.TxAdvertisement}
+08-31 07:44:13.005 27566  9185 I NearbyConnections: Processing lost BlePeripheral BlePeripheral{advertisement=BleAdvertisement { version=2, socketVersion=2, isFast=true, serviceIdHash=null, data=[ 0x23 0x47 0x50 0x55 0x31 0x11 0x32 0xe5 0xc5 0xba 0x66 0x52 0x2c 0xf3 0xf9 0xf2 0x1f 0x83 0x99 0x4c 0x13 0xdb 0xce ], deviceToken=[ 0x9d 0xa2 ], rxAdvertisement=null }, dctAdvertisement=null, address=null, psm=0, deviceToken=<ByteString@4da8a3e size=2 contents="\235\242">, isSecondProfile=false, rxInstantConnectionAdv=null}.
+08-31 07:44:13.005 27566  9185 I NearbyConnections: Lost BleEndpoint for BlePeripheral BlePeripheral{advertisement=BleAdvertisement { version=2, socketVersion=2, isFast=true, serviceIdHash=null, data=[ 0x23 0x47 0x50 0x55 0x31 0x11 0x32 0xe5 0xc5 0xba 0x66 0x52 0x2c 0xf3 0xf9 0xf2 0x1f 0x83 0x99 0x4c 0x13 0xdb 0xce ], deviceToken=[ 0x9d 0xa2 ], rxAdvertisement=null }, dctAdvertisement=null, address=null, psm=0, deviceToken=<ByteString@4da8a3e size=2 contents="\235\242">, isSecondProfile=false, rxInstantConnectionAdv=null} (with EndpointId GPU1 and EndpointInfo [ 0x32 0xe5 0xc5 0xba 0x66 0x52 0x2c 0xf3 0xf9 0xf2 0x1f 0x83 0x99 0x4c 0x13 0xdb 0xce ]).
+08-31 07:44:13.005 27566  9185 I NearbyConnections: Unable to record lost endpoint due to null currentDiscoveryPhase
+08-31 07:44:13.005 27566  9185 I NearbyConnections: ClientProxy(53193533) reporting onEndpointLost(GPU1)
+08-31 07:44:13.006 27566  8459 I NearbySharing: NearbySharing Internal event EndpointLost(endpointId=GPU1)
+08-31 07:44:13.103 26020 28797 D RPCS3   : S3PERF crosscheck native_fps=62.937 native_frametime_ms=15.889
+08-31 07:44:13.104 26020 28797 D S3PERF  : crosscheck json_fps=62.936832 json_frametime_ms=15.8889475
+08-31 07:44:13.104 26020 28797 D S3PERF  : crosscheck ui_snapshot_fps=62.936832 ui_snapshot_frametime_ms=15.8889475
+08-31 07:44:12.807  4937  4937 E [TP0]touchpanel: irq gpio is 0
+08-31 07:44:13.397  1579  1658 W libbinder.ServiceManagerCppClient: Waited one second for vendor.qti.qhcp.IQHDC/default (is service started? Number of threads started in the threadpool: 2. Are binder threads started and available?)
+08-31 07:44:13.399   899  9190 W libc    : Unable to set property "ctl.interface_start" to "aidl/vendor.qti.qhcp.IQHDC/default": PROP_ERROR_HANDLE_CONTROL_MESSAGE (0x20)
+08-31 07:44:13.004   899   899 I servicemanager: Caller(pid=1579,uid=0,sid=u:r:vendor_hal_perf_default:s0) Since 'vendor.qti.qhcp.IQHDC/default' could not be found trying to start it as a lazy AIDL service. (if it's not configured to be a lazy service, it may be stuck starting or still starting).
+08-31 07:44:13.005     1     1 E init    : Control message: Could not find 'aidl/vendor.qti.qhcp.IQHDC/default' for ctl.interface_start from pid: 899 (/system/bin/servicemanager)
+08-31 07:44:13.006  9190  9190 I servicemanager: Caller(pid=1579,uid=0,sid=u:r:vendor_hal_perf_default:s0) Tried to start aidl service vendor.qti.qhcp.IQHDC/default as a lazy service, but was unable to. Usually this happens when a service is not installed, but if the service is intended to be used as a lazy service, then it may be configured incorrectly.
+08-31 07:44:13.942  1502  3285 I vendor.qti.bluetooth@1.1-ibs_handler: ProcessIbsCmd: Received IBS_WAKE_IND: 0xFD
+08-31 07:44:13.942  1502  3285 D vendor.qti.bluetooth@1.1-ibs_handler: SerialClockVote: vote for UART CLK ON
+08-31 07:44:13.942  1502  3285 E vendor.qti.bluetooth@1.1-wake_lock: Acquire write to wakelock file failed -1 - Operation not permitted
+08-31 07:44:13.942  1502  3285 I vendor.qti.bluetooth@1.1-ibs_handler: ProcessIbsCmd: Writing IBS_WAKE_ACK
+08-31 07:44:13.987  2447  2726 D WifiClientModeImpl[14183:wlan0]: updateLinkLayerStatsRssiSpeedFrequencyCapabilities rssi=-24 TxLinkspeed=585 freq=5220 RxLinkSpeed=780
+08-31 07:44:13.987  2447  2726 D WifiDataStall: tx tput in kbps: 470420
+08-31 07:44:13.987  2447  2726 D WifiDataStall: rx tput in kbps: 815257
+08-31 07:44:13.987  2447  2726 V WifiConfigManager: Updating scan detail cache freq=5220 BSSID=b4:86:18:de:39:ca RSSI=-23 for "Excitel_home_wifi_5"WPA_PSK
+08-31 07:44:13.988  2447  2726 D WifiDataStall:  ccaLevel = 15
+08-31 07:44:13.988  2447  2726 D WifiDataStall: L2 txTputKbps: 523186, rxTputKbps: 734296, L3 txTputKbps: 0, rxTputKbps: 0, TxTrafficHigh: false, RxTrafficHigh: false, Throughput Sufficient: true
+08-31 07:44:13.988  2447  2726 D WifiThroughputPredictor:  utilization (LLS) 15 isBluetoothConnected: false final utilization: 15
+08-31 07:44:13.988  2447  2726 D WifiThroughputPredictor:  BW: 2 RSSI: -24 Nss: 2 Mode: 5 symDur: 3600 snrDb 50 bitPerTone: 6667 rate: 866 throughput: 815
+08-31 07:44:13.988  2447  2726 D WifiThroughputPredictor:  utilization (LLS) 15 isBluetoothConnected: false final utilization: 15
+08-31 07:44:13.988  2447  2726 D WifiThroughputPredictor:  BW: 2 RSSI: -24 Nss: 2 Mode: 5 symDur: 3600 snrDb 50 bitPerTone: 6667 rate: 866 throughput: 815
+08-31 07:44:13.989  2447  2726 D WifiScoreCard: BSSID update SIGNAL_POLL ID: 715353381 SSID: "Excitel_home_wifi_5", BSSID: b4:86:18:de:39:ca, MAC: c6:52:65:7d:a1:b6, IP: /192.168.1.35, Security type: 2, Supplicant state: COMPLETED, Wi-Fi standard: 11ac, RSSI: -24, Link speed: 585Mbps, Tx Link speed: 585Mbps, Max Supported Tx Link speed: 866Mbps, Rx Link speed: 780Mbps, Max Supported Rx Link speed: 866Mbps, Frequency: 5220MHz, Net ID: 5, Metered hint: false, score: 106, isUsable: true, CarrierMerged: false, SubscriptionId: -1, IsPrimary: 1, Trusted: true, Restricted: false, Ephemeral: false, OEM paid: false, OEM private: false, OSU AP: false, FQDN: <none>, Provider friendly name: <none>, Requesting package name: <none>"Excitel_home_wifi_5"wpa2-pskMLO Information: , Is TID-To-Link negotiation supported by the AP: false, AP MLD Address: <none>, AP MLO Link Id: <none>, AP MLO Affiliated links: <none>, Vendor Data: <none>
+08-31 07:44:13.989  2447  2726 D WifiScoreCard: txRate: 2 txSpeed: 585
+08-31 07:44:13.989  2447  2726 D WifiScoreCard: network update SIGNAL_POLL "Excitel_home_wifi_5" ID: 1721486633 RSSI -24 txSpeed -1
+08-31 07:44:13.990  2447  2726 D WifiClientModeImpl[14183:wlan0]:  ClientModeImpl$L2ConnectedState screen=on 68 0 "Excitel_home_wifi_5" b4:86:18:de:39:ca rssi=-24 f=5220 sc=106 link=585 tx=1.1, 0.4, 0.0 rx=1.2 bcn=1897680 [on:0 tx:1 rx:0 period:3014] from screen [on:0 period:31186990] score=106
+08-31 07:44:14.017  1502  3285 I vendor.qti.bluetooth@1.1-ibs_handler: ProcessIbsCmd: Received IBS_SLEEP_IND: 0xFE
+08-31 07:44:14.017  1502  3285 D vendor.qti.bluetooth@1.1-ibs_handler: SerialClockVote: vote for UART CLK OFF
+08-31 07:44:13.703 30923 30923 I [LCD][0][INFO][dsi_display_status_check_error_flag:1212] [ESD]: first read: master=0 slave=0
+08-31 07:44:14.167  1502  3136 E vendor.qti.bluetooth@1.1-wake_lock: Release wake lock not initialized/acquired
+08-31 07:44:14.314 26020 28797 D RPCS3   : S3PERF crosscheck native_fps=59.575 native_frametime_ms=16.786
+08-31 07:44:14.315 26020 28797 D S3PERF  : crosscheck json_fps=59.574833 json_frametime_ms=16.785612
+08-31 07:44:14.315 26020 28797 D S3PERF  : crosscheck ui_snapshot_fps=59.574833 ui_snapshot_frametime_ms=16.785612
+08-31 07:44:14.398  1579  1658 W libbinder.ServiceManagerCppClient: Waited one second for vendor.qti.qhcp.IQHDC/default (is service started? Number of threads started in the threadpool: 2. Are binder threads started and available?)
+08-31 07:44:14.006   899   899 I servicemanager: Caller(pid=1579,uid=0,sid=u:r:vendor_hal_perf_default:s0) Since 'vendor.qti.qhcp.IQHDC/default' could not be found trying to start it as a lazy AIDL service. (if it's not configured to be a lazy service, it may be stuck starting or still starting).
+08-31 07:44:14.402   899  9191 W libc    : Unable to set property "ctl.interface_start" to "aidl/vendor.qti.qhcp.IQHDC/default": PROP_ERROR_HANDLE_CONTROL_MESSAGE (0x20)
+08-31 07:44:14.007     1     1 E init    : Control message: Could not find 'aidl/vendor.qti.qhcp.IQHDC/default' for ctl.interface_start from pid: 899 (/system/bin/servicemanager)
+08-31 07:44:14.008  9191  9191 I servicemanager: Caller(pid=1579,uid=0,sid=u:r:vendor_hal_perf_default:s0) Tried to start aidl service vendor.qti.qhcp.IQHDC/default as a lazy service, but was unable to. Usually this happens when a service is not installed, but if the service is intended to be used as a lazy service, then it may be configured incorrectly.
+08-31 07:44:14.052   943   943 I logd    : logdr: UID=2000 GID=2000 PID=9192 n tail=0 logMask=99 pid=0 start=0ns deadline=0ns

@@ -145,6 +145,9 @@ class MainActivity : ComponentActivity() {
                 handingOffToRecovery = true
                 startActivity(Intent(this, RPCSXActivity::class.java).apply {
                     putExtra("path", pending.originalGamePath)
+                    putExtra(RPCSXActivity.EXTRA_ORIGINAL_GAME_PATH, pending.originalGamePath)
+                    putExtra(RPCSXActivity.EXTRA_BOOT_MODE, EmulatorBootMode.DurableRecovery.name)
+                    putExtra(RPCSXActivity.EXTRA_SAVESTATE_PATH, pending.savestatePath)
                     putExtra(RPCSXActivity.EXTRA_RECOVERY_SAVESTATE, pending.savestatePath)
                     putExtra(RPCSXActivity.EXTRA_RECOVERY_REQUEST_ID, pending.requestId)
                 })
@@ -210,8 +213,10 @@ class MainActivity : ComponentActivity() {
                             if (slot?.path != null) {
                                 startActivity(Intent(this@MainActivity, RPCSXActivity::class.java).apply {
                                     putExtra("path", unfinishedSession.gamePath)
-                                    putExtra(RPCSXActivity.EXTRA_USER_SAVESTATE, slot.path)
-                                    putExtra(RPCSXActivity.EXTRA_USER_SAVESTATE_SLOT, slot.slot)
+                                    putExtra(RPCSXActivity.EXTRA_ORIGINAL_GAME_PATH, unfinishedSession.gamePath)
+                                    putExtra(RPCSXActivity.EXTRA_BOOT_MODE, EmulatorBootMode.UserSelectedSavestate.name)
+                                    putExtra(RPCSXActivity.EXTRA_SAVESTATE_PATH, slot.path)
+                                    putExtra(RPCSXActivity.EXTRA_SAVESTATE_SLOT, slot.slot)
                                 })
                                 handingOffToRecovery = true
                                 finish()

@@ -1,0 +1,854 @@
+--------- beginning of main
+08-31 05:12:21.191 13837 13837 W cat     : type=1400 audit(0.0:866355): avc:  denied  { read } for  name="cur_freq" dev="sysfs" ino=139692 scontext=u:r:untrusted_app:s0:c224,c256,c512,c768 tcontext=u:object_r:vendor_sysfs_kgsl:s0 tclass=file permissive=0 app=com.ivarna.mkm
+08-31 05:12:21.207  1501 14551 I AHAL: AudioStream: GetFramesWritten: 3406: mmap position is 87775392
+08-31 05:12:21.207  1501 14551 I AHAL: AudioStream: GetFramesWritten: 3409: mmap signed frames 87775248
+08-31 05:12:21.243 13844 13844 W cat     : type=1400 audit(0.0:866356): avc:  denied  { read } for  name="gpuclk" dev="sysfs" ino=139614 scontext=u:r:untrusted_app:s0:c224,c256,c512,c768 tcontext=u:object_r:vendor_sysfs_kgsl_gpuclk:s0 tclass=file permissive=0 app=com.ivarna.mkm
+--------- beginning of kernel
+08-31 05:12:20.861 13846 13846 W audit   : audit_lost=568819 audit_rate_limit=5 audit_backlog_limit=64
+08-31 05:12:20.861 13846 13846 E audit   : rate limit exceeded
+08-31 05:12:21.257  1501 14551 I AHAL: AudioStream: GetFramesWritten: 3406: mmap position is 87777792
+08-31 05:12:21.257  1501 14551 I AHAL: AudioStream: GetFramesWritten: 3409: mmap signed frames 87777648
+08-31 05:12:21.299  2038  2038 I S3TOUCH : root action=down x=513 y=1182
+08-31 05:12:21.299  2038  2038 I S3TOUCH : pad action=down menu=false
+08-31 05:12:21.299  3141  3141 D TaskbarManager: dispatchTouchEvent:  displayId=0 isDefaultDisplay=true
+08-31 05:12:21.300  1514  1514 I android.hardware.power-service-qti: Power setBoost: 0, duration: 0
+08-31 05:12:21.302  1514  1514 E QTI PowerHAL: Failed to acquire lock.
+08-31 05:12:21.302  1514  1514 E QTI PowerHAL: Failed process_boost for boost_handle
+08-31 05:12:21.308  1501 14551 I AHAL: AudioStream: GetFramesWritten: 3406: mmap position is 87780192
+08-31 05:12:21.308  1501 14551 I AHAL: AudioStream: GetFramesWritten: 3409: mmap signed frames 87780048
+08-31 05:12:21.328  1502  3136 E vendor.qti.bluetooth@1.1-wake_lock: Release wake lock not initialized/acquired
+08-31 05:12:21.358  1501 14551 I AHAL: AudioStream: GetFramesWritten: 3406: mmap position is 87782640
+08-31 05:12:21.358  1501 14551 I AHAL: AudioStream: GetFramesWritten: 3409: mmap signed frames 87782496
+08-31 05:12:21.409  1501 14551 I AHAL: AudioStream: GetFramesWritten: 3406: mmap position is 87785088
+08-31 05:12:21.409  1501 14551 I AHAL: AudioStream: GetFramesWritten: 3409: mmap signed frames 87784944
+08-31 05:12:21.415  1579  1658 W libbinder.ServiceManagerCppClient: Waited one second for vendor.qti.qhcp.IQHDC/default (is service started? Number of threads started in the threadpool: 2. Are binder threads started and available?)
+08-31 05:12:21.023   899   899 I servicemanager: Caller(pid=1579,uid=0,sid=u:r:vendor_hal_perf_default:s0) Since 'vendor.qti.qhcp.IQHDC/default' could not be found trying to start it as a lazy AIDL service. (if it's not configured to be a lazy service, it may be stuck starting or still starting).
+08-31 05:12:21.419   899 13877 W libc    : Unable to set property "ctl.interface_start" to "aidl/vendor.qti.qhcp.IQHDC/default": PROP_ERROR_HANDLE_CONTROL_MESSAGE (0x20)
+08-31 05:12:21.025     1     1 E init    : Control message: Could not find 'aidl/vendor.qti.qhcp.IQHDC/default' for ctl.interface_start from pid: 899 (/system/bin/servicemanager)
+08-31 05:12:21.025 13877 13877 I servicemanager: Caller(pid=1579,uid=0,sid=u:r:vendor_hal_perf_default:s0) Tried to start aidl service vendor.qti.qhcp.IQHDC/default as a lazy service, but was unable to. Usually this happens when a service is not installed, but if the service is intended to be used as a lazy service, then it may be configured incorrectly.
+08-31 05:12:21.459  1501 14551 I AHAL: AudioStream: GetFramesWritten: 3406: mmap position is 87787488
+08-31 05:12:21.459  1501 14551 I AHAL: AudioStream: GetFramesWritten: 3409: mmap signed frames 87787344
+08-31 05:12:21.509  1501 14551 I AHAL: AudioStream: GetFramesWritten: 3406: mmap position is 87789888
+08-31 05:12:21.509  1501 14551 I AHAL: AudioStream: GetFramesWritten: 3409: mmap signed frames 87789744
+08-31 05:12:21.549  3141  3141 D TaskbarManager: dispatchTouchEvent:  displayId=0 isDefaultDisplay=true
+08-31 05:12:21.550  2038  2038 I S3TOUCH : root action=down x=513 y=1635
+08-31 05:12:21.550  2038  2038 I S3TOUCH : pad action=down menu=false
+08-31 05:12:21.550  1514  1514 I android.hardware.power-service-qti: Power setBoost: 0, duration: 0
+08-31 05:12:21.550  1514  1514 E QTI PowerHAL: Failed to acquire lock.
+08-31 05:12:21.550  1514  1514 E QTI PowerHAL: Failed process_boost for boost_handle
+08-31 05:12:21.560  1501 14551 I AHAL: AudioStream: GetFramesWritten: 3406: mmap position is 87792336
+08-31 05:12:21.560  1501 14551 I AHAL: AudioStream: GetFramesWritten: 3409: mmap signed frames 87792192
+08-31 05:12:21.611  1501 14551 I AHAL: AudioStream: GetFramesWritten: 3406: mmap position is 87794784
+08-31 05:12:21.611  1501 14551 I AHAL: AudioStream: GetFramesWritten: 3409: mmap signed frames 87794640
+08-31 05:12:21.662  1501 14551 I AHAL: AudioStream: GetFramesWritten: 3406: mmap position is 87797232
+08-31 05:12:21.662  1501 14551 I AHAL: AudioStream: GetFramesWritten: 3409: mmap signed frames 87797088
+08-31 05:12:21.712  1501 14551 I AHAL: AudioStream: GetFramesWritten: 3406: mmap position is 87799632
+08-31 05:12:21.713  1501 14551 I AHAL: AudioStream: GetFramesWritten: 3409: mmap signed frames 87799488
+08-31 05:12:21.763  1501 14551 I AHAL: AudioStream: GetFramesWritten: 3406: mmap position is 87802032
+08-31 05:12:21.763  1501 14551 I AHAL: AudioStream: GetFramesWritten: 3409: mmap signed frames 87801888
+08-31 05:12:21.387 31543 31543 E iostack : irqs = 1797318, self-block = 0
+08-31 05:12:21.804  3141  3141 D TaskbarManager: dispatchTouchEvent:  displayId=0 isDefaultDisplay=true
+08-31 05:12:21.804  2038  2038 I S3TOUCH : root action=down x=260 y=1410
+08-31 05:12:21.804  2038  2038 I S3TOUCH : pad action=down menu=false
+08-31 05:12:21.805  1514  1514 I android.hardware.power-service-qti: Power setBoost: 0, duration: 0
+08-31 05:12:21.809  1514  1514 E QTI PowerHAL: Failed to acquire lock.
+08-31 05:12:21.809  1514  1514 E QTI PowerHAL: Failed process_boost for boost_handle
+08-31 05:12:21.813  1501 14551 I AHAL: AudioStream: GetFramesWritten: 3406: mmap position is 87804480
+08-31 05:12:21.813  1501 14551 I AHAL: AudioStream: GetFramesWritten: 3409: mmap signed frames 87804336
+08-31 05:12:21.864  1501 14551 I AHAL: AudioStream: GetFramesWritten: 3406: mmap position is 87806928
+08-31 05:12:21.864  1501 14551 I AHAL: AudioStream: GetFramesWritten: 3409: mmap signed frames 87806784
+08-31 05:12:21.864  1501  2510 I android.hardware.audio.service: [Awinic] [INF] aw_audioreach_monitor_thread: monitor->state = 3
+08-31 05:12:21.864  1501  2510 D android.hardware.audio.service: [Awinic] [DBG] aw_ar_kmsg_ctl_get_monitor_en: dev_index[0]:monitor enable:1
+08-31 05:12:21.470  2510  2510 I [Awinic][7-0034]aw882xx_monitor_get: monitor switch is 1
+08-31 05:12:21.472  2510  2510 I [Awinic][7-0034]aw_monitor_get_voltage: chip voltage is 3993
+08-31 05:12:21.867  1501  2510 D android.hardware.audio.service: [Awinic] [DBG] aw_ar_monitor_work_func: dev[0], vmax[0xffee3c06] is not modified or the value is none
+08-31 05:12:21.472  2510  2510 I [Awinic][7-0034]aw_monitor_get_temperature: reg val is 0x0032
+08-31 05:12:21.867  1501  2510 D android.hardware.audio.service: [Awinic] [DBG] aw_ar_kmsg_ctl_get_monitor_en: dev_index[1]:monitor enable:1
+08-31 05:12:21.472  2510  2510 I [Awinic][7-0034]aw_monitor_get_temperature: chip temperature = 50
+08-31 05:12:21.473  2510  2510 I [Awinic][4-0034]aw882xx_monitor_get: monitor switch is 1
+08-31 05:12:21.474  2510  2510 I [Awinic][4-0034]aw_monitor_get_voltage: chip voltage is 4004
+08-31 05:12:21.475  2510  2510 I [Awinic][4-0034]aw_monitor_get_temperature: reg val is 0x0028
+08-31 05:12:21.475  2510  2510 I [Awinic][4-0034]aw_monitor_get_temperature: chip temperature = 40
+08-31 05:12:21.869  1501  2510 D android.hardware.audio.service: [Awinic] [DBG] aw_ar_monitor_work_func: dev[1], vmax[0xffee3c06] is not modified or the value is none
+08-31 05:12:21.869  1501  2510 D android.hardware.audio.service: [Awinic] [DBG] aw_ar_kmsg_ctl_get_monitor_en: dev_index[2]:monitor enable:1
+08-31 05:12:21.476  2510  2510 I [Awinic][7-0035]aw882xx_monitor_get: monitor switch is 1
+08-31 05:12:21.476  2510  2510 I [Awinic][7-0035]aw_monitor_get_voltage: chip voltage is 3993
+08-31 05:12:21.477  2510  2510 I [Awinic][7-0035]aw_monitor_get_temperature: reg val is 0x0031
+08-31 05:12:21.477  2510  2510 I [Awinic][7-0035]aw_monitor_get_temperature: chip temperature = 49
+08-31 05:12:21.871  1501  2510 D android.hardware.audio.service: [Awinic] [DBG] aw_ar_monitor_work_func: dev[2], vmax[0xffee3c06] is not modified or the value is none
+08-31 05:12:21.871  1501  2510 D android.hardware.audio.service: [Awinic] [DBG] aw_ar_kmsg_ctl_get_monitor_en: dev_index[3]:monitor enable:1
+08-31 05:12:21.478  2510  2510 I [Awinic][4-0035]aw882xx_monitor_get: monitor switch is 1
+08-31 05:12:21.478  2510  2510 I [Awinic][4-0035]aw_monitor_get_voltage: chip voltage is 3981
+08-31 05:12:21.478  2510  2510 I [Awinic][4-0035]aw_monitor_get_temperature: reg val is 0x0029
+08-31 05:12:21.478  2510  2510 I [Awinic][4-0035]aw_monitor_get_temperature: chip temperature = 41
+08-31 05:12:21.873  1501  2510 D android.hardware.audio.service: [Awinic] [DBG] aw_ar_monitor_work_func: dev[3], vmax[0xffee3c06] is not modified or the value is none
+08-31 05:12:21.915  1501 14551 I AHAL: AudioStream: GetFramesWritten: 3406: mmap position is 87809376
+08-31 05:12:21.915  1501 14551 I AHAL: AudioStream: GetFramesWritten: 3409: mmap signed frames 87809232
+08-31 05:12:21.965  1501 14551 I AHAL: AudioStream: GetFramesWritten: 3406: mmap position is 87811776
+08-31 05:12:21.965  1501 14551 I AHAL: AudioStream: GetFramesWritten: 3409: mmap signed frames 87811632
+08-31 05:12:22.015  1501 14551 I AHAL: AudioStream: GetFramesWritten: 3406: mmap position is 87814176
+08-31 05:12:22.015  1501 14551 I AHAL: AudioStream: GetFramesWritten: 3409: mmap signed frames 87814032
+08-31 05:12:22.049  2038 13511 D RPCS3   : PPU Syscall Usage Stats:
+08-31 05:12:22.049  2038 13511 D RPCS3   : 	⁂ sys_timer_usleep [18077588]
+08-31 05:12:22.049  2038 13511 D RPCS3   : 	⁂ sys_ppu_thread_yield [5424611]
+08-31 05:12:22.049  2038 13511 D RPCS3   : 	⁂ sys_event_queue_receive [143874]
+08-31 05:12:22.049  2038 13511 D RPCS3   : 	⁂ sys_event_flag_wait [44473]
+08-31 05:12:22.049  2038 13511 D RPCS3   : 	⁂ sys_event_flag_set [44467]
+08-31 05:12:22.049  2038 13511 D RPCS3   : 	⁂ sys_rsx_context_attribute [35230]
+08-31 05:12:22.049  2038 13511 D RPCS3   : 	⁂ _sys_lwmutex_lock [30046]
+08-31 05:12:22.049  2038 13511 D RPCS3   : 	⁂ _sys_lwmutex_unlock [30046]
+08-31 05:12:22.049  2038 13511 D RPCS3   : 	⁂ sys_fs_lseek [2219]
+08-31 05:12:22.049  2038 13511 D RPCS3   : 	⁂ sys_fs_read [833]
+08-31 05:12:22.065  1501 14551 I AHAL: AudioStream: GetFramesWritten: 3406: mmap position is 87816576
+08-31 05:12:22.065  1501 14551 I AHAL: AudioStream: GetFramesWritten: 3409: mmap signed frames 87816432
+08-31 05:12:22.078  3141  3141 D TaskbarManager: dispatchTouchEvent:  displayId=0 isDefaultDisplay=true
+08-31 05:12:22.078  2038  2038 I S3TOUCH : root action=down x=780 y=1410
+08-31 05:12:22.079  2038  2038 I S3TOUCH : pad action=down menu=false
+08-31 05:12:22.079  1514  1514 I android.hardware.power-service-qti: Power setBoost: 0, duration: 0
+08-31 05:12:22.080  1514  1514 E QTI PowerHAL: Failed to acquire lock.
+08-31 05:12:22.080  1514  1514 E QTI PowerHAL: Failed process_boost for boost_handle
+08-31 05:12:22.116  1501 14551 I AHAL: AudioStream: GetFramesWritten: 3406: mmap position is 87819024
+08-31 05:12:22.116  1501 14551 I AHAL: AudioStream: GetFramesWritten: 3409: mmap signed frames 87818880
+08-31 05:12:22.166  1501 14551 I AHAL: AudioStream: GetFramesWritten: 3406: mmap position is 87821424
+08-31 05:12:22.166  1501 14551 I AHAL: AudioStream: GetFramesWritten: 3409: mmap signed frames 87821280
+08-31 05:12:22.216  1501 14551 I AHAL: AudioStream: GetFramesWritten: 3406: mmap position is 87823824
+08-31 05:12:22.217  1501 14551 I AHAL: AudioStream: GetFramesWritten: 3409: mmap signed frames 87823680
+08-31 05:12:22.267  1501 14551 I AHAL: AudioStream: GetFramesWritten: 3406: mmap position is 87826272
+08-31 05:12:22.267  1501 14551 I AHAL: AudioStream: GetFramesWritten: 3409: mmap signed frames 87826128
+08-31 05:12:22.317  1501 14551 I AHAL: AudioStream: GetFramesWritten: 3406: mmap position is 87828672
+08-31 05:12:22.317  1501 14551 I AHAL: AudioStream: GetFramesWritten: 3409: mmap signed frames 87828528
+08-31 05:12:22.337  3141  3141 D TaskbarManager: dispatchTouchEvent:  displayId=0 isDefaultDisplay=true
+08-31 05:12:22.337  2038  2038 I S3TOUCH : root action=down x=2420 y=1260
+08-31 05:12:22.338  2038  2038 I S3TOUCH : pad action=down menu=false
+08-31 05:12:22.339  1514  1514 I android.hardware.power-service-qti: Power setBoost: 0, duration: 0
+08-31 05:12:22.341  1514  1514 E QTI PowerHAL: Failed to acquire lock.
+08-31 05:12:22.341  1514  1514 E QTI PowerHAL: Failed process_boost for boost_handle
+08-31 05:12:22.367  1501 14551 I AHAL: AudioStream: GetFramesWritten: 3406: mmap position is 87831072
+08-31 05:12:22.367  1501 14551 I AHAL: AudioStream: GetFramesWritten: 3409: mmap signed frames 87830928
+08-31 05:12:22.417  1501 14551 I AHAL: AudioStream: GetFramesWritten: 3406: mmap position is 87833472
+08-31 05:12:22.417  1501 14551 I AHAL: AudioStream: GetFramesWritten: 3409: mmap signed frames 87833328
+08-31 05:12:22.417  1579  1658 W libbinder.ServiceManagerCppClient: Waited one second for vendor.qti.qhcp.IQHDC/default (is service started? Number of threads started in the threadpool: 2. Are binder threads started and available?)
+08-31 05:12:22.420   899 13902 W libc    : Unable to set property "ctl.interface_start" to "aidl/vendor.qti.qhcp.IQHDC/default": PROP_ERROR_HANDLE_CONTROL_MESSAGE (0x20)
+08-31 05:12:22.025   899   899 I servicemanager: Caller(pid=1579,uid=0,sid=u:r:vendor_hal_perf_default:s0) Since 'vendor.qti.qhcp.IQHDC/default' could not be found trying to start it as a lazy AIDL service. (if it's not configured to be a lazy service, it may be stuck starting or still starting).
+08-31 05:12:22.026     1     1 E init    : Control message: Could not find 'aidl/vendor.qti.qhcp.IQHDC/default' for ctl.interface_start from pid: 899 (/system/bin/servicemanager)
+08-31 05:12:22.026 13902 13902 I servicemanager: Caller(pid=1579,uid=0,sid=u:r:vendor_hal_perf_default:s0) Tried to start aidl service vendor.qti.qhcp.IQHDC/default as a lazy service, but was unable to. Usually this happens when a service is not installed, but if the service is intended to be used as a lazy service, then it may be configured incorrectly.
+08-31 05:12:22.467  1501 14551 I AHAL: AudioStream: GetFramesWritten: 3406: mmap position is 87835872
+08-31 05:12:22.468  1501 14551 I AHAL: AudioStream: GetFramesWritten: 3409: mmap signed frames 87835728
+08-31 05:12:22.505  1502  3285 I vendor.qti.bluetooth@1.1-ibs_handler: ProcessIbsCmd: Received IBS_WAKE_IND: 0xFD
+08-31 05:12:22.505  1502  3285 D vendor.qti.bluetooth@1.1-ibs_handler: SerialClockVote: vote for UART CLK ON
+08-31 05:12:22.505  1502  3285 E vendor.qti.bluetooth@1.1-wake_lock: Acquire write to wakelock file failed -1 - Operation not permitted
+08-31 05:12:22.505  1502  3285 I vendor.qti.bluetooth@1.1-ibs_handler: ProcessIbsCmd: Writing IBS_WAKE_ACK
+08-31 05:12:22.519  1501 14551 I AHAL: AudioStream: GetFramesWritten: 3406: mmap position is 87838320
+08-31 05:12:22.519  1501 14551 I AHAL: AudioStream: GetFramesWritten: 3409: mmap signed frames 87838176
+08-31 05:12:22.546  1502  3285 I vendor.qti.bluetooth@1.1-ibs_handler: ProcessIbsCmd: Received IBS_SLEEP_IND: 0xFE
+08-31 05:12:22.546  1502  3285 D vendor.qti.bluetooth@1.1-ibs_handler: SerialClockVote: vote for UART CLK OFF
+08-31 05:12:22.557  1502  3285 I vendor.qti.bluetooth@1.1-ibs_handler: ProcessIbsCmd: Received IBS_WAKE_IND: 0xFD
+08-31 05:12:22.557  1502  3285 D vendor.qti.bluetooth@1.1-ibs_handler: SerialClockVote: vote for UART CLK ON
+08-31 05:12:22.557  1502  3285 E vendor.qti.bluetooth@1.1-wake_lock: Acquire write to wakelock file failed -1 - Operation not permitted
+08-31 05:12:22.557  1502  3285 I vendor.qti.bluetooth@1.1-ibs_handler: ProcessIbsCmd: Writing IBS_WAKE_ACK
+08-31 05:12:22.569  1501 14551 I AHAL: AudioStream: GetFramesWritten: 3406: mmap position is 87840768
+08-31 05:12:22.569  1501 14551 I AHAL: AudioStream: GetFramesWritten: 3409: mmap signed frames 87840624
+08-31 05:12:22.575  1601  1667 D vendor.oplus.hardware.charger-V10-service: parallel fold conf file parse fail parallel_fold_state 2
+08-31 05:12:22.575  1601  1667 D vendor.oplus.hardware.charger-V10-service: scale_chg Start!!!
+08-31 05:12:22.575  1601  1667 D vendor.oplus.hardware.charger-V10-service: [0, 0, 3]
+08-31 05:12:22.575  1601  1667 D vendor.oplus.hardware.charger-V10-service: [0, 2, 9]
+08-31 05:12:22.576  1601  1667 D vendor.oplus.hardware.charger-V10-service: [0, 1, 4]
+08-31 05:12:22.576  1601  1667 D vendor.oplus.hardware.charger-V10-service: [0, 3, 3]
+08-31 05:12:22.576  1601  1667 D vendor.oplus.hardware.charger-V10-service: [0, 4, 3]
+08-31 05:12:22.576  1601  1667 D vendor.oplus.hardware.charger-V10-service: [0, 5, 4]
+08-31 05:12:22.576  1601  1667 D vendor.oplus.hardware.charger-V10-service: [0, 6, 3]
+08-31 05:12:22.576  1601  1667 D vendor.oplus.hardware.charger-V10-service: scale_chg Start!!!
+08-31 05:12:22.576  1601  1667 D vendor.oplus.hardware.charger-V10-service: [0, 0, 3]
+08-31 05:12:22.576  1601  1667 D vendor.oplus.hardware.charger-V10-service: [0, 2, 9]
+08-31 05:12:22.577  1601  1667 D vendor.oplus.hardware.charger-V10-service: [0, 1, 4]
+08-31 05:12:22.577  1601  1667 D vendor.oplus.hardware.charger-V10-service: [0, 3, 3]
+08-31 05:12:22.577  1601  1667 D vendor.oplus.hardware.charger-V10-service: [0, 4, 3]
+08-31 05:12:22.577  1601  1667 D vendor.oplus.hardware.charger-V10-service: [0, 5, 4]
+08-31 05:12:22.578  1601  1667 D vendor.oplus.hardware.charger-V10-service: [0, 6, 3]
+08-31 05:12:22.579  3141  3141 D TaskbarManager: dispatchTouchEvent:  displayId=0 isDefaultDisplay=true
+08-31 05:12:22.579  2038  2038 I S3TOUCH : root action=down x=2646 y=1486
+08-31 05:12:22.579  2038  2038 I S3TOUCH : pad action=down menu=false
+08-31 05:12:22.579  1514  1514 I android.hardware.power-service-qti: Power setBoost: 0, duration: 0
+08-31 05:12:22.599  1502  3285 I vendor.qti.bluetooth@1.1-ibs_handler: ProcessIbsCmd: Received IBS_SLEEP_IND: 0xFE
+08-31 05:12:22.599  1502  3285 D vendor.qti.bluetooth@1.1-ibs_handler: SerialClockVote: vote for UART CLK OFF
+08-31 05:12:22.599  1502  3285 E vendor.qti.bluetooth@1.1-wake_lock: Release wake lock not initialized/acquired
+08-31 05:12:22.620  1501 14551 I AHAL: AudioStream: GetFramesWritten: 3406: mmap position is 87843216
+08-31 05:12:22.620  1501 14551 I AHAL: AudioStream: GetFramesWritten: 3409: mmap signed frames 87843072
+08-31 05:12:22.670  1501 14551 I AHAL: AudioStream: GetFramesWritten: 3406: mmap position is 87845616
+08-31 05:12:22.670  1501 14551 I AHAL: AudioStream: GetFramesWritten: 3409: mmap signed frames 87845472
+08-31 05:12:22.721  1501 14551 I AHAL: AudioStream: GetFramesWritten: 3406: mmap position is 87848064
+08-31 05:12:22.721  1501 14551 I AHAL: AudioStream: GetFramesWritten: 3409: mmap signed frames 87847920
+08-31 05:12:22.751  1502  3136 E vendor.qti.bluetooth@1.1-wake_lock: Release wake lock not initialized/acquired
+08-31 05:12:22.771  1501 14551 I AHAL: AudioStream: GetFramesWritten: 3406: mmap position is 87850464
+08-31 05:12:22.771  1501 14551 I AHAL: AudioStream: GetFramesWritten: 3409: mmap signed frames 87850320
+08-31 05:12:22.822  1501 14551 I AHAL: AudioStream: GetFramesWritten: 3406: mmap position is 87852912
+08-31 05:12:22.822  1501 14551 I AHAL: AudioStream: GetFramesWritten: 3409: mmap signed frames 87852768
+08-31 05:12:22.854  3141  3141 D TaskbarManager: dispatchTouchEvent:  displayId=0 isDefaultDisplay=true
+08-31 05:12:22.854  2038  2038 I S3TOUCH : root action=down x=2420 y=1713
+08-31 05:12:22.855  2038  2038 I S3TOUCH : pad action=down menu=false
+08-31 05:12:22.855  1514  1514 I android.hardware.power-service-qti: Power setBoost: 0, duration: 0
+08-31 05:12:22.856  1514  1514 E QTI PowerHAL: Failed to acquire lock.
+08-31 05:12:22.856  1514  1514 E QTI PowerHAL: Failed process_boost for boost_handle
+08-31 05:12:22.872  1501 14551 I AHAL: AudioStream: GetFramesWritten: 3406: mmap position is 87855312
+08-31 05:12:22.872  1501 14551 I AHAL: AudioStream: GetFramesWritten: 3409: mmap signed frames 87855168
+08-31 05:12:22.503  5215  5215 E [TP0]touchpanel: irq gpio is 0
+08-31 05:12:22.923  1501 14551 I AHAL: AudioStream: GetFramesWritten: 3406: mmap position is 87857760
+08-31 05:12:22.923  1501 14551 I AHAL: AudioStream: GetFramesWritten: 3409: mmap signed frames 87857616
+08-31 05:12:22.974  1501 14551 I AHAL: AudioStream: GetFramesWritten: 3406: mmap position is 87860160
+08-31 05:12:22.974  1501 14551 I AHAL: AudioStream: GetFramesWritten: 3409: mmap signed frames 87860016
+08-31 05:12:23.024  1501 14551 I AHAL: AudioStream: GetFramesWritten: 3406: mmap position is 87862608
+08-31 05:12:23.024  1501 14551 I AHAL: AudioStream: GetFramesWritten: 3409: mmap signed frames 87862464
+08-31 05:12:23.075  1501 14551 I AHAL: AudioStream: GetFramesWritten: 3406: mmap position is 87865056
+08-31 05:12:23.075  1501 14551 I AHAL: AudioStream: GetFramesWritten: 3409: mmap signed frames 87864912
+08-31 05:12:23.094  2038  2038 I S3TOUCH : root action=down x=2193 y=1486
+08-31 05:12:23.094  2038  2038 I S3TOUCH : pad action=down menu=false
+08-31 05:12:23.094  1514  1514 I android.hardware.power-service-qti: Power setBoost: 0, duration: 0
+08-31 05:12:23.095  3141  3141 D TaskbarManager: dispatchTouchEvent:  displayId=0 isDefaultDisplay=true
+08-31 05:12:23.125  1501 14551 I AHAL: AudioStream: GetFramesWritten: 3406: mmap position is 87867456
+08-31 05:12:23.125  1501 14551 I AHAL: AudioStream: GetFramesWritten: 3409: mmap signed frames 87867312
+08-31 05:12:22.758  1508  1508 W healthd : battery l=72 v=4020 t=37.8 h=2 st=2 c=1140 fc=9230000 cc=10 chg=u
+08-31 05:12:23.176  1501 14551 I AHAL: AudioStream: GetFramesWritten: 3406: mmap position is 87869904
+08-31 05:12:23.176  1501 14551 I AHAL: AudioStream: GetFramesWritten: 3409: mmap signed frames 87869760
+08-31 05:12:23.213  2447  2726 D WifiClientModeImpl[14183:wlan0]: updateLinkLayerStatsRssiSpeedFrequencyCapabilities rssi=-23 TxLinkspeed=650 freq=5220 RxLinkSpeed=866
+08-31 05:12:23.213  2447  2726 D WifiDataStall: tx tput in kbps: 581318
+08-31 05:12:23.213  2447  2726 D WifiDataStall: rx tput in kbps: 815257
+08-31 05:12:23.213  2447  2726 V WifiConfigManager: Updating scan detail cache freq=5220 BSSID=b4:86:18:de:39:ca RSSI=-23 for "Excitel_home_wifi_5"WPA_PSK
+08-31 05:12:23.213  2447  2726 D WifiDataStall:  ccaLevel = 15
+08-31 05:12:23.213  2447  2726 D WifiDataStall: L2 txTputKbps: 581318, rxTputKbps: 815257, L3 txTputKbps: 0, rxTputKbps: 0, TxTrafficHigh: false, RxTrafficHigh: false, Throughput Sufficient: true
+08-31 05:12:23.213  2447  2726 D WifiThroughputPredictor:  utilization (LLS) 15 isBluetoothConnected: false final utilization: 15
+08-31 05:12:23.213  2447  2726 D WifiThroughputPredictor:  BW: 2 RSSI: -23 Nss: 2 Mode: 5 symDur: 3600 snrDb 51 bitPerTone: 6667 rate: 866 throughput: 815
+08-31 05:12:23.213  2447  2726 D WifiThroughputPredictor:  utilization (LLS) 15 isBluetoothConnected: false final utilization: 15
+08-31 05:12:23.213  2447  2726 D WifiThroughputPredictor:  BW: 2 RSSI: -23 Nss: 2 Mode: 5 symDur: 3600 snrDb 51 bitPerTone: 6667 rate: 866 throughput: 815
+08-31 05:12:23.214  2447  2726 D WifiScoreCard: BSSID update SIGNAL_POLL ID: 715353381 SSID: "Excitel_home_wifi_5", BSSID: b4:86:18:de:39:ca, MAC: c6:52:65:7d:a1:b6, IP: /192.168.1.35, Security type: 2, Supplicant state: COMPLETED, Wi-Fi standard: 11ac, RSSI: -23, Link speed: 650Mbps, Tx Link speed: 650Mbps, Max Supported Tx Link speed: 866Mbps, Rx Link speed: 866Mbps, Max Supported Rx Link speed: 866Mbps, Frequency: 5220MHz, Net ID: 5, Metered hint: false, score: 107, isUsable: true, CarrierMerged: false, SubscriptionId: -1, IsPrimary: 1, Trusted: true, Restricted: false, Ephemeral: false, OEM paid: false, OEM private: false, OSU AP: false, FQDN: <none>, Provider friendly name: <none>, Requesting package name: <none>"Excitel_home_wifi_5"wpa2-pskMLO Information: , Is TID-To-Link negotiation supported by the AP: false, AP MLD Address: <none>, AP MLO Link Id: <none>, AP MLO Affiliated links: <none>, Vendor Data: <none>
+08-31 05:12:23.214  2447  2726 D WifiScoreCard: txRate: 2 txSpeed: 650
+08-31 05:12:23.214  2447  2726 D WifiScoreCard: network update SIGNAL_POLL "Excitel_home_wifi_5" ID: 1721486633 RSSI -23 txSpeed -1
+08-31 05:12:23.215  2447  2726 D WifiClientModeImpl[14183:wlan0]:  ClientModeImpl$L2ConnectedState screen=on 68 0 "Excitel_home_wifi_5" b4:86:18:de:39:ca rssi=-23 f=5220 sc=107 link=650 tx=1.1, 0.1, 0.0 rx=1.1 bcn=1816029 [on:0 tx:1 rx:0 period:3016] from screen [on:0 period:22076216] score=107
+08-31 05:12:23.226  1501 14551 I AHAL: AudioStream: GetFramesWritten: 3406: mmap position is 87872304
+08-31 05:12:23.226  1501 14551 I AHAL: AudioStream: GetFramesWritten: 3409: mmap signed frames 87872160
+08-31 05:12:23.277  1501 14551 I AHAL: AudioStream: GetFramesWritten: 3406: mmap position is 87874752
+08-31 05:12:23.277  1501 14551 I AHAL: AudioStream: GetFramesWritten: 3409: mmap signed frames 87874608
+08-31 05:12:23.327  1501 14551 I AHAL: AudioStream: GetFramesWritten: 3406: mmap position is 87877152
+08-31 05:12:23.327  1501 14551 I AHAL: AudioStream: GetFramesWritten: 3409: mmap signed frames 87877008
+08-31 05:12:23.361  3141  3141 D TaskbarManager: dispatchTouchEvent:  displayId=0 isDefaultDisplay=true
+08-31 05:12:23.361  2038  2038 I S3TOUCH : root action=down x=326 y=448
+08-31 05:12:23.361  2038  2038 I S3TOUCH : pad action=down menu=false
+08-31 05:12:23.362  1514  1514 I android.hardware.power-service-qti: Power setBoost: 0, duration: 0
+08-31 05:12:23.363  1514  1514 E QTI PowerHAL: Failed to acquire lock.
+08-31 05:12:23.364  1514  1514 E QTI PowerHAL: Failed process_boost for boost_handle
+08-31 05:12:23.377  1501 14551 I AHAL: AudioStream: GetFramesWritten: 3406: mmap position is 87879552
+08-31 05:12:23.377  1501 14551 I AHAL: AudioStream: GetFramesWritten: 3409: mmap signed frames 87879408
+08-31 05:12:23.419  1579  1658 W libbinder.ServiceManagerCppClient: Waited one second for vendor.qti.qhcp.IQHDC/default (is service started? Number of threads started in the threadpool: 2. Are binder threads started and available?)
+08-31 05:12:23.423   899 13926 W libc    : Unable to set property "ctl.interface_start" to "aidl/vendor.qti.qhcp.IQHDC/default": PROP_ERROR_HANDLE_CONTROL_MESSAGE (0x20)
+08-31 05:12:23.027   899   899 I servicemanager: Caller(pid=1579,uid=0,sid=u:r:vendor_hal_perf_default:s0) Since 'vendor.qti.qhcp.IQHDC/default' could not be found trying to start it as a lazy AIDL service. (if it's not configured to be a lazy service, it may be stuck starting or still starting).
+08-31 05:12:23.029     1     1 E init    : Control message: Could not find 'aidl/vendor.qti.qhcp.IQHDC/default' for ctl.interface_start from pid: 899 (/system/bin/servicemanager)
+08-31 05:12:23.029 13926 13926 I servicemanager: Caller(pid=1579,uid=0,sid=u:r:vendor_hal_perf_default:s0) Tried to start aidl service vendor.qti.qhcp.IQHDC/default as a lazy service, but was unable to. Usually this happens when a service is not installed, but if the service is intended to be used as a lazy service, then it may be configured incorrectly.
+08-31 05:12:23.428  1501 14551 I AHAL: AudioStream: GetFramesWritten: 3406: mmap position is 87882000
+08-31 05:12:23.428  1501 14551 I AHAL: AudioStream: GetFramesWritten: 3409: mmap signed frames 87881856
+08-31 05:12:23.479  1501 14551 I AHAL: AudioStream: GetFramesWritten: 3406: mmap position is 87884448
+08-31 05:12:23.479  1501 14551 I AHAL: AudioStream: GetFramesWritten: 3409: mmap signed frames 87884304
+08-31 05:12:23.529  1501 14551 I AHAL: AudioStream: GetFramesWritten: 3406: mmap position is 87886848
+08-31 05:12:23.529  1501 14551 I AHAL: AudioStream: GetFramesWritten: 3409: mmap signed frames 87886704
+08-31 05:12:23.579  1501 14551 I AHAL: AudioStream: GetFramesWritten: 3406: mmap position is 87889248
+08-31 05:12:23.579  1501 14551 I AHAL: AudioStream: GetFramesWritten: 3409: mmap signed frames 87889104
+08-31 05:12:23.625  3141  3141 D TaskbarManager: dispatchTouchEvent:  displayId=0 isDefaultDisplay=true
+08-31 05:12:23.625  2038  2038 I S3TOUCH : root action=down x=2670 y=450
+08-31 05:12:23.625  2038  2038 I S3TOUCH : pad action=down menu=false
+08-31 05:12:23.626  1514  1514 I android.hardware.power-service-qti: Power setBoost: 0, duration: 0
+08-31 05:12:23.627  1514  1514 E QTI PowerHAL: Failed to acquire lock.
+08-31 05:12:23.627  1514  1514 E QTI PowerHAL: Failed process_boost for boost_handle
+08-31 05:12:23.630  1501 14551 I AHAL: AudioStream: GetFramesWritten: 3406: mmap position is 87891696
+08-31 05:12:23.630  1501 14551 I AHAL: AudioStream: GetFramesWritten: 3409: mmap signed frames 87891552
+08-31 05:12:23.681  1501 14551 I AHAL: AudioStream: GetFramesWritten: 3406: mmap position is 87894144
+08-31 05:12:23.681  1501 14551 I AHAL: AudioStream: GetFramesWritten: 3409: mmap signed frames 87894000
+08-31 05:12:23.731  1501 14551 I AHAL: AudioStream: GetFramesWritten: 3406: mmap position is 87896544
+08-31 05:12:23.731  1501 14551 I AHAL: AudioStream: GetFramesWritten: 3409: mmap signed frames 87896400
+08-31 05:12:23.737  1502  3285 I vendor.qti.bluetooth@1.1-ibs_handler: ProcessIbsCmd: Received IBS_WAKE_IND: 0xFD
+08-31 05:12:23.737  1502  3285 D vendor.qti.bluetooth@1.1-ibs_handler: SerialClockVote: vote for UART CLK ON
+08-31 05:12:23.737  1502  3285 E vendor.qti.bluetooth@1.1-wake_lock: Acquire write to wakelock file failed -1 - Operation not permitted
+08-31 05:12:23.737  1502  3285 I vendor.qti.bluetooth@1.1-ibs_handler: ProcessIbsCmd: Writing IBS_WAKE_ACK
+08-31 05:12:23.781  1501 14551 I AHAL: AudioStream: GetFramesWritten: 3406: mmap position is 87898944
+08-31 05:12:23.781  1501 14551 I AHAL: AudioStream: GetFramesWritten: 3409: mmap signed frames 87898800
+08-31 05:12:23.807  1502  3285 I vendor.qti.bluetooth@1.1-ibs_handler: ProcessIbsCmd: Received IBS_SLEEP_IND: 0xFE
+08-31 05:12:23.807  1502  3285 D vendor.qti.bluetooth@1.1-ibs_handler: SerialClockVote: vote for UART CLK OFF
+08-31 05:12:23.832  1501 14551 I AHAL: AudioStream: GetFramesWritten: 3406: mmap position is 87901392
+08-31 05:12:23.438 12282 12282 I         : [INFO]: OPLUS_CHG[MMS_GAUGE]([oplus_mms_gauge_choice_fit_vol][3465]): choice cp voltage as vbat [4033, 4005]
+08-31 05:12:23.832  1501 14551 I AHAL: AudioStream: GetFramesWritten: 3409: mmap signed frames 87901248
+08-31 05:12:23.439 12282 12282 I         : [INFO]: OPLUS_CHG[MMS_GAUGE]([oplus_mms_gauge_choice_fit_vol][3465]): choice cp voltage as vbat [4033, 4005]
+08-31 05:12:23.449 31772 31772 I         : [INFO]: OPLUS_CHG[CHG_COMM]([oplus_comm_smooth_to_soc][3416]): soc[0 3 69 69 71 72] avg[3 1 0 0 0] fifo[71 71 71 71]
+08-31 05:12:23.457 26831 26831 I OPLUS_CHG[oplus_charge_info]: BATTERY[378 378 4033 4033 1274 69 72 71 6033 8698 1 0x20 0], CHARGE[4455 600 0 0], WIRED[1 447 4985 500 1 0x0 0 0 0 2 0], WIRELESS[0 0 0 0 0 0x0 0 0 0], VOOC[0 0 0 0 0x0], UFCS[0 0 0 0x0], COMMON[6 0 0 0x0 1 0 1 8698 100 0]
+08-31 05:12:23.462 26831 26831 I         : [INFO]: OPLUS_CHG[ADSP]([oplus_chg_8350_reg_dump][7390]): sm8450_st_dump: [chg_en=1, suspend=0, pd_svooc=0], subtype=0x01],[oplus_UsbCommCapable=0, oplus_pd_svooc=0, typec_mode=0, cid_status=0x01, usb_in_status=1],[0x2606=0x83, 0x2607=0x19, 0x2608=0x02, 0x2609=0x02], [0x260a=0x04, 0x260b=0x55, 0x260c=0x0a, 0x260d=0x10], [0x260e=0x0a, 0x260f=0x01, 0x2610=0x00, 0x2640=0x01], [0x2641=0x02, 0x2642=0x05, 0x2646=0x01, 0x2650=0x04], [0x2706=0x0a, 0x2707=0x0a, 0x2708=0x0a, 0x2709=0x0a], [0x270b=0xe2, 0x270c=0x48, 0x2710=0xc0, 0x280c=0x38], [0x2810=0x00, 0x2840=0x01, 0x287f=0x00, 0x2906=0x02], [0x2908=0x0f, 0x290a=0x11, 0x290b=0x01, 0x290c=0x01], [0x2910=0x11, 0x2944=0x80, 0x2950=0x02, 0x2951=0x01], [0x2952=0x0a, 0x2954=0x00, 0x2960=0xe0, 0x2b06=0x08], [0x2b07=0x00, 0x2b08=0x00, 0x2b09=0xa3, 0x2b0a=0x39], [0x2b0b=0xab, 0x2b0c=0x00, 0x29a8=0x81, 0x29a9=0x83], [0x29aa=0x00, 0x2aa2=0x00, 0x2aa8=0x87, 0x2aa9=0x00], [0x2aaa=0x00],
+08-31 05:12:23.882  1501 14551 I AHAL: AudioStream: GetFramesWritten: 3406: mmap position is 87903792
+08-31 05:12:23.882  1501 14551 I AHAL: AudioStream: GetFramesWritten: 3409: mmap signed frames 87903648
+08-31 05:12:23.890  2038  2038 I S3TOUCH : root action=down x=326 y=120
+08-31 05:12:23.890  2038  2038 I S3TOUCH : pad action=down menu=false
+08-31 05:12:23.890  3141  3141 D TaskbarManager: dispatchTouchEvent:  displayId=0 isDefaultDisplay=true
+08-31 05:12:23.891  1514  1514 I android.hardware.power-service-qti: Power setBoost: 0, duration: 0
+08-31 05:12:23.893  1514  1514 E QTI PowerHAL: Failed to acquire lock.
+08-31 05:12:23.894  1514  1514 E QTI PowerHAL: Failed process_boost for boost_handle
+08-31 05:12:23.933  1501 14551 I AHAL: AudioStream: GetFramesWritten: 3406: mmap position is 87906240
+08-31 05:12:23.933  1501 14551 I AHAL: AudioStream: GetFramesWritten: 3409: mmap signed frames 87906096
+08-31 05:12:23.957  1502  3136 E vendor.qti.bluetooth@1.1-wake_lock: Release wake lock not initialized/acquired
+08-31 05:12:23.983  1501 14551 I AHAL: AudioStream: GetFramesWritten: 3406: mmap position is 87908640
+08-31 05:12:23.983  1501 14551 I AHAL: AudioStream: GetFramesWritten: 3409: mmap signed frames 87908496
+08-31 05:12:24.034  1501 14551 I AHAL: AudioStream: GetFramesWritten: 3406: mmap position is 87911088
+08-31 05:12:24.034  1501 14551 I AHAL: AudioStream: GetFramesWritten: 3409: mmap signed frames 87910944
+08-31 05:12:24.085  1501 14551 I AHAL: AudioStream: GetFramesWritten: 3406: mmap position is 87913536
+08-31 05:12:24.085  1501 14551 I AHAL: AudioStream: GetFramesWritten: 3409: mmap signed frames 87913392
+08-31 05:12:24.136  1501 14551 I AHAL: AudioStream: GetFramesWritten: 3406: mmap position is 87915984
+08-31 05:12:24.136  1501 14551 I AHAL: AudioStream: GetFramesWritten: 3409: mmap signed frames 87915840
+08-31 05:12:24.152  3141  3141 D TaskbarManager: dispatchTouchEvent:  displayId=0 isDefaultDisplay=true
+08-31 05:12:24.152  2038  2038 I S3TOUCH : root action=down x=2670 y=120
+08-31 05:12:24.152  2038  2038 I S3TOUCH : pad action=down menu=false
+08-31 05:12:24.153  1514  1514 I android.hardware.power-service-qti: Power setBoost: 0, duration: 0
+08-31 05:12:24.154  1514  1514 E QTI PowerHAL: Failed to acquire lock.
+08-31 05:12:24.154  1514  1514 E QTI PowerHAL: Failed process_boost for boost_handle
+08-31 05:12:24.186  1501 14551 I AHAL: AudioStream: GetFramesWritten: 3406: mmap position is 87918384
+08-31 05:12:24.186  1501 14551 I AHAL: AudioStream: GetFramesWritten: 3409: mmap signed frames 87918240
+08-31 05:12:24.237  1501 14551 I AHAL: AudioStream: GetFramesWritten: 3406: mmap position is 87920832
+08-31 05:12:24.237  1501 14551 I AHAL: AudioStream: GetFramesWritten: 3409: mmap signed frames 87920688
+08-31 05:12:24.287  1501 14551 I AHAL: AudioStream: GetFramesWritten: 3406: mmap position is 87923232
+08-31 05:12:24.287  1501 14551 I AHAL: AudioStream: GetFramesWritten: 3409: mmap signed frames 87923088
+08-31 05:12:24.338  1501 14551 I AHAL: AudioStream: GetFramesWritten: 3406: mmap position is 87925680
+08-31 05:12:24.338  1501 14551 I AHAL: AudioStream: GetFramesWritten: 3409: mmap signed frames 87925536
+08-31 05:12:24.388  1501 14551 I AHAL: AudioStream: GetFramesWritten: 3406: mmap position is 87928080
+08-31 05:12:24.388  1501 14551 I AHAL: AudioStream: GetFramesWritten: 3409: mmap signed frames 87927936
+08-31 05:12:24.422  1579  1658 W libbinder.ServiceManagerCppClient: Waited one second for vendor.qti.qhcp.IQHDC/default (is service started? Number of threads started in the threadpool: 2. Are binder threads started and available?)
+08-31 05:12:24.030   899   899 I servicemanager: Caller(pid=1579,uid=0,sid=u:r:vendor_hal_perf_default:s0) Since 'vendor.qti.qhcp.IQHDC/default' could not be found trying to start it as a lazy AIDL service. (if it's not configured to be a lazy service, it may be stuck starting or still starting).
+08-31 05:12:24.426  3141  3141 D TaskbarManager: dispatchTouchEvent:  displayId=0 isDefaultDisplay=true
+08-31 05:12:24.426  2038  2038 I S3TOUCH : root action=down x=1240 y=1825
+08-31 05:12:24.426  2038  2038 I S3TOUCH : pad action=down menu=false
+08-31 05:12:24.427  1514  1514 I android.hardware.power-service-qti: Power setBoost: 0, duration: 0
+08-31 05:12:24.427  1514  1514 E QTI PowerHAL: Failed to acquire lock.
+08-31 05:12:24.427  1514  1514 E QTI PowerHAL: Failed process_boost for boost_handle
+08-31 05:12:24.428   899 13954 W libc    : Unable to set property "ctl.interface_start" to "aidl/vendor.qti.qhcp.IQHDC/default": PROP_ERROR_HANDLE_CONTROL_MESSAGE (0x20)
+08-31 05:12:24.032     1     1 E init    : Control message: Could not find 'aidl/vendor.qti.qhcp.IQHDC/default' for ctl.interface_start from pid: 899 (/system/bin/servicemanager)
+08-31 05:12:24.037 13954 13954 I servicemanager: Caller(pid=1579,uid=0,sid=u:r:vendor_hal_perf_default:s0) Tried to start aidl service vendor.qti.qhcp.IQHDC/default as a lazy service, but was unable to. Usually this happens when a service is not installed, but if the service is intended to be used as a lazy service, then it may be configured incorrectly.
+08-31 05:12:24.439  1501 14551 I AHAL: AudioStream: GetFramesWritten: 3406: mmap position is 87930480
+08-31 05:12:24.439  1501 14551 I AHAL: AudioStream: GetFramesWritten: 3409: mmap signed frames 87930336
+08-31 05:12:24.455  5485  5485 W DefaultDispatch: type=1400 audit(0.0:866366): avc:  denied  { read } for  name="version" dev="proc" ino=4026532013 scontext=u:r:untrusted_app:s0:c224,c256,c512,c768 tcontext=u:object_r:proc_version:s0 tclass=file permissive=0 app=com.ivarna.mkm
+08-31 05:12:24.471  5485  7854 W CpuUtilizationProvider: Failed to read /proc/stat: grep: /proc/stat: Permission denied
+08-31 05:12:24.477  5485  7854 D CpuUtilizationProvider: CPU usage updated from frequency (fallback): 63%
+08-31 05:12:24.478  5485  7854 D CpuProvider: Core 0: freq=672000, usage=0.16161616 (hwMin=364800, hwMax=2265600)
+08-31 05:12:24.478  5485  7854 D CpuProvider: Core 1: freq=672000, usage=0.16161616 (hwMin=364800, hwMax=2265600)
+08-31 05:12:24.478  5485  7854 D CpuProvider: Core 2: freq=1401600, usage=0.71014494 (hwMin=499200, hwMax=3148800)
+08-31 05:12:24.478  5485  7854 D CpuProvider: Core 3: freq=1920000, usage=0.73188406 (hwMin=499200, hwMax=3148800)
+08-31 05:12:24.478  5485  7854 D CpuProvider: Core 4: freq=1401600, usage=0.71014494 (hwMin=499200, hwMax=3148800)
+08-31 05:12:24.479  5485  7854 D CpuProvider: Core 5: freq=1612800, usage=0.7890625 (hwMin=499200, hwMax=2956800)
+08-31 05:12:24.479  5485  7854 D CpuProvider: Core 6: freq=1612800, usage=0.765625 (hwMin=499200, hwMax=2956800)
+08-31 05:12:24.480  5485  7854 D CpuProvider: Core 7: freq=3244800, usage=0.97959185 (hwMin=480000, hwMax=3302400)
+08-31 05:12:24.480  5485  7854 D CpuProvider: Overall usage: 0.6316455 (from 8 cores), Avg Freq: 1678000
+08-31 05:12:24.489  1501 14551 I AHAL: AudioStream: GetFramesWritten: 3406: mmap position is 87932928
+08-31 05:12:24.489  1501 14551 I AHAL: AudioStream: GetFramesWritten: 3409: mmap signed frames 87932784
+08-31 05:12:24.487 13963 13963 W cat     : type=1400 audit(0.0:866367): avc:  denied  { read } for  name="governor" dev="sysfs" ino=139690 scontext=u:r:untrusted_app:s0:c224,c256,c512,c768 tcontext=u:object_r:vendor_sysfs_kgsl:s0 tclass=file permissive=0
+08-31 05:12:24.495 13966 13966 W cat     : type=1400 audit(0.0:866368): avc:  denied  { read } for  name="available_governors" dev="sysfs" ino=139691 scontext=u:r:untrusted_app:s0:c224,c256,c512,c768 tcontext=u:object_r:vendor_sysfs_kgsl:s0 tclass=file permissive=0 app=com.ivarna.mkm
+08-31 05:12:24.519 13973 13973 W cat     : type=1400 audit(0.0:866369): avc:  denied  { read } for  name="cur_freq" dev="sysfs" ino=139692 scontext=u:r:untrusted_app:s0:c224,c256,c512,c768 tcontext=u:object_r:vendor_sysfs_kgsl:s0 tclass=file permissive=0 app=com.ivarna.mkm
+08-31 05:12:24.535 13980 13980 W cat     : type=1400 audit(0.0:866370): avc:  denied  { read } for  name="gpuclk" dev="sysfs" ino=139614 scontext=u:r:untrusted_app:s0:c224,c256,c512,c768 tcontext=u:object_r:vendor_sysfs_kgsl_gpuclk:s0 tclass=file permissive=0 app=com.ivarna.mkm
+08-31 05:12:24.540  1501 14551 I AHAL: AudioStream: GetFramesWritten: 3406: mmap position is 87935376
+08-31 05:12:24.540  1501 14551 I AHAL: AudioStream: GetFramesWritten: 3409: mmap signed frames 87935232
+08-31 05:12:24.151 13982 13982 W audit   : audit_lost=568828 audit_rate_limit=5 audit_backlog_limit=64
+08-31 05:12:24.151 13982 13982 E audit   : rate limit exceeded
+08-31 05:12:24.591  1501  5760 I AHAL: AudioStream: GetFramesWritten: 3406: mmap position is 87937824
+08-31 05:12:24.591  1501  5760 I AHAL: AudioStream: GetFramesWritten: 3409: mmap signed frames 87937680
+08-31 05:12:24.641  1501  5760 I AHAL: AudioStream: GetFramesWritten: 3406: mmap position is 87940224
+08-31 05:12:24.641  1501  5760 I AHAL: AudioStream: GetFramesWritten: 3409: mmap signed frames 87940080
+08-31 05:12:24.689  3141  3141 D TaskbarManager: dispatchTouchEvent:  displayId=0 isDefaultDisplay=true
+08-31 05:12:24.689  2038  2038 I S3TOUCH : root action=down x=1740 y=1825
+08-31 05:12:24.690  2038  2038 I S3TOUCH : pad action=down menu=false
+08-31 05:12:24.691  1514  1514 I android.hardware.power-service-qti: Power setBoost: 0, duration: 0
+08-31 05:12:24.691  1501  5760 I AHAL: AudioStream: GetFramesWritten: 3406: mmap position is 87942624
+08-31 05:12:24.691  1501  5760 I AHAL: AudioStream: GetFramesWritten: 3409: mmap signed frames 87942480
+08-31 05:12:24.692  1514  1514 E QTI PowerHAL: Failed to acquire lock.
+08-31 05:12:24.692  1514  1514 E QTI PowerHAL: Failed process_boost for boost_handle
+08-31 05:12:24.741  1501  5760 I AHAL: AudioStream: GetFramesWritten: 3406: mmap position is 87945024
+08-31 05:12:24.741  1501  5760 I AHAL: AudioStream: GetFramesWritten: 3409: mmap signed frames 87944880
+08-31 05:12:24.792  1501  5760 I AHAL: AudioStream: GetFramesWritten: 3406: mmap position is 87947472
+08-31 05:12:24.792  1501  5760 I AHAL: AudioStream: GetFramesWritten: 3409: mmap signed frames 87947328
+08-31 05:12:24.842  1501  5760 I AHAL: AudioStream: GetFramesWritten: 3406: mmap position is 87949872
+08-31 05:12:24.842  1501  5760 I AHAL: AudioStream: GetFramesWritten: 3409: mmap signed frames 87949728
+08-31 05:12:24.893  1501  5760 I AHAL: AudioStream: GetFramesWritten: 3406: mmap position is 87952320
+08-31 05:12:24.893  1501  5760 I AHAL: AudioStream: GetFramesWritten: 3409: mmap signed frames 87952176
+08-31 05:12:24.519 12736 12736 E [TP0]touchpanel: irq gpio is 0
+08-31 05:12:24.943  1501  5760 I AHAL: AudioStream: GetFramesWritten: 3406: mmap position is 87954720
+08-31 05:12:24.943  1501  5760 I AHAL: AudioStream: GetFramesWritten: 3409: mmap signed frames 87954576
+08-31 05:12:24.953  3141  3141 D TaskbarManager: dispatchTouchEvent:  displayId=0 isDefaultDisplay=true
+08-31 05:12:24.953  2038  2038 I S3TOUCH : root action=down x=1200 y=120
+08-31 05:12:24.953  2038  2038 I S3TOUCH : pad action=down menu=false
+08-31 05:12:24.954  1514  1514 I android.hardware.power-service-qti: Power setBoost: 0, duration: 0
+08-31 05:12:24.954  1514  1514 E QTI PowerHAL: Failed to acquire lock.
+08-31 05:12:24.955  1514  1514 E QTI PowerHAL: Failed process_boost for boost_handle
+08-31 05:12:24.965  5924  5943 I Finsky:background: [41] Stats for Executor: bgExecutor xss@a0ea787[Running, pool size = 4, active threads = 0, queued tasks = 0, completed tasks = 6026]
+08-31 05:12:24.966  5924  5943 I Finsky:background: [41] Stats for Executor: LightweightExecutor xss@dc9259b[Running, pool size = 4, active threads = 0, queued tasks = 0, completed tasks = 5264]
+08-31 05:12:24.966  5924  5943 I Finsky:background: [41] Stats for Executor: BlockingExecutor xss@479dec2[Running, pool size = 0, active threads = 0, queued tasks = 0, completed tasks = 1406]
+08-31 05:12:24.994  1501  5760 I AHAL: AudioStream: GetFramesWritten: 3406: mmap position is 87957168
+08-31 05:12:24.994  1501  5760 I AHAL: AudioStream: GetFramesWritten: 3409: mmap signed frames 87957024
+08-31 05:12:25.034  1502  3285 I vendor.qti.bluetooth@1.1-ibs_handler: ProcessIbsCmd: Received IBS_WAKE_IND: 0xFD
+08-31 05:12:25.034  1502  3285 D vendor.qti.bluetooth@1.1-ibs_handler: SerialClockVote: vote for UART CLK ON
+08-31 05:12:25.035  1502  3285 E vendor.qti.bluetooth@1.1-wake_lock: Acquire write to wakelock file failed -1 - Operation not permitted
+08-31 05:12:25.035  1502  3285 I vendor.qti.bluetooth@1.1-ibs_handler: ProcessIbsCmd: Writing IBS_WAKE_ACK
+08-31 05:12:25.044  1501  5760 I AHAL: AudioStream: GetFramesWritten: 3406: mmap position is 87959568
+08-31 05:12:25.044  1501  5760 I AHAL: AudioStream: GetFramesWritten: 3409: mmap signed frames 87959424
+08-31 05:12:25.075  1502  3285 I vendor.qti.bluetooth@1.1-ibs_handler: ProcessIbsCmd: Received IBS_SLEEP_IND: 0xFE
+08-31 05:12:25.075  1502  3285 D vendor.qti.bluetooth@1.1-ibs_handler: SerialClockVote: vote for UART CLK OFF
+08-31 05:12:25.095  1501  5760 I AHAL: AudioStream: GetFramesWritten: 3406: mmap position is 87961968
+08-31 05:12:25.095  1501  5760 I AHAL: AudioStream: GetFramesWritten: 3409: mmap signed frames 87961824
+08-31 05:12:25.145  1501  5760 I AHAL: AudioStream: GetFramesWritten: 3406: mmap position is 87964416
+08-31 05:12:25.145  1501  5760 I AHAL: AudioStream: GetFramesWritten: 3409: mmap signed frames 87964272
+08-31 05:12:25.196  1501  5760 I AHAL: AudioStream: GetFramesWritten: 3406: mmap position is 87966864
+08-31 05:12:25.196  1501  5760 I AHAL: AudioStream: GetFramesWritten: 3409: mmap signed frames 87966720
+08-31 05:12:25.225  1502  3136 E vendor.qti.bluetooth@1.1-wake_lock: Release wake lock not initialized/acquired
+08-31 05:12:25.229  2038  2038 I S3TOUCH : root action=down x=1800 y=120
+08-31 05:12:25.229  3141  3141 D TaskbarManager: dispatchTouchEvent:  displayId=0 isDefaultDisplay=true
+08-31 05:12:25.230  2038  2038 I S3TOUCH : pad action=down menu=false
+08-31 05:12:25.229  1514  1514 I android.hardware.power-service-qti: Power setBoost: 0, duration: 0
+08-31 05:12:25.231  1514  1514 E QTI PowerHAL: Failed to acquire lock.
+08-31 05:12:25.231  1514  1514 E QTI PowerHAL: Failed process_boost for boost_handle
+08-31 05:12:25.247  1501  5760 I AHAL: AudioStream: GetFramesWritten: 3406: mmap position is 87969264
+08-31 05:12:25.247  1501  5760 I AHAL: AudioStream: GetFramesWritten: 3409: mmap signed frames 87969120
+08-31 05:12:25.297  1501  5760 I AHAL: AudioStream: GetFramesWritten: 3406: mmap position is 87971712
+08-31 05:12:25.297  1501  5760 I AHAL: AudioStream: GetFramesWritten: 3409: mmap signed frames 87971568
+08-31 05:12:25.347  1501  5760 I AHAL: AudioStream: GetFramesWritten: 3406: mmap position is 87974112
+08-31 05:12:25.347  1501  5760 I AHAL: AudioStream: GetFramesWritten: 3409: mmap signed frames 87973968
+08-31 05:12:25.398  1501  5760 I AHAL: AudioStream: GetFramesWritten: 3406: mmap position is 87976560
+08-31 05:12:25.398  1501  5760 I AHAL: AudioStream: GetFramesWritten: 3409: mmap signed frames 87976416
+08-31 05:12:25.425  1579  1658 W libbinder.ServiceManagerCppClient: Waited one second for vendor.qti.qhcp.IQHDC/default (is service started? Number of threads started in the threadpool: 2. Are binder threads started and available?)
+08-31 05:12:25.426   899 14030 W libc    : Unable to set property "ctl.interface_start" to "aidl/vendor.qti.qhcp.IQHDC/default": PROP_ERROR_HANDLE_CONTROL_MESSAGE (0x20)
+08-31 05:12:25.031   899   899 I servicemanager: Caller(pid=1579,uid=0,sid=u:r:vendor_hal_perf_default:s0) Since 'vendor.qti.qhcp.IQHDC/default' could not be found trying to start it as a lazy AIDL service. (if it's not configured to be a lazy service, it may be stuck starting or still starting).
+08-31 05:12:25.032     1     1 E init    : Control message: Could not find 'aidl/vendor.qti.qhcp.IQHDC/default' for ctl.interface_start from pid: 899 (/system/bin/servicemanager)
+08-31 05:12:25.032 14030 14030 I servicemanager: Caller(pid=1579,uid=0,sid=u:r:vendor_hal_perf_default:s0) Tried to start aidl service vendor.qti.qhcp.IQHDC/default as a lazy service, but was unable to. Usually this happens when a service is not installed, but if the service is intended to be used as a lazy service, then it may be configured incorrectly.
+08-31 05:12:25.448  1501  5760 I AHAL: AudioStream: GetFramesWritten: 3406: mmap position is 87978960
+08-31 05:12:25.449  1501  5760 I AHAL: AudioStream: GetFramesWritten: 3409: mmap signed frames 87978816
+08-31 05:12:25.483  3141  3141 D TaskbarManager: dispatchTouchEvent:  displayId=0 isDefaultDisplay=true
+08-31 05:12:25.483  2038  2038 I S3TOUCH : root action=down x=1240 y=1825
+08-31 05:12:25.483  2038  2038 I S3TOUCH : pad action=down menu=false
+08-31 05:12:25.484  1514  1514 I android.hardware.power-service-qti: Power setBoost: 0, duration: 0
+08-31 05:12:25.485  1514  1514 E QTI PowerHAL: Failed to acquire lock.
+08-31 05:12:25.485  1514  1514 E QTI PowerHAL: Failed process_boost for boost_handle
+08-31 05:12:25.499  1501  5760 I AHAL: AudioStream: GetFramesWritten: 3406: mmap position is 87981408
+08-31 05:12:25.499  1501  5760 I AHAL: AudioStream: GetFramesWritten: 3409: mmap signed frames 87981264
+08-31 05:12:25.549  1501  5760 I AHAL: AudioStream: GetFramesWritten: 3406: mmap position is 87983808
+08-31 05:12:25.549  1501  5760 I AHAL: AudioStream: GetFramesWritten: 3409: mmap signed frames 87983664
+08-31 05:12:25.585  1514  1514 I android.hardware.power-service-qti: Power setBoost: 0, duration: 0
+08-31 05:12:25.600  1501  5760 I AHAL: AudioStream: GetFramesWritten: 3406: mmap position is 87986256
+08-31 05:12:25.600  1501  5760 I AHAL: AudioStream: GetFramesWritten: 3409: mmap signed frames 87986112
+08-31 05:12:25.223 16637 16637 I [LCD][0][INFO][dsi_display_status_check_error_flag:1212] [ESD]: first read: master=0 slave=0
+08-31 05:12:25.650  1501  5760 I AHAL: AudioStream: GetFramesWritten: 3406: mmap position is 87988656
+08-31 05:12:25.650  1501  5760 I AHAL: AudioStream: GetFramesWritten: 3409: mmap signed frames 87988512
+08-31 05:12:25.269     0     0 W [    C1] gen7_err_callback: 86 callbacks suppressed
+08-31 05:12:25.269     0     0 F         : [    C1] kgsl kgsl-3d0: CP: AHB bus error, CP_RL_ERROR_DETAILS_0:0x10008e07 CP_RL_ERROR_DETAILS_1:0x12144
+08-31 05:12:25.684  1514  1514 I android.hardware.power-service-qti: Power setBoost: 0, duration: 0
+08-31 05:12:25.700  1501  5760 I AHAL: AudioStream: GetFramesWritten: 3406: mmap position is 87991056
+08-31 05:12:25.700  1501  5760 I AHAL: AudioStream: GetFramesWritten: 3409: mmap signed frames 87990912
+08-31 05:12:25.317     0     0 F         : [    C1] kgsl kgsl-3d0: CP: AHB bus error, CP_RL_ERROR_DETAILS_0:0x10008e07 CP_RL_ERROR_DETAILS_1:0x12144
+08-31 05:12:25.750  1501  5760 I AHAL: AudioStream: GetFramesWritten: 3406: mmap position is 87993456
+08-31 05:12:25.750  1501  5760 I AHAL: AudioStream: GetFramesWritten: 3409: mmap signed frames 87993312
+08-31 05:12:25.367     0     0 F         : [    C1] kgsl kgsl-3d0: CP: AHB bus error, CP_RL_ERROR_DETAILS_0:0x10008e07 CP_RL_ERROR_DETAILS_1:0x12144
+08-31 05:12:25.785  1514  1514 I android.hardware.power-service-qti: Power setBoost: 0, duration: 0
+08-31 05:12:25.786  1514  1514 E QTI PowerHAL: Failed to acquire lock.
+08-31 05:12:25.786  1514  1514 E QTI PowerHAL: Failed process_boost for boost_handle
+08-31 05:12:25.801  1501  5760 I AHAL: AudioStream: GetFramesWritten: 3406: mmap position is 87995904
+08-31 05:12:25.801  1501  5760 I AHAL: AudioStream: GetFramesWritten: 3409: mmap signed frames 87995760
+08-31 05:12:25.417     0     0 F         : [    C1] kgsl kgsl-3d0: CP: AHB bus error, CP_RL_ERROR_DETAILS_0:0x10008e07 CP_RL_ERROR_DETAILS_1:0x12144
+08-31 05:12:25.852  1501  5760 I AHAL: AudioStream: GetFramesWritten: 3406: mmap position is 87998352
+08-31 05:12:25.852  1501  5760 I AHAL: AudioStream: GetFramesWritten: 3409: mmap signed frames 87998208
+08-31 05:12:25.467     0     0 F         : [    C1] kgsl kgsl-3d0: CP: AHB bus error, CP_RL_ERROR_DETAILS_0:0x10008e07 CP_RL_ERROR_DETAILS_1:0x12144
+08-31 05:12:25.893  1514  1514 I android.hardware.power-service-qti: Power setBoost: 0, duration: 0
+08-31 05:12:25.902  1501  5760 I AHAL: AudioStream: GetFramesWritten: 3406: mmap position is 88000752
+08-31 05:12:25.902  1501  5760 I AHAL: AudioStream: GetFramesWritten: 3409: mmap signed frames 88000608
+08-31 05:12:25.517     0     0 F         : [    C1] kgsl kgsl-3d0: CP: AHB bus error, CP_RL_ERROR_DETAILS_0:0x10008e07 CP_RL_ERROR_DETAILS_1:0x12144
+08-31 05:12:25.953  1501  5760 I AHAL: AudioStream: GetFramesWritten: 3406: mmap position is 88003200
+08-31 05:12:25.953  1501  5760 I AHAL: AudioStream: GetFramesWritten: 3409: mmap signed frames 88003056
+08-31 05:12:25.567     0     0 F         : [    C1] kgsl kgsl-3d0: CP: AHB bus error, CP_RL_ERROR_DETAILS_0:0x10008e07 CP_RL_ERROR_DETAILS_1:0x12144
+08-31 05:12:25.992  1514  1514 I android.hardware.power-service-qti: Power setBoost: 0, duration: 0
+08-31 05:12:26.003  1501  5760 I AHAL: AudioStream: GetFramesWritten: 3406: mmap position is 88005600
+08-31 05:12:26.003  1501  5760 I AHAL: AudioStream: GetFramesWritten: 3409: mmap signed frames 88005456
+08-31 05:12:25.618     0     0 F         : [    C1] kgsl kgsl-3d0: CP: AHB bus error, CP_RL_ERROR_DETAILS_0:0x10008e07 CP_RL_ERROR_DETAILS_1:0x12144
+08-31 05:12:26.054  1501  5760 I AHAL: AudioStream: GetFramesWritten: 3406: mmap position is 88008048
+08-31 05:12:26.054  1501  5760 I AHAL: AudioStream: GetFramesWritten: 3409: mmap signed frames 88007904
+08-31 05:12:25.669     0     0 F         : [    C1] kgsl kgsl-3d0: CP: AHB bus error, CP_RL_ERROR_DETAILS_0:0x10008e07 CP_RL_ERROR_DETAILS_1:0x12144
+08-31 05:12:26.092  1514  1514 I android.hardware.power-service-qti: Power setBoost: 0, duration: 0
+08-31 05:12:26.093  1514  1514 E QTI PowerHAL: Failed to acquire lock.
+08-31 05:12:26.093  1514  1514 E QTI PowerHAL: Failed process_boost for boost_handle
+08-31 05:12:26.105  1501  5760 I AHAL: AudioStream: GetFramesWritten: 3406: mmap position is 88010496
+08-31 05:12:26.105  1501  5760 I AHAL: AudioStream: GetFramesWritten: 3409: mmap signed frames 88010352
+08-31 05:12:25.718     0     0 F         : [    C1] kgsl kgsl-3d0: CP: AHB bus error, CP_RL_ERROR_DETAILS_0:0x10008e07 CP_RL_ERROR_DETAILS_1:0x12144
+08-31 05:12:26.155  1501  5760 I AHAL: AudioStream: GetFramesWritten: 3406: mmap position is 88012896
+08-31 05:12:26.155  1501  5760 I AHAL: AudioStream: GetFramesWritten: 3409: mmap signed frames 88012752
+08-31 05:12:26.177  2447  2726 D WifiNetworkSelector: Current connected network: 5
+08-31 05:12:26.177  2447  2726 V WifiConnectivityManager: No partial scan because firmware roaming is supported.
+08-31 05:12:26.177  2447  2726 V WifiConnectivityManager: schedulePeriodicScanTimer intervalMs 20000
+08-31 05:12:26.185  1514  1514 I android.hardware.power-service-qti: Power setBoost: 0, duration: 91
+08-31 05:12:26.206  1501  5760 I AHAL: AudioStream: GetFramesWritten: 3406: mmap position is 88015344
+08-31 05:12:26.206  1501  5760 I AHAL: AudioStream: GetFramesWritten: 3409: mmap signed frames 88015200
+08-31 05:12:26.228  2447  2726 D WifiClientModeImpl[14183:wlan0]: updateLinkLayerStatsRssiSpeedFrequencyCapabilities rssi=-24 TxLinkspeed=650 freq=5220 RxLinkSpeed=866
+08-31 05:12:26.228  2447  2726 D WifiDataStall: tx tput in kbps: 581318
+08-31 05:12:26.228  2447  2726 D WifiDataStall: rx tput in kbps: 815257
+08-31 05:12:26.228  2447  2726 V WifiConfigManager: Updating scan detail cache freq=5220 BSSID=b4:86:18:de:39:ca RSSI=-23 for "Excitel_home_wifi_5"WPA_PSK
+08-31 05:12:26.228  2447  2726 D WifiDataStall:  ccaLevel = 15
+08-31 05:12:26.228  2447  2726 D WifiDataStall: L2 txTputKbps: 581318, rxTputKbps: 815257, L3 txTputKbps: 0, rxTputKbps: 0, TxTrafficHigh: false, RxTrafficHigh: false, Throughput Sufficient: true
+08-31 05:12:26.229  2447  2726 D WifiThroughputPredictor:  utilization (LLS) 15 isBluetoothConnected: false final utilization: 15
+08-31 05:12:26.229  2447  2726 D WifiThroughputPredictor:  BW: 2 RSSI: -24 Nss: 2 Mode: 5 symDur: 3600 snrDb 50 bitPerTone: 6667 rate: 866 throughput: 815
+08-31 05:12:26.229  2447  2726 D WifiThroughputPredictor:  utilization (LLS) 15 isBluetoothConnected: false final utilization: 15
+08-31 05:12:26.229  2447  2726 D WifiThroughputPredictor:  BW: 2 RSSI: -24 Nss: 2 Mode: 5 symDur: 3600 snrDb 50 bitPerTone: 6667 rate: 866 throughput: 815
+08-31 05:12:26.230  2447  2726 D WifiScoreCard: BSSID update SIGNAL_POLL ID: 715353381 SSID: "Excitel_home_wifi_5", BSSID: b4:86:18:de:39:ca, MAC: c6:52:65:7d:a1:b6, IP: /192.168.1.35, Security type: 2, Supplicant state: COMPLETED, Wi-Fi standard: 11ac, RSSI: -24, Link speed: 650Mbps, Tx Link speed: 650Mbps, Max Supported Tx Link speed: 866Mbps, Rx Link speed: 866Mbps, Max Supported Rx Link speed: 866Mbps, Frequency: 5220MHz, Net ID: 5, Metered hint: false, score: 107, isUsable: true, CarrierMerged: false, SubscriptionId: -1, IsPrimary: 1, Trusted: true, Restricted: false, Ephemeral: false, OEM paid: false, OEM private: false, OSU AP: false, FQDN: <none>, Provider friendly name: <none>, Requesting package name: <none>"Excitel_home_wifi_5"wpa2-pskMLO Information: , Is TID-To-Link negotiation supported by the AP: false, AP MLD Address: <none>, AP MLO Link Id: <none>, AP MLO Affiliated links: <none>, Vendor Data: <none>
+08-31 05:12:26.230  2447  2726 D WifiScoreCard: txRate: 1 txSpeed: 650
+08-31 05:12:26.230  2447  2726 D WifiScoreCard: network update SIGNAL_POLL "Excitel_home_wifi_5" ID: 1721486633 RSSI -24 txSpeed -1
+08-31 05:12:26.230  2447  2726 D WifiClientModeImpl[14183:wlan0]:  ClientModeImpl$L2ConnectedState screen=on 68 0 "Excitel_home_wifi_5" b4:86:18:de:39:ca rssi=-24 f=5220 sc=107 link=650 tx=0.8, 0.0, 0.0 rx=0.8 bcn=1816055 [on:0 tx:1 rx:0 period:3015] from screen [on:0 period:22079231] score=107
+08-31 05:12:26.247  3141  3141 D TaskbarManager: dispatchTouchEvent:  displayId=0 isDefaultDisplay=true
+08-31 05:12:26.247  2038  2038 I S3TOUCH : root action=down x=1740 y=1825
+08-31 05:12:26.247  2038  2038 I S3TOUCH : pad action=down menu=false
+08-31 05:12:26.247  1514  1514 I android.hardware.power-service-qti: Power setBoost: 0, duration: 0
+08-31 05:12:26.256  1501  5760 I AHAL: AudioStream: GetFramesWritten: 3406: mmap position is 88017744
+08-31 05:12:26.256  1501  5760 I AHAL: AudioStream: GetFramesWritten: 3409: mmap signed frames 88017600
+08-31 05:12:26.307  1501  5760 I AHAL: AudioStream: GetFramesWritten: 3406: mmap position is 88020192
+08-31 05:12:26.307  1501  5760 I AHAL: AudioStream: GetFramesWritten: 3409: mmap signed frames 88020048
+08-31 05:12:26.321  1502  3285 I vendor.qti.bluetooth@1.1-ibs_handler: ProcessIbsCmd: Received IBS_WAKE_IND: 0xFD
+08-31 05:12:26.321  1502  3285 D vendor.qti.bluetooth@1.1-ibs_handler: SerialClockVote: vote for UART CLK ON
+08-31 05:12:26.321  1502  3285 E vendor.qti.bluetooth@1.1-wake_lock: Acquire write to wakelock file failed -1 - Operation not permitted
+08-31 05:12:26.321  1502  3285 I vendor.qti.bluetooth@1.1-ibs_handler: ProcessIbsCmd: Writing IBS_WAKE_ACK
+08-31 05:12:26.351  1514  1514 I android.hardware.power-service-qti: Power setBoost: 0, duration: 0
+08-31 05:12:26.352  1514  1514 E QTI PowerHAL: Failed to acquire lock.
+08-31 05:12:26.352  1514  1514 E QTI PowerHAL: Failed process_boost for boost_handle
+08-31 05:12:26.357  1501  5760 I AHAL: AudioStream: GetFramesWritten: 3406: mmap position is 88022592
+08-31 05:12:26.357  1501  5760 I AHAL: AudioStream: GetFramesWritten: 3409: mmap signed frames 88022448
+08-31 05:12:26.362  1502  3285 I vendor.qti.bluetooth@1.1-ibs_handler: ProcessIbsCmd: Received IBS_SLEEP_IND: 0xFE
+08-31 05:12:26.362  1502  3285 D vendor.qti.bluetooth@1.1-ibs_handler: SerialClockVote: vote for UART CLK OFF
+08-31 05:12:26.381  1502  3285 I vendor.qti.bluetooth@1.1-ibs_handler: ProcessIbsCmd: Received IBS_WAKE_IND: 0xFD
+08-31 05:12:26.382  1502  3285 D vendor.qti.bluetooth@1.1-ibs_handler: SerialClockVote: vote for UART CLK ON
+08-31 05:12:26.382  1502  3285 E vendor.qti.bluetooth@1.1-wake_lock: Acquire write to wakelock file failed -1 - Operation not permitted
+08-31 05:12:26.382  1502  3285 I vendor.qti.bluetooth@1.1-ibs_handler: ProcessIbsCmd: Writing IBS_WAKE_ACK
+08-31 05:12:26.407  1501  5760 I AHAL: AudioStream: GetFramesWritten: 3406: mmap position is 88024992
+08-31 05:12:26.407  1501  5760 I AHAL: AudioStream: GetFramesWritten: 3409: mmap signed frames 88024848
+08-31 05:12:26.423  1502  3285 I vendor.qti.bluetooth@1.1-ibs_handler: ProcessIbsCmd: Received IBS_SLEEP_IND: 0xFE
+08-31 05:12:26.423  1502  3285 D vendor.qti.bluetooth@1.1-ibs_handler: SerialClockVote: vote for UART CLK OFF
+08-31 05:12:26.423  1502  3285 E vendor.qti.bluetooth@1.1-wake_lock: Release wake lock not initialized/acquired
+08-31 05:12:26.425  1579  1658 W libbinder.ServiceManagerCppClient: Waited one second for vendor.qti.qhcp.IQHDC/default (is service started? Number of threads started in the threadpool: 2. Are binder threads started and available?)
+08-31 05:12:26.036   899   899 I servicemanager: Caller(pid=1579,uid=0,sid=u:r:vendor_hal_perf_default:s0) Since 'vendor.qti.qhcp.IQHDC/default' could not be found trying to start it as a lazy AIDL service. (if it's not configured to be a lazy service, it may be stuck starting or still starting).
+08-31 05:12:26.037     1     1 E init    : Control message: Could not find 'aidl/vendor.qti.qhcp.IQHDC/default' for ctl.interface_start from pid: 899 (/system/bin/servicemanager)
+08-31 05:12:26.432   899 14045 W libc    : Unable to set property "ctl.interface_start" to "aidl/vendor.qti.qhcp.IQHDC/default": PROP_ERROR_HANDLE_CONTROL_MESSAGE (0x20)
+08-31 05:12:26.039 14045 14045 I servicemanager: Caller(pid=1579,uid=0,sid=u:r:vendor_hal_perf_default:s0) Tried to start aidl service vendor.qti.qhcp.IQHDC/default as a lazy service, but was unable to. Usually this happens when a service is not installed, but if the service is intended to be used as a lazy service, then it may be configured incorrectly.
+08-31 05:12:26.451  1514  1514 I android.hardware.power-service-qti: Power setBoost: 0, duration: 0
+08-31 05:12:26.458  1501  5760 I AHAL: AudioStream: GetFramesWritten: 3406: mmap position is 88027440
+08-31 05:12:26.458  1501  5760 I AHAL: AudioStream: GetFramesWritten: 3409: mmap signed frames 88027296
+08-31 05:12:26.509  1501  5760 I AHAL: AudioStream: GetFramesWritten: 3406: mmap position is 88029888
+08-31 05:12:26.509  1501  5760 I AHAL: AudioStream: GetFramesWritten: 3409: mmap signed frames 88029744
+08-31 05:12:26.559  1514  1514 I android.hardware.power-service-qti: Power setBoost: 0, duration: 0
+08-31 05:12:26.560  1501  5760 I AHAL: AudioStream: GetFramesWritten: 3406: mmap position is 88032336
+08-31 05:12:26.560  1501  5760 I AHAL: AudioStream: GetFramesWritten: 3409: mmap signed frames 88032192
+08-31 05:12:26.573  1502  3136 E vendor.qti.bluetooth@1.1-wake_lock: Release wake lock not initialized/acquired
+08-31 05:12:26.610  1501  5760 I AHAL: AudioStream: GetFramesWritten: 3406: mmap position is 88034736
+08-31 05:12:26.610  1501  5760 I AHAL: AudioStream: GetFramesWritten: 3409: mmap signed frames 88034592
+08-31 05:12:26.659  1514  1514 I android.hardware.power-service-qti: Power setBoost: 0, duration: 0
+08-31 05:12:26.660  1514  1514 E QTI PowerHAL: Failed to acquire lock.
+08-31 05:12:26.661  1514  1514 E QTI PowerHAL: Failed process_boost for boost_handle
+08-31 05:12:26.661  1501  5760 I AHAL: AudioStream: GetFramesWritten: 3406: mmap position is 88037184
+08-31 05:12:26.661  1501  5760 I AHAL: AudioStream: GetFramesWritten: 3409: mmap signed frames 88037040
+08-31 05:12:26.712  1501  5760 I AHAL: AudioStream: GetFramesWritten: 3406: mmap position is 88039632
+08-31 05:12:26.712  1501  5760 I AHAL: AudioStream: GetFramesWritten: 3409: mmap signed frames 88039488
+08-31 05:12:26.759  1514  1514 I android.hardware.power-service-qti: Power setBoost: 0, duration: 0
+08-31 05:12:26.762  1501  5760 I AHAL: AudioStream: GetFramesWritten: 3406: mmap position is 88042032
+08-31 05:12:26.762  1501  5760 I AHAL: AudioStream: GetFramesWritten: 3409: mmap signed frames 88041888
+08-31 05:12:26.813  1501  5760 I AHAL: AudioStream: GetFramesWritten: 3406: mmap position is 88044480
+08-31 05:12:26.813  1501  5760 I AHAL: AudioStream: GetFramesWritten: 3409: mmap signed frames 88044336
+08-31 05:12:26.859  1514  1514 I android.hardware.power-service-qti: Power setBoost: 0, duration: 0
+08-31 05:12:26.864  1501  5760 I AHAL: AudioStream: GetFramesWritten: 3406: mmap position is 88046928
+08-31 05:12:26.864  1501  5760 I AHAL: AudioStream: GetFramesWritten: 3409: mmap signed frames 88046784
+08-31 05:12:26.873  1501  2510 I android.hardware.audio.service: [Awinic] [INF] aw_audioreach_monitor_thread: monitor->state = 3
+08-31 05:12:26.873  1501  2510 D android.hardware.audio.service: [Awinic] [DBG] aw_ar_kmsg_ctl_get_monitor_en: dev_index[0]:monitor enable:1
+08-31 05:12:26.480  2510  2510 I [Awinic][7-0034]aw882xx_monitor_get: monitor switch is 1
+08-31 05:12:26.481  2510  2510 I [Awinic][7-0034]aw_monitor_get_voltage: chip voltage is 3981
+08-31 05:12:26.481  2510  2510 I [Awinic][7-0034]aw_monitor_get_temperature: reg val is 0x0032
+08-31 05:12:26.481  2510  2510 I [Awinic][7-0034]aw_monitor_get_temperature: chip temperature = 50
+08-31 05:12:26.482  2510  2510 I [Awinic][4-0034]aw882xx_monitor_get: monitor switch is 1
+08-31 05:12:26.876  1501  2510 D android.hardware.audio.service: [Awinic] [DBG] aw_ar_monitor_work_func: dev[0], vmax[0xffee3c06] is not modified or the value is none
+08-31 05:12:26.876  1501  2510 D android.hardware.audio.service: [Awinic] [DBG] aw_ar_kmsg_ctl_get_monitor_en: dev_index[1]:monitor enable:1
+08-31 05:12:26.483  2510  2510 I [Awinic][4-0034]aw_monitor_get_voltage: chip voltage is 3993
+08-31 05:12:26.484  2510  2510 I [Awinic][4-0034]aw_monitor_get_temperature: reg val is 0x0028
+08-31 05:12:26.484  2510  2510 I [Awinic][4-0034]aw_monitor_get_temperature: chip temperature = 40
+08-31 05:12:26.878  1501  2510 D android.hardware.audio.service: [Awinic] [DBG] aw_ar_monitor_work_func: dev[1], vmax[0xffee3c06] is not modified or the value is none
+08-31 05:12:26.878  1501  2510 D android.hardware.audio.service: [Awinic] [DBG] aw_ar_kmsg_ctl_get_monitor_en: dev_index[2]:monitor enable:1
+08-31 05:12:26.485  2510  2510 I [Awinic][7-0035]aw882xx_monitor_get: monitor switch is 1
+08-31 05:12:26.485  2510  2510 I [Awinic][7-0035]aw_monitor_get_voltage: chip voltage is 3981
+08-31 05:12:26.485  2510  2510 I [Awinic][7-0035]aw_monitor_get_temperature: reg val is 0x0031
+08-31 05:12:26.485  2510  2510 I [Awinic][7-0035]aw_monitor_get_temperature: chip temperature = 49
+08-31 05:12:26.880  1501  2510 D android.hardware.audio.service: [Awinic] [DBG] aw_ar_monitor_work_func: dev[2], vmax[0xffee3c06] is not modified or the value is none
+08-31 05:12:26.880  1501  2510 D android.hardware.audio.service: [Awinic] [DBG] aw_ar_kmsg_ctl_get_monitor_en: dev_index[3]:monitor enable:1
+08-31 05:12:26.486  2510  2510 I [Awinic][4-0035]aw882xx_monitor_get: monitor switch is 1
+08-31 05:12:26.882  1501  2510 D android.hardware.audio.service: [Awinic] [DBG] aw_ar_monitor_work_func: dev[3], vmax[0xffee3c06] is not modified or the value is none
+08-31 05:12:26.882  1501  2510 D PAL: OplusPalCommon: getActiveStreamPcmId: 2077:  dir: 1, stream: 0xb4000077e923c650, pcmDevId: 126
+08-31 05:12:26.882  1501  2510 D android.hardware.audio.service: [Awinic] [DBG] aw_ar_dsp_get_msg_num: msg num[0]
+08-31 05:12:26.487  2510  2510 I [Awinic][4-0035]aw_monitor_get_voltage: chip voltage is 3981
+08-31 05:12:26.487  2510  2510 I [Awinic][4-0035]aw_monitor_get_temperature: reg val is 0x0029
+08-31 05:12:26.487  2510  2510 I [Awinic][4-0035]aw_monitor_get_temperature: chip temperature = 41
+08-31 05:12:26.882  1501  2510 D AGM: graph: graph_set_config: 1225 entry graph_handle 0x247534c
+08-31 05:12:26.882  1501  2510 D AGM: graph: graph_set_config: 1233 exit, graph handle 0x247534c, ret 0
+08-31 05:12:26.882  1501  2510 D android.hardware.audio.service: [Awinic] [DBG] aw_ar_dsp_read_msg_from_dsp: msg_id:0x7, read data[32] from dsp success
+08-31 05:12:26.883  1501  2510 D android.hardware.audio.service: [Awinic] [DBG] aw_ar_dsp_read_st: dev[0]read Re 7181 , Te 25
+08-31 05:12:26.883  1501  2510 D android.hardware.audio.service: [Awinic] [DBG] aw_ar_dsp_get_msg_num: msg num[0]
+08-31 05:12:26.883  1501  2510 D AGM: graph: graph_set_config: 1225 entry graph_handle 0x247534c
+08-31 05:12:26.883  1501  2510 D AGM: graph: graph_set_config: 1233 exit, graph handle 0x247534c, ret 0
+08-31 05:12:26.883  1501  2510 D android.hardware.audio.service: [Awinic] [DBG] aw_ar_dsp_read_msg_from_dsp: msg_id:0x7, read data[32] from dsp success
+08-31 05:12:26.883  1501  2510 D android.hardware.audio.service: [Awinic] [DBG] aw_ar_dsp_read_st: dev[1]read Re 7232 , Te 25
+08-31 05:12:26.883  1501  2510 D android.hardware.audio.service: [Awinic] [DBG] aw_ar_dsp_get_msg_num: msg num[1]
+08-31 05:12:26.883  1501  2510 D AGM: graph: graph_set_config: 1225 entry graph_handle 0x247534c
+08-31 05:12:26.883  1501  2510 D AGM: graph: graph_set_config: 1233 exit, graph handle 0x247534c, ret 0
+08-31 05:12:26.884  1501  2510 D android.hardware.audio.service: [Awinic] [DBG] aw_ar_dsp_read_msg_from_dsp: msg_id:0x7, read data[32] from dsp success
+08-31 05:12:26.884  1501  2510 D android.hardware.audio.service: [Awinic] [DBG] aw_ar_dsp_read_st: dev[2]read Re 7423 , Te 25
+08-31 05:12:26.884  1501  2510 D android.hardware.audio.service: [Awinic] [DBG] aw_ar_dsp_get_msg_num: msg num[1]
+08-31 05:12:26.884  1501  2510 D AGM: graph: graph_set_config: 1225 entry graph_handle 0x247534c
+08-31 05:12:26.884  1501  2510 D AGM: graph: graph_set_config: 1233 exit, graph handle 0x247534c, ret 0
+08-31 05:12:26.885  1501  2510 D android.hardware.audio.service: [Awinic] [DBG] aw_ar_dsp_read_msg_from_dsp: msg_id:0x7, read data[32] from dsp success
+08-31 05:12:26.885  1501  2510 D android.hardware.audio.service: [Awinic] [DBG] aw_ar_dsp_read_st: dev[3]read Re 7424 , Te 25
+08-31 05:12:26.885  1501  2510 I PAL: OplusSpeakerAwinic: checkSpeakerStatus: 1019: aw_audioreach_dsp_read_st spk0, re=7181, te=25
+08-31 05:12:26.885  1501  2510 I PAL: OplusSpeakerAwinic: checkSpeakerStatus: 1019: aw_audioreach_dsp_read_st spk1, re=7232, te=25
+08-31 05:12:26.885  1501  2510 I PAL: OplusSpeakerAwinic: checkSpeakerStatus: 1019: aw_audioreach_dsp_read_st spk2, re=7423, te=25
+08-31 05:12:26.885  1501  2510 I PAL: OplusSpeakerAwinic: checkSpeakerStatus: 1019: aw_audioreach_dsp_read_st spk3, re=7424, te=25
+08-31 05:12:26.914  1501  5760 I AHAL: AudioStream: GetFramesWritten: 3406: mmap position is 88049328
+08-31 05:12:26.914  1501  5760 I AHAL: AudioStream: GetFramesWritten: 3409: mmap signed frames 88049184
+08-31 05:12:26.535 12736 12736 E [TP0]touchpanel: irq gpio is 0
+08-31 05:12:26.951  1514  1514 I android.hardware.power-service-qti: Power setBoost: 0, duration: 83
+08-31 05:12:26.951  1514  1514 E QTI PowerHAL: Failed to acquire lock.
+08-31 05:12:26.951  1514  1514 E QTI PowerHAL: Failed process_boost for boost_handle
+08-31 05:12:26.965  1501  5760 I AHAL: AudioStream: GetFramesWritten: 3406: mmap position is 88051776
+08-31 05:12:26.965  1501  5760 I AHAL: AudioStream: GetFramesWritten: 3409: mmap signed frames 88051632
+08-31 05:12:27.015  1501  5760 I AHAL: AudioStream: GetFramesWritten: 3406: mmap position is 88054176
+08-31 05:12:27.015  1501  5760 I AHAL: AudioStream: GetFramesWritten: 3409: mmap signed frames 88054032
+08-31 05:12:27.066  1501  5760 I AHAL: AudioStream: GetFramesWritten: 3406: mmap position is 88056624
+08-31 05:12:27.066  1501  5760 I AHAL: AudioStream: GetFramesWritten: 3409: mmap signed frames 88056480
+08-31 05:12:27.117  1501  5760 I AHAL: AudioStream: GetFramesWritten: 3406: mmap position is 88059072
+08-31 05:12:27.117  1501  5760 I AHAL: AudioStream: GetFramesWritten: 3409: mmap signed frames 88058928
+08-31 05:12:27.167  1501  5760 I AHAL: AudioStream: GetFramesWritten: 3406: mmap position is 88061472
+08-31 05:12:27.167  1501  5760 I AHAL: AudioStream: GetFramesWritten: 3409: mmap signed frames 88061328
+08-31 05:12:27.217  1501  5760 I AHAL: AudioStream: GetFramesWritten: 3406: mmap position is 88063872
+08-31 05:12:27.217  1501  5760 I AHAL: AudioStream: GetFramesWritten: 3409: mmap signed frames 88063728
+08-31 05:12:27.268  1501  5760 I AHAL: AudioStream: GetFramesWritten: 3406: mmap position is 88066320
+08-31 05:12:27.268  1501  5760 I AHAL: AudioStream: GetFramesWritten: 3409: mmap signed frames 88066176
+08-31 05:12:27.318  1501  5760 I AHAL: AudioStream: GetFramesWritten: 3406: mmap position is 88068720
+08-31 05:12:27.318  1501  5760 I AHAL: AudioStream: GetFramesWritten: 3409: mmap signed frames 88068576
+08-31 05:12:27.369  1501  5760 I AHAL: AudioStream: GetFramesWritten: 3406: mmap position is 88071168
+08-31 05:12:27.369  1501  5760 I AHAL: AudioStream: GetFramesWritten: 3409: mmap signed frames 88071024
+08-31 05:12:27.420  1501  5760 I AHAL: AudioStream: GetFramesWritten: 3406: mmap position is 88073616
+08-31 05:12:27.420  1501  5760 I AHAL: AudioStream: GetFramesWritten: 3409: mmap signed frames 88073472
+08-31 05:12:27.431  1579  1658 W libbinder.ServiceManagerCppClient: Waited one second for vendor.qti.qhcp.IQHDC/default (is service started? Number of threads started in the threadpool: 2. Are binder threads started and available?)
+08-31 05:12:27.436   899 14048 W libc    : Unable to set property "ctl.interface_start" to "aidl/vendor.qti.qhcp.IQHDC/default": PROP_ERROR_HANDLE_CONTROL_MESSAGE (0x20)
+08-31 05:12:27.040   899   899 I servicemanager: Caller(pid=1579,uid=0,sid=u:r:vendor_hal_perf_default:s0) Since 'vendor.qti.qhcp.IQHDC/default' could not be found trying to start it as a lazy AIDL service. (if it's not configured to be a lazy service, it may be stuck starting or still starting).
+08-31 05:12:27.041     1     1 E init    : Control message: Could not find 'aidl/vendor.qti.qhcp.IQHDC/default' for ctl.interface_start from pid: 899 (/system/bin/servicemanager)
+08-31 05:12:27.042 14048 14048 I servicemanager: Caller(pid=1579,uid=0,sid=u:r:vendor_hal_perf_default:s0) Tried to start aidl service vendor.qti.qhcp.IQHDC/default as a lazy service, but was unable to. Usually this happens when a service is not installed, but if the service is intended to be used as a lazy service, then it may be configured incorrectly.
+08-31 05:12:27.471  1501  5760 I AHAL: AudioStream: GetFramesWritten: 3406: mmap position is 88076064
+08-31 05:12:27.471  1501  5760 I AHAL: AudioStream: GetFramesWritten: 3409: mmap signed frames 88075920
+08-31 05:12:27.473  1502  3285 I vendor.qti.bluetooth@1.1-ibs_handler: ProcessIbsCmd: Received IBS_WAKE_IND: 0xFD
+08-31 05:12:27.473  1502  3285 D vendor.qti.bluetooth@1.1-ibs_handler: SerialClockVote: vote for UART CLK ON
+08-31 05:12:27.473  1502  3285 E vendor.qti.bluetooth@1.1-wake_lock: Acquire write to wakelock file failed -1 - Operation not permitted
+08-31 05:12:27.473  1502  3285 I vendor.qti.bluetooth@1.1-ibs_handler: ProcessIbsCmd: Writing IBS_WAKE_ACK
+08-31 05:12:27.514  1502  3285 I vendor.qti.bluetooth@1.1-ibs_handler: ProcessIbsCmd: Received IBS_SLEEP_IND: 0xFE
+08-31 05:12:27.514  1502  3285 D vendor.qti.bluetooth@1.1-ibs_handler: SerialClockVote: vote for UART CLK OFF
+08-31 05:12:27.521  1501  5760 I AHAL: AudioStream: GetFramesWritten: 3406: mmap position is 88078464
+08-31 05:12:27.521  1501  5760 I AHAL: AudioStream: GetFramesWritten: 3409: mmap signed frames 88078320
+08-31 05:12:27.538  1502  3285 I vendor.qti.bluetooth@1.1-ibs_handler: ProcessIbsCmd: Received IBS_WAKE_IND: 0xFD
+08-31 05:12:27.538  1502  3285 D vendor.qti.bluetooth@1.1-ibs_handler: SerialClockVote: vote for UART CLK ON
+08-31 05:12:27.538  1502  3285 E vendor.qti.bluetooth@1.1-wake_lock: Acquire write to wakelock file failed -1 - Operation not permitted
+08-31 05:12:27.538  1502  3285 I vendor.qti.bluetooth@1.1-ibs_handler: ProcessIbsCmd: Writing IBS_WAKE_ACK
+08-31 05:12:27.548  2038 13356 D RPCS3   : CPU Usage: Total: 26.0%, Cores: 0.0%, 0.0%, 0.0%, 0.0%, 0.0%, 0.0%, 0.0%, 0.0%
+08-31 05:12:27.571  1501  5760 I AHAL: AudioStream: GetFramesWritten: 3406: mmap position is 88080864
+08-31 05:12:27.572  1501  5760 I AHAL: AudioStream: GetFramesWritten: 3409: mmap signed frames 88080720
+08-31 05:12:27.578  1601  1667 D vendor.oplus.hardware.charger-V10-service: parallel fold conf file parse fail parallel_fold_state 2
+08-31 05:12:27.578  1601  1667 D vendor.oplus.hardware.charger-V10-service: scale_chg Start!!!
+08-31 05:12:27.579  1502  3285 I vendor.qti.bluetooth@1.1-ibs_handler: ProcessIbsCmd: Received IBS_SLEEP_IND: 0xFE
+08-31 05:12:27.579  1601  1667 D vendor.oplus.hardware.charger-V10-service: [0, 0, 3]
+08-31 05:12:27.579  1601  1667 D vendor.oplus.hardware.charger-V10-service: [0, 2, 9]
+08-31 05:12:27.579  1502  3285 D vendor.qti.bluetooth@1.1-ibs_handler: SerialClockVote: vote for UART CLK OFF
+08-31 05:12:27.579  1601  1667 D vendor.oplus.hardware.charger-V10-service: [0, 1, 4]
+08-31 05:12:27.579  1601  1667 D vendor.oplus.hardware.charger-V10-service: [0, 3, 3]
+08-31 05:12:27.579  1502  3285 E vendor.qti.bluetooth@1.1-wake_lock: Release wake lock not initialized/acquired
+08-31 05:12:27.579  1601  1667 D vendor.oplus.hardware.charger-V10-service: [0, 4, 3]
+08-31 05:12:27.579  1601  1667 D vendor.oplus.hardware.charger-V10-service: [0, 5, 4]
+08-31 05:12:27.579  1601  1667 D vendor.oplus.hardware.charger-V10-service: [0, 6, 3]
+08-31 05:12:27.579  1601  1667 D vendor.oplus.hardware.charger-V10-service: scale_chg Start!!!
+08-31 05:12:27.580  1601  1667 D vendor.oplus.hardware.charger-V10-service: [0, 0, 3]
+08-31 05:12:27.580  1601  1667 D vendor.oplus.hardware.charger-V10-service: [0, 2, 9]
+08-31 05:12:27.580  1601  1667 D vendor.oplus.hardware.charger-V10-service: [0, 1, 4]
+08-31 05:12:27.580  1601  1667 D vendor.oplus.hardware.charger-V10-service: [0, 3, 3]
+08-31 05:12:27.580  1601  1667 D vendor.oplus.hardware.charger-V10-service: [0, 4, 3]
+08-31 05:12:27.580  1601  1667 D vendor.oplus.hardware.charger-V10-service: [0, 5, 4]
+08-31 05:12:27.580  1601  1667 D vendor.oplus.hardware.charger-V10-service: [0, 6, 3]
+08-31 05:12:27.622  1501  5760 I AHAL: AudioStream: GetFramesWritten: 3406: mmap position is 88083312
+08-31 05:12:27.622  1501  5760 I AHAL: AudioStream: GetFramesWritten: 3409: mmap signed frames 88083168
+08-31 05:12:27.672  1501  5760 I AHAL: AudioStream: GetFramesWritten: 3406: mmap position is 88085712
+08-31 05:12:27.672  1501  5760 I AHAL: AudioStream: GetFramesWritten: 3409: mmap signed frames 88085568
+08-31 05:12:27.707  5485  5485 W DefaultDispatch: type=1400 audit(0.0:866380): avc:  denied  { read } for  name="version" dev="proc" ino=4026532013 scontext=u:r:untrusted_app:s0:c224,c256,c512,c768 tcontext=u:object_r:proc_version:s0 tclass=file permissive=0 app=com.ivarna.mkm
+08-31 05:12:27.722  5485  7854 W CpuUtilizationProvider: Failed to read /proc/stat: grep: /proc/stat: Permission denied
+08-31 05:12:27.722  1501  5760 I AHAL: AudioStream: GetFramesWritten: 3406: mmap position is 88088112
+08-31 05:12:27.722  1501  5760 I AHAL: AudioStream: GetFramesWritten: 3409: mmap signed frames 88087968
+08-31 05:12:27.729  5485  7854 D CpuUtilizationProvider: CPU usage updated from frequency (fallback): 69%
+08-31 05:12:27.729  1502  3136 E vendor.qti.bluetooth@1.1-wake_lock: Release wake lock not initialized/acquired
+08-31 05:12:27.729  5485  7854 D CpuProvider: Core 0: freq=672000, usage=0.16161616 (hwMin=364800, hwMax=2265600)
+08-31 05:12:27.730  5485  7854 D CpuProvider: Core 1: freq=672000, usage=0.16161616 (hwMin=364800, hwMax=2265600)
+08-31 05:12:27.730  5485  7854 D CpuProvider: Core 2: freq=2515200, usage=0.71014494 (hwMin=499200, hwMax=3148800)
+08-31 05:12:27.731  5485  7854 D CpuProvider: Core 3: freq=2515200, usage=0.615942 (hwMin=499200, hwMax=3148800)
+08-31 05:12:27.731  5485  7854 D CpuProvider: Core 4: freq=2515200, usage=0.8333333 (hwMin=499200, hwMax=3148800)
+08-31 05:12:27.732  5485  7854 D CpuProvider: Core 5: freq=2707200, usage=0.84375 (hwMin=499200, hwMax=2956800)
+08-31 05:12:27.732  5485  7854 D CpuProvider: Core 6: freq=2707200, usage=0.8984375 (hwMin=499200, hwMax=2956800)
+08-31 05:12:27.733  5485  7854 D CpuProvider: Core 7: freq=3244800, usage=0.97959185 (hwMin=480000, hwMax=3302400)
+08-31 05:12:27.733  5485  7854 D CpuProvider: Overall usage: 0.69996244 (from 8 cores), Avg Freq: 2215500
+08-31 05:12:27.739 14056 14056 W cat     : type=1400 audit(0.0:866381): avc:  denied  { read } for  name="governor" dev="sysfs" ino=139690 scontext=u:r:untrusted_app:s0:c224,c256,c512,c768 tcontext=u:object_r:vendor_sysfs_kgsl:s0 tclass=file permissive=0
+08-31 05:12:27.747 14057 14057 W cat     : type=1400 audit(0.0:866382): avc:  denied  { read } for  name="available_governors" dev="sysfs" ino=139691 scontext=u:r:untrusted_app:s0:c224,c256,c512,c768 tcontext=u:object_r:vendor_sysfs_kgsl:s0 tclass=file permissive=0 app=com.ivarna.mkm
+08-31 05:12:27.750  2038 13496 D RPCS3   : sys_fs_fcntl(0xc0000006): /dev_bdvd
+08-31 05:12:27.751  2038 13496 W RPCS3   : sys_fs_open(path=“/dev_bdvd/PS3_GAME/USRDIR/PS3DataMain.obb”, flags=00, fd=*0xd055c9b0, mode=00, arg=*0x0, size=0x0)
+08-31 05:12:27.751  2038 13496 W RPCS3   : sys_fs_open(): fd=38, Regular file, '/dev_bdvd/PS3_GAME/USRDIR/PS3DataMain.obb', Mode: 0x0, Flags: 0x0, Pos/Size: 0/1.37818GB (0x0/0x5834285d)
+08-31 05:12:27.757  2038 13496 D RPCS3   : sys_fs_fcntl(0xc0000006): /dev_bdvd
+08-31 05:12:27.757  2038 13496 W RPCS3   : sys_fs_open(path=“/dev_bdvd/PS3_GAME/USRDIR/PS3DataMain.obb”, flags=00, fd=*0xd055c9b0, mode=00, arg=*0x0, size=0x0)
+08-31 05:12:27.757  2038 13496 W RPCS3   : sys_fs_open(): fd=42, Regular file, '/dev_bdvd/PS3_GAME/USRDIR/PS3DataMain.obb', Mode: 0x0, Flags: 0x0, Pos/Size: 0/1.37818GB (0x0/0x5834285d)
+08-31 05:12:27.759  2038 13496 W RPCS3   : sys_fs_close(fd=41): Regular file, '/dev_bdvd/PS3_GAME/USRDIR/PS3DataMain.obb', Mode: 0x0, Flags: 0x0, Pos/Size: 1.01392GB/1.37818GB (0x40e42116/0x5834285d)
+08-31 05:12:27.773  1501  5760 I AHAL: AudioStream: GetFramesWritten: 3406: mmap position is 88090560
+08-31 05:12:27.773  1501  5760 I AHAL: AudioStream: GetFramesWritten: 3409: mmap signed frames 88090416
+08-31 05:12:27.771 14063 14063 W cat     : type=1400 audit(0.0:866383): avc:  denied  { read } for  name="cur_freq" dev="sysfs" ino=139692 scontext=u:r:untrusted_app:s0:c224,c256,c512,c768 tcontext=u:object_r:vendor_sysfs_kgsl:s0 tclass=file permissive=0
+08-31 05:12:27.787 14069 14069 W cat     : type=1400 audit(0.0:866384): avc:  denied  { read } for  name="gpuclk" dev="sysfs" ino=139614 scontext=u:r:untrusted_app:s0:c224,c256,c512,c768 tcontext=u:object_r:vendor_sysfs_kgsl_gpuclk:s0 tclass=file permissive=0 app=com.ivarna.mkm
+08-31 05:12:27.404 14071 14071 W audit   : audit_lost=568837 audit_rate_limit=5 audit_backlog_limit=64
+08-31 05:12:27.404 14071 14071 E audit   : rate limit exceeded
+08-31 05:12:27.823  1501  5760 I AHAL: AudioStream: GetFramesWritten: 3406: mmap position is 88092960
+08-31 05:12:27.823  1501  5760 I AHAL: AudioStream: GetFramesWritten: 3409: mmap signed frames 88092816
+08-31 05:12:27.849  2038 13496 W RPCS3   : sys_fs_close(fd=42): Regular file, '/dev_bdvd/PS3_GAME/USRDIR/PS3DataMain.obb', Mode: 0x0, Flags: 0x0, Pos/Size: 1.14879GB/1.37818GB (0x4985cbc1/0x5834285d)
+08-31 05:12:27.873  1501  5760 I AHAL: AudioStream: GetFramesWritten: 3406: mmap position is 88095360
+08-31 05:12:27.873  1501  5760 I AHAL: AudioStream: GetFramesWritten: 3409: mmap signed frames 88095216
+08-31 05:12:27.897  2038 13496 D RPCS3   : sys_fs_fcntl(0xc0000006): /dev_bdvd
+08-31 05:12:27.897  2038 13496 W RPCS3   : sys_fs_open(path=“/dev_bdvd/PS3_GAME/USRDIR/PS3DataMain.obb”, flags=00, fd=*0xd055c9b0, mode=00, arg=*0x0, size=0x0)
+08-31 05:12:27.897  2038 13496 W RPCS3   : sys_fs_open(): fd=41, Regular file, '/dev_bdvd/PS3_GAME/USRDIR/PS3DataMain.obb', Mode: 0x0, Flags: 0x0, Pos/Size: 0/1.37818GB (0x0/0x5834285d)
+08-31 05:12:27.908  2038 13496 W RPCS3   : sys_fs_close(fd=38): Regular file, '/dev_bdvd/PS3_GAME/USRDIR/PS3DataMain.obb', Mode: 0x0, Flags: 0x0, Pos/Size: 1.14913GB/1.37818GB (0x498b691d/0x5834285d)
+08-31 05:12:27.923  1501  5760 I AHAL: AudioStream: GetFramesWritten: 3406: mmap position is 88097760
+08-31 05:12:27.923  1501  5760 I AHAL: AudioStream: GetFramesWritten: 3409: mmap signed frames 88097616
+08-31 05:12:27.938  2038 13496 D RPCS3   : sys_fs_fcntl(0xc0000006): /dev_bdvd
+08-31 05:12:27.938  2038 13496 W RPCS3   : sys_fs_open(path=“/dev_bdvd/PS3_GAME/USRDIR/PS3DataMain.obb”, flags=00, fd=*0xd055c9b0, mode=00, arg=*0x0, size=0x0)
+08-31 05:12:27.938  2038 13496 W RPCS3   : sys_fs_open(): fd=38, Regular file, '/dev_bdvd/PS3_GAME/USRDIR/PS3DataMain.obb', Mode: 0x0, Flags: 0x0, Pos/Size: 0/1.37818GB (0x0/0x5834285d)
+08-31 05:12:27.974  1501  5760 I AHAL: AudioStream: GetFramesWritten: 3406: mmap position is 88100208
+08-31 05:12:27.974  1501  5760 I AHAL: AudioStream: GetFramesWritten: 3409: mmap signed frames 88100064
+08-31 05:12:28.019  3141  3141 D TaskbarManager: dispatchTouchEvent:  displayId=0 isDefaultDisplay=true
+08-31 05:12:28.019  2038  2038 I S3TOUCH : root action=down x=1500 y=120
+08-31 05:12:28.020  2038  2038 I S3TOUCH : pad action=down menu=false
+08-31 05:12:28.021  1514  1514 I android.hardware.power-service-qti: Power setBoost: 0, duration: 0
+08-31 05:12:28.022  2038 13528 D RPCS3   : FRONTEND_MENU home-request consumed
+08-31 05:12:28.024  1514  1514 E QTI PowerHAL: Failed to acquire lock.
+08-31 05:12:28.024  1514  1514 E QTI PowerHAL: Failed process_boost for boost_handle
+08-31 05:12:28.025  1501  5760 I AHAL: AudioStream: GetFramesWritten: 3406: mmap position is 88102656
+08-31 05:12:28.025  1501  5760 I AHAL: AudioStream: GetFramesWritten: 3409: mmap signed frames 88102512
+08-31 05:12:28.026  2038  2038 I S3HOME  : source=NativeFrontendEvent edge=down action=open state=Running
+08-31 05:12:28.026  2038  2184 D RPCS3   : FRONTEND_MENU begin pauseDuringMenu=0 isPaused=0
+08-31 05:12:28.027  2038  8053 D RPCS3   : Loading RPCN config. Path: /storage/emulated/0/Android/data/com.zenithblue.sambas3/files/config/rpcn.yml
+08-31 05:12:28.075  1501  5760 I AHAL: AudioStream: GetFramesWritten: 3406: mmap position is 88105056
+08-31 05:12:28.075  1501  5760 I AHAL: AudioStream: GetFramesWritten: 3409: mmap signed frames 88104912
+08-31 05:12:28.126  1501  5760 I AHAL: AudioStream: GetFramesWritten: 3406: mmap position is 88107504
+08-31 05:12:28.126  1501  5760 I AHAL: AudioStream: GetFramesWritten: 3409: mmap signed frames 88107360
+08-31 05:12:28.177  1501  5760 I AHAL: AudioStream: GetFramesWritten: 3406: mmap position is 88109952
+08-31 05:12:28.177  1501  5760 I AHAL: AudioStream: GetFramesWritten: 3409: mmap signed frames 88109808
+08-31 05:12:28.227  1501  5760 I AHAL: AudioStream: GetFramesWritten: 3406: mmap position is 88112352
+08-31 05:12:28.227  1501  5760 I AHAL: AudioStream: GetFramesWritten: 3409: mmap signed frames 88112208
+08-31 05:12:28.278  1501  5760 I AHAL: AudioStream: GetFramesWritten: 3406: mmap position is 88114800
+08-31 05:12:28.278  1501  5760 I AHAL: AudioStream: GetFramesWritten: 3409: mmap signed frames 88114656
+08-31 05:12:28.328  1501  5760 I AHAL: AudioStream: GetFramesWritten: 3406: mmap position is 88117200
+08-31 05:12:28.328  1501  5760 I AHAL: AudioStream: GetFramesWritten: 3409: mmap signed frames 88117056
+08-31 05:12:28.379  1501  5760 I AHAL: AudioStream: GetFramesWritten: 3406: mmap position is 88119648
+08-31 05:12:28.379  1501  5760 I AHAL: AudioStream: GetFramesWritten: 3409: mmap signed frames 88119504
+08-31 05:12:28.429  1501  5760 I AHAL: AudioStream: GetFramesWritten: 3406: mmap position is 88122048
+08-31 05:12:28.429  1501  5760 I AHAL: AudioStream: GetFramesWritten: 3409: mmap signed frames 88121904
+08-31 05:12:28.434  1579  1658 W libbinder.ServiceManagerCppClient: Waited one second for vendor.qti.qhcp.IQHDC/default (is service started? Number of threads started in the threadpool: 2. Are binder threads started and available?)
+08-31 05:12:28.042   899   899 I servicemanager: Caller(pid=1579,uid=0,sid=u:r:vendor_hal_perf_default:s0) Since 'vendor.qti.qhcp.IQHDC/default' could not be found trying to start it as a lazy AIDL service. (if it's not configured to be a lazy service, it may be stuck starting or still starting).
+08-31 05:12:28.438   899 14101 W libc    : Unable to set property "ctl.interface_start" to "aidl/vendor.qti.qhcp.IQHDC/default": PROP_ERROR_HANDLE_CONTROL_MESSAGE (0x20)
+08-31 05:12:28.044     1     1 E init    : Control message: Could not find 'aidl/vendor.qti.qhcp.IQHDC/default' for ctl.interface_start from pid: 899 (/system/bin/servicemanager)
+08-31 05:12:28.045 14101 14101 I servicemanager: Caller(pid=1579,uid=0,sid=u:r:vendor_hal_perf_default:s0) Tried to start aidl service vendor.qti.qhcp.IQHDC/default as a lazy service, but was unable to. Usually this happens when a service is not installed, but if the service is intended to be used as a lazy service, then it may be configured incorrectly.
+08-31 05:12:28.480  1501  5760 I AHAL: AudioStream: GetFramesWritten: 3406: mmap position is 88124496
+08-31 05:12:28.480  1501  5760 I AHAL: AudioStream: GetFramesWritten: 3409: mmap signed frames 88124352
+08-31 05:12:28.531  1501  5760 I AHAL: AudioStream: GetFramesWritten: 3406: mmap position is 88126944
+08-31 05:12:28.531  1501  5760 I AHAL: AudioStream: GetFramesWritten: 3409: mmap signed frames 88126800
+08-31 05:12:28.581  1501  5760 I AHAL: AudioStream: GetFramesWritten: 3406: mmap position is 88129296
+08-31 05:12:28.581  1501  5760 I AHAL: AudioStream: GetFramesWritten: 3409: mmap signed frames 88129152
+08-31 05:12:28.631  1501  5760 I AHAL: AudioStream: GetFramesWritten: 3406: mmap position is 88131744
+08-31 05:12:28.631  1501  5760 I AHAL: AudioStream: GetFramesWritten: 3409: mmap signed frames 88131600
+08-31 05:12:28.682  1501  5760 I AHAL: AudioStream: GetFramesWritten: 3406: mmap position is 88134192
+08-31 05:12:28.682  1501  5760 I AHAL: AudioStream: GetFramesWritten: 3409: mmap signed frames 88134048
+08-31 05:12:28.733  1501  5760 I AHAL: AudioStream: GetFramesWritten: 3406: mmap position is 88136640
+08-31 05:12:28.733  1501  5760 I AHAL: AudioStream: GetFramesWritten: 3409: mmap signed frames 88136496
+08-31 05:12:28.783  1501  5760 I AHAL: AudioStream: GetFramesWritten: 3406: mmap position is 88139040
+08-31 05:12:28.783  1501  5760 I AHAL: AudioStream: GetFramesWritten: 3409: mmap signed frames 88138896
+08-31 05:12:28.833  1501  5760 I AHAL: AudioStream: GetFramesWritten: 3406: mmap position is 88141440
+08-31 05:12:28.833  1501  5760 I AHAL: AudioStream: GetFramesWritten: 3409: mmap signed frames 88141296
+08-31 05:12:28.883  1501  5760 I AHAL: AudioStream: GetFramesWritten: 3406: mmap position is 88143840
+08-31 05:12:28.883  1501  5760 I AHAL: AudioStream: GetFramesWritten: 3409: mmap signed frames 88143696
+08-31 05:12:28.933  1501  5760 I AHAL: AudioStream: GetFramesWritten: 3406: mmap position is 88146240
+08-31 05:12:28.933  1501  5760 I AHAL: AudioStream: GetFramesWritten: 3409: mmap signed frames 88146096
+08-31 05:12:28.551 12736 12736 E [TP0]touchpanel: irq gpio is 0
+08-31 05:12:28.556 12282 12282 I         : [INFO]: OPLUS_CHG[MMS_GAUGE]([oplus_mms_gauge_choice_fit_vol][3465]): choice cp voltage as vbat [4017, 4006]
+08-31 05:12:28.556 12282 12282 I         : [INFO]: OPLUS_CHG[MMS_GAUGE]([oplus_mms_gauge_choice_fit_vol][3465]): choice cp voltage as vbat [4017, 4006]
+08-31 05:12:28.563 31772 31772 I         : [INFO]: OPLUS_CHG[CHG_COMM]([oplus_comm_smooth_to_soc][3416]): soc[0 3 69 69 71 72] avg[0 1 0 0 0] fifo[71 71 71 71]
+08-31 05:12:28.571 26831 26831 I OPLUS_CHG[oplus_charge_info]: BATTERY[378 378 4017 4017 1268 69 72 71 6033 8698 1 0x20 0], CHARGE[4455 600 0 0], WIRED[1 447 4989 500 1 0x0 0 0 0 2 0], WIRELESS[0 0 0 0 0 0x0 0 0 0], VOOC[0 0 0 0 0x0], UFCS[0 0 0 0x0], COMMON[6 0 0 0x0 1 0 1 8698 100 0]
+08-31 05:12:28.576 26831 26831 I         : [INFO]: OPLUS_CHG[ADSP]([oplus_chg_8350_reg_dump][7390]): sm8450_st_dump: [chg_en=1, suspend=0, pd_svooc=0], subtype=0x01],[oplus_UsbCommCapable=0, oplus_pd_svooc=0, typec_mode=0, cid_status=0x01, usb_in_status=1],[0x2606=0x83, 0x2607=0x19, 0x2608=0x02, 0x2609=0x02], [0x260a=0x04, 0x260b=0x55, 0x260c=0x0a, 0x260d=0x10], [0x260e=0x0a, 0x260f=0x01, 0x2610=0x00, 0x2640=0x01], [0x2641=0x02, 0x2642=0x05, 0x2646=0x01, 0x2650=0x04], [0x2706=0x0a, 0x2707=0x0a, 0x2708=0x0a, 0x2709=0x0a], [0x270b=0xe2, 0x270c=0x48, 0x2710=0xc0, 0x280c=0x38], [0x2810=0x00, 0x2840=0x01, 0x287f=0x00, 0x2906=0x02], [0x2908=0x0f, 0x290a=0x11, 0x290b=0x01, 0x290c=0x01], [0x2910=0x11, 0x2944=0x80, 0x2950=0x02, 0x2951=0x01], [0x2952=0x0a, 0x2954=0x00, 0x2960=0xe0, 0x2b06=0x08], [0x2b07=0x00, 0x2b08=0x00, 0x2b09=0xa3, 0x2b0a=0x39], [0x2b0b=0xab, 0x2b0c=0x00, 0x29a8=0x81, 0x29a9=0x83], [0x29aa=0x00, 0x2aa2=0x00, 0x2aa8=0x87, 0x2aa9=0x00], [0x2aaa=0x00],
+08-31 05:12:28.984  1501  5760 I AHAL: AudioStream: GetFramesWritten: 3406: mmap position is 88148640
+08-31 05:12:28.984  1501  5760 I AHAL: AudioStream: GetFramesWritten: 3409: mmap signed frames 88148496
+08-31 05:12:29.035  1501  5760 I AHAL: AudioStream: GetFramesWritten: 3406: mmap position is 88151136
+08-31 05:12:29.035  1501  5760 I AHAL: AudioStream: GetFramesWritten: 3409: mmap signed frames 88150992
+08-31 05:12:29.085  1501  5760 I AHAL: AudioStream: GetFramesWritten: 3406: mmap position is 88153488
+08-31 05:12:29.085  1501  5760 I AHAL: AudioStream: GetFramesWritten: 3409: mmap signed frames 88153344
+08-31 05:12:29.133 14104 14104 W libbinder.BackendUnifiedServiceManager: Thread Pool max thread count is 0. Cannot cache binder as linkToDeath cannot be implemented. serviceName: SurfaceFlingerAIDL
+08-31 05:12:29.133 14104 14104 W libbinder.BpBinder: Linking to death on android.gui.ISurfaceComposer but there are no threads (yet?) listening to incoming transactions. See ProcessState::startThreadPool and ProcessState::setThreadPoolMaxThreadCount. Generally you should setup the binder threadpool before other initialization steps.
+08-31 05:12:29.133 14104 14104 W libbinder.ProcessState: Extra binder thread started, but 0 threads requested. Do not use *startThreadPool when zero threads are requested.
+08-31 05:12:29.135  1501  5760 I AHAL: AudioStream: GetFramesWritten: 3406: mmap position is 88155936
+08-31 05:12:29.135  1501  5760 I AHAL: AudioStream: GetFramesWritten: 3409: mmap signed frames 88155792
+08-31 05:12:29.165 14104 14105 I Gralloc4: Adding additional valid usage bits: 0x8202000
+08-31 05:12:29.166 14104 14105 I AdrenoUtils: <ReadGpuID:357>: Reading chip ID through GSL
+08-31 05:12:29.185  1501  5760 I AHAL: AudioStream: GetFramesWritten: 3406: mmap position is 88158336
+08-31 05:12:29.185  1501  5760 I AHAL: AudioStream: GetFramesWritten: 3409: mmap signed frames 88158192
+08-31 05:12:29.237  1501  5760 I AHAL: AudioStream: GetFramesWritten: 3406: mmap position is 88160784
+08-31 05:12:29.237  1501  5760 I AHAL: AudioStream: GetFramesWritten: 3409: mmap signed frames 88160640
+08-31 05:12:29.243  2447  2726 D WifiClientModeImpl[14183:wlan0]: updateLinkLayerStatsRssiSpeedFrequencyCapabilities rssi=-24 TxLinkspeed=702 freq=5220 RxLinkSpeed=866
+08-31 05:12:29.243  2447  2726 D WifiDataStall: tx tput in kbps: 581318
+08-31 05:12:29.243  2447  2726 D WifiDataStall: rx tput in kbps: 815257
+08-31 05:12:29.243  2447  2726 V WifiConfigManager: Updating scan detail cache freq=5220 BSSID=b4:86:18:de:39:ca RSSI=-23 for "Excitel_home_wifi_5"WPA_PSK
+08-31 05:12:29.243  2447  2726 D WifiDataStall:  ccaLevel = 15
+08-31 05:12:29.243  2447  2726 D WifiDataStall: L2 txTputKbps: 627823, rxTputKbps: 815257, L3 txTputKbps: 0, rxTputKbps: 0, TxTrafficHigh: false, RxTrafficHigh: false, Throughput Sufficient: true
+08-31 05:12:29.244  2447  2726 D WifiThroughputPredictor:  utilization (LLS) 15 isBluetoothConnected: false final utilization: 15
+08-31 05:12:29.244  2447  2726 D WifiThroughputPredictor:  BW: 2 RSSI: -24 Nss: 2 Mode: 5 symDur: 3600 snrDb 50 bitPerTone: 6667 rate: 866 throughput: 815
+08-31 05:12:29.244  2447  2726 D WifiThroughputPredictor:  utilization (LLS) 15 isBluetoothConnected: false final utilization: 15
+08-31 05:12:29.244  2447  2726 D WifiThroughputPredictor:  BW: 2 RSSI: -24 Nss: 2 Mode: 5 symDur: 3600 snrDb 50 bitPerTone: 6667 rate: 866 throughput: 815
+08-31 05:12:29.248  2447  2726 D WifiScoreReport: report new wifi score 106
+08-31 05:12:29.248  2447  2726 D WifiScoreCard: BSSID update SIGNAL_POLL ID: 715353381 SSID: "Excitel_home_wifi_5", BSSID: b4:86:18:de:39:ca, MAC: c6:52:65:7d:a1:b6, IP: /192.168.1.35, Security type: 2, Supplicant state: COMPLETED, Wi-Fi standard: 11ac, RSSI: -24, Link speed: 702Mbps, Tx Link speed: 702Mbps, Max Supported Tx Link speed: 866Mbps, Rx Link speed: 866Mbps, Max Supported Rx Link speed: 866Mbps, Frequency: 5220MHz, Net ID: 5, Metered hint: false, score: 106, isUsable: true, CarrierMerged: false, SubscriptionId: -1, IsPrimary: 1, Trusted: true, Restricted: false, Ephemeral: false, OEM paid: false, OEM private: false, OSU AP: false, FQDN: <none>, Provider friendly name: <none>, Requesting package name: <none>"Excitel_home_wifi_5"wpa2-pskMLO Information: , Is TID-To-Link negotiation supported by the AP: false, AP MLD Address: <none>, AP MLO Link Id: <none>, AP MLO Affiliated links: <none>, Vendor Data: <none>
+08-31 05:12:29.248  2447  2726 D WifiScoreCard: txRate: 1 txSpeed: 702
+08-31 05:12:29.248  2447  2726 D WifiScoreCard: network update SIGNAL_POLL "Excitel_home_wifi_5" ID: 1721486633 RSSI -24 txSpeed -1
+08-31 05:12:29.248  2447  2734 D ConnectivityService: NetReassign [no changes] [c 0] [a 0] [i 0]
+08-31 05:12:29.248  2447  2726 D WifiClientModeImpl[14183:wlan0]:  ClientModeImpl$L2ConnectedState screen=on 68 0 "Excitel_home_wifi_5" b4:86:18:de:39:ca rssi=-24 f=5220 sc=106 link=702 tx=0.9, 0.0, 0.0 rx=0.9 bcn=1816080 [on:0 tx:0 rx:0 period:3018] from screen [on:0 period:22082249] score=106
+08-31 05:12:29.287  1501  5760 I AHAL: AudioStream: GetFramesWritten: 3406: mmap position is 88163232
+08-31 05:12:29.287  1501  5760 I AHAL: AudioStream: GetFramesWritten: 3409: mmap signed frames 88163088
+08-31 05:12:29.337  1501  5760 I AHAL: AudioStream: GetFramesWritten: 3406: mmap position is 88165632
+08-31 05:12:29.338  1501  5760 I AHAL: AudioStream: GetFramesWritten: 3409: mmap signed frames 88165488
+08-31 05:12:29.388  1501  5760 I AHAL: AudioStream: GetFramesWritten: 3406: mmap position is 88168080
+08-31 05:12:29.388  1501  5760 I AHAL: AudioStream: GetFramesWritten: 3409: mmap signed frames 88167936
+08-31 05:12:29.437  1579  1658 W libbinder.ServiceManagerCppClient: Waited one second for vendor.qti.qhcp.IQHDC/default (is service started? Number of threads started in the threadpool: 2. Are binder threads started and available?)
+08-31 05:12:29.439  1501  5760 I AHAL: AudioStream: GetFramesWritten: 3406: mmap position is 88170528
+08-31 05:12:29.439  1501  5760 I AHAL: AudioStream: GetFramesWritten: 3409: mmap signed frames 88170384
+08-31 05:12:29.440   899 14106 W libc    : Unable to set property "ctl.interface_start" to "aidl/vendor.qti.qhcp.IQHDC/default": PROP_ERROR_HANDLE_CONTROL_MESSAGE (0x20)
+08-31 05:12:29.045   899   899 I servicemanager: Caller(pid=1579,uid=0,sid=u:r:vendor_hal_perf_default:s0) Since 'vendor.qti.qhcp.IQHDC/default' could not be found trying to start it as a lazy AIDL service. (if it's not configured to be a lazy service, it may be stuck starting or still starting).
+08-31 05:12:29.046     1     1 E init    : Control message: Could not find 'aidl/vendor.qti.qhcp.IQHDC/default' for ctl.interface_start from pid: 899 (/system/bin/servicemanager)
+08-31 05:12:29.047 14106 14106 I servicemanager: Caller(pid=1579,uid=0,sid=u:r:vendor_hal_perf_default:s0) Tried to start aidl service vendor.qti.qhcp.IQHDC/default as a lazy service, but was unable to. Usually this happens when a service is not installed, but if the service is intended to be used as a lazy service, then it may be configured incorrectly.
+08-31 05:12:29.490  1501  5760 I AHAL: AudioStream: GetFramesWritten: 3406: mmap position is 88172928
+08-31 05:12:29.490  1501  5760 I AHAL: AudioStream: GetFramesWritten: 3409: mmap signed frames 88172784
+08-31 05:12:29.540  1501  5760 I AHAL: AudioStream: GetFramesWritten: 3406: mmap position is 88175376
+08-31 05:12:29.541  1501  5760 I AHAL: AudioStream: GetFramesWritten: 3409: mmap signed frames 88175232
+08-31 05:12:29.591  1501  5760 I AHAL: AudioStream: GetFramesWritten: 3406: mmap position is 88177824
+08-31 05:12:29.591  1501  5760 I AHAL: AudioStream: GetFramesWritten: 3409: mmap signed frames 88177680
+08-31 05:12:29.642  1501  5760 I AHAL: AudioStream: GetFramesWritten: 3406: mmap position is 88180272
+08-31 05:12:29.642  1501  5760 I AHAL: AudioStream: GetFramesWritten: 3409: mmap signed frames 88180128
+08-31 05:12:29.692  1501  5760 I AHAL: AudioStream: GetFramesWritten: 3406: mmap position is 88182672
+08-31 05:12:29.692  1501  5760 I AHAL: AudioStream: GetFramesWritten: 3409: mmap signed frames 88182528
+08-31 05:12:29.743  1501  5760 I AHAL: AudioStream: GetFramesWritten: 3406: mmap position is 88185120
+08-31 05:12:29.743  1501  5760 I AHAL: AudioStream: GetFramesWritten: 3409: mmap signed frames 88184976
+08-31 05:12:29.794  1501  5760 I AHAL: AudioStream: GetFramesWritten: 3406: mmap position is 88187568
+08-31 05:12:29.794  1501  5760 I AHAL: AudioStream: GetFramesWritten: 3409: mmap signed frames 88187424
+08-31 05:12:29.844  1501  5760 I AHAL: AudioStream: GetFramesWritten: 3406: mmap position is 88189968
+08-31 05:12:29.844  1501  5760 I AHAL: AudioStream: GetFramesWritten: 3409: mmap signed frames 88189824
+08-31 05:12:29.894  1501  5760 I AHAL: AudioStream: GetFramesWritten: 3406: mmap position is 88192368
+08-31 05:12:29.895  1501  5760 I AHAL: AudioStream: GetFramesWritten: 3409: mmap signed frames 88192224
+08-31 05:12:29.945  1501  5760 I AHAL: AudioStream: GetFramesWritten: 3406: mmap position is 88194816
+08-31 05:12:29.945  1501  5760 I AHAL: AudioStream: GetFramesWritten: 3409: mmap signed frames 88194672
+08-31 05:12:29.995  1501  5760 I AHAL: AudioStream: GetFramesWritten: 3406: mmap position is 88197216
+08-31 05:12:29.995  1501  5760 I AHAL: AudioStream: GetFramesWritten: 3409: mmap signed frames 88197072
+08-31 05:12:30.045  1501  5760 I AHAL: AudioStream: GetFramesWritten: 3406: mmap position is 88199616
+08-31 05:12:30.045  1501  5760 I AHAL: AudioStream: GetFramesWritten: 3409: mmap signed frames 88199472
+08-31 05:12:30.096  1501  5760 I AHAL: AudioStream: GetFramesWritten: 3406: mmap position is 88202064
+08-31 05:12:30.096  1501  5760 I AHAL: AudioStream: GetFramesWritten: 3409: mmap signed frames 88201920
+08-31 05:12:29.738   943   943 I logd    : logdr: UID=2000 GID=2000 PID=14107 n tail=0 logMask=99 pid=0 start=0ns deadline=0ns

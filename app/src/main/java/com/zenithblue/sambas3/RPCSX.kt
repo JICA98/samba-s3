@@ -108,8 +108,13 @@ class RPCSX {
     // Native now supports _rpcsx_getPpuManifestKeyForTitle(titleId) with global fallback.
     external fun getPpuManifestKey(titleId: String): String?
     external fun getCoreBuildId(): String?
+    /** Runtime capability probes used to reject stale packaged cores. */
+    external fun hasPerfMetricsExport(): Boolean
+    external fun hasTrophyExports(): Boolean
     /** Optional structured performance snapshot from newer runtime cores. */
     external fun getPerfMetricsJson(): String?
+    /** Enables the core-side metrics snapshot producer only while the UI monitor is active. */
+    external fun setPerfMetricsEnabled(enabled: Boolean, intervalMs: Int): Boolean
     // ISO preview probe — extracts only PS3_GAME/ICON0.PNG to cache, size capped 16 MiB, no install/PPU.
     external fun extractIsoPreview(fd: Int, destinationPath: String): Int
     // Headless prelaunch runtime PPU preparation — reuses boot-discoverable PPU logic, no Surface/RSX/audio.
@@ -134,6 +139,8 @@ class RPCSX {
     external fun saveState(slot: Int): Boolean
     external fun loadSaveState(slot: Int): Boolean
     external fun getCurrentTrophies(): String
+    /** Reads the installed RPCS3 trophy set for a stopped title without booting it. */
+    external fun getTrophiesForTitle(titleId: String): String
     external fun getFriends(): String
     external fun friendAction(action: String, username: String): Boolean
     external fun beginInGameSettingsSession(): Boolean
@@ -183,6 +190,7 @@ class RPCSX {
         const val FRONTEND_EVENT_SAVESTATE_COMMITTED = 5
         const val FRONTEND_EVENT_SAVESTATE_FAILED = 6
         const val FRONTEND_EVENT_RENDERER_ERROR = 7
+        const val FRONTEND_EVENT_TROPHY_UNLOCKED = 8
 
         /**
          * JNI descriptor for [CompileProgressCallback.onEvent]. Must match
@@ -228,6 +236,13 @@ class RPCSX {
             }
 
             activeLibrary.value = path
+            runCatching {
+                android.util.Log.i(
+                    "S3CAP",
+                    "perf_export=${if (instance.hasPerfMetricsExport()) 1 else 0} " +
+                        "trophy_export=${if (instance.hasTrophyExports()) 1 else 0}"
+                )
+            }
             return true
         }
 

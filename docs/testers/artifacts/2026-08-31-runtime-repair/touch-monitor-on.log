@@ -1,0 +1,451 @@
+--------- beginning of main
+08-31 03:37:01.225  1502  3285 I vendor.qti.bluetooth@1.1-ibs_handler: ProcessIbsCmd: Received IBS_SLEEP_IND: 0xFE
+08-31 03:37:01.225  1502  3285 D vendor.qti.bluetooth@1.1-ibs_handler: SerialClockVote: vote for UART CLK OFF
+08-31 03:37:01.230  1501  5760 I AHAL: AudioStream: GetFramesWritten: 3406: mmap position is 5435856
+08-31 03:37:01.230  1501  5760 I AHAL: AudioStream: GetFramesWritten: 3409: mmap signed frames 5435712
+08-31 03:37:01.281  1501  1501 I AHAL: AudioStream: GetFramesWritten: 3406: mmap position is 5438304
+08-31 03:37:01.281  1501  1501 I AHAL: AudioStream: GetFramesWritten: 3409: mmap signed frames 5438160
+08-31 03:37:01.320 22912 22912 I S3TOUCH : root action=down x=513 y=1182
+08-31 03:37:01.320 22912 22912 I S3TOUCH : monitor action=down consumed=false
+08-31 03:37:01.320 22912 22912 I S3TOUCH : pad action=down menu=false
+08-31 03:37:01.321  3141  3141 D TaskbarManager: dispatchTouchEvent:  displayId=0 isDefaultDisplay=true
+08-31 03:37:01.322  1514  1514 I android.hardware.power-service-qti: Power setBoost: 0, duration: 0
+08-31 03:37:01.324  1514  1514 E QTI PowerHAL: Failed to acquire lock.
+08-31 03:37:01.325  1514  1514 E QTI PowerHAL: Failed process_boost for boost_handle
+08-31 03:37:01.331  1501  1501 I AHAL: AudioStream: GetFramesWritten: 3406: mmap position is 5440656
+08-31 03:37:01.331  1501  1501 I AHAL: AudioStream: GetFramesWritten: 3409: mmap signed frames 5440512
+08-31 03:37:01.375  1502  3136 E vendor.qti.bluetooth@1.1-wake_lock: Release wake lock not initialized/acquired
+08-31 03:37:01.381  1501  1501 I AHAL: AudioStream: GetFramesWritten: 3406: mmap position is 5443104
+08-31 03:37:01.381  1501  1501 I AHAL: AudioStream: GetFramesWritten: 3409: mmap signed frames 5442960
+08-31 03:37:01.432  1501  1501 I AHAL: AudioStream: GetFramesWritten: 3406: mmap position is 5445504
+08-31 03:37:01.432  1501  1501 I AHAL: AudioStream: GetFramesWritten: 3409: mmap signed frames 5445360
+--------- beginning of kernel
+08-31 03:37:01.063 31772 31772 I [LCD][0][INFO][dsi_display_status_check_error_flag:1212] [ESD]: first read: master=0 slave=0
+08-31 03:37:01.482  1501  1501 I AHAL: AudioStream: GetFramesWritten: 3406: mmap position is 5447952
+08-31 03:37:01.482  1501  1501 I AHAL: AudioStream: GetFramesWritten: 3409: mmap signed frames 5447808
+08-31 03:37:01.489  2447  2726 D WifiClientModeImpl[14183:wlan0]: updateLinkLayerStatsRssiSpeedFrequencyCapabilities rssi=-23 TxLinkspeed=866 freq=5220 RxLinkSpeed=866
+08-31 03:37:01.490  2447  2726 D WifiDataStall: tx tput in kbps: 774494
+08-31 03:37:01.490  2447  2726 D WifiDataStall: rx tput in kbps: 815257
+08-31 03:37:01.490  2447  2726 V WifiConfigManager: Updating scan detail cache freq=5220 BSSID=b4:86:18:de:39:ca RSSI=-23 for "Excitel_home_wifi_5"WPA_PSK
+08-31 03:37:01.490  2447  2726 D WifiDataStall:  ccaLevel = 15
+08-31 03:37:01.490  2447  2726 D WifiDataStall: L2 txTputKbps: 774494, rxTputKbps: 815257, L3 txTputKbps: 0, rxTputKbps: 0, TxTrafficHigh: false, RxTrafficHigh: false, Throughput Sufficient: true
+08-31 03:37:01.490  2447  2726 D WifiThroughputPredictor:  utilization (LLS) 15 isBluetoothConnected: false final utilization: 15
+08-31 03:37:01.490  2447  2726 D WifiThroughputPredictor:  BW: 2 RSSI: -23 Nss: 2 Mode: 5 symDur: 3600 snrDb 51 bitPerTone: 6667 rate: 866 throughput: 815
+08-31 03:37:01.490  2447  2726 D WifiThroughputPredictor:  utilization (LLS) 15 isBluetoothConnected: false final utilization: 15
+08-31 03:37:01.490  2447  2726 D WifiThroughputPredictor:  BW: 2 RSSI: -23 Nss: 2 Mode: 5 symDur: 3600 snrDb 51 bitPerTone: 6667 rate: 866 throughput: 815
+08-31 03:37:01.492  2447  2726 D WifiScoreCard: BSSID update SIGNAL_POLL ID: 715353381 SSID: "Excitel_home_wifi_5", BSSID: b4:86:18:de:39:ca, MAC: c6:52:65:7d:a1:b6, IP: /192.168.1.35, Security type: 2, Supplicant state: COMPLETED, Wi-Fi standard: 11ac, RSSI: -23, Link speed: 866Mbps, Tx Link speed: 866Mbps, Max Supported Tx Link speed: 866Mbps, Rx Link speed: 866Mbps, Max Supported Rx Link speed: 866Mbps, Frequency: 5220MHz, Net ID: 5, Metered hint: false, score: 107, isUsable: true, CarrierMerged: false, SubscriptionId: -1, IsPrimary: 1, Trusted: true, Restricted: false, Ephemeral: false, OEM paid: false, OEM private: false, OSU AP: false, FQDN: <none>, Provider friendly name: <none>, Requesting package name: <none>"Excitel_home_wifi_5"wpa2-pskMLO Information: , Is TID-To-Link negotiation supported by the AP: false, AP MLD Address: <none>, AP MLO Link Id: <none>, AP MLO Affiliated links: <none>, Vendor Data: <none>
+08-31 03:37:01.492  2447  2726 D WifiScoreCard: txRate: 1 txSpeed: 866
+08-31 03:37:01.492  2447  2726 D WifiScoreCard: network update SIGNAL_POLL "Excitel_home_wifi_5" ID: 1721486633 RSSI -23 txSpeed -1
+08-31 03:37:01.492  2447  2726 D WifiClientModeImpl[14183:wlan0]:  ClientModeImpl$L2ConnectedState screen=on 68 0 "Excitel_home_wifi_5" b4:86:18:de:39:ca rssi=-23 f=5220 sc=107 link=866 tx=0.8, 0.0, 0.0 rx=0.8 bcn=1765569 [on:0 tx:1 rx:0 period:3016] from screen [on:0 period:16354493] score=107
+08-31 03:37:01.095 16994 16994 E [TP0]touchpanel: irq gpio is 0
+08-31 03:37:01.533  1501  1501 I AHAL: AudioStream: GetFramesWritten: 3406: mmap position is 5450352
+08-31 03:37:01.533  1501  1501 I AHAL: AudioStream: GetFramesWritten: 3409: mmap signed frames 5450208
+08-31 03:37:01.583  1501  1501 I AHAL: AudioStream: GetFramesWritten: 3406: mmap position is 5452800
+08-31 03:37:01.583  1501  1501 I AHAL: AudioStream: GetFramesWritten: 3409: mmap signed frames 5452656
+08-31 03:37:01.585  3141  3141 D TaskbarManager: dispatchTouchEvent:  displayId=0 isDefaultDisplay=true
+08-31 03:37:01.585 22912 22912 I S3TOUCH : root action=down x=2420 y=1260
+08-31 03:37:01.585 22912 22912 I S3TOUCH : monitor action=down consumed=false
+08-31 03:37:01.585 22912 22912 I S3TOUCH : pad action=down menu=false
+08-31 03:37:01.585  1514  1514 I android.hardware.power-service-qti: Power setBoost: 0, duration: 0
+08-31 03:37:01.586  1514  1514 E QTI PowerHAL: Failed to acquire lock.
+08-31 03:37:01.586  1514  1514 E QTI PowerHAL: Failed process_boost for boost_handle
+08-31 03:37:01.634  1501  1501 I AHAL: AudioStream: GetFramesWritten: 3406: mmap position is 5455248
+08-31 03:37:01.634  1501  1501 I AHAL: AudioStream: GetFramesWritten: 3409: mmap signed frames 5455104
+08-31 03:37:01.685  1501  1501 I AHAL: AudioStream: GetFramesWritten: 3406: mmap position is 5457648
+08-31 03:37:01.685  1501  1501 I AHAL: AudioStream: GetFramesWritten: 3409: mmap signed frames 5457504
+08-31 03:37:01.735  1501  1501 I AHAL: AudioStream: GetFramesWritten: 3406: mmap position is 5460096
+08-31 03:37:01.735  1501  1501 I AHAL: AudioStream: GetFramesWritten: 3409: mmap signed frames 5459952
+08-31 03:37:01.786  1501  1501 I AHAL: AudioStream: GetFramesWritten: 3406: mmap position is 5462496
+08-31 03:37:01.786  1501  1501 I AHAL: AudioStream: GetFramesWritten: 3409: mmap signed frames 5462352
+08-31 03:37:01.836  1501  1501 I AHAL: AudioStream: GetFramesWritten: 3406: mmap position is 5464944
+08-31 03:37:01.836  1501  1501 I AHAL: AudioStream: GetFramesWritten: 3409: mmap signed frames 5464800
+08-31 03:37:01.837  1579  1658 W libbinder.ServiceManagerCppClient: Waited one second for vendor.qti.qhcp.IQHDC/default (is service started? Number of threads started in the threadpool: 2. Are binder threads started and available?)
+08-31 03:37:01.839   899 25779 W libc    : Unable to set property "ctl.interface_start" to "aidl/vendor.qti.qhcp.IQHDC/default": PROP_ERROR_HANDLE_CONTROL_MESSAGE (0x20)
+08-31 03:37:01.444   899   899 I servicemanager: Caller(pid=1579,uid=0,sid=u:r:vendor_hal_perf_default:s0) Since 'vendor.qti.qhcp.IQHDC/default' could not be found trying to start it as a lazy AIDL service. (if it's not configured to be a lazy service, it may be stuck starting or still starting).
+08-31 03:37:01.445     1     1 E init    : Control message: Could not find 'aidl/vendor.qti.qhcp.IQHDC/default' for ctl.interface_start from pid: 899 (/system/bin/servicemanager)
+08-31 03:37:01.446 25779 25779 I servicemanager: Caller(pid=1579,uid=0,sid=u:r:vendor_hal_perf_default:s0) Tried to start aidl service vendor.qti.qhcp.IQHDC/default as a lazy service, but was unable to. Usually this happens when a service is not installed, but if the service is intended to be used as a lazy service, then it may be configured incorrectly.
+08-31 03:37:01.851  3141  3141 D TaskbarManager: dispatchTouchEvent:  displayId=0 isDefaultDisplay=true
+08-31 03:37:01.851 22912 22912 I S3TOUCH : root action=down x=326 y=448
+08-31 03:37:01.852 22912 22912 I S3TOUCH : monitor action=down consumed=false
+08-31 03:37:01.852 22912 22912 I S3TOUCH : pad action=down menu=false
+08-31 03:37:01.852  1514  1514 I android.hardware.power-service-qti: Power setBoost: 0, duration: 0
+08-31 03:37:01.854  1514  1514 E QTI PowerHAL: Failed to acquire lock.
+08-31 03:37:01.854  1514  1514 E QTI PowerHAL: Failed process_boost for boost_handle
+08-31 03:37:01.887  1501  1501 I AHAL: AudioStream: GetFramesWritten: 3406: mmap position is 5467392
+08-31 03:37:01.887  1501  1501 I AHAL: AudioStream: GetFramesWritten: 3409: mmap signed frames 5467248
+08-31 03:37:01.938  1501  1501 I AHAL: AudioStream: GetFramesWritten: 3406: mmap position is 5469792
+08-31 03:37:01.938  1501  1501 I AHAL: AudioStream: GetFramesWritten: 3409: mmap signed frames 5469648
+08-31 03:37:01.988  1501  1501 I AHAL: AudioStream: GetFramesWritten: 3406: mmap position is 5472192
+08-31 03:37:01.988  1501  1501 I AHAL: AudioStream: GetFramesWritten: 3409: mmap signed frames 5472048
+08-31 03:37:02.038  1501  1501 I AHAL: AudioStream: GetFramesWritten: 3406: mmap position is 5474640
+08-31 03:37:02.039  1501  1501 I AHAL: AudioStream: GetFramesWritten: 3409: mmap signed frames 5474496
+08-31 03:37:02.052  1518  1567 I android.hardware.thermal-service.qti: sensor: skin-msm-therm temperature: 50.074 old: 2 new: 3
+--------- beginning of system
+08-31 03:37:02.054  2447  2519 D BrightnessThermalClamper: New thermal throttling status = 3
+08-31 03:37:02.055  3141  3141 I ActivityThread: Schedule relaunch activity: com.android.launcher3.uioverrides.QuickstepLauncher
+08-31 03:37:02.055  3141  3141 D BaseDepthController: mSurface is null and mCurrentBlur is: 79
+08-31 03:37:02.058  3141  3141 D RecentsView: destroy
+08-31 03:37:02.058  3141  3141 D RecentsDependencies: destroyed 147050564
+08-31 03:37:02.058  3141  3141 D RecentsDependencies: also destroyed default scope
+08-31 03:37:02.058  3141  3141 D TaskbarManager: onActivityDestroyed: displayId=0 isDefaultDisplay=true
+08-31 03:37:02.058  3141  3141 D TaskbarManager: onActivityDestroyed: unregistering callbacks displayId=0 isDefaultDisplay=true
+08-31 03:37:02.058  3141  3141 D TaskbarManager: onActivityDestroyed: setting taskbarUIController displayId=0 isDefaultDisplay=true
+08-31 03:37:02.059  3141  3141 D WindowOnBackDispatcher: setTopOnBackInvokedCallback (unwrapped): null
+08-31 03:37:02.059  2447  3249 D CoreBackPreview: Window{7069a03 u0 com.android.launcher3/com.android.launcher3.uioverrides.QuickstepLauncher}: Setting back callback null
+08-31 03:37:02.059  3141  3141 D RecentsView: reset - mEnableDrawingLiveTile: false, mRecentsAnimationController: null
+08-31 03:37:02.060  3141  3141 D RecentsView: cleanupRemoteTargets - mRemoteTargetHandles: null
+08-31 03:37:02.073  3141  3141 D ViewRootImpl: Skipping stats log for color mode
+08-31 03:37:02.078  3141  3141 D RecentsDependencies: initializing
+08-31 03:37:02.078  3141  3141 D RecentsDependencies: startDefaultScope
+08-31 03:37:02.078  3141  3141 D RecentsDependencies: createRecentsViewScope 63365751
+08-31 03:37:02.084  3141  3141 E RecyclerView: Cannot scroll to position a LayoutManager set. Call setLayoutManager with a non-null argument.
+08-31 03:37:02.084  3141  3141 D ActivityAllAppsContainerView: rebindAdapters: force: true
+08-31 03:37:02.084  3141  3141 D ActivityAllAppsContainerView: replaceAppsRVContainer: showTabs: false
+08-31 03:37:02.085  3141  3141 D AlphabeticalAppsList: Clearing FastScrollerSections.
+08-31 03:37:02.085  3141  3141 D AlphabeticalAppsList: Adding apps with sections. HasPrivateApps: true
+08-31 03:37:02.085  3141  3141 E RecyclerView: Cannot scroll to position a LayoutManager set. Call setLayoutManager with a non-null argument.
+08-31 03:37:02.086  3141  3141 D OverviewActionsView: updateActionButtonsVisibility() called: showSingleTaskActions = [true], showGroupActions = [false]
+08-31 03:37:02.088  3141  3141 D LauncherStateManager: StateManager.goToState: fromState: Normal, toState: AllApps, partial trace:
+08-31 03:37:02.088  3141  3141 D LauncherStateManager: 	at com.android.launcher3.Launcher.restoreState(Launcher.java:1258)
+08-31 03:37:02.088  3141  3141 D LauncherStateManager: 	at com.android.launcher3.Launcher.onCreate(Launcher.java:497)
+08-31 03:37:02.088  3141  3141 D LauncherStateManager: 	at com.android.launcher3.uioverrides.QuickstepLauncher.onCreate(QuickstepLauncher.java:831)
+08-31 03:37:02.088  3141  3141 D LauncherStateManager: StateManager.cancelAnimation: animation ongoing: false, partial trace:
+08-31 03:37:02.088  3141  3141 D LauncherStateManager: 	at com.android.launcher3.statemanager.StateManager.goToState(StateManager.java:286)
+08-31 03:37:02.088  3141  3141 D LauncherStateManager: 	at com.android.launcher3.statemanager.StateManager.goToState(StateManager.java:181)
+08-31 03:37:02.088  3141  3141 D LauncherStateManager: 	at com.android.launcher3.Launcher.restoreState(Launcher.java:1258)
+08-31 03:37:02.088  3141  3141 D BaseActivity: Launcher flags updated: [state_transition_active] +[state_transition_active]
+08-31 03:37:02.089  3141  3141 D StatsLog: LAUNCHER_ALLAPPS_ENTRY_WITH_DEVICE_SEARCH
+08-31 03:37:02.089  3141  3141 D LauncherStateManager: StateManager.onStateTransitionStart: state: AllApps
+08-31 03:37:02.089  1501  1501 I AHAL: AudioStream: GetFramesWritten: 3406: mmap position is 5477040
+08-31 03:37:02.089  1501  1501 I AHAL: AudioStream: GetFramesWritten: 3409: mmap signed frames 5476896
+08-31 03:37:02.090  3141  3141 D AllAppsTransitionController: shouldProtectHeader: true skipScrim: false state: AllApps stateManager.getState(): AllApps
+08-31 03:37:02.090  3141  3141 D BaseDepthController: mSurface is null and mCurrentBlur is: 0
+08-31 03:37:02.090  3141  3141 D BaseActivity: Launcher flags updated: [] -[state_transition_active]
+08-31 03:37:02.090  3141  3141 D LauncherStateManager: StateManager.onStateTransitionEnd: state: AllApps
+08-31 03:37:02.090  3141  3141 D RecentsView: reset - mEnableDrawingLiveTile: false, mRecentsAnimationController: null
+08-31 03:37:02.090  3141  3141 D RecentsView: cleanupRemoteTargets - mRemoteTargetHandles: null
+08-31 03:37:02.090  3141  3141 D AllAppsTransitionController: shouldProtectHeader: true skipScrim: false state: AllApps stateManager.getState(): AllApps
+08-31 03:37:02.091  3141  3141 D ModelCallbacks: startBinding: hotseat layout was vertical: false and is setting to false
+08-31 03:37:02.093  3141  3141 I LauncherAppWidgetHostView: App widget created with id: 2
+08-31 03:37:02.093  3141  3141 I LauncherAppWidgetHostView: App widget with id: 2 loaded
+08-31 03:37:02.093  3141  3141 I LauncherAppWidgetHostView: App widget created with id: 3
+08-31 03:37:02.093  3141  3141 I LauncherAppWidgetHostView: App widget with id: 3 loaded
+08-31 03:37:02.093  3141  3141 D Launcher.Workspace: addInScreenFromBind: hotseat inflation with x = 0 and y = 0
+08-31 03:37:02.093  3141  3141 D CellLayout: Adding view to ShortcutsAndWidgetsContainer: com.android.launcher3.views.DoubleShadowBubbleTextView{e6ef615 VFED..C.. ......ID 0,0-0,0 #1}
+08-31 03:37:02.094  3141  3141 D Launcher.Workspace: addInScreenFromBind: hotseat inflation with x = 1 and y = 0
+08-31 03:37:02.094  3141  3141 D CellLayout: Adding view to ShortcutsAndWidgetsContainer: com.android.launcher3.views.DoubleShadowBubbleTextView{d775d2a VFED..C.. ......ID 0,0-0,0 #2}
+08-31 03:37:02.094  3141  3141 D Launcher.Workspace: addInScreenFromBind: hotseat inflation with x = 2 and y = 0
+08-31 03:37:02.094  3141  3141 D CellLayout: Adding view to ShortcutsAndWidgetsContainer: com.android.launcher3.views.DoubleShadowBubbleTextView{2b1a71b VFED..C.. ......ID 0,0-0,0 #3}
+08-31 03:37:02.094  3141  3141 D Launcher.Workspace: addInScreenFromBind: hotseat inflation with x = 3 and y = 0
+08-31 03:37:02.094  3141  3141 D CellLayout: Adding view to ShortcutsAndWidgetsContainer: com.android.launcher3.views.DoubleShadowBubbleTextView{255de91 VFED..C.. ......ID 0,0-0,0 #4}
+08-31 03:37:02.094  3141  3141 D Launcher.Workspace: addInScreenFromBind: hotseat inflation with x = 5 and y = 0
+08-31 03:37:02.094  3141  3141 D CellLayout: Adding view to ShortcutsAndWidgetsContainer: com.android.launcher3.views.DoubleShadowBubbleTextView{d8621f6 VFED..C.. ......ID 0,0-0,0 #5}
+08-31 03:37:02.094  3141  3141 D CellLayout: Adding view to ShortcutsAndWidgetsContainer: com.android.launcher3.widget.LauncherAppWidgetHostView{9fa0064 VFE...... R.....I. 0,0-0,0 #6}
+08-31 03:37:02.094  3141  3141 D CellLayout: Adding view to ShortcutsAndWidgetsContainer: com.android.launcher3.widget.LauncherAppWidgetHostView{ce8d2cd VFE...... R.....I. 0,0-0,0 #7}
+08-31 03:37:02.095  3141  3141 D ModelCallbacks: Starting async inflation
+08-31 03:37:02.095  3141  3141 D AllAppsStore: setApps: apps.length=40
+08-31 03:37:02.095  3141  3141 D AllAppsStore: notifyUpdate: notifying listeners
+08-31 03:37:02.095  3141  3141 D ActivityAllAppsContainerView: onAppsUpdated; number of apps: 40
+08-31 03:37:02.095  3141  3141 D ActivityAllAppsContainerView: rebindAdapters: force: false
+08-31 03:37:02.095  3141  3141 D ActivityAllAppsContainerView: rebindAdapters: Not needed.
+08-31 03:37:02.095  3141  3141 D StatsLog: LAUNCHER_ALLAPPS_COUNT
+08-31 03:37:02.095  3141  3141 D AlphabeticalAppsList: Clearing FastScrollerSections.
+08-31 03:37:02.095  3141  3141 D AlphabeticalAppsList: Adding apps with sections. HasPrivateApps: false
+08-31 03:37:02.095  3141  3141 D AlphabeticalAppsList: addAppsWithSections: adding sectionName: … with appInfoTitle: 1 2 3 4 Player Games
+08-31 03:37:02.095  3141  3141 D AlphabeticalAppsList: addAppsWithSections: adding sectionName: A with appInfoTitle: Adirstat
+08-31 03:37:02.095  3141  3141 D AlphabeticalAppsList: addAppsWithSections: adding sectionName: B with appInfoTitle: BachataS4
+08-31 03:37:02.095  3141  3141 D AlphabeticalAppsList: addAppsWithSections: adding sectionName: C with appInfoTitle: Calculator
+08-31 03:37:02.095  3141  3141 D AlphabeticalAppsList: addAppsWithSections: adding sectionName: D with appInfoTitle: DeviceInsights
+08-31 03:37:02.095  3141  3141 D AlphabeticalAppsList: addAppsWithSections: adding sectionName: F with appInfoTitle: FactualStats
+08-31 03:37:02.095  3141  3141 D AlphabeticalAppsList: addAppsWithSections: adding sectionName: G with appInfoTitle: Gallery
+08-31 03:37:02.095  3141  3141 D AlphabeticalAppsList: addAppsWithSections: adding sectionName: M with appInfoTitle: Meet
+08-31 03:37:02.095  3141  3141 D AlphabeticalAppsList: addAppsWithSections: adding sectionName: N with appInfoTitle: Nimble Cleaner
+08-31 03:37:02.095  3141  3141 D AlphabeticalAppsList: addAppsWithSections: adding sectionName: P with appInfoTitle: Play Store
+08-31 03:37:02.095  3141  3141 D AlphabeticalAppsList: addAppsWithSections: adding sectionName: R with appInfoTitle: Recorder
+08-31 03:37:02.095  3141  3141 D AlphabeticalAppsList: addAppsWithSections: adding sectionName: S with appInfoTitle: Sahur Sort
+08-31 03:37:02.095  3141  3141 D AlphabeticalAppsList: addAppsWithSections: adding sectionName: T with appInfoTitle: Telegram
+08-31 03:37:02.095  3141  3141 D AlphabeticalAppsList: addAppsWithSections: adding sectionName: V with appInfoTitle: VLC
+08-31 03:37:02.095  3141  3141 D AlphabeticalAppsList: addAppsWithSections: adding sectionName: Z with appInfoTitle: ZArchiver
+08-31 03:37:02.095  3141  3141 D AlphabeticalAppsList: Adding FastScrollSection duplicate to scroll to the bottom.
+08-31 03:37:02.095  3141  3141 D AlphabeticalAppsList: Clearing FastScrollerSections.
+08-31 03:37:02.095  3141  3141 D AlphabeticalAppsList: Adding apps with sections. HasPrivateApps: false
+08-31 03:37:02.095  3141  3141 D AlphabeticalAppsList: addAppsWithSections: adding sectionName: … with appInfoTitle: 1 2 3 4 Player Games
+08-31 03:37:02.095  3141  3141 D AlphabeticalAppsList: addAppsWithSections: adding sectionName: A with appInfoTitle: Adirstat
+08-31 03:37:02.095  3141  3141 D AlphabeticalAppsList: addAppsWithSections: adding sectionName: B with appInfoTitle: BachataS4
+08-31 03:37:02.095  3141  3141 D AlphabeticalAppsList: addAppsWithSections: adding sectionName: C with appInfoTitle: Calculator
+08-31 03:37:02.095  3141  3141 D AlphabeticalAppsList: addAppsWithSections: adding sectionName: D with appInfoTitle: DeviceInsights
+08-31 03:37:02.095  3141  3141 D AlphabeticalAppsList: addAppsWithSections: adding sectionName: F with appInfoTitle: FactualStats
+08-31 03:37:02.095  3141  3141 D AlphabeticalAppsList: addAppsWithSections: adding sectionName: G with appInfoTitle: Gallery
+08-31 03:37:02.095  3141  3141 D AlphabeticalAppsList: addAppsWithSections: adding sectionName: M with appInfoTitle: Meet
+08-31 03:37:02.095  3141  3141 D AlphabeticalAppsList: addAppsWithSections: adding sectionName: N with appInfoTitle: Nimble Cleaner
+08-31 03:37:02.095  3141  3141 D AlphabeticalAppsList: addAppsWithSections: adding sectionName: P with appInfoTitle: Play Store
+08-31 03:37:02.095  3141  3141 D AlphabeticalAppsList: addAppsWithSections: adding sectionName: R with appInfoTitle: Recorder
+08-31 03:37:02.095  3141  3141 D AlphabeticalAppsList: addAppsWithSections: adding sectionName: S with appInfoTitle: Sahur Sort
+08-31 03:37:02.095  3141  3141 D AlphabeticalAppsList: addAppsWithSections: adding sectionName: T with appInfoTitle: Telegram
+08-31 03:37:02.095  3141  3141 D AlphabeticalAppsList: addAppsWithSections: adding sectionName: V with appInfoTitle: VLC
+08-31 03:37:02.095  3141  3141 D AlphabeticalAppsList: addAppsWithSections: adding sectionName: Z with appInfoTitle: ZArchiver
+08-31 03:37:02.095  3141  3141 D AlphabeticalAppsList: Adding FastScrollSection duplicate to scroll to the bottom.
+08-31 03:37:02.096  3141  3141 D AlphabeticIndexCompat: computeSectionName: cs: Settings sectionName: S
+08-31 03:37:02.096  3141  3141 D AlphabeticIndexCompat: computeSectionName: cs: Contacts sectionName: C
+08-31 03:37:02.096  3141  3141 D AlphabeticIndexCompat: computeSectionName: cs: Block Blast! sectionName: B
+08-31 03:37:02.097  3141  3141 D AlphabeticIndexCompat: computeSectionName: cs: Music sectionName: M
+08-31 03:37:02.097  3141  3141 D AlphabeticIndexCompat: computeSectionName: cs: VLC sectionName: V
+08-31 03:37:02.097  3141  3141 D AlphabeticIndexCompat: computeSectionName: cs: Clock sectionName: C
+08-31 03:37:02.097  3141  3141 D AlphabeticIndexCompat: computeSectionName: cs: Firefox Nightly sectionName: F
+08-31 03:37:02.097  3141  3141 D AlphabeticIndexCompat: computeSectionName: cs: Google Play Store sectionName: G
+08-31 03:37:02.097  3141  3141 D AlphabeticIndexCompat: computeSectionName: cs: Calendar sectionName: C
+08-31 03:37:02.097  3141  3141 D AlphabeticIndexCompat: computeSectionName: cs: DuckDuckGo sectionName: D
+08-31 03:37:02.097  3141  3141 D AlphabeticIndexCompat: computeSectionName: cs: Telegram sectionName: T
+08-31 03:37:02.097  3141  3141 D AlphabeticIndexCompat: computeSectionName: cs: DeviceInsights sectionName: D
+08-31 03:37:02.098  3141  3141 D AlphabeticIndexCompat: computeSectionName: cs: Google sectionName: G
+08-31 03:37:02.098  3141  3141 D AlphabeticIndexCompat: computeSectionName: cs: Digital Wellbeing sectionName: D
+08-31 03:37:02.098  3141  3141 D AlphabeticIndexCompat: computeSectionName: cs: Conversations sectionName: C
+08-31 03:37:02.098  3141  3141 D OverviewActionsView: updateActionButtonsVisibility() called: showSingleTaskActions = [true], showGroupActions = [false]
+08-31 03:37:02.098 22912 22912 I S3TOUCH : root action=down x=1240 y=1825
+08-31 03:37:02.098 22912 22912 I S3TOUCH : monitor action=down consumed=false
+08-31 03:37:02.098 22912 22912 I S3TOUCH : pad action=down menu=false
+08-31 03:37:02.099  1514  1514 I android.hardware.power-service-qti: Power setBoost: 0, duration: 0
+08-31 03:37:02.099  3141  3141 D b/380940677: [mStateHandlerRequest=0, mCurrentStateRequest=0, mLastActivityFlags=-1, mIgnoreAutoRotateSettings=true, mHomeRotationEnabled=false, mForceAllowRotationForTesting=false, mDestroyed=false, mIsFixedLandscape=false]
+08-31 03:37:02.100  3141  3141 D BaseActivity: Launcher flags updated: [state_started] +[state_started]
+08-31 03:37:02.100  3141  3141 D BaseActivity: Launcher flags updated: [state_started|state_resumed|state_user_active] +[state_resumed|state_user_active]
+08-31 03:37:02.100  2447  2781 D BackgroundInstallControlService: Package event received: 0
+08-31 03:37:02.100  2447  2781 D BackgroundInstallControlService: Package event received: 0
+08-31 03:37:02.102  3141  3141 D BaseActivity: Launcher flags updated: [state_started|state_user_active] -[state_resumed]
+08-31 03:37:02.102  3141  3141 W SplitSelectStateCtor: Missing session instanceIds
+08-31 03:37:02.102  3141  3141 D StatsLog: LAUNCHER_SPLIT_SELECTION_EXIT_INTERRUPTED
+08-31 03:37:02.103  3141  3141 D BaseActivity: Launcher flags updated: [] -[state_started|state_user_active]
+08-31 03:37:02.103  3141  3141 D ActivityContext: hideKeyboard
+08-31 03:37:02.103  3141  3141 D ActivityContext: isImeShown: false
+08-31 03:37:02.103  3141  3141 D TaskbarManager: dispatchTouchEvent:  displayId=0 isDefaultDisplay=true
+08-31 03:37:02.104  3141  3141 D WindowOnBackDispatcher: setTopOnBackInvokedCallback (unwrapped): android.app.Activity$$ExternalSyntheticLambda0@9ffcd25
+08-31 03:37:02.104  3141  3141 D WindowOnBackDispatcher: setTopOnBackInvokedCallback (unwrapped): com.android.launcher3.uioverrides.QuickstepLauncher$3@209cefa
+08-31 03:37:02.104  3141  3141 D BaseDepthController: mSurface is null and mCurrentBlur is: 0
+08-31 03:37:02.104  3141  3141 D VRI[QuickstepLauncher]: WindowInsets changed: 3000x2120 mandatorySystemGestures:[0,100,0,84] 
+08-31 03:37:02.104 27299 27299 I cfqb    : (REDACTED) Dismissing old window %s
+08-31 03:37:02.104  2447  3249 D CoreBackPreview: Window{ded57cd u0 com.android.launcher3/com.android.launcher3.uioverrides.QuickstepLauncher}: Setting back callback OnBackInvokedCallbackInfo{mCallback=android.window.IOnBackInvokedCallback$Stub$Proxy@ac06b93, mPriority=-1, mIsAnimationCallback=false, mOverrideBehavior=0}
+08-31 03:37:02.104 27299 27299 I cfqb    : Disabling window touch for binder managed window
+08-31 03:37:02.105  3141  3141 D OverviewActionsView: updateActionButtonsVisibility() called: showSingleTaskActions = [true], showGroupActions = [false]
+08-31 03:37:02.105  2447  3249 D CoreBackPreview: Window{ded57cd u0 com.android.launcher3/com.android.launcher3.uioverrides.QuickstepLauncher}: Setting back callback OnBackInvokedCallbackInfo{mCallback=android.window.IOnBackInvokedCallback$Stub$Proxy@b66c7d0, mPriority=0, mIsAnimationCallback=true, mOverrideBehavior=0}
+08-31 03:37:02.105  3141  3141 D LauncherStateManager: StateManager.cancelAnimation: animation ongoing: false, partial trace:
+08-31 03:37:02.105  3141  3141 D LauncherStateManager: 	at com.android.launcher3.statemanager.StateManager.reapplyState(StateManager.java:224)
+08-31 03:37:02.105  3141  3141 D LauncherStateManager: 	at com.android.launcher3.LauncherRootView.handleSystemWindowInsets(LauncherRootView.java:51)
+08-31 03:37:02.105  3141  3141 D LauncherStateManager: 	at com.android.launcher3.LauncherRootView.updateInsets(LauncherRootView.java:65)
+08-31 03:37:02.105  3141  3141 D AllAppsTransitionController: shouldProtectHeader: true skipScrim: false state: AllApps stateManager.getState(): AllApps
+08-31 03:37:02.107  3141  3141 E ActivityThread: Activity com.android.launcher3.uioverrides.QuickstepLauncher has leaked IntentReceiver com.android.launcher3.util.SimpleBroadcastReceiver@fa367a3 that was originally registered here. Are you missing a call to unregisterReceiver()?
+08-31 03:37:02.107  3141  3141 E ActivityThread: android.app.IntentReceiverLeaked: Activity com.android.launcher3.uioverrides.QuickstepLauncher has leaked IntentReceiver com.android.launcher3.util.SimpleBroadcastReceiver@fa367a3 that was originally registered here. Are you missing a call to unregisterReceiver()?
+08-31 03:37:02.107  3141  3141 E ActivityThread: 	at android.app.LoadedApk$ReceiverDispatcher.<init>(LoadedApk.java:1971)
+08-31 03:37:02.107  3141  3141 E ActivityThread: 	at android.app.LoadedApk.getReceiverDispatcher(LoadedApk.java:1711)
+08-31 03:37:02.107  3141  3141 E ActivityThread: 	at android.app.ContextImpl.registerReceiverInternal(ContextImpl.java:1972)
+08-31 03:37:02.107  3141  3141 E ActivityThread: 	at android.app.ContextImpl.registerReceiver(ContextImpl.java:1931)
+08-31 03:37:02.107  3141  3141 E ActivityThread: 	at android.content.ContextWrapper.registerReceiver(ContextWrapper.java:812)
+08-31 03:37:02.107  3141  3141 E ActivityThread: 	at android.content.ContextWrapper.registerReceiver(ContextWrapper.java:812)
+08-31 03:37:02.107  3141  3141 E ActivityThread: 	at com.android.launcher3.util.SimpleBroadcastReceiver$register$1$1.run(SimpleBroadcastReceiver.kt:59)
+08-31 03:37:02.107  3141  3141 E ActivityThread: 	at android.os.Handler.handleCallback(Handler.java:1070)
+08-31 03:37:02.107  3141  3141 E ActivityThread: 	at android.os.Handler.dispatchMessage(Handler.java:125)
+08-31 03:37:02.107  3141  3141 E ActivityThread: 	at android.os.Looper.dispatchMessage(Looper.java:333)
+08-31 03:37:02.107  3141  3141 E ActivityThread: 	at android.os.Looper.loopOnce(Looper.java:263)
+08-31 03:37:02.107  3141  3141 E ActivityThread: 	at android.os.Looper.loop(Looper.java:367)
+08-31 03:37:02.107  3141  3141 E ActivityThread: 	at android.os.HandlerThread.run(HandlerThread.java:139)
+08-31 03:37:02.107  3141  3141 D TISBindHelper: TIS service connected
+08-31 03:37:02.107  3141  3141 D TaskbarManager: setActivity: mActivity=null displayId=0 isDefaultDisplay=true
+08-31 03:37:02.107  3141  3141 D TaskbarManager: setActivity: registering activity lifecycle callbacks. displayId=0 isDefaultDisplay=true
+08-31 03:37:02.107  3141  3141 D TaskbarManager: getUnfoldTransitionProgressProviderForActivity displayId=0 isDefaultDisplay=true
+08-31 03:37:02.107  3141  3141 D TaskbarManager: setRecentsViewContainer displayId=0 isDefaultDisplay=true
+08-31 03:37:02.107  3141  3141 D TaskbarManager: createTaskbarUIControllerForRecentsViewContainer displayId=0 isDefaultDisplay=true
+08-31 03:37:02.107  3141  3165 I PluginActionManager[com.android.systemui.action.PLUGIN_LAUNCHER_OVERLAY]: Found 0 plugins
+08-31 03:37:02.108  3141  3165 I PluginActionManager[com.android.systemui.action.PLUGIN_ALL_APPS_ACTIONS]: Found 0 plugins
+08-31 03:37:02.108  3141  3141 D ActivityAllAppsContainerView: rebindAdapters: force: false
+08-31 03:37:02.108  3141  3141 D ActivityAllAppsContainerView: rebindAdapters: Not needed.
+08-31 03:37:02.108  3141  3141 D ActivityContext: hideKeyboard
+08-31 03:37:02.108  3141  3141 D ActivityContext: isImeShown: false
+08-31 03:37:02.109 27299 27299 I cfqb    : (REDACTED) Created new binder managed window %s
+08-31 03:37:02.109 27299 27299 I cfqb    : (REDACTED) WindowRefsActive: %d, TouchableWindowRefsActive: %b
+08-31 03:37:02.109 27299 27299 I cfqk    : (REDACTED) MinusoneConfigDbg windowAttached config=%s
+08-31 03:37:02.109 27299 27299 I cfqk    : (REDACTED) windowAttached start logFlowId=%s, configuration=%s, acetoneState=%s, overlayWindow=%s, fragmentHost=%s, binderManagedWindow=%s, params=%s
+08-31 03:37:02.109  3141  3141 D ModelCallbacks: Calling onCompleteSignal
+08-31 03:37:02.109  3141  3141 D ViewOnDrawExecutor: markCompleted: executing tasks
+08-31 03:37:02.109  3141  3141 D CellLayout: Adding view to ShortcutsAndWidgetsContainer: com.android.launcher3.views.DoubleShadowBubbleTextView{81753f VFED..C.. ......ID 0,0-0,0 #8}
+08-31 03:37:02.109  2447 11593 I ActivityTaskManager: Activity reported stop, but no longer stopping: ActivityRecord{105608543 u0 com.android.launcher3/.uioverrides.QuickstepLauncher t6} STOPPED
+08-31 03:37:02.109  3141  3141 D CellLayout: Adding view to ShortcutsAndWidgetsContainer: com.android.launcher3.views.DoubleShadowBubbleTextView{6924e0c VFED..C.. ......ID 0,0-0,0 #9}
+08-31 03:37:02.109  3141  3141 D CellLayout: Adding view to ShortcutsAndWidgetsContainer: com.android.launcher3.views.DoubleShadowBubbleTextView{95b1355 VFED..C.. ......ID 0,0-0,0 #a}
+08-31 03:37:02.109  3141  3141 D CellLayout: Adding view to ShortcutsAndWidgetsContainer: com.android.launcher3.views.DoubleShadowBubbleTextView{469516a VFED..C.. ......ID 0,0-0,0 #d}
+08-31 03:37:02.109  3141  3141 D CellLayout: Adding view to ShortcutsAndWidgetsContainer: com.android.launcher3.views.DoubleShadowBubbleTextView{9a2265b VFED..C.. ......ID 0,0-0,0 #e}
+08-31 03:37:02.109  3141  3141 D CellLayout: Adding view to ShortcutsAndWidgetsContainer: com.android.launcher3.views.DoubleShadowBubbleTextView{71c3ef8 VFED..C.. ......ID 0,0-0,0 #f}
+08-31 03:37:02.109  3141  3141 D CellLayout: Adding view to ShortcutsAndWidgetsContainer: com.android.launcher3.views.DoubleShadowBubbleTextView{e068fd1 VFED..C.. ......ID 0,0-0,0 #10}
+08-31 03:37:02.109  3141  3141 D CellLayout: Adding view to ShortcutsAndWidgetsContainer: com.android.launcher3.views.DoubleShadowBubbleTextView{5431a36 VFED..C.. ......ID 0,0-0,0 #12}
+08-31 03:37:02.109  3141  3141 D CellLayout: Adding view to ShortcutsAndWidgetsContainer: com.android.launcher3.views.DoubleShadowBubbleTextView{b52cd37 VFED..C.. ......ID 0,0-0,0 #13}
+08-31 03:37:02.109  3141  3141 D CellLayout: Adding view to ShortcutsAndWidgetsContainer: com.android.launcher3.views.DoubleShadowBubbleTextView{c5252a4 VFED..C.. ......ID 0,0-0,0 #14}
+08-31 03:37:02.109  3141  3141 D CellLayout: Adding view to ShortcutsAndWidgetsContainer: com.android.launcher3.views.DoubleShadowBubbleTextView{313580d VFED..C.. ......ID 0,0-0,0 #15}
+08-31 03:37:02.109  3141  3141 D CellLayout: Adding view to ShortcutsAndWidgetsContainer: com.android.launcher3.views.DoubleShadowBubbleTextView{b1ea3c2 VFED..C.. ......ID 0,0-0,0 #16}
+08-31 03:37:02.109  3141  3141 D CellLayout: Adding view to ShortcutsAndWidgetsContainer: com.android.launcher3.views.DoubleShadowBubbleTextView{bfd05d3 VFED..C.. ......ID 0,0-0,0 #17}
+08-31 03:37:02.109  3141  3141 D CellLayout: Adding view to ShortcutsAndWidgetsContainer: com.android.launcher3.views.DoubleShadowBubbleTextView{6b3f510 VFED..C.. ......ID 0,0-0,0 #18}
+08-31 03:37:02.109  3141  3141 D CellLayout: Adding view to ShortcutsAndWidgetsContainer: com.android.launcher3.views.DoubleShadowBubbleTextView{9aa6809 VFED..C.. ......ID 0,0-0,0 #19}
+08-31 03:37:02.109  3141  3141 D CellLayout: Adding view to ShortcutsAndWidgetsContainer: com.android.launcher3.views.DoubleShadowBubbleTextView{9373a0e VFED..C.. ......ID 0,0-0,0 #1a}
+08-31 03:37:02.109  3141  3141 D CellLayout: Adding view to ShortcutsAndWidgetsContainer: com.android.launcher3.views.DoubleShadowBubbleTextView{5082c2f VFED..C.. ......ID 0,0-0,0 #1b}
+08-31 03:37:02.109  3141  3141 D CellLayout: Adding view to ShortcutsAndWidgetsContainer: com.android.launcher3.views.DoubleShadowBubbleTextView{d4b523c VFED..C.. ......ID 0,0-0,0 #1c}
+08-31 03:37:02.109  3141  3141 D CellLayout: Adding view to ShortcutsAndWidgetsContainer: com.android.launcher3.views.DoubleShadowBubbleTextView{2887bc5 VFED..C.. ......ID 0,0-0,0 #1d}
+08-31 03:37:02.109 27299 27299 I cfqk    : (REDACTED) configuration changed from %s -> %s
+08-31 03:37:02.109 27299 27299 I cfqk    : (REDACTED) onDestroy: isRecreating: %s
+08-31 03:37:02.109 27299 27299 D WindowOnBackDispatcher: setTopOnBackInvokedCallback (unwrapped): null
+08-31 03:37:02.110  2447 19258 D CoreBackPreview: Window{f82ac29 u0 GoogleDiscoverWindow}: Setting back callback null
+08-31 03:37:02.110  2447  2781 D BackgroundInstallControlService: Package event received: 0
+08-31 03:37:02.112  2831  2848 D WindowManagerShell: setLauncherKeepClearAreaHeight: visible=true, height=263
+08-31 03:37:02.112  2831  2848 D WindowManagerShell: setLauncherKeepClearAreaHeight: visible=false, height=263
+08-31 03:37:02.112  2831  2848 V WindowManagerShell: Transition requested (#911): android.os.BinderProxy@ec3467 TransitionRequestInfo { type = CHANGE, triggerTask = null, pipChange = null, remoteTransitionInfo = null, displayChange = null, requestedLocation = null, userChange = null, windowingLayerChange = null, flags = 0, debugId = 911 }
+08-31 03:37:02.113  2831  2848 V ShellDesktopMode: DesktopTasksController: handleRequest request=TransitionRequestInfo { type = CHANGE, triggerTask = null, pipChange = null, remoteTransitionInfo = null, displayChange = null, requestedLocation = null, userChange = null, windowingLayerChange = null, flags = 0, debugId = 911 }
+08-31 03:37:02.113  2831  2848 V ShellDesktopMode: DesktopTasksController: skipping handleRequest reason=triggerTask is null
+08-31 03:37:02.114  2831 14315 V WindowManagerShell: onTransitionReady(transaction=10509785180386)
+08-31 03:37:02.114  2447  2519 V WindowManager: Sent Transition (#911) createdAt=08-31 03:37:02.111 via request=TransitionRequestInfo { type = CHANGE, triggerTask = null, pipChange = null, remoteTransitionInfo = null, displayChange = null, requestedLocation = null, userChange = null, windowingLayerChange = null, flags = 0, debugId = 911 }
+08-31 03:37:02.114  2447  2519 V WindowManager:     startWCT=WindowContainerTransaction { changes= {} hops= [] errorCallbackToken=null taskFragmentOrganizer=null }
+08-31 03:37:02.114  2447  2519 V WindowManager:     info={id=911 t=CHANGE f=0x0 trk=0 r=[] c=[]}
+08-31 03:37:02.115  2831  2848 V WindowManagerShell: onTransitionReady (#911) android.os.BinderProxy@ec3467: {id=911 t=CHANGE f=0x0 trk=0 r=[] c=[]}
+08-31 03:37:02.115  2831  2848 V ShellDesktopMode: DesktopModeLogger: taskInfo map after processing changes 0
+08-31 03:37:02.115  2831  2848 V WindowManagerShell: No transition roots in (#911) android.os.BinderProxy@ec3467@0 so abort
+08-31 03:37:02.115  2831  2848 V WindowManagerShell: Transition animation finished (aborted=true), notifying core (#911) android.os.BinderProxy@ec3467@0
+08-31 03:37:02.115 27299 27299 W cddn    : Null back to top button - can't update visibility
+08-31 03:37:02.116  2447  2519 V WindowManager: Finish Transition (#911): created at 08-31 03:37:02.111 collect-started=0.05ms request-sent=0.353ms started=2.12ms ready=2.112ms sent=2.912ms finished=5.169ms
+08-31 03:37:02.117  2831  2848 V WindowManagerShell: Track 0 became idle
+08-31 03:37:02.117  2831  2848 V WindowManagerShell: All active transition animations finished
+08-31 03:37:02.119 27299 27299 I ewzc    : destroy
+08-31 03:37:02.119 27299 27299 I cfqk    : (REDACTED) initWindow for %s with token %s
+08-31 03:37:02.124 27299 27299 I cfqk    : (REDACTED) windowAttached completed window=%s fragmentHost=%s
+08-31 03:37:02.124 27299 27299 D WindowOnBackDispatcher: setTopOnBackInvokedCallback (unwrapped): fmfl@70b6b05
+08-31 03:37:02.124  2447 11593 D CoreBackPreview: Window{887ba0b u0 GoogleDiscoverWindow}: Setting back callback OnBackInvokedCallbackInfo{mCallback=android.window.IOnBackInvokedCallback$Stub$Proxy@2f9c5a6, mPriority=1000000, mIsAnimationCallback=false, mOverrideBehavior=0}
+08-31 03:37:02.139  1501  1501 I AHAL: AudioStream: GetFramesWritten: 3406: mmap position is 5479440
+08-31 03:37:02.139  1501  1501 I AHAL: AudioStream: GetFramesWritten: 3409: mmap signed frames 5479296
+08-31 03:37:02.190  1501  1501 I AHAL: AudioStream: GetFramesWritten: 3406: mmap position is 5481888
+08-31 03:37:02.190  1501  1501 I AHAL: AudioStream: GetFramesWritten: 3409: mmap signed frames 5481744
+08-31 03:37:02.240  1501  1501 I AHAL: AudioStream: GetFramesWritten: 3406: mmap position is 5484336
+08-31 03:37:02.240  1501  1501 I AHAL: AudioStream: GetFramesWritten: 3409: mmap signed frames 5484192
+08-31 03:37:02.291  1501  1501 I AHAL: AudioStream: GetFramesWritten: 3406: mmap position is 5486784
+08-31 03:37:02.291  1501  1501 I AHAL: AudioStream: GetFramesWritten: 3409: mmap signed frames 5486640
+08-31 03:37:02.341  1501  1501 I AHAL: AudioStream: GetFramesWritten: 3406: mmap position is 5489184
+08-31 03:37:02.341  1501  1501 I AHAL: AudioStream: GetFramesWritten: 3409: mmap signed frames 5489040
+08-31 03:37:02.361  3141  3141 D TaskbarManager: dispatchTouchEvent:  displayId=0 isDefaultDisplay=true
+08-31 03:37:02.361 22912 22912 I S3TOUCH : root action=down x=1200 y=120
+08-31 03:37:02.361 22912 22912 I S3TOUCH : monitor action=down consumed=false
+08-31 03:37:02.361 22912 22912 I S3TOUCH : pad action=down menu=false
+08-31 03:37:02.362  1514  1514 I android.hardware.power-service-qti: Power setBoost: 0, duration: 0
+08-31 03:37:02.363  1514  1514 E QTI PowerHAL: Failed to acquire lock.
+08-31 03:37:02.363  1514  1514 E QTI PowerHAL: Failed process_boost for boost_handle
+08-31 03:37:02.392  1501  1501 I AHAL: AudioStream: GetFramesWritten: 3406: mmap position is 5491584
+08-31 03:37:02.392  1501  1501 I AHAL: AudioStream: GetFramesWritten: 3409: mmap signed frames 5491440
+08-31 03:37:02.442  1501  1501 I AHAL: AudioStream: GetFramesWritten: 3406: mmap position is 5494032
+08-31 03:37:02.442  1501  1501 I AHAL: AudioStream: GetFramesWritten: 3409: mmap signed frames 5493888
+08-31 03:37:02.493  1501  1501 I AHAL: AudioStream: GetFramesWritten: 3406: mmap position is 5496432
+08-31 03:37:02.493  1501  1501 I AHAL: AudioStream: GetFramesWritten: 3409: mmap signed frames 5496288
+08-31 03:37:02.543  1501  1501 I AHAL: AudioStream: GetFramesWritten: 3406: mmap position is 5498832
+08-31 03:37:02.543  1501  1501 I AHAL: AudioStream: GetFramesWritten: 3409: mmap signed frames 5498688
+08-31 03:37:02.593  1501  1501 I AHAL: AudioStream: GetFramesWritten: 3406: mmap position is 5501280
+08-31 03:37:02.593  1501  1501 I AHAL: AudioStream: GetFramesWritten: 3409: mmap signed frames 5501136
+08-31 03:37:02.623  3141  3141 D TaskbarManager: dispatchTouchEvent:  displayId=0 isDefaultDisplay=true
+08-31 03:37:02.624 22912 22912 I S3TOUCH : root action=down x=1500 y=120
+08-31 03:37:02.624 22912 22912 I S3TOUCH : monitor action=down consumed=false
+08-31 03:37:02.624 22912 22912 I S3TOUCH : pad action=down menu=false
+08-31 03:37:02.625  1514  1514 I android.hardware.power-service-qti: Power setBoost: 0, duration: 0
+08-31 03:37:02.625 22912 23633 D RPCS3   : FRONTEND_MENU home-request consumed
+08-31 03:37:02.626  1514  1514 E QTI PowerHAL: Failed to acquire lock.
+08-31 03:37:02.626  1514  1514 E QTI PowerHAL: Failed process_boost for boost_handle
+08-31 03:37:02.634 22912 22912 I S3HOME  : source=NativeFrontendEvent edge=down action=open state=Running
+08-31 03:37:02.634 22912 23513 D RPCS3   : FRONTEND_MENU begin pauseDuringMenu=0 isPaused=0
+08-31 03:37:02.635 22912 23579 D RPCS3   : Loading RPCN config. Path: /storage/emulated/0/Android/data/com.zenithblue.sambas3/files/config/rpcn.yml
+08-31 03:37:02.643  1501  1501 I AHAL: AudioStream: GetFramesWritten: 3406: mmap position is 5503680
+08-31 03:37:02.643  1501  1501 I AHAL: AudioStream: GetFramesWritten: 3409: mmap signed frames 5503536
+08-31 03:37:02.693  1501  1501 I AHAL: AudioStream: GetFramesWritten: 3406: mmap position is 5506080
+08-31 03:37:02.693  1501  1501 I AHAL: AudioStream: GetFramesWritten: 3409: mmap signed frames 5505936
+08-31 03:37:02.744  1501  1501 I AHAL: AudioStream: GetFramesWritten: 3406: mmap position is 5508480
+08-31 03:37:02.744  1501  1501 I AHAL: AudioStream: GetFramesWritten: 3409: mmap signed frames 5508336
+08-31 03:37:02.794  1501  1501 I AHAL: AudioStream: GetFramesWritten: 3406: mmap position is 5510880
+08-31 03:37:02.794  1501  1501 I AHAL: AudioStream: GetFramesWritten: 3409: mmap signed frames 5510736
+08-31 03:37:02.839  1579  1658 W libbinder.ServiceManagerCppClient: Waited one second for vendor.qti.qhcp.IQHDC/default (is service started? Number of threads started in the threadpool: 2. Are binder threads started and available?)
+08-31 03:37:02.448   899   899 I servicemanager: Caller(pid=1579,uid=0,sid=u:r:vendor_hal_perf_default:s0) Since 'vendor.qti.qhcp.IQHDC/default' could not be found trying to start it as a lazy AIDL service. (if it's not configured to be a lazy service, it may be stuck starting or still starting).
+08-31 03:37:02.844   899 25803 W libc    : Unable to set property "ctl.interface_start" to "aidl/vendor.qti.qhcp.IQHDC/default": PROP_ERROR_HANDLE_CONTROL_MESSAGE (0x20)
+08-31 03:37:02.450     1     1 E init    : Control message: Could not find 'aidl/vendor.qti.qhcp.IQHDC/default' for ctl.interface_start from pid: 899 (/system/bin/servicemanager)
+08-31 03:37:02.844  1501  1501 I AHAL: AudioStream: GetFramesWritten: 3406: mmap position is 5513328
+08-31 03:37:02.450 25803 25803 I servicemanager: Caller(pid=1579,uid=0,sid=u:r:vendor_hal_perf_default:s0) Tried to start aidl service vendor.qti.qhcp.IQHDC/default as a lazy service, but was unable to. Usually this happens when a service is not installed, but if the service is intended to be used as a lazy service, then it may be configured incorrectly.
+08-31 03:37:02.844  1501  1501 I AHAL: AudioStream: GetFramesWritten: 3409: mmap signed frames 5513184
+08-31 03:37:02.895  1501  1501 I AHAL: AudioStream: GetFramesWritten: 3406: mmap position is 5515776
+08-31 03:37:02.895  1501  1501 I AHAL: AudioStream: GetFramesWritten: 3409: mmap signed frames 5515632
+08-31 03:37:02.946  1501  1501 I AHAL: AudioStream: GetFramesWritten: 3406: mmap position is 5518176
+08-31 03:37:02.946  1501  1501 I AHAL: AudioStream: GetFramesWritten: 3409: mmap signed frames 5518032
+08-31 03:37:02.996  1501  1501 I AHAL: AudioStream: GetFramesWritten: 3406: mmap position is 5520624
+08-31 03:37:02.996  1501  1501 I AHAL: AudioStream: GetFramesWritten: 3409: mmap signed frames 5520480
+08-31 03:37:03.047  1501  1501 I AHAL: AudioStream: GetFramesWritten: 3406: mmap position is 5523024
+08-31 03:37:03.047  1501  1501 I AHAL: AudioStream: GetFramesWritten: 3409: mmap signed frames 5522880
+08-31 03:37:03.097  1501  1501 I AHAL: AudioStream: GetFramesWritten: 3406: mmap position is 5525472
+08-31 03:37:03.097  1501  1501 I AHAL: AudioStream: GetFramesWritten: 3409: mmap signed frames 5525328
+08-31 03:37:03.148  1501  1501 I AHAL: AudioStream: GetFramesWritten: 3406: mmap position is 5527872
+08-31 03:37:03.148  1501  1501 I AHAL: AudioStream: GetFramesWritten: 3409: mmap signed frames 5527728
+08-31 03:37:03.199  1501  1501 I AHAL: AudioStream: GetFramesWritten: 3406: mmap position is 5530320
+08-31 03:37:03.199  1501  1501 I AHAL: AudioStream: GetFramesWritten: 3409: mmap signed frames 5530176
+08-31 03:37:03.215  1501  2510 I android.hardware.audio.service: [Awinic] [INF] aw_audioreach_monitor_thread: monitor->state = 3
+08-31 03:37:03.215  1501  2510 D android.hardware.audio.service: [Awinic] [DBG] aw_ar_kmsg_ctl_get_monitor_en: dev_index[0]:monitor enable:1
+08-31 03:37:02.821  2510  2510 I [Awinic][7-0034]aw882xx_monitor_get: monitor switch is 1
+08-31 03:37:02.822  2510  2510 I [Awinic][7-0034]aw_monitor_get_voltage: chip voltage is 4146
+08-31 03:37:02.823  2510  2510 I [Awinic][7-0034]aw_monitor_get_temperature: reg val is 0x002c
+08-31 03:37:02.823  2510  2510 I [Awinic][7-0034]aw_monitor_get_temperature: chip temperature = 44
+08-31 03:37:03.217  1501  2510 D android.hardware.audio.service: [Awinic] [DBG] aw_ar_monitor_work_func: dev[0], vmax[0x0] is not modified or the value is none
+08-31 03:37:03.217  1501  2510 D android.hardware.audio.service: [Awinic] [DBG] aw_ar_kmsg_ctl_get_monitor_en: dev_index[1]:monitor enable:1
+08-31 03:37:02.824  2510  2510 I [Awinic][4-0034]aw882xx_monitor_get: monitor switch is 1
+08-31 03:37:02.825  2510  2510 I [Awinic][4-0034]aw_monitor_get_voltage: chip voltage is 4158
+08-31 03:37:02.825  2510  2510 I [Awinic][4-0034]aw_monitor_get_temperature: reg val is 0x0023
+08-31 03:37:02.825  2510  2510 I [Awinic][4-0034]aw_monitor_get_temperature: chip temperature = 35
+08-31 03:37:02.826  2510  2510 I [Awinic][7-0035]aw882xx_monitor_get: monitor switch is 1
+08-31 03:37:03.219  1501  2510 D android.hardware.audio.service: [Awinic] [DBG] aw_ar_monitor_work_func: dev[1], vmax[0x0] is not modified or the value is none
+08-31 03:37:03.219  1501  2510 D android.hardware.audio.service: [Awinic] [DBG] aw_ar_kmsg_ctl_get_monitor_en: dev_index[2]:monitor enable:1
+08-31 03:37:02.826  2510  2510 I [Awinic][7-0035]aw_monitor_get_voltage: chip voltage is 4146
+08-31 03:37:02.827  2510  2510 I [Awinic][7-0035]aw_monitor_get_temperature: reg val is 0x002b
+08-31 03:37:02.827  2510  2510 I [Awinic][7-0035]aw_monitor_get_temperature: chip temperature = 43
+08-31 03:37:03.221 22912 23512 D RPCS3   : CPU Usage: Total: 25.6%, Cores: 0.0%, 0.0%, 0.0%, 0.0%, 0.0%, 0.0%, 0.0%, 0.0%
+08-31 03:37:03.221  1501  2510 D android.hardware.audio.service: [Awinic] [DBG] aw_ar_monitor_work_func: dev[2], vmax[0x0] is not modified or the value is none
+08-31 03:37:03.221  1501  2510 D android.hardware.audio.service: [Awinic] [DBG] aw_ar_kmsg_ctl_get_monitor_en: dev_index[3]:monitor enable:1
+08-31 03:37:02.828  2510  2510 I [Awinic][4-0035]aw882xx_monitor_get: monitor switch is 1
+08-31 03:37:02.828  2510  2510 I [Awinic][4-0035]aw_monitor_get_voltage: chip voltage is 4134
+08-31 03:37:03.223  1501  2510 D android.hardware.audio.service: [Awinic] [DBG] aw_ar_monitor_work_func: dev[3], vmax[0x0] is not modified or the value is none
+08-31 03:37:02.829  2510  2510 I [Awinic][4-0035]aw_monitor_get_temperature: reg val is 0x0024
+08-31 03:37:02.829  2510  2510 I [Awinic][4-0035]aw_monitor_get_temperature: chip temperature = 36
+08-31 03:37:03.249  1501  1501 I AHAL: AudioStream: GetFramesWritten: 3406: mmap position is 5532768
+08-31 03:37:03.249  1501  1501 I AHAL: AudioStream: GetFramesWritten: 3409: mmap signed frames 5532624
+08-31 03:37:03.300  1501  1501 I AHAL: AudioStream: GetFramesWritten: 3406: mmap position is 5535168
+08-31 03:37:03.300  1501  1501 I AHAL: AudioStream: GetFramesWritten: 3409: mmap signed frames 5535024
+08-31 03:37:03.350  1501  1501 I AHAL: AudioStream: GetFramesWritten: 3406: mmap position is 5537616
+08-31 03:37:03.351  1501  1501 I AHAL: AudioStream: GetFramesWritten: 3409: mmap signed frames 5537472
+08-31 03:37:03.401  1501  1501 I AHAL: AudioStream: GetFramesWritten: 3406: mmap position is 5540064
+08-31 03:37:03.401  1501  1501 I AHAL: AudioStream: GetFramesWritten: 3409: mmap signed frames 5539920
+08-31 03:37:03.451  1501  1501 I AHAL: AudioStream: GetFramesWritten: 3406: mmap position is 5542464
+08-31 03:37:03.451  1501  1501 I AHAL: AudioStream: GetFramesWritten: 3409: mmap signed frames 5542320
+08-31 03:37:03.502  1501  1501 I AHAL: AudioStream: GetFramesWritten: 3406: mmap position is 5544864
+08-31 03:37:03.502  1501  1501 I AHAL: AudioStream: GetFramesWritten: 3409: mmap signed frames 5544720
+08-31 03:37:03.111 12027 12027 E [TP0]touchpanel: irq gpio is 0
+08-31 03:37:03.553  1501  1501 I AHAL: AudioStream: GetFramesWritten: 3406: mmap position is 5547312
+08-31 03:37:03.553  1501  1501 I AHAL: AudioStream: GetFramesWritten: 3409: mmap signed frames 5547168
+08-31 03:37:03.603  1501  1501 I AHAL: AudioStream: GetFramesWritten: 3406: mmap position is 5549760
+08-31 03:37:03.603  1501  1501 I AHAL: AudioStream: GetFramesWritten: 3409: mmap signed frames 5549616
+08-31 03:37:03.654  1501  1501 I AHAL: AudioStream: GetFramesWritten: 3406: mmap position is 5552160
+08-31 03:37:03.654  1501  1501 I AHAL: AudioStream: GetFramesWritten: 3409: mmap signed frames 5552016
+08-31 03:37:03.704  1501  1501 I AHAL: AudioStream: GetFramesWritten: 3406: mmap position is 5554608
+08-31 03:37:03.704  1501  1501 I AHAL: AudioStream: GetFramesWritten: 3409: mmap signed frames 5554464
+08-31 03:37:03.755  1501  1501 I AHAL: AudioStream: GetFramesWritten: 3406: mmap position is 5557008
+08-31 03:37:03.755  1501  1501 I AHAL: AudioStream: GetFramesWritten: 3409: mmap signed frames 5556864
+08-31 03:37:03.779  5485  5485 W DefaultDispatch: type=1400 audit(0.0:843134): avc:  denied  { read } for  name="version" dev="proc" ino=4026532013 scontext=u:r:untrusted_app:s0:c224,c256,c512,c768 tcontext=u:object_r:proc_version:s0 tclass=file permissive=0 app=com.ivarna.mkm
+08-31 03:37:03.796  5485  7854 W CpuUtilizationProvider: Failed to read /proc/stat: grep: /proc/stat: Permission denied
+08-31 03:37:03.806  1501  1501 I AHAL: AudioStream: GetFramesWritten: 3406: mmap position is 5559504
+08-31 03:37:03.807  1501  1501 I AHAL: AudioStream: GetFramesWritten: 3409: mmap signed frames 5559360
+08-31 03:37:03.807  5485  7854 D CpuUtilizationProvider: CPU usage updated from frequency (fallback): 60%
+08-31 03:37:03.808  5485  7854 D CpuProvider: Core 0: freq=1344000, usage=0.22222222 (hwMin=364800, hwMax=2265600)
+08-31 03:37:03.808  5485  7854 D CpuProvider: Core 1: freq=1344000, usage=0.22222222 (hwMin=364800, hwMax=2265600)
+08-31 03:37:03.809  5485  7854 D CpuProvider: Core 2: freq=2572800, usage=0.615942 (hwMin=499200, hwMax=3148800)
+08-31 03:37:03.810  5485  7854 D CpuProvider: Core 3: freq=2572800, usage=0.71014494 (hwMin=499200, hwMax=3148800)
+08-31 03:37:03.810  5485  7854 D CpuProvider: Core 4: freq=2572800, usage=0.615942 (hwMin=499200, hwMax=3148800)
+08-31 03:37:03.811  5485  7854 D CpuProvider: Core 5: freq=844800, usage=0.765625 (hwMin=499200, hwMax=2956800)
+08-31 03:37:03.811  5485  7854 D CpuProvider: Core 6: freq=844800, usage=0.6640625 (hwMin=499200, hwMax=2956800)
+08-31 03:37:03.812  5485  7854 D CpuProvider: Core 7: freq=3244800, usage=0.7346939 (hwMin=480000, hwMax=3302400)
+08-31 03:37:03.812  5485  7854 D CpuProvider: Overall usage: 0.6051029 (from 8 cores), Avg Freq: 1998500
+08-31 03:37:03.835 25811 25811 W cat     : type=1400 audit(0.0:843135): avc:  denied  { read } for  name="governor" dev="sysfs" ino=139690 scontext=u:r:untrusted_app:s0:c224,c256,c512,c768 tcontext=u:object_r:vendor_sysfs_kgsl:s0 tclass=file permissive=0 app=com.ivarna.mkm
+08-31 03:37:03.843  1579  1658 W libbinder.ServiceManagerCppClient: Waited one second for vendor.qti.qhcp.IQHDC/default (is service started? Number of threads started in the threadpool: 2. Are binder threads started and available?)
+08-31 03:37:03.450   899   899 I servicemanager: Caller(pid=1579,uid=0,sid=u:r:vendor_hal_perf_default:s0) Since 'vendor.qti.qhcp.IQHDC/default' could not be found trying to start it as a lazy AIDL service. (if it's not configured to be a lazy service, it may be stuck starting or still starting).
+08-31 03:37:03.451     1     1 E init    : Control message: Could not find 'aidl/vendor.qti.qhcp.IQHDC/default' for ctl.interface_start from pid: 899 (/system/bin/servicemanager)
+08-31 03:37:03.846   899 25815 W libc    : Unable to set property "ctl.interface_start" to "aidl/vendor.qti.qhcp.IQHDC/default": PROP_ERROR_HANDLE_CONTROL_MESSAGE (0x20)
+08-31 03:37:03.452 25815 25815 I servicemanager: Caller(pid=1579,uid=0,sid=u:r:vendor_hal_perf_default:s0) Tried to start aidl service vendor.qti.qhcp.IQHDC/default as a lazy service, but was unable to. Usually this happens when a service is not installed, but if the service is intended to be used as a lazy service, then it may be configured incorrectly.
+08-31 03:37:03.847 25813 25813 W cat     : type=1400 audit(0.0:843136): avc:  denied  { read } for  name="available_governors" dev="sysfs" ino=139691 scontext=u:r:untrusted_app:s0:c224,c256,c512,c768 tcontext=u:object_r:vendor_sysfs_kgsl:s0 tclass=file permissive=0 app=com.ivarna.mkm
+08-31 03:37:03.458   943   943 I logd    : logdr: UID=2000 GID=2000 PID=25812 n tail=0 logMask=99 pid=0 start=0ns deadline=0ns

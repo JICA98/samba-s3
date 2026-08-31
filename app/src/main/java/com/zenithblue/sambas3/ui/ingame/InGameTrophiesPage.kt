@@ -27,14 +27,21 @@ import com.zenithblue.sambas3.R
 import com.zenithblue.sambas3.RPCSXColors
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
+import coil3.compose.AsyncImage
+import coil3.request.ImageRequest
+import androidx.compose.ui.platform.LocalContext
+import java.io.File
 
 @Composable
 fun InGameTrophiesPage(core: InGameMenuCoreGateway, onBack: () -> Unit) {
     var data by remember { mutableStateOf<TrophiesData?>(null) }
     var loading by remember { mutableStateOf(true) }
     var showHidden by remember { mutableStateOf(false) }
+    var refreshTick by remember { mutableStateOf(0) }
 
-    LaunchedEffect(Unit) {
+    LaunchedEffect(Unit) { TrophyEvents.refreshes.collect { refreshTick++ } }
+
+    LaunchedEffect(refreshTick) {
         loading = true
         data = core.trophies().getOrNull()
         loading = false
@@ -77,7 +84,7 @@ fun InGameTrophiesPage(core: InGameMenuCoreGateway, onBack: () -> Unit) {
                     }
                 } else if (data?.available != true) {
                     Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                        Text("No trophies available", color = RPCSXColors.textSecondary)
+                        Text(when (data?.status) { "initializing" -> "Trophy data is still initializing"; "parse_failed" -> "Failed to read trophy data"; "no_trophy_set", "empty" -> "This title has no installed trophy set"; else -> "No trophies available" }, color = RPCSXColors.textSecondary)
                     }
                 } else {
                     // Hidden toggle
@@ -101,7 +108,9 @@ fun InGameTrophiesPage(core: InGameMenuCoreGateway, onBack: () -> Unit) {
                                     modifier = Modifier.size(64.dp).clip(RoundedCornerShape(8.dp)).background(Color.DarkGray),
                                     contentAlignment = Alignment.Center
                                 ) {
-                                    Icon(painter = painterResource(id = R.drawable.ic_star), contentDescription = null, tint = RPCSXColors.primary)
+                                    if (!trophy.iconPath.isNullOrBlank() && File(trophy.iconPath).isFile) {
+                                        AsyncImage(model = ImageRequest.Builder(LocalContext.current).data(File(trophy.iconPath)).build(), contentDescription = trophy.name, modifier = Modifier.fillMaxSize(), contentScale = ContentScale.Crop)
+                                    } else Icon(painter = painterResource(id = R.drawable.ic_star), contentDescription = null, tint = RPCSXColors.primary)
                                 }
                                 Spacer(modifier = Modifier.width(12.dp))
                                 Column(modifier = Modifier.weight(1f)) {

@@ -57,6 +57,7 @@ fun GameLaunchCenter(
     onConfigure: () -> Unit,
     onDriver: () -> Unit,
     onPatches: () -> Unit,
+    onAchievements: () -> Unit,
 ) {
     Box(Modifier.fillMaxSize().background(Color.Black.copy(alpha = .78f)), contentAlignment = Alignment.Center) {
         Surface(
@@ -84,6 +85,7 @@ fun GameLaunchCenter(
                     Text("GPU driver", color = RPCSXColors.textSecondary)
                     Text(snapshot.selectedDriver + if (snapshot.driverSysmem) "  SYSMEM" else "", color = RPCSXColors.textPrimary)
                 }
+                OutlinedButton(onClick = onAchievements, modifier = Modifier.padding(top = 8.dp)) { Text("ACHIEVEMENTS") }
                 Text("PPU readiness: ${snapshot.ppuStatus}", color = if (snapshot.ppuStatus == "Ready") RPCSXColors.primary else RPCSXColors.textSecondary, modifier = Modifier.padding(top = 6.dp))
                 Spacer(Modifier.height(12.dp))
                 Text("SAVES", color = RPCSXColors.primary, style = MaterialTheme.typography.titleMedium)

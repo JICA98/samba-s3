@@ -1,0 +1,734 @@
+--------- beginning of main
+D/TaskbarManager( 3141): dispatchTouchEvent:  displayId=0 isDefaultDisplay=true
+I/android.hardware.power-service-qti( 1514): Power setBoost: 0, duration: 0
+E/QTI PowerHAL( 1514): Failed to acquire lock.
+E/QTI PowerHAL( 1514): Failed process_boost for boost_handle
+D/RPCS3   ( 8545): S3PERF native_export=1 enabled=0
+D/RPCS3   ( 8545): S3PERF native_export=1 enabled=0
+I/S3PERF  ( 8545): monitor enabled=false intervalMs=300
+--------- beginning of kernel
+E/[TP0]touchpanel(12027): irq gpio is 0
+I/        (23268): [INFO]: OPLUS_CHG[MMS_GAUGE]([oplus_mms_gauge_choice_fit_vol][3465]): choice cp voltage as vbat [4215, 4210]
+I/        (23268): [INFO]: OPLUS_CHG[MMS_GAUGE]([oplus_mms_gauge_choice_fit_vol][3465]): choice cp voltage as vbat [4215, 4210]
+I/        (26591): [INFO]: OPLUS_CHG[MSG]([oplus_msg_queue_update][227]): battery: update, gp=5000 ms
+I/        (11049): [INFO]: OPLUS_CHG[CHG_COMM]([oplus_comm_smooth_to_soc][3416]): soc[0 3 87 87 90 91] avg[3 1 0 0 0] fifo[90 90 90 90]
+I/        (11049): [INFO]: OPLUS_CHG[MSG]([oplus_msg_queue_update_work][106]): battery: update delay: 0 ms, update interval: 61436 ms
+I/OPLUS_CHG[oplus_charge_info](22428): BATTERY[300 300 4215 4215 1327 87 91 90 7560 8698 1 0x20 0], CHARGE[4455 600 0 0], WIRED[1 444 4997 500 1 0x0 0 0 0 2 0], WIRELESS[0 0 0 0 0 0x0 0 0 0], VOOC[0 0 0 0 0x0], UFCS[0 0 0 0x0], COMMON[6 0 0 0x0 1 0 1 8698 100 0]
+W/healthd ( 1508): battery l=91 v=4215 t=30.0 h=2 st=2 c=1327 fc=9230000 cc=10 chg=u
+I/        (22428): [INFO]: OPLUS_CHG[ADSP]([oplus_chg_8350_reg_dump][7390]): sm8450_st_dump: [chg_en=1, suspend=0, pd_svooc=0], subtype=0x01],[oplus_UsbCommCapable=0, oplus_pd_svooc=0, typec_mode=0, cid_status=0x01, usb_in_status=1],[0x2606=0x83, 0x2607=0x19, 0x2608=0x06, 0x2609=0x0a], [0x260a=0x04, 0x260b=0x55, 0x260c=0x0a, 0x260d=0x14], [0x260e=0x0a, 0x260f=0x01, 0x2610=0x00, 0x2640=0x01], [0x2641=0x02, 0x2642=0x05, 0x2646=0x01, 0x2650=0x04], [0x2706=0x0a, 0x2707=0x0a, 0x2708=0x0a, 0x2709=0x0a], [0x270b=0xe2, 0x270c=0x48, 0x2710=0xc0, 0x280c=0x38], [0x2810=0x00, 0x2840=0x01, 0x287f=0x00, 0x2906=0x02], [0x2908=0x0f, 0x290a=0x11, 0x290b=0x01, 0x290c=0x01], [0x2910=0x11, 0x2944=0x80, 0x2950=0x02, 0x2951=0x01], [0x2952=0x0a, 0x2954=0x00, 0x2960=0xe0, 0x2b06=0x08], [0x2b07=0x00, 0x2b08=0x00, 0x2b09=0xa3, 0x2b0a=0x39], [0x2b0b=0xab, 0x2b0c=0x00, 0x29a8=0x81, 0x29a9=0x83], [0x29aa=0x00, 0x2aa2=0x00, 0x2aa8=0x87, 0x2aa9=0x00], [0x2aaa=0x00],
+I/vendor.qti.bluetooth@1.1-ibs_handler( 1502): ProcessIbsCmd: Received IBS_WAKE_IND: 0xFD
+D/vendor.qti.bluetooth@1.1-ibs_handler( 1502): SerialClockVote: vote for UART CLK ON
+E/vendor.qti.bluetooth@1.1-wake_lock( 1502): Acquire write to wakelock file failed -1 - Operation not permitted
+I/vendor.qti.bluetooth@1.1-ibs_handler( 1502): ProcessIbsCmd: Writing IBS_WAKE_ACK
+W/libbinder.ServiceManagerCppClient( 1579): Waited one second for vendor.qti.qhcp.IQHDC/default (is service started? Number of threads started in the threadpool: 2. Are binder threads started and available?)
+I/servicemanager(  899): Caller(pid=1579,uid=0,sid=u:r:vendor_hal_perf_default:s0) Since 'vendor.qti.qhcp.IQHDC/default' could not be found trying to start it as a lazy AIDL service. (if it's not configured to be a lazy service, it may be stuck starting or still starting).
+W/libc    (  899): Unable to set property "ctl.interface_start" to "aidl/vendor.qti.qhcp.IQHDC/default": PROP_ERROR_HANDLE_CONTROL_MESSAGE (0x20)
+E/init    (    1): Control message: Could not find 'aidl/vendor.qti.qhcp.IQHDC/default' for ctl.interface_start from pid: 899 (/system/bin/servicemanager)
+I/servicemanager(16783): Caller(pid=1579,uid=0,sid=u:r:vendor_hal_perf_default:s0) Tried to start aidl service vendor.qti.qhcp.IQHDC/default as a lazy service, but was unable to. Usually this happens when a service is not installed, but if the service is intended to be used as a lazy service, then it may be configured incorrectly.
+I/vendor.qti.bluetooth@1.1-ibs_handler( 1502): ProcessIbsCmd: Received IBS_SLEEP_IND: 0xFE
+D/vendor.qti.bluetooth@1.1-ibs_handler( 1502): SerialClockVote: vote for UART CLK OFF
+--------- beginning of system
+D/ActivityManager( 2447): sync unfroze 32535 org.mozilla.fenix for 6
+D/ActivityManager( 2447): sync unfroze 32591 org.mozilla.fenix:crashhelper_disable_art_image_ for 6
+D/ActivityThread(32591): Package [com.zenithblue.sambas3] reported as REPLACED, but missing application info. Assuming REMOVED.
+D/ActivityThread(32591): Package [com.zenithblue.sambas3] reported as REPLACED, but missing application info. Assuming REMOVED.
+D/ActivityThread(32591): Package [com.zenithblue.sambas3] reported as REPLACED, but missing application info. Assuming REMOVED.
+D/ActivityThread(32591): Package [com.zenithblue.sambas3] reported as REPLACED, but missing application info. Assuming REMOVED.
+D/ActivityThread(32591): Package [com.zenithblue.sambas3] reported as REPLACED, but missing application info. Assuming REMOVED.
+D/ActivityThread(32591): Package [com.zenithblue.sambas3] reported as REPLACED, but missing application info. Assuming REMOVED.
+D/ActivityThread(32591): Package [com.zenithblue.sambas3] reported as REPLACED, but missing application info. Assuming REMOVED.
+D/ActivityThread(32591): Package [com.zenithblue.sambas3] reported as REPLACED, but missing application info. Assuming REMOVED.
+D/ActivityThread(32591): Package [com.zenithblue.sambas3] reported as REPLACED, but missing application info. Assuming REMOVED.
+D/ActivityThread(32591): Package [com.zenithblue.sambas3] reported as REPLACED, but missing application info. Assuming REMOVED.
+D/ActivityManager( 2447): sync unfroze 782 com.google.android.googlequicksearchbox:search for 6
+E/vendor.qti.bluetooth@1.1-wake_lock( 1502): Release wake lock not initialized/acquired
+D/WM-DelayedWorkTracker(  782): Scheduling work 16ad3a23-188f-48c2-a2e8-586bad6a1127
+D/ActivityThread(  782): Package [com.zenithblue.sambas3] reported as REPLACED, but missing application info. Assuming REMOVED.
+D/WM-GreedyScheduler(  782): Starting work for 16ad3a23-188f-48c2-a2e8-586bad6a1127
+D/ActivityThread(  782): Package [com.zenithblue.sambas3] reported as REPLACED, but missing application info. Assuming REMOVED.
+D/WM-SystemJobService(  782): onStartJob for WorkGenerationalId(workSpecId=16ad3a23-188f-48c2-a2e8-586bad6a1127, generation=0)
+W/ProcessStats( 2447): Tracking association SourceState{5e9cd09 system/1000 ImpBg #61204} whose proc state 6 is better than process ProcessState{f365786 com.google.android.googlequicksearchbox:search/10102 pkg=com.google.android.googlequicksearchbox} proc state 14 (6 skipped)
+D/ActivityThread(32535): Package [com.zenithblue.sambas3] reported as REPLACED, but missing application info. Assuming REMOVED.
+D/WM-Processor(  782): rai: processing WorkGenerationalId(workSpecId=16ad3a23-188f-48c2-a2e8-586bad6a1127, generation=0)
+D/WM-Processor(  782): Work WorkGenerationalId(workSpecId=16ad3a23-188f-48c2-a2e8-586bad6a1127, generation=0) is already enqueued for processing
+D/ActivityThread(32535): Package [com.zenithblue.sambas3] reported as REPLACED, but missing application info. Assuming REMOVED.
+D/ActivityThread(32535): Package [com.zenithblue.sambas3] reported as REPLACED, but missing application info. Assuming REMOVED.
+D/ActivityThread(32535): Package [com.zenithblue.sambas3] reported as REPLACED, but missing application info. Assuming REMOVED.
+D/ActivityThread(32535): Package [com.zenithblue.sambas3] reported as REPLACED, but missing application info. Assuming REMOVED.
+D/ActivityThread(32535): Package [com.zenithblue.sambas3] reported as REPLACED, but missing application info. Assuming REMOVED.
+D/ActivityThread(32535): Package [com.zenithblue.sambas3] reported as REPLACED, but missing application info. Assuming REMOVED.
+D/RPCS3   ( 8545): PPU Syscall Usage Stats:
+D/RPCS3   ( 8545): 	⁂ sys_timer_usleep [936225]
+D/RPCS3   ( 8545): 	⁂ sys_ppu_thread_yield [283388]
+D/RPCS3   ( 8545): 	⁂ sys_event_queue_receive [7412]
+D/RPCS3   ( 8545): 	⁂ sys_event_flag_wait [2297]
+D/RPCS3   ( 8545): 	⁂ sys_event_flag_set [2292]
+D/RPCS3   ( 8545): 	⁂ sys_rsx_context_attribute [1801]
+D/RPCS3   ( 8545): 	⁂ _sys_lwmutex_lock [1767]
+D/RPCS3   ( 8545): 	⁂ _sys_lwmutex_unlock [1767]
+D/RPCS3   ( 8545): 	⁂ sys_fs_lseek [118]
+D/RPCS3   ( 8545): 	⁂ sys_fs_read [45]
+D/ActivityThread(32535): Package [com.zenithblue.sambas3] reported as REPLACED, but missing application info. Assuming REMOVED.
+D/ActivityThread(32535): Package [com.zenithblue.sambas3] reported as REPLACED, but missing application info. Assuming REMOVED.
+D/ActivityThread(32535): Package [com.zenithblue.sambas3] reported as REPLACED, but missing application info. Assuming REMOVED.
+D/WM-WorkerWrapper(  782): Starting work for com.google.apps.tiktok.contrib.work.TikTokListenableWorker
+D/WM-ListenableWorkerImpl(  782): Binding to com.google.android.googlequicksearchbox, com.google.android.libraries.search.integrations.tiktok.RemoteWorkerService_googleapp
+I/nimbus::stateful::nimbus_client(32535): fetching experiments
+I/remote_settings::client(32535): breadcrumb: make_request: https://firefox.settings.services.mozilla.com/v2/buckets/main/collections/nimbus-mobile-experiments/changeset?_expected=0&_since=1787870221447
+I/app-services-error-reporter::breadcrumb(32535): make_request: https://firefox.settings.services.mozilla.com/v2/buckets/main/collections/nimbus-mobile-experiments/changeset?_expected=0&_since=1787870221447
+I/WM-RemoteWorkerService(27299): Binding to RemoteWorkerService
+D/WM-ListenableWorkerImpl(  782): Service connected
+D/WM-ListenableWorkerImpl(27299): Executing work request (16ad3a23-188f-48c2-a2e8-586bad6a1127, com.google.apps.tiktok.contrib.work.TikTokListenableWorker)
+D/BackgroundInstallControlService( 2447): Package event received: 0
+D/SntpClient( 2447): round trip: 70ms, clock offset: -3794ms
+D/SystemClockTime( 2447): Setting time of day to sec=1788125808
+W/SystemClockTime( 2447): Unable to set rtc to 1788125808: No such device
+D/ActivityManager( 2447): sync unfroze 4170 com.android.keychain for 10
+D/ActivityManager( 2447): sync unfroze 19677 com.android.settings for 10
+D/ActivityManager( 2447): sync unfroze 6887 org.lineageos.lineageparts for 10
+D/ActivityManager( 2447): sync unfroze 10330 com.android.DeviceAsWebcam for 10
+D/ModelInitializer( 3141): onAppIconChanged: org.lineageos.etar
+D/ActivityManager( 2447): sync unfroze 29701 com.android.deskclock for 3
+D/DevicePolicyManager( 2447): updateSystemUpdateFreezePeriodsRecord
+D/ActivityThread(29701): Package [com.zenithblue.sambas3] reported as REPLACED, but missing application info. Assuming REMOVED.
+D/ActivityThread(29701): Package [com.zenithblue.sambas3] reported as REPLACED, but missing application info. Assuming REMOVED.
+D/ActivityThread(29701): Package [com.zenithblue.sambas3] reported as REPLACED, but missing application info. Assuming REMOVED.
+D/ActivityThread(29701): Package [com.zenithblue.sambas3] reported as REPLACED, but missing application info. Assuming REMOVED.
+D/ActivityThread(29701): Package [com.zenithblue.sambas3] reported as REPLACED, but missing application info. Assuming REMOVED.
+D/ActivityThread(29701): Package [com.zenithblue.sambas3] reported as REPLACED, but missing application info. Assuming REMOVED.
+D/ActivityThread(29701): Package [com.zenithblue.sambas3] reported as REPLACED, but missing application info. Assuming REMOVED.
+D/ActivityThread(29701): Package [com.zenithblue.sambas3] reported as REPLACED, but missing application info. Assuming REMOVED.
+D/ActivityThread(29701): Package [com.zenithblue.sambas3] reported as REPLACED, but missing application info. Assuming REMOVED.
+D/ActivityThread(29701): Package [com.zenithblue.sambas3] reported as REPLACED, but missing application info. Assuming REMOVED.
+D/ActivityManager( 2447): sync unfroze 3215 com.android.permissioncontroller for 3
+D/ActivityThread(29701): Package [com.zenithblue.sambas3] reported as REPLACED, but missing application info. Assuming REMOVED.
+D/ActivityThread(29701): Package [com.zenithblue.sambas3] reported as REPLACED, but missing application info. Assuming REMOVED.
+D/ActivityThread(29701): Package [com.zenithblue.sambas3] reported as REPLACED, but missing application info. Assuming REMOVED.
+D/ActivityThread(29701): Package [com.zenithblue.sambas3] reported as REPLACED, but missing application info. Assuming REMOVED.
+D/ActivityThread(29701): Package [com.zenithblue.sambas3] reported as REPLACED, but missing application info. Assuming REMOVED.
+D/ActivityThread(29701): Package [com.zenithblue.sambas3] reported as REPLACED, but missing application info. Assuming REMOVED.
+I/AlarmClock(29701): AlarmInitReceiver android.intent.action.TIME_SET
+D/ActivityManager( 2447): sync unfroze 3491 com.google.android.apps.wellbeing for 3
+I/AlarmClock(29701): Fixing alarm instances
+D/AccessibilitySourceService( 3215): enabled a11y services count 0
+D/AccessibilitySourceService( 3215): a11y source sending 0 issue to sc
+D/ActivityThread( 3491): Package [com.zenithblue.sambas3] reported as REPLACED, but missing application info. Assuming REMOVED.
+D/ActivityThread( 3491): Package [com.zenithblue.sambas3] reported as REPLACED, but missing application info. Assuming REMOVED.
+D/ActivityThread( 3491): Package [com.zenithblue.sambas3] reported as REPLACED, but missing application info. Assuming REMOVED.
+V/AlarmClock(29701): AlarmInitReceiver finished
+D/SafetySourceDataValidat( 2447): No cert check requested for package com.android.permissioncontroller
+D/AlphabeticIndexCompat( 3141): computeSectionName: cs: Calendar sectionName: C
+D/AccessibilitySourceService( 3215): enabled a11y services count 0
+D/AccessibilitySourceService( 3215): a11y source sending 0 issue to sc
+D/SafetySourceDataValidat( 2447): No cert check requested for package com.android.permissioncontroller
+D/AccessibilitySourceService( 3215): enabled a11y services count 0
+D/AccessibilitySourceService( 3215): a11y source sending 0 issue to sc
+D/SafetySourceDataValidat( 2447): No cert check requested for package com.android.permissioncontroller
+D/ActivityThread( 3491): Package [com.zenithblue.sambas3] reported as REPLACED, but missing application info. Assuming REMOVED.
+D/AllAppsStore( 3141): setApps: apps.length=40
+D/AccessibilitySourceService( 3215): enabled a11y services count 0
+D/AllAppsStore( 3141): notifyUpdate: notifying listeners
+D/AccessibilitySourceService( 3215): a11y source sending 0 issue to sc
+D/ActivityAllAppsContainerView( 3141): onAppsUpdated; number of apps: 40
+D/ActivityAllAppsContainerView( 3141): rebindAdapters: force: false
+D/ActivityAllAppsContainerView( 3141): rebindAdapters: Not needed.
+D/StatsLog( 3141): LAUNCHER_ALLAPPS_COUNT
+D/AlphabeticalAppsList( 3141): Clearing FastScrollerSections.
+D/SafetySourceDataValidat( 2447): No cert check requested for package com.android.permissioncontroller
+D/AlphabeticalAppsList( 3141): Adding apps with sections. HasPrivateApps: false
+D/AlphabeticalAppsList( 3141): addAppsWithSections: adding sectionName: … with appInfoTitle: 1 2 3 4 Player Games
+D/ActivityThread( 3491): Package [com.zenithblue.sambas3] reported as REPLACED, but missing application info. Assuming REMOVED.
+D/AlphabeticalAppsList( 3141): addAppsWithSections: adding sectionName: A with appInfoTitle: Adirstat
+D/AlphabeticalAppsList( 3141): addAppsWithSections: adding sectionName: B with appInfoTitle: BachataS4
+D/AlphabeticalAppsList( 3141): addAppsWithSections: adding sectionName: C with appInfoTitle: Calculator
+D/AlphabeticalAppsList( 3141): addAppsWithSections: adding sectionName: D with appInfoTitle: DeviceInsights
+D/AlphabeticalAppsList( 3141): addAppsWithSections: adding sectionName: F with appInfoTitle: FactualStats
+D/AlphabeticalAppsList( 3141): addAppsWithSections: adding sectionName: G with appInfoTitle: Gallery
+D/AlphabeticalAppsList( 3141): addAppsWithSections: adding sectionName: M with appInfoTitle: Meet
+D/AlphabeticalAppsList( 3141): addAppsWithSections: adding sectionName: N with appInfoTitle: Nimble Cleaner
+D/AlphabeticalAppsList( 3141): addAppsWithSections: adding sectionName: P with appInfoTitle: Play Store
+D/AlphabeticalAppsList( 3141): addAppsWithSections: adding sectionName: R with appInfoTitle: Recorder
+D/AlphabeticalAppsList( 3141): addAppsWithSections: adding sectionName: S with appInfoTitle: Sahur Sort
+D/AlphabeticalAppsList( 3141): addAppsWithSections: adding sectionName: T with appInfoTitle: Telegram
+D/ActivityThread( 3491): Package [com.zenithblue.sambas3] reported as REPLACED, but missing application info. Assuming REMOVED.
+D/AlphabeticalAppsList( 3141): addAppsWithSections: adding sectionName: V with appInfoTitle: VLC
+D/AlphabeticalAppsList( 3141): addAppsWithSections: adding sectionName: Z with appInfoTitle: ZArchiver
+D/AlphabeticalAppsList( 3141): Adding FastScrollSection duplicate to scroll to the bottom.
+D/AlphabeticalAppsList( 3141): Clearing FastScrollerSections.
+D/AlphabeticalAppsList( 3141): Adding apps with sections. HasPrivateApps: false
+D/AlphabeticalAppsList( 3141): addAppsWithSections: adding sectionName: … with appInfoTitle: 1 2 3 4 Player Games
+D/AlphabeticalAppsList( 3141): addAppsWithSections: adding sectionName: A with appInfoTitle: Adirstat
+D/AlphabeticalAppsList( 3141): addAppsWithSections: adding sectionName: B with appInfoTitle: BachataS4
+D/AlphabeticalAppsList( 3141): addAppsWithSections: adding sectionName: C with appInfoTitle: Calculator
+D/AlphabeticalAppsList( 3141): addAppsWithSections: adding sectionName: D with appInfoTitle: DeviceInsights
+D/AlphabeticalAppsList( 3141): addAppsWithSections: adding sectionName: F with appInfoTitle: FactualStats
+D/AlphabeticalAppsList( 3141): addAppsWithSections: adding sectionName: G with appInfoTitle: Gallery
+D/AlphabeticalAppsList( 3141): addAppsWithSections: adding sectionName: M with appInfoTitle: Meet
+D/AlphabeticalAppsList( 3141): addAppsWithSections: adding sectionName: N with appInfoTitle: Nimble Cleaner
+D/AlphabeticalAppsList( 3141): addAppsWithSections: adding sectionName: P with appInfoTitle: Play Store
+D/AlphabeticalAppsList( 3141): addAppsWithSections: adding sectionName: R with appInfoTitle: Recorder
+D/AlphabeticalAppsList( 3141): addAppsWithSections: adding sectionName: S with appInfoTitle: Sahur Sort
+D/AlphabeticalAppsList( 3141): addAppsWithSections: adding sectionName: T with appInfoTitle: Telegram
+D/AlphabeticalAppsList( 3141): addAppsWithSections: adding sectionName: V with appInfoTitle: VLC
+D/AlphabeticalAppsList( 3141): addAppsWithSections: adding sectionName: Z with appInfoTitle: ZArchiver
+D/AlphabeticalAppsList( 3141): Adding FastScrollSection duplicate to scroll to the bottom.
+I/DigitalWidgetProvider(29701): onReceive: Intent { act=android.intent.action.TIME_SET flg=0x25200010 xflg=0x4 cmp=com.android.deskclock/com.android.alarmclock.DigitalAppWidgetProvider }
+D/AccessibilitySourceService( 3215): enabled a11y services count 0
+D/AccessibilitySourceService( 3215): a11y source sending 0 issue to sc
+D/SafetySourceDataValidat( 2447): No cert check requested for package com.android.permissioncontroller
+D/BootBroadcastReceiver(19677): refresh job and clear data from action=android.intent.action.TIME_SET
+D/ActivityThread( 3491): Package [com.zenithblue.sambas3] reported as REPLACED, but missing application info. Assuming REMOVED.
+D/ActivityThread( 3491): Package [com.zenithblue.sambas3] reported as REPLACED, but missing application info. Assuming REMOVED.
+D/ActivityThread( 3491): Package [com.zenithblue.sambas3] reported as REPLACED, but missing application info. Assuming REMOVED.
+D/ActivityThread( 3491): Package [com.zenithblue.sambas3] reported as REPLACED, but missing application info. Assuming REMOVED.
+D/ActivityThread( 3491): Package [com.zenithblue.sambas3] reported as REPLACED, but missing application info. Assuming REMOVED.
+D/ActivityThread( 3491): Package [com.zenithblue.sambas3] reported as REPLACED, but missing application info. Assuming REMOVED.
+D/ActivityThread( 3491): Package [com.zenithblue.sambas3] reported as REPLACED, but missing application info. Assuming REMOVED.
+D/ActivityThread( 3491): Package [com.zenithblue.sambas3] reported as REPLACED, but missing application info. Assuming REMOVED.
+D/ActivityThread( 3491): Package [com.zenithblue.sambas3] reported as REPLACED, but missing application info. Assuming REMOVED.
+D/ActivityThread( 3491): Package [com.zenithblue.sambas3] reported as REPLACED, but missing application info. Assuming REMOVED.
+D/AccessibilitySourceService( 3215): enabled a11y services count 0
+D/AccessibilitySourceService( 3215): a11y source sending 0 issue to sc
+D/SafetySourceDataValidat( 2447): No cert check requested for package com.android.permissioncontroller
+D/AccessibilitySourceService( 3215): enabled a11y services count 0
+D/AccessibilitySourceService( 3215): a11y source sending 0 issue to sc
+D/SafetySourceDataValidat( 2447): No cert check requested for package com.android.permissioncontroller
+D/ActivityManager( 2447): sync unfroze 13070 com.google.android.gms.unstable for 10
+D/AccessibilitySourceService( 3215): enabled a11y services count 0
+D/BaseAllAppsAdapter( 3141): onBindViewHolder: isPrivateSpaceItem: false isStateTransitioning: false isScrolling: false readyToAnimate: false currentState: 0 currentAlpha: 1.0
+D/AccessibilitySourceService( 3215): a11y source sending 0 issue to sc
+D/BaseAllAppsAdapter( 3141): onBindViewHolder: isPrivateSpaceItem: false isStateTransitioning: false isScrolling: false readyToAnimate: false currentState: 0 currentAlpha: 1.0
+D/SafetySourceDataValidat( 2447): No cert check requested for package com.android.permissioncontroller
+D/BaseAllAppsAdapter( 3141): onBindViewHolder: isPrivateSpaceItem: false isStateTransitioning: false isScrolling: false readyToAnimate: false currentState: 0 currentAlpha: 1.0
+D/ActivityManager( 2447): sync unfroze 10708 com.google.android.gms.ui for 10
+D/BaseAllAppsAdapter( 3141): onBindViewHolder: isPrivateSpaceItem: false isStateTransitioning: false isScrolling: false readyToAnimate: false currentState: 0 currentAlpha: 1.0
+D/BaseAllAppsAdapter( 3141): onBindViewHolder: isPrivateSpaceItem: false isStateTransitioning: false isScrolling: false readyToAnimate: false currentState: 0 currentAlpha: 1.0
+D/BaseAllAppsAdapter( 3141): onBindViewHolder: isPrivateSpaceItem: false isStateTransitioning: false isScrolling: false readyToAnimate: false currentState: 0 currentAlpha: 1.0
+D/BaseAllAppsAdapter( 3141): onBindViewHolder: isPrivateSpaceItem: false isStateTransitioning: false isScrolling: false readyToAnimate: false currentState: 0 currentAlpha: 1.0
+D/ActivityManager( 2447): sync unfroze 30423 com.google.android.gms:snet for 10
+D/BaseAllAppsAdapter( 3141): onBindViewHolder: isPrivateSpaceItem: false isStateTransitioning: false isScrolling: false readyToAnimate: false currentState: 0 currentAlpha: 1.0
+D/BaseAllAppsAdapter( 3141): onBindViewHolder: isPrivateSpaceItem: false isStateTransitioning: false isScrolling: false readyToAnimate: false currentState: 0 currentAlpha: 1.0
+D/BaseAllAppsAdapter( 3141): onBindViewHolder: isPrivateSpaceItem: false isStateTransitioning: false isScrolling: false readyToAnimate: false currentState: 0 currentAlpha: 1.0
+D/AccessibilitySourceService( 3215): enabled a11y services count 0
+D/AccessibilitySourceService( 3215): a11y source sending 0 issue to sc
+D/BaseAllAppsAdapter( 3141): onBindViewHolder: isPrivateSpaceItem: false isStateTransitioning: false isScrolling: false readyToAnimate: false currentState: 0 currentAlpha: 1.0
+D/BaseAllAppsAdapter( 3141): onBindViewHolder: isPrivateSpaceItem: false isStateTransitioning: false isScrolling: false readyToAnimate: false currentState: 0 currentAlpha: 1.0
+D/SafetySourceDataValidat( 2447): No cert check requested for package com.android.permissioncontroller
+D/BaseAllAppsAdapter( 3141): onBindViewHolder: isPrivateSpaceItem: false isStateTransitioning: false isScrolling: false readyToAnimate: false currentState: 0 currentAlpha: 1.0
+D/BaseAllAppsAdapter( 3141): onBindViewHolder: isPrivateSpaceItem: false isStateTransitioning: false isScrolling: false readyToAnimate: false currentState: 0 currentAlpha: 1.0
+D/BaseAllAppsAdapter( 3141): onBindViewHolder: isPrivateSpaceItem: false isStateTransitioning: false isScrolling: false readyToAnimate: false currentState: 0 currentAlpha: 1.0
+D/BaseAllAppsAdapter( 3141): onBindViewHolder: isPrivateSpaceItem: false isStateTransitioning: false isScrolling: false readyToAnimate: false currentState: 0 currentAlpha: 1.0
+D/BaseAllAppsAdapter( 3141): onBindViewHolder: isPrivateSpaceItem: false isStateTransitioning: false isScrolling: false readyToAnimate: false currentState: 0 currentAlpha: 1.0
+D/BaseAllAppsAdapter( 3141): onBindViewHolder: isPrivateSpaceItem: false isStateTransitioning: false isScrolling: false readyToAnimate: false currentState: 0 currentAlpha: 1.0
+D/BaseAllAppsAdapter( 3141): onBindViewHolder: isPrivateSpaceItem: false isStateTransitioning: false isScrolling: false readyToAnimate: false currentState: 0 currentAlpha: 1.0
+D/AccessibilitySourceService( 3215): enabled a11y services count 0
+D/AccessibilitySourceService( 3215): a11y source sending 0 issue to sc
+D/BaseAllAppsAdapter( 3141): onBindViewHolder: isPrivateSpaceItem: false isStateTransitioning: false isScrolling: false readyToAnimate: false currentState: 0 currentAlpha: 1.0
+D/BaseAllAppsAdapter( 3141): onBindViewHolder: isPrivateSpaceItem: false isStateTransitioning: false isScrolling: false readyToAnimate: false currentState: 0 currentAlpha: 1.0
+D/BaseAllAppsAdapter( 3141): onBindViewHolder: isPrivateSpaceItem: false isStateTransitioning: false isScrolling: false readyToAnimate: false currentState: 0 currentAlpha: 1.0
+D/BaseAllAppsAdapter( 3141): onBindViewHolder: isPrivateSpaceItem: false isStateTransitioning: false isScrolling: false readyToAnimate: false currentState: 0 currentAlpha: 1.0
+D/SafetySourceDataValidat( 2447): No cert check requested for package com.android.permissioncontroller
+D/BaseAllAppsAdapter( 3141): onBindViewHolder: isPrivateSpaceItem: false isStateTransitioning: false isScrolling: false readyToAnimate: false currentState: 0 currentAlpha: 1.0
+D/BaseAllAppsAdapter( 3141): onBindViewHolder: isPrivateSpaceItem: false isStateTransitioning: false isScrolling: false readyToAnimate: false currentState: 0 currentAlpha: 1.0
+D/BaseAllAppsAdapter( 3141): onBindViewHolder: isPrivateSpaceItem: false isStateTransitioning: false isScrolling: false readyToAnimate: false currentState: 0 currentAlpha: 1.0
+D/BaseAllAppsAdapter( 3141): onBindViewHolder: isPrivateSpaceItem: false isStateTransitioning: false isScrolling: false readyToAnimate: false currentState: 0 currentAlpha: 1.0
+D/BaseAllAppsAdapter( 3141): onBindViewHolder: isPrivateSpaceItem: false isStateTransitioning: false isScrolling: false readyToAnimate: false currentState: 0 currentAlpha: 1.0
+D/BaseAllAppsAdapter( 3141): onBindViewHolder: isPrivateSpaceItem: false isStateTransitioning: false isScrolling: false readyToAnimate: false currentState: 0 currentAlpha: 1.0
+D/BaseAllAppsAdapter( 3141): onBindViewHolder: isPrivateSpaceItem: false isStateTransitioning: false isScrolling: false readyToAnimate: false currentState: 0 currentAlpha: 1.0
+D/AccessibilitySourceService( 3215): enabled a11y services count 0
+D/AccessibilitySourceService( 3215): a11y source sending 0 issue to sc
+D/SafetySourceDataValidat( 2447): No cert check requested for package com.android.permissioncontroller
+V/DigitalWidgetProvider(29701): Target dimensions: 1204px x 317px
+V/DigitalWidgetProvider(29701): Last valid widget container measurement: 430px x 317px
+V/DigitalWidgetProvider(29701): Last text clock measurement: 346px x 190px
+V/DigitalWidgetProvider(29701): Clock font: 162px
+D/AccessibilitySourceService( 3215): enabled a11y services count 0
+D/AccessibilitySourceService( 3215): a11y source sending 0 issue to sc
+D/ActivityThread(30423): Package [com.zenithblue.sambas3] reported as REPLACED, but missing application info. Assuming REMOVED.
+D/ActivityThread(10708): Package [com.zenithblue.sambas3] reported as REPLACED, but missing application info. Assuming REMOVED.
+D/ActivityThread(30423): Package [com.zenithblue.sambas3] reported as REPLACED, but missing application info. Assuming REMOVED.
+D/SafetySourceDataValidat( 2447): No cert check requested for package com.android.permissioncontroller
+D/ActivityThread(13070): Package [com.zenithblue.sambas3] reported as REPLACED, but missing application info. Assuming REMOVED.
+D/AccessibilitySourceService( 3215): enabled a11y services count 0
+D/AccessibilitySourceService( 3215): a11y source sending 0 issue to sc
+D/SafetySourceDataValidat( 2447): No cert check requested for package com.android.permissioncontroller
+D/ActivityThread(13070): Package [com.zenithblue.sambas3] reported as REPLACED, but missing application info. Assuming REMOVED.
+D/AccessibilitySourceService( 3215): enabled a11y services count 0
+D/AccessibilitySourceService( 3215): a11y source sending 0 issue to sc
+V/DigitalWidgetProvider(29701): Target dimensions: 1572px x 241px
+V/DigitalWidgetProvider(29701): Last valid widget container measurement: 315px x 240px
+V/DigitalWidgetProvider(29701): Last text clock measurement: 231px x 126px
+V/DigitalWidgetProvider(29701): Clock font: 108px
+E/RemoteViews(29701): Possibly notifying updates for nonexistent view Id
+D/AppWidgetServiceImpl( 2447): Trying to notify widget update for package com.android.deskclock with widget id: 3
+D/ActivityManager( 2447): sync unfroze 32009 com.google.android.syncadapters.calendar for 3
+D/ActivityThread(30423): Package [com.zenithblue.sambas3] reported as REPLACED, but missing application info. Assuming REMOVED.
+D/SafetySourceDataValidat( 2447): No cert check requested for package com.android.permissioncontroller
+D/AccessibilitySourceService( 3215): enabled a11y services count 0
+D/AccessibilitySourceService( 3215): a11y source sending 0 issue to sc
+D/DatabaseUtils(19677): clear data after current time = 1788125808114
+D/SafetySourceDataValidat( 2447): No cert check requested for package com.android.permissioncontroller
+V/NativeCrypto(32009): SSL shutdown failed: ssl=0xb400007701a6fa98: I/O error during system call, Software caused connection abort
+D/ActivityThread(32009): Package [com.zenithblue.sambas3] reported as REPLACED, but missing application info. Assuming REMOVED.
+D/ActivityThread(13070): Package [com.zenithblue.sambas3] reported as REPLACED, but missing application info. Assuming REMOVED.
+D/BoundBrokerSvc(27566): onBind: Intent { act=com.google.android.gms.clearcut.bootcount.service.START dat=chimera-action:/... xflg=0x4 cmp=com.google.android.gms/.chimera.PersistentBoundBrokerService }
+D/BoundBrokerSvc(27566): Loading bound service for intent: Intent { act=com.google.android.gms.clearcut.bootcount.service.START dat=chimera-action:/... xflg=0x4 cmp=com.google.android.gms/.chimera.PersistentBoundBrokerService }
+D/ActivityThread(30423): Package [com.zenithblue.sambas3] reported as REPLACED, but missing application info. Assuming REMOVED.
+D/ActivityThread(13070): Package [com.zenithblue.sambas3] reported as REPLACED, but missing application info. Assuming REMOVED.
+I/nimbus::stateful::nimbus_client(32535): updating experiment list
+D/ActivityThread(10708): Package [com.zenithblue.sambas3] reported as REPLACED, but missing application info. Assuming REMOVED.
+D/ActivityThread(10708): Package [com.zenithblue.sambas3] reported as REPLACED, but missing application info. Assuming REMOVED.
+D/ActivityThread(30423): Package [com.zenithblue.sambas3] reported as REPLACED, but missing application info. Assuming REMOVED.
+D/ActivityManager( 2447): sync unfroze 29751 com.qualcomm.timeservice for 3
+D/ActivityThread(13070): Package [com.zenithblue.sambas3] reported as REPLACED, but missing application info. Assuming REMOVED.
+D/ActivityThread(10708): Package [com.zenithblue.sambas3] reported as REPLACED, but missing application info. Assuming REMOVED.
+D/ActivityThread(29751): Package [com.zenithblue.sambas3] reported as REPLACED, but missing application info. Assuming REMOVED.
+D/ActivityThread(29751): Package [com.zenithblue.sambas3] reported as REPLACED, but missing application info. Assuming REMOVED.
+D/ActivityThread(29751): Package [com.zenithblue.sambas3] reported as REPLACED, but missing application info. Assuming REMOVED.
+D/ActivityThread(29751): Package [com.zenithblue.sambas3] reported as REPLACED, but missing application info. Assuming REMOVED.
+D/ActivityThread(29751): Package [com.zenithblue.sambas3] reported as REPLACED, but missing application info. Assuming REMOVED.
+D/ActivityThread(29751): Package [com.zenithblue.sambas3] reported as REPLACED, but missing application info. Assuming REMOVED.
+D/ActivityThread(29751): Package [com.zenithblue.sambas3] reported as REPLACED, but missing application info. Assuming REMOVED.
+D/ActivityThread(32009): Package [com.zenithblue.sambas3] reported as REPLACED, but missing application info. Assuming REMOVED.
+D/ActivityThread(29751): Package [com.zenithblue.sambas3] reported as REPLACED, but missing application info. Assuming REMOVED.
+D/ActivityThread(32009): Package [com.zenithblue.sambas3] reported as REPLACED, but missing application info. Assuming REMOVED.
+D/ActivityThread(32009): Package [com.zenithblue.sambas3] reported as REPLACED, but missing application info. Assuming REMOVED.
+D/ActivityThread(29751): Package [com.zenithblue.sambas3] reported as REPLACED, but missing application info. Assuming REMOVED.
+D/ActivityThread(32009): Package [com.zenithblue.sambas3] reported as REPLACED, but missing application info. Assuming REMOVED.
+D/ActivityThread(32009): Package [com.zenithblue.sambas3] reported as REPLACED, but missing application info. Assuming REMOVED.
+D/ActivityThread(32009): Package [com.zenithblue.sambas3] reported as REPLACED, but missing application info. Assuming REMOVED.
+D/ActivityThread(29751): Package [com.zenithblue.sambas3] reported as REPLACED, but missing application info. Assuming REMOVED.
+D/ActivityThread(32009): Package [com.zenithblue.sambas3] reported as REPLACED, but missing application info. Assuming REMOVED.
+D/ActivityThread(32009): Package [com.zenithblue.sambas3] reported as REPLACED, but missing application info. Assuming REMOVED.
+D/ActivityThread(32009): Package [com.zenithblue.sambas3] reported as REPLACED, but missing application info. Assuming REMOVED.
+D/ActivityThread(32009): Package [com.zenithblue.sambas3] reported as REPLACED, but missing application info. Assuming REMOVED.
+D/ActivityThread(29751): Package [com.zenithblue.sambas3] reported as REPLACED, but missing application info. Assuming REMOVED.
+D/ActivityThread(32009): Package [com.zenithblue.sambas3] reported as REPLACED, but missing application info. Assuming REMOVED.
+D/ActivityThread(32009): Package [com.zenithblue.sambas3] reported as REPLACED, but missing application info. Assuming REMOVED.
+D/ActivityThread(29751): Package [com.zenithblue.sambas3] reported as REPLACED, but missing application info. Assuming REMOVED.
+D/ActivityThread(29751): Package [com.zenithblue.sambas3] reported as REPLACED, but missing application info. Assuming REMOVED.
+D/ActivityThread(32009): Package [com.zenithblue.sambas3] reported as REPLACED, but missing application info. Assuming REMOVED.
+D/ActivityThread(32009): Package [com.zenithblue.sambas3] reported as REPLACED, but missing application info. Assuming REMOVED.
+D/ActivityThread(29751): Package [com.zenithblue.sambas3] reported as REPLACED, but missing application info. Assuming REMOVED.
+D/ActivityThread(10708): Package [com.zenithblue.sambas3] reported as REPLACED, but missing application info. Assuming REMOVED.
+D/ActivityThread(30423): Package [com.zenithblue.sambas3] reported as REPLACED, but missing application info. Assuming REMOVED.
+D/ActivityThread(32009): Package [com.zenithblue.sambas3] reported as REPLACED, but missing application info. Assuming REMOVED.
+D/ActivityThread(13070): Package [com.zenithblue.sambas3] reported as REPLACED, but missing application info. Assuming REMOVED.
+D/ActivityThread(10708): Package [com.zenithblue.sambas3] reported as REPLACED, but missing application info. Assuming REMOVED.
+D/ActivityThread(29751): Package [com.zenithblue.sambas3] reported as REPLACED, but missing application info. Assuming REMOVED.
+D/ActivityThread(29751): Package [com.zenithblue.sambas3] reported as REPLACED, but missing application info. Assuming REMOVED.
+D/ActivityThread(29751): Package [com.zenithblue.sambas3] reported as REPLACED, but missing application info. Assuming REMOVED.
+D/ActivityThread(29751): Package [com.zenithblue.sambas3] reported as REPLACED, but missing application info. Assuming REMOVED.
+D/PeriodicJobManager(19677): schedule next alarm job at Aug 31, 2026, 04:00:00
+D/ActivityThread(29751): Package [com.zenithblue.sambas3] reported as REPLACED, but missing application info. Assuming REMOVED.
+D/ActivityThread(29751): Package [com.zenithblue.sambas3] reported as REPLACED, but missing application info. Assuming REMOVED.
+D/BatteryUsageContentProvider(19677): getLastFullChargeTimestamp() in 0/ms
+D/ActivityThread(29751): Package [com.zenithblue.sambas3] reported as REPLACED, but missing application info. Assuming REMOVED.
+D/ActivityThread(29751): Package [com.zenithblue.sambas3] reported as REPLACED, but missing application info. Assuming REMOVED.
+D/ActivityThread(29751): Package [com.zenithblue.sambas3] reported as REPLACED, but missing application info. Assuming REMOVED.
+D/BoundBrokerSvc(27566): onRebind: Intent { act=com.google.android.gms.libs.gmscorelogger.service.START dat=chimera-action:/... xflg=0x4 cmp=com.google.android.gms/.chimera.PersistentDirectBootAwareApiService }
+D/ActivityThread(13070): Package [com.zenithblue.sambas3] reported as REPLACED, but missing application info. Assuming REMOVED.
+D/ActivityThread(29751): Package [com.zenithblue.sambas3] reported as REPLACED, but missing application info. Assuming REMOVED.
+D/ActivityThread(29751): Package [com.zenithblue.sambas3] reported as REPLACED, but missing application info. Assuming REMOVED.
+D/DatabaseUtils(19677): getLastFullChargeTime() lastFullChargeTime=Aug 31, 2026, 01:23:40 in 1/ms
+D/DatabaseUtils(19677): getBatteryEvents for timestamp: 1788119620944
+D/ActivityThread(13070): Package [com.zenithblue.sambas3] reported as REPLACED, but missing application info. Assuming REMOVED.
+D/BatteryUsageContentProvider(19677): getQueryBatteryEventTypes from uri: content://com.android.settings.battery.usage.provider/BatteryEvent?timestamp=1788119620944&batteryEventType=3%2C4
+D/ActivityThread(29751): Package [com.zenithblue.sambas3] reported as REPLACED, but missing application info. Assuming REMOVED.
+D/BatteryUsageContentProvider(19677): getQueryTimestamp from uri: content://com.android.settings.battery.usage.provider/BatteryEvent?timestamp=1788119620944&batteryEventType=3%2C4
+W/BatteryUsageContentProvider(19677): getBatteryEvents() in 0/ms
+D/ActivityThread(29751): Package [com.zenithblue.sambas3] reported as REPLACED, but missing application info. Assuming REMOVED.
+D/ActivityThread(29751): Package [com.zenithblue.sambas3] reported as REPLACED, but missing application info. Assuming REMOVED.
+D/ActivityThread(13070): Package [com.zenithblue.sambas3] reported as REPLACED, but missing application info. Assuming REMOVED.
+D/ActivityThread(29751): Package [org.mozilla.fenix] reported as REPLACED, but missing application info. Assuming REMOVED.
+D/ActivityThread(30423): Package [com.zenithblue.sambas3] reported as REPLACED, but missing application info. Assuming REMOVED.
+D/WM-RescheduleReceiver(32009): Received intent Intent { act=android.intent.action.TIME_SET flg=0x25200010 xflg=0x4 cmp=com.google.android.syncadapters.calendar/androidx.work.impl.background.systemalarm.RescheduleReceiver }
+I/SystemUpdate(27300): [Installation,ReceiverIntentOperation] Received intent: Intent { act=android.intent.action.TIME_SET flg=0x25200010 xflg=0x4 pkg=com.google.android.gms cmp=com.google.android.gms/.chimera.GmsIntentOperationService$PersistentTrustedReceiver }.
+D/ActivityThread(29751): Package [org.mozilla.fenix] reported as REPLACED, but missing application info. Assuming REMOVED.
+D/ActivityThread(29751): Package [org.videolan.vlc] reported as REPLACED, but missing application info. Assuming REMOVED.
+D/ActivityThread(29751): Package [org.videolan.vlc] reported as REPLACED, but missing application info. Assuming REMOVED.
+D/ActivityThread(29751): Package [com.zenithblue.sambas3] reported as REPLACED, but missing application info. Assuming REMOVED.
+D/ActivityThread(29751): Package [com.zenithblue.sambas3] reported as REPLACED, but missing application info. Assuming REMOVED.
+D/ActivityThread(29751): Package [com.zenithblue.sambas3] reported as REPLACED, but missing application info. Assuming REMOVED.
+D/ActivityThread(29751): Package [com.zenithblue.sambas3] reported as REPLACED, but missing application info. Assuming REMOVED.
+D/ActivityThread(29751): Package [com.zenithblue.sambas3] reported as REPLACED, but missing application info. Assuming REMOVED.
+D/ActivityThread(29751): Package [com.zenithblue.sambas3] reported as REPLACED, but missing application info. Assuming REMOVED.
+D/ActivityThread(29751): Package [com.zenithblue.sambas3] reported as REPLACED, but missing application info. Assuming REMOVED.
+D/ActivityThread(29751): Package [com.zenithblue.sambas3] reported as REPLACED, but missing application info. Assuming REMOVED.
+D/ActivityThread(29751): Package [com.zenithblue.sambas3] reported as REPLACED, but missing application info. Assuming REMOVED.
+D/ActivityThread(10708): Package [com.zenithblue.sambas3] reported as REPLACED, but missing application info. Assuming REMOVED.
+D/ActivityThread(30423): Package [com.zenithblue.sambas3] reported as REPLACED, but missing application info. Assuming REMOVED.
+D/DatabaseUtils(19677): getBatteryEvents size=4 in 2/ms
+D/ActivityThread(29751): Package [com.zenithblue.sambas3] reported as REPLACED, but missing application info. Assuming REMOVED.
+D/ActivityThread(30423): Package [com.zenithblue.sambas3] reported as REPLACED, but missing application info. Assuming REMOVED.
+D/ActivityThread(29751): Package [com.zenithblue.sambas3] reported as REPLACED, but missing application info. Assuming REMOVED.
+D/ActivityThread(10708): Package [com.zenithblue.sambas3] reported as REPLACED, but missing application info. Assuming REMOVED.
+D/ActivityThread(29751): Package [com.zenithblue.sambas3] reported as REPLACED, but missing application info. Assuming REMOVED.
+D/ActivityThread(29751): Package [com.zenithblue.sambas3] reported as REPLACED, but missing application info. Assuming REMOVED.
+D/ActivityThread(29751): Package [com.zenithblue.sambas3] reported as REPLACED, but missing application info. Assuming REMOVED.
+D/ActivityThread(29751): Package [com.zenithblue.sambas3] reported as REPLACED, but missing application info. Assuming REMOVED.
+D/ActivityThread(29751): Package [com.zenithblue.sambas3] reported as REPLACED, but missing application info. Assuming REMOVED.
+D/ActivityThread(10708): Package [com.zenithblue.sambas3] reported as REPLACED, but missing application info. Assuming REMOVED.
+D/TimeService(29751): Receivedandroid.intent.action.TIME_SET intent. Current Time is 1788125808145
+D/ActivityThread(30423): Package [com.zenithblue.sambas3] reported as REPLACED, but missing application info. Assuming REMOVED.
+D/QC-time-services( 1390): Daemon: Connection accepted:time_genoff
+D/ActivityThread(13070): Package [com.zenithblue.sambas3] reported as REPLACED, but missing application info. Assuming REMOVED.
+D/ActivityManager( 2447): sync unfroze 7539 org.lineageos.etar for 3
+D/ActivityThread(30423): Package [com.zenithblue.sambas3] reported as REPLACED, but missing application info. Assuming REMOVED.
+D/ActivityThread(10708): Package [com.zenithblue.sambas3] reported as REPLACED, but missing application info. Assuming REMOVED.
+D/ActivityThread( 7539): Package [com.zenithblue.sambas3] reported as REPLACED, but missing application info. Assuming REMOVED.
+D/ActivityThread(13070): Package [com.zenithblue.sambas3] reported as REPLACED, but missing application info. Assuming REMOVED.
+D/QC-time-services( 1390): Daemon:Received base = 2, unit = 1, operation = 0,value = 1788125808145
+D/QC-time-services( 1390): Daemon:genoff_opr: Base = 2, val = 1788125808145, operation = 0
+D/QC-time-services( 1390): Daemon:Value read from QTimer mseconds = 277548899
+D/QC-time-services( 1390): Daemon:Value read from RTC mseconds on boot = 54561869000
+D/QC-time-services( 1390): Daemon:Delta read on boot mseconds = 54561860249
+D/QC-time-services( 1390): Daemon:new time 1788125808145 
+D/QC-time-services( 1390): Daemon: delta 1733286398997 genoff 1733286398997 
+D/QC-time-services( 1390): Daemon:genoff_persistent_update: Writing genoff = 1733286398997 to memory
+D/QC-time-services( 1390): Daemon:Opening File: /mnt/vendor/persist/time/ats_2 /data/vendor/time/ats_2
+D/QC-time-services( 1390): Daemon:time_persistent_memory_opr:Genoff write operation 
+D/ActivityManager( 2447): sync unfroze 17866 com.block.juggle for 3
+D/ActivityThread(10708): Package [com.zenithblue.sambas3] reported as REPLACED, but missing application info. Assuming REMOVED.
+D/ActivityThread(13070): Package [com.zenithblue.sambas3] reported as REPLACED, but missing application info. Assuming REMOVED.
+D/ActivityThread( 7539): Package [com.zenithblue.sambas3] reported as REPLACED, but missing application info. Assuming REMOVED.
+D/ActivityThread( 7539): Package [com.zenithblue.sambas3] reported as REPLACED, but missing application info. Assuming REMOVED.
+D/ActivityThread( 7539): Package [com.zenithblue.sambas3] reported as REPLACED, but missing application info. Assuming REMOVED.
+D/ActivityThread( 7539): Package [com.zenithblue.sambas3] reported as REPLACED, but missing application info. Assuming REMOVED.
+D/ActivityThread( 7539): Package [com.zenithblue.sambas3] reported as REPLACED, but missing application info. Assuming REMOVED.
+D/ActivityThread( 7539): Package [com.zenithblue.sambas3] reported as REPLACED, but missing application info. Assuming REMOVED.
+D/ActivityThread(30423): Package [com.zenithblue.sambas3] reported as REPLACED, but missing application info. Assuming REMOVED.
+D/QC-time-services( 1390): Updating the TOD offset
+D/QC-time-services( 1390): Daemon:genoff_persistent_update: Writing genoff = 1733286398997 to memory
+D/QC-time-services( 1390): Daemon:Opening File: /mnt/vendor/persist/time/ats_1 /data/vendor/time/ats_1
+D/QC-time-services( 1390): Daemon:time_persistent_memory_opr:Genoff write operation 
+D/ActivityThread(10708): Package [com.zenithblue.sambas3] reported as REPLACED, but missing application info. Assuming REMOVED.
+D/ActivityThread(10708): Package [com.zenithblue.sambas3] reported as REPLACED, but missing application info. Assuming REMOVED.
+D/ActivityThread(30423): Package [com.zenithblue.sambas3] reported as REPLACED, but missing application info. Assuming REMOVED.
+D/ActivityThread(17866): Package [com.zenithblue.sambas3] reported as REPLACED, but missing application info. Assuming REMOVED.
+D/ActivityThread(10708): Package [com.zenithblue.sambas3] reported as REPLACED, but missing application info. Assuming REMOVED.
+D/ActivityThread(30423): Package [com.zenithblue.sambas3] reported as REPLACED, but missing application info. Assuming REMOVED.
+D/ActivityThread(13070): Package [com.zenithblue.sambas3] reported as REPLACED, but missing application info. Assuming REMOVED.
+D/ActivityThread(10708): Package [com.zenithblue.sambas3] reported as REPLACED, but missing application info. Assuming REMOVED.
+D/ActivityThread(13070): Package [com.zenithblue.sambas3] reported as REPLACED, but missing application info. Assuming REMOVED.
+D/ActivityThread(10708): Package [com.zenithblue.sambas3] reported as REPLACED, but missing application info. Assuming REMOVED.
+D/ActivityThread(13070): Package [com.zenithblue.sambas3] reported as REPLACED, but missing application info. Assuming REMOVED.
+D/ActivityThread(30423): Package [com.zenithblue.sambas3] reported as REPLACED, but missing application info. Assuming REMOVED.
+I/AlarmManager(27300): setExactAndAllowWhileIdle [name: RemindersNSREFRESH_TIME_REMINDERS_ALARM type: 0 triggerAtMillis: 1788201000000]
+D/ActivityThread(13070): Package [com.zenithblue.sambas3] reported as REPLACED, but missing application info. Assuming REMOVED.
+D/ActivityThread(30423): Package [com.zenithblue.sambas3] reported as REPLACED, but missing application info. Assuming REMOVED.
+D/ActivityThread( 7539): Package [com.zenithblue.sambas3] reported as REPLACED, but missing application info. Assuming REMOVED.
+D/ActivityThread( 7539): Package [com.zenithblue.sambas3] reported as REPLACED, but missing application info. Assuming REMOVED.
+D/ActivityThread( 7539): Package [com.zenithblue.sambas3] reported as REPLACED, but missing application info. Assuming REMOVED.
+D/ActivityThread( 7539): Package [com.zenithblue.sambas3] reported as REPLACED, but missing application info. Assuming REMOVED.
+D/ActivityThread( 7539): Package [com.zenithblue.sambas3] reported as REPLACED, but missing application info. Assuming REMOVED.
+D/ActivityThread(17866): Package [com.zenithblue.sambas3] reported as REPLACED, but missing application info. Assuming REMOVED.
+D/ActivityThread(17866): Package [com.zenithblue.sambas3] reported as REPLACED, but missing application info. Assuming REMOVED.
+D/ActivityThread(17866): Package [com.zenithblue.sambas3] reported as REPLACED, but missing application info. Assuming REMOVED.
+D/ActivityThread( 7539): Package [com.zenithblue.sambas3] reported as REPLACED, but missing application info. Assuming REMOVED.
+D/ActivityThread(17866): Package [com.zenithblue.sambas3] reported as REPLACED, but missing application info. Assuming REMOVED.
+D/ActivityThread(17866): Package [com.zenithblue.sambas3] reported as REPLACED, but missing application info. Assuming REMOVED.
+D/ActivityThread(17866): Package [com.zenithblue.sambas3] reported as REPLACED, but missing application info. Assuming REMOVED.
+D/ActivityThread( 7539): Package [com.zenithblue.sambas3] reported as REPLACED, but missing application info. Assuming REMOVED.
+D/ActivityThread(17866): Package [com.zenithblue.sambas3] reported as REPLACED, but missing application info. Assuming REMOVED.
+D/ActivityThread(17866): Package [com.zenithblue.sambas3] reported as REPLACED, but missing application info. Assuming REMOVED.
+D/ActivityThread( 7539): Package [com.zenithblue.sambas3] reported as REPLACED, but missing application info. Assuming REMOVED.
+D/ActivityThread(17866): Package [com.zenithblue.sambas3] reported as REPLACED, but missing application info. Assuming REMOVED.
+D/ActivityThread( 7539): Package [com.zenithblue.sambas3] reported as REPLACED, but missing application info. Assuming REMOVED.
+I/libglean_ffi(32535): glean_core::ping: Collecting nimbus-targeting-context
+I/UsageStatsService( 2447): Time changed in by -3 seconds
+V/GrammaticalInflectionUtils( 2447): AttributionSource: android.content.AttributionSource@7f599e0f does not have READ_SYSTEM_GRAMMATICAL_GENDER permission.
+D/BackgroundInstallControlService( 2447): Package event received: 0
+D/ActivityManager( 2447): sync unfroze 5326 com.duckduckgo.mobile.android for 3
+D/NativePermissionController( 1655): checkPermission: missing 13 for 10189
+D/Zygote  ( 1418): Forked child process 16820
+D/NativePermissionController( 1655): checkPermission: missing 13 for 10189
+I/MessageNotificationWorker(32535): Successfully fetched and applied Nimbus experiments.
+I/ActivityManager( 2447): Start proc 16820:com.android.providers.calendar/u0a74 for content provider {com.android.providers.calendar/com.android.providers.calendar.CalendarProvider2}
+I/SystemUpdate(27300): [Execution,InstallationEventIntentOperation] Handling event of type 6.
+D/QC-time-services( 1390): Daemon:genoff_set: Updating the WLAN offset
+D/QC-time-services( 1390): Daemon:genoff_persistent_update: Writing genoff = 1733286398997 to memory
+D/QC-time-services( 1390): Daemon:Opening File: /mnt/vendor/persist/time/ats_16 /data/vendor/time/ats_16
+D/QC-time-services( 1390): Daemon:time_persistent_memory_opr:Genoff write operation 
+D/NativePermissionController( 1655): checkPermission: missing 13 for 10189
+I/Zygote  (16820): Process 16820 created for com.android.providers.calendar
+I/viders.calendar(16820): Using CollectorTypeCMC GC.
+I/libglean_ffi(32535): glean_core::upload::directory: Processing ping at: /data/user/0/org.mozilla.fenix/glean_data/pending_pings/87d8022e-2202-473f-a7b4-ab88f3739c53
+D/TimeService(29751): Set time successfully!
+I/libglean_ffi(32535): glean_core::metrics::ping: The ping 'nimbus-targeting-context' was submitted and will be sent as soon as possible
+E/QC-time-services( 1390): Daemon: Time-services: Waiting to acceptconnection
+D/NativePermissionController( 1655): checkPermission: missing 13 for 10189
+D/NativePermissionController( 1655): checkPermission: missing 13 for 10189
+D/NativePermissionController( 1655): checkPermission: missing 13 for 10189
+I/SystemUpdate(27300): [Execution,InstallationIntentOperation] Received intent: Intent { act=com.google.android.gms.update.INSTALL_UPDATE cat=[targeted_intent_op_prefix:.update.execution.InstallationIntentOperation] xflg=0x4 cmp=com.google.android.gms/.chimera.GmsIntentOperationService (has extras) }.
+I/SystemUpdate(27300): [Execution,ExecutionManager] Start action execution: finished-execution
+D/NativePermissionController( 1655): checkPermission: missing 13 for 10189
+I/SystemUpdate(27300): [Execution,ExecutionManager] Action finished-execution executed for 0.00 seconds.
+D/NativePermissionController( 1655): checkPermission: missing 13 for 10189
+D/NativePermissionController( 1655): checkPermission: missing 13 for 10189
+D/NativePermissionController( 1655): checkPermission: missing 13 for 10189
+D/NativePermissionController( 1655): checkPermission: missing 13 for 10189
+I/AF::TrackHandle( 1655): opChanged OP_PLAY_AUDIO callback received for 
+D/NativePermissionController( 1655): checkPermission: missing 13 for 10189
+I/AF::TrackHandle( 1655): opChanged OP_PLAY_AUDIO callback received for 
+I/AF::TrackHandle( 1655): opChanged OP_PLAY_AUDIO callback received for 
+I/AF::TrackHandle( 1655): opChanged OP_PLAY_AUDIO callback received for 
+D/ActivityManager( 2447): sync unfroze 7030 com.ivarna.deviceinsight for 3
+D/ActivityThread( 5326): Package [com.zenithblue.sambas3] reported as REPLACED, but missing application info. Assuming REMOVED.
+W/UsageSyncManager( 3491): <DWB> Last (TimeDelta{wallTime=2026-08-29T09:31:52.866Z, elapsedSinceBoot=PT41H44.728S}, boot count 19) and current (TimeDelta{wallTime=2026-08-30T21:36:48.153Z, elapsedSinceBoot=PT77H5M43.81S}, boot count 19) deltas are different. Increase event shift by PT-3.795S.
+W/UsageSyncManager( 3491): <DWB> Deferring shifting events by PT-3.795S
+I/AF::TrackHandle( 1655): opChanged OP_PLAY_AUDIO callback received for 
+I/AF::TrackHandle( 1655): opChanged OP_PLAY_AUDIO callback received for 
+D/ActivityThread( 5326): Package [com.zenithblue.sambas3] reported as REPLACED, but missing application info. Assuming REMOVED.
+W/JobInfo (32535): Requested important-while-foreground flag for job574 is ignored and takes no effect
+D/ActivityThread( 5326): Package [com.zenithblue.sambas3] reported as REPLACED, but missing application info. Assuming REMOVED.
+D/ActivityThread( 5326): Package [com.zenithblue.sambas3] reported as REPLACED, but missing application info. Assuming REMOVED.
+D/ActivityThread( 5326): Package [com.zenithblue.sambas3] reported as REPLACED, but missing application info. Assuming REMOVED.
+D/ActivityThread( 5326): Package [com.zenithblue.sambas3] reported as REPLACED, but missing application info. Assuming REMOVED.
+D/nativeloader(16820): Load libframework-connectivity-tiramisu-jni.so using APEX ns com_android_tethering for caller /apex/com.android.tethering/javalib/framework-connectivity-t.jar: ok
+I/WM-WorkerWrapper( 5326): Worker result SUCCESS for Work [ id=02e4a05f-ef27-4b83-b0c4-7018e59e0424, tags={ com.duckduckgo.mobile.android.vpn.heartbeat.VpnServiceHeartbeatMonitorWorker, VpnServiceHeartbeatMonitorWorker } ]
+I/WM-WorkerWrapper(32535): Worker result SUCCESS for Work [ id=0a08bc61-44c3-461c-9a11-ae9e491f088c, tags={ org.mozilla.fenix.messaging.MessageNotificationWorker } ]
+D/FileUtils( 2447): Rounded bytes from 12101951488 to 16000000000
+D/BoundBrokerSvc(27566): onBind: Intent { act=com.google.android.contextmanager.service.ContextManagerService.START xflg=0x4 pkg=com.google.android.gms }
+D/BoundBrokerSvc(27566): Loading bound service for intent: Intent { act=com.google.android.contextmanager.service.ContextManagerService.START xflg=0x4 pkg=com.google.android.gms }
+I/ReactNativeJNI(17866): Memory warning (pressure level: TRIM_MEMORY_BACKGROUND) received by JS VM, running a GC
+I/libglean_ffi(32535): glean_core::upload: New upload task with id 87d8022e-2202-473f-a7b4-ab88f3739c53 (path: /submit/org-mozilla-fenix/nimbus-targeting-context/1/87d8022e-2202-473f-a7b4-ab88f3739c53)
+D/nativeloader(16820): Configuring clns-shared-9 for other apk /system/priv-app/CalendarProvider/CalendarProvider.apk. target_sdk_version=36, uses_libraries=, library_path=/system/priv-app/CalendarProvider/lib/arm64:/system/lib64:/system_ext/lib64, permitted_path=/data:/mnt/expand:/data/user/0/com.android.providers.calendar:/system/priv-app/CalendarProvider:/system/lib64:/system_ext/lib64
+V/GraphicsEnvironment(16820): Currently set values for:
+V/GraphicsEnvironment(16820):   angle_gl_driver_selection_pkgs=[]
+V/GraphicsEnvironment(16820):   angle_gl_driver_selection_values=[]
+V/GraphicsEnvironment(16820): com.android.providers.calendar is not listed in per-application setting
+V/GraphicsEnvironment(16820): ANGLE allowlist from config: 
+V/GraphicsEnvironment(16820): No special selections for ANGLE, returning default driver choice
+V/GraphicsEnvironment(16820): Neither updatable production driver nor prerelease driver is supported.
+D/ConnectivityService( 2447): requestNetwork for uid/pid:10210/32535 activeRequest: null callbackRequest: 2855 [NetworkRequest [ REQUEST id=2856, [ Capabilities: INTERNET&NOT_RESTRICTED&TRUSTED&NOT_VCN_MANAGED&NOT_BANDWIDTH_CONSTRAINED Uid: 10210 RequestorUid: 10210 RequestorPkg: org.mozilla.fenix UnderlyingNetworks: Null] ]] callback flags: 0 order: 2147483647 isUidTracked: false declaredMethods: AVAIL|LOST|NC|BLK
+D/WifiNetworkFactory( 2447): got request NetworkRequest [ REQUEST id=2856, [ Capabilities: INTERNET&NOT_RESTRICTED&TRUSTED&NOT_VCN_MANAGED&NOT_BANDWIDTH_CONSTRAINED Uid: 10210 RequestorUid: 10210 RequestorPkg: org.mozilla.fenix UnderlyingNetworks: Null] ]
+V/WifiNetworkFactory( 2447): Accepted network request NetworkRequest [ REQUEST id=2856, [ Capabilities: INTERNET&NOT_RESTRICTED&TRUSTED&NOT_VCN_MANAGED&NOT_BANDWIDTH_CONSTRAINED Uid: 10210 RequestorUid: 10210 RequestorPkg: org.mozilla.fenix UnderlyingNetworks: Null] ]
+D/UntrustedWifiNetworkFactory( 2447): got request NetworkRequest [ REQUEST id=2856, [ Capabilities: INTERNET&NOT_RESTRICTED&TRUSTED&NOT_VCN_MANAGED&NOT_BANDWIDTH_CONSTRAINED Uid: 10210 RequestorUid: 10210 RequestorPkg: org.mozilla.fenix UnderlyingNetworks: Null] ]
+D/OemPaidWifiNetworkFactory( 2447): got request NetworkRequest [ REQUEST id=2856, [ Capabilities: INTERNET&NOT_RESTRICTED&TRUSTED&NOT_VCN_MANAGED&NOT_BANDWIDTH_CONSTRAINED Uid: 10210 RequestorUid: 10210 RequestorPkg: org.mozilla.fenix UnderlyingNetworks: Null] ]
+D/ConnectivityService( 2447): NetReassign [2856 : null → 111] [c 0] [a 0] [i 1]
+D/MultiInternetWifiNetworkFactory( 2447): got request NetworkRequest [ REQUEST id=2856, [ Capabilities: INTERNET&NOT_RESTRICTED&TRUSTED&NOT_VCN_MANAGED&NOT_BANDWIDTH_CONSTRAINED Uid: 10210 RequestorUid: 10210 RequestorPkg: org.mozilla.fenix UnderlyingNetworks: Null] ]
+E/ashmem  (16820): Pinning is deprecated since Android Q. Please use trim or other methods.
+I/ReactNativeJNI(17866): Memory warning (pressure level: TRIM_MEMORY_BACKGROUND) received by JS VM, running a GC
+I/CalendarProvider2(16820): Created com.android.providers.calendar.CalendarAlarmManager@d55c69f(com.android.providers.calendar.CalendarProvider2@e0433ec)
+D/RemoteListenableDelegatingWorker(  782): Cleaning up
+W/JobInfo ( 3491): Requested important-while-foreground flag for job359 is ignored and takes no effect
+I/WM-WorkerWrapper(  782): Worker result SUCCESS for Work [ id=16ad3a23-188f-48c2-a2e8-586bad6a1127, class=com.google.apps.tiktok.contrib.work.TikTokListenableWorker, tags={ com.google.apps.tiktok.contrib.work.TikTokListenableWorker,TikTokWorker#com.google.android.libraries.search.suggest.sources.completeserver.CompleteServerZeroPrefixWorker,tiktok_account_work,account_id_4 } ]
+D/WM-Processor(  782): rai 16ad3a23-188f-48c2-a2e8-586bad6a1127 executed; reschedule = false
+D/WM-SystemJobService(  782): 16ad3a23-188f-48c2-a2e8-586bad6a1127 executed on JobScheduler
+D/WM-GreedyScheduler(  782): Cancelling work ID 16ad3a23-188f-48c2-a2e8-586bad6a1127
+D/TileServices( 2831): Couldn't find tile for ComponentInfo{com.google.android.apps.wellbeing/com.google.android.apps.wellbeing.screen.ui.GrayscaleTileService}(0)
+D/WM-SystemJobScheduler(  782): Scheduling work ID 16ad3a23-188f-48c2-a2e8-586bad6a1127 (com.google.apps.tiktok.contrib.work.TikTokListenableWorker), Job ID 5204
+D/FileUtils( 2447): Rounded bytes from 12101951488 to 16000000000
+W/DefaultDispatch( 7030): type=1400 audit(0.0:835751): avc:  denied  { read } for  name="gpuclk" dev="sysfs" ino=139614 scontext=u:r:untrusted_app:s0:c236,c256,c512,c768 tcontext=u:object_r:vendor_sysfs_kgsl_gpuclk:s0 tclass=file permissive=0 app=com.ivarna.deviceinsight
+W/DefaultDispatch( 7030): type=1400 audit(0.0:835752): avc:  denied  { read } for  name="max_gpuclk" dev="sysfs" ino=139615 scontext=u:r:untrusted_app:s0:c236,c256,c512,c768 tcontext=u:object_r:vendor_sysfs_kgsl:s0 tclass=file permissive=0 app=com.ivarna.deviceinsight
+E/SELinux (  899): avc:  denied  { find } for pid=16849 uid=10236 name=window scontext=u:r:untrusted_app:s0:c236,c256,c512,c768 tcontext=u:object_r:window_service:s0 tclass=service_manager permissive=0
+W/libbinder.BackendUnifiedServiceManager(16861): Thread Pool max thread count is 0. Cannot cache binder as linkToDeath cannot be implemented. serviceName: activity
+I/UsageStatsService( 2447): User[0] Time changed in by -3 seconds
+I/UsageStatsService( 2447): User[0] Flushing usage stats to disk
+I/UsageStatsDatabase( 2447): Time changed by -3s794ms. files deleted: 0 files moved: 16
+V/Configuration( 2447): Updating configuration, locales updated from [] to [en_US]
+V/Configuration( 2447): Updating configuration, locales updated from [] to [en_US]
+V/Configuration( 2447): Updating configuration, locales updated from [] to [en_US]
+V/Configuration( 2447): Updating configuration, locales updated from [] to [en_US]
+V/Configuration( 2447): Updating configuration, locales updated from [] to [en_US]
+V/Configuration( 2447): Updating configuration, locales updated from [] to [en_US]
+V/Configuration( 2447): Updating configuration, locales updated from [] to [en_US]
+V/Configuration( 2447): Updating configuration, locales updated from [] to [en_US]
+V/Configuration( 2447): Updating configuration, locales updated from [] to [en_US]
+V/Configuration( 2447): Updating configuration, locales updated from [] to [en_US]
+V/Configuration( 2447): Updating configuration, locales updated from [] to [en_US]
+V/Configuration( 2447): Updating configuration, locales updated from [] to [en_US]
+V/Configuration( 2447): Updating configuration, locales updated from [] to [en_US]
+V/Configuration( 2447): Updating configuration, locales updated from [] to [en_US]
+V/Configuration( 2447): Updating configuration, locales updated from [] to [en_US]
+V/Configuration( 2447): Updating configuration, locales updated from [] to [en_US]
+V/Configuration( 2447): Updating configuration, locales updated from [] to [en_US]
+V/Configuration( 2447): Updating configuration, locales updated from [] to [en_US]
+V/Configuration( 2447): Updating configuration, locales updated from [] to [en_US]
+V/Configuration( 2447): Updating configuration, locales updated from [] to [en_US]
+V/Configuration( 2447): Updating configuration, locales updated from [] to [en_US]
+V/Configuration( 2447): Updating configuration, locales updated from [] to [en_US]
+V/Configuration( 2447): Updating configuration, locales updated from [] to [en_US]
+V/Configuration( 2447): Updating configuration, locales updated from [] to [en_US]
+V/Configuration( 2447): Updating configuration, locales updated from [] to [en_US]
+V/Configuration( 2447): Updating configuration, locales updated from [] to [en_US]
+D/IntervalStats( 2447): Unable to parse usage stats packages: [223, 233, 234, 237]
+V/Configuration( 2447): Updating configuration, locales updated from [] to [en_US]
+V/Configuration( 2447): Updating configuration, locales updated from [] to [en_US]
+V/Configuration( 2447): Updating configuration, locales updated from [] to [en_US]
+V/Configuration( 2447): Updating configuration, locales updated from [] to [en_US]
+V/Configuration( 2447): Updating configuration, locales updated from [] to [en_US]
+V/Configuration( 2447): Updating configuration, locales updated from [] to [en_US]
+V/Configuration( 2447): Updating configuration, locales updated from [] to [en_US]
+V/Configuration( 2447): Updating configuration, locales updated from [] to [en_US]
+V/Configuration( 2447): Updating configuration, locales updated from [] to [en_US]
+V/Configuration( 2447): Updating configuration, locales updated from [] to [en_US]
+V/Configuration( 2447): Updating configuration, locales updated from [] to [en_US]
+V/Configuration( 2447): Updating configuration, locales updated from [] to [en_US]
+V/Configuration( 2447): Updating configuration, locales updated from [] to [en_US]
+D/IntervalStats( 2447): Unable to parse usage stats packages: [220, 223, 229, 232, 233, 234, 238, 239, 240, 241, 242, 243, 246, 247, 248, 250, 255, 257, 264, 265, 266, 267, 268, 270, 271, 273, 275]
+I/UsageStatsService( 2447): User[0] Rollover scheduled @ 2026-08-31 12:59:20(1788161360140)
+D/BackgroundInstallControlService( 2447): Package event received: 0
+D/BackgroundInstallControlService( 2447): Package event received: 0
+D/BackgroundInstallControlService( 2447): Package event received: 0
+D/BackgroundInstallControlService( 2447): Package event received: 0
+D/BackgroundInstallControlService( 2447): Package event received: 0
+D/BackgroundInstallControlService( 2447): Package event received: 0
+D/BackgroundInstallControlService( 2447): Package event received: 0
+W/.mobile.android( 5326): Reducing the number of considered missed Gc histogram windows from 420 to 100
+W/libbinder.BackendUnifiedServiceManager(16918): Thread Pool max thread count is 0. Cannot cache binder as linkToDeath cannot be implemented. serviceName: SurfaceFlinger
+D/TileServices( 2831): Couldn't find tile for ComponentInfo{com.google.android.apps.wellbeing/com.google.android.apps.wellbeing.focusmode.quicksettings.FocusModeTileService}(0)
+E/SELinux (  899): avc:  denied  { find } for pid=16930 uid=10236 name=window scontext=u:r:untrusted_app:s0:c236,c256,c512,c768 tcontext=u:object_r:window_service:s0 tclass=service_manager permissive=0
+W/.apps.wellbeing( 3491): Reducing the number of considered missed Gc histogram windows from 3449 to 100
+I/WM-WorkerWrapper( 5326): Worker result SUCCESS for Work [ id=d23965b7-1612-4d82-a515-03d1600df646, tags={ com.duckduckgo.malicioussiteprotection.impl.MaliciousSiteProtectionHashPrefixesUpdateWorker, MALICIOUS_SITE_PROTECTION_HASH_PREFIXES_UPDATE_WORKER_SCAM_TAG } ]
+W/libbinder.BackendUnifiedServiceManager(16969): Thread Pool max thread count is 0. Cannot cache binder as linkToDeath cannot be implemented. serviceName: activity
+I/libglean_ffi(32535): glean_core::upload: Ping 87d8022e-2202-473f-a7b4-ab88f3739c53 successfully sent 200.
+I/libglean_ffi(32535): glean_core::upload::directory: File was deleted /data/user/0/org.mozilla.fenix/glean_data/pending_pings/87d8022e-2202-473f-a7b4-ab88f3739c53
+I/libglean_ffi(32535): glean_core::upload: No more pings to upload! You are done.
+I/WM-WorkerWrapper(32535): Worker result SUCCESS for Work [ id=ef5d9fd0-0433-4d87-9e29-12b78e661b05, tags={ mozilla.telemetry.glean.scheduler.PingUploadWorker,mozac_service_glean_ping_upload_worker } ]
+I/FenixApplication(32591): onTrimMemory(), level=40, main=false
+I/MemoryController(32535): onTrimMemory(40)
+I/MemoryController(32535): onTrimMemory(40)
+I/FenixApplication(32535): onTrimMemory(), level=40, main=true
+I/LogMiddleware - BrowserStore(32535): mozilla.components.browser.state.action.SystemAction$LowMemoryAction
+W/libbinder.BackendUnifiedServiceManager(17016): Thread Pool max thread count is 0. Cannot cache binder as linkToDeath cannot be implemented. serviceName: SurfaceFlinger
+W/libbinder.BackendUnifiedServiceManager(17050): Thread Pool max thread count is 0. Cannot cache binder as linkToDeath cannot be implemented. serviceName: activity
+I/AdrenoGLES-0( 7030): QUALCOMM build                   : f6b5df5188, I29aebc4401
+I/AdrenoGLES-0( 7030): Build Date                       : 09/19/25
+I/AdrenoGLES-0( 7030): OpenGL ES Shader Compiler Version: E031.45.02.26
+I/AdrenoGLES-0( 7030): Local Branch                     : 
+I/AdrenoGLES-0( 7030): Remote Branch                    : refs/tags/AU_LINUX_ANDROID_LA.VENDOR.14.3.0.11.00.00.974.010
+I/AdrenoGLES-0( 7030): Remote Branch                    : NONE
+I/AdrenoGLES-0( 7030): Reconstruct Branch               : NOTHING
+I/AdrenoGLES-0( 7030): Build Config                     : S P 16.1.2 AArch64
+I/AdrenoGLES-0( 7030): Driver Path                      : /vendor/lib64/egl/libGLESv2_adreno.so
+I/AdrenoGLES-0( 7030): Driver Version                   : 0762.41
+I/AdrenoGLES-0( 7030): Process Name                     : com.ivarna.deviceinsight
+I/android.hardware.audio.service( 1501): [Awinic] [INF] aw_audioreach_monitor_thread: monitor->state = 3
+D/android.hardware.audio.service( 1501): [Awinic] [DBG] aw_ar_kmsg_ctl_get_monitor_en: dev_index[0]:monitor enable:1
+I/[Awinic][7-0034]aw882xx_monitor_get( 2510): monitor switch is 1
+I/[Awinic][7-0034]aw_monitor_get_voltage( 2510): chip voltage is 4158
+I/[Awinic][7-0034]aw_monitor_get_temperature( 2510): reg val is 0x0027
+I/[Awinic][7-0034]aw_monitor_get_temperature( 2510): chip temperature = 39
+D/android.hardware.audio.service( 1501): [Awinic] [DBG] aw_ar_monitor_work_func: dev[0], vmax[0x0] is not modified or the value is none
+D/android.hardware.audio.service( 1501): [Awinic] [DBG] aw_ar_kmsg_ctl_get_monitor_en: dev_index[1]:monitor enable:1
+D/android.hardware.audio.service( 1501): [Awinic] [DBG] aw_ar_monitor_work_func: dev[1], vmax[0x0] is not modified or the value is none
+D/android.hardware.audio.service( 1501): [Awinic] [DBG] aw_ar_kmsg_ctl_get_monitor_en: dev_index[2]:monitor enable:1
+D/android.hardware.audio.service( 1501): [Awinic] [DBG] aw_ar_monitor_work_func: dev[2], vmax[0x0] is not modified or the value is none
+D/android.hardware.audio.service( 1501): [Awinic] [DBG] aw_ar_kmsg_ctl_get_monitor_en: dev_index[3]:monitor enable:1
+I/[Awinic][4-0034]aw882xx_monitor_get( 2510): monitor switch is 1
+I/[Awinic][4-0034]aw_monitor_get_voltage( 2510): chip voltage is 4169
+I/[Awinic][4-0034]aw_monitor_get_temperature( 2510): reg val is 0x001f
+I/[Awinic][4-0034]aw_monitor_get_temperature( 2510): chip temperature = 31
+I/[Awinic][7-0035]aw882xx_monitor_get( 2510): monitor switch is 1
+I/[Awinic][7-0035]aw_monitor_get_voltage( 2510): chip voltage is 4158
+I/[Awinic][7-0035]aw_monitor_get_temperature( 2510): reg val is 0x0026
+I/[Awinic][7-0035]aw_monitor_get_temperature( 2510): chip temperature = 38
+I/[Awinic][4-0035]aw882xx_monitor_get( 2510): monitor switch is 1
+I/[Awinic][4-0035]aw_monitor_get_voltage( 2510): chip voltage is 4158
+I/[Awinic][4-0035]aw_monitor_get_temperature( 2510): reg val is 0x0020
+I/[Awinic][4-0035]aw_monitor_get_temperature( 2510): chip temperature = 32
+D/android.hardware.audio.service( 1501): [Awinic] [DBG] aw_ar_monitor_work_func: dev[3], vmax[0x0] is not modified or the value is none
+D/PAL: OplusPalCommon( 1501): getActiveStreamPcmId: 2077:  dir: 1, stream: 0xb4000077e923b150, pcmDevId: 126
+D/android.hardware.audio.service( 1501): [Awinic] [DBG] aw_ar_dsp_get_msg_num: msg num[0]
+D/AGM: graph( 1501): graph_set_config: 1225 entry graph_handle 0x247534c
+D/AGM: graph( 1501): graph_set_config: 1233 exit, graph handle 0x247534c, ret 0
+D/android.hardware.audio.service( 1501): [Awinic] [DBG] aw_ar_dsp_read_msg_from_dsp: msg_id:0x7, read data[32] from dsp success
+D/android.hardware.audio.service( 1501): [Awinic] [DBG] aw_ar_dsp_read_st: dev[0]read Re 7181 , Te 25
+D/android.hardware.audio.service( 1501): [Awinic] [DBG] aw_ar_dsp_get_msg_num: msg num[0]
+D/AGM: graph( 1501): graph_set_config: 1225 entry graph_handle 0x247534c
+D/AGM: graph( 1501): graph_set_config: 1233 exit, graph handle 0x247534c, ret 0
+D/android.hardware.audio.service( 1501): [Awinic] [DBG] aw_ar_dsp_read_msg_from_dsp: msg_id:0x7, read data[32] from dsp success
+D/android.hardware.audio.service( 1501): [Awinic] [DBG] aw_ar_dsp_read_st: dev[1]read Re 7232 , Te 25
+D/android.hardware.audio.service( 1501): [Awinic] [DBG] aw_ar_dsp_get_msg_num: msg num[1]
+D/AGM: graph( 1501): graph_set_config: 1225 entry graph_handle 0x247534c
+D/AGM: graph( 1501): graph_set_config: 1233 exit, graph handle 0x247534c, ret 0
+D/android.hardware.audio.service( 1501): [Awinic] [DBG] aw_ar_dsp_read_msg_from_dsp: msg_id:0x7, read data[32] from dsp success
+D/android.hardware.audio.service( 1501): [Awinic] [DBG] aw_ar_dsp_read_st: dev[2]read Re 7423 , Te 25
+D/android.hardware.audio.service( 1501): [Awinic] [DBG] aw_ar_dsp_get_msg_num: msg num[1]
+D/AGM: graph( 1501): graph_set_config: 1225 entry graph_handle 0x247534c
+D/AGM: graph( 1501): graph_set_config: 1233 exit, graph handle 0x247534c, ret 0
+D/android.hardware.audio.service( 1501): [Awinic] [DBG] aw_ar_dsp_read_msg_from_dsp: msg_id:0x7, read data[32] from dsp success
+D/android.hardware.audio.service( 1501): [Awinic] [DBG] aw_ar_dsp_read_st: dev[3]read Re 7424 , Te 25
+I/PAL: OplusSpeakerAwinic( 1501): checkSpeakerStatus: 1019: aw_audioreach_dsp_read_st spk0, re=7181, te=25
+I/PAL: OplusSpeakerAwinic( 1501): checkSpeakerStatus: 1019: aw_audioreach_dsp_read_st spk1, re=7232, te=25
+I/PAL: OplusSpeakerAwinic( 1501): checkSpeakerStatus: 1019: aw_audioreach_dsp_read_st spk2, re=7423, te=25
+I/PAL: OplusSpeakerAwinic( 1501): checkSpeakerStatus: 1019: aw_audioreach_dsp_read_st spk3, re=7424, te=25
+I/AdrenoGLES-0( 7030): PFP: 0x01520181, ME: 0x01520023
+I/qspmHal ( 1595): enter getGpuProf at: 1419413568
+I/qspmHal ( 1595): Coudn't match the GFX PID 7030 to AT PID 0. Checking in local cache.
+E/qspmHal ( 1595): PID 7030 from GFX didn't match!!
+I/WM-WorkerWrapper( 5326): Worker result SUCCESS for Work [ id=28465658-bdcd-48ba-a253-f8fae08d4168, tags={ com.duckduckgo.malicioussiteprotection.impl.MaliciousSiteProtectionHashPrefixesUpdateWorker, MALICIOUS_SITE_PROTECTION_HASH_PREFIXES_UPDATE_WORKER_TAG } ]
+D/FpsMonitor( 7030): FPS 120 REF pkg=com.zenithblue.sambas3 access=STANDARD isStale=false
+W/DefaultDispatch( 7030): type=1400 audit(0.0:835753): avc:  denied  { read } for  name="gpuclk" dev="sysfs" ino=139614 scontext=u:r:untrusted_app:s0:c236,c256,c512,c768 tcontext=u:object_r:vendor_sysfs_kgsl_gpuclk:s0 tclass=file permissive=0 app=com.ivarna.deviceinsight
+W/DefaultDispatch( 7030): type=1400 audit(0.0:835754): avc:  denied  { read } for  name="max_gpuclk" dev="sysfs" ino=139615 scontext=u:r:untrusted_app:s0:c236,c256,c512,c768 tcontext=u:object_r:vendor_sysfs_kgsl:s0 tclass=file permissive=0 app=com.ivarna.deviceinsight
+W/libbinder.ServiceManagerCppClient( 1579): Waited one second for vendor.qti.qhcp.IQHDC/default (is service started? Number of threads started in the threadpool: 2. Are binder threads started and available?)
+E/init    (    1): Control message: Could not find 'aidl/vendor.qti.qhcp.IQHDC/default' for ctl.interface_start from pid: 899 (/system/bin/servicemanager)
+W/libc    (  899): Unable to set property "ctl.interface_start" to "aidl/vendor.qti.qhcp.IQHDC/default": PROP_ERROR_HANDLE_CONTROL_MESSAGE (0x20)
+W/DefaultDispatch( 5485): type=1400 audit(0.0:835755): avc:  denied  { read } for  name="version" dev="proc" ino=4026532013 scontext=u:r:untrusted_app:s0:c224,c256,c512,c768 tcontext=u:object_r:proc_version:s0 tclass=file permissive=0 app=com.ivarna.mkm
+D/CpuProvider( 5485): Core 0: freq=2265600, usage=0.22222222 (hwMin=364800, hwMax=2265600)
+D/CpuProvider( 5485): Core 1: freq=2265600, usage=0.22222222 (hwMin=364800, hwMax=2265600)
+D/CpuProvider( 5485): Core 2: freq=3148800, usage=0.76086956 (hwMin=499200, hwMax=3148800)
+D/CpuProvider( 5485): Core 3: freq=3148800, usage=0.76086956 (hwMin=499200, hwMax=3148800)
+D/CpuProvider( 5485): Core 4: freq=3148800, usage=0.76086956 (hwMin=499200, hwMax=3148800)
+D/CpuProvider( 5485): Core 5: freq=2956800, usage=0.8203125 (hwMin=499200, hwMax=2956800)
+D/CpuProvider( 5485): Core 6: freq=2956800, usage=0.8203125 (hwMin=499200, hwMax=2956800)
+D/CpuProvider( 5485): Core 7: freq=3302400, usage=1.0 (hwMin=480000, hwMax=3302400)
+D/CpuProvider( 5485): Overall usage: 0.5646672 (from 8 cores), Avg Freq: 2890000
+W/audit   (17169): audit_lost=549603 audit_rate_limit=5 audit_backlog_limit=64
+E/audit   (17169): rate limit exceeded
+I/[LCD][0][INFO][dsi_display_status_check_error_flag:1212] [ESD]( 9492): first read: master=0 slave=0
+W/libbinder.BackendUnifiedServiceManager(17215): Thread Pool max thread count is 0. Cannot cache binder as linkToDeath cannot be implemented. serviceName: SurfaceFlingerAIDL
+W/libbinder.BpBinder(17215): Linking to death on android.gui.ISurfaceComposer but there are no threads (yet?) listening to incoming transactions. See ProcessState::startThreadPool and ProcessState::setThreadPoolMaxThreadCount. Generally you should setup the binder threadpool before other initialization steps.
+W/libbinder.ProcessState(17215): Extra binder thread started, but 0 threads requested. Do not use *startThreadPool when zero threads are requested.
+I/Gralloc4(17215): Adding additional valid usage bits: 0x8202000
+I/AdrenoUtils(17215): <ReadGpuID:357>: Reading chip ID through GSL
+D/ThermalProvider( 7030): filter bogus pm8550b-ibat-lvl1=937.0°C raw=937
+I/vendor.qti.bluetooth@1.1-ibs_handler( 1502): ProcessIbsCmd: Received IBS_WAKE_IND: 0xFD
+D/vendor.qti.bluetooth@1.1-ibs_handler( 1502): SerialClockVote: vote for UART CLK ON
+E/vendor.qti.bluetooth@1.1-wake_lock( 1502): Acquire write to wakelock file failed -1 - Operation not permitted
+I/vendor.qti.bluetooth@1.1-ibs_handler( 1502): ProcessIbsCmd: Writing IBS_WAKE_ACK
+E/[TP0]touchpanel(24418): irq gpio is 0
+D/ThermalProvider( 7030): filter bogus pm8550b-ibat-lvl0=937.0°C raw=937
+I/vendor.qti.bluetooth@1.1-ibs_handler( 1502): ProcessIbsCmd: Received IBS_SLEEP_IND: 0xFE
+D/vendor.qti.bluetooth@1.1-ibs_handler( 1502): SerialClockVote: vote for UART CLK OFF
+V/Configuration( 2447): Updating configuration, locales updated from [] to [en_US]
+V/Configuration( 2447): Updating configuration, locales updated from [] to [en_US]
+V/Configuration( 2447): Updating configuration, locales updated from [] to [en_US]
+V/Configuration( 2447): Updating configuration, locales updated from [] to [en_US]
+I/AppsFilter( 2447): interaction: PackageSetting{f129ba2 com.ivarna.deviceinsight/10236} -> PackageSetting{a94614 com.zenithblue.sambas3/10243} BLOCKED
+I/AppsFilter( 2447): interaction: PackageSetting{f129ba2 com.ivarna.deviceinsight/10236} -> PackageSetting{97f3048 ru.zdevs.zarchiver/10228} BLOCKED
+I/AppsFilter( 2447): interaction: PackageSetting{f129ba2 com.ivarna.deviceinsight/10236} -> PackageSetting{bc9805a com.android.launcher3/10144} BLOCKED
+D/vendor.oplus.hardware.charger-V10-service( 1601): parallel fold conf file parse fail parallel_fold_state 2
+D/vendor.oplus.hardware.charger-V10-service( 1601): scale_chg Start!!!
+D/vendor.oplus.hardware.charger-V10-service( 1601): [0, 0, 3]
+D/vendor.oplus.hardware.charger-V10-service( 1601): [0, 2, 9]
+D/vendor.oplus.hardware.charger-V10-service( 1601): [0, 1, 4]
+D/vendor.oplus.hardware.charger-V10-service( 1601): [0, 3, 3]
+D/vendor.oplus.hardware.charger-V10-service( 1601): [0, 4, 3]
+D/vendor.oplus.hardware.charger-V10-service( 1601): [0, 5, 4]
+D/vendor.oplus.hardware.charger-V10-service( 1601): [0, 6, 3]
+D/vendor.oplus.hardware.charger-V10-service( 1601): scale_chg Start!!!
+D/vendor.oplus.hardware.charger-V10-service( 1601): [0, 0, 3]
+D/vendor.oplus.hardware.charger-V10-service( 1601): [0, 2, 9]
+D/vendor.oplus.hardware.charger-V10-service( 1601): [0, 1, 4]
+D/vendor.oplus.hardware.charger-V10-service( 1601): [0, 3, 3]
+D/vendor.oplus.hardware.charger-V10-service( 1601): [0, 4, 3]
+D/vendor.oplus.hardware.charger-V10-service( 1601): [0, 5, 4]
+D/vendor.oplus.hardware.charger-V10-service( 1601): [0, 6, 3]
+E/vendor.qti.bluetooth@1.1-wake_lock( 1502): Release wake lock not initialized/acquired
+D/WifiClientModeImpl[14183:wlan0]( 2447): updateLinkLayerStatsRssiSpeedFrequencyCapabilities rssi=-23 TxLinkspeed=866 freq=5220 RxLinkSpeed=866
+D/WifiDataStall( 2447): tx tput in kbps: 774494
+D/WifiDataStall( 2447): rx tput in kbps: 815257
+V/WifiConfigManager( 2447): Updating scan detail cache freq=5220 BSSID=b4:86:18:de:39:ca RSSI=-23 for "Excitel_home_wifi_5"WPA_PSK
+D/WifiDataStall( 2447):  ccaLevel = 15
+D/WifiDataStall( 2447): L2 txTputKbps: 758189, rxTputKbps: 815257, L3 txTputKbps: 47, rxTputKbps: 153, TxTrafficHigh: true, RxTrafficHigh: true, Throughput Sufficient: true
+D/WifiThroughputPredictor( 2447):  utilization (LLS) 15 isBluetoothConnected: false final utilization: 15
+D/WifiThroughputPredictor( 2447):  BW: 2 RSSI: -23 Nss: 2 Mode: 5 symDur: 3600 snrDb 51 bitPerTone: 6667 rate: 866 throughput: 815
+D/WifiThroughputPredictor( 2447):  utilization (LLS) 15 isBluetoothConnected: false final utilization: 15
+D/WifiThroughputPredictor( 2447):  BW: 2 RSSI: -23 Nss: 2 Mode: 5 symDur: 3600 snrDb 51 bitPerTone: 6667 rate: 866 throughput: 815
+D/WifiScoreCard( 2447): BSSID update SIGNAL_POLL ID: 715353381 SSID: "Excitel_home_wifi_5", BSSID: b4:86:18:de:39:ca, MAC: c6:52:65:7d:a1:b6, IP: /192.168.1.35, Security type: 2, Supplicant state: COMPLETED, Wi-Fi standard: 11ac, RSSI: -23, Link speed: 866Mbps, Tx Link speed: 866Mbps, Max Supported Tx Link speed: 866Mbps, Rx Link speed: 866Mbps, Max Supported Rx Link speed: 866Mbps, Frequency: 5220MHz, Net ID: 5, Metered hint: false, score: 107, isUsable: true, CarrierMerged: false, SubscriptionId: -1, IsPrimary: 1, Trusted: true, Restricted: false, Ephemeral: false, OEM paid: false, OEM private: false, OSU AP: false, FQDN: <none>, Provider friendly name: <none>, Requesting package name: <none>"Excitel_home_wifi_5"wpa2-pskMLO Information: , Is TID-To-Link negotiation supported by the AP: false, AP MLD Address: <none>, AP MLO Link Id: <none>, AP MLO Affiliated links: <none>, Vendor Data: <none>
+D/WifiScoreCard( 2447): txRate: 0 txSpeed: 866
+D/WifiScoreCard( 2447): network update SIGNAL_POLL "Excitel_home_wifi_5" ID: 1721486633 RSSI -23 txSpeed -1
+D/WifiClientModeImpl[14183:wlan0]( 2447):  ClientModeImpl$L2ConnectedState screen=on 68 0 "Excitel_home_wifi_5" b4:86:18:de:39:ca rssi=-23 f=5220 sc=107 link=866 tx=0.0, 0.0, 0.0 rx=0.0 bcn=1749076 [on:0 tx:6 rx:7 period:-779] from screen [on:0 period:14542365] score=107

@@ -1,0 +1,11 @@
+cycle=1 PASS recovery_screen=1
+cycle=2 PASS recovery_screen=1
+cycle=3 PASS recovery_screen=1
+cycle=4 PASS recovery_screen=1
+cycle=5 PASS recovery_screen=1
+cycle=6 PASS recovery_screen=1
+cycle=7 PASS recovery_screen=1
+cycle=8 PASS recovery_screen=1
+cycle=9 PASS recovery_screen=1
+cycle=10 PASS recovery_screen=1
+force_stop_10=PASS

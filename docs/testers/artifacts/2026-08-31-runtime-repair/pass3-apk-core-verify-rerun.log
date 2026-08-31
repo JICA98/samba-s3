@@ -1,0 +1,32 @@
+APK: app/build/outputs/apk/standard/debug/samba-s3-standard-debug.apk
+APK SHA-256: 2deafc7a079e86df42821fa6249a27cdffcad4e895cb288f58cdf914376d7c86
+Patch SHA-256: 4c5edbe84bc8aaa9bc14b984d2be584dc359caf012dc6e404c9f2ecaff1e742a
+RPCSX pin: 657b26a0d197c29d42cdcf3b3f6e8ad5c6765bbc
+Samba HEAD: 6392c3522cae3634ab4833c6e7d33b167bdb6e22
+
+APK contents:
+   217120  1981-01-01 01:01   lib/arm64-v8a/libsambas3-android.so
+   187816  1981-01-01 01:01   lib/x86_64/libsambas3-android.so
+141874088  1981-01-01 01:01   lib/arm64-v8a/librpcsx-android.so
+146650264  1981-01-01 01:01   lib/x86_64/librpcsx-android.so
+
+ABI arm64-v8a:
+  local: /home/abhaybyte/repos/samba-s3/app/src/main/jniLibs/arm64-v8a/librpcsx-android.so
+  local SHA-256: 03a3dbe78a0803648a46c3023b33ac9301b02c0d6d0a9e1e4779e1631111e22e
+  APK lib/arm64-v8a SHA-256: dd4692bbf418568ef139fce68975059dd1b15943916908056f5fe08bad6d08ca
+  S3CORE build ID (APK): rpcsx=657b26a0d197c29d42cdcf3b3f6e8ad5c6765bbc samba=6392c3522cae3634ab4833c6e7d33b167bdb6e22 patch_sha256=4c5edbe84bc8aaa9bc14b984d2be584dc359caf012dc6e404c9f2ecaff1e742a build_type=Debug
+  S3CORE build ID (local): rpcsx=657b26a0d197c29d42cdcf3b3f6e8ad5c6765bbc samba=6392c3522cae3634ab4833c6e7d33b167bdb6e22 patch_sha256=4c5edbe84bc8aaa9bc14b984d2be584dc359caf012dc6e404c9f2ecaff1e742a build_type=Debug
+  WARN: SHA mismatch but S3CORE matches (non-reproducible build, treating as PASS)
+  PASS: arm64-v8a core S3CORE matches
+
+ABI x86_64:
+  local: /home/abhaybyte/repos/samba-s3/app/src/main/jniLibs/x86_64/librpcsx-android.so
+  local SHA-256: 3db863c3826ad7b01f13f5043a68c5a82cd0a77f9c7ce571c16b322678573c80
+  APK lib/x86_64 SHA-256: 352d4d2bb4bd46c6e7214a5c7452397b4e73ae8c37bc4eaa32f4a7cdd4556846
+  S3CORE build ID (APK): rpcsx=657b26a0d197c29d42cdcf3b3f6e8ad5c6765bbc samba=6392c3522cae3634ab4833c6e7d33b167bdb6e22 patch_sha256=4c5edbe84bc8aaa9bc14b984d2be584dc359caf012dc6e404c9f2ecaff1e742a build_type=Debug
+  S3CORE build ID (local): rpcsx=657b26a0d197c29d42cdcf3b3f6e8ad5c6765bbc samba=6392c3522cae3634ab4833c6e7d33b167bdb6e22 patch_sha256=4c5edbe84bc8aaa9bc14b984d2be584dc359caf012dc6e404c9f2ecaff1e742a build_type=Debug
+  WARN: SHA mismatch but S3CORE matches (non-reproducible build, treating as PASS)
+  PASS: x86_64 core S3CORE matches
+
+RESULT: PASS — APK core matches local build
+No bundled_gpu_drivers in APK (expected for standard flavor until Turnip built)

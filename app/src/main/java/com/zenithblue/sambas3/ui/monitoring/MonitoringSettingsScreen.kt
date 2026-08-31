@@ -13,6 +13,7 @@ import androidx.compose.material3.LargeTopAppBar
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Slider
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -43,11 +44,13 @@ fun MonitoringSettingsScreen(navigateBack: () -> Unit, isInSplitPane: Boolean = 
             Text("Preset", color = RPCSXColors.textPrimary)
             Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) { MonitoringPreset.entries.forEach { preset -> FilterChip(selected = settings.preset == preset, onClick = { save(settings.copy(preset = preset)) }, label = { Text(preset.name) }) } }
             Text("Update interval: ${settings.updateMs} ms", color = RPCSXColors.textSecondary)
-            Slider(value = settings.updateMs.toFloat(), onValueChange = { save(settings.copy(updateMs = it.toLong())) }, valueRange = 100f..1000f, steps = 8)
+            Slider(value = settings.updateMs.toFloat(), onValueChange = { save(settings.copy(updateMs = it.toLong())) }, valueRange = 250f..1000f, steps = 6)
             Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) { Text("Graphs", color = RPCSXColors.textPrimary); Switch(settings.showGraphs, { save(settings.copy(showGraphs = it)) }) }
             Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) { Text("Hide while menu is open", color = RPCSXColors.textPrimary); Switch(settings.hideWithMenu, { save(settings.copy(hideWithMenu = it)) }) }
             Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) { Button(onClick = navigateBack) { Text("DONE") }; OutlinedButton(onClick = { save(MonitoringSettings()) }) { Text("RESET") } }
         }
     }
-    if (isInSplitPane) content() else Scaffold(topBar = { LargeTopAppBar(title = { Text("Performance Monitor") }, navigationIcon = { androidx.compose.material3.TextButton(onClick = navigateBack) { Text("BACK") } }) }) { padding -> Column(Modifier.padding(padding)) { content() } }
+    if (isInSplitPane) {
+        Surface(color = RPCSXColors.surfaceElevated, tonalElevation = 6.dp, modifier = Modifier.fillMaxSize().padding(18.dp)) { content() }
+    } else Scaffold(topBar = { LargeTopAppBar(title = { Text("Performance Monitor") }, navigationIcon = { androidx.compose.material3.TextButton(onClick = navigateBack) { Text("BACK") } }) }) { padding -> Column(Modifier.padding(padding)) { content() } }
 }

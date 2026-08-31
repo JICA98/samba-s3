@@ -1,0 +1,758 @@
+--------- beginning of main
+08-31 07:11:23.949 31988 31988 I S3TOUCH : root action=down x=2920 y=1936
+08-31 07:11:23.949  3141  3141 D TaskbarManager: dispatchTouchEvent:  displayId=0 isDefaultDisplay=true
+08-31 07:11:23.949  1514  1514 I android.hardware.power-service-qti: Power setBoost: 0, duration: 0
+08-31 07:11:23.950  1514  1514 E QTI PowerHAL: Failed to acquire lock.
+08-31 07:11:23.950  1514  1514 E QTI PowerHAL: Failed process_boost for boost_handle
+08-31 07:11:23.955 31988 31988 I S3HOME  : source=ToolbarHome edge=down action=open state=Running
+08-31 07:11:23.956 31988  3547 D RPCS3   : FRONTEND_MENU begin pauseDuringMenu=0 isPaused=0
+08-31 07:11:23.957 31988 32052 D RPCS3   : Loading RPCN config. Path: /storage/emulated/0/Android/data/com.zenithblue.sambas3/files/config/rpcn.yml
+08-31 07:11:23.957  2447  2894 W AS.PlaybackActivityMon: No piid assigned for invalid/internal port id 1617
+08-31 07:11:23.958  1501  1501 D AHAL: AudioStream: out_update_source_metadata_v7: 1329: track count is 1 for usecase(1: low-latency-playback)
+08-31 07:11:23.958  1501  1501 D AHAL: AudioStream: out_update_source_metadata_v7: 1379: Source metadata usage:13 content_type:4 gain:0.139346
+08-31 07:11:23.958  1501  1501 D AHAL: AudioStream: SetAggregateSourceMetadata: 4749: Aggregated Source metadata usage:13 content_type:4 gain:0.139346
+08-31 07:11:23.958  1501  1501 D AHAL: AudioStream: SetAggregateSourceMetadata: 4749: Aggregated Source metadata usage:1 content_type:2 gain:0.000000
+08-31 07:11:23.958  1501  4066 D AHAL: AudioStream: AutoPerfLock: 252: (Acquired) perf_lock_handle: 0x45c3, count: 1
+08-31 07:11:23.958  1501  4066 I AHAL: AudioStream: Open: 3667: Enter: OutPrimary usecase(1: low-latency-playback)
+08-31 07:11:23.958  1501  4066 D AHAL: AudioStream: Open: 3673: no_of_devices 1
+08-31 07:11:23.958  1501  4066 D AHAL: AudioStream: Open: 3782: halInputFormat 6 halOutputFormat 6 palformat 21
+08-31 07:11:23.958  1501  4066 D AHAL: AudioStream: Open: 3857: channels 2 samplerate 48000 format id 21, stream type 1  stream bitwidth 24
+08-31 07:11:23.958  1501  4066 D AHAL: AudioStream: Open: 3858: msample_rate 0 mchannels 0 mNoOfOutDevices 1
+08-31 07:11:23.958  1501  4066 I PAL: API: pal_stream_open: 292: Enter, stream type:1
+08-31 07:11:23.958  1501  4066 D PAL: Stream: create: 111: Enter.
+08-31 07:11:23.958  1501  4066 D PAL_ResourceManager: getDeviceConfig: 3478: device id 0x3 channels 8 samplerate 48000, bitwidth 32 format 23 SndDev speaker priority 0x3
+08-31 07:11:23.958  1501  4066 D PAL: Stream: create: 212: stream type 0x1
+08-31 07:11:23.958  1501  4066 D PAL: StreamPCM: isBitWidthSupported: 1610: bitWidth 24
+08-31 07:11:23.958  1501  4066 D PAL: StreamPCM: isSampleRateSupported: 1561: sampleRate 48000
+08-31 07:11:23.958  1501  4066 D PAL: StreamPCM: isChannelSupported: 1584: numChannels 2
+08-31 07:11:23.958  1501  4066 D PAL: StreamPCM: StreamPCM: 96: Enter
+08-31 07:11:23.958  1501  4066 D PAL: Device: insertStreamDeviceAttr: 918: incoming stream: 1 has lowest priority, insert to the end
+08-31 07:11:23.958  1501  4066 D PAL: Device: insertStreamDeviceAttr: 949: dev: 3 attr inserted are: priority: 0x3, stream type: 1, ch: 8, sr: 48000, bit_width: 32, fmt: 23, sndDev: speaker, custom_key: 
+08-31 07:11:23.958  1501  4066 D PAL_ResourceManager: registerStream: 3796: Enter. stream 0xb4000077e923cf10K
+08-31 07:11:23.958  1501  4066 D PAL_ResourceManager: registerStream: 3803: stream type 1
+08-31 07:11:23.958  1501  4066 D PAL_ResourceManager: registerStream: 3967: Exit. ret 0
+08-31 07:11:23.958  1501  4066 D PAL_ResourceManager: updateDeviceConfig: 8937: Enter
+08-31 07:11:23.958  1501  4066 D PAL_ResourceManager: getSharedBEActiveStreamDevs: 8128: got dev 3 active streams on dev is 1
+08-31 07:11:23.958  1501  4066 D PAL_ResourceManager: getSharedBEActiveStreamDevs: 8139: found shared BE stream 0xb4000077e9238210K with dev 3
+08-31 07:11:23.958  1501  4066 I PAL_ResourceManager: compareSharedBEStreamDevAttr: 8319: switchStreams is 0
+08-31 07:11:23.958  1501  4066 I PAL: Device: setDeviceAttributes: 440: DeviceAttributes for Device Id 3 updated
+08-31 07:11:23.958  1501  4066 D PAL_ResourceManager: updateDeviceConfig: 9039: Exit
+08-31 07:11:23.959  1501  4066 D PAL: StreamPCM: StreamPCM: 218: Exit. state 0
+08-31 07:11:23.959  1501  4066 D PAL: Stream: create: 352: Exit stream 0xb4000077e923cf10K create successful
+08-31 07:11:23.959  1501  4066 D PAL: StreamPCM: open: 228: Enter. session handle - 0xb400007669241ed0K device count - 1
+08-31 07:11:23.959  1501  4066 D PAL_ResourceManager: getPALDeviceName: 9199: id 3
+08-31 07:11:23.959  1501  4066 I PAL: Device: open: 530: Enter. deviceCount 1 for device id 3 (PAL_DEVICE_OUT_SPEAKER)
+08-31 07:11:23.959  1501  4066 I PAL: Device: open: 565: Exit. deviceCount 2 for device id 3 (PAL_DEVICE_OUT_SPEAKER), exit status: 0
+08-31 07:11:23.959  1501  4066 D PAL: SessionAlsaPcm: open: 169: Enter
+08-31 07:11:23.959  1501  4066 D PAL_ResourceManager: getBackEndNames: 8376: getBackEndNames (RX): TDM-LPAIF-RX-SECONDARY
+08-31 07:11:23.959  1501  4066 I PAL_ResourceManager: allocateFrontEndIds: 7750: allocateFrontEndIds: front end 117
+08-31 07:11:23.959  1501  4066 D PAL: SessionAlsaUtils: open: 424: Entry 
+08-31 07:11:23.959  1501  4066 I PAL_PayloadBuilder: populateStreamKV: 3145: stream type 1
+08-31 07:11:23.959  1501  4066 I PAL_PayloadBuilder: getSelectorValues: 2943: Direction: 1
+08-31 07:11:23.959  1501  4066 I PAL_PayloadBuilder: getSelectorValues: 2959: Instance: 1
+08-31 07:11:23.959  1501  4066 I PAL_PayloadBuilder: findKVs: 2825: key: 0xa1000000 value: 0xa100000e
+08-31 07:11:23.959  1501  4066 I PAL_PayloadBuilder: findKVs: 2825: key: 0xab000000 value: 0x1
+08-31 07:11:23.959  1501  4066 D PAL: SessionAlsaUtils: getFeMixerControl: 354: mixer control PCM117 control
+08-31 07:11:23.959  1501  4066 D PAL: Stream: getSoundCardId: 704: sound card id = 0x0
+08-31 07:11:23.959  1501  4066 I PAL_PayloadBuilder: populateDeviceKV: 3269: Enter device id:3
+08-31 07:11:23.959  1501  4066 I PAL_PayloadBuilder: findKVs: 2838: key: 0xa2000000 value: 0xa2000001
+08-31 07:11:23.959  1501  4066 I PAL_PayloadBuilder: populateDeviceKV: 3297: Exit device id:3, status 0
+08-31 07:11:23.959  1501  4066 I PAL_PayloadBuilder: populateDevicePPKV: 3410: Rx device id:3
+08-31 07:11:23.959  1501  4066 I PAL_PayloadBuilder: getSelectorValues: 3035: stream type: 1
+08-31 07:11:23.959  1501  4066 I PAL_PayloadBuilder: findKVs: 2825: key: 0xa2000000 value: 0xa2000001
+08-31 07:11:23.959  1501  4066 I PAL_PayloadBuilder: findKVs: 2825: key: 0xac000000 value: 0xac000002
+08-31 07:11:23.959  1501  4066 I PAL_PayloadBuilder: populateDevicePPCkv: 3622: SpeakerProt Status[1], RAS Status[0]
+08-31 07:11:23.959  1501  4066 D PAL: SessionAlsaUtils: open: 556: Speaker protection enabled
+08-31 07:11:23.959  1501  4066 I PAL: OplusSpeakerProtection: populateSpeakerCKV: 2211: scence: 0
+08-31 07:11:23.959  1501  4066 D agm_server_wrapper: Aif id 25 already added to session list of 117
+08-31 07:11:23.959  1501  4066 I AGM: session: session_obj_set_sess_aif_metadata: 1967 Exit
+08-31 07:11:23.959  1501  4066 D agm_server_wrapper: Aif id 25 already added to session list of 117
+08-31 07:11:23.959  1501  4066 I AGM: API: agm_session_aif_connect: 625 connecting aifid:25 with session id=117
+08-31 07:11:23.959  1501  4066 D PAL: SessionAlsaUtils: open: 650: Exit, status 0
+08-31 07:11:23.959  1501  4066 D PAL: SessionAlsaPcm: open: 375: Exit status: 0
+08-31 07:11:23.959  1501  4066 D PAL: StreamPCM: open: 335: stream pcm opened. state 1
+08-31 07:11:23.959  1501  4066 D PAL: memLoggerBuilder: palStateQueueBuilder: 77: TIME IS:1788140483959
+08-31 07:11:23.959  1501  4066 D PAL: StreamPCM: open: 357: Exit ret 0
+08-31 07:11:23.959  1501  4066 D PAL: API: notify_concurrent_stream: 134: Notify concurrent stream type 1, direction 1, active 1
+08-31 07:11:23.959  1501  4066 I PAL: OplusPalFb: oplus_feedback_add_info: 852: add stream device = 3
+08-31 07:11:23.959  1501  4066 I PAL: OplusPalFb: oplus_feedback_add_info: 874: add info stream 0xb4000077e923cf10K, type = 1
+08-31 07:11:23.959  1501  4066 I PAL: API: pal_stream_open: 365: Exit. Value of stream_handle 0xb4000077e923cf10K, status 0
+08-31 07:11:23.959  1501  4066 D AHAL: AudioStream: GetBufferSize: 3536: type 1
+08-31 07:11:23.959  1501  4066 D AHAL: AudioStream: Open: 4079: fragment_size_ 1152 fragments_ 2
+08-31 07:11:23.959  1501  4066 D PAL: API: pal_stream_set_buffer_size: 1043: Enter. Stream handle :0xb4000077e923cf10K
+08-31 07:11:23.959  1501  4066 D PAL: Stream: setBufInfo: 789: Out Buffer size 1152 and Out Buffer count 2 metaData sz 0
+08-31 07:11:23.960  1501  4066 D PAL: API: pal_stream_set_buffer_size: 1053: Exit. status 0
+08-31 07:11:23.960  1501  4066 D AHAL: AudioStream: Open: 4114: Exit ret: 0
+08-31 07:11:23.960  1501  4066 D AHAL: AudioStream: ~AutoPerfLock: 262: (release) perf_lock_handle: 0x45c3, count: 1
+08-31 07:11:23.960  1501  4066 D AHAL: AudioStream: ~AutoPerfLock: 266: Releasing perf_lock_handle: 0x45c3
+08-31 07:11:23.960  1501  4066 D AHAL: AudioStream: AutoPerfLock: 252: (Acquired) perf_lock_handle: 0x45c4, count: 1
+08-31 07:11:23.960  1501  4066 I PAL: API: pal_stream_start: 446: Enter. Stream handle 0xb4000077e923cf10K
+08-31 07:11:23.960  1501  4066 D PAL: StreamPCM: start: 465: Enter. session handle - 0xb400007669241ed0K mStreamAttr->direction - 1 state 1
+08-31 07:11:23.960  1501  4066 I PAL: OplusSpeakerProtection: start: 2655: Inside Speaker Protection start, mDeviceStartCount: 1
+08-31 07:11:23.960  1501  4066 D PAL: Device: start_l: 629: Enter. deviceCount 2 deviceStartStopCount 1 for device id 3 (PAL_DEVICE_OUT_SPEAKER)
+08-31 07:11:23.960  1501  4066 D PAL: Device: start_l: 676: Exit, status 0
+08-31 07:11:23.960  1501  4066 D PAL: SessionAlsaPcm: prepare: 117: Enter
+08-31 07:11:23.960  1501  4066 D PAL: SessionAlsaPcm: prepare: 157: Exit, status 0
+08-31 07:11:23.960  1501  4066 D PAL: SessionAlsaPcm: start: 988: Enter
+08-31 07:11:23.960  1501  4066 I PAL_ResourceManager: voteSleepMonitor: 2400: Voting done for nlpi use case, lpi votes 0, nlpi votes : 2
+08-31 07:11:23.960  1501  4066 D PAL: Stream: getBufInfo: 907: In Buffer size 960, In Buffer count 4
+08-31 07:11:23.960  1501  4066 D PAL: Stream: getBufInfo: 911: Out Buffer size 1152 and Out Buffer count 2
+08-31 07:11:23.961  1501  4066 D agm_client_wrapper: agm_session_open called with handle = 0x75a5ac55a0 , *handle = 0
+08-31 07:11:23.961  1501  4066 I AGM: oplus_agm_fb: recordOpenedSessions: 69 i = 3, record open session_id = 117
+08-31 07:11:23.961  1501  4066 I AGM: device: device_open: 402 device_open: PCM device 23 already opened, refcnt: 1
+08-31 07:11:23.961  1501  4066 D AGM: graph: graph_open: 595 entry
+08-31 07:11:23.961  1501  4066 D AGM: metadata: metadata_print: 79 *************************Metadata*************************
+08-31 07:11:23.961  1501  4066 D AGM: metadata: metadata_print: 80 GKV size:4
+08-31 07:11:23.961  1501  4066 D AGM: metadata: metadata_print: 83 key:0xa1000000, value:0xa100000e 
+08-31 07:11:23.961  1501  4066 D AGM: metadata: metadata_print: 83 key:0xab000000, value:0x1 
+08-31 07:11:23.961  1501  4066 D AGM: metadata: metadata_print: 83 key:0xa2000000, value:0xa2000001 
+08-31 07:11:23.961  1501  4066 D AGM: metadata: metadata_print: 83 key:0xac000000, value:0xac000002 
+08-31 07:11:23.961  1501  4066 D AGM: metadata: metadata_print: 89 CKV count:4
+08-31 07:11:23.961  1501  4066 D AGM: metadata: metadata_print: 95 key:0xa4000000, value:0xf 
+08-31 07:11:23.961  1501  4066 D AGM: metadata: metadata_print: 95 key:0xd2000000, value:0x0 
+08-31 07:11:23.961  1501  4066 D AGM: metadata: metadata_print: 95 key:0xbe000000, value:0x3 
+08-31 07:11:23.961  1501  4066 D AGM: metadata: metadata_print: 95 key:0xef000000, value:0x0 
+08-31 07:11:23.961  1501  4066 D AGM: metadata: metadata_print: 102 Property ID:134217744
+08-31 07:11:23.961  1501  4066 D AGM: metadata: metadata_print: 103 property count:4
+08-31 07:11:23.961  1501  4066 D AGM: metadata: metadata_print: 106 Property Values: 
+08-31 07:11:23.962  1501  4066 D AGM: metadata: metadata_print: 108 0x1 
+08-31 07:11:23.962  1501  4066 D AGM: metadata: metadata_print: 108 0x3 
+08-31 07:11:23.962  1501  4066 D AGM: metadata: metadata_print: 108 0x2 
+08-31 07:11:23.962  1501  4066 D AGM: metadata: metadata_print: 108 0x5 
+08-31 07:11:23.962  1501  4066 D AGM: metadata: metadata_print: 115 ****************Metadata Done***************************
+08-31 07:11:23.962  1501  4066 D AGM: graph: graph_open: 690 miid 40bd mid 7001000 tag c0000002
+08-31 07:11:23.962  1501  4066 D AGM: graph: graph_open: 746 miid 42c8 mid 700100e tag c0000004
+08-31 07:11:23.962  1501  4066 D AGM: graph: graph_open: 690 miid 40c4 mid 7001019 tag c0000006
+08-31 07:11:23.962  1501  4066 D AGM: graph: graph_open: 690 miid 40bf mid 7001005 tag c000000e
+08-31 07:11:23.962  1501  4066 D AGM: graph: graph_open: 690 miid 40c0 mid 7001003 tag c0000010
+08-31 07:11:23.962  1501  4066 D AGM: graph: graph_open: 690 miid 4165 mid 7001032 tag c0000013
+08-31 07:11:23.962  1501  4066 I GPR:    : hardware/qcom-caf/sm8650/audio/graphservices/gpr/core/src/gpr_drv.c:__gpr_cmd_register_v2:926 GPR Register: Source Port is 8211 heap_index: 0
+08-31 07:11:23.965  1501  4066 E ACDB    : hardware/qcom-caf/sm8650/audio/graphservices/acdb/src/acdb_command.c:AcdbCmdGetProcSubgraphCalDataPersist:8678 Error[19]: No calibration found
+08-31 07:11:23.965  1501  4066 E ACDB    : hardware/qcom-caf/sm8650/audio/graphservices/acdb/src/acdb_command.c:AcdbCmdGetProcSubgraphCalDataPersist:8678 Error[19]: No calibration found
+08-31 07:11:23.965  1501  4066 E ACDB    : hardware/qcom-caf/sm8650/audio/graphservices/acdb/src/acdb_command.c:AcdbCmdGetProcSubgraphCalDataPersist:8678 Error[19]: No calibration found
+08-31 07:11:23.965  1501  4066 D AGM: graph: graph_open: 790 graph_handle 0x347534c
+08-31 07:11:23.965  1501  4066 D AGM: graph: graph_open: 830 exit, ret 0
+08-31 07:11:23.965  1501  4066 D agm_client_wrapper: agm_session_open Received handle = 0x75a5ac55a0 , *handle = b4000077e9234a10
+08-31 07:11:23.965  1501  4066 D PLUGIN: pcm: agm_pcm_hw_params: 501 agm_pcm_hw_params: mode: 0
+08-31 07:11:23.965  1501  4066 I PAL: SessionAlsaUtils: getModuleInstanceId: 1247: tag_id 0xc0000019, MIID is 0x40c8
+08-31 07:11:23.965  1501  4066 D PAL: Session: configureMFC: 950: miid : 40c8 id = 117, data TDM-LPAIF-RX-SECONDARY, dev id = 3
+08-31 07:11:23.965  1501  4066 I PAL_PayloadBuilder: payloadMFCConfig: 977: sample_rate:48000 bit_width:24 num_channels:2 Miid:16584
+08-31 07:11:23.965  1501  4066 I PAL: Session: updateCustomPayload: 622: customPayloadSize = 32
+08-31 07:11:23.965  1501  4066 D AGM: graph: graph_set_config: 1225 entry graph_handle 0x347534c
+08-31 07:11:23.966  1501  4066 D AGM: graph: graph_set_config: 1233 exit, graph handle 0x347534c, ret 0
+08-31 07:11:23.966  1501  4066 D PAL: Session: setInitialVolume: 1242: Enter
+08-31 07:11:23.966  1501  4066 D PAL: SessionAlsaPcm: setConfig: 664: Enter tag: -1073741811
+08-31 07:11:23.966  1501  4066 D PAL: Stream: getVolumeData: 747: num config 1
+08-31 07:11:23.966  1501  4066 E ACDB    : hardware/qcom-caf/sm8650/audio/graphservices/acdb/src/acdb_command.c:AcdbCmdGetProcSubgraphCalDataPersist:8678 Error[19]: No calibration found
+08-31 07:11:23.966  1501  4066 E ACDB    : hardware/qcom-caf/sm8650/audio/graphservices/acdb/src/acdb_command.c:AcdbCmdGetProcSubgraphCalDataPersist:8678 Error[19]: No calibration found
+08-31 07:11:23.966  1501  4066 E ACDB    : hardware/qcom-caf/sm8650/audio/graphservices/acdb/src/acdb_command.c:AcdbCmdGetProcSubgraphCalDataPersist:8678 Error[19]: No calibration found
+08-31 07:11:23.966  1501  4066 D PAL: SessionAlsaPcm: setConfig: 810: exit status: 0 
+08-31 07:11:23.966  1501  4066 D PAL: Session: setInitialVolume: 1335: Exit status: 0
+08-31 07:11:23.966  1501  4066 D PAL: SessionAlsaPcm: start: 1820: pcmLpmRefCnt 1
+08-31 07:11:23.966  1501  4066 D PAL: SessionAlsaPcm: start: 1825: pcmLpmRefCnt 2
+08-31 07:11:23.966  1501  4066 D AGM: graph: graph_prepare: 906 entry graph_handle 0x347534c
+08-31 07:11:23.966  1501  4066 D AGM: graph_module: configure_pcm_shared_mem_ep: 1769 entry mod tag c0000002 miid 40bd mid 7001000
+08-31 07:11:23.966  1501  4066 D AGM: graph_module: configure_pcm_shared_mem_ep: 1845 exit, ret 0
+08-31 07:11:23.966  1501  4066 E AGM: graph: graph_prepare: 948 device obj:TDM-LPAIF-RX-SECONDARY in started state, start ref_cnt:1 miid 42c8 mid 700100e tag c0000004
+08-31 07:11:23.966  1501  4066 D AGM: graph_module: configure_output_media_format: 828 entry mod tag c000000e miid 40bf mid 7001005
+08-31 07:11:23.966  1501  4066 D AGM: graph_module: configure_output_media_format: 959 exit, ret 0
+08-31 07:11:23.966  1501  4066 D AGM: graph_module: configure_output_media_format: 828 entry mod tag c0000010 miid 40c0 mid 7001003
+08-31 07:11:23.967  1501  4066 D AGM: graph_module: configure_output_media_format: 959 exit, ret 0
+08-31 07:11:23.967  1501  4066 D AGM: graph_module: configure_spr: 1973 SPR module IID 4165
+08-31 07:11:23.967  1501  4066 D AGM: graph_module: configure_spr: 1996 HW EP module IID 42c8
+08-31 07:11:23.967  1501  4066 D AGM: graph: configure_buffer_params: 212 Enter
+08-31 07:11:23.967  1501  4066 D AGM: graph: configure_buffer_params: 275 Playback sess buf_sz 1152 num_bufs 2
+08-31 07:11:23.967  1501  4066 E AGM: graph: configure_buffer_params: 308 Unsupported buffer mode : 0, Default to Blocking
+08-31 07:11:23.967  1501  4066 D AGM: graph: configure_buffer_params: 328 exit, ret 0
+08-31 07:11:23.968  1501  4066 D AGM: graph: graph_prepare: 984 exit, ret 0
+08-31 07:11:23.968  1501  4066 D AGM: graph: graph_start: 1007 entry graph_handle 0x347534c
+08-31 07:11:23.970  1501  4066 D AGM: graph: graph_start: 1020 exit, ret 0
+08-31 07:11:23.970  1501  4066 D AGM: device: device_prepare: 523 PCM device 23 already in prepare state
+08-31 07:11:23.970  1501  4066 I AGM: device: device_start: 594 PCM device 23 already in start state, refcnt: 1
+08-31 07:11:23.970  1501  4066 I PAL: SessionAlsaUtils: getModuleInstanceId: 1247: tag_id 0xc0000006, MIID is 0x40c4
+08-31 07:11:23.970  1501  4066 D PAL: SessionAlsaPcm: start: 1981: Exit status: 0
+08-31 07:11:23.970  1501  4066 D PAL_ResourceManager: registerDevice: 4895: Enter. dev id: 3
+08-31 07:11:23.970  1501  4066 D PAL_ResourceManager: checkandEnableEC_l: 4833: Enter: setting to enable[ON] for stream 1.
+08-31 07:11:23.970  1501  4066 D PAL_ResourceManager: checkandEnableECForRXStream_l: 4731: Enter: setting EC[ON] for usecase 1 of device 3.
+08-31 07:11:23.970  1501  4066 D PAL_ResourceManager: checkandEnableECForRXStream_l: 4807: Exit. status: 0
+08-31 07:11:23.970  1501  4066 D PAL_ResourceManager: checkandEnableEC_l: 4864: Exit. status: 0
+08-31 07:11:23.970  1501  4066 D PAL_ResourceManager: registerDevice: 4916: Exit.
+08-31 07:11:23.970  1501  4066 D PAL: OplusSpeakerProtection: updateDynamicEQ: 715: updateDynamicEQ: mEqDynCtlVal=-1, mDeviceStartCount=2, ret=0
+08-31 07:11:23.970  1501  4066 D PAL_ResourceManager: checkAndSetDutyCycleParam: 7280: duty cycle for UPD not enabled
+08-31 07:11:23.970  1501  4066 D PAL: memLoggerBuilder: palStateQueueBuilder: 77: TIME IS:1788140483970
+08-31 07:11:23.970  1501  4066 D PAL: StreamPCM: start: 774: Exit. state 3, status 0
+08-31 07:11:23.970  1501  4066 I PAL: API: pal_stream_start: 511: Exit. status 0
+08-31 07:11:23.970  1501  4066 I AHAL: AudioStream: configurePalOutputStream: 4378: notify GEF client of device config
+08-31 07:11:23.970  1501  4066 D generic_effect_ar: gef_device_config_cb: stream type=6 sample_rate=48000 device=2
+08-31 07:11:23.970  1501  4066 D AHAL: AudioStream: ~AutoPerfLock: 262: (release) perf_lock_handle: 0x45c4, count: 1
+08-31 07:11:23.970  1501  4066 D AHAL: AudioStream: ~AutoPerfLock: 266: Releasing perf_lock_handle: 0x45c4
+08-31 07:11:24.146  1501  1501 D AHAL: AudioStream: out_update_source_metadata_v7: 1329: track count is 0 for usecase(1: low-latency-playback)
+08-31 07:11:24.146  1501  1501 D AHAL: AudioStream: SetAggregateSourceMetadata: 4749: Aggregated Source metadata usage:1 content_type:2 gain:0.000000
+08-31 07:11:24.233 31988 32052 D RPCS3   : S3PERF crosscheck native_fps=59.662 native_frametime_ms=16.761
+08-31 07:11:24.233 31988 32052 D S3PERF  : crosscheck json_fps=59.662113 json_frametime_ms=16.761055
+08-31 07:11:24.234 31988 32052 D S3PERF  : crosscheck ui_snapshot_fps=59.662113 ui_snapshot_frametime_ms=16.761055
+08-31 07:11:24.302  1579  1658 W libbinder.ServiceManagerCppClient: Waited one second for vendor.qti.qhcp.IQHDC/default (is service started? Number of threads started in the threadpool: 2. Are binder threads started and available?)
+--------- beginning of kernel
+08-31 07:11:23.910   899   899 I servicemanager: Caller(pid=1579,uid=0,sid=u:r:vendor_hal_perf_default:s0) Since 'vendor.qti.qhcp.IQHDC/default' could not be found trying to start it as a lazy AIDL service. (if it's not configured to be a lazy service, it may be stuck starting or still starting).
+08-31 07:11:23.912     1     1 E init    : Control message: Could not find 'aidl/vendor.qti.qhcp.IQHDC/default' for ctl.interface_start from pid: 899 (/system/bin/servicemanager)
+08-31 07:11:24.306   899  8300 W libc    : Unable to set property "ctl.interface_start" to "aidl/vendor.qti.qhcp.IQHDC/default": PROP_ERROR_HANDLE_CONTROL_MESSAGE (0x20)
+08-31 07:11:23.912  8300  8300 I servicemanager: Caller(pid=1579,uid=0,sid=u:r:vendor_hal_perf_default:s0) Tried to start aidl service vendor.qti.qhcp.IQHDC/default as a lazy service, but was unable to. Usually this happens when a service is not installed, but if the service is intended to be used as a lazy service, then it may be configured incorrectly.
+08-31 07:11:24.447  1501  2510 I android.hardware.audio.service: [Awinic] [INF] aw_audioreach_monitor_thread: monitor->state = 3
+08-31 07:11:24.447  1501  2510 D android.hardware.audio.service: [Awinic] [DBG] aw_ar_kmsg_ctl_get_monitor_en: dev_index[0]:monitor enable:1
+08-31 07:11:24.053  2510  2510 I [Awinic][7-0034]aw882xx_monitor_get: monitor switch is 1
+08-31 07:11:24.054  2510  2510 I [Awinic][7-0034]aw_monitor_get_voltage: chip voltage is 3792
+08-31 07:11:24.055  2510  2510 I [Awinic][7-0034]aw_monitor_get_temperature: reg val is 0x0032
+08-31 07:11:24.055  2510  2510 I [Awinic][7-0034]aw_monitor_get_temperature: chip temperature = 50
+08-31 07:11:24.449  1501  2510 D android.hardware.audio.service: [Awinic] [DBG] aw_ar_monitor_work_func: dev[0], vmax[0xffe0fd22] is not modified or the value is none
+08-31 07:11:24.449  1501  2510 D android.hardware.audio.service: [Awinic] [DBG] aw_ar_kmsg_ctl_get_monitor_en: dev_index[1]:monitor enable:1
+08-31 07:11:24.451  1501  2510 D android.hardware.audio.service: [Awinic] [DBG] aw_ar_monitor_work_func: dev[1], vmax[0xffe0fd22] is not modified or the value is none
+08-31 07:11:24.451  1501  2510 D android.hardware.audio.service: [Awinic] [DBG] aw_ar_kmsg_ctl_get_monitor_en: dev_index[2]:monitor enable:1
+08-31 07:11:24.055  2510  2510 I [Awinic][4-0034]aw882xx_monitor_get: monitor switch is 1
+08-31 07:11:24.056  2510  2510 I [Awinic][4-0034]aw_monitor_get_voltage: chip voltage is 3804
+08-31 07:11:24.057  2510  2510 I [Awinic][4-0034]aw_monitor_get_temperature: reg val is 0x0029
+08-31 07:11:24.057  2510  2510 I [Awinic][4-0034]aw_monitor_get_temperature: chip temperature = 41
+08-31 07:11:24.453  1501  2510 D android.hardware.audio.service: [Awinic] [DBG] aw_ar_monitor_work_func: dev[2], vmax[0xffe0fd22] is not modified or the value is none
+08-31 07:11:24.453  1501  2510 D android.hardware.audio.service: [Awinic] [DBG] aw_ar_kmsg_ctl_get_monitor_en: dev_index[3]:monitor enable:1
+08-31 07:11:24.057  2510  2510 I [Awinic][7-0035]aw882xx_monitor_get: monitor switch is 1
+08-31 07:11:24.058  2510  2510 I [Awinic][7-0035]aw_monitor_get_voltage: chip voltage is 3792
+08-31 07:11:24.058  2510  2510 I [Awinic][7-0035]aw_monitor_get_temperature: reg val is 0x0031
+08-31 07:11:24.058  2510  2510 I [Awinic][7-0035]aw_monitor_get_temperature: chip temperature = 49
+08-31 07:11:24.060  2510  2510 I [Awinic][4-0035]aw882xx_monitor_get: monitor switch is 1
+08-31 07:11:24.060  2510  2510 I [Awinic][4-0035]aw_monitor_get_voltage: chip voltage is 3769
+08-31 07:11:24.455  1501  2510 D android.hardware.audio.service: [Awinic] [DBG] aw_ar_monitor_work_func: dev[3], vmax[0xffe0fd22] is not modified or the value is none
+08-31 07:11:24.455  1501  2510 D PAL: OplusPalCommon: getActiveStreamPcmId: 2077:  dir: 1, stream: 0xb4000077e923cf10, pcmDevId: 117
+08-31 07:11:24.455  1501  2510 D android.hardware.audio.service: [Awinic] [DBG] aw_ar_dsp_get_msg_num: msg num[0]
+08-31 07:11:24.455  1501  2510 D AGM: graph: graph_set_config: 1225 entry graph_handle 0x347534c
+08-31 07:11:24.456  1501  2510 D AGM: graph: graph_set_config: 1233 exit, graph handle 0x347534c, ret 0
+08-31 07:11:24.061  2510  2510 I [Awinic][4-0035]aw_monitor_get_temperature: reg val is 0x002a
+08-31 07:11:24.061  2510  2510 I [Awinic][4-0035]aw_monitor_get_temperature: chip temperature = 42
+08-31 07:11:24.456  1501  2510 D android.hardware.audio.service: [Awinic] [DBG] aw_ar_dsp_read_msg_from_dsp: msg_id:0x7, read data[32] from dsp success
+08-31 07:11:24.456  1501  2510 D android.hardware.audio.service: [Awinic] [DBG] aw_ar_dsp_read_st: dev[0]read Re 7224 , Te 26
+08-31 07:11:24.456  1501  2510 D android.hardware.audio.service: [Awinic] [DBG] aw_ar_dsp_get_msg_num: msg num[0]
+08-31 07:11:24.456  1501  2510 D AGM: graph: graph_set_config: 1225 entry graph_handle 0x347534c
+08-31 07:11:24.457  1501  2510 D AGM: graph: graph_set_config: 1233 exit, graph handle 0x347534c, ret 0
+08-31 07:11:24.457  1501  2510 D android.hardware.audio.service: [Awinic] [DBG] aw_ar_dsp_read_msg_from_dsp: msg_id:0x7, read data[32] from dsp success
+08-31 07:11:24.457  1501  2510 D android.hardware.audio.service: [Awinic] [DBG] aw_ar_dsp_read_st: dev[1]read Re 7248 , Te 25
+08-31 07:11:24.457  1501  2510 D android.hardware.audio.service: [Awinic] [DBG] aw_ar_dsp_get_msg_num: msg num[1]
+08-31 07:11:24.457  1501  2510 D AGM: graph: graph_set_config: 1225 entry graph_handle 0x347534c
+08-31 07:11:24.457  1501  2510 D AGM: graph: graph_set_config: 1233 exit, graph handle 0x347534c, ret 0
+08-31 07:11:24.458  1501  2510 D android.hardware.audio.service: [Awinic] [DBG] aw_ar_dsp_read_msg_from_dsp: msg_id:0x7, read data[32] from dsp success
+08-31 07:11:24.458  1501  2510 D android.hardware.audio.service: [Awinic] [DBG] aw_ar_dsp_read_st: dev[2]read Re 7446 , Te 25
+08-31 07:11:24.458  1501  2510 D android.hardware.audio.service: [Awinic] [DBG] aw_ar_dsp_get_msg_num: msg num[1]
+08-31 07:11:24.458  1501  2510 D AGM: graph: graph_set_config: 1225 entry graph_handle 0x347534c
+08-31 07:11:24.458  1501  2510 D AGM: graph: graph_set_config: 1233 exit, graph handle 0x347534c, ret 0
+08-31 07:11:24.458  1501  2510 D android.hardware.audio.service: [Awinic] [DBG] aw_ar_dsp_read_msg_from_dsp: msg_id:0x7, read data[32] from dsp success
+08-31 07:11:24.458  1501  2510 D android.hardware.audio.service: [Awinic] [DBG] aw_ar_dsp_read_st: dev[3]read Re 7443 , Te 25
+08-31 07:11:24.458  1501  2510 I PAL: OplusSpeakerAwinic: checkSpeakerStatus: 1019: aw_audioreach_dsp_read_st spk0, re=7224, te=26
+08-31 07:11:24.458  1501  2510 I PAL: OplusSpeakerAwinic: checkSpeakerStatus: 1019: aw_audioreach_dsp_read_st spk1, re=7248, te=25
+08-31 07:11:24.458  1501  2510 I PAL: OplusSpeakerAwinic: checkSpeakerStatus: 1019: aw_audioreach_dsp_read_st spk2, re=7446, te=25
+08-31 07:11:24.458  1501  2510 I PAL: OplusSpeakerAwinic: checkSpeakerStatus: 1019: aw_audioreach_dsp_read_st spk3, re=7443, te=25
+08-31 07:11:25.304  1579  1658 W libbinder.ServiceManagerCppClient: Waited one second for vendor.qti.qhcp.IQHDC/default (is service started? Number of threads started in the threadpool: 2. Are binder threads started and available?)
+08-31 07:11:24.911   899   899 I servicemanager: Caller(pid=1579,uid=0,sid=u:r:vendor_hal_perf_default:s0) Since 'vendor.qti.qhcp.IQHDC/default' could not be found trying to start it as a lazy AIDL service. (if it's not configured to be a lazy service, it may be stuck starting or still starting).
+08-31 07:11:24.913     1     1 E init    : Control message: Could not find 'aidl/vendor.qti.qhcp.IQHDC/default' for ctl.interface_start from pid: 899 (/system/bin/servicemanager)
+08-31 07:11:25.307   899  8302 W libc    : Unable to set property "ctl.interface_start" to "aidl/vendor.qti.qhcp.IQHDC/default": PROP_ERROR_HANDLE_CONTROL_MESSAGE (0x20)
+08-31 07:11:24.914  8302  8302 I servicemanager: Caller(pid=1579,uid=0,sid=u:r:vendor_hal_perf_default:s0) Tried to start aidl service vendor.qti.qhcp.IQHDC/default as a lazy service, but was unable to. Usually this happens when a service is not installed, but if the service is intended to be used as a lazy service, then it may be configured incorrectly.
+08-31 07:11:25.355  1601  1667 D vendor.oplus.hardware.charger-V10-service: parallel fold conf file parse fail parallel_fold_state 2
+08-31 07:11:25.355  1601  1667 D vendor.oplus.hardware.charger-V10-service: scale_chg Start!!!
+08-31 07:11:25.356  1601  1667 D vendor.oplus.hardware.charger-V10-service: [0, 0, 3]
+08-31 07:11:25.356  1601  1667 D vendor.oplus.hardware.charger-V10-service: [0, 2, 9]
+08-31 07:11:25.356  1601  1667 D vendor.oplus.hardware.charger-V10-service: [0, 1, 4]
+08-31 07:11:25.356  1601  1667 D vendor.oplus.hardware.charger-V10-service: [0, 3, 3]
+08-31 07:11:25.357  1601  1667 D vendor.oplus.hardware.charger-V10-service: [0, 4, 3]
+08-31 07:11:25.357  1601  1667 D vendor.oplus.hardware.charger-V10-service: [0, 5, 4]
+08-31 07:11:25.357  1601  1667 D vendor.oplus.hardware.charger-V10-service: [0, 6, 3]
+08-31 07:11:25.357  1601  1667 D vendor.oplus.hardware.charger-V10-service: scale_chg Start!!!
+08-31 07:11:25.357  1601  1667 D vendor.oplus.hardware.charger-V10-service: [0, 0, 3]
+08-31 07:11:25.357  1601  1667 D vendor.oplus.hardware.charger-V10-service: [0, 2, 9]
+08-31 07:11:25.357  1601  1667 D vendor.oplus.hardware.charger-V10-service: [0, 1, 4]
+08-31 07:11:25.357  1601  1667 D vendor.oplus.hardware.charger-V10-service: [0, 3, 3]
+08-31 07:11:25.357  1601  1667 D vendor.oplus.hardware.charger-V10-service: [0, 4, 3]
+08-31 07:11:25.358  1601  1667 D vendor.oplus.hardware.charger-V10-service: [0, 5, 4]
+08-31 07:11:25.358  1601  1667 D vendor.oplus.hardware.charger-V10-service: [0, 6, 3]
+08-31 07:11:25.442 31988 32038 D RPCS3   : S3PERF crosscheck native_fps=62.917 native_frametime_ms=15.894
+08-31 07:11:25.444 31988 32038 D S3PERF  : crosscheck json_fps=62.91745 json_frametime_ms=15.893842
+08-31 07:11:25.444 31988 32038 D S3PERF  : crosscheck ui_snapshot_fps=62.91745 ui_snapshot_frametime_ms=15.893842
+08-31 07:11:25.191 20724 20724 E [TP0]touchpanel: irq gpio is 0
+08-31 07:11:25.984 31988 31988 I S3TOUCH : root action=down x=1500 y=1373
+08-31 07:11:25.984  3141  3141 D TaskbarManager: dispatchTouchEvent:  displayId=0 isDefaultDisplay=true
+08-31 07:11:25.984  1514  1514 I android.hardware.power-service-qti: Power setBoost: 0, duration: 0
+08-31 07:11:25.985  1514  1514 E QTI PowerHAL: Failed to acquire lock.
+08-31 07:11:25.985  1514  1514 E QTI PowerHAL: Failed process_boost for boost_handle
+08-31 07:11:26.017 31988 32052 D RPCS3   : S3TROPHY title=BLUS31584 set=NPWR10029_00 state=ready total=33 unlocked=1
+08-31 07:11:26.062  1501  1501 D AHAL: AudioStream: astream_out_standby: 781: enter: stream (0xb4000076b9235960), usecase(1: low-latency-playback)
+08-31 07:11:26.062  1501  1501 D AHAL: AudioStream: Standby: 2811: Enter
+08-31 07:11:26.062  1501  1501 I PAL: API: pal_stream_stop: 527: Enter. Stream handle :0xb4000077e923cf10K
+08-31 07:11:26.062  1501  1501 D PAL: Stream: setCachedState: 2555: set cachedState to 6
+08-31 07:11:26.062  1501  1501 D PAL: StreamPCM: stop: 786: Enter. session handle - 0xb400007669241ed0K mStreamAttr->direction - 1 state 3
+08-31 07:11:26.062  1501  1501 D PAL_ResourceManager: deregisterDevice: 4940: Enter. dev id: 3
+08-31 07:11:26.062  1501  1501 D PAL_ResourceManager: checkandEnableEC_l: 4833: Enter: setting to enable[OFF] for stream 1.
+08-31 07:11:26.062  1501  1501 D PAL_ResourceManager: checkandEnableECForRXStream_l: 4731: Enter: setting EC[OFF] for usecase 1 of device 3.
+08-31 07:11:26.062  1501  1501 D PAL_ResourceManager: checkandEnableECForRXStream_l: 4807: Exit. status: 0
+08-31 07:11:26.062  1501  1501 D PAL_ResourceManager: checkandEnableEC_l: 4864: Exit. status: 0
+08-31 07:11:26.062  1501  1501 D PAL_ResourceManager: deregisterDevice: 4958: Exit.
+08-31 07:11:26.062  1501  1501 D PAL: SessionAlsaPcm: stop: 1994: Enter
+08-31 07:11:26.062  1501  1501 D AGM: graph: graph_stop: 1036 entry graph_handle 0x347534c
+08-31 07:11:26.064  1501  1501 D AGM: graph: graph_stop: 1090 exit, ret 0
+08-31 07:11:26.064  1501  1501 I PAL: SessionAlsaUtils: getModuleInstanceId: 1247: tag_id 0xc0000006, MIID is 0x40c4
+08-31 07:11:26.064  1501  1501 I PAL_ResourceManager: voteSleepMonitor: 2400: Unvoting done for nlpi use case, lpi votes 0, nlpi votes : 1
+08-31 07:11:26.064  1501  1501 D PAL: SessionAlsaPcm: stop: 2197: Exit status: 0
+08-31 07:11:26.064  1501  1501 I PAL: OplusSpeakerProtection: stop: 2682: Inside Speaker Protection stop, mDeviceStartCount: 2
+08-31 07:11:26.064  1501  1501 D PAL: Device: stop_l: 696: Enter. deviceCount 2 deviceStartStopCount 2 for device id 3 (PAL_DEVICE_OUT_SPEAKER)
+08-31 07:11:26.064  1501  1501 D PAL: memLoggerBuilder: palStateQueueBuilder: 77: TIME IS:1788140486064
+08-31 07:11:26.064  1501  1501 D PAL: StreamPCM: stop: 910: Exit. status 0, state 6
+08-31 07:11:26.064  1501  1501 I PAL: API: pal_stream_stop: 569: Exit. status 0
+08-31 07:11:26.064  1501  1501 I PAL: API: pal_stream_close: 381: Enter. Stream handle :0xb4000077e923cf10K
+08-31 07:11:26.064  1501  1501 D PAL: Stream: setCachedState: 2555: set cachedState to 0
+08-31 07:11:26.064  1501  1501 D PAL: StreamPCM: close: 374: Enter. session handle - 0xb400007669241ed0K device count - 1 state 6
+08-31 07:11:26.064  1501  1501 D PAL: SessionAlsaPcm: close: 2214: Enter
+08-31 07:11:26.064  1501  1501 D PAL: SessionAlsaPcm: close: 2274: backendname TDM-LPAIF-RX-SECONDARY
+08-31 07:11:26.064  1501  1501 D PAL: SessionAlsaPcm: close: 2280: Rx dev still active
+08-31 07:11:26.064  1501  1501 D PAL: SessionAlsaUtils: getFeMixerControl: 354: mixer control PCM117 control
+08-31 07:11:26.065  1501  1501 I AGM: API: agm_session_aif_connect: 625 disconnecting aifid:25 with session id=117
+08-31 07:11:26.065  1501  1501 D AGM: graph: graph_stop: 1036 entry graph_handle 0x347534c
+08-31 07:11:26.066  1501  1501 D AGM: graph: graph_stop: 1090 exit, ret 0
+08-31 07:11:26.066  1501  1501 I AGM: device: device_close: 679 PCM device 23 open refcnt: 2
+08-31 07:11:26.066  1501  1501 D PAL: SessionAlsaUtils: close: 729: backend TDM-LPAIF-RX-SECONDARY and freedevicemetadata 0
+08-31 07:11:26.066  1501  1501 I PAL: SessionAlsaUtils: close: 732: No need to free device metadata as device is still active
+08-31 07:11:26.066  1501  1501 I AGM: session: session_obj_set_sess_aif_metadata: 1967 Exit
+08-31 07:11:26.066  1501  1501 D PAL: SessionAlsaPcm: close: 2302: pcm_close pcmLpmRefCnt 2
+08-31 07:11:26.066  1501  1501 D PAL: SessionAlsaPcm: close: 2310: pcm_close pcmLpmRefCnt 1
+08-31 07:11:26.066  1501  1501 D AGM: session: session_close: 1454 enter
+08-31 07:11:26.066  1501  1501 D AGM: graph: graph_close: 854 entry handle 0x347534c
+08-31 07:11:26.068  1501  1501 D AGM: graph: graph_close: 882 exit, ret 0
+08-31 07:11:26.068  1501  1501 D AGM: session: session_close: 1505 exit, ret 0
+08-31 07:11:26.068  1501  1501 I AGM: oplus_agm_fb: clearOpenedSessions: 81 i = 3, clear session_id = 117
+08-31 07:11:26.068  1501  1501 D PAL_ResourceManager: registerMixerEventCallback: 5631: callback found for pcm id 117, remove
+08-31 07:11:26.068  1501  1501 I PAL_ResourceManager: freeFrontEndIds: 7952: stream type 1, freeing 117
+08-31 07:11:26.068  1501  1501 D PAL: SessionAlsaPcm: close: 2434: Exit status: 0
+08-31 07:11:26.068  1501  1501 I PAL: Device: close: 575: Enter. deviceCount 2 for device id 3 (PAL_DEVICE_OUT_SPEAKER)
+08-31 07:11:26.068  1501  1501 I PAL: Device: close: 600: Exit. deviceCount 1 for device id 3 (PAL_DEVICE_OUT_SPEAKER), exit status 0
+08-31 07:11:26.068  1501  1501 D PAL_ResourceManager: checkAndSetDutyCycleParam: 7280: duty cycle for UPD not enabled
+08-31 07:11:26.068  1501  1501 D PAL: memLoggerBuilder: palStateQueueBuilder: 77: TIME IS:1788140486068
+08-31 07:11:26.068  1501  1501 D PAL: StreamPCM: close: 419: Exit. closed the stream successfully 0 status 0
+08-31 07:11:26.068  1501  1501 D PAL_ResourceManager: deactivateStreamUserCounter: 4258: stream 0xb4000077e923cf10 is to be deactivated.
+08-31 07:11:26.068  1501  1501 D PAL_ResourceManager: deactivateStreamUserCounter: 4262: stream 0xb4000077e923cf10 is inactive.
+08-31 07:11:26.068  1501  1501 I PAL: OplusPalFb: oplus_feedback_delete_info: 892: delete info i = 2, stream 0xb4000077e923cf10K
+08-31 07:11:26.068  1501  1501 D PAL: API: notify_concurrent_stream: 134: Notify concurrent stream type 1, direction 1, active 0
+08-31 07:11:26.068  1501  1501 D PAL_ResourceManager: eraseStreamUserCounter: 4279: stream counter for 0xb4000077e923cf10 is erased.
+08-31 07:11:26.068  1501  1501 D PAL_ResourceManager: deregisterStream: 3992: Enter. stream 0xb4000077e923cf10K
+08-31 07:11:26.068  1501  1501 I PAL_ResourceManager: deregisterStream: 4000: stream type 1
+08-31 07:11:26.068  1501  1501 D PAL_ResourceManager: deregisterStream: 4153: Exit. ret 0
+08-31 07:11:26.068  1501  1501 D PAL: Device: removeStreamDeviceAttr: 998: found entry for stream:1
+08-31 07:11:26.068  1501  1501 D PAL: Device: removeStreamDeviceAttr: 1007: dev: 3 attr removed are: priority: 0x3, stream type: 1, ch: 8, sr: 48000, bit_width: 32, fmt: 23, sndDev: speaker, custom_key: 
+08-31 07:11:26.068  1501  1501 D PAL_ResourceManager: restoreDevice: 14788: Enter
+08-31 07:11:26.068  1501  1501 D PAL_ResourceManager: restoreDevice: 14818: current device: 3 running at, ch 8, sr 48000, bit_width 32, fmt 23, sndDev speaker
+08-31 07:11:26.068  1501  1501 D PAL_ResourceManager: getSharedBEActiveStreamDevs: 8128: got dev 3 active streams on dev is 1
+08-31 07:11:26.068  1501  1501 D PAL_ResourceManager: getSharedBEActiveStreamDevs: 8139: found shared BE stream 0xb4000077e9238210K with dev 3
+08-31 07:11:26.068  1501  1501 D PAL: Stream: getPalDevices: 645: no. of devices 1
+08-31 07:11:26.068  1501  1501 I PAL_ResourceManager: compareSharedBEStreamDevAttr: 8319: switchStreams is 0
+08-31 07:11:26.068  1501  1501 D PAL_ResourceManager: restoreDevice: 14886: device switch not needed params are all the same
+08-31 07:11:26.068  1501  1501 D PAL_ResourceManager: restoreDevice: 14906: Exit
+08-31 07:11:26.068  1501  1501 I PAL: API: pal_stream_close: 430: Exit. status 0
+08-31 07:11:26.068  1501  1501 D AHAL: AudioStream: Standby: 2898: Exit ret: 0
+08-31 07:11:26.068  1501  1501 D AHAL: AudioStream: astream_out_standby: 789: Exit ret: 0
+08-31 07:11:26.078  1502  3285 I vendor.qti.bluetooth@1.1-ibs_handler: ProcessIbsCmd: Received IBS_WAKE_IND: 0xFD
+08-31 07:11:26.078  1502  3285 D vendor.qti.bluetooth@1.1-ibs_handler: SerialClockVote: vote for UART CLK ON
+08-31 07:11:26.078  1502  3285 E vendor.qti.bluetooth@1.1-wake_lock: Acquire write to wakelock file failed -1 - Operation not permitted
+08-31 07:11:26.078  1502  3285 I vendor.qti.bluetooth@1.1-ibs_handler: ProcessIbsCmd: Writing IBS_WAKE_ACK
+08-31 07:11:26.137  2447  2726 D WifiClientModeImpl[14183:wlan0]: updateLinkLayerStatsRssiSpeedFrequencyCapabilities rssi=-24 TxLinkspeed=117 freq=5220 RxLinkSpeed=468
+08-31 07:11:26.138  2447  2726 D WifiDataStall: tx tput in kbps: 104637
+08-31 07:11:26.138  2447  2726 D WifiDataStall: rx tput in kbps: 440578
+08-31 07:11:26.138  2447  2726 V WifiConfigManager: Updating scan detail cache freq=5220 BSSID=b4:86:18:de:39:ca RSSI=-23 for "Excitel_home_wifi_5"WPA_PSK
+08-31 07:11:26.138  2447  2726 D WifiDataStall:  ccaLevel = 15
+08-31 07:11:26.138  2447  2726 D WifiDataStall: L2 txTputKbps: 104637, rxTputKbps: 440578, L3 txTputKbps: 0, rxTputKbps: 0, TxTrafficHigh: false, RxTrafficHigh: false, Throughput Sufficient: true
+08-31 07:11:26.138  2447  2726 D WifiThroughputPredictor:  utilization (LLS) 15 isBluetoothConnected: false final utilization: 15
+08-31 07:11:26.138  2447  2726 D WifiThroughputPredictor:  BW: 2 RSSI: -24 Nss: 2 Mode: 5 symDur: 3600 snrDb 50 bitPerTone: 6667 rate: 866 throughput: 815
+08-31 07:11:26.138  2447  2726 D WifiThroughputPredictor:  utilization (LLS) 15 isBluetoothConnected: false final utilization: 15
+08-31 07:11:26.138  2447  2726 D WifiThroughputPredictor:  BW: 2 RSSI: -24 Nss: 2 Mode: 5 symDur: 3600 snrDb 50 bitPerTone: 6667 rate: 866 throughput: 815
+08-31 07:11:26.141  2447  2726 D WifiScoreCard: BSSID update SIGNAL_POLL ID: 715353381 SSID: "Excitel_home_wifi_5", BSSID: b4:86:18:de:39:ca, MAC: c6:52:65:7d:a1:b6, IP: /192.168.1.35, Security type: 2, Supplicant state: COMPLETED, Wi-Fi standard: 11ac, RSSI: -24, Link speed: 117Mbps, Tx Link speed: 117Mbps, Max Supported Tx Link speed: 866Mbps, Rx Link speed: 468Mbps, Max Supported Rx Link speed: 866Mbps, Frequency: 5220MHz, Net ID: 5, Metered hint: false, score: 106, isUsable: true, CarrierMerged: false, SubscriptionId: -1, IsPrimary: 1, Trusted: true, Restricted: false, Ephemeral: false, OEM paid: false, OEM private: false, OSU AP: false, FQDN: <none>, Provider friendly name: <none>, Requesting package name: <none>"Excitel_home_wifi_5"wpa2-pskMLO Information: , Is TID-To-Link negotiation supported by the AP: false, AP MLD Address: <none>, AP MLO Link Id: <none>, AP MLO Affiliated links: <none>, Vendor Data: <none>
+08-31 07:11:26.141  2447  2726 D WifiScoreCard: txRate: 2 txSpeed: 117
+08-31 07:11:26.141  2447  2726 D WifiScoreCard: network update SIGNAL_POLL "Excitel_home_wifi_5" ID: 1721486633 RSSI -24 txSpeed -1
+08-31 07:11:26.141  2447  2726 D WifiClientModeImpl[14183:wlan0]:  ClientModeImpl$L2ConnectedState screen=on 68 0 "Excitel_home_wifi_5" b4:86:18:de:39:ca rssi=-24 f=5220 sc=106 link=117 tx=0.9, 0.3, 0.0 rx=0.9 bcn=1880339 [on:0 tx:2 rx:0 period:3032] from screen [on:0 period:29219142] score=106
+08-31 07:11:26.143  1502  3285 I vendor.qti.bluetooth@1.1-ibs_handler: ProcessIbsCmd: Received IBS_SLEEP_IND: 0xFE
+08-31 07:11:26.143  1502  3285 D vendor.qti.bluetooth@1.1-ibs_handler: SerialClockVote: vote for UART CLK OFF
+08-31 07:11:25.837   794   794 I         : [INFO]: OPLUS_CHG[MMS_GAUGE]([oplus_mms_gauge_choice_fit_vol][3465]): choice cp voltage as vbat [3820, 3785]
+08-31 07:11:25.838   794   794 I         : [INFO]: OPLUS_CHG[MMS_GAUGE]([oplus_mms_gauge_choice_fit_vol][3465]): choice cp voltage as vbat [3820, 3785]
+08-31 07:11:25.845  6975  6975 I         : [INFO]: OPLUS_CHG[CHG_COMM]([oplus_comm_smooth_to_soc][3416]): soc[0 3 45 45 46 47] avg[2 1 0 0 0] fifo[46 46 46 46]
+08-31 07:11:25.852 23155 23155 I OPLUS_CHG[oplus_charge_info]: BATTERY[392 392 3820 3820 1780 45 47 46 3918 8698 1 0x20 0], CHARGE[4455 600 0 0], WIRED[1 447 4984 500 1 0x0 0 0 0 2 0], WIRELESS[0 0 0 0 0 0x0 0 0 0], VOOC[0 0 0 0 0x0], UFCS[0 0 0 0x0], COMMON[6 0 0 0x0 1 0 1 8698 100 0]
+08-31 07:11:25.856 23155 23155 I         : [INFO]: OPLUS_CHG[ADSP]([oplus_chg_8350_reg_dump][7390]): sm8450_st_dump: [chg_en=1, suspend=0, pd_svooc=0], subtype=0x01],[oplus_UsbCommCapable=0, oplus_pd_svooc=0, typec_mode=0, cid_status=0x01, usb_in_status=1],[0x2606=0x83, 0x2607=0x19, 0x2608=0x0a, 0x2609=0x02], [0x260a=0x04, 0x260b=0x55, 0x260c=0x0a, 0x260d=0x18], [0x260e=0x0a, 0x260f=0x01, 0x2610=0x00, 0x2640=0x01], [0x2641=0x02, 0x2642=0x05, 0x2646=0x01, 0x2650=0x04], [0x2706=0x0a, 0x2707=0x0a, 0x2708=0x0a, 0x2709=0x0a], [0x270b=0xe2, 0x270c=0x48, 0x2710=0xc0, 0x280c=0x38], [0x2810=0x00, 0x2840=0x01, 0x287f=0x00, 0x2906=0x02], [0x2908=0x0f, 0x290a=0x11, 0x290b=0x01, 0x290c=0x01], [0x2910=0x11, 0x2944=0x80, 0x2950=0x02, 0x2951=0x01], [0x2952=0x0a, 0x2954=0x00, 0x2960=0xe0, 0x2b06=0x08], [0x2b07=0x00, 0x2b08=0x00, 0x2b09=0xa3, 0x2b0a=0x39], [0x2b0b=0xab, 0x2b0c=0x00, 0x29a8=0x81, 0x29a9=0x83], [0x29aa=0x00, 0x2aa2=0x00, 0x2aa8=0x87, 0x2aa9=0x00], [0x2aaa=0x00],
+08-31 07:11:26.294  1502  3136 E vendor.qti.bluetooth@1.1-wake_lock: Release wake lock not initialized/acquired
+08-31 07:11:26.306  1579  1658 W libbinder.ServiceManagerCppClient: Waited one second for vendor.qti.qhcp.IQHDC/default (is service started? Number of threads started in the threadpool: 2. Are binder threads started and available?)
+08-31 07:11:25.914   899   899 I servicemanager: Caller(pid=1579,uid=0,sid=u:r:vendor_hal_perf_default:s0) Since 'vendor.qti.qhcp.IQHDC/default' could not be found trying to start it as a lazy AIDL service. (if it's not configured to be a lazy service, it may be stuck starting or still starting).
+08-31 07:11:26.311   899  8310 W libc    : Unable to set property "ctl.interface_start" to "aidl/vendor.qti.qhcp.IQHDC/default": PROP_ERROR_HANDLE_CONTROL_MESSAGE (0x20)
+08-31 07:11:25.916     1     1 E init    : Control message: Could not find 'aidl/vendor.qti.qhcp.IQHDC/default' for ctl.interface_start from pid: 899 (/system/bin/servicemanager)
+08-31 07:11:25.917  8310  8310 I servicemanager: Caller(pid=1579,uid=0,sid=u:r:vendor_hal_perf_default:s0) Tried to start aidl service vendor.qti.qhcp.IQHDC/default as a lazy service, but was unable to. Usually this happens when a service is not installed, but if the service is intended to be used as a lazy service, then it may be configured incorrectly.
+08-31 07:11:26.113     0     0 W [    C0] gen7_err_callback: 89 callbacks suppressed
+08-31 07:11:26.113     0     0 F         : [    C0] kgsl kgsl-3d0: CP: AHB bus error, CP_RL_ERROR_DETAILS_0:0x10008e07 CP_RL_ERROR_DETAILS_1:0x12144
+08-31 07:11:26.164     0     0 F         : [    C1] kgsl kgsl-3d0: CP: AHB bus error, CP_RL_ERROR_DETAILS_0:0x10008e07 CP_RL_ERROR_DETAILS_1:0x12144
+08-31 07:11:26.555  5485  5485 W DefaultDispatch: type=1400 audit(0.0:895124): avc:  denied  { read } for  name="version" dev="proc" ino=4026532013 scontext=u:r:untrusted_app:s0:c224,c256,c512,c768 tcontext=u:object_r:proc_version:s0 tclass=file permissive=0 app=com.ivarna.mkm
+08-31 07:11:26.569  5485  7854 W CpuUtilizationProvider: Failed to read /proc/stat: grep: /proc/stat: Permission denied
+08-31 07:11:26.576  5485  7854 D CpuUtilizationProvider: CPU usage updated from frequency (fallback): 66%
+08-31 07:11:26.576  5485  7854 D CpuProvider: Core 0: freq=672000, usage=0.16161616 (hwMin=364800, hwMax=2265600)
+08-31 07:11:26.577  5485  7854 D CpuProvider: Core 1: freq=672000, usage=0.16161616 (hwMin=364800, hwMax=2265600)
+08-31 07:11:26.577  5485  7854 D CpuProvider: Core 2: freq=2707200, usage=0.7826087 (hwMin=499200, hwMax=3148800)
+08-31 07:11:26.578  5485  7854 D CpuProvider: Core 3: freq=2707200, usage=0.7826087 (hwMin=499200, hwMax=3148800)
+08-31 07:11:26.578  5485  7854 D CpuProvider: Core 4: freq=2707200, usage=0.7826087 (hwMin=499200, hwMax=3148800)
+08-31 07:11:26.578  5485  7854 D CpuProvider: Core 5: freq=2707200, usage=0.84375 (hwMin=499200, hwMax=2956800)
+08-31 07:11:26.579  5485  7854 D CpuProvider: Core 6: freq=2707200, usage=0.84375 (hwMin=499200, hwMax=2956800)
+08-31 07:11:26.580  5485  7854 D CpuProvider: Core 7: freq=2937600, usage=0.14965986 (hwMin=480000, hwMax=3302400)
+08-31 07:11:26.580  5485  7854 D CpuProvider: Overall usage: 0.665727 (from 8 cores), Avg Freq: 2258000
+08-31 07:11:26.587  8318  8318 W cat     : type=1400 audit(0.0:895125): avc:  denied  { read } for  name="governor" dev="sysfs" ino=139690 scontext=u:r:untrusted_app:s0:c224,c256,c512,c768 tcontext=u:object_r:vendor_sysfs_kgsl:s0 tclass=file permissive=0 app=com.ivarna.mkm
+08-31 07:11:26.591  8319  8319 W cat     : type=1400 audit(0.0:895126): avc:  denied  { read } for  name="available_governors" dev="sysfs" ino=139691 scontext=u:r:untrusted_app:s0:c224,c256,c512,c768 tcontext=u:object_r:vendor_sysfs_kgsl:s0 tclass=file permissive=0 app=com.ivarna.mkm
+08-31 07:11:26.213     0     0 F         : [    C0] kgsl kgsl-3d0: CP: AHB bus error, CP_RL_ERROR_DETAILS_0:0x10008e07 CP_RL_ERROR_DETAILS_1:0x12144
+08-31 07:11:26.615  8324  8324 W cat     : type=1400 audit(0.0:895127): avc:  denied  { read } for  name="cur_freq" dev="sysfs" ino=139692 scontext=u:r:untrusted_app:s0:c224,c256,c512,c768 tcontext=u:object_r:vendor_sysfs_kgsl:s0 tclass=file permissive=0 app=com.ivarna.mkm
+08-31 07:11:26.635  8330  8330 W cat     : type=1400 audit(0.0:895128): avc:  denied  { read } for  name="gpuclk" dev="sysfs" ino=139614 scontext=u:r:untrusted_app:s0:c224,c256,c512,c768 tcontext=u:object_r:vendor_sysfs_kgsl_gpuclk:s0 tclass=file permissive=0
+08-31 07:11:26.250  8332  8332 W audit   : audit_lost=587211 audit_rate_limit=5 audit_backlog_limit=64
+08-31 07:11:26.250  8332  8332 E audit   : rate limit exceeded
+08-31 07:11:26.649 31988 32052 D RPCS3   : S3PERF crosscheck native_fps=59.741 native_frametime_ms=16.739
+08-31 07:11:26.650 31988 32052 D S3PERF  : crosscheck json_fps=59.74053 json_frametime_ms=16.739056
+08-31 07:11:26.650 31988 32052 D S3PERF  : crosscheck ui_snapshot_fps=59.74053 ui_snapshot_frametime_ms=16.739056
+08-31 07:11:26.264     0     0 F         : [    C0] kgsl kgsl-3d0: CP: AHB bus error, CP_RL_ERROR_DETAILS_0:0x10008e07 CP_RL_ERROR_DETAILS_1:0x12144
+08-31 07:11:26.314     0     0 F         : [    C1] kgsl kgsl-3d0: CP: AHB bus error, CP_RL_ERROR_DETAILS_0:0x10008e07 CP_RL_ERROR_DETAILS_1:0x12144
+08-31 07:11:26.364     0     0 F         : [    C1] kgsl kgsl-3d0: CP: AHB bus error, CP_RL_ERROR_DETAILS_0:0x10008e07 CP_RL_ERROR_DETAILS_1:0x12144
+08-31 07:11:26.414     0     0 F         : [    C0] kgsl kgsl-3d0: CP: AHB bus error, CP_RL_ERROR_DETAILS_0:0x10008e07 CP_RL_ERROR_DETAILS_1:0x12144
+08-31 07:11:26.463     0     0 F         : [    C1] kgsl kgsl-3d0: CP: AHB bus error, CP_RL_ERROR_DETAILS_0:0x10008e07 CP_RL_ERROR_DETAILS_1:0x12144
+08-31 07:11:26.879  2447  2726 D WifiNetworkSelector: Current connected network: 5
+08-31 07:11:26.879  2447  2726 V WifiConnectivityManager: No partial scan because firmware roaming is supported.
+08-31 07:11:26.879  2447  2726 V WifiConnectivityManager: schedulePeriodicScanTimer intervalMs 20000
+08-31 07:11:26.513     0     0 F         : [    C0] kgsl kgsl-3d0: CP: AHB bus error, CP_RL_ERROR_DETAILS_0:0x10008e07 CP_RL_ERROR_DETAILS_1:0x12144
+08-31 07:11:26.564     0     0 F         : [    C0] kgsl kgsl-3d0: CP: AHB bus error, CP_RL_ERROR_DETAILS_0:0x10008e07 CP_RL_ERROR_DETAILS_1:0x12144
+08-31 07:11:27.309  1579  1658 W libbinder.ServiceManagerCppClient: Waited one second for vendor.qti.qhcp.IQHDC/default (is service started? Number of threads started in the threadpool: 2. Are binder threads started and available?)
+08-31 07:11:26.917   899   899 I servicemanager: Caller(pid=1579,uid=0,sid=u:r:vendor_hal_perf_default:s0) Since 'vendor.qti.qhcp.IQHDC/default' could not be found trying to start it as a lazy AIDL service. (if it's not configured to be a lazy service, it may be stuck starting or still starting).
+08-31 07:11:27.313   899  8357 W libc    : Unable to set property "ctl.interface_start" to "aidl/vendor.qti.qhcp.IQHDC/default": PROP_ERROR_HANDLE_CONTROL_MESSAGE (0x20)
+08-31 07:11:26.919     1     1 E init    : Control message: Could not find 'aidl/vendor.qti.qhcp.IQHDC/default' for ctl.interface_start from pid: 899 (/system/bin/servicemanager)
+08-31 07:11:26.920  8357  8357 I servicemanager: Caller(pid=1579,uid=0,sid=u:r:vendor_hal_perf_default:s0) Tried to start aidl service vendor.qti.qhcp.IQHDC/default as a lazy service, but was unable to. Usually this happens when a service is not installed, but if the service is intended to be used as a lazy service, then it may be configured incorrectly.
+08-31 07:11:27.443  1502  3285 I vendor.qti.bluetooth@1.1-ibs_handler: ProcessIbsCmd: Received IBS_WAKE_IND: 0xFD
+08-31 07:11:27.443  1502  3285 D vendor.qti.bluetooth@1.1-ibs_handler: SerialClockVote: vote for UART CLK ON
+08-31 07:11:27.444  1502  3285 E vendor.qti.bluetooth@1.1-wake_lock: Acquire write to wakelock file failed -1 - Operation not permitted
+08-31 07:11:27.444  1502  3285 I vendor.qti.bluetooth@1.1-ibs_handler: ProcessIbsCmd: Writing IBS_WAKE_ACK
+08-31 07:11:27.486  1502  3285 I vendor.qti.bluetooth@1.1-ibs_handler: ProcessIbsCmd: Received IBS_SLEEP_IND: 0xFE
+08-31 07:11:27.486  1502  3285 D vendor.qti.bluetooth@1.1-ibs_handler: SerialClockVote: vote for UART CLK OFF
+08-31 07:11:27.207 20724 20724 E [TP0]touchpanel: irq gpio is 0
+08-31 07:11:27.637  1502  3136 E vendor.qti.bluetooth@1.1-wake_lock: Release wake lock not initialized/acquired
+08-31 07:11:27.858 31988 32052 D RPCS3   : S3PERF crosscheck native_fps=62.943 native_frametime_ms=15.887
+08-31 07:11:27.860 31988 32052 D S3PERF  : crosscheck json_fps=62.943085 json_frametime_ms=15.887368
+08-31 07:11:27.860 31988 32052 D S3PERF  : crosscheck ui_snapshot_fps=62.943085 ui_snapshot_frametime_ms=15.887368
+08-31 07:11:27.623 18787 18787 I [LCD][0][INFO][dsi_display_status_check_error_flag:1212] [ESD]: first read: master=0 slave=0
+08-31 07:11:28.311  1579  1658 W libbinder.ServiceManagerCppClient: Waited one second for vendor.qti.qhcp.IQHDC/default (is service started? Number of threads started in the threadpool: 2. Are binder threads started and available?)
+08-31 07:11:28.315   899  8358 W libc    : Unable to set property "ctl.interface_start" to "aidl/vendor.qti.qhcp.IQHDC/default": PROP_ERROR_HANDLE_CONTROL_MESSAGE (0x20)
+08-31 07:11:27.919   899   899 I servicemanager: Caller(pid=1579,uid=0,sid=u:r:vendor_hal_perf_default:s0) Since 'vendor.qti.qhcp.IQHDC/default' could not be found trying to start it as a lazy AIDL service. (if it's not configured to be a lazy service, it may be stuck starting or still starting).
+08-31 07:11:27.920     1     1 E init    : Control message: Could not find 'aidl/vendor.qti.qhcp.IQHDC/default' for ctl.interface_start from pid: 899 (/system/bin/servicemanager)
+08-31 07:11:27.921  8358  8358 I servicemanager: Caller(pid=1579,uid=0,sid=u:r:vendor_hal_perf_default:s0) Tried to start aidl service vendor.qti.qhcp.IQHDC/default as a lazy service, but was unable to. Usually this happens when a service is not installed, but if the service is intended to be used as a lazy service, then it may be configured incorrectly.
+08-31 07:11:28.584  1502  3285 I vendor.qti.bluetooth@1.1-ibs_handler: ProcessIbsCmd: Received IBS_WAKE_IND: 0xFD
+08-31 07:11:28.584  1502  3285 D vendor.qti.bluetooth@1.1-ibs_handler: SerialClockVote: vote for UART CLK ON
+08-31 07:11:28.584  1502  3285 E vendor.qti.bluetooth@1.1-wake_lock: Acquire write to wakelock file failed -1 - Operation not permitted
+08-31 07:11:28.584  1502  3285 I vendor.qti.bluetooth@1.1-ibs_handler: ProcessIbsCmd: Writing IBS_WAKE_ACK
+08-31 07:11:28.625  1502  3285 I vendor.qti.bluetooth@1.1-ibs_handler: ProcessIbsCmd: Received IBS_SLEEP_IND: 0xFE
+08-31 07:11:28.625  1502  3285 D vendor.qti.bluetooth@1.1-ibs_handler: SerialClockVote: vote for UART CLK OFF
+08-31 07:11:28.741 31988 32574 D RPCS3   : CPU Usage: Total: 25.5%, Cores: 0.0%, 0.0%, 0.0%, 0.0%, 0.0%, 0.0%, 0.0%, 0.0%
+08-31 07:11:28.775  1502  3136 E vendor.qti.bluetooth@1.1-wake_lock: Release wake lock not initialized/acquired
+08-31 07:11:29.069 31988  3547 D RPCS3   : S3PERF crosscheck native_fps=59.691 native_frametime_ms=16.753
+08-31 07:11:29.070 31988  3547 D S3PERF  : crosscheck json_fps=59.691196 json_frametime_ms=16.752888
+08-31 07:11:29.070 31988  3547 D S3PERF  : crosscheck ui_snapshot_fps=59.691196 ui_snapshot_frametime_ms=16.752888
+08-31 07:11:29.150  2447  2726 D WifiClientModeImpl[14183:wlan0]: updateLinkLayerStatsRssiSpeedFrequencyCapabilities rssi=-24 TxLinkspeed=117 freq=5220 RxLinkSpeed=526
+08-31 07:11:29.151  2447  2726 D WifiDataStall: tx tput in kbps: 104637
+08-31 07:11:29.151  2447  2726 D WifiDataStall: rx tput in kbps: 440578
+08-31 07:11:29.151  2447  2726 V WifiConfigManager: Updating scan detail cache freq=5220 BSSID=b4:86:18:de:39:ca RSSI=-23 for "Excitel_home_wifi_5"WPA_PSK
+08-31 07:11:29.151  2447  2726 D WifiDataStall:  ccaLevel = 15
+08-31 07:11:29.151  2447  2726 D WifiDataStall: L2 txTputKbps: 55072, rxTputKbps: 495179, L3 txTputKbps: 0, rxTputKbps: 0, TxTrafficHigh: true, RxTrafficHigh: false, Throughput Sufficient: true
+08-31 07:11:29.151  2447  2726 D WifiThroughputPredictor:  utilization (LLS) 15 isBluetoothConnected: false final utilization: 15
+08-31 07:11:29.152  2447  2726 D WifiThroughputPredictor:  BW: 2 RSSI: -24 Nss: 2 Mode: 5 symDur: 3600 snrDb 50 bitPerTone: 6667 rate: 866 throughput: 815
+08-31 07:11:29.152  2447  2726 D WifiThroughputPredictor:  utilization (LLS) 15 isBluetoothConnected: false final utilization: 15
+08-31 07:11:29.152  2447  2726 D WifiThroughputPredictor:  BW: 2 RSSI: -24 Nss: 2 Mode: 5 symDur: 3600 snrDb 50 bitPerTone: 6667 rate: 866 throughput: 815
+08-31 07:11:29.155  2447  2726 D WifiScoreCard: BSSID update SIGNAL_POLL ID: 715353381 SSID: "Excitel_home_wifi_5", BSSID: b4:86:18:de:39:ca, MAC: c6:52:65:7d:a1:b6, IP: /192.168.1.35, Security type: 2, Supplicant state: COMPLETED, Wi-Fi standard: 11ac, RSSI: -24, Link speed: 117Mbps, Tx Link speed: 117Mbps, Max Supported Tx Link speed: 866Mbps, Rx Link speed: 526Mbps, Max Supported Rx Link speed: 866Mbps, Frequency: 5220MHz, Net ID: 5, Metered hint: false, score: 106, isUsable: true, CarrierMerged: false, SubscriptionId: -1, IsPrimary: 1, Trusted: true, Restricted: false, Ephemeral: false, OEM paid: false, OEM private: false, OSU AP: false, FQDN: <none>, Provider friendly name: <none>, Requesting package name: <none>"Excitel_home_wifi_5"wpa2-pskMLO Information: , Is TID-To-Link negotiation supported by the AP: false, AP MLD Address: <none>, AP MLO Link Id: <none>, AP MLO Affiliated links: <none>, Vendor Data: <none>
+08-31 07:11:29.155  2447  2726 D WifiScoreCard: txRate: 3 txSpeed: 117
+08-31 07:11:29.155  2447  2726 D WifiScoreCard: network update SIGNAL_POLL "Excitel_home_wifi_5" ID: 1721486633 RSSI -24 txSpeed -1
+08-31 07:11:29.155  2447  2726 D WifiClientModeImpl[14183:wlan0]:  ClientModeImpl$L2ConnectedState screen=on 68 0 "Excitel_home_wifi_5" b4:86:18:de:39:ca rssi=-24 f=5220 sc=106 link=117 tx=1.1, 0.9, 0.0 rx=1.1 bcn=1880364 [on:0 tx:3 rx:1 period:3014] from screen [on:0 period:29222156] score=106
+08-31 07:11:28.907 29273 29273 E iostack : irqs = 1810345, self-block = 0
+08-31 07:11:29.313  1579  1658 W libbinder.ServiceManagerCppClient: Waited one second for vendor.qti.qhcp.IQHDC/default (is service started? Number of threads started in the threadpool: 2. Are binder threads started and available?)
+08-31 07:11:28.922   899   899 I servicemanager: Caller(pid=1579,uid=0,sid=u:r:vendor_hal_perf_default:s0) Since 'vendor.qti.qhcp.IQHDC/default' could not be found trying to start it as a lazy AIDL service. (if it's not configured to be a lazy service, it may be stuck starting or still starting).
+08-31 07:11:29.318   899  8359 W libc    : Unable to set property "ctl.interface_start" to "aidl/vendor.qti.qhcp.IQHDC/default": PROP_ERROR_HANDLE_CONTROL_MESSAGE (0x20)
+08-31 07:11:28.923     1     1 E init    : Control message: Could not find 'aidl/vendor.qti.qhcp.IQHDC/default' for ctl.interface_start from pid: 899 (/system/bin/servicemanager)
+08-31 07:11:28.924  8359  8359 I servicemanager: Caller(pid=1579,uid=0,sid=u:r:vendor_hal_perf_default:s0) Tried to start aidl service vendor.qti.qhcp.IQHDC/default as a lazy service, but was unable to. Usually this happens when a service is not installed, but if the service is intended to be used as a lazy service, then it may be configured incorrectly.
+08-31 07:11:29.458  1501  2510 I android.hardware.audio.service: [Awinic] [INF] aw_audioreach_monitor_thread: monitor->state = 3
+08-31 07:11:29.459  1501  2510 D android.hardware.audio.service: [Awinic] [DBG] aw_ar_kmsg_ctl_get_monitor_en: dev_index[0]:monitor enable:1
+08-31 07:11:29.065  2510  2510 I [Awinic][7-0034]aw882xx_monitor_get: monitor switch is 1
+08-31 07:11:29.066  2510  2510 I [Awinic][7-0034]aw_monitor_get_voltage: chip voltage is 3781
+08-31 07:11:29.066  2510  2510 I [Awinic][7-0034]aw_monitor_get_temperature: reg val is 0x0032
+08-31 07:11:29.066  2510  2510 I [Awinic][7-0034]aw_monitor_get_temperature: chip temperature = 50
+08-31 07:11:29.461  1501  2510 D android.hardware.audio.service: [Awinic] [DBG] aw_ar_monitor_work_func: dev[0], vmax[0xffe0fd22] is not modified or the value is none
+08-31 07:11:29.461  1501  2510 D android.hardware.audio.service: [Awinic] [DBG] aw_ar_kmsg_ctl_get_monitor_en: dev_index[1]:monitor enable:1
+08-31 07:11:29.067  2510  2510 I [Awinic][4-0034]aw882xx_monitor_get: monitor switch is 1
+08-31 07:11:29.069  2510  2510 I [Awinic][4-0034]aw_monitor_get_voltage: chip voltage is 3804
+08-31 07:11:29.069  2510  2510 I [Awinic][4-0034]aw_monitor_get_temperature: reg val is 0x0029
+08-31 07:11:29.069  2510  2510 I [Awinic][4-0034]aw_monitor_get_temperature: chip temperature = 41
+08-31 07:11:29.463  1501  2510 D android.hardware.audio.service: [Awinic] [DBG] aw_ar_monitor_work_func: dev[1], vmax[0xffe0fd22] is not modified or the value is none
+08-31 07:11:29.464  1501  2510 D android.hardware.audio.service: [Awinic] [DBG] aw_ar_kmsg_ctl_get_monitor_en: dev_index[2]:monitor enable:1
+08-31 07:11:29.070  2510  2510 I [Awinic][7-0035]aw882xx_monitor_get: monitor switch is 1
+08-31 07:11:29.071  2510  2510 I [Awinic][7-0035]aw_monitor_get_voltage: chip voltage is 3781
+08-31 07:11:29.465  1501  2510 D android.hardware.audio.service: [Awinic] [DBG] aw_ar_monitor_work_func: dev[2], vmax[0xffe0fd22] is not modified or the value is none
+08-31 07:11:29.466  1501  2510 D android.hardware.audio.service: [Awinic] [DBG] aw_ar_kmsg_ctl_get_monitor_en: dev_index[3]:monitor enable:1
+08-31 07:11:29.467  1501  2510 D android.hardware.audio.service: [Awinic] [DBG] aw_ar_monitor_work_func: dev[3], vmax[0xffe0fd22] is not modified or the value is none
+08-31 07:11:29.071  2510  2510 I [Awinic][7-0035]aw_monitor_get_temperature: reg val is 0x0031
+08-31 07:11:29.071  2510  2510 I [Awinic][7-0035]aw_monitor_get_temperature: chip temperature = 49
+08-31 07:11:29.072  2510  2510 I [Awinic][4-0035]aw882xx_monitor_get: monitor switch is 1
+08-31 07:11:29.073  2510  2510 I [Awinic][4-0035]aw_monitor_get_voltage: chip voltage is 3781
+08-31 07:11:29.073  2510  2510 I [Awinic][4-0035]aw_monitor_get_temperature: reg val is 0x002a
+08-31 07:11:29.073  2510  2510 I [Awinic][4-0035]aw_monitor_get_temperature: chip temperature = 42
+08-31 07:11:29.223  5559  5559 E [TP0]touchpanel: irq gpio is 0
+08-31 07:11:29.847  5485  5485 W DefaultDispatch: type=1400 audit(0.0:895138): avc:  denied  { read } for  name="version" dev="proc" ino=4026532013 scontext=u:r:untrusted_app:s0:c224,c256,c512,c768 tcontext=u:object_r:proc_version:s0 tclass=file permissive=0 app=com.ivarna.mkm
+08-31 07:11:29.890  5485  7854 W CpuUtilizationProvider: Failed to read /proc/stat: grep: /proc/stat: Permission denied
+08-31 07:11:29.895  1502  3285 I vendor.qti.bluetooth@1.1-ibs_handler: ProcessIbsCmd: Received IBS_WAKE_IND: 0xFD
+08-31 07:11:29.896  1502  3285 D vendor.qti.bluetooth@1.1-ibs_handler: SerialClockVote: vote for UART CLK ON
+08-31 07:11:29.896  1502  3285 E vendor.qti.bluetooth@1.1-wake_lock: Acquire write to wakelock file failed -1 - Operation not permitted
+08-31 07:11:29.896  1502  3285 I vendor.qti.bluetooth@1.1-ibs_handler: ProcessIbsCmd: Writing IBS_WAKE_ACK
+08-31 07:11:29.906  5485  7854 D CpuUtilizationProvider: CPU usage updated from frequency (fallback): 74%
+08-31 07:11:29.907  5485  7854 D CpuProvider: Core 0: freq=1248000, usage=0.46464646 (hwMin=364800, hwMax=2265600)
+08-31 07:11:29.907  5485  7854 D CpuProvider: Core 1: freq=1248000, usage=0.75757575 (hwMin=364800, hwMax=2265600)
+08-31 07:11:29.908  5485  7854 D CpuProvider: Core 2: freq=2707200, usage=0.6884058 (hwMin=499200, hwMax=3148800)
+08-31 07:11:29.908  5485  7854 D CpuProvider: Core 3: freq=2707200, usage=0.8333333 (hwMin=499200, hwMax=3148800)
+08-31 07:11:29.908  5485  7854 D CpuProvider: Core 4: freq=2707200, usage=0.6884058 (hwMin=499200, hwMax=3148800)
+08-31 07:11:29.909  5485  7854 D CpuProvider: Core 5: freq=2707200, usage=0.8984375 (hwMin=499200, hwMax=2956800)
+08-31 07:11:29.910  5485  7854 D CpuProvider: Core 6: freq=2707200, usage=0.7421875 (hwMin=499200, hwMax=2956800)
+08-31 07:11:29.911  5485  7854 D CpuProvider: Core 7: freq=3244800, usage=0.14965986 (hwMin=480000, hwMax=3302400)
+08-31 07:11:29.911  5485  7854 D CpuProvider: Overall usage: 0.74521077 (from 8 cores), Avg Freq: 2492500
+08-31 07:11:29.936  1502  3285 I vendor.qti.bluetooth@1.1-ibs_handler: ProcessIbsCmd: Received IBS_SLEEP_IND: 0xFE
+08-31 07:11:29.936  1502  3285 D vendor.qti.bluetooth@1.1-ibs_handler: SerialClockVote: vote for UART CLK OFF
+08-31 07:11:29.939  8367  8367 W cat     : type=1400 audit(0.0:895139): avc:  denied  { read } for  name="governor" dev="sysfs" ino=139690 scontext=u:r:untrusted_app:s0:c224,c256,c512,c768 tcontext=u:object_r:vendor_sysfs_kgsl:s0 tclass=file permissive=0 app=com.ivarna.mkm
+08-31 07:11:29.955  8368  8368 W cat     : type=1400 audit(0.0:895140): avc:  denied  { read } for  name="available_governors" dev="sysfs" ino=139691 scontext=u:r:untrusted_app:s0:c224,c256,c512,c768 tcontext=u:object_r:vendor_sysfs_kgsl:s0 tclass=file permissive=0 app=com.ivarna.mkm
+08-31 07:11:30.003  8373  8373 W cat     : type=1400 audit(0.0:895141): avc:  denied  { read } for  name="cur_freq" dev="sysfs" ino=139692 scontext=u:r:untrusted_app:s0:c224,c256,c512,c768 tcontext=u:object_r:vendor_sysfs_kgsl:s0 tclass=file permissive=0 app=com.ivarna.mkm
+08-31 07:11:30.063  8381  8381 W cat     : type=1400 audit(0.0:895142): avc:  denied  { read } for  name="gpuclk" dev="sysfs" ino=139614 scontext=u:r:untrusted_app:s0:c224,c256,c512,c768 tcontext=u:object_r:vendor_sysfs_kgsl_gpuclk:s0 tclass=file permissive=0 app=com.ivarna.mkm
+08-31 07:11:30.066  8375  8375 D AndroidRuntime: >>>>>> START com.android.internal.os.RuntimeInit uid 2000 <<<<<<
+08-31 07:11:30.069  8375  8375 I AndroidRuntime: Using default boot image
+08-31 07:11:30.069  8375  8375 I AndroidRuntime: Leaving lock profiling enabled
+08-31 07:11:30.071  8375  8375 I app_process: Core platform API reporting enabled by runtime option
+08-31 07:11:30.071  8375  8375 I app_process: Using CollectorTypeCMC GC.
+08-31 07:11:30.086  1502  3136 E vendor.qti.bluetooth@1.1-wake_lock: Release wake lock not initialized/acquired
+08-31 07:11:29.702  8383  8383 W audit   : audit_lost=587220 audit_rate_limit=5 audit_backlog_limit=64
+08-31 07:11:29.702  8383  8383 E audit   : rate limit exceeded
+08-31 07:11:30.113  1569  1891 I SDM     : DisplayBase::CommitThread: Received idle timeout, panel: video, timeout: 70000 us
+08-31 07:11:30.119  1569  1891 W SDM     : HWDeviceDRM::GetSupportedBitClkRate: Requested rate not supported: 1254876800
+08-31 07:11:29.726  1164  1164 I         : [LCD][0][INFO][oplus_panel_cmd_print:120] [CSOT-NT36532] dsi_cmd: qcom,mdss-dsi-fps-switch-30-command, count=2
+08-31 07:11:29.726  1164  1164 E [TP0]touchpanel: Notification type:4, early_trigger:1
+08-31 07:11:29.726  1164  1164 E [TP0]touchpanel: shashank:Received fps change old fps:120 new fps:30
+08-31 07:11:29.728  1164  1164 E         : [LCD][0][ERR][oplus_panel_switch_vid_mode:475] oplus_panel_switch_vid_mode not support
+08-31 07:11:29.728  1164  1164 I [drm:dsi_display_set_mode [msm_drm]] [msm-dsi-info]: mdp_transfer_time=0, hactive=3000, vactive=2120, fps=30, h_skew=0, clk_rate=1254876800, h_sync_width=40,				h_front_porch236, h_back_porch=200, v_back_porch=208, v_sync_width=40, v_front_porch=7094
+08-31 07:11:30.126  8375  8375 D nativeloader: InitDefaultPublicLibraries for_preload=1: libandroid.so:libaaudio.so:libamidi.so:libbinder_ndk.so:libc.so:libcamera2ndk.so:libdl.so:libEGL.so:libGLESv1_CM.so:libGLESv2.so:libGLESv3.so:libicu.so:libicui18n.so:libicuuc.so:libjnigraphics.so:liblog.so:libmediandk.so:libm.so:libnativehelper.so:libnativewindow.so:libOpenMAXAL.so:libOpenSLES.so:libRS.so:libstdc++.so:libsync.so:libvulkan.so:libwebviewchromium_plat_support.so:libz.so
+08-31 07:11:29.734  1164  1164 E [TP0]touchpanel: Notification type:4, early_trigger:0
+08-31 07:11:29.734  1164  1164 E [TP0]touchpanel: shashank:Received fps change old fps:120 new fps:30
+08-31 07:11:30.133  8375  8375 D nativeloader: Load libicu_jni.so using APEX ns com_android_art for caller /apex/com.android.art/javalib/core-oj.jar: ok
+08-31 07:11:30.133  8375  8375 D app_process: u_setTimeZoneFilesDirectory("/apex/com.android.tzdata/etc/tz/versioned/9/icu") succeeded. 
+08-31 07:11:30.133  8375  8375 D app_process: I18n APEX ICU file found: /apex/com.android.i18n/etc/icu/icudt76l.dat
+08-31 07:11:30.133  8375  8375 D nativeloader: Load libjavacore.so using APEX ns com_android_art for caller /apex/com.android.art/javalib/core-oj.jar: ok
+08-31 07:11:30.134  8375  8375 D nativeloader: Load libopenjdk.so using APEX ns com_android_art for caller /apex/com.android.art/javalib/core-oj.jar: ok
+08-31 07:11:30.135  8375  8375 I app_process: Priority-to-niceness mapping: 19, 16, 13, 10, 0, -2, -4, -5, -6, -8
+08-31 07:11:30.135  8375  8375 W app_process: ClassLoaderContext shared library size mismatch. Expected=2, found=0 (PCL[]{PCL[/system/framework/android.test.base.jar*1752668292]#PCL[/system/framework/android.test.mock.jar*506471120]} | PCL[])
+08-31 07:11:30.136  8375  8375 W app_process: ClassLoaderContext classpath size mismatch. expected=0, found=1 (PCL[]{PCL[/system/framework/android.test.runner.jar*1853607488]{PCL[/system/framework/android.test.base.jar*1752668292]#PCL[/system/framework/android.test.mock.jar*506471120]}#PCL[/system/framework/android.test.base.jar*1752668292]} | PCL[/system/framework/android.test.runner.jar*1853607488])
+08-31 07:11:30.153  8375  8375 D nativeloader: Load libframework-connectivity-tiramisu-jni.so using APEX ns com_android_tethering for caller /apex/com.android.tethering/javalib/framework-connectivity-t.jar: ok
+08-31 07:11:30.154  8375  8375 D AndroidRuntime: Calling main entry com.android.commands.uiautomator.Launcher
+08-31 07:11:30.156  8375  8375 I AconfigPackage: com.android.wifi.flags is mapped to com.android.wifi
+08-31 07:11:30.156  8375  8375 I AconfigPackage: com.android.org.conscrypt.flags is mapped to com.android.conscrypt
+08-31 07:11:30.156  8375  8375 I AconfigPackage: com.android.org.conscrypt.net.flags is mapped to com.android.conscrypt
+08-31 07:11:30.157  8375  8375 I AconfigPackage: com.android.art.flags is mapped to com.android.art
+08-31 07:11:30.157  8375  8375 I AconfigPackage: com.android.art.rw.flags is mapped to com.android.art
+08-31 07:11:30.157  8375  8375 I AconfigPackage: com.android.libcore is mapped to com.android.art
+08-31 07:11:30.157  8375  8375 I AconfigPackage: com.android.permission.flags is mapped to com.android.permission
+08-31 07:11:30.157  8375  8375 I AconfigPackage: com.android.permissioncontroller.flags is mapped to com.android.permission
+08-31 07:11:30.157  8375  8375 I AconfigPackage: android.graphics.pdf.flags is mapped to com.android.mediaprovider
+08-31 07:11:30.157  8375  8375 I AconfigPackage: com.android.providers.media.flags is mapped to com.android.mediaprovider
+08-31 07:11:30.157  8375  8375 I AconfigPackage: android.graphics.pdf.flags.readonly is mapped to com.android.mediaprovider
+08-31 07:11:30.157  8375  8375 I AconfigPackage: android.os.profiling is mapped to com.android.profiling
+08-31 07:11:30.157  8375  8375 I AconfigPackage: android.os.profiling.anomaly.flags is mapped to com.android.profiling
+08-31 07:11:30.157  8375  8375 I AconfigPackage: com.android.tethering.mainline.beta is mapped to com.android.tethering
+08-31 07:11:30.157  8375  8375 I AconfigPackage: android.net.http is mapped to com.android.tethering
+08-31 07:11:30.157  8375  8375 I AconfigPackage: com.android.tethering.readonly.flags is mapped to com.android.tethering
+08-31 07:11:30.157  8375  8375 I AconfigPackage: android.net.vcn is mapped to com.android.tethering
+08-31 07:11:30.157  8375  8375 I AconfigPackage: com.android.net.flags is mapped to com.android.tethering
+08-31 07:11:30.157  8375  8375 I AconfigPackage: com.android.tethering.beta.test is mapped to com.android.tethering
+08-31 07:11:30.157  8375  8375 I AconfigPackage: com.android.nearby.flags is mapped to com.android.tethering
+08-31 07:11:30.157  8375  8375 I AconfigPackage: com.android.net.ct.flags is mapped to com.android.tethering
+08-31 07:11:30.157  8375  8375 I AconfigPackage: com.android.net.thread.flags is mapped to com.android.tethering
+08-31 07:11:30.157  8375  8375 I AconfigPackage: com.android.healthfitness.flags is mapped to com.android.healthfitness
+08-31 07:11:30.157  8375  8375 I AconfigPackage: com.android.uwb.flags is mapped to com.android.uwb
+08-31 07:11:30.157  8375  8375 I AconfigPackage: com.android.ranging.flags is mapped to com.android.uwb
+08-31 07:11:30.158  8375  8375 I AconfigPackage: com.android.media.extractor.flags is mapped to com.android.media
+08-31 07:11:30.158  8375  8375 I AconfigPackage: com.android.media.mainline.flags is mapped to com.android.media
+08-31 07:11:30.158  8375  8375 I AconfigPackage: com.android.os.statsd.flags is mapped to com.android.os.statsd
+08-31 07:11:30.158  8375  8375 I AconfigPackage: com.android.adbd.flags is mapped to com.android.adbd
+08-31 07:11:30.158  8375  8375 I AconfigPackage: com.android.telephony.flags is mapped to com.android.telephonycore
+08-31 07:11:30.158  8375  8375 I AconfigPackage: com.android.rkpd.flags is mapped to com.android.rkpd
+08-31 07:11:30.158  8375  8375 I AconfigPackage: com.android.ipsec.flags is mapped to com.android.ipsec
+08-31 07:11:30.158  8375  8375 I AconfigPackage: android.media.swcodec.flags is mapped to com.android.media.swcodec
+08-31 07:11:30.158  8375  8375 I AconfigPackage: android.uprobestats.mainline.flags is mapped to com.android.uprobestats
+08-31 07:11:30.159  8375  8375 I AconfigPackage: com.android.appsearch.flags is mapped to com.android.appsearch
+08-31 07:11:30.159  8375  8375 I AconfigPackage: android.provider.flags is mapped to com.android.configinfrastructure
+08-31 07:11:30.159  8375  8375 I AconfigPackage: com.android.server.deviceconfig is mapped to com.android.configinfrastructure
+08-31 07:11:30.159  8375  8375 I AconfigPackage: com.android.nfc.module.flags is mapped to com.android.nfcservices
+08-31 07:11:30.159  8375  8375 I AconfigPackage: com.android.compos.flags is mapped to com.android.compos
+08-31 07:11:30.159  8375  8375 I AconfigPackage: com.android.devicelock.flags is mapped to com.android.devicelock
+08-31 07:11:30.159  8375  8375 I AconfigPackage: com.android.adservices.ondevicepersonalization.flags is mapped to com.android.ondevicepersonalization
+08-31 07:11:30.159  8375  8375 I AconfigPackage: com.android.adservices.flags is mapped to com.android.adservices
+08-31 07:11:30.159  8375  8375 I AconfigPackage: com.android.sdksandbox.flags is mapped to com.android.adservices
+08-31 07:11:30.160  8375  8375 I AconfigPackage: com.android.icu is mapped to com.android.i18n
+08-31 07:11:30.160  8375  8375 I AconfigPackage: com.android.crashrecovery.flags is mapped to com.android.crashrecovery
+08-31 07:11:30.160  8375  8375 I AconfigPackage: com.android.system.virtualmachine.flags is mapped to com.android.virt
+08-31 07:11:30.160  8375  8375 I AconfigPackage: com.android.bluetooth.flags is mapped to com.android.bt
+08-31 07:11:30.160  8375  8375 E FeatureFlagsImplExport: android.os.flagging.AconfigStorageReadException: ERROR_PACKAGE_NOT_FOUND: package android.xr cannot be found on the device
+08-31 07:11:30.161  8375  8375 D UiAutomationConnection: Created on user UserHandle{0}
+08-31 07:11:30.161  8375  8375 I UiAutomation: Initialized for user 0 on display 0
+08-31 07:11:30.161  8375  8375 W UiAutomation: Created with deprecatead constructor, assumes DEFAULT_DISPLAY
+--------- beginning of system
+08-31 07:11:30.162  2447  2888 D AccessibilityManagerService: changeCurrentUserForTestAutomationIfNeededLocked(0): ignoring because device doesn't support visible background users
+08-31 07:11:30.162  2447  2888 I UiAutomationManager: Registering UiTestAutomationService (id=com.android.server.accessibility/UiAutomation, flags=0x0) when called by user 0
+08-31 07:11:30.162  2447  2888 V AccessibilityManagerService: onUserStateChangedLocked for userId: 0, forceUpdate: false
+08-31 07:11:30.163  2447  2888 V AccessibilityUserState: updateShortcutTargets: type:accessibility_shortcut_target_service, current:{}, new:{}
+08-31 07:11:30.163  2447  2888 V AccessibilityUserState: updateShortcutTargets: type:accessibility_button_targets, current:{}, new:{}
+08-31 07:11:30.163  2447  2888 V AccessibilityUserState: updateShortcutTargets: type:accessibility_gesture_targets, current:{}, new:{}
+08-31 07:11:30.163  2447  2888 V AccessibilityUserState: updateShortcutTargets: type:accessibility_qs_targets, current:{}, new:{}
+08-31 07:11:30.163  2447  2888 V AccessibilityUserState: updateShortcutTargets: type:accessibility_key_gesture_targets, current:{}, new:{}
+08-31 07:11:30.163  2447  2888 W MagnificationConnectionManager: requestConnection duplicated request: connect=false, mConnectionState=DISCONNECTED
+08-31 07:11:29.773  2447  2447 W debug_low_async_space_locked: 6 callbacks suppressed
+08-31 07:11:29.773  2447  2447 I binder_alloc: 25522: pid 2447 spamming oneway? 1369 buffers allocated for a total size of 186304
+08-31 07:11:29.775  1164  1164 I         : [LCD][0][INFO][oplus_panel_cmd_print:120] [CSOT-NT36532] dsi_cmd: qcom,mdss-dsi-fps-switch-120-command, count=2
+08-31 07:11:29.775  1164  1164 E [TP0]touchpanel: Notification type:4, early_trigger:1
+08-31 07:11:29.775  1164  1164 E [TP0]touchpanel: shashank:Received fps change old fps:30 new fps:120
+08-31 07:11:30.169  1569  1891 W SDM     : HWDeviceDRM::GetSupportedBitClkRate: Requested rate not supported: 1254876800
+08-31 07:11:30.171  2447  2888 V AccessibilityManagerService: onUserStateChangedLocked for userId: 0, forceUpdate: false
+08-31 07:11:30.172  2447  2888 V AccessibilityUserState: updateShortcutTargets: type:accessibility_shortcut_target_service, current:{}, new:{}
+08-31 07:11:30.172  2447  2888 V AccessibilityUserState: updateShortcutTargets: type:accessibility_button_targets, current:{}, new:{}
+08-31 07:11:29.776  1164  1164 E         : [LCD][0][ERR][oplus_panel_switch_vid_mode:475] oplus_panel_switch_vid_mode not support
+08-31 07:11:29.776  1164  1164 I [drm:dsi_display_set_mode [msm_drm]] [msm-dsi-info]: mdp_transfer_time=0, hactive=3000, vactive=2120, fps=120, h_skew=0, clk_rate=1254876800, h_sync_width=40,				h_front_porch236, h_back_porch=200, v_back_porch=208, v_sync_width=40, v_front_porch=26
+08-31 07:11:30.173  2447  2888 V AccessibilityUserState: updateShortcutTargets: type:accessibility_gesture_targets, current:{}, new:{}
+08-31 07:11:30.173  2447  2888 V AccessibilityUserState: updateShortcutTargets: type:accessibility_qs_targets, current:{}, new:{}
+08-31 07:11:30.173  2447  2888 V AccessibilityUserState: updateShortcutTargets: type:accessibility_key_gesture_targets, current:{}, new:{}
+08-31 07:11:30.173  2447  2888 W MagnificationConnectionManager: requestConnection duplicated request: connect=false, mConnectionState=DISCONNECTED
+08-31 07:11:29.780  2447  2447 I binder_alloc: 25522: pid 2447 spamming oneway? 1370 buffers allocated for a total size of 186440
+08-31 07:11:29.781  2447  2447 I binder_alloc: 25522: pid 2447 spamming oneway? 1371 buffers allocated for a total size of 186576
+08-31 07:11:29.781  2447  2447 I binder_alloc: 25522: pid 2447 spamming oneway? 1372 buffers allocated for a total size of 186712
+08-31 07:11:29.782  2447  2447 I binder_alloc: 25522: pid 2447 spamming oneway? 1373 buffers allocated for a total size of 186848
+08-31 07:11:30.176  2447  2447 D BatterySaverPolicy: accessibility changed to true, updating policy.
+08-31 07:11:30.185  2447  2894 D AccessibilityManagerService: .getAccessibilityShortcutTargets {shortcutType=32, userId=0}
+08-31 07:11:29.801  1164  1164 E [TP0]touchpanel: Notification type:4, early_trigger:0
+08-31 07:11:29.801  1164  1164 E [TP0]touchpanel: shashank:Received fps change old fps:30 new fps:120
+08-31 07:11:30.280 31988 32038 D RPCS3   : S3PERF crosscheck native_fps=59.461 native_frametime_ms=16.818
+08-31 07:11:30.281 31988 32038 D S3PERF  : crosscheck json_fps=59.461475 json_frametime_ms=16.817612
+08-31 07:11:30.281 31988 32038 D S3PERF  : crosscheck ui_snapshot_fps=59.461475 ui_snapshot_frametime_ms=16.817612
+08-31 07:11:30.316  1579  1658 W libbinder.ServiceManagerCppClient: Waited one second for vendor.qti.qhcp.IQHDC/default (is service started? Number of threads started in the threadpool: 2. Are binder threads started and available?)
+08-31 07:11:29.925   899   899 I servicemanager: Caller(pid=1579,uid=0,sid=u:r:vendor_hal_perf_default:s0) Since 'vendor.qti.qhcp.IQHDC/default' could not be found trying to start it as a lazy AIDL service. (if it's not configured to be a lazy service, it may be stuck starting or still starting).
+08-31 07:11:30.322   899  8420 W libc    : Unable to set property "ctl.interface_start" to "aidl/vendor.qti.qhcp.IQHDC/default": PROP_ERROR_HANDLE_CONTROL_MESSAGE (0x20)
+08-31 07:11:29.927     1     1 E init    : Control message: Could not find 'aidl/vendor.qti.qhcp.IQHDC/default' for ctl.interface_start from pid: 899 (/system/bin/servicemanager)
+08-31 07:11:29.928  8420  8420 I servicemanager: Caller(pid=1579,uid=0,sid=u:r:vendor_hal_perf_default:s0) Tried to start aidl service vendor.qti.qhcp.IQHDC/default as a lazy service, but was unable to. Usually this happens when a service is not installed, but if the service is intended to be used as a lazy service, then it may be configured incorrectly.
+08-31 07:11:30.348  1569  1891 I SDM     : DisplayBase::CommitThread: Received idle timeout, panel: video, timeout: 69999 us
+08-31 07:11:29.965  1164  1164 I         : [LCD][0][INFO][oplus_panel_cmd_print:120] [CSOT-NT36532] dsi_cmd: qcom,mdss-dsi-fps-switch-30-command, count=2
+08-31 07:11:29.965  1164  1164 E [TP0]touchpanel: Notification type:4, early_trigger:1
+08-31 07:11:29.965  1164  1164 E [TP0]touchpanel: shashank:Received fps change old fps:120 new fps:30
+08-31 07:11:29.967  1164  1164 E         : [LCD][0][ERR][oplus_panel_switch_vid_mode:475] oplus_panel_switch_vid_mode not support
+08-31 07:11:29.967  1164  1164 I [drm:dsi_display_set_mode [msm_drm]] [msm-dsi-info]: mdp_transfer_time=0, hactive=3000, vactive=2120, fps=30, h_skew=0, clk_rate=1254876800, h_sync_width=40,				h_front_porch236, h_back_porch=200, v_back_porch=208, v_sync_width=40, v_front_porch=7094
+08-31 07:11:30.359  1601  1667 D vendor.oplus.hardware.charger-V10-service: parallel fold conf file parse fail parallel_fold_state 2
+08-31 07:11:30.359  1569  1891 W SDM     : HWDeviceDRM::GetSupportedBitClkRate: Requested rate not supported: 1254876800
+08-31 07:11:30.359  1601  1667 D vendor.oplus.hardware.charger-V10-service: scale_chg Start!!!
+08-31 07:11:30.359  1601  1667 D vendor.oplus.hardware.charger-V10-service: [0, 0, 3]
+08-31 07:11:30.359  1601  1667 D vendor.oplus.hardware.charger-V10-service: [0, 2, 9]
+08-31 07:11:30.359  1601  1667 D vendor.oplus.hardware.charger-V10-service: [0, 1, 4]
+08-31 07:11:30.359  1601  1667 D vendor.oplus.hardware.charger-V10-service: [0, 3, 3]
+08-31 07:11:30.360  1601  1667 D vendor.oplus.hardware.charger-V10-service: [0, 4, 3]
+08-31 07:11:30.360  1601  1667 D vendor.oplus.hardware.charger-V10-service: [0, 5, 4]
+08-31 07:11:30.360  1601  1667 D vendor.oplus.hardware.charger-V10-service: [0, 6, 3]
+08-31 07:11:30.360  1601  1667 D vendor.oplus.hardware.charger-V10-service: scale_chg Start!!!
+08-31 07:11:30.360  1601  1667 D vendor.oplus.hardware.charger-V10-service: [0, 0, 3]
+08-31 07:11:30.360  1601  1667 D vendor.oplus.hardware.charger-V10-service: [0, 2, 9]
+08-31 07:11:30.361  1601  1667 D vendor.oplus.hardware.charger-V10-service: [0, 1, 4]
+08-31 07:11:30.361  1601  1667 D vendor.oplus.hardware.charger-V10-service: [0, 3, 3]
+08-31 07:11:30.361  1601  1667 D vendor.oplus.hardware.charger-V10-service: [0, 4, 3]
+08-31 07:11:30.361  1601  1667 D vendor.oplus.hardware.charger-V10-service: [0, 5, 4]
+08-31 07:11:30.361  1601  1667 D vendor.oplus.hardware.charger-V10-service: [0, 6, 3]
+08-31 07:11:29.976  1164  1164 E [TP0]touchpanel: Notification type:4, early_trigger:0
+08-31 07:11:29.976  1164  1164 E [TP0]touchpanel: shashank:Received fps change old fps:120 new fps:30
+08-31 07:11:30.407  1569  1891 W SDM     : HWDeviceDRM::GetSupportedBitClkRate: Requested rate not supported: 1254876800
+08-31 07:11:30.013  1164  1164 I         : [LCD][0][INFO][oplus_panel_cmd_print:120] [CSOT-NT36532] dsi_cmd: qcom,mdss-dsi-fps-switch-120-command, count=2
+08-31 07:11:30.013  1164  1164 E [TP0]touchpanel: Notification type:4, early_trigger:1
+08-31 07:11:30.013  1164  1164 E [TP0]touchpanel: shashank:Received fps change old fps:30 new fps:120
+08-31 07:11:30.016  1164  1164 E         : [LCD][0][ERR][oplus_panel_switch_vid_mode:475] oplus_panel_switch_vid_mode not support
+08-31 07:11:30.016  1164  1164 I [drm:dsi_display_set_mode [msm_drm]] [msm-dsi-info]: mdp_transfer_time=0, hactive=3000, vactive=2120, fps=120, h_skew=0, clk_rate=1254876800, h_sync_width=40,				h_front_porch236, h_back_porch=200, v_back_porch=208, v_sync_width=40, v_front_porch=26
+08-31 07:11:30.043  1164  1164 E [TP0]touchpanel: Notification type:4, early_trigger:0
+08-31 07:11:30.043  1164  1164 E [TP0]touchpanel: shashank:Received fps change old fps:30 new fps:120
+08-31 07:11:30.915  1569  1891 I SDM     : DisplayBase::CommitThread: Received idle timeout, panel: video, timeout: 70000 us
+08-31 07:11:30.533  1164  1164 I         : [LCD][0][INFO][oplus_panel_cmd_print:120] [CSOT-NT36532] dsi_cmd: qcom,mdss-dsi-fps-switch-30-command, count=2
+08-31 07:11:30.927  1569  1891 W SDM     : HWDeviceDRM::GetSupportedBitClkRate: Requested rate not supported: 1254876800
+08-31 07:11:30.533  1164  1164 E [TP0]touchpanel: Notification type:4, early_trigger:1
+08-31 07:11:30.533  1164  1164 E [TP0]touchpanel: shashank:Received fps change old fps:120 new fps:30
+08-31 07:11:30.534  1164  1164 E         : [LCD][0][ERR][oplus_panel_switch_vid_mode:475] oplus_panel_switch_vid_mode not support
+08-31 07:11:30.534  1164  1164 I [drm:dsi_display_set_mode [msm_drm]] [msm-dsi-info]: mdp_transfer_time=0, hactive=3000, vactive=2120, fps=30, h_skew=0, clk_rate=1254876800, h_sync_width=40,				h_front_porch236, h_back_porch=200, v_back_porch=208, v_sync_width=40, v_front_porch=7094
+08-31 07:11:30.543  1164  1164 E [TP0]touchpanel: Notification type:4, early_trigger:0
+08-31 07:11:30.543  1164  1164 E [TP0]touchpanel: shashank:Received fps change old fps:120 new fps:30
+08-31 07:11:30.974  1569  1891 W SDM     : HWDeviceDRM::GetSupportedBitClkRate: Requested rate not supported: 1254876800
+08-31 07:11:30.581  1164  1164 I         : [LCD][0][INFO][oplus_panel_cmd_print:120] [CSOT-NT36532] dsi_cmd: qcom,mdss-dsi-fps-switch-120-command, count=2
+08-31 07:11:30.581  1164  1164 E [TP0]touchpanel: Notification type:4, early_trigger:1
+08-31 07:11:30.581  1164  1164 E [TP0]touchpanel: shashank:Received fps change old fps:30 new fps:120
+08-31 07:11:30.584  1164  1164 E         : [LCD][0][ERR][oplus_panel_switch_vid_mode:475] oplus_panel_switch_vid_mode not support
+08-31 07:11:30.584  1164  1164 I [drm:dsi_display_set_mode [msm_drm]] [msm-dsi-info]: mdp_transfer_time=0, hactive=3000, vactive=2120, fps=120, h_skew=0, clk_rate=1254876800, h_sync_width=40,				h_front_porch236, h_back_porch=200, v_back_porch=208, v_sync_width=40, v_front_porch=26
+08-31 07:11:30.609  1164  1164 E [TP0]touchpanel: Notification type:4, early_trigger:0
+08-31 07:11:30.609  1164  1164 E [TP0]touchpanel: shashank:Received fps change old fps:30 new fps:120
+08-31 07:11:31.052  1502  3285 I vendor.qti.bluetooth@1.1-ibs_handler: ProcessIbsCmd: Received IBS_WAKE_IND: 0xFD
+08-31 07:11:31.052  1502  3285 D vendor.qti.bluetooth@1.1-ibs_handler: SerialClockVote: vote for UART CLK ON
+08-31 07:11:31.052  1502  3285 E vendor.qti.bluetooth@1.1-wake_lock: Acquire write to wakelock file failed -1 - Operation not permitted
+08-31 07:11:31.052  1502  3285 I vendor.qti.bluetooth@1.1-ibs_handler: ProcessIbsCmd: Writing IBS_WAKE_ACK
+08-31 07:11:31.093  1502  3285 I vendor.qti.bluetooth@1.1-ibs_handler: ProcessIbsCmd: Received IBS_SLEEP_IND: 0xFE
+08-31 07:11:31.093  1502  3285 D vendor.qti.bluetooth@1.1-ibs_handler: SerialClockVote: vote for UART CLK OFF
+08-31 07:11:31.184  8375  8375 W libc    : Access denied finding property "qemu.sf.lcd_density"
+08-31 07:11:31.185  8375  8375 W libc    : Access denied finding property "qemu.sf.lcd_density"
+08-31 07:11:31.183  8375  8375 W uiautomator: type=1400 audit(0.0:895152): avc:  denied  { read } for  name="u:object_r:qemu_sf_lcd_density_prop:s0" dev="tmpfs" ino=351 scontext=u:r:shell:s0 tcontext=u:object_r:qemu_sf_lcd_density_prop:s0 tclass=file permissive=0
+08-31 07:11:31.183  8375  8375 W uiautomator: type=1400 audit(0.0:895153): avc:  denied  { read } for  name="u:object_r:qemu_sf_lcd_density_prop:s0" dev="tmpfs" ino=351 scontext=u:r:shell:s0 tcontext=u:object_r:qemu_sf_lcd_density_prop:s0 tclass=file permissive=0
+08-31 07:11:31.243  1502  3136 E vendor.qti.bluetooth@1.1-wake_lock: Release wake lock not initialized/acquired
+08-31 07:11:31.259  8375  8375 W AccessibilityNodeInfoDumper: Fetch time: 73ms
+08-31 07:11:31.260  2447  2894 V AccessibilityManagerService: onUserStateChangedLocked for userId: 0, forceUpdate: false
+08-31 07:11:31.261  2447  2894 V AccessibilityUserState: updateShortcutTargets: type:accessibility_shortcut_target_service, current:{}, new:{}
+08-31 07:11:31.261  2447  2894 V AccessibilityUserState: updateShortcutTargets: type:accessibility_button_targets, current:{}, new:{}
+08-31 07:11:31.261  2447  2894 V AccessibilityUserState: updateShortcutTargets: type:accessibility_gesture_targets, current:{}, new:{}
+08-31 07:11:31.262  2447  2894 V AccessibilityUserState: updateShortcutTargets: type:accessibility_qs_targets, current:{}, new:{}
+08-31 07:11:31.262  2447  2894 V AccessibilityUserState: updateShortcutTargets: type:accessibility_key_gesture_targets, current:{}, new:{}
+08-31 07:11:31.262  2447  2894 W MagnificationConnectionManager: requestConnection duplicated request: connect=false, mConnectionState=DISCONNECTED
+08-31 07:11:31.262  2447  2894 D AccessibilityManagerService: restoreCurrentUserForTestAutomationIfNeededLocked(): ignoring because device doesn't support visible background users
+08-31 07:11:30.870  2447  2447 I binder_alloc: 25522: pid 2447 spamming oneway? 1374 buffers allocated for a total size of 186984
+08-31 07:11:31.265  8375  8401 W libbinder.IPCThreadState: call to talkWithDriver in joinThreadPool returned error: -9 (Bad file descriptor), FD: -1
+08-31 07:11:31.265  8375  8400 W libbinder.IPCThreadState: call to talkWithDriver in joinThreadPool returned error: -9 (Bad file descriptor), FD: -1
+08-31 07:11:31.266  8375  8375 D AndroidRuntime: Shutting down VM
+08-31 07:11:30.872  2447  2447 I binder_alloc: 25522: pid 2447 spamming oneway? 1375 buffers allocated for a total size of 187120
+08-31 07:11:30.873  2447  2447 I binder_alloc: 25522: pid 2447 spamming oneway? 1376 buffers allocated for a total size of 187256
+08-31 07:11:31.268  2447  2447 D BatterySaverPolicy: accessibility changed to false, updating policy.
+08-31 07:11:31.268  8375  8421 W libbinder.IPCThreadState: call to talkWithDriver in joinThreadPool returned error: -9 (Bad file descriptor), FD: -1
+08-31 07:11:31.319  1579  1658 W libbinder.ServiceManagerCppClient: Waited one second for vendor.qti.qhcp.IQHDC/default (is service started? Number of threads started in the threadpool: 2. Are binder threads started and available?)
+08-31 07:11:30.929   899   899 I servicemanager: Caller(pid=1579,uid=0,sid=u:r:vendor_hal_perf_default:s0) Since 'vendor.qti.qhcp.IQHDC/default' could not be found trying to start it as a lazy AIDL service. (if it's not configured to be a lazy service, it may be stuck starting or still starting).
+08-31 07:11:30.931     1     1 E init    : Control message: Could not find 'aidl/vendor.qti.qhcp.IQHDC/default' for ctl.interface_start from pid: 899 (/system/bin/servicemanager)
+08-31 07:11:31.325   899  8422 W libc    : Unable to set property "ctl.interface_start" to "aidl/vendor.qti.qhcp.IQHDC/default": PROP_ERROR_HANDLE_CONTROL_MESSAGE (0x20)
+08-31 07:11:30.931  8422  8422 I servicemanager: Caller(pid=1579,uid=0,sid=u:r:vendor_hal_perf_default:s0) Tried to start aidl service vendor.qti.qhcp.IQHDC/default as a lazy service, but was unable to. Usually this happens when a service is not installed, but if the service is intended to be used as a lazy service, then it may be configured incorrectly.
+08-31 07:11:30.956   794   794 I         : [INFO]: OPLUS_CHG[MMS_GAUGE]([oplus_mms_gauge_choice_fit_vol][3465]): choice cp voltage as vbat [3817, 3801]
+08-31 07:11:30.957   794   794 I         : [INFO]: OPLUS_CHG[MMS_GAUGE]([oplus_mms_gauge_choice_fit_vol][3465]): choice cp voltage as vbat [3817, 3801]
+08-31 07:11:30.968 24989 24989 I         : [INFO]: OPLUS_CHG[MSG]([oplus_msg_queue_update][227]): battery: update, gp=5000 ms
+08-31 07:11:30.968  6721  6721 I         : [INFO]: OPLUS_CHG[CHG_COMM]([oplus_comm_smooth_to_soc][3416]): soc[0 3 45 45 46 47] avg[3 1 0 0 0] fifo[46 46 46 46]
+08-31 07:11:30.968  6721  6721 I         : [INFO]: OPLUS_CHG[MSG]([oplus_msg_queue_update_work][106]): battery: update delay: 0 ms, update interval: 61448 ms
+08-31 07:11:30.979  6545  6545 I OPLUS_CHG[oplus_charge_info]: BATTERY[392 392 3817 3817 1095 45 47 46 3918 8698 1 0x20 0], CHARGE[4455 600 0 0], WIRED[1 447 4982 500 1 0x0 0 0 0 2 0], WIRELESS[0 0 0 0 0 0x0 0 0 0], VOOC[0 0 0 0 0x0], UFCS[0 0 0 0x0], COMMON[6 0 0 0x0 1 0 1 8698 100 0]
+08-31 07:11:30.982  1508  1508 W healthd : battery l=47 v=3817 t=39.2 h=2 st=2 c=1095 fc=9230000 cc=10 chg=u
+08-31 07:11:30.986  6545  6545 I         : [INFO]: OPLUS_CHG[ADSP]([oplus_chg_8350_reg_dump][7390]): sm8450_st_dump: [chg_en=1, suspend=0, pd_svooc=0], subtype=0x01],[oplus_UsbCommCapable=0, oplus_pd_svooc=0, typec_mode=0, cid_status=0x01, usb_in_status=1],[0x2606=0x83, 0x2607=0x19, 0x2608=0x0a, 0x2609=0x02], [0x260a=0x04, 0x260b=0x55, 0x260c=0x0a, 0x260d=0x18], [0x260e=0x0a, 0x260f=0x01, 0x2610=0x00, 0x2640=0x01], [0x2641=0x02, 0x2642=0x05, 0x2646=0x01, 0x2650=0x04], [0x2706=0x0a, 0x2707=0x0a, 0x2708=0x0a, 0x2709=0x0a], [0x270b=0xe2, 0x270c=0x48, 0x2710=0xc0, 0x280c=0x38], [0x2810=0x00, 0x2840=0x01, 0x287f=0x00, 0x2906=0x02], [0x2908=0x0f, 0x290a=0x11, 0x290b=0x01, 0x290c=0x01], [0x2910=0x11, 0x2944=0x80, 0x2950=0x02, 0x2951=0x01], [0x2952=0x0a, 0x2954=0x00, 0x2960=0xe0, 0x2b06=0x08], [0x2b07=0x00, 0x2b08=0x00, 0x2b09=0xa3, 0x2b0a=0x39], [0x2b0b=0xab, 0x2b0c=0x00, 0x29a8=0x81, 0x29a9=0x83], [0x29aa=0x00, 0x2aa2=0x00, 0x2aa8=0x87, 0x2aa9=0x00], [0x2aaa=0x00],
+08-31 07:11:31.490 31988 32038 D RPCS3   : S3PERF crosscheck native_fps=59.670 native_frametime_ms=16.759
+08-31 07:11:31.491 31988 32038 D S3PERF  : crosscheck json_fps=59.67042 json_frametime_ms=16.758722
+08-31 07:11:31.491 31988 32038 D S3PERF  : crosscheck ui_snapshot_fps=59.67042 ui_snapshot_frametime_ms=16.758722
+08-31 07:11:31.147     0     0 W [    C1] gen7_err_callback: 89 callbacks suppressed
+08-31 07:11:31.147     0     0 F         : [    C1] kgsl kgsl-3d0: CP: AHB bus error, CP_RL_ERROR_DETAILS_0:0x10008e07 CP_RL_ERROR_DETAILS_1:0x12144
+08-31 07:11:31.197     0     0 F         : [    C1] kgsl kgsl-3d0: CP: AHB bus error, CP_RL_ERROR_DETAILS_0:0x10008e07 CP_RL_ERROR_DETAILS_1:0x12144
+08-31 07:11:31.239 12736 12736 E [TP0]touchpanel: irq gpio is 0
+08-31 07:11:31.247     0     0 F         : [    C1] kgsl kgsl-3d0: CP: AHB bus error, CP_RL_ERROR_DETAILS_0:0x10008e07 CP_RL_ERROR_DETAILS_1:0x12144
+08-31 07:11:31.297     0     0 F         : [    C1] kgsl kgsl-3d0: CP: AHB bus error, CP_RL_ERROR_DETAILS_0:0x10008e07 CP_RL_ERROR_DETAILS_1:0x12144
+08-31 07:11:31.347     0     0 F         : [    C1] kgsl kgsl-3d0: CP: AHB bus error, CP_RL_ERROR_DETAILS_0:0x10008e07 CP_RL_ERROR_DETAILS_1:0x12144
+08-31 07:11:31.397     0     0 F         : [    C1] kgsl kgsl-3d0: CP: AHB bus error, CP_RL_ERROR_DETAILS_0:0x10008e07 CP_RL_ERROR_DETAILS_1:0x12144
+08-31 07:11:31.447     0     0 F         : [    C1] kgsl kgsl-3d0: CP: AHB bus error, CP_RL_ERROR_DETAILS_0:0x10008e07 CP_RL_ERROR_DETAILS_1:0x12144
+08-31 07:11:31.497     0     0 F         : [    C1] kgsl kgsl-3d0: CP: AHB bus error, CP_RL_ERROR_DETAILS_0:0x10008e07 CP_RL_ERROR_DETAILS_1:0x12144
+08-31 07:11:31.547     0     0 F         : [    C1] kgsl kgsl-3d0: CP: AHB bus error, CP_RL_ERROR_DETAILS_0:0x10008e07 CP_RL_ERROR_DETAILS_1:0x12144
+08-31 07:11:31.597     0     0 F         : [    C1] kgsl kgsl-3d0: CP: AHB bus error, CP_RL_ERROR_DETAILS_0:0x10008e07 CP_RL_ERROR_DETAILS_1:0x12144
+08-31 07:11:31.776   943   943 I logd    : logdr: UID=2000 GID=2000 PID=8425 n tail=0 logMask=99 pid=0 start=0ns deadline=0ns
+08-31 07:11:32.173  2447  2726 D WifiClientModeImpl[14183:wlan0]: updateLinkLayerStatsRssiSpeedFrequencyCapabilities rssi=-24 TxLinkspeed=117 freq=5220 RxLinkSpeed=650
+08-31 07:11:32.173  2447  2726 D WifiDataStall: tx tput in kbps: 55072
+08-31 07:11:32.173  2447  2726 D WifiDataStall: rx tput in kbps: 495179
+08-31 07:11:32.173  2447  2726 V WifiConfigManager: Updating scan detail cache freq=5220 BSSID=b4:86:18:de:39:ca RSSI=-23 for "Excitel_home_wifi_5"WPA_PSK
+08-31 07:11:32.173  2447  2726 D WifiDataStall:  ccaLevel = 15
+08-31 07:11:32.173  2447  2726 D WifiDataStall: L2 txTputKbps: 104637, rxTputKbps: 611914, L3 txTputKbps: 0, rxTputKbps: 0, TxTrafficHigh: false, RxTrafficHigh: false, Throughput Sufficient: true
+08-31 07:11:32.173  2447  2726 D WifiThroughputPredictor:  utilization (LLS) 15 isBluetoothConnected: false final utilization: 15
+08-31 07:11:32.173  2447  2726 D WifiThroughputPredictor:  BW: 2 RSSI: -24 Nss: 2 Mode: 5 symDur: 3600 snrDb 50 bitPerTone: 6667 rate: 866 throughput: 815
+08-31 07:11:32.173  2447  2726 D WifiThroughputPredictor:  utilization (LLS) 15 isBluetoothConnected: false final utilization: 15
+08-31 07:11:32.174  2447  2726 D WifiThroughputPredictor:  BW: 2 RSSI: -24 Nss: 2 Mode: 5 symDur: 3600 snrDb 50 bitPerTone: 6667 rate: 866 throughput: 815

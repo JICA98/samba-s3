@@ -1,0 +1,141 @@
+To honour the JVM settings for this build a single-use Daemon process will be forked. For more on this, please refer to https://docs.gradle.org/8.13/userguide/gradle_daemon.html#sec:disabling_the_daemon in the Gradle documentation.
+Daemon will be stopped at the end of the build 
+> Task :app:checkKotlinGradlePluginConfigurationErrors SKIPPED
+> Task :app:preBuild UP-TO-DATE
+> Task :app:preStandardDebugBuild UP-TO-DATE
+> Task :app:dataBindingMergeDependencyArtifactsStandardDebug UP-TO-DATE
+> Task :app:generateStandardDebugResValues UP-TO-DATE
+> Task :app:generateStandardDebugResources UP-TO-DATE
+> Task :app:mergeStandardDebugResources UP-TO-DATE
+> Task :app:buildRpcsxCore SKIPPED
+
+> Task :app:verifyRpcsxCore
+RPCSX core present: a85f9948 arm64, 84abbebd x86_64
+
+> Task :app:packageStandardDebugResources UP-TO-DATE
+> Task :app:processStandardDebugNavigationResources UP-TO-DATE
+> Task :app:parseStandardDebugLocalResources UP-TO-DATE
+> Task :app:dataBindingGenBaseClassesStandardDebug UP-TO-DATE
+> Task :app:generateStandardDebugBuildConfig UP-TO-DATE
+> Task :app:checkStandardDebugAarMetadata UP-TO-DATE
+> Task :app:compileStandardDebugNavigationResources UP-TO-DATE
+> Task :app:mapStandardDebugSourceSetPaths UP-TO-DATE
+> Task :app:createStandardDebugCompatibleScreenManifests UP-TO-DATE
+> Task :app:extractDeepLinksStandardDebug UP-TO-DATE
+> Task :app:processStandardDebugMainManifest UP-TO-DATE
+> Task :app:processStandardDebugManifest UP-TO-DATE
+> Task :app:processStandardDebugManifestForPackage UP-TO-DATE
+> Task :app:processStandardDebugResources UP-TO-DATE
+> Task :app:compileStandardDebugKotlin UP-TO-DATE
+> Task :app:javaPreCompileStandardDebug UP-TO-DATE
+> Task :app:compileStandardDebugJavaWithJavac UP-TO-DATE
+> Task :app:bundleStandardDebugClassesToRuntimeJar UP-TO-DATE
+> Task :app:bundleStandardDebugClassesToCompileJar UP-TO-DATE
+> Task :app:compileStandardDebugUnitTestKotlin UP-TO-DATE
+> Task :app:preStandardDebugUnitTestBuild UP-TO-DATE
+> Task :app:javaPreCompileStandardDebugUnitTest UP-TO-DATE
+> Task :app:compileStandardDebugUnitTestJavaWithJavac NO-SOURCE
+> Task :app:processStandardDebugJavaRes UP-TO-DATE
+> Task :app:processStandardDebugUnitTestJavaRes UP-TO-DATE
+OpenJDK 64-Bit Server VM warning: Sharing is only supported for boot loader classes because bootstrap classpath has been appended
+> Task :app:testStandardDebugUnitTest
+> Task :app:prePlaystoreDebugBuild UP-TO-DATE
+> Task :app:dataBindingMergeDependencyArtifactsPlaystoreDebug UP-TO-DATE
+> Task :app:generatePlaystoreDebugResValues UP-TO-DATE
+> Task :app:generatePlaystoreDebugResources
+> Task :app:packagePlaystoreDebugResources
+> Task :app:processPlaystoreDebugNavigationResources
+> Task :app:generatePlaystoreDebugBuildConfig UP-TO-DATE
+> Task :app:checkPlaystoreDebugAarMetadata UP-TO-DATE
+> Task :app:compilePlaystoreDebugNavigationResources UP-TO-DATE
+> Task :app:mergePlaystoreDebugResources
+> Task :app:mapPlaystoreDebugSourceSetPaths
+> Task :app:createPlaystoreDebugCompatibleScreenManifests UP-TO-DATE
+> Task :app:extractDeepLinksPlaystoreDebug UP-TO-DATE
+> Task :app:processPlaystoreDebugMainManifest UP-TO-DATE
+> Task :app:processPlaystoreDebugManifest UP-TO-DATE
+> Task :app:processPlaystoreDebugManifestForPackage UP-TO-DATE
+> Task :app:javaPreCompilePlaystoreDebug UP-TO-DATE
+> Task :app:prePlaystoreDebugUnitTestBuild UP-TO-DATE
+> Task :app:javaPreCompilePlaystoreDebugUnitTest UP-TO-DATE
+> Task :app:mergeStandardDebugNativeDebugMetadata NO-SOURCE
+> Task :app:mergeStandardDebugShaders UP-TO-DATE
+> Task :app:compileStandardDebugShaders NO-SOURCE
+> Task :app:generateStandardDebugAssets UP-TO-DATE
+> Task :app:mergeStandardDebugAssets UP-TO-DATE
+> Task :app:compressStandardDebugAssets UP-TO-DATE
+> Task :app:parsePlaystoreDebugLocalResources
+> Task :app:checkStandardDebugDuplicateClasses UP-TO-DATE
+> Task :app:dataBindingGenBaseClassesPlaystoreDebug
+> Task :app:desugarStandardDebugFileDependencies UP-TO-DATE
+> Task :app:mergeExtDexStandardDebug UP-TO-DATE
+> Task :app:mergeLibDexStandardDebug UP-TO-DATE
+> Task :app:dexBuilderStandardDebug UP-TO-DATE
+> Task :app:mergeProjectDexStandardDebug UP-TO-DATE
+> Task :app:mergeStandardDebugJavaResource UP-TO-DATE
+
+> Task :app:configureCMakeDebug[arm64-v8a]
+[CXX5304] This version only understands SDK XML versions up to 3 but an SDK XML file of version 4 was encountered. This can happen if you use versions of Android Studio and the command-line tools that were released at different times.
+[CXX5304] This version only understands SDK XML versions up to 3 but an SDK XML file of version 4 was encountered. This can happen if you use versions of Android Studio and the command-line tools that were released at different times.
+[CXX5304] Observed package id 'platforms;android-37.0' in inconsistent location '/opt/android-sdk/platforms/android-37' (Expected '/opt/android-sdk/platforms/android-37.0')
+[CXX5304] Observed package id 'platforms;android-37.0' in inconsistent location '/opt/android-sdk/platforms/android-37' (Expected '/opt/android-sdk/platforms/android-37.0')
+
+> Task :app:buildCMakeDebug[arm64-v8a]
+> Task :app:configureCMakeDebug[x86_64]
+> Task :app:buildCMakeDebug[x86_64]
+> Task :app:mergeStandardDebugJniLibFolders UP-TO-DATE
+> Task :app:mergeStandardDebugNativeLibs UP-TO-DATE
+> Task :app:stripStandardDebugDebugSymbols UP-TO-DATE
+> Task :app:validateSigningStandardDebug UP-TO-DATE
+> Task :app:writeStandardDebugAppMetadata UP-TO-DATE
+> Task :app:writeStandardDebugSigningConfigVersions UP-TO-DATE
+> Task :app:packageStandardDebug UP-TO-DATE
+> Task :app:createStandardDebugApkListingFileRedirect UP-TO-DATE
+> Task :app:assembleStandardDebug
+> Task :app:mergePlaystoreDebugNativeDebugMetadata NO-SOURCE
+> Task :app:mergePlaystoreDebugShaders UP-TO-DATE
+> Task :app:compilePlaystoreDebugShaders NO-SOURCE
+> Task :app:generatePlaystoreDebugAssets UP-TO-DATE
+> Task :app:mergePlaystoreDebugAssets UP-TO-DATE
+> Task :app:compressPlaystoreDebugAssets UP-TO-DATE
+> Task :app:checkPlaystoreDebugDuplicateClasses UP-TO-DATE
+> Task :app:desugarPlaystoreDebugFileDependencies UP-TO-DATE
+> Task :app:mergeExtDexPlaystoreDebug UP-TO-DATE
+> Task :app:mergeLibDexPlaystoreDebug UP-TO-DATE
+> Task :app:mergePlaystoreDebugJniLibFolders UP-TO-DATE
+> Task :app:mergePlaystoreDebugNativeLibs UP-TO-DATE
+> Task :app:stripPlaystoreDebugDebugSymbols UP-TO-DATE
+> Task :app:validateSigningPlaystoreDebug UP-TO-DATE
+> Task :app:writePlaystoreDebugAppMetadata UP-TO-DATE
+> Task :app:writePlaystoreDebugSigningConfigVersions UP-TO-DATE
+warn: removing resource com.zenithblue.sambas3:string/enter_repo_url without required default value.
+warn: removing resource com.zenithblue.sambas3:string/failed_to_update_ui without required default value.
+warn: removing resource com.zenithblue.sambas3:string/permission_required without required default value.
+warn: removing resource com.zenithblue.sambas3:string/permission_required_description without required default value.
+warn: removing resource com.zenithblue.sambas3:string/select_repo without required default value.
+
+> Task :app:processPlaystoreDebugResources
+
+> Task :app:compilePlaystoreDebugKotlin
+w: file:///home/abhaybyte/repos/samba-s3/app/src/main/java/com/zenithblue/sambas3/RPCSXActivity.kt:1256:57 Elvis operator (?:) always returns the left operand of non-nullable type 'KeyEvent'.
+w: file:///home/abhaybyte/repos/samba-s3/app/src/main/java/com/zenithblue/sambas3/overlay/PadOverlay.kt:87:47 'static field VIBRATOR_SERVICE: String' is deprecated. Deprecated in Java.
+w: file:///home/abhaybyte/repos/samba-s3/app/src/main/java/com/zenithblue/sambas3/overlay/PadOverlay.kt:371:25 Unnecessary safe call on a non-null receiver of type 'Vibrator'.
+
+> Task :app:compilePlaystoreDebugJavaWithJavac
+> Task :app:processPlaystoreDebugJavaRes UP-TO-DATE
+> Task :app:mergePlaystoreDebugJavaResource UP-TO-DATE
+> Task :app:bundlePlaystoreDebugClassesToRuntimeJar
+> Task :app:bundlePlaystoreDebugClassesToCompileJar
+> Task :app:dexBuilderPlaystoreDebug
+> Task :app:mergeProjectDexPlaystoreDebug
+> Task :app:compilePlaystoreDebugUnitTestKotlin
+> Task :app:compilePlaystoreDebugUnitTestJavaWithJavac NO-SOURCE
+> Task :app:processPlaystoreDebugUnitTestJavaRes UP-TO-DATE
+OpenJDK 64-Bit Server VM warning: Sharing is only supported for boot loader classes because bootstrap classpath has been appended
+> Task :app:testPlaystoreDebugUnitTest
+> Task :app:packagePlaystoreDebug
+> Task :app:createPlaystoreDebugApkListingFileRedirect UP-TO-DATE
+> Task :app:assemblePlaystoreDebug
+
+BUILD SUCCESSFUL in 58s
+97 actionable tasks: 23 executed, 74 up-to-date

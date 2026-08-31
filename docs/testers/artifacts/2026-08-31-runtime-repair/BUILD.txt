@@ -1,0 +1,36 @@
+SambaS3 runtime repair evidence — 2026-08-31
+
+Root commit: 6392c3522cae3634ab4833c6e7d33b167bdb6e22
+RPCSX submodule: 657b26a0d197c29d42cdcf3b3f6e8ad5c6765bbc
+Patch SHA-256: 4c5edbe84bc8aaa9bc14b984d2be584dc359caf012dc6e404c9f2ecaff1e742a
+APK: app/build/outputs/apk/standard/debug/samba-s3-standard-debug.apk
+APK SHA-256: 82dd2588f7c630ad72e9acec92f257531b2a7787a94d96b031ad8abc2e7dcabf
+arm64 core SHA-256: 03a3dbe78a0803648a46c3023b33ac9301b02c0d6d0a9e1e4779e1631111e22e
+x86_64 core SHA-256: 3db863c3826ad7b01f13f5043a68c5a82cd0a77f9c7ce571c16b322678573c80
+Build: ./build_rpcsx.sh debug; standard and playstore debug assemblies
+Device: 7d6afed8 / OPD2403 / Vulkan / 3000x2120
+
+Clean normal Home flow:
+- User-selected slot booted directly from Launch Center.
+- Surface-ready barrier completed before boot.
+- Renderer initialized as Vulkan.
+- S3HOMELOAD first-frame-confirmed reached.
+- Live trophy query logged `S3TROPHY title=BLUS31584 set=NPWR10029_00 state=ready total=33 unlocked=1`.
+- Native arm64 symbol audit recorded in `native-symbols.txt`.
+- Home stress matrix: 30 normal, 10 force-stop/reopen, and 10 Continue Latest Save cycles all passed.
+- Performance captures: four current-build profiles, 60 samples each at 5-second cadence.
+- Touch matrix: 19/19 traces with monitor enabled and 19/19 root/PadOverlay traces with monitor disabled.
+- Pass 1 and Pass 2 endurance: 22 minutes each, with image/log capture and zero fatal-pattern matches in the captured windows.
+- Current Pass 2 manual SAVE evidence: accepted, file-committed, completion-event, recovery boot result 0, and first-frame confirmation.
+- Current Pass 2 manual LOAD evidence: `manual-load first-frame-confirmed` with restored gameplay capture.
+- Graph fixtures: unit-tested FPS `[30,40,50,60]` and frame-time `[33.3,25,20,16.7]`; real-game graph crops are current-build captures.
+- Cross-check: 30-second device run produced six native, six JSON, and six UI samples with matching values.
+- Pass4 candidate: 29 native, 29 JSON, and 29 UI samples in a clean 32-second gameplay window with matching values and no fatal signatures.
+- Pass4 candidate: in-game and stopped Launch Center trophy views each returned the real 33-entry GTA set.
+- Pass4 candidate: direct-load image/log captured surface-ready, exact savestate boot, NoErrors return, Running, and first-frame confirmation.
+
+Incident retained for diagnosis:
+- An automated cycle force-stopped a live RPCSXActivity.
+- The next launch correctly showed the previous-session crash recovery screen.
+- Script taps then targeted the wrong screen and timed out; this was not counted as a clean Home-load attempt.
+- The screen and logs are preserved as home-load-failure.png, home-load-failure-logcat.txt, home-load-backend.log, home-load-vulkan.log, and home-load-app.log outside the dated artifact set.
