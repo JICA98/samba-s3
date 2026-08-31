@@ -2,7 +2,7 @@
 
 ## Source state
 Root start: `35924ef` (`fix: finalize achievements recovery and clean exit`)
-Root final: (see commit after this report lands on `recovery/ingame-menu-fix`)
+Root final: `8876cdf6de050da35ab744c2e457b14c4a29fa0c`
 Branch: `recovery/ingame-menu-fix`
 APK SHA: `bc48438fa7ef12757e06dd4a9ca378875c0f6e4757f38b9f2a500837a556c98f` (`assembleStandardDebug`)
 Device under test (only): OnePlus Pad 2 — `OPD2403` / `OP5DAAL1`, ADB serial `adb-7d6afed8-mU47CV (2)._adb-tls-connect._tcp`  
