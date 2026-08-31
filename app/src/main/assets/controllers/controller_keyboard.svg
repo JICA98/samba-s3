@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 480 220" role="img" aria-label="Keyboard layout">
+  <rect id="body" x="10" y="20" width="460" height="180" rx="12" fill="#121820" stroke="#3ad69b" stroke-width="2"/>
+  <text x="240" y="42" text-anchor="middle" font-size="12" fill="#3ad69b">KEYBOARD</text>
+  <!-- Movement WASD -->
+  <g id="key_w"><rect x="70" y="60" width="32" height="28" rx="4" fill="#2b3746"/><text x="86" y="79" text-anchor="middle" font-size="11" fill="#fff">W</text></g>
+  <g id="key_a"><rect x="36" y="94" width="32" height="28" rx="4" fill="#2b3746"/><text x="52" y="113" text-anchor="middle" font-size="11" fill="#fff">A</text></g>
+  <g id="key_s"><rect x="70" y="94" width="32" height="28" rx="4" fill="#2b3746"/><text x="86" y="113" text-anchor="middle" font-size="11" fill="#fff">S</text></g>
+  <g id="key_d"><rect x="104" y="94" width="32" height="28" rx="4" fill="#2b3746"/><text x="120" y="113" text-anchor="middle" font-size="11" fill="#fff">D</text></g>
+  <!-- Camera arrows -->
+  <g id="key_up"><rect x="190" y="60" width="32" height="28" rx="4" fill="#2b3746"/><text x="206" y="79" text-anchor="middle" font-size="10" fill="#fff">↑</text></g>
+  <g id="key_left"><rect x="156" y="94" width="32" height="28" rx="4" fill="#2b3746"/><text x="172" y="113" text-anchor="middle" font-size="10" fill="#fff">←</text></g>
+  <g id="key_down"><rect x="190" y="94" width="32" height="28" rx="4" fill="#2b3746"/><text x="206" y="113" text-anchor="middle" font-size="10" fill="#fff">↓</text></g>
+  <g id="key_right"><rect x="224" y="94" width="32" height="28" rx="4" fill="#2b3746"/><text x="240" y="113" text-anchor="middle" font-size="10" fill="#fff">→</text></g>
+  <!-- Face -->
+  <g id="key_u"><rect x="290" y="60" width="32" height="28" rx="4" fill="#2b3746"/><text x="306" y="79" text-anchor="middle" font-size="11" fill="#fff">U</text></g>
+  <g id="key_i"><rect x="324" y="60" width="32" height="28" rx="4" fill="#2b3746"/><text x="340" y="79" text-anchor="middle" font-size="11" fill="#fff">I</text></g>
+  <g id="key_j"><rect x="290" y="94" width="32" height="28" rx="4" fill="#2b3746"/><text x="306" y="113" text-anchor="middle" font-size="11" fill="#fff">J</text></g>
+  <g id="key_k"><rect x="324" y="94" width="32" height="28" rx="4" fill="#2b3746"/><text x="340" y="113" text-anchor="middle" font-size="11" fill="#fff">K</text></g>
+  <g id="key_z"><rect x="36" y="140" width="32" height="28" rx="4" fill="#2b3746"/><text x="52" y="159" text-anchor="middle" font-size="11" fill="#fff">Z</text></g>
+  <g id="key_x"><rect x="70" y="140" width="32" height="28" rx="4" fill="#2b3746"/><text x="86" y="159" text-anchor="middle" font-size="11" fill="#fff">X</text></g>
+  <g id="key_c"><rect x="104" y="140" width="32" height="28" rx="4" fill="#2b3746"/><text x="120" y="159" text-anchor="middle" font-size="11" fill="#fff">C</text></g>
+  <g id="key_v"><rect x="138" y="140" width="32" height="28" rx="4" fill="#2b3746"/><text x="154" y="159" text-anchor="middle" font-size="11" fill="#fff">V</text></g>
+  <!-- Shoulders / triggers -->
+  <g id="key_q"><rect x="36" y="60" width="28" height="28" rx="4" fill="#243041"/><text x="50" y="79" text-anchor="middle" font-size="11" fill="#fff">Q</text></g>
+  <g id="key_e"><rect x="108" y="60" width="28" height="28" rx="4" fill="#243041"/><text x="122" y="79" text-anchor="middle" font-size="11" fill="#fff">E</text></g>
+  <g id="key_r"><rect x="358" y="60" width="28" height="28" rx="4" fill="#243041"/><text x="372" y="79" text-anchor="middle" font-size="11" fill="#fff">R</text></g>
+  <g id="key_f"><rect x="358" y="94" width="28" height="28" rx="4" fill="#243041"/><text x="372" y="113" text-anchor="middle" font-size="11" fill="#fff">F</text></g>
+  <g id="key_1"><rect x="400" y="60" width="28" height="28" rx="4" fill="#243041"/><text x="414" y="79" text-anchor="middle" font-size="11" fill="#fff">1</text></g>
+  <g id="key_2"><rect x="400" y="94" width="28" height="28" rx="4" fill="#243041"/><text x="414" y="113" text-anchor="middle" font-size="11" fill="#fff">2</text></g>
+  <g id="key_3"><rect x="430" y="60" width="28" height="28" rx="4" fill="#243041"/><text x="444" y="79" text-anchor="middle" font-size="11" fill="#fff">3</text></g>
+  <g id="key_4"><rect x="430" y="94" width="28" height="28" rx="4" fill="#243041"/><text x="444" y="113" text-anchor="middle" font-size="11" fill="#fff">4</text></g>
+  <!-- System -->
+  <g id="key_shift"><rect x="180" y="140" width="56" height="28" rx="4" fill="#2b3746"/><text x="208" y="159" text-anchor="middle" font-size="9" fill="#fff">SHIFT</text></g>
+  <g id="key_space"><rect x="244" y="140" width="72" height="28" rx="4" fill="#2b3746"/><text x="280" y="159" text-anchor="middle" font-size="9" fill="#fff">SPACE</text></g>
+  <g id="key_tab"><rect x="324" y="140" width="44" height="28" rx="4" fill="#2b3746"/><text x="346" y="159" text-anchor="middle" font-size="9" fill="#fff">TAB</text></g>
+  <g id="key_enter"><rect x="376" y="140" width="52" height="28" rx="4" fill="#2b3746"/><text x="402" y="159" text-anchor="middle" font-size="9" fill="#fff">ENTER</text></g>
+  <g id="key_esc"><rect x="20" y="28" width="36" height="20" rx="3" fill="#243041"/><text x="38" y="42" text-anchor="middle" font-size="9" fill="#fff">ESC</text></g>
+</svg>

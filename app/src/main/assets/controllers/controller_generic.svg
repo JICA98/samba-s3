@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 240" role="img" aria-label="Generic gamepad">
+  <rect id="body" x="45" y="50" width="310" height="140" rx="40" fill="#1a2332" stroke="#8899aa" stroke-width="2"/>
+  <g id="btn_dpad_up"><rect x="95" y="95" width="20" height="18" rx="3" fill="#2b3746"/></g>
+  <g id="btn_dpad_down"><rect x="95" y="133" width="20" height="18" rx="3" fill="#2b3746"/></g>
+  <g id="btn_dpad_left"><rect x="77" y="113" width="18" height="20" rx="3" fill="#2b3746"/></g>
+  <g id="btn_dpad_right"><rect x="115" y="113" width="18" height="20" rx="3" fill="#2b3746"/></g>
+  <g id="btn_triangle"><circle cx="290" cy="95" r="11" fill="#2b3746"/></g>
+  <g id="btn_circle"><circle cx="310" cy="115" r="11" fill="#2b3746"/></g>
+  <g id="btn_cross"><circle cx="290" cy="135" r="11" fill="#2b3746"/></g>
+  <g id="btn_square"><circle cx="270" cy="115" r="11" fill="#2b3746"/></g>
+  <g id="btn_a"><circle cx="290" cy="135" r="1" fill="none"/></g>
+  <g id="btn_b"><circle cx="310" cy="115" r="1" fill="none"/></g>
+  <g id="btn_x"><circle cx="270" cy="115" r="1" fill="none"/></g>
+  <g id="btn_y"><circle cx="290" cy="95" r="1" fill="none"/></g>
+  <g id="btn_l1"><rect x="75" y="32" width="48" height="14" rx="3" fill="#2b3746"/></g>
+  <g id="btn_l2"><rect x="75" y="14" width="48" height="12" rx="3" fill="#243041"/></g>
+  <g id="btn_r1"><rect x="277" y="32" width="48" height="14" rx="3" fill="#2b3746"/></g>
+  <g id="btn_r2"><rect x="277" y="14" width="48" height="12" rx="3" fill="#243041"/></g>
+  <g id="btn_select"><rect x="165" y="110" width="26" height="12" rx="3" fill="#2b3746"/></g>
+  <g id="btn_start"><rect x="209" y="110" width="26" height="12" rx="3" fill="#2b3746"/></g>
+  <g id="btn_guide"><circle cx="200" cy="88" r="9" fill="#8899aa"/></g>
+  <g id="stick_left"><circle cx="145" cy="155" r="18" fill="#151c27" stroke="#8899aa" stroke-width="1"/><circle id="btn_l3" cx="145" cy="155" r="8" fill="#2b3746"/></g>
+  <g id="stick_right"><circle cx="245" cy="155" r="18" fill="#151c27" stroke="#8899aa" stroke-width="1"/><circle id="btn_r3" cx="245" cy="155" r="8" fill="#2b3746"/></g>
+  <g id="trigger_left"><rect x="75" y="14" width="48" height="12" rx="3" fill="none"/></g>
+  <g id="trigger_right"><rect x="277" y="14" width="48" height="12" rx="3" fill="none"/></g>
+  <g id="touchpad"><rect x="0" y="0" width="1" height="1" fill="none"/></g>
+</svg>
