@@ -51,14 +51,14 @@ fun KeyboardVisual(
                         onTap = { offset ->
                             val nx = offset.x / size.width
                             val ny = offset.y / size.height
-                            val hit = hotspots.firstOrNull { it.contains(nx, ny) }
+                            val hit = ControllerHotspotLayout.hitTest(nx, ny, ControllerFamily.KEYBOARD)
                             val logical = hit?.let { ControllerHotspotLayout.logicalForHotspot(it.id, ControllerFamily.KEYBOARD) }
                             if (logical != null) onHotspotClick(logical)
                         },
                         onLongPress = { offset ->
                             val nx = offset.x / size.width
                             val ny = offset.y / size.height
-                            val hit = hotspots.firstOrNull { it.contains(nx, ny) }
+                            val hit = ControllerHotspotLayout.hitTest(nx, ny, ControllerFamily.KEYBOARD)
                             val logical = hit?.let { ControllerHotspotLayout.logicalForHotspot(it.id, ControllerFamily.KEYBOARD) }
                             if (logical != null) onHotspotLongPress(logical)
                         },
@@ -84,12 +84,18 @@ fun KeyboardVisual(
                 for (spot in hotspots) {
                     val control = ControllerHotspotLayout.logicalForHotspot(spot.id, ControllerFamily.KEYBOARD)
                     val active = pressedHotspots.contains(spot.id) || selected == control
-                    val fill = if (active) accent.copy(alpha = 0.8f) else Color(0xFF2B3746)
+                    val fill = if (active) accent.copy(alpha = 0.9f) else Color(0xFF4A5A6E)
+                    val left = spot.left * w
+                    val top = spot.top * h
+                    val rw = (spot.right - spot.left) * w
+                    val rh = (spot.bottom - spot.top) * h
+                    drawRoundRect(fill, Offset(left, top), Size(rw, rh), CornerRadius(4.dp.toPx()))
                     drawRoundRect(
-                        color = fill,
-                        topLeft = Offset(spot.left * w, spot.top * h),
-                        size = Size((spot.right - spot.left) * w, (spot.bottom - spot.top) * h),
-                        cornerRadius = CornerRadius(4.dp.toPx()),
+                        Color.White.copy(alpha = 0.28f),
+                        Offset(left, top),
+                        Size(rw, rh),
+                        CornerRadius(4.dp.toPx()),
+                        style = Stroke(1.dp.toPx()),
                     )
                 }
             }

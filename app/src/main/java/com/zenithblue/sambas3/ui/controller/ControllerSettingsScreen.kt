@@ -99,10 +99,22 @@ fun ControllerSettingsScreen(navigateBack: () -> Unit, isInSplitPane: Boolean = 
     }
 
     LaunchedEffect(selectedDevice?.deviceKey) {
-        val device = selectedDevice ?: return@LaunchedEffect
+        val device = selectedDevice
+        if (device == null) {
+            val fallback = ControllerProfileRepository.load()
+            profile = fallback
+            ControllerInputMonitor.reloadProfile(fallback)
+            Log.i(UI_TAG, "no device selected; monitor uses current profile ${fallback.id}")
+            return@LaunchedEffect
+        }
         selectedDeviceKey = device.deviceKey
-        profile = ControllerProfileRepository.loadForDevice(device)
-        Log.i(UI_TAG, "device selected ${device.name} family=${device.family} layout=${ControllerLayoutResolver.resolve(device.family).assetPath}")
+        val loaded = ControllerProfileRepository.loadForDevice(device)
+        profile = loaded
+        ControllerInputMonitor.reloadProfile(loaded)
+        Log.i(
+            UI_TAG,
+            "device selected ${device.name} family=${device.family} layout=${ControllerLayoutResolver.resolve(device.family).assetPath} profile=${loaded.id}",
+        )
     }
 
     // Throttle live pad state so high-frequency samples do not recompose the whole tree every event.
@@ -144,7 +156,7 @@ fun ControllerSettingsScreen(navigateBack: () -> Unit, isInSplitPane: Boolean = 
         } else next
         profile = tagged
         ControllerProfileRepository.save(tagged)
-        ControllerInputMonitor.reloadProfile()
+        ControllerInputMonitor.reloadProfile(tagged)
         Log.i(UI_TAG, "profile saved ${tagged.id}")
     }
 

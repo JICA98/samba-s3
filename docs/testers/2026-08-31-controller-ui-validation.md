@@ -4,7 +4,7 @@
 Root start: `35924ef` (`fix: finalize achievements recovery and clean exit`)
 Root final: `8876cdf6de050da35ab744c2e457b14c4a29fa0c`
 Branch: `recovery/ingame-menu-fix`
-APK SHA: `bc48438fa7ef12757e06dd4a9ca378875c0f6e4757f38b9f2a500837a556c98f` (`assembleStandardDebug`)
+APK SHA: `88fb5b2307c8439bca17fcc75072343b0ba32f828d50d706dc3ba5aeb31674e9` (`assembleStandardDebug`)
 Device under test (only): OnePlus Pad 2 — `OPD2403` / `OP5DAAL1`, ADB serial `adb-7d6afed8-mU47CV (2)._adb-tls-connect._tcp`  
 Phone / emulator / Xiaomi duchamp: **not used** (user instruction: test only on OnePlus Pad 2). Never ran `adb kill-server` after that instruction.
 
@@ -28,6 +28,7 @@ Test mode: Mapping/Test tabs + live stick/trigger meters; Advanced for deadzone/
 SVG files added: `controller_ps.svg`, `controller_xbox.svg`, `controller_switch.svg`, `controller_generic.svg`, `controller_keyboard.svg`.
 Hotspot naming: `btn_*`, `stick_*`, `trigger_*`, `touchpad`, keyboard `key_*` (see worker list).
 Why SVG chosen: repo-local, scalable, stable IDs for Compose hotspot binding; no production hotlinked PNGs.
+Runtime rendering: Android has no built-in SVG rasterizer without an extra decoder; Compose draws high-contrast family-distinct silhouettes whose hotspot IDs match the shipped SVGs (`asset ok` is verified via AssetManager). PS rounded body + △○✕□ labels, Xbox winged body + ABXY, Nintendo pill body + ABXY, dedicated keyboard matrix.
 
 ## Device support
 PlayStation: classifier + PS asset + labels (unit + asset gates; no DualSense attached on Pad 2).
@@ -74,7 +75,7 @@ Repeated critical navigation on the **same unchanged APK** (Controls open, strip
 | `03-ps-layout-test.webp` | Captured (Test tab on available surface) |
 | `04-xbox-layout-mapping.webp` | **Not captured** — no Xbox pad attached |
 | `05-keyboard-layout-mapping.webp` | Captured mapping surface; external keyboard absent after OEM filter → GENERIC empty-strip state; keyboard asset/defaults proven by unit/asset tests |
-| `06-remap-capture-dialog.webp` | Captured capture-mode prompt; REPLACE dialog flaky via adb keyevent without focus — conflict logic unit-tested |
+| `06-remap-capture-dialog.webp` | Captured capture-mode prompt both Pass 1/2 after scrolling mapping list into view; REPLACE AlertDialog via adb keyevent remains focus-flaky — conflict REPLACE/SWAP/CANCEL unit-tested |
 | `07-profile-management.webp` | Captured |
 | `08-player-assignment.webp` | Captured Advanced omission message |
 | `09-phone-portrait-layout.webp` | Captured on Pad 2 with `user_rotation=0` (not a phone) |

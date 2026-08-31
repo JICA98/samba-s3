@@ -73,15 +73,35 @@ object ControllerLayoutResolver {
         return layout
     }
 
+    /**
+     * Primary interactive hotspot id for a logical control on the given family layout.
+     * Xbox: A/B/X/Y. Nintendo: B/A/Y/X for Cross/Circle/Square/Triangle (no id collisions).
+     */
     fun hotspotForLogical(control: LogicalControl, family: ControllerFamily): String = when (control) {
         LogicalControl.DPAD_UP -> "btn_dpad_up"
         LogicalControl.DPAD_DOWN -> "btn_dpad_down"
         LogicalControl.DPAD_LEFT -> "btn_dpad_left"
         LogicalControl.DPAD_RIGHT -> "btn_dpad_right"
-        LogicalControl.CROSS -> if (family == ControllerFamily.XBOX || family == ControllerFamily.NINTENDO) "btn_a" else "btn_cross"
-        LogicalControl.CIRCLE -> if (family == ControllerFamily.XBOX) "btn_b" else if (family == ControllerFamily.NINTENDO) "btn_a" else "btn_circle"
-        LogicalControl.SQUARE -> if (family == ControllerFamily.XBOX) "btn_x" else if (family == ControllerFamily.NINTENDO) "btn_y" else "btn_square"
-        LogicalControl.TRIANGLE -> if (family == ControllerFamily.XBOX) "btn_y" else if (family == ControllerFamily.NINTENDO) "btn_x" else "btn_triangle"
+        LogicalControl.CROSS -> when (family) {
+            ControllerFamily.XBOX -> "btn_a"
+            ControllerFamily.NINTENDO -> "btn_b"
+            else -> "btn_cross"
+        }
+        LogicalControl.CIRCLE -> when (family) {
+            ControllerFamily.XBOX -> "btn_b"
+            ControllerFamily.NINTENDO -> "btn_a"
+            else -> "btn_circle"
+        }
+        LogicalControl.SQUARE -> when (family) {
+            ControllerFamily.XBOX -> "btn_x"
+            ControllerFamily.NINTENDO -> "btn_y"
+            else -> "btn_square"
+        }
+        LogicalControl.TRIANGLE -> when (family) {
+            ControllerFamily.XBOX -> "btn_y"
+            ControllerFamily.NINTENDO -> "btn_x"
+            else -> "btn_triangle"
+        }
         LogicalControl.L1 -> "btn_l1"
         LogicalControl.R1 -> "btn_r1"
         LogicalControl.L2 -> "btn_l2"

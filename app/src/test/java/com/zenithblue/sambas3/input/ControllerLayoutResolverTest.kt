@@ -51,6 +51,17 @@ class ControllerLayoutResolverTest {
     fun hotspotForLogicalMatchesFamilyFaceButtons() {
         assertEquals("btn_cross", ControllerLayoutResolver.hotspotForLogical(LogicalControl.CROSS, ControllerFamily.PLAYSTATION))
         assertEquals("btn_a", ControllerLayoutResolver.hotspotForLogical(LogicalControl.CROSS, ControllerFamily.XBOX))
-        assertEquals("btn_a", ControllerLayoutResolver.hotspotForLogical(LogicalControl.CROSS, ControllerFamily.NINTENDO))
+        assertEquals("btn_b", ControllerLayoutResolver.hotspotForLogical(LogicalControl.CROSS, ControllerFamily.NINTENDO))
+        assertEquals("btn_a", ControllerLayoutResolver.hotspotForLogical(LogicalControl.CIRCLE, ControllerFamily.NINTENDO))
+    }
+
+    @Test
+    fun nintendoFaceHotspotsAreUniqueNoCollision() {
+        val cross = ControllerLayoutResolver.hotspotForLogical(LogicalControl.CROSS, ControllerFamily.NINTENDO)
+        val circle = ControllerLayoutResolver.hotspotForLogical(LogicalControl.CIRCLE, ControllerFamily.NINTENDO)
+        val square = ControllerLayoutResolver.hotspotForLogical(LogicalControl.SQUARE, ControllerFamily.NINTENDO)
+        val triangle = ControllerLayoutResolver.hotspotForLogical(LogicalControl.TRIANGLE, ControllerFamily.NINTENDO)
+        assertEquals(setOf(cross, circle, square, triangle).size, 4)
+        assertFalse(cross == circle)
     }
 }

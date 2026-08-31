@@ -12,7 +12,10 @@ enum class ControllerMonitorMode { Off, Test, Capture }
 data class ControllerInputEvent(val keyCode: Int, val down: Boolean)
 
 object ControllerInputMonitor {
-    private var mapper = GamepadMapper(ControllerProfileRepository.load())
+    // Prefer family defaults at construction so JVM unit tests do not require GeneralSettings.init.
+    private var mapper = GamepadMapper(
+        ControllerProfile(digitalBindings = FamilyDefaultMappings.gamepadDefaults()),
+    )
     private var mode = ControllerMonitorMode.Off
     private val _state = MutableStateFlow(LogicalPadState())
     private val _events = MutableSharedFlow<ControllerInputEvent>(extraBufferCapacity = 16)
@@ -31,5 +34,12 @@ object ControllerInputMonitor {
     fun motion(mapper: GamepadMapper, event: MotionEvent) { if (mode != ControllerMonitorMode.Off) _state.value = mapper.motion(event) }
     fun observeKey(event: KeyEvent, down: Boolean) { key(mapper, event, down) }
     fun observeMotion(event: MotionEvent) { motion(mapper, event) }
-    fun reloadProfile() { mapper = GamepadMapper(ControllerProfileRepository.load()) }
+    /** Reload from the global "current" profile (gameplay / legacy callers). */
+    fun reloadProfile() { reloadProfile(ControllerProfileRepository.load()) }
+    /** Reload from an explicit profile — used by Controls when a device is selected. */
+    fun reloadProfile(profile: ControllerProfile) {
+        mapper = GamepadMapper(profile)
+        if (mode != ControllerMonitorMode.Off) _state.value = LogicalPadState()
+    }
+    fun activeProfile(): ControllerProfile = mapper.profile()
 }
