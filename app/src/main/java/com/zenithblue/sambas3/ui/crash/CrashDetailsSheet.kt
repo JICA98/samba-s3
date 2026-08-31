@@ -1,11 +1,14 @@
 package com.zenithblue.sambas3.ui.crash
 
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.horizontalScroll
 import androidx.compose.material3.Button
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.OutlinedButton
@@ -21,6 +24,7 @@ import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
@@ -39,7 +43,9 @@ fun CrashDetailsSheet(
     initialReport: CrashReport?,
     loadFailure: String? = null,
     onChooseSave: (() -> Unit)? = null,
+    onSafeRetry: (() -> Unit)? = null,
     onViewLogs: (() -> Unit)? = null,
+    onExportReport: (() -> Unit)? = null,
     onDismiss: () -> Unit,
 ) {
     val context = LocalContext.current
@@ -58,11 +64,18 @@ fun CrashDetailsSheet(
         ) {
             Text("RECOVERY DETAILS", color = RPCSXColors.primary)
             if (loadFailure != null) Text(loadFailure, color = RPCSXColors.errorColor)
-            report?.let { CrashLogPane(it, 0, Modifier.weight(1f)) }
-                ?: Text("Collecting diagnostics...", color = RPCSXColors.textSecondary)
-            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+            Row(
+                Modifier.fillMaxWidth().horizontalScroll(rememberScrollState()),
+                horizontalArrangement = Arrangement.spacedBy(8.dp),
+            ) {
                 onChooseSave?.let { OutlinedButton(onClick = it) { Text("CHOOSE SAVE") } }
+                onSafeRetry?.let { OutlinedButton(onClick = it) { Text("SAFE RETRY") } }
                 onViewLogs?.let { OutlinedButton(onClick = it) { Text("VIEW LOGS") } }
+                onExportReport?.let { OutlinedButton(onClick = it) { Text("EXPORT REPORT") } }
+            }
+            Box(Modifier.fillMaxWidth().weight(1f)) {
+                report?.let { CrashLogPane(it, 0, Modifier.fillMaxSize()) }
+                    ?: Text("Collecting diagnostics...", color = RPCSXColors.textSecondary)
             }
             Button(onClick = onDismiss) { Text("CLOSE") }
         }

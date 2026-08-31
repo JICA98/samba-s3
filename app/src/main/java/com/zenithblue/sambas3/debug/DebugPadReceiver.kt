@@ -7,6 +7,7 @@ import android.content.IntentFilter
 import android.os.Handler
 import android.os.Looper
 import android.util.Log
+import com.zenithblue.sambas3.BuildConfig
 import com.zenithblue.sambas3.Digital2Flags
 import com.zenithblue.sambas3.RPCSX
 
@@ -23,9 +24,14 @@ import com.zenithblue.sambas3.RPCSX
  *  adb shell am broadcast -a com.zenithblue.sambas3.DEBUG_PAD --ei d2 64 --ei lx 127
  * Seen in LogMonitor as tag "DebugPad" → routed to BACKEND (via RPCSX-UI? actually uses Log.w).
  */
-class DebugPadReceiver : BroadcastReceiver() {
+class DebugPadReceiver(private val onDebugFatal: (() -> Unit)? = null) : BroadcastReceiver() {
     override fun onReceive(context: Context?, intent: Intent?) {
         val action = intent?.action ?: return
+        if (action == ACTION_FATAL) {
+            if (BuildConfig.DEBUG) onDebugFatal?.invoke()
+            else Log.w("DebugPad", "DEBUG_FATAL ignored in non-debug build")
+            return
+        }
         when {
             action == ACTION_PAD -> {
                 val d1 = intent.getIntExtra("d1", 0)
@@ -76,12 +82,14 @@ class DebugPadReceiver : BroadcastReceiver() {
 
     companion object {
         const val ACTION_PAD = "com.zenithblue.sambas3.DEBUG_PAD"
+        const val ACTION_FATAL = "com.zenithblue.sambas3.DEBUG_FATAL"
         const val PREFIX = "com.zenithblue.sambas3.DEBUG_PAD_"
 
-        fun register(context: Context): DebugPadReceiver {
-            val r = DebugPadReceiver()
+        fun register(context: Context, onDebugFatal: (() -> Unit)? = null): DebugPadReceiver {
+            val r = DebugPadReceiver(onDebugFatal)
             val f = IntentFilter().apply {
                 addAction(ACTION_PAD)
+                addAction(ACTION_FATAL)
                 addAction(PREFIX + "CROSS")
                 addAction(PREFIX + "CIRCLE")
                 addAction(PREFIX + "SQUARE")

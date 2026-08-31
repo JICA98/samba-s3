@@ -1,0 +1,443 @@
+[08-31 19:14:06.404] I/S3SAVE: S3SAVE pending recovery cleared
+[08-31 19:14:06.404] I/S3SAVE: manual-load first-frame-confirmed slot=0 generation=1
+[08-31 19:14:06.577] I/S3SESSION: journal state=RUNNING session=1788183783547-701f0724 game=/storage/emulated/0/Android/data/com.zenithblue.sambas3/files/config/games/BLUS31584 clean=false
+[08-31 19:14:13.185] W/DebugPad: BUTTON PS d1=256 d2=0 press 120ms
+[08-31 19:14:13.305] W/DebugPad: BUTTON PS release
+[08-31 19:14:21.705] W/DebugPad: BUTTON PS d1=256 d2=0 press 120ms
+[08-31 19:14:21.825] W/DebugPad: BUTTON PS release
+[08-31 19:14:30.991] I/S3EXIT: event=requested sessionId=1788183783547-701f0724 activityInstanceId=1 stopRequestId=1 stopReason=InGameExit finishReason=ExplicitExit activeGame=/storage/emulated/0/Android/data/com.zenithblue.sambas3/files/config/games/BLUS31584 nativeState=reading journalState=RUNNING pendingRecovery=none fatalEventId=none timestamp=1788183870991
+[08-31 19:14:30.991] I/S3SAVE: S3SAVE automatic recovery cancel no-marker reason=InGameExit
+[08-31 19:14:30.992] I/S3SESSION: journal state=STOPPING session=1788183783547-701f0724 game=/storage/emulated/0/Android/data/com.zenithblue.sambas3/files/config/games/BLUS31584 clean=false
+[08-31 19:14:30.992] I/S3EXIT: requested session=1788183783547-701f0724 stopRequestId=1 stopReason=InGameExit finishReason=ExplicitExit journal=STOPPING timestamp=1788183870992
+[08-31 19:14:30.993] I/S3EXIT: event=STOPPING sessionId=1788183783547-701f0724 activityInstanceId=1 stopRequestId=1 stopReason=InGameExit finishReason=ExplicitExit activeGame=/storage/emulated/0/Android/data/com.zenithblue.sambas3/files/config/games/BLUS31584 nativeState=Running journalState=STOPPING pendingRecovery=none fatalEventId=none timestamp=1788183870993
+[08-31 19:14:32.505] I/S3EXIT: event=native-Stopped sessionId=1788183783547-701f0724 activityInstanceId=1 stopRequestId=1 stopReason=InGameExit finishReason=ExplicitExit activeGame=/storage/emulated/0/Android/data/com.zenithblue.sambas3/files/config/games/BLUS31584 nativeState=Stopped journalState=STOPPING pendingRecovery=none fatalEventId=none timestamp=1788183872505
+[08-31 19:14:32.505] I/S3EXIT: event=trophy-flush-complete sessionId=1788183783547-701f0724 stopRequestId=1 boundary=native-stop journal=STOPPING
+[08-31 19:14:32.512] I/S3EXIT: journal=CLEAN_STOP session=1788183783547-701f0724 stopRequestId=1 stopReason=InGameExit finishReason=ExplicitExit timestamp=1788183872506
+[08-31 19:14:32.513] I/S3EXIT: event=CLEAN_STOP sessionId=1788183783547-701f0724 activityInstanceId=1 stopRequestId=1 stopReason=InGameExit finishReason=ExplicitExit activeGame=/storage/emulated/0/Android/data/com.zenithblue.sambas3/files/config/games/BLUS31584 nativeState=Stopped journalState=CLEAN_STOP pendingRecovery=none fatalEventId=none timestamp=1788183872513
+[08-31 19:14:32.514] I/S3EXIT: event=activeGame-null sessionId=1788183783547-701f0724 activityInstanceId=1 stopRequestId=1 stopReason=InGameExit finishReason=ExplicitExit activeGame=null nativeState=Stopped journalState=CLEAN_STOP pendingRecovery=none fatalEventId=none timestamp=1788183872514
+[08-31 19:14:32.514] I/S3EXIT: event=finish-external-stop sessionId=1788183783547-701f0724 activityInstanceId=1 stopRequestId=1 stopReason=InGameExit finishReason=ExplicitExit activeGame=null nativeState=Stopped journalState=CLEAN_STOP pendingRecovery=none fatalEventId=none timestamp=1788183872514
+[08-31 19:14:32.525] I/DebugPad: registered
+[08-31 19:14:33.088] I/S3EXIT: event=host-unregistered sessionId=1788183783547-701f0724 activityInstanceId=1 stopRequestId=1 stopReason=InGameExit finishReason=ExplicitExit activeGame=null nativeState=Stopped journalState=CLEAN_STOP pendingRecovery=none fatalEventId=none timestamp=1788183873088
+[08-31 19:14:33.089] I/S3SESSION: activity=1 reason=activity-destroyed native=Stopped mirrored=Stopped activeGame=null surfaceGen=0 recovery=false menu=Closed
+[08-31 19:14:30.991] I/S3EXIT: event=requested sessionId=1788183783547-701f0724 activityInstanceId=1 stopRequestId=1 stopReason=InGameExit finishReason=ExplicitExit activeGame=/storage/emulated/0/Android/data/com.zenithblue.sambas3/files/config/games/BLUS31584 nativeState=reading journalState=RUNNING pendingRecovery=none fatalEventId=none timestamp=1788183870991
+[08-31 19:14:30.991] I/S3SAVE: S3SAVE automatic recovery cancel no-marker reason=InGameExit
+[08-31 19:14:30.992] I/S3SESSION: journal state=STOPPING session=1788183783547-701f0724 game=/storage/emulated/0/Android/data/com.zenithblue.sambas3/files/config/games/BLUS31584 clean=false
+[08-31 19:14:30.992] I/S3EXIT: requested session=1788183783547-701f0724 stopRequestId=1 stopReason=InGameExit finishReason=ExplicitExit journal=STOPPING timestamp=1788183870992
+[08-31 19:14:30.993] I/S3EXIT: event=STOPPING sessionId=1788183783547-701f0724 activityInstanceId=1 stopRequestId=1 stopReason=InGameExit finishReason=ExplicitExit activeGame=/storage/emulated/0/Android/data/com.zenithblue.sambas3/files/config/games/BLUS31584 nativeState=Running journalState=STOPPING pendingRecovery=none fatalEventId=none timestamp=1788183870993
+[08-31 19:14:32.505] I/S3EXIT: event=native-Stopped sessionId=1788183783547-701f0724 activityInstanceId=1 stopRequestId=1 stopReason=InGameExit finishReason=ExplicitExit activeGame=/storage/emulated/0/Android/data/com.zenithblue.sambas3/files/config/games/BLUS31584 nativeState=Stopped journalState=STOPPING pendingRecovery=none fatalEventId=none timestamp=1788183872505
+[08-31 19:14:32.505] I/S3EXIT: event=trophy-flush-complete sessionId=1788183783547-701f0724 stopRequestId=1 boundary=native-stop journal=STOPPING
+[08-31 19:14:32.512] I/S3EXIT: journal=CLEAN_STOP session=1788183783547-701f0724 stopRequestId=1 stopReason=InGameExit finishReason=ExplicitExit timestamp=1788183872506
+[08-31 19:14:32.513] I/S3EXIT: event=CLEAN_STOP sessionId=1788183783547-701f0724 activityInstanceId=1 stopRequestId=1 stopReason=InGameExit finishReason=ExplicitExit activeGame=/storage/emulated/0/Android/data/com.zenithblue.sambas3/files/config/games/BLUS31584 nativeState=Stopped journalState=CLEAN_STOP pendingRecovery=none fatalEventId=none timestamp=1788183872513
+[08-31 19:14:32.514] I/S3EXIT: event=activeGame-null sessionId=1788183783547-701f0724 activityInstanceId=1 stopRequestId=1 stopReason=InGameExit finishReason=ExplicitExit activeGame=null nativeState=Stopped journalState=CLEAN_STOP pendingRecovery=none fatalEventId=none timestamp=1788183872514
+[08-31 19:14:32.514] I/S3EXIT: event=finish-external-stop sessionId=1788183783547-701f0724 activityInstanceId=1 stopRequestId=1 stopReason=InGameExit finishReason=ExplicitExit activeGame=null nativeState=Stopped journalState=CLEAN_STOP pendingRecovery=none fatalEventId=none timestamp=1788183872514
+[08-31 19:14:32.525] I/DebugPad: registered
+[08-31 19:14:33.088] I/S3EXIT: event=host-unregistered sessionId=1788183783547-701f0724 activityInstanceId=1 stopRequestId=1 stopReason=InGameExit finishReason=ExplicitExit activeGame=null nativeState=Stopped journalState=CLEAN_STOP pendingRecovery=none fatalEventId=none timestamp=1788183873088
+[08-31 19:14:33.089] I/S3SESSION: activity=1 reason=activity-destroyed native=Stopped mirrored=Stopped activeGame=null surfaceGen=0 recovery=false menu=Closed
+[08-31 19:14:38.305] I/DebugPad: registered
+[08-31 19:14:38.655] I/S3RECOVERY: refresh session=none state=none terminal=1788183783547-701f0724/true process=none/580f0c7f-4c90-4dd4-b611-98a24f5776d8
+[08-31 19:14:38.655] I/S3RECOVERY: classification=None reason=CLEAN_STOP session=1788183783547-701f0724
+[08-31 19:14:38.666] I/S3RECOVERY: refresh session=none state=none terminal=1788183783547-701f0724/true process=none/580f0c7f-4c90-4dd4-b611-98a24f5776d8
+[08-31 19:14:38.666] I/S3RECOVERY: classification=None reason=CLEAN_STOP session=1788183783547-701f0724
+[08-31 19:14:49.926] I/DebugPad: registered
+[08-31 19:14:49.928] I/S3SESSION: journal state=STARTING session=1788183889927-e55886a9 game=/storage/emulated/0/Android/data/com.zenithblue.sambas3/files/config/games/BLUS31584 clean=false
+[08-31 19:14:49.928] I/S3SESSION: activity=1 reason=activity-created native=Stopped mirrored=Stopped activeGame=null surfaceGen=1 recovery=false menu=Closed
+[08-31 19:14:49.929] I/S3SESSION: journal state=BOOTING session=1788183889927-e55886a9 game=/storage/emulated/0/Android/data/com.zenithblue.sambas3/files/config/games/BLUS31584 clean=false
+[08-31 19:14:49.929] I/S3HOMELOAD: request mode=FreshGame original=/storage/emulated/0/Android/data/com.zenithblue.sambas3/files/config/games/BLUS31584 savestate=null
+[08-31 19:14:49.929] I/S3HOMELOAD: preflight state=Stopped
+[08-31 19:14:49.929] I/S3RECOVERY: preflight state=Stopped activeGame=null recovery=false
+[08-31 19:14:49.929] I/S3HOMELOAD: stopped mode=FreshGame state=Stopped
+[08-31 19:14:49.929] I/S3HOMELOAD: surface-ready-wait mode=FreshGame
+[08-31 19:14:50.055] I/S3HOMELOAD: direct-boot-begin mode=FreshGame source=/storage/emulated/0/Android/data/com.zenithblue.sambas3/files/config/games/BLUS31584 original=/storage/emulated/0/Android/data/com.zenithblue.sambas3/files/config/games/BLUS31584
+[08-31 19:14:50.934] I/S3SESSION: journal state=RUNNING session=1788183889927-e55886a9 game=/storage/emulated/0/Android/data/com.zenithblue.sambas3/files/config/games/BLUS31584 clean=false
+[08-31 19:14:50.934] I/S3SESSION: activity=1 reason=boot-return native=Starting mirrored=Starting activeGame=/storage/emulated/0/Android/data/com.zenithblue.sambas3/files/config/games/BLUS31584 surfaceGen=1 recovery=false menu=Closed
+[08-31 19:14:50.934] I/S3HOMELOAD: direct-boot-return result=NoErrors state=Starting
+[08-31 19:15:16.567] W/DebugPad: BUTTON PS d1=256 d2=0 press 120ms
+[08-31 19:15:16.688] W/DebugPad: BUTTON PS release
+[08-31 19:15:27.364] I/S3SESSION: journal state=LOADING session=1788183889927-e55886a9 game=/storage/emulated/0/Android/data/com.zenithblue.sambas3/files/config/games/BLUS31584 clean=false
+[08-31 19:15:27.364] I/S3SAVE: manual-load transition begin slot=0 path=/storage/emulated/0/Android/data/com.zenithblue.sambas3/files/config//savestates/BLUS31584/BLUS31584_1_0.SAVESTAT.zst
+[08-31 19:15:27.370] I/S3SAVE: S3SAVE manual-load marker armed requestId=1788183927367 slot=0 path=/storage/emulated/0/Android/data/com.zenithblue.sambas3/files/config//savestates/BLUS31584/BLUS31584_1_0.SAVESTAT.zst
+[08-31 19:15:52.358] I/S3SAVE: S3SAVE pending recovery cleared
+[08-31 19:15:52.358] I/S3SAVE: manual-load first-frame-confirmed slot=0 generation=1
+[08-31 19:15:52.529] I/S3SESSION: journal state=RUNNING session=1788183889927-e55886a9 game=/storage/emulated/0/Android/data/com.zenithblue.sambas3/files/config/games/BLUS31584 clean=false
+[08-31 19:15:59.198] W/DebugPad: BUTTON PS d1=256 d2=0 press 120ms
+[08-31 19:15:59.319] W/DebugPad: BUTTON PS release
+[08-31 19:16:07.636] W/DebugPad: BUTTON PS d1=256 d2=0 press 120ms
+[08-31 19:16:07.757] W/DebugPad: BUTTON PS release
+[08-31 19:16:17.011] I/S3EXIT: event=requested sessionId=1788183889927-e55886a9 activityInstanceId=1 stopRequestId=1 stopReason=InGameExit finishReason=ExplicitExit activeGame=/storage/emulated/0/Android/data/com.zenithblue.sambas3/files/config/games/BLUS31584 nativeState=reading journalState=RUNNING pendingRecovery=none fatalEventId=none timestamp=1788183977011
+[08-31 19:16:17.012] I/S3SAVE: S3SAVE automatic recovery cancel no-marker reason=InGameExit
+[08-31 19:16:17.013] I/S3SESSION: journal state=STOPPING session=1788183889927-e55886a9 game=/storage/emulated/0/Android/data/com.zenithblue.sambas3/files/config/games/BLUS31584 clean=false
+[08-31 19:16:17.013] I/S3EXIT: requested session=1788183889927-e55886a9 stopRequestId=1 stopReason=InGameExit finishReason=ExplicitExit journal=STOPPING timestamp=1788183977013
+[08-31 19:16:17.014] I/S3EXIT: event=STOPPING sessionId=1788183889927-e55886a9 activityInstanceId=1 stopRequestId=1 stopReason=InGameExit finishReason=ExplicitExit activeGame=/storage/emulated/0/Android/data/com.zenithblue.sambas3/files/config/games/BLUS31584 nativeState=Running journalState=STOPPING pendingRecovery=none fatalEventId=none timestamp=1788183977014
+[08-31 19:16:18.535] I/S3EXIT: event=native-Stopped sessionId=1788183889927-e55886a9 activityInstanceId=1 stopRequestId=1 stopReason=InGameExit finishReason=ExplicitExit activeGame=/storage/emulated/0/Android/data/com.zenithblue.sambas3/files/config/games/BLUS31584 nativeState=Stopped journalState=STOPPING pendingRecovery=none fatalEventId=none timestamp=1788183978535
+[08-31 19:16:18.535] I/S3EXIT: event=trophy-flush-complete sessionId=1788183889927-e55886a9 stopRequestId=1 boundary=native-stop journal=STOPPING
+[08-31 19:16:18.543] I/S3EXIT: journal=CLEAN_STOP session=1788183889927-e55886a9 stopRequestId=1 stopReason=InGameExit finishReason=ExplicitExit timestamp=1788183978536
+[08-31 19:16:18.543] I/S3EXIT: event=CLEAN_STOP sessionId=1788183889927-e55886a9 activityInstanceId=1 stopRequestId=1 stopReason=InGameExit finishReason=ExplicitExit activeGame=/storage/emulated/0/Android/data/com.zenithblue.sambas3/files/config/games/BLUS31584 nativeState=Stopped journalState=CLEAN_STOP pendingRecovery=none fatalEventId=none timestamp=1788183978543
+[08-31 19:16:18.544] I/S3EXIT: event=activeGame-null sessionId=1788183889927-e55886a9 activityInstanceId=1 stopRequestId=1 stopReason=InGameExit finishReason=ExplicitExit activeGame=null nativeState=Stopped journalState=CLEAN_STOP pendingRecovery=none fatalEventId=none timestamp=1788183978544
+[08-31 19:16:18.544] I/S3EXIT: event=finish-external-stop sessionId=1788183889927-e55886a9 activityInstanceId=1 stopRequestId=1 stopReason=InGameExit finishReason=ExplicitExit activeGame=null nativeState=Stopped journalState=CLEAN_STOP pendingRecovery=none fatalEventId=none timestamp=1788183978544
+[08-31 19:16:18.568] I/DebugPad: registered
+[08-31 19:16:19.136] I/S3EXIT: event=host-unregistered sessionId=1788183889927-e55886a9 activityInstanceId=1 stopRequestId=1 stopReason=InGameExit finishReason=ExplicitExit activeGame=null nativeState=Stopped journalState=CLEAN_STOP pendingRecovery=none fatalEventId=none timestamp=1788183979136
+[08-31 19:16:19.137] I/S3SESSION: activity=1 reason=activity-destroyed native=Stopped mirrored=Stopped activeGame=null surfaceGen=0 recovery=false menu=Closed
+[08-31 19:17:01.157] I/DebugPad: registered
+[08-31 19:17:01.502] I/S3RECOVERY: refresh session=none state=none terminal=1788183889927-e55886a9/true process=none/fff5c6d3-bbb5-4c8b-8e66-0605ef0d7253
+[08-31 19:17:01.502] I/S3RECOVERY: classification=None reason=CLEAN_STOP session=1788183889927-e55886a9
+[08-31 19:17:01.506] I/S3RECOVERY: refresh session=none state=none terminal=1788183889927-e55886a9/true process=none/fff5c6d3-bbb5-4c8b-8e66-0605ef0d7253
+[08-31 19:17:01.506] I/S3RECOVERY: classification=None reason=CLEAN_STOP session=1788183889927-e55886a9
+[08-31 19:17:12.667] I/DebugPad: registered
+[08-31 19:17:12.668] I/S3SESSION: journal state=STARTING session=1788184032668-05866418 game=/storage/emulated/0/Android/data/com.zenithblue.sambas3/files/config/games/BLUS31584 clean=false
+[08-31 19:17:12.668] I/S3SESSION: activity=1 reason=activity-created native=Stopped mirrored=Stopped activeGame=null surfaceGen=1 recovery=false menu=Closed
+[08-31 19:17:12.670] I/S3SESSION: journal state=BOOTING session=1788184032668-05866418 game=/storage/emulated/0/Android/data/com.zenithblue.sambas3/files/config/games/BLUS31584 clean=false
+[08-31 19:17:12.670] I/S3HOMELOAD: request mode=FreshGame original=/storage/emulated/0/Android/data/com.zenithblue.sambas3/files/config/games/BLUS31584 savestate=null
+[08-31 19:17:12.670] I/S3HOMELOAD: preflight state=Stopped
+[08-31 19:17:12.670] I/S3RECOVERY: preflight state=Stopped activeGame=null recovery=false
+[08-31 19:17:12.670] I/S3HOMELOAD: stopped mode=FreshGame state=Stopped
+[08-31 19:17:12.670] I/S3HOMELOAD: surface-ready-wait mode=FreshGame
+[08-31 19:17:12.792] I/S3HOMELOAD: direct-boot-begin mode=FreshGame source=/storage/emulated/0/Android/data/com.zenithblue.sambas3/files/config/games/BLUS31584 original=/storage/emulated/0/Android/data/com.zenithblue.sambas3/files/config/games/BLUS31584
+[08-31 19:17:13.617] I/S3SESSION: journal state=RUNNING session=1788184032668-05866418 game=/storage/emulated/0/Android/data/com.zenithblue.sambas3/files/config/games/BLUS31584 clean=false
+[08-31 19:17:13.617] I/S3SESSION: activity=1 reason=boot-return native=Starting mirrored=Starting activeGame=/storage/emulated/0/Android/data/com.zenithblue.sambas3/files/config/games/BLUS31584 surfaceGen=1 recovery=false menu=Closed
+[08-31 19:17:13.617] I/S3HOMELOAD: direct-boot-return result=NoErrors state=Starting
+[08-31 19:17:40.250] I/S3SESSION: journal state=FAILED session=1788184032668-05866418 game=/storage/emulated/0/Android/data/com.zenithblue.sambas3/files/config/games/BLUS31584 clean=false
+[08-31 19:17:40.250] I/S3EXIT: event=fatal sessionId=1788184032668-05866418 activityInstanceId=1 fatalEventId=fatal-1788184060250-1 timestamp=1788184060250
+[08-31 19:17:52.907] I/S3EXIT: event=requested sessionId=1788184032668-05866418 activityInstanceId=1 stopRequestId=1 stopReason=CrashExit finishReason=Recovery activeGame=/storage/emulated/0/Android/data/com.zenithblue.sambas3/files/config/games/BLUS31584 nativeState=reading journalState=FAILED pendingRecovery=none fatalEventId=fatal-1788184060250-1 timestamp=1788184072907
+[08-31 19:17:52.907] I/S3SAVE: S3SAVE automatic recovery cancel no-marker reason=CrashExit
+[08-31 19:17:52.908] I/S3SESSION: journal state=STOPPING session=1788184032668-05866418 game=/storage/emulated/0/Android/data/com.zenithblue.sambas3/files/config/games/BLUS31584 clean=false
+[08-31 19:17:52.908] I/S3EXIT: requested session=1788184032668-05866418 stopRequestId=1 stopReason=CrashExit finishReason=Recovery journal=STOPPING timestamp=1788184072908
+[08-31 19:17:52.908] I/S3EXIT: event=STOPPING sessionId=1788184032668-05866418 activityInstanceId=1 stopRequestId=1 stopReason=CrashExit finishReason=Recovery activeGame=/storage/emulated/0/Android/data/com.zenithblue.sambas3/files/config/games/BLUS31584 nativeState=Running journalState=STOPPING pendingRecovery=none fatalEventId=fatal-1788184060250-1 timestamp=1788184072908
+[08-31 19:17:53.417] I/S3EXIT: event=native-Stopped sessionId=1788184032668-05866418 activityInstanceId=1 stopRequestId=1 stopReason=CrashExit finishReason=Recovery activeGame=/storage/emulated/0/Android/data/com.zenithblue.sambas3/files/config/games/BLUS31584 nativeState=Stopped journalState=STOPPING pendingRecovery=none fatalEventId=fatal-1788184060250-1 timestamp=1788184073417
+[08-31 19:17:53.418] I/S3SESSION: journal state=FAILED session=1788184032668-05866418 game=/storage/emulated/0/Android/data/com.zenithblue.sambas3/files/config/games/BLUS31584 clean=false
+[08-31 19:17:53.423] I/S3EXIT: journal=FAILED session=1788184032668-05866418 stopRequestId=1 stopReason=CrashExit fatalEventId=fatal-1788184060250-1 timestamp=1788184073418
+[08-31 19:17:53.423] I/S3EXIT: event=FAILED sessionId=1788184032668-05866418 activityInstanceId=1 stopRequestId=1 stopReason=CrashExit finishReason=Recovery activeGame=/storage/emulated/0/Android/data/com.zenithblue.sambas3/files/config/games/BLUS31584 nativeState=Stopped journalState=FAILED pendingRecovery=none fatalEventId=fatal-1788184060250-1 timestamp=1788184073423
+[08-31 19:17:53.424] I/S3EXIT: event=activeGame-null sessionId=1788184032668-05866418 activityInstanceId=1 stopRequestId=1 stopReason=CrashExit finishReason=Recovery activeGame=null nativeState=Stopped journalState=FAILED pendingRecovery=none fatalEventId=fatal-1788184060250-1 timestamp=1788184073424
+[08-31 19:17:53.425] I/S3EXIT: event=finish-external-stop sessionId=1788184032668-05866418 activityInstanceId=1 stopRequestId=1 stopReason=CrashExit finishReason=Recovery activeGame=null nativeState=Stopped journalState=FAILED pendingRecovery=none fatalEventId=fatal-1788184060250-1 timestamp=1788184073425
+[08-31 19:17:53.429] I/S3RECOVERY: failure return stop=true
+[08-31 19:17:53.481] I/DebugPad: registered
+[08-31 19:17:54.080] I/S3EXIT: event=host-unregistered sessionId=1788184032668-05866418 activityInstanceId=1 stopRequestId=1 stopReason=CrashExit finishReason=ExplicitExit activeGame=null nativeState=Stopped journalState=FAILED pendingRecovery=none fatalEventId=fatal-1788184060250-1 timestamp=1788184074080
+[08-31 19:17:54.080] I/S3SESSION: activity=1 reason=activity-destroyed native=Stopped mirrored=Stopped activeGame=null surfaceGen=0 recovery=false menu=Closed
+[08-31 19:18:57.536] I/DebugPad: registered
+[08-31 19:19:10.613] I/S3SAVE: S3SAVE pending recovery cleared
+[08-31 19:20:19.662] I/DebugPad: registered
+[08-31 19:20:19.985] I/S3RECOVERY: refresh session=none state=none terminal=1788184032668-05866418/false process=none/f1c79cc3-b264-4439-9fc7-2ea3bb53598b
+[08-31 19:20:19.995] I/S3RECOVERY: refresh session=none state=none terminal=1788184032668-05866418/false process=none/f1c79cc3-b264-4439-9fc7-2ea3bb53598b
+[08-31 19:20:31.268] I/DebugPad: registered
+[08-31 19:20:31.269] I/S3SESSION: journal state=STARTING session=1788184231269-d155c7d9 game=/storage/emulated/0/Android/data/com.zenithblue.sambas3/files/config/games/BLUS31584 clean=false
+[08-31 19:20:31.269] I/S3SESSION: activity=1 reason=activity-created native=Stopped mirrored=Stopped activeGame=null surfaceGen=1 recovery=false menu=Closed
+[08-31 19:20:31.271] I/S3SESSION: journal state=BOOTING session=1788184231269-d155c7d9 game=/storage/emulated/0/Android/data/com.zenithblue.sambas3/files/config/games/BLUS31584 clean=false
+[08-31 19:20:31.271] I/S3HOMELOAD: request mode=FreshGame original=/storage/emulated/0/Android/data/com.zenithblue.sambas3/files/config/games/BLUS31584 savestate=null
+[08-31 19:20:31.271] I/S3HOMELOAD: preflight state=Stopped
+[08-31 19:20:31.271] I/S3RECOVERY: preflight state=Stopped activeGame=null recovery=false
+[08-31 19:20:31.271] I/S3HOMELOAD: stopped mode=FreshGame state=Stopped
+[08-31 19:20:31.271] I/S3HOMELOAD: surface-ready-wait mode=FreshGame
+[08-31 19:20:31.388] I/S3HOMELOAD: direct-boot-begin mode=FreshGame source=/storage/emulated/0/Android/data/com.zenithblue.sambas3/files/config/games/BLUS31584 original=/storage/emulated/0/Android/data/com.zenithblue.sambas3/files/config/games/BLUS31584
+[08-31 19:20:32.227] I/S3SESSION: journal state=RUNNING session=1788184231269-d155c7d9 game=/storage/emulated/0/Android/data/com.zenithblue.sambas3/files/config/games/BLUS31584 clean=false
+[08-31 19:20:32.227] I/S3SESSION: activity=1 reason=boot-return native=Starting mirrored=Starting activeGame=/storage/emulated/0/Android/data/com.zenithblue.sambas3/files/config/games/BLUS31584 surfaceGen=1 recovery=false menu=Closed
+[08-31 19:20:32.227] I/S3HOMELOAD: direct-boot-return result=NoErrors state=Starting
+[08-31 19:20:57.895] W/DebugPad: BUTTON PS d1=256 d2=0 press 120ms
+[08-31 19:20:58.016] W/DebugPad: BUTTON PS release
+[08-31 19:21:04.253] W/DebugPad: BUTTON PS d1=256 d2=0 press 120ms
+[08-31 19:21:04.373] W/DebugPad: BUTTON PS release
+[08-31 19:21:13.649] I/S3EXIT: event=requested sessionId=1788184231269-d155c7d9 activityInstanceId=1 stopRequestId=1 stopReason=InGameExit finishReason=ExplicitExit activeGame=/storage/emulated/0/Android/data/com.zenithblue.sambas3/files/config/games/BLUS31584 nativeState=reading journalState=RUNNING pendingRecovery=none fatalEventId=none timestamp=1788184273649
+[08-31 19:21:13.649] I/S3SAVE: S3SAVE automatic recovery cancel no-marker reason=InGameExit
+[08-31 19:21:13.649] I/S3SESSION: journal state=STOPPING session=1788184231269-d155c7d9 game=/storage/emulated/0/Android/data/com.zenithblue.sambas3/files/config/games/BLUS31584 clean=false
+[08-31 19:21:13.649] I/S3EXIT: requested session=1788184231269-d155c7d9 stopRequestId=1 stopReason=InGameExit finishReason=ExplicitExit journal=STOPPING timestamp=1788184273649
+[08-31 19:21:13.650] I/S3EXIT: event=STOPPING sessionId=1788184231269-d155c7d9 activityInstanceId=1 stopRequestId=1 stopReason=InGameExit finishReason=ExplicitExit activeGame=/storage/emulated/0/Android/data/com.zenithblue.sambas3/files/config/games/BLUS31584 nativeState=Running journalState=STOPPING pendingRecovery=none fatalEventId=none timestamp=1788184273650
+[08-31 19:21:15.230] I/S3EXIT: event=native-Stopped sessionId=1788184231269-d155c7d9 activityInstanceId=1 stopRequestId=1 stopReason=InGameExit finishReason=ExplicitExit activeGame=/storage/emulated/0/Android/data/com.zenithblue.sambas3/files/config/games/BLUS31584 nativeState=Stopped journalState=STOPPING pendingRecovery=none fatalEventId=none timestamp=1788184275230
+[08-31 19:21:15.231] I/S3EXIT: event=trophy-flush-complete sessionId=1788184231269-d155c7d9 stopRequestId=1 boundary=native-stop journal=STOPPING
+[08-31 19:21:15.238] I/S3EXIT: journal=CLEAN_STOP session=1788184231269-d155c7d9 stopRequestId=1 stopReason=InGameExit finishReason=ExplicitExit timestamp=1788184275231
+[08-31 19:21:15.238] I/S3EXIT: event=CLEAN_STOP sessionId=1788184231269-d155c7d9 activityInstanceId=1 stopRequestId=1 stopReason=InGameExit finishReason=ExplicitExit activeGame=/storage/emulated/0/Android/data/com.zenithblue.sambas3/files/config/games/BLUS31584 nativeState=Stopped journalState=CLEAN_STOP pendingRecovery=none fatalEventId=none timestamp=1788184275238
+[08-31 19:21:15.239] I/S3EXIT: event=activeGame-null sessionId=1788184231269-d155c7d9 activityInstanceId=1 stopRequestId=1 stopReason=InGameExit finishReason=ExplicitExit activeGame=null nativeState=Stopped journalState=CLEAN_STOP pendingRecovery=none fatalEventId=none timestamp=1788184275239
+[08-31 19:21:15.240] I/S3EXIT: event=finish-external-stop sessionId=1788184231269-d155c7d9 activityInstanceId=1 stopRequestId=1 stopReason=InGameExit finishReason=ExplicitExit activeGame=null nativeState=Stopped journalState=CLEAN_STOP pendingRecovery=none fatalEventId=none timestamp=1788184275240
+[08-31 19:21:15.254] I/DebugPad: registered
+[08-31 19:21:15.815] I/S3EXIT: event=host-unregistered sessionId=1788184231269-d155c7d9 activityInstanceId=1 stopRequestId=1 stopReason=InGameExit finishReason=ExplicitExit activeGame=null nativeState=Stopped journalState=CLEAN_STOP pendingRecovery=none fatalEventId=none timestamp=1788184275815
+[08-31 19:21:15.816] I/S3SESSION: activity=1 reason=activity-destroyed native=Stopped mirrored=Stopped activeGame=null surfaceGen=0 recovery=false menu=Closed
+[08-31 19:21:13.649] I/S3EXIT: event=requested sessionId=1788184231269-d155c7d9 activityInstanceId=1 stopRequestId=1 stopReason=InGameExit finishReason=ExplicitExit activeGame=/storage/emulated/0/Android/data/com.zenithblue.sambas3/files/config/games/BLUS31584 nativeState=reading journalState=RUNNING pendingRecovery=none fatalEventId=none timestamp=1788184273649
+[08-31 19:21:13.649] I/S3SAVE: S3SAVE automatic recovery cancel no-marker reason=InGameExit
+[08-31 19:21:13.649] I/S3SESSION: journal state=STOPPING session=1788184231269-d155c7d9 game=/storage/emulated/0/Android/data/com.zenithblue.sambas3/files/config/games/BLUS31584 clean=false
+[08-31 19:21:13.649] I/S3EXIT: requested session=1788184231269-d155c7d9 stopRequestId=1 stopReason=InGameExit finishReason=ExplicitExit journal=STOPPING timestamp=1788184273649
+[08-31 19:21:13.650] I/S3EXIT: event=STOPPING sessionId=1788184231269-d155c7d9 activityInstanceId=1 stopRequestId=1 stopReason=InGameExit finishReason=ExplicitExit activeGame=/storage/emulated/0/Android/data/com.zenithblue.sambas3/files/config/games/BLUS31584 nativeState=Running journalState=STOPPING pendingRecovery=none fatalEventId=none timestamp=1788184273650
+[08-31 19:21:15.230] I/S3EXIT: event=native-Stopped sessionId=1788184231269-d155c7d9 activityInstanceId=1 stopRequestId=1 stopReason=InGameExit finishReason=ExplicitExit activeGame=/storage/emulated/0/Android/data/com.zenithblue.sambas3/files/config/games/BLUS31584 nativeState=Stopped journalState=STOPPING pendingRecovery=none fatalEventId=none timestamp=1788184275230
+[08-31 19:21:15.231] I/S3EXIT: event=trophy-flush-complete sessionId=1788184231269-d155c7d9 stopRequestId=1 boundary=native-stop journal=STOPPING
+[08-31 19:21:15.238] I/S3EXIT: journal=CLEAN_STOP session=1788184231269-d155c7d9 stopRequestId=1 stopReason=InGameExit finishReason=ExplicitExit timestamp=1788184275231
+[08-31 19:21:15.238] I/S3EXIT: event=CLEAN_STOP sessionId=1788184231269-d155c7d9 activityInstanceId=1 stopRequestId=1 stopReason=InGameExit finishReason=ExplicitExit activeGame=/storage/emulated/0/Android/data/com.zenithblue.sambas3/files/config/games/BLUS31584 nativeState=Stopped journalState=CLEAN_STOP pendingRecovery=none fatalEventId=none timestamp=1788184275238
+[08-31 19:21:15.239] I/S3EXIT: event=activeGame-null sessionId=1788184231269-d155c7d9 activityInstanceId=1 stopRequestId=1 stopReason=InGameExit finishReason=ExplicitExit activeGame=null nativeState=Stopped journalState=CLEAN_STOP pendingRecovery=none fatalEventId=none timestamp=1788184275239
+[08-31 19:21:15.240] I/S3EXIT: event=finish-external-stop sessionId=1788184231269-d155c7d9 activityInstanceId=1 stopRequestId=1 stopReason=InGameExit finishReason=ExplicitExit activeGame=null nativeState=Stopped journalState=CLEAN_STOP pendingRecovery=none fatalEventId=none timestamp=1788184275240
+[08-31 19:21:15.254] I/DebugPad: registered
+[08-31 19:21:15.815] I/S3EXIT: event=host-unregistered sessionId=1788184231269-d155c7d9 activityInstanceId=1 stopRequestId=1 stopReason=InGameExit finishReason=ExplicitExit activeGame=null nativeState=Stopped journalState=CLEAN_STOP pendingRecovery=none fatalEventId=none timestamp=1788184275815
+[08-31 19:21:15.816] I/S3SESSION: activity=1 reason=activity-destroyed native=Stopped mirrored=Stopped activeGame=null surfaceGen=0 recovery=false menu=Closed
+[08-31 19:21:20.916] I/DebugPad: registered
+[08-31 19:21:21.260] I/S3RECOVERY: refresh session=none state=none terminal=1788184231269-d155c7d9/true process=none/ead177af-faca-4ccb-a7f2-7ed59c8271ed
+[08-31 19:21:21.260] I/S3RECOVERY: classification=None reason=CLEAN_STOP session=1788184231269-d155c7d9
+[08-31 19:21:21.269] I/S3RECOVERY: refresh session=none state=none terminal=1788184231269-d155c7d9/true process=none/ead177af-faca-4ccb-a7f2-7ed59c8271ed
+[08-31 19:21:21.269] I/S3RECOVERY: classification=None reason=CLEAN_STOP session=1788184231269-d155c7d9
+[08-31 19:21:32.449] I/DebugPad: registered
+[08-31 19:21:32.450] I/S3SESSION: journal state=STARTING session=1788184292450-688baed0 game=/storage/emulated/0/Android/data/com.zenithblue.sambas3/files/config/games/BLUS31584 clean=false
+[08-31 19:21:32.450] I/S3SESSION: activity=1 reason=activity-created native=Stopped mirrored=Stopped activeGame=null surfaceGen=1 recovery=false menu=Closed
+[08-31 19:21:32.451] I/S3SESSION: journal state=BOOTING session=1788184292450-688baed0 game=/storage/emulated/0/Android/data/com.zenithblue.sambas3/files/config/games/BLUS31584 clean=false
+[08-31 19:21:32.452] I/S3HOMELOAD: request mode=FreshGame original=/storage/emulated/0/Android/data/com.zenithblue.sambas3/files/config/games/BLUS31584 savestate=null
+[08-31 19:21:32.452] I/S3HOMELOAD: preflight state=Stopped
+[08-31 19:21:32.452] I/S3RECOVERY: preflight state=Stopped activeGame=null recovery=false
+[08-31 19:21:32.452] I/S3HOMELOAD: stopped mode=FreshGame state=Stopped
+[08-31 19:21:32.452] I/S3HOMELOAD: surface-ready-wait mode=FreshGame
+[08-31 19:21:32.602] I/S3HOMELOAD: direct-boot-begin mode=FreshGame source=/storage/emulated/0/Android/data/com.zenithblue.sambas3/files/config/games/BLUS31584 original=/storage/emulated/0/Android/data/com.zenithblue.sambas3/files/config/games/BLUS31584
+[08-31 19:21:33.477] I/S3SESSION: journal state=RUNNING session=1788184292450-688baed0 game=/storage/emulated/0/Android/data/com.zenithblue.sambas3/files/config/games/BLUS31584 clean=false
+[08-31 19:21:33.477] I/S3SESSION: activity=1 reason=boot-return native=Starting mirrored=Starting activeGame=/storage/emulated/0/Android/data/com.zenithblue.sambas3/files/config/games/BLUS31584 surfaceGen=1 recovery=false menu=Closed
+[08-31 19:21:33.477] I/S3HOMELOAD: direct-boot-return result=NoErrors state=Starting
+[08-31 19:21:59.044] W/DebugPad: BUTTON PS d1=256 d2=0 press 120ms
+[08-31 19:21:59.165] W/DebugPad: BUTTON PS release
+[08-31 19:22:05.488] W/DebugPad: BUTTON PS d1=256 d2=0 press 120ms
+[08-31 19:22:05.608] W/DebugPad: BUTTON PS release
+[08-31 19:22:14.955] I/S3EXIT: event=requested sessionId=1788184292450-688baed0 activityInstanceId=1 stopRequestId=1 stopReason=InGameExit finishReason=ExplicitExit activeGame=/storage/emulated/0/Android/data/com.zenithblue.sambas3/files/config/games/BLUS31584 nativeState=reading journalState=RUNNING pendingRecovery=none fatalEventId=none timestamp=1788184334955
+[08-31 19:22:14.956] I/S3SAVE: S3SAVE automatic recovery cancel no-marker reason=InGameExit
+[08-31 19:22:14.956] I/S3SESSION: journal state=STOPPING session=1788184292450-688baed0 game=/storage/emulated/0/Android/data/com.zenithblue.sambas3/files/config/games/BLUS31584 clean=false
+[08-31 19:22:14.956] I/S3EXIT: requested session=1788184292450-688baed0 stopRequestId=1 stopReason=InGameExit finishReason=ExplicitExit journal=STOPPING timestamp=1788184334956
+[08-31 19:22:14.957] I/S3EXIT: event=STOPPING sessionId=1788184292450-688baed0 activityInstanceId=1 stopRequestId=1 stopReason=InGameExit finishReason=ExplicitExit activeGame=/storage/emulated/0/Android/data/com.zenithblue.sambas3/files/config/games/BLUS31584 nativeState=Running journalState=STOPPING pendingRecovery=none fatalEventId=none timestamp=1788184334957
+[08-31 19:22:16.469] I/S3EXIT: event=native-Stopped sessionId=1788184292450-688baed0 activityInstanceId=1 stopRequestId=1 stopReason=InGameExit finishReason=ExplicitExit activeGame=/storage/emulated/0/Android/data/com.zenithblue.sambas3/files/config/games/BLUS31584 nativeState=Stopped journalState=STOPPING pendingRecovery=none fatalEventId=none timestamp=1788184336469
+[08-31 19:22:16.470] I/S3EXIT: event=trophy-flush-complete sessionId=1788184292450-688baed0 stopRequestId=1 boundary=native-stop journal=STOPPING
+[08-31 19:22:16.475] I/S3EXIT: journal=CLEAN_STOP session=1788184292450-688baed0 stopRequestId=1 stopReason=InGameExit finishReason=ExplicitExit timestamp=1788184336470
+[08-31 19:22:16.475] I/S3EXIT: event=CLEAN_STOP sessionId=1788184292450-688baed0 activityInstanceId=1 stopRequestId=1 stopReason=InGameExit finishReason=ExplicitExit activeGame=/storage/emulated/0/Android/data/com.zenithblue.sambas3/files/config/games/BLUS31584 nativeState=Stopped journalState=CLEAN_STOP pendingRecovery=none fatalEventId=none timestamp=1788184336475
+[08-31 19:22:16.476] I/S3EXIT: event=activeGame-null sessionId=1788184292450-688baed0 activityInstanceId=1 stopRequestId=1 stopReason=InGameExit finishReason=ExplicitExit activeGame=null nativeState=Stopped journalState=CLEAN_STOP pendingRecovery=none fatalEventId=none timestamp=1788184336476
+[08-31 19:22:16.476] I/S3EXIT: event=finish-external-stop sessionId=1788184292450-688baed0 activityInstanceId=1 stopRequestId=1 stopReason=InGameExit finishReason=ExplicitExit activeGame=null nativeState=Stopped journalState=CLEAN_STOP pendingRecovery=none fatalEventId=none timestamp=1788184336476
+[08-31 19:22:16.483] I/DebugPad: registered
+[08-31 19:22:17.047] I/S3EXIT: event=host-unregistered sessionId=1788184292450-688baed0 activityInstanceId=1 stopRequestId=1 stopReason=InGameExit finishReason=ExplicitExit activeGame=null nativeState=Stopped journalState=CLEAN_STOP pendingRecovery=none fatalEventId=none timestamp=1788184337047
+[08-31 19:22:17.048] I/S3SESSION: activity=1 reason=activity-destroyed native=Stopped mirrored=Stopped activeGame=null surfaceGen=0 recovery=false menu=Closed
+[08-31 19:22:14.955] I/S3EXIT: event=requested sessionId=1788184292450-688baed0 activityInstanceId=1 stopRequestId=1 stopReason=InGameExit finishReason=ExplicitExit activeGame=/storage/emulated/0/Android/data/com.zenithblue.sambas3/files/config/games/BLUS31584 nativeState=reading journalState=RUNNING pendingRecovery=none fatalEventId=none timestamp=1788184334955
+[08-31 19:22:14.956] I/S3SAVE: S3SAVE automatic recovery cancel no-marker reason=InGameExit
+[08-31 19:22:14.956] I/S3SESSION: journal state=STOPPING session=1788184292450-688baed0 game=/storage/emulated/0/Android/data/com.zenithblue.sambas3/files/config/games/BLUS31584 clean=false
+[08-31 19:22:14.956] I/S3EXIT: requested session=1788184292450-688baed0 stopRequestId=1 stopReason=InGameExit finishReason=ExplicitExit journal=STOPPING timestamp=1788184334956
+[08-31 19:22:14.957] I/S3EXIT: event=STOPPING sessionId=1788184292450-688baed0 activityInstanceId=1 stopRequestId=1 stopReason=InGameExit finishReason=ExplicitExit activeGame=/storage/emulated/0/Android/data/com.zenithblue.sambas3/files/config/games/BLUS31584 nativeState=Running journalState=STOPPING pendingRecovery=none fatalEventId=none timestamp=1788184334957
+[08-31 19:22:16.469] I/S3EXIT: event=native-Stopped sessionId=1788184292450-688baed0 activityInstanceId=1 stopRequestId=1 stopReason=InGameExit finishReason=ExplicitExit activeGame=/storage/emulated/0/Android/data/com.zenithblue.sambas3/files/config/games/BLUS31584 nativeState=Stopped journalState=STOPPING pendingRecovery=none fatalEventId=none timestamp=1788184336469
+[08-31 19:22:16.470] I/S3EXIT: event=trophy-flush-complete sessionId=1788184292450-688baed0 stopRequestId=1 boundary=native-stop journal=STOPPING
+[08-31 19:22:16.475] I/S3EXIT: journal=CLEAN_STOP session=1788184292450-688baed0 stopRequestId=1 stopReason=InGameExit finishReason=ExplicitExit timestamp=1788184336470
+[08-31 19:22:16.475] I/S3EXIT: event=CLEAN_STOP sessionId=1788184292450-688baed0 activityInstanceId=1 stopRequestId=1 stopReason=InGameExit finishReason=ExplicitExit activeGame=/storage/emulated/0/Android/data/com.zenithblue.sambas3/files/config/games/BLUS31584 nativeState=Stopped journalState=CLEAN_STOP pendingRecovery=none fatalEventId=none timestamp=1788184336475
+[08-31 19:22:16.476] I/S3EXIT: event=activeGame-null sessionId=1788184292450-688baed0 activityInstanceId=1 stopRequestId=1 stopReason=InGameExit finishReason=ExplicitExit activeGame=null nativeState=Stopped journalState=CLEAN_STOP pendingRecovery=none fatalEventId=none timestamp=1788184336476
+[08-31 19:22:16.476] I/S3EXIT: event=finish-external-stop sessionId=1788184292450-688baed0 activityInstanceId=1 stopRequestId=1 stopReason=InGameExit finishReason=ExplicitExit activeGame=null nativeState=Stopped journalState=CLEAN_STOP pendingRecovery=none fatalEventId=none timestamp=1788184336476
+[08-31 19:22:16.483] I/DebugPad: registered
+[08-31 19:22:17.047] I/S3EXIT: event=host-unregistered sessionId=1788184292450-688baed0 activityInstanceId=1 stopRequestId=1 stopReason=InGameExit finishReason=ExplicitExit activeGame=null nativeState=Stopped journalState=CLEAN_STOP pendingRecovery=none fatalEventId=none timestamp=1788184337047
+[08-31 19:22:17.048] I/S3SESSION: activity=1 reason=activity-destroyed native=Stopped mirrored=Stopped activeGame=null surfaceGen=0 recovery=false menu=Closed
+[08-31 19:22:22.356] I/DebugPad: registered
+[08-31 19:22:22.706] I/S3RECOVERY: refresh session=none state=none terminal=1788184292450-688baed0/true process=none/05ff6fef-919b-48a4-b205-6f3faf6986db
+[08-31 19:22:22.706] I/S3RECOVERY: classification=None reason=CLEAN_STOP session=1788184292450-688baed0
+[08-31 19:22:22.709] I/S3RECOVERY: refresh session=none state=none terminal=1788184292450-688baed0/true process=none/05ff6fef-919b-48a4-b205-6f3faf6986db
+[08-31 19:22:22.709] I/S3RECOVERY: classification=None reason=CLEAN_STOP session=1788184292450-688baed0
+[08-31 19:22:33.822] I/DebugPad: registered
+[08-31 19:22:33.823] I/S3SESSION: journal state=STARTING session=1788184353823-bf20be55 game=/storage/emulated/0/Android/data/com.zenithblue.sambas3/files/config/games/BLUS31584 clean=false
+[08-31 19:22:33.823] I/S3SESSION: activity=1 reason=activity-created native=Stopped mirrored=Stopped activeGame=null surfaceGen=1 recovery=false menu=Closed
+[08-31 19:22:33.825] I/S3SESSION: journal state=BOOTING session=1788184353823-bf20be55 game=/storage/emulated/0/Android/data/com.zenithblue.sambas3/files/config/games/BLUS31584 clean=false
+[08-31 19:22:33.826] I/S3HOMELOAD: request mode=FreshGame original=/storage/emulated/0/Android/data/com.zenithblue.sambas3/files/config/games/BLUS31584 savestate=null
+[08-31 19:22:33.826] I/S3HOMELOAD: preflight state=Stopped
+[08-31 19:22:33.826] I/S3RECOVERY: preflight state=Stopped activeGame=null recovery=false
+[08-31 19:22:33.826] I/S3HOMELOAD: stopped mode=FreshGame state=Stopped
+[08-31 19:22:33.826] I/S3HOMELOAD: surface-ready-wait mode=FreshGame
+[08-31 19:22:33.967] I/S3HOMELOAD: direct-boot-begin mode=FreshGame source=/storage/emulated/0/Android/data/com.zenithblue.sambas3/files/config/games/BLUS31584 original=/storage/emulated/0/Android/data/com.zenithblue.sambas3/files/config/games/BLUS31584
+[08-31 19:22:34.893] I/S3SESSION: journal state=RUNNING session=1788184353823-bf20be55 game=/storage/emulated/0/Android/data/com.zenithblue.sambas3/files/config/games/BLUS31584 clean=false
+[08-31 19:22:34.893] I/S3SESSION: activity=1 reason=boot-return native=Starting mirrored=Starting activeGame=/storage/emulated/0/Android/data/com.zenithblue.sambas3/files/config/games/BLUS31584 surfaceGen=1 recovery=false menu=Closed
+[08-31 19:22:34.893] I/S3HOMELOAD: direct-boot-return result=NoErrors state=Starting
+[08-31 19:23:00.458] W/DebugPad: BUTTON PS d1=256 d2=0 press 120ms
+[08-31 19:23:00.578] W/DebugPad: BUTTON PS release
+[08-31 19:23:06.857] W/DebugPad: BUTTON PS d1=256 d2=0 press 120ms
+[08-31 19:23:06.977] W/DebugPad: BUTTON PS release
+[08-31 19:23:16.194] I/S3EXIT: event=requested sessionId=1788184353823-bf20be55 activityInstanceId=1 stopRequestId=1 stopReason=InGameExit finishReason=ExplicitExit activeGame=/storage/emulated/0/Android/data/com.zenithblue.sambas3/files/config/games/BLUS31584 nativeState=reading journalState=RUNNING pendingRecovery=none fatalEventId=none timestamp=1788184396193
+[08-31 19:23:16.194] I/S3SAVE: S3SAVE automatic recovery cancel no-marker reason=InGameExit
+[08-31 19:23:16.195] I/S3SESSION: journal state=STOPPING session=1788184353823-bf20be55 game=/storage/emulated/0/Android/data/com.zenithblue.sambas3/files/config/games/BLUS31584 clean=false
+[08-31 19:23:16.195] I/S3EXIT: requested session=1788184353823-bf20be55 stopRequestId=1 stopReason=InGameExit finishReason=ExplicitExit journal=STOPPING timestamp=1788184396195
+[08-31 19:23:16.195] I/S3EXIT: event=STOPPING sessionId=1788184353823-bf20be55 activityInstanceId=1 stopRequestId=1 stopReason=InGameExit finishReason=ExplicitExit activeGame=/storage/emulated/0/Android/data/com.zenithblue.sambas3/files/config/games/BLUS31584 nativeState=Running journalState=STOPPING pendingRecovery=none fatalEventId=none timestamp=1788184396195
+[08-31 19:23:17.772] I/S3EXIT: event=native-Stopped sessionId=1788184353823-bf20be55 activityInstanceId=1 stopRequestId=1 stopReason=InGameExit finishReason=ExplicitExit activeGame=/storage/emulated/0/Android/data/com.zenithblue.sambas3/files/config/games/BLUS31584 nativeState=Stopped journalState=STOPPING pendingRecovery=none fatalEventId=none timestamp=1788184397772
+[08-31 19:23:17.772] I/S3EXIT: event=trophy-flush-complete sessionId=1788184353823-bf20be55 stopRequestId=1 boundary=native-stop journal=STOPPING
+[08-31 19:23:17.779] I/S3EXIT: journal=CLEAN_STOP session=1788184353823-bf20be55 stopRequestId=1 stopReason=InGameExit finishReason=ExplicitExit timestamp=1788184397772
+[08-31 19:23:17.779] I/S3EXIT: event=CLEAN_STOP sessionId=1788184353823-bf20be55 activityInstanceId=1 stopRequestId=1 stopReason=InGameExit finishReason=ExplicitExit activeGame=/storage/emulated/0/Android/data/com.zenithblue.sambas3/files/config/games/BLUS31584 nativeState=Stopped journalState=CLEAN_STOP pendingRecovery=none fatalEventId=none timestamp=1788184397779
+[08-31 19:23:17.781] I/S3EXIT: event=activeGame-null sessionId=1788184353823-bf20be55 activityInstanceId=1 stopRequestId=1 stopReason=InGameExit finishReason=ExplicitExit activeGame=null nativeState=Stopped journalState=CLEAN_STOP pendingRecovery=none fatalEventId=none timestamp=1788184397780
+[08-31 19:23:17.781] I/S3EXIT: event=finish-external-stop sessionId=1788184353823-bf20be55 activityInstanceId=1 stopRequestId=1 stopReason=InGameExit finishReason=ExplicitExit activeGame=null nativeState=Stopped journalState=CLEAN_STOP pendingRecovery=none fatalEventId=none timestamp=1788184397781
+[08-31 19:23:17.794] I/DebugPad: registered
+[08-31 19:23:18.347] I/S3EXIT: event=host-unregistered sessionId=1788184353823-bf20be55 activityInstanceId=1 stopRequestId=1 stopReason=InGameExit finishReason=ExplicitExit activeGame=null nativeState=Stopped journalState=CLEAN_STOP pendingRecovery=none fatalEventId=none timestamp=1788184398347
+[08-31 19:23:18.348] I/S3SESSION: activity=1 reason=activity-destroyed native=Stopped mirrored=Stopped activeGame=null surfaceGen=0 recovery=false menu=Closed
+[08-31 19:23:16.194] I/S3EXIT: event=requested sessionId=1788184353823-bf20be55 activityInstanceId=1 stopRequestId=1 stopReason=InGameExit finishReason=ExplicitExit activeGame=/storage/emulated/0/Android/data/com.zenithblue.sambas3/files/config/games/BLUS31584 nativeState=reading journalState=RUNNING pendingRecovery=none fatalEventId=none timestamp=1788184396193
+[08-31 19:23:16.194] I/S3SAVE: S3SAVE automatic recovery cancel no-marker reason=InGameExit
+[08-31 19:23:16.195] I/S3SESSION: journal state=STOPPING session=1788184353823-bf20be55 game=/storage/emulated/0/Android/data/com.zenithblue.sambas3/files/config/games/BLUS31584 clean=false
+[08-31 19:23:16.195] I/S3EXIT: requested session=1788184353823-bf20be55 stopRequestId=1 stopReason=InGameExit finishReason=ExplicitExit journal=STOPPING timestamp=1788184396195
+[08-31 19:23:16.195] I/S3EXIT: event=STOPPING sessionId=1788184353823-bf20be55 activityInstanceId=1 stopRequestId=1 stopReason=InGameExit finishReason=ExplicitExit activeGame=/storage/emulated/0/Android/data/com.zenithblue.sambas3/files/config/games/BLUS31584 nativeState=Running journalState=STOPPING pendingRecovery=none fatalEventId=none timestamp=1788184396195
+[08-31 19:23:17.772] I/S3EXIT: event=native-Stopped sessionId=1788184353823-bf20be55 activityInstanceId=1 stopRequestId=1 stopReason=InGameExit finishReason=ExplicitExit activeGame=/storage/emulated/0/Android/data/com.zenithblue.sambas3/files/config/games/BLUS31584 nativeState=Stopped journalState=STOPPING pendingRecovery=none fatalEventId=none timestamp=1788184397772
+[08-31 19:23:17.772] I/S3EXIT: event=trophy-flush-complete sessionId=1788184353823-bf20be55 stopRequestId=1 boundary=native-stop journal=STOPPING
+[08-31 19:23:17.779] I/S3EXIT: journal=CLEAN_STOP session=1788184353823-bf20be55 stopRequestId=1 stopReason=InGameExit finishReason=ExplicitExit timestamp=1788184397772
+[08-31 19:23:17.779] I/S3EXIT: event=CLEAN_STOP sessionId=1788184353823-bf20be55 activityInstanceId=1 stopRequestId=1 stopReason=InGameExit finishReason=ExplicitExit activeGame=/storage/emulated/0/Android/data/com.zenithblue.sambas3/files/config/games/BLUS31584 nativeState=Stopped journalState=CLEAN_STOP pendingRecovery=none fatalEventId=none timestamp=1788184397779
+[08-31 19:23:17.781] I/S3EXIT: event=activeGame-null sessionId=1788184353823-bf20be55 activityInstanceId=1 stopRequestId=1 stopReason=InGameExit finishReason=ExplicitExit activeGame=null nativeState=Stopped journalState=CLEAN_STOP pendingRecovery=none fatalEventId=none timestamp=1788184397780
+[08-31 19:23:17.781] I/S3EXIT: event=finish-external-stop sessionId=1788184353823-bf20be55 activityInstanceId=1 stopRequestId=1 stopReason=InGameExit finishReason=ExplicitExit activeGame=null nativeState=Stopped journalState=CLEAN_STOP pendingRecovery=none fatalEventId=none timestamp=1788184397781
+[08-31 19:23:17.794] I/DebugPad: registered
+[08-31 19:23:18.347] I/S3EXIT: event=host-unregistered sessionId=1788184353823-bf20be55 activityInstanceId=1 stopRequestId=1 stopReason=InGameExit finishReason=ExplicitExit activeGame=null nativeState=Stopped journalState=CLEAN_STOP pendingRecovery=none fatalEventId=none timestamp=1788184398347
+[08-31 19:23:18.348] I/S3SESSION: activity=1 reason=activity-destroyed native=Stopped mirrored=Stopped activeGame=null surfaceGen=0 recovery=false menu=Closed
+[08-31 19:23:23.502] I/DebugPad: registered
+[08-31 19:23:23.523] I/S3RECOVERY: refresh session=none state=none terminal=1788184353823-bf20be55/true process=none/0a2137f6-c593-4a4c-9e70-f56b0be34685
+[08-31 19:23:23.523] I/S3RECOVERY: classification=None reason=CLEAN_STOP session=1788184353823-bf20be55
+[08-31 19:23:23.860] I/S3RECOVERY: refresh session=none state=none terminal=1788184353823-bf20be55/true process=none/0a2137f6-c593-4a4c-9e70-f56b0be34685
+[08-31 19:23:23.860] I/S3RECOVERY: classification=None reason=CLEAN_STOP session=1788184353823-bf20be55
+[08-31 19:23:35.032] I/DebugPad: registered
+[08-31 19:23:35.033] I/S3SESSION: journal state=STARTING session=1788184415032-02d70f11 game=/storage/emulated/0/Android/data/com.zenithblue.sambas3/files/config/games/BLUS31584 clean=false
+[08-31 19:23:35.033] I/S3SESSION: activity=1 reason=activity-created native=Stopped mirrored=Stopped activeGame=null surfaceGen=1 recovery=false menu=Closed
+[08-31 19:23:35.034] I/S3SESSION: journal state=BOOTING session=1788184415032-02d70f11 game=/storage/emulated/0/Android/data/com.zenithblue.sambas3/files/config/games/BLUS31584 clean=false
+[08-31 19:23:35.034] I/S3HOMELOAD: request mode=FreshGame original=/storage/emulated/0/Android/data/com.zenithblue.sambas3/files/config/games/BLUS31584 savestate=null
+[08-31 19:23:35.034] I/S3HOMELOAD: preflight state=Stopped
+[08-31 19:23:35.034] I/S3RECOVERY: preflight state=Stopped activeGame=null recovery=false
+[08-31 19:23:35.034] I/S3HOMELOAD: stopped mode=FreshGame state=Stopped
+[08-31 19:23:35.034] I/S3HOMELOAD: surface-ready-wait mode=FreshGame
+[08-31 19:23:35.159] I/S3HOMELOAD: direct-boot-begin mode=FreshGame source=/storage/emulated/0/Android/data/com.zenithblue.sambas3/files/config/games/BLUS31584 original=/storage/emulated/0/Android/data/com.zenithblue.sambas3/files/config/games/BLUS31584
+[08-31 19:23:36.057] I/S3SESSION: journal state=RUNNING session=1788184415032-02d70f11 game=/storage/emulated/0/Android/data/com.zenithblue.sambas3/files/config/games/BLUS31584 clean=false
+[08-31 19:23:36.057] I/S3SESSION: activity=1 reason=boot-return native=Starting mirrored=Starting activeGame=/storage/emulated/0/Android/data/com.zenithblue.sambas3/files/config/games/BLUS31584 surfaceGen=1 recovery=false menu=Closed
+[08-31 19:23:36.057] I/S3HOMELOAD: direct-boot-return result=NoErrors state=Starting
+[08-31 19:24:01.698] W/DebugPad: BUTTON PS d1=256 d2=0 press 120ms
+[08-31 19:24:01.819] W/DebugPad: BUTTON PS release
+[08-31 19:24:08.026] W/DebugPad: BUTTON PS d1=256 d2=0 press 120ms
+[08-31 19:24:08.146] W/DebugPad: BUTTON PS release
+[08-31 19:24:17.452] I/S3EXIT: event=requested sessionId=1788184415032-02d70f11 activityInstanceId=1 stopRequestId=1 stopReason=InGameExit finishReason=ExplicitExit activeGame=/storage/emulated/0/Android/data/com.zenithblue.sambas3/files/config/games/BLUS31584 nativeState=reading journalState=RUNNING pendingRecovery=none fatalEventId=none timestamp=1788184457452
+[08-31 19:24:17.452] I/S3SAVE: S3SAVE automatic recovery cancel no-marker reason=InGameExit
+[08-31 19:24:17.453] I/S3SESSION: journal state=STOPPING session=1788184415032-02d70f11 game=/storage/emulated/0/Android/data/com.zenithblue.sambas3/files/config/games/BLUS31584 clean=false
+[08-31 19:24:17.453] I/S3EXIT: requested session=1788184415032-02d70f11 stopRequestId=1 stopReason=InGameExit finishReason=ExplicitExit journal=STOPPING timestamp=1788184457453
+[08-31 19:24:17.453] I/S3EXIT: event=STOPPING sessionId=1788184415032-02d70f11 activityInstanceId=1 stopRequestId=1 stopReason=InGameExit finishReason=ExplicitExit activeGame=/storage/emulated/0/Android/data/com.zenithblue.sambas3/files/config/games/BLUS31584 nativeState=Running journalState=STOPPING pendingRecovery=none fatalEventId=none timestamp=1788184457453
+[08-31 19:24:19.029] I/S3EXIT: event=native-Stopped sessionId=1788184415032-02d70f11 activityInstanceId=1 stopRequestId=1 stopReason=InGameExit finishReason=ExplicitExit activeGame=/storage/emulated/0/Android/data/com.zenithblue.sambas3/files/config/games/BLUS31584 nativeState=Stopped journalState=STOPPING pendingRecovery=none fatalEventId=none timestamp=1788184459029
+[08-31 19:24:19.029] I/S3EXIT: event=trophy-flush-complete sessionId=1788184415032-02d70f11 stopRequestId=1 boundary=native-stop journal=STOPPING
+[08-31 19:24:19.036] I/S3EXIT: journal=CLEAN_STOP session=1788184415032-02d70f11 stopRequestId=1 stopReason=InGameExit finishReason=ExplicitExit timestamp=1788184459030
+[08-31 19:24:19.036] I/S3EXIT: event=CLEAN_STOP sessionId=1788184415032-02d70f11 activityInstanceId=1 stopRequestId=1 stopReason=InGameExit finishReason=ExplicitExit activeGame=/storage/emulated/0/Android/data/com.zenithblue.sambas3/files/config/games/BLUS31584 nativeState=Stopped journalState=CLEAN_STOP pendingRecovery=none fatalEventId=none timestamp=1788184459036
+[08-31 19:24:19.037] I/S3EXIT: event=activeGame-null sessionId=1788184415032-02d70f11 activityInstanceId=1 stopRequestId=1 stopReason=InGameExit finishReason=ExplicitExit activeGame=null nativeState=Stopped journalState=CLEAN_STOP pendingRecovery=none fatalEventId=none timestamp=1788184459037
+[08-31 19:24:19.037] I/S3EXIT: event=finish-external-stop sessionId=1788184415032-02d70f11 activityInstanceId=1 stopRequestId=1 stopReason=InGameExit finishReason=ExplicitExit activeGame=null nativeState=Stopped journalState=CLEAN_STOP pendingRecovery=none fatalEventId=none timestamp=1788184459037
+[08-31 19:24:19.047] I/DebugPad: registered
+[08-31 19:24:19.611] I/S3EXIT: event=host-unregistered sessionId=1788184415032-02d70f11 activityInstanceId=1 stopRequestId=1 stopReason=InGameExit finishReason=ExplicitExit activeGame=null nativeState=Stopped journalState=CLEAN_STOP pendingRecovery=none fatalEventId=none timestamp=1788184459611
+[08-31 19:24:19.612] I/S3SESSION: activity=1 reason=activity-destroyed native=Stopped mirrored=Stopped activeGame=null surfaceGen=0 recovery=false menu=Closed
+[08-31 19:24:17.452] I/S3EXIT: event=requested sessionId=1788184415032-02d70f11 activityInstanceId=1 stopRequestId=1 stopReason=InGameExit finishReason=ExplicitExit activeGame=/storage/emulated/0/Android/data/com.zenithblue.sambas3/files/config/games/BLUS31584 nativeState=reading journalState=RUNNING pendingRecovery=none fatalEventId=none timestamp=1788184457452
+[08-31 19:24:17.452] I/S3SAVE: S3SAVE automatic recovery cancel no-marker reason=InGameExit
+[08-31 19:24:17.453] I/S3SESSION: journal state=STOPPING session=1788184415032-02d70f11 game=/storage/emulated/0/Android/data/com.zenithblue.sambas3/files/config/games/BLUS31584 clean=false
+[08-31 19:24:17.453] I/S3EXIT: requested session=1788184415032-02d70f11 stopRequestId=1 stopReason=InGameExit finishReason=ExplicitExit journal=STOPPING timestamp=1788184457453
+[08-31 19:24:17.453] I/S3EXIT: event=STOPPING sessionId=1788184415032-02d70f11 activityInstanceId=1 stopRequestId=1 stopReason=InGameExit finishReason=ExplicitExit activeGame=/storage/emulated/0/Android/data/com.zenithblue.sambas3/files/config/games/BLUS31584 nativeState=Running journalState=STOPPING pendingRecovery=none fatalEventId=none timestamp=1788184457453
+[08-31 19:24:19.029] I/S3EXIT: event=native-Stopped sessionId=1788184415032-02d70f11 activityInstanceId=1 stopRequestId=1 stopReason=InGameExit finishReason=ExplicitExit activeGame=/storage/emulated/0/Android/data/com.zenithblue.sambas3/files/config/games/BLUS31584 nativeState=Stopped journalState=STOPPING pendingRecovery=none fatalEventId=none timestamp=1788184459029
+[08-31 19:24:19.029] I/S3EXIT: event=trophy-flush-complete sessionId=1788184415032-02d70f11 stopRequestId=1 boundary=native-stop journal=STOPPING
+[08-31 19:24:19.036] I/S3EXIT: journal=CLEAN_STOP session=1788184415032-02d70f11 stopRequestId=1 stopReason=InGameExit finishReason=ExplicitExit timestamp=1788184459030
+[08-31 19:24:19.036] I/S3EXIT: event=CLEAN_STOP sessionId=1788184415032-02d70f11 activityInstanceId=1 stopRequestId=1 stopReason=InGameExit finishReason=ExplicitExit activeGame=/storage/emulated/0/Android/data/com.zenithblue.sambas3/files/config/games/BLUS31584 nativeState=Stopped journalState=CLEAN_STOP pendingRecovery=none fatalEventId=none timestamp=1788184459036
+[08-31 19:24:19.037] I/S3EXIT: event=activeGame-null sessionId=1788184415032-02d70f11 activityInstanceId=1 stopRequestId=1 stopReason=InGameExit finishReason=ExplicitExit activeGame=null nativeState=Stopped journalState=CLEAN_STOP pendingRecovery=none fatalEventId=none timestamp=1788184459037
+[08-31 19:24:19.037] I/S3EXIT: event=finish-external-stop sessionId=1788184415032-02d70f11 activityInstanceId=1 stopRequestId=1 stopReason=InGameExit finishReason=ExplicitExit activeGame=null nativeState=Stopped journalState=CLEAN_STOP pendingRecovery=none fatalEventId=none timestamp=1788184459037
+[08-31 19:24:19.047] I/DebugPad: registered
+[08-31 19:24:19.611] I/S3EXIT: event=host-unregistered sessionId=1788184415032-02d70f11 activityInstanceId=1 stopRequestId=1 stopReason=InGameExit finishReason=ExplicitExit activeGame=null nativeState=Stopped journalState=CLEAN_STOP pendingRecovery=none fatalEventId=none timestamp=1788184459611
+[08-31 19:24:19.612] I/S3SESSION: activity=1 reason=activity-destroyed native=Stopped mirrored=Stopped activeGame=null surfaceGen=0 recovery=false menu=Closed
+[08-31 19:24:24.784] I/DebugPad: registered
+[08-31 19:24:24.801] I/S3RECOVERY: refresh session=none state=none terminal=1788184415032-02d70f11/true process=none/280f0c35-e8ed-4386-b440-b4b5abc36947
+[08-31 19:24:24.801] I/S3RECOVERY: classification=None reason=CLEAN_STOP session=1788184415032-02d70f11
+[08-31 19:24:25.134] I/S3RECOVERY: refresh session=none state=none terminal=1788184415032-02d70f11/true process=none/280f0c35-e8ed-4386-b440-b4b5abc36947
+[08-31 19:24:25.134] I/S3RECOVERY: classification=None reason=CLEAN_STOP session=1788184415032-02d70f11
+[08-31 19:24:36.402] I/DebugPad: registered
+[08-31 19:24:36.403] I/S3SESSION: journal state=STARTING session=1788184476403-c57db1f6 game=/storage/emulated/0/Android/data/com.zenithblue.sambas3/files/config/games/BLUS31584 clean=false
+[08-31 19:24:36.403] I/S3SESSION: activity=1 reason=activity-created native=Stopped mirrored=Stopped activeGame=null surfaceGen=1 recovery=false menu=Closed
+[08-31 19:24:36.405] I/S3SESSION: journal state=BOOTING session=1788184476403-c57db1f6 game=/storage/emulated/0/Android/data/com.zenithblue.sambas3/files/config/games/BLUS31584 clean=false
+[08-31 19:24:36.406] I/S3HOMELOAD: request mode=FreshGame original=/storage/emulated/0/Android/data/com.zenithblue.sambas3/files/config/games/BLUS31584 savestate=null
+[08-31 19:24:36.406] I/S3HOMELOAD: preflight state=Stopped
+[08-31 19:24:36.406] I/S3RECOVERY: preflight state=Stopped activeGame=null recovery=false
+[08-31 19:24:36.407] I/S3HOMELOAD: stopped mode=FreshGame state=Stopped
+[08-31 19:24:36.407] I/S3HOMELOAD: surface-ready-wait mode=FreshGame
+[08-31 19:24:36.537] I/S3HOMELOAD: direct-boot-begin mode=FreshGame source=/storage/emulated/0/Android/data/com.zenithblue.sambas3/files/config/games/BLUS31584 original=/storage/emulated/0/Android/data/com.zenithblue.sambas3/files/config/games/BLUS31584
+[08-31 19:24:37.468] I/S3SESSION: journal state=RUNNING session=1788184476403-c57db1f6 game=/storage/emulated/0/Android/data/com.zenithblue.sambas3/files/config/games/BLUS31584 clean=false
+[08-31 19:24:37.468] I/S3SESSION: activity=1 reason=boot-return native=Starting mirrored=Starting activeGame=/storage/emulated/0/Android/data/com.zenithblue.sambas3/files/config/games/BLUS31584 surfaceGen=1 recovery=false menu=Closed
+[08-31 19:24:37.468] I/S3HOMELOAD: direct-boot-return result=NoErrors state=Starting
+[08-31 19:25:03.029] W/DebugPad: BUTTON PS d1=256 d2=0 press 120ms
+[08-31 19:25:03.150] W/DebugPad: BUTTON PS release
+[08-31 19:25:09.459] W/DebugPad: BUTTON PS d1=256 d2=0 press 120ms
+[08-31 19:25:09.580] W/DebugPad: BUTTON PS release
+[08-31 19:25:18.969] I/S3EXIT: event=requested sessionId=1788184476403-c57db1f6 activityInstanceId=1 stopRequestId=1 stopReason=InGameExit finishReason=ExplicitExit activeGame=/storage/emulated/0/Android/data/com.zenithblue.sambas3/files/config/games/BLUS31584 nativeState=reading journalState=RUNNING pendingRecovery=none fatalEventId=none timestamp=1788184518969
+[08-31 19:25:18.970] I/S3SAVE: S3SAVE automatic recovery cancel no-marker reason=InGameExit
+[08-31 19:25:18.970] I/S3SESSION: journal state=STOPPING session=1788184476403-c57db1f6 game=/storage/emulated/0/Android/data/com.zenithblue.sambas3/files/config/games/BLUS31584 clean=false
+[08-31 19:25:18.970] I/S3EXIT: requested session=1788184476403-c57db1f6 stopRequestId=1 stopReason=InGameExit finishReason=ExplicitExit journal=STOPPING timestamp=1788184518970
+[08-31 19:25:18.971] I/S3EXIT: event=STOPPING sessionId=1788184476403-c57db1f6 activityInstanceId=1 stopRequestId=1 stopReason=InGameExit finishReason=ExplicitExit activeGame=/storage/emulated/0/Android/data/com.zenithblue.sambas3/files/config/games/BLUS31584 nativeState=Running journalState=STOPPING pendingRecovery=none fatalEventId=none timestamp=1788184518971
+[08-31 19:25:20.501] I/S3EXIT: event=native-Stopped sessionId=1788184476403-c57db1f6 activityInstanceId=1 stopRequestId=1 stopReason=InGameExit finishReason=ExplicitExit activeGame=/storage/emulated/0/Android/data/com.zenithblue.sambas3/files/config/games/BLUS31584 nativeState=Stopped journalState=STOPPING pendingRecovery=none fatalEventId=none timestamp=1788184520501
+[08-31 19:25:20.501] I/S3EXIT: event=trophy-flush-complete sessionId=1788184476403-c57db1f6 stopRequestId=1 boundary=native-stop journal=STOPPING
+[08-31 19:25:20.508] I/S3EXIT: journal=CLEAN_STOP session=1788184476403-c57db1f6 stopRequestId=1 stopReason=InGameExit finishReason=ExplicitExit timestamp=1788184520501
+[08-31 19:25:20.508] I/S3EXIT: event=CLEAN_STOP sessionId=1788184476403-c57db1f6 activityInstanceId=1 stopRequestId=1 stopReason=InGameExit finishReason=ExplicitExit activeGame=/storage/emulated/0/Android/data/com.zenithblue.sambas3/files/config/games/BLUS31584 nativeState=Stopped journalState=CLEAN_STOP pendingRecovery=none fatalEventId=none timestamp=1788184520508
+[08-31 19:25:20.509] I/S3EXIT: event=activeGame-null sessionId=1788184476403-c57db1f6 activityInstanceId=1 stopRequestId=1 stopReason=InGameExit finishReason=ExplicitExit activeGame=null nativeState=Stopped journalState=CLEAN_STOP pendingRecovery=none fatalEventId=none timestamp=1788184520509
+[08-31 19:25:20.509] I/S3EXIT: event=finish-external-stop sessionId=1788184476403-c57db1f6 activityInstanceId=1 stopRequestId=1 stopReason=InGameExit finishReason=ExplicitExit activeGame=null nativeState=Stopped journalState=CLEAN_STOP pendingRecovery=none fatalEventId=none timestamp=1788184520509
+[08-31 19:25:20.543] I/DebugPad: registered
+[08-31 19:25:21.124] I/S3EXIT: event=host-unregistered sessionId=1788184476403-c57db1f6 activityInstanceId=1 stopRequestId=1 stopReason=InGameExit finishReason=ExplicitExit activeGame=null nativeState=Stopped journalState=CLEAN_STOP pendingRecovery=none fatalEventId=none timestamp=1788184521124
+[08-31 19:25:21.124] I/S3SESSION: activity=1 reason=activity-destroyed native=Stopped mirrored=Stopped activeGame=null surfaceGen=0 recovery=false menu=Closed
+[08-31 19:26:44.771] I/S3TROPHY: source=title title=BLUS31584 user=00000001 set=NPWR10029_00 TROPUSR=/storage/emulated/0/Android/data/com.zenithblue.sambas3/files/config/dev_hdd0/home/00000001/trophy/NPWR10029_00/TROPUSR.DAT exists=true size=6976 mtime=1788184498 generation={}:{} cache=miss cacheKey=BLUS31584|00000001|NPWR10029_00|{}:{} total=33 unlocked=1 ids=[1] durationMs=1
+[08-31 19:28:04.858] I/DebugPad: registered
+[08-31 19:28:04.858] I/S3SESSION: journal state=STARTING session=1788184684858-6f518c04 game=/storage/emulated/0/Android/data/com.zenithblue.sambas3/files/config/games/BLUS31584 clean=false
+[08-31 19:28:04.858] I/S3SESSION: activity=2 reason=activity-created native=Stopped mirrored=Stopped activeGame=null surfaceGen=1 recovery=false menu=Closed
+[08-31 19:28:04.859] I/S3SESSION: journal state=BOOTING session=1788184684858-6f518c04 game=/storage/emulated/0/Android/data/com.zenithblue.sambas3/files/config/games/BLUS31584 clean=false
+[08-31 19:28:04.859] I/S3HOMELOAD: request mode=FreshGame original=/storage/emulated/0/Android/data/com.zenithblue.sambas3/files/config/games/BLUS31584 savestate=null
+[08-31 19:28:04.859] I/S3HOMELOAD: preflight state=Stopped
+[08-31 19:28:04.859] I/S3RECOVERY: preflight state=Stopped activeGame=null recovery=false
+[08-31 19:28:04.859] I/S3HOMELOAD: stopped mode=FreshGame state=Stopped
+[08-31 19:28:04.859] I/S3HOMELOAD: surface-ready-wait mode=FreshGame
+[08-31 19:28:04.955] I/S3HOMELOAD: direct-boot-begin mode=FreshGame source=/storage/emulated/0/Android/data/com.zenithblue.sambas3/files/config/games/BLUS31584 original=/storage/emulated/0/Android/data/com.zenithblue.sambas3/files/config/games/BLUS31584
+[08-31 19:28:05.751] I/S3SESSION: journal state=RUNNING session=1788184684858-6f518c04 game=/storage/emulated/0/Android/data/com.zenithblue.sambas3/files/config/games/BLUS31584 clean=false
+[08-31 19:28:05.752] I/S3SESSION: activity=2 reason=boot-return native=Starting mirrored=Starting activeGame=/storage/emulated/0/Android/data/com.zenithblue.sambas3/files/config/games/BLUS31584 surfaceGen=1 recovery=false menu=Closed
+[08-31 19:28:05.752] I/S3HOMELOAD: direct-boot-return result=NoErrors state=Starting
+[08-31 19:28:31.530] W/DebugPad: BUTTON PS d1=256 d2=0 press 120ms
+[08-31 19:28:31.651] W/DebugPad: BUTTON PS release
+[08-31 19:28:33.602] I/S3TROPHY: source=live title=BLUS31584 user=00000001 set=NPWR10029_00 TROPUSR=/storage/emulated/0/Android/data/com.zenithblue.sambas3/files/config/dev_hdd0/home/00000001/trophy/NPWR10029_00/TROPUSR.DAT exists=true size=6976 mtime=1788184705 generation={}:{} cache=miss cacheKey=BLUS31584|00000001|NPWR10029_00|{}:{} total=33 unlocked=1 ids=[1] durationMs=1
+[08-31 19:29:30.961] I/S3EXIT: event=requested sessionId=1788184684858-6f518c04 activityInstanceId=2 stopRequestId=2 stopReason=InGameExit finishReason=ExplicitExit activeGame=/storage/emulated/0/Android/data/com.zenithblue.sambas3/files/config/games/BLUS31584 nativeState=reading journalState=RUNNING pendingRecovery=none fatalEventId=none timestamp=1788184770961
+[08-31 19:29:30.961] I/S3SAVE: S3SAVE automatic recovery cancel no-marker reason=InGameExit
+[08-31 19:29:30.962] I/S3SESSION: journal state=STOPPING session=1788184684858-6f518c04 game=/storage/emulated/0/Android/data/com.zenithblue.sambas3/files/config/games/BLUS31584 clean=false
+[08-31 19:29:30.962] I/S3EXIT: requested session=1788184684858-6f518c04 stopRequestId=2 stopReason=InGameExit finishReason=ExplicitExit journal=STOPPING timestamp=1788184770961
+[08-31 19:29:30.962] I/S3EXIT: event=STOPPING sessionId=1788184684858-6f518c04 activityInstanceId=2 stopRequestId=2 stopReason=InGameExit finishReason=ExplicitExit activeGame=/storage/emulated/0/Android/data/com.zenithblue.sambas3/files/config/games/BLUS31584 nativeState=Running journalState=STOPPING pendingRecovery=none fatalEventId=none timestamp=1788184770962
+[08-31 19:29:32.474] I/S3EXIT: event=native-Stopped sessionId=1788184684858-6f518c04 activityInstanceId=2 stopRequestId=2 stopReason=InGameExit finishReason=ExplicitExit activeGame=/storage/emulated/0/Android/data/com.zenithblue.sambas3/files/config/games/BLUS31584 nativeState=Stopped journalState=STOPPING pendingRecovery=none fatalEventId=none timestamp=1788184772474
+[08-31 19:29:32.474] I/S3EXIT: event=trophy-flush-complete sessionId=1788184684858-6f518c04 stopRequestId=2 boundary=native-stop journal=STOPPING
+[08-31 19:29:32.480] I/S3EXIT: journal=CLEAN_STOP session=1788184684858-6f518c04 stopRequestId=2 stopReason=InGameExit finishReason=ExplicitExit timestamp=1788184772474
+[08-31 19:29:32.481] I/S3EXIT: event=CLEAN_STOP sessionId=1788184684858-6f518c04 activityInstanceId=2 stopRequestId=2 stopReason=InGameExit finishReason=ExplicitExit activeGame=/storage/emulated/0/Android/data/com.zenithblue.sambas3/files/config/games/BLUS31584 nativeState=Stopped journalState=CLEAN_STOP pendingRecovery=none fatalEventId=none timestamp=1788184772481
+[08-31 19:29:32.481] I/S3EXIT: event=activeGame-null sessionId=1788184684858-6f518c04 activityInstanceId=2 stopRequestId=2 stopReason=InGameExit finishReason=ExplicitExit activeGame=null nativeState=Stopped journalState=CLEAN_STOP pendingRecovery=none fatalEventId=none timestamp=1788184772481
+[08-31 19:29:32.482] I/S3EXIT: event=finish-external-stop sessionId=1788184684858-6f518c04 activityInstanceId=2 stopRequestId=2 stopReason=InGameExit finishReason=ExplicitExit activeGame=null nativeState=Stopped journalState=CLEAN_STOP pendingRecovery=none fatalEventId=none timestamp=1788184772482
+[08-31 19:29:32.495] I/DebugPad: registered
+[08-31 19:29:33.053] I/S3EXIT: event=host-unregistered sessionId=1788184684858-6f518c04 activityInstanceId=2 stopRequestId=2 stopReason=InGameExit finishReason=ExplicitExit activeGame=null nativeState=Stopped journalState=CLEAN_STOP pendingRecovery=none fatalEventId=none timestamp=1788184773052
+[08-31 19:29:33.053] I/S3SESSION: activity=2 reason=activity-destroyed native=Stopped mirrored=Stopped activeGame=null surfaceGen=0 recovery=false menu=Closed
+[08-31 19:29:53.389] I/DebugPad: registered
+[08-31 19:29:53.709] I/S3RECOVERY: refresh session=none state=none terminal=1788184684858-6f518c04/true process=none/5573549c-e315-4735-bef9-41cd904c1123
+[08-31 19:29:53.709] I/S3RECOVERY: classification=None reason=CLEAN_STOP session=1788184684858-6f518c04
+[08-31 19:29:53.719] I/S3RECOVERY: refresh session=none state=none terminal=1788184684858-6f518c04/true process=none/5573549c-e315-4735-bef9-41cd904c1123
+[08-31 19:29:53.719] I/S3RECOVERY: classification=None reason=CLEAN_STOP session=1788184684858-6f518c04
+[08-31 19:30:09.439] I/S3TROPHY: source=title title=BLUS31584 user=00000001 set=NPWR10029_00 TROPUSR=/storage/emulated/0/Android/data/com.zenithblue.sambas3/files/config/dev_hdd0/home/00000001/trophy/NPWR10029_00/TROPUSR.DAT exists=true size=6976 mtime=1788184705 generation={}:{} cache=miss cacheKey=BLUS31584|00000001|NPWR10029_00|{}:{} total=33 unlocked=1 ids=[1] durationMs=2
+[08-31 19:31:15.978] I/DebugPad: registered
+[08-31 19:31:16.293] I/S3RECOVERY: refresh session=none state=none terminal=1788184684858-6f518c04/true process=none/9afdc564-f0f6-4aa8-b0fa-57a6f4f94012
+[08-31 19:31:16.293] I/S3RECOVERY: classification=None reason=CLEAN_STOP session=1788184684858-6f518c04
+[08-31 19:31:16.303] I/S3RECOVERY: refresh session=none state=none terminal=1788184684858-6f518c04/true process=none/9afdc564-f0f6-4aa8-b0fa-57a6f4f94012
+[08-31 19:31:16.303] I/S3RECOVERY: classification=None reason=CLEAN_STOP session=1788184684858-6f518c04
+[08-31 19:32:04.069] I/S3TROPHY: source=title title=BLUS31584 user=00000001 set=NPWR10029_00 TROPUSR=/storage/emulated/0/Android/data/com.zenithblue.sambas3/files/config/dev_hdd0/home/00000001/trophy/NPWR10029_00/TROPUSR.DAT exists=true size=6976 mtime=1788184705 generation={}:{} cache=miss cacheKey=BLUS31584|00000001|NPWR10029_00|{}:{} total=33 unlocked=1 ids=[1] durationMs=1
+[08-31 19:32:24.933] I/DebugPad: registered
+[08-31 19:32:24.935] I/S3SESSION: journal state=STARTING session=1788184944934-be52cc00 game=/storage/emulated/0/Android/data/com.zenithblue.sambas3/files/config/games/BLUS31584 clean=false
+[08-31 19:32:24.935] I/S3SESSION: activity=1 reason=activity-created native=Stopped mirrored=Stopped activeGame=null surfaceGen=1 recovery=false menu=Closed
+[08-31 19:32:24.936] I/S3SESSION: journal state=BOOTING session=1788184944934-be52cc00 game=/storage/emulated/0/Android/data/com.zenithblue.sambas3/files/config/games/BLUS31584 clean=false
+[08-31 19:32:24.936] I/S3HOMELOAD: request mode=FreshGame original=/storage/emulated/0/Android/data/com.zenithblue.sambas3/files/config/games/BLUS31584 savestate=null
+[08-31 19:32:24.936] I/S3HOMELOAD: preflight state=Stopped
+[08-31 19:32:24.936] I/S3RECOVERY: preflight state=Stopped activeGame=null recovery=false
+[08-31 19:32:24.936] I/S3HOMELOAD: stopped mode=FreshGame state=Stopped
+[08-31 19:32:24.937] I/S3HOMELOAD: surface-ready-wait mode=FreshGame
+[08-31 19:32:25.047] I/S3HOMELOAD: direct-boot-begin mode=FreshGame source=/storage/emulated/0/Android/data/com.zenithblue.sambas3/files/config/games/BLUS31584 original=/storage/emulated/0/Android/data/com.zenithblue.sambas3/files/config/games/BLUS31584
+[08-31 19:32:25.867] I/S3SESSION: journal state=RUNNING session=1788184944934-be52cc00 game=/storage/emulated/0/Android/data/com.zenithblue.sambas3/files/config/games/BLUS31584 clean=false
+[08-31 19:32:25.867] I/S3SESSION: activity=1 reason=boot-return native=Starting mirrored=Starting activeGame=/storage/emulated/0/Android/data/com.zenithblue.sambas3/files/config/games/BLUS31584 surfaceGen=1 recovery=false menu=Closed
+[08-31 19:32:25.867] I/S3HOMELOAD: direct-boot-return result=NoErrors state=Starting
+[08-31 19:32:51.496] W/DebugPad: BUTTON PS d1=256 d2=0 press 120ms
+[08-31 19:32:51.616] W/DebugPad: BUTTON PS release
+[08-31 19:32:53.584] I/S3TROPHY: source=live title=BLUS31584 user=00000001 set=NPWR10029_00 TROPUSR=/storage/emulated/0/Android/data/com.zenithblue.sambas3/files/config/dev_hdd0/home/00000001/trophy/NPWR10029_00/TROPUSR.DAT exists=true size=6976 mtime=1788184965 generation={}:{} cache=miss cacheKey=BLUS31584|00000001|NPWR10029_00|{}:{} total=33 unlocked=1 ids=[1] durationMs=1
+[08-31 19:33:12.291] I/S3EXIT: event=requested sessionId=1788184944934-be52cc00 activityInstanceId=1 stopRequestId=1 stopReason=InGameExit finishReason=ExplicitExit activeGame=/storage/emulated/0/Android/data/com.zenithblue.sambas3/files/config/games/BLUS31584 nativeState=reading journalState=RUNNING pendingRecovery=none fatalEventId=none timestamp=1788184992291
+[08-31 19:33:12.292] I/S3SAVE: S3SAVE automatic recovery cancel no-marker reason=InGameExit
+[08-31 19:33:12.292] I/S3SESSION: journal state=STOPPING session=1788184944934-be52cc00 game=/storage/emulated/0/Android/data/com.zenithblue.sambas3/files/config/games/BLUS31584 clean=false
+[08-31 19:33:12.292] I/S3EXIT: requested session=1788184944934-be52cc00 stopRequestId=1 stopReason=InGameExit finishReason=ExplicitExit journal=STOPPING timestamp=1788184992292
+[08-31 19:33:12.293] I/S3EXIT: event=STOPPING sessionId=1788184944934-be52cc00 activityInstanceId=1 stopRequestId=1 stopReason=InGameExit finishReason=ExplicitExit activeGame=/storage/emulated/0/Android/data/com.zenithblue.sambas3/files/config/games/BLUS31584 nativeState=Running journalState=STOPPING pendingRecovery=none fatalEventId=none timestamp=1788184992293
+[08-31 19:33:13.804] I/S3EXIT: event=native-Stopped sessionId=1788184944934-be52cc00 activityInstanceId=1 stopRequestId=1 stopReason=InGameExit finishReason=ExplicitExit activeGame=/storage/emulated/0/Android/data/com.zenithblue.sambas3/files/config/games/BLUS31584 nativeState=Stopped journalState=STOPPING pendingRecovery=none fatalEventId=none timestamp=1788184993804
+[08-31 19:33:13.804] I/S3EXIT: event=trophy-flush-complete sessionId=1788184944934-be52cc00 stopRequestId=1 boundary=native-stop journal=STOPPING
+[08-31 19:33:13.810] I/S3EXIT: journal=CLEAN_STOP session=1788184944934-be52cc00 stopRequestId=1 stopReason=InGameExit finishReason=ExplicitExit timestamp=1788184993805
+[08-31 19:33:13.811] I/S3EXIT: event=CLEAN_STOP sessionId=1788184944934-be52cc00 activityInstanceId=1 stopRequestId=1 stopReason=InGameExit finishReason=ExplicitExit activeGame=/storage/emulated/0/Android/data/com.zenithblue.sambas3/files/config/games/BLUS31584 nativeState=Stopped journalState=CLEAN_STOP pendingRecovery=none fatalEventId=none timestamp=1788184993810
+[08-31 19:33:13.811] I/S3EXIT: event=activeGame-null sessionId=1788184944934-be52cc00 activityInstanceId=1 stopRequestId=1 stopReason=InGameExit finishReason=ExplicitExit activeGame=null nativeState=Stopped journalState=CLEAN_STOP pendingRecovery=none fatalEventId=none timestamp=1788184993811
+[08-31 19:33:13.812] I/S3EXIT: event=finish-external-stop sessionId=1788184944934-be52cc00 activityInstanceId=1 stopRequestId=1 stopReason=InGameExit finishReason=ExplicitExit activeGame=null nativeState=Stopped journalState=CLEAN_STOP pendingRecovery=none fatalEventId=none timestamp=1788184993812
+[08-31 19:33:13.827] I/DebugPad: registered
+[08-31 19:33:14.390] I/S3EXIT: event=host-unregistered sessionId=1788184944934-be52cc00 activityInstanceId=1 stopRequestId=1 stopReason=InGameExit finishReason=ExplicitExit activeGame=null nativeState=Stopped journalState=CLEAN_STOP pendingRecovery=none fatalEventId=none timestamp=1788184994390
+[08-31 19:33:14.391] I/S3SESSION: activity=1 reason=activity-destroyed native=Stopped mirrored=Stopped activeGame=null surfaceGen=0 recovery=false menu=Closed
+[08-31 19:33:12.291] I/S3EXIT: event=requested sessionId=1788184944934-be52cc00 activityInstanceId=1 stopRequestId=1 stopReason=InGameExit finishReason=ExplicitExit activeGame=/storage/emulated/0/Android/data/com.zenithblue.sambas3/files/config/games/BLUS31584 nativeState=reading journalState=RUNNING pendingRecovery=none fatalEventId=none timestamp=1788184992291
+[08-31 19:33:12.292] I/S3SAVE: S3SAVE automatic recovery cancel no-marker reason=InGameExit
+[08-31 19:33:12.292] I/S3SESSION: journal state=STOPPING session=1788184944934-be52cc00 game=/storage/emulated/0/Android/data/com.zenithblue.sambas3/files/config/games/BLUS31584 clean=false
+[08-31 19:33:12.292] I/S3EXIT: requested session=1788184944934-be52cc00 stopRequestId=1 stopReason=InGameExit finishReason=ExplicitExit journal=STOPPING timestamp=1788184992292
+[08-31 19:33:12.293] I/S3EXIT: event=STOPPING sessionId=1788184944934-be52cc00 activityInstanceId=1 stopRequestId=1 stopReason=InGameExit finishReason=ExplicitExit activeGame=/storage/emulated/0/Android/data/com.zenithblue.sambas3/files/config/games/BLUS31584 nativeState=Running journalState=STOPPING pendingRecovery=none fatalEventId=none timestamp=1788184992293
+[08-31 19:33:13.804] I/S3EXIT: event=native-Stopped sessionId=1788184944934-be52cc00 activityInstanceId=1 stopRequestId=1 stopReason=InGameExit finishReason=ExplicitExit activeGame=/storage/emulated/0/Android/data/com.zenithblue.sambas3/files/config/games/BLUS31584 nativeState=Stopped journalState=STOPPING pendingRecovery=none fatalEventId=none timestamp=1788184993804
+[08-31 19:33:13.804] I/S3EXIT: event=trophy-flush-complete sessionId=1788184944934-be52cc00 stopRequestId=1 boundary=native-stop journal=STOPPING
+[08-31 19:33:13.810] I/S3EXIT: journal=CLEAN_STOP session=1788184944934-be52cc00 stopRequestId=1 stopReason=InGameExit finishReason=ExplicitExit timestamp=1788184993805
+[08-31 19:33:13.811] I/S3EXIT: event=CLEAN_STOP sessionId=1788184944934-be52cc00 activityInstanceId=1 stopRequestId=1 stopReason=InGameExit finishReason=ExplicitExit activeGame=/storage/emulated/0/Android/data/com.zenithblue.sambas3/files/config/games/BLUS31584 nativeState=Stopped journalState=CLEAN_STOP pendingRecovery=none fatalEventId=none timestamp=1788184993810
+[08-31 19:33:13.811] I/S3EXIT: event=activeGame-null sessionId=1788184944934-be52cc00 activityInstanceId=1 stopRequestId=1 stopReason=InGameExit finishReason=ExplicitExit activeGame=null nativeState=Stopped journalState=CLEAN_STOP pendingRecovery=none fatalEventId=none timestamp=1788184993811
+[08-31 19:33:13.812] I/S3EXIT: event=finish-external-stop sessionId=1788184944934-be52cc00 activityInstanceId=1 stopRequestId=1 stopReason=InGameExit finishReason=ExplicitExit activeGame=null nativeState=Stopped journalState=CLEAN_STOP pendingRecovery=none fatalEventId=none timestamp=1788184993812
+[08-31 19:33:13.827] I/DebugPad: registered
+[08-31 19:33:14.390] I/S3EXIT: event=host-unregistered sessionId=1788184944934-be52cc00 activityInstanceId=1 stopRequestId=1 stopReason=InGameExit finishReason=ExplicitExit activeGame=null nativeState=Stopped journalState=CLEAN_STOP pendingRecovery=none fatalEventId=none timestamp=1788184994390
+[08-31 19:33:14.391] I/S3SESSION: activity=1 reason=activity-destroyed native=Stopped mirrored=Stopped activeGame=null surfaceGen=0 recovery=false menu=Closed
+[08-31 19:33:21.289] I/DebugPad: registered
+[08-31 19:33:21.630] I/S3RECOVERY: refresh session=none state=none terminal=1788184944934-be52cc00/true process=none/14896730-85a0-4a59-878c-ca4851b3a65b
+[08-31 19:33:21.630] I/S3RECOVERY: classification=None reason=CLEAN_STOP session=1788184944934-be52cc00
+[08-31 19:33:21.641] I/S3RECOVERY: refresh session=none state=none terminal=1788184944934-be52cc00/true process=none/14896730-85a0-4a59-878c-ca4851b3a65b
+[08-31 19:33:21.641] I/S3RECOVERY: classification=None reason=CLEAN_STOP session=1788184944934-be52cc00
+[08-31 19:33:37.256] I/S3TROPHY: source=title title=BLUS31584 user=00000001 set=NPWR10029_00 TROPUSR=/storage/emulated/0/Android/data/com.zenithblue.sambas3/files/config/dev_hdd0/home/00000001/trophy/NPWR10029_00/TROPUSR.DAT exists=true size=6976 mtime=1788184965 generation={}:{} cache=miss cacheKey=BLUS31584|00000001|NPWR10029_00|{}:{} total=33 unlocked=1 ids=[1] durationMs=1

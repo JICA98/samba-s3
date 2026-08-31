@@ -131,13 +131,24 @@ class MainActivity : ComponentActivity() {
         } else {
             unregisterUsbEventListener = {}
         }
-        debugPadReceiver = DebugPadReceiver.register(this)
+    }
+
+    override fun onResume() {
+        super.onResume()
+        if (debugPadReceiver == null) debugPadReceiver = DebugPadReceiver.register(this)
+    }
+
+    override fun onPause() {
+        try { debugPadReceiver?.let { unregisterReceiver(it) } } catch (_: Exception) {}
+        debugPadReceiver = null
+        super.onPause()
     }
 
     override fun onDestroy() {
         super.onDestroy()
         unregisterUsbEventListener()
         try { debugPadReceiver?.let { unregisterReceiver(it) } } catch (_: Exception) {}
+        debugPadReceiver = null
         LogMonitor.stop()
     }
 

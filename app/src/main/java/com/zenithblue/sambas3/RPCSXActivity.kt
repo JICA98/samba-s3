@@ -363,7 +363,11 @@ class RPCSXActivity : ComponentActivity(), EmulationHost {
         }
         onBackPressedDispatcher.addCallback(this, backCallback)
 
-        debugPadReceiver = DebugPadReceiver.register(this)
+        debugPadReceiver = DebugPadReceiver.register(this) {
+            if (com.zenithblue.sambas3.BuildConfig.DEBUG) {
+                showInProcessFault("DEBUG_SIMULATED_FATAL VK_ERROR_DEVICE_LOST")
+            }
+        }
 
         binding.oscToggle.setOnClickListener {
             if (interactionLock.isLocked()) return@setOnClickListener
@@ -1185,12 +1189,13 @@ class RPCSXActivity : ComponentActivity(), EmulationHost {
         if (finishReason == EmulatorActivityFinishReason.ExplicitExit || finishReason == EmulatorActivityFinishReason.HomeStop) {
             val session = EmulationSessionJournal.read(this)
             val terminal = EmulationSessionJournal.terminal(this)
-            Log.i("S3EXIT", "event=host-unregistered sessionId=${session?.sessionId ?: terminal?.sessionId ?: "none"} " +
+            val sessionTerminal = terminal?.takeIf { session == null || it.sessionId == session.sessionId }
+            Log.i("S3EXIT", "event=host-unregistered sessionId=${session?.sessionId ?: sessionTerminal?.sessionId ?: "none"} " +
                 "activityInstanceId=$activityInstanceId stopRequestId=${session?.stopRequestId ?: terminal?.stopRequestId ?: 0L} " +
                 "stopReason=${externalStopReason?.name ?: "unknown"} finishReason=${finishReason.name} " +
                 "activeGame=${RPCSX.activeGame.value ?: "null"} nativeState=${runCatching { RPCSX.getState() }.getOrDefault(EmulatorState.Stopped)} " +
-                "journalState=${session?.state ?: terminal?.state ?: "none"} pendingRecovery=${PendingSavestateRecoveryStore.read(this)?.state ?: "none"} " +
-                "fatalEventId=${session?.fatalEventId ?: terminal?.fatalEventId ?: "none"} timestamp=${System.currentTimeMillis()}")
+                "journalState=${session?.state ?: sessionTerminal?.state ?: "none"} pendingRecovery=${PendingSavestateRecoveryStore.read(this)?.state ?: "none"} " +
+                "fatalEventId=${session?.fatalEventId ?: sessionTerminal?.fatalEventId ?: "none"} timestamp=${System.currentTimeMillis()}")
         }
         if (::monitoringRepository.isInitialized) monitoringRepository.stop()
         transitionBitmap?.recycle()

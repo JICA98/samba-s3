@@ -7,6 +7,8 @@ enum class RecoveryAction {
     ContinueSave,
     PlayFresh,
     ChooseSave,
+    SafeRetry,
+    ExportReport,
     ViewDetails,
     Dismiss,
 }

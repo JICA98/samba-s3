@@ -1,10 +1,13 @@
 package com.zenithblue.sambas3.ui.games
 
+import android.content.ClipData
 import android.content.Intent
+import android.content.ActivityNotFoundException
 import android.net.Uri
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.core.content.FileProvider
 import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
@@ -268,6 +271,74 @@ fun GamesScreen(
             }
             if (savePath != null) PendingSavestateRecoveryStore.clear(context)
             withContext(Dispatchers.Main) { bootGame(context, game, savePath, slot) }
+        }
+    }
+
+    fun safeRetryRecovery(state: HomeRecoveryState) {
+        val game = recoveryGame
+        val loadFailure = state as? HomeRecoveryState.LoadFailure
+        val selectedSave = loadFailure?.savestatePath?.takeIf { it.isNotBlank() }
+            ?: game?.let {
+                GameSavestateRepository.slots(context, it)
+                    .filter { save -> save.exists && save.path != null }
+                    .maxByOrNull { save -> save.mtimeMs }
+                    ?.let { save -> save.path to save.slot }
+            }?.let { it.first }
+        val selectedSlot = loadFailure?.slot ?: game?.let {
+            GameSavestateRepository.slots(context, it)
+                .filter { save -> save.exists && save.path == selectedSave }
+                .firstOrNull()?.slot
+        }
+        detailsState = null
+        launchRecovery(game, selectedSave, selectedSlot, RecoveryAction.SafeRetry)
+    }
+
+    fun exportRecoveryReport(state: HomeRecoveryState) {
+        val session = when (state) {
+            is HomeRecoveryState.ConfirmedCrash -> state.session
+            is HomeRecoveryState.Interrupted -> state.session
+            is HomeRecoveryState.ActionFailed -> state.session
+            else -> null
+        }
+        if (session == null) {
+            android.widget.Toast.makeText(context, "No session report is available", android.widget.Toast.LENGTH_SHORT).show()
+            return
+        }
+        detailsState = null
+        recoveryScope.launch(Dispatchers.IO) {
+            val report = runCatching { com.zenithblue.sambas3.crash.CrashEvidenceCollector.collect(context, session) }.getOrNull()
+            val files = report?.sources?.values?.filter { it.isFile }?.distinctBy { it.absolutePath }.orEmpty()
+            withContext(Dispatchers.Main) {
+                if (files.isEmpty()) {
+                    android.widget.Toast.makeText(context, "Report could not be collected", android.widget.Toast.LENGTH_SHORT).show()
+                    return@withContext
+                }
+                val authority = "${context.packageName}.provider"
+                val uris = runCatching { files.map { FileProvider.getUriForFile(context, authority, it) } }.getOrElse {
+                    android.widget.Toast.makeText(context, "Report sharing failed: ${it.message}", android.widget.Toast.LENGTH_LONG).show()
+                    return@withContext
+                }
+                val intent = if (uris.size == 1) {
+                    Intent(Intent.ACTION_SEND).apply {
+                        type = "text/plain"
+                        putExtra(Intent.EXTRA_STREAM, uris.single())
+                        clipData = ClipData.newUri(context.contentResolver, "crash-report", uris.single())
+                    }
+                } else {
+                    Intent(Intent.ACTION_SEND_MULTIPLE).apply {
+                        type = "text/plain"
+                        putParcelableArrayListExtra(Intent.EXTRA_STREAM, ArrayList(uris))
+                        clipData = ClipData.newUri(context.contentResolver, "crash-report", uris.first()).also { clip ->
+                            uris.drop(1).forEach { clip.addItem(ClipData.Item(it)) }
+                        }
+                    }
+                }.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+                try {
+                    context.startActivity(Intent.createChooser(intent, "Export recovery report"))
+                } catch (_: ActivityNotFoundException) {
+                    android.widget.Toast.makeText(context, "No app can export this report", android.widget.Toast.LENGTH_SHORT).show()
+                }
+            }
         }
     }
 
@@ -1005,7 +1076,9 @@ fun GamesScreen(
                     detailsState = null
                     if (recoveryGame != null) launchCenterGame = recoveryGame
                 },
+                onSafeRetry = { safeRetryRecovery(state) },
                 onViewLogs = { navigateToLogs?.invoke() },
+                onExportReport = { exportRecoveryReport(state) },
                 onDismiss = { detailsState = null },
             )
         }

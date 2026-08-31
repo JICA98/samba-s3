@@ -93,6 +93,12 @@ fun AchievementsContent(snapshot: TrophySnapshot?, loading: Boolean, onClose: ()
     var sort by remember { mutableStateOf(AchievementSort.DEFAULT) }
     var showHidden by remember { mutableStateOf(false) }
     var selectedId by remember(snapshot?.titleId) { mutableStateOf<Int?>(null) }
+    val uiState: AchievementUiState = when {
+        loading -> AchievementUiState.Loading
+        snapshot == null -> AchievementUiState.Failed("Trophy data could not be read")
+        snapshot.state == TrophySnapshotState.READY && snapshot.trophies.isNotEmpty() -> AchievementUiState.Ready(snapshot)
+        else -> AchievementUiState.Empty(snapshot.emptyReason())
+    }
 
     Column(modifier.fillMaxSize().padding(horizontal = 16.dp, vertical = 12.dp)) {
         Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.SpaceBetween) {
@@ -103,14 +109,15 @@ fun AchievementsContent(snapshot: TrophySnapshot?, loading: Boolean, onClose: ()
             TextButton(onClick = onClose) { Text("CLOSE") }
         }
         HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
-        when {
-            loading -> Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) { CircularProgressIndicator(color = RPCSXColors.primary) }
-            snapshot == null -> EmptyAchievements("Trophy data could not be read")
-            snapshot.state != TrophySnapshotState.READY || snapshot.trophies.isEmpty() -> EmptyAchievements(snapshotStatus(snapshot))
-            else -> {
-                AchievementSummary(snapshot)
-                FilterBar(filter, showHidden, sort, snapshot.trophies.any { it.unlockTimestamp != null }, { filter = it }, { showHidden = !showHidden }, { sort = it })
-                val visible = AchievementPresentation.sort(AchievementPresentation.filter(snapshot.trophies, filter, showHidden), sort)
+        when (val state = uiState) {
+            AchievementUiState.Loading -> Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) { CircularProgressIndicator(color = RPCSXColors.primary) }
+            is AchievementUiState.Failed -> EmptyAchievements(state.message)
+            is AchievementUiState.Empty -> EmptyAchievements(state.reason.label)
+            is AchievementUiState.Ready -> {
+                val readySnapshot = state.snapshot
+                AchievementSummary(readySnapshot)
+                FilterBar(filter, showHidden, sort, readySnapshot.trophies.any { it.unlockTimestamp != null }, { filter = it }, { showHidden = !showHidden }, { sort = it })
+                val visible = AchievementPresentation.sort(AchievementPresentation.filter(readySnapshot.trophies, filter, showHidden), sort)
                 if (visible.isEmpty()) EmptyAchievements("No trophies match this filter")
                 else BoxWithConstraints(Modifier.fillMaxSize()) {
                     if (maxWidth >= 700.dp) {
@@ -126,14 +133,29 @@ fun AchievementsContent(snapshot: TrophySnapshot?, loading: Boolean, onClose: ()
         }
     }
 
-    if (snapshot?.state == TrophySnapshotState.READY && snapshot.trophies.isNotEmpty() && selectedId != null) {
+    if (uiState is AchievementUiState.Ready && selectedId != null) {
         BoxWithConstraints(Modifier.fillMaxSize()) {
-            if (maxWidth < 700.dp) snapshot.trophies.firstOrNull { it.id == selectedId }?.let { selected ->
+            if (maxWidth < 700.dp) uiState.snapshot.trophies.firstOrNull { it.id == selectedId }?.let { selected ->
                 AlertDialog(onDismissRequest = { selectedId = null }, title = { Text(selected.name) }, text = { TrophyDetail(selected, Modifier.fillMaxWidth()) }, confirmButton = { TextButton(onClick = { selectedId = null }) { Text("CLOSE") } })
             }
         }
     }
 }
+
+private fun TrophySnapshot.emptyReason(): TrophyEmptyReason = when (state) {
+    TrophySnapshotState.INITIALIZING -> TrophyEmptyReason.Initializing
+    TrophySnapshotState.PARSE_ERROR -> TrophyEmptyReason.ParseError
+    TrophySnapshotState.UNSUPPORTED -> TrophyEmptyReason.Unsupported
+    TrophySnapshotState.EMPTY, TrophySnapshotState.NO_TROPHY_SET, TrophySnapshotState.READY -> TrophyEmptyReason.NoTrophySet
+}
+
+private val TrophyEmptyReason.label: String
+    get() = when (this) {
+        TrophyEmptyReason.NoTrophySet -> "No installed trophy set for this title"
+        TrophyEmptyReason.Initializing -> "Trophy data is still initializing"
+        TrophyEmptyReason.ParseError -> "Failed to parse the installed trophy set"
+        TrophyEmptyReason.Unsupported -> "This runtime does not expose trophy data"
+    }
 
 @Composable
 private fun AchievementSummary(snapshot: TrophySnapshot) {
@@ -197,11 +219,3 @@ private fun TrophyIcon(trophy: TrophyEntry, size: Dp) {
 
 @Composable
 private fun EmptyAchievements(message: String) { Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) { Text(message, color = RPCSXColors.textSecondary, modifier = Modifier.padding(20.dp)) } }
-
-private fun snapshotStatus(snapshot: TrophySnapshot): String = when (snapshot.state) {
-    TrophySnapshotState.INITIALIZING -> "Trophy data is still initializing"
-    TrophySnapshotState.PARSE_ERROR -> "Failed to parse the installed trophy set"
-    TrophySnapshotState.UNSUPPORTED -> "This runtime does not expose trophy data"
-    TrophySnapshotState.EMPTY, TrophySnapshotState.NO_TROPHY_SET -> "No installed trophy set for this title"
-    TrophySnapshotState.READY -> "No trophies available"
-}
