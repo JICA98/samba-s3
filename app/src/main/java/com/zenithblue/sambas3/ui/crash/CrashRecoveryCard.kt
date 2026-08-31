@@ -72,11 +72,7 @@ fun CrashRecoveryCard(
                         Button(onClick = onContinueSave) { Text("CONTINUE SAVE") }
                         OutlinedButton(onClick = onRetry) { Text("RETRY") }
                     }
-                    OutlinedButton(onClick = onChooseSave) { Text("CHOOSE SAVE") }
-                }
-                Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
                     OutlinedButton(onClick = onDetails) { Text("DETAILS") }
-                    OutlinedButton(onClick = onViewLogs) { Text("VIEW LOGS") }
                     OutlinedButton(onClick = onDismiss) { Text("DISMISS") }
                 }
             }

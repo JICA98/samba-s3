@@ -573,7 +573,7 @@ class RPCSXActivity : ComponentActivity(), EmulationHost {
                         Log.e("S3SAVE", "completion failed payload=$payload")
                     }
 
-                    RPCSX.FRONTEND_EVENT_TROPHY_UNLOCKED -> runOnUiThread { TrophyEvents.notifyUnlocked() }
+                    RPCSX.FRONTEND_EVENT_TROPHY_UNLOCKED -> runOnUiThread { TrophyEvents.notifyUnlocked(payload) }
 
                     RPCSX.FRONTEND_EVENT_RENDERER_ERROR,
                     RPCSX.FRONTEND_EVENT_EMULATOR_ACTION_ERROR -> runOnUiThread {
@@ -600,7 +600,8 @@ class RPCSXActivity : ComponentActivity(), EmulationHost {
     private fun showInProcessFault(evidence: String) {
         if (!terminalFailure.compareAndSet(false, true)) return
         interactionLock.lock(EmulatorInteractionLock.CrashView)
-        EmulationSessionJournal.update(this, EmulationSessionState.FAILED)
+        val fatalEventId = "fatal-${System.currentTimeMillis()}-${activityInstanceId}"
+        EmulationSessionJournal.markFailure(this, fatalEventId)
         Log.e("S3CRASH", "in-process fault evidence=$evidence")
         lifecycleScope.launch(kotlinx.coroutines.Dispatchers.IO) {
             val session = EmulationSessionJournal.read(this@RPCSXActivity)
@@ -608,7 +609,7 @@ class RPCSXActivity : ComponentActivity(), EmulationHost {
                 CrashEvidenceCollector.collectSummary(this@RPCSXActivity, session, evidence)
             }.getOrNull()
             HomeRecoveryRepository.recordCrashFailure(this@RPCSXActivity, session, report)
-            stopAndFinishAfterFailure()
+            stopAndFinishAfterFailure(EmulatorStopReason.CrashExit)
         }
     }
 
@@ -616,7 +617,8 @@ class RPCSXActivity : ComponentActivity(), EmulationHost {
     private fun failBootAndReturnHome(reason: String) {
         if (!terminalFailure.compareAndSet(false, true)) return
         interactionLock.lock(EmulatorInteractionLock.CrashView)
-        EmulationSessionJournal.update(this, EmulationSessionState.FAILED)
+        val failureEventId = "boot-failure-${System.currentTimeMillis()}-${activityInstanceId}"
+        EmulationSessionJournal.markFailure(this, failureEventId)
         Log.e("S3HOMELOAD", "boot failed reason=$reason mode=$bootMode")
         lifecycleScope.launch(kotlinx.coroutines.Dispatchers.IO) {
             HomeRecoveryRepository.recordLoadFailure(
@@ -626,13 +628,13 @@ class RPCSXActivity : ComponentActivity(), EmulationHost {
                 bootRequest.slot,
                 reason,
             )
-            stopAndFinishAfterFailure()
+            stopAndFinishAfterFailure(EmulatorStopReason.BootFailureCleanup)
         }
     }
 
-    private fun stopAndFinishAfterFailure() {
+    private fun stopAndFinishAfterFailure(reason: EmulatorStopReason) {
         val stopped = kotlinx.coroutines.runBlocking {
-            EmulatorStopCoordinator.stop(this@RPCSXActivity, EmulatorStopReason.BootFailureCleanup)
+            EmulatorStopCoordinator.stop(this@RPCSXActivity, reason)
         }
         Log.i("S3RECOVERY", "failure return stop=$stopped")
         if (!stopped) {
@@ -1180,6 +1182,16 @@ class RPCSXActivity : ComponentActivity(), EmulationHost {
 
     override fun onDestroy() {
         EmulationHostRegistry.unregister(this)
+        if (finishReason == EmulatorActivityFinishReason.ExplicitExit || finishReason == EmulatorActivityFinishReason.HomeStop) {
+            val session = EmulationSessionJournal.read(this)
+            val terminal = EmulationSessionJournal.terminal(this)
+            Log.i("S3EXIT", "event=host-unregistered sessionId=${session?.sessionId ?: terminal?.sessionId ?: "none"} " +
+                "activityInstanceId=$activityInstanceId stopRequestId=${session?.stopRequestId ?: terminal?.stopRequestId ?: 0L} " +
+                "stopReason=${externalStopReason?.name ?: "unknown"} finishReason=${finishReason.name} " +
+                "activeGame=${RPCSX.activeGame.value ?: "null"} nativeState=${runCatching { RPCSX.getState() }.getOrDefault(EmulatorState.Stopped)} " +
+                "journalState=${session?.state ?: terminal?.state ?: "none"} pendingRecovery=${PendingSavestateRecoveryStore.read(this)?.state ?: "none"} " +
+                "fatalEventId=${session?.fatalEventId ?: terminal?.fatalEventId ?: "none"} timestamp=${System.currentTimeMillis()}")
+        }
         if (::monitoringRepository.isInitialized) monitoringRepository.stop()
         transitionBitmap?.recycle()
         transitionBitmap = null

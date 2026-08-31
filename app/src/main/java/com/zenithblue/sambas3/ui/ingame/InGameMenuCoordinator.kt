@@ -216,7 +216,10 @@ class InGameMenuCoordinator(
             is InGameMenuIntent.RequestScreenshot -> closeAndRun(CloseReason.Screenshot) { core.requestScreenshot() }
             is InGameMenuIntent.ToggleRecording -> closeAndRun(CloseReason.Recording) { core.toggleRecording() }
             is InGameMenuIntent.Restart -> closeAndRun(CloseReason.Restart) { core.restart() }
-            is InGameMenuIntent.Exit -> closeAndRun(CloseReason.Exit) { core.gracefulShutdown() }
+            // Shutdown ownership belongs to EmulatorStopCoordinator. The
+            // Activity effect below waits for native Stopped, so this intent
+            // only closes the menu and requests that single terminal path.
+            is InGameMenuIntent.Exit -> closeAndRun(CloseReason.Exit) { Result.success(true) }
             is InGameMenuIntent.SaveState -> closeAndRun(CloseReason.SaveState, intent.slot) { core.saveState(intent.slot) }
             is InGameMenuIntent.LoadState -> closeAndRun(CloseReason.LoadState, intent.slot) { core.loadState(intent.slot) }
 

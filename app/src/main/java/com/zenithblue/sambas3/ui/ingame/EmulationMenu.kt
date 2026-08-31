@@ -154,7 +154,9 @@ private fun InGameMainPanel(
                             enabled = row.enabled,
                             showArrow = row.showArrow,
                             onClick = {
-                                if (row.intent == InGameMenuIntent.Restart) {
+                                if (row.intent == InGameMenuIntent.Exit) {
+                                    showExitConfirm = true
+                                } else if (row.intent == InGameMenuIntent.Restart) {
                                     showRestartConfirm = true
                                 } else {
                                     onIntent(row.intent)

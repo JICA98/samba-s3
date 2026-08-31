@@ -65,6 +65,8 @@ import com.zenithblue.sambas3.ui.games.launch.GameLaunchRepository
 import com.zenithblue.sambas3.ui.games.launch.GameSavestateRepository
 import com.zenithblue.sambas3.ui.games.launch.StoppedTrophiesDialog
 import com.zenithblue.sambas3.ui.ingame.TrophiesData
+import com.zenithblue.sambas3.ui.achievements.AchievementEvents
+import com.zenithblue.sambas3.ui.achievements.AchievementRepository
 import com.zenithblue.sambas3.crash.HomeRecoveryRepository
 import com.zenithblue.sambas3.crash.HomeRecoveryState
 import com.zenithblue.sambas3.crash.RecoveryAction
@@ -199,7 +201,21 @@ fun GamesScreen(
     var launchCenterGame by remember { mutableStateOf<Game?>(null) }
     var stoppedTrophies by remember { mutableStateOf<TrophiesData?>(null) }
     var stoppedTrophiesLoading by remember { mutableStateOf(false) }
-    val trophiesScope = rememberCoroutineScope()
+    LaunchedEffect(Unit) {
+        AchievementEvents.invalidations.collect {
+            if (stoppedTrophies != null && launchCenterGame != null) {
+                stoppedTrophies = null
+                stoppedTrophiesLoading = true
+            }
+        }
+    }
+    LaunchedEffect(stoppedTrophiesLoading, launchCenterGame?.info?.path) {
+        val game = launchCenterGame
+        if (!stoppedTrophiesLoading || game == null) return@LaunchedEffect
+        val titleId = GameIdentity.titleIdOrNull(game.info.path, game.info.name.value)
+        stoppedTrophies = titleId?.let { AchievementRepository.title(it, force = true) }
+        stoppedTrophiesLoading = false
+    }
     val recoveryScope = rememberCoroutineScope()
     var showImportDialog by remember { mutableStateOf(false) }
     var scannedFolderGames by remember { mutableStateOf<List<GameFolderMatch>?>(null) }
@@ -963,14 +979,6 @@ fun GamesScreen(
                 onAchievements = {
                     stoppedTrophiesLoading = true
                     stoppedTrophies = null
-                    trophiesScope.launch {
-                        val titleId = GameIdentity.titleIdOrNull(game.info.path, game.info.name.value)
-                        val json = withContext(Dispatchers.IO) {
-                            titleId?.let { runCatching { RPCSX.instance.getTrophiesForTitle(it) }.getOrNull() }
-                        }
-                        stoppedTrophies = TrophiesData.fromJson(json)
-                        stoppedTrophiesLoading = false
-                    }
                 }
             )
         }
@@ -989,7 +997,17 @@ fun GamesScreen(
                 else -> null
             }
             val failure = (state as? HomeRecoveryState.LoadFailure)?.reason
-            CrashDetailsSheet(session, report, failure) { detailsState = null }
+            CrashDetailsSheet(
+                session = session,
+                initialReport = report,
+                loadFailure = failure,
+                onChooseSave = {
+                    detailsState = null
+                    if (recoveryGame != null) launchCenterGame = recoveryGame
+                },
+                onViewLogs = { navigateToLogs?.invoke() },
+                onDismiss = { detailsState = null },
+            )
         }
 
         if (stoppedTrophiesLoading || stoppedTrophies != null) {

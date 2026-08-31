@@ -23,11 +23,10 @@ object CrashEvidenceCollector {
     fun collectSummary(context: Context, session: EmulationSessionRecord?, evidenceHint: String = ""): CrashReport {
         LogMonitor.flushWriters()
         val sourceFiles = LogMonitor.getAllLogFiles().associateBy { it.name }
+        val endMs = session?.let { maxOf(it.lastHeartbeatMs, it.failureAtMs ?: 0L, it.stoppedAtMs ?: 0L) + 2_000L }
         val evidence = buildString {
             if (evidenceHint.isNotBlank()) append(evidenceHint).append('\n')
-            sourceFiles.values.forEach { file ->
-                if (file.isFile) append(file.readTail(256 * 1024)).append('\n')
-            }
+            sourceFiles.values.forEach { file -> if (file.isFile) append(file.readEvidence(session?.startedAtMs, endMs)).append('\n') }
         }
         val classification = CrashClassifier.classify(evidence, session != null)
         val id = session?.sessionId ?: "report-${System.currentTimeMillis()}"
@@ -45,11 +44,10 @@ object CrashEvidenceCollector {
     fun collect(context: Context, session: EmulationSessionRecord?, evidenceHint: String = ""): CrashReport {
         LogMonitor.flushWriters()
         val sourceFiles = LogMonitor.getAllLogFiles().associateBy { it.name }
+        val endMs = session?.let { maxOf(it.lastHeartbeatMs, it.failureAtMs ?: 0L, it.stoppedAtMs ?: 0L) + 2_000L }
         val evidence = buildString {
             append(evidenceHint).append('\n')
-            sourceFiles.values.forEach { file ->
-                if (file.isFile) append(file.readEvidence(session?.startedAtMs)).append('\n')
-            }
+            sourceFiles.values.forEach { file -> if (file.isFile) append(file.readEvidence(session?.startedAtMs, endMs)).append('\n') }
         }
         val classification = CrashClassifier.classify(evidence, session != null)
         val id = session?.sessionId ?: "report-${System.currentTimeMillis()}"
@@ -57,7 +55,7 @@ object CrashEvidenceCollector {
         val copied = mutableMapOf<String, File>()
         sourceFiles.forEach { (name, source) ->
             val destination = File(dir, name)
-            runCatching { source.copyTo(destination, overwrite = true); copied[name] = destination }
+            runCatching { destination.writeText(source.readEvidence(session?.startedAtMs, endMs)); copied[name] = destination }
         }
         val metadata = File(dir, "metadata.json").apply { writeText(JSONObject().apply {
             put("classification", classification.name)
@@ -67,6 +65,8 @@ object CrashEvidenceCollector {
             put("titleId", session?.titleId ?: "")
             put("startedAtMs", session?.startedAtMs ?: 0L)
             put("lastHeartbeatMs", session?.lastHeartbeatMs ?: 0L)
+            put("failureAtMs", session?.failureAtMs ?: 0L)
+            put("stoppedAtMs", session?.stoppedAtMs ?: 0L)
         }.toString(2)) }
         File(dir, "summary.txt").writeText("${classification.name}\nLikely cause: ${CrashClassifier.likelyCause(evidence)}\n${evidence.take(4000)}")
         copied["metadata.json"] = metadata
@@ -74,41 +74,33 @@ object CrashEvidenceCollector {
         return CrashReport(dir, classification, classification.name.replace('_', ' '), CrashClassifier.likelyCause(evidence), copied)
     }
 
-    private fun File.readEvidence(startedAtMs: Long?, maxBytes: Int = 512 * 1024): String {
+    private fun File.readEvidence(startedAtMs: Long?, endAtMs: Long? = null, maxBytes: Int = 512 * 1024): String {
         if (startedAtMs == null) return readPrefix(maxBytes)
         val start = startedAtMs
         val now = System.currentTimeMillis()
         val lines = StringBuilder()
         var parsedLine = false
-        bufferedReader().useLines { sequence ->
-            sequence.forEach { line ->
+        // Recovery runs during Home startup. Read only the newest bounded tail;
+        // scanning a rotated 25 MB log before drawing the card makes recovery
+        // appear hung and can delay the first frame for many seconds.
+        val fileLength = length()
+        val tailStart = maxOf(0L, fileLength - maxBytes.toLong())
+        java.io.RandomAccessFile(this, "r").use { file ->
+            file.seek(tailStart)
+            if (tailStart > 0L) file.readLine()
+            while (file.filePointer < fileLength) {
+                val line = file.readLine() ?: break
                 val lineTime = line.logTimestampMs(now)
                 if (lineTime != null) {
                     parsedLine = true
-                    if (lineTime >= start && lines.length < maxBytes) lines.append(line).append('\n')
-                } else if (!parsedLine && lastModified() >= start && lines.length < maxBytes) {
+                    if (lineTime >= start && (endAtMs == null || lineTime <= endAtMs) && lines.length < maxBytes) lines.append(line).append('\n')
+                } else if (!parsedLine && lastModified() >= start && (endAtMs == null || lastModified() <= endAtMs) && lines.length < maxBytes) {
                     lines.append(line).append('\n')
                 }
+                if (lines.length >= maxBytes) break
             }
         }
         return lines.toString().take(maxBytes)
-    }
-
-    private fun File.readTail(maxBytes: Int): String {
-        if (!isFile || maxBytes <= 0) return ""
-        return runCatching {
-            java.io.RandomAccessFile(this, "r").use { raf ->
-                val start = (raf.length() - maxBytes).coerceAtLeast(0L)
-                raf.seek(start)
-                if (start > 0) raf.readLine()
-                val out = StringBuilder()
-                var line: String?
-                while (raf.readLine().also { line = it } != null && out.length < maxBytes) {
-                    out.append(line).append('\n')
-                }
-                out.toString().take(maxBytes)
-            }
-        }.getOrDefault("")
     }
 
     private fun File.readPrefix(maxBytes: Int): String = inputStream().use { stream ->

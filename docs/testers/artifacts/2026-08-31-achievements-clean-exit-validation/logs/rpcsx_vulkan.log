@@ -1,0 +1,876 @@
+[08-27 19:46:09.792] I/hook_impl: hook_android_load_sphal_library: filename: vulkan.adreno.so
+[08-27 19:46:09.792] I/hook_impl: hook_android_dlopen_ext: filename: vulkan.adreno.so
+[08-27 19:46:09.793] I/hook_impl: hook_android_dlopen_ext: loading custom driver: /data/data/com.zenithblue.sambas3/files/gpu_drivers/turnip-26.3/libvulkan_freedreno.so
+[08-27 19:46:09.794] D/vulkan: searching for layers in '/data/app/~~uScmnhpVUCqVNHXC-HZ_lg==/com.zenithblue.sambas3-eMb6bHD4imymFNRhHc9rtA==/lib/arm64'
+[08-27 19:46:09.794] D/vulkan: searching for layers in '/data/app/~~uScmnhpVUCqVNHXC-HZ_lg==/com.zenithblue.sambas3-eMb6bHD4imymFNRhHc9rtA==/base.apk!/lib/arm64-v8a'
+[08-27 19:46:34.227] D/vulkan: searching for layers in '/data/app/~~uScmnhpVUCqVNHXC-HZ_lg==/com.zenithblue.sambas3-eMb6bHD4imymFNRhHc9rtA==/lib/arm64'
+[08-27 19:46:34.228] D/vulkan: searching for layers in '/data/app/~~uScmnhpVUCqVNHXC-HZ_lg==/com.zenithblue.sambas3-eMb6bHD4imymFNRhHc9rtA==/base.apk!/lib/arm64-v8a'
+[08-27 19:51:27.455] I/hook_impl: hook_android_load_sphal_library: filename: vulkan.adreno.so
+[08-27 19:51:27.455] I/hook_impl: hook_android_dlopen_ext: filename: vulkan.adreno.so
+[08-27 19:51:27.456] I/hook_impl: hook_android_dlopen_ext: loading custom driver: /data/data/com.zenithblue.sambas3/files/gpu_drivers/turnip-26.3/libvulkan_freedreno.so
+[08-27 19:51:27.462] D/vulkan: searching for layers in '/data/app/~~uScmnhpVUCqVNHXC-HZ_lg==/com.zenithblue.sambas3-eMb6bHD4imymFNRhHc9rtA==/lib/arm64'
+[08-27 19:51:27.463] D/vulkan: searching for layers in '/data/app/~~uScmnhpVUCqVNHXC-HZ_lg==/com.zenithblue.sambas3-eMb6bHD4imymFNRhHc9rtA==/base.apk!/lib/arm64-v8a'
+[08-27 20:05:27.760] D/vulkan: searching for layers in '/data/app/~~zN5AjjYmN7ZBsWsq7eS7yw==/com.zenithblue.sambas3-5QUqWO5KA7OzuYZteNTmIg==/lib/arm64'
+[08-27 20:05:27.760] D/vulkan: searching for layers in '/data/app/~~zN5AjjYmN7ZBsWsq7eS7yw==/com.zenithblue.sambas3-5QUqWO5KA7OzuYZteNTmIg==/base.apk!/lib/arm64-v8a'
+[08-27 20:05:33.497] I/hook_impl: hook_android_load_sphal_library: filename: vulkan.adreno.so
+[08-27 20:05:33.497] I/hook_impl: hook_android_dlopen_ext: filename: vulkan.adreno.so
+[08-27 20:05:33.498] I/hook_impl: hook_android_dlopen_ext: loading custom driver: /data/data/com.zenithblue.sambas3/files/gpu_drivers/turnip-26.3/libvulkan_freedreno.so
+[08-27 20:05:33.499] D/vulkan: searching for layers in '/data/app/~~zN5AjjYmN7ZBsWsq7eS7yw==/com.zenithblue.sambas3-5QUqWO5KA7OzuYZteNTmIg==/lib/arm64'
+[08-27 20:05:33.500] D/vulkan: searching for layers in '/data/app/~~zN5AjjYmN7ZBsWsq7eS7yw==/com.zenithblue.sambas3-5QUqWO5KA7OzuYZteNTmIg==/base.apk!/lib/arm64-v8a'
+[08-27 20:21:40.762] D/vulkan: searching for layers in '/data/app/~~5NomN3iyXS5kB8i99TZKqQ==/com.zenithblue.sambas3-exVUAXvNo14Qm9R8Rrr1sA==/lib/arm64'
+[08-27 20:21:40.762] D/vulkan: searching for layers in '/data/app/~~5NomN3iyXS5kB8i99TZKqQ==/com.zenithblue.sambas3-exVUAXvNo14Qm9R8Rrr1sA==/base.apk!/lib/arm64-v8a'
+[08-27 20:21:45.537] I/hook_impl: hook_android_load_sphal_library: filename: vulkan.adreno.so
+[08-27 20:21:45.537] I/hook_impl: hook_android_dlopen_ext: filename: vulkan.adreno.so
+[08-27 20:21:45.539] I/hook_impl: hook_android_dlopen_ext: loading custom driver: /data/data/com.zenithblue.sambas3/files/gpu_drivers/turnip-26.3/libvulkan_freedreno.so
+[08-27 20:21:45.540] D/vulkan: searching for layers in '/data/app/~~5NomN3iyXS5kB8i99TZKqQ==/com.zenithblue.sambas3-exVUAXvNo14Qm9R8Rrr1sA==/lib/arm64'
+[08-27 20:21:45.540] D/vulkan: searching for layers in '/data/app/~~5NomN3iyXS5kB8i99TZKqQ==/com.zenithblue.sambas3-exVUAXvNo14Qm9R8Rrr1sA==/base.apk!/lib/arm64-v8a'
+[08-27 23:39:32.058] D/vulkan: searching for layers in '/data/app/~~5NomN3iyXS5kB8i99TZKqQ==/com.zenithblue.sambas3-exVUAXvNo14Qm9R8Rrr1sA==/lib/arm64'
+[08-27 23:39:32.058] D/vulkan: searching for layers in '/data/app/~~5NomN3iyXS5kB8i99TZKqQ==/com.zenithblue.sambas3-exVUAXvNo14Qm9R8Rrr1sA==/base.apk!/lib/arm64-v8a'
+[08-29 12:24:45.319] D/vulkan: searching for layers in '/data/app/~~xQCbjiDNaVNOkOfiA5YHyw==/com.zenithblue.sambas3-tPSP7yoRagXxSz8bNylUfQ==/lib/arm64'
+[08-29 12:24:45.319] D/vulkan: searching for layers in '/data/app/~~xQCbjiDNaVNOkOfiA5YHyw==/com.zenithblue.sambas3-tPSP7yoRagXxSz8bNylUfQ==/base.apk!/lib/arm64-v8a'
+[08-29 12:25:09.445] I/hook_impl: hook_android_load_sphal_library: filename: vulkan.adreno.so
+[08-29 12:25:09.445] I/hook_impl: hook_android_dlopen_ext: filename: vulkan.adreno.so
+[08-29 12:25:09.446] I/hook_impl: hook_android_dlopen_ext: loading custom driver: /data/data/com.zenithblue.sambas3/files/gpu_drivers/turnip-26.3/libvulkan_freedreno.so
+[08-29 12:25:09.452] D/vulkan: searching for layers in '/data/app/~~xQCbjiDNaVNOkOfiA5YHyw==/com.zenithblue.sambas3-tPSP7yoRagXxSz8bNylUfQ==/lib/arm64'
+[08-29 12:25:09.452] D/vulkan: searching for layers in '/data/app/~~xQCbjiDNaVNOkOfiA5YHyw==/com.zenithblue.sambas3-tPSP7yoRagXxSz8bNylUfQ==/base.apk!/lib/arm64-v8a'
+[08-29 13:04:09.292] D/vulkan: searching for layers in '/data/app/~~laARgI2Lh8Pbi_5wQ1Ad7Q==/com.zenithblue.sambas3-8f51hnYsQeCzjOIC5QyodA==/lib/arm64'
+[08-29 13:04:09.292] D/vulkan: searching for layers in '/data/app/~~laARgI2Lh8Pbi_5wQ1Ad7Q==/com.zenithblue.sambas3-8f51hnYsQeCzjOIC5QyodA==/base.apk!/lib/arm64-v8a'
+[08-29 13:09:44.739] D/vulkan: searching for layers in '/data/app/~~dHwuLDimWo3naVtvpvYFjQ==/com.zenithblue.sambas3-QX0IZnTk0PuSnXVXOxgACA==/lib/arm64'
+[08-29 13:09:44.739] D/vulkan: searching for layers in '/data/app/~~dHwuLDimWo3naVtvpvYFjQ==/com.zenithblue.sambas3-QX0IZnTk0PuSnXVXOxgACA==/base.apk!/lib/arm64-v8a'
+[08-29 13:11:13.871] I/hook_impl: hook_android_load_sphal_library: filename: vulkan.adreno.so
+[08-29 13:11:13.871] I/hook_impl: hook_android_dlopen_ext: filename: vulkan.adreno.so
+[08-29 13:11:13.871] I/hook_impl: hook_android_dlopen_ext: loading custom driver: /data/data/com.zenithblue.sambas3/files/gpu_drivers/turnip-26.3/libvulkan_freedreno.so
+[08-29 13:11:13.872] D/vulkan: searching for layers in '/data/app/~~dHwuLDimWo3naVtvpvYFjQ==/com.zenithblue.sambas3-QX0IZnTk0PuSnXVXOxgACA==/lib/arm64'
+[08-29 13:11:13.872] D/vulkan: searching for layers in '/data/app/~~dHwuLDimWo3naVtvpvYFjQ==/com.zenithblue.sambas3-QX0IZnTk0PuSnXVXOxgACA==/base.apk!/lib/arm64-v8a'
+[08-29 13:28:42.005] D/vulkan: searching for layers in '/data/app/~~QZSpjpuROvRIRbsZGjQkGQ==/com.zenithblue.sambas3-NhAhoMESCbAw4mNijTp8oQ==/lib/arm64'
+[08-29 13:28:42.005] D/vulkan: searching for layers in '/data/app/~~QZSpjpuROvRIRbsZGjQkGQ==/com.zenithblue.sambas3-NhAhoMESCbAw4mNijTp8oQ==/base.apk!/lib/arm64-v8a'
+[08-29 13:29:07.949] I/hook_impl: hook_android_load_sphal_library: filename: vulkan.adreno.so
+[08-29 13:29:07.949] I/hook_impl: hook_android_dlopen_ext: filename: vulkan.adreno.so
+[08-29 13:29:07.949] I/hook_impl: hook_android_dlopen_ext: loading custom driver: /data/data/com.zenithblue.sambas3/files/gpu_drivers/turnip-26.3/libvulkan_freedreno.so
+[08-29 13:29:07.950] D/vulkan: searching for layers in '/data/app/~~QZSpjpuROvRIRbsZGjQkGQ==/com.zenithblue.sambas3-NhAhoMESCbAw4mNijTp8oQ==/lib/arm64'
+[08-29 13:29:07.950] D/vulkan: searching for layers in '/data/app/~~QZSpjpuROvRIRbsZGjQkGQ==/com.zenithblue.sambas3-NhAhoMESCbAw4mNijTp8oQ==/base.apk!/lib/arm64-v8a'
+[08-29 13:57:50.739] D/vulkan: searching for layers in '/data/app/~~WG-XYEnT7RqgDSbTnrLrQw==/com.zenithblue.sambas3-fd04p4T-XJCBrj6TmPKT8w==/lib/arm64'
+[08-29 13:57:50.739] D/vulkan: searching for layers in '/data/app/~~WG-XYEnT7RqgDSbTnrLrQw==/com.zenithblue.sambas3-fd04p4T-XJCBrj6TmPKT8w==/base.apk!/lib/arm64-v8a'
+[08-29 13:58:23.476] I/hook_impl: hook_android_load_sphal_library: filename: vulkan.adreno.so
+[08-29 13:58:23.476] I/hook_impl: hook_android_dlopen_ext: filename: vulkan.adreno.so
+[08-29 13:58:23.477] I/hook_impl: hook_android_dlopen_ext: loading custom driver: /data/data/com.zenithblue.sambas3/files/gpu_drivers/turnip-26.3/libvulkan_freedreno.so
+[08-29 13:58:23.478] D/vulkan: searching for layers in '/data/app/~~WG-XYEnT7RqgDSbTnrLrQw==/com.zenithblue.sambas3-fd04p4T-XJCBrj6TmPKT8w==/lib/arm64'
+[08-29 13:58:23.478] D/vulkan: searching for layers in '/data/app/~~WG-XYEnT7RqgDSbTnrLrQw==/com.zenithblue.sambas3-fd04p4T-XJCBrj6TmPKT8w==/base.apk!/lib/arm64-v8a'
+[08-29 14:12:09.326] D/vulkan: searching for layers in '/data/app/~~ofT09-ODgjFjsAusHeyTdg==/com.zenithblue.sambas3-3UpZ2aCAET2GnRvABxf45A==/lib/arm64'
+[08-29 14:12:09.326] D/vulkan: searching for layers in '/data/app/~~ofT09-ODgjFjsAusHeyTdg==/com.zenithblue.sambas3-3UpZ2aCAET2GnRvABxf45A==/base.apk!/lib/arm64-v8a'
+[08-29 14:13:38.618] I/hook_impl: hook_android_load_sphal_library: filename: vulkan.adreno.so
+[08-29 14:13:38.618] I/hook_impl: hook_android_dlopen_ext: filename: vulkan.adreno.so
+[08-29 14:13:38.618] I/hook_impl: hook_android_dlopen_ext: loading custom driver: /data/data/com.zenithblue.sambas3/files/gpu_drivers/turnip-26.3/libvulkan_freedreno.so
+[08-29 14:13:38.619] D/vulkan: searching for layers in '/data/app/~~ofT09-ODgjFjsAusHeyTdg==/com.zenithblue.sambas3-3UpZ2aCAET2GnRvABxf45A==/lib/arm64'
+[08-29 14:13:38.619] D/vulkan: searching for layers in '/data/app/~~ofT09-ODgjFjsAusHeyTdg==/com.zenithblue.sambas3-3UpZ2aCAET2GnRvABxf45A==/base.apk!/lib/arm64-v8a'
+[08-29 15:01:58.555] D/vulkan: searching for layers in '/data/app/~~RXw1HtSh6C0YsbHSzFR9dQ==/com.zenithblue.sambas3-7DBdcjyVUFGp4N-gCTeG2w==/lib/arm64'
+[08-29 15:01:58.555] D/vulkan: searching for layers in '/data/app/~~RXw1HtSh6C0YsbHSzFR9dQ==/com.zenithblue.sambas3-7DBdcjyVUFGp4N-gCTeG2w==/base.apk!/lib/arm64-v8a'
+[08-29 15:22:52.486] I/hook_impl: hook_android_load_sphal_library: filename: vulkan.adreno.so
+[08-29 15:22:52.486] I/hook_impl: hook_android_dlopen_ext: filename: vulkan.adreno.so
+[08-29 15:22:52.487] I/hook_impl: hook_android_dlopen_ext: loading custom driver: /data/data/com.zenithblue.sambas3/files/gpu_drivers/turnip-26.3/libvulkan_freedreno.so
+[08-29 15:22:52.488] D/vulkan: searching for layers in '/data/app/~~RXw1HtSh6C0YsbHSzFR9dQ==/com.zenithblue.sambas3-7DBdcjyVUFGp4N-gCTeG2w==/lib/arm64'
+[08-29 15:22:52.488] D/vulkan: searching for layers in '/data/app/~~RXw1HtSh6C0YsbHSzFR9dQ==/com.zenithblue.sambas3-7DBdcjyVUFGp4N-gCTeG2w==/base.apk!/lib/arm64-v8a'
+[08-29 15:44:49.226] E/vulkan: dequeueBuffer failed: No such device (-19)
+[08-29 15:47:17.627] E/vulkan: native_window_api_connect() failed: Invalid argument (-22)
+[08-29 15:54:18.783] D/vulkan: searching for layers in '/data/app/~~RXw1HtSh6C0YsbHSzFR9dQ==/com.zenithblue.sambas3-7DBdcjyVUFGp4N-gCTeG2w==/lib/arm64'
+[08-29 15:54:18.784] D/vulkan: searching for layers in '/data/app/~~RXw1HtSh6C0YsbHSzFR9dQ==/com.zenithblue.sambas3-7DBdcjyVUFGp4N-gCTeG2w==/base.apk!/lib/arm64-v8a'
+[08-29 15:54:23.940] I/hook_impl: hook_android_load_sphal_library: filename: vulkan.adreno.so
+[08-29 15:54:23.940] I/hook_impl: hook_android_dlopen_ext: filename: vulkan.adreno.so
+[08-29 15:54:23.941] I/hook_impl: hook_android_dlopen_ext: loading custom driver: /data/data/com.zenithblue.sambas3/files/gpu_drivers/turnip-26.3/libvulkan_freedreno.so
+[08-29 15:54:23.942] D/vulkan: searching for layers in '/data/app/~~RXw1HtSh6C0YsbHSzFR9dQ==/com.zenithblue.sambas3-7DBdcjyVUFGp4N-gCTeG2w==/lib/arm64'
+[08-29 15:54:23.942] D/vulkan: searching for layers in '/data/app/~~RXw1HtSh6C0YsbHSzFR9dQ==/com.zenithblue.sambas3-7DBdcjyVUFGp4N-gCTeG2w==/base.apk!/lib/arm64-v8a'
+[08-29 16:18:27.990] E/vulkan: dequeueBuffer failed: No such device (-19)
+[08-29 16:33:34.987] D/vulkan: searching for layers in '/data/app/~~41oc8Y9cySHvmMHh36zvcA==/com.zenithblue.sambas3-G-6SOxZItcoYgxHh5W3SQA==/lib/arm64'
+[08-29 16:33:34.987] D/vulkan: searching for layers in '/data/app/~~41oc8Y9cySHvmMHh36zvcA==/com.zenithblue.sambas3-G-6SOxZItcoYgxHh5W3SQA==/base.apk!/lib/arm64-v8a'
+[08-29 16:34:24.567] D/vulkan: searching for layers in '/data/app/~~41oc8Y9cySHvmMHh36zvcA==/com.zenithblue.sambas3-G-6SOxZItcoYgxHh5W3SQA==/lib/arm64'
+[08-29 16:34:24.567] D/vulkan: searching for layers in '/data/app/~~41oc8Y9cySHvmMHh36zvcA==/com.zenithblue.sambas3-G-6SOxZItcoYgxHh5W3SQA==/base.apk!/lib/arm64-v8a'
+[08-29 16:35:24.137] I/hook_impl: hook_android_load_sphal_library: filename: vulkan.adreno.so
+[08-29 16:35:24.137] I/hook_impl: hook_android_dlopen_ext: filename: vulkan.adreno.so
+[08-29 16:35:24.138] I/hook_impl: hook_android_dlopen_ext: loading custom driver: /data/data/com.zenithblue.sambas3/files/gpu_drivers/turnip-26.3/libvulkan_freedreno.so
+[08-29 16:35:24.139] D/vulkan: searching for layers in '/data/app/~~41oc8Y9cySHvmMHh36zvcA==/com.zenithblue.sambas3-G-6SOxZItcoYgxHh5W3SQA==/lib/arm64'
+[08-29 16:35:24.139] D/vulkan: searching for layers in '/data/app/~~41oc8Y9cySHvmMHh36zvcA==/com.zenithblue.sambas3-G-6SOxZItcoYgxHh5W3SQA==/base.apk!/lib/arm64-v8a'
+[08-29 16:56:18.940] D/vulkan: searching for layers in '/data/app/~~mdpCcZefdB1886bdi7ynlQ==/com.zenithblue.sambas3-aASJuQIV5PT0VV2HFE9UkQ==/lib/arm64'
+[08-29 16:56:18.940] D/vulkan: searching for layers in '/data/app/~~mdpCcZefdB1886bdi7ynlQ==/com.zenithblue.sambas3-aASJuQIV5PT0VV2HFE9UkQ==/base.apk!/lib/arm64-v8a'
+[08-29 16:57:37.688] I/hook_impl: hook_android_load_sphal_library: filename: vulkan.adreno.so
+[08-29 16:57:37.688] I/hook_impl: hook_android_dlopen_ext: filename: vulkan.adreno.so
+[08-29 16:57:37.689] I/hook_impl: hook_android_dlopen_ext: loading custom driver: /data/data/com.zenithblue.sambas3/files/gpu_drivers/turnip-26.3/libvulkan_freedreno.so
+[08-29 16:57:37.690] D/vulkan: searching for layers in '/data/app/~~mdpCcZefdB1886bdi7ynlQ==/com.zenithblue.sambas3-aASJuQIV5PT0VV2HFE9UkQ==/lib/arm64'
+[08-29 16:57:37.690] D/vulkan: searching for layers in '/data/app/~~mdpCcZefdB1886bdi7ynlQ==/com.zenithblue.sambas3-aASJuQIV5PT0VV2HFE9UkQ==/base.apk!/lib/arm64-v8a'
+[08-29 17:08:09.800] D/vulkan: searching for layers in '/data/app/~~_Qz-Io_fw6exZn_A4SSScg==/com.zenithblue.sambas3-xtUS3x4QHy7XUOs3BV5SbA==/lib/arm64'
+[08-29 17:08:09.800] D/vulkan: searching for layers in '/data/app/~~_Qz-Io_fw6exZn_A4SSScg==/com.zenithblue.sambas3-xtUS3x4QHy7XUOs3BV5SbA==/base.apk!/lib/arm64-v8a'
+[08-29 17:18:24.307] D/vulkan: searching for layers in '/data/app/~~eiQ-adeOEto3fZkG-mx4TQ==/com.zenithblue.sambas3-EjIBqjlqlB3WxaBg1KCefQ==/lib/arm64'
+[08-29 17:18:24.307] D/vulkan: searching for layers in '/data/app/~~eiQ-adeOEto3fZkG-mx4TQ==/com.zenithblue.sambas3-EjIBqjlqlB3WxaBg1KCefQ==/base.apk!/lib/arm64-v8a'
+[08-29 17:18:27.094] I/hook_impl: hook_android_load_sphal_library: filename: vulkan.adreno.so
+[08-29 17:18:27.094] I/hook_impl: hook_android_dlopen_ext: filename: vulkan.adreno.so
+[08-29 17:18:27.095] I/hook_impl: hook_android_dlopen_ext: loading custom driver: /data/data/com.zenithblue.sambas3/files/gpu_drivers/turnip-26.3/libvulkan_freedreno.so
+[08-29 17:18:27.096] D/vulkan: searching for layers in '/data/app/~~eiQ-adeOEto3fZkG-mx4TQ==/com.zenithblue.sambas3-EjIBqjlqlB3WxaBg1KCefQ==/lib/arm64'
+[08-29 17:18:27.096] D/vulkan: searching for layers in '/data/app/~~eiQ-adeOEto3fZkG-mx4TQ==/com.zenithblue.sambas3-EjIBqjlqlB3WxaBg1KCefQ==/base.apk!/lib/arm64-v8a'
+[08-29 17:47:29.456] D/vulkan: searching for layers in '/data/app/~~POLUFXT4H-_oIDRc4iQlEQ==/com.zenithblue.sambas3-gSyvptIErBB4dbPDWxajew==/lib/arm64'
+[08-29 17:47:29.456] D/vulkan: searching for layers in '/data/app/~~POLUFXT4H-_oIDRc4iQlEQ==/com.zenithblue.sambas3-gSyvptIErBB4dbPDWxajew==/base.apk!/lib/arm64-v8a'
+[08-29 17:48:56.601] I/hook_impl: hook_android_load_sphal_library: filename: vulkan.adreno.so
+[08-29 17:48:56.601] I/hook_impl: hook_android_dlopen_ext: filename: vulkan.adreno.so
+[08-29 17:48:56.601] I/hook_impl: hook_android_dlopen_ext: loading custom driver: /data/data/com.zenithblue.sambas3/files/gpu_drivers/turnip-26.3/libvulkan_freedreno.so
+[08-29 17:48:56.602] D/vulkan: searching for layers in '/data/app/~~POLUFXT4H-_oIDRc4iQlEQ==/com.zenithblue.sambas3-gSyvptIErBB4dbPDWxajew==/lib/arm64'
+[08-29 17:48:56.602] D/vulkan: searching for layers in '/data/app/~~POLUFXT4H-_oIDRc4iQlEQ==/com.zenithblue.sambas3-gSyvptIErBB4dbPDWxajew==/base.apk!/lib/arm64-v8a'
+[08-29 17:55:20.582] D/vulkan: searching for layers in '/data/app/~~8S2dcOrRH3bkSZIHxAy0Aw==/com.zenithblue.sambas3-08FntZru09TqV5QL4lgVbA==/lib/arm64'
+[08-29 17:55:20.582] D/vulkan: searching for layers in '/data/app/~~8S2dcOrRH3bkSZIHxAy0Aw==/com.zenithblue.sambas3-08FntZru09TqV5QL4lgVbA==/base.apk!/lib/arm64-v8a'
+[08-29 17:55:42.321] I/hook_impl: hook_android_load_sphal_library: filename: vulkan.adreno.so
+[08-29 17:55:42.321] I/hook_impl: hook_android_dlopen_ext: filename: vulkan.adreno.so
+[08-29 17:55:42.322] I/hook_impl: hook_android_dlopen_ext: loading custom driver: /data/data/com.zenithblue.sambas3/files/gpu_drivers/turnip-26.3/libvulkan_freedreno.so
+[08-29 17:55:42.323] D/vulkan: searching for layers in '/data/app/~~8S2dcOrRH3bkSZIHxAy0Aw==/com.zenithblue.sambas3-08FntZru09TqV5QL4lgVbA==/lib/arm64'
+[08-29 17:55:42.323] D/vulkan: searching for layers in '/data/app/~~8S2dcOrRH3bkSZIHxAy0Aw==/com.zenithblue.sambas3-08FntZru09TqV5QL4lgVbA==/base.apk!/lib/arm64-v8a'
+[08-29 18:15:10.044] D/vulkan: searching for layers in '/data/app/~~BEkweRpZPtrf9pFfDDWTdw==/com.zenithblue.sambas3-hoWVeRTStzktslk0oLN6-A==/lib/arm64'
+[08-29 18:15:10.044] D/vulkan: searching for layers in '/data/app/~~BEkweRpZPtrf9pFfDDWTdw==/com.zenithblue.sambas3-hoWVeRTStzktslk0oLN6-A==/base.apk!/lib/arm64-v8a'
+[08-29 18:15:46.488] I/hook_impl: hook_android_load_sphal_library: filename: vulkan.adreno.so
+[08-29 18:15:46.488] I/hook_impl: hook_android_dlopen_ext: filename: vulkan.adreno.so
+[08-29 18:15:46.489] I/hook_impl: hook_android_dlopen_ext: loading custom driver: /data/data/com.zenithblue.sambas3/files/gpu_drivers/turnip-26.3/libvulkan_freedreno.so
+[08-29 18:15:46.492] D/vulkan: searching for layers in '/data/app/~~BEkweRpZPtrf9pFfDDWTdw==/com.zenithblue.sambas3-hoWVeRTStzktslk0oLN6-A==/lib/arm64'
+[08-29 18:15:46.492] D/vulkan: searching for layers in '/data/app/~~BEkweRpZPtrf9pFfDDWTdw==/com.zenithblue.sambas3-hoWVeRTStzktslk0oLN6-A==/base.apk!/lib/arm64-v8a'
+[08-29 18:31:58.638] D/vulkan: searching for layers in '/data/app/~~XFuPb6oe-hI7m3Q2TGlO7w==/com.zenithblue.sambas3-sJJreDe5cbE5u2os3AsvVg==/lib/arm64'
+[08-29 18:31:58.639] D/vulkan: searching for layers in '/data/app/~~XFuPb6oe-hI7m3Q2TGlO7w==/com.zenithblue.sambas3-sJJreDe5cbE5u2os3AsvVg==/base.apk!/lib/arm64-v8a'
+[08-29 18:32:13.109] I/hook_impl: hook_android_load_sphal_library: filename: vulkan.adreno.so
+[08-29 18:32:13.109] I/hook_impl: hook_android_dlopen_ext: filename: vulkan.adreno.so
+[08-29 18:32:13.110] I/hook_impl: hook_android_dlopen_ext: loading custom driver: /data/data/com.zenithblue.sambas3/files/gpu_drivers/turnip-26.3/libvulkan_freedreno.so
+[08-29 18:32:13.111] D/vulkan: searching for layers in '/data/app/~~XFuPb6oe-hI7m3Q2TGlO7w==/com.zenithblue.sambas3-sJJreDe5cbE5u2os3AsvVg==/lib/arm64'
+[08-29 18:32:13.111] D/vulkan: searching for layers in '/data/app/~~XFuPb6oe-hI7m3Q2TGlO7w==/com.zenithblue.sambas3-sJJreDe5cbE5u2os3AsvVg==/base.apk!/lib/arm64-v8a'
+[08-29 18:38:28.627] D/vulkan: searching for layers in '/data/app/~~XFuPb6oe-hI7m3Q2TGlO7w==/com.zenithblue.sambas3-sJJreDe5cbE5u2os3AsvVg==/lib/arm64'
+[08-29 18:38:28.627] D/vulkan: searching for layers in '/data/app/~~XFuPb6oe-hI7m3Q2TGlO7w==/com.zenithblue.sambas3-sJJreDe5cbE5u2os3AsvVg==/base.apk!/lib/arm64-v8a'
+[08-29 18:38:31.772] I/hook_impl: hook_android_load_sphal_library: filename: vulkan.adreno.so
+[08-29 18:38:31.772] I/hook_impl: hook_android_dlopen_ext: filename: vulkan.adreno.so
+[08-29 18:38:31.773] I/hook_impl: hook_android_dlopen_ext: loading custom driver: /data/data/com.zenithblue.sambas3/files/gpu_drivers/turnip-26.3/libvulkan_freedreno.so
+[08-29 18:38:31.774] D/vulkan: searching for layers in '/data/app/~~XFuPb6oe-hI7m3Q2TGlO7w==/com.zenithblue.sambas3-sJJreDe5cbE5u2os3AsvVg==/lib/arm64'
+[08-29 18:38:31.774] D/vulkan: searching for layers in '/data/app/~~XFuPb6oe-hI7m3Q2TGlO7w==/com.zenithblue.sambas3-sJJreDe5cbE5u2os3AsvVg==/base.apk!/lib/arm64-v8a'
+[08-29 18:50:04.345] D/vulkan: searching for layers in '/data/app/~~pST_KfQgI-DcVTmsSopsOg==/com.zenithblue.sambas3-1CIzGscJmB1vVjLDpLjHwg==/lib/arm64'
+[08-29 18:50:04.346] D/vulkan: searching for layers in '/data/app/~~pST_KfQgI-DcVTmsSopsOg==/com.zenithblue.sambas3-1CIzGscJmB1vVjLDpLjHwg==/base.apk!/lib/arm64-v8a'
+[08-29 18:50:53.720] I/hook_impl: hook_android_dlopen_ext: filename: vulkan.adreno.so
+[08-29 18:50:53.720] I/hook_impl: hook_android_dlopen_ext: loading custom driver: /data/data/com.zenithblue.sambas3/files/gpu_drivers/turnip-26.3/libvulkan_freedreno.so
+[08-29 18:50:53.721] D/vulkan: searching for layers in '/data/app/~~pST_KfQgI-DcVTmsSopsOg==/com.zenithblue.sambas3-1CIzGscJmB1vVjLDpLjHwg==/lib/arm64'
+[08-29 18:50:53.721] D/vulkan: searching for layers in '/data/app/~~pST_KfQgI-DcVTmsSopsOg==/com.zenithblue.sambas3-1CIzGscJmB1vVjLDpLjHwg==/base.apk!/lib/arm64-v8a'
+[08-29 19:01:57.666] D/vulkan: searching for layers in '/data/app/~~pST_KfQgI-DcVTmsSopsOg==/com.zenithblue.sambas3-1CIzGscJmB1vVjLDpLjHwg==/lib/arm64'
+[08-29 19:01:57.666] D/vulkan: searching for layers in '/data/app/~~pST_KfQgI-DcVTmsSopsOg==/com.zenithblue.sambas3-1CIzGscJmB1vVjLDpLjHwg==/base.apk!/lib/arm64-v8a'
+[08-29 19:02:00.799] I/hook_impl: hook_android_load_sphal_library: filename: vulkan.adreno.so
+[08-29 19:02:00.799] I/hook_impl: hook_android_dlopen_ext: filename: vulkan.adreno.so
+[08-29 19:02:00.800] I/hook_impl: hook_android_dlopen_ext: loading custom driver: /data/data/com.zenithblue.sambas3/files/gpu_drivers/turnip-26.3/libvulkan_freedreno.so
+[08-29 19:02:00.801] D/vulkan: searching for layers in '/data/app/~~pST_KfQgI-DcVTmsSopsOg==/com.zenithblue.sambas3-1CIzGscJmB1vVjLDpLjHwg==/lib/arm64'
+[08-29 19:02:00.801] D/vulkan: searching for layers in '/data/app/~~pST_KfQgI-DcVTmsSopsOg==/com.zenithblue.sambas3-1CIzGscJmB1vVjLDpLjHwg==/base.apk!/lib/arm64-v8a'
+[08-29 19:15:45.332] D/vulkan: searching for layers in '/data/app/~~S-vvElFkNPNIJNFXnD_Xaw==/com.zenithblue.sambas3-GGT8iVSleuzWROYYcDzTbQ==/lib/arm64'
+[08-29 19:15:45.332] D/vulkan: searching for layers in '/data/app/~~S-vvElFkNPNIJNFXnD_Xaw==/com.zenithblue.sambas3-GGT8iVSleuzWROYYcDzTbQ==/base.apk!/lib/arm64-v8a'
+[08-29 19:16:43.387] I/hook_impl: hook_android_load_sphal_library: filename: vulkan.adreno.so
+[08-29 19:16:43.387] I/hook_impl: hook_android_dlopen_ext: filename: vulkan.adreno.so
+[08-29 19:16:43.388] I/hook_impl: hook_android_dlopen_ext: loading custom driver: /data/data/com.zenithblue.sambas3/files/gpu_drivers/turnip-26.3/libvulkan_freedreno.so
+[08-29 19:16:43.389] D/vulkan: searching for layers in '/data/app/~~S-vvElFkNPNIJNFXnD_Xaw==/com.zenithblue.sambas3-GGT8iVSleuzWROYYcDzTbQ==/lib/arm64'
+[08-29 19:16:43.389] D/vulkan: searching for layers in '/data/app/~~S-vvElFkNPNIJNFXnD_Xaw==/com.zenithblue.sambas3-GGT8iVSleuzWROYYcDzTbQ==/base.apk!/lib/arm64-v8a'
+[08-29 19:33:38.511] D/vulkan: searching for layers in '/data/app/~~R3ZrJLSJjEAl3zXHVnbm-Q==/com.zenithblue.sambas3-qW8Vs5NPVBp1shW7-QJ0wg==/lib/arm64'
+[08-29 19:33:38.511] D/vulkan: searching for layers in '/data/app/~~R3ZrJLSJjEAl3zXHVnbm-Q==/com.zenithblue.sambas3-qW8Vs5NPVBp1shW7-QJ0wg==/base.apk!/lib/arm64-v8a'
+[08-29 19:34:08.232] I/hook_impl: hook_android_load_sphal_library: filename: vulkan.adreno.so
+[08-29 19:34:08.232] I/hook_impl: hook_android_dlopen_ext: filename: vulkan.adreno.so
+[08-29 19:34:08.233] I/hook_impl: hook_android_dlopen_ext: loading custom driver: /data/data/com.zenithblue.sambas3/files/gpu_drivers/turnip-26.3/libvulkan_freedreno.so
+[08-29 19:34:08.234] D/vulkan: searching for layers in '/data/app/~~R3ZrJLSJjEAl3zXHVnbm-Q==/com.zenithblue.sambas3-qW8Vs5NPVBp1shW7-QJ0wg==/lib/arm64'
+[08-29 19:34:08.234] D/vulkan: searching for layers in '/data/app/~~R3ZrJLSJjEAl3zXHVnbm-Q==/com.zenithblue.sambas3-qW8Vs5NPVBp1shW7-QJ0wg==/base.apk!/lib/arm64-v8a'
+[08-29 19:48:57.450] D/vulkan: searching for layers in '/data/app/~~R3ZrJLSJjEAl3zXHVnbm-Q==/com.zenithblue.sambas3-qW8Vs5NPVBp1shW7-QJ0wg==/lib/arm64'
+[08-29 19:48:57.450] D/vulkan: searching for layers in '/data/app/~~R3ZrJLSJjEAl3zXHVnbm-Q==/com.zenithblue.sambas3-qW8Vs5NPVBp1shW7-QJ0wg==/base.apk!/lib/arm64-v8a'
+[08-29 19:49:31.786] I/hook_impl: hook_android_load_sphal_library: filename: vulkan.adreno.so
+[08-29 19:49:31.786] I/hook_impl: hook_android_dlopen_ext: filename: vulkan.adreno.so
+[08-29 19:49:31.787] I/hook_impl: hook_android_dlopen_ext: loading custom driver: /data/data/com.zenithblue.sambas3/files/gpu_drivers/turnip-26.3/libvulkan_freedreno.so
+[08-29 19:49:31.788] D/vulkan: searching for layers in '/data/app/~~R3ZrJLSJjEAl3zXHVnbm-Q==/com.zenithblue.sambas3-qW8Vs5NPVBp1shW7-QJ0wg==/lib/arm64'
+[08-29 19:49:31.788] D/vulkan: searching for layers in '/data/app/~~R3ZrJLSJjEAl3zXHVnbm-Q==/com.zenithblue.sambas3-qW8Vs5NPVBp1shW7-QJ0wg==/base.apk!/lib/arm64-v8a'
+[08-29 19:54:47.148] D/vulkan: searching for layers in '/data/app/~~R3ZrJLSJjEAl3zXHVnbm-Q==/com.zenithblue.sambas3-qW8Vs5NPVBp1shW7-QJ0wg==/lib/arm64'
+[08-29 19:54:47.149] D/vulkan: searching for layers in '/data/app/~~R3ZrJLSJjEAl3zXHVnbm-Q==/com.zenithblue.sambas3-qW8Vs5NPVBp1shW7-QJ0wg==/base.apk!/lib/arm64-v8a'
+[08-29 19:55:52.506] I/hook_impl: hook_android_load_sphal_library: filename: vulkan.adreno.so
+[08-29 19:55:52.506] I/hook_impl: hook_android_dlopen_ext: filename: vulkan.adreno.so
+[08-29 19:55:52.507] I/hook_impl: hook_android_dlopen_ext: loading custom driver: /data/data/com.zenithblue.sambas3/files/gpu_drivers/turnip-26.3/libvulkan_freedreno.so
+[08-29 19:55:52.508] D/vulkan: searching for layers in '/data/app/~~R3ZrJLSJjEAl3zXHVnbm-Q==/com.zenithblue.sambas3-qW8Vs5NPVBp1shW7-QJ0wg==/lib/arm64'
+[08-29 19:55:52.508] D/vulkan: searching for layers in '/data/app/~~R3ZrJLSJjEAl3zXHVnbm-Q==/com.zenithblue.sambas3-qW8Vs5NPVBp1shW7-QJ0wg==/base.apk!/lib/arm64-v8a'
+[08-29 20:00:16.660] D/vulkan: searching for layers in '/data/app/~~R3ZrJLSJjEAl3zXHVnbm-Q==/com.zenithblue.sambas3-qW8Vs5NPVBp1shW7-QJ0wg==/lib/arm64'
+[08-29 20:00:16.660] D/vulkan: searching for layers in '/data/app/~~R3ZrJLSJjEAl3zXHVnbm-Q==/com.zenithblue.sambas3-qW8Vs5NPVBp1shW7-QJ0wg==/base.apk!/lib/arm64-v8a'
+[08-29 20:00:19.418] I/hook_impl: hook_android_load_sphal_library: filename: vulkan.adreno.so
+[08-29 20:00:19.418] I/hook_impl: hook_android_dlopen_ext: filename: vulkan.adreno.so
+[08-29 20:00:19.418] I/hook_impl: hook_android_dlopen_ext: loading custom driver: /data/data/com.zenithblue.sambas3/files/gpu_drivers/turnip-26.3/libvulkan_freedreno.so
+[08-29 20:00:19.420] D/vulkan: searching for layers in '/data/app/~~R3ZrJLSJjEAl3zXHVnbm-Q==/com.zenithblue.sambas3-qW8Vs5NPVBp1shW7-QJ0wg==/lib/arm64'
+[08-29 20:00:19.420] D/vulkan: searching for layers in '/data/app/~~R3ZrJLSJjEAl3zXHVnbm-Q==/com.zenithblue.sambas3-qW8Vs5NPVBp1shW7-QJ0wg==/base.apk!/lib/arm64-v8a'
+[08-29 20:17:43.226] D/vulkan: searching for layers in '/data/app/~~yNec1ISR3m_aYGJzvFpTRQ==/com.zenithblue.sambas3-3NUh7j4vKmYSFatsjCjr8A==/lib/arm64'
+[08-29 20:17:43.226] D/vulkan: searching for layers in '/data/app/~~yNec1ISR3m_aYGJzvFpTRQ==/com.zenithblue.sambas3-3NUh7j4vKmYSFatsjCjr8A==/base.apk!/lib/arm64-v8a'
+[08-29 20:19:17.485] I/hook_impl: hook_android_load_sphal_library: filename: vulkan.adreno.so
+[08-29 20:19:17.485] I/hook_impl: hook_android_dlopen_ext: filename: vulkan.adreno.so
+[08-29 20:19:17.485] I/hook_impl: hook_android_dlopen_ext: loading custom driver: /data/data/com.zenithblue.sambas3/files/gpu_drivers/turnip-26.3/libvulkan_freedreno.so
+[08-29 20:19:17.486] D/vulkan: searching for layers in '/data/app/~~yNec1ISR3m_aYGJzvFpTRQ==/com.zenithblue.sambas3-3NUh7j4vKmYSFatsjCjr8A==/lib/arm64'
+[08-29 20:19:17.486] D/vulkan: searching for layers in '/data/app/~~yNec1ISR3m_aYGJzvFpTRQ==/com.zenithblue.sambas3-3NUh7j4vKmYSFatsjCjr8A==/base.apk!/lib/arm64-v8a'
+[08-29 20:32:31.018] D/vulkan: searching for layers in '/data/app/~~yNec1ISR3m_aYGJzvFpTRQ==/com.zenithblue.sambas3-3NUh7j4vKmYSFatsjCjr8A==/lib/arm64'
+[08-29 20:32:31.018] D/vulkan: searching for layers in '/data/app/~~yNec1ISR3m_aYGJzvFpTRQ==/com.zenithblue.sambas3-3NUh7j4vKmYSFatsjCjr8A==/base.apk!/lib/arm64-v8a'
+[08-29 20:32:34.206] I/hook_impl: hook_android_load_sphal_library: filename: vulkan.adreno.so
+[08-29 20:32:34.206] I/hook_impl: hook_android_dlopen_ext: filename: vulkan.adreno.so
+[08-29 20:32:34.207] I/hook_impl: hook_android_dlopen_ext: loading custom driver: /data/data/com.zenithblue.sambas3/files/gpu_drivers/turnip-26.3/libvulkan_freedreno.so
+[08-29 20:32:34.208] D/vulkan: searching for layers in '/data/app/~~yNec1ISR3m_aYGJzvFpTRQ==/com.zenithblue.sambas3-3NUh7j4vKmYSFatsjCjr8A==/lib/arm64'
+[08-29 20:32:34.208] D/vulkan: searching for layers in '/data/app/~~yNec1ISR3m_aYGJzvFpTRQ==/com.zenithblue.sambas3-3NUh7j4vKmYSFatsjCjr8A==/base.apk!/lib/arm64-v8a'
+[08-29 20:39:35.683] D/vulkan: searching for layers in '/data/app/~~xpKnC7MncptES29lv4XPIA==/com.zenithblue.sambas3-FinFQVhzxefWK1Bs2hnFig==/lib/arm64'
+[08-29 20:39:35.683] D/vulkan: searching for layers in '/data/app/~~xpKnC7MncptES29lv4XPIA==/com.zenithblue.sambas3-FinFQVhzxefWK1Bs2hnFig==/base.apk!/lib/arm64-v8a'
+[08-29 20:40:08.074] I/hook_impl: hook_android_load_sphal_library: filename: vulkan.adreno.so
+[08-29 20:40:08.074] I/hook_impl: hook_android_dlopen_ext: filename: vulkan.adreno.so
+[08-29 20:40:08.074] I/hook_impl: hook_android_dlopen_ext: loading custom driver: /data/data/com.zenithblue.sambas3/files/gpu_drivers/turnip-26.3/libvulkan_freedreno.so
+[08-29 20:40:08.075] D/vulkan: searching for layers in '/data/app/~~xpKnC7MncptES29lv4XPIA==/com.zenithblue.sambas3-FinFQVhzxefWK1Bs2hnFig==/lib/arm64'
+[08-29 20:40:08.075] D/vulkan: searching for layers in '/data/app/~~xpKnC7MncptES29lv4XPIA==/com.zenithblue.sambas3-FinFQVhzxefWK1Bs2hnFig==/base.apk!/lib/arm64-v8a'
+[08-29 21:34:57.036] D/vulkan: searching for layers in '/data/app/~~jwOF6g29Wa-luBeCXu8_Hw==/com.zenithblue.sambas3-EVsdGIuIbR00UDtO_EU7TQ==/lib/arm64'
+[08-29 21:34:57.037] D/vulkan: searching for layers in '/data/app/~~jwOF6g29Wa-luBeCXu8_Hw==/com.zenithblue.sambas3-EVsdGIuIbR00UDtO_EU7TQ==/base.apk!/lib/arm64-v8a'
+[08-29 21:36:03.836] I/hook_impl: hook_android_load_sphal_library: filename: vulkan.adreno.so
+[08-29 21:36:03.836] I/hook_impl: hook_android_dlopen_ext: filename: vulkan.adreno.so
+[08-29 21:36:03.837] I/hook_impl: hook_android_dlopen_ext: loading custom driver: /data/data/com.zenithblue.sambas3/files/gpu_drivers/turnip-26.3/libvulkan_freedreno.so
+[08-29 21:36:03.838] D/vulkan: searching for layers in '/data/app/~~jwOF6g29Wa-luBeCXu8_Hw==/com.zenithblue.sambas3-EVsdGIuIbR00UDtO_EU7TQ==/lib/arm64'
+[08-29 21:36:03.838] D/vulkan: searching for layers in '/data/app/~~jwOF6g29Wa-luBeCXu8_Hw==/com.zenithblue.sambas3-EVsdGIuIbR00UDtO_EU7TQ==/base.apk!/lib/arm64-v8a'
+[08-29 21:43:30.757] D/vulkan: searching for layers in '/data/app/~~jwOF6g29Wa-luBeCXu8_Hw==/com.zenithblue.sambas3-EVsdGIuIbR00UDtO_EU7TQ==/lib/arm64'
+[08-29 21:43:30.757] D/vulkan: searching for layers in '/data/app/~~jwOF6g29Wa-luBeCXu8_Hw==/com.zenithblue.sambas3-EVsdGIuIbR00UDtO_EU7TQ==/base.apk!/lib/arm64-v8a'
+[08-29 21:44:16.419] I/hook_impl: hook_android_load_sphal_library: filename: vulkan.adreno.so
+[08-29 21:44:16.419] I/hook_impl: hook_android_dlopen_ext: filename: vulkan.adreno.so
+[08-29 21:44:16.420] I/hook_impl: hook_android_dlopen_ext: loading custom driver: /data/data/com.zenithblue.sambas3/files/gpu_drivers/turnip-26.3/libvulkan_freedreno.so
+[08-29 21:44:16.421] D/vulkan: searching for layers in '/data/app/~~jwOF6g29Wa-luBeCXu8_Hw==/com.zenithblue.sambas3-EVsdGIuIbR00UDtO_EU7TQ==/lib/arm64'
+[08-29 21:44:16.421] D/vulkan: searching for layers in '/data/app/~~jwOF6g29Wa-luBeCXu8_Hw==/com.zenithblue.sambas3-EVsdGIuIbR00UDtO_EU7TQ==/base.apk!/lib/arm64-v8a'
+[08-29 21:58:41.998] D/vulkan: searching for layers in '/data/app/~~aeUupH_5xXfnZbUr8ZQh1g==/com.zenithblue.sambas3-Y8o6oJROKKNEr4OF7fHrow==/lib/arm64'
+[08-29 21:58:41.998] D/vulkan: searching for layers in '/data/app/~~aeUupH_5xXfnZbUr8ZQh1g==/com.zenithblue.sambas3-Y8o6oJROKKNEr4OF7fHrow==/base.apk!/lib/arm64-v8a'
+[08-29 22:00:53.377] I/hook_impl: hook_android_load_sphal_library: filename: vulkan.adreno.so
+[08-29 22:00:53.377] I/hook_impl: hook_android_dlopen_ext: filename: vulkan.adreno.so
+[08-29 22:00:53.377] I/hook_impl: hook_android_dlopen_ext: loading custom driver: /data/data/com.zenithblue.sambas3/files/gpu_drivers/turnip-26.3/libvulkan_freedreno.so
+[08-29 22:00:53.378] D/vulkan: searching for layers in '/data/app/~~aeUupH_5xXfnZbUr8ZQh1g==/com.zenithblue.sambas3-Y8o6oJROKKNEr4OF7fHrow==/lib/arm64'
+[08-29 22:00:53.378] D/vulkan: searching for layers in '/data/app/~~aeUupH_5xXfnZbUr8ZQh1g==/com.zenithblue.sambas3-Y8o6oJROKKNEr4OF7fHrow==/base.apk!/lib/arm64-v8a'
+[08-29 22:33:31.317] D/vulkan: searching for layers in '/data/app/~~WPccg6iShD7WT9Of2Fnaww==/com.zenithblue.sambas3-mznEGrZxO50CULlLy-1NWw==/lib/arm64'
+[08-29 22:33:31.317] D/vulkan: searching for layers in '/data/app/~~WPccg6iShD7WT9Of2Fnaww==/com.zenithblue.sambas3-mznEGrZxO50CULlLy-1NWw==/base.apk!/lib/arm64-v8a'
+[08-29 22:35:00.374] I/hook_impl: hook_android_load_sphal_library: filename: vulkan.adreno.so
+[08-29 22:35:00.374] I/hook_impl: hook_android_dlopen_ext: filename: vulkan.adreno.so
+[08-29 22:35:00.374] I/hook_impl: hook_android_dlopen_ext: loading custom driver: /data/data/com.zenithblue.sambas3/files/gpu_drivers/turnip-26.3/libvulkan_freedreno.so
+[08-29 22:35:00.375] D/vulkan: searching for layers in '/data/app/~~WPccg6iShD7WT9Of2Fnaww==/com.zenithblue.sambas3-mznEGrZxO50CULlLy-1NWw==/lib/arm64'
+[08-29 22:35:00.375] D/vulkan: searching for layers in '/data/app/~~WPccg6iShD7WT9Of2Fnaww==/com.zenithblue.sambas3-mznEGrZxO50CULlLy-1NWw==/base.apk!/lib/arm64-v8a'
+[08-29 22:47:40.969] D/vulkan: searching for layers in '/data/app/~~gM5SCv6YOWDL9wrU9lSP_g==/com.zenithblue.sambas3-5-ustYFZt5RRkrNZuBuAbQ==/lib/arm64'
+[08-29 22:47:40.969] D/vulkan: searching for layers in '/data/app/~~gM5SCv6YOWDL9wrU9lSP_g==/com.zenithblue.sambas3-5-ustYFZt5RRkrNZuBuAbQ==/base.apk!/lib/arm64-v8a'
+[08-29 22:54:05.353] I/hook_impl: hook_android_load_sphal_library: filename: vulkan.adreno.so
+[08-29 22:54:05.353] I/hook_impl: hook_android_dlopen_ext: filename: vulkan.adreno.so
+[08-29 22:54:05.353] I/hook_impl: hook_android_dlopen_ext: loading custom driver: /data/data/com.zenithblue.sambas3/files/gpu_drivers/turnip-26.3/libvulkan_freedreno.so
+[08-29 22:54:05.354] D/vulkan: searching for layers in '/data/app/~~gM5SCv6YOWDL9wrU9lSP_g==/com.zenithblue.sambas3-5-ustYFZt5RRkrNZuBuAbQ==/lib/arm64'
+[08-29 22:54:05.354] D/vulkan: searching for layers in '/data/app/~~gM5SCv6YOWDL9wrU9lSP_g==/com.zenithblue.sambas3-5-ustYFZt5RRkrNZuBuAbQ==/base.apk!/lib/arm64-v8a'
+[08-29 23:37:43.686] E/vulkan: dequeueBuffer failed: No such device (-19)
+[08-29 23:38:25.835] D/vulkan: searching for layers in '/data/app/~~gM5SCv6YOWDL9wrU9lSP_g==/com.zenithblue.sambas3-5-ustYFZt5RRkrNZuBuAbQ==/lib/arm64'
+[08-29 23:38:25.835] D/vulkan: searching for layers in '/data/app/~~gM5SCv6YOWDL9wrU9lSP_g==/com.zenithblue.sambas3-5-ustYFZt5RRkrNZuBuAbQ==/base.apk!/lib/arm64-v8a'
+[08-29 23:38:28.061] I/hook_impl: hook_android_load_sphal_library: filename: vulkan.adreno.so
+[08-29 23:38:28.061] I/hook_impl: hook_android_dlopen_ext: filename: vulkan.adreno.so
+[08-29 23:38:28.061] I/hook_impl: hook_android_dlopen_ext: loading custom driver: /data/data/com.zenithblue.sambas3/files/gpu_drivers/turnip-26.3/libvulkan_freedreno.so
+[08-29 23:38:28.062] D/vulkan: searching for layers in '/data/app/~~gM5SCv6YOWDL9wrU9lSP_g==/com.zenithblue.sambas3-5-ustYFZt5RRkrNZuBuAbQ==/lib/arm64'
+[08-29 23:38:28.062] D/vulkan: searching for layers in '/data/app/~~gM5SCv6YOWDL9wrU9lSP_g==/com.zenithblue.sambas3-5-ustYFZt5RRkrNZuBuAbQ==/base.apk!/lib/arm64-v8a'
+[08-30 00:03:48.240] E/vulkan: dequeueBuffer failed: No such device (-19)
+[08-30 00:36:47.011] D/vulkan: searching for layers in '/data/app/~~EMYNb_HDmAmDE1zDHBCwwg==/com.zenithblue.sambas3-ebGAwPM4M_8XdOAz1X_TJg==/lib/arm64'
+[08-30 00:36:47.011] D/vulkan: searching for layers in '/data/app/~~EMYNb_HDmAmDE1zDHBCwwg==/com.zenithblue.sambas3-ebGAwPM4M_8XdOAz1X_TJg==/base.apk!/lib/arm64-v8a'
+[08-30 00:36:47.011] D/vulkan: searching for layers in '/data/app/~~EMYNb_HDmAmDE1zDHBCwwg==/com.zenithblue.sambas3-ebGAwPM4M_8XdOAz1X_TJg==/lib/arm64'
+[08-30 00:36:47.011] D/vulkan: searching for layers in '/data/app/~~EMYNb_HDmAmDE1zDHBCwwg==/com.zenithblue.sambas3-ebGAwPM4M_8XdOAz1X_TJg==/base.apk!/lib/arm64-v8a'
+[08-30 00:41:18.635] D/vulkan: searching for layers in '/data/app/~~Z6LFQGi3_aYvopY5oBQ5SQ==/com.zenithblue.sambas3-sEIQmayS_UabxDnAX48VDQ==/lib/arm64'
+[08-30 00:41:18.635] D/vulkan: searching for layers in '/data/app/~~Z6LFQGi3_aYvopY5oBQ5SQ==/com.zenithblue.sambas3-sEIQmayS_UabxDnAX48VDQ==/base.apk!/lib/arm64-v8a'
+[08-30 00:41:18.635] D/vulkan: searching for layers in '/data/app/~~Z6LFQGi3_aYvopY5oBQ5SQ==/com.zenithblue.sambas3-sEIQmayS_UabxDnAX48VDQ==/lib/arm64'
+[08-30 00:41:18.635] D/vulkan: searching for layers in '/data/app/~~Z6LFQGi3_aYvopY5oBQ5SQ==/com.zenithblue.sambas3-sEIQmayS_UabxDnAX48VDQ==/base.apk!/lib/arm64-v8a'
+[08-30 00:41:59.214] D/vulkan: searching for layers in '/data/app/~~6tusJQ2CS1ff6rDuw83P6g==/com.zenithblue.sambas3-ZLYCjkahXRlYcz4vGPtzFQ==/lib/arm64'
+[08-30 00:41:59.214] D/vulkan: searching for layers in '/data/app/~~6tusJQ2CS1ff6rDuw83P6g==/com.zenithblue.sambas3-ZLYCjkahXRlYcz4vGPtzFQ==/base.apk!/lib/arm64-v8a'
+[08-30 00:43:05.154] I/hook_impl: hook_android_load_sphal_library: filename: vulkan.adreno.so
+[08-30 00:43:05.154] I/hook_impl: hook_android_dlopen_ext: filename: vulkan.adreno.so
+[08-30 00:43:05.154] I/hook_impl: hook_android_dlopen_ext: loading custom driver: /data/data/com.zenithblue.sambas3/files/gpu_drivers/turnip-26.3/libvulkan_freedreno.so
+[08-30 00:43:05.155] D/vulkan: searching for layers in '/data/app/~~6tusJQ2CS1ff6rDuw83P6g==/com.zenithblue.sambas3-ZLYCjkahXRlYcz4vGPtzFQ==/lib/arm64'
+[08-30 00:43:05.156] D/vulkan: searching for layers in '/data/app/~~6tusJQ2CS1ff6rDuw83P6g==/com.zenithblue.sambas3-ZLYCjkahXRlYcz4vGPtzFQ==/base.apk!/lib/arm64-v8a'
+[08-30 01:02:11.186] D/vulkan: searching for layers in '/data/app/~~6tusJQ2CS1ff6rDuw83P6g==/com.zenithblue.sambas3-ZLYCjkahXRlYcz4vGPtzFQ==/lib/arm64'
+[08-30 01:02:11.186] D/vulkan: searching for layers in '/data/app/~~6tusJQ2CS1ff6rDuw83P6g==/com.zenithblue.sambas3-ZLYCjkahXRlYcz4vGPtzFQ==/base.apk!/lib/arm64-v8a'
+[08-30 01:31:35.797] D/vulkan: searching for layers in '/data/app/~~vsDA8PuYut7VBDgXQ8yxzg==/com.zenithblue.sambas3-5u0isCf8zbwoO3WdpDEzlg==/lib/arm64'
+[08-30 01:31:35.797] D/vulkan: searching for layers in '/data/app/~~vsDA8PuYut7VBDgXQ8yxzg==/com.zenithblue.sambas3-5u0isCf8zbwoO3WdpDEzlg==/base.apk!/lib/arm64-v8a'
+[08-30 01:32:10.560] I/hook_impl: hook_android_load_sphal_library: filename: vulkan.adreno.so
+[08-30 01:32:10.560] I/hook_impl: hook_android_dlopen_ext: filename: vulkan.adreno.so
+[08-30 01:32:10.560] I/hook_impl: hook_android_dlopen_ext: loading custom driver: /data/data/com.zenithblue.sambas3/files/gpu_drivers/turnip-26.3/libvulkan_freedreno.so
+[08-30 01:32:10.561] D/vulkan: searching for layers in '/data/app/~~vsDA8PuYut7VBDgXQ8yxzg==/com.zenithblue.sambas3-5u0isCf8zbwoO3WdpDEzlg==/lib/arm64'
+[08-30 01:32:10.561] D/vulkan: searching for layers in '/data/app/~~vsDA8PuYut7VBDgXQ8yxzg==/com.zenithblue.sambas3-5u0isCf8zbwoO3WdpDEzlg==/base.apk!/lib/arm64-v8a'
+[08-30 01:36:58.741] D/vulkan: searching for layers in '/data/app/~~vsDA8PuYut7VBDgXQ8yxzg==/com.zenithblue.sambas3-5u0isCf8zbwoO3WdpDEzlg==/lib/arm64'
+[08-30 01:36:58.741] D/vulkan: searching for layers in '/data/app/~~vsDA8PuYut7VBDgXQ8yxzg==/com.zenithblue.sambas3-5u0isCf8zbwoO3WdpDEzlg==/base.apk!/lib/arm64-v8a'
+[08-30 01:42:06.363] D/vulkan: searching for layers in '/data/app/~~yHAR984qLchPN9UiEUtx3Q==/com.zenithblue.sambas3-zA_aDgW4_lOKpuD0flM_kQ==/lib/arm64'
+[08-30 01:42:06.363] D/vulkan: searching for layers in '/data/app/~~yHAR984qLchPN9UiEUtx3Q==/com.zenithblue.sambas3-zA_aDgW4_lOKpuD0flM_kQ==/base.apk!/lib/arm64-v8a'
+[08-30 01:48:15.843] D/vulkan: searching for layers in '/data/app/~~-WUEb8KgzpQ-8AJ-f6QAag==/com.zenithblue.sambas3-hvusc2_eFTHDZgaXEeQR4A==/lib/arm64'
+[08-30 01:48:15.843] D/vulkan: searching for layers in '/data/app/~~-WUEb8KgzpQ-8AJ-f6QAag==/com.zenithblue.sambas3-hvusc2_eFTHDZgaXEeQR4A==/base.apk!/lib/arm64-v8a'
+[08-30 01:49:46.434] I/hook_impl: hook_android_load_sphal_library: filename: vulkan.adreno.so
+[08-30 01:49:46.434] I/hook_impl: hook_android_dlopen_ext: filename: vulkan.adreno.so
+[08-30 01:49:46.434] I/hook_impl: hook_android_dlopen_ext: loading custom driver: /data/data/com.zenithblue.sambas3/files/gpu_drivers/turnip-26.3/libvulkan_freedreno.so
+[08-30 01:49:46.435] D/vulkan: searching for layers in '/data/app/~~-WUEb8KgzpQ-8AJ-f6QAag==/com.zenithblue.sambas3-hvusc2_eFTHDZgaXEeQR4A==/lib/arm64'
+[08-30 01:49:46.435] D/vulkan: searching for layers in '/data/app/~~-WUEb8KgzpQ-8AJ-f6QAag==/com.zenithblue.sambas3-hvusc2_eFTHDZgaXEeQR4A==/base.apk!/lib/arm64-v8a'
+[08-30 01:55:49.733] D/vulkan: searching for layers in '/data/app/~~-WUEb8KgzpQ-8AJ-f6QAag==/com.zenithblue.sambas3-hvusc2_eFTHDZgaXEeQR4A==/lib/arm64'
+[08-30 01:55:49.733] D/vulkan: searching for layers in '/data/app/~~-WUEb8KgzpQ-8AJ-f6QAag==/com.zenithblue.sambas3-hvusc2_eFTHDZgaXEeQR4A==/base.apk!/lib/arm64-v8a'
+[08-30 01:58:56.363] I/hook_impl: hook_android_load_sphal_library: filename: vulkan.adreno.so
+[08-30 01:58:56.363] I/hook_impl: hook_android_dlopen_ext: filename: vulkan.adreno.so
+[08-30 01:58:56.364] I/hook_impl: hook_android_dlopen_ext: loading custom driver: /data/data/com.zenithblue.sambas3/files/gpu_drivers/turnip-26.3/libvulkan_freedreno.so
+[08-30 01:58:56.365] D/vulkan: searching for layers in '/data/app/~~-WUEb8KgzpQ-8AJ-f6QAag==/com.zenithblue.sambas3-hvusc2_eFTHDZgaXEeQR4A==/lib/arm64'
+[08-30 01:58:56.365] D/vulkan: searching for layers in '/data/app/~~-WUEb8KgzpQ-8AJ-f6QAag==/com.zenithblue.sambas3-hvusc2_eFTHDZgaXEeQR4A==/base.apk!/lib/arm64-v8a'
+[08-30 02:12:05.264] D/vulkan: searching for layers in '/data/app/~~FdM383vETZpspzIWLrsyvw==/com.zenithblue.sambas3-OboORxpu554PnBAotKaFfA==/lib/arm64'
+[08-30 02:12:05.264] D/vulkan: searching for layers in '/data/app/~~FdM383vETZpspzIWLrsyvw==/com.zenithblue.sambas3-OboORxpu554PnBAotKaFfA==/base.apk!/lib/arm64-v8a'
+[08-30 02:13:54.515] I/hook_impl: hook_android_load_sphal_library: filename: vulkan.adreno.so
+[08-30 02:13:54.515] I/hook_impl: hook_android_dlopen_ext: filename: vulkan.adreno.so
+[08-30 02:13:54.516] I/hook_impl: hook_android_dlopen_ext: loading custom driver: /data/data/com.zenithblue.sambas3/files/gpu_drivers/turnip-26.3/libvulkan_freedreno.so
+[08-30 02:13:54.517] D/vulkan: searching for layers in '/data/app/~~FdM383vETZpspzIWLrsyvw==/com.zenithblue.sambas3-OboORxpu554PnBAotKaFfA==/lib/arm64'
+[08-30 02:13:54.517] D/vulkan: searching for layers in '/data/app/~~FdM383vETZpspzIWLrsyvw==/com.zenithblue.sambas3-OboORxpu554PnBAotKaFfA==/base.apk!/lib/arm64-v8a'
+[08-30 02:26:44.615] D/vulkan: searching for layers in '/data/app/~~FdM383vETZpspzIWLrsyvw==/com.zenithblue.sambas3-OboORxpu554PnBAotKaFfA==/lib/arm64'
+[08-30 02:26:44.615] D/vulkan: searching for layers in '/data/app/~~FdM383vETZpspzIWLrsyvw==/com.zenithblue.sambas3-OboORxpu554PnBAotKaFfA==/base.apk!/lib/arm64-v8a'
+[08-30 02:27:52.984] I/hook_impl: hook_android_load_sphal_library: filename: vulkan.adreno.so
+[08-30 02:27:52.984] I/hook_impl: hook_android_dlopen_ext: filename: vulkan.adreno.so
+[08-30 02:27:52.984] I/hook_impl: hook_android_dlopen_ext: loading custom driver: /data/data/com.zenithblue.sambas3/files/gpu_drivers/turnip-26.3/libvulkan_freedreno.so
+[08-30 02:27:52.985] D/vulkan: searching for layers in '/data/app/~~FdM383vETZpspzIWLrsyvw==/com.zenithblue.sambas3-OboORxpu554PnBAotKaFfA==/lib/arm64'
+[08-30 02:27:52.985] D/vulkan: searching for layers in '/data/app/~~FdM383vETZpspzIWLrsyvw==/com.zenithblue.sambas3-OboORxpu554PnBAotKaFfA==/base.apk!/lib/arm64-v8a'
+[08-30 08:31:37.897] D/vulkan: searching for layers in '/data/app/~~FdM383vETZpspzIWLrsyvw==/com.zenithblue.sambas3-OboORxpu554PnBAotKaFfA==/lib/arm64'
+[08-30 08:31:37.897] D/vulkan: searching for layers in '/data/app/~~FdM383vETZpspzIWLrsyvw==/com.zenithblue.sambas3-OboORxpu554PnBAotKaFfA==/base.apk!/lib/arm64-v8a'
+[08-30 08:34:38.836] D/vulkan: searching for layers in '/data/app/~~FdM383vETZpspzIWLrsyvw==/com.zenithblue.sambas3-OboORxpu554PnBAotKaFfA==/lib/arm64'
+[08-30 08:34:38.836] D/vulkan: searching for layers in '/data/app/~~FdM383vETZpspzIWLrsyvw==/com.zenithblue.sambas3-OboORxpu554PnBAotKaFfA==/base.apk!/lib/arm64-v8a'
+[08-30 08:34:42.006] I/hook_impl: hook_android_load_sphal_library: filename: vulkan.adreno.so
+[08-30 08:34:42.006] I/hook_impl: hook_android_dlopen_ext: filename: vulkan.adreno.so
+[08-30 08:34:42.007] I/hook_impl: hook_android_dlopen_ext: loading custom driver: /data/data/com.zenithblue.sambas3/files/gpu_drivers/turnip-26.3/libvulkan_freedreno.so
+[08-30 08:34:42.008] D/vulkan: searching for layers in '/data/app/~~FdM383vETZpspzIWLrsyvw==/com.zenithblue.sambas3-OboORxpu554PnBAotKaFfA==/lib/arm64'
+[08-30 08:34:42.008] D/vulkan: searching for layers in '/data/app/~~FdM383vETZpspzIWLrsyvw==/com.zenithblue.sambas3-OboORxpu554PnBAotKaFfA==/base.apk!/lib/arm64-v8a'
+[08-30 08:34:43.191] E/vulkan: dequeueBuffer failed: No such device (-19)
+[08-30 08:38:47.086] E/vulkan: NATIVE_WINDOW_MIN_UNDEQUEUED_BUFFERS query failed: No such device (-19)
+[08-30 08:46:01.786] E/vulkan: dequeueBuffer failed: No such device (-19)
+[08-30 09:27:53.057] D/vulkan: searching for layers in '/data/app/~~FdM383vETZpspzIWLrsyvw==/com.zenithblue.sambas3-OboORxpu554PnBAotKaFfA==/lib/arm64'
+[08-30 09:27:53.057] D/vulkan: searching for layers in '/data/app/~~FdM383vETZpspzIWLrsyvw==/com.zenithblue.sambas3-OboORxpu554PnBAotKaFfA==/base.apk!/lib/arm64-v8a'
+[08-30 09:27:53.057] D/vulkan: searching for layers in '/data/app/~~FdM383vETZpspzIWLrsyvw==/com.zenithblue.sambas3-OboORxpu554PnBAotKaFfA==/lib/arm64'
+[08-30 09:27:53.057] D/vulkan: searching for layers in '/data/app/~~FdM383vETZpspzIWLrsyvw==/com.zenithblue.sambas3-OboORxpu554PnBAotKaFfA==/base.apk!/lib/arm64-v8a'
+[08-30 09:31:20.789] D/vulkan: searching for layers in '/data/app/~~Z09CwuXyFMWseGgOXSMOkw==/com.zenithblue.sambas3-pohMiHnQ7efZYXR2RSEGbQ==/lib/arm64'
+[08-30 09:31:20.790] D/vulkan: searching for layers in '/data/app/~~Z09CwuXyFMWseGgOXSMOkw==/com.zenithblue.sambas3-pohMiHnQ7efZYXR2RSEGbQ==/base.apk!/lib/arm64-v8a'
+[08-30 09:33:54.723] I/hook_impl: hook_android_load_sphal_library: filename: vulkan.adreno.so
+[08-30 09:33:54.723] I/hook_impl: hook_android_dlopen_ext: filename: vulkan.adreno.so
+[08-30 09:33:54.724] I/hook_impl: hook_android_dlopen_ext: loading custom driver: /data/data/com.zenithblue.sambas3/files/gpu_drivers/turnip-26.3/libvulkan_freedreno.so
+[08-30 09:33:54.724] D/vulkan: searching for layers in '/data/app/~~Z09CwuXyFMWseGgOXSMOkw==/com.zenithblue.sambas3-pohMiHnQ7efZYXR2RSEGbQ==/lib/arm64'
+[08-30 09:33:54.725] D/vulkan: searching for layers in '/data/app/~~Z09CwuXyFMWseGgOXSMOkw==/com.zenithblue.sambas3-pohMiHnQ7efZYXR2RSEGbQ==/base.apk!/lib/arm64-v8a'
+[08-30 09:38:35.459] D/vulkan: searching for layers in '/data/app/~~Z09CwuXyFMWseGgOXSMOkw==/com.zenithblue.sambas3-pohMiHnQ7efZYXR2RSEGbQ==/lib/arm64'
+[08-30 09:38:35.460] D/vulkan: searching for layers in '/data/app/~~Z09CwuXyFMWseGgOXSMOkw==/com.zenithblue.sambas3-pohMiHnQ7efZYXR2RSEGbQ==/base.apk!/lib/arm64-v8a'
+[08-30 09:40:21.022] D/vulkan: searching for layers in '/data/app/~~Z09CwuXyFMWseGgOXSMOkw==/com.zenithblue.sambas3-pohMiHnQ7efZYXR2RSEGbQ==/lib/arm64'
+[08-30 09:40:21.023] D/vulkan: searching for layers in '/data/app/~~Z09CwuXyFMWseGgOXSMOkw==/com.zenithblue.sambas3-pohMiHnQ7efZYXR2RSEGbQ==/base.apk!/lib/arm64-v8a'
+[08-30 09:40:21.022] D/vulkan: searching for layers in '/data/app/~~Z09CwuXyFMWseGgOXSMOkw==/com.zenithblue.sambas3-pohMiHnQ7efZYXR2RSEGbQ==/lib/arm64'
+[08-30 09:40:21.023] D/vulkan: searching for layers in '/data/app/~~Z09CwuXyFMWseGgOXSMOkw==/com.zenithblue.sambas3-pohMiHnQ7efZYXR2RSEGbQ==/base.apk!/lib/arm64-v8a'
+[08-30 09:40:21.022] D/vulkan: searching for layers in '/data/app/~~Z09CwuXyFMWseGgOXSMOkw==/com.zenithblue.sambas3-pohMiHnQ7efZYXR2RSEGbQ==/lib/arm64'
+[08-30 09:40:21.023] D/vulkan: searching for layers in '/data/app/~~Z09CwuXyFMWseGgOXSMOkw==/com.zenithblue.sambas3-pohMiHnQ7efZYXR2RSEGbQ==/base.apk!/lib/arm64-v8a'
+[08-30 09:43:24.474] D/vulkan: searching for layers in '/data/app/~~hMllr55bppEm36B_4Fzycw==/com.zenithblue.sambas3-oF1xk4ULMURcOO5xmHi13w==/lib/arm64'
+[08-30 09:43:24.474] D/vulkan: searching for layers in '/data/app/~~hMllr55bppEm36B_4Fzycw==/com.zenithblue.sambas3-oF1xk4ULMURcOO5xmHi13w==/base.apk!/lib/arm64-v8a'
+[08-30 09:44:57.463] D/vulkan: searching for layers in '/data/app/~~hMllr55bppEm36B_4Fzycw==/com.zenithblue.sambas3-oF1xk4ULMURcOO5xmHi13w==/lib/arm64'
+[08-30 09:44:57.463] D/vulkan: searching for layers in '/data/app/~~hMllr55bppEm36B_4Fzycw==/com.zenithblue.sambas3-oF1xk4ULMURcOO5xmHi13w==/base.apk!/lib/arm64-v8a'
+[08-30 09:45:37.292] I/hook_impl: hook_android_load_sphal_library: filename: vulkan.adreno.so
+[08-30 09:45:37.292] I/hook_impl: hook_android_dlopen_ext: filename: vulkan.adreno.so
+[08-30 09:45:37.292] I/hook_impl: hook_android_dlopen_ext: loading custom driver: /data/data/com.zenithblue.sambas3/files/gpu_drivers/turnip-26.3/libvulkan_freedreno.so
+[08-30 09:45:37.293] D/vulkan: searching for layers in '/data/app/~~hMllr55bppEm36B_4Fzycw==/com.zenithblue.sambas3-oF1xk4ULMURcOO5xmHi13w==/lib/arm64'
+[08-30 09:45:37.293] D/vulkan: searching for layers in '/data/app/~~hMllr55bppEm36B_4Fzycw==/com.zenithblue.sambas3-oF1xk4ULMURcOO5xmHi13w==/base.apk!/lib/arm64-v8a'
+[08-30 10:00:48.986] D/vulkan: searching for layers in '/data/app/~~AxUcAQSzdbypbfiGx6xhlQ==/com.zenithblue.sambas3-LM-UXZ7ljAKTgFWAjnMihQ==/lib/arm64'
+[08-30 10:00:48.986] D/vulkan: searching for layers in '/data/app/~~AxUcAQSzdbypbfiGx6xhlQ==/com.zenithblue.sambas3-LM-UXZ7ljAKTgFWAjnMihQ==/base.apk!/lib/arm64-v8a'
+[08-30 10:01:28.161] I/hook_impl: hook_android_load_sphal_library: filename: vulkan.adreno.so
+[08-30 10:01:28.162] I/hook_impl: hook_android_dlopen_ext: filename: vulkan.adreno.so
+[08-30 10:01:28.162] I/hook_impl: hook_android_dlopen_ext: loading custom driver: /data/data/com.zenithblue.sambas3/files/gpu_drivers/turnip-26.3/libvulkan_freedreno.so
+[08-30 10:01:28.164] D/vulkan: searching for layers in '/data/app/~~AxUcAQSzdbypbfiGx6xhlQ==/com.zenithblue.sambas3-LM-UXZ7ljAKTgFWAjnMihQ==/lib/arm64'
+[08-30 10:01:28.164] D/vulkan: searching for layers in '/data/app/~~AxUcAQSzdbypbfiGx6xhlQ==/com.zenithblue.sambas3-LM-UXZ7ljAKTgFWAjnMihQ==/base.apk!/lib/arm64-v8a'
+[08-30 10:06:37.213] E/vulkan: dequeueBuffer failed: No such device (-19)
+[08-30 10:09:25.205] D/vulkan: searching for layers in '/data/app/~~AxUcAQSzdbypbfiGx6xhlQ==/com.zenithblue.sambas3-LM-UXZ7ljAKTgFWAjnMihQ==/lib/arm64'
+[08-30 10:09:25.206] D/vulkan: searching for layers in '/data/app/~~AxUcAQSzdbypbfiGx6xhlQ==/com.zenithblue.sambas3-LM-UXZ7ljAKTgFWAjnMihQ==/base.apk!/lib/arm64-v8a'
+[08-30 10:09:28.731] I/hook_impl: hook_android_load_sphal_library: filename: vulkan.adreno.so
+[08-30 10:09:28.731] I/hook_impl: hook_android_dlopen_ext: filename: vulkan.adreno.so
+[08-30 10:09:28.732] I/hook_impl: hook_android_dlopen_ext: loading custom driver: /data/data/com.zenithblue.sambas3/files/gpu_drivers/turnip-26.3/libvulkan_freedreno.so
+[08-30 10:09:28.733] D/vulkan: searching for layers in '/data/app/~~AxUcAQSzdbypbfiGx6xhlQ==/com.zenithblue.sambas3-LM-UXZ7ljAKTgFWAjnMihQ==/lib/arm64'
+[08-30 10:09:28.733] D/vulkan: searching for layers in '/data/app/~~AxUcAQSzdbypbfiGx6xhlQ==/com.zenithblue.sambas3-LM-UXZ7ljAKTgFWAjnMihQ==/base.apk!/lib/arm64-v8a'
+[08-30 11:23:24.303] D/vulkan: searching for layers in '/data/app/~~svbfnRTGf4aB-zE4ZuP-Cw==/com.zenithblue.sambas3-PhN8yPhP1RqripM-DEdW6g==/lib/arm64'
+[08-30 11:23:24.303] D/vulkan: searching for layers in '/data/app/~~svbfnRTGf4aB-zE4ZuP-Cw==/com.zenithblue.sambas3-PhN8yPhP1RqripM-DEdW6g==/base.apk!/lib/arm64-v8a'
+[08-30 11:52:19.077] D/vulkan: searching for layers in '/data/app/~~YCockMGsX_zmZu8Vv8HtUQ==/com.zenithblue.sambas3-Xl1Ej8p5SKkli-lvs3w-ew==/lib/arm64'
+[08-30 11:52:19.077] D/vulkan: searching for layers in '/data/app/~~YCockMGsX_zmZu8Vv8HtUQ==/com.zenithblue.sambas3-Xl1Ej8p5SKkli-lvs3w-ew==/base.apk!/lib/arm64-v8a'
+[08-30 11:53:14.730] I/hook_impl: hook_android_load_sphal_library: filename: vulkan.adreno.so
+[08-30 11:53:14.730] I/hook_impl: hook_android_dlopen_ext: filename: vulkan.adreno.so
+[08-30 11:53:14.731] I/hook_impl: hook_android_dlopen_ext: loading custom driver: /data/data/com.zenithblue.sambas3/files/gpu_drivers/turnip-26.3/libvulkan_freedreno.so
+[08-30 11:53:14.736] D/vulkan: searching for layers in '/data/app/~~YCockMGsX_zmZu8Vv8HtUQ==/com.zenithblue.sambas3-Xl1Ej8p5SKkli-lvs3w-ew==/lib/arm64'
+[08-30 11:53:14.736] D/vulkan: searching for layers in '/data/app/~~YCockMGsX_zmZu8Vv8HtUQ==/com.zenithblue.sambas3-Xl1Ej8p5SKkli-lvs3w-ew==/base.apk!/lib/arm64-v8a'
+[08-30 12:13:14.739] E/vulkan: dequeueBuffer failed: No such device (-19)
+[08-31 01:57:53.606] D/vulkan: searching for layers in '/data/app/~~YJu4bGHpoLDLUMa3UwxuOA==/com.zenithblue.sambas3-s-2qI2J2Y6YiZvIvvrHfgA==/lib/arm64'
+[08-31 01:57:53.606] D/vulkan: searching for layers in '/data/app/~~YJu4bGHpoLDLUMa3UwxuOA==/com.zenithblue.sambas3-s-2qI2J2Y6YiZvIvvrHfgA==/base.apk!/lib/arm64-v8a'
+[08-31 01:58:43.737] D/vulkan: searching for layers in '/data/app/~~YJu4bGHpoLDLUMa3UwxuOA==/com.zenithblue.sambas3-s-2qI2J2Y6YiZvIvvrHfgA==/lib/arm64'
+[08-31 01:58:43.737] D/vulkan: searching for layers in '/data/app/~~YJu4bGHpoLDLUMa3UwxuOA==/com.zenithblue.sambas3-s-2qI2J2Y6YiZvIvvrHfgA==/base.apk!/lib/arm64-v8a'
+[08-31 01:59:15.114] I/hook_impl: hook_android_load_sphal_library: filename: vulkan.adreno.so
+[08-31 01:59:15.114] I/hook_impl: hook_android_dlopen_ext: filename: vulkan.adreno.so
+[08-31 01:59:15.115] I/hook_impl: hook_android_dlopen_ext: loading custom driver: /data/data/com.zenithblue.sambas3/files/gpu_drivers/turnip-26.3/libvulkan_freedreno.so
+[08-31 01:59:15.117] D/vulkan: searching for layers in '/data/app/~~YJu4bGHpoLDLUMa3UwxuOA==/com.zenithblue.sambas3-s-2qI2J2Y6YiZvIvvrHfgA==/lib/arm64'
+[08-31 01:59:15.118] D/vulkan: searching for layers in '/data/app/~~YJu4bGHpoLDLUMa3UwxuOA==/com.zenithblue.sambas3-s-2qI2J2Y6YiZvIvvrHfgA==/base.apk!/lib/arm64-v8a'
+[08-31 02:01:40.823] D/vulkan: searching for layers in '/data/app/~~UupVPFZaSIcIseROWs4RVA==/com.zenithblue.sambas3-YdLBeRTIw85ZFkn5VU-M9A==/lib/arm64'
+[08-31 02:01:40.823] D/vulkan: searching for layers in '/data/app/~~UupVPFZaSIcIseROWs4RVA==/com.zenithblue.sambas3-YdLBeRTIw85ZFkn5VU-M9A==/base.apk!/lib/arm64-v8a'
+[08-31 02:06:37.698] D/vulkan: searching for layers in '/data/app/~~g5OaFAmKgc3bd6sSdp3kpw==/com.zenithblue.sambas3-uwc86UeJoWrWFLgfOL_dzA==/lib/arm64'
+[08-31 02:06:37.699] D/vulkan: searching for layers in '/data/app/~~g5OaFAmKgc3bd6sSdp3kpw==/com.zenithblue.sambas3-uwc86UeJoWrWFLgfOL_dzA==/base.apk!/lib/arm64-v8a'
+[08-31 02:07:25.315] I/hook_impl: hook_android_load_sphal_library: filename: vulkan.adreno.so
+[08-31 02:07:25.315] I/hook_impl: hook_android_dlopen_ext: filename: vulkan.adreno.so
+[08-31 02:07:25.315] I/hook_impl: hook_android_dlopen_ext: loading custom driver: /data/data/com.zenithblue.sambas3/files/gpu_drivers/turnip-26.3/libvulkan_freedreno.so
+[08-31 02:07:25.316] D/vulkan: searching for layers in '/data/app/~~g5OaFAmKgc3bd6sSdp3kpw==/com.zenithblue.sambas3-uwc86UeJoWrWFLgfOL_dzA==/lib/arm64'
+[08-31 02:07:25.317] D/vulkan: searching for layers in '/data/app/~~g5OaFAmKgc3bd6sSdp3kpw==/com.zenithblue.sambas3-uwc86UeJoWrWFLgfOL_dzA==/base.apk!/lib/arm64-v8a'
+[08-31 02:14:16.544] D/vulkan: searching for layers in '/data/app/~~VrGxabWqsYDPvMwhhSuOow==/com.zenithblue.sambas3-zmoU_u4_OYjKDQ29ccmR1A==/lib/arm64'
+[08-31 02:14:16.544] D/vulkan: searching for layers in '/data/app/~~VrGxabWqsYDPvMwhhSuOow==/com.zenithblue.sambas3-zmoU_u4_OYjKDQ29ccmR1A==/base.apk!/lib/arm64-v8a'
+[08-31 02:14:39.599] I/hook_impl: hook_android_load_sphal_library: filename: vulkan.adreno.so
+[08-31 02:14:39.599] I/hook_impl: hook_android_dlopen_ext: filename: vulkan.adreno.so
+[08-31 02:14:39.599] I/hook_impl: hook_android_dlopen_ext: loading custom driver: /data/data/com.zenithblue.sambas3/files/gpu_drivers/turnip-26.3/libvulkan_freedreno.so
+[08-31 02:14:39.600] D/vulkan: searching for layers in '/data/app/~~VrGxabWqsYDPvMwhhSuOow==/com.zenithblue.sambas3-zmoU_u4_OYjKDQ29ccmR1A==/lib/arm64'
+[08-31 02:14:39.601] D/vulkan: searching for layers in '/data/app/~~VrGxabWqsYDPvMwhhSuOow==/com.zenithblue.sambas3-zmoU_u4_OYjKDQ29ccmR1A==/base.apk!/lib/arm64-v8a'
+[08-31 02:21:52.915] D/vulkan: searching for layers in '/data/app/~~5mEgbERVMyP2_SZeBk3yuw==/com.zenithblue.sambas3-6j3oEmiC5tRCkSNTvO7KRw==/lib/arm64'
+[08-31 02:21:52.915] D/vulkan: searching for layers in '/data/app/~~5mEgbERVMyP2_SZeBk3yuw==/com.zenithblue.sambas3-6j3oEmiC5tRCkSNTvO7KRw==/base.apk!/lib/arm64-v8a'
+[08-31 02:22:06.482] I/hook_impl: hook_android_load_sphal_library: filename: vulkan.adreno.so
+[08-31 02:22:06.482] I/hook_impl: hook_android_dlopen_ext: filename: vulkan.adreno.so
+[08-31 02:22:06.483] I/hook_impl: hook_android_dlopen_ext: loading custom driver: /data/data/com.zenithblue.sambas3/files/gpu_drivers/turnip-26.3/libvulkan_freedreno.so
+[08-31 02:22:06.484] D/vulkan: searching for layers in '/data/app/~~5mEgbERVMyP2_SZeBk3yuw==/com.zenithblue.sambas3-6j3oEmiC5tRCkSNTvO7KRw==/lib/arm64'
+[08-31 02:22:06.484] D/vulkan: searching for layers in '/data/app/~~5mEgbERVMyP2_SZeBk3yuw==/com.zenithblue.sambas3-6j3oEmiC5tRCkSNTvO7KRw==/base.apk!/lib/arm64-v8a'
+[08-31 02:29:01.125] D/vulkan: searching for layers in '/data/app/~~xzjwmpJw2W7J7svxMhlK8A==/com.zenithblue.sambas3-xqo7wxqfa1ARascLmb0amg==/lib/arm64'
+[08-31 02:29:01.126] D/vulkan: searching for layers in '/data/app/~~xzjwmpJw2W7J7svxMhlK8A==/com.zenithblue.sambas3-xqo7wxqfa1ARascLmb0amg==/base.apk!/lib/arm64-v8a'
+[08-31 02:29:14.737] I/hook_impl: hook_android_load_sphal_library: filename: vulkan.adreno.so
+[08-31 02:29:14.737] I/hook_impl: hook_android_dlopen_ext: filename: vulkan.adreno.so
+[08-31 02:29:14.737] I/hook_impl: hook_android_dlopen_ext: loading custom driver: /data/data/com.zenithblue.sambas3/files/gpu_drivers/turnip-26.3/libvulkan_freedreno.so
+[08-31 02:29:14.739] D/vulkan: searching for layers in '/data/app/~~xzjwmpJw2W7J7svxMhlK8A==/com.zenithblue.sambas3-xqo7wxqfa1ARascLmb0amg==/lib/arm64'
+[08-31 02:29:14.739] D/vulkan: searching for layers in '/data/app/~~xzjwmpJw2W7J7svxMhlK8A==/com.zenithblue.sambas3-xqo7wxqfa1ARascLmb0amg==/base.apk!/lib/arm64-v8a'
+[08-31 02:36:01.027] D/vulkan: searching for layers in '/data/app/~~-wsblxRliou9DP9EMgfzFg==/com.zenithblue.sambas3-tlv2H318F7YUpjUxAClSHQ==/lib/arm64'
+[08-31 02:36:01.028] D/vulkan: searching for layers in '/data/app/~~-wsblxRliou9DP9EMgfzFg==/com.zenithblue.sambas3-tlv2H318F7YUpjUxAClSHQ==/base.apk!/lib/arm64-v8a'
+[08-31 03:00:14.475] D/vulkan: searching for layers in '/data/app/~~LCKMQp1gsqxoWgiO3xGAzg==/com.zenithblue.sambas3-cl9nLXOqyJB07O4L6wibtw==/lib/arm64'
+[08-31 03:00:14.475] D/vulkan: searching for layers in '/data/app/~~LCKMQp1gsqxoWgiO3xGAzg==/com.zenithblue.sambas3-cl9nLXOqyJB07O4L6wibtw==/base.apk!/lib/arm64-v8a'
+[08-31 03:00:14.475] D/vulkan: searching for layers in '/data/app/~~LCKMQp1gsqxoWgiO3xGAzg==/com.zenithblue.sambas3-cl9nLXOqyJB07O4L6wibtw==/lib/arm64'
+[08-31 03:00:14.475] D/vulkan: searching for layers in '/data/app/~~LCKMQp1gsqxoWgiO3xGAzg==/com.zenithblue.sambas3-cl9nLXOqyJB07O4L6wibtw==/base.apk!/lib/arm64-v8a'
+[08-31 03:05:01.802] I/hook_impl: hook_android_load_sphal_library: filename: vulkan.adreno.so
+[08-31 03:05:01.802] I/hook_impl: hook_android_dlopen_ext: filename: vulkan.adreno.so
+[08-31 03:05:01.803] I/hook_impl: hook_android_dlopen_ext: loading custom driver: /data/data/com.zenithblue.sambas3/files/gpu_drivers/turnip-26.3/libvulkan_freedreno.so
+[08-31 03:05:01.804] D/vulkan: searching for layers in '/data/app/~~LCKMQp1gsqxoWgiO3xGAzg==/com.zenithblue.sambas3-cl9nLXOqyJB07O4L6wibtw==/lib/arm64'
+[08-31 03:05:01.805] D/vulkan: searching for layers in '/data/app/~~LCKMQp1gsqxoWgiO3xGAzg==/com.zenithblue.sambas3-cl9nLXOqyJB07O4L6wibtw==/base.apk!/lib/arm64-v8a'
+[08-31 03:16:15.107] D/vulkan: searching for layers in '/data/app/~~LCKMQp1gsqxoWgiO3xGAzg==/com.zenithblue.sambas3-cl9nLXOqyJB07O4L6wibtw==/lib/arm64'
+[08-31 03:16:15.107] D/vulkan: searching for layers in '/data/app/~~LCKMQp1gsqxoWgiO3xGAzg==/com.zenithblue.sambas3-cl9nLXOqyJB07O4L6wibtw==/base.apk!/lib/arm64-v8a'
+[08-31 03:22:17.015] I/hook_impl: hook_android_load_sphal_library: filename: vulkan.adreno.so
+[08-31 03:22:17.015] I/hook_impl: hook_android_dlopen_ext: filename: vulkan.adreno.so
+[08-31 03:22:17.016] I/hook_impl: hook_android_dlopen_ext: loading custom driver: /data/data/com.zenithblue.sambas3/files/gpu_drivers/turnip-26.3/libvulkan_freedreno.so
+[08-31 03:22:17.017] D/vulkan: searching for layers in '/data/app/~~LCKMQp1gsqxoWgiO3xGAzg==/com.zenithblue.sambas3-cl9nLXOqyJB07O4L6wibtw==/lib/arm64'
+[08-31 03:22:17.017] D/vulkan: searching for layers in '/data/app/~~LCKMQp1gsqxoWgiO3xGAzg==/com.zenithblue.sambas3-cl9nLXOqyJB07O4L6wibtw==/base.apk!/lib/arm64-v8a'
+[08-31 03:34:32.787] D/vulkan: searching for layers in '/data/app/~~eVmYR8JRlw8uwtKfJ_FOFg==/com.zenithblue.sambas3-odhv1HnFBfQK04gHt3qgTw==/lib/arm64'
+[08-31 03:34:32.787] D/vulkan: searching for layers in '/data/app/~~eVmYR8JRlw8uwtKfJ_FOFg==/com.zenithblue.sambas3-odhv1HnFBfQK04gHt3qgTw==/base.apk!/lib/arm64-v8a'
+[08-31 03:35:07.468] I/hook_impl: hook_android_load_sphal_library: filename: vulkan.adreno.so
+[08-31 03:35:07.468] I/hook_impl: hook_android_dlopen_ext: filename: vulkan.adreno.so
+[08-31 03:35:07.468] I/hook_impl: hook_android_dlopen_ext: loading custom driver: /data/data/com.zenithblue.sambas3/files/gpu_drivers/turnip-26.3/libvulkan_freedreno.so
+[08-31 03:35:07.470] D/vulkan: searching for layers in '/data/app/~~eVmYR8JRlw8uwtKfJ_FOFg==/com.zenithblue.sambas3-odhv1HnFBfQK04gHt3qgTw==/lib/arm64'
+[08-31 03:35:07.470] D/vulkan: searching for layers in '/data/app/~~eVmYR8JRlw8uwtKfJ_FOFg==/com.zenithblue.sambas3-odhv1HnFBfQK04gHt3qgTw==/base.apk!/lib/arm64-v8a'
+[08-31 03:50:34.251] D/vulkan: searching for layers in '/data/app/~~qDuLJo-UQlaTk5nIV6jwVw==/com.zenithblue.sambas3-UDc-nu09RKnsbLfHy_jCew==/lib/arm64'
+[08-31 03:50:34.251] D/vulkan: searching for layers in '/data/app/~~qDuLJo-UQlaTk5nIV6jwVw==/com.zenithblue.sambas3-UDc-nu09RKnsbLfHy_jCew==/base.apk!/lib/arm64-v8a'
+[08-31 03:52:54.585] I/hook_impl: hook_android_load_sphal_library: filename: vulkan.adreno.so
+[08-31 03:52:54.585] I/hook_impl: hook_android_dlopen_ext: filename: vulkan.adreno.so
+[08-31 03:52:54.585] I/hook_impl: hook_android_dlopen_ext: loading custom driver: /data/data/com.zenithblue.sambas3/files/gpu_drivers/turnip-26.3/libvulkan_freedreno.so
+[08-31 03:52:54.586] D/vulkan: searching for layers in '/data/app/~~qDuLJo-UQlaTk5nIV6jwVw==/com.zenithblue.sambas3-UDc-nu09RKnsbLfHy_jCew==/lib/arm64'
+[08-31 03:52:54.586] D/vulkan: searching for layers in '/data/app/~~qDuLJo-UQlaTk5nIV6jwVw==/com.zenithblue.sambas3-UDc-nu09RKnsbLfHy_jCew==/base.apk!/lib/arm64-v8a'
+[08-31 04:00:16.390] D/vulkan: searching for layers in '/data/app/~~qDuLJo-UQlaTk5nIV6jwVw==/com.zenithblue.sambas3-UDc-nu09RKnsbLfHy_jCew==/lib/arm64'
+[08-31 04:00:16.390] D/vulkan: searching for layers in '/data/app/~~qDuLJo-UQlaTk5nIV6jwVw==/com.zenithblue.sambas3-UDc-nu09RKnsbLfHy_jCew==/base.apk!/lib/arm64-v8a'
+[08-31 04:02:39.011] I/hook_impl: hook_android_load_sphal_library: filename: vulkan.adreno.so
+[08-31 04:02:39.011] I/hook_impl: hook_android_dlopen_ext: filename: vulkan.adreno.so
+[08-31 04:02:39.012] I/hook_impl: hook_android_dlopen_ext: loading custom driver: /data/data/com.zenithblue.sambas3/files/gpu_drivers/turnip-26.3/libvulkan_freedreno.so
+[08-31 04:02:39.016] D/vulkan: searching for layers in '/data/app/~~qDuLJo-UQlaTk5nIV6jwVw==/com.zenithblue.sambas3-UDc-nu09RKnsbLfHy_jCew==/lib/arm64'
+[08-31 04:02:39.016] D/vulkan: searching for layers in '/data/app/~~qDuLJo-UQlaTk5nIV6jwVw==/com.zenithblue.sambas3-UDc-nu09RKnsbLfHy_jCew==/base.apk!/lib/arm64-v8a'
+[08-31 04:23:48.585] D/vulkan: searching for layers in '/data/app/~~qDuLJo-UQlaTk5nIV6jwVw==/com.zenithblue.sambas3-UDc-nu09RKnsbLfHy_jCew==/lib/arm64'
+[08-31 04:23:48.585] D/vulkan: searching for layers in '/data/app/~~qDuLJo-UQlaTk5nIV6jwVw==/com.zenithblue.sambas3-UDc-nu09RKnsbLfHy_jCew==/base.apk!/lib/arm64-v8a'
+[08-31 04:24:02.146] I/hook_impl: hook_android_load_sphal_library: filename: vulkan.adreno.so
+[08-31 04:24:02.146] I/hook_impl: hook_android_dlopen_ext: filename: vulkan.adreno.so
+[08-31 04:24:02.147] I/hook_impl: hook_android_dlopen_ext: loading custom driver: /data/data/com.zenithblue.sambas3/files/gpu_drivers/turnip-26.3/libvulkan_freedreno.so
+[08-31 04:24:02.152] D/vulkan: searching for layers in '/data/app/~~qDuLJo-UQlaTk5nIV6jwVw==/com.zenithblue.sambas3-UDc-nu09RKnsbLfHy_jCew==/lib/arm64'
+[08-31 04:24:02.152] D/vulkan: searching for layers in '/data/app/~~qDuLJo-UQlaTk5nIV6jwVw==/com.zenithblue.sambas3-UDc-nu09RKnsbLfHy_jCew==/base.apk!/lib/arm64-v8a'
+[08-31 04:24:57.050] D/vulkan: searching for layers in '/data/app/~~qDuLJo-UQlaTk5nIV6jwVw==/com.zenithblue.sambas3-UDc-nu09RKnsbLfHy_jCew==/lib/arm64'
+[08-31 04:24:57.051] D/vulkan: searching for layers in '/data/app/~~qDuLJo-UQlaTk5nIV6jwVw==/com.zenithblue.sambas3-UDc-nu09RKnsbLfHy_jCew==/base.apk!/lib/arm64-v8a'
+[08-31 04:25:10.652] I/hook_impl: hook_android_load_sphal_library: filename: vulkan.adreno.so
+[08-31 04:25:10.652] I/hook_impl: hook_android_dlopen_ext: filename: vulkan.adreno.so
+[08-31 04:25:10.653] I/hook_impl: hook_android_dlopen_ext: loading custom driver: /data/data/com.zenithblue.sambas3/files/gpu_drivers/turnip-26.3/libvulkan_freedreno.so
+[08-31 04:25:10.654] D/vulkan: searching for layers in '/data/app/~~qDuLJo-UQlaTk5nIV6jwVw==/com.zenithblue.sambas3-UDc-nu09RKnsbLfHy_jCew==/lib/arm64'
+[08-31 04:25:10.654] D/vulkan: searching for layers in '/data/app/~~qDuLJo-UQlaTk5nIV6jwVw==/com.zenithblue.sambas3-UDc-nu09RKnsbLfHy_jCew==/base.apk!/lib/arm64-v8a'
+[08-31 04:26:05.795] D/vulkan: searching for layers in '/data/app/~~qDuLJo-UQlaTk5nIV6jwVw==/com.zenithblue.sambas3-UDc-nu09RKnsbLfHy_jCew==/lib/arm64'
+[08-31 04:26:05.795] D/vulkan: searching for layers in '/data/app/~~qDuLJo-UQlaTk5nIV6jwVw==/com.zenithblue.sambas3-UDc-nu09RKnsbLfHy_jCew==/base.apk!/lib/arm64-v8a'
+[08-31 04:26:19.320] I/hook_impl: hook_android_load_sphal_library: filename: vulkan.adreno.so
+[08-31 04:26:19.320] I/hook_impl: hook_android_dlopen_ext: filename: vulkan.adreno.so
+[08-31 04:26:19.321] I/hook_impl: hook_android_dlopen_ext: loading custom driver: /data/data/com.zenithblue.sambas3/files/gpu_drivers/turnip-26.3/libvulkan_freedreno.so
+[08-31 04:26:19.322] D/vulkan: searching for layers in '/data/app/~~qDuLJo-UQlaTk5nIV6jwVw==/com.zenithblue.sambas3-UDc-nu09RKnsbLfHy_jCew==/lib/arm64'
+[08-31 04:26:19.322] D/vulkan: searching for layers in '/data/app/~~qDuLJo-UQlaTk5nIV6jwVw==/com.zenithblue.sambas3-UDc-nu09RKnsbLfHy_jCew==/base.apk!/lib/arm64-v8a'
+[08-31 04:27:14.325] D/vulkan: searching for layers in '/data/app/~~qDuLJo-UQlaTk5nIV6jwVw==/com.zenithblue.sambas3-UDc-nu09RKnsbLfHy_jCew==/lib/arm64'
+[08-31 04:27:14.325] D/vulkan: searching for layers in '/data/app/~~qDuLJo-UQlaTk5nIV6jwVw==/com.zenithblue.sambas3-UDc-nu09RKnsbLfHy_jCew==/base.apk!/lib/arm64-v8a'
+[08-31 04:27:27.825] I/hook_impl: hook_android_load_sphal_library: filename: vulkan.adreno.so
+[08-31 04:27:27.825] I/hook_impl: hook_android_dlopen_ext: filename: vulkan.adreno.so
+[08-31 04:27:27.826] I/hook_impl: hook_android_dlopen_ext: loading custom driver: /data/data/com.zenithblue.sambas3/files/gpu_drivers/turnip-26.3/libvulkan_freedreno.so
+[08-31 04:27:27.827] D/vulkan: searching for layers in '/data/app/~~qDuLJo-UQlaTk5nIV6jwVw==/com.zenithblue.sambas3-UDc-nu09RKnsbLfHy_jCew==/lib/arm64'
+[08-31 04:27:27.827] D/vulkan: searching for layers in '/data/app/~~qDuLJo-UQlaTk5nIV6jwVw==/com.zenithblue.sambas3-UDc-nu09RKnsbLfHy_jCew==/base.apk!/lib/arm64-v8a'
+[08-31 04:28:23.813] D/vulkan: searching for layers in '/data/app/~~qDuLJo-UQlaTk5nIV6jwVw==/com.zenithblue.sambas3-UDc-nu09RKnsbLfHy_jCew==/lib/arm64'
+[08-31 04:28:23.813] D/vulkan: searching for layers in '/data/app/~~qDuLJo-UQlaTk5nIV6jwVw==/com.zenithblue.sambas3-UDc-nu09RKnsbLfHy_jCew==/base.apk!/lib/arm64-v8a'
+[08-31 04:28:37.387] I/hook_impl: hook_android_load_sphal_library: filename: vulkan.adreno.so
+[08-31 04:28:37.387] I/hook_impl: hook_android_dlopen_ext: filename: vulkan.adreno.so
+[08-31 04:28:37.388] I/hook_impl: hook_android_dlopen_ext: loading custom driver: /data/data/com.zenithblue.sambas3/files/gpu_drivers/turnip-26.3/libvulkan_freedreno.so
+[08-31 04:28:37.389] D/vulkan: searching for layers in '/data/app/~~qDuLJo-UQlaTk5nIV6jwVw==/com.zenithblue.sambas3-UDc-nu09RKnsbLfHy_jCew==/lib/arm64'
+[08-31 04:28:37.389] D/vulkan: searching for layers in '/data/app/~~qDuLJo-UQlaTk5nIV6jwVw==/com.zenithblue.sambas3-UDc-nu09RKnsbLfHy_jCew==/base.apk!/lib/arm64-v8a'
+[08-31 04:29:32.498] D/vulkan: searching for layers in '/data/app/~~qDuLJo-UQlaTk5nIV6jwVw==/com.zenithblue.sambas3-UDc-nu09RKnsbLfHy_jCew==/lib/arm64'
+[08-31 04:29:32.499] D/vulkan: searching for layers in '/data/app/~~qDuLJo-UQlaTk5nIV6jwVw==/com.zenithblue.sambas3-UDc-nu09RKnsbLfHy_jCew==/base.apk!/lib/arm64-v8a'
+[08-31 04:29:46.022] I/hook_impl: hook_android_load_sphal_library: filename: vulkan.adreno.so
+[08-31 04:29:46.022] I/hook_impl: hook_android_dlopen_ext: filename: vulkan.adreno.so
+[08-31 04:29:46.023] I/hook_impl: hook_android_dlopen_ext: loading custom driver: /data/data/com.zenithblue.sambas3/files/gpu_drivers/turnip-26.3/libvulkan_freedreno.so
+[08-31 04:29:46.024] D/vulkan: searching for layers in '/data/app/~~qDuLJo-UQlaTk5nIV6jwVw==/com.zenithblue.sambas3-UDc-nu09RKnsbLfHy_jCew==/lib/arm64'
+[08-31 04:29:46.024] D/vulkan: searching for layers in '/data/app/~~qDuLJo-UQlaTk5nIV6jwVw==/com.zenithblue.sambas3-UDc-nu09RKnsbLfHy_jCew==/base.apk!/lib/arm64-v8a'
+[08-31 04:30:41.158] D/vulkan: searching for layers in '/data/app/~~qDuLJo-UQlaTk5nIV6jwVw==/com.zenithblue.sambas3-UDc-nu09RKnsbLfHy_jCew==/lib/arm64'
+[08-31 04:30:41.158] D/vulkan: searching for layers in '/data/app/~~qDuLJo-UQlaTk5nIV6jwVw==/com.zenithblue.sambas3-UDc-nu09RKnsbLfHy_jCew==/base.apk!/lib/arm64-v8a'
+[08-31 04:30:54.712] I/hook_impl: hook_android_load_sphal_library: filename: vulkan.adreno.so
+[08-31 04:30:54.712] I/hook_impl: hook_android_dlopen_ext: filename: vulkan.adreno.so
+[08-31 04:30:54.713] I/hook_impl: hook_android_dlopen_ext: loading custom driver: /data/data/com.zenithblue.sambas3/files/gpu_drivers/turnip-26.3/libvulkan_freedreno.so
+[08-31 04:30:54.714] D/vulkan: searching for layers in '/data/app/~~qDuLJo-UQlaTk5nIV6jwVw==/com.zenithblue.sambas3-UDc-nu09RKnsbLfHy_jCew==/lib/arm64'
+[08-31 04:30:54.714] D/vulkan: searching for layers in '/data/app/~~qDuLJo-UQlaTk5nIV6jwVw==/com.zenithblue.sambas3-UDc-nu09RKnsbLfHy_jCew==/base.apk!/lib/arm64-v8a'
+[08-31 04:31:50.880] D/vulkan: searching for layers in '/data/app/~~qDuLJo-UQlaTk5nIV6jwVw==/com.zenithblue.sambas3-UDc-nu09RKnsbLfHy_jCew==/lib/arm64'
+[08-31 04:31:50.880] D/vulkan: searching for layers in '/data/app/~~qDuLJo-UQlaTk5nIV6jwVw==/com.zenithblue.sambas3-UDc-nu09RKnsbLfHy_jCew==/base.apk!/lib/arm64-v8a'
+[08-31 04:32:04.433] I/hook_impl: hook_android_load_sphal_library: filename: vulkan.adreno.so
+[08-31 04:32:04.433] I/hook_impl: hook_android_dlopen_ext: filename: vulkan.adreno.so
+[08-31 04:32:04.434] I/hook_impl: hook_android_dlopen_ext: loading custom driver: /data/data/com.zenithblue.sambas3/files/gpu_drivers/turnip-26.3/libvulkan_freedreno.so
+[08-31 04:32:04.435] D/vulkan: searching for layers in '/data/app/~~qDuLJo-UQlaTk5nIV6jwVw==/com.zenithblue.sambas3-UDc-nu09RKnsbLfHy_jCew==/lib/arm64'
+[08-31 04:32:04.435] D/vulkan: searching for layers in '/data/app/~~qDuLJo-UQlaTk5nIV6jwVw==/com.zenithblue.sambas3-UDc-nu09RKnsbLfHy_jCew==/base.apk!/lib/arm64-v8a'
+[08-31 04:32:59.437] D/vulkan: searching for layers in '/data/app/~~qDuLJo-UQlaTk5nIV6jwVw==/com.zenithblue.sambas3-UDc-nu09RKnsbLfHy_jCew==/lib/arm64'
+[08-31 04:32:59.437] D/vulkan: searching for layers in '/data/app/~~qDuLJo-UQlaTk5nIV6jwVw==/com.zenithblue.sambas3-UDc-nu09RKnsbLfHy_jCew==/base.apk!/lib/arm64-v8a'
+[08-31 04:33:12.986] I/hook_impl: hook_android_load_sphal_library: filename: vulkan.adreno.so
+[08-31 04:33:12.986] I/hook_impl: hook_android_dlopen_ext: filename: vulkan.adreno.so
+[08-31 04:33:12.986] I/hook_impl: hook_android_dlopen_ext: loading custom driver: /data/data/com.zenithblue.sambas3/files/gpu_drivers/turnip-26.3/libvulkan_freedreno.so
+[08-31 04:33:12.988] D/vulkan: searching for layers in '/data/app/~~qDuLJo-UQlaTk5nIV6jwVw==/com.zenithblue.sambas3-UDc-nu09RKnsbLfHy_jCew==/lib/arm64'
+[08-31 04:33:12.988] D/vulkan: searching for layers in '/data/app/~~qDuLJo-UQlaTk5nIV6jwVw==/com.zenithblue.sambas3-UDc-nu09RKnsbLfHy_jCew==/base.apk!/lib/arm64-v8a'
+[08-31 04:34:09.295] D/vulkan: searching for layers in '/data/app/~~qDuLJo-UQlaTk5nIV6jwVw==/com.zenithblue.sambas3-UDc-nu09RKnsbLfHy_jCew==/lib/arm64'
+[08-31 04:34:09.295] D/vulkan: searching for layers in '/data/app/~~qDuLJo-UQlaTk5nIV6jwVw==/com.zenithblue.sambas3-UDc-nu09RKnsbLfHy_jCew==/base.apk!/lib/arm64-v8a'
+[08-31 04:34:22.873] I/hook_impl: hook_android_load_sphal_library: filename: vulkan.adreno.so
+[08-31 04:34:22.873] I/hook_impl: hook_android_dlopen_ext: filename: vulkan.adreno.so
+[08-31 04:34:22.874] I/hook_impl: hook_android_dlopen_ext: loading custom driver: /data/data/com.zenithblue.sambas3/files/gpu_drivers/turnip-26.3/libvulkan_freedreno.so
+[08-31 04:34:22.875] D/vulkan: searching for layers in '/data/app/~~qDuLJo-UQlaTk5nIV6jwVw==/com.zenithblue.sambas3-UDc-nu09RKnsbLfHy_jCew==/lib/arm64'
+[08-31 04:34:22.875] D/vulkan: searching for layers in '/data/app/~~qDuLJo-UQlaTk5nIV6jwVw==/com.zenithblue.sambas3-UDc-nu09RKnsbLfHy_jCew==/base.apk!/lib/arm64-v8a'
+[08-31 05:20:13.090] D/vulkan: searching for layers in '/data/app/~~qDuLJo-UQlaTk5nIV6jwVw==/com.zenithblue.sambas3-UDc-nu09RKnsbLfHy_jCew==/lib/arm64'
+[08-31 05:20:13.090] D/vulkan: searching for layers in '/data/app/~~qDuLJo-UQlaTk5nIV6jwVw==/com.zenithblue.sambas3-UDc-nu09RKnsbLfHy_jCew==/base.apk!/lib/arm64-v8a'
+[08-31 05:22:52.567] I/hook_impl: hook_android_load_sphal_library: filename: vulkan.adreno.so
+[08-31 05:22:52.567] I/hook_impl: hook_android_dlopen_ext: filename: vulkan.adreno.so
+[08-31 05:22:52.568] I/hook_impl: hook_android_dlopen_ext: loading custom driver: /data/data/com.zenithblue.sambas3/files/gpu_drivers/turnip-26.3/libvulkan_freedreno.so
+[08-31 05:22:52.569] D/vulkan: searching for layers in '/data/app/~~qDuLJo-UQlaTk5nIV6jwVw==/com.zenithblue.sambas3-UDc-nu09RKnsbLfHy_jCew==/lib/arm64'
+[08-31 05:22:52.569] D/vulkan: searching for layers in '/data/app/~~qDuLJo-UQlaTk5nIV6jwVw==/com.zenithblue.sambas3-UDc-nu09RKnsbLfHy_jCew==/base.apk!/lib/arm64-v8a'
+[08-31 05:51:57.549] D/vulkan: searching for layers in '/data/app/~~qDuLJo-UQlaTk5nIV6jwVw==/com.zenithblue.sambas3-UDc-nu09RKnsbLfHy_jCew==/lib/arm64'
+[08-31 05:51:57.550] D/vulkan: searching for layers in '/data/app/~~qDuLJo-UQlaTk5nIV6jwVw==/com.zenithblue.sambas3-UDc-nu09RKnsbLfHy_jCew==/base.apk!/lib/arm64-v8a'
+[08-31 05:52:38.529] I/hook_impl: hook_android_load_sphal_library: filename: vulkan.adreno.so
+[08-31 05:52:38.529] I/hook_impl: hook_android_dlopen_ext: filename: vulkan.adreno.so
+[08-31 05:52:38.530] I/hook_impl: hook_android_dlopen_ext: loading custom driver: /data/data/com.zenithblue.sambas3/files/gpu_drivers/turnip-26.3/libvulkan_freedreno.so
+[08-31 05:52:38.531] D/vulkan: searching for layers in '/data/app/~~qDuLJo-UQlaTk5nIV6jwVw==/com.zenithblue.sambas3-UDc-nu09RKnsbLfHy_jCew==/lib/arm64'
+[08-31 05:52:38.531] D/vulkan: searching for layers in '/data/app/~~qDuLJo-UQlaTk5nIV6jwVw==/com.zenithblue.sambas3-UDc-nu09RKnsbLfHy_jCew==/base.apk!/lib/arm64-v8a'
+[08-31 07:04:22.434] D/vulkan: searching for layers in '/data/app/~~_ZzslX_KL1b3wQqZy-Jb0A==/com.zenithblue.sambas3-XIpmAmRBq7MQHpJvVKH6Lw==/lib/arm64'
+[08-31 07:04:22.434] D/vulkan: searching for layers in '/data/app/~~_ZzslX_KL1b3wQqZy-Jb0A==/com.zenithblue.sambas3-XIpmAmRBq7MQHpJvVKH6Lw==/base.apk!/lib/arm64-v8a'
+[08-31 07:04:53.080] I/hook_impl: hook_android_load_sphal_library: filename: vulkan.adreno.so
+[08-31 07:04:53.080] I/hook_impl: hook_android_dlopen_ext: filename: vulkan.adreno.so
+[08-31 07:04:53.080] I/hook_impl: hook_android_dlopen_ext: loading custom driver: /data/data/com.zenithblue.sambas3/files/gpu_drivers/turnip-26.3/libvulkan_freedreno.so
+[08-31 07:04:53.081] D/vulkan: searching for layers in '/data/app/~~_ZzslX_KL1b3wQqZy-Jb0A==/com.zenithblue.sambas3-XIpmAmRBq7MQHpJvVKH6Lw==/lib/arm64'
+[08-31 07:04:53.081] D/vulkan: searching for layers in '/data/app/~~_ZzslX_KL1b3wQqZy-Jb0A==/com.zenithblue.sambas3-XIpmAmRBq7MQHpJvVKH6Lw==/base.apk!/lib/arm64-v8a'
+[08-31 07:12:25.767] D/vulkan: searching for layers in '/data/app/~~_ZzslX_KL1b3wQqZy-Jb0A==/com.zenithblue.sambas3-XIpmAmRBq7MQHpJvVKH6Lw==/lib/arm64'
+[08-31 07:12:25.767] D/vulkan: searching for layers in '/data/app/~~_ZzslX_KL1b3wQqZy-Jb0A==/com.zenithblue.sambas3-XIpmAmRBq7MQHpJvVKH6Lw==/base.apk!/lib/arm64-v8a'
+[08-31 07:26:11.836] D/vulkan: searching for layers in '/data/app/~~SZoiFJ4QtJhQLpgW2PvoSQ==/com.zenithblue.sambas3-D8XHd7CvrXyDb_rNgyGXug==/lib/arm64'
+[08-31 07:26:11.836] D/vulkan: searching for layers in '/data/app/~~SZoiFJ4QtJhQLpgW2PvoSQ==/com.zenithblue.sambas3-D8XHd7CvrXyDb_rNgyGXug==/base.apk!/lib/arm64-v8a'
+[08-31 07:26:40.488] I/hook_impl: hook_android_load_sphal_library: filename: vulkan.adreno.so
+[08-31 07:26:40.488] I/hook_impl: hook_android_dlopen_ext: filename: vulkan.adreno.so
+[08-31 07:26:40.489] I/hook_impl: hook_android_dlopen_ext: loading custom driver: /data/data/com.zenithblue.sambas3/files/gpu_drivers/turnip-26.3/libvulkan_freedreno.so
+[08-31 07:26:40.490] D/vulkan: searching for layers in '/data/app/~~SZoiFJ4QtJhQLpgW2PvoSQ==/com.zenithblue.sambas3-D8XHd7CvrXyDb_rNgyGXug==/lib/arm64'
+[08-31 07:26:40.490] D/vulkan: searching for layers in '/data/app/~~SZoiFJ4QtJhQLpgW2PvoSQ==/com.zenithblue.sambas3-D8XHd7CvrXyDb_rNgyGXug==/base.apk!/lib/arm64-v8a'
+[08-31 07:30:20.242] D/vulkan: searching for layers in '/data/app/~~SZoiFJ4QtJhQLpgW2PvoSQ==/com.zenithblue.sambas3-D8XHd7CvrXyDb_rNgyGXug==/lib/arm64'
+[08-31 07:30:20.243] D/vulkan: searching for layers in '/data/app/~~SZoiFJ4QtJhQLpgW2PvoSQ==/com.zenithblue.sambas3-D8XHd7CvrXyDb_rNgyGXug==/base.apk!/lib/arm64-v8a'
+[08-31 07:33:10.380] I/hook_impl: hook_android_load_sphal_library: filename: vulkan.adreno.so
+[08-31 07:33:10.380] I/hook_impl: hook_android_dlopen_ext: filename: vulkan.adreno.so
+[08-31 07:33:10.380] I/hook_impl: hook_android_dlopen_ext: loading custom driver: /data/data/com.zenithblue.sambas3/files/gpu_drivers/turnip-26.3/libvulkan_freedreno.so
+[08-31 07:33:10.381] D/vulkan: searching for layers in '/data/app/~~SZoiFJ4QtJhQLpgW2PvoSQ==/com.zenithblue.sambas3-D8XHd7CvrXyDb_rNgyGXug==/lib/arm64'
+[08-31 07:33:10.381] D/vulkan: searching for layers in '/data/app/~~SZoiFJ4QtJhQLpgW2PvoSQ==/com.zenithblue.sambas3-D8XHd7CvrXyDb_rNgyGXug==/base.apk!/lib/arm64-v8a'
+[08-31 07:51:06.614] D/vulkan: searching for layers in '/data/app/~~SZoiFJ4QtJhQLpgW2PvoSQ==/com.zenithblue.sambas3-D8XHd7CvrXyDb_rNgyGXug==/lib/arm64'
+[08-31 07:51:06.614] D/vulkan: searching for layers in '/data/app/~~SZoiFJ4QtJhQLpgW2PvoSQ==/com.zenithblue.sambas3-D8XHd7CvrXyDb_rNgyGXug==/base.apk!/lib/arm64-v8a'
+[08-31 07:51:20.648] I/hook_impl: hook_android_load_sphal_library: filename: vulkan.adreno.so
+[08-31 07:51:20.648] I/hook_impl: hook_android_dlopen_ext: filename: vulkan.adreno.so
+[08-31 07:51:20.649] I/hook_impl: hook_android_dlopen_ext: loading custom driver: /data/data/com.zenithblue.sambas3/files/gpu_drivers/turnip-26.3/libvulkan_freedreno.so
+[08-31 07:51:20.650] D/vulkan: searching for layers in '/data/app/~~SZoiFJ4QtJhQLpgW2PvoSQ==/com.zenithblue.sambas3-D8XHd7CvrXyDb_rNgyGXug==/lib/arm64'
+[08-31 07:51:20.650] D/vulkan: searching for layers in '/data/app/~~SZoiFJ4QtJhQLpgW2PvoSQ==/com.zenithblue.sambas3-D8XHd7CvrXyDb_rNgyGXug==/base.apk!/lib/arm64-v8a'
+[08-31 07:51:46.635] D/vulkan: searching for layers in '/data/app/~~SZoiFJ4QtJhQLpgW2PvoSQ==/com.zenithblue.sambas3-D8XHd7CvrXyDb_rNgyGXug==/lib/arm64'
+[08-31 07:51:46.635] D/vulkan: searching for layers in '/data/app/~~SZoiFJ4QtJhQLpgW2PvoSQ==/com.zenithblue.sambas3-D8XHd7CvrXyDb_rNgyGXug==/base.apk!/lib/arm64-v8a'
+[08-31 07:52:00.698] I/hook_impl: hook_android_load_sphal_library: filename: vulkan.adreno.so
+[08-31 07:52:00.699] I/hook_impl: hook_android_dlopen_ext: filename: vulkan.adreno.so
+[08-31 07:52:00.699] I/hook_impl: hook_android_dlopen_ext: loading custom driver: /data/data/com.zenithblue.sambas3/files/gpu_drivers/turnip-26.3/libvulkan_freedreno.so
+[08-31 07:52:00.701] D/vulkan: searching for layers in '/data/app/~~SZoiFJ4QtJhQLpgW2PvoSQ==/com.zenithblue.sambas3-D8XHd7CvrXyDb_rNgyGXug==/lib/arm64'
+[08-31 07:52:00.701] D/vulkan: searching for layers in '/data/app/~~SZoiFJ4QtJhQLpgW2PvoSQ==/com.zenithblue.sambas3-D8XHd7CvrXyDb_rNgyGXug==/base.apk!/lib/arm64-v8a'
+[08-31 07:52:26.653] D/vulkan: searching for layers in '/data/app/~~SZoiFJ4QtJhQLpgW2PvoSQ==/com.zenithblue.sambas3-D8XHd7CvrXyDb_rNgyGXug==/lib/arm64'
+[08-31 07:52:26.653] D/vulkan: searching for layers in '/data/app/~~SZoiFJ4QtJhQLpgW2PvoSQ==/com.zenithblue.sambas3-D8XHd7CvrXyDb_rNgyGXug==/base.apk!/lib/arm64-v8a'
+[08-31 07:52:40.690] I/hook_impl: hook_android_load_sphal_library: filename: vulkan.adreno.so
+[08-31 07:52:40.690] I/hook_impl: hook_android_dlopen_ext: filename: vulkan.adreno.so
+[08-31 07:52:40.691] I/hook_impl: hook_android_dlopen_ext: loading custom driver: /data/data/com.zenithblue.sambas3/files/gpu_drivers/turnip-26.3/libvulkan_freedreno.so
+[08-31 07:52:40.693] D/vulkan: searching for layers in '/data/app/~~SZoiFJ4QtJhQLpgW2PvoSQ==/com.zenithblue.sambas3-D8XHd7CvrXyDb_rNgyGXug==/lib/arm64'
+[08-31 07:52:40.693] D/vulkan: searching for layers in '/data/app/~~SZoiFJ4QtJhQLpgW2PvoSQ==/com.zenithblue.sambas3-D8XHd7CvrXyDb_rNgyGXug==/base.apk!/lib/arm64-v8a'
+[08-31 07:53:32.662] D/vulkan: searching for layers in '/data/app/~~SZoiFJ4QtJhQLpgW2PvoSQ==/com.zenithblue.sambas3-D8XHd7CvrXyDb_rNgyGXug==/lib/arm64'
+[08-31 07:53:32.662] D/vulkan: searching for layers in '/data/app/~~SZoiFJ4QtJhQLpgW2PvoSQ==/com.zenithblue.sambas3-D8XHd7CvrXyDb_rNgyGXug==/base.apk!/lib/arm64-v8a'
+[08-31 07:53:46.694] I/hook_impl: hook_android_load_sphal_library: filename: vulkan.adreno.so
+[08-31 07:53:46.694] I/hook_impl: hook_android_dlopen_ext: filename: vulkan.adreno.so
+[08-31 07:53:46.695] I/hook_impl: hook_android_dlopen_ext: loading custom driver: /data/data/com.zenithblue.sambas3/files/gpu_drivers/turnip-26.3/libvulkan_freedreno.so
+[08-31 07:53:46.696] D/vulkan: searching for layers in '/data/app/~~SZoiFJ4QtJhQLpgW2PvoSQ==/com.zenithblue.sambas3-D8XHd7CvrXyDb_rNgyGXug==/lib/arm64'
+[08-31 07:53:46.696] D/vulkan: searching for layers in '/data/app/~~SZoiFJ4QtJhQLpgW2PvoSQ==/com.zenithblue.sambas3-D8XHd7CvrXyDb_rNgyGXug==/base.apk!/lib/arm64-v8a'
+[08-31 07:54:12.679] D/vulkan: searching for layers in '/data/app/~~SZoiFJ4QtJhQLpgW2PvoSQ==/com.zenithblue.sambas3-D8XHd7CvrXyDb_rNgyGXug==/lib/arm64'
+[08-31 07:54:12.679] D/vulkan: searching for layers in '/data/app/~~SZoiFJ4QtJhQLpgW2PvoSQ==/com.zenithblue.sambas3-D8XHd7CvrXyDb_rNgyGXug==/base.apk!/lib/arm64-v8a'
+[08-31 07:54:26.722] I/hook_impl: hook_android_load_sphal_library: filename: vulkan.adreno.so
+[08-31 07:54:26.722] I/hook_impl: hook_android_dlopen_ext: filename: vulkan.adreno.so
+[08-31 07:54:26.723] I/hook_impl: hook_android_dlopen_ext: loading custom driver: /data/data/com.zenithblue.sambas3/files/gpu_drivers/turnip-26.3/libvulkan_freedreno.so
+[08-31 07:54:26.724] D/vulkan: searching for layers in '/data/app/~~SZoiFJ4QtJhQLpgW2PvoSQ==/com.zenithblue.sambas3-D8XHd7CvrXyDb_rNgyGXug==/lib/arm64'
+[08-31 07:54:26.725] D/vulkan: searching for layers in '/data/app/~~SZoiFJ4QtJhQLpgW2PvoSQ==/com.zenithblue.sambas3-D8XHd7CvrXyDb_rNgyGXug==/base.apk!/lib/arm64-v8a'
+[08-31 07:54:52.671] D/vulkan: searching for layers in '/data/app/~~SZoiFJ4QtJhQLpgW2PvoSQ==/com.zenithblue.sambas3-D8XHd7CvrXyDb_rNgyGXug==/lib/arm64'
+[08-31 07:54:52.671] D/vulkan: searching for layers in '/data/app/~~SZoiFJ4QtJhQLpgW2PvoSQ==/com.zenithblue.sambas3-D8XHd7CvrXyDb_rNgyGXug==/base.apk!/lib/arm64-v8a'
+[08-31 07:55:06.720] I/hook_impl: hook_android_load_sphal_library: filename: vulkan.adreno.so
+[08-31 07:55:06.720] I/hook_impl: hook_android_dlopen_ext: filename: vulkan.adreno.so
+[08-31 07:55:06.721] I/hook_impl: hook_android_dlopen_ext: loading custom driver: /data/data/com.zenithblue.sambas3/files/gpu_drivers/turnip-26.3/libvulkan_freedreno.so
+[08-31 07:55:06.722] D/vulkan: searching for layers in '/data/app/~~SZoiFJ4QtJhQLpgW2PvoSQ==/com.zenithblue.sambas3-D8XHd7CvrXyDb_rNgyGXug==/lib/arm64'
+[08-31 07:55:06.723] D/vulkan: searching for layers in '/data/app/~~SZoiFJ4QtJhQLpgW2PvoSQ==/com.zenithblue.sambas3-D8XHd7CvrXyDb_rNgyGXug==/base.apk!/lib/arm64-v8a'
+[08-31 07:55:32.674] D/vulkan: searching for layers in '/data/app/~~SZoiFJ4QtJhQLpgW2PvoSQ==/com.zenithblue.sambas3-D8XHd7CvrXyDb_rNgyGXug==/lib/arm64'
+[08-31 07:55:32.676] D/vulkan: searching for layers in '/data/app/~~SZoiFJ4QtJhQLpgW2PvoSQ==/com.zenithblue.sambas3-D8XHd7CvrXyDb_rNgyGXug==/base.apk!/lib/arm64-v8a'
+[08-31 07:55:46.765] I/hook_impl: hook_android_load_sphal_library: filename: vulkan.adreno.so
+[08-31 07:55:46.765] I/hook_impl: hook_android_dlopen_ext: filename: vulkan.adreno.so
+[08-31 07:55:46.766] I/hook_impl: hook_android_dlopen_ext: loading custom driver: /data/data/com.zenithblue.sambas3/files/gpu_drivers/turnip-26.3/libvulkan_freedreno.so
+[08-31 07:55:46.767] D/vulkan: searching for layers in '/data/app/~~SZoiFJ4QtJhQLpgW2PvoSQ==/com.zenithblue.sambas3-D8XHd7CvrXyDb_rNgyGXug==/lib/arm64'
+[08-31 07:55:46.767] D/vulkan: searching for layers in '/data/app/~~SZoiFJ4QtJhQLpgW2PvoSQ==/com.zenithblue.sambas3-D8XHd7CvrXyDb_rNgyGXug==/base.apk!/lib/arm64-v8a'
+[08-31 07:56:12.727] D/vulkan: searching for layers in '/data/app/~~SZoiFJ4QtJhQLpgW2PvoSQ==/com.zenithblue.sambas3-D8XHd7CvrXyDb_rNgyGXug==/lib/arm64'
+[08-31 07:56:12.727] D/vulkan: searching for layers in '/data/app/~~SZoiFJ4QtJhQLpgW2PvoSQ==/com.zenithblue.sambas3-D8XHd7CvrXyDb_rNgyGXug==/base.apk!/lib/arm64-v8a'
+[08-31 07:56:26.809] I/hook_impl: hook_android_load_sphal_library: filename: vulkan.adreno.so
+[08-31 07:56:26.810] I/hook_impl: hook_android_dlopen_ext: loading custom driver: /data/data/com.zenithblue.sambas3/files/gpu_drivers/turnip-26.3/libvulkan_freedreno.so
+[08-31 07:56:26.811] D/vulkan: searching for layers in '/data/app/~~SZoiFJ4QtJhQLpgW2PvoSQ==/com.zenithblue.sambas3-D8XHd7CvrXyDb_rNgyGXug==/lib/arm64'
+[08-31 07:56:26.811] D/vulkan: searching for layers in '/data/app/~~SZoiFJ4QtJhQLpgW2PvoSQ==/com.zenithblue.sambas3-D8XHd7CvrXyDb_rNgyGXug==/base.apk!/lib/arm64-v8a'
+[08-31 07:56:52.776] D/vulkan: searching for layers in '/data/app/~~SZoiFJ4QtJhQLpgW2PvoSQ==/com.zenithblue.sambas3-D8XHd7CvrXyDb_rNgyGXug==/lib/arm64'
+[08-31 07:56:52.776] D/vulkan: searching for layers in '/data/app/~~SZoiFJ4QtJhQLpgW2PvoSQ==/com.zenithblue.sambas3-D8XHd7CvrXyDb_rNgyGXug==/base.apk!/lib/arm64-v8a'
+[08-31 07:57:06.776] I/hook_impl: hook_android_load_sphal_library: filename: vulkan.adreno.so
+[08-31 07:57:06.776] I/hook_impl: hook_android_dlopen_ext: filename: vulkan.adreno.so
+[08-31 07:57:06.777] I/hook_impl: hook_android_dlopen_ext: loading custom driver: /data/data/com.zenithblue.sambas3/files/gpu_drivers/turnip-26.3/libvulkan_freedreno.so
+[08-31 07:57:06.778] D/vulkan: searching for layers in '/data/app/~~SZoiFJ4QtJhQLpgW2PvoSQ==/com.zenithblue.sambas3-D8XHd7CvrXyDb_rNgyGXug==/lib/arm64'
+[08-31 07:57:06.778] D/vulkan: searching for layers in '/data/app/~~SZoiFJ4QtJhQLpgW2PvoSQ==/com.zenithblue.sambas3-D8XHd7CvrXyDb_rNgyGXug==/base.apk!/lib/arm64-v8a'
+[08-31 07:57:32.788] D/vulkan: searching for layers in '/data/app/~~SZoiFJ4QtJhQLpgW2PvoSQ==/com.zenithblue.sambas3-D8XHd7CvrXyDb_rNgyGXug==/lib/arm64'
+[08-31 07:57:32.789] D/vulkan: searching for layers in '/data/app/~~SZoiFJ4QtJhQLpgW2PvoSQ==/com.zenithblue.sambas3-D8XHd7CvrXyDb_rNgyGXug==/base.apk!/lib/arm64-v8a'
+[08-31 07:57:46.819] I/hook_impl: hook_android_load_sphal_library: filename: vulkan.adreno.so
+[08-31 07:57:46.819] I/hook_impl: hook_android_dlopen_ext: filename: vulkan.adreno.so
+[08-31 07:57:46.820] I/hook_impl: hook_android_dlopen_ext: loading custom driver: /data/data/com.zenithblue.sambas3/files/gpu_drivers/turnip-26.3/libvulkan_freedreno.so
+[08-31 07:57:46.821] D/vulkan: searching for layers in '/data/app/~~SZoiFJ4QtJhQLpgW2PvoSQ==/com.zenithblue.sambas3-D8XHd7CvrXyDb_rNgyGXug==/lib/arm64'
+[08-31 07:57:46.821] D/vulkan: searching for layers in '/data/app/~~SZoiFJ4QtJhQLpgW2PvoSQ==/com.zenithblue.sambas3-D8XHd7CvrXyDb_rNgyGXug==/base.apk!/lib/arm64-v8a'
+[08-31 07:58:56.132] D/vulkan: searching for layers in '/data/app/~~SZoiFJ4QtJhQLpgW2PvoSQ==/com.zenithblue.sambas3-D8XHd7CvrXyDb_rNgyGXug==/lib/arm64'
+[08-31 07:58:56.132] D/vulkan: searching for layers in '/data/app/~~SZoiFJ4QtJhQLpgW2PvoSQ==/com.zenithblue.sambas3-D8XHd7CvrXyDb_rNgyGXug==/base.apk!/lib/arm64-v8a'
+[08-31 07:59:05.976] I/hook_impl: hook_android_load_sphal_library: filename: vulkan.adreno.so
+[08-31 07:59:05.976] I/hook_impl: hook_android_dlopen_ext: filename: vulkan.adreno.so
+[08-31 07:59:05.976] I/hook_impl: hook_android_dlopen_ext: loading custom driver: /data/data/com.zenithblue.sambas3/files/gpu_drivers/turnip-26.3/libvulkan_freedreno.so
+[08-31 07:59:05.978] D/vulkan: searching for layers in '/data/app/~~SZoiFJ4QtJhQLpgW2PvoSQ==/com.zenithblue.sambas3-D8XHd7CvrXyDb_rNgyGXug==/lib/arm64'
+[08-31 07:59:05.978] D/vulkan: searching for layers in '/data/app/~~SZoiFJ4QtJhQLpgW2PvoSQ==/com.zenithblue.sambas3-D8XHd7CvrXyDb_rNgyGXug==/base.apk!/lib/arm64-v8a'
+[08-31 07:59:57.576] D/vulkan: searching for layers in '/data/app/~~SZoiFJ4QtJhQLpgW2PvoSQ==/com.zenithblue.sambas3-D8XHd7CvrXyDb_rNgyGXug==/lib/arm64'
+[08-31 07:59:57.577] D/vulkan: searching for layers in '/data/app/~~SZoiFJ4QtJhQLpgW2PvoSQ==/com.zenithblue.sambas3-D8XHd7CvrXyDb_rNgyGXug==/base.apk!/lib/arm64-v8a'
+[08-31 08:00:29.163] D/vulkan: searching for layers in '/data/app/~~SZoiFJ4QtJhQLpgW2PvoSQ==/com.zenithblue.sambas3-D8XHd7CvrXyDb_rNgyGXug==/lib/arm64'
+[08-31 08:00:29.164] D/vulkan: searching for layers in '/data/app/~~SZoiFJ4QtJhQLpgW2PvoSQ==/com.zenithblue.sambas3-D8XHd7CvrXyDb_rNgyGXug==/base.apk!/lib/arm64-v8a'
+[08-31 08:01:00.909] D/vulkan: searching for layers in '/data/app/~~SZoiFJ4QtJhQLpgW2PvoSQ==/com.zenithblue.sambas3-D8XHd7CvrXyDb_rNgyGXug==/lib/arm64'
+[08-31 08:01:00.909] D/vulkan: searching for layers in '/data/app/~~SZoiFJ4QtJhQLpgW2PvoSQ==/com.zenithblue.sambas3-D8XHd7CvrXyDb_rNgyGXug==/base.apk!/lib/arm64-v8a'
+[08-31 08:04:53.929] D/vulkan: searching for layers in '/data/app/~~SZoiFJ4QtJhQLpgW2PvoSQ==/com.zenithblue.sambas3-D8XHd7CvrXyDb_rNgyGXug==/lib/arm64'
+[08-31 08:04:53.930] D/vulkan: searching for layers in '/data/app/~~SZoiFJ4QtJhQLpgW2PvoSQ==/com.zenithblue.sambas3-D8XHd7CvrXyDb_rNgyGXug==/base.apk!/lib/arm64-v8a'
+[08-31 08:05:04.305] I/hook_impl: hook_android_load_sphal_library: filename: vulkan.adreno.so
+[08-31 08:05:04.305] I/hook_impl: hook_android_dlopen_ext: filename: vulkan.adreno.so
+[08-31 08:05:04.306] I/hook_impl: hook_android_dlopen_ext: loading custom driver: /data/data/com.zenithblue.sambas3/files/gpu_drivers/turnip-26.3/libvulkan_freedreno.so
+[08-31 08:05:04.307] D/vulkan: searching for layers in '/data/app/~~SZoiFJ4QtJhQLpgW2PvoSQ==/com.zenithblue.sambas3-D8XHd7CvrXyDb_rNgyGXug==/lib/arm64'
+[08-31 08:05:04.307] D/vulkan: searching for layers in '/data/app/~~SZoiFJ4QtJhQLpgW2PvoSQ==/com.zenithblue.sambas3-D8XHd7CvrXyDb_rNgyGXug==/base.apk!/lib/arm64-v8a'
+[08-31 08:05:34.035] D/vulkan: searching for layers in '/data/app/~~SZoiFJ4QtJhQLpgW2PvoSQ==/com.zenithblue.sambas3-D8XHd7CvrXyDb_rNgyGXug==/lib/arm64'
+[08-31 08:05:34.035] D/vulkan: searching for layers in '/data/app/~~SZoiFJ4QtJhQLpgW2PvoSQ==/com.zenithblue.sambas3-D8XHd7CvrXyDb_rNgyGXug==/base.apk!/lib/arm64-v8a'
+[08-31 08:05:44.313] I/hook_impl: hook_android_load_sphal_library: filename: vulkan.adreno.so
+[08-31 08:05:44.313] I/hook_impl: hook_android_dlopen_ext: filename: vulkan.adreno.so
+[08-31 08:05:44.314] I/hook_impl: hook_android_dlopen_ext: loading custom driver: /data/data/com.zenithblue.sambas3/files/gpu_drivers/turnip-26.3/libvulkan_freedreno.so
+[08-31 08:05:44.315] D/vulkan: searching for layers in '/data/app/~~SZoiFJ4QtJhQLpgW2PvoSQ==/com.zenithblue.sambas3-D8XHd7CvrXyDb_rNgyGXug==/base.apk!/lib/arm64-v8a'
+[08-31 08:06:09.682] D/vulkan: searching for layers in '/data/app/~~SZoiFJ4QtJhQLpgW2PvoSQ==/com.zenithblue.sambas3-D8XHd7CvrXyDb_rNgyGXug==/lib/arm64'
+[08-31 08:06:09.682] D/vulkan: searching for layers in '/data/app/~~SZoiFJ4QtJhQLpgW2PvoSQ==/com.zenithblue.sambas3-D8XHd7CvrXyDb_rNgyGXug==/base.apk!/lib/arm64-v8a'
+[08-31 08:06:20.080] I/hook_impl: hook_android_load_sphal_library: filename: vulkan.adreno.so
+[08-31 08:06:20.080] I/hook_impl: hook_android_dlopen_ext: filename: vulkan.adreno.so
+[08-31 08:06:20.080] I/hook_impl: hook_android_dlopen_ext: loading custom driver: /data/data/com.zenithblue.sambas3/files/gpu_drivers/turnip-26.3/libvulkan_freedreno.so
+[08-31 08:06:20.081] D/vulkan: searching for layers in '/data/app/~~SZoiFJ4QtJhQLpgW2PvoSQ==/com.zenithblue.sambas3-D8XHd7CvrXyDb_rNgyGXug==/lib/arm64'
+[08-31 08:06:20.082] D/vulkan: searching for layers in '/data/app/~~SZoiFJ4QtJhQLpgW2PvoSQ==/com.zenithblue.sambas3-D8XHd7CvrXyDb_rNgyGXug==/base.apk!/lib/arm64-v8a'
+[08-31 08:06:44.278] D/vulkan: searching for layers in '/data/app/~~SZoiFJ4QtJhQLpgW2PvoSQ==/com.zenithblue.sambas3-D8XHd7CvrXyDb_rNgyGXug==/lib/arm64'
+[08-31 08:06:44.278] D/vulkan: searching for layers in '/data/app/~~SZoiFJ4QtJhQLpgW2PvoSQ==/com.zenithblue.sambas3-D8XHd7CvrXyDb_rNgyGXug==/base.apk!/lib/arm64-v8a'
+[08-31 08:06:54.660] I/hook_impl: hook_android_load_sphal_library: filename: vulkan.adreno.so
+[08-31 08:06:54.660] I/hook_impl: hook_android_dlopen_ext: filename: vulkan.adreno.so
+[08-31 08:06:54.660] I/hook_impl: hook_android_dlopen_ext: loading custom driver: /data/data/com.zenithblue.sambas3/files/gpu_drivers/turnip-26.3/libvulkan_freedreno.so
+[08-31 08:06:54.661] D/vulkan: searching for layers in '/data/app/~~SZoiFJ4QtJhQLpgW2PvoSQ==/com.zenithblue.sambas3-D8XHd7CvrXyDb_rNgyGXug==/lib/arm64'
+[08-31 08:06:54.662] D/vulkan: searching for layers in '/data/app/~~SZoiFJ4QtJhQLpgW2PvoSQ==/com.zenithblue.sambas3-D8XHd7CvrXyDb_rNgyGXug==/base.apk!/lib/arm64-v8a'
+[08-31 08:07:19.974] D/vulkan: searching for layers in '/data/app/~~SZoiFJ4QtJhQLpgW2PvoSQ==/com.zenithblue.sambas3-D8XHd7CvrXyDb_rNgyGXug==/lib/arm64'
+[08-31 08:07:19.974] D/vulkan: searching for layers in '/data/app/~~SZoiFJ4QtJhQLpgW2PvoSQ==/com.zenithblue.sambas3-D8XHd7CvrXyDb_rNgyGXug==/base.apk!/lib/arm64-v8a'
+[08-31 08:07:30.457] I/hook_impl: hook_android_load_sphal_library: filename: vulkan.adreno.so
+[08-31 08:07:30.457] I/hook_impl: hook_android_dlopen_ext: filename: vulkan.adreno.so
+[08-31 08:07:30.458] I/hook_impl: hook_android_dlopen_ext: loading custom driver: /data/data/com.zenithblue.sambas3/files/gpu_drivers/turnip-26.3/libvulkan_freedreno.so
+[08-31 08:07:30.459] D/vulkan: searching for layers in '/data/app/~~SZoiFJ4QtJhQLpgW2PvoSQ==/com.zenithblue.sambas3-D8XHd7CvrXyDb_rNgyGXug==/lib/arm64'
+[08-31 08:07:30.459] D/vulkan: searching for layers in '/data/app/~~SZoiFJ4QtJhQLpgW2PvoSQ==/com.zenithblue.sambas3-D8XHd7CvrXyDb_rNgyGXug==/base.apk!/lib/arm64-v8a'
+[08-31 08:07:55.795] D/vulkan: searching for layers in '/data/app/~~SZoiFJ4QtJhQLpgW2PvoSQ==/com.zenithblue.sambas3-D8XHd7CvrXyDb_rNgyGXug==/lib/arm64'
+[08-31 08:07:55.795] D/vulkan: searching for layers in '/data/app/~~SZoiFJ4QtJhQLpgW2PvoSQ==/com.zenithblue.sambas3-D8XHd7CvrXyDb_rNgyGXug==/base.apk!/lib/arm64-v8a'
+[08-31 08:08:06.356] I/hook_impl: hook_android_load_sphal_library: filename: vulkan.adreno.so
+[08-31 08:08:06.356] I/hook_impl: hook_android_dlopen_ext: filename: vulkan.adreno.so
+[08-31 08:08:06.356] I/hook_impl: hook_android_dlopen_ext: loading custom driver: /data/data/com.zenithblue.sambas3/files/gpu_drivers/turnip-26.3/libvulkan_freedreno.so
+[08-31 08:08:06.358] D/vulkan: searching for layers in '/data/app/~~SZoiFJ4QtJhQLpgW2PvoSQ==/com.zenithblue.sambas3-D8XHd7CvrXyDb_rNgyGXug==/lib/arm64'
+[08-31 08:08:06.358] D/vulkan: searching for layers in '/data/app/~~SZoiFJ4QtJhQLpgW2PvoSQ==/com.zenithblue.sambas3-D8XHd7CvrXyDb_rNgyGXug==/base.apk!/lib/arm64-v8a'
+[08-31 08:08:31.651] D/vulkan: searching for layers in '/data/app/~~SZoiFJ4QtJhQLpgW2PvoSQ==/com.zenithblue.sambas3-D8XHd7CvrXyDb_rNgyGXug==/lib/arm64'
+[08-31 08:08:31.652] D/vulkan: searching for layers in '/data/app/~~SZoiFJ4QtJhQLpgW2PvoSQ==/com.zenithblue.sambas3-D8XHd7CvrXyDb_rNgyGXug==/base.apk!/lib/arm64-v8a'
+[08-31 08:08:42.161] I/hook_impl: hook_android_load_sphal_library: filename: vulkan.adreno.so
+[08-31 08:08:42.161] I/hook_impl: hook_android_dlopen_ext: filename: vulkan.adreno.so
+[08-31 08:08:42.162] I/hook_impl: hook_android_dlopen_ext: loading custom driver: /data/data/com.zenithblue.sambas3/files/gpu_drivers/turnip-26.3/libvulkan_freedreno.so
+[08-31 08:08:42.163] D/vulkan: searching for layers in '/data/app/~~SZoiFJ4QtJhQLpgW2PvoSQ==/com.zenithblue.sambas3-D8XHd7CvrXyDb_rNgyGXug==/lib/arm64'
+[08-31 08:08:42.163] D/vulkan: searching for layers in '/data/app/~~SZoiFJ4QtJhQLpgW2PvoSQ==/com.zenithblue.sambas3-D8XHd7CvrXyDb_rNgyGXug==/base.apk!/lib/arm64-v8a'
+[08-31 08:09:07.515] D/vulkan: searching for layers in '/data/app/~~SZoiFJ4QtJhQLpgW2PvoSQ==/com.zenithblue.sambas3-D8XHd7CvrXyDb_rNgyGXug==/lib/arm64'
+[08-31 08:09:07.515] D/vulkan: searching for layers in '/data/app/~~SZoiFJ4QtJhQLpgW2PvoSQ==/com.zenithblue.sambas3-D8XHd7CvrXyDb_rNgyGXug==/base.apk!/lib/arm64-v8a'
+[08-31 08:09:18.055] I/hook_impl: hook_android_load_sphal_library: filename: vulkan.adreno.so
+[08-31 08:09:18.055] I/hook_impl: hook_android_dlopen_ext: filename: vulkan.adreno.so
+[08-31 08:09:18.056] I/hook_impl: hook_android_dlopen_ext: loading custom driver: /data/data/com.zenithblue.sambas3/files/gpu_drivers/turnip-26.3/libvulkan_freedreno.so
+[08-31 08:09:18.057] D/vulkan: searching for layers in '/data/app/~~SZoiFJ4QtJhQLpgW2PvoSQ==/com.zenithblue.sambas3-D8XHd7CvrXyDb_rNgyGXug==/lib/arm64'
+[08-31 08:09:18.057] D/vulkan: searching for layers in '/data/app/~~SZoiFJ4QtJhQLpgW2PvoSQ==/com.zenithblue.sambas3-D8XHd7CvrXyDb_rNgyGXug==/base.apk!/lib/arm64-v8a'
+[08-31 08:09:43.216] D/vulkan: searching for layers in '/data/app/~~SZoiFJ4QtJhQLpgW2PvoSQ==/com.zenithblue.sambas3-D8XHd7CvrXyDb_rNgyGXug==/lib/arm64'
+[08-31 08:09:43.216] D/vulkan: searching for layers in '/data/app/~~SZoiFJ4QtJhQLpgW2PvoSQ==/com.zenithblue.sambas3-D8XHd7CvrXyDb_rNgyGXug==/base.apk!/lib/arm64-v8a'
+[08-31 08:09:53.733] I/hook_impl: hook_android_load_sphal_library: filename: vulkan.adreno.so
+[08-31 08:09:53.733] I/hook_impl: hook_android_dlopen_ext: filename: vulkan.adreno.so
+[08-31 08:09:53.734] I/hook_impl: hook_android_dlopen_ext: loading custom driver: /data/data/com.zenithblue.sambas3/files/gpu_drivers/turnip-26.3/libvulkan_freedreno.so
+[08-31 08:09:53.735] D/vulkan: searching for layers in '/data/app/~~SZoiFJ4QtJhQLpgW2PvoSQ==/com.zenithblue.sambas3-D8XHd7CvrXyDb_rNgyGXug==/lib/arm64'
+[08-31 08:09:53.735] D/vulkan: searching for layers in '/data/app/~~SZoiFJ4QtJhQLpgW2PvoSQ==/com.zenithblue.sambas3-D8XHd7CvrXyDb_rNgyGXug==/base.apk!/lib/arm64-v8a'
+[08-31 08:11:49.635] D/vulkan: searching for layers in '/data/app/~~SZoiFJ4QtJhQLpgW2PvoSQ==/com.zenithblue.sambas3-D8XHd7CvrXyDb_rNgyGXug==/lib/arm64'
+[08-31 08:11:49.635] D/vulkan: searching for layers in '/data/app/~~SZoiFJ4QtJhQLpgW2PvoSQ==/com.zenithblue.sambas3-D8XHd7CvrXyDb_rNgyGXug==/base.apk!/lib/arm64-v8a'
+[08-31 08:11:49.635] D/vulkan: searching for layers in '/data/app/~~SZoiFJ4QtJhQLpgW2PvoSQ==/com.zenithblue.sambas3-D8XHd7CvrXyDb_rNgyGXug==/lib/arm64'
+[08-31 08:11:49.635] D/vulkan: searching for layers in '/data/app/~~SZoiFJ4QtJhQLpgW2PvoSQ==/com.zenithblue.sambas3-D8XHd7CvrXyDb_rNgyGXug==/base.apk!/lib/arm64-v8a'
+[08-31 08:11:49.635] D/vulkan: searching for layers in '/data/app/~~SZoiFJ4QtJhQLpgW2PvoSQ==/com.zenithblue.sambas3-D8XHd7CvrXyDb_rNgyGXug==/lib/arm64'
+[08-31 08:11:49.635] D/vulkan: searching for layers in '/data/app/~~SZoiFJ4QtJhQLpgW2PvoSQ==/com.zenithblue.sambas3-D8XHd7CvrXyDb_rNgyGXug==/base.apk!/lib/arm64-v8a'
+[08-31 08:11:49.635] D/vulkan: searching for layers in '/data/app/~~SZoiFJ4QtJhQLpgW2PvoSQ==/com.zenithblue.sambas3-D8XHd7CvrXyDb_rNgyGXug==/lib/arm64'
+[08-31 08:11:49.635] D/vulkan: searching for layers in '/data/app/~~SZoiFJ4QtJhQLpgW2PvoSQ==/com.zenithblue.sambas3-D8XHd7CvrXyDb_rNgyGXug==/base.apk!/lib/arm64-v8a'
+[08-31 08:12:11.419] D/vulkan: searching for layers in '/data/app/~~SZoiFJ4QtJhQLpgW2PvoSQ==/com.zenithblue.sambas3-D8XHd7CvrXyDb_rNgyGXug==/lib/arm64'
+[08-31 08:12:11.419] D/vulkan: searching for layers in '/data/app/~~SZoiFJ4QtJhQLpgW2PvoSQ==/com.zenithblue.sambas3-D8XHd7CvrXyDb_rNgyGXug==/base.apk!/lib/arm64-v8a'
+[08-31 08:12:40.469] I/hook_impl: hook_android_load_sphal_library: filename: vulkan.adreno.so
+[08-31 08:12:40.469] I/hook_impl: hook_android_dlopen_ext: filename: vulkan.adreno.so
+[08-31 08:12:40.470] I/hook_impl: hook_android_dlopen_ext: loading custom driver: /data/data/com.zenithblue.sambas3/files/gpu_drivers/turnip-26.3/libvulkan_freedreno.so
+[08-31 08:12:40.471] D/vulkan: searching for layers in '/data/app/~~SZoiFJ4QtJhQLpgW2PvoSQ==/com.zenithblue.sambas3-D8XHd7CvrXyDb_rNgyGXug==/lib/arm64'
+[08-31 08:12:40.471] D/vulkan: searching for layers in '/data/app/~~SZoiFJ4QtJhQLpgW2PvoSQ==/com.zenithblue.sambas3-D8XHd7CvrXyDb_rNgyGXug==/base.apk!/lib/arm64-v8a'
+[08-31 08:12:41.552] E/vulkan: dequeueBuffer failed: No such device (-19)
+[08-31 08:42:27.606] D/vulkan: searching for layers in '/data/app/~~Qz7kf5GtMzwjZK-bNcq9gQ==/com.zenithblue.sambas3-6WCW0PAW9nqh0rQ0nXw5Ag==/lib/arm64'
+[08-31 08:42:27.606] D/vulkan: searching for layers in '/data/app/~~Qz7kf5GtMzwjZK-bNcq9gQ==/com.zenithblue.sambas3-6WCW0PAW9nqh0rQ0nXw5Ag==/base.apk!/lib/arm64-v8a'
+[08-31 08:42:27.606] D/vulkan: searching for layers in '/data/app/~~Qz7kf5GtMzwjZK-bNcq9gQ==/com.zenithblue.sambas3-6WCW0PAW9nqh0rQ0nXw5Ag==/lib/arm64'
+[08-31 08:42:27.606] D/vulkan: searching for layers in '/data/app/~~Qz7kf5GtMzwjZK-bNcq9gQ==/com.zenithblue.sambas3-6WCW0PAW9nqh0rQ0nXw5Ag==/base.apk!/lib/arm64-v8a'
+[08-31 08:42:55.229] D/vulkan: searching for layers in '/data/app/~~Qz7kf5GtMzwjZK-bNcq9gQ==/com.zenithblue.sambas3-6WCW0PAW9nqh0rQ0nXw5Ag==/lib/arm64'
+[08-31 08:42:55.230] D/vulkan: searching for layers in '/data/app/~~Qz7kf5GtMzwjZK-bNcq9gQ==/com.zenithblue.sambas3-6WCW0PAW9nqh0rQ0nXw5Ag==/base.apk!/lib/arm64-v8a'
+[08-31 08:43:33.954] I/hook_impl: hook_android_load_sphal_library: filename: vulkan.adreno.so
+[08-31 08:43:33.954] I/hook_impl: hook_android_dlopen_ext: filename: vulkan.adreno.so
+[08-31 08:43:33.954] I/hook_impl: hook_android_dlopen_ext: loading custom driver: /data/data/com.zenithblue.sambas3/files/gpu_drivers/turnip-26.3/libvulkan_freedreno.so
+[08-31 08:43:33.956] D/vulkan: searching for layers in '/data/app/~~Qz7kf5GtMzwjZK-bNcq9gQ==/com.zenithblue.sambas3-6WCW0PAW9nqh0rQ0nXw5Ag==/lib/arm64'
+[08-31 08:43:33.956] D/vulkan: searching for layers in '/data/app/~~Qz7kf5GtMzwjZK-bNcq9gQ==/com.zenithblue.sambas3-6WCW0PAW9nqh0rQ0nXw5Ag==/base.apk!/lib/arm64-v8a'
+[08-31 08:48:03.013] D/vulkan: searching for layers in '/data/app/~~2-g-X02c3r0P1b6Jkc3HPw==/com.zenithblue.sambas3-z7dd_no6GLGqdDaCvSPuyg==/lib/arm64'
+[08-31 08:48:03.013] D/vulkan: searching for layers in '/data/app/~~2-g-X02c3r0P1b6Jkc3HPw==/com.zenithblue.sambas3-z7dd_no6GLGqdDaCvSPuyg==/base.apk!/lib/arm64-v8a'
+[08-31 08:48:17.624] I/hook_impl: hook_android_load_sphal_library: filename: vulkan.adreno.so
+[08-31 08:48:17.624] I/hook_impl: hook_android_dlopen_ext: filename: vulkan.adreno.so
+[08-31 08:48:17.625] I/hook_impl: hook_android_dlopen_ext: loading custom driver: /data/data/com.zenithblue.sambas3/files/gpu_drivers/turnip-26.3/libvulkan_freedreno.so
+[08-31 08:48:17.626] D/vulkan: searching for layers in '/data/app/~~2-g-X02c3r0P1b6Jkc3HPw==/com.zenithblue.sambas3-z7dd_no6GLGqdDaCvSPuyg==/lib/arm64'
+[08-31 08:48:17.626] D/vulkan: searching for layers in '/data/app/~~2-g-X02c3r0P1b6Jkc3HPw==/com.zenithblue.sambas3-z7dd_no6GLGqdDaCvSPuyg==/base.apk!/lib/arm64-v8a'
+[08-31 09:15:21.667] D/vulkan: searching for layers in '/data/app/~~NHHO71nqGolG3AzPEnN7lw==/com.zenithblue.sambas3-zNEZBPNsKafz7vCijR22Ag==/lib/arm64'
+[08-31 09:15:21.668] D/vulkan: searching for layers in '/data/app/~~NHHO71nqGolG3AzPEnN7lw==/com.zenithblue.sambas3-zNEZBPNsKafz7vCijR22Ag==/base.apk!/lib/arm64-v8a'
+[08-31 09:15:49.148] I/hook_impl: hook_android_load_sphal_library: filename: vulkan.adreno.so
+[08-31 09:15:49.148] I/hook_impl: hook_android_dlopen_ext: filename: vulkan.adreno.so
+[08-31 09:15:49.148] I/hook_impl: hook_android_dlopen_ext: loading custom driver: /data/data/com.zenithblue.sambas3/files/gpu_drivers/turnip-26.3/libvulkan_freedreno.so
+[08-31 09:15:49.150] D/vulkan: searching for layers in '/data/app/~~NHHO71nqGolG3AzPEnN7lw==/com.zenithblue.sambas3-zNEZBPNsKafz7vCijR22Ag==/lib/arm64'
+[08-31 09:15:49.150] D/vulkan: searching for layers in '/data/app/~~NHHO71nqGolG3AzPEnN7lw==/com.zenithblue.sambas3-zNEZBPNsKafz7vCijR22Ag==/base.apk!/lib/arm64-v8a'
+[08-31 09:18:47.657] D/vulkan: searching for layers in '/data/app/~~NHHO71nqGolG3AzPEnN7lw==/com.zenithblue.sambas3-zNEZBPNsKafz7vCijR22Ag==/lib/arm64'
+[08-31 09:18:47.657] D/vulkan: searching for layers in '/data/app/~~NHHO71nqGolG3AzPEnN7lw==/com.zenithblue.sambas3-zNEZBPNsKafz7vCijR22Ag==/base.apk!/lib/arm64-v8a'
+[08-31 09:19:38.672] I/hook_impl: hook_android_load_sphal_library: filename: vulkan.adreno.so
+[08-31 09:19:38.672] I/hook_impl: hook_android_dlopen_ext: filename: vulkan.adreno.so
+[08-31 09:19:38.672] I/hook_impl: hook_android_dlopen_ext: loading custom driver: /data/data/com.zenithblue.sambas3/files/gpu_drivers/turnip-26.3/libvulkan_freedreno.so
+[08-31 09:19:38.674] D/vulkan: searching for layers in '/data/app/~~NHHO71nqGolG3AzPEnN7lw==/com.zenithblue.sambas3-zNEZBPNsKafz7vCijR22Ag==/lib/arm64'
+[08-31 09:19:38.674] D/vulkan: searching for layers in '/data/app/~~NHHO71nqGolG3AzPEnN7lw==/com.zenithblue.sambas3-zNEZBPNsKafz7vCijR22Ag==/base.apk!/lib/arm64-v8a'
+[08-31 09:20:31.916] D/vulkan: searching for layers in '/data/app/~~NHHO71nqGolG3AzPEnN7lw==/com.zenithblue.sambas3-zNEZBPNsKafz7vCijR22Ag==/lib/arm64'
+[08-31 09:20:31.916] D/vulkan: searching for layers in '/data/app/~~NHHO71nqGolG3AzPEnN7lw==/com.zenithblue.sambas3-zNEZBPNsKafz7vCijR22Ag==/base.apk!/lib/arm64-v8a'
+[08-31 09:21:18.420] I/hook_impl: hook_android_load_sphal_library: filename: vulkan.adreno.so
+[08-31 09:21:18.420] I/hook_impl: hook_android_dlopen_ext: filename: vulkan.adreno.so
+[08-31 09:21:18.420] I/hook_impl: hook_android_dlopen_ext: loading custom driver: /data/data/com.zenithblue.sambas3/files/gpu_drivers/turnip-26.3/libvulkan_freedreno.so
+[08-31 09:21:18.421] D/vulkan: searching for layers in '/data/app/~~NHHO71nqGolG3AzPEnN7lw==/com.zenithblue.sambas3-zNEZBPNsKafz7vCijR22Ag==/lib/arm64'
+[08-31 09:21:18.421] D/vulkan: searching for layers in '/data/app/~~NHHO71nqGolG3AzPEnN7lw==/com.zenithblue.sambas3-zNEZBPNsKafz7vCijR22Ag==/base.apk!/lib/arm64-v8a'
+[08-31 09:40:13.496] D/vulkan: searching for layers in '/data/app/~~8l8p5c8WMAf41qNdAdQE5A==/com.zenithblue.sambas3-KpgPN1HxoCUswxkAu_65lA==/lib/arm64'
+[08-31 09:40:13.496] D/vulkan: searching for layers in '/data/app/~~8l8p5c8WMAf41qNdAdQE5A==/com.zenithblue.sambas3-KpgPN1HxoCUswxkAu_65lA==/base.apk!/lib/arm64-v8a'
+[08-31 09:42:21.745] I/hook_impl: hook_android_load_sphal_library: filename: vulkan.adreno.so
+[08-31 09:42:21.745] I/hook_impl: hook_android_dlopen_ext: filename: vulkan.adreno.so
+[08-31 09:42:21.746] I/hook_impl: hook_android_dlopen_ext: loading custom driver: /data/data/com.zenithblue.sambas3/files/gpu_drivers/turnip-26.3/libvulkan_freedreno.so
+[08-31 09:42:21.747] D/vulkan: searching for layers in '/data/app/~~8l8p5c8WMAf41qNdAdQE5A==/com.zenithblue.sambas3-KpgPN1HxoCUswxkAu_65lA==/lib/arm64'
+[08-31 09:42:21.747] D/vulkan: searching for layers in '/data/app/~~8l8p5c8WMAf41qNdAdQE5A==/com.zenithblue.sambas3-KpgPN1HxoCUswxkAu_65lA==/base.apk!/lib/arm64-v8a'
+[08-31 09:46:08.257] D/vulkan: searching for layers in '/data/app/~~U9JbFAPZJScNZOgJGJV6qw==/com.zenithblue.sambas3-L5a-R5ZOCF3--LO0qMlMMg==/lib/arm64'
+[08-31 09:46:08.257] D/vulkan: searching for layers in '/data/app/~~U9JbFAPZJScNZOgJGJV6qw==/com.zenithblue.sambas3-L5a-R5ZOCF3--LO0qMlMMg==/base.apk!/lib/arm64-v8a'
+[08-31 09:46:32.396] I/hook_impl: hook_android_load_sphal_library: filename: vulkan.adreno.so
+[08-31 09:46:32.396] I/hook_impl: hook_android_dlopen_ext: filename: vulkan.adreno.so
+[08-31 09:46:32.397] I/hook_impl: hook_android_dlopen_ext: loading custom driver: /data/data/com.zenithblue.sambas3/files/gpu_drivers/turnip-26.3/libvulkan_freedreno.so
+[08-31 09:46:32.398] D/vulkan: searching for layers in '/data/app/~~U9JbFAPZJScNZOgJGJV6qw==/com.zenithblue.sambas3-L5a-R5ZOCF3--LO0qMlMMg==/lib/arm64'
+[08-31 09:46:32.398] D/vulkan: searching for layers in '/data/app/~~U9JbFAPZJScNZOgJGJV6qw==/com.zenithblue.sambas3-L5a-R5ZOCF3--LO0qMlMMg==/base.apk!/lib/arm64-v8a'
+[08-31 10:17:21.248] E/vulkan: dequeueBuffer failed: No such device (-19)
+[08-31 11:02:52.238] E/vulkan: dequeueBuffer failed: No such device (-19)
+[08-31 11:30:29.392] D/vulkan: searching for layers in '/data/app/~~ZCKVUTWKu9PjNPnKiTeG1Q==/com.zenithblue.sambas3-nPIPK4fz1LB7TGwZgEIY4w==/lib/arm64'
+[08-31 11:30:29.392] D/vulkan: searching for layers in '/data/app/~~ZCKVUTWKu9PjNPnKiTeG1Q==/com.zenithblue.sambas3-nPIPK4fz1LB7TGwZgEIY4w==/base.apk!/lib/arm64-v8a'
+[08-31 11:31:02.694] I/hook_impl: hook_android_load_sphal_library: filename: vulkan.adreno.so
+[08-31 11:31:02.694] I/hook_impl: hook_android_dlopen_ext: filename: vulkan.adreno.so
+[08-31 11:31:02.695] I/hook_impl: hook_android_dlopen_ext: loading custom driver: /data/data/com.zenithblue.sambas3/files/gpu_drivers/turnip-26.3/libvulkan_freedreno.so
+[08-31 11:31:02.696] D/vulkan: searching for layers in '/data/app/~~ZCKVUTWKu9PjNPnKiTeG1Q==/com.zenithblue.sambas3-nPIPK4fz1LB7TGwZgEIY4w==/lib/arm64'
+[08-31 11:31:02.696] D/vulkan: searching for layers in '/data/app/~~ZCKVUTWKu9PjNPnKiTeG1Q==/com.zenithblue.sambas3-nPIPK4fz1LB7TGwZgEIY4w==/base.apk!/lib/arm64-v8a'
+[08-31 11:31:12.679] E/vulkan: dequeueBuffer failed: No such device (-19)
+[08-31 11:37:14.302] E/vulkan: dequeueBuffer failed: No such device (-19)
+[08-31 11:38:13.085] E/vulkan: dequeueBuffer failed: No such device (-19)
+[08-31 11:40:48.733] D/vulkan: searching for layers in '/data/app/~~ZCKVUTWKu9PjNPnKiTeG1Q==/com.zenithblue.sambas3-nPIPK4fz1LB7TGwZgEIY4w==/lib/arm64'
+[08-31 11:40:48.734] D/vulkan: searching for layers in '/data/app/~~ZCKVUTWKu9PjNPnKiTeG1Q==/com.zenithblue.sambas3-nPIPK4fz1LB7TGwZgEIY4w==/base.apk!/lib/arm64-v8a'
+[08-31 11:44:15.556] D/vulkan: searching for layers in '/data/app/~~SCvt6W-YT4NBvkOD8A4dKA==/com.zenithblue.sambas3-1Chqg-hj0oHYbCLWKAdbpg==/lib/arm64'
+[08-31 11:44:15.556] D/vulkan: searching for layers in '/data/app/~~SCvt6W-YT4NBvkOD8A4dKA==/com.zenithblue.sambas3-1Chqg-hj0oHYbCLWKAdbpg==/base.apk!/lib/arm64-v8a'
+[08-31 11:45:30.164] I/hook_impl: hook_android_load_sphal_library: filename: vulkan.adreno.so
+[08-31 11:45:30.164] I/hook_impl: hook_android_dlopen_ext: filename: vulkan.adreno.so
+[08-31 11:45:30.165] I/hook_impl: hook_android_dlopen_ext: loading custom driver: /data/data/com.zenithblue.sambas3/files/gpu_drivers/turnip-26.3/libvulkan_freedreno.so
+[08-31 11:45:30.166] D/vulkan: searching for layers in '/data/app/~~SCvt6W-YT4NBvkOD8A4dKA==/com.zenithblue.sambas3-1Chqg-hj0oHYbCLWKAdbpg==/lib/arm64'
+[08-31 11:45:30.166] D/vulkan: searching for layers in '/data/app/~~SCvt6W-YT4NBvkOD8A4dKA==/com.zenithblue.sambas3-1Chqg-hj0oHYbCLWKAdbpg==/base.apk!/lib/arm64-v8a'
+[08-31 12:17:43.209] D/vulkan: searching for layers in '/data/app/~~mgXM222TC60KpDIu6VxkuQ==/com.zenithblue.sambas3-7TUNfRlbqqiuKNaWf423-g==/lib/arm64'
+[08-31 12:17:43.209] D/vulkan: searching for layers in '/data/app/~~mgXM222TC60KpDIu6VxkuQ==/com.zenithblue.sambas3-7TUNfRlbqqiuKNaWf423-g==/base.apk!/lib/arm64-v8a'
+[08-31 12:18:06.658] D/vulkan: searching for layers in '/data/app/~~sHX57Dq8JTiDYIEpY9FqdQ==/com.zenithblue.sambas3-aKWo67BPydzfNsOXt7Lb5Q==/lib/arm64'
+[08-31 12:18:06.658] D/vulkan: searching for layers in '/data/app/~~sHX57Dq8JTiDYIEpY9FqdQ==/com.zenithblue.sambas3-aKWo67BPydzfNsOXt7Lb5Q==/base.apk!/lib/arm64-v8a'
+[08-31 12:19:48.347] I/hook_impl: hook_android_load_sphal_library: filename: vulkan.adreno.so
+[08-31 12:19:48.347] I/hook_impl: hook_android_dlopen_ext: filename: vulkan.adreno.so
+[08-31 12:19:48.348] I/hook_impl: hook_android_dlopen_ext: loading custom driver: /data/data/com.zenithblue.sambas3/files/gpu_drivers/turnip-26.3/libvulkan_freedreno.so
+[08-31 12:19:48.351] D/vulkan: searching for layers in '/data/app/~~sHX57Dq8JTiDYIEpY9FqdQ==/com.zenithblue.sambas3-aKWo67BPydzfNsOXt7Lb5Q==/lib/arm64'
+[08-31 12:19:48.352] D/vulkan: searching for layers in '/data/app/~~sHX57Dq8JTiDYIEpY9FqdQ==/com.zenithblue.sambas3-aKWo67BPydzfNsOXt7Lb5Q==/base.apk!/lib/arm64-v8a'
+[08-31 12:28:13.740] D/vulkan: searching for layers in '/data/app/~~YJIVeckWcTMFxTGVvWg7VA==/com.zenithblue.sambas3-cl8HJeaW_dZnbdngThvKsg==/lib/arm64'
+[08-31 12:28:13.740] D/vulkan: searching for layers in '/data/app/~~YJIVeckWcTMFxTGVvWg7VA==/com.zenithblue.sambas3-cl8HJeaW_dZnbdngThvKsg==/base.apk!/lib/arm64-v8a'
+[08-31 12:28:24.392] I/hook_impl: hook_android_load_sphal_library: filename: vulkan.adreno.so
+[08-31 12:28:24.392] I/hook_impl: hook_android_dlopen_ext: filename: vulkan.adreno.so
+[08-31 12:28:24.393] I/hook_impl: hook_android_dlopen_ext: loading custom driver: /data/data/com.zenithblue.sambas3/files/gpu_drivers/turnip-26.3/libvulkan_freedreno.so
+[08-31 12:28:24.394] D/vulkan: searching for layers in '/data/app/~~YJIVeckWcTMFxTGVvWg7VA==/com.zenithblue.sambas3-cl8HJeaW_dZnbdngThvKsg==/lib/arm64'
+[08-31 12:28:24.394] D/vulkan: searching for layers in '/data/app/~~YJIVeckWcTMFxTGVvWg7VA==/com.zenithblue.sambas3-cl8HJeaW_dZnbdngThvKsg==/base.apk!/lib/arm64-v8a'
+[08-31 12:31:05.467] D/vulkan: searching for layers in '/data/app/~~0sXZk_bNrOzOxdH7-ddlAw==/com.zenithblue.sambas3-4aKUfQAm2HBV4KlzELfYfw==/lib/arm64'
+[08-31 12:31:05.467] D/vulkan: searching for layers in '/data/app/~~0sXZk_bNrOzOxdH7-ddlAw==/com.zenithblue.sambas3-4aKUfQAm2HBV4KlzELfYfw==/base.apk!/lib/arm64-v8a'
+[08-31 12:31:16.033] I/hook_impl: hook_android_load_sphal_library: filename: vulkan.adreno.so
+[08-31 12:31:16.033] I/hook_impl: hook_android_dlopen_ext: filename: vulkan.adreno.so
+[08-31 12:31:16.034] I/hook_impl: hook_android_dlopen_ext: loading custom driver: /data/data/com.zenithblue.sambas3/files/gpu_drivers/turnip-26.3/libvulkan_freedreno.so
+[08-31 12:31:16.036] D/vulkan: searching for layers in '/data/app/~~0sXZk_bNrOzOxdH7-ddlAw==/com.zenithblue.sambas3-4aKUfQAm2HBV4KlzELfYfw==/lib/arm64'
+[08-31 12:31:16.036] D/vulkan: searching for layers in '/data/app/~~0sXZk_bNrOzOxdH7-ddlAw==/com.zenithblue.sambas3-4aKUfQAm2HBV4KlzELfYfw==/base.apk!/lib/arm64-v8a'
+[08-31 12:34:00.235] D/vulkan: searching for layers in '/data/app/~~ICUD_wGauG2vtMZxWPXkUw==/com.zenithblue.sambas3-oaV1haewQdX88rp1fPM_iw==/lib/arm64'
+[08-31 12:34:00.235] D/vulkan: searching for layers in '/data/app/~~ICUD_wGauG2vtMZxWPXkUw==/com.zenithblue.sambas3-oaV1haewQdX88rp1fPM_iw==/base.apk!/lib/arm64-v8a'
+[08-31 12:34:10.737] I/hook_impl: hook_android_load_sphal_library: filename: vulkan.adreno.so
+[08-31 12:34:10.737] I/hook_impl: hook_android_dlopen_ext: filename: vulkan.adreno.so
+[08-31 12:34:10.738] I/hook_impl: hook_android_dlopen_ext: loading custom driver: /data/data/com.zenithblue.sambas3/files/gpu_drivers/turnip-26.3/libvulkan_freedreno.so
+[08-31 12:34:10.740] D/vulkan: searching for layers in '/data/app/~~ICUD_wGauG2vtMZxWPXkUw==/com.zenithblue.sambas3-oaV1haewQdX88rp1fPM_iw==/lib/arm64'
+[08-31 12:34:10.740] D/vulkan: searching for layers in '/data/app/~~ICUD_wGauG2vtMZxWPXkUw==/com.zenithblue.sambas3-oaV1haewQdX88rp1fPM_iw==/base.apk!/lib/arm64-v8a'
+[08-31 12:38:14.169] D/vulkan: searching for layers in '/data/app/~~sZ3G0vllHMlSRbAczgEu1A==/com.zenithblue.sambas3-VT8Ss5GKAn6ZMsH1WOM1Tg==/lib/arm64'
+[08-31 12:38:14.169] D/vulkan: searching for layers in '/data/app/~~sZ3G0vllHMlSRbAczgEu1A==/com.zenithblue.sambas3-VT8Ss5GKAn6ZMsH1WOM1Tg==/base.apk!/lib/arm64-v8a'
+[08-31 12:38:24.620] I/hook_impl: hook_android_load_sphal_library: filename: vulkan.adreno.so
+[08-31 12:38:24.620] I/hook_impl: hook_android_dlopen_ext: filename: vulkan.adreno.so
+[08-31 12:38:24.621] I/hook_impl: hook_android_dlopen_ext: loading custom driver: /data/data/com.zenithblue.sambas3/files/gpu_drivers/turnip-26.3/libvulkan_freedreno.so
+[08-31 12:38:24.622] D/vulkan: searching for layers in '/data/app/~~sZ3G0vllHMlSRbAczgEu1A==/com.zenithblue.sambas3-VT8Ss5GKAn6ZMsH1WOM1Tg==/lib/arm64'
+[08-31 12:38:24.622] D/vulkan: searching for layers in '/data/app/~~sZ3G0vllHMlSRbAczgEu1A==/com.zenithblue.sambas3-VT8Ss5GKAn6ZMsH1WOM1Tg==/base.apk!/lib/arm64-v8a'
+[08-31 12:44:02.732] D/vulkan: searching for layers in '/data/app/~~pvuIzbcTBPlLF5wSYJFU4g==/com.zenithblue.sambas3-44BsHGz_3uMOtkNjiH7xNA==/lib/arm64'
+[08-31 12:44:02.732] D/vulkan: searching for layers in '/data/app/~~pvuIzbcTBPlLF5wSYJFU4g==/com.zenithblue.sambas3-44BsHGz_3uMOtkNjiH7xNA==/base.apk!/lib/arm64-v8a'
+[08-31 12:45:14.957] I/hook_impl: hook_android_load_sphal_library: filename: vulkan.adreno.so
+[08-31 12:45:14.957] I/hook_impl: hook_android_dlopen_ext: filename: vulkan.adreno.so
+[08-31 12:45:14.958] I/hook_impl: hook_android_dlopen_ext: loading custom driver: /data/data/com.zenithblue.sambas3/files/gpu_drivers/turnip-26.3/libvulkan_freedreno.so
+[08-31 12:45:14.959] D/vulkan: searching for layers in '/data/app/~~pvuIzbcTBPlLF5wSYJFU4g==/com.zenithblue.sambas3-44BsHGz_3uMOtkNjiH7xNA==/lib/arm64'
+[08-31 12:45:14.959] D/vulkan: searching for layers in '/data/app/~~pvuIzbcTBPlLF5wSYJFU4g==/com.zenithblue.sambas3-44BsHGz_3uMOtkNjiH7xNA==/base.apk!/lib/arm64-v8a'
+[08-31 12:52:57.320] D/vulkan: searching for layers in '/data/app/~~Nn5RERiOqm0FP0FHOYzpbg==/com.zenithblue.sambas3-12nFu5zz7c0amhnskwNhdA==/lib/arm64'
+[08-31 12:52:57.320] D/vulkan: searching for layers in '/data/app/~~Nn5RERiOqm0FP0FHOYzpbg==/com.zenithblue.sambas3-12nFu5zz7c0amhnskwNhdA==/base.apk!/lib/arm64-v8a'
+[08-31 12:53:15.811] I/hook_impl: hook_android_load_sphal_library: filename: vulkan.adreno.so
+[08-31 12:53:15.811] I/hook_impl: hook_android_dlopen_ext: filename: vulkan.adreno.so
+[08-31 12:53:15.812] I/hook_impl: hook_android_dlopen_ext: loading custom driver: /data/data/com.zenithblue.sambas3/files/gpu_drivers/turnip-26.3/libvulkan_freedreno.so
+[08-31 12:53:15.813] D/vulkan: searching for layers in '/data/app/~~Nn5RERiOqm0FP0FHOYzpbg==/com.zenithblue.sambas3-12nFu5zz7c0amhnskwNhdA==/lib/arm64'
+[08-31 12:53:15.813] D/vulkan: searching for layers in '/data/app/~~Nn5RERiOqm0FP0FHOYzpbg==/com.zenithblue.sambas3-12nFu5zz7c0amhnskwNhdA==/base.apk!/lib/arm64-v8a'
+[08-31 13:45:55.199] D/vulkan: searching for layers in '/data/app/~~1glCnPwo3QonDhbFDXwysA==/com.zenithblue.sambas3-FWQWbin-JoJLQVhZAnqaeA==/lib/arm64'
+[08-31 13:45:55.199] D/vulkan: searching for layers in '/data/app/~~1glCnPwo3QonDhbFDXwysA==/com.zenithblue.sambas3-FWQWbin-JoJLQVhZAnqaeA==/base.apk!/lib/arm64-v8a'
+[08-31 13:47:33.709] I/hook_impl: hook_android_load_sphal_library: filename: vulkan.adreno.so
+[08-31 13:47:33.709] I/hook_impl: hook_android_dlopen_ext: filename: vulkan.adreno.so
+[08-31 13:47:33.710] I/hook_impl: hook_android_dlopen_ext: loading custom driver: /data/data/com.zenithblue.sambas3/files/gpu_drivers/turnip-26.3/libvulkan_freedreno.so
+[08-31 13:47:33.711] D/vulkan: searching for layers in '/data/app/~~1glCnPwo3QonDhbFDXwysA==/com.zenithblue.sambas3-FWQWbin-JoJLQVhZAnqaeA==/lib/arm64'
+[08-31 13:47:33.711] D/vulkan: searching for layers in '/data/app/~~1glCnPwo3QonDhbFDXwysA==/com.zenithblue.sambas3-FWQWbin-JoJLQVhZAnqaeA==/base.apk!/lib/arm64-v8a'
+[08-31 13:59:29.700] D/vulkan: searching for layers in '/data/app/~~hK664GFGOs9qRgEDzm5PaQ==/com.zenithblue.sambas3-OWKrOZkM8bvpQhyqpRJk6A==/lib/arm64'
+[08-31 13:59:29.700] D/vulkan: searching for layers in '/data/app/~~hK664GFGOs9qRgEDzm5PaQ==/com.zenithblue.sambas3-OWKrOZkM8bvpQhyqpRJk6A==/base.apk!/lib/arm64-v8a'
+[08-31 14:00:16.808] I/hook_impl: hook_android_load_sphal_library: filename: vulkan.adreno.so
+[08-31 14:00:16.808] I/hook_impl: hook_android_dlopen_ext: filename: vulkan.adreno.so
+[08-31 14:00:16.808] I/hook_impl: hook_android_dlopen_ext: loading custom driver: /data/data/com.zenithblue.sambas3/files/gpu_drivers/turnip-26.3/libvulkan_freedreno.so
+[08-31 14:00:16.809] D/vulkan: searching for layers in '/data/app/~~hK664GFGOs9qRgEDzm5PaQ==/com.zenithblue.sambas3-OWKrOZkM8bvpQhyqpRJk6A==/lib/arm64'
+[08-31 14:00:16.810] D/vulkan: searching for layers in '/data/app/~~hK664GFGOs9qRgEDzm5PaQ==/com.zenithblue.sambas3-OWKrOZkM8bvpQhyqpRJk6A==/base.apk!/lib/arm64-v8a'
+[08-31 14:12:43.223] D/vulkan: searching for layers in '/data/app/~~syqDow13gFRlcXLiC3F_pA==/com.zenithblue.sambas3-aGjrH22O5F6BMIBoqllcdQ==/lib/arm64'
+[08-31 14:12:43.223] D/vulkan: searching for layers in '/data/app/~~syqDow13gFRlcXLiC3F_pA==/com.zenithblue.sambas3-aGjrH22O5F6BMIBoqllcdQ==/base.apk!/lib/arm64-v8a'
+[08-31 14:13:08.632] I/hook_impl: hook_android_load_sphal_library: filename: vulkan.adreno.so
+[08-31 14:13:08.632] I/hook_impl: hook_android_dlopen_ext: filename: vulkan.adreno.so
+[08-31 14:13:08.633] I/hook_impl: hook_android_dlopen_ext: loading custom driver: /data/data/com.zenithblue.sambas3/files/gpu_drivers/turnip-26.3/libvulkan_freedreno.so
+[08-31 14:13:08.634] D/vulkan: searching for layers in '/data/app/~~syqDow13gFRlcXLiC3F_pA==/com.zenithblue.sambas3-aGjrH22O5F6BMIBoqllcdQ==/lib/arm64'
+[08-31 14:13:08.634] D/vulkan: searching for layers in '/data/app/~~syqDow13gFRlcXLiC3F_pA==/com.zenithblue.sambas3-aGjrH22O5F6BMIBoqllcdQ==/base.apk!/lib/arm64-v8a'
+[08-31 15:42:00.641] D/vulkan: searching for layers in '/data/app/~~wh9jcwY1-NyLrFCsORXmtw==/com.zenithblue.sambas3-USOIS69dFj0fwmGN__etuA==/lib/arm64'
+[08-31 15:42:00.641] D/vulkan: searching for layers in '/data/app/~~wh9jcwY1-NyLrFCsORXmtw==/com.zenithblue.sambas3-USOIS69dFj0fwmGN__etuA==/base.apk!/lib/arm64-v8a'
+[08-31 15:45:13.929] I/hook_impl: hook_android_load_sphal_library: filename: vulkan.adreno.so
+[08-31 15:45:13.929] I/hook_impl: hook_android_dlopen_ext: filename: vulkan.adreno.so
+[08-31 15:45:13.930] I/hook_impl: hook_android_dlopen_ext: loading custom driver: /data/data/com.zenithblue.sambas3/files/gpu_drivers/turnip-26.3/libvulkan_freedreno.so
+[08-31 15:45:13.931] D/vulkan: searching for layers in '/data/app/~~wh9jcwY1-NyLrFCsORXmtw==/com.zenithblue.sambas3-USOIS69dFj0fwmGN__etuA==/lib/arm64'
+[08-31 15:45:13.931] D/vulkan: searching for layers in '/data/app/~~wh9jcwY1-NyLrFCsORXmtw==/com.zenithblue.sambas3-USOIS69dFj0fwmGN__etuA==/base.apk!/lib/arm64-v8a'
+[08-31 15:50:07.932] D/vulkan: searching for layers in '/data/app/~~wh9jcwY1-NyLrFCsORXmtw==/com.zenithblue.sambas3-USOIS69dFj0fwmGN__etuA==/lib/arm64'
+[08-31 15:50:07.932] D/vulkan: searching for layers in '/data/app/~~wh9jcwY1-NyLrFCsORXmtw==/com.zenithblue.sambas3-USOIS69dFj0fwmGN__etuA==/base.apk!/lib/arm64-v8a'

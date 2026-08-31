@@ -10,4 +10,5 @@ class CrashClassifierTest {
     @Test fun unfinishedWithoutFatalEvidenceIsUnexpected() = assertEquals(CrashClassification.UNEXPECTED_TERMINATION, CrashClassifier.classify("process ended", true))
     @Test fun normalStopWinsOverEvidence() = assertEquals(CrashClassification.CLEAN_STOP, CrashClassifier.classify("SIGABRT in old rotated log", true, cleanStop = true))
     @Test fun gpuCauseIsIdentified() = assertEquals("GPU / Vulkan / driver", CrashClassifier.likelyCause("VK_ERROR_DEVICE_LOST"))
+    @Test fun ordinaryVulkanStartupLineIsNotAConfirmedGpuCrash() = assertEquals("Emulator or application", CrashClassifier.likelyCause("Vulkan renderer initialized with driver"))
 }

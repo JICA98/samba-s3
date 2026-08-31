@@ -13,7 +13,7 @@ object CrashClassifier {
     }
 
     fun likelyCause(evidence: String): String = when {
-        Regex("VK_ERROR_DEVICE_LOST|vulkan|gpu|driver", RegexOption.IGNORE_CASE).containsMatchIn(evidence) -> "GPU / Vulkan / driver"
+        Regex("VK_ERROR_DEVICE_LOST|device lost|native renderer fatal|gpu fault|driver crash", RegexOption.IGNORE_CASE).containsMatchIn(evidence) -> "GPU / Vulkan / driver"
         Regex("SIG|Scudo|Access violation|assertion|FATAL", RegexOption.IGNORE_CASE).containsMatchIn(evidence) -> "Native emulator / backend"
         else -> "Emulator or application"
     }

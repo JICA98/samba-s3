@@ -5,8 +5,10 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.Row
 import androidx.compose.material3.Button
 import androidx.compose.material3.ModalBottomSheet
+import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.ScrollableTabRow
 import androidx.compose.material3.Tab
@@ -36,6 +38,8 @@ fun CrashDetailsSheet(
     session: EmulationSessionRecord?,
     initialReport: CrashReport?,
     loadFailure: String? = null,
+    onChooseSave: (() -> Unit)? = null,
+    onViewLogs: (() -> Unit)? = null,
     onDismiss: () -> Unit,
 ) {
     val context = LocalContext.current
@@ -56,6 +60,10 @@ fun CrashDetailsSheet(
             if (loadFailure != null) Text(loadFailure, color = RPCSXColors.errorColor)
             report?.let { CrashLogPane(it, 0, Modifier.weight(1f)) }
                 ?: Text("Collecting diagnostics...", color = RPCSXColors.textSecondary)
+            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                onChooseSave?.let { OutlinedButton(onClick = it) { Text("CHOOSE SAVE") } }
+                onViewLogs?.let { OutlinedButton(onClick = it) { Text("VIEW LOGS") } }
+            }
             Button(onClick = onDismiss) { Text("CLOSE") }
         }
     }

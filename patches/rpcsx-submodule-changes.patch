@@ -1,5 +1,5 @@
 diff --git a/android/src/rpcsx-android.cpp b/android/src/rpcsx-android.cpp
-index 8308a4798..b6bed240b 100644
+index 8308a4798..be6b5b390 100644
 --- a/android/src/rpcsx-android.cpp
 +++ b/android/src/rpcsx-android.cpp
 @@ -7,6 +7,8 @@
@@ -105,29 +105,31 @@ index 8308a4798..b6bed240b 100644
  static void emit_prelaunch_ppu_event(
      CompilePhase phase,
      u64 job_id,
-@@ -1293,6 +1368,9 @@ struct destructive_guard {
+@@ -1293,6 +1368,10 @@ struct destructive_guard {
    ~destructive_guard() { end_destructive(); }
  };
  
 +static std::string android_get_trophies_for_set(std::string tropName,
-+                                                const std::string& titleId);
++                                                const std::string& titleId,
++                                                const char* querySource = "title");
 +
  static void emit_frontend_event(int type, const std::string* payload)
  {
      // Dispatch via main thread processor to ensure JNI env is valid.
-@@ -1319,6 +1397,32 @@ extern "C" void _rpcsx_android_renderer_error(int error_code, const char* messag
+@@ -1319,6 +1398,33 @@ extern "C" void _rpcsx_android_renderer_error(int error_code, const char* messag
    emit_frontend_event(FRONTEND_EVENT_RENDERER_ERROR, &detail);
  }
  
 +extern "C" void _rpcsx_android_trophy_unlocked(int trophy_id, const char* trophy_set)
 +{
 +    const std::string set = trophy_set ? trophy_set : "";
-+    nlohmann::json payload{{"id", trophy_id}, {"trophySet", set}};
++    nlohmann::json payload{{"id", trophy_id}, {"trophySet", set},
++                           {"titleId", Emu.GetTitleID()}, {"rpcS3UserId", Emu.GetUsr()}};
 +    // Include the resolved item metadata in the one-shot event when the
 +    // trophy files are readable. Kotlin still refreshes the complete set;
 +    // this keeps the event useful to notification consumers without polling.
 +    try {
-+        const auto snapshot = nlohmann::json::parse(android_get_trophies_for_set(set, Emu.GetTitleID()));
++        const auto snapshot = nlohmann::json::parse(android_get_trophies_for_set(set, Emu.GetTitleID(), "live"));
 +        for (const auto& entry : snapshot.value("trophies", nlohmann::json::array())) {
 +            if (entry.value("id", -1) == trophy_id) {
 +                payload["name"] = entry.value("name", "");
@@ -148,7 +150,7 @@ index 8308a4798..b6bed240b 100644
  
  static void invokeAsync(std::function<void(JNIEnv *)> cb) {
    g_mainThreadProcessor.push(std::move(cb));
-@@ -2331,6 +2435,34 @@ extern "C" int _rpcsx_bootSavestate(std::string_view savestate_path_,
+@@ -2331,6 +2437,34 @@ extern "C" int _rpcsx_bootSavestate(std::string_view savestate_path_,
    const auto result = Emu.BootGame(savestate_path, "", true, cfg_mode::global);
    rpcsx_android.notice("S3SAVE recovery-boot path='%s' result=%d",
                         savestate_path.c_str(), static_cast<int>(result));
@@ -183,7 +185,7 @@ index 8308a4798..b6bed240b 100644
    return static_cast<int>(result);
  }
  
-@@ -4199,145 +4331,389 @@ extern "C" bool _rpcsx_loadSaveState(int slot)
+@@ -4199,145 +4333,419 @@ extern "C" bool _rpcsx_loadSaveState(int slot)
      return true;
  }
  
@@ -407,8 +409,11 @@ index 8308a4798..b6bed240b 100644
 +
 +extern "C" std::string _rpcsx_getTrophiesForTitle(const char* requested_title_id);
 +
-+static std::string android_get_trophies_for_set(std::string tropName, const std::string& titleId)
++static std::string android_get_trophies_for_set(std::string tropName,
++                                                const std::string& titleId,
++                                                const char* querySource)
 +{
++    const auto started = std::chrono::steady_clock::now();
 +    nlohmann::json j;
      if (tropName.empty()) {
 +        j["status"] = "initializing";
@@ -420,6 +425,9 @@ index 8308a4798..b6bed240b 100644
 +    j["status"] = "unavailable";
 +    j["titleId"] = titleId;
      j["trophySet"] = tropName;
++    j["trophySetId"] = tropName;
++    j["querySource"] = querySource ? querySource : "title";
++    j["rpcS3UserId"] = Emu.GetUsr();
      j["gameName"] = "";
 -    j["total"] = 0;
 -    j["unlocked"] = 0;
@@ -445,16 +453,28 @@ index 8308a4798..b6bed240b 100644
 -                    // Simpler: use loader counts and load details via sceNpTrophy helpers if available.
 -                    u32 count = loader.GetTrophiesCount();
 -                    u32 unlocked = loader.GetUnlockedTrophiesCount();
++            fs::stat_t tropusr_stat{};
++            const bool tropusr_exists = fs::get_stat(tropusr_path, tropusr_stat) && !tropusr_stat.is_directory;
++            j["tropusrPath"] = tropusr_path;
++            j["tropusrExists"] = tropusr_exists;
++            j["tropusrSize"] = tropusr_exists ? tropusr_stat.size : 0;
++            j["tropusrMtime"] = tropusr_exists ? tropusr_stat.mtime : 0;
++            j["tropusrGeneration"] = tropusr_exists ? fmt::format("{}:{}", tropusr_stat.size, tropusr_stat.mtime) : "";
 +            std::unique_ptr<TROPUSRLoader> loader;
-+            // TROPUSRLoader resolves through VFS, which is unmounted after a
-+            // clean stop. Keep stopped-title queries physical-file-only;
-+            // active gameplay still reports native unlock state.
++            // During gameplay prefer the VFS-backed loader so an unlock is
++            // visible immediately from the live RPCSX context. The same
++            // physical file is the fallback and is the only source used after
++            // a clean stop, when the game VFS has been unmounted.
 +            if (Emu.IsRunning() || Emu.IsPaused()) {
 +                loader = std::make_unique<TROPUSRLoader>();
 +                if (!loader->Load("/dev_hdd0/home/" + Emu.GetUsr() + "/trophy/" + tropName + "/TROPUSR.DAT",
 +                                  "/dev_hdd0/home/" + Emu.GetUsr() + "/trophy/" + tropName + "/TROPCONF.SFM").success) {
 +                    loader.reset();
 +                }
++            }
++            if (!loader && tropusr_exists) {
++                loader = std::make_unique<TROPUSRLoader>();
++                if (!loader->LoadPhysical(tropusr_path)) loader.reset();
 +            }
 +            fs::file config(tropconf_path);
 +            if (config) {
@@ -599,9 +619,21 @@ index 8308a4798..b6bed240b 100644
          j["percent"] = arr.empty() ? 0 : (100 * unlocked / (int)arr.size());
      }
 +    if (arr.empty() && j["status"] == "unavailable") j["status"] = "no_trophy_set";
-+    rpcsx_android.notice("S3TROPHY title=%s set=%s state=%s total=%d unlocked=%d",
-+                        titleId, tropName, j.value("status", "unavailable"),
-+                        j.value("total", 0), j.value("unlocked", 0));
++    j["unlockedIds"] = nlohmann::json::array();
++    for (const auto& entry : arr) {
++        if (entry.value("unlocked", false)) j["unlockedIds"].push_back(entry.value("id", -1));
++    }
++    j["queryDurationMs"] = std::chrono::duration_cast<std::chrono::milliseconds>(
++        std::chrono::steady_clock::now() - started).count();
++    rpcsx_android.notice(
++        "S3TROPHY source=%s title=%s user=%s set=%s TROPUSR=%s exists=%d size=%llu mtime=%lld generation=%s total=%d unlocked=%d unlockedIds=%s durationMs=%lld",
++        j.value("querySource", "title").c_str(), titleId.c_str(), Emu.GetUsr().c_str(),
++        j.value("trophySetId", "").c_str(), j.value("tropusrPath", "").c_str(),
++        j.value("tropusrExists", false) ? 1 : 0,
++        (unsigned long long)j.value("tropusrSize", 0ULL),
++        (long long)j.value("tropusrMtime", 0LL), j.value("tropusrGeneration", "").c_str(),
++        j.value("total", 0), j.value("unlocked", 0), j.value("unlockedIds", nlohmann::json::array()).dump().c_str(),
++        (long long)j.value("queryDurationMs", 0LL));
      return j.dump();
  }
  
@@ -615,7 +647,7 @@ index 8308a4798..b6bed240b 100644
 +        }
 +    } catch (...) {}
 +    const std::string title_id = Emu.GetTitleID();
-+    if (!tropName.empty()) return android_get_trophies_for_set(std::move(tropName), title_id);
++    if (!tropName.empty()) return android_get_trophies_for_set(std::move(tropName), title_id, "live");
 +
 +    // Disc-backed games can expose the trophy set through Emu.GetDir() before
 +    // current_trophy_name is populated. Read the actual mounted TROPDIR.
@@ -623,7 +655,7 @@ index 8308a4798..b6bed240b 100644
 +        const std::string trophy_root = rpcs3::utils::get_games_dir() + title_id + "/PS3_GAME/TROPDIR/";
 +        for (const auto& entry : fs::dir(trophy_root)) {
 +            if (entry.is_directory && entry.name != "." && entry.name != "..")
-+                return android_get_trophies_for_set(entry.name, title_id);
++                return android_get_trophies_for_set(entry.name, title_id, "live");
 +        }
 +    } catch (...) {}
 +
@@ -668,7 +700,7 @@ index 8308a4798..b6bed240b 100644
 +                const std::string installed_path = rpcs3::utils::get_hdd0_dir() + "game/" + title_id + "/TROPDIR/" + trophy_set + "/TROPHY.TRP";
 +                matches = fs::is_file(disc_path) || fs::is_file(installed_path);
 +            }
-+            if (matches) return android_get_trophies_for_set(trophy_set, title_id);
++            if (matches) return android_get_trophies_for_set(trophy_set, title_id, "title");
 +        }
 +    } catch (const std::exception& e) {
 +        rpcsx_android.error("getTrophiesForTitle failed: %s", e.what());
@@ -679,6 +711,21 @@ index 8308a4798..b6bed240b 100644
  extern "C" std::string _rpcsx_getFriends()
  {
      nlohmann::json j;
+diff --git a/android/src/samba-build-id.cpp b/android/src/samba-build-id.cpp
+index 8aca7dc59..e75a116af 100644
+--- a/android/src/samba-build-id.cpp
++++ b/android/src/samba-build-id.cpp
+@@ -1,7 +1,9 @@
+ #include <string>
+ 
++// Samba S3 core build identity — overwritten by build_rpcsx.sh at build time.
++// Fallback placeholder ensures old binaries are detectable.
+ static std::string g_samba_build_id =
+-    "rpcsx=27441815c12cca1a4dcb3daec82b513b1a35eed7 samba=62a70942d8c121a7e58c74b6a4e2700cf369c0ae patch_sha256=6468572dbc6dec3ea7d0ad996adeb57dffd96a090d10482ea04d7013abecd5f0 build_type=Debug";
++    "rpcsx=e8ae1481ab7ba04d5c6bef89dd852aabba2c88ff samba=unknown patch_sha256=unknown build_type=release";
+ 
+ extern "C" const char* _rpcsx_sambaBuildId() {
+     return g_samba_build_id.c_str();
 diff --git a/ps3fw/sceNpTrophy.cpp b/ps3fw/sceNpTrophy.cpp
 index b6f295e4c..f4048c7e2 100644
 --- a/ps3fw/sceNpTrophy.cpp
@@ -740,6 +787,47 @@ index adbf67a19..dfc4a1f55 100644
  	}
  
  	void thread::check_zcull_status(bool framebuffer_swap)
+diff --git a/rpcs3/Loader/TROPUSR.cpp b/rpcs3/Loader/TROPUSR.cpp
+index b94dd35c4..a8d19fbe0 100644
+--- a/rpcs3/Loader/TROPUSR.cpp
++++ b/rpcs3/Loader/TROPUSR.cpp
+@@ -74,6 +74,21 @@ TROPUSRLoader::load_result TROPUSRLoader::Load(std::string_view filepath, std::s
+ 	return res;
+ }
+ 
++bool TROPUSRLoader::LoadPhysical(std::string_view filepath)
++{
++	// This path is deliberately read-only. Calling Load() while the VFS is
++	// unmounted can fall through to Generate(), which would replace a valid
++	// user's trophy history with an empty file.
++	if (!m_file.open(std::string(filepath)))
++	{
++		return false;
++	}
++
++	const bool valid = LoadHeader() && LoadTableHeaders() && LoadTables();
++	m_file.close();
++	return valid;
++}
++
+ bool TROPUSRLoader::LoadHeader()
+ {
+ 	if (!m_file)
+diff --git a/rpcs3/Loader/TROPUSR.h b/rpcs3/Loader/TROPUSR.h
+index 2465b7dc6..c3e4cb483 100644
+--- a/rpcs3/Loader/TROPUSR.h
++++ b/rpcs3/Loader/TROPUSR.h
+@@ -96,6 +96,10 @@ public:
+ 	};
+ 
+ 	[[nodiscard]] load_result Load(std::string_view filepath, std::string_view configpath);
++	// Read an existing physical TROPUSR.DAT without consulting the emulator VFS
++	// and, importantly, without generating or overwriting a missing file. The
++	// Android title browser uses this after a game has been cleanly stopped.
++	[[nodiscard]] bool LoadPhysical(std::string_view filepath);
+ 	[[nodiscard]] bool Save(std::string_view filepath);
+ 
+ 	[[nodiscard]] u32 GetTrophiesCount() const;
 diff --git a/rpcs3/util/cpu_stats.cpp b/rpcs3/util/cpu_stats.cpp
 index 69814e65f..38d808393 100644
 --- a/rpcs3/util/cpu_stats.cpp

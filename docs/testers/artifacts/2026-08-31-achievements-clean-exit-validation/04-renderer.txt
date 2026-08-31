@@ -1,0 +1,5 @@
+  Renderer: Vulkan
+  Resolution: 1280x720
+--
+  Renderer: Cubeb
+  Audio Provider: CellAudio

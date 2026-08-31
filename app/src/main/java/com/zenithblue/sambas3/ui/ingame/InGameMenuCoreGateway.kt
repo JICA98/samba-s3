@@ -1,6 +1,7 @@
 package com.zenithblue.sambas3.ui.ingame
 
 import com.zenithblue.sambas3.RPCSX
+import com.zenithblue.sambas3.ui.achievements.AchievementRepository
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import org.json.JSONObject
@@ -118,8 +119,8 @@ class RpcsxInGameMenuCoreGateway(private val bridge: RpcsxBridge) : InGameMenuCo
     override suspend fun saveState(slot: Int): Result<Boolean> = io { bridge.saveState(slot) }
     override suspend fun loadState(slot: Int): Result<Boolean> = io { bridge.loadSaveState(slot) }
 
-    override suspend fun trophies(): Result<TrophiesData?> = io {
-        bridge.getCurrentTrophies().takeIf { it.isNotBlank() }?.let { TrophiesData.fromJson(it) }
+    override suspend fun trophies(): Result<TrophiesData?> = runCatching {
+        AchievementRepository.current(force = true)
     }
 
     override suspend fun friends(): Result<FriendsData?> = io {

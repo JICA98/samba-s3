@@ -7,6 +7,7 @@ import com.zenithblue.sambas3.PendingSavestateRecoveryStore
 import com.zenithblue.sambas3.RPCSX
 import com.zenithblue.sambas3.session.EmulationSessionJournal
 import com.zenithblue.sambas3.session.EmulationSessionRecord
+import com.zenithblue.sambas3.session.EmulationSessionState
 import com.zenithblue.sambas3.session.ProcessInstance
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -36,6 +37,17 @@ object HomeRecoveryRepository {
         }
 
         val session = withContext(Dispatchers.IO) { EmulationSessionJournal.unfinished(appContext) }
+        val terminal = withContext(Dispatchers.IO) { EmulationSessionJournal.terminal(appContext) }
+        Log.i(TAG, "refresh session=${session?.sessionId ?: "none"} state=${session?.state ?: "none"} terminal=${terminal?.sessionId ?: "none"}/${terminal?.clean ?: false} process=${session?.processInstanceId ?: "none"}/${ProcessInstance.id}")
+        if (terminal?.clean == true && (session == null || terminal.sessionId == session.sessionId)) {
+            Log.i(TAG, "classification=None reason=CLEAN_STOP session=${terminal.sessionId}")
+            mutableState.value = HomeRecoveryState.None
+            return
+        }
+        if (terminal?.clean == true && session != null && terminal.sessionId != session.sessionId) {
+            Log.i(TAG, "ignoring stale CLEAN_STOP session=${terminal.sessionId} activeSession=${session.sessionId}")
+        }
+
         if (session == null || isAcknowledged(appContext, session)) {
             mutableState.value = HomeRecoveryState.None
             return
@@ -53,9 +65,19 @@ object HomeRecoveryRepository {
         val report = withContext(Dispatchers.IO) {
             runCatching { CrashEvidenceCollector.collectSummary(appContext, session) }.getOrNull()
         }
-        val confirmed = session.state.name == "FAILED" ||
-            report?.classification == CrashClassification.CONFIRMED_CRASH
-        mutableState.value = if (confirmed && report != null) {
+        val decision = HomeRecoveryDecision.decide(
+            session.state,
+            session.stopReason,
+            session.processInstanceId == ProcessInstance.id,
+            report?.classification,
+        )
+        Log.i(TAG, "decision=${decision.name} session=${session.sessionId} report=${report?.classification?.name ?: "none"} cause=${report?.cause ?: "none"}")
+        if (decision == RecoveryDecision.NONE) {
+            Log.i(TAG, "classification=None reason=EXPECTED_STOP session=${session.sessionId}")
+            mutableState.value = HomeRecoveryState.None
+            return
+        }
+        mutableState.value = if (decision == RecoveryDecision.CONFIRMED_CRASH && report != null) {
             HomeRecoveryState.ConfirmedCrash(session, report)
         } else {
             HomeRecoveryState.Interrupted(session, report = report)
@@ -84,7 +106,7 @@ object HomeRecoveryRepository {
 
     fun recordCrashFailure(context: Context, session: EmulationSessionRecord?, report: CrashReport?) {
         if (session == null) return
-        if (report != null) {
+        if (report?.classification == CrashClassification.CONFIRMED_CRASH) {
             mutableState.value = HomeRecoveryState.ConfirmedCrash(session, report)
         } else {
             mutableState.value = HomeRecoveryState.Interrupted(session)
@@ -134,4 +156,20 @@ object HomeRecoveryRepository {
             reason = json.optString("reason", "Unknown load failure"),
         )
     }.getOrNull()
+}
+
+enum class RecoveryDecision { NONE, CONFIRMED_CRASH, INTERRUPTED }
+
+/** Pure recovery precedence used by Home and regression tests. */
+object HomeRecoveryDecision {
+    fun decide(
+        state: EmulationSessionState,
+        stopReason: String?,
+        sameProcess: Boolean,
+        classification: CrashClassification?,
+    ): RecoveryDecision = when {
+        state == EmulationSessionState.STOPPING && stopReason in setOf("InGameExit", "HomeStop") && sameProcess -> RecoveryDecision.NONE
+        classification == CrashClassification.CONFIRMED_CRASH -> RecoveryDecision.CONFIRMED_CRASH
+        else -> RecoveryDecision.INTERRUPTED
+    }
 }

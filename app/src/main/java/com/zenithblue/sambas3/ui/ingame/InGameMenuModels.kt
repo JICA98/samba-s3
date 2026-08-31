@@ -2,8 +2,12 @@ package com.zenithblue.sambas3.ui.ingame
 
 import org.json.JSONObject
 import com.zenithblue.sambas3.SavestateThumbnailStore
-import kotlinx.coroutines.flow.MutableSharedFlow
-import kotlinx.coroutines.flow.SharedFlow
+import com.zenithblue.sambas3.ui.achievements.TrophyEntry as SharedTrophyEntry
+import com.zenithblue.sambas3.ui.achievements.TrophySnapshot
+
+/** Compatibility aliases for existing in-game menu call sites. */
+typealias TrophyEntry = SharedTrophyEntry
+typealias TrophiesData = TrophySnapshot
 
 data class InGameMenuCapabilities(
     val apiVersion: Int,
@@ -110,69 +114,11 @@ data class SaveSlot(
     val previewMtimeMs: Long = 0L
 )
 
-data class TrophyEntry(
-    val id: Int,
-    val name: String,
-    val description: String,
-    val grade: String,
-    val unlocked: Boolean,
-    val hidden: Boolean,
-    val platinumRelevant: Boolean,
-    val iconPath: String?
-)
-
-data class TrophiesData(
-    val available: Boolean,
-    val status: String = "ready",
-    val gameName: String,
-    val trophySet: String,
-    val total: Int,
-    val unlocked: Int,
-    val percent: Int,
-    val trophies: List<TrophyEntry>
-) {
-    companion object {
-        fun fromJson(jsonStr: String?): TrophiesData? {
-            if (jsonStr.isNullOrBlank()) return null
-            return try {
-                val j = JSONObject(jsonStr)
-                if (!j.optBoolean("available", false)) return TrophiesData(false, j.optString("status", "unavailable"), "", "", 0, 0, 0, emptyList())
-                val arr = j.optJSONArray("trophies")
-                val list = mutableListOf<TrophyEntry>()
-                if (arr != null) {
-                    for (i in 0 until arr.length()) {
-                        val o = arr.optJSONObject(i) ?: continue
-                        list.add(TrophyEntry(
-                            id = o.optInt("id", i),
-                            name = o.optString("name", ""),
-                            description = o.optString("description", ""),
-                            grade = o.optString("grade", "bronze"),
-                            unlocked = o.optBoolean("unlocked", false),
-                            hidden = o.optBoolean("hidden", false),
-                            platinumRelevant = o.optBoolean("platinumRelevant", false),
-                            iconPath = if (o.has("iconPath")) o.optString("iconPath") else null
-                        ))
-                    }
-                }
-                TrophiesData(
-                    available = true,
-                    status = j.optString("status", "ready"),
-                    gameName = j.optString("gameName", ""),
-                    trophySet = j.optString("trophySet", ""),
-                    total = j.optInt("total", list.size),
-                    unlocked = j.optInt("unlocked", list.count { it.unlocked }),
-                    percent = j.optInt("percent", 0),
-                    trophies = list
-                )
-            } catch (_: Exception) { null }
-        }
-    }
-}
-
 object TrophyEvents {
-    private val _refreshes = MutableSharedFlow<Unit>(extraBufferCapacity = 8)
-    val refreshes: SharedFlow<Unit> = _refreshes
-    fun notifyUnlocked() { _refreshes.tryEmit(Unit) }
+    /** Deprecated compatibility shim; all invalidation is owned by the shared provider. */
+    val refreshes get() = com.zenithblue.sambas3.ui.achievements.AchievementEvents.invalidations
+    fun notifyUnlocked(payload: String? = null) =
+        com.zenithblue.sambas3.ui.achievements.AchievementEvents.notifyUnlocked(payload)
 }
 
 data class FriendsData(

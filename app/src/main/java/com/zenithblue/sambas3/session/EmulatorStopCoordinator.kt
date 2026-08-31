@@ -78,6 +78,7 @@ object EmulatorStopCoordinator {
             context = appContext,
             readState = { RPCSX.getState() },
             kill = { RPCSX.instance.kill() },
+            gracefulStop = { RPCSX.instance.gracefulShutdown() },
             host = EmulationHostRegistry.current(),
             cancelRecovery = { PendingSavestateRecoveryStore.cancelAutomaticRecovery(appContext, reason.name) },
             finalize = { requestId, host -> finalizeStopped(appContext, requestId, host, reason) },
@@ -132,6 +133,7 @@ object EmulatorStopCoordinator {
         context: Context?,
         readState: () -> EmulatorState,
         kill: () -> Unit,
+        gracefulStop: (() -> Boolean)? = null,
         host: EmulationHost?,
         cancelRecovery: () -> Unit,
         finalize: suspend (Long, EmulationHost?) -> Boolean,
@@ -157,13 +159,15 @@ object EmulatorStopCoordinator {
             return request.result.await()
         }
 
-        Log.i(TAG, "request id=${request.requestId} reason=$reason process=${ProcessInstance.id} activity=${host?.activityInstanceId} activeGame=${RPCSX.activeGame.value} nativeState=reading surface=${host?.currentSurfaceGeneration} journal=${context?.let { EmulationSessionJournal.read(it)?.state }} recovery=${context?.let { PendingSavestateRecoveryStore.read(it)?.state }}")
+        logExitTrace(context, host, request.requestId, reason, "requested", "reading")
         processScope.launch {
             val success = terminalMutex.withLock {
                 runCatching {
                     cancelRecovery()
                     Log.i(TAG, "id=${request.requestId} recovery-cancelled")
                     val before = readStateStrict(readState, request.requestId, reason) ?: return@runCatching false
+                    context?.let { EmulationSessionJournal.markStopping(it, request.requestId, reason.name, stopFinishReason(reason)) }
+                    logExitTrace(context, host, request.requestId, reason, "STOPPING", before.name)
                     mutableState.value = EmulatorStopState.Stopping(
                         request.requestId,
                         reason,
@@ -180,7 +184,11 @@ object EmulatorStopCoordinator {
                             it.prepareForExternalStop(reason)
                         }
                     }
-                    if (before != EmulatorState.Stopping) {
+                    val gracefulRequested = reason == EmulatorStopReason.InGameExit &&
+                        gracefulStop?.let { runCatching { it() }.getOrDefault(false) } == true
+                    if (gracefulRequested) {
+                        Log.i(TAG, "id=${request.requestId} graceful-stop-requested native=$before")
+                    } else if (before != EmulatorState.Stopping) {
                         kill()
                         Log.i(TAG, "id=${request.requestId} kill-requested native=$before")
                     } else {
@@ -192,9 +200,13 @@ object EmulatorStopCoordinator {
                         Log.w(TAG, "id=${request.requestId} active-timeout passive-reconcile")
                         if (waitForStopped(readState, request.requestId, reason, passiveTimeoutMs, PASSIVE_POLL_MS) != true) {
                             mutableState.value = EmulatorStopState.Failed(request.requestId, reason, safeReadState(readState), "native emulator did not reach Stopped")
+                            context?.let {
+                                EmulationSessionJournal.markFailedStop(it, request.requestId, reason.name)
+                            }
                             return@runCatching false
                         }
                     }
+                    logExitTrace(context, host, request.requestId, reason, "native-Stopped", EmulatorState.Stopped.name)
                     finalize(request.requestId, host)
                 }
             }.getOrElse { error ->
@@ -245,13 +257,31 @@ object EmulatorStopCoordinator {
             mutableState.value = EmulatorStopState.Failed(requestId, reason, proven, "final native state was $proven")
             return false
         }
+        val session = EmulationSessionJournal.read(context)
+        val cleanReason = reason == EmulatorStopReason.InGameExit ||
+            reason == EmulatorStopReason.HomeStop ||
+            reason == EmulatorStopReason.AppRecoveryCleanup
+        // A fatal marker survives the STOPPING transition. It is the durable
+        // distinction between a user-requested exit and cleanup after a
+        // renderer/boot failure, even when native reaches Stopped cleanly.
+        if (cleanReason && session?.state != EmulationSessionState.FAILED && session?.fatalEventId == null) {
+            // Trophy writes are synchronous in the native unlock boundary;
+            // this journal commit is the Android-side flush boundary before
+            // Home is allowed to classify recovery.
+            Log.i("S3EXIT", "event=trophy-flush-complete sessionId=${session?.sessionId ?: "none"} stopRequestId=$requestId boundary=native-stop journal=${session?.state ?: "none"}")
+            EmulationSessionJournal.markCleanStop(context, requestId, reason.name, stopFinishReason(reason))
+        } else {
+            EmulationSessionJournal.markFailedStop(context, requestId, reason.name, session?.fatalEventId)
+        }
+        logExitTrace(context, host, requestId, reason, if (cleanReason) "CLEAN_STOP" else "FAILED", EmulatorState.Stopped.name)
         withContext(Dispatchers.Main.immediate) {
             RPCSX.state.value = EmulatorState.Stopped
             RPCSX.activeGame.value = null
-            EmulationSessionJournal.markCleanStop(context)
-            Log.i(TAG, "id=$requestId finalize native=Stopped published=Stopped activeGame=null journal=CLEAN_STOP")
+            logExitTrace(context, host, requestId, reason, "activeGame-null", EmulatorState.Stopped.name)
+            Log.i(TAG, "id=$requestId finalize native=Stopped published=Stopped activeGame=null journal=${if (cleanReason) "CLEAN_STOP" else "FAILED"}")
             host?.let {
                 Log.i(TAG, "id=$requestId host-finish activity=${it.activityInstanceId}")
+                logExitTrace(context, host, requestId, reason, "finish-external-stop", EmulatorState.Stopped.name)
                 it.finishAfterExternalStop(requestId)
             }
         }
@@ -284,6 +314,7 @@ object EmulatorStopCoordinator {
             context = null,
             readState,
             kill,
+            gracefulStop = null,
             host = null,
             cancelRecovery = {},
             finalize = { id, _ ->
@@ -303,5 +334,22 @@ object EmulatorStopCoordinator {
     internal fun clearForTest() {
         synchronized(lock) { inFlight = null }
         mutableState.value = EmulatorStopState.Idle
+    }
+
+    private fun stopFinishReason(reason: EmulatorStopReason): String = when (reason) {
+        EmulatorStopReason.InGameExit, EmulatorStopReason.HomeStop -> "ExplicitExit"
+        else -> "Recovery"
+    }
+
+    private fun logExitTrace(context: Context?, host: EmulationHost?, requestId: Long, reason: EmulatorStopReason, event: String, nativeState: String) {
+        val session = context?.let { EmulationSessionJournal.read(it) }
+        val terminal = context?.let { EmulationSessionJournal.terminal(it) }
+        val pending = context?.let { PendingSavestateRecoveryStore.read(it)?.state }
+        Log.i("S3EXIT", "event=$event sessionId=${session?.sessionId ?: terminal?.sessionId ?: "none"} " +
+            "activityInstanceId=${host?.activityInstanceId ?: 0L} stopRequestId=$requestId stopReason=${reason.name} " +
+            "finishReason=${stopFinishReason(reason)} activeGame=${RPCSX.activeGame.value ?: "null"} " +
+            "nativeState=$nativeState journalState=${session?.state ?: terminal?.state ?: "none"} " +
+            "pendingRecovery=${pending ?: "none"} fatalEventId=${session?.fatalEventId ?: terminal?.fatalEventId ?: "none"} " +
+            "timestamp=${System.currentTimeMillis()}")
     }
 }
