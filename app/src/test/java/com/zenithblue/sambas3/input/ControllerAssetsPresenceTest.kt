@@ -1,51 +1,40 @@
 package com.zenithblue.sambas3.input
 
+import com.zenithblue.sambas3.ui.controller.SvgRegionRegistry
+import org.junit.Assert.assertEquals
+import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
 import org.junit.Test
 import java.io.File
 
-/**
- * Structural check that repo-local controller SVGs exist with required hotspot IDs.
- * Drives the same asset paths resolved by [ControllerLayoutResolver].
- */
+/** Structural checks for the real SVG assets and their source-derived region maps. */
 class ControllerAssetsPresenceTest {
 
     private val assetsRoot: File
-        get() {
-            val candidates = listOf(
-                File("app/src/main/assets/controllers"),
-                File("src/main/assets/controllers"),
-            )
-            return candidates.first { it.isDirectory }
-        }
+        get() = listOf(
+            File("app/src/main/assets/controllers"),
+            File("src/main/assets/controllers"),
+        ).first { it.isDirectory }
 
     @Test
-    fun allFamilyAssetsExistWithRequiredHotspots() {
-        val families = listOf(
-            ControllerFamily.PLAYSTATION,
-            ControllerFamily.XBOX,
-            ControllerFamily.NINTENDO,
-            ControllerFamily.GENERIC_GAMEPAD,
-            ControllerFamily.KEYBOARD,
-        )
-        for (family in families) {
-            val layout = ControllerLayoutResolver.resolve(family)
-            val fileName = layout.assetPath.substringAfterLast('/')
-            val file = File(assetsRoot, fileName)
-            assertTrue("missing asset for $family: ${file.absolutePath}", file.isFile)
-            val text = file.readText()
-            for (id in layout.hotspotIds) {
-                assertTrue("$fileName missing hotspot id=$id", text.contains("id=\"$id\""))
-            }
-        }
+    fun allResolvedLayoutsHavePackagedArtworkAndRegions() {
+        val ds3 = File(assetsRoot, "controller_ds3.svg")
+        val keyboard = File(assetsRoot, "controller_keyboard.svg")
+        assertTrue(ds3.isFile)
+        assertTrue(keyboard.isFile)
+        assertTrue(ds3.readText().contains("data-button=\"triangle\""))
+        assertTrue(keyboard.readText().contains("data-code=\"KeyW\""))
+        assertEquals(ControllerLayoutResolver.GAMEPAD_HOTSPOTS, SvgRegionRegistry.decodeController(File(assetsRoot, "controller_ds3_regions.json").readText()).regions.map { it.id }.toSet())
+        assertEquals(104, SvgRegionRegistry.decodeKeyboard(File(assetsRoot, "controller_keyboard_regions.json").readText()).regions.size)
     }
 
     @Test
-    fun keyboardAssetIsNotAGamepadSilhouetteFile() {
-        val kb = ControllerLayoutResolver.resolve(ControllerFamily.KEYBOARD)
-        assertTrue(kb.assetPath.endsWith("controller_keyboard.svg"))
-        val text = File(assetsRoot, "controller_keyboard.svg").readText()
-        assertTrue(text.contains("KEYBOARD"))
-        assertTrue(text.contains("id=\"key_w\""))
+    fun runtimeSvgsContainNoBrowserRuntimeOrStatusCopy() {
+        for (name in listOf("controller_ds3.svg", "controller_keyboard.svg")) {
+            val text = File(assetsRoot, name).readText()
+            assertFalse("$name must be static", text.contains("<script"))
+            assertFalse("$name must not show source status", text.contains("PRESS ANY KEY"))
+            assertFalse("$name must not show source status", text.contains("NO GAMEPAD DETECTED"))
+        }
     }
 }

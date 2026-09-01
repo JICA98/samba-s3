@@ -98,6 +98,16 @@ class ControllerKeyboardRepairTest {
     }
 
     @Test
+    fun physicalKeyboardRegistryUsesFullSvgCodes() {
+        assertEquals("Escape", KeyboardKeyVisualRegistry.hotspotForKey(KeyEvent.KEYCODE_ESCAPE))
+        assertEquals("F12", KeyboardKeyVisualRegistry.hotspotForKey(KeyEvent.KEYCODE_F12))
+        assertEquals("KeyW", KeyboardKeyVisualRegistry.hotspotForKey(KeyEvent.KEYCODE_W))
+        assertEquals("ArrowUp", KeyboardKeyVisualRegistry.hotspotForKey(KeyEvent.KEYCODE_DPAD_UP))
+        assertEquals("NumpadEnter", KeyboardKeyVisualRegistry.hotspotForKey(KeyEvent.KEYCODE_NUMPAD_ENTER))
+        assertNull(KeyboardKeyVisualRegistry.hotspotForKey(KeyEvent.KEYCODE_BUTTON_A))
+    }
+
+    @Test
     fun startHoldRequiresFiveSecondsAndCompletesOnce() {
         val tracker = StartHoldTracker()
         assertEquals(0f, tracker.update(true, 1_000L).progress)

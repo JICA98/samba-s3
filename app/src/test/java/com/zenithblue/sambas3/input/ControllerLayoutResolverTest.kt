@@ -8,24 +8,26 @@ import org.junit.Test
 class ControllerLayoutResolverTest {
 
     @Test
-    fun playstationUsesPsAssetWithGamepadHotspots() {
+    fun allGamepadFamiliesUseTheSuppliedDs3Artwork() {
         val layout = ControllerLayoutResolver.resolve(ControllerFamily.PLAYSTATION)
         assertEquals(ControllerLayoutResolver.ASSET_PS, layout.assetPath)
-        assertTrue(layout.hotspotIds.containsAll(setOf("btn_cross", "stick_left", "trigger_right", "btn_guide")))
+        assertEquals(ControllerLayoutResolver.ASSET_DS3, layout.assetPath)
+        assertTrue(layout.hotspotIds.containsAll(setOf("btn_cross", "stick_left", "btn_r2", "btn_guide")))
         assertFalse(layout.assetPath.contains("keyboard"))
     }
 
     @Test
-    fun xboxUsesXboxAsset() {
+    fun xboxUsesDs3ArtworkWithPhysicalLabelsSeparate() {
         val layout = ControllerLayoutResolver.resolve(ControllerFamily.XBOX)
         assertEquals(ControllerLayoutResolver.ASSET_XBOX, layout.assetPath)
-        assertTrue(layout.hotspotIds.contains("btn_a"))
+        assertEquals(ControllerLayoutResolver.ASSET_DS3, layout.assetPath)
+        assertTrue(layout.physicalLabels.getValue("btn_cross").contains("Cross"))
     }
 
     @Test
-    fun nintendoUsesSwitchAsset() {
+    fun nintendoUsesDs3Artwork() {
         assertEquals(
-            ControllerLayoutResolver.ASSET_SWITCH,
+            ControllerLayoutResolver.ASSET_DS3,
             ControllerLayoutResolver.resolve(ControllerFamily.NINTENDO).assetPath,
         )
     }
@@ -34,7 +36,7 @@ class ControllerLayoutResolverTest {
     fun keyboardNeverResolvesToGamepadSkin() {
         val layout = ControllerLayoutResolver.resolve(ControllerFamily.KEYBOARD)
         assertEquals(ControllerLayoutResolver.ASSET_KEYBOARD, layout.assetPath)
-        assertTrue(layout.hotspotIds.contains("key_w"))
+        assertTrue(layout.hotspotIds.contains("KeyW"))
         assertFalse(layout.hotspotIds.contains("btn_cross"))
         assertFalse(layout.assetPath.contains("controller_ps"))
         assertFalse(layout.assetPath.contains("controller_generic"))
@@ -48,20 +50,26 @@ class ControllerLayoutResolverTest {
     }
 
     @Test
-    fun hotspotForLogicalMatchesFamilyFaceButtons() {
+    fun hotspotForLogicalUsesTheSameDs3FaceButtonsForEveryGamepad() {
         assertEquals("btn_cross", ControllerLayoutResolver.hotspotForLogical(LogicalControl.CROSS, ControllerFamily.PLAYSTATION))
-        assertEquals("btn_a", ControllerLayoutResolver.hotspotForLogical(LogicalControl.CROSS, ControllerFamily.XBOX))
-        assertEquals("btn_b", ControllerLayoutResolver.hotspotForLogical(LogicalControl.CROSS, ControllerFamily.NINTENDO))
-        assertEquals("btn_a", ControllerLayoutResolver.hotspotForLogical(LogicalControl.CIRCLE, ControllerFamily.NINTENDO))
+        assertEquals("btn_cross", ControllerLayoutResolver.hotspotForLogical(LogicalControl.CROSS, ControllerFamily.XBOX))
+        assertEquals("btn_cross", ControllerLayoutResolver.hotspotForLogical(LogicalControl.CROSS, ControllerFamily.NINTENDO))
+        assertEquals("btn_circle", ControllerLayoutResolver.hotspotForLogical(LogicalControl.CIRCLE, ControllerFamily.NINTENDO))
     }
 
     @Test
-    fun nintendoFaceHotspotsAreUniqueNoCollision() {
+    fun keyboardLogicalHotspotsUseSourceDataCodes() {
+        assertEquals("KeyW", ControllerLayoutResolver.hotspotForLogical(LogicalControl.DPAD_UP, ControllerFamily.KEYBOARD))
+        assertEquals("Enter", ControllerLayoutResolver.hotspotForLogical(LogicalControl.START, ControllerFamily.KEYBOARD))
+    }
+
+    @Test
+    fun gamepadFaceHotspotsAreUniqueNoCollision() {
         val cross = ControllerLayoutResolver.hotspotForLogical(LogicalControl.CROSS, ControllerFamily.NINTENDO)
         val circle = ControllerLayoutResolver.hotspotForLogical(LogicalControl.CIRCLE, ControllerFamily.NINTENDO)
         val square = ControllerLayoutResolver.hotspotForLogical(LogicalControl.SQUARE, ControllerFamily.NINTENDO)
         val triangle = ControllerLayoutResolver.hotspotForLogical(LogicalControl.TRIANGLE, ControllerFamily.NINTENDO)
-        assertEquals(setOf(cross, circle, square, triangle).size, 4)
+        assertEquals(4, setOf(cross, circle, square, triangle).size)
         assertFalse(cross == circle)
     }
 }

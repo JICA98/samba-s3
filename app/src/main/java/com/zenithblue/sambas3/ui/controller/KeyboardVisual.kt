@@ -92,9 +92,3 @@ private fun KeyboardSvgRegionMap.logicalAt(x: Float, y: Float, width: Int, heigh
     return regions.firstOrNull { it.bounds.contains(source.x, source.y) }
         ?.let { ControllerHotspotLayout.logicalForHotspot(it.code, ControllerFamily.KEYBOARD) }
 }
-
-private fun KeyboardSvgRegionMap.logicalAt(x: Float, y: Float, width: Float, height: Float): LogicalControl? {
-    val source = SvgViewportTransform(viewBox, width, height).screenToSource(SvgScreenPoint(x, y)) ?: return null
-    return regions.firstOrNull { it.bounds.contains(source.x, source.y) }
-        ?.let { ControllerHotspotLayout.logicalForHotspot(it.code, ControllerFamily.KEYBOARD) }
-}
