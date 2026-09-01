@@ -1,0 +1,45 @@
+[09-01 20:01:10.938] D/S3PERF: crosscheck source=emu_flip presented=5219 json_fps=29.270006 json_frametime_ms=33.329
+[09-01 20:01:12.195] D/S3PERF: crosscheck source=emu_flip presented=5257 json_fps=28.727468 json_frametime_ms=33.324886
+[09-01 20:01:13.503] D/S3PERF: crosscheck source=emu_flip presented=5296 json_fps=29.78205 json_frametime_ms=33.343273
+[09-01 20:01:14.756] D/S3PERF: crosscheck source=emu_flip presented=5334 json_fps=28.793365 json_frametime_ms=33.336662
+[09-01 20:01:16.002] D/S3PERF: crosscheck source=emu_flip presented=5371 json_fps=28.49941 json_frametime_ms=33.313778
+[09-01 20:01:17.308] D/S3PERF: crosscheck source=emu_flip presented=5410 json_fps=28.666985 json_frametime_ms=33.32711
+[09-01 20:01:18.566] D/S3PERF: crosscheck source=emu_flip presented=5448 json_fps=28.792261 json_frametime_ms=33.33911
+[09-01 20:01:19.876] D/S3PERF: crosscheck source=emu_flip presented=5487 json_fps=29.768831 json_frametime_ms=33.334
+[09-01 20:01:21.135] D/S3PERF: crosscheck source=emu_flip presented=5525 json_fps=28.81051 json_frametime_ms=33.323666
+[09-01 20:01:22.394] D/S3PERF: crosscheck source=emu_flip presented=5563 json_fps=28.815952 json_frametime_ms=33.327778
+[09-01 20:01:27.962] I/S3CFG: boot_enter path=/storage/emulated/0/Android/data/com.zenithblue.sambas3/files/config/games/BLUS31584
+[09-01 20:01:28.521] I/S3CFG: boot phase=fresh result=0 generation=0 title=BLUS31584 effectiveHash=15633311867323765951 frameLimit="60" resolution="720x576" aspect="16:9" renderer="Vulkan" ppuDecoder="LLVM Recompiler (Legacy)" audioRenderer="Cubeb"
+[09-01 20:01:36.850] D/S3PERF: crosscheck source=emu_flip presented=1 json_fps=3.2139769 json_frametime_ms=0.0
+[09-01 20:01:38.121] D/S3PERF: crosscheck source=emu_flip presented=26 json_fps=29.169071 json_frametime_ms=33.175888
+[09-01 20:01:39.340] D/S3PERF: crosscheck source=emu_flip presented=63 json_fps=32.25619 json_frametime_ms=33.417397
+[09-01 20:01:40.606] D/S3PERF: crosscheck source=emu_flip presented=101 json_fps=30.966724 json_frametime_ms=33.303635
+[09-01 20:01:41.832] D/S3PERF: crosscheck source=emu_flip presented=137 json_fps=29.008583 json_frametime_ms=33.52544
+[09-01 20:01:43.066] D/S3PERF: crosscheck source=emu_flip presented=174 json_fps=28.960417 json_frametime_ms=33.611668
+[09-01 20:01:44.356] D/S3PERF: crosscheck source=emu_flip presented=213 json_fps=31.605164 json_frametime_ms=33.3648
+[09-01 20:01:45.609] D/S3PERF: crosscheck source=emu_flip presented=250 json_fps=28.370493 json_frametime_ms=33.357334
+[09-01 20:01:46.906] D/S3PERF: crosscheck source=emu_flip presented=289 json_fps=30.514954 json_frametime_ms=33.276817
+[09-01 20:01:48.154] D/S3PERF: crosscheck source=emu_flip presented=327 json_fps=31.921347 json_frametime_ms=33.375298
+[09-01 20:01:49.395] D/S3PERF: crosscheck source=emu_flip presented=364 json_fps=31.679255 json_frametime_ms=33.2891
+[09-01 20:01:50.707] D/S3PERF: crosscheck source=emu_flip presented=403 json_fps=28.393854 json_frametime_ms=33.48122
+[09-01 20:01:51.958] D/S3PERF: crosscheck source=emu_flip presented=441 json_fps=31.753895 json_frametime_ms=33.4416
+[09-01 20:01:53.241] D/S3PERF: crosscheck source=emu_flip presented=496 json_fps=60.161404 json_frametime_ms=16.674002
+[09-01 20:01:54.497] D/S3PERF: crosscheck source=emu_flip presented=570 json_fps=59.560196 json_frametime_ms=17.046158
+[09-01 20:01:55.746] D/S3PERF: crosscheck source=emu_flip presented=643 json_fps=60.144474 json_frametime_ms=17.176105
+[09-01 20:01:57.060] D/S3PERF: crosscheck source=emu_flip presented=719 json_fps=60.77841 json_frametime_ms=16.992685
+[09-01 20:01:58.308] D/S3PERF: crosscheck source=emu_flip presented=792 json_fps=56.974285 json_frametime_ms=17.05089
+[09-01 20:01:59.609] D/S3PERF: crosscheck source=emu_flip presented=869 json_fps=58.66526 json_frametime_ms=16.971498
+[09-01 20:02:00.842] D/S3PERF: crosscheck source=emu_flip presented=941 json_fps=57.98502 json_frametime_ms=17.189833
+[09-01 20:02:02.082] D/S3PERF: crosscheck source=emu_flip presented=1013 json_fps=57.98353 json_frametime_ms=17.047335
+[09-01 20:02:03.376] D/S3PERF: crosscheck source=emu_flip presented=1089 json_fps=58.129208 json_frametime_ms=17.133278
+[09-01 20:02:04.616] D/S3PERF: crosscheck source=emu_flip presented=1161 json_fps=57.523975 json_frametime_ms=16.993612
+[09-01 20:02:05.921] D/S3PERF: crosscheck source=emu_flip presented=1238 json_fps=59.032352 json_frametime_ms=17.000591
+[09-01 20:02:07.171] D/S3PERF: crosscheck source=emu_flip presented=1311 json_fps=57.03133 json_frametime_ms=17.150835
+[09-01 20:02:08.420] D/S3PERF: crosscheck source=emu_flip presented=1384 json_fps=60.191917 json_frametime_ms=17.210423
+[09-01 20:02:09.722] D/S3PERF: crosscheck source=emu_flip presented=1460 json_fps=60.20603 json_frametime_ms=17.262842
+[09-01 20:02:10.970] D/S3PERF: crosscheck source=emu_flip presented=1533 json_fps=60.032543 json_frametime_ms=17.21458
+[09-01 20:02:12.274] D/S3PERF: crosscheck source=emu_flip presented=1609 json_fps=59.164436 json_frametime_ms=16.963224
+[09-01 20:02:13.512] D/S3PERF: crosscheck source=emu_flip presented=1682 json_fps=58.341545 json_frametime_ms=16.684608
+[09-01 20:02:14.746] D/S3PERF: crosscheck source=emu_flip presented=1755 json_fps=58.27657 json_frametime_ms=16.721443
+[09-01 20:02:15.230] I/S3CFG_HARNESS: global path=Video@@Frame limit value={
+[09-01 20:02:16.049] D/S3PERF: crosscheck source=emu_flip presented=1832 json_fps=58.980038 json_frametime_ms=17.043444

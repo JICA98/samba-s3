@@ -1,0 +1,1802 @@
+{
+    "Core": {
+        "PPU Decoder": {
+            "type": "enum",
+            "value": "LLVM Recompiler (Legacy)",
+            "default": "LLVM Recompiler (Legacy)",
+            "variants": [
+                "Interpreter (Legacy)",
+                "LLVM Recompiler (Legacy)",
+                "Interpreter"
+            ]
+        },
+        "PPU Threads": {
+            "type": "int",
+            "value": "2",
+            "default": "2",
+            "min": "1",
+            "max": "8"
+        },
+        "PPU Debug": {
+            "type": "bool",
+            "value": false,
+            "default": false
+        },
+        "PPU Calling History": {
+            "type": "bool",
+            "value": false,
+            "default": false
+        },
+        "PPU LLVM Codegen Mode": {
+            "type": "enum",
+            "value": "Aggressive",
+            "default": "Aggressive",
+            "variants": [
+                "Less",
+                "Default",
+                "Aggressive"
+            ]
+        },
+        "Save LLVM logs": {
+            "type": "bool",
+            "value": false,
+            "default": false
+        },
+        "Use LLVM CPU": {
+            "type": "string",
+            "value": "cortex-a34",
+            "default": ""
+        },
+        "Max LLVM Compile Threads": {
+            "type": "int",
+            "value": "0",
+            "default": "0",
+            "min": "0",
+            "max": "16"
+        },
+        "PPU Foreground Compile Threads": {
+            "type": "int",
+            "value": "0",
+            "default": "0",
+            "min": "0",
+            "max": "32"
+        },
+        "PPU LLVM Greedy Mode": {
+            "type": "bool",
+            "value": false,
+            "default": false
+        },
+        "LLVM Precompilation": {
+            "type": "bool",
+            "value": true,
+            "default": true
+        },
+        "Thread Scheduler Mode": {
+            "type": "enum",
+            "value": "Operating System",
+            "default": "Operating System",
+            "variants": [
+                "Operating System",
+                "RPCS3 Scheduler",
+                "RPCS3 Alternative Scheduler"
+            ]
+        },
+        "Set DAZ and FTZ": {
+            "type": "bool",
+            "value": false,
+            "default": false
+        },
+        "SPU Decoder": {
+            "type": "enum",
+            "value": "Recompiler (LLVM)",
+            "default": "Recompiler (LLVM)",
+            "variants": [
+                "Interpreter (static)",
+                "Interpreter (dynamic)",
+                "Recompiler (ASMJIT)",
+                "Recompiler (LLVM)"
+            ]
+        },
+        "SPU Reservation Busy Waiting Percentage": {
+            "type": "uint",
+            "value": "0",
+            "default": "0",
+            "min": "0",
+            "max": "100"
+        },
+        "SPU GETLLAR Busy Waiting Percentage": {
+            "type": "uint",
+            "value": "100",
+            "default": "100",
+            "min": "0",
+            "max": "100"
+        },
+        "Disable SPU GETLLAR Spin Optimization": {
+            "type": "bool",
+            "value": false,
+            "default": false
+        },
+        "SPU Debug": {
+            "type": "bool",
+            "value": false,
+            "default": false
+        },
+        "MFC Debug": {
+            "type": "bool",
+            "value": false,
+            "default": false
+        },
+        "Preferred SPU Threads": {
+            "type": "int",
+            "value": "0",
+            "default": "0",
+            "min": "0",
+            "max": "6"
+        },
+        "SPU delay penalty": {
+            "type": "int",
+            "value": "3",
+            "default": "3",
+            "min": "0",
+            "max": "16"
+        },
+        "SPU loop detection": {
+            "type": "bool",
+            "value": false,
+            "default": false
+        },
+        "Max SPURS Threads": {
+            "type": "int",
+            "value": "6",
+            "default": "6",
+            "min": "1",
+            "max": "6"
+        },
+        "SPU Block Size": {
+            "type": "enum",
+            "value": "Safe",
+            "default": "Safe",
+            "variants": [
+                "Safe",
+                "Mega",
+                "Giga"
+            ]
+        },
+        "Accurate SPU DMA": {
+            "type": "bool",
+            "value": false,
+            "default": false
+        },
+        "Accurate SPU Reservations": {
+            "type": "bool",
+            "value": true,
+            "default": true
+        },
+        "Accurate Cache Line Stores": {
+            "type": "bool",
+            "value": false,
+            "default": false
+        },
+        "Accurate RSX reservation access": {
+            "type": "bool",
+            "value": false,
+            "default": false
+        },
+        "Affinity": {
+            "CPU0": {
+                "type": "enum",
+                "value": "General",
+                "default": "General",
+                "variants": [
+                    "General",
+                    "PPU",
+                    "SPU",
+                    "RSX"
+                ]
+            },
+            "CPU1": {
+                "type": "enum",
+                "value": "General",
+                "default": "General",
+                "variants": [
+                    "General",
+                    "PPU",
+                    "SPU",
+                    "RSX"
+                ]
+            },
+            "CPU2": {
+                "type": "enum",
+                "value": "General",
+                "default": "General",
+                "variants": [
+                    "General",
+                    "PPU",
+                    "SPU",
+                    "RSX"
+                ]
+            },
+            "CPU3": {
+                "type": "enum",
+                "value": "General",
+                "default": "General",
+                "variants": [
+                    "General",
+                    "PPU",
+                    "SPU",
+                    "RSX"
+                ]
+            },
+            "CPU4": {
+                "type": "enum",
+                "value": "General",
+                "default": "General",
+                "variants": [
+                    "General",
+                    "PPU",
+                    "SPU",
+                    "RSX"
+                ]
+            },
+            "CPU5": {
+                "type": "enum",
+                "value": "General",
+                "default": "General",
+                "variants": [
+                    "General",
+                    "PPU",
+                    "SPU",
+                    "RSX"
+                ]
+            },
+            "CPU6": {
+                "type": "enum",
+                "value": "General",
+                "default": "General",
+                "variants": [
+                    "General",
+                    "PPU",
+                    "SPU",
+                    "RSX"
+                ]
+            },
+            "CPU7": {
+                "type": "enum",
+                "value": "General",
+                "default": "General",
+                "variants": [
+                    "General",
+                    "PPU",
+                    "SPU",
+                    "RSX"
+                ]
+            }
+        },
+        "RSX FIFO Accuracy": {
+            "type": "enum",
+            "value": "Fast",
+            "default": "Fast",
+            "variants": [
+                "Fast",
+                "Atomic",
+                "Ordered & Atomic",
+                "PS3"
+            ]
+        },
+        "SPU Verification": {
+            "type": "bool",
+            "value": true,
+            "default": true
+        },
+        "SPU Cache": {
+            "type": "bool",
+            "value": true,
+            "default": true
+        },
+        "SPU Profiler": {
+            "type": "bool",
+            "value": false,
+            "default": false
+        },
+        "MFC Commands Shuffling Limit": {
+            "type": "uint",
+            "value": "0",
+            "default": "0",
+            "min": "0",
+            "max": "16"
+        },
+        "MFC Commands Timeout": {
+            "type": "uint",
+            "value": "0",
+            "default": "0",
+            "min": "0",
+            "max": "10000"
+        },
+        "MFC Commands Shuffling In Steps": {
+            "type": "bool",
+            "value": false,
+            "default": false
+        },
+        "Enable TSX": {
+            "type": "enum",
+            "value": "Disabled",
+            "default": "Disabled",
+            "variants": [
+                "Disabled",
+                "Enabled",
+                "Forced"
+            ]
+        },
+        "XFloat Accuracy": {
+            "type": "enum",
+            "value": "Approximate",
+            "default": "Approximate",
+            "variants": [
+                "Accurate",
+                "Approximate",
+                "Relaxed",
+                "Inaccurate"
+            ]
+        },
+        "Accurate PPU 128-byte Reservation Op Max Length": {
+            "type": "int",
+            "value": "0",
+            "default": "0",
+            "min": "-1",
+            "max": "14"
+        },
+        "Stub PPU Traps": {
+            "type": "int",
+            "value": "0",
+            "default": "0",
+            "min": "-64",
+            "max": "64"
+        },
+        "Precise SPU Verification": {
+            "type": "bool",
+            "value": false,
+            "default": false
+        },
+        "PPU LLVM Java Mode Handling": {
+            "type": "bool",
+            "value": true,
+            "default": true
+        },
+        "Use Accurate DFMA": {
+            "type": "bool",
+            "value": true,
+            "default": true
+        },
+        "PPU Set Saturation Bit": {
+            "type": "bool",
+            "value": false,
+            "default": false
+        },
+        "PPU Accurate Non-Java Mode": {
+            "type": "bool",
+            "value": false,
+            "default": false
+        },
+        "PPU Fixup Vector NaN Values": {
+            "type": "bool",
+            "value": false,
+            "default": false
+        },
+        "PPU Accurate Vector NaN Values": {
+            "type": "bool",
+            "value": false,
+            "default": false
+        },
+        "PPU Set FPCC Bits": {
+            "type": "bool",
+            "value": false,
+            "default": false
+        },
+        "Debug Console Mode": {
+            "type": "bool",
+            "value": false,
+            "default": false
+        },
+        "Hook static functions": {
+            "type": "bool",
+            "value": false,
+            "default": false
+        },
+        "Libraries Control": {
+            "type": "set",
+            "value": []
+        },
+        "HLE lwmutex": {
+            "type": "bool",
+            "value": false,
+            "default": false
+        },
+        "SPU LLVM Lower Bound": {
+            "type": "uint",
+            "value": "0",
+            "default": "0",
+            "min": "0",
+            "max": "18446744073709551615"
+        },
+        "SPU LLVM Upper Bound": {
+            "type": "uint",
+            "value": "18446744073709551615",
+            "default": "18446744073709551615",
+            "min": "0",
+            "max": "18446744073709551615"
+        },
+        "TSX Transaction First Limit": {
+            "type": "uint",
+            "value": "800",
+            "default": "800",
+            "min": "0",
+            "max": "18446744073709551615"
+        },
+        "TSX Transaction Second Limit": {
+            "type": "uint",
+            "value": "2000",
+            "default": "2000",
+            "min": "0",
+            "max": "18446744073709551615"
+        },
+        "Clocks scale": {
+            "type": "int",
+            "value": "100",
+            "default": "100",
+            "min": "10",
+            "max": "3000"
+        },
+        "SPU Wake-Up Delay": {
+            "type": "uint",
+            "value": "0",
+            "default": "0",
+            "min": "0",
+            "max": "3000"
+        },
+        "SPU Wake-Up Delay Thread Mask": {
+            "type": "uint",
+            "value": "63",
+            "default": "63",
+            "min": "0",
+            "max": "63"
+        },
+        "Max CPU Preempt Count": {
+            "type": "uint",
+            "value": "0",
+            "default": "0",
+            "min": "0",
+            "max": "400"
+        },
+        "Allow RSX CPU Preemptions": {
+            "type": "bool",
+            "value": true,
+            "default": true
+        },
+        "Sleep Timers Accuracy": {
+            "type": "enum",
+            "value": "As Host",
+            "default": "As Host",
+            "variants": [
+                "As Host",
+                "Usleep Only",
+                "All Timers"
+            ]
+        },
+        "Usleep Time Addend": {
+            "type": "int",
+            "value": "0",
+            "default": "0",
+            "min": "-1000",
+            "max": "1500"
+        },
+        "Performance Report Threshold": {
+            "type": "uint",
+            "value": "500",
+            "default": "500",
+            "min": "0",
+            "max": "18446744073709551615"
+        },
+        "Enable Performance Report": {
+            "type": "bool",
+            "value": false,
+            "default": false
+        },
+        "Assume External Debugger": {
+            "type": "bool",
+            "value": false,
+            "default": false
+        }
+    },
+    "VFS": {
+        "Enable /host_root/": {
+            "type": "bool",
+            "value": false,
+            "default": false
+        },
+        "Initialize Directories": {
+            "type": "bool",
+            "value": true,
+            "default": true
+        },
+        "Limit disk cache size": {
+            "type": "bool",
+            "value": false,
+            "default": false
+        },
+        "Disk cache maximum size (MB)": {
+            "type": "int",
+            "value": "5120",
+            "default": "5120",
+            "min": "0",
+            "max": "10240"
+        },
+        "Empty /dev_hdd0/tmp/": {
+            "type": "bool",
+            "value": true,
+            "default": true
+        }
+    },
+    "Video": {
+        "Renderer": {
+            "type": "enum",
+            "value": "Vulkan",
+            "default": "Vulkan",
+            "variants": [
+                "Null",
+                "OpenGL",
+                "Vulkan"
+            ]
+        },
+        "Resolution": {
+            "type": "enum",
+            "value": "720x576",
+            "default": "1280x720",
+            "variants": [
+                "1920x1080",
+                "1920x1080i",
+                "1280x720",
+                "720x480",
+                "720x480i",
+                "720x576",
+                "720x576i",
+                "1600x1080",
+                "1440x1080",
+                "1280x1080",
+                "960x1080"
+            ]
+        },
+        "Aspect ratio": {
+            "type": "enum",
+            "value": "16:9",
+            "default": "16:9",
+            "variants": [
+                "4:3",
+                "16:9"
+            ]
+        },
+        "Frame limit": {
+            "type": "enum",
+            "value": "60",
+            "default": "Auto",
+            "variants": [
+                "Off",
+                "30",
+                "50",
+                "60",
+                "120",
+                "Display",
+                "Auto",
+                "PS3 Native",
+                "Infinite"
+            ]
+        },
+        "Second Frame Limit": {
+            "type": "float",
+            "value": "0",
+            "default": "0",
+            "min": "0.000000",
+            "max": "1000.000000"
+        },
+        "MSAA": {
+            "type": "enum",
+            "value": "Disabled",
+            "default": "Auto",
+            "variants": [
+                "Disabled",
+                "Auto"
+            ]
+        },
+        "Shader Mode": {
+            "type": "enum",
+            "value": "Async Shader Recompiler",
+            "default": "Async Shader Recompiler",
+            "variants": [
+                "Shader Recompiler",
+                "Async Shader Recompiler",
+                "Async with Shader Interpreter",
+                "Shader Interpreter only"
+            ]
+        },
+        "Shader Precision": {
+            "type": "enum",
+            "value": "High",
+            "default": "High",
+            "variants": [
+                "Ultra",
+                "High",
+                "Low",
+                "Auto"
+            ]
+        },
+        "Write Color Buffers": {
+            "type": "bool",
+            "value": false,
+            "default": false
+        },
+        "Write Depth Buffer": {
+            "type": "bool",
+            "value": false,
+            "default": false
+        },
+        "Read Color Buffers": {
+            "type": "bool",
+            "value": false,
+            "default": false
+        },
+        "Read Depth Buffer": {
+            "type": "bool",
+            "value": false,
+            "default": false
+        },
+        "Handle RSX Memory Tiling": {
+            "type": "bool",
+            "value": false,
+            "default": false
+        },
+        "Log shader programs": {
+            "type": "bool",
+            "value": false,
+            "default": false
+        },
+        "VSync": {
+            "type": "bool",
+            "value": false,
+            "default": false
+        },
+        "Debug output": {
+            "type": "bool",
+            "value": false,
+            "default": false
+        },
+        "Debug overlay": {
+            "type": "bool",
+            "value": false,
+            "default": false
+        },
+        "Renderdoc Compatibility Mode": {
+            "type": "bool",
+            "value": false,
+            "default": false
+        },
+        "Use GPU texture scaling": {
+            "type": "bool",
+            "value": false,
+            "default": false
+        },
+        "Stretch To Display Area": {
+            "type": "bool",
+            "value": false,
+            "default": false
+        },
+        "Force High Precision Z buffer": {
+            "type": "bool",
+            "value": false,
+            "default": false
+        },
+        "Strict Rendering Mode": {
+            "type": "bool",
+            "value": false,
+            "default": false
+        },
+        "Disable ZCull Occlusion Queries": {
+            "type": "bool",
+            "value": false,
+            "default": false
+        },
+        "Disable Video Output": {
+            "type": "bool",
+            "value": false,
+            "default": false
+        },
+        "Disable Vertex Cache": {
+            "type": "bool",
+            "value": false,
+            "default": false
+        },
+        "Disable FIFO Reordering": {
+            "type": "bool",
+            "value": false,
+            "default": false
+        },
+        "Enable Frame Skip": {
+            "type": "bool",
+            "value": false,
+            "default": false
+        },
+        "Force CPU Blit": {
+            "type": "bool",
+            "value": false,
+            "default": false
+        },
+        "Disable On-Disk Shader Cache": {
+            "type": "bool",
+            "value": false,
+            "default": false
+        },
+        "Disable Vulkan Memory Allocator": {
+            "type": "bool",
+            "value": false,
+            "default": false
+        },
+        "Use full RGB output range": {
+            "type": "bool",
+            "value": true,
+            "default": true
+        },
+        "Strict Texture Flushing": {
+            "type": "bool",
+            "value": false,
+            "default": false
+        },
+        "Multithreaded RSX": {
+            "type": "bool",
+            "value": false,
+            "default": false
+        },
+        "Relaxed ZCULL Sync": {
+            "type": "bool",
+            "value": false,
+            "default": false
+        },
+        "Force Hardware MSAA Resolve": {
+            "type": "bool",
+            "value": false,
+            "default": false
+        },
+        "3D Display Mode": {
+            "type": "enum",
+            "value": "Disabled",
+            "default": "Disabled",
+            "variants": [
+                "Disabled",
+                "Side-by-Side",
+                "Over-Under",
+                "Interlaced",
+                "Anaglyph Red-Green",
+                "Anaglyph Red-Blue",
+                "Anaglyph Red-Cyan",
+                "Anaglyph Magenta-Cyan",
+                "Anaglyph Trioscopic",
+                "Anaglyph Amber-Blue"
+            ]
+        },
+        "Debug Program Analyser": {
+            "type": "bool",
+            "value": false,
+            "default": false
+        },
+        "Accurate ZCULL stats": {
+            "type": "bool",
+            "value": true,
+            "default": true
+        },
+        "Consecutive Frames To Draw": {
+            "type": "int",
+            "value": "1",
+            "default": "1",
+            "min": "1",
+            "max": "8"
+        },
+        "Consecutive Frames To Skip": {
+            "type": "int",
+            "value": "1",
+            "default": "1",
+            "min": "1",
+            "max": "8"
+        },
+        "Resolution Scale": {
+            "type": "int",
+            "value": "100",
+            "default": "100",
+            "min": "25",
+            "max": "800"
+        },
+        "Anisotropic Filter Override": {
+            "type": "uint",
+            "value": "0",
+            "default": "0",
+            "min": "0",
+            "max": "16"
+        },
+        "Texture LOD Bias Addend": {
+            "type": "float",
+            "value": "0",
+            "default": "0",
+            "min": "-32.000000",
+            "max": "32.000000"
+        },
+        "Minimum Scalable Dimension": {
+            "type": "int",
+            "value": "16",
+            "default": "16",
+            "min": "1",
+            "max": "1024"
+        },
+        "Shader Compiler Threads": {
+            "type": "int",
+            "value": "0",
+            "default": "0",
+            "min": "0",
+            "max": "16"
+        },
+        "Driver Recovery Timeout": {
+            "type": "int",
+            "value": "1000000",
+            "default": "1000000",
+            "min": "0",
+            "max": "30000000"
+        },
+        "Driver Wake-Up Delay": {
+            "type": "uint",
+            "value": "0",
+            "default": "0",
+            "min": "0",
+            "max": "16667"
+        },
+        "Vblank Rate": {
+            "type": "int",
+            "value": "60",
+            "default": "60",
+            "min": "1",
+            "max": "6000"
+        },
+        "Vblank NTSC Fixup": {
+            "type": "bool",
+            "value": false,
+            "default": false
+        },
+        "DECR memory layout": {
+            "type": "bool",
+            "value": false,
+            "default": false
+        },
+        "Allow Host GPU Labels": {
+            "type": "bool",
+            "value": false,
+            "default": false
+        },
+        "Disable MSL Fast Math": {
+            "type": "bool",
+            "value": false,
+            "default": false
+        },
+        "Disable Asynchronous Memory Manager": {
+            "type": "bool",
+            "value": false,
+            "default": false
+        },
+        "Output Scaling Mode": {
+            "type": "enum",
+            "value": "Bilinear",
+            "default": "Bilinear",
+            "variants": [
+                "Nearest",
+                "Bilinear",
+                "FidelityFX Super Resolution"
+            ]
+        },
+        "Vulkan": {
+            "Adapter": {
+                "type": "string",
+                "value": "",
+                "default": ""
+            },
+            "Force FIFO present mode": {
+                "type": "bool",
+                "value": false,
+                "default": false
+            },
+            "Force primitive restart flag": {
+                "type": "bool",
+                "value": false,
+                "default": false
+            },
+            "Exclusive Fullscreen Mode": {
+                "type": "enum",
+                "value": "Automatic",
+                "default": "Automatic",
+                "variants": [
+                    "Automatic",
+                    "Disable",
+                    "Enable"
+                ]
+            },
+            "Asynchronous Texture Streaming 2": {
+                "type": "bool",
+                "value": false,
+                "default": false
+            },
+            "FidelityFX CAS Sharpening Intensity": {
+                "type": "uint",
+                "value": "50",
+                "default": "50",
+                "min": "0",
+                "max": "100"
+            },
+            "Asynchronous Queue Scheduler": {
+                "type": "enum",
+                "value": "Safe",
+                "default": "Safe",
+                "variants": [
+                    "Safe",
+                    "Fast"
+                ]
+            },
+            "VRAM allocation limit (MB)": {
+                "type": "uint",
+                "value": "65536",
+                "default": "65536",
+                "min": "256",
+                "max": "65536"
+            },
+            "Custom Driver": {
+                "Path": {
+                    "type": "string",
+                    "value": "",
+                    "default": ""
+                },
+                "Internal Data Directory": {
+                    "type": "string",
+                    "value": "",
+                    "default": ""
+                },
+                "Hook Directory": {
+                    "type": "string",
+                    "value": "",
+                    "default": ""
+                },
+                "Turbo Mode": {
+                    "type": "bool",
+                    "value": false,
+                    "default": false
+                }
+            },
+            "Workarounds": {
+                "No Primitive Restart": {
+                    "type": "bool",
+                    "value": false,
+                    "default": false
+                },
+                "Sanitize FP Values": {
+                    "type": "bool",
+                    "value": false,
+                    "default": false
+                },
+                "Disable Fence Reset": {
+                    "type": "bool",
+                    "value": false,
+                    "default": false
+                },
+                "Emulate Cond Render": {
+                    "type": "bool",
+                    "value": false,
+                    "default": false
+                },
+                "Strict Query Scopes": {
+                    "type": "bool",
+                    "value": false,
+                    "default": false
+                },
+                "Force Reuse Query Pools": {
+                    "type": "bool",
+                    "value": false,
+                    "default": false
+                }
+            }
+        },
+        "Performance Overlay": {
+            "Enabled": {
+                "type": "bool",
+                "value": false,
+                "default": false
+            },
+            "Enable Framerate Graph": {
+                "type": "bool",
+                "value": false,
+                "default": false
+            },
+            "Enable Frametime Graph": {
+                "type": "bool",
+                "value": false,
+                "default": false
+            },
+            "Framerate datapoints": {
+                "type": "uint",
+                "value": "50",
+                "default": "50",
+                "min": "2",
+                "max": "6000"
+            },
+            "Frametime datapoints": {
+                "type": "uint",
+                "value": "170",
+                "default": "170",
+                "min": "2",
+                "max": "6000"
+            },
+            "Detail level": {
+                "type": "enum",
+                "value": "Medium",
+                "default": "Medium",
+                "variants": [
+                    "None",
+                    "Minimal",
+                    "Low",
+                    "Medium",
+                    "High"
+                ]
+            },
+            "Framerate graph detail level": {
+                "type": "enum",
+                "value": "All",
+                "default": "All",
+                "variants": [
+                    "Minimal",
+                    "Show min and max",
+                    "Show 1% and average",
+                    "All"
+                ]
+            },
+            "Frametime graph detail level": {
+                "type": "enum",
+                "value": "All",
+                "default": "All",
+                "variants": [
+                    "Minimal",
+                    "Show min and max",
+                    "Show 1% and average",
+                    "All"
+                ]
+            },
+            "Metrics update interval (ms)": {
+                "type": "uint",
+                "value": "350",
+                "default": "350",
+                "min": "1",
+                "max": "1000"
+            },
+            "Font size (px)": {
+                "type": "uint",
+                "value": "10",
+                "default": "10",
+                "min": "4",
+                "max": "36"
+            },
+            "Position": {
+                "type": "enum",
+                "value": "Top Left",
+                "default": "Top Left",
+                "variants": [
+                    "Top Left",
+                    "Top Right",
+                    "Bottom Left",
+                    "Bottom Right"
+                ]
+            },
+            "Font": {
+                "type": "string",
+                "value": "n023055ms.ttf",
+                "default": "n023055ms.ttf"
+            },
+            "Horizontal Margin (px)": {
+                "type": "uint",
+                "value": "50",
+                "default": "50",
+                "min": "0",
+                "max": "1280"
+            },
+            "Vertical Margin (px)": {
+                "type": "uint",
+                "value": "50",
+                "default": "50",
+                "min": "0",
+                "max": "720"
+            },
+            "Center Horizontally": {
+                "type": "bool",
+                "value": false,
+                "default": false
+            },
+            "Center Vertically": {
+                "type": "bool",
+                "value": false,
+                "default": false
+            },
+            "Opacity (%)": {
+                "type": "uint",
+                "value": "70",
+                "default": "70",
+                "min": "0",
+                "max": "100"
+            },
+            "Body Color (hex)": {
+                "type": "string",
+                "value": "#FFE138FF",
+                "default": "#FFE138FF"
+            },
+            "Body Background (hex)": {
+                "type": "string",
+                "value": "#002339FF",
+                "default": "#002339FF"
+            },
+            "Title Color (hex)": {
+                "type": "string",
+                "value": "#F26C24FF",
+                "default": "#F26C24FF"
+            },
+            "Title Background (hex)": {
+                "type": "string",
+                "value": "#00000000",
+                "default": "#00000000"
+            }
+        },
+        "Shader Loading Dialog": {
+            "Allow custom background": {
+                "type": "bool",
+                "value": true,
+                "default": true
+            },
+            "Darkening effect strength": {
+                "type": "uint",
+                "value": "30",
+                "default": "30",
+                "min": "0",
+                "max": "100"
+            },
+            "Blur effect strength": {
+                "type": "uint",
+                "value": "0",
+                "default": "0",
+                "min": "0",
+                "max": "100"
+            }
+        }
+    },
+    "Audio": {
+        "Renderer": {
+            "type": "enum",
+            "value": "Cubeb",
+            "default": "Cubeb",
+            "variants": [
+                "Null",
+                "Cubeb"
+            ]
+        },
+        "Audio Provider": {
+            "type": "enum",
+            "value": "CellAudio",
+            "default": "CellAudio",
+            "variants": [
+                "None",
+                "CellAudio",
+                "RSXAudio"
+            ]
+        },
+        "RSXAudio Avport": {
+            "type": "enum",
+            "value": "HDMI 0",
+            "default": "HDMI 0",
+            "variants": [
+                "HDMI 0",
+                "HDMI 1",
+                "AV multiout",
+                "SPDIF 0",
+                "SPDIF 1"
+            ]
+        },
+        "Dump to file": {
+            "type": "bool",
+            "value": false,
+            "default": false
+        },
+        "Convert to 16 bit": {
+            "type": "bool",
+            "value": false,
+            "default": false
+        },
+        "Audio Format": {
+            "type": "enum",
+            "value": "Stereo",
+            "default": "Stereo",
+            "variants": [
+                "Stereo",
+                "Surround 5.1",
+                "Surround 7.1",
+                "Automatic",
+                "Manual"
+            ]
+        },
+        "Audio Formats": {
+            "type": "uint",
+            "value": "0",
+            "default": "0",
+            "min": "0",
+            "max": "255"
+        },
+        "Audio Channel Layout": {
+            "type": "enum",
+            "value": "Automatic",
+            "default": "Automatic",
+            "variants": [
+                "Automatic",
+                "Mono",
+                "Stereo",
+                "Stereo LFE",
+                "Quadraphonic",
+                "Quadraphonic LFE",
+                "Surround 5.1",
+                "Surround 7.1"
+            ]
+        },
+        "Audio Device": {
+            "type": "string",
+            "value": "@@@default@@@",
+            "default": "@@@default@@@"
+        },
+        "Master Volume": {
+            "type": "int",
+            "value": "100",
+            "default": "100",
+            "min": "0",
+            "max": "200"
+        },
+        "Enable Buffering": {
+            "type": "bool",
+            "value": true,
+            "default": true
+        },
+        "Desired Audio Buffer Duration": {
+            "type": "int",
+            "value": "100",
+            "default": "100",
+            "min": "4",
+            "max": "250"
+        },
+        "Enable Time Stretching": {
+            "type": "bool",
+            "value": false,
+            "default": false
+        },
+        "Disable Sampling Skip": {
+            "type": "bool",
+            "value": false,
+            "default": false
+        },
+        "Time Stretching Threshold": {
+            "type": "int",
+            "value": "75",
+            "default": "75",
+            "min": "0",
+            "max": "100"
+        },
+        "Microphone Type": {
+            "type": "enum",
+            "value": "Null",
+            "default": "Null",
+            "variants": [
+                "Null",
+                "Standard",
+                "SingStar",
+                "Real SingStar",
+                "Rocksmith"
+            ]
+        },
+        "Microphone Devices": {
+            "type": "string",
+            "value": "@@@@@@@@@@@@",
+            "default": "@@@@@@@@@@@@"
+        },
+        "Music Handler": {
+            "type": "enum",
+            "value": "Qt",
+            "default": "Qt",
+            "variants": [
+                "Null",
+                "Qt"
+            ]
+        }
+    },
+    "Input/Output": {
+        "Keyboard": {
+            "type": "enum",
+            "value": "Null",
+            "default": "Null",
+            "variants": [
+                "Null",
+                "Basic"
+            ]
+        },
+        "Mouse": {
+            "type": "enum",
+            "value": "Basic",
+            "default": "Basic",
+            "variants": [
+                "Null",
+                "Basic",
+                "Raw"
+            ]
+        },
+        "Camera": {
+            "type": "enum",
+            "value": "Null",
+            "default": "Null",
+            "variants": [
+                "Null",
+                "Fake",
+                "Qt"
+            ]
+        },
+        "Camera type": {
+            "type": "enum",
+            "value": "Unknown",
+            "default": "Unknown",
+            "variants": [
+                "Unknown",
+                "EyeToy",
+                "PS Eye",
+                "UVC 1.1"
+            ]
+        },
+        "Camera flip": {
+            "type": "enum",
+            "value": "None",
+            "default": "None",
+            "variants": [
+                "None",
+                "Horizontal",
+                "Vertical",
+                "Both"
+            ]
+        },
+        "Camera ID": {
+            "type": "string",
+            "value": "Default",
+            "default": "Default"
+        },
+        "Move": {
+            "type": "enum",
+            "value": "Null",
+            "default": "Null",
+            "variants": [
+                "Null",
+                "Real",
+                "Fake",
+                "Mouse",
+                "Raw Mouse"
+            ]
+        },
+        "Buzz emulated controller": {
+            "type": "enum",
+            "value": "Null",
+            "default": "Null",
+            "variants": [
+                "Null",
+                "1 controller",
+                "2 controllers"
+            ]
+        },
+        "Turntable emulated controller": {
+            "type": "enum",
+            "value": "Null",
+            "default": "Null",
+            "variants": [
+                "Null",
+                "1 controller",
+                "2 controllers"
+            ]
+        },
+        "GHLtar emulated controller": {
+            "type": "enum",
+            "value": "Null",
+            "default": "Null",
+            "variants": [
+                "Null",
+                "1 controller",
+                "2 controllers"
+            ]
+        },
+        "Pad handler mode": {
+            "type": "enum",
+            "value": "Single-threaded",
+            "default": "Single-threaded",
+            "variants": [
+                "Single-threaded",
+                "Multi-threaded"
+            ]
+        },
+        "Keep pads connected": {
+            "type": "bool",
+            "value": false,
+            "default": false
+        },
+        "Pad handler sleep (microseconds)": {
+            "type": "uint",
+            "value": "1000",
+            "default": "1000",
+            "min": "0",
+            "max": "100000"
+        },
+        "Background input enabled": {
+            "type": "bool",
+            "value": true,
+            "default": true
+        },
+        "Show move cursor": {
+            "type": "bool",
+            "value": false,
+            "default": false
+        },
+        "Paint move spheres": {
+            "type": "bool",
+            "value": false,
+            "default": false
+        },
+        "Allow move hue set by game": {
+            "type": "bool",
+            "value": false,
+            "default": false
+        },
+        "Lock overlay input to player one": {
+            "type": "bool",
+            "value": false,
+            "default": false
+        },
+        "Emulated Midi devices": {
+            "type": "string",
+            "value": "ßßß@@@ßßß@@@ßßß@@@",
+            "default": "ßßß@@@ßßß@@@ßßß@@@"
+        },
+        "Load SDL GameController Mappings": {
+            "type": "bool",
+            "value": true,
+            "default": true
+        },
+        "IO Debug overlay": {
+            "type": "bool",
+            "value": false,
+            "default": false
+        },
+        "Fake Move Rotation Cone": {
+            "type": "uint",
+            "value": "10",
+            "default": "10",
+            "min": "1",
+            "max": "180"
+        },
+        "Fake Move Rotation Cone (Vertical)": {
+            "type": "uint",
+            "value": "10",
+            "default": "10",
+            "min": "1",
+            "max": "180"
+        }
+    },
+    "System": {
+        "License Area": {
+            "type": "enum",
+            "value": "SCEA",
+            "default": "SCEA",
+            "variants": [
+                "SCEJ",
+                "SCEA",
+                "SCEE",
+                "SCEH",
+                "SCEK",
+                "SCH",
+                "Other"
+            ]
+        },
+        "Language": {
+            "type": "enum",
+            "value": "English (US)",
+            "default": "English (US)",
+            "variants": [
+                "Japanese",
+                "English (US)",
+                "French",
+                "Spanish",
+                "German",
+                "Italian",
+                "Dutch",
+                "Portuguese (Portugal)",
+                "Russian",
+                "Korean",
+                "Chinese (Traditional)",
+                "Chinese (Simplified)",
+                "Finnish",
+                "Swedish",
+                "Danish",
+                "Norwegian",
+                "Polish",
+                "Portuguese (Brazil)",
+                "English (UK)",
+                "Turkish"
+            ]
+        },
+        "Keyboard Type": {
+            "type": "enum",
+            "value": "English keyboard (US standard)",
+            "default": "English keyboard (US standard)",
+            "variants": [
+                "English keyboard (US standard)",
+                "Japanese keyboard",
+                "Japanese keyboard (Kana state)",
+                "German keyboard",
+                "Spanish keyboard",
+                "French keyboard",
+                "Italian keyboard",
+                "Dutch keyboard",
+                "Portuguese keyboard (Portugal)",
+                "Russian keyboard",
+                "English keyboard (UK standard)",
+                "Korean keyboard",
+                "Norwegian keyboard",
+                "Finnish keyboard",
+                "Danish keyboard",
+                "Swedish keyboard",
+                "Chinese keyboard (Traditional)",
+                "Chinese keyboard (Simplified)",
+                "French keyboard (Switzerland)",
+                "German keyboard (Switzerland)",
+                "French keyboard (Canada)",
+                "French keyboard (Belgium)",
+                "Polish keyboard",
+                "Portuguese keyboard (Brazil)",
+                "Turkish keyboard"
+            ]
+        },
+        "Enter button assignment": {
+            "type": "enum",
+            "value": "Enter with cross",
+            "default": "Enter with cross",
+            "variants": [
+                "Enter with circle",
+                "Enter with cross"
+            ]
+        },
+        "Console time offset (s)": {
+            "type": "int",
+            "value": "0",
+            "default": "0",
+            "min": "-3153600000",
+            "max": "3153600000"
+        },
+        "System Name": {
+            "type": "string",
+            "value": "RPCS3-858",
+            "default": "RPCS3-178"
+        },
+        "PSID high": {
+            "type": "uint",
+            "value": "0",
+            "default": "0",
+            "min": "0",
+            "max": "18446744073709551615"
+        },
+        "PSID low": {
+            "type": "uint",
+            "value": "0",
+            "default": "0",
+            "min": "0",
+            "max": "18446744073709551615"
+        },
+        "HDD Model Name": {
+            "type": "string",
+            "value": "",
+            "default": ""
+        },
+        "HDD Serial Number": {
+            "type": "string",
+            "value": "",
+            "default": ""
+        },
+        "Process ARGV": {
+            "type": "map",
+            "value": {}
+        }
+    },
+    "Net": {
+        "Internet enabled": {
+            "type": "enum",
+            "value": "Disconnected",
+            "default": "Disconnected",
+            "variants": [
+                "Disconnected",
+                "Connected"
+            ]
+        },
+        "IP address": {
+            "type": "string",
+            "value": "0.0.0.0",
+            "default": "0.0.0.0"
+        },
+        "Bind address": {
+            "type": "string",
+            "value": "0.0.0.0",
+            "default": "0.0.0.0"
+        },
+        "DNS address": {
+            "type": "string",
+            "value": "8.8.8.8",
+            "default": "8.8.8.8"
+        },
+        "IP swap list": {
+            "type": "string",
+            "value": "",
+            "default": ""
+        },
+        "UPNP Enabled": {
+            "type": "bool",
+            "value": false,
+            "default": false
+        },
+        "PSN status": {
+            "type": "enum",
+            "value": "Disconnected",
+            "default": "Disconnected",
+            "variants": [
+                "Disconnected",
+                "Simulated",
+                "RPCN"
+            ]
+        },
+        "PSN Country": {
+            "type": "string",
+            "value": "us",
+            "default": "us"
+        }
+    },
+    "Savestate": {
+        "Start Paused": {
+            "type": "bool",
+            "value": false,
+            "default": false
+        },
+        "Suspend Emulation Savestate Mode": {
+            "type": "bool",
+            "value": false,
+            "default": false
+        },
+        "Compatible Savestate Mode": {
+            "type": "bool",
+            "value": false,
+            "default": false
+        },
+        "Inspection Mode Savestates": {
+            "type": "bool",
+            "value": false,
+            "default": false
+        },
+        "Save Disc Game Data": {
+            "type": "bool",
+            "value": false,
+            "default": false
+        }
+    },
+    "Miscellaneous": {
+        "Automatically start games after boot": {
+            "type": "bool",
+            "value": true,
+            "default": true
+        },
+        "Exit RPCS3 when process finishes": {
+            "type": "bool",
+            "value": false,
+            "default": false
+        },
+        "Pause emulation on RPCS3 focus loss": {
+            "type": "bool",
+            "value": false,
+            "default": false
+        },
+        "Start games in fullscreen mode": {
+            "type": "bool",
+            "value": false,
+            "default": false
+        },
+        "Prevent display sleep while running games": {
+            "type": "bool",
+            "value": true,
+            "default": true
+        },
+        "Show trophy popups": {
+            "type": "bool",
+            "value": true,
+            "default": true
+        },
+        "Show RPCN popups": {
+            "type": "bool",
+            "value": true,
+            "default": true
+        },
+        "Show shader compilation hint": {
+            "type": "bool",
+            "value": true,
+            "default": true
+        },
+        "Show PPU compilation hint": {
+            "type": "bool",
+            "value": true,
+            "default": true
+        },
+        "Show autosave/autoload hint": {
+            "type": "bool",
+            "value": false,
+            "default": false
+        },
+        "Show pressure intensity toggle hint": {
+            "type": "bool",
+            "value": true,
+            "default": true
+        },
+        "Show analog limiter toggle hint": {
+            "type": "bool",
+            "value": true,
+            "default": true
+        },
+        "Show mouse and keyboard toggle hint": {
+            "type": "bool",
+            "value": true,
+            "default": true
+        },
+        "Use native user interface": {
+            "type": "bool",
+            "value": true,
+            "default": true
+        },
+        "GDB Server": {
+            "type": "string",
+            "value": "127.0.0.1:2345",
+            "default": "127.0.0.1:2345"
+        },
+        "Silence All Logs": {
+            "type": "bool",
+            "value": false,
+            "default": false
+        },
+        "Window Title Format": {
+            "type": "string",
+            "value": "FPS: %F | %R | %V | %T [%t]",
+            "default": "FPS: %F | %R | %V | %T [%t]"
+        },
+        "Pause Emulation During Home Menu": {
+            "type": "bool",
+            "value": false,
+            "default": false
+        }
+    },
+    "Log": {
+        "type": "log_map",
+        "values": {},
+        "levels": [
+            "Nothing",
+            "Fatal",
+            "Error",
+            "TODO",
+            "Success",
+            "Warning",
+            "Notice",
+            "Trace"
+        ]
+    }
+}

@@ -1,5 +1,5 @@
 diff --git a/android/src/rpcsx-android.cpp b/android/src/rpcsx-android.cpp
-index 8308a4798..e0325d43c 100644
+index 8308a4798..6708cc23b 100644
 --- a/android/src/rpcsx-android.cpp
 +++ b/android/src/rpcsx-android.cpp
 @@ -7,6 +7,8 @@
@@ -35,7 +35,7 @@ index 8308a4798..e0325d43c 100644
  #include <jni.h>
  #include <mutex>
  #include <optional>
-@@ -110,6 +115,10 @@
+@@ -110,6 +115,11 @@
  extern bool boot_last_savestate(bool testing);
  namespace cfg { class _base; }
  static cfg::_base* find_cfg_node(cfg::_base *root, std::string_view path);
@@ -43,10 +43,11 @@ index 8308a4798..e0325d43c 100644
 +static bool read_settings_file(const std::string& path, std::string& contents);
 +static bool load_settings_root(cfg_root& root, const std::string& path);
 +static bool valid_settings_title_id(std::string_view title_id);
++static void log_effective_boot_settings(std::string_view phase, int result);
  
  struct AtExit {
    std::function<void()> cb;
-@@ -155,6 +164,7 @@ static constexpr int FRONTEND_EVENT_EMULATOR_ACTION_ERROR = 4;
+@@ -155,6 +165,7 @@ static constexpr int FRONTEND_EVENT_EMULATOR_ACTION_ERROR = 4;
  static constexpr int FRONTEND_EVENT_SAVESTATE_COMMITTED = 5;
  static constexpr int FRONTEND_EVENT_SAVESTATE_FAILED = 6;
  static constexpr int FRONTEND_EVENT_RENDERER_ERROR = 7;
@@ -54,7 +55,7 @@ index 8308a4798..e0325d43c 100644
  
  static atomic_t<bool> g_frontend_menu_active{false};
  static atomic_t<bool> g_frontend_menu_paused_emu{false};
-@@ -164,6 +174,77 @@ static std::mutex g_ingame_settings_mutex;
+@@ -164,6 +175,77 @@ static std::mutex g_ingame_settings_mutex;
  static std::optional<std::string> g_ingame_settings_backup;
  static bool g_ingame_settings_dirty = false;
  
@@ -132,7 +133,7 @@ index 8308a4798..e0325d43c 100644
  static void emit_prelaunch_ppu_event(
      CompilePhase phase,
      u64 job_id,
-@@ -1293,6 +1374,10 @@ struct destructive_guard {
+@@ -1293,6 +1375,10 @@ struct destructive_guard {
    ~destructive_guard() { end_destructive(); }
  };
  
@@ -143,7 +144,7 @@ index 8308a4798..e0325d43c 100644
  static void emit_frontend_event(int type, const std::string* payload)
  {
      // Dispatch via main thread processor to ensure JNI env is valid.
-@@ -1319,6 +1404,33 @@ extern "C" void _rpcsx_android_renderer_error(int error_code, const char* messag
+@@ -1319,6 +1405,33 @@ extern "C" void _rpcsx_android_renderer_error(int error_code, const char* messag
    emit_frontend_event(FRONTEND_EVENT_RENDERER_ERROR, &detail);
  }
  
@@ -177,18 +178,23 @@ index 8308a4798..e0325d43c 100644
  
  static void invokeAsync(std::function<void(JNIEnv *)> cb) {
    g_mainThreadProcessor.push(std::move(cb));
-@@ -2307,7 +2419,9 @@ extern "C" int _rpcsx_boot(std::string_view path_) {
+@@ -2307,7 +2420,14 @@ extern "C" int _rpcsx_boot(std::string_view path_) {
      path.pop_back();
    }
  
 -  return static_cast<int>(Emu.BootGame(path, "", false, cfg_mode::global));
++  __android_log_print(ANDROID_LOG_INFO, "S3CFG", "boot_enter path=%s", path.c_str());
++
 +  // Let RPCS3 load the canonical global config followed by the sparse
 +  // title-specific custom config for this game.
-+  return static_cast<int>(Emu.BootGame(path, "", false, cfg_mode::custom));
++  const auto result = Emu.BootGame(path, "", false, cfg_mode::custom);
++  log_effective_boot_settings("fresh", static_cast<int>(result));
++  __android_log_print(ANDROID_LOG_INFO, "S3CFG", "boot_return result=%d", static_cast<int>(result));
++  return static_cast<int>(result);
  }
  
  // Recovery boot for a savestate created by Android.  A savestate stores the
-@@ -2328,9 +2442,39 @@ extern "C" int _rpcsx_bootSavestate(std::string_view savestate_path_,
+@@ -2328,9 +2448,40 @@ extern "C" int _rpcsx_bootSavestate(std::string_view savestate_path_,
    Emu.SetContinuousMode(true);
    Emu.SetForceBoot(true);
    const std::string savestate_path(savestate_path_);
@@ -196,6 +202,7 @@ index 8308a4798..e0325d43c 100644
 +  // Savestate recovery follows the same global + title custom-config path as
 +  // a normal boot. The saved title id is resolved by Load().
 +  const auto result = Emu.BootGame(savestate_path, "", true, cfg_mode::custom);
++  log_effective_boot_settings("savestate", static_cast<int>(result));
    rpcsx_android.notice("S3SAVE recovery-boot path='%s' result=%d",
                         savestate_path.c_str(), static_cast<int>(result));
 +
@@ -229,7 +236,7 @@ index 8308a4798..e0325d43c 100644
    return static_cast<int>(result);
  }
  
-@@ -3461,14 +3605,37 @@ extern "C" int _rpcsx_prepareRuntimePpu(const char* path, u64 sessionId)
+@@ -3461,14 +3612,37 @@ extern "C" int _rpcsx_prepareRuntimePpu(const char* path, u64 sessionId)
          title_id.c_str(),
          path);
  
@@ -269,7 +276,7 @@ index 8308a4798..e0325d43c 100644
  
      const bool stopped = Emu.IsStopped(true);
  
-@@ -3562,8 +3729,19 @@ extern "C" std::string _rpcsx_systemInfo() {
+@@ -3562,8 +3736,24 @@ extern "C" std::string _rpcsx_systemInfo() {
    return result;
  }
  
@@ -284,13 +291,18 @@ index 8308a4798..e0325d43c 100644
 +  return result;
 +}
 +
++static std::string normalize_settings_path(std::string_view path) {
++  if (path.starts_with("@@")) path.remove_prefix(2);
++  return std::string(path);
++}
++
  static cfg::_base *find_cfg_node(cfg::_base *root, std::string_view path) {
 -  auto pathList = fmt::split(path, {"@@"});
 +  auto pathList = split_settings_path(path);
    std::ranges::reverse(pathList);
  
    while (!pathList.empty()) {
-@@ -3597,50 +3775,347 @@ static cfg::_base *find_cfg_node(cfg::_base *root, std::string_view path) {
+@@ -3597,50 +3787,416 @@ static cfg::_base *find_cfg_node(cfg::_base *root, std::string_view path) {
    return root;
  }
  
@@ -352,6 +364,29 @@ index 8308a4798..e0325d43c 100644
 +  const auto value = json.find("value");
 +  if (value == json.end()) return {};
 +  return value->is_string() ? value->get<std::string>() : value->dump();
++}
++
++static void log_effective_boot_settings(std::string_view phase, int result) {
++  const auto value_for = [](std::string_view path) {
++    return encoded_cfg_value(find_cfg_node(&g_cfg, path));
++  };
++  const std::string frame_limit = value_for("@@Video@@Frame limit");
++  const std::string resolution = value_for("@@Video@@Resolution");
++  const std::string aspect_ratio = value_for("@@Video@@Aspect ratio");
++  const std::string renderer = value_for("@@Video@@Renderer");
++  const std::string ppu_decoder = value_for("@@Core@@PPU Decoder");
++  const std::string audio_renderer = value_for("@@Audio@@Renderer");
++  const std::string serialized = g_cfg.to_string();
++  const auto effective_hash = std::hash<std::string>{}(serialized);
++  __android_log_print(
++      ANDROID_LOG_INFO, "S3CFG",
++      "boot phase=%s result=%d generation=%llu title=%s effectiveHash=%zu "
++      "frameLimit=%s resolution=%s aspect=%s renderer=%s ppuDecoder=%s audioRenderer=%s",
++      std::string(phase).c_str(), result,
++      static_cast<unsigned long long>(g_emu_generation.load()),
++      Emu.GetTitleID().c_str(), effective_hash, frame_limit.c_str(),
++      resolution.c_str(), aspect_ratio.c_str(), renderer.c_str(),
++      ppu_decoder.c_str(), audio_renderer.c_str());
 +}
 +
 +static std::string encoded_yaml_value(const cfg::_base* schema_node,
@@ -526,6 +561,20 @@ index 8308a4798..e0325d43c 100644
  
 -  if (root == nullptr) {
 -    rpcsx_android.error("settingsSet: node %s not found", path);
++  cfg_root persisted;
++  if (!load_settings_root(persisted, global_settings_path())) return false;
++  const auto* persisted_node = find_cfg_node(&persisted, path);
++  const std::string read_back = encoded_cfg_value(persisted_node);
++  if (read_back != encoded_cfg_value(node)) {
++    rpcsx_android.error("S3CFG global read-back mismatch path=%s requested=%s readBack=%s",
++                        std::string(path).c_str(), std::string(value_string).c_str(),
++                        read_back.c_str());
+     return false;
+   }
+ 
+-  if (!root->from_json(value, !Emu.IsStopped())) {
+-    rpcsx_android.error("settingsSet: node %s not accepts value '%s'", path,
+-                        value.dump());
 -    return false;
 +  // A stopped live tree is only a working cache. Keep it aligned for callers
 +  // that still use settingsGet(), while never replacing an active title config.
@@ -534,30 +583,32 @@ index 8308a4798..e0325d43c 100644
 +    g_cfg.name = global_settings_path();
 +    g_backup_cfg.from_string(g_cfg.to_string());
    }
-+  rpcsx_android.notice("S3CFG write scope=global path=%s requested=%s readBack=%s applyPhase=%s",
++  rpcsx_android.notice("S3CFG write scope=global path=%s requested=%s readBack=%s applyPhase=NEXT_EMULATION_BOOT",
 +                       std::string(path).c_str(), std::string(value_string).c_str(),
-+                       encoded_cfg_value(node).c_str(), Emu.IsStopped() ? "LIVE" : "NEXT_EMULATION_BOOT");
++                       read_back.c_str());
 +  return true;
 +}
  
--  if (!root->from_json(value, !Emu.IsStopped())) {
--    rpcsx_android.error("settingsSet: node %s not accepts value '%s'", path,
--                        value.dump());
--    return false;
+-  Emulator::SaveSettings(g_cfg.to_string(), "");
 +static bool set_title_setting(std::string_view title_id,
 +                              std::string_view path,
 +                              std::string_view value_string) {
 +  if (!valid_settings_title_id(title_id) || path.empty()) return false;
 +
++  // Compose callers use @@-prefixed paths while sparse YAML maps use the
++  // canonical root-relative form. Normalize before touching the map so the
++  // in-memory candidate and disk readback compare identically.
++  const std::string normalized_path = normalize_settings_path(path);
++
 +  cfg_root global;
 +  if (!load_settings_root(global, global_settings_path())) return false;
-+  auto* schema_node = find_cfg_node(&global, path);
++  auto* schema_node = find_cfg_node(&global, normalized_path);
 +  if (!schema_node || schema_node->get_type() == cfg::type::node) return false;
 +  const std::string global_encoded = encoded_cfg_value(schema_node);
 +
 +  sparse_settings_map values = load_sparse_title_settings(title_id, global);
 +  if (value_string.empty()) {
-+    values.erase(std::string(path));
++    values.erase(normalized_path);
 +  } else {
 +    nlohmann::json value;
 +    try {
@@ -567,19 +618,32 @@ index 8308a4798..e0325d43c 100644
 +    }
 +    if (!schema_node->from_json(value, false)) return false;
 +    const std::string encoded = encoded_cfg_value(schema_node);
-+    auto* global_node = find_cfg_node(&global, path);
++    auto* global_node = find_cfg_node(&global, normalized_path);
 +    if (global_node && encoded == global_encoded) {
-+      values.erase(std::string(path));
++      values.erase(normalized_path);
 +    } else {
-+      values[std::string(path)] = encoded;
++      values[normalized_path] = encoded;
 +    }
-   }
- 
--  Emulator::SaveSettings(g_cfg.to_string(), "");
++  }
++
 +  if (!save_sparse_title_settings(title_id, values)) return false;
++  cfg_root persisted_global;
++  if (!load_settings_root(persisted_global, global_settings_path())) return false;
++  const auto persisted_values = load_sparse_title_settings(title_id, persisted_global);
++  if (persisted_values != values) {
++    rpcsx_android.error("S3CFG game read-back mismatch title=%s path=%s",
++                        std::string(title_id).c_str(), std::string(path).c_str());
++    return false;
++  }
++  const auto read_back_it = persisted_values.find(normalized_path);
++  const std::string read_back = read_back_it == persisted_values.end()
++                                    ? "<global>"
++                                    : read_back_it->second;
 +  rpcsx_android.notice("S3CFG write scope=game title=%s path=%s requested=%s applyPhase=NEXT_EMULATION_BOOT",
 +                       std::string(title_id).c_str(), std::string(path).c_str(),
 +                       value_string.empty() ? "<clear>" : std::string(value_string).c_str());
++  rpcsx_android.notice("S3CFG read-back scope=game title=%s path=%s readBack=%s applyPhase=NEXT_EMULATION_BOOT",
++                       std::string(title_id).c_str(), std::string(path).c_str(), read_back.c_str());
    return true;
  }
  
@@ -624,14 +688,30 @@ index 8308a4798..e0325d43c 100644
 +
 +extern "C" std::string _rpcsx_settingsGetEffective(std::string_view title_id,
 +                                                    std::string_view path) {
++  const std::string normalized_path = normalize_settings_path(path);
 +  cfg_root effective;
 +  if (!load_settings_root(effective, global_settings_path())) return "{}";
++  cfg_root global;
++  if (!load_settings_root(global, global_settings_path())) return "{}";
++  sparse_settings_map overrides;
 +  if (valid_settings_title_id(title_id)) {
-+    std::string title_config;
-+    const std::string config_path = rpcs3::utils::get_custom_config_path(std::string(title_id));
-+    if (read_settings_file(config_path, title_config)) effective.from_string(title_config, false);
++    overrides = load_sparse_title_settings(title_id, global);
++    if (!overrides.empty()) {
++      std::string title_config;
++      const std::string config_path = rpcs3::utils::get_custom_config_path(std::string(title_id));
++      if (read_settings_file(config_path, title_config)) effective.from_string(title_config, false);
++    }
 +  }
-+  auto* node = find_cfg_node(&effective, path);
++  auto* node = find_cfg_node(&effective, normalized_path);
++  const auto* global_node = find_cfg_node(&global, normalized_path);
++  const std::string global_value = encoded_cfg_value(global_node);
++  const auto override_it = overrides.find(normalized_path);
++  const std::string override_value = override_it == overrides.end() ? "" : override_it->second;
++  rpcsx_android.notice(
++      "S3CFG effective title=%s path=%s source=%s global=%s override=%s effective=%s",
++      std::string(title_id).c_str(), std::string(path).c_str(),
++      override_it == overrides.end() ? "global" : "override",
++      global_value.c_str(), override_value.c_str(), encoded_cfg_value(node).c_str());
 +  return node ? node->to_json().dump(4) : "{}";
 +}
 +
@@ -660,7 +740,18 @@ index 8308a4798..e0325d43c 100644
  extern "C" std::string _rpcsx_getVersion() {
    return rx::getVersion().toString();
  }
-@@ -4193,151 +4668,428 @@ extern "C" bool _rpcsx_loadSaveState(int slot)
+@@ -3921,6 +4477,10 @@ extern "C" bool _rpcsx_restartGame()
+                              (u64)id, new_gen, (int)::gettid());
+         Emu.SetContinuousMode(true);
+         Emu.Restart(false);
++        // Restart re-enters the same custom-config boot path internally. Keep
++        // an explicit lifecycle marker so validation can distinguish a fresh
++        // launch from a restart that should resolve the same title override.
++        log_effective_boot_settings("restart", 0);
+         sstate_log(id, "restart", "done");
+     });
+     return true;
+@@ -4193,151 +4753,429 @@ extern "C" bool _rpcsx_loadSaveState(int slot)
                               (u64)id, new_gen, (int)::gettid(), path.c_str());
          Emu.SetContinuousMode(true);
          Emu.SetForceBoot(true);
@@ -668,7 +759,8 @@ index 8308a4798..e0325d43c 100644
 +        // Savestate recovery is a full game boot as well; keep the same
 +        // global + title custom-config resolver as normal and explicit
 +        // savestate boots.
-+        Emu.BootGame(path, "", true, cfg_mode::custom);
++        const auto result = Emu.BootGame(path, "", true, cfg_mode::custom);
++        log_effective_boot_settings("load", static_cast<int>(result));
          sstate_log(id, "load", "boot_returned");
      });
      return true;
@@ -1196,7 +1288,22 @@ index 8308a4798..e0325d43c 100644
  extern "C" std::string _rpcsx_getFriends()
  {
      nlohmann::json j;
-@@ -4461,10 +5213,22 @@ extern "C" bool _rpcsx_commitInGameSettingsSession()
+@@ -4446,6 +5284,14 @@ extern "C" bool _rpcsx_settingsSetTransient(std::string_view path, std::string_v
+         rpcsx_android.error("settingsSetTransient: node %s not accepts value", std::string(path).c_str());
+         return false;
+     }
++    const std::string read_back = encoded_cfg_value(root);
++    rpcsx_android.notice(
++        "S3CFG write scope=game title=%s path=%s requested=%s readBack=%s "
++        "applyPhase=%s emuState=%d",
++        Emu.GetTitleID().c_str(), std::string(path).c_str(),
++        std::string(valueString).c_str(), read_back.c_str(),
++        Emu.IsStopped() ? "NEXT_EMULATION_BOOT" : "LIVE",
++        static_cast<int>(Emu.GetStatus(false)));
+     // Update dirty flag
+     {
+         std::lock_guard lock(g_ingame_settings_mutex);
+@@ -4461,10 +5307,22 @@ extern "C" bool _rpcsx_commitInGameSettingsSession()
      std::lock_guard lock(g_ingame_settings_mutex);
      if (!g_ingame_settings_backup) return false;
      try {

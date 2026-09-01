@@ -1,0 +1,113 @@
+I/S3CFG_HARNESS(20496): clear-all scope=game title=BLUS31584 ok=true
+D/RPCS3   (20496): S3CFG write scope=global path=Video@@Frame limit requested="30" readBack="30" applyPhase=NEXT_EMULATION_BOOT
+I/S3CFG_HARNESS(20496): write scope=global path=Video@@Frame limit requested="30" ok=true readBack={
+I/S3CFG_HARNESS(20496):     "type": "enum",
+I/S3CFG_HARNESS(20496):     "value": "30",
+I/S3CFG_HARNESS(20496):     "default": "Auto",
+I/S3CFG_HARNESS(20496):     "variants": [
+I/S3CFG_HARNESS(20496):         "Off",
+I/S3CFG_HARNESS(20496):         "30",
+I/S3CFG_HARNESS(20496):         "50",
+I/S3CFG_HARNESS(20496):         "60",
+I/S3CFG_HARNESS(20496):         "120",
+I/S3CFG_HARNESS(20496):         "Display",
+I/S3CFG_HARNESS(20496):         "Auto",
+I/S3CFG_HARNESS(20496):         "PS3 Native",
+I/S3CFG_HARNESS(20496):         "Infinite"
+I/S3CFG_HARNESS(20496):     ]
+I/S3CFG_HARNESS(20496): }
+I/S3CFG_HARNESS(20496): global path=Video@@Frame limit value={
+I/S3CFG_HARNESS(20496):     "type": "enum",
+I/S3CFG_HARNESS(20496):     "value": "30",
+I/S3CFG_HARNESS(20496):     "default": "Auto",
+I/S3CFG_HARNESS(20496):     "variants": [
+I/S3CFG_HARNESS(20496):         "Off",
+I/S3CFG_HARNESS(20496):         "30",
+I/S3CFG_HARNESS(20496):         "50",
+I/S3CFG_HARNESS(20496):         "60",
+I/S3CFG_HARNESS(20496):         "120",
+I/S3CFG_HARNESS(20496):         "Display",
+I/S3CFG_HARNESS(20496):         "Auto",
+I/S3CFG_HARNESS(20496):         "PS3 Native",
+I/S3CFG_HARNESS(20496):         "Infinite"
+I/S3CFG_HARNESS(20496):     ]
+I/S3CFG_HARNESS(20496): }
+D/RPCS3   (20496): S3CFG write scope=global path=Video@@Write Color Buffers requested=true readBack=true applyPhase=NEXT_EMULATION_BOOT
+I/S3CFG_HARNESS(20496): write scope=global path=Video@@Write Color Buffers requested=true ok=true readBack={
+I/S3CFG_HARNESS(20496):     "type": "bool",
+I/S3CFG_HARNESS(20496):     "value": true,
+I/S3CFG_HARNESS(20496):     "default": false
+I/S3CFG_HARNESS(20496): }
+I/S3CFG_HARNESS(20496): global path=Video@@Write Color Buffers value={
+I/S3CFG_HARNESS(20496):     "type": "bool",
+I/S3CFG_HARNESS(20496):     "value": true,
+I/S3CFG_HARNESS(20496):     "default": false
+I/S3CFG_HARNESS(20496): }
+D/RPCS3   (20496): S3CFG write scope=global path=Video@@Write Color Buffers requested=false readBack=false applyPhase=NEXT_EMULATION_BOOT
+I/S3CFG_HARNESS(20496): write scope=global path=Video@@Write Color Buffers requested=false ok=true readBack={
+I/S3CFG_HARNESS(20496):     "type": "bool",
+I/S3CFG_HARNESS(20496):     "value": false,
+I/S3CFG_HARNESS(20496):     "default": false
+I/S3CFG_HARNESS(20496): }
+I/S3CFG_HARNESS(20496): global path=Video@@Write Color Buffers value={
+I/S3CFG_HARNESS(20496):     "type": "bool",
+I/S3CFG_HARNESS(20496):     "value": false,
+I/S3CFG_HARNESS(20496):     "default": false
+I/S3CFG_HARNESS(20496): }
+D/RPCS3   (20496): S3CFG write scope=game title=BLUS31584 path=Video@@Frame limit requested="30" applyPhase=NEXT_EMULATION_BOOT
+D/RPCS3   (20496): S3CFG read-back scope=game title=BLUS31584 path=Video@@Frame limit readBack=<global> applyPhase=NEXT_EMULATION_BOOT
+I/S3CFG_HARNESS(20496): write scope=game title=BLUS31584 path=Video@@Frame limit requested="30" ok=true overrides={}
+D/RPCS3   (20496): S3CFG effective title=BLUS31584 path=Video@@Frame limit source=global global="30" override= effective="30"
+I/S3CFG_HARNESS(20496): effective title=BLUS31584 path=Video@@Frame limit value={
+I/S3CFG_HARNESS(20496):     "type": "enum",
+I/S3CFG_HARNESS(20496):     "value": "30",
+I/S3CFG_HARNESS(20496):     "default": "Auto",
+I/S3CFG_HARNESS(20496):     "variants": [
+I/S3CFG_HARNESS(20496):         "Off",
+I/S3CFG_HARNESS(20496):         "30",
+I/S3CFG_HARNESS(20496):         "50",
+I/S3CFG_HARNESS(20496):         "60",
+I/S3CFG_HARNESS(20496):         "120",
+I/S3CFG_HARNESS(20496):         "Display",
+I/S3CFG_HARNESS(20496):         "Auto",
+I/S3CFG_HARNESS(20496):         "PS3 Native",
+I/S3CFG_HARNESS(20496):         "Infinite"
+I/S3CFG_HARNESS(20496):     ]
+I/S3CFG_HARNESS(20496): }
+I/S3CFG_HARNESS(20496): overrides title=BLUS31584 value={}
+I/S3CFG_HARNESS(20496): clear-all scope=game title=BLUS31584 ok=true
+D/RPCS3   (20496): S3CFG effective title=BLUS31584 path=Video@@Frame limit source=global global="30" override= effective="30"
+I/S3CFG_HARNESS(20496): effective title=BLUS31584 path=Video@@Frame limit value={
+I/S3CFG_HARNESS(20496):     "type": "enum",
+I/S3CFG_HARNESS(20496):     "value": "30",
+I/S3CFG_HARNESS(20496):     "default": "Auto",
+I/S3CFG_HARNESS(20496):     "variants": [
+I/S3CFG_HARNESS(20496):         "Off",
+I/S3CFG_HARNESS(20496):         "30",
+I/S3CFG_HARNESS(20496):         "50",
+I/S3CFG_HARNESS(20496):         "60",
+I/S3CFG_HARNESS(20496):         "120",
+I/S3CFG_HARNESS(20496):         "Display",
+I/S3CFG_HARNESS(20496):         "Auto",
+I/S3CFG_HARNESS(20496):         "PS3 Native",
+I/S3CFG_HARNESS(20496):         "Infinite"
+I/S3CFG_HARNESS(20496):     ]
+I/S3CFG_HARNESS(20496): }
+I/S3CFG_HARNESS(20496): overrides title=BLUS31584 value={}
+D/RPCS3   (20496): S3CFG write scope=global path=Video@@Frame limit requested="60" readBack="60" applyPhase=NEXT_EMULATION_BOOT
+I/S3CFG_HARNESS(20496): write scope=global path=Video@@Frame limit requested="60" ok=true readBack={
+I/S3CFG_HARNESS(20496):     "type": "enum",
+I/S3CFG_HARNESS(20496):     "value": "60",
+I/S3CFG_HARNESS(20496):     "default": "Auto",
+I/S3CFG_HARNESS(20496):     "variants": [
+I/S3CFG_HARNESS(20496):         "Off",
+I/S3CFG_HARNESS(20496):         "30",
+I/S3CFG_HARNESS(20496):         "50",
+I/S3CFG_HARNESS(20496):         "60",
+I/S3CFG_HARNESS(20496):         "120",
+I/S3CFG_HARNESS(20496):         "Display",
+I/S3CFG_HARNESS(20496):         "Auto",
+I/S3CFG_HARNESS(20496):         "PS3 Native",
+I/S3CFG_HARNESS(20496):         "Infinite"
+I/S3CFG_HARNESS(20496):     ]
+I/S3CFG_HARNESS(20496): }

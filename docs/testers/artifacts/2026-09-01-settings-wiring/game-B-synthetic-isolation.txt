@@ -1,0 +1,39 @@
+Game-scope isolation evidence
+Date: 2026-09-01
+Device: OnePlus Pad 2 only
+
+Actual installed game A: BLUS31584 (GTA San Andreas)
+Synthetic backend-only title B: S3TESTB
+Note: no second installed game was available in the Pad 2 library, so S3TESTB
+was used only as a durable sparse-config/effective-resolver fixture. It was not
+claimed as a second UI boot.
+
+Pad 2 backend harness matrix on Video@@Frame limit:
+
+  Initial:
+    canonical global = 30
+    BLUS31584 override = none; effective = 30
+    S3TESTB override = none; effective = 30
+
+  Game A override:
+    canonical global = 30
+    BLUS31584 sparse override = 60; effective = 60
+    S3TESTB override = none; effective = 30
+    global readback remains = 30
+
+  Global changed while A is overridden:
+    canonical global = Off
+    BLUS31584 sparse override = 60; effective = 60
+    S3TESTB override = none; effective = Off
+
+  Game A reset:
+    canonical global = Off
+    BLUS31584 override = none; effective = Off
+    S3TESTB override = none; effective = Off
+
+All writes returned ok=true and all reads returned the requested/effective
+value. The corresponding raw harness capture is
+`s3cfg-isolation-pad2.log`; the earlier process-restart persistence capture is
+`process-restart-app-final.log`.
+Both title files were cleared after validation; title-config-final-state.txt
+records that both files are absent in the final device state.

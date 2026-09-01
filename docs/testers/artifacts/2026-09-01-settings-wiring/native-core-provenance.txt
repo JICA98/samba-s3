@@ -1,8 +1,7 @@
 Device: OnePlus Pad 2 only (OPD2403 / OP5DAAL1)
+Package: com.zenithblue.sambas3
 APK: app/build/outputs/apk/standard/debug/samba-s3-standard-debug.apk
-APK SHA-256: 70175bab5555523a35a4bf21c5637f48078d3114db2ce174650f5740e91ddb39
-Arm64 core SHA-256: c9b9db91083d313682e1479e172c4eef8318c6b01a293973a48140b969ab378f
-Scoped exports: present (_rpcsx_settingsGetGlobal, _rpcsx_settingsSetGlobal,
-_rpcsx_gameSettingsOverridesGet, _rpcsx_gameSettingsOverrideSet,
-_rpcsx_settingsGetEffective)
-RPCSX submodule: 657b26a0d197c29d42cdcf3b3f6e8ad5c6765bbc
+APK SHA-256: 46878fd38efbbb56a3fdfc4ab780ffeb9cec58ca8017d1004228f76d35bb8629
+Arm64 core SHA-256: afc8d4a706135c1c00e1b0988abe9888846cd06ef6474c544e9b1cc16579eec9
+RPCSX runtime core ID: rpcsx=657b26a0d197c29d42cdcf3b3f6e8ad5c6765bbc samba=5f599909946dafdecab2a084cb49f672f86bcb37 patch_sha256=2444bd02c690b4a7901a3d50b7f6ad40249952fe9a1d6eb86d9e8d14fc9bc91e build_type=RelWithDebInfo
+Scoped exports: present (_rpcsx_settingsGetGlobal, _rpcsx_settingsSetGlobal, _rpcsx_gameSettingsOverridesGet, _rpcsx_gameSettingsOverrideSet, _rpcsx_settingsGetEffective)

@@ -1,0 +1,1398 @@
+[09-01 20:13:29.253] D/RPCS3: **** cellFiber export: (0x8b6baa01) at 0x0f783c0 [at:0x0f6276c, rtoc:same-above]:  cellFiberPpuFinalizeScheduler
+[09-01 20:13:29.253] D/RPCS3: **** cellFiber export: (0x9e25c72d) at 0x0f78370 [at:0x0f61b50, rtoc:same-above]:  _cellFiberPpuSchedulerAttributeInitialize
+[09-01 20:13:29.253] D/RPCS3: **** cellFiber export: (0xa27c95ca) at 0x0f784f0 [at:0x0f659b8, rtoc:same-above]:  cellFiberPpuUtilWorkerControlFinalize
+[09-01 20:13:29.253] D/RPCS3: **** cellFiber export: (0xa4599cf3) at 0x0f783f0 [at:0x0f63be0, rtoc:same-above]:  cellFiberPpuWaitFlag
+[09-01 20:13:29.253] D/RPCS3: **** cellFiber export: (0xa6004249) at 0x0f783e0 [at:0x0f63574, rtoc:same-above]:  cellFiberPpuJoinFiber
+[09-01 20:13:29.253] D/RPCS3: **** cellFiber export: (0xaba1c563) at 0x0f782c0 [at:0x0f60b18, rtoc:same-above]:  cellFiberPpuContextRun
+[09-01 20:13:29.253] D/RPCS3: **** cellFiber export: (0xadedbebf) at 0x0f78440 [at:0x0f64418, rtoc:same-above]:  cellFiberPpuSchedulerTraceStart
+[09-01 20:13:29.253] D/RPCS3: **** cellFiber export: (0xb0594b2d) at 0x0f78338 [at:0x0f61720, rtoc:same-above]:  cellFiberPpuGetScheduler
+[09-01 20:13:29.253] D/RPCS3: **** cellFiber export: (0xb3a48079) at 0x0f782f8 [at:0x0f611b8, rtoc:same-above]:  cellFiberPpuContextFinalize
+[09-01 20:13:29.253] D/RPCS3: **** cellFiber export: (0xb90c871b) at 0x0f78308 [at:0x0f613b8, rtoc:same-above]:  cellFiberPpuContextCheckStackLimit
+[09-01 20:13:29.253] D/RPCS3: **** cellFiber export: (0xbabf714b) at 0x0f784a8 [at:0x0f65260, rtoc:same-above]:  cellFiberPpuUtilWorkerControlWakeup
+[09-01 20:13:29.253] D/RPCS3: **** cellFiber export: (0xbf9cd933) at 0x0f78450 [at:0x0f64544, rtoc:same-above]:  cellFiberPpuSchedulerTraceInitialize
+[09-01 20:13:29.253] D/RPCS3: **** cellFiber export: (0xbfca88d3) at 0x0f78498 [at:0x0f64cc8, rtoc:same-above]:  cellFiberPpuUtilWorkerControlCreateFiber
+[09-01 20:13:29.253] D/RPCS3: **** cellFiber export: (0xc04e2438) at 0x0f784e8 [at:0x0f65848, rtoc:same-above]:  cellFiberPpuUtilWorkerControlShutdown
+[09-01 20:13:29.253] D/RPCS3: **** cellFiber export: (0xc11f8056) at 0x0f78378 [at:0x0f61be4, rtoc:same-above]:  _cellFiberPpuAttributeInitialize
+[09-01 20:13:29.253] D/RPCS3: **** cellFiber export: (0xd0066b17) at 0x0f782d0 [at:0x0f60c00, rtoc:same-above]:  cellFiberPpuContextSwitch
+[09-01 20:13:29.253] D/RPCS3: **** cellFiber export: (0xe492a675) at 0x0f78330 [at:0x0f616bc, rtoc:same-above]:  cellFiberPpuHasRunnableFiber
+[09-01 20:13:29.253] D/RPCS3: **** cellFiber export: (0xe665f9a9) at 0x0f78430 [at:0x0f642ec, rtoc:same-above]:  cellFiberPpuSchedulerTraceStop
+[09-01 20:13:29.253] D/RPCS3: **** cellFiber export: (0xea6dc1ad) at 0x0f784b0 [at:0x0f65380, rtoc:same-above]:  cellFiberPpuUtilWorkerControlCheckFlags
+[09-01 20:13:29.253] D/RPCS3: **** cellFiber export: (0xee3b604d) at 0x0f78380 [at:0x0f61ca4, rtoc:same-above]:  cellFiberPpuInitializeScheduler
+[09-01 20:13:29.253] D/RPCS3: **** cellFiber export: (0xf2ccad4f) at 0x0f784d0 [at:0x0f6579c, rtoc:same-above]:  cellFiberPpuUtilWorkerControlInitializeWithAttribute
+[09-01 20:13:29.253] D/RPCS3: **** cellFiber export: (0xf3e81219) at 0x0f78398 [at:0x0f620dc, rtoc:same-above]:  cellFiberPpuCheckStackLimit
+[09-01 20:13:29.253] D/RPCS3: **** cellFiber export: (0xf6c6900c) at 0x0f78328 [at:0x0f6150c, rtoc:same-above]:  cellFiberPpuCheckFlags
+[09-01 20:13:29.253] D/RPCS3: **** cellFiber export: (0xfa8d5f95) at 0x0f78360 [at:0x0f61a30, rtoc:same-above]:  cellFiberPpuExit
+[09-01 20:13:29.253] D/RPCS3: **** cellFiber export: (0xfbf5fe40) at 0x0f783a0 [at:0x0f6215c, rtoc:same-above]:  cellFiberPpuSetPriority
+[09-01 20:13:29.253] D/RPCS3: ** Imported module 'cellLibprof' (ver=0x1, attr=0x9, 0x0, 0x0) [0xf65df4]
+[09-01 20:13:29.253] D/RPCS3: **** cellLibprof import: [cellUserTraceRegister] (0x05893e7c) -> 0xc32860
+[09-01 20:13:29.253] D/RPCS3: **** cellLibprof import: [cellUserTraceUnregister] (0x6d045c2e) -> 0xc32868
+[09-01 20:13:29.253] D/RPCS3: ** Imported module 'sysPrxForUser' (ver=0x1, attr=0x9, 0x0, 0x0) [0xf65e20]
+[09-01 20:13:29.253] D/RPCS3: **** sysPrxForUser import: [sys_ppu_thread_get_id] (0x350d454e) -> 0xe702e8
+[09-01 20:13:29.253] D/RPCS3: **** sysPrxForUser import: [_sys_memset] (0x68b9b011) -> 0xe70688
+[09-01 20:13:29.253] D/RPCS3: **** sysPrxForUser import: [_sys_memcpy] (0x6bf66ea7) -> 0xe70678
+[09-01 20:13:29.253] D/RPCS3: **** sysPrxForUser import: [_sys_printf] (0x9f04f7af) -> 0xe707f0
+[09-01 20:13:29.253] D/RPCS3: **** sysPrxForUser import: [0x9FB6228E] (0x9fb6228e) -> 0xe70698
+[09-01 20:13:29.253] D/RPCS3: **** sysPrxForUser import: [_sys_strncpy] (0xd3039d4d) -> 0xe70710
+[09-01 20:13:29.253] D/RPCS3: **** sysPrxForUser import: [sys_prx_get_module_id_by_name] (0xe0998dbf) -> 0xe70810
+[09-01 20:13:29.254] D/RPCS3: Function analysis: 98 functions (148 enqueued)
+[09-01 20:13:29.254] D/RPCS3: Block analysis: 1190 blocks (1 enqueued)
+[09-01 20:13:29.254] D/RPCS3: ** Exported module 'cellFiber' (vnids=0x0, vstubs=0x0, fnids=0xf65edc, faddrs=0xf65fb8, version=0x2, attributes=0x9, unk4=0x2c000001, unk5=0x90002)
+[09-01 20:13:29.254] D/RPCS3: **** cellFiber export: (0x01036193) at 0x0f782d8 [at:0x0f60e0c, rtoc:0x00f80520]:  cellFiberPpuContextReturnToThread
+[09-01 20:13:29.254] D/RPCS3: **** cellFiber export: (0x081c98be) at 0x0f782c8 [at:0x0f60bac, rtoc:same-above]:  cellFiberPpuContextRunScheduler
+[09-01 20:13:29.254] D/RPCS3: **** cellFiber export: (0x0a25b6c8) at 0x0f782a8 [at:0x0f60748, rtoc:same-above]:  cellFiberPpuContextEnterScheduler
+[09-01 20:13:29.254] D/RPCS3: **** cellFiber export: (0x0c44f441) at 0x0f783d0 [at:0x0f633dc, rtoc:same-above]:  cellFiberPpuYield
+[09-01 20:13:29.254] D/RPCS3: **** cellFiber export: (0x12b1acf0) at 0x0f783b8 [at:0x0f6254c, rtoc:same-above]:  cellFiberPpuRunFibers
+[09-01 20:13:29.254] D/RPCS3: **** cellFiber export: (0x1e7a247a) at 0x0f784a0 [at:0x0f64dcc, rtoc:same-above]:  cellFiberPpuUtilWorkerControlRunFibers
+[09-01 20:13:29.254] D/RPCS3: **** cellFiber export: (0x31252ec3) at 0x0f782f0 [at:0x0f610f8, rtoc:same-above]:  _cellFiberPpuContextAttributeInitialize
+[09-01 20:13:29.254] D/RPCS3: **** cellFiber export: (0x3204b146) at 0x0f784d8 [at:0x0f657a0, rtoc:same-above]:  cellFiberPpuUtilWorkerControlInitialize
+[09-01 20:13:29.254] D/RPCS3: **** cellFiber export: (0x34a81091) at 0x0f78310 [at:0x0f61430, rtoc:same-above]:  cellFiberPpuContextSelf
+[09-01 20:13:29.254] D/RPCS3: **** cellFiber export: (0x3860a12a) at 0x0f78420 [at:0x0f641b4, rtoc:same-above]:  cellFiberPpuSchedulerTraceFinalize
+[09-01 20:13:29.254] D/RPCS3: **** cellFiber export: (0x392c5aa5) at 0x0f784c0 [at:0x0f654c4, rtoc:same-above]:  cellFiberPpuUtilWorkerControlSetPollingMode
+[09-01 20:13:29.254] D/RPCS3: **** cellFiber export: (0x3b417f82) at 0x0f78490 [at:0x0f64c98, rtoc:same-above]:  cellFiberPpuUtilWorkerControlJoinFiber
+[09-01 20:13:29.254] D/RPCS3: **** cellFiber export: (0x4fc86b2c) at 0x0f78488 [at:0x0f64c8c, rtoc:same-above]:  cellFiberPpuUtilWorkerControlDisconnectEventQueue
+[09-01 20:13:29.254] D/RPCS3: **** cellFiber export: (0x55870804) at 0x0f783f8 [at:0x0f63d18, rtoc:same-above]:  _cellFiberPpuInitialize
+[09-01 20:13:29.254] D/RPCS3: **** cellFiber export: (0x5d3992dd) at 0x0f784b8 [at:0x0f6544c, rtoc:same-above]:  cellFiberPpuUtilWorkerControlSendSignal
+[09-01 20:13:29.254] D/RPCS3: **** cellFiber export: (0x5d9a7034) at 0x0f783b0 [at:0x0f62514, rtoc:same-above]:  cellFiberPpuSelf
+[09-01 20:13:29.254] D/RPCS3: **** cellFiber export: (0x62a20f0d) at 0x0f78480 [at:0x0f64c80, rtoc:same-above]:  cellFiberPpuUtilWorkerControlConnectEventQueueToSpurs
+[09-01 20:13:29.254] D/RPCS3: **** cellFiber export: (0x68ba4568) at 0x0f784e0 [at:0x0f657a8, rtoc:same-above]:  _cellFiberPpuUtilWorkerControlAttributeInitialize
+[09-01 20:13:29.254] D/RPCS3: **** cellFiber export: (0x6c164b3b) at 0x0f783e8 [at:0x0f63b84, rtoc:same-above]:  cellFiberPpuWaitSignal
+[09-01 20:13:29.254] D/RPCS3: **** cellFiber export: (0x72086315) at 0x0f782e8 [at:0x0f61030, rtoc:same-above]:  cellFiberPpuContextInitialize
+[09-01 20:13:29.254] D/RPCS3: **** cellFiber export: (0x7c2f4034) at 0x0f783a8 [at:0x0f621cc, rtoc:same-above]:  cellFiberPpuCreateFiber
+[09-01 20:13:29.254] D/RPCS3: **** cellFiber export: (0x8afb8356) at 0x0f78350 [at:0x0f618b8, rtoc:same-above]:  cellFiberPpuSendSignal
+[09-01 20:13:29.254] D/RPCS3: **** cellFiber export: (0x8b6baa01) at 0x0f783c0 [at:0x0f6276c, rtoc:same-above]:  cellFiberPpuFinalizeScheduler
+[09-01 20:13:29.254] D/RPCS3: **** cellFiber export: (0x9e25c72d) at 0x0f78370 [at:0x0f61b50, rtoc:same-above]:  _cellFiberPpuSchedulerAttributeInitialize
+[09-01 20:13:29.254] D/RPCS3: **** cellFiber export: (0xa27c95ca) at 0x0f784f0 [at:0x0f659b8, rtoc:same-above]:  cellFiberPpuUtilWorkerControlFinalize
+[09-01 20:13:29.254] D/RPCS3: **** cellFiber export: (0xa4599cf3) at 0x0f783f0 [at:0x0f63be0, rtoc:same-above]:  cellFiberPpuWaitFlag
+[09-01 20:13:29.254] D/RPCS3: **** cellFiber export: (0xa6004249) at 0x0f783e0 [at:0x0f63574, rtoc:same-above]:  cellFiberPpuJoinFiber
+[09-01 20:13:29.254] D/RPCS3: **** cellFiber export: (0xaba1c563) at 0x0f782c0 [at:0x0f60b18, rtoc:same-above]:  cellFiberPpuContextRun
+[09-01 20:13:29.254] D/RPCS3: **** cellFiber export: (0xadedbebf) at 0x0f78440 [at:0x0f64418, rtoc:same-above]:  cellFiberPpuSchedulerTraceStart
+[09-01 20:13:29.254] D/RPCS3: **** cellFiber export: (0xb0594b2d) at 0x0f78338 [at:0x0f61720, rtoc:same-above]:  cellFiberPpuGetScheduler
+[09-01 20:13:29.254] D/RPCS3: **** cellFiber export: (0xb3a48079) at 0x0f782f8 [at:0x0f611b8, rtoc:same-above]:  cellFiberPpuContextFinalize
+[09-01 20:13:29.254] D/RPCS3: **** cellFiber export: (0xb90c871b) at 0x0f78308 [at:0x0f613b8, rtoc:same-above]:  cellFiberPpuContextCheckStackLimit
+[09-01 20:13:29.254] D/RPCS3: **** cellFiber export: (0xbabf714b) at 0x0f784a8 [at:0x0f65260, rtoc:same-above]:  cellFiberPpuUtilWorkerControlWakeup
+[09-01 20:13:29.254] D/RPCS3: **** cellFiber export: (0xbf9cd933) at 0x0f78450 [at:0x0f64544, rtoc:same-above]:  cellFiberPpuSchedulerTraceInitialize
+[09-01 20:13:29.254] D/RPCS3: **** cellFiber export: (0xbfca88d3) at 0x0f78498 [at:0x0f64cc8, rtoc:same-above]:  cellFiberPpuUtilWorkerControlCreateFiber
+[09-01 20:13:29.254] D/RPCS3: **** cellFiber export: (0xc04e2438) at 0x0f784e8 [at:0x0f65848, rtoc:same-above]:  cellFiberPpuUtilWorkerControlShutdown
+[09-01 20:13:29.254] D/RPCS3: **** cellFiber export: (0xc11f8056) at 0x0f78378 [at:0x0f61be4, rtoc:same-above]:  _cellFiberPpuAttributeInitialize
+[09-01 20:13:29.254] D/RPCS3: **** cellFiber export: (0xd0066b17) at 0x0f782d0 [at:0x0f60c00, rtoc:same-above]:  cellFiberPpuContextSwitch
+[09-01 20:13:29.254] D/RPCS3: **** cellFiber export: (0xe492a675) at 0x0f78330 [at:0x0f616bc, rtoc:same-above]:  cellFiberPpuHasRunnableFiber
+[09-01 20:13:29.254] D/RPCS3: **** cellFiber export: (0xe665f9a9) at 0x0f78430 [at:0x0f642ec, rtoc:same-above]:  cellFiberPpuSchedulerTraceStop
+[09-01 20:13:29.254] D/RPCS3: **** cellFiber export: (0xea6dc1ad) at 0x0f784b0 [at:0x0f65380, rtoc:same-above]:  cellFiberPpuUtilWorkerControlCheckFlags
+[09-01 20:13:29.254] D/RPCS3: **** cellFiber export: (0xee3b604d) at 0x0f78380 [at:0x0f61ca4, rtoc:same-above]:  cellFiberPpuInitializeScheduler
+[09-01 20:13:29.254] D/RPCS3: **** cellFiber export: (0xf2ccad4f) at 0x0f784d0 [at:0x0f6579c, rtoc:same-above]:  cellFiberPpuUtilWorkerControlInitializeWithAttribute
+[09-01 20:13:29.255] D/RPCS3: **** cellFiber export: (0xf3e81219) at 0x0f78398 [at:0x0f620dc, rtoc:same-above]:  cellFiberPpuCheckStackLimit
+[09-01 20:13:29.255] D/RPCS3: **** cellFiber export: (0xf6c6900c) at 0x0f78328 [at:0x0f6150c, rtoc:same-above]:  cellFiberPpuCheckFlags
+[09-01 20:13:29.255] D/RPCS3: **** cellFiber export: (0xfa8d5f95) at 0x0f78360 [at:0x0f61a30, rtoc:same-above]:  cellFiberPpuExit
+[09-01 20:13:29.255] D/RPCS3: **** cellFiber export: (0xfbf5fe40) at 0x0f783a0 [at:0x0f6215c, rtoc:same-above]:  cellFiberPpuSetPriority
+[09-01 20:13:29.255] D/RPCS3: ** Segment: p_type=0x1, p_vaddr=0x0, p_filesz=0x6c88, p_memsz=0x10000, flags=0x400005
+[09-01 20:13:29.255] W/RPCS3: **** Loaded to 0xf80000...0xf8ffff (size=0x10000)
+[09-01 20:13:29.255] D/RPCS3: ** Segment: p_type=0x1, p_vaddr=0x6c90, p_filesz=0x80c, p_memsz=0x850, flags=0x600006
+[09-01 20:13:29.255] W/RPCS3: **** Loaded to 0xf90000...0xf9084f (size=0x850)
+[09-01 20:13:29.255] D/RPCS3: ** Segment: p_type=0x700000a4, p_vaddr=0x0, p_filesz=0x2220, p_memsz=0x0, flags=0x0
+[09-01 20:13:29.255] W/RPCS3: Library cellSync2_Library (rtoc=0xf986f0):
+[09-01 20:13:29.255] D/RPCS3: ** Special: [module_start] at 0xf90450 [0xf80040, 0xf986f0]
+[09-01 20:13:29.255] D/RPCS3: ** Special: [module_stop] at 0xf90448 [0xf80008, 0xf986f0]
+[09-01 20:13:29.255] D/RPCS3: ** Special: [module_exit] at 0xf90440 [0xf80000, 0xf986f0]
+[09-01 20:13:29.255] D/RPCS3: ** Special: &[module_info] at 0xf865a8
+[09-01 20:13:29.255] D/RPCS3: ** Special: &[0x6D0F6CAE] at 0xf90038
+[09-01 20:13:29.255] D/RPCS3: ** Exported module 'cellSync2' (vnids=0x0, vstubs=0x0, fnids=0xf86654, faddrs=0xf8670c, version=0x2, attributes=0x9, unk4=0x2c000001, unk5=0x90001)
+[09-01 20:13:29.255] D/RPCS3: **** cellSync2 export: (0x0080fe88) at 0x0f90538 [at:0x0f818d4, rtoc:0x00f986f0]:  cellSync2MutexUnlock
+[09-01 20:13:29.255] D/RPCS3: **** cellSync2 export: (0x0c2983ac) at 0x0f906c0 [at:0x0f85960, rtoc:same-above]:  cellSync2SemaphoreRelease
+[09-01 20:13:29.255] D/RPCS3: **** cellSync2 export: (0x0c9a0ea9) at 0x0f90650 [at:0x0f84950, rtoc:same-above]:  cellSync2QueueTryPop
+[09-01 20:13:29.255] D/RPCS3: **** cellSync2 export: (0x12f0a27d) at 0x0f905e0 [at:0x0f82c84, rtoc:same-above]:  cellSync2QueueGetSize
+[09-01 20:13:29.255] D/RPCS3: **** cellSync2 export: (0x164843a7) at 0x0f90690 [at:0x0f853d8, rtoc:same-above]:  cellSync2SemaphoreFinalize
+[09-01 20:13:29.255] D/RPCS3: **** cellSync2 export: (0x27f2d61c) at 0x0f90510 [at:0x0f81490, rtoc:same-above]:  cellSync2MutexFinalize
+[09-01 20:13:29.255] D/RPCS3: **** cellSync2 export: (0x2d77fe17) at 0x0f906a8 [at:0x0f85734, rtoc:same-above]:  _cellSync2SemaphoreAttributeInitialize
+[09-01 20:13:29.255] D/RPCS3: **** cellSync2 export: (0x4e2ee031) at 0x0f90670 [at:0x0f84c1c, rtoc:same-above]:  cellSync2SemaphoreGetCount
+[09-01 20:13:29.255] D/RPCS3: **** cellSync2 export: (0x55836e73) at 0x0f90528 [at:0x0f81708, rtoc:same-above]:  _cellSync2MutexAttributeInitialize
+[09-01 20:13:29.255] D/RPCS3: **** cellSync2 export: (0x58be9a0f) at 0x0f90590 [at:0x0f82660, rtoc:same-above]:  cellSync2CondInitialize
+[09-01 20:13:29.255] D/RPCS3: **** cellSync2 export: (0x5b1e4d7a) at 0x0f90550 [at:0x0f81bf8, rtoc:same-above]:  cellSync2CondEstimateBufferSize
+[09-01 20:13:29.255] D/RPCS3: **** cellSync2 export: (0x5e00d433) at 0x0f90620 [at:0x0f83d1c, rtoc:same-above]:  _cellSync2QueueAttributeInitialize
+[09-01 20:13:29.255] D/RPCS3: **** cellSync2 export: (0x5e4b0f87) at 0x0f906b0 [at:0x0f857c8, rtoc:same-above]:  cellSync2SemaphoreTryAcquire
+[09-01 20:13:29.255] D/RPCS3: **** cellSync2 export: (0x63062249) at 0x0f90580 [at:0x0f8245c, rtoc:same-above]:  cellSync2CondFinalize
+[09-01 20:13:29.255] D/RPCS3: **** cellSync2 export: (0x6af85cdf) at 0x0f90618 [at:0x0f83ce8, rtoc:same-above]:  cellSync2QueueFinalize
+[09-01 20:13:29.255] D/RPCS3: **** cellSync2 export: (0x74c2780f) at 0x0f90668 [at:0x0f84b94, rtoc:same-above]:  cellSync2SemaphoreEstimateBufferSize
+[09-01 20:13:29.255] D/RPCS3: **** cellSync2 export: (0x7d967d91) at 0x0f90648 [at:0x0f8485c, rtoc:same-above]:  cellSync2QueuePush
+[09-01 20:13:29.255] D/RPCS3: **** cellSync2 export: (0x7fd479fe) at 0x0f90640 [at:0x0f84750, rtoc:same-above]:  cellSync2QueueTryPush
+[09-01 20:13:29.255] D/RPCS3: **** cellSync2 export: (0x871af804) at 0x0f905a0 [at:0x0f827ec, rtoc:same-above]:  cellSync2CondSignal
+[09-01 20:13:29.255] D/RPCS3: **** cellSync2 export: (0x8aae07c2) at 0x0f905b0 [at:0x0f82994, rtoc:same-above]:  cellSync2CondSignalAll
+[09-01 20:13:29.255] D/RPCS3: **** cellSync2 export: (0xa400d82e) at 0x0f90530 [at:0x0f8179c, rtoc:same-above]:  cellSync2MutexLock
+[09-01 20:13:29.255] D/RPCS3: **** cellSync2 export: (0xa69c749c) at 0x0f90540 [at:0x0f81a94, rtoc:same-above]:  cellSync2MutexTryLock
+[09-01 20:13:29.255] D/RPCS3: **** cellSync2 export: (0xbc96d751) at 0x0f905a8 [at:0x0f828c0, rtoc:same-above]:  cellSync2CondWait
+[09-01 20:13:29.255] D/RPCS3: **** cellSync2 export: (0xc08cc0f9) at 0x0f905c0 [at:0x0f82b1c, rtoc:same-above]:  cellSync2QueueEstimateBufferSize
+[09-01 20:13:29.255] D/RPCS3: **** cellSync2 export: (0xc5dee254) at 0x0f906a0 [at:0x0f855d0, rtoc:same-above]:  cellSync2SemaphoreInitialize
+[09-01 20:13:29.255] D/RPCS3: **** cellSync2 export: (0xd1b0d146) at 0x0f906b8 [at:0x0f85894, rtoc:same-above]:  cellSync2SemaphoreAcquire
+[09-01 20:13:29.255] D/RPCS3: **** cellSync2 export: (0xd51bfae7) at 0x0f904e0 [at:0x0f80c8c, rtoc:same-above]:  cellSync2MutexEstimateBufferSize
+[09-01 20:13:29.255] D/RPCS3: **** cellSync2 export: (0xd83ab0c9) at 0x0f90658 [at:0x0f84a44, rtoc:same-above]:  cellSync2QueuePop
+[09-01 20:13:29.255] D/RPCS3: **** cellSync2 export: (0xdf3c532a) at 0x0f90598 [at:0x0f82760, rtoc:same-above]:  _cellSync2CondAttributeInitialize
+[09-01 20:13:29.255] D/RPCS3: **** cellSync2 export: (0xeb81a467) at 0x0f90520 [at:0x0f815ec, rtoc:same-above]:  cellSync2MutexInitialize
+[09-01 20:13:29.255] D/RPCS3: **** cellSync2 export: (0xf0e1471c) at 0x0f905d0 [at:0x0f82c14, rtoc:same-above]:  cellSync2QueueGetDepth
+[09-01 20:13:29.255] D/RPCS3: **** cellSync2 export: (0xf125e044) at 0x0f90630 [at:0x0f84060, rtoc:same-above]:  cellSync2QueueInitialize
+[09-01 20:13:29.255] D/RPCS3: **** cellSync2 export: &[gCellSync2NotifierSpursTask] at 0xf90410
+[09-01 20:13:29.255] D/RPCS3: **** cellSync2 export: &[gCellSync2NotifierPpuFiber] at 0xf90400
+[09-01 20:13:29.255] D/RPCS3: **** cellSync2 export: &[gCellSync2CallerThreadTypePpuFiber] at 0xf903e0
+[09-01 20:13:29.255] D/RPCS3: **** cellSync2 export: &[gCellSync2CallerThreadTypePpuThread] at 0xf903b0
+[09-01 20:13:29.255] D/RPCS3: **** cellSync2 export: &[gCellSync2NotifierPpuThread] at 0xf903d0
+[09-01 20:13:29.255] D/RPCS3: **** cellSync2 export: &[gCellSync2NotifierSpursJobQueueJob] at 0xf90420
+[09-01 20:13:29.255] D/RPCS3: ** Imported module 'cellSpurs' (ver=0x1, attr=0x9, 0x0, 0x0) [0xf864f4]
+[09-01 20:13:29.255] D/RPCS3: **** cellSpurs import: [_cellSpursSendSignal] (0xe0a6dbe4) -> 0xef3634
+[09-01 20:13:29.255] D/RPCS3: ** Imported module 'cellSpursJq' (ver=0x1, attr=0x9, 0x0, 0x0) [0xf86520]
+[09-01 20:13:29.255] D/RPCS3: **** cellSpursJq import: [cellSpursJobQueueSendSignal] (0x915455b3) -> 0xc340c8
+[09-01 20:13:29.255] D/RPCS3: ** Imported module 'cellFiber' (ver=0x1, attr=0x9, 0x0, 0x0) [0xf8654c]
+[09-01 20:13:29.255] D/RPCS3: **** cellFiber import: [cellFiberPpuUtilWorkerControlSendSignal] (0x5d3992dd) -> 0xf784b8
+[09-01 20:13:29.255] D/RPCS3: **** cellFiber import: [cellFiberPpuSelf] (0x5d9a7034) -> 0xf783b0
+[09-01 20:13:29.255] D/RPCS3: **** cellFiber import: [cellFiberPpuWaitSignal] (0x6c164b3b) -> 0xf783e8
+[09-01 20:13:29.255] D/RPCS3: ** Imported module 'sysPrxForUser' (ver=0x1, attr=0x9, 0x0, 0x0) [0xf86578]
+[09-01 20:13:29.255] D/RPCS3: **** sysPrxForUser import: [sys_lwmutex_lock] (0x1573dc3f) -> 0xe70328
+[09-01 20:13:29.255] D/RPCS3: **** sysPrxForUser import: [sys_lwmutex_unlock] (0x1bc200f4) -> 0xe70308
+[09-01 20:13:29.255] D/RPCS3: **** sysPrxForUser import: [sys_lwmutex_create] (0x2f85c0ef) -> 0xe702f0
+[09-01 20:13:29.255] D/RPCS3: **** sysPrxForUser import: [sys_ppu_thread_get_id] (0x350d454e) -> 0xe702e8
+[09-01 20:13:29.255] D/RPCS3: **** sysPrxForUser import: [_sys_memset] (0x68b9b011) -> 0xe70688
+[09-01 20:13:29.255] D/RPCS3: **** sysPrxForUser import: [_sys_printf] (0x9f04f7af) -> 0xe707f0
+[09-01 20:13:29.255] D/RPCS3: **** sysPrxForUser import: [0x9FB6228E] (0x9fb6228e) -> 0xe70698
+[09-01 20:13:29.255] D/RPCS3: **** sysPrxForUser import: [sys_lwmutex_destroy] (0xc3476d0c) -> 0xe70310
+[09-01 20:13:29.255] D/RPCS3: **** sysPrxForUser import: [_sys_strncpy] (0xd3039d4d) -> 0xe70710
+[09-01 20:13:29.256] D/RPCS3: Function analysis: 99 functions (165 enqueued)
+[09-01 20:13:29.256] D/RPCS3: Block analysis: 1271 blocks (1 enqueued)
+[09-01 20:13:29.256] D/RPCS3: ** Exported module 'cellSync2' (vnids=0x0, vstubs=0x0, fnids=0xf86654, faddrs=0xf8670c, version=0x2, attributes=0x9, unk4=0x2c000001, unk5=0x90001)
+[09-01 20:13:29.256] D/RPCS3: **** cellSync2 export: (0x0080fe88) at 0x0f90538 [at:0x0f818d4, rtoc:0x00f986f0]:  cellSync2MutexUnlock
+[09-01 20:13:29.256] D/RPCS3: **** cellSync2 export: (0x0c2983ac) at 0x0f906c0 [at:0x0f85960, rtoc:same-above]:  cellSync2SemaphoreRelease
+[09-01 20:13:29.256] D/RPCS3: **** cellSync2 export: (0x0c9a0ea9) at 0x0f90650 [at:0x0f84950, rtoc:same-above]:  cellSync2QueueTryPop
+[09-01 20:13:29.256] D/RPCS3: **** cellSync2 export: (0x12f0a27d) at 0x0f905e0 [at:0x0f82c84, rtoc:same-above]:  cellSync2QueueGetSize
+[09-01 20:13:29.256] D/RPCS3: **** cellSync2 export: (0x164843a7) at 0x0f90690 [at:0x0f853d8, rtoc:same-above]:  cellSync2SemaphoreFinalize
+[09-01 20:13:29.256] D/RPCS3: **** cellSync2 export: (0x27f2d61c) at 0x0f90510 [at:0x0f81490, rtoc:same-above]:  cellSync2MutexFinalize
+[09-01 20:13:29.256] D/RPCS3: **** cellSync2 export: (0x2d77fe17) at 0x0f906a8 [at:0x0f85734, rtoc:same-above]:  _cellSync2SemaphoreAttributeInitialize
+[09-01 20:13:29.256] D/RPCS3: **** cellSync2 export: (0x4e2ee031) at 0x0f90670 [at:0x0f84c1c, rtoc:same-above]:  cellSync2SemaphoreGetCount
+[09-01 20:13:29.256] D/RPCS3: **** cellSync2 export: (0x55836e73) at 0x0f90528 [at:0x0f81708, rtoc:same-above]:  _cellSync2MutexAttributeInitialize
+[09-01 20:13:29.256] D/RPCS3: **** cellSync2 export: (0x58be9a0f) at 0x0f90590 [at:0x0f82660, rtoc:same-above]:  cellSync2CondInitialize
+[09-01 20:13:29.256] D/RPCS3: **** cellSync2 export: (0x5b1e4d7a) at 0x0f90550 [at:0x0f81bf8, rtoc:same-above]:  cellSync2CondEstimateBufferSize
+[09-01 20:13:29.257] D/RPCS3: **** cellSync2 export: (0x5e00d433) at 0x0f90620 [at:0x0f83d1c, rtoc:same-above]:  _cellSync2QueueAttributeInitialize
+[09-01 20:13:29.257] D/RPCS3: **** cellSync2 export: (0x5e4b0f87) at 0x0f906b0 [at:0x0f857c8, rtoc:same-above]:  cellSync2SemaphoreTryAcquire
+[09-01 20:13:29.257] D/RPCS3: **** cellSync2 export: (0x63062249) at 0x0f90580 [at:0x0f8245c, rtoc:same-above]:  cellSync2CondFinalize
+[09-01 20:13:29.257] D/RPCS3: **** cellSync2 export: (0x6af85cdf) at 0x0f90618 [at:0x0f83ce8, rtoc:same-above]:  cellSync2QueueFinalize
+[09-01 20:13:29.257] D/RPCS3: **** cellSync2 export: (0x74c2780f) at 0x0f90668 [at:0x0f84b94, rtoc:same-above]:  cellSync2SemaphoreEstimateBufferSize
+[09-01 20:13:29.257] D/RPCS3: **** cellSync2 export: (0x7d967d91) at 0x0f90648 [at:0x0f8485c, rtoc:same-above]:  cellSync2QueuePush
+[09-01 20:13:29.257] D/RPCS3: **** cellSync2 export: (0x7fd479fe) at 0x0f90640 [at:0x0f84750, rtoc:same-above]:  cellSync2QueueTryPush
+[09-01 20:13:29.257] D/RPCS3: **** cellSync2 export: (0x871af804) at 0x0f905a0 [at:0x0f827ec, rtoc:same-above]:  cellSync2CondSignal
+[09-01 20:13:29.257] D/RPCS3: **** cellSync2 export: (0x8aae07c2) at 0x0f905b0 [at:0x0f82994, rtoc:same-above]:  cellSync2CondSignalAll
+[09-01 20:13:29.257] D/RPCS3: **** cellSync2 export: (0xa400d82e) at 0x0f90530 [at:0x0f8179c, rtoc:same-above]:  cellSync2MutexLock
+[09-01 20:13:29.257] D/RPCS3: **** cellSync2 export: (0xa69c749c) at 0x0f90540 [at:0x0f81a94, rtoc:same-above]:  cellSync2MutexTryLock
+[09-01 20:13:29.257] D/RPCS3: **** cellSync2 export: (0xbc96d751) at 0x0f905a8 [at:0x0f828c0, rtoc:same-above]:  cellSync2CondWait
+[09-01 20:13:29.257] D/RPCS3: **** cellSync2 export: (0xc08cc0f9) at 0x0f905c0 [at:0x0f82b1c, rtoc:same-above]:  cellSync2QueueEstimateBufferSize
+[09-01 20:13:29.257] D/RPCS3: **** cellSync2 export: (0xc5dee254) at 0x0f906a0 [at:0x0f855d0, rtoc:same-above]:  cellSync2SemaphoreInitialize
+[09-01 20:13:29.257] D/RPCS3: **** cellSync2 export: (0xd1b0d146) at 0x0f906b8 [at:0x0f85894, rtoc:same-above]:  cellSync2SemaphoreAcquire
+[09-01 20:13:29.257] D/RPCS3: **** cellSync2 export: (0xd51bfae7) at 0x0f904e0 [at:0x0f80c8c, rtoc:same-above]:  cellSync2MutexEstimateBufferSize
+[09-01 20:13:29.257] D/RPCS3: **** cellSync2 export: (0xd83ab0c9) at 0x0f90658 [at:0x0f84a44, rtoc:same-above]:  cellSync2QueuePop
+[09-01 20:13:29.257] D/RPCS3: **** cellSync2 export: (0xdf3c532a) at 0x0f90598 [at:0x0f82760, rtoc:same-above]:  _cellSync2CondAttributeInitialize
+[09-01 20:13:29.257] D/RPCS3: **** cellSync2 export: (0xeb81a467) at 0x0f90520 [at:0x0f815ec, rtoc:same-above]:  cellSync2MutexInitialize
+[09-01 20:13:29.257] D/RPCS3: **** cellSync2 export: (0xf0e1471c) at 0x0f905d0 [at:0x0f82c14, rtoc:same-above]:  cellSync2QueueGetDepth
+[09-01 20:13:29.257] D/RPCS3: **** cellSync2 export: (0xf125e044) at 0x0f90630 [at:0x0f84060, rtoc:same-above]:  cellSync2QueueInitialize
+[09-01 20:13:29.257] D/RPCS3: **** cellSync2 export: &[gCellSync2NotifierSpursTask] at 0xf90410
+[09-01 20:13:29.257] D/RPCS3: **** cellSync2 export: &[gCellSync2NotifierPpuFiber] at 0xf90400
+[09-01 20:13:29.257] D/RPCS3: **** cellSync2 export: &[gCellSync2CallerThreadTypePpuFiber] at 0xf903e0
+[09-01 20:13:29.257] D/RPCS3: **** cellSync2 export: &[gCellSync2CallerThreadTypePpuThread] at 0xf903b0
+[09-01 20:13:29.257] D/RPCS3: **** cellSync2 export: &[gCellSync2NotifierPpuThread] at 0xf903d0
+[09-01 20:13:29.257] D/RPCS3: **** cellSync2 export: &[gCellSync2NotifierSpursJobQueueJob] at 0xf90420
+[09-01 20:13:29.257] D/RPCS3: cellAudioOut: found support for Linear PCM 2 Ch.
+[09-01 20:13:29.257] D/RPCS3: cellAudioOut: added primary mode: type=0, channel=2, fs=4, layout=1
+[09-01 20:13:29.257] D/RPCS3: cellAudioOut: added secondary mode: type=0, channel=2, fs=4, layout=1
+[09-01 20:13:29.257] D/RPCS3: cellAudioOut: initial primary output configuration: channels=2, encoder=0, downmixer=0
+[09-01 20:13:29.257] D/RPCS3: cellAudioOut: initial secondary output configuration: channels=2, encoder=0, downmixer=0
+[09-01 20:13:29.257] D/RPCS3: Loading usio config: /storage/emulated/0/Android/data/com.zenithblue.sambas3/files/config/usio.yml
+[09-01 20:13:29.257] D/RPCS3: USIO config=
+[09-01 20:13:29.257] I/RPCS3: Emulating device: Skylanders Portal (1)
+[09-01 20:13:29.257] I/RPCS3: Emulating device: Disney Infinity Base (1)
+[09-01 20:13:29.257] I/RPCS3: Emulating device: Lego Dimensions Portal (1)
+[09-01 20:13:29.257] I/RPCS3: Emulating device: PS3A-USJ (1)
+[09-01 20:13:29.258] D/RPCS3: Loading gem_real config: /storage/emulated/0/Android/data/com.zenithblue.sambas3/files/config/gem_real.yml
+[09-01 20:13:29.258] D/RPCS3: Loading gem config: /storage/emulated/0/Android/data/com.zenithblue.sambas3/files/config/gem.yml
+[09-01 20:13:29.258] D/RPCS3: Loading gem_mouse config: /storage/emulated/0/Android/data/com.zenithblue.sambas3/files/config/gem_mouse.yml
+[09-01 20:13:29.258] D/RPCS3: Real gem config=
+[09-01 20:13:29.258] D/RPCS3: Fake gem config=
+[09-01 20:13:29.259] D/RPCS3: Mouse gem config=
+[09-01 20:13:29.259] I/RPCS3: Loaded file descriptor '/dev_bdvd/PS3_GAME/USRDIR/PS3DataText.zip' file for savestates (vpath='/dev_bdvd/PS3_GAME/USRDIR/PS3DataText.zip', type=Regular file, flags=0x0, id=3)
+[09-01 20:13:29.259] I/RPCS3: Loaded file descriptor '/dev_bdvd/PS3_GAME/USRDIR/PS3DataText2.zip' file for savestates (vpath='/dev_bdvd/PS3_GAME/USRDIR/PS3DataText2.zip', type=Regular file, flags=0x0, id=4)
+[09-01 20:13:29.259] I/RPCS3: Loaded file descriptor '/dev_bdvd/PS3_GAME/USRDIR/PS3Data.obb' file for savestates (vpath='/dev_bdvd/PS3_GAME/USRDIR/PS3Data.obb', type=Regular file, flags=0x0, id=5)
+[09-01 20:13:29.259] I/RPCS3: Loaded file descriptor '/dev_bdvd/PS3_GAME/USRDIR/PS3DataMain.obb' file for savestates (vpath='/dev_bdvd/PS3_GAME/USRDIR/PS3DataMain.obb', type=Regular file, flags=0x0, id=6)
+[09-01 20:13:29.259] I/RPCS3: Loaded file descriptor '/dev_bdvd/PS3_GAME/USRDIR/PS3Data.obb' file for savestates (vpath='/dev_bdvd/PS3_GAME/USRDIR/PS3Data.obb', type=Regular file, flags=0x0, id=7)
+[09-01 20:13:29.259] I/RPCS3: Loaded file descriptor '/dev_bdvd/PS3_GAME/USRDIR/PS3Data.obb' file for savestates (vpath='/dev_bdvd/PS3_GAME/USRDIR/PS3Data.obb', type=Regular file, flags=0x0, id=8)
+[09-01 20:13:29.259] I/RPCS3: Loaded file descriptor '/dev_bdvd/PS3_GAME/USRDIR/PS3Data.obb' file for savestates (vpath='/dev_bdvd/PS3_GAME/USRDIR/PS3Data.obb', type=Regular file, flags=0x0, id=9)
+[09-01 20:13:29.259] I/RPCS3: Loaded file descriptor '/dev_bdvd/PS3_GAME/USRDIR/PS3Data.obb' file for savestates (vpath='/dev_bdvd/PS3_GAME/USRDIR/PS3Data.obb', type=Regular file, flags=0x0, id=10)
+[09-01 20:13:29.259] I/RPCS3: Loaded file descriptor '/dev_bdvd/PS3_GAME/USRDIR/PS3Data.obb' file for savestates (vpath='/dev_bdvd/PS3_GAME/USRDIR/PS3Data.obb', type=Regular file, flags=0x0, id=11)
+[09-01 20:13:29.259] I/RPCS3: Loaded file descriptor '/dev_bdvd/PS3_GAME/USRDIR/PS3Data.obb' file for savestates (vpath='/dev_bdvd/PS3_GAME/USRDIR/PS3Data.obb', type=Regular file, flags=0x0, id=12)
+[09-01 20:13:29.259] I/RPCS3: Loaded file descriptor '/dev_bdvd/PS3_GAME/USRDIR/PS3Data.obb' file for savestates (vpath='/dev_bdvd/PS3_GAME/USRDIR/PS3Data.obb', type=Regular file, flags=0x0, id=13)
+[09-01 20:13:29.259] I/RPCS3: Loaded file descriptor '/dev_bdvd/PS3_GAME/USRDIR/PS3DataMain.obb' file for savestates (vpath='/dev_bdvd/PS3_GAME/USRDIR/PS3DataMain.obb', type=Regular file, flags=0x0, id=14)
+[09-01 20:13:29.259] I/RPCS3: Loaded file descriptor '/dev_bdvd/PS3_GAME/USRDIR/PS3DataMain.obb' file for savestates (vpath='/dev_bdvd/PS3_GAME/USRDIR/PS3DataMain.obb', type=Regular file, flags=0x0, id=15)
+[09-01 20:13:29.259] I/RPCS3: Loaded file descriptor '/dev_bdvd/PS3_GAME/USRDIR/PS3DataMain.obb' file for savestates (vpath='/dev_bdvd/PS3_GAME/USRDIR/PS3DataMain.obb', type=Regular file, flags=0x0, id=16)
+[09-01 20:13:29.259] I/RPCS3: Loaded file descriptor '/dev_bdvd/PS3_GAME/USRDIR/PS3DataMain.obb' file for savestates (vpath='/dev_bdvd/PS3_GAME/USRDIR/PS3DataMain.obb', type=Regular file, flags=0x0, id=17)
+[09-01 20:13:29.259] I/RPCS3: Loaded file descriptor '/dev_bdvd/PS3_GAME/USRDIR/PS3DataMain.obb' file for savestates (vpath='/dev_bdvd/PS3_GAME/USRDIR/PS3DataMain.obb', type=Regular file, flags=0x0, id=18)
+[09-01 20:13:29.259] I/RPCS3: Loaded file descriptor '/dev_bdvd/PS3_GAME/USRDIR/PS3DataMain.obb' file for savestates (vpath='/dev_bdvd/PS3_GAME/USRDIR/PS3DataMain.obb', type=Regular file, flags=0x0, id=19)
+[09-01 20:13:29.259] I/RPCS3: Loaded file descriptor '/dev_bdvd/PS3_GAME/USRDIR/PS3DataMain.obb' file for savestates (vpath='/dev_bdvd/PS3_GAME/USRDIR/PS3DataMain.obb', type=Regular file, flags=0x0, id=20)
+[09-01 20:13:29.259] I/RPCS3: Loaded file descriptor '/dev_bdvd/PS3_GAME/USRDIR/PS3DataMain.obb' file for savestates (vpath='/dev_bdvd/PS3_GAME/USRDIR/PS3DataMain.obb', type=Regular file, flags=0x0, id=21)
+[09-01 20:13:29.259] I/RPCS3: Loaded file descriptor '/dev_bdvd/PS3_GAME/USRDIR/PS3DataMain.obb' file for savestates (vpath='/dev_bdvd/PS3_GAME/USRDIR/PS3DataMain.obb', type=Regular file, flags=0x0, id=22)
+[09-01 20:13:29.259] I/RPCS3: Loaded file descriptor '/dev_bdvd/PS3_GAME/USRDIR/PS3DataMain.obb' file for savestates (vpath='/dev_bdvd/PS3_GAME/USRDIR/PS3DataMain.obb', type=Regular file, flags=0x0, id=23)
+[09-01 20:13:29.259] I/RPCS3: Loaded file descriptor '/dev_bdvd/PS3_GAME/USRDIR/PS3DataMain.obb' file for savestates (vpath='/dev_bdvd/PS3_GAME/USRDIR/PS3DataMain.obb', type=Regular file, flags=0x0, id=24)
+[09-01 20:13:29.259] I/RPCS3: Loaded file descriptor '/dev_bdvd/PS3_GAME/USRDIR/PS3DataMain.obb' file for savestates (vpath='/dev_bdvd/PS3_GAME/USRDIR/PS3DataMain.obb', type=Regular file, flags=0x0, id=25)
+[09-01 20:13:29.259] I/RPCS3: Loaded file descriptor '/dev_bdvd/PS3_GAME/USRDIR/PS3Data.obb' file for savestates (vpath='/dev_bdvd/PS3_GAME/USRDIR/PS3Data.obb', type=Regular file, flags=0x0, id=26)
+[09-01 20:13:29.260] E/RPCS3: cubeb_register_device_collection_changed() failed: -4
+[09-01 20:13:29.260] D/RPCS3: Using backend aaudio
+[09-01 20:13:29.260] D/RPCS3: cellAudio initializing. Backend: Cubeb
+[09-01 20:13:29.260] D/RPCS3: Trying to open default device
+[09-01 20:13:29.260] D/RPCS3: Searching for default device
+[09-01 20:13:29.260] E/RPCS3: cubeb_enumerate_devices() failed: -4
+[09-01 20:13:29.260] D/RPCS3: Starting alternative search for default device with freq=48000, sample_size=4 and ch_cnt=2
+[09-01 20:13:29.262] D/RPCS3: Starting thread
+[09-01 20:13:29.263] D/RPCS3: Started listening on '127.0.0.1:2345'.
+[09-01 20:13:29.269] I/RPCS3: Found Vulkan-compatible GPU: 'Turnip Adreno (TM) 750' running on driver 26.2.99
+[09-01 20:13:29.269] W/RPCS3: Dedicated transfer+compute queue was not found on this GPU. Will use graphics queue instead.
+[09-01 20:13:29.269] E/RPCS3: Your GPU does not support double precision floats in shaders. Graphics may not render correctly.
+[09-01 20:13:29.269] D/RPCS3: GPU/driver supports float16 data types natively. Using native float16_t variables if possible.
+[09-01 20:13:29.272] D/RPCS3: 10 extensions loaded:
+[09-01 20:13:29.272] D/RPCS3: ** Using VK_KHR_swapchain
+[09-01 20:13:29.272] D/RPCS3: ** Using VK_KHR_shader_float16_int8
+[09-01 20:13:29.272] D/RPCS3: ** Using VK_EXT_custom_border_color
+[09-01 20:13:29.272] D/RPCS3: ** Using VK_EXT_conditional_rendering
+[09-01 20:13:29.272] D/RPCS3: ** Using VK_EXT_shader_stencil_export
+[09-01 20:13:29.272] D/RPCS3: ** Using VK_KHR_sampler_mirror_clamp_to_edge
+[09-01 20:13:29.272] D/RPCS3: ** Using VK_KHR_maintenance3
+[09-01 20:13:29.272] D/RPCS3: ** Using VK_EXT_descriptor_indexing
+[09-01 20:13:29.272] D/RPCS3: ** Using VK_EXT_attachment_feedback_loop_layout
+[09-01 20:13:29.272] D/RPCS3: ** Using VK_KHR_synchronization2
+[09-01 20:13:29.272] D/RPCS3: Detected 8655 MB of device local memory
+[09-01 20:13:29.272] D/RPCS3: Detected 8655 MB of host coherent memory
+[09-01 20:13:29.272] D/RPCS3: Detected 8655 MB of BAR memory
+[09-01 20:13:29.272] W/RPCS3: Unsupported device: Turnip Adreno (TM) 750
+[09-01 20:13:29.272] D/RPCS3: Vulkan: Renderer initialized on device 'Turnip Adreno (TM) 750'
+[09-01 20:13:29.272] D/RPCS3: Swapchain: present mode 1 in use.
+[09-01 20:13:29.432] D/RPCS3: Cubeb log: cubeb_resampler_internal.h:521:Input and output sample-rate match, target rate of 48000Hz
+[09-01 20:13:29.432] E/RPCS3: cubeb_stream_get_current_device() failed: err=-4, crnt_dev=0
+[09-01 20:13:29.453] E/RPCS3: Image resource file `/storage/emulated/0/Android/data/com.zenithblue.sambas3/files/config/Icons/ui/fade_top.png' could not be opened (Not found)
+[09-01 20:13:29.453] E/RPCS3: Image resource file `Icons/ui/fade_top.png' could not be opened (Not found)
+[09-01 20:13:29.453] E/RPCS3: Image resource file `/system/bin/../share/rpcs3/Icons/ui/fade_top.png' could not be opened (Not found)
+[09-01 20:13:29.453] E/RPCS3: Image resource file `/system/bin/Icons/ui/fade_top.png' could not be opened (Not found)
+[09-01 20:13:29.453] E/RPCS3: Image resource file `/storage/emulated/0/Android/data/com.zenithblue.sambas3/files/config/Icons/ui/fade_bottom.png' could not be opened (Not found)
+[09-01 20:13:29.453] E/RPCS3: Image resource file `Icons/ui/fade_bottom.png' could not be opened (Not found)
+[09-01 20:13:29.453] E/RPCS3: Image resource file `/system/bin/../share/rpcs3/Icons/ui/fade_bottom.png' could not be opened (Not found)
+[09-01 20:13:29.453] E/RPCS3: Image resource file `/system/bin/Icons/ui/fade_bottom.png' could not be opened (Not found)
+[09-01 20:13:29.453] E/RPCS3: Image resource file `/storage/emulated/0/Android/data/com.zenithblue.sambas3/files/config/Icons/ui/select.png' could not be opened (Not found)
+[09-01 20:13:29.453] E/RPCS3: Image resource file `Icons/ui/select.png' could not be opened (Not found)
+[09-01 20:13:29.453] E/RPCS3: Image resource file `/system/bin/../share/rpcs3/Icons/ui/select.png' could not be opened (Not found)
+[09-01 20:13:29.453] E/RPCS3: Image resource file `/system/bin/Icons/ui/select.png' could not be opened (Not found)
+[09-01 20:13:29.453] E/RPCS3: Image resource file `/storage/emulated/0/Android/data/com.zenithblue.sambas3/files/config/Icons/ui/start.png' could not be opened (Not found)
+[09-01 20:13:29.453] E/RPCS3: Image resource file `Icons/ui/start.png' could not be opened (Not found)
+[09-01 20:13:29.453] E/RPCS3: Image resource file `/system/bin/../share/rpcs3/Icons/ui/start.png' could not be opened (Not found)
+[09-01 20:13:29.453] E/RPCS3: Image resource file `/system/bin/Icons/ui/start.png' could not be opened (Not found)
+[09-01 20:13:29.454] E/RPCS3: Image resource file `/storage/emulated/0/Android/data/com.zenithblue.sambas3/files/config/Icons/ui/cross.png' could not be opened (Not found)
+[09-01 20:13:29.454] E/RPCS3: Image resource file `Icons/ui/cross.png' could not be opened (Not found)
+[09-01 20:13:29.454] E/RPCS3: Image resource file `/system/bin/../share/rpcs3/Icons/ui/cross.png' could not be opened (Not found)
+[09-01 20:13:29.454] E/RPCS3: Image resource file `/system/bin/Icons/ui/cross.png' could not be opened (Not found)
+[09-01 20:13:29.454] E/RPCS3: Image resource file `/storage/emulated/0/Android/data/com.zenithblue.sambas3/files/config/Icons/ui/circle.png' could not be opened (Not found)
+[09-01 20:13:29.454] E/RPCS3: Image resource file `Icons/ui/circle.png' could not be opened (Not found)
+[09-01 20:13:29.454] E/RPCS3: Image resource file `/system/bin/../share/rpcs3/Icons/ui/circle.png' could not be opened (Not found)
+[09-01 20:13:29.454] E/RPCS3: Image resource file `/system/bin/Icons/ui/circle.png' could not be opened (Not found)
+[09-01 20:13:29.454] E/RPCS3: Image resource file `/storage/emulated/0/Android/data/com.zenithblue.sambas3/files/config/Icons/ui/triangle.png' could not be opened (Not found)
+[09-01 20:13:29.454] E/RPCS3: Image resource file `Icons/ui/triangle.png' could not be opened (Not found)
+[09-01 20:13:29.454] E/RPCS3: Image resource file `/system/bin/../share/rpcs3/Icons/ui/triangle.png' could not be opened (Not found)
+[09-01 20:13:29.454] E/RPCS3: Image resource file `/system/bin/Icons/ui/triangle.png' could not be opened (Not found)
+[09-01 20:13:29.454] E/RPCS3: Image resource file `/storage/emulated/0/Android/data/com.zenithblue.sambas3/files/config/Icons/ui/square.png' could not be opened (Not found)
+[09-01 20:13:29.454] E/RPCS3: Image resource file `Icons/ui/square.png' could not be opened (Not found)
+[09-01 20:13:29.454] E/RPCS3: Image resource file `/system/bin/../share/rpcs3/Icons/ui/square.png' could not be opened (Not found)
+[09-01 20:13:29.454] E/RPCS3: Image resource file `/system/bin/Icons/ui/square.png' could not be opened (Not found)
+[09-01 20:13:29.454] E/RPCS3: Image resource file `/storage/emulated/0/Android/data/com.zenithblue.sambas3/files/config/Icons/ui/L1.png' could not be opened (Not found)
+[09-01 20:13:29.454] E/RPCS3: Image resource file `Icons/ui/L1.png' could not be opened (Not found)
+[09-01 20:13:29.454] E/RPCS3: Image resource file `/system/bin/../share/rpcs3/Icons/ui/L1.png' could not be opened (Not found)
+[09-01 20:13:29.454] E/RPCS3: Image resource file `/system/bin/Icons/ui/L1.png' could not be opened (Not found)
+[09-01 20:13:29.454] E/RPCS3: Image resource file `/storage/emulated/0/Android/data/com.zenithblue.sambas3/files/config/Icons/ui/R1.png' could not be opened (Not found)
+[09-01 20:13:29.454] E/RPCS3: Image resource file `Icons/ui/R1.png' could not be opened (Not found)
+[09-01 20:13:29.454] E/RPCS3: Image resource file `/system/bin/../share/rpcs3/Icons/ui/R1.png' could not be opened (Not found)
+[09-01 20:13:29.454] E/RPCS3: Image resource file `/system/bin/Icons/ui/R1.png' could not be opened (Not found)
+[09-01 20:13:29.454] E/RPCS3: Image resource file `/storage/emulated/0/Android/data/com.zenithblue.sambas3/files/config/Icons/ui/L2.png' could not be opened (Not found)
+[09-01 20:13:29.454] E/RPCS3: Image resource file `Icons/ui/L2.png' could not be opened (Not found)
+[09-01 20:13:29.454] E/RPCS3: Image resource file `/system/bin/../share/rpcs3/Icons/ui/L2.png' could not be opened (Not found)
+[09-01 20:13:29.454] E/RPCS3: Image resource file `/system/bin/Icons/ui/L2.png' could not be opened (Not found)
+[09-01 20:13:29.454] E/RPCS3: Image resource file `/storage/emulated/0/Android/data/com.zenithblue.sambas3/files/config/Icons/ui/R2.png' could not be opened (Not found)
+[09-01 20:13:29.454] E/RPCS3: Image resource file `Icons/ui/R2.png' could not be opened (Not found)
+[09-01 20:13:29.454] E/RPCS3: Image resource file `/system/bin/../share/rpcs3/Icons/ui/R2.png' could not be opened (Not found)
+[09-01 20:13:29.454] E/RPCS3: Image resource file `/system/bin/Icons/ui/R2.png' could not be opened (Not found)
+[09-01 20:13:29.454] E/RPCS3: Image resource file `/storage/emulated/0/Android/data/com.zenithblue.sambas3/files/config/Icons/ui/save.png' could not be opened (Not found)
+[09-01 20:13:29.454] E/RPCS3: Image resource file `Icons/ui/save.png' could not be opened (Not found)
+[09-01 20:13:29.454] E/RPCS3: Image resource file `/system/bin/../share/rpcs3/Icons/ui/save.png' could not be opened (Not found)
+[09-01 20:13:29.454] E/RPCS3: Image resource file `/system/bin/Icons/ui/save.png' could not be opened (Not found)
+[09-01 20:13:29.454] E/RPCS3: Image resource file `/storage/emulated/0/Android/data/com.zenithblue.sambas3/files/config/Icons/ui/new.png' could not be opened (Not found)
+[09-01 20:13:29.454] E/RPCS3: Image resource file `Icons/ui/new.png' could not be opened (Not found)
+[09-01 20:13:29.454] E/RPCS3: Image resource file `/system/bin/../share/rpcs3/Icons/ui/new.png' could not be opened (Not found)
+[09-01 20:13:29.454] E/RPCS3: Image resource file `/system/bin/Icons/ui/new.png' could not be opened (Not found)
+[09-01 20:13:29.454] E/RPCS3: Image resource file `/storage/emulated/0/Android/data/com.zenithblue.sambas3/files/config/Icons/ui/spinner-24.png' could not be opened (Not found)
+[09-01 20:13:29.454] E/RPCS3: Image resource file `Icons/ui/spinner-24.png' could not be opened (Not found)
+[09-01 20:13:29.454] E/RPCS3: Image resource file `/system/bin/../share/rpcs3/Icons/ui/spinner-24.png' could not be opened (Not found)
+[09-01 20:13:29.454] E/RPCS3: Image resource file `/system/bin/Icons/ui/spinner-24.png' could not be opened (Not found)
+[09-01 20:13:29.457] D/RPCS3: S3SAVE recovery-boot path='/storage/emulated/0/Android/data/com.zenithblue.sambas3/files/config/savestates/BLUS31584/BLUS31584_1_0.SAVESTAT.zst' result=0
+[09-01 20:13:29.457] D/RPCS3: Using input configuration: '' (override='')
+[09-01 20:13:29.457] D/RPCS3: Loading pad config (title_id='', config_file='', strict=0)
+[09-01 20:13:29.458] D/RPCS3: Loading input configuration: '/storage/emulated/0/Android/data/com.zenithblue.sambas3/files/config/input_configs/global/Default.yml'
+[09-01 20:13:29.463] D/RPCS3: Loading pad config (title_id='', config_file='', strict=0)
+[09-01 20:13:29.464] D/RPCS3: Loading input configuration: '/storage/emulated/0/Android/data/com.zenithblue.sambas3/files/config/input_configs/global/Default.yml'
+[09-01 20:13:29.468] D/RPCS3: Pad 0: device='Virtual', handler=Virtual, VID=0x0, PID=0x0, class_type=0x0, class_profile=0x0
+[09-01 20:13:29.468] D/RPCS3: Pad 0: config=
+[09-01 20:13:29.468] D/RPCS3: Handler: Virtual
+[09-01 20:13:29.468] D/RPCS3: Device: Virtual
+[09-01 20:13:29.468] D/RPCS3: Config:
+[09-01 20:13:29.468] D/RPCS3: Left Stick Left: ""
+[09-01 20:13:29.468] D/RPCS3: Left Stick Down: ""
+[09-01 20:13:29.468] D/RPCS3: Left Stick Right: ""
+[09-01 20:13:29.468] D/RPCS3: Left Stick Up: ""
+[09-01 20:13:29.468] D/RPCS3: Right Stick Left: ""
+[09-01 20:13:29.468] D/RPCS3: Right Stick Down: ""
+[09-01 20:13:29.468] D/RPCS3: Right Stick Right: ""
+[09-01 20:13:29.468] D/RPCS3: Right Stick Up: ""
+[09-01 20:13:29.468] D/RPCS3: Start: ""
+[09-01 20:13:29.468] D/RPCS3: Select: ""
+[09-01 20:13:29.468] D/RPCS3: PS Button: ""
+[09-01 20:13:29.468] D/RPCS3: Square: ""
+[09-01 20:13:29.468] D/RPCS3: Cross: ""
+[09-01 20:13:29.468] D/RPCS3: Circle: ""
+[09-01 20:13:29.468] D/RPCS3: Triangle: ""
+[09-01 20:13:29.468] D/RPCS3: Left: ""
+[09-01 20:13:29.468] D/RPCS3: Down: ""
+[09-01 20:13:29.468] D/RPCS3: Right: ""
+[09-01 20:13:29.468] D/RPCS3: Up: ""
+[09-01 20:13:29.468] D/RPCS3: R1: ""
+[09-01 20:13:29.468] D/RPCS3: R2: ""
+[09-01 20:13:29.468] D/RPCS3: R3: ""
+[09-01 20:13:29.468] D/RPCS3: L1: ""
+[09-01 20:13:29.468] D/RPCS3: L2: ""
+[09-01 20:13:29.468] D/RPCS3: L3: ""
+[09-01 20:13:29.468] D/RPCS3: IR Nose: ""
+[09-01 20:13:29.468] D/RPCS3: IR Tail: ""
+[09-01 20:13:29.468] D/RPCS3: IR Left: ""
+[09-01 20:13:29.468] D/RPCS3: IR Right: ""
+[09-01 20:13:29.468] D/RPCS3: Tilt Left: ""
+[09-01 20:13:29.468] D/RPCS3: Tilt Right: ""
+[09-01 20:13:29.468] D/RPCS3: Motion Sensor X:
+[09-01 20:13:29.468] D/RPCS3: Axis: ""
+[09-01 20:13:29.468] D/RPCS3: Mirrored: false
+[09-01 20:13:29.468] D/RPCS3: Shift: 0
+[09-01 20:13:29.468] D/RPCS3: Motion Sensor Y:
+[09-01 20:13:29.468] D/RPCS3: Axis: ""
+[09-01 20:13:29.468] D/RPCS3: Mirrored: false
+[09-01 20:13:29.468] D/RPCS3: Shift: 0
+[09-01 20:13:29.468] D/RPCS3: Motion Sensor Z:
+[09-01 20:13:29.468] D/RPCS3: Axis: ""
+[09-01 20:13:29.468] D/RPCS3: Mirrored: false
+[09-01 20:13:29.468] D/RPCS3: Shift: 0
+[09-01 20:13:29.468] D/RPCS3: Motion Sensor G:
+[09-01 20:13:29.468] D/RPCS3: Axis: ""
+[09-01 20:13:29.468] D/RPCS3: Mirrored: false
+[09-01 20:13:29.468] D/RPCS3: Shift: 0
+[09-01 20:13:29.468] D/RPCS3: Orientation Reset Button: ""
+[09-01 20:13:29.468] D/RPCS3: Orientation Enabled: false
+[09-01 20:13:29.468] D/RPCS3: Pressure Intensity Button: ""
+[09-01 20:13:29.468] D/RPCS3: Pressure Intensity Percent: 50
+[09-01 20:13:29.468] D/RPCS3: Pressure Intensity Toggle Mode: false
+[09-01 20:13:29.468] D/RPCS3: Pressure Intensity Deadzone: 0
+[09-01 20:13:29.468] D/RPCS3: Analog Limiter Button: ""
+[09-01 20:13:29.468] D/RPCS3: Analog Limiter Toggle Mode: false
+[09-01 20:13:29.468] D/RPCS3: Left Stick Multiplier: 100
+[09-01 20:13:29.468] D/RPCS3: Right Stick Multiplier: 100
+[09-01 20:13:29.468] D/RPCS3: Left Stick Deadzone: 0
+[09-01 20:13:29.468] D/RPCS3: Right Stick Deadzone: 0
+[09-01 20:13:29.468] D/RPCS3: Left Stick Anti-Deadzone: 0
+[09-01 20:13:29.468] D/RPCS3: Right Stick Anti-Deadzone: 0
+[09-01 20:13:29.468] D/RPCS3: Left Trigger Threshold: 0
+[09-01 20:13:29.468] D/RPCS3: Right Trigger Threshold: 0
+[09-01 20:13:29.468] D/RPCS3: Left Pad Squircling Factor: 8000
+[09-01 20:13:29.468] D/RPCS3: Right Pad Squircling Factor: 8000
+[09-01 20:13:29.468] D/RPCS3: Color Value R: 0
+[09-01 20:13:29.468] D/RPCS3: Color Value G: 0
+[09-01 20:13:29.468] D/RPCS3: Color Value B: 0
+[09-01 20:13:29.468] D/RPCS3: Blink LED when battery is below 20%: true
+[09-01 20:13:29.468] D/RPCS3: Use LED as a battery indicator: false
+[09-01 20:13:29.468] D/RPCS3: LED battery indicator brightness: 50
+[09-01 20:13:29.468] D/RPCS3: Player LED enabled: true
+[09-01 20:13:29.468] D/RPCS3: Large Vibration Motor Multiplier: 100
+[09-01 20:13:29.468] D/RPCS3: Small Vibration Motor Multiplier: 100
+[09-01 20:13:29.468] D/RPCS3: Switch Vibration Motors: false
+[09-01 20:13:29.468] D/RPCS3: Mouse Movement Mode: Relative
+[09-01 20:13:29.468] D/RPCS3: Mouse Deadzone X Axis: 60
+[09-01 20:13:29.468] D/RPCS3: Mouse Deadzone Y Axis: 60
+[09-01 20:13:29.468] D/RPCS3: Mouse Acceleration X Axis: 200
+[09-01 20:13:29.468] D/RPCS3: Mouse Acceleration Y Axis: 250
+[09-01 20:13:29.468] D/RPCS3: Left Stick Lerp Factor: 100
+[09-01 20:13:29.468] D/RPCS3: Right Stick Lerp Factor: 100
+[09-01 20:13:29.468] D/RPCS3: Analog Button Lerp Factor: 100
+[09-01 20:13:29.468] D/RPCS3: Trigger Lerp Factor: 100
+[09-01 20:13:29.468] D/RPCS3: Device Class Type: 0
+[09-01 20:13:29.468] D/RPCS3: Vendor ID: 0
+[09-01 20:13:29.468] D/RPCS3: Product ID: 0
+[09-01 20:13:29.468] D/RPCS3: Buddy Device: "Null"
+[09-01 20:13:29.468] D/RPCS3: Pad 1: device='Null', handler=Null, VID=0x0, PID=0x0, class_type=0x0, class_profile=0x0
+[09-01 20:13:29.468] D/RPCS3: Pad 2: device='Null', handler=Null, VID=0x0, PID=0x0, class_type=0x0, class_profile=0x0
+[09-01 20:13:29.468] D/RPCS3: Pad 3: device='Null', handler=Null, VID=0x0, PID=0x0, class_type=0x0, class_profile=0x0
+[09-01 20:13:29.468] D/RPCS3: Pad 4: device='Null', handler=Null, VID=0x0, PID=0x0, class_type=0x0, class_profile=0x0
+[09-01 20:13:29.468] D/RPCS3: Pad 5: device='Null', handler=Null, VID=0x0, PID=0x0, class_type=0x0, class_profile=0x0
+[09-01 20:13:29.468] D/RPCS3: Pad 6: device='Null', handler=Null, VID=0x0, PID=0x0, class_type=0x0, class_profile=0x0
+[09-01 20:13:29.468] D/RPCS3: set_mouse_and_keyboard: device=emulated
+[09-01 20:13:29.468] D/RPCS3: Stopping pad threads...
+[09-01 20:13:29.468] D/RPCS3: Pad threads stopped
+[09-01 20:13:29.468] I/RPCS3: The pad mode was changed to Single-threaded
+[09-01 20:13:29.533] E/RPCS3: Cannot detect default device. Channel count detection unavailable.
+[09-01 20:13:29.533] E/RPCS3: Device reported invalid channel count, using stereo instead
+[09-01 20:13:29.533] D/RPCS3: Channel count is 2
+[09-01 20:13:29.545] W/RPCS3: [descriptor_manager::register] Now monitoring 1 descriptor sets
+[09-01 20:13:29.624] W/RPCS3: [descriptor_manager::register] Now monitoring 2 descriptor sets
+[09-01 20:13:29.684] D/RPCS3: Cubeb log: cubeb_resampler_internal.h:521:Input and output sample-rate match, target rate of 48000Hz
+[09-01 20:13:29.745] D/RPCS3: Opened audio backend (sampling_rate=48000, sample_size=4, channels=2, layout=Stereo)
+[09-01 20:13:29.750] D/RPCS3: Stream started
+[09-01 20:13:30.183] D/RPCS3: Add program (vp id = 1, fp id = 9)
+[09-01 20:13:30.183] D/RPCS3: Add program (vp id = 37, fp id = 35)
+[09-01 20:13:30.183] D/RPCS3: Add program (vp id = 47, fp id = 63)
+[09-01 20:13:30.184] D/RPCS3: Add program (vp id = 4, fp id = 93)
+[09-01 20:13:30.184] D/RPCS3: Add program (vp id = 7, fp id = 130)
+[09-01 20:13:30.184] D/RPCS3: Add program (vp id = 7, fp id = 26)
+[09-01 20:13:30.185] D/RPCS3: Add program (vp id = 109, fp id = 52)
+[09-01 20:13:30.185] D/RPCS3: Add program (vp id = 123, fp id = 14)
+[09-01 20:13:30.185] D/RPCS3: Add program (vp id = 20, fp id = 34)
+[09-01 20:13:30.185] D/RPCS3: Add program (vp id = 68, fp id = 115)
+[09-01 20:13:30.188] D/RPCS3: Add program (vp id = 125, fp id = 152)
+[09-01 20:13:30.188] D/RPCS3: Add program (vp id = 7, fp id = 55)
+[09-01 20:13:30.188] D/RPCS3: Add program (vp id = 126, fp id = 26)
+[09-01 20:13:30.191] D/RPCS3: Add program (vp id = 8, fp id = 77)
+[09-01 20:13:30.191] D/RPCS3: Add program (vp id = 162, fp id = 63)
+[09-01 20:13:30.191] D/RPCS3: Add program (vp id = 153, fp id = 55)
+[09-01 20:13:30.325] D/RPCS3: Add program (vp id = 2, fp id = 13)
+[09-01 20:13:30.381] D/RPCS3: Add program (vp id = 6, fp id = 24)
+[09-01 20:13:30.389] D/RPCS3: Add program (vp id = 132, fp id = 63)
+[09-01 20:13:30.406] D/RPCS3: Add program (vp id = 31, fp id = 49)
+[09-01 20:13:30.428] D/RPCS3: Add program (vp id = 3, fp id = 38)
+[09-01 20:13:30.430] D/RPCS3: Add program (vp id = 126, fp id = 43)
+[09-01 20:13:30.436] D/RPCS3: Add program (vp id = 39, fp id = 11)
+[09-01 20:13:30.454] D/RPCS3: Add program (vp id = 0, fp id = 30)
+[09-01 20:13:30.488] D/RPCS3: Add program (vp id = 0, fp id = 26)
+[09-01 20:13:30.510] D/RPCS3: Add program (vp id = 4, fp id = 44)
+[09-01 20:13:30.522] D/RPCS3: Add program (vp id = 103, fp id = 165)
+[09-01 20:13:30.538] D/RPCS3: Add program (vp id = 8, fp id = 33)
+[09-01 20:13:30.552] D/RPCS3: Add program (vp id = 118, fp id = 188)
+[09-01 20:13:30.573] D/RPCS3: Add program (vp id = 91, fp id = 121)
+[09-01 20:13:30.599] D/RPCS3: Add program (vp id = 0, fp id = 11)
+[09-01 20:13:30.645] D/RPCS3: Add program (vp id = 15, fp id = 22)
+[09-01 20:13:30.686] D/RPCS3: Add program (vp id = 104, fp id = 14)
+[09-01 20:13:30.702] D/RPCS3: Add program (vp id = 6, fp id = 93)
+[09-01 20:13:30.706] D/RPCS3: Add program (vp id = 39, fp id = 79)
+[09-01 20:13:30.707] D/RPCS3: Add program (vp id = 3, fp id = 122)
+[09-01 20:13:30.707] D/RPCS3: Add program (vp id = 164, fp id = 160)
+[09-01 20:13:30.713] D/RPCS3: Add program (vp id = 20, fp id = 137)
+[09-01 20:13:30.713] D/RPCS3: Add program (vp id = 20, fp id = 54)
+[09-01 20:13:30.713] D/RPCS3: Add program (vp id = 2, fp id = 55)
+[09-01 20:13:30.732] D/RPCS3: Add program (vp id = 20, fp id = 54)
+[09-01 20:13:30.733] D/RPCS3: Add program (vp id = 20, fp id = 54)
+[09-01 20:13:30.733] D/RPCS3: Add program (vp id = 3, fp id = 107)
+[09-01 20:13:30.733] D/RPCS3: Add program (vp id = 39, fp id = 13)
+[09-01 20:13:30.733] D/RPCS3: Add program (vp id = 3, fp id = 38)
+[09-01 20:13:30.733] D/RPCS3: Add program (vp id = 20, fp id = 34)
+[09-01 20:13:30.733] D/RPCS3: Add program (vp id = 99, fp id = 74)
+[09-01 20:13:30.752] D/RPCS3: Add program (vp id = 39, fp id = 43)
+[09-01 20:13:30.753] D/RPCS3: Add program (vp id = 3, fp id = 122)
+[09-01 20:13:30.753] D/RPCS3: Add program (vp id = 68, fp id = 83)
+[09-01 20:13:30.753] D/RPCS3: Add program (vp id = 149, fp id = 14)
+[09-01 20:13:30.776] D/RPCS3: Add program (vp id = 0, fp id = 14)
+[09-01 20:13:30.776] D/RPCS3: Add program (vp id = 3, fp id = 38)
+[09-01 20:13:30.776] D/RPCS3: Add program (vp id = 3, fp id = 38)
+[09-01 20:13:30.776] D/RPCS3: Add program (vp id = 120, fp id = 55)
+[09-01 20:13:30.798] D/RPCS3: Add program (vp id = 3, fp id = 131)
+[09-01 20:13:30.825] D/RPCS3: Add program (vp id = 3, fp id = 122)
+[09-01 20:13:30.825] D/RPCS3: Add program (vp id = 29, fp id = 59)
+[09-01 20:13:30.840] D/RPCS3: Add program (vp id = 2, fp id = 43)
+[09-01 20:13:30.840] D/RPCS3: Add program (vp id = 20, fp id = 198)
+[09-01 20:13:30.917] D/RPCS3: Add program (vp id = 3, fp id = 38)
+[09-01 20:13:30.917] D/RPCS3: Add program (vp id = 176, fp id = 55)
+[09-01 20:13:30.963] D/RPCS3: Add program (vp id = 66, fp id = 24)
+[09-01 20:13:30.975] D/RPCS3: Add program (vp id = 76, fp id = 93)
+[09-01 20:13:30.982] D/RPCS3: Add program (vp id = 5, fp id = 28)
+[09-01 20:13:30.983] D/RPCS3: Add program (vp id = 69, fp id = 72)
+[09-01 20:13:31.023] D/RPCS3: Add program (vp id = 109, fp id = 52)
+[09-01 20:13:31.023] D/RPCS3: Add program (vp id = 116, fp id = 24)
+[09-01 20:13:31.030] D/RPCS3: Add program (vp id = 3, fp id = 18)
+[09-01 20:13:31.032] D/RPCS3: Add program (vp id = 7, fp id = 11)
+[09-01 20:13:31.035] D/RPCS3: Add program (vp id = 2, fp id = 26)
+[09-01 20:13:31.038] D/RPCS3: Add program (vp id = 0, fp id = 14)
+[09-01 20:13:31.038] D/RPCS3: Add program (vp id = 20, fp id = 25)
+[09-01 20:13:31.073] D/RPCS3: Add program (vp id = 3, fp id = 18)
+[09-01 20:13:31.073] D/RPCS3: Add program (vp id = 20, fp id = 34)
+[09-01 20:13:31.073] D/RPCS3: Add program (vp id = 3, fp id = 61)
+[09-01 20:13:31.073] D/RPCS3: Add program (vp id = 0, fp id = 43)
+[09-01 20:13:31.073] D/RPCS3: Add program (vp id = 2, fp id = 30)
+[09-01 20:13:31.073] D/RPCS3: Add program (vp id = 2, fp id = 30)
+[09-01 20:13:31.073] D/RPCS3: Add program (vp id = 65, fp id = 72)
+[09-01 20:13:31.081] D/RPCS3: Add program (vp id = 7, fp id = 30)
+[09-01 20:13:31.081] D/RPCS3: Add program (vp id = 47, fp id = 71)
+[09-01 20:13:31.082] D/RPCS3: Add program (vp id = 20, fp id = 137)
+[09-01 20:13:31.082] D/RPCS3: Add program (vp id = 0, fp id = 55)
+[09-01 20:13:31.082] D/RPCS3: Add program (vp id = 0, fp id = 55)
+[09-01 20:13:31.082] D/RPCS3: Add program (vp id = 106, fp id = 45)
+[09-01 20:13:31.091] D/RPCS3: Add program (vp id = 20, fp id = 34)
+[09-01 20:13:31.091] D/RPCS3: Add program (vp id = 39, fp id = 14)
+[09-01 20:13:31.093] D/RPCS3: Add program (vp id = 10, fp id = 96)
+[09-01 20:13:31.101] D/RPCS3: Add program (vp id = 3, fp id = 38)
+[09-01 20:13:31.101] D/RPCS3: Add program (vp id = 20, fp id = 157)
+[09-01 20:13:31.101] D/RPCS3: Add program (vp id = 2, fp id = 43)
+[09-01 20:13:31.101] D/RPCS3: Add program (vp id = 2, fp id = 11)
+[09-01 20:13:31.101] D/RPCS3: Add program (vp id = 2, fp id = 26)
+[09-01 20:13:31.102] D/RPCS3: Add program (vp id = 84, fp id = 34)
+[09-01 20:13:31.107] D/RPCS3: Add program (vp id = 48, fp id = 55)
+[09-01 20:13:31.117] D/RPCS3: Add program (vp id = 118, fp id = 155)
+[09-01 20:13:31.123] D/RPCS3: Add program (vp id = 68, fp id = 115)
+[09-01 20:13:31.123] D/RPCS3: Add program (vp id = 20, fp id = 157)
+[09-01 20:13:31.123] D/RPCS3: Add program (vp id = 91, fp id = 139)
+[09-01 20:13:31.160] D/RPCS3: Add program (vp id = 120, fp id = 55)
+[09-01 20:13:31.160] D/RPCS3: Add program (vp id = 108, fp id = 49)
+[09-01 20:13:31.192] D/RPCS3: Add program (vp id = 3, fp id = 70)
+[09-01 20:13:31.192] D/RPCS3: Add program (vp id = 3, fp id = 70)
+[09-01 20:13:31.192] D/RPCS3: Add program (vp id = 92, fp id = 67)
+[09-01 20:13:31.222] D/RPCS3: Add program (vp id = 66, fp id = 49)
+[09-01 20:13:31.242] D/RPCS3: Add program (vp id = 3, fp id = 38)
+[09-01 20:13:31.243] D/RPCS3: Add program (vp id = 132, fp id = 63)
+[09-01 20:13:31.243] D/RPCS3: Add program (vp id = 23, fp id = 139)
+[09-01 20:13:31.276] D/RPCS3: Add program (vp id = 7, fp id = 30)
+[09-01 20:13:31.276] D/RPCS3: Add program (vp id = 153, fp id = 55)
+[09-01 20:13:31.276] D/RPCS3: Add program (vp id = 148, fp id = 63)
+[09-01 20:13:31.283] D/RPCS3: Add program (vp id = 8, fp id = 77)
+[09-01 20:13:31.283] D/RPCS3: Add program (vp id = 3, fp id = 167)
+[09-01 20:13:31.285] D/RPCS3: Add program (vp id = 5, fp id = 22)
+[09-01 20:13:31.356] D/RPCS3: Add program (vp id = 10, fp id = 96)
+[09-01 20:13:31.433] D/RPCS3: Add program (vp id = 123, fp id = 26)
+[09-01 20:13:31.433] D/RPCS3: Add program (vp id = 91, fp id = 19)
+[09-01 20:13:31.444] D/RPCS3: Add program (vp id = 47, fp id = 63)
+[09-01 20:13:31.444] D/RPCS3: Add program (vp id = 5, fp id = 22)
+[09-01 20:13:31.463] D/RPCS3: Add program (vp id = 5, fp id = 22)
+[09-01 20:13:31.505] D/RPCS3: Add program (vp id = 105, fp id = 59)
+[09-01 20:13:31.545] D/RPCS3: Add program (vp id = 7, fp id = 55)
+[09-01 20:13:31.545] D/RPCS3: Add program (vp id = 20, fp id = 42)
+[09-01 20:13:31.545] D/RPCS3: Add program (vp id = 76, fp id = 49)
+[09-01 20:13:31.586] D/RPCS3: Add program (vp id = 7, fp id = 55)
+[09-01 20:13:31.595] D/RPCS3: Add program (vp id = 84, fp id = 34)
+[09-01 20:13:31.622] D/RPCS3: Add program (vp id = 117, fp id = 130)
+[09-01 20:13:31.623] D/RPCS3: Add program (vp id = 20, fp id = 97)
+[09-01 20:13:31.624] D/RPCS3: Add program (vp id = 90, fp id = 26)
+[09-01 20:13:31.659] D/RPCS3: Add program (vp id = 5, fp id = 59)
+[09-01 20:13:31.663] D/RPCS3: Add program (vp id = 103, fp id = 113)
+[09-01 20:13:31.663] D/RPCS3: Add program (vp id = 3, fp id = 111)
+[09-01 20:13:31.663] D/RPCS3: Add program (vp id = 120, fp id = 55)
+[09-01 20:13:31.663] D/RPCS3: Add program (vp id = 3, fp id = 53)
+[09-01 20:13:31.663] D/RPCS3: Add program (vp id = 20, fp id = 154)
+[09-01 20:13:31.663] D/RPCS3: Add program (vp id = 76, fp id = 67)
+[09-01 20:13:31.664] D/RPCS3: Add program (vp id = 3, fp id = 107)
+[09-01 20:13:31.664] D/RPCS3: Add program (vp id = 76, fp id = 94)
+[09-01 20:13:31.665] D/RPCS3: Add program (vp id = 5, fp id = 112)
+[09-01 20:13:31.666] D/RPCS3: Add program (vp id = 7, fp id = 11)
+[09-01 20:13:31.666] D/RPCS3: Add program (vp id = 4, fp id = 24)
+[09-01 20:13:31.666] D/RPCS3: Add program (vp id = 2, fp id = 30)
+[09-01 20:13:31.666] D/RPCS3: Add program (vp id = 20, fp id = 34)
+[09-01 20:13:31.666] D/RPCS3: Add program (vp id = 23, fp id = 32)
+[09-01 20:13:31.748] D/RPCS3: Add program (vp id = 20, fp id = 42)
+[09-01 20:13:31.748] D/RPCS3: Add program (vp id = 3, fp id = 38)
+[09-01 20:13:31.748] D/RPCS3: Add program (vp id = 10, fp id = 145)
+[09-01 20:13:31.748] D/RPCS3: Add program (vp id = 7, fp id = 43)
+[09-01 20:13:31.748] D/RPCS3: Add program (vp id = 106, fp id = 156)
+[09-01 20:13:31.748] D/RPCS3: Add program (vp id = 12, fp id = 93)
+[09-01 20:13:31.774] D/RPCS3: Add program (vp id = 5, fp id = 51)
+[09-01 20:13:31.794] D/RPCS3: Add program (vp id = 117, fp id = 55)
+[09-01 20:13:31.834] D/RPCS3: Add program (vp id = 162, fp id = 63)
+[09-01 20:13:31.834] D/RPCS3: Add program (vp id = 37, fp id = 46)
+[09-01 20:13:31.834] D/RPCS3: Add program (vp id = 3, fp id = 146)
+[09-01 20:13:31.834] D/RPCS3: Add program (vp id = 20, fp id = 25)
+[09-01 20:13:31.835] D/RPCS3: Add program (vp id = 29, fp id = 22)
+[09-01 20:13:31.845] D/RPCS3: Add program (vp id = 7, fp id = 55)
+[09-01 20:13:31.845] D/RPCS3: Add program (vp id = 3, fp id = 61)
+[09-01 20:13:31.845] D/RPCS3: Add program (vp id = 5, fp id = 59)
+[09-01 20:13:31.846] D/RPCS3: Add program (vp id = 65, fp id = 35)
+[09-01 20:13:31.846] D/RPCS3: Add program (vp id = 2, fp id = 13)
+[09-01 20:13:31.846] D/RPCS3: Add program (vp id = 7, fp id = 26)
+[09-01 20:13:31.846] D/RPCS3: Add program (vp id = 7, fp id = 13)
+[09-01 20:13:31.846] D/RPCS3: Add program (vp id = 7, fp id = 79)
+[09-01 20:13:31.846] D/RPCS3: Add program (vp id = 76, fp id = 151)
+[09-01 20:13:31.859] D/RPCS3: Add program (vp id = 57, fp id = 59)
+[09-01 20:13:31.968] D/RPCS3: Add program (vp id = 3, fp id = 60)
+[09-01 20:13:31.968] D/RPCS3: Add program (vp id = 21, fp id = 46)
+[09-01 20:13:31.980] D/RPCS3: Add program (vp id = 5, fp id = 19)
+[09-01 20:13:31.981] D/RPCS3: Add program (vp id = 21, fp id = 35)
+[09-01 20:13:32.001] D/RPCS3: Add program (vp id = 10, fp id = 168)
+[09-01 20:13:32.009] D/RPCS3: Add program (vp id = 39, fp id = 26)
+[09-01 20:13:32.009] D/RPCS3: Add program (vp id = 68, fp id = 115)
+[09-01 20:13:32.010] D/RPCS3: Add program (vp id = 123, fp id = 30)
+[09-01 20:13:32.011] D/RPCS3: Add program (vp id = 6, fp id = 88)
+[09-01 20:13:32.032] D/RPCS3: Add program (vp id = 6, fp id = 49)
+[09-01 20:13:32.056] D/RPCS3: Add program (vp id = 133, fp id = 70)
+[09-01 20:13:32.072] D/RPCS3: Add program (vp id = 65, fp id = 46)
+[09-01 20:13:32.072] D/RPCS3: Add program (vp id = 124, fp id = 146)
+[09-01 20:13:32.117] D/RPCS3: Add program (vp id = 3, fp id = 70)
+[09-01 20:13:32.117] D/RPCS3: Add program (vp id = 5, fp id = 22)
+[09-01 20:13:32.118] D/RPCS3: Add program (vp id = 3, fp id = 143)
+[09-01 20:13:32.119] D/RPCS3: Add program (vp id = 68, fp id = 115)
+[09-01 20:13:32.119] D/RPCS3: Add program (vp id = 20, fp id = 137)
+[09-01 20:13:32.119] D/RPCS3: Add program (vp id = 3, fp id = 111)
+[09-01 20:13:32.119] D/RPCS3: Add program (vp id = 3, fp id = 53)
+[09-01 20:13:32.119] D/RPCS3: Add program (vp id = 3, fp id = 143)
+[09-01 20:13:32.119] D/RPCS3: Add program (vp id = 98, fp id = 74)
+[09-01 20:13:32.152] D/RPCS3: Add program (vp id = 5, fp id = 121)
+[09-01 20:13:32.152] D/RPCS3: Add program (vp id = 5, fp id = 170)
+[09-01 20:13:32.152] D/RPCS3: Add program (vp id = 3, fp id = 61)
+[09-01 20:13:32.152] D/RPCS3: Add program (vp id = 5, fp id = 51)
+[09-01 20:13:32.152] D/RPCS3: Add program (vp id = 169, fp id = 72)
+[09-01 20:13:32.189] D/RPCS3: Add program (vp id = 133, fp id = 18)
+[09-01 20:13:32.209] D/RPCS3: Add program (vp id = 6, fp id = 44)
+[09-01 20:13:32.255] D/RPCS3: Add program (vp id = 2, fp id = 30)
+[09-01 20:13:32.263] D/RPCS3: Add program (vp id = 133, fp id = 50)
+[09-01 20:13:32.266] D/RPCS3: Add program (vp id = 20, fp id = 25)
+[09-01 20:13:32.267] D/RPCS3: Add program (vp id = 17, fp id = 28)
+[09-01 20:13:32.273] D/RPCS3: Add program (vp id = 3, fp id = 50)
+[09-01 20:13:32.273] D/RPCS3: Add program (vp id = 56, fp id = 38)
+[09-01 20:13:32.275] D/RPCS3: Add program (vp id = 68, fp id = 80)
+[09-01 20:13:32.275] D/RPCS3: Add program (vp id = 68, fp id = 80)
+[09-01 20:13:32.276] D/RPCS3: Add program (vp id = 7, fp id = 43)
+[09-01 20:13:32.276] D/RPCS3: Add program (vp id = 5, fp id = 28)
+[09-01 20:13:32.276] D/RPCS3: Add program (vp id = 78, fp id = 38)
+[09-01 20:13:32.315] D/RPCS3: Add program (vp id = 105, fp id = 22)
+[09-01 20:13:32.329] D/RPCS3: Add program (vp id = 3, fp id = 159)
+[09-01 20:13:32.329] D/RPCS3: Add program (vp id = 103, fp id = 150)
+[09-01 20:13:32.329] D/RPCS3: Add program (vp id = 20, fp id = 166)
+[09-01 20:13:32.329] D/RPCS3: Add program (vp id = 141, fp id = 55)
+[09-01 20:13:32.346] D/RPCS3: Add program (vp id = 20, fp id = 157)
+[09-01 20:13:32.346] D/RPCS3: Add program (vp id = 20, fp id = 154)
+[09-01 20:13:32.346] D/RPCS3: Add program (vp id = 138, fp id = 55)
+[09-01 20:13:32.349] D/RPCS3: Add program (vp id = 7, fp id = 14)
+[09-01 20:13:32.349] D/RPCS3: Add program (vp id = 106, fp id = 93)
+[09-01 20:13:32.349] D/RPCS3: Add program (vp id = 10, fp id = 161)
+[09-01 20:13:32.399] D/RPCS3: Add program (vp id = 20, fp id = 34)
+[09-01 20:13:32.399] D/RPCS3: Add program (vp id = 120, fp id = 55)
+[09-01 20:13:32.399] D/RPCS3: Add program (vp id = 31, fp id = 49)
+[09-01 20:13:32.399] D/RPCS3: Add program (vp id = 0, fp id = 13)
+[09-01 20:13:32.399] D/RPCS3: Add program (vp id = 108, fp id = 49)
+[09-01 20:13:32.399] D/RPCS3: Add program (vp id = 68, fp id = 115)
+[09-01 20:13:32.400] D/RPCS3: Add program (vp id = 68, fp id = 64)
+[09-01 20:13:32.400] D/RPCS3: Add program (vp id = 7, fp id = 11)
+[09-01 20:13:32.400] D/RPCS3: Add program (vp id = 3, fp id = 70)
+[09-01 20:13:32.400] D/RPCS3: Add program (vp id = 3, fp id = 143)
+[09-01 20:13:32.400] D/RPCS3: Add program (vp id = 98, fp id = 74)
+[09-01 20:13:32.400] D/RPCS3: Add program (vp id = 0, fp id = 13)
+[09-01 20:13:32.400] D/RPCS3: Add program (vp id = 29, fp id = 121)
+[09-01 20:13:32.400] D/RPCS3: Add program (vp id = 133, fp id = 53)
+[09-01 20:13:32.448] D/RPCS3: Add program (vp id = 41, fp id = 130)
+[09-01 20:13:32.486] D/RPCS3: Add program (vp id = 106, fp id = 94)
+[09-01 20:13:32.486] D/RPCS3: Add program (vp id = 39, fp id = 43)
+[09-01 20:13:32.486] D/RPCS3: Add program (vp id = 2, fp id = 130)
+[09-01 20:13:32.486] D/RPCS3: Add program (vp id = 92, fp id = 67)
+[09-01 20:13:32.486] D/RPCS3: Add program (vp id = 7, fp id = 13)
+[09-01 20:13:32.486] D/RPCS3: Add program (vp id = 21, fp id = 140)
+[09-01 20:13:32.486] D/RPCS3: Add program (vp id = 39, fp id = 30)
+[09-01 20:13:32.486] D/RPCS3: Add program (vp id = 3, fp id = 38)
+[09-01 20:13:32.487] D/RPCS3: Add program (vp id = 138, fp id = 55)
+[09-01 20:13:32.499] D/RPCS3: Add program (vp id = 5, fp id = 32)
+[09-01 20:13:32.499] D/RPCS3: Add program (vp id = 92, fp id = 45)
+[09-01 20:13:32.548] D/RPCS3: Add program (vp id = 126, fp id = 130)
+[09-01 20:13:32.548] D/RPCS3: Add program (vp id = 120, fp id = 130)
+[09-01 20:13:32.559] D/RPCS3: Add program (vp id = 15, fp id = 28)
+[09-01 20:13:32.565] D/RPCS3: Add program (vp id = 5, fp id = 32)
+[09-01 20:13:32.566] D/RPCS3: Add program (vp id = 90, fp id = 55)
+[09-01 20:13:32.566] D/RPCS3: Add program (vp id = 123, fp id = 55)
+[09-01 20:13:32.566] D/RPCS3: Add program (vp id = 162, fp id = 71)
+[09-01 20:13:32.566] D/RPCS3: Add program (vp id = 8, fp id = 89)
+[09-01 20:13:32.566] D/RPCS3: Add program (vp id = 3, fp id = 18)
+[09-01 20:13:32.567] D/RPCS3: Add program (vp id = 90, fp id = 130)
+[09-01 20:13:32.582] D/RPCS3: Add program (vp id = 3, fp id = 146)
+[09-01 20:13:32.583] D/RPCS3: Add program (vp id = 66, fp id = 93)
+[09-01 20:13:32.583] D/RPCS3: Add program (vp id = 3, fp id = 50)
+[09-01 20:13:32.583] D/RPCS3: Add program (vp id = 133, fp id = 122)
+[09-01 20:13:32.583] D/RPCS3: Add program (vp id = 104, fp id = 30)
+[09-01 20:13:32.583] D/RPCS3: Add program (vp id = 3, fp id = 122)
+[09-01 20:13:32.583] D/RPCS3: Add program (vp id = 3, fp id = 50)
+[09-01 20:13:32.583] D/RPCS3: Add program (vp id = 126, fp id = 55)
+[09-01 20:13:32.583] D/RPCS3: Add program (vp id = 126, fp id = 13)
+[09-01 20:13:32.583] D/RPCS3: Add program (vp id = 23, fp id = 51)
+[09-01 20:13:32.583] D/RPCS3: Add program (vp id = 106, fp id = 45)
+[09-01 20:13:32.584] D/RPCS3: Add program (vp id = 163, fp id = 38)
+[09-01 20:13:32.605] D/RPCS3: Add program (vp id = 3, fp id = 122)
+[09-01 20:13:32.605] D/RPCS3: Add program (vp id = 86, fp id = 128)
+[09-01 20:13:32.639] D/RPCS3: Add program (vp id = 66, fp id = 67)
+[09-01 20:13:32.639] D/RPCS3: Add program (vp id = 73, fp id = 59)
+[09-01 20:13:32.651] D/RPCS3: Add program (vp id = 0, fp id = 11)
+[09-01 20:13:32.651] D/RPCS3: Add program (vp id = 78, fp id = 50)
+[09-01 20:13:32.651] D/RPCS3: Add program (vp id = 104, fp id = 130)
+[09-01 20:13:32.682] D/RPCS3: Add program (vp id = 76, fp id = 67)
+[09-01 20:13:32.682] D/RPCS3: Add program (vp id = 3, fp id = 146)
+[09-01 20:13:32.683] D/RPCS3: Add program (vp id = 172, fp id = 180)
+[09-01 20:13:32.700] D/RPCS3: Add program (vp id = 3, fp id = 50)
+[09-01 20:13:32.701] D/RPCS3: Add program (vp id = 20, fp id = 157)
+[09-01 20:13:32.701] D/RPCS3: Add program (vp id = 6, fp id = 88)
+[09-01 20:13:32.701] D/RPCS3: Add program (vp id = 3, fp id = 146)
+[09-01 20:13:32.701] D/RPCS3: Add program (vp id = 2, fp id = 26)
+[09-01 20:13:32.702] D/RPCS3: Add program (vp id = 10, fp id = 168)
+[09-01 20:13:32.702] D/RPCS3: Add program (vp id = 120, fp id = 55)
+[09-01 20:13:32.702] D/RPCS3: Add program (vp id = 3, fp id = 101)
+[09-01 20:13:32.702] D/RPCS3: Add program (vp id = 197, fp id = 74)
+[09-01 20:13:32.703] D/RPCS3: Add program (vp id = 65, fp id = 46)
+[09-01 20:13:32.703] D/RPCS3: Add program (vp id = 2, fp id = 14)
+[09-01 20:13:32.704] D/RPCS3: Add program (vp id = 20, fp id = 52)
+[09-01 20:13:32.704] D/RPCS3: Add program (vp id = 20, fp id = 52)
+[09-01 20:13:32.704] D/RPCS3: Add program (vp id = 3, fp id = 38)
+[09-01 20:13:32.710] D/RPCS3: Add program (vp id = 5, fp id = 51)
+[09-01 20:13:32.710] D/RPCS3: Add program (vp id = 48, fp id = 55)
+[09-01 20:13:32.711] D/RPCS3: Add program (vp id = 16, fp id = 64)
+[09-01 20:13:32.713] D/RPCS3: Add program (vp id = 3, fp id = 50)
+[09-01 20:13:32.716] D/RPCS3: Add program (vp id = 3, fp id = 146)
+[09-01 20:13:32.716] D/RPCS3: Add program (vp id = 153, fp id = 130)
+[09-01 20:13:32.719] D/RPCS3: Add program (vp id = 17, fp id = 32)
+[09-01 20:13:32.737] D/RPCS3: Add program (vp id = 29, fp id = 22)
+[09-01 20:13:32.737] D/RPCS3: Add program (vp id = 5, fp id = 22)
+[09-01 20:13:32.737] D/RPCS3: Add program (vp id = 119, fp id = 46)
+[09-01 20:13:32.787] D/RPCS3: Add program (vp id = 3, fp id = 60)
+[09-01 20:13:32.788] D/RPCS3: Add program (vp id = 0, fp id = 43)
+[09-01 20:13:32.788] D/RPCS3: Add program (vp id = 57, fp id = 59)
+[09-01 20:13:32.788] D/RPCS3: Add program (vp id = 123, fp id = 30)
+[09-01 20:13:32.788] D/RPCS3: Add program (vp id = 5, fp id = 59)
+[09-01 20:13:32.788] D/RPCS3: Add program (vp id = 3, fp id = 61)
+[09-01 20:13:32.789] D/RPCS3: Add program (vp id = 3, fp id = 60)
+[09-01 20:13:32.789] D/RPCS3: Add program (vp id = 29, fp id = 121)
+[09-01 20:13:32.789] D/RPCS3: Add program (vp id = 118, fp id = 144)
+[09-01 20:13:32.789] D/RPCS3: Add program (vp id = 103, fp id = 147)
+[09-01 20:13:32.789] D/RPCS3: Add program (vp id = 133, fp id = 107)
+[09-01 20:13:32.789] D/RPCS3: Add program (vp id = 39, fp id = 14)
+[09-01 20:13:32.789] D/RPCS3: Add program (vp id = 3, fp id = 143)
+[09-01 20:13:32.789] D/RPCS3: Add program (vp id = 2, fp id = 43)
+[09-01 20:13:32.789] D/RPCS3: Add program (vp id = 0, fp id = 14)
+[09-01 20:13:32.790] D/RPCS3: Add program (vp id = 104, fp id = 30)
+[09-01 20:13:32.790] D/RPCS3: Add program (vp id = 39, fp id = 43)
+[09-01 20:13:32.790] D/RPCS3: Add program (vp id = 129, fp id = 55)
+[09-01 20:13:32.819] D/RPCS3: Add program (vp id = 8, fp id = 89)
+[09-01 20:13:32.819] D/RPCS3: Add program (vp id = 8, fp id = 174)
+[09-01 20:13:32.820] D/RPCS3: Add program (vp id = 109, fp id = 34)
+[09-01 20:13:32.820] D/RPCS3: Add program (vp id = 109, fp id = 34)
+[09-01 20:13:32.820] D/RPCS3: Add program (vp id = 4, fp id = 45)
+[09-01 20:13:32.821] D/RPCS3: Add program (vp id = 98, fp id = 74)
+[09-01 20:13:32.821] D/RPCS3: Add program (vp id = 103, fp id = 171)
+[09-01 20:13:32.821] D/RPCS3: Add program (vp id = 120, fp id = 130)
+[09-01 20:13:32.853] D/RPCS3: Add program (vp id = 126, fp id = 26)
+[09-01 20:13:32.853] D/RPCS3: Add program (vp id = 90, fp id = 13)
+[09-01 20:13:32.880] D/RPCS3: Add program (vp id = 20, fp id = 42)
+[09-01 20:13:32.881] D/RPCS3: Add program (vp id = 7, fp id = 43)
+[09-01 20:13:32.881] D/RPCS3: Add program (vp id = 3, fp id = 38)
+[09-01 20:13:32.881] D/RPCS3: Add program (vp id = 82, fp id = 35)
+[09-01 20:13:32.894] D/RPCS3: Add program (vp id = 0, fp id = 26)
+[09-01 20:13:32.894] D/RPCS3: Add program (vp id = 69, fp id = 46)
+[09-01 20:13:32.895] D/RPCS3: Add program (vp id = 20, fp id = 54)
+[09-01 20:13:32.895] D/RPCS3: Add program (vp id = 20, fp id = 97)
+[09-01 20:13:32.900] D/RPCS3: Add program (vp id = 3, fp id = 70)
+[09-01 20:13:32.900] D/RPCS3: Add program (vp id = 15, fp id = 32)
+[09-01 20:13:32.931] D/RPCS3: Add program (vp id = 124, fp id = 53)
+[09-01 20:13:32.931] D/RPCS3: Add program (vp id = 39, fp id = 43)
+[09-01 20:13:32.932] D/RPCS3: Add program (vp id = 39, fp id = 30)
+[09-01 20:13:32.947] D/RPCS3: Add program (vp id = 119, fp id = 46)
+[09-01 20:13:32.947] D/RPCS3: Add program (vp id = 176, fp id = 55)
+[09-01 20:13:32.948] D/RPCS3: Add program (vp id = 3, fp id = 50)
+[09-01 20:13:32.948] D/RPCS3: Add program (vp id = 78, fp id = 53)
+[09-01 20:13:32.949] D/RPCS3: Add program (vp id = 116, fp id = 94)
+[09-01 20:13:32.949] D/RPCS3: Add program (vp id = 182, fp id = 94)
+[09-01 20:13:32.974] D/RPCS3: Add program (vp id = 114, fp id = 89)
+[09-01 20:13:32.977] D/RPCS3: Add program (vp id = 84, fp id = 52)
+[09-01 20:13:32.978] D/RPCS3: Add program (vp id = 10, fp id = 96)
+[09-01 20:13:32.980] D/RPCS3: Add program (vp id = 7, fp id = 14)
+[09-01 20:13:32.983] D/RPCS3: Add program (vp id = 182, fp id = 45)
+[09-01 20:13:32.983] D/RPCS3: Add program (vp id = 2, fp id = 11)
+[09-01 20:13:32.983] D/RPCS3: Add program (vp id = 95, fp id = 52)
+[09-01 20:13:32.987] D/RPCS3: Add program (vp id = 114, fp id = 142)
+[09-01 20:13:32.989] D/RPCS3: Add program (vp id = 68, fp id = 64)
+[09-01 20:13:32.989] D/RPCS3: Add program (vp id = 57, fp id = 59)
+[09-01 20:13:32.989] D/RPCS3: Add program (vp id = 3, fp id = 53)
+[09-01 20:13:32.989] D/RPCS3: Add program (vp id = 2, fp id = 55)
+[09-01 20:13:32.989] D/RPCS3: Add program (vp id = 40, fp id = 71)
+[09-01 20:13:33.022] D/RPCS3: Add program (vp id = 3, fp id = 18)
+[09-01 20:13:33.022] D/RPCS3: Add program (vp id = 10, fp id = 27)
+[09-01 20:13:33.022] D/RPCS3: Add program (vp id = 5, fp id = 19)
+[09-01 20:13:33.022] D/RPCS3: Add program (vp id = 20, fp id = 42)
+[09-01 20:13:33.023] D/RPCS3: Add program (vp id = 7, fp id = 26)
+[09-01 20:13:33.023] D/RPCS3: Add program (vp id = 6, fp id = 45)
+[09-01 20:13:33.023] D/RPCS3: Add program (vp id = 8, fp id = 33)
+[09-01 20:13:33.023] D/RPCS3: Add program (vp id = 7, fp id = 43)
+[09-01 20:13:33.023] D/RPCS3: Add program (vp id = 23, fp id = 22)
+[09-01 20:13:33.090] D/RPCS3: Add program (vp id = 12, fp id = 94)
+[09-01 20:13:33.090] D/RPCS3: Add program (vp id = 39, fp id = 55)
+[09-01 20:13:33.090] D/RPCS3: Add program (vp id = 106, fp id = 67)
+[09-01 20:13:33.098] D/RPCS3: Add program (vp id = 31, fp id = 94)
+[09-01 20:13:33.101] D/RPCS3: Add program (vp id = 41, fp id = 43)
+[09-01 20:13:33.101] D/RPCS3: Add program (vp id = 3, fp id = 146)
+[09-01 20:13:33.101] D/RPCS3: Add program (vp id = 141, fp id = 130)
+[09-01 20:13:33.104] D/RPCS3: Add program (vp id = 62, fp id = 89)
+[09-01 20:13:33.114] D/RPCS3: Add program (vp id = 149, fp id = 26)
+[09-01 20:13:33.114] D/RPCS3: Add program (vp id = 41, fp id = 13)
+[09-01 20:13:33.115] D/RPCS3: Add program (vp id = 153, fp id = 55)
+[09-01 20:13:33.115] D/RPCS3: Add program (vp id = 163, fp id = 38)
+[09-01 20:13:33.115] D/RPCS3: Add program (vp id = 153, fp id = 55)
+[09-01 20:13:33.123] D/RPCS3: Add program (vp id = 95, fp id = 34)
+[09-01 20:13:33.123] D/RPCS3: Add program (vp id = 5, fp id = 22)
+[09-01 20:13:33.123] D/RPCS3: Add program (vp id = 5, fp id = 51)
+[09-01 20:13:33.124] D/RPCS3: Add program (vp id = 5, fp id = 19)
+[09-01 20:13:33.124] D/RPCS3: Add program (vp id = 7, fp id = 30)
+[09-01 20:13:33.128] D/RPCS3: Add program (vp id = 92, fp id = 94)
+[09-01 20:13:33.128] D/RPCS3: Add program (vp id = 68, fp id = 83)
+[09-01 20:13:33.129] D/RPCS3: Add program (vp id = 29, fp id = 59)
+[09-01 20:13:33.129] D/RPCS3: Add program (vp id = 86, fp id = 160)
+[09-01 20:13:33.155] D/RPCS3: Add program (vp id = 3, fp id = 70)
+[09-01 20:13:33.156] D/RPCS3: Add program (vp id = 37, fp id = 72)
+[09-01 20:13:33.156] D/RPCS3: Add program (vp id = 65, fp id = 74)
+[09-01 20:13:33.156] D/RPCS3: Add program (vp id = 20, fp id = 75)
+[09-01 20:13:33.156] D/RPCS3: Add program (vp id = 65, fp id = 72)
+[09-01 20:13:33.156] D/RPCS3: Add program (vp id = 3, fp id = 61)
+[09-01 20:13:33.156] D/RPCS3: Add program (vp id = 57, fp id = 19)
+[09-01 20:13:33.223] D/RPCS3: Add program (vp id = 0, fp id = 26)
+[09-01 20:13:33.224] D/RPCS3: Add program (vp id = 105, fp id = 59)
+[09-01 20:13:33.224] D/RPCS3: Add program (vp id = 119, fp id = 74)
+[09-01 20:13:33.224] D/RPCS3: Add program (vp id = 105, fp id = 19)
+[09-01 20:13:33.228] D/RPCS3: Add program (vp id = 39, fp id = 55)
+[09-01 20:13:33.228] D/RPCS3: Add program (vp id = 116, fp id = 45)
+[09-01 20:13:33.228] D/RPCS3: Add program (vp id = 10, fp id = 161)
+[09-01 20:13:33.228] D/RPCS3: Add program (vp id = 39, fp id = 13)
+[09-01 20:13:33.228] D/RPCS3: Add program (vp id = 3, fp id = 61)
+[09-01 20:13:33.228] D/RPCS3: Add program (vp id = 118, fp id = 179)
+[09-01 20:13:33.228] D/RPCS3: Add program (vp id = 175, fp id = 74)
+[09-01 20:13:33.246] D/RPCS3: Add program (vp id = 90, fp id = 26)
+[09-01 20:13:33.249] D/RPCS3: Add program (vp id = 78, fp id = 61)
+[09-01 20:13:33.249] D/RPCS3: Add program (vp id = 41, fp id = 26)
+[09-01 20:13:33.272] D/RPCS3: Add program (vp id = 119, fp id = 35)
+[09-01 20:13:33.272] D/RPCS3: Add program (vp id = 7, fp id = 14)
+[09-01 20:13:33.272] D/RPCS3: Add program (vp id = 10, fp id = 145)
+[09-01 20:13:33.272] D/RPCS3: Add program (vp id = 68, fp id = 64)
+[09-01 20:13:33.272] D/RPCS3: Add program (vp id = 7, fp id = 130)
+[09-01 20:13:33.272] D/RPCS3: Add program (vp id = 10, fp id = 27)
+[09-01 20:13:33.273] D/RPCS3: Add program (vp id = 12, fp id = 45)
+[09-01 20:13:33.273] D/RPCS3: Add program (vp id = 164, fp id = 181)
+[09-01 20:13:33.273] D/RPCS3: Add program (vp id = 21, fp id = 72)
+[09-01 20:13:33.273] D/RPCS3: Add program (vp id = 2, fp id = 11)
+[09-01 20:13:33.273] D/RPCS3: Add program (vp id = 76, fp id = 24)
+[09-01 20:13:33.273] D/RPCS3: Add program (vp id = 126, fp id = 11)
+[09-01 20:13:33.273] D/RPCS3: Add program (vp id = 20, fp id = 137)
+[09-01 20:13:33.273] D/RPCS3: Add program (vp id = 15, fp id = 22)
+[09-01 20:13:33.273] D/RPCS3: Add program (vp id = 99, fp id = 74)
+[09-01 20:13:33.273] D/RPCS3: Add program (vp id = 117, fp id = 55)
+[09-01 20:13:33.273] D/RPCS3: Add program (vp id = 73, fp id = 32)
+[09-01 20:13:33.273] D/RPCS3: Add program (vp id = 3, fp id = 184)
+[09-01 20:13:33.274] D/RPCS3: Add program (vp id = 173, fp id = 158)
+[09-01 20:13:33.304] D/RPCS3: Add program (vp id = 17, fp id = 121)
+[09-01 20:13:33.308] D/RPCS3: Add program (vp id = 95, fp id = 34)
+[09-01 20:13:33.308] D/RPCS3: Add program (vp id = 133, fp id = 61)
+[09-01 20:13:33.308] D/RPCS3: Add program (vp id = 7, fp id = 13)
+[09-01 20:13:33.308] D/RPCS3: Add program (vp id = 92, fp id = 93)
+[09-01 20:13:33.308] D/RPCS3: Add program (vp id = 58, fp id = 22)
+[09-01 20:13:33.330] D/RPCS3: Add program (vp id = 3, fp id = 38)
+[09-01 20:13:33.330] D/RPCS3: Add program (vp id = 12, fp id = 44)
+[09-01 20:13:33.374] D/RPCS3: Add program (vp id = 66, fp id = 45)
+[09-01 20:13:33.374] D/RPCS3: Add program (vp id = 62, fp id = 36)
+[09-01 20:13:33.447] D/RPCS3: Add program (vp id = 110, fp id = 127)
+[09-01 20:13:33.458] D/RPCS3: Add program (vp id = 62, fp id = 77)
+[09-01 20:13:33.459] D/RPCS3: Add program (vp id = 3, fp id = 87)
+[09-01 20:13:33.459] D/RPCS3: Add program (vp id = 91, fp id = 22)
+[09-01 20:13:33.459] D/RPCS3: Add program (vp id = 5, fp id = 51)
+[09-01 20:13:33.459] D/RPCS3: Add program (vp id = 62, fp id = 77)
+[09-01 20:13:33.459] D/RPCS3: Add program (vp id = 66, fp id = 24)
+[09-01 20:13:33.459] D/RPCS3: Add program (vp id = 2, fp id = 11)
+[09-01 20:13:33.459] D/RPCS3: Add program (vp id = 3, fp id = 53)
+[09-01 20:13:33.460] D/RPCS3: Add program (vp id = 37, fp id = 72)
+[09-01 20:13:33.460] D/RPCS3: Add program (vp id = 3, fp id = 70)
+[09-01 20:13:33.460] D/RPCS3: Add program (vp id = 47, fp id = 71)
+[09-01 20:13:33.460] D/RPCS3: Add program (vp id = 68, fp id = 83)
+[09-01 20:13:33.460] D/RPCS3: Add program (vp id = 3, fp id = 38)
+[09-01 20:13:33.460] D/RPCS3: Add program (vp id = 3, fp id = 81)
+[09-01 20:13:33.460] D/RPCS3: Add program (vp id = 3, fp id = 70)
+[09-01 20:13:33.460] D/RPCS3: Add program (vp id = 5, fp id = 19)
+[09-01 20:13:33.460] D/RPCS3: Add program (vp id = 16, fp id = 80)
+[09-01 20:13:33.460] D/RPCS3: Add program (vp id = 3, fp id = 60)
+[09-01 20:13:33.460] D/RPCS3: Add program (vp id = 10, fp id = 96)
+[09-01 20:13:33.460] D/RPCS3: Add program (vp id = 3, fp id = 53)
+[09-01 20:13:33.460] D/RPCS3: Add program (vp id = 2, fp id = 14)
+[09-01 20:13:33.460] D/RPCS3: Add program (vp id = 69, fp id = 46)
+[09-01 20:13:33.460] D/RPCS3: Add program (vp id = 65, fp id = 46)
+[09-01 20:13:33.461] D/RPCS3: Add program (vp id = 66, fp id = 88)
+[09-01 20:13:33.461] D/RPCS3: Add program (vp id = 8, fp id = 36)
+[09-01 20:13:33.461] D/RPCS3: Add program (vp id = 20, fp id = 52)
+[09-01 20:13:33.461] D/RPCS3: Add program (vp id = 20, fp id = 52)
+[09-01 20:13:33.461] D/RPCS3: Add program (vp id = 29, fp id = 59)
+[09-01 20:13:33.462] D/RPCS3: Add program (vp id = 39, fp id = 26)
+[09-01 20:13:33.462] D/RPCS3: Add program (vp id = 0, fp id = 55)
+[09-01 20:13:33.462] D/RPCS3: Add program (vp id = 58, fp id = 22)
+[09-01 20:13:33.463] D/RPCS3: Add program (vp id = 7, fp id = 55)
+[09-01 20:13:33.463] D/RPCS3: Add program (vp id = 20, fp id = 42)
+[09-01 20:13:33.464] D/RPCS3: Add program (vp id = 116, fp id = 24)
+[09-01 20:13:33.464] D/RPCS3: Add program (vp id = 41, fp id = 30)
+[09-01 20:13:33.464] D/RPCS3: Add program (vp id = 7, fp id = 26)
+[09-01 20:13:33.464] D/RPCS3: Add program (vp id = 8, fp id = 142)
+[09-01 20:13:33.534] D/RPCS3: Add program (vp id = 116, fp id = 93)
+[09-01 20:13:33.534] D/RPCS3: Add program (vp id = 2, fp id = 130)
+[09-01 20:13:33.534] D/RPCS3: Add program (vp id = 0, fp id = 13)
+[09-01 20:13:33.534] D/RPCS3: Add program (vp id = 182, fp id = 24)
+[09-01 20:13:33.534] D/RPCS3: Add program (vp id = 119, fp id = 35)
+[09-01 20:13:33.534] D/RPCS3: Add program (vp id = 5, fp id = 28)
+[09-01 20:13:33.534] D/RPCS3: Add program (vp id = 90, fp id = 43)
+[09-01 20:13:33.534] D/RPCS3: Add program (vp id = 187, fp id = 190)
+[09-01 20:13:33.560] D/RPCS3: Add program (vp id = 3, fp id = 50)
+[09-01 20:13:33.563] D/RPCS3: Add program (vp id = 21, fp id = 46)
+[09-01 20:13:33.563] D/RPCS3: Add program (vp id = 106, fp id = 94)
+[09-01 20:13:33.564] D/RPCS3: Add program (vp id = 39, fp id = 11)
+[09-01 20:13:33.564] D/RPCS3: Add program (vp id = 0, fp id = 43)
+[09-01 20:13:33.564] D/RPCS3: Add program (vp id = 126, fp id = 13)
+[09-01 20:13:33.564] D/RPCS3: Add program (vp id = 124, fp id = 38)
+[09-01 20:13:33.565] D/RPCS3: Add program (vp id = 5, fp id = 139)
+[09-01 20:13:33.568] D/RPCS3: Add program (vp id = 172, fp id = 183)
+[09-01 20:13:33.568] D/RPCS3: Add program (vp id = 3, fp id = 185)
+[09-01 20:13:33.568] D/RPCS3: Add program (vp id = 173, fp id = 186)
+[09-01 20:13:33.569] D/RPCS3: Add program (vp id = 119, fp id = 72)
+[09-01 20:13:33.569] D/RPCS3: Add program (vp id = 3, fp id = 70)
+[09-01 20:13:33.569] D/RPCS3: Add program (vp id = 20, fp id = 137)
+[09-01 20:13:33.569] D/RPCS3: Add program (vp id = 5, fp id = 28)
+[09-01 20:13:33.569] D/RPCS3: Add program (vp id = 3, fp id = 18)
+[09-01 20:13:33.569] D/RPCS3: Add program (vp id = 2, fp id = 14)
+[09-01 20:13:33.570] D/RPCS3: Add program (vp id = 3, fp id = 111)
+[09-01 20:13:33.570] D/RPCS3: Add program (vp id = 7, fp id = 30)
+[09-01 20:13:33.570] D/RPCS3: Add program (vp id = 0, fp id = 30)
+[09-01 20:13:33.570] D/RPCS3: Add program (vp id = 76, fp id = 44)
+[09-01 20:13:33.570] D/RPCS3: Add program (vp id = 106, fp id = 24)
+[09-01 20:13:33.570] D/RPCS3: Add program (vp id = 7, fp id = 13)
+[09-01 20:13:33.570] D/RPCS3: Add program (vp id = 135, fp id = 71)
+[09-01 20:13:33.570] D/RPCS3: Add program (vp id = 3, fp id = 167)
+[09-01 20:13:33.570] D/RPCS3: Add program (vp id = 2, fp id = 13)
+[09-01 20:13:33.571] D/RPCS3: Add program (vp id = 3, fp id = 38)
+[09-01 20:13:33.597] D/RPCS3: Add program (vp id = 124, fp id = 50)
+[09-01 20:13:33.597] D/RPCS3: Add program (vp id = 7, fp id = 14)
+[09-01 20:13:33.598] D/RPCS3: Add program (vp id = 124, fp id = 61)
+[09-01 20:13:33.598] D/RPCS3: Add program (vp id = 3, fp id = 146)
+[09-01 20:13:33.598] D/RPCS3: Add program (vp id = 5, fp id = 139)
+[09-01 20:13:33.598] D/RPCS3: Add program (vp id = 3, fp id = 18)
+[09-01 20:13:33.598] D/RPCS3: Add program (vp id = 0, fp id = 11)
+[09-01 20:13:33.598] D/RPCS3: Add program (vp id = 68, fp id = 83)
+[09-01 20:13:33.598] D/RPCS3: Add program (vp id = 3, fp id = 146)
+[09-01 20:13:33.598] D/RPCS3: Add program (vp id = 3, fp id = 50)
+[09-01 20:13:33.598] D/RPCS3: Add program (vp id = 3, fp id = 60)
+[09-01 20:13:33.598] D/RPCS3: Add program (vp id = 20, fp id = 75)
+[09-01 20:13:33.598] D/RPCS3: Add program (vp id = 4, fp id = 94)
+[09-01 20:13:33.598] D/RPCS3: Add program (vp id = 12, fp id = 94)
+[09-01 20:13:33.598] D/RPCS3: Add program (vp id = 114, fp id = 33)
+[09-01 20:13:33.630] D/RPCS3: Add program (vp id = 3, fp id = 38)
+[09-01 20:13:33.630] D/RPCS3: Add program (vp id = 47, fp id = 63)
+[09-01 20:13:33.630] D/RPCS3: Add program (vp id = 7, fp id = 30)
+[09-01 20:13:33.630] D/RPCS3: Add program (vp id = 10, fp id = 168)
+[09-01 20:13:33.630] D/RPCS3: Add program (vp id = 29, fp id = 22)
+[09-01 20:13:33.630] D/RPCS3: Add program (vp id = 114, fp id = 36)
+[09-01 20:13:33.630] D/RPCS3: Add program (vp id = 68, fp id = 64)
+[09-01 20:13:33.631] D/RPCS3: Add program (vp id = 39, fp id = 11)
+[09-01 20:13:33.631] D/RPCS3: Add program (vp id = 105, fp id = 59)
+[09-01 20:13:33.631] D/RPCS3: Add program (vp id = 57, fp id = 22)
+[09-01 20:13:33.632] D/RPCS3: Add program (vp id = 39, fp id = 26)
+[09-01 20:13:33.632] D/RPCS3: Add program (vp id = 5, fp id = 28)
+[09-01 20:13:33.632] D/RPCS3: Add program (vp id = 7, fp id = 11)
+[09-01 20:13:33.632] D/RPCS3: Add program (vp id = 20, fp id = 154)
+[09-01 20:13:33.632] D/RPCS3: Add program (vp id = 20, fp id = 137)
+[09-01 20:13:33.632] D/RPCS3: Add program (vp id = 3, fp id = 146)
+[09-01 20:13:33.632] D/RPCS3: Add program (vp id = 20, fp id = 154)
+[09-01 20:13:33.632] D/RPCS3: Add program (vp id = 29, fp id = 22)
+[09-01 20:13:33.632] D/RPCS3: Add program (vp id = 5, fp id = 28)
+[09-01 20:13:33.680] D/RPCS3: Add program (vp id = 8, fp id = 33)
+[09-01 20:13:33.680] D/RPCS3: Add program (vp id = 12, fp id = 24)
+[09-01 20:13:33.680] D/RPCS3: Add program (vp id = 6, fp id = 44)
+[09-01 20:13:33.680] D/RPCS3: Add program (vp id = 62, fp id = 36)
+[09-01 20:13:33.681] D/RPCS3: Add program (vp id = 2, fp id = 43)
+[09-01 20:13:33.681] D/RPCS3: Add program (vp id = 3, fp id = 101)
+[09-01 20:13:33.681] D/RPCS3: Add program (vp id = 15, fp id = 59)
+[09-01 20:13:33.681] D/RPCS3: Add program (vp id = 7, fp id = 130)
+[09-01 20:13:33.681] D/RPCS3: Add program (vp id = 138, fp id = 130)
+[09-01 20:13:33.689] D/RPCS3: Add program (vp id = 3, fp id = 101)
+[09-01 20:13:33.690] D/RPCS3: Add program (vp id = 3, fp id = 101)
+[09-01 20:13:33.690] D/RPCS3: Add program (vp id = 0, fp id = 43)
+[09-01 20:13:33.690] D/RPCS3: Add program (vp id = 76, fp id = 88)
+[09-01 20:13:33.691] D/RPCS3: Add program (vp id = 98, fp id = 74)
+[09-01 20:13:33.691] D/RPCS3: Add program (vp id = 62, fp id = 33)
+[09-01 20:13:33.706] D/RPCS3: Add program (vp id = 110, fp id = 158)
+[09-01 20:13:33.738] D/RPCS3: Add program (vp id = 118, fp id = 136)
+[09-01 20:13:33.738] D/RPCS3: Add program (vp id = 4, fp id = 94)
+[09-01 20:13:33.739] D/RPCS3: Add program (vp id = 85, fp id = 134)
+[09-01 20:13:33.758] D/RPCS3: Add program (vp id = 199, fp id = 26)
+[09-01 20:13:33.760] D/RPCS3: Add program (vp id = 29, fp id = 22)
+[09-01 20:13:33.760] D/RPCS3: Add program (vp id = 39, fp id = 43)
+[09-01 20:13:33.760] D/RPCS3: Add program (vp id = 21, fp id = 46)
+[09-01 20:13:33.760] D/RPCS3: Add program (vp id = 0, fp id = 11)
+[09-01 20:13:33.760] D/RPCS3: Add program (vp id = 4, fp id = 45)
+[09-01 20:13:33.762] D/RPCS3: Add program (vp id = 41, fp id = 11)
+[09-01 20:13:33.762] D/RPCS3: Add program (vp id = 21, fp id = 35)
+[09-01 20:13:33.762] D/RPCS3: Add program (vp id = 2, fp id = 13)
+[09-01 20:13:33.762] D/RPCS3: Add program (vp id = 20, fp id = 54)
+[09-01 20:13:33.762] D/RPCS3: Add program (vp id = 20, fp id = 52)
+[09-01 20:13:33.762] D/RPCS3: Add program (vp id = 20, fp id = 34)
+[09-01 20:13:33.763] D/RPCS3: Add program (vp id = 20, fp id = 52)
+[09-01 20:13:33.763] D/RPCS3: Add program (vp id = 20, fp id = 52)
+[09-01 20:13:33.763] D/RPCS3: Add program (vp id = 8, fp id = 36)
+[09-01 20:13:33.772] D/RPCS3: Add program (vp id = 2, fp id = 11)
+[09-01 20:13:33.774] D/RPCS3: Add program (vp id = 8, fp id = 77)
+[09-01 20:13:33.774] D/RPCS3: Add program (vp id = 3, fp id = 53)
+[09-01 20:13:33.775] D/RPCS3: Add program (vp id = 114, fp id = 36)
+[09-01 20:13:33.775] D/RPCS3: Add program (vp id = 114, fp id = 33)
+[09-01 20:13:33.791] D/RPCS3: Add program (vp id = 41, fp id = 43)
+[09-01 20:13:33.824] D/RPCS3: Add program (vp id = 10, fp id = 191)
+[09-01 20:13:33.824] D/RPCS3: Add program (vp id = 177, fp id = 74)
+[09-01 20:13:33.836] D/RPCS3: Add program (vp id = 3, fp id = 146)
+[09-01 20:13:33.837] D/RPCS3: Add program (vp id = 176, fp id = 130)
+[09-01 20:13:33.850] D/RPCS3: Add program (vp id = 106, fp id = 151)
+[09-01 20:13:33.850] D/RPCS3: Add program (vp id = 20, fp id = 34)
+[09-01 20:13:33.850] D/RPCS3: Add program (vp id = 148, fp id = 63)
+[09-01 20:13:33.850] D/RPCS3: Add program (vp id = 153, fp id = 130)
+[09-01 20:13:33.850] D/RPCS3: Add program (vp id = 20, fp id = 34)
+[09-01 20:13:33.850] D/RPCS3: Add program (vp id = 68, fp id = 115)
+[09-01 20:13:33.850] D/RPCS3: Add program (vp id = 129, fp id = 55)
+[09-01 20:13:33.850] D/RPCS3: Add program (vp id = 29, fp id = 32)
+[09-01 20:13:33.850] D/RPCS3: Add program (vp id = 3, fp id = 18)
+[09-01 20:13:33.850] D/RPCS3: Add program (vp id = 6, fp id = 67)
+[09-01 20:13:33.850] D/RPCS3: Add program (vp id = 20, fp id = 34)
+[09-01 20:13:33.850] D/RPCS3: Add program (vp id = 3, fp id = 18)
+[09-01 20:13:33.850] D/RPCS3: Add program (vp id = 37, fp id = 46)
+[09-01 20:13:33.900] D/RPCS3: Add program (vp id = 4, fp id = 24)
+[09-01 20:13:33.900] D/RPCS3: Add program (vp id = 69, fp id = 72)
+[09-01 20:13:33.901] D/RPCS3: Add program (vp id = 65, fp id = 72)
+[09-01 20:13:33.901] D/RPCS3: Add program (vp id = 66, fp id = 44)
+[09-01 20:13:33.901] D/RPCS3: Add program (vp id = 23, fp id = 19)
+[09-01 20:13:33.902] D/RPCS3: Add program (vp id = 68, fp id = 83)
+[09-01 20:13:33.902] D/RPCS3: Add program (vp id = 39, fp id = 30)
+[09-01 20:13:33.902] D/RPCS3: Add program (vp id = 114, fp id = 77)
+[09-01 20:13:33.902] D/RPCS3: Add program (vp id = 92, fp id = 24)
+[09-01 20:13:33.902] D/RPCS3: Add program (vp id = 57, fp id = 22)
+[09-01 20:13:33.903] D/RPCS3: Add program (vp id = 104, fp id = 14)
+[09-01 20:13:33.904] D/RPCS3: Add program (vp id = 104, fp id = 14)
+[09-01 20:13:33.904] D/RPCS3: Add program (vp id = 39, fp id = 11)
+[09-01 20:13:33.904] D/RPCS3: Add program (vp id = 29, fp id = 59)
+[09-01 20:13:33.904] D/RPCS3: Add program (vp id = 0, fp id = 43)
+[09-01 20:13:33.904] D/RPCS3: Add program (vp id = 0, fp id = 30)
+[09-01 20:13:33.904] D/RPCS3: Add program (vp id = 104, fp id = 13)
+[09-01 20:13:33.904] D/RPCS3: Add program (vp id = 85, fp id = 102)
+[09-01 20:13:33.908] D/RPCS3: Add program (vp id = 20, fp id = 100)
+[09-01 20:13:33.908] D/RPCS3: Add program (vp id = 7, fp id = 79)
+[09-01 20:13:33.908] D/RPCS3: Add program (vp id = 66, fp id = 88)
+[09-01 20:13:33.913] D/RPCS3: Add program (vp id = 62, fp id = 33)
+[09-01 20:13:33.913] D/RPCS3: Add program (vp id = 7, fp id = 30)
+[09-01 20:13:33.913] D/RPCS3: Add program (vp id = 3, fp id = 53)
+[09-01 20:13:33.913] D/RPCS3: Add program (vp id = 21, fp id = 46)
+[09-01 20:13:33.913] D/RPCS3: Add program (vp id = 3, fp id = 53)
+[09-01 20:13:33.913] D/RPCS3: Add program (vp id = 39, fp id = 14)
+[09-01 20:13:33.914] D/RPCS3: Add program (vp id = 164, fp id = 128)
+[09-01 20:13:33.915] D/RPCS3: Add program (vp id = 20, fp id = 75)
+[09-01 20:13:33.915] D/RPCS3: Add program (vp id = 7, fp id = 14)
+[09-01 20:13:33.915] D/RPCS3: Add program (vp id = 125, fp id = 127)
+[09-01 20:13:33.915] D/RPCS3: Add program (vp id = 68, fp id = 64)
+[09-01 20:13:33.946] D/RPCS3: Add program (vp id = 126, fp id = 30)
+[09-01 20:13:33.946] D/RPCS3: Add program (vp id = 3, fp id = 192)
+[09-01 20:13:33.946] D/RPCS3: Add program (vp id = 76, fp id = 49)
+[09-01 20:13:33.946] D/RPCS3: Add program (vp id = 29, fp id = 121)
+[09-01 20:13:33.946] D/RPCS3: Add program (vp id = 187, fp id = 193)
+[09-01 20:13:33.947] D/RPCS3: Add program (vp id = 29, fp id = 22)
+[09-01 20:13:33.947] D/RPCS3: Add program (vp id = 10, fp id = 96)
+[09-01 20:13:33.947] D/RPCS3: Add program (vp id = 20, fp id = 54)
+[09-01 20:13:33.947] D/RPCS3: Add program (vp id = 189, fp id = 195)
+[09-01 20:13:33.977] D/RPCS3: Add program (vp id = 39, fp id = 11)
+[09-01 20:13:33.977] D/RPCS3: Add program (vp id = 119, fp id = 72)
+[09-01 20:13:33.977] D/RPCS3: Add program (vp id = 2, fp id = 43)
+[09-01 20:13:33.977] D/RPCS3: Add program (vp id = 3, fp id = 50)
+[09-01 20:13:33.977] D/RPCS3: Add program (vp id = 23, fp id = 121)
+[09-01 20:13:33.977] D/RPCS3: Add program (vp id = 123, fp id = 55)
+[09-01 20:13:33.977] D/RPCS3: Add program (vp id = 7, fp id = 55)
+[09-01 20:13:33.977] D/RPCS3: Add program (vp id = 21, fp id = 74)
+[09-01 20:13:33.977] D/RPCS3: Add program (vp id = 108, fp id = 94)
+[09-01 20:13:33.989] D/RPCS3: Add program (vp id = 3, fp id = 146)
+[09-01 20:13:33.989] D/RPCS3: Add program (vp id = 104, fp id = 55)
+[09-01 20:13:33.990] D/RPCS3: Add program (vp id = 200, fp id = 158)
+[09-01 20:13:33.992] D/RPCS3: Add program (vp id = 68, fp id = 115)
+[09-01 20:13:33.992] D/RPCS3: Add program (vp id = 164, fp id = 178)
+[09-01 20:13:34.017] D/RPCS3: Add program (vp id = 3, fp id = 18)
+[09-01 20:13:34.017] D/RPCS3: Add program (vp id = 0, fp id = 13)
+[09-01 20:13:34.017] D/RPCS3: Add program (vp id = 90, fp id = 30)
+[09-01 20:13:34.017] D/RPCS3: Add program (vp id = 105, fp id = 22)
+[09-01 20:13:34.017] D/RPCS3: Add program (vp id = 3, fp id = 111)
+[09-01 20:13:34.017] D/RPCS3: Add program (vp id = 4, fp id = 49)
+[09-01 20:13:34.041] D/RPCS3: Add program (vp id = 76, fp id = 45)
+[09-01 20:13:34.041] D/RPCS3: Add program (vp id = 125, fp id = 158)
+[09-01 20:13:34.041] D/RPCS3: Add program (vp id = 12, fp id = 67)
+[09-01 20:13:34.041] D/RPCS3: Add program (vp id = 123, fp id = 26)
+[09-01 20:13:34.085] D/RPCS3: Add program (vp id = 20, fp id = 34)
+[09-01 20:13:34.085] D/RPCS3: Add program (vp id = 3, fp id = 38)
+[09-01 20:13:34.085] D/RPCS3: Add program (vp id = 66, fp id = 94)
+[09-01 20:13:34.085] D/RPCS3: Add program (vp id = 6, fp id = 49)
+[09-01 20:13:34.085] D/RPCS3: Add program (vp id = 39, fp id = 55)
+[09-01 20:13:34.085] D/RPCS3: Add program (vp id = 3, fp id = 146)
+[09-01 20:13:34.085] D/RPCS3: Add program (vp id = 20, fp id = 201)
+[09-01 20:13:34.085] D/RPCS3: Add program (vp id = 3, fp id = 53)
+[09-01 20:13:34.085] D/RPCS3: Add program (vp id = 20, fp id = 201)
+[09-01 20:13:34.085] D/RPCS3: Add program (vp id = 202, fp id = 94)
+[09-01 20:13:34.103] D/RPCS3: Add program (vp id = 194, fp id = 158)
+[09-01 20:13:34.139] D/RPCS3: Add program (vp id = 153, fp id = 130)
+[09-01 20:13:34.139] D/RPCS3: Add program (vp id = 3, fp id = 122)
+[09-01 20:13:34.139] D/RPCS3: Add program (vp id = 66, fp id = 44)
+[09-01 20:13:34.139] D/RPCS3: Add program (vp id = 114, fp id = 77)
+[09-01 20:13:34.139] D/RPCS3: Add program (vp id = 3, fp id = 38)
+[09-01 20:13:34.139] D/RPCS3: Add program (vp id = 65, fp id = 46)
+[09-01 20:13:34.139] D/RPCS3: Add program (vp id = 7, fp id = 130)
+[09-01 20:13:34.139] D/RPCS3: Add program (vp id = 68, fp id = 80)
+[09-01 20:13:34.140] D/RPCS3: Add program (vp id = 20, fp id = 34)
+[09-01 20:13:34.140] D/RPCS3: Add program (vp id = 20, fp id = 25)
+[09-01 20:13:34.140] D/RPCS3: Add program (vp id = 10, fp id = 27)
+[09-01 20:13:34.140] D/RPCS3: Add program (vp id = 177, fp id = 74)
+[09-01 20:13:34.140] D/RPCS3: Add program (vp id = 3, fp id = 53)
+[09-01 20:13:34.173] D/RPCS3: Add program (vp id = 82, fp id = 74)
+[09-01 20:13:34.173] D/RPCS3: Add program (vp id = 68, fp id = 83)
+[09-01 20:13:34.173] D/RPCS3: Add program (vp id = 5, fp id = 121)
+[09-01 20:13:34.173] D/RPCS3: Add program (vp id = 5, fp id = 32)
+[09-01 20:13:34.173] D/RPCS3: Add program (vp id = 66, fp id = 49)
+[09-01 20:13:34.173] D/RPCS3: Add program (vp id = 92, fp id = 49)
+[09-01 20:13:34.185] D/RPCS3: Add program (vp id = 110, fp id = 152)
+[09-01 20:13:34.192] D/RPCS3: Add program (vp id = 5, fp id = 196)
+[09-01 20:13:34.252] D/RPCS3: Add program (vp id = 20, fp id = 166)
+[09-01 20:13:34.252] D/RPCS3: Add program (vp id = 20, fp id = 203)
+[09-01 20:13:34.252] D/RPCS3: Add program (vp id = 149, fp id = 30)
+[09-01 20:13:34.252] D/RPCS3: Add program (vp id = 204, fp id = 71)
+[09-01 20:13:34.289] D/RPCS3: Add program (vp id = 3, fp id = 107)
+[09-01 20:13:34.289] D/RPCS3: Add program (vp id = 5, fp id = 19)
+[09-01 20:13:34.289] D/RPCS3: Add program (vp id = 153, fp id = 55)
+[09-01 20:13:34.289] D/RPCS3: Add program (vp id = 21, fp id = 72)
+[09-01 20:13:34.290] D/RPCS3: Add program (vp id = 0, fp id = 11)
+[09-01 20:13:34.290] D/RPCS3: Add program (vp id = 20, fp id = 42)
+[09-01 20:13:34.290] D/RPCS3: Add program (vp id = 4, fp id = 67)
+[09-01 20:13:34.290] D/RPCS3: Add program (vp id = 7, fp id = 14)
+[09-01 20:13:34.349] D/RPCS3: Reading OPD section at 0x750718...
+[09-01 20:13:34.414] D/RPCS3: Function [0x653c24]: 'abort'
+[09-01 20:13:34.601] D/RPCS3: Function analysis: 20197 functions (43547 enqueued)
+[09-01 20:13:34.793] D/RPCS3: Block analysis: 338412 blocks (127 enqueued)
+[09-01 20:13:35.494] D/RPCS3: S3PPU stage=link-begin tid=500023530176 modules=71 jits=1
+[09-01 20:13:35.505] I/RPCS3: LLVM: Loaded module v7-kusa-d2PmguPsVA4PtEp2YsdLM9-00001P-cortex-a34-2.obj
+[09-01 20:13:35.517] I/RPCS3: LLVM: Loaded module v7-kusa-0fKTqk26MJFRyYJYJKLvar-00001P-cortex-a34-2.obj
+[09-01 20:13:35.530] I/RPCS3: LLVM: Loaded module v7-kusa-LKHgG8AfoqVCAqt9yCEPeg-00001P-cortex-a34-2.obj
+[09-01 20:13:35.541] I/RPCS3: LLVM: Loaded module v7-kusa-CV6Z2HE0kG9hi5QN5qsioH-00001P-cortex-a34-2.obj
+[09-01 20:13:35.555] I/RPCS3: LLVM: Loaded module v7-kusa-T5nqAfgpgNqVFoEbHFiQ9N-00001P-cortex-a34-2.obj
+[09-01 20:13:35.567] I/RPCS3: LLVM: Loaded module v7-kusa-Jx18okpJyru2Zz2CUAVnLJ-00001P-cortex-a34-2.obj
+[09-01 20:13:35.579] I/RPCS3: LLVM: Loaded module v7-kusa-YFzduomHbtEmqwHfKL8Lsj-00001P-cortex-a34-2.obj
+[09-01 20:13:35.590] I/RPCS3: LLVM: Loaded module v7-kusa-tauJFnGdprRaxiexRC7LWV-00001P-cortex-a34-2.obj
+[09-01 20:13:35.602] I/RPCS3: LLVM: Loaded module v7-kusa-ZCdukmVHouqYaY4V70YXXP-00001P-cortex-a34-2.obj
+[09-01 20:13:35.616] I/RPCS3: LLVM: Loaded module v7-kusa-8himF1nNdhM0JoFqpd6H6z-00001P-cortex-a34-2.obj
+[09-01 20:13:35.625] I/RPCS3: LLVM: Loaded module v7-kusa-9biJMvkwjuRcYkEA0bheYQ-00001P-cortex-a34-2.obj
+[09-01 20:13:35.637] I/RPCS3: LLVM: Loaded module v7-kusa-8Qoy4jZueoUWUJRn7KFJcu-00001P-cortex-a34-2.obj
+[09-01 20:13:35.650] I/RPCS3: LLVM: Loaded module v7-kusa-UkSzsGXwNTqE8mkSKqviLg-00001P-cortex-a34-2.obj
+[09-01 20:13:35.666] I/RPCS3: LLVM: Loaded module v7-kusa-2o3XWctXqgaAvLxtWyfzi8-00001P-cortex-a34-2.obj
+[09-01 20:13:35.672] I/RPCS3: LLVM: Loaded module v7-kusa-A9fw7jNMqW94dHNj5wMPSC-00001P-cortex-a34-2.obj
+[09-01 20:13:35.686] I/RPCS3: LLVM: Loaded module v7-kusa-XjHuiWEpfkiRu3LAXmkAH2-00001P-cortex-a34-2.obj
+[09-01 20:13:35.699] I/RPCS3: LLVM: Loaded module v7-kusa-midP8zv55K8747MWAkm26d-00001P-cortex-a34-2.obj
+[09-01 20:13:35.710] I/RPCS3: LLVM: Loaded module v7-kusa-izbGjdXwwCGcqopHWnhvwt-00001P-cortex-a34-2.obj
+[09-01 20:13:35.722] I/RPCS3: LLVM: Loaded module v7-kusa-FuCM8ttnTMHkoxgxg8x44j-00001P-cortex-a34-2.obj
+[09-01 20:13:35.734] I/RPCS3: LLVM: Loaded module v7-kusa-PVQ0TGrtA1GtrATf9LCPkk-00001P-cortex-a34-2.obj
+[09-01 20:13:35.748] I/RPCS3: LLVM: Loaded module v7-kusa-t1bjmuXNTSd0w6KTWQeukz-00001P-cortex-a34-2.obj
+[09-01 20:13:35.764] I/RPCS3: LLVM: Loaded module v7-kusa-nSQHQsEYfN8ipCWNQyA11u-00001P-cortex-a34-2.obj
+[09-01 20:13:35.778] I/RPCS3: LLVM: Loaded module v7-kusa-sre7cw4ZjMYNMkqLJpmXWr-00001P-cortex-a34-2.obj
+[09-01 20:13:35.791] I/RPCS3: LLVM: Loaded module v7-kusa-oiM1fFNvN61fSLwPbttcgJ-00001P-cortex-a34-2.obj
+[09-01 20:13:35.802] I/RPCS3: LLVM: Loaded module v7-kusa-qNEVZh4tSFW6XUWY8pSUdr-00001P-cortex-a34-2.obj
+[09-01 20:13:35.814] I/RPCS3: LLVM: Loaded module v7-kusa-tWmFYxffLEKE1XL44tJzY6-00001P-cortex-a34-2.obj
+[09-01 20:13:35.826] I/RPCS3: LLVM: Loaded module v7-kusa-HggUnpLmGG9Let9ZLUd5VZ-00001P-cortex-a34-2.obj
+[09-01 20:13:35.840] I/RPCS3: LLVM: Loaded module v7-kusa-a6d2wV3SifcgqdQowYmXgG-00001P-cortex-a34-2.obj
+[09-01 20:13:35.854] I/RPCS3: LLVM: Loaded module v7-kusa-Cwc1bTu082SeivCyrC2Y77-00001P-cortex-a34-2.obj
+[09-01 20:13:35.867] I/RPCS3: LLVM: Loaded module v7-kusa-Qh7jMrZwEkPnXpcYkPhRjL-00001P-cortex-a34-2.obj
+[09-01 20:13:35.880] I/RPCS3: LLVM: Loaded module v7-kusa-KKk3bFtEXxedkLkNcKR9gG-00001P-cortex-a34-2.obj
+[09-01 20:13:35.893] I/RPCS3: LLVM: Loaded module v7-kusa-n8fd1Pg2UaCjoRkTpsR1xq-00001P-cortex-a34-2.obj
+[09-01 20:13:35.907] I/RPCS3: LLVM: Loaded module v7-kusa-qa4YrqfhrUgTEgej1wEyNL-00001P-cortex-a34-2.obj
+[09-01 20:13:35.920] I/RPCS3: LLVM: Loaded module v7-kusa-pRyEpLb1b22jxF63uiKAxd-00001P-cortex-a34-2.obj
+[09-01 20:13:35.933] I/RPCS3: LLVM: Loaded module v7-kusa-cWS0Yoa70fLRwk7aYgqE1b-00001P-cortex-a34-2.obj
+[09-01 20:13:35.946] I/RPCS3: LLVM: Loaded module v7-kusa-8o15SXAALsQZAbsTcMzxsx-00001P-cortex-a34-2.obj
+[09-01 20:13:35.957] I/RPCS3: LLVM: Loaded module v7-kusa-5ZZsNuLJPSspSm4hY47GPz-00001P-cortex-a34-2.obj
+[09-01 20:13:35.967] I/RPCS3: LLVM: Loaded module v7-kusa-MKraLV1ACvpKcwE79xK6Q5-00001P-cortex-a34-2.obj
+[09-01 20:13:35.978] I/RPCS3: LLVM: Loaded module v7-kusa-F4KroqWAMzcTE3YQ2MiPEs-00001P-cortex-a34-2.obj
+[09-01 20:13:35.990] I/RPCS3: LLVM: Loaded module v7-kusa-0av3xbCj5SPd68iSHjTFzJ-00001P-cortex-a34-2.obj
+[09-01 20:13:36.005] I/RPCS3: LLVM: Loaded module v7-kusa-0MT4i6RKf1KWZdsZ4bGELg-00001P-cortex-a34-2.obj
+[09-01 20:13:36.018] I/RPCS3: LLVM: Loaded module v7-kusa-eCk7yeXoYaHdpp7fPUnMi9-00001P-cortex-a34-2.obj
+[09-01 20:13:36.034] I/RPCS3: LLVM: Loaded module v7-kusa-0fm1GTcaJZoKCgTeWxbJv4-00001P-cortex-a34-2.obj
+[09-01 20:13:36.047] I/RPCS3: LLVM: Loaded module v7-kusa-5bRoJ7JesuCsh6KbMHKtbW-00001P-cortex-a34-2.obj
+[09-01 20:13:36.063] I/RPCS3: LLVM: Loaded module v7-kusa-0mQfWiJhMA82sdUrvs0khy-00001P-cortex-a34-2.obj
+[09-01 20:13:36.077] I/RPCS3: LLVM: Loaded module v7-kusa-aCN07PJ57Y8bbcUeUQsYCS-00001P-cortex-a34-2.obj
+[09-01 20:13:36.092] I/RPCS3: LLVM: Loaded module v7-kusa-PMqe7CQatdxF7o5L22Fqnj-00001P-cortex-a34-2.obj
+[09-01 20:13:36.106] I/RPCS3: LLVM: Loaded module v7-kusa-AJyn1jP2goWtYpwjQUG1NE-00001P-cortex-a34-2.obj
+[09-01 20:13:36.120] I/RPCS3: LLVM: Loaded module v7-kusa-GGMbAXpNzpKrpkas1Pnid4-00001P-cortex-a34-2.obj
+[09-01 20:13:36.133] I/RPCS3: LLVM: Loaded module v7-kusa-NVsKZYWfoWQEnbxUAdE7FP-00001P-cortex-a34-2.obj
+[09-01 20:13:36.145] I/RPCS3: LLVM: Loaded module v7-kusa-7Jc5xewPYm7ohRWiL9bGPv-00001P-cortex-a34-2.obj
+[09-01 20:13:36.160] I/RPCS3: LLVM: Loaded module v7-kusa-cFaovc4RwCF2APvpPR6EQK-00001P-cortex-a34-2.obj
+[09-01 20:13:36.173] I/RPCS3: LLVM: Loaded module v7-kusa-pzowthE2N1AdvHnYqY5sVG-00001P-cortex-a34-2.obj
+[09-01 20:13:36.187] I/RPCS3: LLVM: Loaded module v7-kusa-2GqWhXcKXfSC66t173WMsV-00001P-cortex-a34-2.obj
+[09-01 20:13:36.199] I/RPCS3: LLVM: Loaded module v7-kusa-nGoa0sdTcvEKwmfz1RVVeb-00001P-cortex-a34-2.obj
+[09-01 20:13:36.211] I/RPCS3: LLVM: Loaded module v7-kusa-hjm6okMZCXCn1HGEZ56cLe-00001P-cortex-a34-2.obj
+[09-01 20:13:36.224] I/RPCS3: LLVM: Loaded module v7-kusa-bw5dQbdvvfhfnH4q5eQ1Rt-00001P-cortex-a34-2.obj
+[09-01 20:13:36.234] I/RPCS3: LLVM: Loaded module v7-kusa-ZPqJphARGHVUWuhnZf5FpN-00001P-cortex-a34-2.obj
+[09-01 20:13:36.246] I/RPCS3: LLVM: Loaded module v7-kusa-Q5gooWnmi8ttKjE6vV9gEj-00001P-cortex-a34-2.obj
+[09-01 20:13:36.257] I/RPCS3: LLVM: Loaded module v7-kusa-7rystS1WgE9jTor1FZUTAc-00001P-cortex-a34-2.obj
+[09-01 20:13:36.268] I/RPCS3: LLVM: Loaded module v7-kusa-FvKzXeEmKcm25bnFGffZUG-00001P-cortex-a34-2.obj
+[09-01 20:13:36.280] I/RPCS3: LLVM: Loaded module v7-kusa-1U4dt3HoV4JrYTSb1bKweJ-00001P-cortex-a34-2.obj
+[09-01 20:13:36.291] I/RPCS3: LLVM: Loaded module v7-kusa-e6ATd2KVjkogkkmZLg99Eb-00001P-cortex-a34-2.obj
+[09-01 20:13:36.303] I/RPCS3: LLVM: Loaded module v7-kusa-e1pzmaxEKE2eTZpzsnJNym-00001P-cortex-a34-2.obj
+[09-01 20:13:36.315] I/RPCS3: LLVM: Loaded module v7-kusa-VtjodHCPdvUHeaxzyv3MyV-00001P-cortex-a34-2.obj
+[09-01 20:13:36.326] I/RPCS3: LLVM: Loaded module v7-kusa-dGzZQpWiRbdSuGoHfX8tQ9-00001P-cortex-a34-2.obj
+[09-01 20:13:36.339] I/RPCS3: LLVM: Loaded module v7-kusa-2eing5WtGi8TuZPntN3Ewf-00001P-cortex-a34-2.obj
+[09-01 20:13:36.351] I/RPCS3: LLVM: Loaded module v7-kusa-rkvqU1Fc2bgSR350mriWgr-00001P-cortex-a34-2.obj
+[09-01 20:13:36.362] I/RPCS3: LLVM: Loaded module v7-kusa-oAquyXZWSXdTcdScQ13xiR-00001P-cortex-a34-2.obj
+[09-01 20:13:36.374] I/RPCS3: LLVM: Loaded module v7-kusa-0kxgLUGj7vJLR8iErKyEdH-00001P-cortex-a34-2.obj
+[09-01 20:13:36.653] I/RPCS3: LLVM: Loaded module v7-kusa-LR4Na4TsoML9mdoYPYYSpc-0004Xr-cortex-a34-2.obj
+[09-01 20:13:36.653] D/RPCS3: S3PPU stage=link-end tid=500023530176 failed=0 jits=1
+[09-01 20:13:36.653] D/RPCS3: S3PPU stage=apply-begin tid=500023530176 jits=1 resolver_count=1 first=1
+[09-01 20:13:36.653] D/RPCS3: S3PPU stage=jit-finalize-begin tid=500023530176 index=0 total=1
+[09-01 20:13:36.670] D/RPCS3: S3PPU stage=jit-finalize-end tid=500023530176 index=0 total=1
+[09-01 20:13:36.672] D/RPCS3: S3PPU stage=apply-end tid=500023530176 resolvers=1 first=1
+[09-01 20:13:36.684] D/RPCS3: S3PPU stage=link-begin tid=500023530176 modules=0 jits=1
+[09-01 20:13:36.684] D/RPCS3: S3PPU stage=link-end tid=500023530176 failed=0 jits=1
+[09-01 20:13:36.684] D/RPCS3: S3PPU stage=apply-begin tid=500023530176 jits=1 resolver_count=1 first=0
+[09-01 20:13:36.685] D/RPCS3: S3PPU stage=apply-end tid=500023530176 resolvers=1 first=0
+[09-01 20:13:36.692] D/RPCS3: S3PPU stage=link-begin tid=500023530176 modules=1 jits=1
+[09-01 20:13:36.702] I/RPCS3: LLVM: Loaded module v7-kusa-2tV4iEAdVg43etCtc4k221-0004Xr-cortex-a34-2.obj
+[09-01 20:13:36.702] D/RPCS3: S3PPU stage=link-end tid=500023530176 failed=0 jits=1
+[09-01 20:13:36.702] D/RPCS3: S3PPU stage=apply-begin tid=500023530176 jits=1 resolver_count=1 first=1
+[09-01 20:13:36.702] D/RPCS3: S3PPU stage=jit-finalize-begin tid=500023530176 index=0 total=1
+[09-01 20:13:36.703] D/RPCS3: S3PPU stage=jit-finalize-end tid=500023530176 index=0 total=1
+[09-01 20:13:36.703] D/RPCS3: S3PPU stage=apply-end tid=500023530176 resolvers=1 first=1
+[09-01 20:13:36.705] D/RPCS3: S3PPU stage=link-begin tid=500023530176 modules=1 jits=1
+[09-01 20:13:36.708] I/RPCS3: LLVM: Loaded module v7-kusa-7LHmPKQURuTbHwAhSpWFH6-0004Xr-cortex-a34-2.obj
+[09-01 20:13:36.708] D/RPCS3: S3PPU stage=link-end tid=500023530176 failed=0 jits=1
+[09-01 20:13:36.708] D/RPCS3: S3PPU stage=apply-begin tid=500023530176 jits=1 resolver_count=1 first=1
+[09-01 20:13:36.708] D/RPCS3: S3PPU stage=jit-finalize-begin tid=500023530176 index=0 total=1
+[09-01 20:13:36.709] D/RPCS3: S3PPU stage=jit-finalize-end tid=500023530176 index=0 total=1
+[09-01 20:13:36.709] D/RPCS3: S3PPU stage=apply-end tid=500023530176 resolvers=1 first=1
+[09-01 20:13:36.711] D/RPCS3: S3PPU stage=link-begin tid=500023530176 modules=1 jits=1
+[09-01 20:13:36.715] I/RPCS3: LLVM: Loaded module v7-kusa-XCgQWMc1s99n1WTwrpWvw4-0004Xr-cortex-a34-2.obj
+[09-01 20:13:36.715] D/RPCS3: S3PPU stage=link-end tid=500023530176 failed=0 jits=1
+[09-01 20:13:36.715] D/RPCS3: S3PPU stage=apply-begin tid=500023530176 jits=1 resolver_count=1 first=1
+[09-01 20:13:36.715] D/RPCS3: S3PPU stage=jit-finalize-begin tid=500023530176 index=0 total=1
+[09-01 20:13:36.716] D/RPCS3: S3PPU stage=jit-finalize-end tid=500023530176 index=0 total=1
+[09-01 20:13:36.716] D/RPCS3: S3PPU stage=apply-end tid=500023530176 resolvers=1 first=1
+[09-01 20:13:36.723] D/RPCS3: S3PPU stage=link-begin tid=500023530176 modules=2 jits=1
+[09-01 20:13:36.735] I/RPCS3: LLVM: Loaded module v7-kusa-GsbjiwC5Sm3exFcR5udHpE-00001P-cortex-a34-2.obj
+[09-01 20:13:36.740] I/RPCS3: LLVM: Loaded module v7-kusa-21xHoN2E2MFsanXhUVTS5N-0004Xr-cortex-a34-2.obj
+[09-01 20:13:36.740] D/RPCS3: S3PPU stage=link-end tid=500023530176 failed=0 jits=1
+[09-01 20:13:36.740] D/RPCS3: S3PPU stage=apply-begin tid=500023530176 jits=1 resolver_count=1 first=1
+[09-01 20:13:36.740] D/RPCS3: S3PPU stage=jit-finalize-begin tid=500023530176 index=0 total=1
+[09-01 20:13:36.742] D/RPCS3: S3PPU stage=jit-finalize-end tid=500023530176 index=0 total=1
+[09-01 20:13:36.742] D/RPCS3: S3PPU stage=apply-end tid=500023530176 resolvers=1 first=1
+[09-01 20:13:36.745] D/RPCS3: S3PPU stage=link-begin tid=500023530176 modules=1 jits=1
+[09-01 20:13:36.752] I/RPCS3: LLVM: Loaded module v7-kusa-fLV79QqHgPi90UziTsWrHo-0004Xr-cortex-a34-2.obj
+[09-01 20:13:36.752] D/RPCS3: S3PPU stage=link-end tid=500023530176 failed=0 jits=1
+[09-01 20:13:36.752] D/RPCS3: S3PPU stage=apply-begin tid=500023530176 jits=1 resolver_count=1 first=1
+[09-01 20:13:36.752] D/RPCS3: S3PPU stage=jit-finalize-begin tid=500023530176 index=0 total=1
+[09-01 20:13:36.752] D/RPCS3: S3PPU stage=jit-finalize-end tid=500023530176 index=0 total=1
+[09-01 20:13:36.752] D/RPCS3: S3PPU stage=apply-end tid=500023530176 resolvers=1 first=1
+[09-01 20:13:36.755] D/RPCS3: S3PPU stage=link-begin tid=500023530176 modules=1 jits=1
+[09-01 20:13:36.760] I/RPCS3: LLVM: Loaded module v7-kusa-GidnR56pzgun0Z5aqipN0L-0004Xr-cortex-a34-2.obj
+[09-01 20:13:36.760] D/RPCS3: S3PPU stage=link-end tid=500023530176 failed=0 jits=1
+[09-01 20:13:36.760] D/RPCS3: S3PPU stage=apply-begin tid=500023530176 jits=1 resolver_count=1 first=1
+[09-01 20:13:36.760] D/RPCS3: S3PPU stage=jit-finalize-begin tid=500023530176 index=0 total=1
+[09-01 20:13:36.761] D/RPCS3: S3PPU stage=jit-finalize-end tid=500023530176 index=0 total=1
+[09-01 20:13:36.761] D/RPCS3: S3PPU stage=apply-end tid=500023530176 resolvers=1 first=1
+[09-01 20:13:36.763] D/RPCS3: S3PPU stage=link-begin tid=500023530176 modules=1 jits=1
+[09-01 20:13:36.767] I/RPCS3: LLVM: Loaded module v7-kusa-e6Ztz5quEuXfyACR7GqJvc-0004Xr-cortex-a34-2.obj
+[09-01 20:13:36.767] D/RPCS3: S3PPU stage=link-end tid=500023530176 failed=0 jits=1
+[09-01 20:13:36.767] D/RPCS3: S3PPU stage=apply-begin tid=500023530176 jits=1 resolver_count=1 first=1
+[09-01 20:13:36.767] D/RPCS3: S3PPU stage=jit-finalize-begin tid=500023530176 index=0 total=1
+[09-01 20:13:36.768] D/RPCS3: S3PPU stage=jit-finalize-end tid=500023530176 index=0 total=1
+[09-01 20:13:36.768] D/RPCS3: S3PPU stage=apply-end tid=500023530176 resolvers=1 first=1
+[09-01 20:13:36.771] D/RPCS3: S3PPU stage=link-begin tid=500023530176 modules=1 jits=1
+[09-01 20:13:36.774] I/RPCS3: LLVM: Loaded module v7-kusa-WoisQeLxhd27z3jTVxPE2F-0004Xr-cortex-a34-2.obj
+[09-01 20:13:36.774] D/RPCS3: S3PPU stage=link-end tid=500023530176 failed=0 jits=1
+[09-01 20:13:36.774] D/RPCS3: S3PPU stage=apply-begin tid=500023530176 jits=1 resolver_count=1 first=1
+[09-01 20:13:36.774] D/RPCS3: S3PPU stage=jit-finalize-begin tid=500023530176 index=0 total=1
+[09-01 20:13:36.775] D/RPCS3: S3PPU stage=jit-finalize-end tid=500023530176 index=0 total=1
+[09-01 20:13:36.775] D/RPCS3: S3PPU stage=apply-end tid=500023530176 resolvers=1 first=1
+[09-01 20:13:36.777] D/RPCS3: S3PPU stage=link-begin tid=500023530176 modules=1 jits=1
+[09-01 20:13:36.780] I/RPCS3: LLVM: Loaded module v7-kusa-RbeaQbvifmZrUssxpkwsAm-0004Xr-cortex-a34-2.obj
+[09-01 20:13:36.780] D/RPCS3: S3PPU stage=link-end tid=500023530176 failed=0 jits=1
+[09-01 20:13:36.780] D/RPCS3: S3PPU stage=apply-begin tid=500023530176 jits=1 resolver_count=1 first=1
+[09-01 20:13:36.780] D/RPCS3: S3PPU stage=jit-finalize-begin tid=500023530176 index=0 total=1
+[09-01 20:13:36.781] D/RPCS3: S3PPU stage=jit-finalize-end tid=500023530176 index=0 total=1
+[09-01 20:13:36.781] D/RPCS3: S3PPU stage=apply-end tid=500023530176 resolvers=1 first=1
+[09-01 20:13:36.904] I/RPCS3: SPU Runtime: Built the interpreter.
+[09-01 20:13:36.905] D/RPCS3: SPU Runtime: Workers built 0 programs.
+[09-01 20:13:36.905] W/RPCS3: Threads (11)
+[09-01 20:13:36.905] W/RPCS3: Threads (10)
+[09-01 20:13:36.905] W/RPCS3: Threads (9)
+[09-01 20:13:36.905] W/RPCS3: Threads (8)
+[09-01 20:13:36.906] W/RPCS3: Threads (7)
+[09-01 20:13:36.906] W/RPCS3: Threads (6)
+[09-01 20:13:36.906] W/RPCS3: Threads (5): 0x1000007, 0x1000009, 0x100000d, 0x100000e, 0x100000f
+[09-01 20:13:36.907] W/RPCS3: Threads (4): 0x1000007, 0x100000d, 0x100000e, 0x100000f
+[09-01 20:13:36.907] W/RPCS3: Threads (3): 0x1000007, 0x100000d, 0x100000f
+[09-01 20:13:36.907] W/RPCS3: Threads (2): 0x100000d, 0x100000f
+[09-01 20:13:36.908] W/RPCS3: Threads (1): 0x100000f
+[09-01 20:13:36.908] W/RPCS3: Final Thread
+[09-01 20:13:36.914] W/RPCS3: [descriptor_manager::register] Now monitoring 3 descriptor sets
+[09-01 20:13:36.924] W/RPCS3: [descriptor_manager::register] Now monitoring 4 descriptor sets
+[09-01 20:13:37.509] D/RPCS3: S3PERF crosscheck source=emu_flip presented=36 native_fps=61.275 native_frametime_ms=17.068
+[09-01 20:13:38.010] D/RPCS3: S3PPU savestate-progress-cleared
+[09-01 20:13:38.788] D/RPCS3: S3PERF crosscheck source=emu_flip presented=111 native_fps=57.863 native_frametime_ms=17.042
+[09-01 20:13:39.079] D/RPCS3: CPU Usage: Total: 20.6%, Cores: 0.0%, 0.0%, 0.0%, 0.0%, 0.0%, 0.0%, 0.0%, 0.0%
+[09-01 20:13:39.269] D/RPCS3: PPU Syscall Usage Stats:
+[09-01 20:13:39.269] D/RPCS3: ⁂ sys_timer_usleep [17945]
+[09-01 20:13:39.269] D/RPCS3: ⁂ sys_ppu_thread_yield [17710]
+[09-01 20:13:39.269] D/RPCS3: ⁂ sys_event_queue_receive [281]
+[09-01 20:13:39.269] D/RPCS3: ⁂ sys_event_flag_wait [145]
+[09-01 20:13:39.269] D/RPCS3: ⁂ sys_event_flag_set [140]
+[09-01 20:13:39.269] D/RPCS3: ⁂ sys_rsx_context_attribute [138]
+[09-01 20:13:39.269] D/RPCS3: ⁂ _sys_lwmutex_lock [12]
+[09-01 20:13:39.269] D/RPCS3: ⁂ _sys_lwmutex_unlock [12]
+[09-01 20:13:40.030] D/RPCS3: S3PERF crosscheck source=emu_flip presented=184 native_fps=60.086 native_frametime_ms=16.990
+[09-01 20:13:41.270] D/RPCS3: S3PERF crosscheck source=emu_flip presented=256 native_fps=57.808 native_frametime_ms=17.068
+[09-01 20:13:42.565] D/RPCS3: S3PERF crosscheck source=emu_flip presented=332 native_fps=57.581 native_frametime_ms=17.046
+[09-01 20:13:43.803] D/RPCS3: S3PERF crosscheck source=emu_flip presented=405 native_fps=60.299 native_frametime_ms=17.151
+[09-01 20:13:45.105] D/RPCS3: S3PERF crosscheck source=emu_flip presented=481 native_fps=57.556 native_frametime_ms=17.264
+[09-01 20:13:46.357] D/RPCS3: S3PERF crosscheck source=emu_flip presented=554 native_fps=57.101 native_frametime_ms=17.067
+[09-01 20:13:47.610] D/RPCS3: S3PERF crosscheck source=emu_flip presented=627 native_fps=57.022 native_frametime_ms=17.056
+[09-01 20:13:48.919] D/RPCS3: S3PERF crosscheck source=emu_flip presented=703 native_fps=56.679 native_frametime_ms=17.106
+[09-01 20:13:49.079] D/RPCS3: CPU Usage: Total: 20.5%, Cores: 0.0%, 0.0%, 0.0%, 0.0%, 0.0%, 0.0%, 0.0%, 0.0%
+[09-01 20:13:49.269] D/RPCS3: PPU Syscall Usage Stats:
+[09-01 20:13:49.269] D/RPCS3: ⁂ sys_timer_usleep [93817]
+[09-01 20:13:49.269] D/RPCS3: ⁂ sys_ppu_thread_yield [92612]
+[09-01 20:13:49.269] D/RPCS3: ⁂ sys_event_queue_receive [1466]
+[09-01 20:13:49.269] D/RPCS3: ⁂ sys_event_flag_wait [737]
+[09-01 20:13:49.269] D/RPCS3: ⁂ sys_event_flag_set [732]
+[09-01 20:13:49.269] D/RPCS3: ⁂ sys_rsx_context_attribute [723]
+[09-01 20:13:49.269] D/RPCS3: ⁂ _sys_lwmutex_lock [40]
+[09-01 20:13:49.269] D/RPCS3: ⁂ _sys_lwmutex_unlock [40]
+[09-01 20:13:50.178] D/RPCS3: S3PERF crosscheck source=emu_flip presented=777 native_fps=56.229 native_frametime_ms=17.057
+[09-01 20:13:51.483] D/RPCS3: S3PERF crosscheck source=emu_flip presented=854 native_fps=58.314 native_frametime_ms=17.176
+[09-01 20:13:52.726] D/RPCS3: S3PERF crosscheck source=emu_flip presented=926 native_fps=56.931 native_frametime_ms=17.096
+[09-01 20:13:53.980] D/RPCS3: S3PERF crosscheck source=emu_flip presented=1000 native_fps=60.396 native_frametime_ms=16.991
+[09-01 20:13:54.980] D/RPCS3: S3PERF crosscheck source=emu_flip presented=1058 native_fps=56.932 native_frametime_ms=17.069
+[09-01 20:13:56.222] D/RPCS3: S3PERF crosscheck source=emu_flip presented=1131 native_fps=60.079 native_frametime_ms=17.070
+[09-01 20:13:57.532] D/RPCS3: S3PERF crosscheck source=emu_flip presented=1208 native_fps=59.203 native_frametime_ms=17.016
+[09-01 20:13:58.782] D/RPCS3: S3PERF crosscheck source=emu_flip presented=1281 native_fps=59.972 native_frametime_ms=17.159
+[09-01 20:13:59.079] D/RPCS3: CPU Usage: Total: 20.0%, Cores: 0.0%, 0.0%, 0.0%, 0.0%, 0.0%, 0.0%, 0.0%, 0.0%
+[09-01 20:13:59.269] D/RPCS3: PPU Syscall Usage Stats:
+[09-01 20:13:59.269] D/RPCS3: ⁂ sys_timer_usleep [169549]
+[09-01 20:13:59.269] D/RPCS3: ⁂ sys_ppu_thread_yield [167370]
+[09-01 20:13:59.269] D/RPCS3: ⁂ sys_event_queue_receive [2652]
+[09-01 20:13:59.269] D/RPCS3: ⁂ sys_event_flag_wait [1332]
+[09-01 20:13:59.269] D/RPCS3: ⁂ sys_event_flag_set [1327]
+[09-01 20:13:59.269] D/RPCS3: ⁂ sys_rsx_context_attribute [1309]
+[09-01 20:13:59.269] D/RPCS3: ⁂ _sys_lwmutex_lock [82]
+[09-01 20:13:59.269] D/RPCS3: ⁂ _sys_lwmutex_unlock [82]
+[09-01 20:14:00.031] D/RPCS3: S3PERF crosscheck source=emu_flip presented=1354 native_fps=56.814 native_frametime_ms=16.975
+[09-01 20:14:01.334] D/RPCS3: S3PERF crosscheck source=emu_flip presented=1430 native_fps=56.827 native_frametime_ms=17.146
+[09-01 20:14:02.581] D/RPCS3: S3PERF crosscheck source=emu_flip presented=1503 native_fps=57.469 native_frametime_ms=17.280
+[09-01 20:14:03.887] D/RPCS3: S3PERF crosscheck source=emu_flip presented=1580 native_fps=58.876 native_frametime_ms=17.117
+[09-01 20:14:05.132] D/RPCS3: S3PERF crosscheck source=emu_flip presented=1652 native_fps=60.375 native_frametime_ms=17.089
+[09-01 20:14:06.373] D/RPCS3: S3PERF crosscheck source=emu_flip presented=1724 native_fps=56.810 native_frametime_ms=17.026
+[09-01 20:14:07.682] D/RPCS3: S3PERF crosscheck source=emu_flip presented=1801 native_fps=58.253 native_frametime_ms=16.993
+[09-01 20:14:08.936] D/RPCS3: S3PERF crosscheck source=emu_flip presented=1874 native_fps=56.983 native_frametime_ms=17.244
+[09-01 20:14:09.080] D/RPCS3: CPU Usage: Total: 20.2%, Cores: 0.0%, 0.0%, 0.0%, 0.0%, 0.0%, 0.0%, 0.0%, 0.0%
+[09-01 20:14:09.269] D/RPCS3: PPU Syscall Usage Stats:
+[09-01 20:14:09.269] D/RPCS3: ⁂ sys_timer_usleep [245261]
+[09-01 20:14:09.269] D/RPCS3: ⁂ sys_ppu_thread_yield [242109]
+[09-01 20:14:09.269] D/RPCS3: ⁂ sys_event_queue_receive [3836]
+[09-01 20:14:09.269] D/RPCS3: ⁂ sys_event_flag_wait [1922]
+[09-01 20:14:09.269] D/RPCS3: ⁂ sys_event_flag_set [1917]
+[09-01 20:14:09.269] D/RPCS3: ⁂ sys_rsx_context_attribute [1893]
+[09-01 20:14:09.269] D/RPCS3: ⁂ _sys_lwmutex_lock [126]
+[09-01 20:14:09.269] D/RPCS3: ⁂ _sys_lwmutex_unlock [126]
+[09-01 20:14:10.250] D/RPCS3: S3PERF crosscheck source=emu_flip presented=1951 native_fps=58.663 native_frametime_ms=17.257
+[09-01 20:14:11.487] D/RPCS3: S3PERF crosscheck source=emu_flip presented=2023 native_fps=58.607 native_frametime_ms=17.152
+[09-01 20:14:12.730] D/RPCS3: S3PERF crosscheck source=emu_flip presented=2096 native_fps=57.815 native_frametime_ms=17.031
+[09-01 20:14:13.737] D/RPCS3: S3PERF crosscheck source=emu_flip presented=2155 native_fps=58.930 native_frametime_ms=17.119
+[09-01 20:14:14.979] D/RPCS3: S3PERF crosscheck source=emu_flip presented=2229 native_fps=60.778 native_frametime_ms=16.838
+[09-01 20:14:16.215] D/RPCS3: S3PERF crosscheck source=emu_flip presented=2302 native_fps=58.352 native_frametime_ms=16.853

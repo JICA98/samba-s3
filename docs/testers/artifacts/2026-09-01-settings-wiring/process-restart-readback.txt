@@ -1,0 +1,17 @@
+Process restart persistence readback
+Date: 2026-09-01
+Device: OnePlus Pad 2 only
+
+Before process restart:
+  global Video@@Frame limit = 60
+  BLUS31584 effective Video@@Frame limit = 30
+  S3TESTB effective Video@@Frame limit = 50
+  BLUS31584 sparse override = 30
+  S3TESTB sparse override = 50
+
+Procedure: force-stop com.zenithblue.sambas3, relaunch MainActivity, then read
+the same global/effective/override APIs again.
+
+After process restart: the same five values were read back (60, 30, 50, 30,
+50). The full multiline Android log is process-restart-app-final.log. The
+title files were then removed and the global baseline was restored to 60.

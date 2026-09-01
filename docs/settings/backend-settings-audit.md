@@ -1,90 +1,92 @@
 # Backend settings audit
 
-Audited against the pinned RPCSX submodule at
-`657b26a0d197c29d42cdcf3b3f6e8ad5c6765bbc` and its Android build of
-`rpcs3/Emu/system_config.h`.
+This audit is tied to the RPCSX Android core used by the 2026-09-01 standard
+debug Pad 2 build. The native tree returned by `settingsGetGlobal("")` is the
+source of truth; the complete build-specific result is
+[`settings-path-audit.csv`](settings-path-audit.csv), with one row per runtime
+leaf and the canonical path, type, scope, persistence, apply phase, Android
+support, current value, default, variants, and validation method.
 
-The Android settings tree is generated from the same `cfg_root` used by the
-emulator. Paths below are the exact `@@` paths consumed by the Android bridge.
-Leaves not listed in the curated Configure Game screen remain available in the
-Advanced Settings tree when their native type is supported by the generic
-editor. String/map leaves are intentionally read-only/not rendered by the
-generic Android editor until a text editor is added.
+## Runtime result
 
-| UI label | Full setting path | Scope | UI/backend type | Persistent file | Apply phase | Android support | Validation |
-|---|---|---|---|---|---|---|---|
-| PPU Decoder | `Core@@PPU Decoder` | Global/game | enum | `config.yml` / title custom | Next boot | Supported | set + read-back + PPU boot log |
-| PPU Threads | `Core@@PPU Threads` | Global/game | int 1..8 | same | Next boot | Supported | range/read-back |
-| PPU LLVM Codegen Mode | `Core@@PPU LLVM Codegen Mode` | Global/game | enum | same | Next boot | Supported | read-back + PPU log |
-| Max LLVM Compile Threads | `Core@@Max LLVM Compile Threads` | Global/game | int 0..1024 | same | Next boot | Supported (`0` auto) | range/read-back |
-| PPU Foreground Compile Threads | `Core@@PPU Foreground Compile Threads` | Global/game | int 0..32 | same | Next boot | Supported (`0` auto) | range/read-back |
-| PPU LLVM Greedy Mode | `Core@@PPU LLVM Greedy Mode` | Global/game | bool | same | Next boot | Supported | true/false read-back |
-| LLVM Precompilation | `Core@@LLVM Precompilation` | Global/game | bool | same | Next boot | Supported | true/false read-back |
-| SPU Decoder | `Core@@SPU Decoder` | Global/game | enum | same | Next boot | Supported | set + read-back |
-| SPU Block Size | `Core@@SPU Block Size` | Global/game | enum | same | Next boot | Supported | set + read-back |
-| Enable /host_root | `VFS@@Enable /host_root/` | Global/game | bool | same | Next boot | Supported | read-back |
-| Initialize Directories | `VFS@@Initialize Directories` | Global/game | bool | same | Next boot | Supported | read-back |
-| Limit disk cache size | `VFS@@Limit disk cache size` | Global/game | bool | same | Next boot | Supported | read-back |
-| Disk cache maximum size | `VFS@@Disk cache maximum size (MB)` | Global/game | int 0..10240 | same | Next boot | Supported | range/read-back |
-| Renderer | `Video@@Renderer` | Global/game | enum | same | Next boot | Vulkan supported on Pad 2 | read-back + Vulkan log |
-| Resolution | `Video@@Resolution` | Global/game | enum | same | Next boot | Supported | read-back + renderer log |
-| Aspect ratio | `Video@@Aspect ratio` | Global/game | enum | same | Next boot | Supported | read-back + screenshot |
-| Frame limit | `Video@@Frame limit` | Global/game | enum | same | Next boot | Supported | read-back + performance monitor |
-| MSAA | `Video@@MSAA` | Global/game | enum | same | Next boot | Supported options only | read-back + Vulkan boot |
-| Shader Mode | `Video@@Shader Mode` | Global/game | enum | same | Next boot | Supported options only | read-back + shader log |
-| Write Color Buffers | `Video@@Write Color Buffers` | Global/game | bool | same | Next boot | Supported | both bool directions/read-back |
-| Read Color Buffers | `Video@@Read Color Buffers` | Global/game | bool | same | Next boot | Supported | both bool directions/read-back |
-| VSync | `Video@@VSync` | Global/game | bool | same | Next boot | Supported | read-back + frame timing |
-| Resolution Scale | `Video@@Resolution Scale` | Global/game | int 25..800 | same | Next boot | Supported | range/read-back |
-| Anisotropic Filter Override | `Video@@Anisotropic Filter Override` | Global/game | uint 0..16 | same | Next boot | Supported (`0` auto) | range/read-back |
-| Output Scaling Mode | `Video@@Output Scaling Mode` | Global/game | enum | same | Next boot | Supported | read-back |
-| Audio Renderer | `Audio@@Renderer` | Global/game | enum | same | Next boot | Native Android backend | read-back + audio init |
-| Audio Provider | `Audio@@Audio Provider` | Global/game | enum | same | Next boot | Native Android backend | read-back + audio init |
-| RSXAudio Avport | `Audio@@RSXAudio Avport` | Global/game | enum | same | Next boot | Native Android backend | read-back |
-| Audio Format | `Audio@@Audio Format` | Global/game | enum | same | Next boot | Supported options only | read-back + audio init |
-| Master Volume | `Audio@@Master Volume` | Global/game | int 0..200 | same | Live/next boot | Supported | range/read-back |
-| Enable Buffering | `Audio@@Enable Buffering` | Global/game | bool | same | Next boot | Supported | bool/read-back |
-| Desired Audio Buffer Duration | `Audio@@Desired Audio Buffer Duration` | Global/game | int 4..250 | same | Next boot | Supported | range/read-back |
-| Keyboard | `Input/Output@@Keyboard` | Global/game | enum | same | Next boot | Android bridge | read-back |
-| Mouse | `Input/Output@@Mouse` | Global/game | enum | same | Next boot | Android bridge | read-back |
-| Pad handler mode | `Input/Output@@Pad handler mode` | Global/game | enum | same | Next boot | Android bridge | read-back |
-| Keep pads connected | `Input/Output@@Keep pads connected` | Global/game | bool | same | Live/next boot | Android bridge | bool/read-back |
-| Background input enabled | `Input/Output@@Background input enabled` | Global/game | bool | same | Live/next boot | Android bridge | bool/read-back |
-| Language | `System@@Language` | Global/game | enum | same | App/core restart | Supported | read-back + relaunch |
-| Keyboard Type | `System@@Keyboard Type` | Global/game | enum | same | Next boot | Supported | read-back |
-| Enter button assignment | `System@@Enter button assignment` | Global/game | enum | same | Next boot | Supported | read-back |
-| Internet enabled | `Net@@Internet enabled` | Global/game | enum | same | Next boot | Supported | read-back + network log |
-| UPNP Enabled | `Net@@UPNP Enabled` | Global/game | bool | same | Next boot | Supported | bool/read-back |
-| Start Paused | `Savestate@@Start Paused` | Global/game | bool | same | Next boot | Supported | bool/read-back |
-| Suspend Emulation Savestate Mode | `Savestate@@Suspend Emulation Savestate Mode` | Global/game | bool | same | Next boot | Supported | bool/read-back |
-| Compatible Savestate Mode | `Savestate@@Compatible Savestate Mode` | Global/game | bool | same | Next boot | Supported | bool/read-back |
-| Automatically start games after boot | `Miscellaneous@@Automatically start games after boot` | Global/game | bool | same | Next boot | Supported | bool/read-back |
-| Prevent display sleep while running games | `Miscellaneous@@Prevent display sleep while running games` | Global/game | bool | same | Live/next boot | Android integration | bool/read-back |
-| Show trophy popups | `Miscellaneous@@Show trophy popups` | Global/game | bool | same | Live/next boot | Supported | bool/read-back |
-| Pause Emulation During Home Menu | `Miscellaneous@@Pause Emulation During Home Menu` | Global/game | bool | same | Live | Android integration | bool/read-back |
+Pad 2 schema probe: `leaves=258 missing=0 typeMismatch=0 duplicate=0
+unsupported=27 valid=true`.
 
-## Type and path rules
+| Runtime type | Count | Android editor behavior |
+|---|---:|---|
+| `bool` | 121 | Supported switch |
+| `enum` | 55 | Supported selection |
+| `int` | 22 | Supported bounded numeric control |
+| `uint` | 31 | Supported bounded numeric control |
+| `float` | 2 | Supported bounded numeric control |
+| `string` | 24 | Hidden until a safe text editor exists |
+| `map` / `set` / `log_map` | 3 | Hidden/read-only |
 
-- Native `cfg::_bool` leaves are emitted as JSON booleans and are written as
-  bare YAML booleans.
-- Native enum/string leaves are emitted as JSON strings and are written as YAML
-  strings; the JNI contract receives JSON literals, not enum indexes.
-- Integer/unsigned/float leaves retain their numeric literal and native range
-  validation remains authoritative.
-- `0` is displayed as the backend's auto value where the native field documents
-  that meaning; it is not silently rewritten by the app.
-- A node missing from the runtime tree is not synthesized by the app. Generic
-  UI rendering only acts on the node returned by the backend.
+The generic editor therefore covers 231 leaves. The 27 unsupported leaves are
+not silently presented as editable controls. See
+[`settings-schema-audit.txt`](../testers/artifacts/2026-09-01-settings-wiring/settings-schema-audit.txt)
+and [`unsupported-setting-example.txt`](../testers/artifacts/2026-09-01-settings-wiring/unsupported-setting-example.txt)
+for the exact runtime list and the rationale for hiding strings/maps/sets.
 
-## Audit command
+## Canonical paths and storage
 
-The runtime source of truth for a full build-specific audit is:
+Paths use the root-relative RPCSX form, for example
+`Video@@Frame limit`; JNI callers may include the leading `@@`. The native
+resolver normalizes that prefix before looking up a leaf.
 
-```text
-RPCSX.settingsGetGlobal("")
-```
+| Surface | Canonical backend | Persistent storage | Scope |
+|---|---|---|---|
+| Global Settings | `settingsGetGlobal` / `settingsSetGlobal` | `config/config.yml` | Global |
+| Configure Game | `gameSettingsOverride*` | `config/custom_configs/config_<TITLE_ID>.yml` | One title |
+| Effective value | `settingsGetEffective` | Merge of the two files | One title |
+| In-game Settings | transient setter + sparse commit | Current title custom file | Explicit `THIS GAME` |
 
-The result includes each leaf's `type`, `value`, `default`, and where applicable
-`min`, `max`, and `variants`. The scoped APIs use the same path resolver, so a
-path cannot be accepted by the scoped writer unless it resolves against the
-same `cfg_root` schema.
+Global reads always load the canonical global file, even when a game is active.
+Title files contain only values that differ from global. A value equal to the
+global value removes the sparse key; a missing key is displayed as `USE GLOBAL`.
+All native writes serialize through the lifecycle mutex, use an atomic pending
+file, and perform disk read-back before reporting success.
+
+## Curated UI coverage
+
+The following high-risk settings are explicitly used by the validation matrix;
+the exhaustive list is in the CSV linked above.
+
+| UI label | Full setting path | Backend type | Scope | Apply phase | Validation |
+|---|---|---|---|---|---|
+| PPU Decoder | `Core@@PPU Decoder` | enum | global + title | next boot | read-back + PPU boot |
+| PPU Threads | `Core@@PPU Threads` | int | global + title | next boot | range + read-back |
+| Renderer | `Video@@Renderer` | enum | global + title | next boot | Vulkan render |
+| Resolution | `Video@@Resolution` | enum | global + title | next boot | exact read-back + boot |
+| Aspect ratio | `Video@@Aspect ratio` | enum | global + title | next boot | exact read-back |
+| Frame limit | `Video@@Frame limit` | enum | global + title | next boot | boot line + emu-flip FPS |
+| Write Color Buffers | `Video@@Write Color Buffers` | bool | global + title | next boot | true and false |
+| Read Color Buffers | `Video@@Read Color Buffers` | bool | global + title | next boot | true and false |
+| VSync | `Video@@VSync` | bool | global + title | next boot | read-back |
+| Resolution Scale | `Video@@Resolution Scale` | int | global + title | next boot | range + read-back |
+| Audio Renderer | `Audio@@Renderer` | enum | global + title | next boot | read-back + audio init |
+| Audio Provider | `Audio@@Audio Provider` | enum | global + title | next boot | read-back + audio init |
+| Audio Format | `Audio@@Audio Format` | enum | global + title | next boot | read-back + audio init |
+| Master Volume | `Audio@@Master Volume` | int | global + title | live | range + read-back |
+| Keyboard | `Input/Output@@Keyboard` | enum | global + title | next boot | read-back |
+| Pad handler mode | `Input/Output@@Pad handler mode` | enum | global + title | next boot | read-back |
+| Language | `System@@Language` | enum | global + title | app restart | read-back + relaunch |
+| UPNP Enabled | `Net@@UPNP Enabled` | bool | global + title | next boot | true and false |
+| Start Paused | `Savestate@@Start Paused` | bool | global + title | next boot | read-back |
+| Pause Emulation During Home Menu | `Miscellaneous@@Pause Emulation During Home Menu` | bool | global + title | live | read-back |
+
+`Audio@@Renderer` and `Audio@@Audio Provider` were observed as `Cubeb` and
+`CellAudio` on the Pad 2; the game log contains `cellAudioInit`, port open, and
+port start. No unsupported “Native Android backend” label is inferred.
+
+## Apply phases
+
+Every supported editor row displays an explicit phase. Live values are applied
+immediately where the core supports that behavior. Most core/video/audio
+choices are persistent and take effect after the next emulation boot. Language
+is marked for an app restart. In-game edits are labeled for the current game
+and are committed as sparse title state; unsupported runtime types are marked
+`UNSUPPORTED` in the CSV and are not rendered as generic controls.
+
+The phase table is generated from `SettingsBackendAudit` plus the runtime type
+probe, so a stale path/type assumption is visible in the root schema log.

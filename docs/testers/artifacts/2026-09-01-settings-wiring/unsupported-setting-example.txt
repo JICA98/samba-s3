@@ -1,0 +1,13 @@
+Unsupported-setting example (intentional)
+
+Runtime path: Video@@Vulkan@@Adapter
+Runtime type: string
+Android editor status: hidden / UNSUPPORTED
+Reason: the generic Compose editor supports bool, enum, uint, int, and float;
+this string selects a device-specific Vulkan adapter and is not safely editable
+by the generic control.
+
+Other unsupported runtime types are listed in settings-schema-audit.txt and in
+the Android support column of settings-path-audit.csv. This is a text evidence
+artifact rather than a fabricated UI screenshot: the correct UI behavior is
+that unsupported settings are not rendered as editable rows.

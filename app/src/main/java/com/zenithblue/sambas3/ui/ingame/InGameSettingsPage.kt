@@ -112,6 +112,7 @@ fun InGameSettingsPage(
                     settings = node,
                     path = currentPath,
                     isInSplitPane = false,
+                    isInGameSettings = true,
                     onValueCommitted = { _, _ -> onIntent(InGameMenuIntent.RequestDirtyCheck) },
                     settingsSetter = { pathArg, value ->
                         // Synchronous adapter: coordinator applies transient set on its scope.

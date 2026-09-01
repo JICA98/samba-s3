@@ -1,0 +1,103 @@
+D/RPCS3   (17700): S3PPU stage=link-begin tid=498979599040 modules=71 jits=1
+D/RPCS3   (17700): S3PPU stage=link-end tid=498979599040 failed=0 jits=1
+D/RPCS3   (17700): S3PPU stage=apply-begin tid=498979599040 jits=1 resolver_count=1 first=1
+D/RPCS3   (17700): S3PPU stage=jit-finalize-begin tid=498979599040 index=0 total=1
+D/RPCS3   (17700): S3PPU stage=jit-finalize-end tid=498979599040 index=0 total=1
+D/RPCS3   (17700): S3PPU stage=apply-end tid=498979599040 resolvers=1 first=1
+D/RPCS3   (17700): S3PPU stage=link-begin tid=498979599040 modules=0 jits=1
+D/RPCS3   (17700): S3PPU stage=link-end tid=498979599040 failed=0 jits=1
+D/RPCS3   (17700): S3PPU stage=apply-begin tid=498979599040 jits=1 resolver_count=1 first=0
+D/RPCS3   (17700): S3PPU stage=apply-end tid=498979599040 resolvers=1 first=0
+D/RPCS3   (17700): S3PPU stage=link-begin tid=498979599040 modules=1 jits=1
+D/RPCS3   (17700): S3PPU stage=link-end tid=498979599040 failed=0 jits=1
+D/RPCS3   (17700): S3PPU stage=apply-begin tid=498979599040 jits=1 resolver_count=1 first=1
+D/RPCS3   (17700): S3PPU stage=jit-finalize-begin tid=498979599040 index=0 total=1
+D/RPCS3   (17700): S3PPU stage=jit-finalize-end tid=498979599040 index=0 total=1
+D/RPCS3   (17700): S3PPU stage=apply-end tid=498979599040 resolvers=1 first=1
+D/RPCS3   (17700): S3PPU stage=link-begin tid=498979599040 modules=1 jits=1
+D/RPCS3   (17700): S3PPU stage=link-end tid=498979599040 failed=0 jits=1
+D/RPCS3   (17700): S3PPU stage=apply-begin tid=498979599040 jits=1 resolver_count=1 first=1
+D/RPCS3   (17700): S3PPU stage=jit-finalize-begin tid=498979599040 index=0 total=1
+D/RPCS3   (17700): S3PPU stage=jit-finalize-end tid=498979599040 index=0 total=1
+D/RPCS3   (17700): S3PPU stage=apply-end tid=498979599040 resolvers=1 first=1
+D/RPCS3   (17700): S3PPU stage=link-begin tid=498979599040 modules=1 jits=1
+D/RPCS3   (17700): S3PPU stage=link-end tid=498979599040 failed=0 jits=1
+D/RPCS3   (17700): S3PPU stage=apply-begin tid=498979599040 jits=1 resolver_count=1 first=1
+D/RPCS3   (17700): S3PPU stage=jit-finalize-begin tid=498979599040 index=0 total=1
+D/RPCS3   (17700): S3PPU stage=jit-finalize-end tid=498979599040 index=0 total=1
+D/RPCS3   (17700): S3PPU stage=apply-end tid=498979599040 resolvers=1 first=1
+D/RPCS3   (17700): S3PPU stage=link-begin tid=498979599040 modules=2 jits=1
+D/RPCS3   (17700): S3PPU stage=link-end tid=498979599040 failed=0 jits=1
+D/RPCS3   (17700): S3PPU stage=apply-begin tid=498979599040 jits=1 resolver_count=1 first=1
+D/RPCS3   (17700): S3PPU stage=jit-finalize-begin tid=498979599040 index=0 total=1
+D/RPCS3   (17700): S3PPU stage=jit-finalize-end tid=498979599040 index=0 total=1
+D/RPCS3   (17700): S3PPU stage=apply-end tid=498979599040 resolvers=1 first=1
+D/RPCS3   (17700): S3PPU stage=link-begin tid=498979599040 modules=1 jits=1
+D/RPCS3   (17700): S3PPU stage=link-end tid=498979599040 failed=0 jits=1
+D/RPCS3   (17700): S3PPU stage=apply-begin tid=498979599040 jits=1 resolver_count=1 first=1
+D/RPCS3   (17700): S3PPU stage=jit-finalize-begin tid=498979599040 index=0 total=1
+D/RPCS3   (17700): S3PPU stage=jit-finalize-end tid=498979599040 index=0 total=1
+D/RPCS3   (17700): S3PPU stage=apply-end tid=498979599040 resolvers=1 first=1
+W/RPCS3   (17700): cellAudioOutConfigure(audioOut=0, config=*0xd0040c30, option=*0x0, waitForEvent=0)
+D/RPCS3   (17700): cellAudioOutConfigure: channels=2, encoder=0, downMixer=0
+W/RPCS3   (17700): cellAudioInit()
+D/RPCS3   (17700): S3PPU stage=link-begin tid=498979599040 modules=1 jits=1
+D/RPCS3   (17700): S3PPU stage=link-end tid=498979599040 failed=0 jits=1
+D/RPCS3   (17700): S3PPU stage=apply-begin tid=498979599040 jits=1 resolver_count=1 first=1
+D/RPCS3   (17700): S3PPU stage=jit-finalize-begin tid=498979599040 index=0 total=1
+D/RPCS3   (17700): S3PPU stage=jit-finalize-end tid=498979599040 index=0 total=1
+D/RPCS3   (17700): S3PPU stage=apply-end tid=498979599040 resolvers=1 first=1
+D/RPCS3   (17700): S3PPU stage=link-begin tid=498979599040 modules=1 jits=1
+D/RPCS3   (17700): S3PPU stage=link-end tid=498979599040 failed=0 jits=1
+D/RPCS3   (17700): S3PPU stage=apply-begin tid=498979599040 jits=1 resolver_count=1 first=1
+D/RPCS3   (17700): S3PPU stage=jit-finalize-begin tid=498979599040 index=0 total=1
+D/RPCS3   (17700): S3PPU stage=jit-finalize-end tid=498979599040 index=0 total=1
+D/RPCS3   (17700): S3PPU stage=apply-end tid=498979599040 resolvers=1 first=1
+D/RPCS3   (17700): S3PPU stage=link-begin tid=498979599040 modules=1 jits=1
+D/RPCS3   (17700): S3PPU stage=link-end tid=498979599040 failed=0 jits=1
+D/RPCS3   (17700): S3PPU stage=apply-begin tid=498979599040 jits=1 resolver_count=1 first=1
+D/RPCS3   (17700): S3PPU stage=jit-finalize-begin tid=498979599040 index=0 total=1
+D/RPCS3   (17700): S3PPU stage=jit-finalize-end tid=498979599040 index=0 total=1
+D/RPCS3   (17700): S3PPU stage=apply-end tid=498979599040 resolvers=1 first=1
+D/RPCS3   (17700): S3PPU stage=link-begin tid=498979599040 modules=1 jits=1
+D/RPCS3   (17700): S3PPU stage=link-end tid=498979599040 failed=0 jits=1
+D/RPCS3   (17700): S3PPU stage=apply-begin tid=498979599040 jits=1 resolver_count=1 first=1
+D/RPCS3   (17700): S3PPU stage=jit-finalize-begin tid=498979599040 index=0 total=1
+D/RPCS3   (17700): S3PPU stage=jit-finalize-end tid=498979599040 index=0 total=1
+D/RPCS3   (17700): S3PPU stage=apply-end tid=498979599040 resolvers=1 first=1
+W/RPCS3   (17700): cellAudioPortOpen(audioParam=*0xd03cd340, portNum=*0x7ca324)
+W/RPCS3   (17700): cellAudioPortStart(portNum=0)
+W/RPCS3   (17700): cellAudioPortOpen(audioParam=*0xd034e9e0, portNum=*0x77e300)
+W/RPCS3   (17700): cellAudioPortStart(portNum=1)
+D/RPCS3   (17700): S3PERF crosscheck source=emu_flip presented=4 native_fps=9.889 native_frametime_ms=235.699
+D/RPCS3   (17700): S3PERF crosscheck source=emu_flip presented=42 native_fps=28.021 native_frametime_ms=33.291
+D/RPCS3   (17700): S3PERF crosscheck source=emu_flip presented=79 native_fps=29.542 native_frametime_ms=33.499
+D/RPCS3   (17700): S3PERF crosscheck source=emu_flip presented=115 native_fps=29.502 native_frametime_ms=33.337
+D/RPCS3   (17700): S3PERF crosscheck source=emu_flip presented=154 native_fps=32.531 native_frametime_ms=33.337
+D/RPCS3   (17700): S3PERF crosscheck source=emu_flip presented=191 native_fps=32.745 native_frametime_ms=33.333
+D/RPCS3   (17700): S3PERF crosscheck source=emu_flip presented=229 native_fps=30.769 native_frametime_ms=33.332
+D/RPCS3   (17700): S3PERF crosscheck source=emu_flip presented=267 native_fps=32.033 native_frametime_ms=33.289
+D/RPCS3   (17700): S3PERF crosscheck source=emu_flip presented=304 native_fps=29.506 native_frametime_ms=33.438
+D/RPCS3   (17700): S3PERF crosscheck source=emu_flip presented=342 native_fps=29.352 native_frametime_ms=33.396
+D/RPCS3   (17700): S3PERF crosscheck source=emu_flip presented=380 native_fps=28.917 native_frametime_ms=33.549
+D/RPCS3   (17700): S3PERF crosscheck source=emu_flip presented=418 native_fps=28.550 native_frametime_ms=33.382
+D/RPCS3   (17700): S3PERF crosscheck source=emu_flip presented=455 native_fps=29.411 native_frametime_ms=33.352
+W/RPCS3   (17700): cellAudioPortClose(portNum=0)
+D/RPCS3   (17700): S3PERF crosscheck source=emu_flip presented=492 native_fps=28.770 native_frametime_ms=33.338
+D/RPCS3   (17700): S3PERF crosscheck source=emu_flip presented=531 native_fps=28.646 native_frametime_ms=33.344
+D/RPCS3   (17700): S3PERF crosscheck source=emu_flip presented=569 native_fps=28.616 native_frametime_ms=33.346
+D/RPCS3   (17700): S3PERF crosscheck source=emu_flip presented=608 native_fps=30.314 native_frametime_ms=33.326
+D/RPCS3   (17700): S3PERF crosscheck source=emu_flip presented=645 native_fps=28.681 native_frametime_ms=33.323
+D/RPCS3   (17700): S3PERF crosscheck source=emu_flip presented=683 native_fps=28.456 native_frametime_ms=33.341
+D/RPCS3   (17700): S3PERF crosscheck source=emu_flip presented=722 native_fps=28.940 native_frametime_ms=33.339
+D/RPCS3   (17700): S3PERF crosscheck source=emu_flip presented=760 native_fps=28.607 native_frametime_ms=33.353
+D/RPCS3   (17700): S3PERF crosscheck source=emu_flip presented=800 native_fps=32.156 native_frametime_ms=33.333
+D/RPCS3   (17700): S3PERF crosscheck source=emu_flip presented=837 native_fps=28.628 native_frametime_ms=33.344
+D/RPCS3   (17700): S3PERF crosscheck source=emu_flip presented=875 native_fps=31.789 native_frametime_ms=33.326
+D/RPCS3   (17700): S3PERF crosscheck source=emu_flip presented=914 native_fps=28.658 native_frametime_ms=33.323
+D/RPCS3   (17700): S3PERF crosscheck source=emu_flip presented=952 native_fps=31.554 native_frametime_ms=33.303
+D/RPCS3   (17700): S3PERF crosscheck source=emu_flip presented=991 native_fps=29.559 native_frametime_ms=33.347
+D/RPCS3   (17700): S3PERF crosscheck source=emu_flip presented=1029 native_fps=28.660 native_frametime_ms=33.380
+D/RPCS3   (17700): S3PERF crosscheck source=emu_flip presented=1066 native_fps=28.748 native_frametime_ms=33.344
+D/RPCS3   (17700): S3PERF crosscheck source=emu_flip presented=1105 native_fps=29.106 native_frametime_ms=33.330
+D/RPCS3   (17700): S3PERF crosscheck source=emu_flip presented=1143 native_fps=28.894 native_frametime_ms=33.352

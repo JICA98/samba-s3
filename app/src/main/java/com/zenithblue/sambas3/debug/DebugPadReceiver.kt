@@ -7,9 +7,12 @@ import android.content.IntentFilter
 import android.os.Handler
 import android.os.Looper
 import android.util.Log
+import android.util.Base64
 import com.zenithblue.sambas3.BuildConfig
 import com.zenithblue.sambas3.Digital2Flags
 import com.zenithblue.sambas3.RPCSX
+import com.zenithblue.sambas3.gameconfig.SettingsBackendAudit
+import org.json.JSONObject
 
 /**
  * Agent ADB bridge for controller injection — no coordinate taps.
@@ -30,6 +33,10 @@ class DebugPadReceiver(private val onDebugFatal: (() -> Unit)? = null) : Broadca
         if (action == ACTION_FATAL) {
             if (BuildConfig.DEBUG) onDebugFatal?.invoke()
             else Log.w("DebugPad", "DEBUG_FATAL ignored in non-debug build")
+            return
+        }
+        if (action.startsWith(ACTION_SETTINGS_PREFIX)) {
+            handleSettingsProbe(intent)
             return
         }
         when {
@@ -59,6 +66,90 @@ class DebugPadReceiver(private val onDebugFatal: (() -> Unit)? = null) : Broadca
         }
     }
 
+    private fun handleSettingsProbe(intent: Intent) {
+        if (!BuildConfig.DEBUG) {
+            Log.w("S3CFG_HARNESS", "ignored in non-debug build")
+            return
+        }
+        val action = intent.action ?: return
+        val path = intent.getStringExtra("path_b64")?.let {
+            runCatching { String(Base64.decode(it, Base64.NO_WRAP)) }.getOrNull()
+        } ?: intent.getStringExtra("path") ?: "@@Video@@Frame limit"
+        val title = intent.getStringExtra("title") ?: "BLUS31584"
+        when (action) {
+            ACTION_SETTINGS_READ_GLOBAL -> {
+                Log.i("S3CFG_HARNESS", "global path=$path value=${RPCSX.instance.settingsGetGlobal(path)}")
+            }
+            ACTION_SETTINGS_READ_GLOBAL_TREE -> {
+                val encoded = Base64.encodeToString(
+                    RPCSX.instance.settingsGetGlobal("").toByteArray(),
+                    Base64.NO_WRAP
+                )
+                val chunkSize = 2400
+                encoded.chunked(chunkSize).forEachIndexed { index, chunk ->
+                    Log.i("S3CFG_TREE", "chunk=$index total=${(encoded.length + chunkSize - 1) / chunkSize} data=$chunk")
+                }
+            }
+            ACTION_SETTINGS_SCHEMA_AUDIT -> {
+                val audit = SettingsBackendAudit.audit(
+                    JSONObject(RPCSX.instance.settingsGetGlobal(""))
+                )
+                Log.i(
+                    "S3CFG_HARNESS",
+                    "schema ${SettingsBackendAudit.compactLog(audit)} valid=${audit.isValid}"
+                )
+            }
+            ACTION_SETTINGS_READ_EFFECTIVE -> {
+                Log.i(
+                    "S3CFG_HARNESS",
+                    "effective title=$title path=$path value=${RPCSX.instance.settingsGetEffective(title, path)}"
+                )
+            }
+            ACTION_SETTINGS_READ_OVERRIDES -> {
+                Log.i(
+                    "S3CFG_HARNESS",
+                    "overrides title=$title value=${RPCSX.instance.gameSettingsOverridesGet(title)}"
+                )
+            }
+            ACTION_SETTINGS_WRITE_GLOBAL -> {
+                val rawValue = intent.getStringExtra("value") ?: return
+                val value = encodeProbeValue(path, rawValue)
+                val ok = RPCSX.instance.settingsSetGlobalAndVerify(path, value)
+                Log.i(
+                    "S3CFG_HARNESS",
+                    "write scope=global path=$path requested=$value ok=$ok readBack=${RPCSX.instance.settingsGetGlobal(path)}"
+                )
+            }
+            ACTION_SETTINGS_WRITE_GAME -> {
+                val rawValue = intent.getStringExtra("value") ?: return
+                val value = encodeProbeValue(path, rawValue)
+                val ok = RPCSX.instance.gameSettingsOverrideSet(title, path, value)
+                Log.i(
+                    "S3CFG_HARNESS",
+                    "write scope=game title=$title path=$path requested=$value ok=$ok overrides=${RPCSX.instance.gameSettingsOverridesGet(title)}"
+                )
+            }
+            ACTION_SETTINGS_CLEAR_GAME -> {
+                val ok = RPCSX.instance.gameSettingsOverrideClear(title, path)
+                Log.i(
+                    "S3CFG_HARNESS",
+                    "clear scope=game title=$title path=$path ok=$ok overrides=${RPCSX.instance.gameSettingsOverridesGet(title)}"
+                )
+            }
+            ACTION_SETTINGS_CLEAR_ALL -> {
+                val ok = RPCSX.instance.gameSettingsOverridesClear(title)
+                Log.i("S3CFG_HARNESS", "clear-all scope=game title=$title ok=$ok")
+            }
+        }
+    }
+
+    private fun encodeProbeValue(path: String, rawValue: String): String {
+        val type = runCatching {
+            JSONObject(RPCSX.instance.settingsGetGlobal(path)).optString("type")
+        }.getOrDefault("")
+        return if (type == "enum" || type == "string") JSONObject.quote(rawValue) else rawValue
+    }
+
     private fun buttonToBits(name: String): Pair<Int, Int>? = when (name.uppercase()) {
         "CROSS" -> 0 to Digital2Flags.CELL_PAD_CTRL_CROSS.bit
         "CIRCLE" -> 0 to Digital2Flags.CELL_PAD_CTRL_CIRCLE.bit
@@ -84,12 +175,31 @@ class DebugPadReceiver(private val onDebugFatal: (() -> Unit)? = null) : Broadca
         const val ACTION_PAD = "com.zenithblue.sambas3.DEBUG_PAD"
         const val ACTION_FATAL = "com.zenithblue.sambas3.DEBUG_FATAL"
         const val PREFIX = "com.zenithblue.sambas3.DEBUG_PAD_"
+        const val ACTION_SETTINGS_PREFIX = "com.zenithblue.sambas3.DEBUG_SETTINGS_"
+        const val ACTION_SETTINGS_READ_GLOBAL = ACTION_SETTINGS_PREFIX + "READ_GLOBAL"
+        const val ACTION_SETTINGS_READ_GLOBAL_TREE = ACTION_SETTINGS_PREFIX + "READ_GLOBAL_TREE"
+        const val ACTION_SETTINGS_SCHEMA_AUDIT = ACTION_SETTINGS_PREFIX + "SCHEMA_AUDIT"
+        const val ACTION_SETTINGS_READ_EFFECTIVE = ACTION_SETTINGS_PREFIX + "READ_EFFECTIVE"
+        const val ACTION_SETTINGS_READ_OVERRIDES = ACTION_SETTINGS_PREFIX + "READ_OVERRIDES"
+        const val ACTION_SETTINGS_WRITE_GLOBAL = ACTION_SETTINGS_PREFIX + "WRITE_GLOBAL"
+        const val ACTION_SETTINGS_WRITE_GAME = ACTION_SETTINGS_PREFIX + "WRITE_GAME"
+        const val ACTION_SETTINGS_CLEAR_GAME = ACTION_SETTINGS_PREFIX + "CLEAR_GAME"
+        const val ACTION_SETTINGS_CLEAR_ALL = ACTION_SETTINGS_PREFIX + "CLEAR_ALL"
 
         fun register(context: Context, onDebugFatal: (() -> Unit)? = null): DebugPadReceiver {
             val r = DebugPadReceiver(onDebugFatal)
             val f = IntentFilter().apply {
                 addAction(ACTION_PAD)
                 addAction(ACTION_FATAL)
+                addAction(ACTION_SETTINGS_READ_GLOBAL)
+                addAction(ACTION_SETTINGS_READ_GLOBAL_TREE)
+                addAction(ACTION_SETTINGS_SCHEMA_AUDIT)
+                addAction(ACTION_SETTINGS_READ_EFFECTIVE)
+                addAction(ACTION_SETTINGS_READ_OVERRIDES)
+                addAction(ACTION_SETTINGS_WRITE_GLOBAL)
+                addAction(ACTION_SETTINGS_WRITE_GAME)
+                addAction(ACTION_SETTINGS_CLEAR_GAME)
+                addAction(ACTION_SETTINGS_CLEAR_ALL)
                 addAction(PREFIX + "CROSS")
                 addAction(PREFIX + "CIRCLE")
                 addAction(PREFIX + "SQUARE")

@@ -1,0 +1,18 @@
+[09-01 20:04:23.114] D/RPCS3: S3LIFE id=1 action=restart phase=main_enter gen=1
+[09-01 20:04:23.114] D/RPCS3: S3LIFE id=1 action=restart phase=restart_begin new_gen=1
+[09-01 20:04:23.119] I/S3CFG: boot phase=restart result=0 generation=1 title=BLUS31584 effectiveHash=6442402168776459763 frameLimit="Off" resolution="720x576" aspect="16:9" renderer="Vulkan" ppuDecoder="LLVM Recompiler (Legacy)" audioRenderer="Cubeb"
+[09-01 20:04:23.119] D/RPCS3: S3LIFE id=1 action=restart phase=done gen=1
+[09-01 20:05:25.847] I/S3SAVE: manual-load transition begin slot=0 path=/storage/emulated/0/Android/data/com.zenithblue.sambas3/files/config//savestates/BLUS31584/BLUS31584_1_0.SAVESTAT.zst
+[09-01 20:05:27.304] D/RPCS3: S3LIFE id=2 action=load phase=boot_begin new_gen=2
+[09-01 20:05:27.891] D/RPCS3: S3LIFE id=2 action=load phase=boot_returned gen=2
+[09-01 20:05:27.891] I/S3CFG: boot phase=load result=0 generation=2 title=BLUS31584 effectiveHash=6442402168776459763 frameLimit="Off" resolution="720x576" aspect="16:9" renderer="Vulkan" ppuDecoder="LLVM Recompiler (Legacy)" audioRenderer="Cubeb"
+[09-01 20:05:36.587] I/S3SAVE: manual-load first-frame-confirmed slot=0 generation=1
+[09-01 20:13:28.888] I/S3SAVE: manual-load marker armed requestId=1788273808883 slot=0
+[09-01 20:13:29.457] I/S3CFG: boot phase=savestate result=0 generation=0 title=BLUS31584 effectiveHash=15633311867323765951 frameLimit="60" resolution="720x576" aspect="16:9" renderer="Vulkan" ppuDecoder="LLVM Recompiler (Legacy)" audioRenderer="Cubeb"
+[09-01 20:13:29.457] D/RPCS3: S3SAVE recovery-boot path=/storage/emulated/0/Android/data/com.zenithblue.sambas3/files/config/savestates/BLUS31584/BLUS31584_1_0.SAVESTAT.zst result=0
+[09-01 20:13:38.010] I/S3RENDER: first-frame-confirmed generation=1
+[09-01 20:13:38.010] I/S3HOMELOAD: first-frame-confirmed mode=UserSelectedSavestate generation=1
+[09-01 20:13:38.010] I/S3SAVE: S3SAVE pending recovery cleared
+
+The complete untrimmed captures are restart-app-final.log, restart-backend-final.log,
+load-app-final.log, load-backend-final.log, and the cold-recovery captures.

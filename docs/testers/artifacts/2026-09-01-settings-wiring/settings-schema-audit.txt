@@ -1,0 +1,32 @@
+SambaS3 settings schema audit
+Date: 2026-09-01
+Device: OnePlus Pad 2 (OPD2403 / OP5DAAL1), 3000x2120 landscape
+Source: settings-tree-pad2.json, collected from RPCSX.settingsGetGlobal("")
+
+Result: PASS
+  leaves=258
+  missing known paths=0
+  type mismatches=0
+  duplicate paths=0
+  unsupported leaves=27 (hidden from the generic Android editor)
+
+Runtime type counts:
+  bool=121
+  enum=55
+  float=2
+  int=22
+  uint=31
+  string=24
+  map=1
+  set=1
+  log_map=1
+
+Editor support:
+  supported editor leaves (bool/enum/uint/int/float)=231
+  unsupported string/map/set/log_map leaves=27
+  exhaustive path/type/apply/support table=../../../../settings/settings-path-audit.csv
+
+The verifier checks the runtime tree returned by the patched core. It does not
+synthesize missing settings. Unsupported Android values remain available to
+the native backend but are intentionally omitted from the generic editor until
+an appropriate text/list editor exists.

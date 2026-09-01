@@ -79,6 +79,7 @@ import com.zenithblue.sambas3.ui.settings.components.core.PreferenceHeader
 import com.zenithblue.sambas3.ui.settings.components.core.PreferenceIcon
 import com.zenithblue.sambas3.ui.settings.components.core.PreferenceTitle
 import com.zenithblue.sambas3.ui.settings.components.core.PreferenceValue
+import com.zenithblue.sambas3.ui.settings.components.core.PreferenceSubtitle
 import com.zenithblue.sambas3.ui.settings.components.preference.HomePreference
 import com.zenithblue.sambas3.ui.settings.components.preference.RegularPreference
 import com.zenithblue.sambas3.ui.settings.components.preference.SingleSelectionDialog
@@ -109,6 +110,7 @@ import com.zenithblue.sambas3.utils.GeneralSettings
 import com.zenithblue.sambas3.utils.InputBindingPrefs
 import com.zenithblue.sambas3.ui.monitoring.MonitoringSettingsScreen
 import com.zenithblue.sambas3.ui.controller.ControllerSettingsScreen
+import com.zenithblue.sambas3.gameconfig.SettingsBackendAudit
 import org.json.JSONObject
 import java.io.File
 import kotlin.math.ceil
@@ -468,6 +470,13 @@ private fun SettingLeadingIcon(name: String, pathHint: String = "") {
     PreferenceIcon(icon = painterResource(id = advancedSettingIconRes(name, pathHint)))
 }
 
+@Composable
+private fun SettingApplyHint(path: String, inGame: Boolean, type: String) {
+    PreferenceSubtitle(
+        text = SettingsBackendAudit.applyHint(path, inGame = inGame, actualType = type)
+    )
+}
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AdvancedSettingsScreen(
@@ -477,6 +486,7 @@ fun AdvancedSettingsScreen(
     settings: JSONObject,
     path: String = "",
     isInSplitPane: Boolean = false,
+    isInGameSettings: Boolean = false,
     onValueCommitted: ((path: String, value: String) -> Unit)? = null,
     settingsSetter: ((path: String, value: String) -> Boolean)? = null
 ) {
@@ -486,6 +496,16 @@ fun AdvancedSettingsScreen(
     val settingValue = remember(settings) { mutableStateOf(settings) }
     var searchQuery by remember { mutableStateOf("") }
     var isSearching by remember { mutableStateOf(false) }
+
+    // The native tree is the source of truth. Emit one compact audit whenever
+    // the root is entered so stale paths/types are visible in Log Monitor and
+    // in the tester's S3CFG capture.
+    if (path.isEmpty()) {
+        LaunchedEffect(settings) {
+            val audit = SettingsBackendAudit.audit(settings)
+            Log.i("S3CFG", "schema ${SettingsBackendAudit.compactLog(audit)} valid=${audit.isValid}")
+        }
+    }
 
     val filteredKeys = remember(searchQuery, settings, isSearching, path) {
         if (!isSearching || searchQuery.isBlank()) {
@@ -557,6 +577,7 @@ fun AdvancedSettingsScreen(
                                         title = key + if (itemValue == def) "" else " *"
                                     )
                                 },
+                                subtitle = { SettingApplyHint(itemPath, isInGameSettings, type) },
                                 leadingIcon = { SettingLeadingIcon(key, itemPath) },
                                 onClick = { value ->
                                     if (!setter(
@@ -622,6 +643,7 @@ fun AdvancedSettingsScreen(
                                         title = key + if (itemValue == def) "" else " *"
                                     )
                                 },
+                                subtitle = { SettingApplyHint(itemPath, isInGameSettings, type) },
                                 onValueChange = { value ->
                                     if (!setter(
                                             itemPath, "\"" + value + "\""
@@ -688,6 +710,9 @@ fun AdvancedSettingsScreen(
                                     valueRange = min.toFloat()..max.toFloat(),
                                     title = key + if (itemValue == def) "" else " *",
                                     leadingIcon = { SettingLeadingIcon(key, itemPath) },
+                                    subtitle = SettingsBackendAudit.applyHint(
+                                        itemPath, isInGameSettings, type
+                                    ),
                                     steps = (max - min).toInt() - 1,
                                     onValueChange = { value ->
                                         if (!setter(
@@ -764,6 +789,9 @@ fun AdvancedSettingsScreen(
                                     valueRange = min.toFloat()..max.toFloat(),
                                     title = key + if (itemValue == def) "" else " *",
                                     leadingIcon = { SettingLeadingIcon(key, itemPath) },
+                                    subtitle = SettingsBackendAudit.applyHint(
+                                        itemPath, isInGameSettings, type
+                                    ),
                                     steps = ceil(max - min).toInt() - 1,
                                     onValueChange = { value ->
                                         if (!setter(
