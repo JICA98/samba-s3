@@ -31,6 +31,18 @@ enum class LogicalControl(val label: String, val bank: Int, val bit: Int) {
 data class AxisBinding(val axis: Int, val invert: Boolean = false)
 data class StickTuning(val deadzone: Float = .12f, val sensitivity: Float = 1f, val invertX: Boolean = false, val invertY: Boolean = false)
 
+data class DigitalAxisPair(
+    val negativeKey: Int? = null,
+    val positiveKey: Int? = null,
+)
+
+data class KeyboardAnalogBindings(
+    val leftX: DigitalAxisPair = DigitalAxisPair(),
+    val leftY: DigitalAxisPair = DigitalAxisPair(),
+    val rightX: DigitalAxisPair = DigitalAxisPair(),
+    val rightY: DigitalAxisPair = DigitalAxisPair(),
+)
+
 data class ControllerProfile(
     val id: String = "default",
     val name: String = "Default",
@@ -49,6 +61,7 @@ data class ControllerProfile(
     val leftStick: StickTuning = StickTuning(),
     val rightStick: StickTuning = StickTuning(),
     val triggerThreshold: Float = .1f,
+    val keyboardAnalog: KeyboardAnalogBindings? = null,
     val isDefault: Boolean = false,
 )
 
@@ -74,6 +87,16 @@ object ControllerProfileSelection {
         legacyLogicalBindings: Map<LogicalControl, Int> = emptyMap(),
     ): ControllerProfile {
         profiles.firstOrNull { it.deviceKey == deviceKey }?.let {
+            val staleKeyboardDefault = family == ControllerFamily.KEYBOARD && (
+                it.name != "PC Gamepad" ||
+                    it.keyboardAnalog == null ||
+                    it.digitalBindings[LogicalControl.CROSS] != KeyEvent.KEYCODE_J ||
+                    it.digitalBindings[LogicalControl.START] != KeyEvent.KEYCODE_ENTER
+                )
+            if (it.isDefault && (it.family != family || staleKeyboardDefault)) {
+                Log.i(TAG, "migrate generated profile deviceKey=$deviceKey ${it.family}->$family")
+                return buildDefault(deviceKey, family, descriptor, vendorId, productId)
+            }
             Log.i(TAG, "profile hit deviceKey=$deviceKey id=${it.id}")
             return it
         }
@@ -101,11 +124,18 @@ object ControllerProfileSelection {
         productId: Int? = null,
         legacyLogicalBindings: Map<LogicalControl, Int> = emptyMap(),
     ): ControllerProfile {
-        val bindings = FamilyDefaultMappings.mergeWithLegacy(family, legacyLogicalBindings)
+        // Legacy bindings are intentionally opt-in. A newly detected device must receive
+        // the defaults for its actual family; callers that explicitly migrate legacy state
+        // use [migrateLegacy] below.
+        val bindings = if (legacyLogicalBindings.isEmpty()) {
+            FamilyDefaultMappings.defaultsFor(family)
+        } else {
+            FamilyDefaultMappings.mergeWithLegacy(family, legacyLogicalBindings)
+        }
         return ControllerProfile(
             id = if (deviceKey != null) "device:$deviceKey" else "default",
             name = when (family) {
-                ControllerFamily.KEYBOARD -> "Keyboard Default"
+                ControllerFamily.KEYBOARD -> "PC Gamepad"
                 ControllerFamily.PLAYSTATION -> "PlayStation Default"
                 ControllerFamily.XBOX -> "Xbox Default"
                 ControllerFamily.NINTENDO -> "Nintendo Default"
@@ -117,6 +147,7 @@ object ControllerProfileSelection {
             productId = productId,
             family = family,
             digitalBindings = bindings,
+            keyboardAnalog = if (family == ControllerFamily.KEYBOARD) FamilyDefaultMappings.keyboardAnalogDefaults() else null,
             isDefault = true,
         )
     }
@@ -145,6 +176,9 @@ object ControllerProfileSelection {
             productId = productId ?: legacy.productId,
             family = family,
             digitalBindings = merged,
+            keyboardAnalog = if (family == ControllerFamily.KEYBOARD) {
+                legacy.keyboardAnalog ?: FamilyDefaultMappings.keyboardAnalogDefaults()
+            } else legacy.keyboardAnalog,
             isDefault = false,
         )
     }
@@ -182,7 +216,6 @@ object ControllerProfileRepository {
     }
 
     fun loadForDevice(device: ConnectedInputDevice): ControllerProfile {
-        val legacy = FamilyDefaultMappings.fromInputBindingPrefs(InputBindingPrefs.loadBindings())
         val selected = ControllerProfileSelection.selectForDevice(
             profiles = loadAll(),
             deviceKey = device.deviceKey,
@@ -190,8 +223,13 @@ object ControllerProfileRepository {
             descriptor = device.descriptor,
             vendorId = device.vendorId,
             productId = device.productId,
-            legacyLogicalBindings = legacy,
         )
+        // A generated profile saved under the old family is replaced only when it is still
+        // marked default. Custom profiles are left intact for an explicit user migration.
+        if (selected.isDefault && selected.family == device.family && selected.deviceKey == device.deviceKey) {
+            val stored = loadAll().firstOrNull { it.deviceKey == device.deviceKey }
+            if (stored != null && stored != selected) save(selected)
+        }
         Log.i(TAG, "loadForDevice ${device.name} -> ${selected.id}")
         return selected
     }
@@ -238,6 +276,22 @@ object ControllerProfileRepository {
         }
         val familyName = j.optString("family", "").ifBlank { null }
         val family = familyName?.let { runCatching { ControllerFamily.valueOf(it) }.getOrNull() }
+        val familyFallback = family?.let { ControllerProfileSelection.buildDefault(null, it) } ?: fallback
+        fun digitalPair(name: String): DigitalAxisPair? {
+            val value = j.optJSONObject("keyboardAnalog")?.optJSONObject(name) ?: return null
+            return DigitalAxisPair(
+                negativeKey = if (value.has("negativeKey")) value.optInt("negativeKey") else null,
+                positiveKey = if (value.has("positiveKey")) value.optInt("positiveKey") else null,
+            )
+        }
+        val analog = if (family == ControllerFamily.KEYBOARD) {
+            KeyboardAnalogBindings(
+                leftX = digitalPair("leftX") ?: familyFallback.keyboardAnalog?.leftX ?: DigitalAxisPair(),
+                leftY = digitalPair("leftY") ?: familyFallback.keyboardAnalog?.leftY ?: DigitalAxisPair(),
+                rightX = digitalPair("rightX") ?: familyFallback.keyboardAnalog?.rightX ?: DigitalAxisPair(),
+                rightY = digitalPair("rightY") ?: familyFallback.keyboardAnalog?.rightY ?: DigitalAxisPair(),
+            )
+        } else null
         return fallback.copy(
             id = j.optString("id", "default"),
             name = j.optString("name", "Default"),
@@ -246,12 +300,13 @@ object ControllerProfileRepository {
             vendorId = if (j.has("vendorId")) j.optInt("vendorId") else null,
             productId = if (j.has("productId")) j.optInt("productId") else null,
             family = family,
-            digitalBindings = map.ifEmpty { fallback.digitalBindings },
+            digitalBindings = map.ifEmpty { familyFallback.digitalBindings },
             leftX = axis("leftX", fallback.leftX), leftY = axis("leftY", fallback.leftY),
             rightX = axis("rightX", fallback.rightX), rightY = axis("rightY", fallback.rightY),
             leftTrigger = axis("leftTrigger", fallback.leftTrigger), rightTrigger = axis("rightTrigger", fallback.rightTrigger),
             leftStick = tuning("leftStick", fallback.leftStick), rightStick = tuning("rightStick", fallback.rightStick),
             triggerThreshold = j.optDouble("triggerThreshold", fallback.triggerThreshold.toDouble()).toFloat(),
+            keyboardAnalog = analog,
             isDefault = j.optBoolean("isDefault", false),
         )
     }
@@ -265,6 +320,18 @@ object ControllerProfileRepository {
         profile.family?.let { put("family", it.name) }
         put("isDefault", profile.isDefault)
         put("digital", JSONObject().apply { profile.digitalBindings.forEach { (logical, key) -> put(logical.name, key) } })
+        profile.keyboardAnalog?.let { analog ->
+            put("keyboardAnalog", JSONObject().apply {
+                fun pair(name: String, value: DigitalAxisPair) {
+                    put(name, JSONObject().apply {
+                        value.negativeKey?.let { put("negativeKey", it) }
+                        value.positiveKey?.let { put("positiveKey", it) }
+                    })
+                }
+                pair("leftX", analog.leftX); pair("leftY", analog.leftY)
+                pair("rightX", analog.rightX); pair("rightY", analog.rightY)
+            })
+        }
         fun axis(name: String, value: AxisBinding) {
             put(name, JSONObject().put("axis", value.axis).put("invert", value.invert))
         }

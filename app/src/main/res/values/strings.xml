@@ -89,7 +89,8 @@
     <string name="failed_to_boot">Failed to boot</string>
 
     <!-- RPCSXActivity -->
-    <string name="home_menu_toggle_cd">Home menu</string>
+    <string name="home_menu_toggle_cd">Home menu (Esc / Home / F1)</string>
+    <string name="osc_toggle_cd">Keyboard / on-screen controls (F2)</string>
     <string name="exit_game_confirm_message">Quit the game and return to the launcher?</string>
     <string name="exit_game_confirm_yes">Yes</string>
     <string name="exit_game_confirm_no">No</string>

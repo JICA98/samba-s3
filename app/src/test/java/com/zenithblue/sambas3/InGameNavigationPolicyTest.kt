@@ -1,5 +1,6 @@
 package com.zenithblue.sambas3
 
+import android.view.KeyEvent
 import org.junit.Assert.assertEquals
 import org.junit.Test
 
@@ -53,5 +54,13 @@ class InGameNavigationPolicyTest {
         assertEquals(false, gate.acceptDown(1))
         assertEquals(true, gate.acceptUp())
         assertEquals(true, gate.acceptDown(0))
+    }
+
+    @Test
+    fun keyboard_renderer_shortcuts_are_reserved_for_game_chrome() {
+        assertEquals(KeyboardRenderAction.PsButton, resolveKeyboardRenderAction(KeyEvent.KEYCODE_HOME))
+        assertEquals(KeyboardRenderAction.HomeButton, resolveKeyboardRenderAction(KeyEvent.KEYCODE_F1))
+        assertEquals(KeyboardRenderAction.KeyboardButton, resolveKeyboardRenderAction(KeyEvent.KEYCODE_F2))
+        assertEquals(null, resolveKeyboardRenderAction(KeyEvent.KEYCODE_F3))
     }
 }

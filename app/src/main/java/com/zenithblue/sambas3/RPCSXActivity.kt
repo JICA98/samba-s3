@@ -62,10 +62,11 @@ import com.zenithblue.sambas3.crash.HomeRecoveryRepository
 import com.zenithblue.sambas3.monitoring.MonitoringOverlaySettings
 import com.zenithblue.sambas3.monitoring.MonitoringRepository
 import com.zenithblue.sambas3.ui.monitoring.MonitoringOverlay
-import com.zenithblue.sambas3.input.ControllerInputMonitor
-import com.zenithblue.sambas3.input.ControllerProfileRepository
-import com.zenithblue.sambas3.input.GamepadMapper
-import com.zenithblue.sambas3.utils.InputBindingPrefs
+import com.zenithblue.sambas3.input.ControllerDeviceRepository
+import com.zenithblue.sambas3.input.ControllerFamily
+import com.zenithblue.sambas3.input.DeviceInputMapperRegistry
+import com.zenithblue.sambas3.input.LogicalControl
+import com.zenithblue.sambas3.input.RoutedInputMapper
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
@@ -87,6 +88,8 @@ private enum class EmulatorActivityFinishReason {
 private enum class FrontendHomeInputSource {
     TouchPs,
     PhysicalGuide,
+    KeyboardPsButton,
+    KeyboardHomeButton,
     NativeFrontendEvent,
     ToolbarHome,
     MenuCommand
@@ -127,8 +130,7 @@ class RPCSXActivity : ComponentActivity(), EmulationHost {
     private lateinit var thumbnailStore: SavestateThumbnailStore
     private val bootMutex = Any()
     private val terminalFailure = java.util.concurrent.atomic.AtomicBoolean(false)
-    private val inputBindings by lazy { InputBindingPrefs.loadBindings() }
-    private val gamepadMapper by lazy { GamepadMapper(ControllerProfileRepository.load()) }
+    private val mapperRegistry by lazy { DeviceInputMapperRegistry() }
 
     override val currentSurfaceGeneration: Long
         get() = if (::surfaceLeaseManager.isInitialized) surfaceLeaseManager.currentGeneration else 0L
@@ -370,9 +372,7 @@ class RPCSXActivity : ComponentActivity(), EmulationHost {
         }
 
         binding.oscToggle.setOnClickListener {
-            if (interactionLock.isLocked()) return@setOnClickListener
-            binding.padOverlay.isInvisible = !binding.padOverlay.isInvisible
-            binding.oscToggle.setImageResource(if (binding.padOverlay.isInvisible) R.drawable.ic_osc_off else R.drawable.ic_show_osc)
+            toggleOnScreenControls()
         }
 
         binding.menuToggle.setOnClickListener {
@@ -678,6 +678,15 @@ class RPCSXActivity : ComponentActivity(), EmulationHost {
                 coordinator.dispatch(InGameMenuIntent.Resume)
             }
         }
+    }
+
+    private fun toggleOnScreenControls() {
+        if (interactionLock.isLocked()) return
+        binding.padOverlay.isInvisible = !binding.padOverlay.isInvisible
+        binding.oscToggle.setImageResource(
+            if (binding.padOverlay.isInvisible) R.drawable.ic_osc_off else R.drawable.ic_show_osc
+        )
+        Log.i("S3UIKEY", "action=toggle-controls visible=${!binding.padOverlay.isInvisible}")
     }
 
     override fun onNewIntent(intent: Intent) {
@@ -1244,17 +1253,6 @@ class RPCSXActivity : ComponentActivity(), EmulationHost {
         try { if (bootThread?.isAlive == true) Log.w("S3LIFE", "bootThread still alive after onDestroy join timeout") } catch (_: Exception) {}
     }
 
-    private fun keyCodeToPadBit(keyCode: Int): Pair<Int, Int> {
-        val event = inputBindings[keyCode] ?: Pair(0, 0)
-        if (keyCode == KeyEvent.KEYCODE_BUTTON_R2) {
-            if (usesAxisR2) return Pair(0, 0) else return event
-        }
-        if (keyCode == KeyEvent.KEYCODE_BUTTON_L2) {
-            if (usesAxisL2) return Pair(0, 0) else return event
-        }
-        return event
-    }
-
     private fun isMenuOpen(): Boolean = coordinator.state.value.isOpen
 
     private fun logSessionSnapshot(reason: String) {
@@ -1271,13 +1269,70 @@ class RPCSXActivity : ComponentActivity(), EmulationHost {
     private fun isFrontendHomeKey(keyCode: Int): Boolean =
         keyCode == KeyEvent.KEYCODE_HOME || keyCode == KeyEvent.KEYCODE_BUTTON_MODE
 
+    /**
+     * Physical keyboard events must never fall through to the game-view
+     * Compose/toolbar hierarchy. A keyboard may advertise DPAD/JOYSTICK
+     * capability bits too, so use the resolved device identity rather than
+     * only the event source mask.
+     */
+    private fun isExternalKeyboardEvent(event: KeyEvent, routed: RoutedInputMapper?): Boolean =
+        !event.device.isVirtual && (
+            routed?.device?.family == ControllerFamily.KEYBOARD ||
+                ControllerDeviceRepository.toConnected(event.device)?.family == ControllerFamily.KEYBOARD
+            )
+
+    /** Intercept before child views can interpret Enter, arrows, Tab, Home, etc. */
+    override fun dispatchKeyEvent(event: KeyEvent): Boolean {
+        val routed = mapperRegistry.resolve(event)
+        if (isExternalKeyboardEvent(event, routed)) {
+            return when (event.action) {
+                KeyEvent.ACTION_DOWN -> onKeyDown(event.keyCode, event)
+                KeyEvent.ACTION_UP -> onKeyUp(event.keyCode, event)
+                else -> true
+            }
+        }
+        return super.dispatchKeyEvent(event)
+    }
+
     override fun onKeyDown(keyCode: Int, event: KeyEvent?): Boolean {
         if (interactionLock.isLocked()) return true
         physicalTracker.onKeyEvent(keyCode, event?.action ?: KeyEvent.ACTION_UP)
+        val routed = event?.let(mapperRegistry::resolve)
+        val keyboardEvent = event?.let { isExternalKeyboardEvent(it, routed) } == true
+        val repeatCount = event?.repeatCount ?: 0
+        if (keyboardEvent) {
+            when (resolveKeyboardRenderAction(keyCode)) {
+                KeyboardRenderAction.PsButton -> {
+                    if (repeatCount == 0) {
+                        requestHomeToggle(FrontendHomeInputSource.KeyboardPsButton)
+                    }
+                    return true
+                }
+                KeyboardRenderAction.HomeButton -> {
+                    if (repeatCount == 0) {
+                        requestHomeToggle(FrontendHomeInputSource.KeyboardHomeButton)
+                    }
+                    return true
+                }
+                KeyboardRenderAction.KeyboardButton -> {
+                    if (repeatCount == 0) toggleOnScreenControls()
+                    return true
+                }
+                null -> Unit
+            }
+        }
         if (isFrontendHomeKey(keyCode)) {
-            if (event == null || frontendHomeKeyGate.acceptDown(event.repeatCount)) {
+            // Guide is still a frontend command for gamepads. Physical
+            // keyboard Home is handled above as the reserved PS shortcut.
+            if (keyboardEvent) return true
+            if (event == null || frontendHomeKeyGate.acceptDown(repeatCount)) {
                 requestHomeToggle(FrontendHomeInputSource.PhysicalGuide)
             }
+            return true
+        }
+        val mappedLogical = routed?.mapper?.logicalForKey(keyCode)
+        if (mappedLogical == LogicalControl.PS_HOME_FRONTEND) {
+            if (repeatCount == 0) requestHomeToggle(FrontendHomeInputSource.PhysicalGuide)
             return true
         }
         if (isMenuOpen()) {
@@ -1290,15 +1345,21 @@ class RPCSXActivity : ComponentActivity(), EmulationHost {
         if (!inputGate.onPhysicalEvent()) {
             return true
         }
-        if (event == null || (event.source and (InputDevice.SOURCE_GAMEPAD or InputDevice.SOURCE_JOYSTICK or InputDevice.SOURCE_DPAD)) == 0 || event.repeatCount != 0) {
+        if (routed == null || !routed.mapper.isMappedKey(keyCode)) {
+            if (keyboardEvent) {
+                Log.d("S3KEYBOARD", "consume unmapped key=$keyCode to keep game UI inert")
+                return true
+            }
             return super.onKeyDown(keyCode, event)
         }
-        ControllerInputMonitor.key(gamepadMapper, event, true)
-        val padBit = gamepadMapper.digitalBinding(keyCode)
-        if (padBit.first == 0) {
-            return super.onKeyDown(keyCode, event)
-        }
-        gamePadState.digital[padBit.second] = gamePadState.digital[padBit.second] or padBit.first
+        if (repeatCount != 0) return true
+        val mapped = routed.mapper.keyDown(keyCode) ?: return true
+        gamePadState.digital[0] = mapped.digital1
+        gamePadState.digital[1] = mapped.digital2
+        gamePadState.leftStickX = mapped.leftX
+        gamePadState.leftStickY = mapped.leftY
+        gamePadState.rightStickX = mapped.rightX
+        gamePadState.rightStickY = mapped.rightY
         sendGamepadData()
         return true
     }
@@ -1306,10 +1367,15 @@ class RPCSXActivity : ComponentActivity(), EmulationHost {
     override fun onKeyUp(keyCode: Int, event: KeyEvent?): Boolean {
         if (interactionLock.isLocked()) return true
         physicalTracker.onKeyEvent(keyCode, event?.action ?: KeyEvent.ACTION_UP)
+        val routed = event?.let(mapperRegistry::resolve)
+        val keyboardEvent = event?.let { isExternalKeyboardEvent(it, routed) } == true
+        if (keyboardEvent && resolveKeyboardRenderAction(keyCode) != null) return true
         if (isFrontendHomeKey(keyCode)) {
             frontendHomeKeyGate.acceptUp()
             return true
         }
+        val mappedLogical = routed?.mapper?.logicalForKey(keyCode)
+        if (mappedLogical == LogicalControl.PS_HOME_FRONTEND) return true
         if (isMenuOpen()) {
             if (menuInputRouter.isMenuInputKey(keyCode)) return true
             if (event != null && event.source and (InputDevice.SOURCE_GAMEPAD or InputDevice.SOURCE_JOYSTICK or InputDevice.SOURCE_DPAD) != 0) {
@@ -1319,16 +1385,20 @@ class RPCSXActivity : ComponentActivity(), EmulationHost {
         if (!inputGate.onPhysicalEvent()) {
             return true
         }
-        if (event == null || event.source and (InputDevice.SOURCE_GAMEPAD or InputDevice.SOURCE_JOYSTICK or InputDevice.SOURCE_DPAD) == 0) {
+        if (routed == null || !routed.mapper.isMappedKey(keyCode)) {
+            if (keyboardEvent) {
+                Log.d("S3KEYBOARD", "consume unmapped key-up=$keyCode to keep game UI inert")
+                return true
+            }
             return super.onKeyUp(keyCode, event)
         }
-        ControllerInputMonitor.key(gamepadMapper, event ?: KeyEvent(KeyEvent.ACTION_UP, keyCode), false)
-        val padBit = gamepadMapper.digitalBinding(keyCode)
-        if (padBit.first == 0) {
-            return super.onKeyUp(keyCode, event)
-        }
-        gamePadState.digital[padBit.second] =
-            gamePadState.digital[padBit.second] and padBit.first.inv()
+        val mapped = routed.mapper.keyUp(keyCode) ?: return true
+        gamePadState.digital[0] = mapped.digital1
+        gamePadState.digital[1] = mapped.digital2
+        gamePadState.leftStickX = mapped.leftX
+        gamePadState.leftStickY = mapped.leftY
+        gamePadState.rightStickX = mapped.rightX
+        gamePadState.rightStickY = mapped.rightY
         sendGamepadData()
         return true
     }
@@ -1343,12 +1413,12 @@ class RPCSXActivity : ComponentActivity(), EmulationHost {
         if (!inputGate.onPhysicalEvent()) {
             return true
         }
-        if (event == null || event.source and InputDevice.SOURCE_JOYSTICK != InputDevice.SOURCE_JOYSTICK || event.action != MotionEvent.ACTION_MOVE) {
+        val routed = event?.let(mapperRegistry::resolve)
+        if (routed == null || event?.action != MotionEvent.ACTION_MOVE) {
             return super.onGenericMotionEvent(event)
         }
 
-        val mapped = gamepadMapper.motion(event)
-        ControllerInputMonitor.motion(gamepadMapper, event)
+        val mapped = routed.mapper.motion(event!!)
         gamePadState.digital[0] = mapped.digital1
         gamePadState.digital[1] = mapped.digital2
         gamePadState.leftStickX = mapped.leftX
@@ -1412,7 +1482,7 @@ class RPCSXActivity : ComponentActivity(), EmulationHost {
 
     override fun onResume() {
         super.onResume()
-        gamepadMapper.reload(ControllerProfileRepository.load())
+        mapperRegistry.invalidateAll()
         // Menu re-arming/stale sessions are owned by the coordinator via state;
         // no blind native calls here (§17 rule 8).
     }

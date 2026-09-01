@@ -116,7 +116,7 @@ class MainActivity : ComponentActivity() {
 
         setContent {
             RPCSXTheme {
-                AppNavHost()
+                AppNavHost(initialRoute = intent.getStringExtra("route"))
             }
         }
 
@@ -153,14 +153,32 @@ class MainActivity : ComponentActivity() {
     }
 
     override fun dispatchKeyEvent(event: android.view.KeyEvent): Boolean {
-        if (event.source and (android.view.InputDevice.SOURCE_GAMEPAD or android.view.InputDevice.SOURCE_JOYSTICK) != 0) {
+        val physicalSource = event.source and (
+            android.view.InputDevice.SOURCE_KEYBOARD or
+                android.view.InputDevice.SOURCE_GAMEPAD or
+                android.view.InputDevice.SOURCE_JOYSTICK or
+                android.view.InputDevice.SOURCE_DPAD
+            ) != 0
+        if (physicalSource && ControllerInputMonitor.consumesPhysicalInput()) {
+            ControllerInputMonitor.observeKey(event, event.action == android.view.KeyEvent.ACTION_DOWN)
+            return true
+        }
+        if (physicalSource) {
             ControllerInputMonitor.observeKey(event, event.action == android.view.KeyEvent.ACTION_DOWN)
         }
         return super.dispatchKeyEvent(event)
     }
 
     override fun dispatchGenericMotionEvent(event: android.view.MotionEvent): Boolean {
-        if (event.source and (android.view.InputDevice.SOURCE_GAMEPAD or android.view.InputDevice.SOURCE_JOYSTICK) != 0) ControllerInputMonitor.observeMotion(event)
+        val physicalSource = event.source and (
+            android.view.InputDevice.SOURCE_GAMEPAD or
+                android.view.InputDevice.SOURCE_JOYSTICK
+            ) != 0
+        if (physicalSource && ControllerInputMonitor.consumesPhysicalInput()) {
+            ControllerInputMonitor.observeMotion(event)
+            return true
+        }
+        if (physicalSource) ControllerInputMonitor.observeMotion(event)
         return super.dispatchGenericMotionEvent(event)
     }
 }

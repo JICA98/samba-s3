@@ -85,6 +85,7 @@ import com.zenithblue.sambas3.ui.settings.SettingsScreen
 import com.zenithblue.sambas3.ui.debug.DebugControllerScreen
 import com.zenithblue.sambas3.ui.monitoring.MonitoringSettingsScreen
 import com.zenithblue.sambas3.ui.controller.ControllerSettingsScreen
+import com.zenithblue.sambas3.ui.controller.ControllerTestScreen
 import com.zenithblue.sambas3.ui.settings.advancedSettingsRoute
 import com.zenithblue.sambas3.ui.settings.decodeAdvancedSettingsPath
 import com.zenithblue.sambas3.ui.settings.getNestedSettings
@@ -103,7 +104,7 @@ import org.json.JSONObject
 @Preview
 @Composable
 @OptIn(ExperimentalMaterial3Api::class)
-fun AppNavHost() {
+fun AppNavHost(initialRoute: String? = null) {
     val context = LocalContext.current
     val navController = rememberNavController()
     val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
@@ -166,7 +167,7 @@ fun AppNavHost() {
 
     NavHost(
         navController = navController,
-        startDestination = "games"
+        startDestination = initialRoute ?: "games"
     ) {
         composable(
             route = "games"
@@ -239,7 +240,18 @@ fun AppNavHost() {
             route = "controls"
         ) {
             ControllerSettingsScreen(
-                navigateBack = navController::navigateUp
+                navigateBack = navController::navigateUp,
+                onOpenTest = { device -> navigateTo("controller_test/${Uri.encode(device.deviceKey)}") },
+            )
+        }
+
+        composable(
+            route = "controller_test/{deviceKey}",
+            arguments = listOf(navArgument("deviceKey") { type = NavType.StringType }),
+        ) { entry ->
+            ControllerTestScreen(
+                deviceKey = Uri.decode(entry.arguments?.getString("deviceKey").orEmpty()),
+                navigateBack = navController::navigateUp,
             )
         }
 

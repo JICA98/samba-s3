@@ -1405,7 +1405,8 @@ fun SettingsScreen(
                         "controls" -> {
                             ControllerSettingsScreen(
                                 navigateBack = { activeSettingKey = null },
-                                isInSplitPane = true
+                                isInSplitPane = true,
+                                onOpenTest = { device -> navigateTo("controller_test/${android.net.Uri.encode(device.deviceKey)}") },
                             )
                         }
                         "logs" -> {

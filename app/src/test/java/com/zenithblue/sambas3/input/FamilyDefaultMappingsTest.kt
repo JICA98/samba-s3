@@ -11,7 +11,7 @@ class FamilyDefaultMappingsTest {
     @Test
     fun keyboardDefaultsAreKeysNotGamepadButtons() {
         val map = FamilyDefaultMappings.keyboardDefaults()
-        assertEquals(KeyEvent.KEYCODE_W, map[LogicalControl.DPAD_UP])
+        assertEquals(KeyEvent.KEYCODE_NUMPAD_8, map[LogicalControl.DPAD_UP])
         assertEquals(KeyEvent.KEYCODE_J, map[LogicalControl.CROSS])
         assertEquals(KeyEvent.KEYCODE_ENTER, map[LogicalControl.START])
         assertEquals(KeyEvent.KEYCODE_ESCAPE, map[LogicalControl.PS_HOME_FRONTEND])

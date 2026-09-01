@@ -1,5 +1,7 @@
 package com.zenithblue.sambas3
 
+import android.view.KeyEvent
+
 internal enum class AndroidBackAction {
     OpenMenu,
     DispatchMenuBack,
@@ -35,4 +37,18 @@ internal class FrontendHomeKeyGate {
         held = false
         return true
     }
+}
+
+internal enum class KeyboardRenderAction {
+    PsButton,
+    HomeButton,
+    KeyboardButton,
+}
+
+/** Reserved physical-keyboard shortcuts handled by the renderer chrome. */
+internal fun resolveKeyboardRenderAction(keyCode: Int): KeyboardRenderAction? = when (keyCode) {
+    KeyEvent.KEYCODE_HOME -> KeyboardRenderAction.PsButton
+    KeyEvent.KEYCODE_F1 -> KeyboardRenderAction.HomeButton
+    KeyEvent.KEYCODE_F2 -> KeyboardRenderAction.KeyboardButton
+    else -> null
 }

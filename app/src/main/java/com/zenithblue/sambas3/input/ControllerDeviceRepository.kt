@@ -99,8 +99,18 @@ class ControllerDeviceRepository(context: Context) : InputManager.InputDeviceLis
             sources: Int = 0,
             isVirtual: Boolean = false,
             transport: String? = null,
+            keyboardType: Int = 0,
+            motionAxes: Set<Int> = emptySet(),
         ): ConnectedInputDevice {
-            val (type, family) = ControllerClassifier.classify(name, vendorId, productId, sources, isVirtual)
+            val (type, family) = ControllerClassifier.classify(
+                name = name,
+                vendorId = vendorId,
+                productId = productId,
+                sources = sources,
+                isVirtual = isVirtual,
+                keyboardType = keyboardType,
+                motionAxes = motionAxes,
+            )
             return ConnectedInputDevice(
                 deviceId = deviceId,
                 descriptor = descriptor,

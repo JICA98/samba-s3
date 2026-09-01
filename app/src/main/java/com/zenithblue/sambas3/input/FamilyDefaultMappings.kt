@@ -39,10 +39,12 @@ object FamilyDefaultMappings {
     fun playstationDefaults(): Map<LogicalControl, Int> = gamepadDefaults()
 
     fun keyboardDefaults(): Map<LogicalControl, Int> = mapOf(
-        LogicalControl.DPAD_UP to KeyEvent.KEYCODE_W,
-        LogicalControl.DPAD_DOWN to KeyEvent.KEYCODE_S,
-        LogicalControl.DPAD_LEFT to KeyEvent.KEYCODE_A,
-        LogicalControl.DPAD_RIGHT to KeyEvent.KEYCODE_D,
+        // PC Gamepad uses WASD for the left analog stick. Numpad keeps a useful
+        // secondary D-pad without stealing the movement keys.
+        LogicalControl.DPAD_UP to KeyEvent.KEYCODE_NUMPAD_8,
+        LogicalControl.DPAD_DOWN to KeyEvent.KEYCODE_NUMPAD_2,
+        LogicalControl.DPAD_LEFT to KeyEvent.KEYCODE_NUMPAD_4,
+        LogicalControl.DPAD_RIGHT to KeyEvent.KEYCODE_NUMPAD_6,
         LogicalControl.CROSS to KeyEvent.KEYCODE_J,
         LogicalControl.CIRCLE to KeyEvent.KEYCODE_K,
         LogicalControl.SQUARE to KeyEvent.KEYCODE_U,
@@ -57,6 +59,20 @@ object FamilyDefaultMappings {
         LogicalControl.SELECT to KeyEvent.KEYCODE_TAB,
         LogicalControl.PS_HOME_FRONTEND to KeyEvent.KEYCODE_ESCAPE,
     )
+
+    fun keyboardAnalogDefaults(): KeyboardAnalogBindings = KeyboardAnalogBindings(
+        leftX = DigitalAxisPair(KeyEvent.KEYCODE_A, KeyEvent.KEYCODE_D),
+        leftY = DigitalAxisPair(KeyEvent.KEYCODE_W, KeyEvent.KEYCODE_S),
+        rightX = DigitalAxisPair(KeyEvent.KEYCODE_DPAD_LEFT, KeyEvent.KEYCODE_DPAD_RIGHT),
+        rightY = DigitalAxisPair(KeyEvent.KEYCODE_DPAD_UP, KeyEvent.KEYCODE_DPAD_DOWN),
+    )
+
+    fun keyboardDpadDefaults(): Map<LogicalControl, Int> = keyboardDefaults().toMutableMap().apply {
+        put(LogicalControl.DPAD_UP, KeyEvent.KEYCODE_W)
+        put(LogicalControl.DPAD_DOWN, KeyEvent.KEYCODE_S)
+        put(LogicalControl.DPAD_LEFT, KeyEvent.KEYCODE_A)
+        put(LogicalControl.DPAD_RIGHT, KeyEvent.KEYCODE_D)
+    }
 
     fun defaultsFor(family: ControllerFamily): Map<LogicalControl, Int> = when (family) {
         ControllerFamily.KEYBOARD -> keyboardDefaults()

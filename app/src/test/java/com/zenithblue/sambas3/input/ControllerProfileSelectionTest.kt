@@ -73,7 +73,7 @@ class ControllerProfileSelectionTest {
         )
         assertEquals(ControllerFamily.KEYBOARD, selected.family)
         assertEquals("desc:new", selected.deviceKey)
-        assertEquals(KeyEvent.KEYCODE_W, selected.digitalBindings[LogicalControl.DPAD_UP])
+        assertEquals(KeyEvent.KEYCODE_NUMPAD_8, selected.digitalBindings[LogicalControl.DPAD_UP])
         assertTrue(selected.isDefault)
     }
 
