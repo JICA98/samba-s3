@@ -98,7 +98,7 @@
     <g class="key" data-code="End"><rect class="cap" x="1050" y="128" width="58" height="58" rx="7"/><text class="fn" x="1079" y="161">End</text></g>
     <g class="key" data-code="PageDown"><rect class="cap" x="1114" y="128" width="58" height="58" rx="7"/><text class="fn" x="1143" y="161">PgDn</text></g>
     <g class="key" data-code="Numpad7"><rect class="cap" x="1204" y="128" width="58" height="58" rx="7"/><text class="sh mid" x="1233" y="143">Home</text><text class="mn mid" x="1233" y="169">7</text></g>
-    <g class="key" data-code="Numpad8"><rect class="cap" x="1268" y="128" width="58" height="58" rx="7"/><text class="sh mid" x="1297" y="143">&amp;#8593;</text><text class="mn mid" x="1297" y="169">8</text></g>
+    <g class="key" data-code="Numpad8"><rect class="cap" x="1268" y="128" width="58" height="58" rx="7"/><text class="sh mid" x="1297" y="143">↑</text><text class="mn mid" x="1297" y="169">8</text></g>
     <g class="key" data-code="Numpad9"><rect class="cap" x="1332" y="128" width="58" height="58" rx="7"/><text class="sh mid" x="1361" y="143">PgUp</text><text class="mn mid" x="1361" y="169">9</text></g>
     <g class="key" data-code="NumpadAdd"><rect class="cap" x="1396" y="128" width="58" height="122" rx="7"/><text class="mn mid" x="1425" y="196">+</text></g>
 
@@ -116,9 +116,9 @@
     <g class="key" data-code="Semicolon"><rect class="cap" x="688" y="192" width="58" height="58" rx="7"/><text class="sh" x="699" y="210">:</text><text class="mn" x="699" y="237">;</text></g>
     <g class="key" data-code="Quote"><rect class="cap" x="752" y="192" width="58" height="58" rx="7"/><text class="sh" x="763" y="210">"</text><text class="mn" x="763" y="237">'</text></g>
     <g class="key" data-code="Enter"><rect class="cap" x="816" y="192" width="138" height="58" rx="7"/><text class="fn" x="885" y="225">Enter</text></g>
-    <g class="key" data-code="Numpad4"><rect class="cap" x="1204" y="192" width="58" height="58" rx="7"/><text class="sh mid" x="1233" y="207">&amp;#8592;</text><text class="mn mid" x="1233" y="233">4</text></g>
+    <g class="key" data-code="Numpad4"><rect class="cap" x="1204" y="192" width="58" height="58" rx="7"/><text class="sh mid" x="1233" y="207">←</text><text class="mn mid" x="1233" y="233">4</text></g>
     <g class="key" data-code="Numpad5"><rect class="cap" x="1268" y="192" width="58" height="58" rx="7"/><text class="mn mid" x="1297" y="233">5</text><path class="bump" d="M1288 244h18"/></g>
-    <g class="key" data-code="Numpad6"><rect class="cap" x="1332" y="192" width="58" height="58" rx="7"/><text class="sh mid" x="1361" y="207">&amp;#8594;</text><text class="mn mid" x="1361" y="233">6</text></g>
+    <g class="key" data-code="Numpad6"><rect class="cap" x="1332" y="192" width="58" height="58" rx="7"/><text class="sh mid" x="1361" y="207">→</text><text class="mn mid" x="1361" y="233">6</text></g>
 
     <!-- ══ ROW 4 : bottom row ══ -->
     <g class="key" data-code="ShiftLeft"><rect class="cap" x="0" y="256" width="138" height="58" rx="7"/><text class="fn" x="69" y="289">Shift</text></g>
@@ -133,9 +133,9 @@
     <g class="key" data-code="Period"><rect class="cap" x="656" y="256" width="58" height="58" rx="7"/><text class="sh" x="667" y="274">&gt;</text><text class="mn" x="667" y="301">.</text></g>
     <g class="key" data-code="Slash"><rect class="cap" x="720" y="256" width="58" height="58" rx="7"/><text class="sh" x="731" y="274">?</text><text class="mn" x="731" y="301">/</text></g>
     <g class="key" data-code="ShiftRight"><rect class="cap" x="784" y="256" width="170" height="58" rx="7"/><text class="fn" x="869" y="289">Shift</text></g>
-    <g class="key" data-code="ArrowUp"><rect class="cap" x="1050" y="256" width="58" height="58" rx="7"/><text class="fn" x="1079" y="289">&amp;#8593;</text></g>
+    <g class="key" data-code="ArrowUp"><rect class="cap" x="1050" y="256" width="58" height="58" rx="7"/><text class="fn" x="1079" y="289">↑</text></g>
     <g class="key" data-code="Numpad1"><rect class="cap" x="1204" y="256" width="58" height="58" rx="7"/><text class="sh mid" x="1233" y="271">End</text><text class="mn mid" x="1233" y="297">1</text></g>
-    <g class="key" data-code="Numpad2"><rect class="cap" x="1268" y="256" width="58" height="58" rx="7"/><text class="sh mid" x="1297" y="271">&amp;#8595;</text><text class="mn mid" x="1297" y="297">2</text></g>
+    <g class="key" data-code="Numpad2"><rect class="cap" x="1268" y="256" width="58" height="58" rx="7"/><text class="sh mid" x="1297" y="271">↓</text><text class="mn mid" x="1297" y="297">2</text></g>
     <g class="key" data-code="Numpad3"><rect class="cap" x="1332" y="256" width="58" height="58" rx="7"/><text class="sh mid" x="1361" y="271">PgDn</text><text class="mn mid" x="1361" y="297">3</text></g>
     <g class="key" data-code="NumpadEnter"><rect class="cap" x="1396" y="256" width="58" height="122" rx="7"/><text class="fn" x="1425" y="321">Enter</text></g>
 
@@ -148,69 +148,10 @@
     <g class="key" data-code="MetaRight"><rect class="cap" x="720" y="320" width="74" height="58" rx="7"/><text class="fn" x="757" y="353">Win</text></g>
     <g class="key" data-code="ContextMenu"><rect class="cap" x="800" y="320" width="74" height="58" rx="7"/><text class="fn" x="837" y="353">Menu</text></g>
     <g class="key" data-code="ControlRight"><rect class="cap" x="880" y="320" width="74" height="58" rx="7"/><text class="fn" x="917" y="353">Ctrl</text></g>
-    <g class="key" data-code="ArrowLeft"><rect class="cap" x="986" y="320" width="58" height="58" rx="7"/><text class="fn" x="1015" y="353">&amp;#8592;</text></g>
-    <g class="key" data-code="ArrowDown"><rect class="cap" x="1050" y="320" width="58" height="58" rx="7"/><text class="fn" x="1079" y="353">&amp;#8595;</text></g>
-    <g class="key" data-code="ArrowRight"><rect class="cap" x="1114" y="320" width="58" height="58" rx="7"/><text class="fn" x="1143" y="353">&amp;#8594;</text></g>
+    <g class="key" data-code="ArrowLeft"><rect class="cap" x="986" y="320" width="58" height="58" rx="7"/><text class="fn" x="1015" y="353">←</text></g>
+    <g class="key" data-code="ArrowDown"><rect class="cap" x="1050" y="320" width="58" height="58" rx="7"/><text class="fn" x="1079" y="353">↓</text></g>
+    <g class="key" data-code="ArrowRight"><rect class="cap" x="1114" y="320" width="58" height="58" rx="7"/><text class="fn" x="1143" y="353">→</text></g>
     <g class="key" data-code="Numpad0"><rect class="cap" x="1204" y="320" width="122" height="58" rx="7"/><text class="sh mid" x="1265" y="335">Ins</text><text class="mn mid" x="1265" y="361">0</text></g>
     <g class="key" data-code="NumpadDecimal"><rect class="cap" x="1332" y="320" width="58" height="58" rx="7"/><text class="sh mid" x="1361" y="335">Del</text><text class="mn mid" x="1361" y="361">.</text></g>
   </g>
-
-  <!-- status bar (updated by the script below — safe to delete) -->
-  <text x="28" y="436" font-size="11" fill="#3f4754" font-weight="600">ANSI-104</text>
-  <text id="kb-status" x="755" y="436" text-anchor="middle" font-size="12.5" fill="#5f6878" font-weight="600" letter-spacing="1.5">PRESS ANY KEY &amp;#183; CLICK / TOUCH ALSO WORKS</text>
-
-  <!-- built-in highlighting: works inline or via <object>/<iframe>; <img> ignores scripts -->
-  <script><![CDATA[
-    (function () {
-      var doc = document;
-      function el(code) { return doc.querySelector('.key[data-code="' + code + '"]'); }
-      function cls(code, name, on) {
-        var e = el(code);
-        if (e) { if (on) { e.classList.add(name); } else { e.classList.remove(name); } }
-      }
-      function clearHeld() {
-        var list = doc.querySelectorAll('.key.on'), i;
-        for (i = 0; i < list.length; i++) { list[i].classList.remove('on'); }
-      }
-      var status = doc.getElementById('kb-status');
-      function report(e) {
-        if (!status) { return; }
-        var k = e.key || e.code || '';
-        if (k === ' ') { k = 'Space'; }
-        status.textContent = 'key: ' + k + '   \u00B7   code: ' + e.code;
-      }
-      function keydown(e) {
-        cls(e.code, 'on', true);
-        if (e.getModifierState) {
-          cls('CapsLock', 'lock', e.getModifierState('CapsLock'));
-          cls('NumLock', 'lock', e.getModifierState('NumLock'));
-          cls('ScrollLock', 'lock', e.getModifierState('ScrollLock'));
-        }
-        report(e);
-      }
-      function keyup(e) { cls(e.code, 'on', false); }
-      function attach(w) {
-        w.addEventListener('keydown', keydown, true);
-        w.addEventListener('keyup', keyup, true);
-        w.addEventListener('blur', clearHeld);
-      }
-      attach(window);
-      try { if (window.parent && window.parent !== window) { attach(window.parent); } } catch (err) {}
-
-      /* click / tap a key to light it up (touch devices) */
-      doc.addEventListener('pointerdown', function (ev) {
-        var g = ev.target && ev.target.closest ? ev.target.closest('.key') : null;
-        if (!g) { return; }
-        g.classList.add('on');
-        if (status) { status.textContent = 'key: (pointer)   \u00B7   code: ' + g.getAttribute('data-code'); }
-        function release() {
-          g.classList.remove('on');
-          doc.removeEventListener('pointerup', release);
-          doc.removeEventListener('pointercancel', release);
-        }
-        doc.addEventListener('pointerup', release);
-        doc.addEventListener('pointercancel', release);
-      });
-    })();
-  ]]></script>
 </svg>

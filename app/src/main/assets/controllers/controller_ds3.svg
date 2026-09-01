@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 560" width="1000" height="560" role="img" aria-label="DualShock 3 controller test layout">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 500" width="1000" height="500" role="img" aria-label="DualShock 3 controller test layout">
   <title>DualShock 3 — Controller Input Test</title>
   <desc>17 buttons + 2 analog sticks. Elements carry data-button names matching the standard Gamepad API mapping. Sticks are draggable; buttons highlight on press.</desc>
 
@@ -96,8 +96,8 @@
   <!-- ══ Select / Start / LEDs / PS ══ -->
   <g class="pkey" data-button="select" transform="rotate(-10 408 195)"><rect class="pcap" x="390" y="188" width="36" height="14" rx="7"/></g>
   <g class="pkey" data-button="start" transform="rotate(10 592 195)"><rect class="pcap" x="574" y="188" width="36" height="14" rx="7"/></g>
-  <text class="lbl" x="408" y="217">SELECT</text>
-  <text class="lbl" x="592" y="217">START</text>
+  <text class="lbl" x="408" y="181">SELECT</text>
+  <text class="lbl" x="592" y="181">START</text>
   <g>
     <rect class="led" data-led="0" x="472" y="204" width="10" height="6" rx="2"/>
     <rect class="led" data-led="1" x="487" y="204" width="10" height="6" rx="2"/>
@@ -132,148 +132,5 @@
   <text class="tag" x="735" y="129">R1</text>
   <text class="tag" x="265" y="129">L1</text>
 
-  <!-- status bar -->
-  <text class="tiny" x="28" y="536">DS3 · 17 BUTTONS · 4 AXES · GAMEPAD API</text>
-  <text id="pad-status" class="st" x="500" y="536" text-anchor="middle">NO GAMEPAD DETECTED · PRESS ANY BUTTON ON THE CONTROLLER TO CONNECT</text>
-  <text class="tiny" x="972" y="536" text-anchor="end">CLICK BUTTONS · DRAG STICKS</text>
-
   <!-- built-in test: polls the Gamepad API, highlights buttons, moves sticks. Also supports pointer (click/drag). -->
-  <script><![CDATA[
-    (function () {
-      var doc = document;
-      /* standard mapping: button index -> data-button name */
-      var MAP = ['cross','circle','square','triangle','l1','r1','l2','r2','select','start','l3','r3',
-                 'dpad-up','dpad-down','dpad-left','dpad-right','ps'];
-      var btns = {}, stickGrp = {}, caps = {}, i, list, node;
-      list = doc.querySelectorAll('[data-button]');
-      for (i = 0; i < list.length; i++) {
-        node = list[i];
-        node._down = false;
-        btns[node.getAttribute('data-button')] = node;
-      }
-      list = doc.querySelectorAll('[data-stick]');
-      for (i = 0; i < list.length; i++) {
-        node = list[i];
-        var side = node.getAttribute('data-stick');
-        stickGrp[side] = node;
-        caps[side] = node.querySelector('.stick-cap');
-      }
-      var status = doc.getElementById('pad-status');
-      var leds = doc.querySelectorAll('[data-led]');
-      var pdown = {};   /* pointer-held buttons */
-      var drag = null;  /* active stick drag */
-
-      function setStick(side, x, y) {
-        x = x || 0; y = y || 0;
-        var m = Math.sqrt(x * x + y * y);
-        if (m > 1) { x /= m; y /= m; m = 1; }
-        var cap = caps[side];
-        if (cap) { cap.style.transform = 'translate(' + (x * 15).toFixed(2) + 'px,' + (y * 15).toFixed(2) + 'px)'; }
-        var g = stickGrp[side];
-        if (g) { g.classList.toggle('active', m > 0.09); }
-      }
-      function fmt(v) { v = v || 0; return Math.abs(v) < 0.005 ? '0.00' : (v < 0 ? '' : '+') + v.toFixed(2); }
-      function setStatus(msg, ok) {
-        if (!status) { return; }
-        status.textContent = msg;
-        if (ok) { status.classList.add('ok'); } else { status.classList.remove('ok'); }
-      }
-
-      function poll() {
-        var pads = navigator.getGamepads ? navigator.getGamepads() : [];
-        var first = null, down = {}, b, p, name, on, names = [];
-        for (i = 0; i < pads.length; i++) {
-          p = pads[i];
-          if (!p) { continue; }
-          if (!first) { first = p; }
-          for (b = 0; b < p.buttons.length; b++) {
-            if (p.buttons[b] && p.buttons[b].pressed) { down[b] = true; }
-          }
-        }
-        for (i = 0; i < MAP.length; i++) {
-          name = MAP[i];
-          node = btns[name];
-          if (!node) { continue; }
-          on = !!down[i] || !!pdown[name];
-          if (on !== node._down) { node._down = on; node.classList.toggle('on', on); }
-          if (on) {
-            var v = (first && first.buttons[i] && typeof first.buttons[i].value === 'number') ? first.buttons[i].value : 1;
-            names.push(name + (v > 0.04 && v < 0.96 ? '(' + Math.round(v * 100) + '%)' : ''));
-          }
-        }
-        if (first) {
-          if (!drag || drag.side !== 'left')  { setStick('left',  first.axes[0], first.axes[1]); }
-          if (!drag || drag.side !== 'right') { setStick('right', first.axes[2], first.axes[3]); }
-          var id = String(first.id || 'gamepad').replace(/\s+/g, ' ');
-          if (id.length > 40) { id = id.slice(0, 40) + '...'; }
-          var msg = 'CONNECTED: ' + id + '  |  L(' + fmt(first.axes[0]) + ',' + fmt(first.axes[1]) +
-                    ')  R(' + fmt(first.axes[2]) + ',' + fmt(first.axes[3]) + ')';
-          if (names.length) { msg += '  |  ' + names.join(' + '); }
-          if (first.mapping !== 'standard') { msg += '  |  NON-STANDARD MAP'; }
-          setStatus(msg, true);
-          var idx = first.index | 0;
-          for (i = 0; i < leds.length; i++) { leds[i].classList.toggle('on', i === idx); }
-        } else {
-          var m2 = 'NO GAMEPAD DETECTED · PRESS ANY BUTTON ON THE CONTROLLER TO CONNECT';
-          if (names.length) { m2 = 'POINTER TEST  |  ' + names.join(' + '); }
-          setStatus(m2, names.length > 0);
-          for (i = 0; i < leds.length; i++) { leds[i].classList.remove('on'); }
-        }
-        requestAnimationFrame(poll);
-      }
-      requestAnimationFrame(poll);
-
-      window.addEventListener('gamepadconnected', function (e) {
-        if (e.gamepad) { setStatus('GAMEPAD CONNECTED: ' + e.gamepad.id, true); }
-      });
-      window.addEventListener('gamepaddisconnected', function () {
-        setStatus('GAMEPAD DISCONNECTED', false);
-      });
-
-      /* pointer testing: click any button, drag either stick */
-      doc.addEventListener('pointerdown', function (ev) {
-        var t = ev.target;
-        if (!t || !t.closest) { return; }
-        var s = t.closest('[data-stick]');
-        if (s) {
-          ev.preventDefault();
-          drag = {
-            side: s.getAttribute('data-stick'), el: s,
-            cx: parseFloat(s.getAttribute('data-cx')) || 0,
-            cy: parseFloat(s.getAttribute('data-cy')) || 0
-          };
-          try { s.setPointerCapture(ev.pointerId); } catch (err) {}
-          return;
-        }
-        var g = t.closest('[data-button]');
-        if (g) { pdown[g.getAttribute('data-button')] = true; }
-      });
-      doc.addEventListener('pointermove', function (ev) {
-        if (!drag) { return; }
-        var root = drag.el.ownerSVGElement;
-        if (!root || !root.getScreenCTM) { return; }
-        var ctm = root.getScreenCTM();
-        if (!ctm) { return; }
-        var pt = root.createSVGPoint();
-        pt.x = ev.clientX; pt.y = ev.clientY;
-        pt = pt.matrixTransform(ctm.inverse());
-        var dx = pt.x - drag.cx, dy = pt.y - drag.cy;
-        var m = Math.sqrt(dx * dx + dy * dy);
-        if (m > 15) { dx = dx / m * 15; dy = dy / m * 15; }
-        var cap = caps[drag.side];
-        if (cap) { cap.style.transform = 'translate(' + dx.toFixed(2) + 'px,' + dy.toFixed(2) + 'px)'; }
-      });
-      function endDrag() {
-        if (!drag) { return; }
-        var cap = caps[drag.side];
-        if (cap) { cap.style.transform = 'translate(0,0)'; }
-        var g = stickGrp[drag.side];
-        if (g) { g.classList.remove('active'); }
-        drag = null;
-      }
-      doc.addEventListener('pointerup', endDrag);
-      doc.addEventListener('pointercancel', endDrag);
-      doc.addEventListener('pointerup', function () { pdown = {}; });
-    })();
-  ]]></script>
 </svg>
