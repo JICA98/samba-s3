@@ -33,6 +33,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.focus.focusProperties
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -65,6 +66,13 @@ fun ControllerTestScreen(
     var exited by remember { mutableStateOf(false) }
     val startTracker = remember { StartHoldTracker() }
     val startDown = testState.pressedLogicalControls.contains(LogicalControl.START)
+    val closeTest: () -> Unit = {
+        if (!exited) {
+            exited = true
+            ControllerInputMonitor.stopSession()
+            navigateBack()
+        }
+    }
 
     DisposableEffect(devicesRepo) {
         devicesRepo.start()
@@ -95,9 +103,7 @@ fun ControllerTestScreen(
             val result = startTracker.update(true, SystemClock.elapsedRealtime())
             startProgress = result.progress
             if (result.completed && !exited) {
-                exited = true
-                ControllerInputMonitor.stopSession()
-                navigateBack()
+                closeTest()
                 break
             }
             delay(50L)
@@ -115,14 +121,21 @@ fun ControllerTestScreen(
         topBar = {
             Row(
                 Modifier.fillMaxWidth().padding(horizontal = 22.dp, vertical = 16.dp),
-                horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically,
             ) {
-                Column {
+                Column(Modifier.weight(1f)) {
                     Text("TEST", color = RPCSXColors.primary, style = MaterialTheme.typography.headlineSmall)
                     Text(device?.name ?: "Device disconnected", color = Color.White)
                 }
-                Text("Selected device only", color = RPCSXColors.textSecondary)
+                Column(horizontalAlignment = Alignment.End) {
+                    Text("Selected device only", color = RPCSXColors.textSecondary)
+                    TextButton(
+                        onClick = closeTest,
+                        modifier = Modifier.focusProperties { canFocus = false },
+                    ) {
+                        Text("CLOSE")
+                    }
+                }
             }
         },
     ) { padding ->
@@ -133,11 +146,10 @@ fun ControllerTestScreen(
             if (device == null || currentProfile == null) {
                 Text("Device disconnected", color = RPCSXColors.errorColor)
                 Text("Reconnect the selected device to resume testing.", color = RPCSXColors.textSecondary)
-                OutlinedButton(onClick = navigateBack) { Text("RETURN TO CONTROLS") }
+                OutlinedButton(onClick = closeTest) { Text("RETURN TO CONTROLS") }
                 return@Column
             }
 
-            Text("Profile: ${currentProfile.name}", color = RPCSXColors.textSecondary)
             val family = device.family
             val layout = remember(family) { ControllerLayoutResolver.resolve(family) }
             val pad = testState.pad
@@ -145,6 +157,21 @@ fun ControllerTestScreen(
             val rightStick = Offset((pad.rightX - 127) / 127f, (pad.rightY - 127) / 127f)
             val hotspots = remember(testState, family) {
                 testHotspots(device, testState.pressedLogicalControls, testState.pressedPhysicalKeys, pad)
+            }
+            Row(
+                Modifier.fillMaxWidth().background(RPCSXColors.surface).padding(horizontal = 14.dp, vertical = 10.dp),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                Column(Modifier.weight(1f)) {
+                    Text("LIVE CONTROLLER", color = RPCSXColors.primary, style = MaterialTheme.typography.labelLarge)
+                    Text(currentProfile.name, color = Color.White)
+                }
+                Text(
+                    if (family == ControllerFamily.KEYBOARD) "Keyboard input" else "Physical controller",
+                    color = RPCSXColors.textSecondary,
+                    style = MaterialTheme.typography.bodySmall,
+                )
             }
             Box(
                 Modifier.fillMaxWidth().weight(1f).background(RPCSXColors.surface),
@@ -168,21 +195,29 @@ fun ControllerTestScreen(
             if (family == ControllerFamily.KEYBOARD) {
                 Text("WASD → Left Stick     Arrows → Right Stick     J/K/U/I → Face", color = Color.White)
             }
-            Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceEvenly) {
-                StickValue("LS", leftStick)
-                StickValue("RS", rightStick)
-                Text("LT ${"%.0f".format(pad.leftTrigger * 100)}%", color = Color.White)
-                Text("RT ${"%.0f".format(pad.rightTrigger * 100)}%", color = Color.White)
+            Row(
+                Modifier.fillMaxWidth().background(RPCSXColors.surface).padding(vertical = 9.dp),
+                horizontalArrangement = Arrangement.SpaceEvenly,
+            ) {
+                TestMetric("LEFT STICK", "${"%.2f".format(leftStick.x)},${"%.2f".format(leftStick.y)}")
+                TestMetric("RIGHT STICK", "${"%.2f".format(rightStick.x)},${"%.2f".format(rightStick.y)}")
+                TestMetric("L2", "${"%.0f".format(pad.leftTrigger * 100)}%")
+                TestMetric("R2", "${"%.0f".format(pad.rightTrigger * 100)}%")
             }
-            Text(
-                "Last input: ${testState.lastInput?.let { "${it.physical} → ${it.action}" } ?: "—"}",
-                color = RPCSXColors.primary,
-            )
-            testState.unmappedPhysicalInputs.firstOrNull()?.let {
-                Text("UNMAPPED INPUT  ${it.label}", color = RPCSXColors.errorColor)
+            Column(
+                Modifier.fillMaxWidth().background(RPCSXColors.surface).padding(horizontal = 12.dp, vertical = 9.dp),
+            ) {
+                Text("LAST INPUT", color = RPCSXColors.primary, style = MaterialTheme.typography.labelSmall)
+                Text(
+                    testState.lastInput?.let { "${it.physical} → ${it.action}" } ?: "No input yet",
+                    color = Color.White,
+                )
+                testState.unmappedPhysicalInputs.firstOrNull()?.let {
+                    Text("UNMAPPED INPUT  ${it.label}", color = RPCSXColors.errorColor)
+                }
             }
             if (startDown) {
-                Text("EXIT TEST  ${"%.1f".format(startProgress * 5f)} / 5.0 s · Release to cancel", color = RPCSXColors.primary)
+                Text("EXIT TEST  ${"%.1f".format(startProgress * 2f)} / 2.0 s · Release to cancel", color = RPCSXColors.primary)
                 LinearProgressIndicator(
                     progress = { startProgress },
                     Modifier.fillMaxWidth(),
@@ -190,7 +225,7 @@ fun ControllerTestScreen(
                     trackColor = RPCSXColors.surfaceOverlay,
                 )
             } else {
-                Text("Hold ${if (family == ControllerFamily.KEYBOARD) "ENTER (START)" else "START"} for 5 seconds to exit", color = RPCSXColors.textSecondary)
+                Text("Hold ${if (family == ControllerFamily.KEYBOARD) "ENTER (START)" else "START"} for 2 seconds to exit", color = RPCSXColors.textSecondary)
                 LinearProgressIndicator(
                     progress = { 0f },
                     Modifier.fillMaxWidth(),
@@ -198,14 +233,17 @@ fun ControllerTestScreen(
                     trackColor = RPCSXColors.surfaceOverlay,
                 )
             }
-            if (backHintNonce > 0) Text("Back is disabled here. Hold START for 5 seconds.", color = RPCSXColors.textSecondary)
+            if (backHintNonce > 0) Text("Back is disabled here. Hold START for 2 seconds or tap CLOSE.", color = RPCSXColors.textSecondary)
         }
     }
 }
 
 @Composable
-private fun StickValue(label: String, value: Offset) {
-    Text("$label ${"%.2f".format(value.x)},${"%.2f".format(value.y)}", color = Color.White)
+private fun TestMetric(label: String, value: String) {
+    Column(horizontalAlignment = Alignment.CenterHorizontally) {
+        Text(label, color = RPCSXColors.textSecondary, style = MaterialTheme.typography.labelSmall)
+        Text(value, color = Color.White, style = MaterialTheme.typography.bodySmall)
+    }
 }
 
 private fun testHotspots(

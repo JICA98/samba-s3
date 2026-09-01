@@ -108,14 +108,14 @@ class ControllerKeyboardRepairTest {
     }
 
     @Test
-    fun startHoldRequiresFiveSecondsAndCompletesOnce() {
+    fun startHoldRequiresTwoSecondsAndCompletesOnce() {
         val tracker = StartHoldTracker()
         assertEquals(0f, tracker.update(true, 1_000L).progress)
-        assertEquals(0.5f, tracker.update(true, 3_500L).progress, 0.001f)
-        assertTrue(!tracker.update(true, 5_999L).completed)
-        assertTrue(tracker.update(true, 6_000L).completed)
-        assertTrue(!tracker.update(true, 7_000L).completed)
-        assertEquals(0f, tracker.update(false, 7_001L).progress)
-        assertTrue(tracker.update(true, 7_002L).progress == 0f)
+        assertEquals(0.25f, tracker.update(true, 1_500L).progress, 0.001f)
+        assertTrue(!tracker.update(true, 2_999L).completed)
+        assertTrue(tracker.update(true, 3_000L).completed)
+        assertTrue(!tracker.update(true, 4_000L).completed)
+        assertEquals(0f, tracker.update(false, 4_001L).progress)
+        assertTrue(tracker.update(true, 4_002L).progress == 0f)
     }
 }

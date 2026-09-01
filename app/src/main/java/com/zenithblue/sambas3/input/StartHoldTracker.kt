@@ -6,7 +6,7 @@ data class StartHoldProgress(
 )
 
 /** Monotonic START-hold state machine; UI supplies SystemClock.elapsedRealtime(). */
-class StartHoldTracker(private val holdMs: Long = 5_000L) {
+class StartHoldTracker(private val holdMs: Long = 2_000L) {
     private var downAtMs: Long? = null
     private var completionEmitted = false
 
