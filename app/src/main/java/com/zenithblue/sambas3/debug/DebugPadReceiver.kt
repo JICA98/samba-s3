@@ -6,10 +6,12 @@ import android.content.Intent
 import android.content.IntentFilter
 import android.os.Handler
 import android.os.Looper
+import android.os.SystemClock
 import android.util.Log
 import android.util.Base64
 import com.zenithblue.sambas3.BuildConfig
 import com.zenithblue.sambas3.Digital2Flags
+import com.zenithblue.sambas3.LogMonitor
 import com.zenithblue.sambas3.RPCSX
 import com.zenithblue.sambas3.gameconfig.SettingsBackendAudit
 import org.json.JSONObject
@@ -33,6 +35,25 @@ class DebugPadReceiver(private val onDebugFatal: (() -> Unit)? = null) : Broadca
         if (action == ACTION_FATAL) {
             if (BuildConfig.DEBUG) onDebugFatal?.invoke()
             else Log.w("DebugPad", "DEBUG_FATAL ignored in non-debug build")
+            return
+        }
+        if (action == ACTION_LOG_MONITOR_START || action == ACTION_LOG_MONITOR_STOP) {
+            if (!BuildConfig.DEBUG) {
+                Log.w("DebugPad", "$action ignored in non-debug build")
+                return
+            }
+            if (action == ACTION_LOG_MONITOR_START) LogMonitor.start(context ?: return)
+            else LogMonitor.stop()
+            Log.i("S3BENCH", "log_monitor=${if (action == ACTION_LOG_MONITOR_START) "on" else "off"}")
+            return
+        }
+        if (action == ACTION_BENCH_START || action == ACTION_BENCH_STOP) {
+            if (BuildConfig.DEBUG) {
+                if (action == ACTION_BENCH_START) BenchmarkDebugController.start()
+                else BenchmarkDebugController.stop()
+            } else {
+                Log.w("DebugPad", "$action ignored in non-debug build")
+            }
             return
         }
         if (action.startsWith(ACTION_SETTINGS_PREFIX)) {
@@ -174,6 +195,10 @@ class DebugPadReceiver(private val onDebugFatal: (() -> Unit)? = null) : Broadca
     companion object {
         const val ACTION_PAD = "com.zenithblue.sambas3.DEBUG_PAD"
         const val ACTION_FATAL = "com.zenithblue.sambas3.DEBUG_FATAL"
+        const val ACTION_LOG_MONITOR_START = "com.zenithblue.sambas3.DEBUG_LOG_MONITOR_START"
+        const val ACTION_LOG_MONITOR_STOP = "com.zenithblue.sambas3.DEBUG_LOG_MONITOR_STOP"
+        const val ACTION_BENCH_START = "com.zenithblue.sambas3.DEBUG_BENCH_START"
+        const val ACTION_BENCH_STOP = "com.zenithblue.sambas3.DEBUG_BENCH_STOP"
         const val PREFIX = "com.zenithblue.sambas3.DEBUG_PAD_"
         const val ACTION_SETTINGS_PREFIX = "com.zenithblue.sambas3.DEBUG_SETTINGS_"
         const val ACTION_SETTINGS_READ_GLOBAL = ACTION_SETTINGS_PREFIX + "READ_GLOBAL"
@@ -191,6 +216,10 @@ class DebugPadReceiver(private val onDebugFatal: (() -> Unit)? = null) : Broadca
             val f = IntentFilter().apply {
                 addAction(ACTION_PAD)
                 addAction(ACTION_FATAL)
+                addAction(ACTION_LOG_MONITOR_START)
+                addAction(ACTION_LOG_MONITOR_STOP)
+                addAction(ACTION_BENCH_START)
+                addAction(ACTION_BENCH_STOP)
                 addAction(ACTION_SETTINGS_READ_GLOBAL)
                 addAction(ACTION_SETTINGS_READ_GLOBAL_TREE)
                 addAction(ACTION_SETTINGS_SCHEMA_AUDIT)
@@ -222,5 +251,64 @@ class DebugPadReceiver(private val onDebugFatal: (() -> Unit)? = null) : Broadca
             Log.i("DebugPad", "registered")
             return r
         }
+    }
+}
+
+/**
+ * Debug-only sampler for reproducible performance runs. The native frame
+ * counter remains gated inside the core; this reads one already-aggregated
+ * snapshot per second and emits no overlay or Compose work.
+ */
+private object BenchmarkDebugController {
+    private const val INTERVAL_MS = 1_000L
+    private val handler = Handler(Looper.getMainLooper())
+    private var active = false
+    private val sample = object : Runnable {
+        override fun run() {
+            if (!active) return
+            logSnapshot()
+            handler.postDelayed(this, INTERVAL_MS)
+        }
+    }
+
+    fun start() {
+        if (active) return
+        active = true
+        runCatching { RPCSX.instance.setPerfMetricsEnabled(true, INTERVAL_MS.toInt()) }
+            .onFailure { Log.w("S3BENCH", "start failed: ${it.message}") }
+        Log.i("S3BENCH", "started source=emu_flip interval_ms=$INTERVAL_MS")
+        handler.post(sample)
+    }
+
+    fun stop() {
+        if (!active) return
+        active = false
+        handler.removeCallbacks(sample)
+        runCatching { RPCSX.instance.setPerfMetricsEnabled(false, INTERVAL_MS.toInt()) }
+        Log.i("S3BENCH", "stopped elapsed_ms=${SystemClock.elapsedRealtime()}")
+    }
+
+    private fun logSnapshot() {
+        val raw = runCatching { RPCSX.instance.getPerfMetricsJson() }.getOrNull()
+        if (raw.isNullOrBlank()) {
+            Log.i("S3BENCH", "elapsed_ms=${SystemClock.elapsedRealtime()} state=unavailable")
+            return
+        }
+        val json = runCatching { JSONObject(raw) }.getOrNull()
+        if (json == null) {
+            Log.i("S3BENCH", "elapsed_ms=${SystemClock.elapsedRealtime()} state=malformed")
+            return
+        }
+        fun value(name: String): String = if (json.has(name) && !json.isNull(name)) {
+            json.opt(name)?.toString() ?: "null"
+        } else "null"
+        Log.i(
+            "S3BENCH",
+            "elapsed_ms=${SystemClock.elapsedRealtime()} state=ready " +
+                "fps=${value("fps")} frametime_ms=${value("frametimeMs")} " +
+                "presented=${value("presentedFrameCount")} vblank_delta=${value("vblankDelta")} " +
+                "host_cpu=${value("hostCpu")} ppu_cpu=${value("ppuCpu")} " +
+                "spu_cpu=${value("spuCpu")} rsx_cpu=${value("rsxCpu")} rsx_load=${value("rsxLoad")}"
+        )
     }
 }

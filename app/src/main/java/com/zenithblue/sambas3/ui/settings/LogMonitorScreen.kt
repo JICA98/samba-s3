@@ -42,6 +42,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.derivedStateOf
@@ -114,6 +115,15 @@ fun LogMonitorScreen(
     var selectedSource by remember { mutableStateOf<LogSource?>(null) }
     var autoScroll by remember { mutableStateOf(true) }
     var filtersExpanded by remember { mutableStateOf(false) }
+
+    val context = LocalContext.current
+    DisposableEffect(context) {
+        // Log capture is an explicit diagnostic surface. Keeping logcat
+        // parsing and three disk writers alive during every game session
+        // adds avoidable CPU, I/O, and battery pressure.
+        LogMonitor.start(context)
+        onDispose { LogMonitor.stop() }
+    }
 
     val allLogs by LogMonitor.logs.collectAsState()
     val filtered by remember(allLogs, selectedLevel, selectedSource) {

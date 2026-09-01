@@ -48,6 +48,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
@@ -166,6 +167,12 @@ fun AppNavHost(initialRoute: String? = null) {
     val refreshSettings: () -> Unit = {
         settings.value = JSONObject(RPCSX.instance.settingsGetGlobal(""))
     }
+    // Keep the wide Settings detail pane above individual NavHost destinations.
+    // The controller test route is pushed over Settings; keeping this state here
+    // prevents a hot-plug/recomposition or route pop from selecting the default
+    // Storage Directory pane again.
+    var settingsFocusedKey by rememberSaveable { mutableStateOf("internal_directory") }
+    var settingsActiveSettingKey by rememberSaveable { mutableStateOf<String?>(null) }
 
     NavHost(
         navController = navController,
@@ -219,7 +226,11 @@ fun AppNavHost(initialRoute: String? = null) {
                 navigateBack = navController::navigateUp,
                 navigateTo = navigateTo,
                 settings = settings.value,
-                onRefresh = refreshSettings
+                onRefresh = refreshSettings,
+                focusedKey = settingsFocusedKey,
+                activeSettingKey = settingsActiveSettingKey,
+                onFocusedKeyChanged = { settingsFocusedKey = it },
+                onActiveSettingKeyChanged = { settingsActiveSettingKey = it },
             )
         }
 

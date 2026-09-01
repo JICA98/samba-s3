@@ -148,14 +148,12 @@ class RPCSXActivity : ComponentActivity(), EmulationHost {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         AlertDialogQueue.hostsSuppressed = true
-        try { LogMonitor.start(this) } catch (_: Exception) {}
         try { com.zenithblue.sambas3.utils.GeneralSettings.init(this) } catch (_: Exception) {}
         if (RPCSX.rootDirectory.isEmpty()) {
             RPCSX.rootDirectory = applicationContext.getExternalFilesDir(null)?.toString()?.let { if (it.endsWith("/")) it else "$it/" } ?: ""
             try { com.zenithblue.sambas3.utils.FileUtil.fixNestedGameDirs(RPCSX.rootDirectory) } catch (_: Exception) {}
         }
         if (!RPCSX.initialized) {
-            try { LogMonitor.start(this) } catch (_: Exception) {}
             try {
                 RPCSX.nativeLibDirectory = packageManager.getApplicationInfo(packageName, 0).nativeLibraryDir
                 if (RPCSX.openLibrary()) {

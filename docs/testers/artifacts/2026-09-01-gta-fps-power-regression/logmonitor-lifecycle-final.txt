@@ -1,0 +1,5 @@
+activity:
+    topResumedActivity=ActivityRecord{178349594 u0 com.zenithblue.sambas3/.MainActivity t725}
+logcat processes:
+u0_a243      24156  1418   74001344 370592 0                   0 S com.zenithblue.sambas3
+recent lifecycle lines:

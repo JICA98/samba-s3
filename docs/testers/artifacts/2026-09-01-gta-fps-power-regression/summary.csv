@@ -1,0 +1,13 @@
+run,samples,fps_mean,fps_min,fps_max,frametime_mean_ms,host_cpu_mean_pct,ppu_cpu_mean_pct,rsx_cpu_mean_pct,rsx_load_mean_pct,vblank_mean,presented_last,power_w,power_status
+cold-continue,29,29.851,28.873,30.826,33.507,17.605,12.723,4.882,99.276,60.310,870,,not measured: tablet remained physically charging
+final-build,19,29.833,29.399,30.427,33.493,18.750,13.515,5.235,98.895,60.737,574,,not measured: tablet remained physically charging
+frame-off,19,29.833,29.763,29.974,33.523,18.129,13.232,4.897,99.316,60.316,570,,not measured: tablet remained physically charging
+fresh,29,29.815,28.956,30.633,33.519,19.257,14.190,5.066,99.690,60.793,876,,not measured: tablet remained physically charging
+logmonitor-off-final,20,29.838,28.839,30.855,33.513,17.638,12.460,5.178,96.550,60.250,599,,not measured: tablet remained physically charging
+logmonitor-on-final,20,29.805,28.942,29.956,33.508,17.886,12.987,4.899,99.400,60.300,599,,not measured: tablet remained physically charging
+long-20m,1191,29.842,28.815,30.885,33.510,18.190,13.529,4.660,99.801,60.315,35789,,not measured: tablet remained physically charging
+manual-load,30,29.867,28.862,30.882,33.488,19.184,14.243,4.941,99.800,60.333,901,,not measured: tablet remained physically charging
+monitor-off,29,29.820,28.913,29.968,33.513,18.175,13.245,4.930,99.345,60.310,869,,not measured: tablet remained physically charging
+restart,29,29.828,29.358,30.755,33.527,20.928,16.010,4.917,99.793,60.724,875,,not measured: tablet remained physically charging
+save-auto-recovery,29,29.837,29.748,29.930,33.515,18.103,13.214,4.889,99.207,60.345,870,,not measured: tablet remained physically charging
+vsync-on,19,29.825,28.866,30.853,33.516,18.233,13.405,4.828,99.789,60.211,569,,not measured: tablet remained physically charging

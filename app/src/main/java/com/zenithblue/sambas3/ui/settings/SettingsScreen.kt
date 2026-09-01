@@ -56,7 +56,6 @@ import androidx.compose.runtime.mutableLongStateOf
 import androidx.compose.runtime.mutableStateMapOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -1086,18 +1085,20 @@ fun SettingsScreen(
     navigateBack: () -> Unit,
     navigateTo: (path: String) -> Unit,
     settings: JSONObject,
-    onRefresh: () -> Unit
+    onRefresh: () -> Unit,
+    focusedKey: String,
+    activeSettingKey: String?,
+    onFocusedKeyChanged: (String) -> Unit,
+    onActiveSettingKeyChanged: (String?) -> Unit,
 ) {
     val topBarScrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior()
     val activeUser by remember { UserRepository.activeUser }
-    var focusedKey by rememberSaveable { mutableStateOf("internal_directory") }
-    var activeSettingKey by rememberSaveable { mutableStateOf<String?>(null) }
     val advancedSettingsPathStack = remember { mutableStateListOf("") }
     val configuration = androidx.compose.ui.platform.LocalConfiguration.current
     val isWideScreen = configuration.screenWidthDp > 600
 
     BackHandler(enabled = activeSettingKey != null) {
-        activeSettingKey = null
+        onActiveSettingKeyChanged(null)
     }
 
     Scaffold(
@@ -1209,7 +1210,7 @@ fun SettingsScreen(
                                 )
                             }
                         },
-                        onFocusChanged = { if (it) focusedKey = "internal_directory" }
+                        onFocusChanged = { if (it) onFocusedKeyChanged("internal_directory") }
                     )
                 }
 
@@ -1223,10 +1224,10 @@ fun SettingsScreen(
                             PreferenceIcon(icon = painterResource(id = R.drawable.ic_person))
                         },
                         onClick = {
-                            if (isWideScreen) activeSettingKey = "users"
+                            if (isWideScreen) onActiveSettingKeyChanged("users")
                             else navigateTo("users")
                         },
-                        onFocusChanged = { if (it) focusedKey = "users" }
+                        onFocusChanged = { if (it) onFocusedKeyChanged("users") }
                     )
                 }
 
@@ -1236,7 +1237,7 @@ fun SettingsScreen(
                         description = stringResource(R.string.onboarding_replay_description),
                         icon = { Icon(painterResource(R.drawable.ic_refresh), contentDescription = null) },
                         onClick = { navigateTo(ONBOARDING_ROUTE) },
-                        onFocusChanged = { if (it) focusedKey = "onboarding" },
+                        onFocusChanged = { if (it) onFocusedKeyChanged("onboarding") },
                     )
                 }
 
@@ -1261,7 +1262,7 @@ fun SettingsScreen(
                                 }
                             )
                         },
-                        onFocusChanged = { if (it) focusedKey = "advanced_settings" }
+                        onFocusChanged = { if (it) onFocusedKeyChanged("advanced_settings") }
                     )
                 }
 
@@ -1274,7 +1275,7 @@ fun SettingsScreen(
                         description = stringResource(R.string.custom_driver_description),
                         onClick = {
                             if (RPCSX.instance.supportsCustomDriverLoading()) {
-                                if (isWideScreen) activeSettingKey = "custom_driver"
+                                if (isWideScreen) onActiveSettingKeyChanged("custom_driver")
                                 else navigateTo("drivers")
                             } else {
                                 AlertDialogQueue.showDialog(
@@ -1285,7 +1286,7 @@ fun SettingsScreen(
                                 )
                             }
                         },
-                        onFocusChanged = { if (it) focusedKey = "custom_driver" }
+                        onFocusChanged = { if (it) onFocusedKeyChanged("custom_driver") }
                     )
                 }
 
@@ -1295,10 +1296,10 @@ fun SettingsScreen(
                         icon = { Icon(painterResource(R.drawable.gamepad), null) },
                         description = stringResource(R.string.controls_description),
                         onClick = {
-                            if (isWideScreen) activeSettingKey = "controls"
+                            if (isWideScreen) onActiveSettingKeyChanged("controls")
                             else navigateTo("controls")
                         },
-                        onFocusChanged = { if (it) focusedKey = "controls" }
+                        onFocusChanged = { if (it) onFocusedKeyChanged("controls") }
                     )
                 }
 
@@ -1326,7 +1327,7 @@ fun SettingsScreen(
                                 Toast.makeText(context, context.getString(R.string.log_not_found), Toast.LENGTH_SHORT).show()
                             }
                         },
-                        onFocusChanged = { if (it) focusedKey = "share_logs" }
+                        onFocusChanged = { if (it) onFocusedKeyChanged("share_logs") }
                     )
                 }
 
@@ -1336,10 +1337,10 @@ fun SettingsScreen(
                         icon = { Icon(painterResource(R.drawable.ic_terminal), null) },
                         description = stringResource(R.string.log_monitor_description),
                         onClick = {
-                            if (isWideScreen) activeSettingKey = "logs"
+                            if (isWideScreen) onActiveSettingKeyChanged("logs")
                             else navigateTo("logs")
                         },
-                        onFocusChanged = { if (it) focusedKey = "logs" }
+                        onFocusChanged = { if (it) onFocusedKeyChanged("logs") }
                     )
                 }
 
@@ -1349,9 +1350,9 @@ fun SettingsScreen(
                         icon = { Icon(painterResource(R.drawable.ic_video), null) },
                         description = "In-game FPS, CPU/GPU, RAM, thermal and power telemetry.",
                         onClick = {
-                            if (isWideScreen) activeSettingKey = "monitoring" else navigateTo("monitoring")
+                            if (isWideScreen) onActiveSettingKeyChanged("monitoring") else navigateTo("monitoring")
                         },
-                        onFocusChanged = { if (it) focusedKey = "monitoring" }
+                        onFocusChanged = { if (it) onFocusedKeyChanged("monitoring") }
                     )
                 }
 
@@ -1361,10 +1362,10 @@ fun SettingsScreen(
                         icon = { Icon(painterResource(R.drawable.gamepad), null) },
                         description = "Agent ADB bridge (DEBUG_PAD broadcasts) + tap calibration 1632,873. Test X/UP/Sticks without restarting game.",
                         onClick = {
-                            if (isWideScreen) activeSettingKey = "debug_controller"
+                            if (isWideScreen) onActiveSettingKeyChanged("debug_controller")
                             else navigateTo("debug_controller")
                         },
-                        onFocusChanged = { if (it) focusedKey = "debug_controller" }
+                        onFocusChanged = { if (it) onFocusedKeyChanged("debug_controller") }
                     )
                 }
 
@@ -1375,10 +1376,10 @@ fun SettingsScreen(
                             icon = { Icon(painterResource(R.drawable.tune), null) },
                             description = stringResource(R.string.patch_manager_description),
                             onClick = {
-                                if (isWideScreen) activeSettingKey = "patches"
+                                if (isWideScreen) onActiveSettingKeyChanged("patches")
                                 else navigateTo("patches")
                             },
-                            onFocusChanged = { if (it) focusedKey = "patches" }
+                            onFocusChanged = { if (it) onFocusedKeyChanged("patches") }
                         )
                     }
                 }
@@ -1403,7 +1404,7 @@ fun SettingsScreen(
                     when (activeSettingKey) {
                         "users" -> {
                             UsersScreen(
-                                navigateBack = { activeSettingKey = null },
+                                navigateBack = { onActiveSettingKeyChanged(null) },
                                 isInSplitPane = true
                             )
                         }
@@ -1415,7 +1416,7 @@ fun SettingsScreen(
                                     if (advancedSettingsPathStack.size > 1) {
                                         advancedSettingsPathStack.removeAt(advancedSettingsPathStack.lastIndex)
                                     } else {
-                                        activeSettingKey = null
+                                        onActiveSettingKeyChanged(null)
                                     }
                                 },
                                 navigateTo = { route ->
@@ -1436,45 +1437,45 @@ fun SettingsScreen(
                         }
                         "custom_driver" -> {
                             GpuDriversScreen(
-                                navigateBack = { activeSettingKey = null },
+                                navigateBack = { onActiveSettingKeyChanged(null) },
                                 isInSplitPane = true
                             )
                         }
                         "controls" -> {
                             ControllerSettingsScreen(
-                                navigateBack = { activeSettingKey = null },
+                                navigateBack = { onActiveSettingKeyChanged(null) },
                                 isInSplitPane = true,
                                 onOpenTest = { device ->
                                     // The test route is pushed above Settings. Restore the
                                     // controller pane when it pops instead of falling back to
                                     // the default Storage Directory detail pane.
-                                    focusedKey = "controls"
-                                    activeSettingKey = "controls"
+                                    onFocusedKeyChanged("controls")
+                                    onActiveSettingKeyChanged("controls")
                                     navigateTo("controller_test/${android.net.Uri.encode(device.deviceKey)}")
                                 },
                             )
                         }
                         "logs" -> {
                             LogMonitorScreen(
-                                navigateBack = { activeSettingKey = null },
+                                navigateBack = { onActiveSettingKeyChanged(null) },
                                 isInSplitPane = true
                             )
                         }
                         "monitoring" -> {
                             MonitoringSettingsScreen(
-                                navigateBack = { activeSettingKey = null },
+                                navigateBack = { onActiveSettingKeyChanged(null) },
                                 isInSplitPane = true
                             )
                         }
                         "debug_controller" -> {
                             com.zenithblue.sambas3.ui.debug.DebugControllerScreen(
-                                navigateBack = { activeSettingKey = null }
+                                navigateBack = { onActiveSettingKeyChanged(null) }
                             )
                         }
                         "patches" -> {
                             if (!BuildConfig.IS_PLAYSTORE_BUILD) {
                                 PatchManagerScreen(
-                                    navigateBack = { activeSettingKey = null },
+                                    navigateBack = { onActiveSettingKeyChanged(null) },
                                     isInSplitPane = true
                                 )
                             } else {

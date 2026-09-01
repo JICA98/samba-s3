@@ -24,8 +24,6 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
 
         GeneralSettings.init(this)
-        LogMonitor.start(this) // capture logs from boot
-
         WindowCompat.setDecorFitsSystemWindows(window, false)
 
         // Ensure notification channel exists for all entry points (cold RPCSXActivity safety)
