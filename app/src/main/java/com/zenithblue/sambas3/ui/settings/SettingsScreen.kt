@@ -56,6 +56,7 @@ import androidx.compose.runtime.mutableLongStateOf
 import androidx.compose.runtime.mutableStateMapOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -1053,8 +1054,8 @@ fun SettingsScreen(
 ) {
     val topBarScrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior()
     val activeUser by remember { UserRepository.activeUser }
-    var focusedKey by remember { mutableStateOf("internal_directory") }
-    var activeSettingKey by remember { mutableStateOf<String?>(null) }
+    var focusedKey by rememberSaveable { mutableStateOf("internal_directory") }
+    var activeSettingKey by rememberSaveable { mutableStateOf<String?>(null) }
     val advancedSettingsPathStack = remember { mutableStateListOf("") }
     val settings = remember { JSONObject(RPCSX.instance.settingsGet("")) }
     val configuration = androidx.compose.ui.platform.LocalConfiguration.current
@@ -1406,7 +1407,14 @@ fun SettingsScreen(
                             ControllerSettingsScreen(
                                 navigateBack = { activeSettingKey = null },
                                 isInSplitPane = true,
-                                onOpenTest = { device -> navigateTo("controller_test/${android.net.Uri.encode(device.deviceKey)}") },
+                                onOpenTest = { device ->
+                                    // The test route is pushed above Settings. Restore the
+                                    // controller pane when it pops instead of falling back to
+                                    // the default Storage Directory detail pane.
+                                    focusedKey = "controls"
+                                    activeSettingKey = "controls"
+                                    navigateTo("controller_test/${android.net.Uri.encode(device.deviceKey)}")
+                                },
                             )
                         }
                         "logs" -> {
