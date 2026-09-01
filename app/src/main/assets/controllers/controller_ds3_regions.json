@@ -1,0 +1,178 @@
+{
+  "viewBox": {
+    "width": 1000.0,
+    "height": 500.0
+  },
+  "regions": [
+    {
+      "id": "btn_r2",
+      "kind": "button",
+      "bounds": {
+        "left": 646.0,
+        "top": 74.0,
+        "right": 814.0,
+        "bottom": 246.0
+      }
+    },
+    {
+      "id": "btn_l2",
+      "kind": "button",
+      "bounds": {
+        "left": 186.0,
+        "top": 74.0,
+        "right": 354.0,
+        "bottom": 246.0
+      }
+    },
+    {
+      "id": "btn_r1",
+      "kind": "button",
+      "bounds": {
+        "left": 642.0,
+        "top": 101.0,
+        "right": 799.0,
+        "bottom": 234.0
+      }
+    },
+    {
+      "id": "btn_l1",
+      "kind": "button",
+      "bounds": {
+        "left": 201.0,
+        "top": 101.0,
+        "right": 358.0,
+        "bottom": 234.0
+      }
+    },
+    {
+      "id": "btn_dpad_up",
+      "kind": "button",
+      "bounds": {
+        "left": 310.0,
+        "top": 162.0,
+        "right": 350.0,
+        "bottom": 214.0
+      }
+    },
+    {
+      "id": "btn_dpad_down",
+      "kind": "button",
+      "bounds": {
+        "left": 310.0,
+        "top": 214.0,
+        "right": 350.0,
+        "bottom": 266.0
+      }
+    },
+    {
+      "id": "btn_dpad_left",
+      "kind": "button",
+      "bounds": {
+        "left": 278.0,
+        "top": 194.0,
+        "right": 330.0,
+        "bottom": 234.0
+      }
+    },
+    {
+      "id": "btn_dpad_right",
+      "kind": "button",
+      "bounds": {
+        "left": 330.0,
+        "top": 194.0,
+        "right": 382.0,
+        "bottom": 234.0
+      }
+    },
+    {
+      "id": "btn_triangle",
+      "kind": "button",
+      "bounds": {
+        "left": 649.0,
+        "top": 145.0,
+        "right": 691.0,
+        "bottom": 187.0
+      }
+    },
+    {
+      "id": "btn_circle",
+      "kind": "button",
+      "bounds": {
+        "left": 705.0,
+        "top": 197.0,
+        "right": 747.0,
+        "bottom": 239.0
+      }
+    },
+    {
+      "id": "btn_cross",
+      "kind": "button",
+      "bounds": {
+        "left": 649.0,
+        "top": 249.0,
+        "right": 691.0,
+        "bottom": 291.0
+      }
+    },
+    {
+      "id": "btn_square",
+      "kind": "button",
+      "bounds": {
+        "left": 593.0,
+        "top": 197.0,
+        "right": 635.0,
+        "bottom": 239.0
+      }
+    },
+    {
+      "id": "btn_select",
+      "kind": "button",
+      "bounds": {
+        "left": 389.0579232021118,
+        "top": 184.98067853090978,
+        "right": 426.94207679788826,
+        "bottom": 205.0193214690902
+      }
+    },
+    {
+      "id": "btn_start",
+      "kind": "button",
+      "bounds": {
+        "left": 573.0579232021117,
+        "top": 184.9806785309098,
+        "right": 610.9420767978883,
+        "bottom": 205.0193214690902
+      }
+    },
+    {
+      "id": "btn_guide",
+      "kind": "button",
+      "bounds": {
+        "left": 484.0,
+        "top": 226.0,
+        "right": 516.0,
+        "bottom": 258.0
+      }
+    },
+    {
+      "id": "stick_left",
+      "kind": "stick",
+      "bounds": {
+        "left": 366.0,
+        "top": 238.0,
+        "right": 474.0,
+        "bottom": 346.0
+      }
+    },
+    {
+      "id": "stick_right",
+      "kind": "stick",
+      "bounds": {
+        "left": 526.0,
+        "top": 238.0,
+        "right": 634.0,
+        "bottom": 346.0
+      }
+    }
+  ]
+}

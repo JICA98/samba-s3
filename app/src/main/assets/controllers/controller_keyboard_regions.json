@@ -1,0 +1,944 @@
+{
+  "viewBox": {
+    "width": 1510.0,
+    "height": 450.0
+  },
+  "regions": [
+    {
+      "code": "Escape",
+      "bounds": {
+        "left": 28.0,
+        "top": 28.0,
+        "right": 86.0,
+        "bottom": 86.0
+      }
+    },
+    {
+      "code": "F1",
+      "bounds": {
+        "left": 124.0,
+        "top": 28.0,
+        "right": 182.0,
+        "bottom": 86.0
+      }
+    },
+    {
+      "code": "F2",
+      "bounds": {
+        "left": 188.0,
+        "top": 28.0,
+        "right": 246.0,
+        "bottom": 86.0
+      }
+    },
+    {
+      "code": "F3",
+      "bounds": {
+        "left": 252.0,
+        "top": 28.0,
+        "right": 310.0,
+        "bottom": 86.0
+      }
+    },
+    {
+      "code": "F4",
+      "bounds": {
+        "left": 316.0,
+        "top": 28.0,
+        "right": 374.0,
+        "bottom": 86.0
+      }
+    },
+    {
+      "code": "F5",
+      "bounds": {
+        "left": 412.0,
+        "top": 28.0,
+        "right": 470.0,
+        "bottom": 86.0
+      }
+    },
+    {
+      "code": "F6",
+      "bounds": {
+        "left": 476.0,
+        "top": 28.0,
+        "right": 534.0,
+        "bottom": 86.0
+      }
+    },
+    {
+      "code": "F7",
+      "bounds": {
+        "left": 540.0,
+        "top": 28.0,
+        "right": 598.0,
+        "bottom": 86.0
+      }
+    },
+    {
+      "code": "F8",
+      "bounds": {
+        "left": 604.0,
+        "top": 28.0,
+        "right": 662.0,
+        "bottom": 86.0
+      }
+    },
+    {
+      "code": "F9",
+      "bounds": {
+        "left": 700.0,
+        "top": 28.0,
+        "right": 758.0,
+        "bottom": 86.0
+      }
+    },
+    {
+      "code": "F10",
+      "bounds": {
+        "left": 764.0,
+        "top": 28.0,
+        "right": 822.0,
+        "bottom": 86.0
+      }
+    },
+    {
+      "code": "F11",
+      "bounds": {
+        "left": 828.0,
+        "top": 28.0,
+        "right": 886.0,
+        "bottom": 86.0
+      }
+    },
+    {
+      "code": "F12",
+      "bounds": {
+        "left": 892.0,
+        "top": 28.0,
+        "right": 950.0,
+        "bottom": 86.0
+      }
+    },
+    {
+      "code": "PrintScreen",
+      "bounds": {
+        "left": 1014.0,
+        "top": 28.0,
+        "right": 1072.0,
+        "bottom": 86.0
+      }
+    },
+    {
+      "code": "ScrollLock",
+      "bounds": {
+        "left": 1078.0,
+        "top": 28.0,
+        "right": 1136.0,
+        "bottom": 86.0
+      }
+    },
+    {
+      "code": "Pause",
+      "bounds": {
+        "left": 1142.0,
+        "top": 28.0,
+        "right": 1200.0,
+        "bottom": 86.0
+      }
+    },
+    {
+      "code": "Backquote",
+      "bounds": {
+        "left": 28.0,
+        "top": 92.0,
+        "right": 86.0,
+        "bottom": 150.0
+      }
+    },
+    {
+      "code": "Digit1",
+      "bounds": {
+        "left": 92.0,
+        "top": 92.0,
+        "right": 150.0,
+        "bottom": 150.0
+      }
+    },
+    {
+      "code": "Digit2",
+      "bounds": {
+        "left": 156.0,
+        "top": 92.0,
+        "right": 214.0,
+        "bottom": 150.0
+      }
+    },
+    {
+      "code": "Digit3",
+      "bounds": {
+        "left": 220.0,
+        "top": 92.0,
+        "right": 278.0,
+        "bottom": 150.0
+      }
+    },
+    {
+      "code": "Digit4",
+      "bounds": {
+        "left": 284.0,
+        "top": 92.0,
+        "right": 342.0,
+        "bottom": 150.0
+      }
+    },
+    {
+      "code": "Digit5",
+      "bounds": {
+        "left": 348.0,
+        "top": 92.0,
+        "right": 406.0,
+        "bottom": 150.0
+      }
+    },
+    {
+      "code": "Digit6",
+      "bounds": {
+        "left": 412.0,
+        "top": 92.0,
+        "right": 470.0,
+        "bottom": 150.0
+      }
+    },
+    {
+      "code": "Digit7",
+      "bounds": {
+        "left": 476.0,
+        "top": 92.0,
+        "right": 534.0,
+        "bottom": 150.0
+      }
+    },
+    {
+      "code": "Digit8",
+      "bounds": {
+        "left": 540.0,
+        "top": 92.0,
+        "right": 598.0,
+        "bottom": 150.0
+      }
+    },
+    {
+      "code": "Digit9",
+      "bounds": {
+        "left": 604.0,
+        "top": 92.0,
+        "right": 662.0,
+        "bottom": 150.0
+      }
+    },
+    {
+      "code": "Digit0",
+      "bounds": {
+        "left": 668.0,
+        "top": 92.0,
+        "right": 726.0,
+        "bottom": 150.0
+      }
+    },
+    {
+      "code": "Minus",
+      "bounds": {
+        "left": 732.0,
+        "top": 92.0,
+        "right": 790.0,
+        "bottom": 150.0
+      }
+    },
+    {
+      "code": "Equal",
+      "bounds": {
+        "left": 796.0,
+        "top": 92.0,
+        "right": 854.0,
+        "bottom": 150.0
+      }
+    },
+    {
+      "code": "Backspace",
+      "bounds": {
+        "left": 860.0,
+        "top": 92.0,
+        "right": 982.0,
+        "bottom": 150.0
+      }
+    },
+    {
+      "code": "Insert",
+      "bounds": {
+        "left": 1014.0,
+        "top": 92.0,
+        "right": 1072.0,
+        "bottom": 150.0
+      }
+    },
+    {
+      "code": "Home",
+      "bounds": {
+        "left": 1078.0,
+        "top": 92.0,
+        "right": 1136.0,
+        "bottom": 150.0
+      }
+    },
+    {
+      "code": "PageUp",
+      "bounds": {
+        "left": 1142.0,
+        "top": 92.0,
+        "right": 1200.0,
+        "bottom": 150.0
+      }
+    },
+    {
+      "code": "NumLock",
+      "bounds": {
+        "left": 1232.0,
+        "top": 92.0,
+        "right": 1290.0,
+        "bottom": 150.0
+      }
+    },
+    {
+      "code": "NumpadDivide",
+      "bounds": {
+        "left": 1296.0,
+        "top": 92.0,
+        "right": 1354.0,
+        "bottom": 150.0
+      }
+    },
+    {
+      "code": "NumpadMultiply",
+      "bounds": {
+        "left": 1360.0,
+        "top": 92.0,
+        "right": 1418.0,
+        "bottom": 150.0
+      }
+    },
+    {
+      "code": "NumpadSubtract",
+      "bounds": {
+        "left": 1424.0,
+        "top": 92.0,
+        "right": 1482.0,
+        "bottom": 150.0
+      }
+    },
+    {
+      "code": "Tab",
+      "bounds": {
+        "left": 28.0,
+        "top": 156.0,
+        "right": 118.0,
+        "bottom": 214.0
+      }
+    },
+    {
+      "code": "KeyQ",
+      "bounds": {
+        "left": 124.0,
+        "top": 156.0,
+        "right": 182.0,
+        "bottom": 214.0
+      }
+    },
+    {
+      "code": "KeyW",
+      "bounds": {
+        "left": 188.0,
+        "top": 156.0,
+        "right": 246.0,
+        "bottom": 214.0
+      }
+    },
+    {
+      "code": "KeyE",
+      "bounds": {
+        "left": 252.0,
+        "top": 156.0,
+        "right": 310.0,
+        "bottom": 214.0
+      }
+    },
+    {
+      "code": "KeyR",
+      "bounds": {
+        "left": 316.0,
+        "top": 156.0,
+        "right": 374.0,
+        "bottom": 214.0
+      }
+    },
+    {
+      "code": "KeyT",
+      "bounds": {
+        "left": 380.0,
+        "top": 156.0,
+        "right": 438.0,
+        "bottom": 214.0
+      }
+    },
+    {
+      "code": "KeyY",
+      "bounds": {
+        "left": 444.0,
+        "top": 156.0,
+        "right": 502.0,
+        "bottom": 214.0
+      }
+    },
+    {
+      "code": "KeyU",
+      "bounds": {
+        "left": 508.0,
+        "top": 156.0,
+        "right": 566.0,
+        "bottom": 214.0
+      }
+    },
+    {
+      "code": "KeyI",
+      "bounds": {
+        "left": 572.0,
+        "top": 156.0,
+        "right": 630.0,
+        "bottom": 214.0
+      }
+    },
+    {
+      "code": "KeyO",
+      "bounds": {
+        "left": 636.0,
+        "top": 156.0,
+        "right": 694.0,
+        "bottom": 214.0
+      }
+    },
+    {
+      "code": "KeyP",
+      "bounds": {
+        "left": 700.0,
+        "top": 156.0,
+        "right": 758.0,
+        "bottom": 214.0
+      }
+    },
+    {
+      "code": "BracketLeft",
+      "bounds": {
+        "left": 764.0,
+        "top": 156.0,
+        "right": 822.0,
+        "bottom": 214.0
+      }
+    },
+    {
+      "code": "BracketRight",
+      "bounds": {
+        "left": 828.0,
+        "top": 156.0,
+        "right": 886.0,
+        "bottom": 214.0
+      }
+    },
+    {
+      "code": "Backslash",
+      "bounds": {
+        "left": 892.0,
+        "top": 156.0,
+        "right": 982.0,
+        "bottom": 214.0
+      }
+    },
+    {
+      "code": "Delete",
+      "bounds": {
+        "left": 1014.0,
+        "top": 156.0,
+        "right": 1072.0,
+        "bottom": 214.0
+      }
+    },
+    {
+      "code": "End",
+      "bounds": {
+        "left": 1078.0,
+        "top": 156.0,
+        "right": 1136.0,
+        "bottom": 214.0
+      }
+    },
+    {
+      "code": "PageDown",
+      "bounds": {
+        "left": 1142.0,
+        "top": 156.0,
+        "right": 1200.0,
+        "bottom": 214.0
+      }
+    },
+    {
+      "code": "Numpad7",
+      "bounds": {
+        "left": 1232.0,
+        "top": 156.0,
+        "right": 1290.0,
+        "bottom": 214.0
+      }
+    },
+    {
+      "code": "Numpad8",
+      "bounds": {
+        "left": 1296.0,
+        "top": 156.0,
+        "right": 1354.0,
+        "bottom": 214.0
+      }
+    },
+    {
+      "code": "Numpad9",
+      "bounds": {
+        "left": 1360.0,
+        "top": 156.0,
+        "right": 1418.0,
+        "bottom": 214.0
+      }
+    },
+    {
+      "code": "NumpadAdd",
+      "bounds": {
+        "left": 1424.0,
+        "top": 156.0,
+        "right": 1482.0,
+        "bottom": 278.0
+      }
+    },
+    {
+      "code": "CapsLock",
+      "bounds": {
+        "left": 28.0,
+        "top": 220.0,
+        "right": 134.0,
+        "bottom": 278.0
+      }
+    },
+    {
+      "code": "KeyA",
+      "bounds": {
+        "left": 140.0,
+        "top": 220.0,
+        "right": 198.0,
+        "bottom": 278.0
+      }
+    },
+    {
+      "code": "KeyS",
+      "bounds": {
+        "left": 204.0,
+        "top": 220.0,
+        "right": 262.0,
+        "bottom": 278.0
+      }
+    },
+    {
+      "code": "KeyD",
+      "bounds": {
+        "left": 268.0,
+        "top": 220.0,
+        "right": 326.0,
+        "bottom": 278.0
+      }
+    },
+    {
+      "code": "KeyF",
+      "bounds": {
+        "left": 332.0,
+        "top": 220.0,
+        "right": 390.0,
+        "bottom": 278.0
+      }
+    },
+    {
+      "code": "KeyG",
+      "bounds": {
+        "left": 396.0,
+        "top": 220.0,
+        "right": 454.0,
+        "bottom": 278.0
+      }
+    },
+    {
+      "code": "KeyH",
+      "bounds": {
+        "left": 460.0,
+        "top": 220.0,
+        "right": 518.0,
+        "bottom": 278.0
+      }
+    },
+    {
+      "code": "KeyJ",
+      "bounds": {
+        "left": 524.0,
+        "top": 220.0,
+        "right": 582.0,
+        "bottom": 278.0
+      }
+    },
+    {
+      "code": "KeyK",
+      "bounds": {
+        "left": 588.0,
+        "top": 220.0,
+        "right": 646.0,
+        "bottom": 278.0
+      }
+    },
+    {
+      "code": "KeyL",
+      "bounds": {
+        "left": 652.0,
+        "top": 220.0,
+        "right": 710.0,
+        "bottom": 278.0
+      }
+    },
+    {
+      "code": "Semicolon",
+      "bounds": {
+        "left": 716.0,
+        "top": 220.0,
+        "right": 774.0,
+        "bottom": 278.0
+      }
+    },
+    {
+      "code": "Quote",
+      "bounds": {
+        "left": 780.0,
+        "top": 220.0,
+        "right": 838.0,
+        "bottom": 278.0
+      }
+    },
+    {
+      "code": "Enter",
+      "bounds": {
+        "left": 844.0,
+        "top": 220.0,
+        "right": 982.0,
+        "bottom": 278.0
+      }
+    },
+    {
+      "code": "Numpad4",
+      "bounds": {
+        "left": 1232.0,
+        "top": 220.0,
+        "right": 1290.0,
+        "bottom": 278.0
+      }
+    },
+    {
+      "code": "Numpad5",
+      "bounds": {
+        "left": 1296.0,
+        "top": 220.0,
+        "right": 1354.0,
+        "bottom": 278.0
+      }
+    },
+    {
+      "code": "Numpad6",
+      "bounds": {
+        "left": 1360.0,
+        "top": 220.0,
+        "right": 1418.0,
+        "bottom": 278.0
+      }
+    },
+    {
+      "code": "ShiftLeft",
+      "bounds": {
+        "left": 28.0,
+        "top": 284.0,
+        "right": 166.0,
+        "bottom": 342.0
+      }
+    },
+    {
+      "code": "KeyZ",
+      "bounds": {
+        "left": 172.0,
+        "top": 284.0,
+        "right": 230.0,
+        "bottom": 342.0
+      }
+    },
+    {
+      "code": "KeyX",
+      "bounds": {
+        "left": 236.0,
+        "top": 284.0,
+        "right": 294.0,
+        "bottom": 342.0
+      }
+    },
+    {
+      "code": "KeyC",
+      "bounds": {
+        "left": 300.0,
+        "top": 284.0,
+        "right": 358.0,
+        "bottom": 342.0
+      }
+    },
+    {
+      "code": "KeyV",
+      "bounds": {
+        "left": 364.0,
+        "top": 284.0,
+        "right": 422.0,
+        "bottom": 342.0
+      }
+    },
+    {
+      "code": "KeyB",
+      "bounds": {
+        "left": 428.0,
+        "top": 284.0,
+        "right": 486.0,
+        "bottom": 342.0
+      }
+    },
+    {
+      "code": "KeyN",
+      "bounds": {
+        "left": 492.0,
+        "top": 284.0,
+        "right": 550.0,
+        "bottom": 342.0
+      }
+    },
+    {
+      "code": "KeyM",
+      "bounds": {
+        "left": 556.0,
+        "top": 284.0,
+        "right": 614.0,
+        "bottom": 342.0
+      }
+    },
+    {
+      "code": "Comma",
+      "bounds": {
+        "left": 620.0,
+        "top": 284.0,
+        "right": 678.0,
+        "bottom": 342.0
+      }
+    },
+    {
+      "code": "Period",
+      "bounds": {
+        "left": 684.0,
+        "top": 284.0,
+        "right": 742.0,
+        "bottom": 342.0
+      }
+    },
+    {
+      "code": "Slash",
+      "bounds": {
+        "left": 748.0,
+        "top": 284.0,
+        "right": 806.0,
+        "bottom": 342.0
+      }
+    },
+    {
+      "code": "ShiftRight",
+      "bounds": {
+        "left": 812.0,
+        "top": 284.0,
+        "right": 982.0,
+        "bottom": 342.0
+      }
+    },
+    {
+      "code": "ArrowUp",
+      "bounds": {
+        "left": 1078.0,
+        "top": 284.0,
+        "right": 1136.0,
+        "bottom": 342.0
+      }
+    },
+    {
+      "code": "Numpad1",
+      "bounds": {
+        "left": 1232.0,
+        "top": 284.0,
+        "right": 1290.0,
+        "bottom": 342.0
+      }
+    },
+    {
+      "code": "Numpad2",
+      "bounds": {
+        "left": 1296.0,
+        "top": 284.0,
+        "right": 1354.0,
+        "bottom": 342.0
+      }
+    },
+    {
+      "code": "Numpad3",
+      "bounds": {
+        "left": 1360.0,
+        "top": 284.0,
+        "right": 1418.0,
+        "bottom": 342.0
+      }
+    },
+    {
+      "code": "NumpadEnter",
+      "bounds": {
+        "left": 1424.0,
+        "top": 284.0,
+        "right": 1482.0,
+        "bottom": 406.0
+      }
+    },
+    {
+      "code": "ControlLeft",
+      "bounds": {
+        "left": 28.0,
+        "top": 348.0,
+        "right": 102.0,
+        "bottom": 406.0
+      }
+    },
+    {
+      "code": "MetaLeft",
+      "bounds": {
+        "left": 108.0,
+        "top": 348.0,
+        "right": 182.0,
+        "bottom": 406.0
+      }
+    },
+    {
+      "code": "AltLeft",
+      "bounds": {
+        "left": 188.0,
+        "top": 348.0,
+        "right": 262.0,
+        "bottom": 406.0
+      }
+    },
+    {
+      "code": "Space",
+      "bounds": {
+        "left": 268.0,
+        "top": 348.0,
+        "right": 662.0,
+        "bottom": 406.0
+      }
+    },
+    {
+      "code": "AltRight",
+      "bounds": {
+        "left": 668.0,
+        "top": 348.0,
+        "right": 742.0,
+        "bottom": 406.0
+      }
+    },
+    {
+      "code": "MetaRight",
+      "bounds": {
+        "left": 748.0,
+        "top": 348.0,
+        "right": 822.0,
+        "bottom": 406.0
+      }
+    },
+    {
+      "code": "ContextMenu",
+      "bounds": {
+        "left": 828.0,
+        "top": 348.0,
+        "right": 902.0,
+        "bottom": 406.0
+      }
+    },
+    {
+      "code": "ControlRight",
+      "bounds": {
+        "left": 908.0,
+        "top": 348.0,
+        "right": 982.0,
+        "bottom": 406.0
+      }
+    },
+    {
+      "code": "ArrowLeft",
+      "bounds": {
+        "left": 1014.0,
+        "top": 348.0,
+        "right": 1072.0,
+        "bottom": 406.0
+      }
+    },
+    {
+      "code": "ArrowDown",
+      "bounds": {
+        "left": 1078.0,
+        "top": 348.0,
+        "right": 1136.0,
+        "bottom": 406.0
+      }
+    },
+    {
+      "code": "ArrowRight",
+      "bounds": {
+        "left": 1142.0,
+        "top": 348.0,
+        "right": 1200.0,
+        "bottom": 406.0
+      }
+    },
+    {
+      "code": "Numpad0",
+      "bounds": {
+        "left": 1232.0,
+        "top": 348.0,
+        "right": 1354.0,
+        "bottom": 406.0
+      }
+    },
+    {
+      "code": "NumpadDecimal",
+      "bounds": {
+        "left": 1360.0,
+        "top": 348.0,
+        "right": 1418.0,
+        "bottom": 406.0
+      }
+    }
+  ]
+}

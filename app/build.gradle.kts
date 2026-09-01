@@ -211,6 +211,7 @@ dependencies {
     debugImplementation(libs.androidx.ui.tooling)
     implementation(libs.kotlinx.serialization.json)
     implementation(libs.coil.compose)
+    implementation(libs.coil.svg)
     implementation(libs.squareup.okhttp3)
     implementation(libs.androidx.documentfile)
     implementation(libs.materialswitch)
