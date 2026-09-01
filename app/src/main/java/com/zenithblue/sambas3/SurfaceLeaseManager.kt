@@ -87,7 +87,10 @@ class SurfaceLeaseManager(
             createGeneration()
         } else if (!currentSurfaceCreated) {
             // No native surface was ever attached, so there is no destroy
-            // callback to await.
+            // callback to await.  Remove the old view as well: this branch
+            // also covers a frame whose window was temporarily destroyed by
+            // Android while the activity was backgrounded.
+            host.removeView(old)
             current = null
             currentSurfaceCreated = false
             pendingReady = null
@@ -128,6 +131,10 @@ class SurfaceLeaseManager(
             Log.w(TAG, "S3SURFACE stale-created generation=$generation current=$currentGeneration")
             return
         }
+        if (currentSurfaceCreated) {
+            Log.w(TAG, "S3SURFACE duplicate-created generation=$generation")
+            return
+        }
         val accepted = bridge.event(surface, 0, generation)
         Log.i(TAG, "S3SURFACE created generation=$generation accepted=$accepted")
         if (!accepted) {
@@ -161,6 +168,10 @@ class SurfaceLeaseManager(
             Log.w(TAG, "S3SURFACE stale-destroyed generation=$generation current=$currentGeneration")
             return
         }
+        if (!currentSurfaceCreated) {
+            Log.w(TAG, "S3SURFACE duplicate-destroyed generation=$generation")
+            return
+        }
         val released = bridge.event(surface, 2, generation)
         Log.i(TAG, "S3SURFACE destroyed generation=$generation native-release-return=$released")
         if (!released) {
@@ -169,7 +180,16 @@ class SurfaceLeaseManager(
             return
         }
         currentSurfaceCreated = false
-        current = null
+        // Android may destroy a SurfaceView's native window when the activity
+        // loses focus without removing the view from the host. Keep that
+        // generation alive so the matching surfaceCreated callback can
+        // re-attach the renderer on resume. A replacement or terminal destroy
+        // explicitly removes the view and must discard the generation.
+        val replacementPending = pendingReady != null
+        val frameStillAttached = frame.parent === host
+        if (destroying || replacementPending || !frameStillAttached) {
+            current = null
+        }
         if (destroying) return
         val ready = pendingReady
         pendingReady = null

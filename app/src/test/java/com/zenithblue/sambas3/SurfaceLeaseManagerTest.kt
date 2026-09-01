@@ -104,7 +104,7 @@ class SurfaceLeaseManagerTest {
     }
 
     @Test
-    fun duplicate_destroy_is_forwarded_once_and_does_not_recreate() {
+    fun temporary_surface_loss_keeps_generation_for_reattach() {
         val host = FrameLayout(ApplicationProvider.getApplicationContext())
         val events = mutableListOf<Pair<Int, Long>>()
         val manager = SurfaceLeaseManager(host, SurfaceLeaseBridge { _, event, generation ->
@@ -117,8 +117,12 @@ class SurfaceLeaseManagerTest {
         manager.onSurfaceDestroyed(frame, frame.generation, testSurface())
         manager.onSurfaceDestroyed(frame, frame.generation, testSurface())
 
-        assertEquals(null, manager.currentFrame)
+        assertEquals(frame, manager.currentFrame)
+        assertEquals(frame.generation, manager.currentGeneration)
         assertEquals(listOf(0 to frame.generation, 2 to frame.generation), events)
+
+        manager.onSurfaceCreated(frame, frame.generation, testSurface())
+        assertEquals(listOf(0 to frame.generation, 2 to frame.generation, 0 to frame.generation), events)
     }
 
     @Test

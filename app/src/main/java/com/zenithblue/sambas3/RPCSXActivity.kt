@@ -394,6 +394,13 @@ class RPCSXActivity : ComponentActivity(), EmulationHost {
             return
         }
         val gamePath = originalGamePath
+        val gameInfo = GameRepository.find(gamePath)?.info
+        GameSessionService.start(
+            this,
+            gamePath,
+            gameInfo?.name?.value,
+            gameInfo?.iconPath?.value
+        )
         RPCSX.lastPlayedGame = gamePath
         EmulationSessionJournal.begin(
             this,
@@ -748,6 +755,7 @@ class RPCSXActivity : ComponentActivity(), EmulationHost {
         } else {
             EmulatorActivityFinishReason.ExplicitExit
         }
+        GameSessionService.stop(this)
         Log.i("S3HOST", "finish-external-stop activity=$activityInstanceId requestId=$requestId")
         finish()
     }

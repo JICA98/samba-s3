@@ -42,6 +42,14 @@
                 android:name="android.app.PROPERTY_SPECIAL_USE_FGS_SUBTYPE"
                 android:value="Keeps user-initiated PS3 PPU and graphics-pipeline compilation visible and running during game launch or temporary backgrounding; interruption delays gameplay" />
         </service>
+        <service
+            android:name=".GameSessionService"
+            android:foregroundServiceType="specialUse"
+            android:exported="false">
+            <property
+                android:name="android.app.PROPERTY_SPECIAL_USE_FGS_SUBTYPE"
+                android:value="Keeps a user-started PS3 game emulation session and its rendering/input runtime active while the player temporarily backgrounds SambaS3; the ongoing notification identifies the game" />
+        </service>
 
         <meta-data 
             android:name="android.game_mode_config"

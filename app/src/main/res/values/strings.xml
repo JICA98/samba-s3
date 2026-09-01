@@ -82,6 +82,8 @@
     <string name="compiling_shaders_title">Compiling shaders</string>
     <string name="compiling_shaders_desc">Building Vulkan pipelines</string>
     <string name="compiling_notification_desc">Compilation progress</string>
+    <string name="game_session_channel">Game session</string>
+    <string name="game_session_running">Game running</string>
     <string name="time_remaining_format">%1$s remaining</string>
 
     <!-- SambaS3Activity -->
