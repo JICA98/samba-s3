@@ -1,0 +1,279 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 560" width="1000" height="560" role="img" aria-label="DualShock 3 controller test layout">
+  <title>DualShock 3 — Controller Input Test</title>
+  <desc>17 buttons + 2 analog sticks. Elements carry data-button names matching the standard Gamepad API mapping. Sticks are draggable; buttons highlight on press.</desc>
+
+  <defs>
+    <linearGradient id="dsBody" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#2b323d"/><stop offset=".55" stop-color="#1b212a"/><stop offset="1" stop-color="#10141d"/>
+    </linearGradient>
+    <linearGradient id="dsCap" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#4a505c"/><stop offset="1" stop-color="#282c35"/>
+    </linearGradient>
+    <linearGradient id="dsTrig" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#575f6c"/><stop offset="1" stop-color="#2e3440"/>
+    </linearGradient>
+    <radialGradient id="dsWell">
+      <stop offset="0" stop-color="#05070a"/><stop offset=".8" stop-color="#0d1116"/><stop offset="1" stop-color="#1c222b"/>
+    </radialGradient>
+    <radialGradient id="dsStick" cx=".38" cy=".32" r=".8">
+      <stop offset="0" stop-color="#5d6572"/><stop offset=".55" stop-color="#3a414d"/><stop offset="1" stop-color="#252b34"/>
+    </radialGradient>
+    <radialGradient id="dsDish" cx=".5" cy=".45" r=".65">
+      <stop offset="0" stop-color="#12161e"/><stop offset="1" stop-color="#1f2530"/>
+    </radialGradient>
+  </defs>
+
+  <style><![CDATA[
+    text  { font-family:'Segoe UI',Roboto,'Helvetica Neue',Arial,sans-serif; fill:#e9edf5; pointer-events:none; user-select:none; -webkit-user-select:none; }
+    .pkey { cursor:pointer; }
+    .pcap { fill:url(#dsCap); stroke:#0a0c10; stroke-width:1.25; transition:fill .07s ease, stroke .07s ease; }
+    .pkey:hover .pcap { fill:#3d4450; }
+    .pkey.on .pcap { fill:#2f6fe4; stroke:#aac9ff; filter:drop-shadow(0 0 6px rgba(84,136,255,.9)); }
+    .pkey.on text { fill:#fff; }
+    .hump { fill:url(#dsTrig); }
+    /* face buttons glow in their own color */
+    .sym { fill:none; stroke-width:3.5; stroke-linecap:round; stroke-linejoin:round; }
+    .sym-tri { stroke:#35c2a5; } .sym-cir { stroke:#f06a73; } .sym-x { stroke:#7fb2f0; } .sym-sqr { stroke:#e96bb5; }
+    .pkey.on .sym { stroke:#fff; }
+    .pkey.on[data-button="triangle"] .pcap { fill:#0e5c49; stroke:#7ef0cd; filter:drop-shadow(0 0 7px rgba(62,201,164,.85)); }
+    .pkey.on[data-button="circle"]  .pcap { fill:#6e1f28; stroke:#ff9aa5; filter:drop-shadow(0 0 7px rgba(240,106,115,.85)); }
+    .pkey.on[data-button="cross"]   .pcap { fill:#1c4a85; stroke:#9fc8ff; filter:drop-shadow(0 0 7px rgba(127,178,240,.85)); }
+    .pkey.on[data-button="square"]  .pcap { fill:#6b2b52; stroke:#ff9ad6; filter:drop-shadow(0 0 7px rgba(233,107,181,.85)); }
+    .arr { fill:#9aa5b6; }
+    .pkey.on .arr { fill:#fff; }
+    .body  { fill:url(#dsBody); stroke:#04060a; stroke-width:2.5; filter:drop-shadow(0 16px 24px rgba(0,0,0,.5)); }
+    .sheen { fill:#ffffff; opacity:.05; }
+    .brand { font-size:13px; font-weight:600; fill:#616b7a; letter-spacing:4px; text-anchor:middle; }
+    .lbl   { font-size:10px; font-weight:700; fill:#727d8f; letter-spacing:1.5px; text-anchor:middle; }
+    .tag   { font-size:11px; font-weight:700; fill:#8f9bb0; text-anchor:middle; }
+    .ps-t  { font-size:12px; font-weight:800; fill:#c7cedb; text-anchor:middle; }
+    .led   { fill:#262b33; stroke:#0a0c10; stroke-width:1; }
+    .led.on{ fill:#e0b34c; filter:drop-shadow(0 0 5px rgba(224,179,76,.9)); }
+    .well  { fill:url(#dsWell); stroke:#39404d; stroke-width:2; transition:stroke .12s ease; }
+    [data-stick] { touch-action:none; cursor:grab; }
+    [data-stick]:active { cursor:grabbing; }
+    .stick-cap { transition:transform .09s cubic-bezier(.25,.8,.35,1); }
+    .stickcap { fill:url(#dsStick); stroke:#11141a; stroke-width:1.5; }
+    .knurl { fill:none; stroke:rgba(0,0,0,.4); stroke-width:2; stroke-dasharray:2.5 4; }
+    .dish  { fill:url(#dsDish); stroke:#0b0e13; stroke-width:1; }
+    .stk   { font-size:11px; font-weight:700; fill:#939eaf; text-anchor:middle; letter-spacing:1px; }
+    .stick.active .well { stroke:#4e7fe0; }
+    .stick.on .stickcap { fill:#2f6fe4; stroke:#aac9ff; filter:drop-shadow(0 0 7px rgba(84,136,255,.9)); }
+    .stick.on .dish { fill:#20406f; }
+    .stick.on .stk  { fill:#fff; }
+    .tiny { font-size:11px; font-weight:600; fill:#3f4754; letter-spacing:1.5px; }
+    .st   { font-size:12.5px; font-weight:600; fill:#5f6878; letter-spacing:1.5px; }
+    .st.ok{ fill:#7dc98a; }
+  ]]></style>
+
+  <!-- ══ L2 / R2 triggers (behind shell) ══ -->
+  <g class="pkey" data-button="r2"><path class="pcap hump" d="M646,182 C650,118 682,86 726,80 C768,74 796,92 804,114 C812,136 814,166 810,196 C807,216 802,232 795,246 Z"/></g>
+  <g class="pkey" data-button="l2" transform="translate(1000,0) scale(-1,1)"><path class="pcap hump" d="M646,182 C650,118 682,86 726,80 C768,74 796,92 804,114 C812,136 814,166 810,196 C807,216 802,232 795,246 Z"/></g>
+
+  <!-- ══ L1 / R1 shoulders (behind shell) ══ -->
+  <g class="pkey" data-button="r1"><path class="pcap hump" d="M642,174 C646,124 676,106 714,104 C752,101 780,112 790,128 C797,140 799,158 796,178 C793,200 788,220 781,234 Z"/></g>
+  <g class="pkey" data-button="l1" transform="translate(1000,0) scale(-1,1)"><path class="pcap hump" d="M642,174 C646,124 676,106 714,104 C752,101 780,112 790,128 C797,140 799,158 796,178 C793,200 788,220 781,234 Z"/></g>
+
+  <!-- ══ body ══ -->
+  <path class="body" d="M355,132 C420,124 580,124 645,132 C690,138 732,146 765,162 C800,180 818,212 828,258 C836,296 838,336 830,376 C822,410 806,440 780,455 C756,468 730,466 712,450 C694,434 686,404 668,376 C652,352 630,344 600,350 C555,358 445,358 400,350 C370,344 348,352 332,376 C314,404 306,434 288,450 C270,466 244,468 220,455 C194,440 178,410 170,376 C162,336 164,296 172,258 C182,212 200,180 235,162 C270,146 310,138 355,132 Z"/>
+  <ellipse class="sheen" cx="500" cy="158" rx="225" ry="26" pointer-events="none"/>
+  <text class="brand" x="500" y="169">DUALSHOCK 3</text>
+
+  <!-- ══ D-pad ══ -->
+  <g class="pkey" data-button="dpad-up"><rect class="pcap" x="310" y="162" width="40" height="52" rx="8"/><path class="arr" d="M330,171 l-6,9 h12 Z"/></g>
+  <g class="pkey" data-button="dpad-down"><rect class="pcap" x="310" y="214" width="40" height="52" rx="8"/><path class="arr" d="M330,257 l-6,-9 h12 Z"/></g>
+  <g class="pkey" data-button="dpad-left"><rect class="pcap" x="278" y="194" width="52" height="40" rx="8"/><path class="arr" d="M283,214 l9,-6 v12 Z"/></g>
+  <g class="pkey" data-button="dpad-right"><rect class="pcap" x="330" y="194" width="52" height="40" rx="8"/><path class="arr" d="M377,214 l-9,-6 v12 Z"/></g>
+  <circle class="pcap" cx="330" cy="214" r="13" pointer-events="none"/>
+
+  <!-- ══ face buttons ══ -->
+  <g class="pkey" data-button="triangle"><circle class="pcap" cx="670" cy="166" r="21"/><path class="sym sym-tri" d="M670,157 L679,172 L661,172 Z"/></g>
+  <g class="pkey" data-button="circle"><circle class="pcap" cx="726" cy="218" r="21"/><circle class="sym sym-cir" cx="726" cy="218" r="8.5"/></g>
+  <g class="pkey" data-button="cross"><circle class="pcap" cx="670" cy="270" r="21"/><path class="sym sym-x" d="M662,262 L678,278 M678,262 L662,278"/></g>
+  <g class="pkey" data-button="square"><circle class="pcap" cx="614" cy="218" r="21"/><rect class="sym sym-sqr" x="606.5" y="210.5" width="15" height="15"/></g>
+
+  <!-- ══ Select / Start / LEDs / PS ══ -->
+  <g class="pkey" data-button="select" transform="rotate(-10 408 195)"><rect class="pcap" x="390" y="188" width="36" height="14" rx="7"/></g>
+  <g class="pkey" data-button="start" transform="rotate(10 592 195)"><rect class="pcap" x="574" y="188" width="36" height="14" rx="7"/></g>
+  <text class="lbl" x="408" y="217">SELECT</text>
+  <text class="lbl" x="592" y="217">START</text>
+  <g>
+    <rect class="led" data-led="0" x="472" y="204" width="10" height="6" rx="2"/>
+    <rect class="led" data-led="1" x="487" y="204" width="10" height="6" rx="2"/>
+    <rect class="led" data-led="2" x="502" y="204" width="10" height="6" rx="2"/>
+    <rect class="led" data-led="3" x="517" y="204" width="10" height="6" rx="2"/>
+  </g>
+  <g class="pkey" data-button="ps"><circle class="pcap" cx="500" cy="242" r="16"/><text class="ps-t" x="500" y="246">PS</text></g>
+
+  <!-- ══ analog sticks (L3 / R3 — draggable) ══ -->
+  <g class="stick pkey" data-button="l3" data-stick="left" data-cx="420" data-cy="292" transform="translate(420,292)">
+    <circle class="well" r="54"/>
+    <g class="stick-cap">
+      <circle class="stickcap" r="39"/>
+      <circle class="knurl" r="31"/>
+      <circle class="dish" r="23"/>
+      <text class="stk" y="4">L3</text>
+    </g>
+  </g>
+  <g class="stick pkey" data-button="r3" data-stick="right" data-cx="580" data-cy="292" transform="translate(580,292)">
+    <circle class="well" r="54"/>
+    <g class="stick-cap">
+      <circle class="stickcap" r="39"/>
+      <circle class="knurl" r="31"/>
+      <circle class="dish" r="23"/>
+      <text class="stk" y="4">R3</text>
+    </g>
+  </g>
+
+  <!-- shoulder labels -->
+  <text class="tag" x="762" y="97">R2</text>
+  <text class="tag" x="238" y="97">L2</text>
+  <text class="tag" x="735" y="129">R1</text>
+  <text class="tag" x="265" y="129">L1</text>
+
+  <!-- status bar -->
+  <text class="tiny" x="28" y="536">DS3 · 17 BUTTONS · 4 AXES · GAMEPAD API</text>
+  <text id="pad-status" class="st" x="500" y="536" text-anchor="middle">NO GAMEPAD DETECTED · PRESS ANY BUTTON ON THE CONTROLLER TO CONNECT</text>
+  <text class="tiny" x="972" y="536" text-anchor="end">CLICK BUTTONS · DRAG STICKS</text>
+
+  <!-- built-in test: polls the Gamepad API, highlights buttons, moves sticks. Also supports pointer (click/drag). -->
+  <script><![CDATA[
+    (function () {
+      var doc = document;
+      /* standard mapping: button index -> data-button name */
+      var MAP = ['cross','circle','square','triangle','l1','r1','l2','r2','select','start','l3','r3',
+                 'dpad-up','dpad-down','dpad-left','dpad-right','ps'];
+      var btns = {}, stickGrp = {}, caps = {}, i, list, node;
+      list = doc.querySelectorAll('[data-button]');
+      for (i = 0; i < list.length; i++) {
+        node = list[i];
+        node._down = false;
+        btns[node.getAttribute('data-button')] = node;
+      }
+      list = doc.querySelectorAll('[data-stick]');
+      for (i = 0; i < list.length; i++) {
+        node = list[i];
+        var side = node.getAttribute('data-stick');
+        stickGrp[side] = node;
+        caps[side] = node.querySelector('.stick-cap');
+      }
+      var status = doc.getElementById('pad-status');
+      var leds = doc.querySelectorAll('[data-led]');
+      var pdown = {};   /* pointer-held buttons */
+      var drag = null;  /* active stick drag */
+
+      function setStick(side, x, y) {
+        x = x || 0; y = y || 0;
+        var m = Math.sqrt(x * x + y * y);
+        if (m > 1) { x /= m; y /= m; m = 1; }
+        var cap = caps[side];
+        if (cap) { cap.style.transform = 'translate(' + (x * 15).toFixed(2) + 'px,' + (y * 15).toFixed(2) + 'px)'; }
+        var g = stickGrp[side];
+        if (g) { g.classList.toggle('active', m > 0.09); }
+      }
+      function fmt(v) { v = v || 0; return Math.abs(v) < 0.005 ? '0.00' : (v < 0 ? '' : '+') + v.toFixed(2); }
+      function setStatus(msg, ok) {
+        if (!status) { return; }
+        status.textContent = msg;
+        if (ok) { status.classList.add('ok'); } else { status.classList.remove('ok'); }
+      }
+
+      function poll() {
+        var pads = navigator.getGamepads ? navigator.getGamepads() : [];
+        var first = null, down = {}, b, p, name, on, names = [];
+        for (i = 0; i < pads.length; i++) {
+          p = pads[i];
+          if (!p) { continue; }
+          if (!first) { first = p; }
+          for (b = 0; b < p.buttons.length; b++) {
+            if (p.buttons[b] && p.buttons[b].pressed) { down[b] = true; }
+          }
+        }
+        for (i = 0; i < MAP.length; i++) {
+          name = MAP[i];
+          node = btns[name];
+          if (!node) { continue; }
+          on = !!down[i] || !!pdown[name];
+          if (on !== node._down) { node._down = on; node.classList.toggle('on', on); }
+          if (on) {
+            var v = (first && first.buttons[i] && typeof first.buttons[i].value === 'number') ? first.buttons[i].value : 1;
+            names.push(name + (v > 0.04 && v < 0.96 ? '(' + Math.round(v * 100) + '%)' : ''));
+          }
+        }
+        if (first) {
+          if (!drag || drag.side !== 'left')  { setStick('left',  first.axes[0], first.axes[1]); }
+          if (!drag || drag.side !== 'right') { setStick('right', first.axes[2], first.axes[3]); }
+          var id = String(first.id || 'gamepad').replace(/\s+/g, ' ');
+          if (id.length > 40) { id = id.slice(0, 40) + '...'; }
+          var msg = 'CONNECTED: ' + id + '  |  L(' + fmt(first.axes[0]) + ',' + fmt(first.axes[1]) +
+                    ')  R(' + fmt(first.axes[2]) + ',' + fmt(first.axes[3]) + ')';
+          if (names.length) { msg += '  |  ' + names.join(' + '); }
+          if (first.mapping !== 'standard') { msg += '  |  NON-STANDARD MAP'; }
+          setStatus(msg, true);
+          var idx = first.index | 0;
+          for (i = 0; i < leds.length; i++) { leds[i].classList.toggle('on', i === idx); }
+        } else {
+          var m2 = 'NO GAMEPAD DETECTED · PRESS ANY BUTTON ON THE CONTROLLER TO CONNECT';
+          if (names.length) { m2 = 'POINTER TEST  |  ' + names.join(' + '); }
+          setStatus(m2, names.length > 0);
+          for (i = 0; i < leds.length; i++) { leds[i].classList.remove('on'); }
+        }
+        requestAnimationFrame(poll);
+      }
+      requestAnimationFrame(poll);
+
+      window.addEventListener('gamepadconnected', function (e) {
+        if (e.gamepad) { setStatus('GAMEPAD CONNECTED: ' + e.gamepad.id, true); }
+      });
+      window.addEventListener('gamepaddisconnected', function () {
+        setStatus('GAMEPAD DISCONNECTED', false);
+      });
+
+      /* pointer testing: click any button, drag either stick */
+      doc.addEventListener('pointerdown', function (ev) {
+        var t = ev.target;
+        if (!t || !t.closest) { return; }
+        var s = t.closest('[data-stick]');
+        if (s) {
+          ev.preventDefault();
+          drag = {
+            side: s.getAttribute('data-stick'), el: s,
+            cx: parseFloat(s.getAttribute('data-cx')) || 0,
+            cy: parseFloat(s.getAttribute('data-cy')) || 0
+          };
+          try { s.setPointerCapture(ev.pointerId); } catch (err) {}
+          return;
+        }
+        var g = t.closest('[data-button]');
+        if (g) { pdown[g.getAttribute('data-button')] = true; }
+      });
+      doc.addEventListener('pointermove', function (ev) {
+        if (!drag) { return; }
+        var root = drag.el.ownerSVGElement;
+        if (!root || !root.getScreenCTM) { return; }
+        var ctm = root.getScreenCTM();
+        if (!ctm) { return; }
+        var pt = root.createSVGPoint();
+        pt.x = ev.clientX; pt.y = ev.clientY;
+        pt = pt.matrixTransform(ctm.inverse());
+        var dx = pt.x - drag.cx, dy = pt.y - drag.cy;
+        var m = Math.sqrt(dx * dx + dy * dy);
+        if (m > 15) { dx = dx / m * 15; dy = dy / m * 15; }
+        var cap = caps[drag.side];
+        if (cap) { cap.style.transform = 'translate(' + dx.toFixed(2) + 'px,' + dy.toFixed(2) + 'px)'; }
+      });
+      function endDrag() {
+        if (!drag) { return; }
+        var cap = caps[drag.side];
+        if (cap) { cap.style.transform = 'translate(0,0)'; }
+        var g = stickGrp[drag.side];
+        if (g) { g.classList.remove('active'); }
+        drag = null;
+      }
+      doc.addEventListener('pointerup', endDrag);
+      doc.addEventListener('pointercancel', endDrag);
+      doc.addEventListener('pointerup', function () { pdown = {}; });
+    })();
+  ]]></script>
+</svg>
