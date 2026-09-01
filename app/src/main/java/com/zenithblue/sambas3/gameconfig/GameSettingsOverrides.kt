@@ -4,6 +4,7 @@ import android.content.Context
 import android.content.SharedPreferences
 import android.util.Log
 import com.zenithblue.sambas3.RPCSX
+import org.json.JSONObject
 
 /**
  * Read/write seam over the tier-map persistence backend: SharedPreferences-backed
@@ -25,24 +26,16 @@ class SharedPreferencesTierStore(private val prefs: SharedPreferences) : Overrid
 }
 
 /**
- * App-side per-game setting override store and boot replay engine (the emulator's
- * `settingsSet` hardcodes global save into the single `g_cfg` tree, so per-title
- * overrides must be recorded app-side and replayed around boot).
+ * Scope-aware facade over RPCS3's canonical per-title custom-config store.
  *
- * Persistence: SharedPreferences file "sambas3_game_overrides" with tier keys
- * `global`, `baseline`, `game.<TITLE_ID>` plus the `learned.<gamePath>` title-id
- * learning map. Tier maps persist via [SettingsValueCodec.encodeOverrideMap] /
- * [decodeOverrideMap] (org.json-free).
+ * Persistent production data lives in the core's
+ * `custom_configs/config_<TITLE_ID>.yml` as sparse overrides. The old
+ * SharedPreferences tier implementation remains as a pure test seam for the
+ * resolver tests and for migration compatibility, but is not consulted by the
+ * active settings UI.
  *
- * Replay ladder order: built-in recommended defaults -> baseline -> global ->
- * per-title. Pre-boot the full ladder runs while the emulator is Stopped so
- * restart-required cfg nodes accept; post-boot learning replays ONLY the per-title
- * tier ([applyTitleTier]) because defaults/baseline/global were already applied.
- *
- * Threading contract: replay calls marshal onto RPCSXActivity's bootThread
- * (single serial writer for g_cfg); interactive UI sets keep running on the main
- * thread exactly like the launcher settings screen. Engine-side locking is out of
- * scope (documented assumption: one writer at a time).
+ * RPCS3 loads global config followed by this title config at every custom boot,
+ * so there is no app-side replay that can leak a title value into config.yml.
  *
  * JVM testability: every operation has an internal [OverrideTierStore]-based core;
  * tests exercise those directly with an in-memory store + fake setter, so no test
@@ -72,7 +65,7 @@ object GameSettingsOverrides {
         SharedPreferencesTierStore(context.getSharedPreferences(PREFS_FILE, Context.MODE_PRIVATE))
     }
 
-    /** Live-setter seam - replay/clear calls marshal through here. */
+    /** Test-only setter seam for the legacy in-memory resolver tests. */
     internal var settingsSetter: (path: String, value: String) -> Boolean = { path, value ->
         RPCSX.instance.settingsSet(path, value)
     }
@@ -80,8 +73,10 @@ object GameSettingsOverrides {
     // ── Recording ────────────────────────────────────────────────────────────
 
     /** Record a committed value into the GLOBAL tier (in-game Global Settings page). */
-    fun recordGlobal(context: Context, path: String, encoded: String) =
-        recordGlobal(storeFactory(context), path, encoded)
+    @Deprecated("Global values are canonical in RPCS3 config.yml")
+    fun recordGlobal(context: Context, path: String, encoded: String) {
+        runCatching { RPCSX.instance.settingsSetGlobal(path, encoded) }
+    }
 
     internal fun recordGlobal(store: OverrideTierStore, path: String, encoded: String) {
         if (path.isBlank()) return
@@ -100,7 +95,16 @@ object GameSettingsOverrides {
         path: String,
         encoded: String,
         previousEncoded: String?
-    ) = recordGame(storeFactory(context), titleId, path, encoded, previousEncoded)
+    ): Boolean {
+        if (titleId.isBlank() || path.isBlank()) return false
+        return runCatching {
+            val wrote = RPCSX.instance.gameSettingsOverrideSet(titleId, path, encoded)
+            val readBack = gameOverrides(context, titleId)[path]
+            val matched = readBack == encoded
+            Log.i(TAG, "S3CFG write scope=game title=$titleId path=$path requested=$encoded readBack=$readBack matched=$matched")
+            wrote && matched
+        }.getOrDefault(false)
+    }
 
     internal fun recordGame(
         store: OverrideTierStore,
@@ -134,7 +138,15 @@ object GameSettingsOverrides {
         titleId: String?,
         path: String,
         fallbackEncoded: String
-    ): Boolean = clearGameSetting(storeFactory(context), titleId, path, fallbackEncoded)
+    ): Boolean {
+        if (titleId.isNullOrBlank() || path.isBlank()) return false
+        return runCatching {
+            val cleared = RPCSX.instance.gameSettingsOverrideClear(titleId, path)
+            val remains = gameOverrides(context, titleId).containsKey(path)
+            Log.i(TAG, "S3CFG clear scope=game title=$titleId path=$path cleared=${cleared && !remains}")
+            cleared && !remains
+        }.getOrDefault(false)
+    }
 
     internal fun clearGameSetting(
         store: OverrideTierStore,
@@ -165,8 +177,14 @@ object GameSettingsOverrides {
     }
 
     /** Wipe every per-title row for [titleId] (other titles untouched). */
-    fun clearGame(context: Context, titleId: String) =
-        clearGame(storeFactory(context), titleId)
+    fun clearGame(context: Context, titleId: String): Boolean {
+        if (titleId.isBlank()) return false
+        return runCatching {
+            val cleared = RPCSX.instance.gameSettingsOverridesClear(titleId)
+            val remains = gameOverrides(context, titleId).isNotEmpty()
+            cleared && !remains
+        }.getOrDefault(false)
+    }
 
     internal fun clearGame(store: OverrideTierStore, titleId: String) {
         if (titleId.isBlank()) return
@@ -175,8 +193,17 @@ object GameSettingsOverrides {
 
     // ── Reads ────────────────────────────────────────────────────────────────
 
-    fun gameOverrides(context: Context, titleId: String): Map<String, String> =
-        gameOverrides(storeFactory(context), titleId)
+    fun gameOverrides(context: Context, titleId: String): Map<String, String> {
+        if (titleId.isBlank()) return emptyMap()
+        return runCatching {
+            val json = JSONObject(RPCSX.instance.gameSettingsOverridesGet(titleId))
+            buildMap {
+                json.keys().forEach { path ->
+                    put(path, json.getString(path))
+                }
+            }
+        }.getOrDefault(emptyMap())
+    }
 
     internal fun gameOverrides(store: OverrideTierStore, titleId: String): Map<String, String> {
         if (titleId.isBlank()) return emptyMap()
@@ -185,9 +212,9 @@ object GameSettingsOverrides {
         )
     }
 
-    /** Baseline layered under global: what "use global" resolves to per path. */
+    /** Compatibility read for old callers; global values are never app-cached now. */
     fun resolvedGlobalValues(context: Context): Map<String, String> =
-        resolvedGlobalValues(storeFactory(context))
+        emptyMap()
 
     internal fun resolvedGlobalValues(store: OverrideTierStore): Map<String, String> {
         val baseline = SettingsValueCodec.decodeOverrideMap(store.getString(KEY_BASELINE) ?: "{}")
@@ -202,11 +229,12 @@ object GameSettingsOverrides {
      * Call PRE-BOOT while Emu.IsStopped() so restart-required nodes accept their
      * values. Rejections are logged, never thrown.
      */
+    @Deprecated("RPCS3 loads custom_configs/config_<TITLE_ID>.yml during custom boot")
     fun applyForGame(
         context: Context,
         titleIdOrNull: String?,
         setter: (path: String, value: String) -> Boolean = settingsSetter
-    ) = applyForGame(storeFactory(context), titleIdOrNull, setter)
+    ) = Unit
 
     internal fun applyForGame(
         store: OverrideTierStore,
@@ -222,11 +250,12 @@ object GameSettingsOverrides {
      * restart-required node is written while Running (defaults/baseline/global were
      * already applied pre-boot).
      */
+    @Deprecated("RPCS3 loads custom_configs/config_<TITLE_ID>.yml during custom boot")
     fun applyTitleTier(
         context: Context,
         titleId: String?,
         setter: (path: String, value: String) -> Boolean = settingsSetter
-    ) = applyTitleTier(storeFactory(context), titleId, setter)
+    ) = Unit
 
     internal fun applyTitleTier(
         store: OverrideTierStore,

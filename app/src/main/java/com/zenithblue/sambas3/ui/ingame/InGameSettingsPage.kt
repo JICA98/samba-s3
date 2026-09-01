@@ -55,6 +55,39 @@ fun InGameSettingsPage(
             val currentPath = uiState.settingsBackstack.lastOrNull() ?: ""
             val node = remember(tree, currentPath) { getNestedSettings(tree, currentPath) }
             Column(modifier = Modifier.fillMaxSize()) {
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .background(RPCSXColors.surface)
+                        .padding(horizontal = 16.dp, vertical = 8.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Text(
+                        text = "SCOPE",
+                        color = RPCSXColors.textSecondary,
+                        style = androidx.compose.material3.MaterialTheme.typography.labelSmall
+                    )
+                    Text(
+                        text = "THIS GAME",
+                        color = RPCSXColors.primary,
+                        style = androidx.compose.material3.MaterialTheme.typography.labelSmall,
+                        modifier = Modifier.padding(start = 12.dp)
+                    )
+                    Text(
+                        text = "· applies on next boot",
+                        color = RPCSXColors.textSecondary,
+                        style = androidx.compose.material3.MaterialTheme.typography.labelSmall,
+                        modifier = Modifier.padding(start = 12.dp)
+                    )
+                    if (uiState.settingsWriteError != null) {
+                        Text(
+                            text = "· ${uiState.settingsWriteError}",
+                            color = androidx.compose.material3.MaterialTheme.colorScheme.error,
+                            style = androidx.compose.material3.MaterialTheme.typography.labelSmall,
+                            modifier = Modifier.padding(start = 12.dp)
+                        )
+                    }
+                }
                 AdvancedSettingsScreen(
                     modifier = Modifier.weight(1f),
                     navigateBack = {

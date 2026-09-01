@@ -215,18 +215,8 @@ object ImportPpuPreparationCoordinator {
 
                 Log.i(
                     TAG,
-                    "Applying normal pre-boot settings " +
-                        "before headless PPU " +
-                        "title=$resolvedTitleId"
-                )
-
-                // This is the same ladder the normal boot activity applies before normal boot.
-                //
-                // Engine is fully Stopped here.
-                // Keep a single serialized config writer.
-                GameSettingsOverrides.applyForGame(
-                    appCtx,
-                    resolvedTitleId
+                    "Using canonical global + sparse title config " +
+                        "for headless PPU title=$resolvedTitleId"
                 )
 
                 val manifestBefore =

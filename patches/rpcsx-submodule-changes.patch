@@ -1,5 +1,5 @@
 diff --git a/android/src/rpcsx-android.cpp b/android/src/rpcsx-android.cpp
-index 8308a4798..be6b5b390 100644
+index 8308a4798..e0325d43c 100644
 --- a/android/src/rpcsx-android.cpp
 +++ b/android/src/rpcsx-android.cpp
 @@ -7,6 +7,8 @@
@@ -11,7 +11,15 @@ index 8308a4798..be6b5b390 100644
  #include "Emu/IdManager.h"
  #include "Emu/Io/KeyboardHandler.h"
  #include "Emu/Io/Null/NullKeyboardHandler.h"
-@@ -80,6 +82,7 @@
+@@ -51,6 +53,7 @@
+ #include "util/File.h"
+ #include "util/JIT.h"
+ #include "util/StrFmt.h"
++#include "util/yaml.hpp"
+ 
+ #include <cctype>
+ #include <ctime>
+@@ -80,6 +83,7 @@
  #include "Emu/NP/rpcn_config.h"
  #include "Emu/NP/rpcn_client.h"
  #include "util/video_provider.h"
@@ -19,7 +27,26 @@ index 8308a4798..be6b5b390 100644
  
  #include <algorithm>
  #include <android/log.h>
-@@ -155,6 +158,7 @@ static constexpr int FRONTEND_EVENT_EMULATOR_ACTION_ERROR = 4;
+@@ -93,6 +97,7 @@
+ #include <functional>
+ #include <iterator>
+ #include <cerrno>
++#include <map>
+ #include <jni.h>
+ #include <mutex>
+ #include <optional>
+@@ -110,6 +115,10 @@
+ extern bool boot_last_savestate(bool testing);
+ namespace cfg { class _base; }
+ static cfg::_base* find_cfg_node(cfg::_base *root, std::string_view path);
++static std::string global_settings_path();
++static bool read_settings_file(const std::string& path, std::string& contents);
++static bool load_settings_root(cfg_root& root, const std::string& path);
++static bool valid_settings_title_id(std::string_view title_id);
+ 
+ struct AtExit {
+   std::function<void()> cb;
+@@ -155,6 +164,7 @@ static constexpr int FRONTEND_EVENT_EMULATOR_ACTION_ERROR = 4;
  static constexpr int FRONTEND_EVENT_SAVESTATE_COMMITTED = 5;
  static constexpr int FRONTEND_EVENT_SAVESTATE_FAILED = 6;
  static constexpr int FRONTEND_EVENT_RENDERER_ERROR = 7;
@@ -27,7 +54,7 @@ index 8308a4798..be6b5b390 100644
  
  static atomic_t<bool> g_frontend_menu_active{false};
  static atomic_t<bool> g_frontend_menu_paused_emu{false};
-@@ -164,6 +168,77 @@ static std::mutex g_ingame_settings_mutex;
+@@ -164,6 +174,77 @@ static std::mutex g_ingame_settings_mutex;
  static std::optional<std::string> g_ingame_settings_backup;
  static bool g_ingame_settings_dirty = false;
  
@@ -105,7 +132,7 @@ index 8308a4798..be6b5b390 100644
  static void emit_prelaunch_ppu_event(
      CompilePhase phase,
      u64 job_id,
-@@ -1293,6 +1368,10 @@ struct destructive_guard {
+@@ -1293,6 +1374,10 @@ struct destructive_guard {
    ~destructive_guard() { end_destructive(); }
  };
  
@@ -116,7 +143,7 @@ index 8308a4798..be6b5b390 100644
  static void emit_frontend_event(int type, const std::string* payload)
  {
      // Dispatch via main thread processor to ensure JNI env is valid.
-@@ -1319,6 +1398,33 @@ extern "C" void _rpcsx_android_renderer_error(int error_code, const char* messag
+@@ -1319,6 +1404,33 @@ extern "C" void _rpcsx_android_renderer_error(int error_code, const char* messag
    emit_frontend_event(FRONTEND_EVENT_RENDERER_ERROR, &detail);
  }
  
@@ -150,8 +177,25 @@ index 8308a4798..be6b5b390 100644
  
  static void invokeAsync(std::function<void(JNIEnv *)> cb) {
    g_mainThreadProcessor.push(std::move(cb));
-@@ -2331,6 +2437,34 @@ extern "C" int _rpcsx_bootSavestate(std::string_view savestate_path_,
-   const auto result = Emu.BootGame(savestate_path, "", true, cfg_mode::global);
+@@ -2307,7 +2419,9 @@ extern "C" int _rpcsx_boot(std::string_view path_) {
+     path.pop_back();
+   }
+ 
+-  return static_cast<int>(Emu.BootGame(path, "", false, cfg_mode::global));
++  // Let RPCS3 load the canonical global config followed by the sparse
++  // title-specific custom config for this game.
++  return static_cast<int>(Emu.BootGame(path, "", false, cfg_mode::custom));
+ }
+ 
+ // Recovery boot for a savestate created by Android.  A savestate stores the
+@@ -2328,9 +2442,39 @@ extern "C" int _rpcsx_bootSavestate(std::string_view savestate_path_,
+   Emu.SetContinuousMode(true);
+   Emu.SetForceBoot(true);
+   const std::string savestate_path(savestate_path_);
+-  const auto result = Emu.BootGame(savestate_path, "", true, cfg_mode::global);
++  // Savestate recovery follows the same global + title custom-config path as
++  // a normal boot. The saved title id is resolved by Load().
++  const auto result = Emu.BootGame(savestate_path, "", true, cfg_mode::custom);
    rpcsx_android.notice("S3SAVE recovery-boot path='%s' result=%d",
                         savestate_path.c_str(), static_cast<int>(result));
 +
@@ -185,7 +229,448 @@ index 8308a4798..be6b5b390 100644
    return static_cast<int>(result);
  }
  
-@@ -4199,145 +4333,419 @@ extern "C" bool _rpcsx_loadSaveState(int slot)
+@@ -3461,14 +3605,37 @@ extern "C" int _rpcsx_prepareRuntimePpu(const char* path, u64 sessionId)
+         title_id.c_str(),
+         path);
+ 
+-    const auto result =
+-        Emu.PreparePpuOnly(
++    Emulator::ppu_preflight_result result;
++    {
++        // PreparePpuOnly does not run the normal Load() config phase. Give its
++        // isolated compiler session the same global + sparse title values, then
++        // restore the stopped live tree so this preflight cannot become global.
++        const std::string previous_config = g_cfg.to_string();
++        cfg_root effective;
++        if (load_settings_root(effective, global_settings_path())) {
++            std::string title_config;
++            if (valid_settings_title_id(title_id) &&
++                read_settings_file(
++                    rpcs3::utils::get_custom_config_path(title_id), title_config)) {
++                effective.from_string(title_config, false);
++            }
++            g_cfg.from_string(effective.to_string(), false);
++            rpcsx_android.notice("S3CFG boot scope=game title=%s phase=PPU_PREPARE",
++                                 title_id.c_str());
++        }
++        struct RestoreConfig {
++            const std::string& serialized;
++            ~RestoreConfig() { g_cfg.from_string(serialized, false); }
++        } restore{previous_config};
++
++        result = Emu.PreparePpuOnly(
+             path,
+             title_id,
+             [sessionId]()
+             {
+                 return g_prelaunch_canceled && g_prelaunch_session == sessionId;
+             });
++    }
+ 
+     const bool stopped = Emu.IsStopped(true);
+ 
+@@ -3562,8 +3729,19 @@ extern "C" std::string _rpcsx_systemInfo() {
+   return result;
+ }
+ 
++static std::vector<std::string> split_settings_path(std::string_view path) {
++  std::vector<std::string> result;
++  while (true) {
++    const auto separator = path.find("@@");
++    result.emplace_back(path.substr(0, separator));
++    if (separator == std::string_view::npos) break;
++    path.remove_prefix(separator + 2);
++  }
++  return result;
++}
++
+ static cfg::_base *find_cfg_node(cfg::_base *root, std::string_view path) {
+-  auto pathList = fmt::split(path, {"@@"});
++  auto pathList = split_settings_path(path);
+   std::ranges::reverse(pathList);
+ 
+   while (!pathList.empty()) {
+@@ -3597,50 +3775,347 @@ static cfg::_base *find_cfg_node(cfg::_base *root, std::string_view path) {
+   return root;
+ }
+ 
+-extern "C" void _rpcsx_loginUser(std::string_view userId) {
+-  Emu.SetUsr(std::string(userId));
++// Settings edited by Samba are backed by RPCS3's own files. Keep this helper
++// layer independent from the live g_cfg tree so the launcher can inspect the
++// canonical global config after a title-specific runtime config was active.
++using sparse_settings_map = std::map<std::string, std::string>;
++
++static std::string global_settings_path() {
++  return fs::get_config_dir(true) + "config.yml";
+ }
+ 
+-extern "C" std::string _rpcsx_getUser() { return Emu.GetUsr(); }
++static bool valid_settings_title_id(std::string_view title_id) {
++  if (title_id.size() < 3 || title_id.size() > 64) return false;
++  return std::ranges::all_of(title_id, [](unsigned char c) {
++    return std::isalnum(c) || c == '_' || c == '.' || c == '-';
++  });
++}
+ 
+-extern "C" std::string _rpcsx_settingsGet(std::string_view path) {
+-  auto root = find_cfg_node(&g_cfg, path);
++static bool read_settings_file(const std::string& path, std::string& contents) {
++  fs::file file{path};
++  if (!file) return false;
++  contents = file.to_string();
++  return true;
++}
+ 
+-  if (root == nullptr) {
+-    return nullptr;
++static bool load_settings_root(cfg_root& root, const std::string& path) {
++  root.from_default();
++  std::string contents;
++  if (!read_settings_file(path, contents)) return true;
++  if (root.from_string(contents)) return true;
++  rpcsx_android.error("S3CFG failed to parse settings file %s", path.c_str());
++  return false;
++}
++
++static bool save_settings_file(const std::string& path, const std::string& contents) {
++  if (!fs::create_path(fs::get_parent_dir(path))) return false;
++  fs::pending_file pending{path};
++  if (!pending.file) return false;
++  pending.file.write(contents.c_str(), contents.size());
++  return pending.commit();
++}
++
++static std::string encoded_cfg_value(const cfg::_base* node) {
++  if (!node) return {};
++  const auto json = node->to_json();
++  const auto type = json.value("type", "");
++  if (type == "bool") return json.value("value", false) ? "true" : "false";
++  if (type == "enum" || type == "string") {
++    return nlohmann::json(json.value("value", "")).dump();
++  }
++  const auto value = json.find("value");
++  if (value == json.end()) return {};
++  return value->is_string() ? value->get<std::string>() : value->dump();
++}
++
++static std::string encoded_yaml_value(const cfg::_base* schema_node,
++                                      const YAML::Node& value) {
++  if (!schema_node || !value.IsScalar()) return {};
++  switch (schema_node->get_type()) {
++    case cfg::type::_bool: {
++      std::string scalar = value.Scalar();
++      std::ranges::transform(scalar, scalar.begin(), [](unsigned char c) {
++        return static_cast<char>(std::tolower(c));
++      });
++      return scalar == "true" ? "true" : "false";
++    }
++    case cfg::type::_enum:
++    case cfg::type::string:
++      return nlohmann::json(value.Scalar()).dump();
++    default:
++      return value.Scalar();
+   }
++}
+ 
+-  return root->to_json().dump(4);
++static void collect_sparse_yaml(const YAML::Node& yaml,
++                                const std::string& base_path,
++                                cfg_root& schema,
++                                sparse_settings_map& result) {
++  if (!yaml.IsMap()) return;
++  for (const auto& pair : yaml) {
++    if (!pair.first.IsScalar()) continue;
++    const std::string key = pair.first.Scalar();
++    const std::string path = base_path.empty() ? key : base_path + "@@" + key;
++    if (pair.second.IsMap()) {
++      collect_sparse_yaml(pair.second, path, schema, result);
++      continue;
++    }
++    if (!pair.second.IsScalar()) continue;
++    if (auto* node = find_cfg_node(&schema, path)) {
++      const std::string encoded = encoded_yaml_value(node, pair.second);
++      if (!encoded.empty()) result[path] = encoded;
++    }
++  }
+ }
+ 
+-extern "C" bool _rpcsx_settingsSet(std::string_view path,
+-                                   std::string_view valueString) {
++static sparse_settings_map load_sparse_title_settings(std::string_view title_id,
++                                                       cfg_root& global) {
++  sparse_settings_map result;
++  if (!valid_settings_title_id(title_id)) return result;
++
++  const std::string path = rpcs3::utils::get_custom_config_path(std::string(title_id));
++  std::string contents;
++  if (!read_settings_file(path, contents)) return result;
++  const auto [yaml, error] = yaml_load(contents);
++  if (!error.empty()) {
++    rpcsx_android.error("S3CFG failed to parse title config %s: %s", path.c_str(), error.c_str());
++    return result;
++  }
++
++  cfg_root schema;
++  schema.from_default();
++  collect_sparse_yaml(yaml, "", schema, result);
++  for (auto it = result.begin(); it != result.end();) {
++    auto* global_node = find_cfg_node(&global, it->first);
++    if (global_node && encoded_cfg_value(global_node) == it->second) {
++      it = result.erase(it);
++    } else {
++      ++it;
++    }
++  }
++  return result;
++}
++
++static YAML::Node sparse_settings_yaml(const sparse_settings_map& values) {
++  YAML::Node root{YAML::NodeType::Map};
++  for (const auto& [path, encoded] : values) {
++    const auto parts = split_settings_path(path);
++    if (parts.empty()) continue;
++    YAML::Node current = root;
++    for (std::size_t i = 0; i + 1 < parts.size(); ++i) {
++      const std::string key = parts[i];
++      if (!current[key] || !current[key].IsMap()) {
++        current[key] = YAML::Node{YAML::NodeType::Map};
++      }
++      // yaml-cpp's Node assignment copies node data; reset() rebinds the
++      // traversal handle without replacing the root map.
++      current.reset(current[key]);
++    }
++    try {
++      const auto json_value = nlohmann::json::parse(encoded);
++      if (json_value.is_boolean()) {
++        current[parts.back()] = json_value.get<bool>();
++      } else if (json_value.is_number_integer()) {
++        current[parts.back()] = json_value.get<s64>();
++      } else if (json_value.is_number_float()) {
++        current[parts.back()] = json_value.get<double>();
++      } else if (json_value.is_string()) {
++        current[parts.back()] = json_value.get<std::string>();
++      } else {
++        continue;
++      }
++    } catch (...) {
++      continue;
++    }
++  }
++  return root;
++}
++
++static std::string settings_map_json(const sparse_settings_map& values) {
++  nlohmann::ordered_json result = nlohmann::ordered_json::object();
++  for (const auto& [path, value] : values) result[path] = value;
++  return result.dump(4);
++}
++
++static bool save_sparse_title_settings(std::string_view title_id,
++                                       const sparse_settings_map& values) {
++  if (!valid_settings_title_id(title_id)) return false;
++  const std::string config_path =
++      rpcs3::utils::get_custom_config_path(std::string(title_id));
++  if (values.empty()) {
++    fs::remove_file(config_path);
++    return true;
++  }
++
++  YAML::Emitter emitter;
++  emitter << sparse_settings_yaml(values);
++  return save_settings_file(config_path, {emitter.c_str(), emitter.size()});
++}
++
++static sparse_settings_map live_sparse_title_settings(cfg_root& global) {
++  sparse_settings_map values;
++  const auto [yaml, error] = yaml_load(g_cfg.to_string());
++  if (!error.empty()) return values;
++
++  cfg_root schema;
++  schema.from_default();
++  collect_sparse_yaml(yaml, "", schema, values);
++  for (auto it = values.begin(); it != values.end();) {
++    auto* global_node = find_cfg_node(&global, it->first);
++    if (global_node && encoded_cfg_value(global_node) == it->second) {
++      it = values.erase(it);
++    } else {
++      ++it;
++    }
++  }
++  return values;
++}
++
++static bool set_global_setting(std::string_view path,
++                               std::string_view value_string) {
++  cfg_root global;
++  if (!load_settings_root(global, global_settings_path())) return false;
++  auto* node = find_cfg_node(&global, path);
++  if (!node || node->get_type() == cfg::type::node) return false;
++
+   nlohmann::json value;
+   try {
+-    value = nlohmann::json::parse(valueString);
++    value = nlohmann::json::parse(value_string);
+   } catch (...) {
+-    rpcsx_android.error("settingsSet: node %s passed with invalid json '%s'",
+-                        path, valueString);
++    rpcsx_android.error("S3CFG global write invalid JSON path=%s value=%s",
++                        std::string(path).c_str(), std::string(value_string).c_str());
+     return false;
+   }
++  if (!node->from_json(value, false)) return false;
+ 
+-  auto root = find_cfg_node(&g_cfg, path);
++  const std::string serialized = global.to_string();
++  if (!save_settings_file(global_settings_path(), serialized)) return false;
+ 
+-  if (root == nullptr) {
+-    rpcsx_android.error("settingsSet: node %s not found", path);
+-    return false;
++  // A stopped live tree is only a working cache. Keep it aligned for callers
++  // that still use settingsGet(), while never replacing an active title config.
++  if (Emu.IsStopped()) {
++    g_cfg.from_string(serialized, false);
++    g_cfg.name = global_settings_path();
++    g_backup_cfg.from_string(g_cfg.to_string());
+   }
++  rpcsx_android.notice("S3CFG write scope=global path=%s requested=%s readBack=%s applyPhase=%s",
++                       std::string(path).c_str(), std::string(value_string).c_str(),
++                       encoded_cfg_value(node).c_str(), Emu.IsStopped() ? "LIVE" : "NEXT_EMULATION_BOOT");
++  return true;
++}
+ 
+-  if (!root->from_json(value, !Emu.IsStopped())) {
+-    rpcsx_android.error("settingsSet: node %s not accepts value '%s'", path,
+-                        value.dump());
+-    return false;
++static bool set_title_setting(std::string_view title_id,
++                              std::string_view path,
++                              std::string_view value_string) {
++  if (!valid_settings_title_id(title_id) || path.empty()) return false;
++
++  cfg_root global;
++  if (!load_settings_root(global, global_settings_path())) return false;
++  auto* schema_node = find_cfg_node(&global, path);
++  if (!schema_node || schema_node->get_type() == cfg::type::node) return false;
++  const std::string global_encoded = encoded_cfg_value(schema_node);
++
++  sparse_settings_map values = load_sparse_title_settings(title_id, global);
++  if (value_string.empty()) {
++    values.erase(std::string(path));
++  } else {
++    nlohmann::json value;
++    try {
++      value = nlohmann::json::parse(value_string);
++    } catch (...) {
++      return false;
++    }
++    if (!schema_node->from_json(value, false)) return false;
++    const std::string encoded = encoded_cfg_value(schema_node);
++    auto* global_node = find_cfg_node(&global, path);
++    if (global_node && encoded == global_encoded) {
++      values.erase(std::string(path));
++    } else {
++      values[std::string(path)] = encoded;
++    }
+   }
+ 
+-  Emulator::SaveSettings(g_cfg.to_string(), "");
++  if (!save_sparse_title_settings(title_id, values)) return false;
++  rpcsx_android.notice("S3CFG write scope=game title=%s path=%s requested=%s applyPhase=NEXT_EMULATION_BOOT",
++                       std::string(title_id).c_str(), std::string(path).c_str(),
++                       value_string.empty() ? "<clear>" : std::string(value_string).c_str());
+   return true;
+ }
+ 
++extern "C" std::string _rpcsx_settingsGetGlobal(std::string_view path) {
++  cfg_root global;
++  if (!load_settings_root(global, global_settings_path())) return "{}";
++  auto* node = find_cfg_node(&global, path);
++  return node ? node->to_json().dump(4) : "{}";
++}
++
++extern "C" bool _rpcsx_settingsSetGlobal(std::string_view path,
++                                          std::string_view value_string) {
++  std::unique_lock lifecycle_lock(g_emulator_lifecycle_mutex);
++  return set_global_setting(path, value_string);
++}
++
++extern "C" std::string _rpcsx_gameSettingsOverridesGet(std::string_view title_id) {
++  cfg_root global;
++  if (!load_settings_root(global, global_settings_path())) return "{}";
++  return settings_map_json(load_sparse_title_settings(title_id, global));
++}
++
++extern "C" bool _rpcsx_gameSettingsOverrideSet(std::string_view title_id,
++                                                std::string_view path,
++                                                std::string_view value_string) {
++  std::unique_lock lifecycle_lock(g_emulator_lifecycle_mutex);
++  return set_title_setting(title_id, path, value_string);
++}
++
++extern "C" bool _rpcsx_gameSettingsOverrideClear(std::string_view title_id,
++                                                  std::string_view path) {
++  std::unique_lock lifecycle_lock(g_emulator_lifecycle_mutex);
++  return set_title_setting(title_id, path, {});
++}
++
++extern "C" bool _rpcsx_gameSettingsOverridesClear(std::string_view title_id) {
++  std::unique_lock lifecycle_lock(g_emulator_lifecycle_mutex);
++  if (!valid_settings_title_id(title_id)) return false;
++  const std::string path = rpcs3::utils::get_custom_config_path(std::string(title_id));
++  return fs::remove_file(path) || !fs::is_file(path);
++}
++
++extern "C" std::string _rpcsx_settingsGetEffective(std::string_view title_id,
++                                                    std::string_view path) {
++  cfg_root effective;
++  if (!load_settings_root(effective, global_settings_path())) return "{}";
++  if (valid_settings_title_id(title_id)) {
++    std::string title_config;
++    const std::string config_path = rpcs3::utils::get_custom_config_path(std::string(title_id));
++    if (read_settings_file(config_path, title_config)) effective.from_string(title_config, false);
++  }
++  auto* node = find_cfg_node(&effective, path);
++  return node ? node->to_json().dump(4) : "{}";
++}
++
++extern "C" void _rpcsx_loginUser(std::string_view userId) {
++  Emu.SetUsr(std::string(userId));
++}
++
++extern "C" std::string _rpcsx_getUser() { return Emu.GetUsr(); }
++
++extern "C" std::string _rpcsx_settingsGet(std::string_view path) {
++  auto root = find_cfg_node(&g_cfg, path);
++
++  if (root == nullptr) {
++    return "{}";
++  }
++
++  return root->to_json().dump(4);
++}
++
++extern "C" bool _rpcsx_settingsSet(std::string_view path,
++                                   std::string_view valueString) {
++  std::unique_lock lifecycle_lock(g_emulator_lifecycle_mutex);
++  return set_global_setting(path, valueString);
++}
++
+ extern "C" std::string _rpcsx_getVersion() {
+   return rx::getVersion().toString();
+ }
+@@ -4193,151 +4668,428 @@ extern "C" bool _rpcsx_loadSaveState(int slot)
+                              (u64)id, new_gen, (int)::gettid(), path.c_str());
+         Emu.SetContinuousMode(true);
+         Emu.SetForceBoot(true);
+-        Emu.BootGame(path, "", true);
++        // Savestate recovery is a full game boot as well; keep the same
++        // global + title custom-config resolver as normal and explicit
++        // savestate boots.
++        Emu.BootGame(path, "", true, cfg_mode::custom);
+         sstate_log(id, "load", "boot_returned");
+     });
      return true;
  }
  
@@ -711,6 +1196,31 @@ index 8308a4798..be6b5b390 100644
  extern "C" std::string _rpcsx_getFriends()
  {
      nlohmann::json j;
+@@ -4461,10 +5213,22 @@ extern "C" bool _rpcsx_commitInGameSettingsSession()
+     std::lock_guard lock(g_ingame_settings_mutex);
+     if (!g_ingame_settings_backup) return false;
+     try {
+-        Emu.GetCallbacks().save_emu_settings();
++        // The active g_cfg is an effective global + title tree. Persist only
++        // its differences from config.yml so a later global edit continues to
++        // flow to every title using Use Global.
++        const std::string title_id = Emu.GetTitleID();
++        cfg_root global;
++        if (!valid_settings_title_id(title_id) ||
++            !load_settings_root(global, global_settings_path()) ||
++            !save_sparse_title_settings(title_id, live_sparse_title_settings(global))) {
++            rpcsx_android.error("S3CFG commit scope=game title=%s failed to save sparse config",
++                                 title_id.c_str());
++            return false;
++        }
+         g_ingame_settings_backup = g_cfg.to_string();
+         g_ingame_settings_dirty = false;
+-        rpcsx_android.notice("FRONTEND_MENU commitSettings");
++        rpcsx_android.notice("S3CFG commit scope=game title=%s applyPhase=NEXT_EMULATION_BOOT",
++                             title_id.c_str());
+         return true;
+     } catch (...) { return false; }
+ }
 diff --git a/android/src/samba-build-id.cpp b/android/src/samba-build-id.cpp
 index 8aca7dc59..e75a116af 100644
 --- a/android/src/samba-build-id.cpp

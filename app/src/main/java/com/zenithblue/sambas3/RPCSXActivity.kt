@@ -505,8 +505,8 @@ class RPCSXActivity : ComponentActivity(), EmulationHost {
                 runOnUiThread { failBootAndReturnHome("retry-limit") }
                 return@thread
             }
-            val preBootTitleId = GameSettingsOverrides.resolveTitleId(gamePath, this@RPCSXActivity)
-            GameSettingsOverrides.applyForGame(this@RPCSXActivity, preBootTitleId)
+            // The native boot path loads config.yml followed by the sparse
+            // custom_configs/config_<TITLE_ID>.yml for this title.
             if (intent.getBooleanExtra(EXTRA_SAFE_RETRY, false)) {
                 // Safe retry is transient and must not overwrite the user's driver choice.
                 runCatching {
@@ -1181,7 +1181,6 @@ class RPCSXActivity : ComponentActivity(), EmulationHost {
             }
             if (titleId.isNotBlank()) {
                 GameSettingsOverrides.learnTitleId(this, gamePath, titleId)
-                GameSettingsOverrides.applyTitleTier(this, titleId)
                 return
             }
             try {

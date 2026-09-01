@@ -1,0 +1,5 @@
+OnePlus Pad 2 final APK:
+  global Video@@Aspect ratio -> 4:3 -> read back 4:3
+  global Video@@Aspect ratio -> 16:9 -> read back 16:9
+
+Evidence: s3cfg-final.log, 06-aspect-4x3.png, 07-aspect-restored.png.

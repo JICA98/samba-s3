@@ -1,8 +1,11 @@
 package com.zenithblue.sambas3
 
 import android.view.Surface
+import android.util.Log
 import androidx.annotation.Keep
 import androidx.compose.runtime.mutableStateOf
+import org.json.JSONTokener
+import org.json.JSONObject
 
 enum class Digital1Flags(val bit: Int)
 {
@@ -90,6 +93,15 @@ class RPCSX {
     external fun systemInfo(): String
     external fun settingsGet(path: String): String
     external fun settingsSet(path: String, value: String): Boolean
+    /** Canonical global config.yml access, independent of any active title session. */
+    external fun settingsGetGlobal(path: String): String
+    external fun settingsSetGlobal(path: String, value: String): Boolean
+    /** Sparse RPCS3 custom_configs/config_<TITLE_ID>.yml access. */
+    external fun gameSettingsOverridesGet(titleId: String): String
+    external fun gameSettingsOverrideSet(titleId: String, path: String, value: String): Boolean
+    external fun gameSettingsOverrideClear(titleId: String, path: String): Boolean
+    external fun gameSettingsOverridesClear(titleId: String): Boolean
+    external fun settingsGetEffective(titleId: String, path: String): String
     external fun getState() : Int
     external fun kill()
     external fun resume()
@@ -123,6 +135,19 @@ class RPCSX {
     // Headless prelaunch runtime PPU preparation — reuses boot-discoverable PPU logic, no Surface/RSX/audio.
     external fun prepareRuntimePpu(path: String, sessionId: Long): Int
     external fun cancelRuntimePpuPreparation(sessionId: Long): Boolean
+
+    /** Global writes are accepted only after the native config read-back matches. */
+    fun settingsSetGlobalAndVerify(path: String, value: String): Boolean {
+        val wrote = runCatching { settingsSetGlobal(path, value) }.getOrDefault(false)
+        if (!wrote) return false
+        val matched = runCatching {
+            val requested = JSONTokener(value).nextValue()
+            val readBack = JSONObject(settingsGetGlobal(path)).opt("value")
+            requested == readBack || requested.toString() == readBack?.toString()
+        }.getOrDefault(false)
+        Log.i("S3CFG", "write scope=global path=$path requested=$value matched=$matched")
+        return matched
+    }
 
     // ── Frontend Home Menu — Kotlin owns presentation ──────────────────────
     @Keep

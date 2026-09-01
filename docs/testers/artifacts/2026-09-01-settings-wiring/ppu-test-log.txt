@@ -1,0 +1,6 @@
+OnePlus Pad 2 final APK:
+  PPU category was rendered from the global backend and showed the current
+  decoder/thread/codegen rows. No controlled PPU performance benchmark was run.
+
+Status: UI/readback smoke PASS; runtime PPU performance NOT_TESTED.
+Evidence: 10-advanced-core.png.

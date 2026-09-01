@@ -71,6 +71,30 @@ class GameSettingsOverridesTest {
     }
 
     @Test
+    fun changing_global_moves_only_use_global_rows() {
+        GameSettingsOverrides.recordGlobal(store, PATH_GLOBAL, "30")
+        GameSettingsOverrides.recordGame(store, TITLE_ID, PATH_GLOBAL, "60", "30")
+        GameSettingsOverrides.recordGlobal(store, PATH_GLOBAL, "45")
+
+        assertEquals("45", GameSettingsOverrides.resolvedGlobalValues(store)[PATH_GLOBAL])
+        assertEquals("60", GameSettingsOverrides.gameOverrides(store, TITLE_ID)[PATH_GLOBAL])
+
+        appliedCalls.clear()
+        GameSettingsOverrides.applyForGame(store, TITLE_ID, recordingSetter())
+        assertTrue(appliedCalls.contains(PATH_GLOBAL to "45"))
+        assertTrue(appliedCalls.contains(PATH_GLOBAL to "60"))
+    }
+
+    @Test
+    fun recording_game_override_never_writes_global_or_another_title() {
+        GameSettingsOverrides.recordGlobal(store, PATH_GLOBAL, "30")
+        GameSettingsOverrides.recordGame(store, TITLE_ID, PATH_GLOBAL, "60", "30")
+
+        assertEquals("30", GameSettingsOverrides.resolvedGlobalValues(store)[PATH_GLOBAL])
+        assertTrue(GameSettingsOverrides.gameOverrides(store, OTHER_TITLE).isEmpty())
+    }
+
+    @Test
     fun clear_game_wipes_only_that_title() {
         GameSettingsOverrides.recordGame(store, TITLE_ID, PATH_TITLE, "1", null)
         GameSettingsOverrides.recordGame(store, OTHER_TITLE, PATH_TITLE, "2", null)

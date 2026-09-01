@@ -1,0 +1,15 @@
+Device: OnePlus Pad 2 (OPD2403 / OP5DAAL1)
+Title: BLUS31584 (GTA San Andreas)
+
+Override pass:
+  Frame limit: 30
+  UI scope: OVERRIDE
+  UI value: 30
+  Native title file: Video -> Frame limit = 30
+
+After reset pass:
+  Frame limit: 60
+  UI scope: USE GLOBAL
+  Native title file: absent
+
+No second installed title was available for a device-level Game B check.

@@ -47,6 +47,13 @@ struct RPCSXApi {
   std::string (*getUser)();
   std::string (*settingsGet)(std::string_view path);
   bool (*settingsSet)(std::string_view path, std::string_view valueString);
+  std::string (*settingsGetGlobal)(std::string_view path);
+  bool (*settingsSetGlobal)(std::string_view path, std::string_view valueString);
+  std::string (*gameSettingsOverridesGet)(std::string_view titleId);
+  bool (*gameSettingsOverrideSet)(std::string_view titleId, std::string_view path, std::string_view valueString);
+  bool (*gameSettingsOverrideClear)(std::string_view titleId, std::string_view path);
+  bool (*gameSettingsOverridesClear)(std::string_view titleId);
+  std::string (*settingsGetEffective)(std::string_view titleId, std::string_view path);
   std::string (*getVersion)();
   std::string (*getPerfMetricsJson)();
   bool (*setPerfMetricsEnabled)(bool enabled, int intervalMs);
@@ -145,6 +152,13 @@ struct RPCSXLibrary : RPCSXApi {
     result.getUser = reinterpret_cast<decltype(getUser)>(dlsym(handle, "_rpcsx_getUser"));
     result.settingsGet = reinterpret_cast<decltype(settingsGet)>(dlsym(handle, "_rpcsx_settingsGet"));
     result.settingsSet = reinterpret_cast<decltype(settingsSet)>(dlsym(handle, "_rpcsx_settingsSet"));
+    result.settingsGetGlobal = reinterpret_cast<decltype(settingsGetGlobal)>(dlsym(handle, "_rpcsx_settingsGetGlobal"));
+    result.settingsSetGlobal = reinterpret_cast<decltype(settingsSetGlobal)>(dlsym(handle, "_rpcsx_settingsSetGlobal"));
+    result.gameSettingsOverridesGet = reinterpret_cast<decltype(gameSettingsOverridesGet)>(dlsym(handle, "_rpcsx_gameSettingsOverridesGet"));
+    result.gameSettingsOverrideSet = reinterpret_cast<decltype(gameSettingsOverrideSet)>(dlsym(handle, "_rpcsx_gameSettingsOverrideSet"));
+    result.gameSettingsOverrideClear = reinterpret_cast<decltype(gameSettingsOverrideClear)>(dlsym(handle, "_rpcsx_gameSettingsOverrideClear"));
+    result.gameSettingsOverridesClear = reinterpret_cast<decltype(gameSettingsOverridesClear)>(dlsym(handle, "_rpcsx_gameSettingsOverridesClear"));
+    result.settingsGetEffective = reinterpret_cast<decltype(settingsGetEffective)>(dlsym(handle, "_rpcsx_settingsGetEffective"));
     result.getVersion = reinterpret_cast<decltype(getVersion)>(dlsym(handle, "_rpcsx_getVersion"));
     result.getPerfMetricsJson = reinterpret_cast<decltype(getPerfMetricsJson)>(dlsym(handle, "_rpcsx_getPerfMetricsJson"));
     result.setPerfMetricsEnabled = reinterpret_cast<decltype(setPerfMetricsEnabled)>(dlsym(handle, "_rpcsx_setPerfMetricsEnabled"));
@@ -471,7 +485,55 @@ Java_com_zenithblue_sambas3_RPCSX_settingsGet(JNIEnv *env, jobject, jstring jpat
 
 extern "C" JNIEXPORT jboolean JNICALL Java_com_zenithblue_sambas3_RPCSX_settingsSet(
     JNIEnv *env, jobject, jstring jpath, jstring jvalue) {
+  if (!rpcsxLib.settingsSet) return false;
   return rpcsxLib.settingsSet(unwrap(env, jpath), unwrap(env, jvalue));
+}
+
+extern "C" JNIEXPORT jstring JNICALL
+Java_com_zenithblue_sambas3_RPCSX_settingsGetGlobal(JNIEnv *env, jobject, jstring jpath) {
+  if (!rpcsxLib.settingsGetGlobal) return wrap(env, std::string("{}"));
+  return wrap(env, rpcsxLib.settingsGetGlobal(unwrap(env, jpath)));
+}
+
+extern "C" JNIEXPORT jboolean JNICALL
+Java_com_zenithblue_sambas3_RPCSX_settingsSetGlobal(JNIEnv *env, jobject, jstring jpath, jstring jvalue) {
+  if (!rpcsxLib.settingsSetGlobal) return false;
+  return rpcsxLib.settingsSetGlobal(unwrap(env, jpath), unwrap(env, jvalue));
+}
+
+extern "C" JNIEXPORT jstring JNICALL
+Java_com_zenithblue_sambas3_RPCSX_gameSettingsOverridesGet(JNIEnv *env, jobject, jstring jtitleId) {
+  if (!rpcsxLib.gameSettingsOverridesGet) return wrap(env, std::string("{}"));
+  return wrap(env, rpcsxLib.gameSettingsOverridesGet(unwrap(env, jtitleId)));
+}
+
+extern "C" JNIEXPORT jboolean JNICALL
+Java_com_zenithblue_sambas3_RPCSX_gameSettingsOverrideSet(
+    JNIEnv *env, jobject, jstring jtitleId, jstring jpath, jstring jvalue) {
+  if (!rpcsxLib.gameSettingsOverrideSet) return false;
+  return rpcsxLib.gameSettingsOverrideSet(
+      unwrap(env, jtitleId), unwrap(env, jpath), unwrap(env, jvalue));
+}
+
+extern "C" JNIEXPORT jboolean JNICALL
+Java_com_zenithblue_sambas3_RPCSX_gameSettingsOverrideClear(
+    JNIEnv *env, jobject, jstring jtitleId, jstring jpath) {
+  if (!rpcsxLib.gameSettingsOverrideClear) return false;
+  return rpcsxLib.gameSettingsOverrideClear(unwrap(env, jtitleId), unwrap(env, jpath));
+}
+
+extern "C" JNIEXPORT jboolean JNICALL
+Java_com_zenithblue_sambas3_RPCSX_gameSettingsOverridesClear(
+    JNIEnv *env, jobject, jstring jtitleId) {
+  if (!rpcsxLib.gameSettingsOverridesClear) return false;
+  return rpcsxLib.gameSettingsOverridesClear(unwrap(env, jtitleId));
+}
+
+extern "C" JNIEXPORT jstring JNICALL
+Java_com_zenithblue_sambas3_RPCSX_settingsGetEffective(
+    JNIEnv *env, jobject, jstring jtitleId, jstring jpath) {
+  if (!rpcsxLib.settingsGetEffective) return wrap(env, std::string("{}"));
+  return wrap(env, rpcsxLib.settingsGetEffective(unwrap(env, jtitleId), unwrap(env, jpath)));
 }
 
 extern "C" JNIEXPORT jboolean JNICALL

@@ -160,9 +160,11 @@ fun AppNavHost(initialRoute: String? = null) {
         return
     }
 
-    val settings = remember { mutableStateOf(JSONObject(RPCSX.instance.settingsGet(""))) }
+    // The launcher always reads the canonical global config. The live g_cfg tree
+    // may contain a title-specific runtime config after a game session.
+    val settings = remember { mutableStateOf(JSONObject(RPCSX.instance.settingsGetGlobal(""))) }
     val refreshSettings: () -> Unit = {
-        settings.value = JSONObject(RPCSX.instance.settingsGet(""))
+        settings.value = JSONObject(RPCSX.instance.settingsGetGlobal(""))
     }
 
     NavHost(
@@ -204,7 +206,9 @@ fun AppNavHost(initialRoute: String? = null) {
                 navigateBack = navController::navigateUp,
                 navigateTo = navigateTo,
                 settings = node,
-                path = nestedPath
+                path = nestedPath,
+                onValueCommitted = { _, _ -> refreshSettings() },
+                settingsSetter = RPCSX.instance::settingsSetGlobalAndVerify
             )
         }
 
@@ -214,6 +218,7 @@ fun AppNavHost(initialRoute: String? = null) {
             SettingsScreen(
                 navigateBack = navController::navigateUp,
                 navigateTo = navigateTo,
+                settings = settings.value,
                 onRefresh = refreshSettings
             )
         }

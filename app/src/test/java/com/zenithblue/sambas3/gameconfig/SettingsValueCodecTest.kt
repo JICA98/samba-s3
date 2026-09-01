@@ -19,6 +19,21 @@ class SettingsValueCodecTest {
     }
 
     @Test
+    fun bool_commit_request_uses_the_new_value_in_both_directions() {
+        val backendRequests = mutableListOf<String>()
+        fun commit(newValue: Boolean) {
+            backendRequests += SettingsValueCodec.encodedFromNode(
+                spec("bool"), newValue.toString()
+            )
+        }
+
+        commit(true)
+        commit(false)
+
+        assertEquals(listOf("true", "false"), backendRequests)
+    }
+
+    @Test
     fun numeric_values_encode_raw_without_quotes() {
         assertEquals(
             "2",

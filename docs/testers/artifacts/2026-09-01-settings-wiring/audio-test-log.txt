@@ -1,0 +1,5 @@
+OnePlus Pad 2 final APK audio category rendered from the global backend:
+Renderer=Cubeb; Audio Provider=CellAudio; RSXAudio Avport=HDMI 0;
+Audio Format=Stereo; Master Volume=100; Enable Buffering=true.
+
+Evidence: 12-advanced-audio.png.

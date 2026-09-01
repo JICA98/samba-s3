@@ -1,0 +1,6 @@
+OnePlus Pad 2 final APK:
+  global Video@@Resolution -> 1280x720 -> read back 1280x720
+  global Video@@Resolution -> 720x576 -> read back 720x576
+
+Evidence: s3cfg-final.log, 05-resolution-1280x720.png,
+05-resolution-restored.png.

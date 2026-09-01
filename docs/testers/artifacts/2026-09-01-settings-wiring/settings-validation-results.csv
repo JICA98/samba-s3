@@ -1,0 +1,14 @@
+pass,scope,setting,requested,result,restored,evidence
+1,global,Frame limit,30,PASS,60,01-global-frame-limit-30.png+s3cfg-final.log
+1,global,Frame limit,60,PASS,60,02-global-frame-limit-60.png+s3cfg-final.log
+1,global,Write Color Buffers,true then false,PASS,false,08-write-color-buffers-on.png+09-write-color-buffers-off.png
+1,global,Resolution,1280x720 then 720x576,PASS,720x576,05-resolution-1280x720.png+05-resolution-restored.png
+1,global,Aspect ratio,4:3 then 16:9,PASS,16:9,06-aspect-4x3.png+07-aspect-restored.png
+1,game BLUS31584,Frame limit,30 then reset,PASS,USE GLOBAL/60,03-game-a-frame-override.png+04-game-a-use-global.png
+2,global,Frame limit,30 then 60,PASS,60,s3cfg-final.log
+2,global,Write Color Buffers,true then false,PASS,false,s3cfg-final.log
+2,global,Resolution,1280x720 then 720x576,PASS,720x576,s3cfg-final.log
+2,global,Aspect ratio,4:3 then 16:9,PASS,16:9,s3cfg-final.log
+2,game BLUS31584,Frame limit,30 then reset,PASS,USE GLOBAL/60,14-pass2-game-a-frame-override.png+15-pass2-game-a-use-global.png
+device,game B,second installed title,unavailable,NOT_TESTED,,effective-BLUS31584.txt
+device,runtime FPS,controlled benchmark,not run,NOT_TESTED,,../../2026-09-01-settings-backend-wiring-validation.md

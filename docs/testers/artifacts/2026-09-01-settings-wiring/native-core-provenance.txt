@@ -1,0 +1,8 @@
+Device: OnePlus Pad 2 only (OPD2403 / OP5DAAL1)
+APK: app/build/outputs/apk/standard/debug/samba-s3-standard-debug.apk
+APK SHA-256: 70175bab5555523a35a4bf21c5637f48078d3114db2ce174650f5740e91ddb39
+Arm64 core SHA-256: c9b9db91083d313682e1479e172c4eef8318c6b01a293973a48140b969ab378f
+Scoped exports: present (_rpcsx_settingsGetGlobal, _rpcsx_settingsSetGlobal,
+_rpcsx_gameSettingsOverridesGet, _rpcsx_gameSettingsOverrideSet,
+_rpcsx_settingsGetEffective)
+RPCSX submodule: 657b26a0d197c29d42cdcf3b3f6e8ad5c6765bbc

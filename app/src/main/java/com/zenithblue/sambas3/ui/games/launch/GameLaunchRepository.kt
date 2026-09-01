@@ -6,6 +6,7 @@ import com.zenithblue.sambas3.Game
 import com.zenithblue.sambas3.GameIdentity
 import com.zenithblue.sambas3.RPCSX
 import com.zenithblue.sambas3.gameconfig.GameSettingsOverrides
+import com.zenithblue.sambas3.gameconfig.SettingsValueCodec
 import com.zenithblue.sambas3.ppu.GameLaunchAvailability
 import com.zenithblue.sambas3.ppu.GameRunEligibilityHelper
 import com.zenithblue.sambas3.ui.ingame.SaveSlot
@@ -15,9 +16,21 @@ object GameLaunchRepository {
     fun snapshot(context: Context, game: Game): GameLaunchSnapshot {
         val titleId = GameIdentity.titleIdOrNull(game.info.path, game.info.name.value)
         val overrides = titleId?.let { GameSettingsOverrides.gameOverrides(context, it) }.orEmpty()
-        val globals = GameSettingsOverrides.resolvedGlobalValues(context)
+        fun globalValue(path: String, fallback: String): String {
+            return runCatching {
+                val node = org.json.JSONObject(RPCSX.instance.settingsGetGlobal(path))
+                val type = node.optString("type")
+                val display = when (type) {
+                    "bool" -> node.optBoolean("value").toString()
+                    else -> node.optString("value", fallback)
+                }
+                SettingsValueCodec.encodedFromNode(
+                    SettingsValueCodec.SettingNodeSpec(type = type), display
+                )
+            }.getOrDefault(fallback)
+        }
         fun setting(label: String, path: String, fallback: String): LaunchSetting {
-            val value = overrides[path] ?: globals[path] ?: fallback
+            val value = overrides[path] ?: globalValue(path, fallback)
             return LaunchSetting(label, value, if (path in overrides) "GAME" else "GLOBAL")
         }
         val availability = GameRunEligibilityHelper.evaluateAvailability(

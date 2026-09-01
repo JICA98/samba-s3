@@ -1,0 +1,3 @@
+scope,title,path,requested,readback,ui
+global,,Video@@Frame limit,60,60,PASS
+game,BLUS31584,Video@@Frame limit,60,60/PASS,USE GLOBAL after reset

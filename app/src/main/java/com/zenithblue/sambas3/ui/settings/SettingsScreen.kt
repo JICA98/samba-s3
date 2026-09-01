@@ -481,7 +481,8 @@ fun AdvancedSettingsScreen(
     settingsSetter: ((path: String, value: String) -> Boolean)? = null
 ) {
     val context = LocalContext.current
-    val setter: (String, String) -> Boolean = settingsSetter ?: { p, v -> RPCSX.instance.settingsSet(p, v) }
+    val setter: (String, String) -> Boolean =
+        settingsSetter ?: RPCSX.instance::settingsSetGlobalAndVerify
     val settingValue = remember(settings) { mutableStateOf(settings) }
     var searchQuery by remember { mutableStateOf("") }
     var isSearching by remember { mutableStateOf(false) }
@@ -547,7 +548,7 @@ fun AdvancedSettingsScreen(
                         }
 
                         "bool" -> {
-                            var itemValue by remember { mutableStateOf(itemObject.getBoolean("value")) }
+                            var itemValue by remember(itemObject) { mutableStateOf(itemObject.getBoolean("value")) }
                             val def = itemObject.getBoolean("default")
                             SwitchPreference(
                                 checked = itemValue,
@@ -604,7 +605,7 @@ fun AdvancedSettingsScreen(
                         }
 
                         "enum" -> {
-                            var itemValue by remember { mutableStateOf(itemObject.getString("value")) }
+                            var itemValue by remember(itemObject) { mutableStateOf(itemObject.getString("value")) }
                             val def = itemObject.getString("default")
                             val variantsJson = itemObject.getJSONArray("variants")
                             val variants = ArrayList<String>()
@@ -680,7 +681,7 @@ fun AdvancedSettingsScreen(
                             } catch (e: Exception) {
                                 e.printStackTrace()
                             }
-                            var itemValue by remember { mutableLongStateOf(initialItemValue) }
+                            var itemValue by remember(itemObject) { mutableLongStateOf(initialItemValue) }
                             if (min < max) {
                                 SliderPreference(
                                     value = itemValue.toFloat(),
@@ -742,7 +743,7 @@ fun AdvancedSettingsScreen(
                         }
 
                         "float" -> {
-                            var itemValue by remember {
+                            var itemValue by remember(itemObject) {
                                 mutableDoubleStateOf(
                                     itemObject.getString(
                                         "value"
@@ -941,8 +942,14 @@ fun AdvancedSettingsScreen(
                 isSettingsFolder(settings.optJSONObject(key))
             }.toList()
         }
-        var selectedCategoryKey by remember(settings, categories) {
-            mutableStateOf(categories.firstOrNull() ?: "")
+        // Keep the user's category across canonical-tree refreshes after a
+        // successful write. Only recover to the first category if the backend
+        // no longer exposes the selected one.
+        var selectedCategoryKey by remember(path) { mutableStateOf("") }
+        LaunchedEffect(settings, categories) {
+            if (selectedCategoryKey !in categories) {
+                selectedCategoryKey = categories.firstOrNull() ?: ""
+            }
         }
         val categoryObj = remember(settings, selectedCategoryKey) {
             settings.optJSONObject(selectedCategoryKey) ?: JSONObject()
@@ -1050,6 +1057,7 @@ fun SettingsScreen(
     modifier: Modifier = Modifier,
     navigateBack: () -> Unit,
     navigateTo: (path: String) -> Unit,
+    settings: JSONObject,
     onRefresh: () -> Unit
 ) {
     val topBarScrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior()
@@ -1057,7 +1065,6 @@ fun SettingsScreen(
     var focusedKey by rememberSaveable { mutableStateOf("internal_directory") }
     var activeSettingKey by rememberSaveable { mutableStateOf<String?>(null) }
     val advancedSettingsPathStack = remember { mutableStateListOf("") }
-    val settings = remember { JSONObject(RPCSX.instance.settingsGet("")) }
     val configuration = androidx.compose.ui.platform.LocalConfiguration.current
     val isWideScreen = configuration.screenWidthDp > 600
 
@@ -1394,7 +1401,9 @@ fun SettingsScreen(
                                 },
                                 settings = currentObj,
                                 path = currentPath,
-                                isInSplitPane = true
+                                isInSplitPane = true,
+                                onValueCommitted = { _, _ -> onRefresh() },
+                                settingsSetter = RPCSX.instance::settingsSetGlobalAndVerify
                             )
                         }
                         "custom_driver" -> {

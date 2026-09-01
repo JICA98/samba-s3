@@ -1,0 +1,25 @@
+category,path,expected_type,scope,apply_phase
+Core,Core@@PPU Decoder,enum,global|game,next_emulation_boot
+Core,Core@@PPU Threads,int,global|game,next_emulation_boot
+Core,Core@@SPU Decoder,enum,global|game,next_emulation_boot
+Core,Core@@SPU Block Size,enum,global|game,next_emulation_boot
+VFS,VFS@@Enable /host_root/,bool,global|game,next_emulation_boot
+Video,Video@@Resolution,enum,global|game,next_emulation_boot
+Video,Video@@Aspect ratio,enum,global|game,next_emulation_boot
+Video,Video@@Frame limit,enum,global|game,next_emulation_boot
+Video,Video@@MSAA,enum,global|game,next_emulation_boot
+Video,Video@@Shader Mode,enum,global|game,next_emulation_boot
+Video,Video@@Write Color Buffers,bool,global|game,next_emulation_boot
+Video,Video@@Read Color Buffers,bool,global|game,next_emulation_boot
+Video,Video@@VSync,bool,global|game,next_emulation_boot
+Video,Video@@Resolution Scale,int,global|game,next_emulation_boot
+Audio,Audio@@Renderer,enum,global|game,next_emulation_boot
+Audio,Audio@@Audio Provider,enum,global|game,next_emulation_boot
+Audio,Audio@@Audio Format,enum,global|game,next_emulation_boot
+Audio,Audio@@Master Volume,int,global|game,live_or_next_boot
+Input/Output,Input/Output@@Keyboard,enum,global|game,next_emulation_boot
+Input/Output,Input/Output@@Pad handler mode,enum,global|game,next_emulation_boot
+System,System@@Language,enum,global|game,app_or_core_restart
+Net,Net@@Internet enabled,enum,global|game,next_emulation_boot
+Savestate,Savestate@@Start Paused,bool,global|game,next_emulation_boot
+Miscellaneous,Miscellaneous@@Automatically start games after boot,bool,global|game,next_emulation_boot

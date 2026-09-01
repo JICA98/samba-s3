@@ -106,7 +106,8 @@ data class InGameMenuUiState(
     val itemCounts: Map<InGamePage, Int> = emptyMap(),
     val settingsTreeJson: String? = null,
     val settingsLoading: Boolean = false,
-    val showDirtyDialog: Boolean = false
+    val showDirtyDialog: Boolean = false,
+    val settingsWriteError: String? = null
 ) {
     val isOpen: Boolean get() = session is MenuSessionState.Opening || session is MenuSessionState.Open
     val currentPage: InGamePage? get() = (session as? MenuSessionState.Open)?.pageStack?.lastOrNull()
@@ -469,6 +470,13 @@ class InGameMenuCoordinator(
 
     private suspend fun settingsTransientSet(path: String, value: String) {
         val ok = core.setTransientSetting(path, value).getOrDefault(false)
+        val tree = core.settingsTree().getOrNull()
+        _state.update {
+            it.copy(
+                settingsTreeJson = tree ?: it.settingsTreeJson,
+                settingsWriteError = if (ok) null else "Setting was rejected by the emulator"
+            )
+        }
         if (ok) refreshDirty()
     }
 

@@ -102,8 +102,9 @@ private val CURATED_SECTIONS = listOf(
 /**
  * Per-game Configure Game page: curated tri-state rows (Use Global vs Override),
  * per-row reset (long-click or the trailing restore action), Reset All overflow.
- * Values persist app-side via [GameSettingsOverrides] and are replayed at boot in
- * tier order; edits apply live to the engine tree via settingsSet.
+ * Values persist as sparse RPCS3 title overrides. The core loads them after the
+ * canonical global config on the next emulation boot; this screen never writes a
+ * title value through the global setter.
  *
  * Hosted either fullscreen inside the emulation overlay ([GameConfigureOverlay])
  * or from the launcher's game long-press bottom sheet (engine gated to Stopped by
@@ -123,7 +124,7 @@ fun GameConfigureScreen(
     LaunchedEffect(Unit) {
         tree = withContext(Dispatchers.IO) {
             try {
-                JSONObject(RPCSX.instance.settingsGet(""))
+                JSONObject(RPCSX.instance.settingsGetGlobal(""))
             } catch (e: Exception) {
                 null
             }
@@ -132,15 +133,15 @@ fun GameConfigureScreen(
 
     val titleId = remember(tree, gamePath) {
         GameSettingsOverrides.resolveTitleId(gamePath ?: "", context)
+            ?: if (isInGame) runCatching { RPCSX.instance.getTitleId() }
+                .getOrNull()
+                ?.takeIf { it.isNotBlank() }
+            else null
     }
 
     var overrides by remember(titleId) {
         mutableStateOf(GameSettingsOverrides.gameOverrides(context, titleId ?: ""))
     }
-    val resolvedGlobals = remember(overrides, titleId) {
-        GameSettingsOverrides.resolvedGlobalValues(context)
-    }
-
     var showResetAllConfirm by remember { mutableStateOf(false) }
     var resetAllMenuOpen by remember { mutableStateOf(false) }
 
@@ -152,11 +153,13 @@ fun GameConfigureScreen(
         val tid = titleId ?: return
         val spec = nodeSpec(node)
         val encoded = SettingsValueCodec.encodedFromNode(spec, newDisplayValue)
-        val applied = try {
-            RPCSX.instance.settingsSet(path, encoded)
-        } catch (e: Exception) {
-            false
-        }
+        val applied = GameSettingsOverrides.recordGame(
+            context = context,
+            titleId = tid,
+            path = path,
+            encoded = encoded,
+            previousEncoded = overrides[path] ?: engineEncodedValue(node)
+        )
         if (!applied) {
             AlertDialogQueue.showDialog(
                 context.getString(R.string.error),
@@ -164,9 +167,6 @@ fun GameConfigureScreen(
             )
             return
         }
-        val previous =
-            overrides[path] ?: resolvedGlobals[path] ?: engineEncodedValue(node)
-        GameSettingsOverrides.recordGame(context, tid, path, encoded, previous)
         refreshOverrides()
     }
 
@@ -174,8 +174,14 @@ fun GameConfigureScreen(
         val tid = titleId ?: return
         val fallback = SettingsValueCodec.encodedDefault(nodeSpec(node))
             ?: engineEncodedValue(node)
-        GameSettingsOverrides.clearGameSetting(context, tid, path, fallback)
-        refreshOverrides()
+        if (GameSettingsOverrides.clearGameSetting(context, tid, path, fallback)) {
+            refreshOverrides()
+        } else {
+            AlertDialogQueue.showDialog(
+                context.getString(R.string.error),
+                context.getString(R.string.failed_to_reset_key, path)
+            )
+        }
     }
 
     Column(modifier = modifier.fillMaxSize().background(RPCSXColors.background)) {
@@ -270,7 +276,7 @@ fun GameConfigureScreen(
             else -> CuratedList(
                 tree = tree!!,
                 overrides = overrides,
-                resolvedGlobals = resolvedGlobals,
+                resolvedGlobals = emptyMap(),
                 onCommit = ::commitOverride,
                 onResetRow = ::resetRow
             )
@@ -286,15 +292,7 @@ fun GameConfigureScreen(
                 TextButton(onClick = {
                     showResetAllConfirm = false
                     val tid = titleId
-                    CURATED_SECTIONS.forEach { section ->
-                        section.nodePaths.forEach { path ->
-                            findCuratedNode(tree, path)?.let { node ->
-                                if (overrides.containsKey(path)) resetRow(path, node)
-                            }
-                        }
-                    }
-                    GameSettingsOverrides.clearGame(context, tid)
-                    refreshOverrides()
+                    if (GameSettingsOverrides.clearGame(context, tid)) refreshOverrides()
                 }) { Text(stringResource(android.R.string.ok)) }
             },
             dismissButton = {

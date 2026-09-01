@@ -1,0 +1,37 @@
+[09-01 16:56:43.159] D/RPCS3: Applying global config: /storage/emulated/0/Android/data/com.zenithblue.sambas3/files/config/config.yml
+[09-01 16:57:52.178] D/RPCS3: S3CFG write scope=global path=@@Video@@Frame limit requested="30" readBack="30" applyPhase=LIVE
+[09-01 16:58:49.904] D/RPCS3: S3CFG write scope=global path=@@Core@@PPU Calling History requested=true readBack=true applyPhase=LIVE
+[09-01 16:59:37.291] D/RPCS3: S3CFG write scope=global path=@@Video@@Frame limit requested="60" readBack="60" applyPhase=LIVE
+[09-01 17:00:00.389] D/RPCS3: S3CFG write scope=global path=@@Core@@PPU Calling History requested=false readBack=false applyPhase=LIVE
+[09-01 17:00:21.859] D/RPCS3: S3CFG write scope=global path=@@Video@@Frame limit requested="60" readBack="60" applyPhase=LIVE
+[09-01 17:00:32.561] D/RPCS3: S3CFG write scope=global path=@@Core@@PPU LLVM Greedy Mode requested=true readBack=true applyPhase=LIVE
+[09-01 17:00:34.228] D/RPCS3: S3CFG write scope=global path=@@Core@@PPU LLVM Greedy Mode requested=false readBack=false applyPhase=LIVE
+[09-01 17:10:13.063] D/RPCS3: Applying global config: /storage/emulated/0/Android/data/com.zenithblue.sambas3/files/config/config.yml
+[09-01 17:11:02.918] D/RPCS3: S3CFG write scope=global path=@@Video@@Write Color Buffers requested=true readBack=true applyPhase=LIVE
+[09-01 17:11:15.476] D/RPCS3: S3CFG write scope=global path=@@Video@@Write Color Buffers requested=false readBack=false applyPhase=LIVE
+[09-01 17:11:40.963] D/RPCS3: S3CFG write scope=global path=@@Video@@Resolution requested="1280x720" readBack="1280x720" applyPhase=LIVE
+[09-01 17:12:04.660] D/RPCS3: S3CFG write scope=global path=@@Video@@Aspect ratio requested="4:3" readBack="4:3" applyPhase=LIVE
+[09-01 17:12:19.361] D/RPCS3: S3CFG write scope=global path=@@Video@@Aspect ratio requested="16:9" readBack="16:9" applyPhase=LIVE
+[09-01 17:13:15.100] D/RPCS3: S3CFG write scope=global path=@@Video@@Frame limit requested="30" readBack="30" applyPhase=LIVE
+[09-01 17:13:20.804] D/RPCS3: S3CFG write scope=global path=@@Video@@Frame limit requested="60" readBack="60" applyPhase=LIVE
+[09-01 17:13:35.614] D/RPCS3: S3CFG write scope=global path=@@Video@@Resolution requested="720x576" readBack="720x576" applyPhase=LIVE
+[09-01 17:16:20.135] D/RPCS3: S3CFG write scope=game title=BLUS31584 path=Video@@Frame limit requested="30" applyPhase=NEXT_EMULATION_BOOT
+[09-01 17:53:20.290] D/RPCS3: Applying global config: /storage/emulated/0/Android/data/com.zenithblue.sambas3/files/config/config.yml
+[09-01 17:54:31.617] D/RPCS3: S3CFG write scope=game title=BLUS31584 path=Video@@Frame limit requested="30" applyPhase=NEXT_EMULATION_BOOT
+[09-01 18:01:23.094] D/RPCS3: Applying global config: /storage/emulated/0/Android/data/com.zenithblue.sambas3/files/config/config.yml
+[09-01 18:01:46.317] D/RPCS3: S3CFG write scope=game title=BLUS31584 path=Video@@Frame limit requested="30" applyPhase=NEXT_EMULATION_BOOT
+[09-01 18:17:54.113] D/RPCS3: Applying global config: /storage/emulated/0/Android/data/com.zenithblue.sambas3/files/config/config.yml
+[09-01 18:18:02.164] D/RPCS3: S3CFG write scope=game title=BLUS31584 path=Video@@Frame limit requested="30" applyPhase=NEXT_EMULATION_BOOT
+[09-01 18:19:56.068] D/RPCS3: S3CFG write scope=global path=@@Video@@Frame limit requested="30" readBack="30" applyPhase=LIVE
+[09-01 18:20:10.177] D/RPCS3: S3CFG write scope=global path=@@Video@@Frame limit requested="60" readBack="60" applyPhase=LIVE
+[09-01 18:20:24.974] D/RPCS3: S3CFG write scope=global path=@@Video@@Write Color Buffers requested=true readBack=true applyPhase=LIVE
+[09-01 18:20:29.996] D/RPCS3: S3CFG write scope=global path=@@Video@@Write Color Buffers requested=false readBack=false applyPhase=LIVE
+[09-01 18:21:03.491] D/RPCS3: S3CFG write scope=global path=@@Video@@Resolution requested="1280x720" readBack="1280x720" applyPhase=LIVE
+[09-01 18:21:07.331] D/RPCS3: S3CFG write scope=global path=@@Video@@Resolution requested="720x576" readBack="720x576" applyPhase=LIVE
+[09-01 18:21:39.203] D/RPCS3: S3CFG write scope=global path=@@Video@@Aspect ratio requested="4:3" readBack="4:3" applyPhase=LIVE
+[09-01 18:21:43.077] D/RPCS3: S3CFG write scope=global path=@@Video@@Aspect ratio requested="16:9" readBack="16:9" applyPhase=LIVE
+[09-01 18:21:07.331] D/RPCS3: S3CFG write scope=global path=@@Video@@Resolution requested="720x576" readBack="720x576" applyPhase=LIVE
+[09-01 18:21:39.203] D/RPCS3: S3CFG write scope=global path=@@Video@@Aspect ratio requested="4:3" readBack="4:3" applyPhase=LIVE
+[09-01 18:21:43.077] D/RPCS3: S3CFG write scope=global path=@@Video@@Aspect ratio requested="16:9" readBack="16:9" applyPhase=LIVE
+[09-01 18:22:10.090] D/RPCS3: Applying global config: /storage/emulated/0/Android/data/com.zenithblue.sambas3/files/config/config.yml
+[09-01 18:22:18.115] D/RPCS3: S3CFG write scope=game title=BLUS31584 path=Video@@Frame limit requested="30" applyPhase=NEXT_EMULATION_BOOT
