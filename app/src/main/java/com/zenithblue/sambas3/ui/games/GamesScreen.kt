@@ -985,29 +985,39 @@ fun GamesScreen(
                                 HintButton(text = "PREPARING", icon = "X", color = RPCSXColors.textDisabled, onClick = { })
                             }
                             is com.zenithblue.sambas3.ppu.GameLaunchAvailability.NeedsPreparation -> {
-                                HintButton(text = "PREPARE", icon = "X", color = RPCSXColors.primary, onClick = {
-                                    hintGame?.let { com.zenithblue.sambas3.ppu.ImportPpuPreparationCoordinator.requestPreparation(context, it) }
+                                HintButton(text = "RE-IMPORT", icon = "X", color = RPCSXColors.primary, onClick = {
+                                    // Install phase only — never manufacture READY / start headless Runtime.
+                                    hintGame?.let {
+                                        com.zenithblue.sambas3.ppu.ImportPpuPreparationCoordinator.requestPreparation(context, it)
+                                    }
+                                    showImportDialog = true
                                 })
                             }
                             is com.zenithblue.sambas3.ppu.GameLaunchAvailability.Failed -> {
-                                HintButton(text = "RETRY", icon = "X", color = RPCSXColors.errorColor, onClick = {
-                                    hintGame?.let { com.zenithblue.sambas3.ppu.ImportPpuPreparationCoordinator.requestPreparation(context, it) }
+                                HintButton(text = "RE-IMPORT", icon = "X", color = RPCSXColors.errorColor, onClick = {
+                                    hintGame?.let {
+                                        com.zenithblue.sambas3.ppu.ImportPpuPreparationCoordinator.requestPreparation(context, it)
+                                    }
+                                    showImportDialog = true
                                 })
                             }
                             is com.zenithblue.sambas3.ppu.GameLaunchAvailability.Ready -> {
                                 HintButton(text = "PLAY", icon = "X", color = RPCSXColors.primary, onClick = { launchCenterGame = hintGame })
                             }
                             else -> {
-                                // No game or import required -> still show PLAY disabled or ADD?
                                 val isPlayable = hintAvailability == null || hintAvailability is com.zenithblue.sambas3.ppu.GameLaunchAvailability.Ready
                                 HintButton(
                                     text = "PLAY",
                                     icon = "X",
                                     color = if (isPlayable || hintGame == null) RPCSXColors.primary else RPCSXColors.textDisabled,
                                     onClick = {
-                                        if (hintGame != null && hintAvailability is com.zenithblue.sambas3.ppu.GameLaunchAvailability.Ready) launchCenterGame = hintGame
-                                        else if (hintAvailability is com.zenithblue.sambas3.ppu.GameLaunchAvailability.NeedsPreparation) {
-                                            com.zenithblue.sambas3.ppu.ImportPpuPreparationCoordinator.requestPreparation(context, hintGame!!)
+                                        if (hintGame != null && hintAvailability is com.zenithblue.sambas3.ppu.GameLaunchAvailability.Ready) {
+                                            launchCenterGame = hintGame
+                                        } else if (hintAvailability is com.zenithblue.sambas3.ppu.GameLaunchAvailability.NeedsPreparation) {
+                                            hintGame?.let {
+                                                com.zenithblue.sambas3.ppu.ImportPpuPreparationCoordinator.requestPreparation(context, it)
+                                            }
+                                            showImportDialog = true
                                         }
                                     }
                                 )
@@ -1020,10 +1030,38 @@ fun GamesScreen(
         }
 
         launchCenterGame?.let { game ->
+            val readinessRevision by PpuReadinessStore.revision.collectAsState()
+            val coordinatorRevision by com.zenithblue.sambas3.ppu.ImportPpuPreparationCoordinator.coordinatorRevision.collectAsState()
+            val titleId = com.zenithblue.sambas3.GameIdentity.titleIdOrNull(game.info.path, game.info.name.value)
+            // Readiness + compile flows must participate in composition so START enables without reopen.
+            @Suppress("UNUSED_VARIABLE")
+            val _rev = readinessRevision + coordinatorRevision
+            val launchInputs = com.zenithblue.sambas3.ui.games.launch.LaunchRuntimeInputs(
+                installPpu = installPpu,
+                prelaunchPpu = prelaunchPpu,
+                runtimePpu = runtimePpu,
+                emulatorState = emulatorState.value,
+                activeGame = emulatorActiveGame.value,
+                waitingForIdle = com.zenithblue.sambas3.ppu.ImportPpuPreparationCoordinator.waitingForIdle,
+                deferredForFgs = com.zenithblue.sambas3.ppu.ImportPpuPreparationCoordinator.deferredForFgs,
+                fgsStartDenied = CompileProgressBridge.fgsStartDenied,
+                preRuntimeState = titleId?.let {
+                    runCatching { PpuReadinessStore.getPreRuntimeState(context, it) }
+                        .getOrDefault(PreRuntimePpuState.NOT_DONE)
+                } ?: PreRuntimePpuState.NOT_DONE,
+                runtimeReadyState = titleId?.let {
+                    runCatching { PpuReadinessStore.getRuntimeState(context, it) }
+                        .getOrDefault(RuntimePpuState.NOT_STARTED)
+                } ?: RuntimePpuState.NOT_STARTED,
+                validatedByRealBootFrame = titleId?.let {
+                    runCatching { PpuReadinessStore.isRuntimeValidated(context, it) }.getOrDefault(false)
+                } ?: false,
+            )
             GameLaunchCenter(
-                snapshot = GameLaunchRepository.snapshot(context, game),
+                snapshot = GameLaunchRepository.snapshot(context, game, launchInputs),
                 onDismiss = { launchCenterGame = null },
                 onFreshPlay = {
+                    // START / START & PREPARE / RETRY ON START — real Activity only, never headless.
                     launchCenterGame = null
                     bootingGame = game
                 },
@@ -1050,7 +1088,13 @@ fun GamesScreen(
                 onAchievements = {
                     stoppedTrophiesLoading = true
                     stoppedTrophies = null
-                }
+                },
+                onPrepare = {
+                    // Re-import / rebuild install PPU — phase-aware, no headless Runtime.
+                    com.zenithblue.sambas3.ppu.ImportPpuPreparationCoordinator.requestPreparation(context, game)
+                    launchCenterGame = null
+                    showImportDialog = true
+                },
             )
         }
 

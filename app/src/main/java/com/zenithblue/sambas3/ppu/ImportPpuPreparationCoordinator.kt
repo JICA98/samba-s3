@@ -1,6 +1,8 @@
 package com.zenithblue.sambas3.ppu
 
+import android.app.ActivityManager
 import android.content.Context
+import android.os.Process
 import android.util.Log
 import com.zenithblue.sambas3.CompileProgressBridge
 import com.zenithblue.sambas3.Game
@@ -18,20 +20,30 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.TimeoutCancellationException
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import kotlinx.coroutines.withTimeout
 import java.io.File
 
 /**
- * Small focused coordinator — reacts to successful install-origin PPU terminal,
- * resolves installed title/game path, waits for engine idle, invokes headless
- * native runtime preparation, exposes prelaunch progress, marks terminal.
+ * Install-origin PPU terminal handler and (diagnostic-only) headless Runtime API.
+ *
+ * Normal Home / Launch Center / post-install paths must NOT start headless
+ * Runtime PPU. Install success only persists PreRuntime READY + Runtime
+ * NOT_STARTED; Runtime PPU runs inside the real RPCSXActivity boot.
  */
 object ImportPpuPreparationCoordinator {
     private const val TAG = "PpuCoordinator"
     private val scope = CoroutineScope(SupervisorJob() + Dispatchers.Main)
     private var currentJob: Job? = null
+
+    /** Counts headless Runtime invocations (tests assert normal paths stay at 0). */
+    @Volatile
+    var headlessInvocationCount: Int = 0
+        private set
 
     @Volatile
     var lastSessionId: Long = -1L
@@ -42,57 +54,136 @@ object ImportPpuPreparationCoordinator {
     var waitingForIdle: Boolean = false
         private set
 
+    /** True while Runtime PPU is deferred until an allowed FGS start context exists. */
+    @Volatile
+    var deferredForFgs: Boolean = false
+        private set
+
+    private val _coordinatorRevision = MutableStateFlow(0L)
+    val coordinatorRevision: StateFlow<Long> = _coordinatorRevision.asStateFlow()
+
+    private fun bumpCoordinatorRevision() {
+        _coordinatorRevision.value = _coordinatorRevision.value + 1L
+    }
+
+    private fun setWaitingForIdle(value: Boolean) {
+        waitingForIdle = value
+        bumpCoordinatorRevision()
+    }
+
+    private fun setDeferredForFgs(value: Boolean) {
+        deferredForFgs = value
+        bumpCoordinatorRevision()
+    }
+
+    fun resetHeadlessInvocationCountForTest() {
+        headlessInvocationCount = 0
+    }
+
+    /** Process is user-visible enough that special-use FGS start is likely allowed. */
+    fun isAppProcessForeground(context: Context): Boolean {
+        return try {
+            val am = context.getSystemService(Context.ACTIVITY_SERVICE) as ActivityManager
+            val pid = Process.myPid()
+            val proc = am.runningAppProcesses?.firstOrNull { it.pid == pid } ?: return false
+            proc.importance <= ActivityManager.RunningAppProcessInfo.IMPORTANCE_FOREGROUND
+        } catch (_: Exception) {
+            false
+        }
+    }
+
+    /**
+     * Real install/pre-runtime terminal for [titleId] — the only normal path that
+     * may establish PreRuntime READY. Does not start headless Runtime PPU.
+     */
     fun onInstallPpuSuccess(context: Context, titleId: String?) {
         if (titleId.isNullOrBlank()) {
             Log.w(TAG, "onInstallPpuSuccess ignored: titleId null/blank")
             return
         }
         val appCtx = context.applicationContext
-        val game = resolveGameForTitle(titleId)
-        val path = resolvePathForTitle(appCtx, titleId, game)
-        if (path.isNullOrBlank() || path == "$" || path.startsWith("content://")) {
-            Log.w(TAG, "Cannot resolve game path for title $titleId, got $path — will retry via constructed path")
-            // Try constructed path as fallback
-            val fallback = File(RPCSX.rootDirectory, "config/games/$titleId").absolutePath
-            if (File(fallback).exists() || File(fallback).isDirectory) {
-                startHeadless(appCtx, titleId, fallback)
-            } else {
-                Log.w(TAG, "No fallback path for $titleId, marking needs retry")
-                PpuReadinessStore.setRuntimeState(appCtx, titleId, RuntimePpuState.FAILED)
-            }
-            return
-        }
-        // Ensure preRuntime is READY (install-origin success)
+        setWaitingForIdle(false)
+        setDeferredForFgs(false)
         PpuReadinessStore.setPreRuntimeState(appCtx, titleId, PreRuntimePpuState.READY)
-        // Mark as waiting, not yet compiling, so UI shows WAITING
-        waitingForIdle = true
-        PpuReadinessStore.setRuntimeState(appCtx, titleId, RuntimePpuState.COMPILING)
-        Log.i(TAG, "Starting headless prelaunch for $titleId at $path")
-        startHeadless(appCtx, titleId, path)
+        PpuReadinessStore.setRuntimeState(appCtx, titleId, RuntimePpuState.NOT_STARTED)
+        Log.i(
+            TAG,
+            "install_ppu_terminal title=$titleId preRuntime=READY runtime=NOT_STARTED " +
+                "automatic_headless=suppressed"
+        )
+        Log.i("S3PPU", "automatic headless suppressed title=$titleId")
     }
 
-    fun requestPreparation(context: Context, game: Game) {
+    /**
+     * Phase-aware Home/Launch action. Never manufactures PreRuntime READY and
+     * never starts headless Runtime PPU on the normal production path.
+     * Returns the decided action so UI can open the real Activity or prompt re-import.
+     */
+    fun requestPreparation(context: Context, game: Game): PpuUserAction {
         val appCtx = context.applicationContext
         val titleId = try {
-            com.zenithblue.sambas3.GameIdentity.titleIdOrNull(game.info.path, game.info.name.value) ?: com.zenithblue.sambas3.GameIdentity.key(game.info.path, game.info.name.value)
-        } catch (_: Exception) { game.info.path }
-        val path = game.info.path
-        if (path.isBlank() || path == "$" || path.startsWith("content://")) {
-            Log.w(TAG, "requestPreparation invalid path $path for $titleId")
-            return
+            com.zenithblue.sambas3.GameIdentity.titleIdOrNull(game.info.path, game.info.name.value)
+                ?: com.zenithblue.sambas3.GameIdentity.key(game.info.path, game.info.name.value)
+        } catch (_: Exception) {
+            game.info.path
         }
-        // If already READY+IDLE, no need
-        val pre = try { PpuReadinessStore.getPreRuntimeState(appCtx, titleId) } catch (_: Exception) { PreRuntimePpuState.NOT_DONE }
-        val rt = try { PpuReadinessStore.getRuntimeState(appCtx, titleId) } catch (_: Exception) { RuntimePpuState.NOT_STARTED }
-        if (pre == PreRuntimePpuState.READY && rt == RuntimePpuState.IDLE_AFTER_COMPILE) {
-            Log.i(TAG, "requestPreparation already ready $titleId")
-            return
+        val pre = try {
+            PpuReadinessStore.getPreRuntimeState(appCtx, titleId)
+        } catch (_: Exception) {
+            PreRuntimePpuState.NOT_DONE
         }
-        PpuReadinessStore.setPreRuntimeState(appCtx, titleId, PreRuntimePpuState.READY)
-        PpuReadinessStore.setRuntimeState(appCtx, titleId, RuntimePpuState.COMPILING)
-        waitingForIdle = true
-        Log.i(TAG, "Manual headless request for $titleId at $path")
-        startHeadless(appCtx, titleId, path)
+        val rt = try {
+            PpuReadinessStore.getRuntimeState(appCtx, titleId)
+        } catch (_: Exception) {
+            RuntimePpuState.NOT_STARTED
+        }
+        val validated = try {
+            PpuReadinessStore.isRuntimeValidated(appCtx, titleId)
+        } catch (_: Exception) {
+            false
+        }
+        val installActive = try {
+            CompileProgressBridge.installState.value.ppuActive
+        } catch (_: Exception) {
+            false
+        }
+        val prelaunchActive = try {
+            CompileProgressBridge.prelaunchState.value.ppuActive
+        } catch (_: Exception) {
+            false
+        }
+        val runtimeActive = try {
+            CompileProgressBridge.state.value.ppuActive
+        } catch (_: Exception) {
+            false
+        }
+        val action = PpuUserActionDecision.decide(
+            PpuActionInputs(
+                preRuntime = pre,
+                runtime = rt,
+                validatedByRealBootFrame = validated,
+                installPpuActive = installActive,
+                prelaunchPpuActive = prelaunchActive,
+                runtimePpuActive = runtimeActive,
+                waitingForIdle = waitingForIdle,
+            )
+        )
+        Log.i(
+            TAG,
+            "requestPreparation title=$titleId pre=$pre runtime=$rt validated=$validated " +
+                "action=$action headless=0"
+        )
+        // Do not flip preRuntime to READY. Do not start headless.
+        return action
+    }
+
+    /**
+     * Diagnostic-only entry for isolated headless Runtime PPU experiments.
+     * Not used by Home, Launch Center, or post-install success.
+     */
+    fun startHeadlessForDiagnostics(context: Context, titleId: String, path: String) {
+        Log.w(TAG, "startHeadlessForDiagnostics title=$titleId — diagnostic path only")
+        startHeadless(context.applicationContext, titleId, path)
     }
 
     fun cancel(sessionId: Long) {
@@ -171,6 +262,7 @@ object ImportPpuPreparationCoordinator {
     }
 
     private fun startHeadless(appCtx: Context, titleId: String, path: String) {
+        headlessInvocationCount++
         val existing =
             currentJob
 
@@ -195,9 +287,9 @@ object ImportPpuPreparationCoordinator {
             lastSessionId = sessionId
             try {
                 // Idle barrier: wait for install compile queue idle + engine Stopped
-                waitingForIdle = true
+                setWaitingForIdle(true)
                 val idleOk = waitForEngineIdle(titleId, sessionId)
-                waitingForIdle = false
+                setWaitingForIdle(false)
                 if (!idleOk) {
                     Log.w(TAG, "Engine idle timeout for $titleId, exposing retry")
                     withContext(Dispatchers.Main) {
@@ -205,6 +297,16 @@ object ImportPpuPreparationCoordinator {
                     }
                     return@launch
                 }
+                // Do not start long unmonitored Runtime PPU while FGS start would be denied.
+                if (!waitForAllowedFgsContext(appCtx, titleId, sessionId)) {
+                    Log.w(TAG, "FGS-safe context timeout for $titleId — marking FAILED retryable")
+                    withContext(Dispatchers.Main) {
+                        setDeferredForFgs(false)
+                        PpuReadinessStore.setRuntimeState(appCtx, titleId, RuntimePpuState.FAILED)
+                    }
+                    return@launch
+                }
+                setDeferredForFgs(false)
                 val resolvedTitleId =
                     GameSettingsOverrides
                         .resolveTitleId(
@@ -362,12 +464,22 @@ object ImportPpuPreparationCoordinator {
                                 RPCSX.activeGame.value = null
                             }
                             RPCSX.state.value = com.zenithblue.sambas3.EmulatorState.Stopped
-                            Log.i("S3PPU", "prepare_terminal session=$sessionId title=$titleId compile_finished=1 workers_idle=1 fxo_clean=1 emu_state=stopped will_resume_game=0")
+                            Log.i(
+                                "S3PPU",
+                                "prepare_terminal session=$sessionId title=$titleId prepare_ret=0 " +
+                                    "observed_native_state=Stopped prelaunch_active=0 " +
+                                    "first_frame_validated=0 will_resume_game=0"
+                            )
                         } catch (e: Exception) {
                             Log.w(TAG, "failed to sync state after prepare: ${e.message}")
                         }
+                        // Diagnostic headless success is not real-boot validation.
                         PpuReadinessStore.setRuntimeState(appCtx, titleId, RuntimePpuState.IDLE_AFTER_COMPILE)
-                        Log.i(TAG, "Headless prelaunch success $titleId -> IDLE_AFTER_COMPILE (after Stopped verified)")
+                        Log.i(
+                            TAG,
+                            "Headless prelaunch success $titleId -> IDLE_AFTER_COMPILE " +
+                                "(not validatedByRealBootFrame)"
+                        )
                     }
                 } else if (ret == -2 || ret == -3) {
                     // Transient busy - should not have happened after idle wait, but treat as retryable
@@ -384,7 +496,8 @@ object ImportPpuPreparationCoordinator {
             } catch (
                 e: CancellationException
             ) {
-                waitingForIdle = false
+                setWaitingForIdle(false)
+                setDeferredForFgs(false)
 
                 Log.i(
                     TAG,
@@ -403,7 +516,8 @@ object ImportPpuPreparationCoordinator {
                     e
                 )
 
-                waitingForIdle = false
+                setWaitingForIdle(false)
+                setDeferredForFgs(false)
 
                 PpuReadinessStore.setRuntimeState(
                     appCtx,
@@ -415,10 +529,46 @@ object ImportPpuPreparationCoordinator {
                     lastSessionId ==
                     sessionId
                 ) {
-                    waitingForIdle = false
+                    setWaitingForIdle(false)
+                    setDeferredForFgs(false)
                 }
             }
         }
+    }
+
+    /**
+     * Defer native Runtime PPU until the process is foreground enough for FGS 2000.
+     * Does not silently run a long unmonitored compile in the background.
+     */
+    private suspend fun waitForAllowedFgsContext(
+        appCtx: Context,
+        titleId: String,
+        sessionId: Long,
+    ): Boolean {
+        if (isAppProcessForeground(appCtx) && !CompileProgressBridge.fgsStartDenied) {
+            return true
+        }
+        withContext(Dispatchers.Main) {
+            setDeferredForFgs(true)
+            setWaitingForIdle(true)
+        }
+        Log.w(
+            TAG,
+            "Deferring Runtime PPU for $titleId until FGS-safe foreground context " +
+                "(fgsDenied=${CompileProgressBridge.fgsStartDenied})"
+        )
+        val maxAttempts = 300 // ~60s at 200ms
+        var attempts = 0
+        while (attempts < maxAttempts) {
+            if (lastSessionId != sessionId) return false
+            if (isAppProcessForeground(appCtx)) {
+                Log.i(TAG, "FGS-safe foreground restored for $titleId after $attempts waits")
+                return true
+            }
+            delay(200)
+            attempts++
+        }
+        return false
     }
 
     private suspend fun waitForEngineIdle(titleId: String, sessionId: Long): Boolean {

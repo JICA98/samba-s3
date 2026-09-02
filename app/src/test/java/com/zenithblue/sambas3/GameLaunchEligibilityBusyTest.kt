@@ -41,4 +41,30 @@ class GameLaunchEligibilityBusyTest {
             }
         }
     }
+
+    @Test
+    fun invalidated_pre_runtime_is_needs_preparation_not_preparing() {
+        val key = "BLUS30443"
+        PpuReadinessStore.removeEntry(context, key)
+        PpuReadinessStore.setPreRuntimeState(context, key, PreRuntimePpuState.INVALIDATED)
+        PpuReadinessStore.setRuntimeState(context, key, RuntimePpuState.NOT_STARTED)
+        val game = Game(
+            GameInfoStore(
+                "/files/config/games/$key",
+                androidx.compose.runtime.mutableStateOf("Demon's Souls"),
+                androidx.compose.runtime.mutableStateOf(null),
+                androidx.compose.runtime.mutableIntStateOf(0),
+            )
+        )
+        val availability = GameRunEligibilityHelper.evaluateAvailability(
+            context,
+            game,
+            installPpuActive = false,
+            prelaunchState = CompileProgressBridge.CompileState(),
+            runtimeState = CompileProgressBridge.CompileState(),
+            emulatorState = EmulatorState.Stopped,
+            activeGame = null,
+        )
+        assertEquals(GameLaunchAvailability.NeedsPreparation, availability)
+    }
 }

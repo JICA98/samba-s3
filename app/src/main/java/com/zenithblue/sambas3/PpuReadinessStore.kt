@@ -3,6 +3,9 @@ package com.zenithblue.sambas3
 import android.content.Context
 import android.util.Log
 import com.zenithblue.sambas3.utils.Telemetry
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
 import java.io.File
@@ -10,10 +13,10 @@ import java.io.File
 enum class PreRuntimePpuState { NOT_DONE, IN_PROGRESS, READY, INVALIDATED, FAILED }
 /**
  * Runtime PPU readiness.
- * IDLE_AFTER_COMPILE now means: the shared boot-equivalent headless PPU preflight
- * succeeded under the same per-title config/cache identity normal boot will use,
- * and the engine is fully Stopped. Do not write it merely because some
- * ppu_precompile() call returned.
+ * IDLE_AFTER_COMPILE alone is not validated readiness — only a real RPCSXActivity
+ * boot that reaches a Runtime PPU terminal (when needed) plus stable first-frame
+ * proof may set [PpuStateEntry.validatedByRealBootFrame].
+ * Legacy headless IDLE entries load with validatedByRealBootFrame=false.
  */
 enum class RuntimePpuState { NOT_STARTED, COMPILING, IDLE_AFTER_COMPILE, FAILED }
 
@@ -23,12 +26,14 @@ data class PpuStateEntry(
     val preRuntime: String, // enum name
     val runtime: String,
     val fingerprint: String?,
+    val validatedByRealBootFrame: Boolean = false,
+    val readinessVersion: Int = 1,
     val updatedMs: Long = System.currentTimeMillis()
 )
 
 @Serializable
 data class PpuStateFile(
-    val version: Int = 1,
+    val version: Int = 2,
     val entries: Map<String, PpuStateEntry> = emptyMap()
 )
 
@@ -37,6 +42,14 @@ object PpuReadinessStore {
     private val json = Json { ignoreUnknownKeys = true; prettyPrint = false }
     private var cache: MutableMap<String, PpuStateEntry> = mutableMapOf()
     private var loaded = false
+
+    /** Bumps when any readiness entry changes so Compose can recompose without polling. */
+    private val _revision = MutableStateFlow(0L)
+    val revision: StateFlow<Long> = _revision.asStateFlow()
+
+    private fun bumpRevision() {
+        _revision.value = _revision.value + 1L
+    }
 
     private fun file(context: Context): File {
         val dir = File(RPCSX.rootDirectory, "config/prefs")
@@ -102,21 +115,39 @@ object PpuReadinessStore {
         return try { RuntimePpuState.valueOf(entry.runtime) } catch (_: Exception) { RuntimePpuState.NOT_STARTED }
     }
 
+    /** Legacy IDLE_AFTER_COMPILE without this marker is not validated Runtime ready. */
+    @Synchronized
+    fun isRuntimeValidated(context: Context, key: String): Boolean {
+        ensureLoaded(context)
+        val entry = cache[key] ?: return false
+        if (!entry.validatedByRealBootFrame) return false
+        return try {
+            RuntimePpuState.valueOf(entry.runtime) == RuntimePpuState.IDLE_AFTER_COMPILE
+        } catch (_: Exception) {
+            false
+        }
+    }
+
     @Synchronized
     fun setPreRuntimeState(context: Context, key: String, state: PreRuntimePpuState, fingerprint: String? = null) {
         ensureLoaded(context)
         val prev = cache[key]?.preRuntime ?: PreRuntimePpuState.NOT_DONE.name
         val fp = fingerprint ?: fingerprint(context, key)
         val entry = cache[key]
+        // Changing install phase clears any prior runtime validation.
+        val clearValidation = state != PreRuntimePpuState.READY
         val newEntry = PpuStateEntry(
             key = key,
             preRuntime = state.name,
-            runtime = entry?.runtime ?: RuntimePpuState.NOT_STARTED.name,
+            runtime = if (clearValidation) RuntimePpuState.NOT_STARTED.name else (entry?.runtime ?: RuntimePpuState.NOT_STARTED.name),
             fingerprint = fp,
+            validatedByRealBootFrame = if (clearValidation) false else (entry?.validatedByRealBootFrame ?: false),
+            readinessVersion = entry?.readinessVersion ?: 1,
             updatedMs = System.currentTimeMillis()
         )
         cache[key] = newEntry
         save(context)
+        bumpRevision()
         if (Telemetry.isEnabled) Telemetry.emitPpuStateChange(key, "preruntime", prev, state.name)
         if (state == PreRuntimePpuState.INVALIDATED && Telemetry.isEnabled) {
             Telemetry.emitPpuInvalidate(key, "fingerprint_mismatch")
@@ -128,16 +159,48 @@ object PpuReadinessStore {
         ensureLoaded(context)
         val prev = cache[key]?.runtime ?: RuntimePpuState.NOT_STARTED.name
         val entry = cache[key]
+        // Only markRuntimeValidatedByRealBoot may set validation true.
+        val keepValidation = state == RuntimePpuState.IDLE_AFTER_COMPILE &&
+            (entry?.validatedByRealBootFrame == true)
         val newEntry = PpuStateEntry(
             key = key,
             preRuntime = entry?.preRuntime ?: PreRuntimePpuState.NOT_DONE.name,
             runtime = state.name,
             fingerprint = entry?.fingerprint,
+            validatedByRealBootFrame = keepValidation,
+            readinessVersion = entry?.readinessVersion ?: 1,
             updatedMs = System.currentTimeMillis()
         )
         cache[key] = newEntry
         save(context)
+        bumpRevision()
         if (Telemetry.isEnabled) Telemetry.emitPpuStateChange(key, "runtime", prev, state.name)
+    }
+
+    /**
+     * Persist validated Runtime ready after real Activity boot + stable first frame.
+     * Must not be called from headless prepare or the compile watchdog.
+     */
+    @Synchronized
+    fun markRuntimeValidatedByRealBoot(context: Context, key: String) {
+        ensureLoaded(context)
+        val entry = cache[key]
+        val newEntry = PpuStateEntry(
+            key = key,
+            preRuntime = entry?.preRuntime ?: PreRuntimePpuState.READY.name,
+            runtime = RuntimePpuState.IDLE_AFTER_COMPILE.name,
+            fingerprint = entry?.fingerprint ?: fingerprint(context, key),
+            validatedByRealBootFrame = true,
+            readinessVersion = 2,
+            updatedMs = System.currentTimeMillis()
+        )
+        cache[key] = newEntry
+        save(context)
+        bumpRevision()
+        if (Telemetry.isEnabled) {
+            Telemetry.emitPpuStateChange(key, "runtime", entry?.runtime ?: "?", RuntimePpuState.IDLE_AFTER_COMPILE.name)
+        }
+        Log.i("PpuReadinessStore", "runtime validated by real boot frame title=$key")
     }
 
     @Synchronized
@@ -168,6 +231,7 @@ object PpuReadinessStore {
         val existed = cache.remove(key) != null
         if (existed) {
             save(context)
+            bumpRevision()
             if (Telemetry.isEnabled) Telemetry.emitPpuStateChange(key, "preruntime", "REMOVED", "REMOVED")
         }
         return existed
@@ -226,6 +290,7 @@ object PpuReadinessStore {
             cache = updated
 
             save(context)
+            bumpRevision()
 
             Log.w(
                 "PpuReadinessStore",

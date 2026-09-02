@@ -13,6 +13,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.cancel
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 
@@ -45,16 +46,20 @@ class CompilationMonitorService : Service() {
     private val serviceScope = CoroutineScope(SupervisorJob() + Dispatchers.Main)
     private var collectJob: Job? = null
     private var isForeground = false
-    private var lastState: CompileProgressBridge.CompileState? = null
+    private var lastProjection: CompilationMonitorLogic.MonitorProjection? = null
 
     override fun onCreate() {
         super.onCreate()
         NotificationChannels.ensureCreated(this)
-        // Do NOT register native listener here — bridge owns it
-        collectJob = CompileProgressBridge.state
-            .onEach { state -> onStateChanged(state) }
+        // Observe runtime + prelaunch together so PRELAUNCH Runtime PPU owns FGS 2000
+        // without collapsing origin/job ownership into a single boolean.
+        collectJob = combine(
+            CompileProgressBridge.state,
+            CompileProgressBridge.prelaunchState,
+        ) { runtime, prelaunch -> CompilationMonitorLogic.project(runtime, prelaunch) }
+            .onEach { projection -> onProjectionChanged(projection) }
             .launchIn(serviceScope)
-        Log.i(TAG, "onCreate collected state")
+        Log.i(TAG, "onCreate collected runtime+prelaunch projection")
     }
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
@@ -67,36 +72,47 @@ class CompilationMonitorService : Service() {
 
         // Install-origin PPU is owned by PrecompilerService. We were still started via
         // startForegroundService, so we must promote then stop to satisfy the ~5s contract.
-        if (origin == RPCSX.COMPILE_ORIGIN_INSTALL) {
+        if (CompilationMonitorLogic.shouldIgnoreInstallOrigin(origin)) {
             Log.w(TAG, "Ignoring INSTALL-origin start request domain=$domain job=$jobId")
-            return promoteThenMaybeStop(CompileProgressBridge.state.value, forceStop = true, startId = startId)
+            val projection = currentProjection()
+            return promoteThenMaybeStop(projection, forceStop = true, startId = startId)
         }
 
-        val live = CompileProgressBridge.state.value
+        val projection = currentProjection()
         val intentJobActive = domain != -1 && jobId != -1L &&
-            CompileProgressBridge.isRuntimeJobActive(domain, jobId)
+            CompileProgressBridge.isMonitorJobActive(domain, jobId, origin)
         // Never reconstruct an active domain from a stale BEGIN extra. Live StateFlow is source of truth.
-        val snapshot = if (live.isActive) live else CompileProgressBridge.CompileState()
-        val forceStop = CompilationMonitorLogic.shouldStopAfterPromotion(live.activeDomainCount) && !intentJobActive
-        return promoteThenMaybeStop(snapshot, forceStop = forceStop, startId = startId)
+        val forceStop = CompilationMonitorLogic.shouldStopAfterPromotion(
+            projection.runtime.activeDomainCount,
+            projection.prelaunchActive,
+        ) && !intentJobActive
+        return promoteThenMaybeStop(projection, forceStop = forceStop, startId = startId)
     }
 
+    private fun currentProjection(): CompilationMonitorLogic.MonitorProjection =
+        CompilationMonitorLogic.project(
+            CompileProgressBridge.state.value,
+            CompileProgressBridge.prelaunchState.value,
+        )
+
     private fun promoteThenMaybeStop(
-        snapshot: CompileProgressBridge.CompileState,
+        projection: CompilationMonitorLogic.MonitorProjection,
         forceStop: Boolean,
         startId: Int
     ): Int {
-        val promoted = promoteForeground(snapshot)
+        val promoted = promoteForeground(projection)
         if (!promoted) {
             Log.e(TAG, "startForeground failed — stopping service (startId=$startId)")
             isForeground = false
             stopSelf(startId)
             return START_NOT_STICKY
         }
-        // Re-read live count AFTER promotion. A fast COMPLETED can land between the snapshot
+        // Re-read live projection AFTER promotion. A fast COMPLETED can land between the snapshot
         // used to build the notification and this point; using the stale snapshot would leak FGS.
+        val live = currentProjection()
         if (forceStop || CompilationMonitorLogic.shouldStopAfterPromotion(
-                CompileProgressBridge.state.value.activeDomainCount
+                live.runtime.activeDomainCount,
+                live.prelaunchActive,
             )
         ) {
             Log.i(TAG, "No live compile jobs after promotion — stopping")
@@ -105,8 +121,8 @@ class CompilationMonitorService : Service() {
         return START_NOT_STICKY
     }
 
-    private fun promoteForeground(state: CompileProgressBridge.CompileState): Boolean {
-        val notification = buildAnchorNotification(state)
+    private fun promoteForeground(projection: CompilationMonitorLogic.MonitorProjection): Boolean {
+        val notification = buildAnchorNotification(projection)
         return try {
             ServiceCompat.startForeground(
                 this,
@@ -115,7 +131,12 @@ class CompilationMonitorService : Service() {
                 ServiceInfo.FOREGROUND_SERVICE_TYPE_SPECIAL_USE
             )
             isForeground = true
-            Log.i(TAG, "startForeground NOTIF_FGS isActive=${state.isActive} ppu=${state.ppuActive} shader=${state.shaderActive}")
+            Log.i(
+                TAG,
+                "startForeground NOTIF_FGS isActive=${projection.isActive} " +
+                    "runtimePpu=${projection.runtime.ppuActive} shader=${projection.runtime.shaderActive} " +
+                    "prelaunch=${projection.prelaunchActive}"
+            )
             // The foreground notification is the single runtime compile notification.
             // Older builds created one notification per domain, which made one PPU job
             // appear two or three times in the notification shade.
@@ -128,24 +149,21 @@ class CompilationMonitorService : Service() {
         }
     }
 
-    private fun onStateChanged(state: CompileProgressBridge.CompileState) {
-        lastState = state
+    private fun onProjectionChanged(projection: CompilationMonitorLogic.MonitorProjection) {
+        lastProjection = projection
         if (!isForeground) {
             // If we are not yet foreground but state became active, we should have been started via intent.
             // This path handles updates while foreground.
             return
         }
 
-        if (!state.isActive) {
-            // Both domains done — stop foreground immediately
-            Log.i(TAG, "State inactive — stopping foreground")
+        if (!projection.isActive) {
+            Log.i(TAG, "Projection inactive — stopping foreground")
             stopForegroundAndSelf()
             return
         }
 
-        // Update the single anchor notification. The launcher card is the detailed
-        // progress surface; Android only needs one compact runtime status entry.
-        val anchor = buildAnchorNotification(state)
+        val anchor = buildAnchorNotification(projection)
         try {
             NotificationManagerCompat.from(this).notify(NOTIF_FGS, anchor)
             cancelSecondaryNotifications()
@@ -154,13 +172,14 @@ class CompilationMonitorService : Service() {
         }
     }
 
-    private fun buildAnchorNotification(state: CompileProgressBridge.CompileState): android.app.Notification {
-        val title = when {
-            state.ppuActive && state.shaderActive -> getString(R.string.compiling_ppu_title) + " + " + getString(R.string.compiling_shaders_title)
-            state.ppuActive -> getString(R.string.compiling_ppu_title)
-            state.shaderActive -> getString(R.string.compiling_shaders_title)
-            else -> getString(R.string.compiling_ppu_title)
-        }
+    private fun buildAnchorNotification(projection: CompilationMonitorLogic.MonitorProjection): android.app.Notification {
+        val state = CompilationMonitorLogic.contentState(projection)
+        val title = CompilationMonitorLogic.notificationTitle(
+            projection,
+            compilingPpu = getString(R.string.compiling_ppu_title),
+            compilingShaders = getString(R.string.compiling_shaders_title),
+            preparingRuntimePpu = "Preparing Runtime PPU",
+        )
         val builder = NotificationCompat.Builder(this, NotificationChannels.RPCSX_PROGRESS)
             .setContentTitle(title)
             .setSmallIcon(R.mipmap.ic_sambas3_foreground)
@@ -169,19 +188,16 @@ class CompilationMonitorService : Service() {
             .setSilent(true)
             .setShowWhen(false)
 
-        // Content
         if (state.ppuActive && state.shaderActive) {
-            // Merged InboxStyle on anchor
             val inbox = NotificationCompat.InboxStyle()
             val ppuLine = state.ppuMsg ?: "PPU ${state.fileDone}/${state.fileTotal} module ${state.moduleDone}/${state.moduleTotal}"
             inbox.addLine(ppuLine)
             inbox.addLine(state.shaderMsg ?: getString(R.string.compiling_shaders_desc))
             builder.setStyle(inbox)
-            // Show PPU progress as determinate on anchor
             builder.setProgress(state.ppuMax, state.ppuPercent, false)
             builder.setContentText(ppuLine)
         } else if (state.ppuActive) {
-            val msg = state.ppuMsg ?: "Compiling…"
+            val msg = state.ppuMsg ?: "Compiling PPU modules…"
             builder.setContentText(msg)
             builder.setStyle(NotificationCompat.BigTextStyle().bigText(msg))
             if (state.ppuMax > 0) builder.setProgress(state.ppuMax, state.ppuPercent, false)
@@ -245,4 +261,77 @@ class CompilationMonitorService : Service() {
 internal object CompilationMonitorLogic {
     /** After startForeground, remain up only while live runtime domains are still active. */
     fun shouldStopAfterPromotion(liveActiveDomainCount: Int): Boolean = liveActiveDomainCount == 0
+
+    /** Combined stop decision across runtime StateFlow + prelaunch StateFlow. */
+    fun shouldStopAfterPromotion(
+        runtimeActiveDomainCount: Int,
+        prelaunchActive: Boolean,
+    ): Boolean = runtimeActiveDomainCount == 0 && !prelaunchActive
+
+    enum class MonitorOwner {
+        PRELAUNCH_PPU,
+        RUNTIME_PPU,
+        RUNTIME_SHADER,
+    }
+
+    data class MonitorProjection(
+        val runtime: CompileProgressBridge.CompileState,
+        val prelaunch: CompileProgressBridge.CompileState,
+    ) {
+        val prelaunchActive: Boolean get() = prelaunch.ppuActive
+        val runtimeActive: Boolean get() = runtime.isActive
+        val isActive: Boolean get() = runtimeActive || prelaunchActive
+        val activeOwners: Set<MonitorOwner>
+            get() = buildSet {
+                if (prelaunch.ppuActive) add(MonitorOwner.PRELAUNCH_PPU)
+                if (runtime.ppuActive) add(MonitorOwner.RUNTIME_PPU)
+                if (runtime.shaderActive) add(MonitorOwner.RUNTIME_SHADER)
+            }
+    }
+
+    fun project(
+        runtime: CompileProgressBridge.CompileState,
+        prelaunch: CompileProgressBridge.CompileState,
+    ): MonitorProjection = MonitorProjection(runtime, prelaunch)
+
+    /** INSTALL origin must never create/keep a runtime-monitor job. */
+    fun shouldIgnoreInstallOrigin(origin: Int): Boolean =
+        origin == RPCSX.COMPILE_ORIGIN_INSTALL
+
+    fun shouldOwnPrelaunch(origin: Int, domain: Int): Boolean =
+        origin == RPCSX.COMPILE_ORIGIN_PRELAUNCH && domain == RPCSX.COMPILE_DOMAIN_PPU
+
+    fun notificationTitle(
+        projection: MonitorProjection,
+        compilingPpu: String,
+        compilingShaders: String,
+        preparingRuntimePpu: String,
+    ): String {
+        val owners = projection.activeOwners
+        return when {
+            MonitorOwner.PRELAUNCH_PPU in owners &&
+                (MonitorOwner.RUNTIME_SHADER in owners || MonitorOwner.RUNTIME_PPU in owners) ->
+                preparingRuntimePpu + " + " + compilingShaders
+            MonitorOwner.PRELAUNCH_PPU in owners -> preparingRuntimePpu
+            MonitorOwner.RUNTIME_PPU in owners && MonitorOwner.RUNTIME_SHADER in owners ->
+                compilingPpu + " + " + compilingShaders
+            MonitorOwner.RUNTIME_PPU in owners -> compilingPpu
+            MonitorOwner.RUNTIME_SHADER in owners -> compilingShaders
+            else -> compilingPpu
+        }
+    }
+
+    fun contentState(projection: MonitorProjection): CompileProgressBridge.CompileState {
+        // Prefer prelaunch progress for the anchor when that owner is active;
+        // keep runtime shader/PPU details when only those remain.
+        return when {
+            projection.prelaunchActive && projection.runtime.shaderActive ->
+                projection.prelaunch.copy(
+                    shaderActive = true,
+                    shaderMsg = projection.runtime.shaderMsg,
+                )
+            projection.prelaunchActive -> projection.prelaunch
+            else -> projection.runtime
+        }
+    }
 }

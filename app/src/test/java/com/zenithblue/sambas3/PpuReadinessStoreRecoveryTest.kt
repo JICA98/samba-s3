@@ -6,6 +6,7 @@ import com.zenithblue.sambas3.ppu.GameLaunchAvailability
 import com.zenithblue.sambas3.ppu.GameRunEligibilityHelper
 import org.junit.After
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
@@ -74,16 +75,15 @@ class PpuReadinessStoreRecoveryTest {
     }
 
     @Test
-    fun stale_compiling_after_reconciliation_is_failed_not_preparing() {
+    fun stale_compiling_after_reconciliation_becomes_retry_on_real_boot() {
         // Key must match the BLxx##### title-id pattern so GameIdentity resolves it
         val key = "BLUS99999"
-        // simulate fresh game with BLUS style key via direct store
         PpuReadinessStore.setPreRuntimeState(ctx, key, PreRuntimePpuState.READY)
         PpuReadinessStore.setRuntimeState(ctx, key, RuntimePpuState.COMPILING)
-        // reconcile (no live job, no prelaunch, Stopped)
         val recovered = PpuReadinessStore.recoverInterruptedRuntimePreparations(ctx)
         assertTrue(recovered.contains(key))
-        // eligibility should now be Failed, not PreparingPpu
+        assertEquals(RuntimePpuState.FAILED, PpuReadinessStore.getRuntimeState(ctx, key))
+        // Install READY + runtime FAILED → real-boot retry, not headless Failed UI
         val game = Game(GameInfoStore("/files/config/games/$key", androidx.compose.runtime.mutableStateOf("Test"), androidx.compose.runtime.mutableStateOf(null), androidx.compose.runtime.mutableIntStateOf(0)))
         val availability = GameRunEligibilityHelper.evaluateAvailability(
             ctx, game, installPpuActive = false,
@@ -92,7 +92,7 @@ class PpuReadinessStoreRecoveryTest {
             emulatorState = EmulatorState.Stopped,
             activeGame = null
         )
-        assertTrue(availability is GameLaunchAvailability.Failed)
-        assertTrue((availability as GameLaunchAvailability.Failed).retryable)
+        assertTrue(availability is GameLaunchAvailability.Ready)
+        assertFalse(PpuReadinessStore.isRuntimeValidated(ctx, key))
     }
 }

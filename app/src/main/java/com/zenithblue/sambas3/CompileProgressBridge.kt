@@ -70,8 +70,18 @@ object CompileProgressBridge {
         ppuDoneWatchdog?.let { mainHandler?.removeCallbacks(it) }
         val r = Runnable {
             if (ppuJobId == jobId && _state.value.ppuActive && _state.value.ppuPercent == 100 && _state.value.moduleDone == _state.value.moduleTotal && _state.value.moduleTotal > 0) {
-                Log.w(TAG, "PPU watchdog: job=$jobId stuck at 100% ${ _state.value.moduleDone}/${ _state.value.moduleTotal} for 30s – forcing clear so PLAY is not blocked")
                 val cur = _state.value
+                val decision = CompileWatchdogLogic.evaluateStuckAtComplete(
+                    ppuActive = cur.ppuActive,
+                    ppuPercent = cur.ppuPercent,
+                    moduleDone = cur.moduleDone,
+                    moduleTotal = cur.moduleTotal,
+                    jobMatches = ppuJobId == jobId,
+                )
+                if (!decision.shouldClearUiActive) return@Runnable
+                // UI-only: never persist Runtime ready / validatedByRealBootFrame from watchdog.
+                Log.w(TAG, decision.logMessage ?: "PPU watchdog clear UI only job=$jobId")
+                Log.w(TAG, "PPU watchdog missing_terminal=1 establishes_validated_ready=0 job=$jobId")
                 ppuJobId = null
                 ppuDoneWatchdog = null
                 if (shaderJobIds.isEmpty()) latestRuntimeEvent = null
@@ -157,10 +167,10 @@ object CompileProgressBridge {
             }
             return
         }
-        // Prelaunch-origin PPU — isolate to prelaunchState for Home coordinator, no FGS monitor.
+        // Prelaunch-origin PPU — isolate to prelaunchState; CompilationMonitorService FGS 2000 owns it.
         if (ev.origin == RPCSX.COMPILE_ORIGIN_PRELAUNCH) {
             if (ev.domain == RPCSX.COMPILE_DOMAIN_PPU) {
-                handlePrelaunchPpu(ev)
+                handlePrelaunchPpu(ev, appCtx)
             } else {
                 Log.d(TAG, "Ignoring PRELAUNCH-origin shader event job=${ev.jobId}")
             }
@@ -218,7 +228,7 @@ object CompileProgressBridge {
         // racing the service's startForeground with a plain notify can hide the FGS notification.
     }
 
-    private fun handlePrelaunchPpu(ev: NativeEvent) {
+    private fun handlePrelaunchPpu(ev: NativeEvent, appCtx: Context?) {
         val cur = _prelaunchState.value
         when (ev.phase) {
             RPCSX.COMPILE_PHASE_BEGIN -> {
@@ -235,10 +245,12 @@ object CompileProgressBridge {
                     moduleDone = ev.moduleDone,
                     moduleTotal = ev.moduleTotal
                 )
+                requestMonitorStart(appCtx, ev)
             }
             RPCSX.COMPILE_PHASE_PROGRESS -> {
                 if (prelaunchPpuJobId == null) prelaunchPpuJobId = ev.jobId
                 if (prelaunchPpuJobId != ev.jobId) return
+                val wasActive = cur.ppuActive
                 _prelaunchState.value = cur.copy(
                     ppuActive = true,
                     titleId = ev.titleId ?: cur.titleId,
@@ -250,6 +262,7 @@ object CompileProgressBridge {
                     moduleDone = ev.moduleDone,
                     moduleTotal = ev.moduleTotal
                 )
+                if (!wasActive) requestMonitorStart(appCtx, ev)
             }
             RPCSX.COMPILE_PHASE_COMPLETED, RPCSX.COMPILE_PHASE_FAILED, RPCSX.COMPILE_PHASE_CANCELED -> {
                 if (prelaunchPpuJobId == null || prelaunchPpuJobId != ev.jobId) return
@@ -422,6 +435,19 @@ object CompileProgressBridge {
             else -> false
         }
     }
+
+    /** Runtime or prelaunch monitor ownership for CompilationMonitorService. */
+    fun isMonitorJobActive(domain: Int, jobId: Long, origin: Int = RPCSX.COMPILE_ORIGIN_RUNTIME): Boolean {
+        if (jobId <= 0L) return false
+        if (origin == RPCSX.COMPILE_ORIGIN_PRELAUNCH) {
+            return domain == RPCSX.COMPILE_DOMAIN_PPU && prelaunchPpuJobId == jobId
+        }
+        if (origin == RPCSX.COMPILE_ORIGIN_INSTALL) return false
+        return isRuntimeJobActive(domain, jobId)
+    }
+
+    fun isPrelaunchJobActive(jobId: Long): Boolean =
+        jobId > 0L && prelaunchPpuJobId == jobId
 
     fun clearForTest() {
         synchronized(this) {

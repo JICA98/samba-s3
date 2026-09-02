@@ -12,9 +12,11 @@ data class GameLaunchSnapshot(
     val driverSysmem: Boolean,
     val settings: List<LaunchSetting>,
     val ppuStatus: String,
+    val ppuUi: LaunchPpuUi,
     val saveSlots: List<SaveSlot>,
     val latestSave: SaveSlot?,
     val canPlayFresh: Boolean,
     val canLoadSave: Boolean,
-    val blockReason: String? = null
+    val blockReason: String? = null,
+    val compactEmptySaves: Boolean = false,
 )

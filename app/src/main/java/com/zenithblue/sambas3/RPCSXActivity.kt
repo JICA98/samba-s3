@@ -30,6 +30,8 @@ import com.zenithblue.sambas3.databinding.ActivityRpcs3Binding
 import com.zenithblue.sambas3.dialogs.AlertDialogQueue
 import com.zenithblue.sambas3.gameconfig.GameSettingsOverrides
 import com.zenithblue.sambas3.overlay.State
+import com.zenithblue.sambas3.ppu.FreshBootFramePhase
+import com.zenithblue.sambas3.ppu.FreshBootFrameValidator
 import com.zenithblue.sambas3.ui.ingame.CloseReason
 import com.zenithblue.sambas3.ui.ingame.GameplayInputGate
 import com.zenithblue.sambas3.ui.ingame.InGameMenuCoordinator
@@ -547,9 +549,177 @@ class RPCSXActivity : ComponentActivity(), EmulationHost {
                 if (bootMode != EmulatorBootMode.FreshGame) {
                     Log.i("S3HOMELOAD", "boot-savestate-return result=NoErrors")
                     Log.i("S3HOMELOAD", "state=${RPCSX.getState()}")
+                    confirmRecoveryFrameAndClear()
+                } else {
+                    Log.i(
+                        "S3BOOTFRAME",
+                        "event=boot_return title=${GameIdentity.titleIdOrNull(gamePath, null)} " +
+                            "result=NoErrors state=${RPCSX.getState()} " +
+                            "surface_gen=${surfaceLeaseManager.currentGeneration}"
+                    )
+                    confirmFreshBootFrameAndValidate()
                 }
-                if (bootMode != EmulatorBootMode.FreshGame) confirmRecoveryFrameAndClear()
                 pollAndLearnTitleId(gamePath)
+            }
+        }
+    }
+
+    /**
+     * Fresh-game boot must prove a real Surface producer frame before Runtime
+     * readiness is persisted. Runtime PPU (if any) must finish first; the
+     * first-frame window does not start while compile is still active.
+     */
+    private fun confirmFreshBootFrameAndValidate() {
+        bootThread?.interrupt()
+        bootThread = thread(name = "S3 Fresh Boot Frame Confirm") {
+            val titleId = GameIdentity.titleIdOrNull(originalGamePath, null)
+                ?: originalGamePath.substringAfterLast('/')
+            var state = FreshBootFrameValidator.bootRequested()
+            val surfaceGen = surfaceLeaseManager.currentGeneration
+            val runtimeActiveAtBoot = runCatching {
+                CompileProgressBridge.state.value.ppuActive
+            }.getOrDefault(false)
+            Log.i(
+                "S3BOOTFRAME",
+                "event=boot_return title=$titleId result=NoErrors " +
+                    "state=${runCatching { RPCSX.getState() }.getOrNull()} surface_gen=$surfaceGen " +
+                    "runtime_ppu_active=${if (runtimeActiveAtBoot) 1 else 0}"
+            )
+            state = FreshBootFrameValidator.bootReturned(
+                state,
+                noErrors = true,
+                surfaceGeneration = surfaceGen,
+                runtimePpuActive = runtimeActiveAtBoot,
+            )
+            // Wait for Runtime PPU terminal if compile is (or becomes) active.
+            val runtimeWaitDeadline = System.currentTimeMillis() + RUNTIME_PPU_WAIT_TIMEOUT_MS
+            while (
+                state.phase == FreshBootFramePhase.WaitingForRuntimePpu &&
+                System.currentTimeMillis() < runtimeWaitDeadline &&
+                !Thread.interrupted()
+            ) {
+                val active = runCatching { CompileProgressBridge.state.value.ppuActive }.getOrDefault(false)
+                if (!active && state.runtimePpuSeen) {
+                    Log.i("S3BOOTFRAME", "event=runtime_ppu_terminal title=$titleId")
+                    state = FreshBootFrameValidator.onRuntimePpuTerminal(
+                        state,
+                        surfaceLeaseManager.currentGeneration,
+                    )
+                    break
+                }
+                if (active && !state.runtimePpuSeen) {
+                    Log.i("S3BOOTFRAME", "event=runtime_ppu_begin title=$titleId")
+                    state = FreshBootFrameValidator.onRuntimePpuBegin(
+                        state,
+                        surfaceLeaseManager.currentGeneration,
+                    )
+                }
+                try {
+                    Thread.sleep(200L)
+                } catch (_: InterruptedException) {
+                    return@thread
+                }
+            }
+            // If Runtime PPU never appeared, move to first-frame wait.
+            if (state.phase == FreshBootFramePhase.WaitingForRuntimePpu) {
+                val stillActive = runCatching { CompileProgressBridge.state.value.ppuActive }.getOrDefault(false)
+                if (!stillActive) {
+                    state = FreshBootFrameValidator.onRuntimePpuTerminal(
+                        state,
+                        surfaceLeaseManager.currentGeneration,
+                    )
+                } else {
+                    Log.e("S3BOOTFRAME", "event=runtime_ppu_wait_timeout title=$titleId")
+                    state = FreshBootFrameValidator.onTimeout(state.copy(phase = FreshBootFramePhase.WaitingForFirstFrame), "runtime-ppu-timeout")
+                }
+            }
+            // Also transition from BootReturned if we skipped runtime wait.
+            if (state.phase == FreshBootFramePhase.BootReturned) {
+                state = state.copy(phase = FreshBootFramePhase.WaitingForFirstFrame)
+            }
+
+            var attempt = 0
+            val frameDeadline = System.currentTimeMillis() + FRESH_BOOT_FIRST_FRAME_TIMEOUT_MS
+            while (
+                state.phase == FreshBootFramePhase.WaitingForFirstFrame &&
+                System.currentTimeMillis() < frameDeadline &&
+                !Thread.interrupted()
+            ) {
+                // If Runtime PPU starts late, pause the frame window.
+                val runtimeActive = runCatching { CompileProgressBridge.state.value.ppuActive }.getOrDefault(false)
+                if (runtimeActive) {
+                    Log.i("S3BOOTFRAME", "event=runtime_ppu_begin title=$titleId late=1")
+                    state = FreshBootFrameValidator.onRuntimePpuBegin(
+                        state,
+                        surfaceLeaseManager.currentGeneration,
+                    )
+                    while (
+                        runCatching { CompileProgressBridge.state.value.ppuActive }.getOrDefault(false) &&
+                        System.currentTimeMillis() < runtimeWaitDeadline &&
+                        !Thread.interrupted()
+                    ) {
+                        try {
+                            Thread.sleep(200L)
+                        } catch (_: InterruptedException) {
+                            return@thread
+                        }
+                    }
+                    state = FreshBootFrameValidator.onRuntimePpuTerminal(
+                        state,
+                        surfaceLeaseManager.currentGeneration,
+                    )
+                    continue
+                }
+                val expectedGen = state.surfaceGeneration
+                val running = runCatching { RPCSX.getState() == EmulatorState.Running }.getOrDefault(false)
+                val copied = if (running) probeCurrentFrame(expectedGen) else false
+                attempt++
+                Log.i(
+                    "S3BOOTFRAME",
+                    "event=frame_probe attempt=$attempt copied=${if (copied) 1 else 0} " +
+                        "state=${runCatching { RPCSX.getState() }.getOrNull()} surface_gen=$expectedGen"
+                )
+                state = FreshBootFrameValidator.onFrameProbe(
+                    state,
+                    copied = copied,
+                    running = running,
+                    surfaceGeneration = surfaceLeaseManager.currentGeneration,
+                )
+                if (state.isValidated) break
+                try {
+                    Thread.sleep(150L)
+                } catch (_: InterruptedException) {
+                    return@thread
+                }
+            }
+
+            if (state.phase == FreshBootFramePhase.WaitingForFirstFrame) {
+                state = FreshBootFrameValidator.onTimeout(state)
+            }
+
+            if (state.isValidated) {
+                Log.i(
+                    "S3BOOTFRAME",
+                    "event=frame_validated samples=${state.stableSamples} surface_gen=${state.surfaceGeneration} title=$titleId"
+                )
+                runCatching {
+                    PpuReadinessStore.markRuntimeValidatedByRealBoot(this@RPCSXActivity, titleId)
+                }
+                EmulationSessionJournal.update(this@RPCSXActivity, EmulationSessionState.RUNNING)
+                return@thread
+            }
+
+            Log.e(
+                "S3BOOTFRAME",
+                "event=frame_timeout title=$titleId phase=${state.phase} reason=${state.failureReason} " +
+                    "runtime_ppu_active=${runCatching { CompileProgressBridge.state.value.ppuActive }.getOrDefault(false)} " +
+                    "shader_active=${runCatching { CompileProgressBridge.state.value.shaderActive }.getOrDefault(false)}"
+            )
+            runCatching {
+                PpuReadinessStore.setRuntimeState(this@RPCSXActivity, titleId, RuntimePpuState.FAILED)
+            }
+            runOnUiThread {
+                failBootAndReturnHome(state.failureReason ?: "first-frame-timeout")
             }
         }
     }
@@ -1513,6 +1683,10 @@ class RPCSXActivity : ComponentActivity(), EmulationHost {
         private const val TITLE_ID_POLL_TIMEOUT_MS = 10_000L
         private const val FRAME_COPY_TIMEOUT_MS = 2_000L
         private const val FIRST_FRAME_TIMEOUT_MS = 120_000L
+        /** First-frame window after Runtime PPU is idle (fresh boot only). */
+        private const val FRESH_BOOT_FIRST_FRAME_TIMEOUT_MS = 45_000L
+        /** Upper bound waiting for in-Activity Runtime PPU before frame probes. */
+        private const val RUNTIME_PPU_WAIT_TIMEOUT_MS = 30 * 60_000L
         private val NEXT_ACTIVITY_ID = AtomicLong(0L)
     }
 }

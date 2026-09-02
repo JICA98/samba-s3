@@ -65,20 +65,32 @@ object GameRunEligibilityHelper {
         }
         val preRuntime = try { PpuReadinessStore.getPreRuntimeState(context, key) } catch (_: Exception) { PreRuntimePpuState.NOT_DONE }
         val runtime = try { PpuReadinessStore.getRuntimeState(context, key) } catch (_: Exception) { RuntimePpuState.NOT_STARTED }
+        val validated = try { PpuReadinessStore.isRuntimeValidated(context, key) } catch (_: Exception) { false }
+        val action = PpuUserActionDecision.decide(
+            PpuActionInputs(
+                preRuntime = preRuntime,
+                runtime = runtime,
+                validatedByRealBootFrame = validated,
+                installPpuActive = installPpuActive,
+                prelaunchPpuActive = prelaunchActive,
+            )
+        )
 
-        return when {
-            preRuntime == PreRuntimePpuState.FAILED || runtime == RuntimePpuState.FAILED ->
-                GameRunEligibility(false, GameRunEligibility.Status.FAILED)
-            preRuntime == PreRuntimePpuState.READY && runtime == RuntimePpuState.IDLE_AFTER_COMPILE ->
+        return when (action) {
+            PpuUserAction.START,
+            PpuUserAction.START_AND_PREPARE_RUNTIME,
+            PpuUserAction.RETRY_RUNTIME_ON_REAL_BOOT ->
                 GameRunEligibility(true, GameRunEligibility.Status.READY)
-            preRuntime == PreRuntimePpuState.IN_PROGRESS || runtime == RuntimePpuState.COMPILING ->
+            PpuUserAction.WAIT_FOR_ACTIVE_JOB ->
                 GameRunEligibility(false, GameRunEligibility.Status.PREPARING_PPU)
-            preRuntime == PreRuntimePpuState.NOT_DONE && runtime == RuntimePpuState.NOT_STARTED ->
-                // Old installs or fresh candidate before import — needs preparation, not bricked
-                GameRunEligibility(false, GameRunEligibility.Status.NEEDS_PREPARATION)
-            else -> {
-                GameRunEligibility(false, GameRunEligibility.Status.PREPARING_PPU)
+            PpuUserAction.REIMPORT_OR_REBUILD_INSTALL_PPU -> when {
+                preRuntime == PreRuntimePpuState.FAILED ->
+                    GameRunEligibility(false, GameRunEligibility.Status.FAILED)
+                else ->
+                    GameRunEligibility(false, GameRunEligibility.Status.NEEDS_PREPARATION)
             }
+            PpuUserAction.NONE ->
+                GameRunEligibility(false, GameRunEligibility.Status.NEEDS_PREPARATION)
         }
     }
 
@@ -117,12 +129,28 @@ object GameRunEligibilityHelper {
         }
         val pre = try { PpuReadinessStore.getPreRuntimeState(context, key) } catch (_: Exception) { PreRuntimePpuState.NOT_DONE }
         val rt = try { PpuReadinessStore.getRuntimeState(context, key) } catch (_: Exception) { RuntimePpuState.NOT_STARTED }
-        return when {
-            pre == PreRuntimePpuState.FAILED || rt == RuntimePpuState.FAILED -> GameLaunchAvailability.Failed(true, "PPU preparation failed")
-            pre == PreRuntimePpuState.READY && rt == RuntimePpuState.IDLE_AFTER_COMPILE -> GameLaunchAvailability.Ready
-            pre == PreRuntimePpuState.IN_PROGRESS || rt == RuntimePpuState.COMPILING -> GameLaunchAvailability.PreparingPpu(prelaunchState)
-            pre == PreRuntimePpuState.NOT_DONE && rt == RuntimePpuState.NOT_STARTED -> GameLaunchAvailability.NeedsPreparation
-            else -> GameLaunchAvailability.PreparingPpu(prelaunchState)
+        val validated = try { PpuReadinessStore.isRuntimeValidated(context, key) } catch (_: Exception) { false }
+        val action = PpuUserActionDecision.decide(
+            PpuActionInputs(
+                preRuntime = pre,
+                runtime = rt,
+                validatedByRealBootFrame = validated,
+                installPpuActive = false,
+                prelaunchPpuActive = false,
+                runtimePpuActive = false,
+            )
+        )
+        return when (action) {
+            PpuUserAction.START,
+            PpuUserAction.START_AND_PREPARE_RUNTIME,
+            PpuUserAction.RETRY_RUNTIME_ON_REAL_BOOT -> GameLaunchAvailability.Ready
+            PpuUserAction.WAIT_FOR_ACTIVE_JOB -> GameLaunchAvailability.PreparingPpu(prelaunchState)
+            PpuUserAction.REIMPORT_OR_REBUILD_INSTALL_PPU -> when {
+                pre == PreRuntimePpuState.FAILED ->
+                    GameLaunchAvailability.Failed(true, "Install PPU failed — re-import required")
+                else -> GameLaunchAvailability.NeedsPreparation
+            }
+            PpuUserAction.NONE -> GameLaunchAvailability.NeedsPreparation
         }
     }
 
