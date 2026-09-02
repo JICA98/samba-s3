@@ -26,7 +26,10 @@ object CompileProgressBridge {
         val fileDone: Int = 0,
         val fileTotal: Int = 0,
         val moduleDone: Int = 0,
-        val moduleTotal: Int = 0
+        val moduleTotal: Int = 0,
+        /** Survives active→false so terminal consumers can distinguish COMPLETED vs FAILED/CANCELED. */
+        val outcome: CompileOutcome = CompileOutcome.NONE,
+        val jobId: Long = 0L,
     ) {
         val activeDomainCount: Int get() = (if (ppuActive) 1 else 0) + (if (shaderActive) 1 else 0)
         val isActive: Boolean get() = ppuActive || shaderActive
@@ -200,7 +203,9 @@ object CompileProgressBridge {
                     fileDone = ev.fileDone,
                     fileTotal = ev.fileTotal,
                     moduleDone = ev.moduleDone,
-                    moduleTotal = ev.moduleTotal
+                    moduleTotal = ev.moduleTotal,
+                    outcome = CompileOutcome.NONE,
+                    jobId = ev.jobId,
                 )
             }
             RPCSX.COMPILE_PHASE_PROGRESS -> {
@@ -215,13 +220,35 @@ object CompileProgressBridge {
                     fileDone = ev.fileDone,
                     fileTotal = ev.fileTotal,
                     moduleDone = ev.moduleDone,
-                    moduleTotal = ev.moduleTotal
+                    moduleTotal = ev.moduleTotal,
+                    outcome = CompileOutcome.NONE,
+                    jobId = ev.jobId,
                 )
             }
             RPCSX.COMPILE_PHASE_COMPLETED, RPCSX.COMPILE_PHASE_FAILED, RPCSX.COMPILE_PHASE_CANCELED -> {
+                // Stale / wrong-job terminals must not clear a newer active job.
                 if (installPpuJobId == null || installPpuJobId != ev.jobId) return
+                val outcome = when (ev.phase) {
+                    RPCSX.COMPILE_PHASE_COMPLETED -> CompileOutcome.COMPLETED
+                    RPCSX.COMPILE_PHASE_FAILED -> CompileOutcome.FAILED
+                    else -> CompileOutcome.CANCELED
+                }
                 installPpuJobId = null
-                _installState.value = CompileState() // clear stale percent/max/msg/file counts/module counts/title
+                // Keep title/job/outcome/progress so PrecompilerService can gate READY on COMPLETED only.
+                _installState.value = cur.copy(
+                    ppuActive = false,
+                    titleId = ev.titleId ?: cur.titleId,
+                    ppuPercent = ev.value.toInt().coerceIn(0, 100).takeIf { ev.max > 0 }
+                        ?: cur.ppuPercent,
+                    ppuMax = if (ev.max > 0) ev.max.toInt() else cur.ppuMax,
+                    ppuMsg = ev.message ?: cur.ppuMsg,
+                    fileDone = if (ev.fileTotal > 0) ev.fileDone else cur.fileDone,
+                    fileTotal = if (ev.fileTotal > 0) ev.fileTotal else cur.fileTotal,
+                    moduleDone = if (ev.moduleTotal > 0) ev.moduleDone else cur.moduleDone,
+                    moduleTotal = if (ev.moduleTotal > 0) ev.moduleTotal else cur.moduleTotal,
+                    outcome = outcome,
+                    jobId = ev.jobId,
+                )
             }
         }
         // PrecompilerService observes installState and updates FGS 3000. Do not notify() here —

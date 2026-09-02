@@ -1,0 +1,7 @@
+=== 1 21:47:04 pid=25970 ===
+VmPeak:	75187508 kB
+VmSize:	74938840 kB
+VmRSS:	  391580 kB
+Threads:	33
+PPUW=
+MemAvailable:    8312316 kB

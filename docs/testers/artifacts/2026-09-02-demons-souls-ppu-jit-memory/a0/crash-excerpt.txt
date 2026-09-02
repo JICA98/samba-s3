@@ -1,0 +1,55 @@
+09-02 21:36:56.636 24052 24316 F libc    : Fatal signal 6 (SIGABRT), code -1 (SI_QUEUE) in tid 24316 (PPUW.1.4), pid 24052 (ithblue.sambas3)
+09-02 21:36:57.053 25004 25004 I crash_dump64: obtaining output fd from tombstoned, type: kDebuggerdTombstoneProto
+09-02 21:36:57.054  1222  1222 I tombstoned: received crash request for pid 24316
+09-02 21:36:57.748 25004 25004 F DEBUG   : *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** ***
+09-02 21:36:57.749 25004 25004 F DEBUG   : LineageOS Version: '23.2-20260614-NIGHTLY-caihong'
+09-02 21:36:57.749 25004 25004 F DEBUG   : Build fingerprint: 'OnePlus/OPD2403IN/OP5DAAL1:16/UKQ1.231108.001/U.R4T3.39a7a65-16b7852-170fdcc:user/release-keys'
+09-02 21:36:57.749 25004 25004 F DEBUG   : Kernel Release: '6.1.173-g84220fe763ed'
+09-02 21:36:57.749 25004 25004 F DEBUG   : Revision: '0'
+09-02 21:36:57.749 25004 25004 F DEBUG   : ABI: 'arm64'
+09-02 21:36:57.749 25004 25004 F DEBUG   : Timestamp: 2026-09-02 21:36:57.105961839+0530
+09-02 21:36:57.749 25004 25004 F DEBUG   : Process uptime: 416s
+09-02 21:36:57.749 25004 25004 F DEBUG   : Executable: /system/bin/app_process64
+09-02 21:36:57.749 25004 25004 F DEBUG   : Cmdline: com.zenithblue.sambas3
+09-02 21:36:57.749 25004 25004 F DEBUG   : pid: 24052, tid: 24316, name: PPUW.1.4  >>> com.zenithblue.sambas3 <<<
+09-02 21:36:57.749 25004 25004 F DEBUG   : uid: 10243
+09-02 21:36:57.749 25004 25004 F DEBUG   : tagged_addr_ctrl: 0000000000000001 (PR_TAGGED_ADDR_ENABLE)
+09-02 21:36:57.749 25004 25004 F DEBUG   : pac_enabled_keys: 000000000000000f (PR_PAC_APIAKEY, PR_PAC_APIBKEY, PR_PAC_APDAKEY, PR_PAC_APDBKEY)
+09-02 21:36:57.749 25004 25004 F DEBUG   : esr: 0000000092000006 (Data Abort Exception 0x24)
+09-02 21:36:57.749 25004 25004 F DEBUG   : signal 6 (SIGABRT), code -1 (SI_QUEUE), fault addr --------
+09-02 21:36:57.749 25004 25004 F DEBUG   :     x0  0000000000000000  x1  0000000000005efc  x2  0000000000000006  x3  00000079f68c47d0
+09-02 21:36:57.749 25004 25004 F DEBUG   :     x4  0000000000000010  x5  0000000000000010  x6  0000000000000010  x7  7f7f7f7f7f7f7f7f
+09-02 21:36:57.749 25004 25004 F DEBUG   :     x8  00000000000000f0  x9  617e3ec742e5422b  x10 000000ff00000020  x11 0000000000090008
+09-02 21:36:57.749 25004 25004 F DEBUG   :     x12 0000000000000001  x13 0000000000000000  x14 cccccccccccccccd  x15 000000000000ffff
+09-02 21:36:57.749 25004 25004 F DEBUG   :     x16 0000007e895ab120  x17 0000007e89592cc0  x18 0000007962a58000  x19 0000000000005df4
+09-02 21:36:57.749 25004 25004 F DEBUG   :     x20 0000000000005efc  x21 00000000ffffffff  x22 0000000000000000  x23 0000007b5144fab0
+09-02 21:36:57.749 25004 25004 F DEBUG   :     x24 00000000004b0b90  x25 0000000000000003  x26 0000007c4ae0bc30  x27 00000079f68c6640
+09-02 21:36:57.749 25004 25004 F DEBUG   :     x28 0005d0090000000b  x29 00000079f68c4850
+09-02 21:36:57.749 25004 25004 F DEBUG   :     lr  0000007e895343c4  sp  00000079f68c47d0  pc  0000007e895343e8  pst 0000000000001000
+09-02 21:36:57.749 25004 25004 F DEBUG   :     esr 0000000092000006
+09-02 21:36:57.749 25004 25004 F DEBUG   : 15 total frames
+09-02 21:36:57.749 25004 25004 F DEBUG   : backtrace:
+09-02 21:36:57.749 25004 25004 F DEBUG   :       #00 pc 00000000000743e8  /apex/com.android.runtime/lib64/bionic/libc.so (abort+156) (BuildId: 0601bdb9deff47820c143e47a687ef5f)
+09-02 21:36:57.749 25004 25004 F DEBUG   :       #01 pc 00000000044956ac  /data/app/~~sGqnzH_5JtZ9pE8sOrsrmA==/com.zenithblue.sambas3-Xi6esVgVNMVYgaOy1o5n4Q==/lib/arm64/librpcsx-android.so (llvm::report_bad_alloc_error(char const*, bool)+128) (BuildId: c519f557ef8b98ed2ebfc64d928336e1e7514fd2)
+09-02 21:36:57.749 25004 25004 F DEBUG   :       #02 pc 00000000044ae5f0  /data/app/~~sGqnzH_5JtZ9pE8sOrsrmA==/com.zenithblue.sambas3-Xi6esVgVNMVYgaOy1o5n4Q==/lib/arm64/librpcsx-android.so (llvm::allocate_buffer(unsigned long, unsigned long)+44) (BuildId: c519f557ef8b98ed2ebfc64d928336e1e7514fd2)
+09-02 21:36:57.749 25004 25004 F DEBUG   :       #03 pc 0000000002ced7e8  /data/app/~~sGqnzH_5JtZ9pE8sOrsrmA==/com.zenithblue.sambas3-Xi6esVgVNMVYgaOy1o5n4Q==/lib/arm64/librpcsx-android.so (BuildId: c519f557ef8b98ed2ebfc64d928336e1e7514fd2)
+09-02 21:36:57.749 25004 25004 F DEBUG   :       #04 pc 0000000002ce9684  /data/app/~~sGqnzH_5JtZ9pE8sOrsrmA==/com.zenithblue.sambas3-Xi6esVgVNMVYgaOy1o5n4Q==/lib/arm64/librpcsx-android.so (llvm::RuntimeDyldImpl::addRelocationForSymbol(llvm::RelocationEntry const&, llvm::StringRef)+292) (BuildId: c519f557ef8b98ed2ebfc64d928336e1e7514fd2)
+09-02 21:36:57.749 25004 25004 F DEBUG   :       #05 pc 0000000002cf5420  /data/app/~~sGqnzH_5JtZ9pE8sOrsrmA==/com.zenithblue.sambas3-Xi6esVgVNMVYgaOy1o5n4Q==/lib/arm64/librpcsx-android.so (llvm::RuntimeDyldELF::processRelocationRef(unsigned int, llvm::object::content_iterator<llvm::object::RelocationRef>, llvm::object::ObjectFile const&, std::__ndk1::map<llvm::object::SectionRef, unsigned int, std::__ndk1::less<llvm::object::SectionRef>, std::__ndk1::allocator<std::__ndk1::pair<llvm::object::SectionRef const, unsigned int>>>&, std::__ndk1::map<llvm::RelocationValueRef, unsigned long, std::__ndk1::less<llvm::RelocationValueRef>, std::__ndk1::allocator<std::__ndk1::pair<llvm::RelocationValueRef const, unsigned long>>>&)+3360) (BuildId: c519f557ef8b98ed2ebfc64d928336e1e7514fd2)
+09-02 21:36:57.749 25004 25004 F DEBUG   :       #06 pc 0000000002ce6cd8  /data/app/~~sGqnzH_5JtZ9pE8sOrsrmA==/com.zenithblue.sambas3-Xi6esVgVNMVYgaOy1o5n4Q==/lib/arm64/librpcsx-android.so (llvm::RuntimeDyldImpl::loadObjectImpl(llvm::object::ObjectFile const&)+2616) (BuildId: c519f557ef8b98ed2ebfc64d928336e1e7514fd2)
+09-02 21:36:57.749 25004 25004 F DEBUG   :       #07 pc 0000000002cf1ebc  /data/app/~~sGqnzH_5JtZ9pE8sOrsrmA==/com.zenithblue.sambas3-Xi6esVgVNMVYgaOy1o5n4Q==/lib/arm64/librpcsx-android.so (llvm::RuntimeDyldELF::loadObject(llvm::object::ObjectFile const&)+52) (BuildId: c519f557ef8b98ed2ebfc64d928336e1e7514fd2)
+09-02 21:36:57.749 25004 25004 F DEBUG   :       #08 pc 0000000002ceb68c  /data/app/~~sGqnzH_5JtZ9pE8sOrsrmA==/com.zenithblue.sambas3-Xi6esVgVNMVYgaOy1o5n4Q==/lib/arm64/librpcsx-android.so (llvm::RuntimeDyld::loadObject(llvm::object::ObjectFile const&)+1712) (BuildId: c519f557ef8b98ed2ebfc64d928336e1e7514fd2)
+09-02 21:36:57.749 25004 25004 F DEBUG   :       #09 pc 0000000002cd654c  /data/app/~~sGqnzH_5JtZ9pE8sOrsrmA==/com.zenithblue.sambas3-Xi6esVgVNMVYgaOy1o5n4Q==/lib/arm64/librpcsx-android.so (llvm::MCJIT::generateCodeForModule(llvm::Module*)+404) (BuildId: c519f557ef8b98ed2ebfc64d928336e1e7514fd2)
+09-02 21:36:57.749 25004 25004 F DEBUG   :       #10 pc 0000000002532098  /data/app/~~sGqnzH_5JtZ9pE8sOrsrmA==/com.zenithblue.sambas3-Xi6esVgVNMVYgaOy1o5n4Q==/lib/arm64/librpcsx-android.so (jit_compiler::add(std::__ndk1::unique_ptr<llvm::Module, std::__ndk1::default_delete<llvm::Module>>, std::__ndk1::basic_string<char, std::__ndk1::char_traits<char>, std::__ndk1::allocator<char>> const&)+148) (BuildId: c519f557ef8b98ed2ebfc64d928336e1e7514fd2)
+09-02 21:36:57.749 25004 25004 F DEBUG   :       #11 pc 00000000051c20c0  /data/app/~~sGqnzH_5JtZ9pE8sOrsrmA==/com.zenithblue.sambas3-Xi6esVgVNMVYgaOy1o5n4Q==/lib/arm64/librpcsx-android.so (BuildId: c519f557ef8b98ed2ebfc64d928336e1e7514fd2)
+09-02 21:36:57.749 25004 25004 F DEBUG   :       #12 pc 00000000051ccdf8  /data/app/~~sGqnzH_5JtZ9pE8sOrsrmA==/com.zenithblue.sambas3-Xi6esVgVNMVYgaOy1o5n4Q==/lib/arm64/librpcsx-android.so (BuildId: c519f557ef8b98ed2ebfc64d928336e1e7514fd2)
+09-02 21:36:57.749 25004 25004 F DEBUG   :       #13 pc 0000000000084a88  /apex/com.android.runtime/lib64/bionic/libc.so (__pthread_start(void*) (.__uniq.67847048707805468364044055584648682506)+236) (BuildId: 0601bdb9deff47820c143e47a687ef5f)
+09-02 21:36:57.749 25004 25004 F DEBUG   :       #14 pc 00000000000775ac  /apex/com.android.runtime/lib64/bionic/libc.so (__start_thread+64) (BuildId: 0601bdb9deff47820c143e47a687ef5f)
+09-02 21:36:57.932  1222  1222 E tombstoned: Tombstone written to: tombstone_32
+09-02 21:36:57.960  6218  6377 I BootReceiver: Filtering tombstone file: tombstone_32.pb
+09-02 21:36:57.968  6218  6377 I BootReceiver: Generated tombstone file: tombstone_32.pb3119807519264563356.pb.tmp
+09-02 21:36:57.968  6218  6377 I BootReceiver: Adding tombstone tombstone_32.pb3119807519264563356.pb.tmp to dropbox
+09-02 21:36:57.974  6218  6377 I BootReceiver: Adding text tombstone version of tombstone_32.pb3119807519264563356.pb.tmp to dropbox
+09-02 21:36:57.514     1     1 I init    : Untracked process (pid: 25013 name: (pbtombstone) ppid: 1 pgrp: 6088 state: Z) exited with status 1
+09-02 21:36:57.514     1     1 I init    : Untracked process (pid: 25013 name: (pbtombstone) ppid: 1 pgrp: 6088 state: Z) did not have an associated service entry and will not be reaped
+09-02 21:36:58.084  6218  6377 I BootReceiver: Copying /data/tombstones/tombstone_32.pb3119807519264563356.pb.tmp485679489419841273.pb.txt.tmp to DropBox (SYSTEM_TOMBSTONE)
+09-02 21:36:57.839     1     1 I init    : Untracked process (pid: 25006 name: (PPUW.1.4) ppid: 1 pgrp: 25006 state: Z) exited with status 0

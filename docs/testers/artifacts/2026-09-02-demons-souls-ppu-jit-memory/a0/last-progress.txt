@@ -1,0 +1,20 @@
+09-02 21:36:08.735 24052 24052 I S3PPU   : event=install_ppu_active progress_id=3000 msg=Progress: module 88 of 233 (9m remaining percent=37 max=100 session=S3-1788364803261-f73a
+09-02 21:36:16.564 24052 24256 W RPCS3   : ProgressMessageDialog::ProgressBarSetMsg(0, Progress: module 89 of 233 (9m remaining))
+09-02 21:36:16.574 24052 24052 I S3PPU   : event=install_ppu_active progress_id=3000 msg=Progress: module 89 of 233 (9m remaining percent=38 max=100 session=S3-1788364803261-f73a
+09-02 21:36:20.323 24052 24256 W RPCS3   : ProgressMessageDialog::ProgressBarSetMsg(0, Progress: module 90 of 233 (9m remaining))
+09-02 21:36:20.338 24052 24052 I S3PPU   : event=install_ppu_active progress_id=3000 msg=Progress: module 90 of 233 (9m remaining percent=38 max=100 session=S3-1788364803261-f73a
+09-02 21:36:21.865 24052 24256 W RPCS3   : ProgressMessageDialog::ProgressBarSetMsg(0, Progress: module 91 of 233 (8m remaining))
+09-02 21:36:21.873 24052 24052 I S3PPU   : event=install_ppu_active progress_id=3000 msg=Progress: module 91 of 233 (8m remaining percent=39 max=100 session=S3-1788364803261-f73a
+09-02 21:36:27.404 24052 24256 W RPCS3   : ProgressMessageDialog::ProgressBarSetMsg(0, Progress: module 92 of 233 (8m remaining))
+09-02 21:36:27.407 24052 24052 I S3PPU   : event=install_ppu_active progress_id=3000 msg=Progress: module 92 of 233 (8m remaining percent=39 max=100 session=S3-1788364803261-f73a
+09-02 21:36:31.893 24052 24256 W RPCS3   : ProgressMessageDialog::ProgressBarSetMsg(0, Progress: module 93 of 233 (8m remaining))
+09-02 21:36:31.894 24052 24052 I S3PPU   : event=install_ppu_active progress_id=3000 msg=Progress: module 93 of 233 (8m remaining percent=39 max=100 session=S3-1788364803261-f73a
+09-02 21:36:32.903 24052 24256 W RPCS3   : ProgressMessageDialog::ProgressBarSetMsg(0, Progress: module 94 of 233 (8m remaining))
+09-02 21:36:32.904 24052 24052 I S3PPU   : event=install_ppu_active progress_id=3000 msg=Progress: module 94 of 233 (8m remaining percent=40 max=100 session=S3-1788364803261-f73a
+09-02 21:36:39.533 24052 24256 W RPCS3   : ProgressMessageDialog::ProgressBarSetMsg(0, Progress: module 95 of 233 (8m remaining))
+09-02 21:36:39.545 24052 24052 I S3PPU   : event=install_ppu_active progress_id=3000 msg=Progress: module 95 of 233 (8m remaining percent=40 max=100 session=S3-1788364803261-f73a
+09-02 21:36:44.983 24052 24256 W RPCS3   : ProgressMessageDialog::ProgressBarSetMsg(0, Progress: module 96 of 233 (8m remaining))
+09-02 21:36:44.993 24052 24052 I S3PPU   : event=install_ppu_active progress_id=3000 msg=Progress: module 96 of 233 (8m remaining percent=41 max=100 session=S3-1788364803261-f73a
+09-02 21:36:45.667 24052 24256 W RPCS3   : ProgressMessageDialog::ProgressBarSetMsg(0, Progress: module 97 of 233 (8m remaining))
+09-02 21:36:45.673 24052 24052 I S3PPU   : event=install_ppu_active progress_id=3000 msg=Progress: module 97 of 233 (8m remaining percent=41 max=100 session=S3-1788364803261-f73a
+09-02 21:36:56.636 24052 24316 F libc    : Fatal signal 6 (SIGABRT), code -1 (SI_QUEUE) in tid 24316 (PPUW.1.4), pid 24052 (ithblue.sambas3)

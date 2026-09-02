@@ -1,0 +1,120 @@
+*** *** *** *** *** *** *** *** *** *** *** *** *** *** *** ***
+LineageOS Version: '23.2-20260614-NIGHTLY-caihong'
+Build fingerprint: 'OnePlus/OPD2403IN/OP5DAAL1:16/UKQ1.231108.001/U.R4T3.39a7a65-16b7852-170fdcc:user/release-keys'
+Kernel Release: '6.1.173-g84220fe763ed'
+Revision: '0'
+ABI: 'arm64'
+Timestamp: 2026-09-02 22:58:04.189082117+0530
+Process uptime: 683s
+Executable: /system/bin/app_process64
+Cmdline: com.zenithblue.sambas3
+pid: 490, tid: 569, name: Thread-6  >>> com.zenithblue.sambas3 <<<
+uid: 10243
+tagged_addr_ctrl: 0000000000000001 (PR_TAGGED_ADDR_ENABLE)
+pac_enabled_keys: 000000000000000f (PR_PAC_APIAKEY, PR_PAC_APIBKEY, PR_PAC_APDAKEY, PR_PAC_APDBKEY)
+esr: 0000000092000006 (Data Abort Exception 0x24)
+signal 6 (SIGABRT), code -1 (SI_QUEUE), fault addr --------
+Abort message: 'Scudo ERROR: internal map failure (error desc=Out of memory)'
+    x0  0000000000000000  x1  0000000000000239  x2  0000000000000006  x3  0000007b5664ebd0
+    x4  71746b6860651f6f  x5  71746b6860651f6f  x6  71746b6860651f6f  x7  7f7f7f7f7f7f7f7f
+    x8  00000000000000f0  x9  4db8a4f0a23f1d10  x10 000000ff00000020  x11 000000003b9ac9ff
+    x12 000000007fffffff  x13 000000000cdd5882  x14 0000091cc3ebc18d  x15 0000000034155555
+    x16 0000007e895ab120  x17 0000007e89592cc0  x18 0000007b430d4000  x19 00000000000001ea
+    x20 0000000000000239  x21 00000000ffffffff  x22 0000000000000005  x23 0000000000000000
+    x24 0000000000000a23  x25 000000671dfb95d0  x26 000000671dfba000  x27 fffffffffffffff0
+    x28 0000000000000000  x29 0000007b5664ec50
+    lr  0000007e895343c4  sp  0000007b5664ebd0  pc  0000007e895343e8  pst 0000000000001000
+    esr 0000000092000006
+
+58 total frames
+backtrace:
+      #00 pc 00000000000743e8  /apex/com.android.runtime/lib64/bionic/libc.so (abort+156) (BuildId: 0601bdb9deff47820c143e47a687ef5f)
+      #01 pc 000000000005ce2c  /apex/com.android.runtime/lib64/bionic/libc.so (scudo::die()+8) (BuildId: 0601bdb9deff47820c143e47a687ef5f)
+      #02 pc 000000000005d79c  /apex/com.android.runtime/lib64/bionic/libc.so (scudo::reportRawError(char const*)+28) (BuildId: 0601bdb9deff47820c143e47a687ef5f)
+      #03 pc 000000000005de8c  /apex/com.android.runtime/lib64/bionic/libc.so (scudo::reportMapError(unsigned long)+172) (BuildId: 0601bdb9deff47820c143e47a687ef5f)
+      #04 pc 000000000005d3ec  /apex/com.android.runtime/lib64/bionic/libc.so (scudo::MemMapLinux::remapImpl(unsigned long, unsigned long, char const*, unsigned long)+208) (BuildId: 0601bdb9deff47820c143e47a687ef5f)
+      #05 pc 0000000000061bf8  /apex/com.android.runtime/lib64/bionic/libc.so (scudo::MapAllocator<scudo::SecondaryConfig<scudo::AndroidNormalConfig>>::allocate(scudo::Options const&, unsigned long, unsigned long, unsigned long*, scudo::FillContentsMode)+412) (BuildId: 0601bdb9deff47820c143e47a687ef5f)
+      #06 pc 000000000005ef84  /apex/com.android.runtime/lib64/bionic/libc.so (scudo::Allocator<scudo::AndroidNormalConfig, &scudo_malloc_postinit>::allocate(unsigned long, scudo::Chunk::Origin, unsigned long, bool)+896) (BuildId: 0601bdb9deff47820c143e47a687ef5f)
+      #07 pc 000000000005f374  /apex/com.android.runtime/lib64/bionic/libc.so (scudo_posix_memalign+64) (BuildId: 0601bdb9deff47820c143e47a687ef5f)
+      #08 pc 0000000000059848  /apex/com.android.runtime/lib64/bionic/libc.so (posix_memalign+44) (BuildId: 0601bdb9deff47820c143e47a687ef5f)
+      #09 pc 00000000081ef860  /data/app/~~e5DFiguoI0bdbVLmBnanCQ==/com.zenithblue.sambas3-NI8dtJh6nYzZ_fW7HmPSmA==/lib/arm64/librpcsx-android.so (operator new(unsigned long, std::align_val_t)+72) (BuildId: e3aca30b2a79cabdf21906556535761053e7339c)
+      #10 pc 000000000775260c  /data/app/~~e5DFiguoI0bdbVLmBnanCQ==/com.zenithblue.sambas3-NI8dtJh6nYzZ_fW7HmPSmA==/lib/arm64/librpcsx-android.so (operator new(unsigned long, std::align_val_t, std::nothrow_t const&)+12) (BuildId: e3aca30b2a79cabdf21906556535761053e7339c)
+      #11 pc 000000000686d8ec  /data/app/~~e5DFiguoI0bdbVLmBnanCQ==/com.zenithblue.sambas3-NI8dtJh6nYzZ_fW7HmPSmA==/lib/arm64/librpcsx-android.so (llvm::allocate_buffer(unsigned long, unsigned long)+16) (BuildId: e3aca30b2a79cabdf21906556535761053e7339c)
+      #12 pc 00000000050aaaf0  /data/app/~~e5DFiguoI0bdbVLmBnanCQ==/com.zenithblue.sambas3-NI8dtJh6nYzZ_fW7HmPSmA==/lib/arm64/librpcsx-android.so (BuildId: e3aca30b2a79cabdf21906556535761053e7339c)
+      #13 pc 00000000050a698c  /data/app/~~e5DFiguoI0bdbVLmBnanCQ==/com.zenithblue.sambas3-NI8dtJh6nYzZ_fW7HmPSmA==/lib/arm64/librpcsx-android.so (llvm::RuntimeDyldImpl::addRelocationForSymbol(llvm::RelocationEntry const&, llvm::StringRef)+292) (BuildId: e3aca30b2a79cabdf21906556535761053e7339c)
+      #14 pc 00000000050b2728  /data/app/~~e5DFiguoI0bdbVLmBnanCQ==/com.zenithblue.sambas3-NI8dtJh6nYzZ_fW7HmPSmA==/lib/arm64/librpcsx-android.so (llvm::RuntimeDyldELF::processRelocationRef(unsigned int, llvm::object::content_iterator<llvm::object::RelocationRef>, llvm::object::ObjectFile const&, std::__ndk1::map<llvm::object::SectionRef, unsigned int, std::__ndk1::less<llvm::object::SectionRef>, std::__ndk1::allocator<std::__ndk1::pair<llvm::object::SectionRef const, unsigned int>>>&, std::__ndk1::map<llvm::RelocationValueRef, unsigned long, std::__ndk1::less<llvm::RelocationValueRef>, std::__ndk1::allocator<std::__ndk1::pair<llvm::RelocationValueRef const, unsigned long>>>&)+3360) (BuildId: e3aca30b2a79cabdf21906556535761053e7339c)
+      #15 pc 00000000050a3fe0  /data/app/~~e5DFiguoI0bdbVLmBnanCQ==/com.zenithblue.sambas3-NI8dtJh6nYzZ_fW7HmPSmA==/lib/arm64/librpcsx-android.so (llvm::RuntimeDyldImpl::loadObjectImpl(llvm::object::ObjectFile const&)+2616) (BuildId: e3aca30b2a79cabdf21906556535761053e7339c)
+      #16 pc 00000000050af1c4  /data/app/~~e5DFiguoI0bdbVLmBnanCQ==/com.zenithblue.sambas3-NI8dtJh6nYzZ_fW7HmPSmA==/lib/arm64/librpcsx-android.so (llvm::RuntimeDyldELF::loadObject(llvm::object::ObjectFile const&)+52) (BuildId: e3aca30b2a79cabdf21906556535761053e7339c)
+      #17 pc 00000000050a8994  /data/app/~~e5DFiguoI0bdbVLmBnanCQ==/com.zenithblue.sambas3-NI8dtJh6nYzZ_fW7HmPSmA==/lib/arm64/librpcsx-android.so (llvm::RuntimeDyld::loadObject(llvm::object::ObjectFile const&)+1712) (BuildId: e3aca30b2a79cabdf21906556535761053e7339c)
+      #18 pc 000000000509382c  /data/app/~~e5DFiguoI0bdbVLmBnanCQ==/com.zenithblue.sambas3-NI8dtJh6nYzZ_fW7HmPSmA==/lib/arm64/librpcsx-android.so (llvm::MCJIT::generateCodeForModule(llvm::Module*)+404) (BuildId: e3aca30b2a79cabdf21906556535761053e7339c)
+      #19 pc 00000000046d9920  /data/app/~~e5DFiguoI0bdbVLmBnanCQ==/com.zenithblue.sambas3-NI8dtJh6nYzZ_fW7HmPSmA==/lib/arm64/librpcsx-android.so (jit_compiler::add(std::__ndk1::unique_ptr<llvm::Module, std::__ndk1::default_delete<llvm::Module>>, std::__ndk1::basic_string<char, std::__ndk1::char_traits<char>, std::__ndk1::allocator<char>> const&)+176) (BuildId: e3aca30b2a79cabdf21906556535761053e7339c)
+      #20 pc 0000000007903d0c  /data/app/~~e5DFiguoI0bdbVLmBnanCQ==/com.zenithblue.sambas3-NI8dtJh6nYzZ_fW7HmPSmA==/lib/arm64/librpcsx-android.so (BuildId: e3aca30b2a79cabdf21906556535761053e7339c)
+      #21 pc 00000000078e1c90  /data/app/~~e5DFiguoI0bdbVLmBnanCQ==/com.zenithblue.sambas3-NI8dtJh6nYzZ_fW7HmPSmA==/lib/arm64/librpcsx-android.so (BuildId: e3aca30b2a79cabdf21906556535761053e7339c)
+      #22 pc 00000000078de4d0  /data/app/~~e5DFiguoI0bdbVLmBnanCQ==/com.zenithblue.sambas3-NI8dtJh6nYzZ_fW7HmPSmA==/lib/arm64/librpcsx-android.so (ppu_initialize(ppu_module<lv2_obj> const&, bool, unsigned long, concurent_memory_limit&)+8964) (BuildId: e3aca30b2a79cabdf21906556535761053e7339c)
+      #23 pc 00000000078dbf24  /data/app/~~e5DFiguoI0bdbVLmBnanCQ==/com.zenithblue.sambas3-NI8dtJh6nYzZ_fW7HmPSmA==/lib/arm64/librpcsx-android.so (ppu_initialize(ppu_module<lv2_obj> const&, bool, unsigned long)+72) (BuildId: e3aca30b2a79cabdf21906556535761053e7339c)
+      #24 pc 0000000003cb668c  /data/app/~~e5DFiguoI0bdbVLmBnanCQ==/com.zenithblue.sambas3-NI8dtJh6nYzZ_fW7HmPSmA==/lib/arm64/librpcsx-android.so (CompilationQueue::impl(_JNIEnv*, CompilationWorkload)+4728) (BuildId: e3aca30b2a79cabdf21906556535761053e7339c)
+      #25 pc 0000000003c4630c  /data/app/~~e5DFiguoI0bdbVLmBnanCQ==/com.zenithblue.sambas3-NI8dtJh6nYzZ_fW7HmPSmA==/lib/arm64/librpcsx-android.so (CompilationQueue::process(_JNIEnv*)+336) (BuildId: e3aca30b2a79cabdf21906556535761053e7339c)
+      #26 pc 0000000003c461a4  /data/app/~~e5DFiguoI0bdbVLmBnanCQ==/com.zenithblue.sambas3-NI8dtJh6nYzZ_fW7HmPSmA==/lib/arm64/librpcsx-android.so (_rpcsx_processCompilationQueue+28) (BuildId: e3aca30b2a79cabdf21906556535761053e7339c)
+      #27 pc 000000000001aeb0  /data/app/~~e5DFiguoI0bdbVLmBnanCQ==/com.zenithblue.sambas3-NI8dtJh6nYzZ_fW7HmPSmA==/lib/arm64/libsambas3-android.so (Java_com_zenithblue_sambas3_RPCSX_processCompilationQueue+36) (BuildId: af3f4ad6256e0bd6ebd95003530221ec3a70d49e)
+      #28 pc 00000000002e9100  /apex/com.android.art/lib64/libart.so (art_quick_generic_jni_trampoline+144) (BuildId: 1ccc007706e8fe8920610268144d1834)
+      #29 pc 00000000002d1d94  /apex/com.android.art/lib64/libart.so (art_quick_invoke_stub+612) (BuildId: 1ccc007706e8fe8920610268144d1834)
+      #30 pc 0000000000589370  /apex/com.android.art/lib64/libart.so (bool art::interpreter::DoCall<false>(art::ArtMethod*, art::Thread*, art::ShadowFrame&, art::Instruction const*, unsigned short, bool, art::JValue*)+2688) (BuildId: 1ccc007706e8fe8920610268144d1834)
+      #31 pc 00000000004a9c1c  /apex/com.android.art/lib64/libart.so (void art::interpreter::ExecuteSwitchImplCpp<false>(art::interpreter::SwitchImplContext*)+1488) (BuildId: 1ccc007706e8fe8920610268144d1834)
+      #32 pc 00000000003c8508  /apex/com.android.art/lib64/libart.so (ExecuteSwitchImplAsm+8) (BuildId: 1ccc007706e8fe8920610268144d1834)
+      #33 pc 000000000002e698  /data/app/~~e5DFiguoI0bdbVLmBnanCQ==/com.zenithblue.sambas3-NI8dtJh6nYzZ_fW7HmPSmA==/base.apk (offset 0x5324000) (com.zenithblue.sambas3.MainActivity.onCreate$lambda$2+0)
+      #34 pc 00000000003c90d4  /apex/com.android.art/lib64/libart.so (art::interpreter::ArtInterpreterToInterpreterBridge(art::Thread*, art::CodeItemDataAccessor const&, art::ShadowFrame*, art::JValue*)+448) (BuildId: 1ccc007706e8fe8920610268144d1834)
+      #35 pc 0000000000589760  /apex/com.android.art/lib64/libart.so (bool art::interpreter::DoCall<false>(art::ArtMethod*, art::Thread*, art::ShadowFrame&, art::Instruction const*, unsigned short, bool, art::JValue*)+3696) (BuildId: 1ccc007706e8fe8920610268144d1834)
+      #36 pc 00000000004a9820  /apex/com.android.art/lib64/libart.so (void art::interpreter::ExecuteSwitchImplCpp<false>(art::interpreter::SwitchImplContext*)+468) (BuildId: 1ccc007706e8fe8920610268144d1834)
+      #37 pc 00000000003c8508  /apex/com.android.art/lib64/libart.so (ExecuteSwitchImplAsm+8) (BuildId: 1ccc007706e8fe8920610268144d1834)
+      #38 pc 000000000002e600  /data/app/~~e5DFiguoI0bdbVLmBnanCQ==/com.zenithblue.sambas3-NI8dtJh6nYzZ_fW7HmPSmA==/base.apk (offset 0x5324000) (com.zenithblue.sambas3.MainActivity.$r8$lambda$cU_A0utkE_r1eqhGd-jwjL2tg0Q+0)
+      #39 pc 00000000003c90d4  /apex/com.android.art/lib64/libart.so (art::interpreter::ArtInterpreterToInterpreterBridge(art::Thread*, art::CodeItemDataAccessor const&, art::ShadowFrame*, art::JValue*)+448) (BuildId: 1ccc007706e8fe8920610268144d1834)
+      #40 pc 0000000000589760  /apex/com.android.art/lib64/libart.so (bool art::interpreter::DoCall<false>(art::ArtMethod*, art::Thread*, art::ShadowFrame&, art::Instruction const*, unsigned short, bool, art::JValue*)+3696) (BuildId: 1ccc007706e8fe8920610268144d1834)
+      #41 pc 00000000004a9820  /apex/com.android.art/lib64/libart.so (void art::interpreter::ExecuteSwitchImplCpp<false>(art::interpreter::SwitchImplContext*)+468) (BuildId: 1ccc007706e8fe8920610268144d1834)
+      #42 pc 00000000003c8508  /apex/com.android.art/lib64/libart.so (ExecuteSwitchImplAsm+8) (BuildId: 1ccc007706e8fe8920610268144d1834)
+      #43 pc 000000000002dfa8  /data/app/~~e5DFiguoI0bdbVLmBnanCQ==/com.zenithblue.sambas3-NI8dtJh6nYzZ_fW7HmPSmA==/base.apk (offset 0x5324000) (com.zenithblue.sambas3.MainActivity$$ExternalSyntheticLambda2.invoke+0)
+      #44 pc 00000000003c90d4  /apex/com.android.art/lib64/libart.so (art::interpreter::ArtInterpreterToInterpreterBridge(art::Thread*, art::CodeItemDataAccessor const&, art::ShadowFrame*, art::JValue*)+448) (BuildId: 1ccc007706e8fe8920610268144d1834)
+      #45 pc 0000000000589760  /apex/com.android.art/lib64/libart.so (bool art::interpreter::DoCall<false>(art::ArtMethod*, art::Thread*, art::ShadowFrame&, art::Instruction const*, unsigned short, bool, art::JValue*)+3696) (BuildId: 1ccc007706e8fe8920610268144d1834)
+      #46 pc 00000000004a9de4  /apex/com.android.art/lib64/libart.so (void art::interpreter::ExecuteSwitchImplCpp<false>(art::interpreter::SwitchImplContext*)+1944) (BuildId: 1ccc007706e8fe8920610268144d1834)
+      #47 pc 00000000003c8508  /apex/com.android.art/lib64/libart.so (ExecuteSwitchImplAsm+8) (BuildId: 1ccc007706e8fe8920610268144d1834)
+      #48 pc 000000000024da78  /data/app/~~e5DFiguoI0bdbVLmBnanCQ==/com.zenithblue.sambas3-NI8dtJh6nYzZ_fW7HmPSmA==/base.apk (offset 0x1c6f000) (kotlin.concurrent.ThreadsKt$thread$thread$1.run+0)
+      #49 pc 00000000003c8160  /apex/com.android.art/lib64/libart.so (art::interpreter::Execute(art::Thread*, art::CodeItemDataAccessor const&, art::ShadowFrame&, art::JValue, bool, bool) (.__uniq.112435418011751916792819755956732575238.llvm.12985447895906126191)+364) (BuildId: 1ccc007706e8fe8920610268144d1834)
+      #50 pc 00000000003c7894  /apex/com.android.art/lib64/libart.so (artQuickToInterpreterBridge+1020) (BuildId: 1ccc007706e8fe8920610268144d1834)
+      #51 pc 00000000002e9238  /apex/com.android.art/lib64/libart.so (art_quick_to_interpreter_bridge+88) (BuildId: 1ccc007706e8fe8920610268144d1834)
+      #52 pc 00000000002d1d94  /apex/com.android.art/lib64/libart.so (art_quick_invoke_stub+612) (BuildId: 1ccc007706e8fe8920610268144d1834)
+      #53 pc 000000000026fce0  /apex/com.android.art/lib64/libart.so (art::ArtMethod::Invoke(art::Thread*, unsigned int*, unsigned int, art::JValue*, char const*)+220) (BuildId: 1ccc007706e8fe8920610268144d1834)
+      #54 pc 000000000049f0b0  /apex/com.android.art/lib64/libart.so (art::Thread::CreateCallback(void*)+1176) (BuildId: 1ccc007706e8fe8920610268144d1834)
+      #55 pc 000000000049ec08  /apex/com.android.art/lib64/libart.so (art::Thread::CreateCallbackWithUffdGc(void*)+8) (BuildId: 1ccc007706e8fe8920610268144d1834)
+      #56 pc 0000000000084a88  /apex/com.android.runtime/lib64/bionic/libc.so (__pthread_start(void*) (.__uniq.67847048707805468364044055584648682506)+236) (BuildId: 0601bdb9deff47820c143e47a687ef5f)
+      #57 pc 00000000000775ac  /apex/com.android.runtime/lib64/bionic/libc.so (__start_thread+64) (BuildId: 0601bdb9deff47820c143e47a687ef5f)
+
+memory near x3 ([anon:stack_and_tls:569]):
+    0000007b5664ebb0 0000000000000005 0000007e894de71f  ..........M.~...
+    0000007b5664ebc0 0000000000001000 0000007b5664ecd0  ..........dV{...
+    0000007b5664ebd0 0000000000000000 00000000ffffffff  ................
+    0000007b5664ebe0 00002803000001ea 0000000000000000  .....(..........
+    0000007b5664ebf0 0000000000000000 0000000000000000  ................
+    0000007b5664ec00 0000000000000000 0000000000000000  ................
+    0000007b5664ec10 0000000000000000 0000000000000000  ................
+    0000007b5664ec20 0000000000000000 0000000000000000  ................
+    0000007b5664ec30 0000000000000000 0000000000000000  ................
+    0000007b5664ec40 0000000000000000 0000000000000000  ................
+    0000007b5664ec50 0000007b5664ec80 0000007e8951ce30  ..dV{...0.Q.~...
+    0000007b5664ec60 0000007e894de71f 0000000000000020  ..M.~... .......
+    0000007b5664ec70 0000000000001000 0000007b5664ecd0  ..........dV{...
+    0000007b5664ec80 0000007b5664ec90 0000007e8951d7a0  ..dV{.....Q.~...
+    0000007b5664ec90 0000007b5664ede0 0000007e8951de90  ..dV{.....Q.~...
+    0000007b5664eca0 0000000000000000 0000007e8951de88  ..........Q.~...
+
+memory near x11 ([anon:dalvik-free list large object space]):
+    000000003b9ac9d0 0000000000000000 0000000000000000  ................
+    000000003b9ac9e0 0000000000000000 0000000000000000  ................
+    000000003b9ac9f0 0000000000000000 0000000000000000  ................
+    000000003b9aca00 0000000000000000 0000000000000000  ................
+    000000003b9aca10 0000000000000000 0000000000000000  ................
+    000000003b9aca20 0000000000000000 0000000000000000  ................
+    000000003b9aca30 0000000000000000 0000000000000000  ................
+    000000003b9aca40 0000000000000000 0000000000000000  ................
+    000000003b9aca50 0000000000000000 0000000000000000  ................
+    000000003b9aca60 0000000000000000 0000000000000000  ................
+    000000003b9aca70 0000000000000000 0000000000000000  ................
+    000000003b9aca80 0000000000000000 0000000000000000  ................

@@ -11,9 +11,13 @@ import android.util.Log
 import android.util.Base64
 import com.zenithblue.sambas3.BuildConfig
 import com.zenithblue.sambas3.Digital2Flags
+import com.zenithblue.sambas3.GameRepository
 import com.zenithblue.sambas3.LogMonitor
+import com.zenithblue.sambas3.PrecompilerService
+import com.zenithblue.sambas3.PrecompilerServiceAction
 import com.zenithblue.sambas3.RPCSX
 import com.zenithblue.sambas3.gameconfig.SettingsBackendAudit
+import com.zenithblue.sambas3.utils.FileUtil
 import org.json.JSONObject
 
 /**
@@ -60,6 +64,10 @@ class DebugPadReceiver(private val onDebugFatal: (() -> Unit)? = null) : Broadca
             handleSettingsProbe(intent)
             return
         }
+        if (action == ACTION_REMOVE_GAME || action == ACTION_INSTALL_FILE) {
+            handleLibraryProbe(context, intent)
+            return
+        }
         when {
             action == ACTION_PAD -> {
                 val d1 = intent.getIntExtra("d1", 0)
@@ -83,6 +91,57 @@ class DebugPadReceiver(private val onDebugFatal: (() -> Unit)? = null) : Broadca
                     RPCSX.instance.overlayPadData(0, 0, 127, 127, 127, 127)
                     Log.w("DebugPad", "BUTTON $suffix release")
                 }, 120)
+            }
+        }
+    }
+
+    private fun handleLibraryProbe(context: Context?, intent: Intent) {
+        if (!BuildConfig.DEBUG) {
+            Log.w("S3LIB_HARNESS", "ignored in non-debug build")
+            return
+        }
+        val ctx = context?.applicationContext ?: return
+        val action = intent.action ?: return
+        when (action) {
+            ACTION_REMOVE_GAME -> {
+                val title = intent.getStringExtra("title")?.trim().orEmpty()
+                if (title.isEmpty()) {
+                    Log.w("S3LIB_HARNESS", "remove missing title=")
+                    return
+                }
+                val game = GameRepository.list().firstOrNull { g ->
+                    val path = g.info.path
+                    path.substringAfterLast('/').equals(title, ignoreCase = true) ||
+                        path.contains(title, ignoreCase = true)
+                }
+                if (game == null) {
+                    Log.w("S3LIB_HARNESS", "remove title=$title not_found")
+                    return
+                }
+                FileUtil.removeGame(ctx, game) { ok ->
+                    Log.i("S3LIB_HARNESS", "remove title=$title ok=$ok path=${game.info.path}")
+                }
+            }
+            ACTION_INSTALL_FILE -> {
+                val uriExtra = intent.getStringExtra("uri")?.trim().orEmpty()
+                val path = intent.getStringExtra("path")?.trim().orEmpty()
+                val uri = when {
+                    uriExtra.isNotEmpty() -> android.net.Uri.parse(uriExtra)
+                    path.isNotEmpty() -> {
+                        val file = java.io.File(path)
+                        if (!file.isFile) {
+                            Log.w("S3LIB_HARNESS", "install path=$path not_file")
+                            return
+                        }
+                        android.net.Uri.fromFile(file)
+                    }
+                    else -> {
+                        Log.w("S3LIB_HARNESS", "install missing path=/uri=")
+                        return
+                    }
+                }
+                PrecompilerService.start(ctx, PrecompilerServiceAction.Install, uri)
+                Log.i("S3LIB_HARNESS", "install started uri=$uri")
             }
         }
     }
@@ -210,6 +269,10 @@ class DebugPadReceiver(private val onDebugFatal: (() -> Unit)? = null) : Broadca
         const val ACTION_SETTINGS_WRITE_GAME = ACTION_SETTINGS_PREFIX + "WRITE_GAME"
         const val ACTION_SETTINGS_CLEAR_GAME = ACTION_SETTINGS_PREFIX + "CLEAR_GAME"
         const val ACTION_SETTINGS_CLEAR_ALL = ACTION_SETTINGS_PREFIX + "CLEAR_ALL"
+        /** Debug-only: remove an imported title via FileUtil.removeGame (same path as UI). */
+        const val ACTION_REMOVE_GAME = "com.zenithblue.sambas3.DEBUG_REMOVE_GAME"
+        /** Debug-only: start PrecompilerService Install for a filesystem ISO/folder path. */
+        const val ACTION_INSTALL_FILE = "com.zenithblue.sambas3.DEBUG_INSTALL_FILE"
 
         fun register(context: Context, onDebugFatal: (() -> Unit)? = null): DebugPadReceiver {
             val r = DebugPadReceiver(onDebugFatal)
@@ -229,6 +292,8 @@ class DebugPadReceiver(private val onDebugFatal: (() -> Unit)? = null) : Broadca
                 addAction(ACTION_SETTINGS_WRITE_GAME)
                 addAction(ACTION_SETTINGS_CLEAR_GAME)
                 addAction(ACTION_SETTINGS_CLEAR_ALL)
+                addAction(ACTION_REMOVE_GAME)
+                addAction(ACTION_INSTALL_FILE)
                 addAction(PREFIX + "CROSS")
                 addAction(PREFIX + "CIRCLE")
                 addAction(PREFIX + "SQUARE")

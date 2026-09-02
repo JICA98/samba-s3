@@ -1,0 +1,470 @@
+09-02 21:55:14.811 25970 25999 F libc    : Fatal signal 6 (SIGABRT), code -1 (SI_QUEUE) in tid 25999 (Thread-6), pid 25970 (ithblue.sambas3)
+09-02 21:55:15.715 27040 27040 F DEBUG   :       #01 pc 00000000044956ac  /data/app/~~moIId_P1Xta3Zr4qVe5ZXA==/com.zenithblue.sambas3-3-u81uW3ksLh99doItQhNw==/lib/arm64/librpcsx-android.so (llvm::report_bad_alloc_error(char const*, bool)+128) (BuildId: c519f557ef8b98ed2ebfc64d928336e1e7514fd2)
+09-02 21:55:15.850  6218  6377 I BootReceiver: Filtering tombstone file: tombstone_33.pb
+09-02 21:55:15.858  6218  6377 I BootReceiver: Generated tombstone file: tombstone_33.pb3998017657568255102.pb.tmp
+09-02 21:55:15.858  6218  6377 I BootReceiver: Adding tombstone tombstone_33.pb3998017657568255102.pb.tmp to dropbox
+09-02 21:55:15.862  6218  6377 I BootReceiver: Adding text tombstone version of tombstone_33.pb3998017657568255102.pb.tmp to dropbox
+09-02 21:55:15.972  6218  6377 I BootReceiver: Copying /data/tombstones/tombstone_33.pb3998017657568255102.pb.tmp460318100297392427.pb.txt.tmp to DropBox (SYSTEM_TOMBSTONE)
+09-02 22:32:44.947 28326 28390 F libc    : Fatal signal 6 (SIGABRT), code -1 (SI_QUEUE) in tid 28390 (Thread-6), pid 28326 (ithblue.sambas3)
+09-02 22:32:45.752 30985 30985 F DEBUG   :       #01 pc 0000000006854834  /data/app/~~3dMTkjLlLLb33hXiMxwbuA==/com.zenithblue.sambas3-j63tPHREEOTUQwbgbRhsFA==/lib/arm64/librpcsx-android.so (llvm::report_bad_alloc_error(char const*, bool)+128) (BuildId: 3ba4d769e30bc2cf68cb8fdf899a9842dfba0ba1)
+09-02 22:32:45.914  6218  6377 I BootReceiver: Filtering tombstone file: tombstone_34.pb
+09-02 22:32:45.924  6218  6377 I BootReceiver: Generated tombstone file: tombstone_34.pb8131351414883378675.pb.tmp
+09-02 22:32:45.924  6218  6377 I BootReceiver: Adding tombstone tombstone_34.pb8131351414883378675.pb.tmp to dropbox
+09-02 22:32:45.929  6218  6377 I BootReceiver: Adding text tombstone version of tombstone_34.pb8131351414883378675.pb.tmp to dropbox
+09-02 22:32:46.037  6218  6377 I BootReceiver: Copying /data/tombstones/tombstone_34.pb8131351414883378675.pb.tmp8241805523132410283.pb.txt.tmp to DropBox (SYSTEM_TOMBSTONE)
+09-02 22:46:43.118   490   523 I DisplayManager: Choreographer implicitly registered for the refresh rate.
+09-02 22:46:43.590   490   490 D InsetsController: Setting requestedVisibleTypes to 502 (was 503)
+09-02 22:46:43.749   490   490 D InsetsController: hide(ime())
+09-02 22:46:46.957   490   490 D InsetsController: hide(ime())
+09-02 22:46:47.978   490   490 D InsetsController: hide(ime())
+09-02 22:46:49.164   490   490 D InsetsController: hide(ime())
+09-02 22:46:49.553   490   490 W NotificationManager: Shedding notify (update) of NotificationKey[user=UserHandle{0}, pkg=com.zenithblue.sambas3, tag=null, id=3000], rate limit (5.0) exceeded: input 7.361954, output would be 5.159067
+09-02 22:46:54.865   490   490 W NotificationManager: Shedding notify (update) of NotificationKey[user=UserHandle{0}, pkg=com.zenithblue.sambas3, tag=null, id=3000], rate limit (5.0) exceeded: input 10.390407, output would be 6.960676
+09-02 22:46:55.872   490   490 W NotificationManager: Shedding notify (update) of NotificationKey[user=UserHandle{0}, pkg=com.zenithblue.sambas3, tag=null, id=3000], rate limit (5.0) exceeded: input 55.620453, output would be 5.1039486
+09-02 22:46:56.899   490   490 W NotificationManager: Shedding notify (update) of NotificationKey[user=UserHandle{0}, pkg=com.zenithblue.sambas3, tag=null, id=3000], rate limit (5.0) exceeded: input 27.87173, output would be 5.029625
+09-02 22:46:57.907   490   490 W NotificationManager: Shedding notify (update) of NotificationKey[user=UserHandle{0}, pkg=com.zenithblue.sambas3, tag=null, id=3000], rate limit (5.0) exceeded: input 141.00017, output would be 5.0959935
+09-02 22:46:58.907   490   490 W NotificationManager: Shedding notify (update) of NotificationKey[user=UserHandle{0}, pkg=com.zenithblue.sambas3, tag=null, id=3000], rate limit (5.0) exceeded: input 281.79123, output would be 5.165251
+09-02 22:46:59.916   490   490 W NotificationManager: Shedding notify (update) of NotificationKey[user=UserHandle{0}, pkg=com.zenithblue.sambas3, tag=null, id=3000], rate limit (5.0) exceeded: input 89.75146, output would be 5.20748
+09-02 22:47:00.917   490   490 W NotificationManager: Shedding notify (update) of NotificationKey[user=UserHandle{0}, pkg=com.zenithblue.sambas3, tag=null, id=3000], rate limit (5.0) exceeded: input 125.897644, output would be 5.3655148
+09-02 22:47:01.921   490   490 W NotificationManager: Shedding notify (update) of NotificationKey[user=UserHandle{0}, pkg=com.zenithblue.sambas3, tag=null, id=3000], rate limit (5.0) exceeded: input 100.258675, output would be 5.457777
+09-02 22:47:02.942   490   490 W NotificationManager: Shedding notify (update) of NotificationKey[user=UserHandle{0}, pkg=com.zenithblue.sambas3, tag=null, id=3000], rate limit (5.0) exceeded: input 93.75128, output would be 5.3503704
+09-02 22:47:03.946   490   490 W NotificationManager: Shedding notify (update) of NotificationKey[user=UserHandle{0}, pkg=com.zenithblue.sambas3, tag=null, id=3000], rate limit (5.0) exceeded: input 122.79291, output would be 5.6131744
+09-02 22:47:04.947   490   490 W NotificationManager: Shedding notify (update) of NotificationKey[user=UserHandle{0}, pkg=com.zenithblue.sambas3, tag=null, id=3000], rate limit (5.0) exceeded: input 299.66547, output would be 5.6401076
+09-02 22:47:05.959   490   490 W NotificationManager: Shedding notify (update) of NotificationKey[user=UserHandle{0}, pkg=com.zenithblue.sambas3, tag=null, id=3000], rate limit (5.0) exceeded: input 41.803936, output would be 5.6378756
+09-02 22:47:06.978   490   490 W NotificationManager: Shedding notify (update) of NotificationKey[user=UserHandle{0}, pkg=com.zenithblue.sambas3, tag=null, id=3000], rate limit (5.0) exceeded: input 133.96216, output would be 5.6488323
+09-02 22:47:07.996   490   490 W NotificationManager: Shedding notify (update) of NotificationKey[user=UserHandle{0}, pkg=com.zenithblue.sambas3, tag=null, id=3000], rate limit (5.0) exceeded: input 55.397987, output would be 5.5534053
+09-02 22:47:08.998   490   490 W NotificationManager: Shedding notify (update) of NotificationKey[user=UserHandle{0}, pkg=com.zenithblue.sambas3, tag=null, id=3000], rate limit (5.0) exceeded: input 266.0729, output would be 5.7184463
+09-02 22:47:10.038   490   490 W NotificationManager: Shedding notify (update) of NotificationKey[user=UserHandle{0}, pkg=com.zenithblue.sambas3, tag=null, id=3000], rate limit (5.0) exceeded: input 35.35758, output would be 5.71498
+09-02 22:47:11.047   490   490 W NotificationManager: Shedding notify (update) of NotificationKey[user=UserHandle{0}, pkg=com.zenithblue.sambas3, tag=null, id=3000], rate limit (5.0) exceeded: input 68.087776, output would be 5.813434
+09-02 22:47:12.063   490   490 W NotificationManager: Shedding notify (update) of NotificationKey[user=UserHandle{0}, pkg=com.zenithblue.sambas3, tag=null, id=3000], rate limit (5.0) exceeded: input 37.53563, output would be 6.0005765
+09-02 22:47:13.071   490   490 W NotificationManager: Shedding notify (update) of NotificationKey[user=UserHandle{0}, pkg=com.zenithblue.sambas3, tag=null, id=3000], rate limit (5.0) exceeded: input 31.45437, output would be 6.42014
+09-02 22:47:14.073   490   490 W NotificationManager: Shedding notify (update) of NotificationKey[user=UserHandle{0}, pkg=com.zenithblue.sambas3, tag=null, id=3000], rate limit (5.0) exceeded: input 249.15524, output would be 6.678741
+09-02 22:47:15.073   490   490 W NotificationManager: Shedding notify (update) of NotificationKey[user=UserHandle{0}, pkg=com.zenithblue.sambas3, tag=null, id=3000], rate limit (5.0) exceeded: input 244.06085, output would be 6.6885138
+09-02 22:47:16.082   490   490 W NotificationManager: Shedding notify (update) of NotificationKey[user=UserHandle{0}, pkg=com.zenithblue.sambas3, tag=null, id=3000], rate limit (5.0) exceeded: input 107.66282, output would be 6.7256784
+09-02 22:47:17.090   490   490 W NotificationManager: Shedding notify (update) of NotificationKey[user=UserHandle{0}, pkg=com.zenithblue.sambas3, tag=null, id=3000], rate limit (5.0) exceeded: input 88.07388, output would be 6.7502904
+09-02 22:47:18.091   490   490 W NotificationManager: Shedding notify (update) of NotificationKey[user=UserHandle{0}, pkg=com.zenithblue.sambas3, tag=null, id=3000], rate limit (5.0) exceeded: input 219.01048, output would be 6.7650824
+09-02 22:47:19.094   490   490 W NotificationManager: Shedding notify (update) of NotificationKey[user=UserHandle{0}, pkg=com.zenithblue.sambas3, tag=null, id=3000], rate limit (5.0) exceeded: input 114.502266, output would be 6.8509016
+09-02 22:47:20.099   490   490 W NotificationManager: Shedding notify (update) of NotificationKey[user=UserHandle{0}, pkg=com.zenithblue.sambas3, tag=null, id=3000], rate limit (5.0) exceeded: input 102.81155, output would be 6.928312
+09-02 22:47:21.100   490   490 W NotificationManager: Shedding notify (update) of NotificationKey[user=UserHandle{0}, pkg=com.zenithblue.sambas3, tag=null, id=3000], rate limit (5.0) exceeded: input 247.78496, output would be 7.037283
+09-02 22:47:22.101   490   490 W NotificationManager: Shedding notify (update) of NotificationKey[user=UserHandle{0}, pkg=com.zenithblue.sambas3, tag=null, id=3000], rate limit (5.0) exceeded: input 244.59525, output would be 7.1015477
+09-02 22:47:23.115   490   490 W NotificationManager: Shedding notify (update) of NotificationKey[user=UserHandle{0}, pkg=com.zenithblue.sambas3, tag=null, id=3000], rate limit (5.0) exceeded: input 207.91791, output would be 6.9962716
+09-02 22:47:24.117   490   490 W NotificationManager: Shedding notify (update) of NotificationKey[user=UserHandle{0}, pkg=com.zenithblue.sambas3, tag=null, id=3000], rate limit (5.0) exceeded: input 226.68416, output would be 7.0677557
+09-02 22:47:25.165   490   490 W NotificationManager: Shedding notify (update) of NotificationKey[user=UserHandle{0}, pkg=com.zenithblue.sambas3, tag=null, id=3000], rate limit (5.0) exceeded: input 45.440365, output would be 6.5718327
+09-02 22:47:26.175   490   490 W NotificationManager: Shedding notify (update) of NotificationKey[user=UserHandle{0}, pkg=com.zenithblue.sambas3, tag=null, id=3000], rate limit (5.0) exceeded: input 268.11972, output would be 6.739416
+09-02 22:47:27.174   490   490 W NotificationManager: Shedding notify (update) of NotificationKey[user=UserHandle{0}, pkg=com.zenithblue.sambas3, tag=null, id=3000], rate limit (5.0) exceeded: input 670.05316, output would be 6.8104706
+09-02 22:47:28.204   490   490 W NotificationManager: Shedding notify (update) of NotificationKey[user=UserHandle{0}, pkg=com.zenithblue.sambas3, tag=null, id=3000], rate limit (5.0) exceeded: input 96.00743, output would be 6.9266844
+09-02 22:47:29.219   490   490 W NotificationManager: Shedding notify (update) of NotificationKey[user=UserHandle{0}, pkg=com.zenithblue.sambas3, tag=null, id=3000], rate limit (5.0) exceeded: input 120.59247, output would be 5.1432037
+09-02 22:47:30.225   490   490 W NotificationManager: Shedding notify (update) of NotificationKey[user=UserHandle{0}, pkg=com.zenithblue.sambas3, tag=null, id=3000], rate limit (5.0) exceeded: input 77.66997, output would be 5.2425585
+09-02 22:47:31.235   490   490 W NotificationManager: Shedding notify (update) of NotificationKey[user=UserHandle{0}, pkg=com.zenithblue.sambas3, tag=null, id=3000], rate limit (5.0) exceeded: input 103.74718, output would be 5.2970085
+09-02 22:47:32.235   490   490 W NotificationManager: Shedding notify (update) of NotificationKey[user=UserHandle{0}, pkg=com.zenithblue.sambas3, tag=null, id=3000], rate limit (5.0) exceeded: input 147.92639, output would be 5.4362674
+09-02 22:47:33.280   490   490 W NotificationManager: Shedding notify (update) of NotificationKey[user=UserHandle{0}, pkg=com.zenithblue.sambas3, tag=null, id=3000], rate limit (5.0) exceeded: input 64.47183, output would be 5.143067
+09-02 22:47:34.284   490   490 W NotificationManager: Shedding notify (update) of NotificationKey[user=UserHandle{0}, pkg=com.zenithblue.sambas3, tag=null, id=3000], rate limit (5.0) exceeded: input 72.55018, output would be 5.2678795
+09-02 22:47:35.304   490   490 W NotificationManager: Shedding notify (update) of NotificationKey[user=UserHandle{0}, pkg=com.zenithblue.sambas3, tag=null, id=3000], rate limit (5.0) exceeded: input 35.390614, output would be 5.2797785
+09-02 22:47:36.346   490   490 W NotificationManager: Shedding notify (update) of NotificationKey[user=UserHandle{0}, pkg=com.zenithblue.sambas3, tag=null, id=3000], rate limit (5.0) exceeded: input 29.386263, output would be 5.205482
+09-02 22:47:37.356   490   490 W NotificationManager: Shedding notify (update) of NotificationKey[user=UserHandle{0}, pkg=com.zenithblue.sambas3, tag=null, id=3000], rate limit (5.0) exceeded: input 39.747696, output would be 5.5731063
+09-02 22:47:38.447   490   490 W NotificationManager: Shedding notify (update) of NotificationKey[user=UserHandle{0}, pkg=com.zenithblue.sambas3, tag=null, id=3000], rate limit (5.0) exceeded: input 29.211763, output would be 5.0843925
+09-02 22:47:39.449   490   490 W NotificationManager: Shedding notify (update) of NotificationKey[user=UserHandle{0}, pkg=com.zenithblue.sambas3, tag=null, id=3000], rate limit (5.0) exceeded: input 122.69612, output would be 5.3626337
+09-02 22:47:40.549   490   490 W NotificationManager: Shedding notify (update) of NotificationKey[user=UserHandle{0}, pkg=com.zenithblue.sambas3, tag=null, id=3000], rate limit (5.0) exceeded: input 30.743902, output would be 6.5091424
+09-02 22:47:41.555   490   490 W NotificationManager: Shedding notify (update) of NotificationKey[user=UserHandle{0}, pkg=com.zenithblue.sambas3, tag=null, id=3000], rate limit (5.0) exceeded: input 110.020996, output would be 6.9448495
+09-02 22:47:42.627   490   490 W NotificationManager: Shedding notify (update) of NotificationKey[user=UserHandle{0}, pkg=com.zenithblue.sambas3, tag=null, id=3000], rate limit (5.0) exceeded: input 60.61645, output would be 6.5892797
+09-02 22:47:43.627   490   490 W NotificationManager: Shedding notify (update) of NotificationKey[user=UserHandle{0}, pkg=com.zenithblue.sambas3, tag=null, id=3000], rate limit (5.0) exceeded: input 18.60378, output would be 5.0561757
+09-02 22:47:44.632   490   490 W NotificationManager: Shedding notify (update) of NotificationKey[user=UserHandle{0}, pkg=com.zenithblue.sambas3, tag=null, id=3000], rate limit (5.0) exceeded: input 401.194, output would be 5.1835656
+09-02 22:47:45.787   490   490 W NotificationManager: Shedding notify (update) of NotificationKey[user=UserHandle{0}, pkg=com.zenithblue.sambas3, tag=null, id=3000], rate limit (5.0) exceeded: input 20.775667, output would be 5.83573
+09-02 22:47:46.804   490   490 W NotificationManager: Shedding notify (update) of NotificationKey[user=UserHandle{0}, pkg=com.zenithblue.sambas3, tag=null, id=3000], rate limit (5.0) exceeded: input 67.017784, output would be 6.195674
+09-02 22:47:47.808   490   490 W NotificationManager: Shedding notify (update) of NotificationKey[user=UserHandle{0}, pkg=com.zenithblue.sambas3, tag=null, id=3000], rate limit (5.0) exceeded: input 101.9941, output would be 6.609731
+09-02 22:47:48.808   490   490 W NotificationManager: Shedding notify (update) of NotificationKey[user=UserHandle{0}, pkg=com.zenithblue.sambas3, tag=null, id=3000], rate limit (5.0) exceeded: input 760.5956, output would be 6.636533
+09-02 22:47:49.820   490   490 W NotificationManager: Shedding notify (update) of NotificationKey[user=UserHandle{0}, pkg=com.zenithblue.sambas3, tag=null, id=3000], rate limit (5.0) exceeded: input 102.391525, output would be 6.6349106
+09-02 22:47:50.823   490   490 W NotificationManager: Shedding notify (update) of NotificationKey[user=UserHandle{0}, pkg=com.zenithblue.sambas3, tag=null, id=3000], rate limit (5.0) exceeded: input 99.598755, output would be 6.7410054
+09-02 22:47:51.908   490   490 W NotificationManager: Shedding notify (update) of NotificationKey[user=UserHandle{0}, pkg=com.zenithblue.sambas3, tag=null, id=3000], rate limit (5.0) exceeded: input 33.769604, output would be 6.0241857
+09-02 22:47:52.908   490   490 W NotificationManager: Shedding notify (update) of NotificationKey[user=UserHandle{0}, pkg=com.zenithblue.sambas3, tag=null, id=3000], rate limit (5.0) exceeded: input 350.8483, output would be 6.397915
+09-02 22:47:53.908   490   490 W NotificationManager: Shedding notify (update) of NotificationKey[user=UserHandle{0}, pkg=com.zenithblue.sambas3, tag=null, id=3000], rate limit (5.0) exceeded: input 607.92126, output would be 6.467541
+09-02 22:47:54.908   490   490 W NotificationManager: Shedding notify (update) of NotificationKey[user=UserHandle{0}, pkg=com.zenithblue.sambas3, tag=null, id=3000], rate limit (5.0) exceeded: input 346.58838, output would be 6.5145626
+09-02 22:47:55.921   490   490 W NotificationManager: Shedding notify (update) of NotificationKey[user=UserHandle{0}, pkg=com.zenithblue.sambas3, tag=null, id=3000], rate limit (5.0) exceeded: input 123.999, output would be 6.545582
+09-02 22:47:57.016   490   490 W NotificationManager: Shedding notify (update) of NotificationKey[user=UserHandle{0}, pkg=com.zenithblue.sambas3, tag=null, id=3000], rate limit (5.0) exceeded: input 26.579655, output would be 5.9274764
+09-02 22:47:58.017   490   490 W NotificationManager: Shedding notify (update) of NotificationKey[user=UserHandle{0}, pkg=com.zenithblue.sambas3, tag=null, id=3000], rate limit (5.0) exceeded: input 630.72144, output would be 6.122636
+09-02 22:47:59.025   490   490 W NotificationManager: Shedding notify (update) of NotificationKey[user=UserHandle{0}, pkg=com.zenithblue.sambas3, tag=null, id=3000], rate limit (5.0) exceeded: input 260.18527, output would be 6.105152
+09-02 22:48:00.025   490   490 W NotificationManager: Shedding notify (update) of NotificationKey[user=UserHandle{0}, pkg=com.zenithblue.sambas3, tag=null, id=3000], rate limit (5.0) exceeded: input 295.73053, output would be 6.1587358
+09-02 22:48:01.088   490   490 W NotificationManager: Shedding notify (update) of NotificationKey[user=UserHandle{0}, pkg=com.zenithblue.sambas3, tag=null, id=3000], rate limit (5.0) exceeded: input 35.221, output would be 5.577543
+09-02 22:48:02.125   490   490 W NotificationManager: Shedding notify (update) of NotificationKey[user=UserHandle{0}, pkg=com.zenithblue.sambas3, tag=null, id=3000], rate limit (5.0) exceeded: input 23.731592, output would be 5.6119523
+09-02 22:48:03.126   490   490 W NotificationManager: Shedding notify (update) of NotificationKey[user=UserHandle{0}, pkg=com.zenithblue.sambas3, tag=null, id=3000], rate limit (5.0) exceeded: input 632.0307, output would be 5.6223235
+09-02 22:48:04.131   490   490 W NotificationManager: Shedding notify (update) of NotificationKey[user=UserHandle{0}, pkg=com.zenithblue.sambas3, tag=null, id=3000], rate limit (5.0) exceeded: input 359.60406, output would be 5.6495247
+09-02 22:48:05.147   490   490 W NotificationManager: Shedding notify (update) of NotificationKey[user=UserHandle{0}, pkg=com.zenithblue.sambas3, tag=null, id=3000], rate limit (5.0) exceeded: input 18.05931, output would be 5.9570527
+09-02 22:48:06.158   490   490 W NotificationManager: Shedding notify (update) of NotificationKey[user=UserHandle{0}, pkg=com.zenithblue.sambas3, tag=null, id=3000], rate limit (5.0) exceeded: input 122.88132, output would be 5.9298267
+09-02 22:48:07.195   490   490 W NotificationManager: Shedding notify (update) of NotificationKey[user=UserHandle{0}, pkg=com.zenithblue.sambas3, tag=null, id=3000], rate limit (5.0) exceeded: input 58.42095, output would be 5.658948
+09-02 22:48:08.218   490   490 W NotificationManager: Shedding notify (update) of NotificationKey[user=UserHandle{0}, pkg=com.zenithblue.sambas3, tag=null, id=3000], rate limit (5.0) exceeded: input 63.05628, output would be 5.6940618
+09-02 22:48:09.256   490   490 W NotificationManager: Shedding notify (update) of NotificationKey[user=UserHandle{0}, pkg=com.zenithblue.sambas3, tag=null, id=3000], rate limit (5.0) exceeded: input 32.721302, output would be 5.745296
+09-02 22:48:10.257   490   490 W NotificationManager: Shedding notify (update) of NotificationKey[user=UserHandle{0}, pkg=com.zenithblue.sambas3, tag=null, id=3000], rate limit (5.0) exceeded: input 530.3442, output would be 5.87531
+09-02 22:48:11.301   490   490 W NotificationManager: Shedding notify (update) of NotificationKey[user=UserHandle{0}, pkg=com.zenithblue.sambas3, tag=null, id=3000], rate limit (5.0) exceeded: input 25.283974, output would be 6.136032
+09-02 22:48:12.307   490   490 W NotificationManager: Shedding notify (update) of NotificationKey[user=UserHandle{0}, pkg=com.zenithblue.sambas3, tag=null, id=3000], rate limit (5.0) exceeded: input 227.93217, output would be 6.100907
+09-02 22:48:13.423   490   490 W NotificationManager: Shedding notify (update) of NotificationKey[user=UserHandle{0}, pkg=com.zenithblue.sambas3, tag=null, id=3000], rate limit (5.0) exceeded: input 17.664354, output would be 5.2909164
+09-02 22:48:14.427   490   490 W NotificationManager: Shedding notify (update) of NotificationKey[user=UserHandle{0}, pkg=com.zenithblue.sambas3, tag=null, id=3000], rate limit (5.0) exceeded: input 148.98648, output would be 5.7517734
+09-02 22:48:15.432   490   490 W NotificationManager: Shedding notify (update) of NotificationKey[user=UserHandle{0}, pkg=com.zenithblue.sambas3, tag=null, id=3000], rate limit (5.0) exceeded: input 424.94177, output would be 5.776027
+09-02 22:48:16.432   490   490 W NotificationManager: Shedding notify (update) of NotificationKey[user=UserHandle{0}, pkg=com.zenithblue.sambas3, tag=null, id=3000], rate limit (5.0) exceeded: input 230.16936, output would be 5.854807
+09-02 22:56:33.840   490   569 I RPCS3   : LLVM: Compiled module v7-kusa-3Un80ek3J0cpuKjup0zrSP-00001P-cortex-a34-2.obj
+09-02 22:56:33.840   490   569 W RPCS3   : LLVM: reporting used memory 1677721600 (free/total: 1756004352/1756004352) by /storage/emulated/0/Android/data/com.zenithblue.sambas3/files/cache/cache/BLUS30443/ppu-U8pStuqfrkhA3fGiHfGZz99SofxM-EBOOT.BIN/v7-kusa-cug6iU2fnyy1jhK26LZ1Qy-00001P-cortex-a34-2.obj
+09-02 22:56:33.840   490   569 W RPCS3   : LLVM: Compiling module /storage/emulated/0/Android/data/com.zenithblue.sambas3/files/cache/cache/BLUS30443/ppu-U8pStuqfrkhA3fGiHfGZz99SofxM-EBOOT.BIN/v7-kusa-cug6iU2fnyy1jhK26LZ1Qy-00001P-cortex-a34-2.obj
+09-02 22:56:33.843   490   792 W RPCS3   : ProgressMessageDialog::ProgressBarSetMsg(0, Progress: module 85 of 233 (14m remaining))
+09-02 22:56:33.843   490   792 W RPCS3   : ProgressMessageDialog::ProgressBarSetValue(0, 36)
+09-02 22:56:33.852   490   490 I S3PPU   : event=install_ppu_active progress_id=3000 msg=Progress: module 85 of 233 (14m remainin percent=36 max=100 session=S3-1788369403263-ce5b
+09-02 22:56:34.174   490   569 D RPCS3   : LLVM: 4023 functions generated (code_size=0x19000, num_func=3874, max_addr(-)min_addr=0x19000)
+09-02 22:56:38.691   490   569 I RPCS3   : LLVM: Compiled module v7-kusa-cug6iU2fnyy1jhK26LZ1Qy-00001P-cortex-a34-2.obj
+09-02 22:56:38.691   490   569 W RPCS3   : LLVM: reporting used memory 1677524992 (free/total: 1756004352/1756004352) by /storage/emulated/0/Android/data/com.zenithblue.sambas3/files/cache/cache/BLUS30443/ppu-U8pStuqfrkhA3fGiHfGZz99SofxM-EBOOT.BIN/v7-kusa-UcfedQFmswg0XWigsNvzUm-00001P-cortex-a34-2.obj
+09-02 22:56:38.691   490   569 W RPCS3   : LLVM: Compiling module /storage/emulated/0/Android/data/com.zenithblue.sambas3/files/cache/cache/BLUS30443/ppu-U8pStuqfrkhA3fGiHfGZz99SofxM-EBOOT.BIN/v7-kusa-UcfedQFmswg0XWigsNvzUm-00001P-cortex-a34-2.obj
+09-02 22:56:38.695   490   792 W RPCS3   : ProgressMessageDialog::ProgressBarSetMsg(0, Progress: module 86 of 233 (13m remaining))
+09-02 22:56:38.696   490   490 I S3PPU   : event=install_ppu_active progress_id=3000 msg=Progress: module 86 of 233 (13m remainin percent=36 max=100 session=S3-1788369403263-ce5b
+09-02 22:56:38.697   490   792 W RPCS3   : ProgressMessageDialog::ProgressBarSetValue(0, 36)
+09-02 22:56:38.702   490   503 I ithblue.sambas3: Method exceeds compiler instruction limit: 20850 in void com.zenithblue.sambas3.ui.games.GamesScreenKt.GamesScreen(androidx.activity.result.ActivityResultLauncher, androidx.activity.result.ActivityResultLauncher, androidx.activity.result.ActivityResultLauncher, kotlin.jvm.functions.Function0, kotlin.jvm.functions.Function0, kotlin.jvm.functions.Function0, kotlin.jvm.functions.Function0, androidx.compose.runtime.State, androidx.compose.runtime.State, androidx.compose.runtime.Composer, int, int)
+09-02 22:56:38.939   490   569 D RPCS3   : LLVM: VMADDFP with -0 addend at [0x00885428]
+09-02 22:56:38.957   490   569 D RPCS3   : LLVM: VMADDFP with -0 addend at [0x00886670]
+09-02 22:56:39.091   490   569 D RPCS3   : LLVM: 5017 functions generated (code_size=0x18ff4, num_func=4837, max_addr(-)min_addr=0x18ff4)
+09-02 22:56:39.548   490   811 D RPCS3   : CPU Usage: Total: 21.9%, Cores: 0.0%, 0.0%, 0.0%, 0.0%, 0.0%, 0.0%, 0.0%, 0.0%
+09-02 22:56:44.206   490   569 I RPCS3   : LLVM: Compiled module v7-kusa-UcfedQFmswg0XWigsNvzUm-00001P-cortex-a34-2.obj
+09-02 22:56:44.206   490   569 W RPCS3   : LLVM: reporting used memory 1677656064 (free/total: 1756004352/1756004352) by /storage/emulated/0/Android/data/com.zenithblue.sambas3/files/cache/cache/BLUS30443/ppu-U8pStuqfrkhA3fGiHfGZz99SofxM-EBOOT.BIN/v7-kusa-ri9zs1PbzMufRK6sm91pNi-00001P-cortex-a34-2.obj
+09-02 22:56:44.206   490   569 W RPCS3   : LLVM: Compiling module /storage/emulated/0/Android/data/com.zenithblue.sambas3/files/cache/cache/BLUS30443/ppu-U8pStuqfrkhA3fGiHfGZz99SofxM-EBOOT.BIN/v7-kusa-ri9zs1PbzMufRK6sm91pNi-00001P-cortex-a34-2.obj
+09-02 22:56:44.213   490   792 W RPCS3   : ProgressMessageDialog::ProgressBarSetMsg(0, Progress: module 87 of 233 (13m remaining))
+09-02 22:56:44.214   490   490 I S3PPU   : event=install_ppu_active progress_id=3000 msg=Progress: module 87 of 233 (13m remainin percent=37 max=100 session=S3-1788369403263-ce5b
+09-02 22:56:44.216   490   792 W RPCS3   : ProgressMessageDialog::ProgressBarSetValue(0, 37)
+09-02 22:56:44.618   490   569 D RPCS3   : LLVM: 5249 functions generated (code_size=0x18ffc, num_func=5136, max_addr(-)min_addr=0x18ffc)
+09-02 22:56:49.548   490   811 D RPCS3   : CPU Usage: Total: 21.5%, Cores: 0.0%, 0.0%, 0.0%, 0.0%, 0.0%, 0.0%, 0.0%, 0.0%
+09-02 22:56:49.946   490   569 I RPCS3   : LLVM: Compiled module v7-kusa-ri9zs1PbzMufRK6sm91pNi-00001P-cortex-a34-2.obj
+09-02 22:56:49.946   490   569 W RPCS3   : LLVM: reporting used memory 1677721600 (free/total: 1756004352/1756004352) by /storage/emulated/0/Android/data/com.zenithblue.sambas3/files/cache/cache/BLUS30443/ppu-U8pStuqfrkhA3fGiHfGZz99SofxM-EBOOT.BIN/v7-kusa-KWxG1f6txxzdZc379wXpdH-00001P-cortex-a34-2.obj
+09-02 22:56:49.946   490   569 W RPCS3   : LLVM: Compiling module /storage/emulated/0/Android/data/com.zenithblue.sambas3/files/cache/cache/BLUS30443/ppu-U8pStuqfrkhA3fGiHfGZz99SofxM-EBOOT.BIN/v7-kusa-KWxG1f6txxzdZc379wXpdH-00001P-cortex-a34-2.obj
+09-02 22:56:49.953   490   792 W RPCS3   : ProgressMessageDialog::ProgressBarSetMsg(0, Progress: module 88 of 233 (13m remaining))
+09-02 22:56:49.953   490   792 W RPCS3   : ProgressMessageDialog::ProgressBarSetValue(0, 37)
+09-02 22:56:49.957   490   490 I S3PPU   : event=install_ppu_active progress_id=3000 msg=Progress: module 88 of 233 (13m remainin percent=37 max=100 session=S3-1788369403263-ce5b
+09-02 22:56:50.358   490   569 D RPCS3   : LLVM: 5321 functions generated (code_size=0x19000, num_func=5124, max_addr(-)min_addr=0x19000)
+09-02 22:56:55.626   490   569 I RPCS3   : LLVM: Compiled module v7-kusa-KWxG1f6txxzdZc379wXpdH-00001P-cortex-a34-2.obj
+09-02 22:56:55.626   490   569 W RPCS3   : LLVM: reporting used memory 1644691456 (free/total: 1756004352/1756004352) by /storage/emulated/0/Android/data/com.zenithblue.sambas3/files/cache/cache/BLUS30443/ppu-U8pStuqfrkhA3fGiHfGZz99SofxM-EBOOT.BIN/v7-kusa-Q43Q7g9diPyKvr6L2XHwsJ-00001P-cortex-a34-2.obj
+09-02 22:56:55.626   490   569 W RPCS3   : LLVM: Compiling module /storage/emulated/0/Android/data/com.zenithblue.sambas3/files/cache/cache/BLUS30443/ppu-U8pStuqfrkhA3fGiHfGZz99SofxM-EBOOT.BIN/v7-kusa-Q43Q7g9diPyKvr6L2XHwsJ-00001P-cortex-a34-2.obj
+09-02 22:56:55.634   490   792 W RPCS3   : ProgressMessageDialog::ProgressBarSetMsg(0, Progress: module 89 of 233 (13m remaining))
+09-02 22:56:55.637   490   792 W RPCS3   : ProgressMessageDialog::ProgressBarSetValue(0, 38)
+09-02 22:56:55.641   490   490 I S3PPU   : event=install_ppu_active progress_id=3000 msg=Progress: module 89 of 233 (13m remainin percent=38 max=100 session=S3-1788369403263-ce5b
+09-02 22:56:55.861   490   569 D RPCS3   : LLVM: VMADDFP with -0 addend at [0x008cfaf4]
+09-02 22:56:55.861   490   569 D RPCS3   : LLVM: VMADDFP with -0 addend at [0x008cfafc]
+09-02 22:56:55.861   490   569 D RPCS3   : LLVM: VMADDFP with -0 addend at [0x008cfb04]
+09-02 22:56:55.861   490   569 D RPCS3   : LLVM: VMADDFP with -0 addend at [0x008cfb0c]
+09-02 22:56:56.019   490   569 D RPCS3   : LLVM: 4961 functions generated (code_size=0x18820, num_func=4741, max_addr(-)min_addr=0x18820)
+09-02 22:56:59.548   490   811 D RPCS3   : CPU Usage: Total: 22.1%, Cores: 0.0%, 0.0%, 0.0%, 0.0%, 0.0%, 0.0%, 0.0%, 0.0%
+09-02 22:57:01.054   490   569 I RPCS3   : LLVM: Compiled module v7-kusa-Q43Q7g9diPyKvr6L2XHwsJ-00001P-cortex-a34-2.obj
+09-02 22:57:01.054   490   569 W RPCS3   : LLVM: reporting used memory 1677721600 (free/total: 1756004352/1756004352) by /storage/emulated/0/Android/data/com.zenithblue.sambas3/files/cache/cache/BLUS30443/ppu-U8pStuqfrkhA3fGiHfGZz99SofxM-EBOOT.BIN/v7-kusa-cPCiEkM7aymdKGqoFe1uuV-00001P-cortex-a34-2.obj
+09-02 22:57:01.054   490   569 W RPCS3   : LLVM: Compiling module /storage/emulated/0/Android/data/com.zenithblue.sambas3/files/cache/cache/BLUS30443/ppu-U8pStuqfrkhA3fGiHfGZz99SofxM-EBOOT.BIN/v7-kusa-cPCiEkM7aymdKGqoFe1uuV-00001P-cortex-a34-2.obj
+09-02 22:57:01.059   490   569 D RPCS3   : LLVM: VMADDFP with -0 addend at [0x008d97e4]
+09-02 22:57:01.059   490   569 D RPCS3   : LLVM: VMADDFP with -0 addend at [0x008d97e8]
+09-02 22:57:01.059   490   569 D RPCS3   : LLVM: VMADDFP with -0 addend at [0x008d97ec]
+09-02 22:57:01.059   490   569 D RPCS3   : LLVM: VMADDFP with -0 addend at [0x008d9800]
+09-02 22:57:01.060   490   569 D RPCS3   : LLVM: VMADDFP with -0 addend at [0x008d987c]
+09-02 22:57:01.060   490   569 D RPCS3   : LLVM: VMADDFP with -0 addend at [0x008d9884]
+09-02 22:57:01.060   490   569 D RPCS3   : LLVM: VMADDFP with -0 addend at [0x008d98a0]
+09-02 22:57:01.060   490   569 D RPCS3   : LLVM: VMADDFP with -0 addend at [0x008d98c4]
+09-02 22:57:01.060   490   569 D RPCS3   : LLVM: VMADDFP with -0 addend at [0x008d996c]
+09-02 22:57:01.060   490   569 D RPCS3   : LLVM: VMADDFP with -0 addend at [0x008d9980]
+09-02 22:57:01.060   490   569 D RPCS3   : LLVM: VMADDFP with -0 addend at [0x008d9a20]
+09-02 22:57:01.060   490   569 D RPCS3   : LLVM: VMADDFP with -0 addend at [0x008d9a38]
+09-02 22:57:01.060   490   569 D RPCS3   : LLVM: VMADDFP with -0 addend at [0x008d9a48]
+09-02 22:57:01.060   490   569 D RPCS3   : LLVM: VMADDFP with -0 addend at [0x008d9a54]
+09-02 22:57:01.060   490   569 D RPCS3   : LLVM: VMADDFP with -0 addend at [0x008d9a74]
+09-02 22:57:01.060   490   569 D RPCS3   : LLVM: VMADDFP with -0 addend at [0x008d9a8c]
+09-02 22:57:01.060   490   569 D RPCS3   : LLVM: VMADDFP with -0 addend at [0x008d9a9c]
+09-02 22:57:01.060   490   569 D RPCS3   : LLVM: VMADDFP with -0 addend at [0x008d9aa8]
+09-02 22:57:01.061   490   569 D RPCS3   : LLVM: VMADDFP with -0 addend at [0x008d9ad4]
+09-02 22:57:01.061   490   569 D RPCS3   : LLVM: VMADDFP with -0 addend at [0x008d9aec]
+09-02 22:57:01.061   490   569 D RPCS3   : LLVM: VMADDFP with -0 addend at [0x008d9afc]
+09-02 22:57:01.061   490   569 D RPCS3   : LLVM: VMADDFP with -0 addend at [0x008d9b08]
+09-02 22:57:01.063   490   792 W RPCS3   : ProgressMessageDialog::ProgressBarSetMsg(0, Progress: module 90 of 233 (13m remaining))
+09-02 22:57:01.064   490   792 W RPCS3   : ProgressMessageDialog::ProgressBarSetValue(0, 38)
+09-02 22:57:01.064   490   490 I S3PPU   : event=install_ppu_active progress_id=3000 msg=Progress: module 90 of 233 (13m remainin percent=38 max=100 session=S3-1788369403263-ce5b
+09-02 22:57:01.070   490   569 D RPCS3   : LLVM: VMADDFP with -0 addend at [0x008dac04]
+09-02 22:57:01.071   490   569 D RPCS3   : LLVM: VMADDFP with -0 addend at [0x008dac08]
+09-02 22:57:01.071   490   569 D RPCS3   : LLVM: VMADDFP with -0 addend at [0x008dac0c]
+09-02 22:57:01.071   490   569 D RPCS3   : LLVM: VMADDFP with -0 addend at [0x008dac20]
+09-02 22:57:01.071   490   569 D RPCS3   : LLVM: VMADDFP with -0 addend at [0x008dac9c]
+09-02 22:57:01.071   490   569 D RPCS3   : LLVM: VMADDFP with -0 addend at [0x008daca4]
+09-02 22:57:01.071   490   569 D RPCS3   : LLVM: VMADDFP with -0 addend at [0x008dacc0]
+09-02 22:57:01.071   490   569 D RPCS3   : LLVM: VMADDFP with -0 addend at [0x008dace4]
+09-02 22:57:01.071   490   569 D RPCS3   : LLVM: VMADDFP with -0 addend at [0x008dad8c]
+09-02 22:57:01.071   490   569 D RPCS3   : LLVM: VMADDFP with -0 addend at [0x008dada0]
+09-02 22:57:01.071   490   569 D RPCS3   : LLVM: VMADDFP with -0 addend at [0x008dae40]
+09-02 22:57:01.071   490   569 D RPCS3   : LLVM: VMADDFP with -0 addend at [0x008dae58]
+09-02 22:57:01.071   490   569 D RPCS3   : LLVM: VMADDFP with -0 addend at [0x008dae68]
+09-02 22:57:01.072   490   569 D RPCS3   : LLVM: VMADDFP with -0 addend at [0x008dae74]
+09-02 22:57:01.072   490   569 D RPCS3   : LLVM: VMADDFP with -0 addend at [0x008dae94]
+09-02 22:57:01.072   490   569 D RPCS3   : LLVM: VMADDFP with -0 addend at [0x008daeac]
+09-02 22:57:01.072   490   569 D RPCS3   : LLVM: VMADDFP with -0 addend at [0x008daebc]
+09-02 22:57:01.072   490   569 D RPCS3   : LLVM: VMADDFP with -0 addend at [0x008daec8]
+09-02 22:57:01.072   490   569 D RPCS3   : LLVM: VMADDFP with -0 addend at [0x008daef4]
+09-02 22:57:01.072   490   569 D RPCS3   : LLVM: VMADDFP with -0 addend at [0x008daf0c]
+09-02 22:57:01.072   490   569 D RPCS3   : LLVM: VMADDFP with -0 addend at [0x008daf1c]
+09-02 22:57:01.072   490   569 D RPCS3   : LLVM: VMADDFP with -0 addend at [0x008daf28]
+09-02 22:57:01.076   490   503 I ithblue.sambas3: Method exceeds compiler instruction limit: 20850 in void com.zenithblue.sambas3.ui.games.GamesScreenKt.GamesScreen(androidx.activity.result.ActivityResultLauncher, androidx.activity.result.ActivityResultLauncher, androidx.activity.result.ActivityResultLauncher, kotlin.jvm.functions.Function0, kotlin.jvm.functions.Function0, kotlin.jvm.functions.Function0, kotlin.jvm.functions.Function0, androidx.compose.runtime.State, androidx.compose.runtime.State, androidx.compose.runtime.Composer, int, int)
+09-02 22:57:01.080   490   569 D RPCS3   : LLVM: VMADDFP with -0 addend at [0x008dbdf4]
+09-02 22:57:01.080   490   569 D RPCS3   : LLVM: VMADDFP with -0 addend at [0x008dbdf8]
+09-02 22:57:01.080   490   569 D RPCS3   : LLVM: VMADDFP with -0 addend at [0x008dbdfc]
+09-02 22:57:01.080   490   569 D RPCS3   : LLVM: VMADDFP with -0 addend at [0x008dbe10]
+09-02 22:57:01.080   490   569 D RPCS3   : LLVM: VMADDFP with -0 addend at [0x008dbe8c]
+09-02 22:57:01.080   490   569 D RPCS3   : LLVM: VMADDFP with -0 addend at [0x008dbe94]
+09-02 22:57:01.080   490   569 D RPCS3   : LLVM: VMADDFP with -0 addend at [0x008dbeb0]
+09-02 22:57:01.080   490   569 D RPCS3   : LLVM: VMADDFP with -0 addend at [0x008dbed4]
+09-02 22:57:01.080   490   569 D RPCS3   : LLVM: VMADDFP with -0 addend at [0x008dbf7c]
+09-02 22:57:01.080   490   569 D RPCS3   : LLVM: VMADDFP with -0 addend at [0x008dbf90]
+09-02 22:57:01.081   490   569 D RPCS3   : LLVM: VMADDFP with -0 addend at [0x008dc030]
+09-02 22:57:01.081   490   569 D RPCS3   : LLVM: VMADDFP with -0 addend at [0x008dc048]
+09-02 22:57:01.081   490   569 D RPCS3   : LLVM: VMADDFP with -0 addend at [0x008dc058]
+09-02 22:57:01.081   490   569 D RPCS3   : LLVM: VMADDFP with -0 addend at [0x008dc064]
+09-02 22:57:01.081   490   569 D RPCS3   : LLVM: VMADDFP with -0 addend at [0x008dc084]
+09-02 22:57:01.081   490   569 D RPCS3   : LLVM: VMADDFP with -0 addend at [0x008dc09c]
+09-02 22:57:01.081   490   569 D RPCS3   : LLVM: VMADDFP with -0 addend at [0x008dc0ac]
+09-02 22:57:01.081   490   569 D RPCS3   : LLVM: VMADDFP with -0 addend at [0x008dc0b8]
+09-02 22:57:01.081   490   569 D RPCS3   : LLVM: VMADDFP with -0 addend at [0x008dc0e4]
+09-02 22:57:01.081   490   569 D RPCS3   : LLVM: VMADDFP with -0 addend at [0x008dc0fc]
+09-02 22:57:01.081   490   569 D RPCS3   : LLVM: VMADDFP with -0 addend at [0x008dc10c]
+09-02 22:57:01.081   490   569 D RPCS3   : LLVM: VMADDFP with -0 addend at [0x008dc118]
+09-02 22:57:01.444   490   569 D RPCS3   : LLVM: 4834 functions generated (code_size=0x19000, num_func=4713, max_addr(-)min_addr=0x19000)
+09-02 22:57:06.488   490   569 I RPCS3   : LLVM: Compiled module v7-kusa-cPCiEkM7aymdKGqoFe1uuV-00001P-cortex-a34-2.obj
+09-02 22:57:06.488   490   569 W RPCS3   : LLVM: reporting used memory 1676148736 (free/total: 1756004352/1756004352) by /storage/emulated/0/Android/data/com.zenithblue.sambas3/files/cache/cache/BLUS30443/ppu-U8pStuqfrkhA3fGiHfGZz99SofxM-EBOOT.BIN/v7-kusa-r0e8WNWx8KUhMQo6MySb4P-00001P-cortex-a34-2.obj
+09-02 22:57:06.488   490   569 W RPCS3   : LLVM: Compiling module /storage/emulated/0/Android/data/com.zenithblue.sambas3/files/cache/cache/BLUS30443/ppu-U8pStuqfrkhA3fGiHfGZz99SofxM-EBOOT.BIN/v7-kusa-r0e8WNWx8KUhMQo6MySb4P-00001P-cortex-a34-2.obj
+09-02 22:57:06.493   490   792 W RPCS3   : ProgressMessageDialog::ProgressBarSetMsg(0, Progress: module 91 of 233 (13m remaining))
+09-02 22:57:06.493   490   792 W RPCS3   : ProgressMessageDialog::ProgressBarSetValue(0, 39)
+09-02 22:57:06.502   490   490 I S3PPU   : event=install_ppu_active progress_id=3000 msg=Progress: module 91 of 233 (13m remainin percent=39 max=100 session=S3-1788369403263-ce5b
+09-02 22:57:06.901   490   569 D RPCS3   : LLVM: 5672 functions generated (code_size=0x18fa0, num_func=5556, max_addr(-)min_addr=0x18fa0)
+09-02 22:57:09.548   490   811 D RPCS3   : CPU Usage: Total: 22.2%, Cores: 0.0%, 0.0%, 0.0%, 0.0%, 0.0%, 0.0%, 0.0%, 0.0%
+09-02 22:57:12.459   490   569 I RPCS3   : LLVM: Compiled module v7-kusa-r0e8WNWx8KUhMQo6MySb4P-00001P-cortex-a34-2.obj
+09-02 22:57:12.459   490   569 W RPCS3   : LLVM: reporting used memory 1677328384 (free/total: 1756004352/1756004352) by /storage/emulated/0/Android/data/com.zenithblue.sambas3/files/cache/cache/BLUS30443/ppu-U8pStuqfrkhA3fGiHfGZz99SofxM-EBOOT.BIN/v7-kusa-qcYgt8CQMV4F576EHAAcb6-00001P-cortex-a34-2.obj
+09-02 22:57:12.459   490   569 W RPCS3   : LLVM: Compiling module /storage/emulated/0/Android/data/com.zenithblue.sambas3/files/cache/cache/BLUS30443/ppu-U8pStuqfrkhA3fGiHfGZz99SofxM-EBOOT.BIN/v7-kusa-qcYgt8CQMV4F576EHAAcb6-00001P-cortex-a34-2.obj
+09-02 22:57:12.463   490   792 W RPCS3   : ProgressMessageDialog::ProgressBarSetMsg(0, Progress: module 92 of 233 (13m remaining))
+09-02 22:57:12.465   490   490 I S3PPU   : event=install_ppu_active progress_id=3000 msg=Progress: module 92 of 233 (13m remainin percent=39 max=100 session=S3-1788369403263-ce5b
+09-02 22:57:12.467   490   792 W RPCS3   : ProgressMessageDialog::ProgressBarSetValue(0, 39)
+09-02 22:57:12.839   490   569 D RPCS3   : LLVM: 4595 functions generated (code_size=0x18fe8, num_func=4437, max_addr(-)min_addr=0x18fe8)
+09-02 22:57:17.651   490   569 I RPCS3   : LLVM: Compiled module v7-kusa-qcYgt8CQMV4F576EHAAcb6-00001P-cortex-a34-2.obj
+09-02 22:57:17.652   490   569 W RPCS3   : LLVM: reporting used memory 1673396224 (free/total: 1756004352/1756004352) by /storage/emulated/0/Android/data/com.zenithblue.sambas3/files/cache/cache/BLUS30443/ppu-U8pStuqfrkhA3fGiHfGZz99SofxM-EBOOT.BIN/v7-kusa-HFxiAAUMisF9FFgc4U20uG-00001P-cortex-a34-2.obj
+09-02 22:57:17.652   490   569 W RPCS3   : LLVM: Compiling module /storage/emulated/0/Android/data/com.zenithblue.sambas3/files/cache/cache/BLUS30443/ppu-U8pStuqfrkhA3fGiHfGZz99SofxM-EBOOT.BIN/v7-kusa-HFxiAAUMisF9FFgc4U20uG-00001P-cortex-a34-2.obj
+09-02 22:57:17.653   490   792 W RPCS3   : ProgressMessageDialog::ProgressBarSetMsg(0, Progress: module 93 of 233 (13m remaining))
+09-02 22:57:17.653   490   792 W RPCS3   : ProgressMessageDialog::ProgressBarSetValue(0, 39)
+09-02 22:57:17.661   490   490 I S3PPU   : event=install_ppu_active progress_id=3000 msg=Progress: module 93 of 233 (13m remainin percent=39 max=100 session=S3-1788369403263-ce5b
+09-02 22:57:17.918   490   569 D RPCS3   : LLVM: VMADDFP with -0 addend at [0x00935844]
+09-02 22:57:17.918   490   569 D RPCS3   : LLVM: VMADDFP with -0 addend at [0x00935944]
+09-02 22:57:17.918   490   569 D RPCS3   : LLVM: VMADDFP with -0 addend at [0x00935954]
+09-02 22:57:17.994   490   569 D RPCS3   : LLVM: VMADDFP with -0 addend at [0x0093b83c]
+09-02 22:57:17.995   490   569 D RPCS3   : LLVM: VMADDFP with -0 addend at [0x0093b93c]
+09-02 22:57:17.995   490   569 D RPCS3   : LLVM: VMADDFP with -0 addend at [0x0093b94c]
+09-02 22:57:18.014   490   569 D RPCS3   : LLVM: 4355 functions generated (code_size=0x18ef8, num_func=4222, max_addr(-)min_addr=0x18ef8)
+09-02 22:57:19.548   490   811 D RPCS3   : CPU Usage: Total: 21.6%, Cores: 0.0%, 0.0%, 0.0%, 0.0%, 0.0%, 0.0%, 0.0%, 0.0%
+09-02 22:57:22.664   490   569 I RPCS3   : LLVM: Compiled module v7-kusa-HFxiAAUMisF9FFgc4U20uG-00001P-cortex-a34-2.obj
+09-02 22:57:22.664   490   569 W RPCS3   : LLVM: reporting used memory 1677131776 (free/total: 1756004352/1756004352) by /storage/emulated/0/Android/data/com.zenithblue.sambas3/files/cache/cache/BLUS30443/ppu-U8pStuqfrkhA3fGiHfGZz99SofxM-EBOOT.BIN/v7-kusa-6x2YxC5eg95pjPcp9FnJwi-00001P-cortex-a34-2.obj
+09-02 22:57:22.664   490   569 W RPCS3   : LLVM: Compiling module /storage/emulated/0/Android/data/com.zenithblue.sambas3/files/cache/cache/BLUS30443/ppu-U8pStuqfrkhA3fGiHfGZz99SofxM-EBOOT.BIN/v7-kusa-6x2YxC5eg95pjPcp9FnJwi-00001P-cortex-a34-2.obj
+09-02 22:57:22.673   490   792 W RPCS3   : ProgressMessageDialog::ProgressBarSetMsg(0, Progress: module 94 of 233 (13m remaining))
+09-02 22:57:22.677   490   490 I S3PPU   : event=install_ppu_active progress_id=3000 msg=Progress: module 94 of 233 (13m remainin percent=40 max=100 session=S3-1788369403263-ce5b
+09-02 22:57:22.678   490   792 W RPCS3   : ProgressMessageDialog::ProgressBarSetValue(0, 40)
+09-02 22:57:22.965   490   569 D RPCS3   : LLVM: VMADDFP with -0 addend at [0x0094fa50]
+09-02 22:57:22.965   490   569 D RPCS3   : LLVM: VMADDFP with -0 addend at [0x0094fa54]
+09-02 22:57:22.965   490   569 D RPCS3   : LLVM: VMADDFP with -0 addend at [0x0094fb2c]
+09-02 22:57:22.965   490   569 D RPCS3   : LLVM: VMADDFP with -0 addend at [0x0094fb30]
+09-02 22:57:22.966   490   569 D RPCS3   : LLVM: VMADDFP with -0 addend at [0x0094fc1c]
+09-02 22:57:22.966   490   569 D RPCS3   : LLVM: VMADDFP with -0 addend at [0x0094fc24]
+09-02 22:57:22.966   490   569 D RPCS3   : LLVM: VMADDFP with -0 addend at [0x0094fc28]
+09-02 22:57:22.966   490   569 D RPCS3   : LLVM: VMADDFP with -0 addend at [0x0094fc30]
+09-02 22:57:22.966   490   569 D RPCS3   : LLVM: VMADDFP with -0 addend at [0x0094fc38]
+09-02 22:57:22.966   490   569 D RPCS3   : LLVM: VMADDFP with -0 addend at [0x0094fc40]
+09-02 22:57:22.966   490   569 D RPCS3   : LLVM: VMADDFP with -0 addend at [0x0094fc44]
+09-02 22:57:22.966   490   569 D RPCS3   : LLVM: VMADDFP with -0 addend at [0x0094fc50]
+09-02 22:57:22.967   490   569 D RPCS3   : LLVM: VMADDFP with -0 addend at [0x0094fd6c]
+09-02 22:57:22.967   490   569 D RPCS3   : LLVM: VMADDFP with -0 addend at [0x0094fd74]
+09-02 22:57:22.967   490   569 D RPCS3   : LLVM: VMADDFP with -0 addend at [0x0094fd7c]
+09-02 22:57:22.967   490   569 D RPCS3   : LLVM: VMADDFP with -0 addend at [0x0094fd84]
+09-02 22:57:22.967   490   569 D RPCS3   : LLVM: VMADDFP with -0 addend at [0x0094fd8c]
+09-02 22:57:22.967   490   569 D RPCS3   : LLVM: VMADDFP with -0 addend at [0x0094fd90]
+09-02 22:57:22.967   490   569 D RPCS3   : LLVM: VMADDFP with -0 addend at [0x0094fd9c]
+09-02 22:57:23.058   490   569 D RPCS3   : LLVM: 5062 functions generated (code_size=0x18fdc, num_func=4806, max_addr(-)min_addr=0x18fdc)
+09-02 22:57:28.084   490   569 I RPCS3   : LLVM: Compiled module v7-kusa-6x2YxC5eg95pjPcp9FnJwi-00001P-cortex-a34-2.obj
+09-02 22:57:28.084   490   569 W RPCS3   : LLVM: reporting used memory 1677656064 (free/total: 1756004352/1756004352) by /storage/emulated/0/Android/data/com.zenithblue.sambas3/files/cache/cache/BLUS30443/ppu-U8pStuqfrkhA3fGiHfGZz99SofxM-EBOOT.BIN/v7-kusa-fXqyMcSHjCQFk3C309LMGK-00001P-cortex-a34-2.obj
+09-02 22:57:28.084   490   569 W RPCS3   : LLVM: Compiling module /storage/emulated/0/Android/data/com.zenithblue.sambas3/files/cache/cache/BLUS30443/ppu-U8pStuqfrkhA3fGiHfGZz99SofxM-EBOOT.BIN/v7-kusa-fXqyMcSHjCQFk3C309LMGK-00001P-cortex-a34-2.obj
+09-02 22:57:28.094   490   792 W RPCS3   : ProgressMessageDialog::ProgressBarSetMsg(0, Progress: module 95 of 233 (13m remaining))
+09-02 22:57:28.094   490   792 W RPCS3   : ProgressMessageDialog::ProgressBarSetValue(0, 40)
+09-02 22:57:28.102   490   490 I S3PPU   : event=install_ppu_active progress_id=3000 msg=Progress: module 95 of 233 (13m remainin percent=40 max=100 session=S3-1788369403263-ce5b
+09-02 22:57:28.105   490   503 I ithblue.sambas3: Method exceeds compiler instruction limit: 20850 in void com.zenithblue.sambas3.ui.games.GamesScreenKt.GamesScreen(androidx.activity.result.ActivityResultLauncher, androidx.activity.result.ActivityResultLauncher, androidx.activity.result.ActivityResultLauncher, kotlin.jvm.functions.Function0, kotlin.jvm.functions.Function0, kotlin.jvm.functions.Function0, kotlin.jvm.functions.Function0, androidx.compose.runtime.State, androidx.compose.runtime.State, androidx.compose.runtime.Composer, int, int)
+09-02 22:57:28.112   490   569 D RPCS3   : LLVM: VMADDFP with -0 addend at [0x00957b54]
+09-02 22:57:28.112   490   569 D RPCS3   : LLVM: VMADDFP with -0 addend at [0x00957b90]
+09-02 22:57:28.112   490   569 D RPCS3   : LLVM: VMADDFP with -0 addend at [0x00957bd8]
+09-02 22:57:28.112   490   569 D RPCS3   : LLVM: VMADDFP with -0 addend at [0x00957c24]
+09-02 22:57:28.112   490   569 D RPCS3   : LLVM: VMADDFP with -0 addend at [0x00957c70]
+09-02 22:57:28.113   490   569 D RPCS3   : LLVM: VMADDFP with -0 addend at [0x00957cbc]
+09-02 22:57:28.113   490   569 D RPCS3   : LLVM: VMADDFP with -0 addend at [0x00957d08]
+09-02 22:57:28.487   490   569 D RPCS3   : LLVM: 5001 functions generated (code_size=0x18ffc, num_func=4892, max_addr(-)min_addr=0x18ffc)
+09-02 22:57:29.548   490   811 D RPCS3   : CPU Usage: Total: 21.6%, Cores: 0.0%, 0.0%, 0.0%, 0.0%, 0.0%, 0.0%, 0.0%, 0.0%
+09-02 22:57:33.689   490   569 I RPCS3   : LLVM: Compiled module v7-kusa-fXqyMcSHjCQFk3C309LMGK-00001P-cortex-a34-2.obj
+09-02 22:57:33.689   490   569 D RPCS3   : S3PPU install_step=5 more_work=1 title=BLUS30443
+09-02 22:57:33.693   490   792 W RPCS3   : ProgressMessageDialog::SetMsg(Loading PPU Modules...)
+09-02 22:57:33.693   490   792 W RPCS3   : ProgressMessageDialog::ProgressBarSetMsg(0, Progress: module 96 of 233 (12m remaining))
+09-02 22:57:33.694   490   792 W RPCS3   : ProgressMessageDialog::ProgressBarSetValue(0, 41)
+09-02 22:57:33.707   490   490 I S3PPU   : event=install_ppu_active progress_id=3000 msg=Progress: module 96 of 233 (12m remainin percent=41 max=100 session=S3-1788369403263-ce5b
+09-02 22:57:34.066   490   569 I RPCS3   : LLVM: Module exists: v7-kusa-1GkNENmWnAxkVxHupbxwK1-00001P-cortex-a34-2.obj
+09-02 22:57:34.092   490   569 I RPCS3   : LLVM: Module exists: v7-kusa-pNVp6gGp1zmaUdCdHss6KR-00001P-cortex-a34-2.obj
+09-02 22:57:34.112   490   569 I RPCS3   : LLVM: Module exists: v7-kusa-NKxx6z85c83NY1tRmG3Vfu-00001P-cortex-a34-2.obj
+09-02 22:57:34.138   490   569 I RPCS3   : LLVM: Module exists: v7-kusa-Zw23AEUg0Hx2Q5v77xpbHT-00001P-cortex-a34-2.obj
+09-02 22:57:34.159   490   569 I RPCS3   : LLVM: Module exists: v7-kusa-38x6GzMfT0Peeq7qWAZzx9-00001P-cortex-a34-2.obj
+09-02 22:57:34.178   490   569 I RPCS3   : LLVM: Module exists: v7-kusa-300xw9dP9EM1C61Wrisx4h-00001P-cortex-a34-2.obj
+09-02 22:57:34.199   490   569 I RPCS3   : LLVM: Module exists: v7-kusa-Sni5gC4LxW0H9ELQ4jMNka-00001P-cortex-a34-2.obj
+09-02 22:57:34.224   490   569 I RPCS3   : LLVM: Module exists: v7-kusa-peSE0WPhNoMStkE39HddYc-00001P-cortex-a34-2.obj
+09-02 22:57:34.245   490   569 I RPCS3   : LLVM: Module exists: v7-kusa-Scqz5U3bCzpRK8VhFF2W1R-00001P-cortex-a34-2.obj
+09-02 22:57:34.269   490   569 I RPCS3   : LLVM: Module exists: v7-kusa-6fbmhqHjnzYAEof4rzQUzC-00001P-cortex-a34-2.obj
+09-02 22:57:34.293   490   569 I RPCS3   : LLVM: Module exists: v7-kusa-RFQUugSEpp4M6tNEvYFzUY-00001P-cortex-a34-2.obj
+09-02 22:57:34.317   490   569 I RPCS3   : LLVM: Module exists: v7-kusa-nwQQEuh7n1QGmvxRJVJYP2-00001P-cortex-a34-2.obj
+09-02 22:57:34.346   490   569 I RPCS3   : LLVM: Module exists: v7-kusa-PbPmJWH5pMcnqZrL3Ymeu0-00001P-cortex-a34-2.obj
+09-02 22:57:34.370   490   569 I RPCS3   : LLVM: Module exists: v7-kusa-V2yrze5o7YJeUPbEds5swN-00001P-cortex-a34-2.obj
+09-02 22:57:34.397   490   569 I RPCS3   : LLVM: Module exists: v7-kusa-Xe7mLNM89swcU3cQd7exgy-00001P-cortex-a34-2.obj
+09-02 22:57:34.425   490   569 I RPCS3   : LLVM: Module exists: v7-kusa-a1bycfdKgijLY5JgwFqd3h-00001P-cortex-a34-2.obj
+09-02 22:57:34.451   490   569 I RPCS3   : LLVM: Module exists: v7-kusa-cV1GMR11ctrAYVMeXCg4qn-00001P-cortex-a34-2.obj
+09-02 22:57:34.478   490   569 I RPCS3   : LLVM: Module exists: v7-kusa-6SVupKurAeST5A1teS9nKc-00001P-cortex-a34-2.obj
+09-02 22:57:34.504   490   569 I RPCS3   : LLVM: Module exists: v7-kusa-39aggqRWGugqbcK0ZHV7JR-00001P-cortex-a34-2.obj
+09-02 22:57:34.531   490   569 I RPCS3   : LLVM: Module exists: v7-kusa-dQaoTECZViQn7snbg2MmFG-00001P-cortex-a34-2.obj
+09-02 22:57:34.556   490   569 I RPCS3   : LLVM: Module exists: v7-kusa-N7KaSpfNrfpQZCAp8QPWEA-00001P-cortex-a34-2.obj
+09-02 22:57:34.581   490   569 I RPCS3   : LLVM: Module exists: v7-kusa-Yj2q2i7Nhi3baEh7SY2NH7-00001P-cortex-a34-2.obj
+09-02 22:57:34.610   490   569 I RPCS3   : LLVM: Module exists: v7-kusa-Wc67tcer4Tn1CkaRMdpn4s-00001P-cortex-a34-2.obj
+09-02 22:57:34.636   490   569 I RPCS3   : LLVM: Module exists: v7-kusa-6g2qF26LXApevJP0VYvfh7-00001P-cortex-a34-2.obj
+09-02 22:57:34.662   490   569 I RPCS3   : LLVM: Module exists: v7-kusa-17NfMU7NCnYm9062XWE07F-00001P-cortex-a34-2.obj
+09-02 22:57:34.689   490   569 I RPCS3   : LLVM: Module exists: v7-kusa-Q6w3wvG7je88Z8NnUYij0x-00001P-cortex-a34-2.obj
+09-02 22:57:34.715   490   569 I RPCS3   : LLVM: Module exists: v7-kusa-TarWJtfuz1K73SjXQr1seb-00001P-cortex-a34-2.obj
+09-02 22:57:34.742   490   569 I RPCS3   : LLVM: Module exists: v7-kusa-883Gwufkanxm00fWX1R6HM-00001P-cortex-a34-2.obj
+09-02 22:57:34.769   490   569 I RPCS3   : LLVM: Module exists: v7-kusa-2pxrYVKwNgqonMRG5kP26L-00001P-cortex-a34-2.obj
+09-02 22:57:34.795   490   569 I RPCS3   : LLVM: Module exists: v7-kusa-SgYyxCVQLquSYm5NK60J17-00001P-cortex-a34-2.obj
+09-02 22:57:34.821   490   569 I RPCS3   : LLVM: Module exists: v7-kusa-EL7pj7EGirMH7AS4qzPgoL-00001P-cortex-a34-2.obj
+09-02 22:57:34.847   490   569 I RPCS3   : LLVM: Module exists: v7-kusa-HEaYvyvf9aysjHchnrj8k9-00001P-cortex-a34-2.obj
+09-02 22:57:34.873   490   569 I RPCS3   : LLVM: Module exists: v7-kusa-bbiCiSb3jRArzoKYfPYRwC-00001P-cortex-a34-2.obj
+09-02 22:57:34.901   490   569 I RPCS3   : LLVM: Module exists: v7-kusa-rHH9UThnooK2kR3rCcMfzR-00001P-cortex-a34-2.obj
+09-02 22:57:34.927   490   569 I RPCS3   : LLVM: Module exists: v7-kusa-rdQxcRA0Y16nmi332LXbqE-00001P-cortex-a34-2.obj
+09-02 22:57:34.955   490   569 I RPCS3   : LLVM: Module exists: v7-kusa-s9qJtzJ794j1drciE0Ke4k-00001P-cortex-a34-2.obj
+09-02 22:57:34.982   490   569 I RPCS3   : LLVM: Module exists: v7-kusa-NfjHQbshoAQLg6NWJsrErc-00001P-cortex-a34-2.obj
+09-02 22:57:35.009   490   569 I RPCS3   : LLVM: Module exists: v7-kusa-AdXpJf8v70jbYmEcxAnhYU-00001P-cortex-a34-2.obj
+09-02 22:57:35.037   490   569 I RPCS3   : LLVM: Module exists: v7-kusa-RzdYgyMud3sh9E6CEHPw3L-00001P-cortex-a34-2.obj
+09-02 22:57:35.058   490   569 I RPCS3   : LLVM: Module exists: v7-kusa-8gGNuPuFsohjbUyTZeiCHK-00001P-cortex-a34-2.obj
+09-02 22:57:35.083   490   569 I RPCS3   : LLVM: Module exists: v7-kusa-QjbyVS2pHnJWRYXvYLeq8W-00001P-cortex-a34-2.obj
+09-02 22:57:35.111   490   569 I RPCS3   : LLVM: Module exists: v7-kusa-TfVf8EQKL2y6XnR2fZnudJ-00001P-cortex-a34-2.obj
+09-02 22:57:35.133   490   569 I RPCS3   : LLVM: Module exists: v7-kusa-qnNSmyF3tQMYaQw27gg5he-00001P-cortex-a34-2.obj
+09-02 22:57:35.154   490   569 I RPCS3   : LLVM: Module exists: v7-kusa-WdXe821E5ue8ZGsJMUa2bM-00001P-cortex-a34-2.obj
+09-02 22:57:35.182   490   569 I RPCS3   : LLVM: Module exists: v7-kusa-nyYF4qnqPan4ud89u7pNNA-00001P-cortex-a34-2.obj
+09-02 22:57:35.213   490   569 I RPCS3   : LLVM: Module exists: v7-kusa-E945VA4pFkWgF0je44jx5X-00001P-cortex-a34-2.obj
+09-02 22:57:35.243   490   569 I RPCS3   : LLVM: Module exists: v7-kusa-brhUhat9StEgmZweqx9Ldn-00001P-cortex-a34-2.obj
+09-02 22:57:35.270   490   569 I RPCS3   : LLVM: Module exists: v7-kusa-Nm6LX0fifaNaCJzqucupvw-00001P-cortex-a34-2.obj
+09-02 22:57:35.297   490   569 I RPCS3   : LLVM: Module exists: v7-kusa-RHGpUQti4NLMWnyi4vMFYY-00001P-cortex-a34-2.obj
+09-02 22:57:35.323   490   569 I RPCS3   : LLVM: Module exists: v7-kusa-LqTPTv3dWhbCjU5qGYonuq-00001P-cortex-a34-2.obj
+09-02 22:57:35.346   490   569 I RPCS3   : LLVM: Module exists: v7-kusa-Pev9S4ss818MJQbofpxyUu-00001P-cortex-a34-2.obj
+09-02 22:57:35.371   490   569 I RPCS3   : LLVM: Module exists: v7-kusa-sJhcqmUWxjdfnWZVgupXiH-00001P-cortex-a34-2.obj
+09-02 22:57:35.397   490   569 I RPCS3   : LLVM: Module exists: v7-kusa-Ug2VXYRR7HQRnQZrZ080fi-00001P-cortex-a34-2.obj
+09-02 22:57:35.427   490   569 I RPCS3   : LLVM: Module exists: v7-kusa-oib0yuY1mSwJxhfA6ddUdU-00001P-cortex-a34-2.obj
+09-02 22:57:35.454   490   569 I RPCS3   : LLVM: Module exists: v7-kusa-5mameQb4h2FjC0zVPrW3Fi-00001P-cortex-a34-2.obj
+09-02 22:57:35.479   490   569 I RPCS3   : LLVM: Module exists: v7-kusa-hyaYmfd7aHw7MrgULNH4qC-00001P-cortex-a34-2.obj
+09-02 22:57:35.506   490   569 I RPCS3   : LLVM: Module exists: v7-kusa-etZMSzViLGNbNMo6Ebd1sy-00001P-cortex-a34-2.obj
+09-02 22:57:35.532   490   569 I RPCS3   : LLVM: Module exists: v7-kusa-fCP1TM9eTmYV3Kp6ignSsp-00001P-cortex-a34-2.obj
+09-02 22:57:35.562   490   569 I RPCS3   : LLVM: Module exists: v7-kusa-SVd5xfLAibKUNPi94uc8RM-00001P-cortex-a34-2.obj
+09-02 22:57:35.586   490   569 I RPCS3   : LLVM: Module exists: v7-kusa-cyRtdfRyXSqSCXgSKUmbxo-00001P-cortex-a34-2.obj
+09-02 22:57:35.610   490   569 I RPCS3   : LLVM: Module exists: v7-kusa-TH1bRCkPqP6LFQmvJqa81g-00001P-cortex-a34-2.obj
+09-02 22:57:35.636   490   569 I RPCS3   : LLVM: Module exists: v7-kusa-Jzxbmh3wsbAiFkRyVJshYp-00001P-cortex-a34-2.obj
+09-02 22:57:35.664   490   569 I RPCS3   : LLVM: Module exists: v7-kusa-KmVhQxsY9e5Tahbet3LtSA-00001P-cortex-a34-2.obj
+09-02 22:57:35.695   490   569 I RPCS3   : LLVM: Module exists: v7-kusa-KytysPELqRLH4PNcgEgQLp-00001P-cortex-a34-2.obj
+09-02 22:57:35.724   490   569 I RPCS3   : LLVM: Module exists: v7-kusa-eMEqbSM95JktTTYKvQ5jJm-00001P-cortex-a34-2.obj
+09-02 22:57:35.751   490   569 I RPCS3   : LLVM: Module exists: v7-kusa-knZk5jCbewRdm1iZv1JFQ5-00001P-cortex-a34-2.obj
+09-02 22:57:35.776   490   569 I RPCS3   : LLVM: Module exists: v7-kusa-TTfi5oNZ1ZghpaP7WFsYoM-00001P-cortex-a34-2.obj
+09-02 22:57:35.803   490   569 I RPCS3   : LLVM: Module exists: v7-kusa-X4QdHZaVUFVnUkprrRVaw4-00001P-cortex-a34-2.obj
+09-02 22:57:35.831   490   569 I RPCS3   : LLVM: Module exists: v7-kusa-p0uNbWr85FPK0dUfZ2HU1Y-00001P-cortex-a34-2.obj
+09-02 22:57:35.856   490   569 I RPCS3   : LLVM: Module exists: v7-kusa-kGrCLRXGP3tnit0gENc4y1-00001P-cortex-a34-2.obj
+09-02 22:57:35.885   490   569 I RPCS3   : LLVM: Module exists: v7-kusa-qWyCYAew1TJgrsrmHEwbw0-00001P-cortex-a34-2.obj
+09-02 22:57:35.910   490   569 I RPCS3   : LLVM: Module exists: v7-kusa-N1LhdJtxTsF4p26qFC0Cpk-00001P-cortex-a34-2.obj
+09-02 22:57:35.936   490   569 I RPCS3   : LLVM: Module exists: v7-kusa-QoGYu8ccesmHiurFzUQ5AM-00001P-cortex-a34-2.obj
+09-02 22:57:35.963   490   569 I RPCS3   : LLVM: Module exists: v7-kusa-00VKNZVjE1YWTS1QonpV13-00001P-cortex-a34-2.obj
+09-02 22:57:35.990   490   569 I RPCS3   : LLVM: Module exists: v7-kusa-QQWVKN3jQHwVdUcHsaxa5K-00001P-cortex-a34-2.obj
+09-02 22:57:36.018   490   569 I RPCS3   : LLVM: Module exists: v7-kusa-b6sCMVnMMztaTyKyt1QW1t-00001P-cortex-a34-2.obj
+09-02 22:57:36.044   490   569 I RPCS3   : LLVM: Module exists: v7-kusa-Mit53Kfdnzm8M1NhrhPiGa-00001P-cortex-a34-2.obj
+09-02 22:57:36.072   490   569 I RPCS3   : LLVM: Module exists: v7-kusa-Pjbf0ycz1aqJ1ayfpoqbYb-00001P-cortex-a34-2.obj
+09-02 22:57:36.099   490   569 I RPCS3   : LLVM: Module exists: v7-kusa-sLEm0wYYMukMfTPubVq5zs-00001P-cortex-a34-2.obj
+09-02 22:57:36.127   490   569 I RPCS3   : LLVM: Module exists: v7-kusa-7w4UYQXuRE5cEWd0bv3J8L-00001P-cortex-a34-2.obj
+09-02 22:57:36.154   490   569 I RPCS3   : LLVM: Module exists: v7-kusa-MXCVy4M6eSVnCitmCisjYr-00001P-cortex-a34-2.obj
+09-02 22:57:36.181   490   569 I RPCS3   : LLVM: Module exists: v7-kusa-cqfQ3f1hpteqzpQxMcJiFH-00001P-cortex-a34-2.obj
+09-02 22:57:36.208   490   569 I RPCS3   : LLVM: Module exists: v7-kusa-q1n8woxAcSRQ3NSuPGimoS-00001P-cortex-a34-2.obj
+09-02 22:57:36.236   490   569 I RPCS3   : LLVM: Module exists: v7-kusa-bbKTxk1qUtNaHNFYH8TqLp-00001P-cortex-a34-2.obj
+09-02 22:57:36.263   490   569 I RPCS3   : LLVM: Module exists: v7-kusa-3Un80ek3J0cpuKjup0zrSP-00001P-cortex-a34-2.obj
+09-02 22:57:36.285   490   569 I RPCS3   : LLVM: Module exists: v7-kusa-cug6iU2fnyy1jhK26LZ1Qy-00001P-cortex-a34-2.obj
+09-02 22:57:36.312   490   569 I RPCS3   : LLVM: Module exists: v7-kusa-UcfedQFmswg0XWigsNvzUm-00001P-cortex-a34-2.obj
+09-02 22:57:36.339   490   569 I RPCS3   : LLVM: Module exists: v7-kusa-ri9zs1PbzMufRK6sm91pNi-00001P-cortex-a34-2.obj
+09-02 22:57:36.367   490   569 I RPCS3   : LLVM: Module exists: v7-kusa-KWxG1f6txxzdZc379wXpdH-00001P-cortex-a34-2.obj
+09-02 22:57:36.393   490   569 I RPCS3   : LLVM: Module exists: v7-kusa-Q43Q7g9diPyKvr6L2XHwsJ-00001P-cortex-a34-2.obj
+09-02 22:57:36.419   490   569 I RPCS3   : LLVM: Module exists: v7-kusa-cPCiEkM7aymdKGqoFe1uuV-00001P-cortex-a34-2.obj
+09-02 22:57:36.449   490   569 I RPCS3   : LLVM: Module exists: v7-kusa-r0e8WNWx8KUhMQo6MySb4P-00001P-cortex-a34-2.obj
+09-02 22:57:36.474   490   569 I RPCS3   : LLVM: Module exists: v7-kusa-qcYgt8CQMV4F576EHAAcb6-00001P-cortex-a34-2.obj
+09-02 22:57:36.499   490   569 I RPCS3   : LLVM: Module exists: v7-kusa-HFxiAAUMisF9FFgc4U20uG-00001P-cortex-a34-2.obj
+09-02 22:57:36.525   490   569 I RPCS3   : LLVM: Module exists: v7-kusa-6x2YxC5eg95pjPcp9FnJwi-00001P-cortex-a34-2.obj
+09-02 22:57:36.551   490   569 I RPCS3   : LLVM: Module exists: v7-kusa-fXqyMcSHjCQFk3C309LMGK-00001P-cortex-a34-2.obj
+09-02 22:57:37.901   490   569 D RPCS3   : S3PPU install_progress pdone=96 ptotal=233 step_workload=16 modules_total=233 cached=96 uncached_remaining=137 more=1
+09-02 22:57:37.901   490   569 W RPCS3   : LLVM: reporting used memory 1676541952 (free/total: 1756004352/1756004352) by /storage/emulated/0/Android/data/com.zenithblue.sambas3/files/cache/cache/BLUS30443/ppu-U8pStuqfrkhA3fGiHfGZz99SofxM-EBOOT.BIN/v7-kusa-WuMig8AH8uMiXqxootWeTx-00001P-cortex-a34-2.obj
+09-02 22:57:37.901   490   569 W RPCS3   : LLVM: Compiling module /storage/emulated/0/Android/data/com.zenithblue.sambas3/files/cache/cache/BLUS30443/ppu-U8pStuqfrkhA3fGiHfGZz99SofxM-EBOOT.BIN/v7-kusa-WuMig8AH8uMiXqxootWeTx-00001P-cortex-a34-2.obj
+09-02 22:57:37.903   490   792 W RPCS3   : ProgressMessageDialog::SetMsg(Compiling PPU Modules...)
+09-02 22:57:37.903   490   792 W RPCS3   : ProgressMessageDialog::ProgressBarSetMsg(0, Progress: module 96 of 233 (13m remaining))
+09-02 22:57:37.903   490   792 W RPCS3   : ProgressMessageDialog::ProgressBarSetValue(0, 41)
+09-02 22:57:37.913   490   490 I S3PPU   : event=install_ppu_active progress_id=3000 msg=Progress: module 96 of 233 (13m remainin percent=41 max=100 session=S3-1788369403263-ce5b
+09-02 22:57:38.288   490   569 D RPCS3   : LLVM: 5382 functions generated (code_size=0x18fb8, num_func=5253, max_addr(-)min_addr=0x18fb8)
+09-02 22:57:39.549   490   811 D RPCS3   : CPU Usage: Total: 21.6%, Cores: 0.0%, 0.0%, 0.0%, 0.0%, 0.0%, 0.0%, 0.0%, 0.0%
+09-02 22:57:43.523   490   569 I RPCS3   : LLVM: Compiled module v7-kusa-WuMig8AH8uMiXqxootWeTx-00001P-cortex-a34-2.obj
+09-02 22:57:43.523   490   569 W RPCS3   : LLVM: reporting used memory 1677590528 (free/total: 1756004352/1756004352) by /storage/emulated/0/Android/data/com.zenithblue.sambas3/files/cache/cache/BLUS30443/ppu-U8pStuqfrkhA3fGiHfGZz99SofxM-EBOOT.BIN/v7-kusa-eMQML8RiLZEg11LkCpc5JS-00001P-cortex-a34-2.obj
+09-02 22:57:43.523   490   569 W RPCS3   : LLVM: Compiling module /storage/emulated/0/Android/data/com.zenithblue.sambas3/files/cache/cache/BLUS30443/ppu-U8pStuqfrkhA3fGiHfGZz99SofxM-EBOOT.BIN/v7-kusa-eMQML8RiLZEg11LkCpc5JS-00001P-cortex-a34-2.obj
+09-02 22:57:43.534   490   792 W RPCS3   : ProgressMessageDialog::ProgressBarSetMsg(0, Progress: module 97 of 233 (12m remaining))
+09-02 22:57:43.534   490   490 I S3PPU   : event=install_ppu_active progress_id=3000 msg=Progress: module 97 of 233 (12m remainin percent=41 max=100 session=S3-1788369403263-ce5b
+09-02 22:57:43.534   490   792 W RPCS3   : ProgressMessageDialog::ProgressBarSetValue(0, 41)
+09-02 22:57:43.919   490   569 D RPCS3   : LLVM: 5674 functions generated (code_size=0x18ff8, num_func=5537, max_addr(-)min_addr=0x18ff8)
+09-02 22:57:49.308   490   569 I RPCS3   : LLVM: Compiled module v7-kusa-eMQML8RiLZEg11LkCpc5JS-00001P-cortex-a34-2.obj
+09-02 22:57:49.308   490   569 W RPCS3   : LLVM: reporting used memory 1677656064 (free/total: 1756004352/1756004352) by /storage/emulated/0/Android/data/com.zenithblue.sambas3/files/cache/cache/BLUS30443/ppu-U8pStuqfrkhA3fGiHfGZz99SofxM-EBOOT.BIN/v7-kusa-paEtgmZ81EEMqfELAGxAKy-00001P-cortex-a34-2.obj
+09-02 22:57:49.308   490   569 W RPCS3   : LLVM: Compiling module /storage/emulated/0/Android/data/com.zenithblue.sambas3/files/cache/cache/BLUS30443/ppu-U8pStuqfrkhA3fGiHfGZz99SofxM-EBOOT.BIN/v7-kusa-paEtgmZ81EEMqfELAGxAKy-00001P-cortex-a34-2.obj
+09-02 22:57:49.313   490   792 W RPCS3   : ProgressMessageDialog::ProgressBarSetMsg(0, Progress: module 98 of 233 (12m remaining))
+09-02 22:57:49.313   490   792 W RPCS3   : ProgressMessageDialog::ProgressBarSetValue(0, 42)
+09-02 22:57:49.314   490   490 I S3PPU   : event=install_ppu_active progress_id=3000 msg=Progress: module 98 of 233 (12m remainin percent=42 max=100 session=S3-1788369403263-ce5b
+09-02 22:57:49.548   490   811 D RPCS3   : CPU Usage: Total: 21.4%, Cores: 0.0%, 0.0%, 0.0%, 0.0%, 0.0%, 0.0%, 0.0%, 0.0%
+09-02 22:57:49.702   490   569 D RPCS3   : LLVM: 5285 functions generated (code_size=0x18ffc, num_func=5082, max_addr(-)min_addr=0x18ffc)
+09-02 22:57:54.893   490   569 I RPCS3   : LLVM: Compiled module v7-kusa-paEtgmZ81EEMqfELAGxAKy-00001P-cortex-a34-2.obj
+09-02 22:57:54.893   490   569 W RPCS3   : LLVM: reporting used memory 1677524992 (free/total: 1756004352/1756004352) by /storage/emulated/0/Android/data/com.zenithblue.sambas3/files/cache/cache/BLUS30443/ppu-U8pStuqfrkhA3fGiHfGZz99SofxM-EBOOT.BIN/v7-kusa-bkPwSyNNqbPnMLQAvuc904-0004Xr-cortex-a34-2.obj
+09-02 22:57:54.893   490   569 W RPCS3   : LLVM: Compiling module /storage/emulated/0/Android/data/com.zenithblue.sambas3/files/cache/cache/BLUS30443/ppu-U8pStuqfrkhA3fGiHfGZz99SofxM-EBOOT.BIN/v7-kusa-bkPwSyNNqbPnMLQAvuc904-0004Xr-cortex-a34-2.obj
+09-02 22:57:54.903   490   792 W RPCS3   : ProgressMessageDialog::ProgressBarSetMsg(0, Progress: module 99 of 233 (12m remaining))
+09-02 22:57:54.904   490   792 W RPCS3   : ProgressMessageDialog::ProgressBarSetValue(0, 42)
+09-02 22:57:54.912   490   490 I S3PPU   : event=install_ppu_active progress_id=3000 msg=Progress: module 99 of 233 (12m remainin percent=42 max=100 session=S3-1788369403263-ce5b
+09-02 22:57:54.914   490   503 I ithblue.sambas3: Method exceeds compiler instruction limit: 20850 in void com.zenithblue.sambas3.ui.games.GamesScreenKt.GamesScreen(androidx.activity.result.ActivityResultLauncher, androidx.activity.result.ActivityResultLauncher, androidx.activity.result.ActivityResultLauncher, kotlin.jvm.functions.Function0, kotlin.jvm.functions.Function0, kotlin.jvm.functions.Function0, kotlin.jvm.functions.Function0, androidx.compose.runtime.State, androidx.compose.runtime.State, androidx.compose.runtime.Composer, int, int)
+09-02 22:57:55.749   490   569 D RPCS3   : LLVM: 478172 functions generated (code_size=0x18ff4, num_func=5058, max_addr(-)min_addr=0x18ff4)
+09-02 22:57:59.548   490   811 D RPCS3   : CPU Usage: Total: 22.0%, Cores: 0.0%, 0.0%, 0.0%, 0.0%, 0.0%, 0.0%, 0.0%, 0.0%
+09-02 22:58:02.680   490   569 I scudo   : Can't populate more pages for size class 3120.
+09-02 22:58:02.801   490   569 I scudo   : Can't populate more pages for size class 4112.
+09-02 22:58:02.929   490   569 I scudo   : Can't populate more pages for size class 4624.
+09-02 22:58:02.971   490   490 I ithblue.sambas3: Waiting for a blocking GC NativeAlloc
+09-02 22:58:02.995   490   490 I ithblue.sambas3: WaitForGcToComplete blocked NativeAlloc on NativeAlloc for 23.904ms
+09-02 22:58:03.032   490   569 I scudo   : Can't populate more pages for size class 7120.
+09-02 22:58:03.115   490   569 I scudo   : Can't populate more pages for size class 8720.
+09-02 22:58:03.190   490   569 I scudo   : Can't populate more pages for size class 11664.
+09-02 22:58:03.250   490   569 I scudo   : Can't populate more pages for size class 14224.
+09-02 22:58:03.301   490   569 I scudo   : Can't populate more pages for size class 16400.
+09-02 22:58:03.354   490   569 I scudo   : Can't populate more pages for size class 18448.
+09-02 22:58:03.398   490   569 I scudo   : Can't populate more pages for size class 23056.
+09-02 22:58:03.431   490   569 I scudo   : Can't populate more pages for size class 29456.
+09-02 22:58:03.465   490   569 I scudo   : Can't populate more pages for size class 33296.
+09-02 22:58:03.482   490   569 I scudo   : Can't populate more pages for size class 65552.
+09-02 22:58:03.521   490   490 I ithblue.sambas3: Waiting for a blocking GC NativeAlloc
+09-02 22:58:03.543   490   490 I ithblue.sambas3: WaitForGcToComplete blocked NativeAlloc on NativeAlloc for 21.605ms
+09-02 22:58:03.763   490   569 I scudo   : Scudo ERROR: internal map failure (error desc=Out of memory)
+09-02 22:58:03.763   490   569 F libc    : Fatal signal 6 (SIGABRT), code -1 (SI_QUEUE) in tid 569 (Thread-6), pid 490 (ithblue.sambas3)
+09-02 22:58:03.764   490   523 W libc    : malloc(13600) failed: returning null pointer
+09-02 22:58:03.764   490   523 F skia    : [skia] "sk_out_of_memory (asked for 13600 bytes)
+09-02 22:58:03.764   490   523 F skia    : " in {void sk_out_of_memory(size_t)}
+09-02 22:58:03.841   490   509 W libc    : malloc(4080) failed: returning null pointer
+09-02 22:58:03.847   490   523 W libc    : malloc(4080) failed: returning null pointer
+09-02 22:58:03.862   490   509 E libc++abi: terminating due to uncaught exception of type St9bad_alloc: std::bad_alloc
+09-02 22:58:03.898   490   523 E libc++abi: terminating due to uncaught exception of type St9bad_alloc: std::bad_alloc
+09-02 22:58:04.127  2471  2471 I crash_dump64: obtaining output fd from tombstoned, type: kDebuggerdTombstoneProto
+09-02 22:58:04.128  1222  1222 I tombstoned: received crash request for pid 569
+09-02 22:58:04.702  2471  2471 F DEBUG   :       #01 pc 000000000005ce2c  /apex/com.android.runtime/lib64/bionic/libc.so (scudo::die()+8) (BuildId: 0601bdb9deff47820c143e47a687ef5f)
+09-02 22:58:04.702  2471  2471 F DEBUG   :       #02 pc 000000000005d79c  /apex/com.android.runtime/lib64/bionic/libc.so (scudo::reportRawError(char const*)+28) (BuildId: 0601bdb9deff47820c143e47a687ef5f)
+09-02 22:58:04.702  2471  2471 F DEBUG   :       #03 pc 000000000005de8c  /apex/com.android.runtime/lib64/bionic/libc.so (scudo::reportMapError(unsigned long)+172) (BuildId: 0601bdb9deff47820c143e47a687ef5f)
+09-02 22:58:04.702  2471  2471 F DEBUG   :       #04 pc 000000000005d3ec  /apex/com.android.runtime/lib64/bionic/libc.so (scudo::MemMapLinux::remapImpl(unsigned long, unsigned long, char const*, unsigned long)+208) (BuildId: 0601bdb9deff47820c143e47a687ef5f)
+09-02 22:58:04.702  2471  2471 F DEBUG   :       #05 pc 0000000000061bf8  /apex/com.android.runtime/lib64/bionic/libc.so (scudo::MapAllocator<scudo::SecondaryConfig<scudo::AndroidNormalConfig>>::allocate(scudo::Options const&, unsigned long, unsigned long, unsigned long*, scudo::FillContentsMode)+412) (BuildId: 0601bdb9deff47820c143e47a687ef5f)
+09-02 22:58:04.702  2471  2471 F DEBUG   :       #06 pc 000000000005ef84  /apex/com.android.runtime/lib64/bionic/libc.so (scudo::Allocator<scudo::AndroidNormalConfig, &scudo_malloc_postinit>::allocate(unsigned long, scudo::Chunk::Origin, unsigned long, bool)+896) (BuildId: 0601bdb9deff47820c143e47a687ef5f)
+09-02 22:58:04.702  2471  2471 F DEBUG   :       #07 pc 000000000005f374  /apex/com.android.runtime/lib64/bionic/libc.so (scudo_posix_memalign+64) (BuildId: 0601bdb9deff47820c143e47a687ef5f)
+09-02 22:58:04.842  1222  1222 E tombstoned: Tombstone written to: tombstone_35
+09-02 22:58:04.859  6218  6377 I BootReceiver: Filtering tombstone file: tombstone_35.pb
+09-02 22:58:04.870  6218  6377 I BootReceiver: Generated tombstone file: tombstone_35.pb202834588179797176.pb.tmp
+09-02 22:58:04.870  6218  6377 I BootReceiver: Adding tombstone tombstone_35.pb202834588179797176.pb.tmp to dropbox
+09-02 22:58:04.874  6218  6377 I BootReceiver: Adding text tombstone version of tombstone_35.pb202834588179797176.pb.tmp to dropbox
+09-02 22:58:04.428     1     1 I init    : Untracked process (pid: 2481 name: (pbtombstone) ppid: 1 pgrp: 6088 state: Z) exited with status 1
+09-02 22:58:04.428     1     1 I init    : Untracked process (pid: 2481 name: (pbtombstone) ppid: 1 pgrp: 6088 state: Z) did not have an associated service entry and will not be reaped
+09-02 22:58:04.991  6218  6377 I BootReceiver: Copying /data/tombstones/tombstone_35.pb202834588179797176.pb.tmp6024057839832467080.pb.txt.tmp to DropBox (SYSTEM_TOMBSTONE)

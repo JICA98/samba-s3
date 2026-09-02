@@ -1,0 +1,427 @@
+09-02 21:47:09.385  6089  9444 I AudioFlinger: openOutput() this 0xb400006f6a28b390, module 10 Device AUDIO_DEVICE_OUT_SPEAKER, @:, SamplingRate 48000, Format 0x000001, Channels 0x3, flags 0x4001
+09-02 21:47:09.530  6089 10941 I AudioFlinger: openOutput() this 0xb400006f6a28b390, module 10 Device AUDIO_DEVICE_OUT_SPEAKER, @:, SamplingRate 48000, Format 0x000001, Channels 0x3, flags 0x4001
+09-02 21:47:09.627 25970 25999 D RPCS3   : **** cellHttp import: [cellHttpTransactionAbortConnection] (0x2d52848b) -> 0x16b8664
+09-02 21:47:09.627 25970 25999 D RPCS3   : **** sceNp import: [sceNpScoreAbortTransaction] (0xee5b20d9) -> 0x16ba6c4
+09-02 21:47:09.628 25970 25999 D RPCS3   : **** cellSysutil import: [cellOskDialogAbort] (0xb6d84526) -> 0x16b9424
+09-02 21:47:09.670  6089 10941 I AudioFlinger: openOutput() this 0xb400006f6a28b390, module 10 Device AUDIO_DEVICE_OUT_SPEAKER, @:, SamplingRate 48000, Format 0x000001, Channels 0x3, flags 0x4001
+09-02 21:47:09.802  6089 10941 I AudioFlinger: openOutput() this 0xb400006f6a28b390, module 10 Device AUDIO_DEVICE_OUT_SPEAKER, @:, SamplingRate 48000, Format 0x000001, Channels 0x3, flags 0x4001
+09-02 21:47:10.677 25970 25970 I S3PPU   : event=install_ppu_active progress_id=3000 msg=Progress: analyzing... percent=0 max=100 session=S3-1788365677285-d8e7
+09-02 21:47:10.955 25970 25999 W RPCS3   : LLVM: Compiling module /storage/emulated/0/Android/data/com.zenithblue.sambas3/files/cache/cache/BLUS30443/ppu-U8pStuqfrkhA3fGiHfGZz99SofxM-EBOOT.BIN/v7-kusa-1GkNENmWnAxkVxHupbxwK1-00001P-cortex-a34-2.obj
+09-02 21:47:10.957 25970 26340 W RPCS3   : ProgressMessageDialog::ProgressBarSetMsg(0, Progress: module 0 of 233)
+09-02 21:47:10.963 25970 25970 I S3PPU   : event=install_ppu_active progress_id=3000 msg=Progress: module 0 of 233 percent=0 max=100 session=S3-1788365677285-d8e7
+09-02 21:47:14.984 25970 25999 I RPCS3   : LLVM: Compiled module v7-kusa-1GkNENmWnAxkVxHupbxwK1-00001P-cortex-a34-2.obj
+09-02 21:47:14.984 25970 25999 W RPCS3   : LLVM: Compiling module /storage/emulated/0/Android/data/com.zenithblue.sambas3/files/cache/cache/BLUS30443/ppu-U8pStuqfrkhA3fGiHfGZz99SofxM-EBOOT.BIN/v7-kusa-pNVp6gGp1zmaUdCdHss6KR-00001P-cortex-a34-2.obj
+09-02 21:47:14.987 25970 26340 W RPCS3   : ProgressMessageDialog::ProgressBarSetMsg(0, Progress: module 1 of 233 (17m remaining))
+09-02 21:47:14.988 25970 25970 I S3PPU   : event=install_ppu_active progress_id=3000 msg=Progress: module 1 of 233 (17m remaining percent=0 max=100 session=S3-1788365677285-d8e7
+09-02 21:47:19.806 25970 25999 I RPCS3   : LLVM: Compiled module v7-kusa-pNVp6gGp1zmaUdCdHss6KR-00001P-cortex-a34-2.obj
+09-02 21:47:19.806 25970 25999 W RPCS3   : LLVM: Compiling module /storage/emulated/0/Android/data/com.zenithblue.sambas3/files/cache/cache/BLUS30443/ppu-U8pStuqfrkhA3fGiHfGZz99SofxM-EBOOT.BIN/v7-kusa-NKxx6z85c83NY1tRmG3Vfu-00001P-cortex-a34-2.obj
+09-02 21:47:19.809 25970 26340 W RPCS3   : ProgressMessageDialog::ProgressBarSetMsg(0, Progress: module 2 of 233 (18m remaining))
+09-02 21:47:19.811 25970 25970 I S3PPU   : event=install_ppu_active progress_id=3000 msg=Progress: module 2 of 233 (18m remaining percent=0 max=100 session=S3-1788365677285-d8e7
+09-02 21:47:23.592 25970 25999 I RPCS3   : LLVM: Compiled module v7-kusa-NKxx6z85c83NY1tRmG3Vfu-00001P-cortex-a34-2.obj
+09-02 21:47:23.592 25970 25999 W RPCS3   : LLVM: Compiling module /storage/emulated/0/Android/data/com.zenithblue.sambas3/files/cache/cache/BLUS30443/ppu-U8pStuqfrkhA3fGiHfGZz99SofxM-EBOOT.BIN/v7-kusa-Zw23AEUg0Hx2Q5v77xpbHT-00001P-cortex-a34-2.obj
+09-02 21:47:23.597 25970 26340 W RPCS3   : ProgressMessageDialog::ProgressBarSetMsg(0, Progress: module 3 of 233 (18m remaining))
+09-02 21:47:23.598 25970 25970 I S3PPU   : event=install_ppu_active progress_id=3000 msg=Progress: module 3 of 233 (18m remaining percent=1 max=100 session=S3-1788365677285-d8e7
+09-02 21:47:28.450 25970 25999 I RPCS3   : LLVM: Compiled module v7-kusa-Zw23AEUg0Hx2Q5v77xpbHT-00001P-cortex-a34-2.obj
+09-02 21:47:28.450 25970 25999 W RPCS3   : LLVM: Compiling module /storage/emulated/0/Android/data/com.zenithblue.sambas3/files/cache/cache/BLUS30443/ppu-U8pStuqfrkhA3fGiHfGZz99SofxM-EBOOT.BIN/v7-kusa-38x6GzMfT0Peeq7qWAZzx9-00001P-cortex-a34-2.obj
+09-02 21:47:28.457 25970 26340 W RPCS3   : ProgressMessageDialog::ProgressBarSetMsg(0, Progress: module 4 of 233 (17m remaining))
+09-02 21:47:28.466 25970 25970 I S3PPU   : event=install_ppu_active progress_id=3000 msg=Progress: module 4 of 233 (17m remaining percent=1 max=100 session=S3-1788365677285-d8e7
+09-02 21:47:32.785 25970 25999 I RPCS3   : LLVM: Compiled module v7-kusa-38x6GzMfT0Peeq7qWAZzx9-00001P-cortex-a34-2.obj
+09-02 21:47:32.786 25970 25999 W RPCS3   : LLVM: Compiling module /storage/emulated/0/Android/data/com.zenithblue.sambas3/files/cache/cache/BLUS30443/ppu-U8pStuqfrkhA3fGiHfGZz99SofxM-EBOOT.BIN/v7-kusa-300xw9dP9EM1C61Wrisx4h-00001P-cortex-a34-2.obj
+09-02 21:47:32.787 25970 26340 W RPCS3   : ProgressMessageDialog::ProgressBarSetMsg(0, Progress: module 5 of 233 (17m remaining))
+09-02 21:47:32.788 25970 25970 I S3PPU   : event=install_ppu_active progress_id=3000 msg=Progress: module 5 of 233 (17m remaining percent=2 max=100 session=S3-1788365677285-d8e7
+09-02 21:47:36.290 25970 25999 I RPCS3   : LLVM: Compiled module v7-kusa-300xw9dP9EM1C61Wrisx4h-00001P-cortex-a34-2.obj
+09-02 21:47:36.290 25970 25999 W RPCS3   : LLVM: Compiling module /storage/emulated/0/Android/data/com.zenithblue.sambas3/files/cache/cache/BLUS30443/ppu-U8pStuqfrkhA3fGiHfGZz99SofxM-EBOOT.BIN/v7-kusa-Sni5gC4LxW0H9ELQ4jMNka-00001P-cortex-a34-2.obj
+09-02 21:47:36.301 25970 26340 W RPCS3   : ProgressMessageDialog::ProgressBarSetMsg(0, Progress: module 6 of 233 (17m remaining))
+09-02 21:47:36.302 25970 25970 I S3PPU   : event=install_ppu_active progress_id=3000 msg=Progress: module 6 of 233 (17m remaining percent=2 max=100 session=S3-1788365677285-d8e7
+09-02 21:47:40.278 25970 25999 I RPCS3   : LLVM: Compiled module v7-kusa-Sni5gC4LxW0H9ELQ4jMNka-00001P-cortex-a34-2.obj
+09-02 21:47:40.278 25970 25999 W RPCS3   : LLVM: Compiling module /storage/emulated/0/Android/data/com.zenithblue.sambas3/files/cache/cache/BLUS30443/ppu-U8pStuqfrkhA3fGiHfGZz99SofxM-EBOOT.BIN/v7-kusa-peSE0WPhNoMStkE39HddYc-00001P-cortex-a34-2.obj
+09-02 21:47:40.289 25970 26340 W RPCS3   : ProgressMessageDialog::ProgressBarSetMsg(0, Progress: module 7 of 233 (16m remaining))
+09-02 21:47:40.290 25970 25970 I S3PPU   : event=install_ppu_active progress_id=3000 msg=Progress: module 7 of 233 (16m remaining percent=3 max=100 session=S3-1788365677285-d8e7
+09-02 21:47:44.556 25970 25999 I RPCS3   : LLVM: Compiled module v7-kusa-peSE0WPhNoMStkE39HddYc-00001P-cortex-a34-2.obj
+09-02 21:47:44.556 25970 25999 W RPCS3   : LLVM: Compiling module /storage/emulated/0/Android/data/com.zenithblue.sambas3/files/cache/cache/BLUS30443/ppu-U8pStuqfrkhA3fGiHfGZz99SofxM-EBOOT.BIN/v7-kusa-Scqz5U3bCzpRK8VhFF2W1R-00001P-cortex-a34-2.obj
+09-02 21:47:44.557 25970 26340 W RPCS3   : ProgressMessageDialog::ProgressBarSetMsg(0, Progress: module 8 of 233 (16m remaining))
+09-02 21:47:44.562 25970 25970 I S3PPU   : event=install_ppu_active progress_id=3000 msg=Progress: module 8 of 233 (16m remaining percent=3 max=100 session=S3-1788365677285-d8e7
+09-02 21:47:48.281 25970 25999 I RPCS3   : LLVM: Compiled module v7-kusa-Scqz5U3bCzpRK8VhFF2W1R-00001P-cortex-a34-2.obj
+09-02 21:47:48.281 25970 25999 W RPCS3   : LLVM: Compiling module /storage/emulated/0/Android/data/com.zenithblue.sambas3/files/cache/cache/BLUS30443/ppu-U8pStuqfrkhA3fGiHfGZz99SofxM-EBOOT.BIN/v7-kusa-6fbmhqHjnzYAEof4rzQUzC-00001P-cortex-a34-2.obj
+09-02 21:47:48.287 25970 26340 W RPCS3   : ProgressMessageDialog::ProgressBarSetMsg(0, Progress: module 9 of 233 (15m remaining))
+09-02 21:47:48.288 25970 25970 I S3PPU   : event=install_ppu_active progress_id=3000 msg=Progress: module 9 of 233 (15m remaining percent=3 max=100 session=S3-1788365677285-d8e7
+09-02 21:47:52.348 25970 25999 I RPCS3   : LLVM: Compiled module v7-kusa-6fbmhqHjnzYAEof4rzQUzC-00001P-cortex-a34-2.obj
+09-02 21:47:52.348 25970 25999 W RPCS3   : LLVM: Compiling module /storage/emulated/0/Android/data/com.zenithblue.sambas3/files/cache/cache/BLUS30443/ppu-U8pStuqfrkhA3fGiHfGZz99SofxM-EBOOT.BIN/v7-kusa-RFQUugSEpp4M6tNEvYFzUY-00001P-cortex-a34-2.obj
+09-02 21:47:52.350 25970 26340 W RPCS3   : ProgressMessageDialog::ProgressBarSetMsg(0, Progress: module 10 of 233 (15m remaining))
+09-02 21:47:52.352 25970 25970 I S3PPU   : event=install_ppu_active progress_id=3000 msg=Progress: module 10 of 233 (15m remainin percent=4 max=100 session=S3-1788365677285-d8e7
+09-02 21:47:56.366 25970 25999 I RPCS3   : LLVM: Compiled module v7-kusa-RFQUugSEpp4M6tNEvYFzUY-00001P-cortex-a34-2.obj
+09-02 21:47:56.366 25970 25999 W RPCS3   : LLVM: Compiling module /storage/emulated/0/Android/data/com.zenithblue.sambas3/files/cache/cache/BLUS30443/ppu-U8pStuqfrkhA3fGiHfGZz99SofxM-EBOOT.BIN/v7-kusa-nwQQEuh7n1QGmvxRJVJYP2-00001P-cortex-a34-2.obj
+09-02 21:47:56.369 25970 26340 W RPCS3   : ProgressMessageDialog::ProgressBarSetMsg(0, Progress: module 11 of 233 (15m remaining))
+09-02 21:47:56.370 25970 25970 I S3PPU   : event=install_ppu_active progress_id=3000 msg=Progress: module 11 of 233 (15m remainin percent=4 max=100 session=S3-1788365677285-d8e7
+09-02 21:48:00.655 25970 25999 I RPCS3   : LLVM: Compiled module v7-kusa-nwQQEuh7n1QGmvxRJVJYP2-00001P-cortex-a34-2.obj
+09-02 21:48:00.655 25970 25999 W RPCS3   : LLVM: Compiling module /storage/emulated/0/Android/data/com.zenithblue.sambas3/files/cache/cache/BLUS30443/ppu-U8pStuqfrkhA3fGiHfGZz99SofxM-EBOOT.BIN/v7-kusa-PbPmJWH5pMcnqZrL3Ymeu0-00001P-cortex-a34-2.obj
+09-02 21:48:00.657 25970 26340 W RPCS3   : ProgressMessageDialog::ProgressBarSetMsg(0, Progress: module 12 of 233 (15m remaining))
+09-02 21:48:00.664 25970 25970 I S3PPU   : event=install_ppu_active progress_id=3000 msg=Progress: module 12 of 233 (15m remainin percent=5 max=100 session=S3-1788365677285-d8e7
+09-02 21:48:05.466 25970 25999 I RPCS3   : LLVM: Compiled module v7-kusa-PbPmJWH5pMcnqZrL3Ymeu0-00001P-cortex-a34-2.obj
+09-02 21:48:05.466 25970 25999 W RPCS3   : LLVM: Compiling module /storage/emulated/0/Android/data/com.zenithblue.sambas3/files/cache/cache/BLUS30443/ppu-U8pStuqfrkhA3fGiHfGZz99SofxM-EBOOT.BIN/v7-kusa-V2yrze5o7YJeUPbEds5swN-00001P-cortex-a34-2.obj
+09-02 21:48:05.467 25970 26340 W RPCS3   : ProgressMessageDialog::ProgressBarSetMsg(0, Progress: module 13 of 233 (15m remaining))
+09-02 21:48:05.477 25970 25970 I S3PPU   : event=install_ppu_active progress_id=3000 msg=Progress: module 13 of 233 (15m remainin percent=5 max=100 session=S3-1788365677285-d8e7
+09-02 21:48:10.082 25970 25999 I RPCS3   : LLVM: Compiled module v7-kusa-V2yrze5o7YJeUPbEds5swN-00001P-cortex-a34-2.obj
+09-02 21:48:10.082 25970 25999 W RPCS3   : LLVM: Compiling module /storage/emulated/0/Android/data/com.zenithblue.sambas3/files/cache/cache/BLUS30443/ppu-U8pStuqfrkhA3fGiHfGZz99SofxM-EBOOT.BIN/v7-kusa-Xe7mLNM89swcU3cQd7exgy-00001P-cortex-a34-2.obj
+09-02 21:48:10.087 25970 26340 W RPCS3   : ProgressMessageDialog::ProgressBarSetMsg(0, Progress: module 14 of 233 (15m remaining))
+09-02 21:48:10.091 25970 25970 I S3PPU   : event=install_ppu_active progress_id=3000 msg=Progress: module 14 of 233 (15m remainin percent=6 max=100 session=S3-1788365677285-d8e7
+09-02 21:48:14.882 25970 25999 I RPCS3   : LLVM: Compiled module v7-kusa-Xe7mLNM89swcU3cQd7exgy-00001P-cortex-a34-2.obj
+09-02 21:48:14.882 25970 25999 W RPCS3   : LLVM: Compiling module /storage/emulated/0/Android/data/com.zenithblue.sambas3/files/cache/cache/BLUS30443/ppu-U8pStuqfrkhA3fGiHfGZz99SofxM-EBOOT.BIN/v7-kusa-a1bycfdKgijLY5JgwFqd3h-00001P-cortex-a34-2.obj
+09-02 21:48:14.887 25970 26340 W RPCS3   : ProgressMessageDialog::ProgressBarSetMsg(0, Progress: module 15 of 233 (15m remaining))
+09-02 21:48:14.890 25970 25970 I S3PPU   : event=install_ppu_active progress_id=3000 msg=Progress: module 15 of 233 (15m remainin percent=6 max=100 session=S3-1788365677285-d8e7
+09-02 21:48:19.853 25970 25999 I RPCS3   : LLVM: Compiled module v7-kusa-a1bycfdKgijLY5JgwFqd3h-00001P-cortex-a34-2.obj
+09-02 21:48:19.853 25970 25999 W RPCS3   : LLVM: Compiling module /storage/emulated/0/Android/data/com.zenithblue.sambas3/files/cache/cache/BLUS30443/ppu-U8pStuqfrkhA3fGiHfGZz99SofxM-EBOOT.BIN/v7-kusa-cV1GMR11ctrAYVMeXCg4qn-00001P-cortex-a34-2.obj
+09-02 21:48:19.857 25970 26340 W RPCS3   : ProgressMessageDialog::ProgressBarSetMsg(0, Progress: module 16 of 233 (15m remaining))
+09-02 21:48:19.867 25970 25970 I S3PPU   : event=install_ppu_active progress_id=3000 msg=Progress: module 16 of 233 (15m remainin percent=6 max=100 session=S3-1788365677285-d8e7
+09-02 21:48:24.515 25970 25999 I RPCS3   : LLVM: Compiled module v7-kusa-cV1GMR11ctrAYVMeXCg4qn-00001P-cortex-a34-2.obj
+09-02 21:48:24.515 25970 25999 W RPCS3   : LLVM: Compiling module /storage/emulated/0/Android/data/com.zenithblue.sambas3/files/cache/cache/BLUS30443/ppu-U8pStuqfrkhA3fGiHfGZz99SofxM-EBOOT.BIN/v7-kusa-6SVupKurAeST5A1teS9nKc-00001P-cortex-a34-2.obj
+09-02 21:48:24.518 25970 26340 W RPCS3   : ProgressMessageDialog::ProgressBarSetMsg(0, Progress: module 17 of 233 (15m remaining))
+09-02 21:48:24.519 25970 25970 I S3PPU   : event=install_ppu_active progress_id=3000 msg=Progress: module 17 of 233 (15m remainin percent=7 max=100 session=S3-1788365677285-d8e7
+09-02 21:48:29.215 25970 25999 I RPCS3   : LLVM: Compiled module v7-kusa-6SVupKurAeST5A1teS9nKc-00001P-cortex-a34-2.obj
+09-02 21:48:29.215 25970 25999 W RPCS3   : LLVM: Compiling module /storage/emulated/0/Android/data/com.zenithblue.sambas3/files/cache/cache/BLUS30443/ppu-U8pStuqfrkhA3fGiHfGZz99SofxM-EBOOT.BIN/v7-kusa-39aggqRWGugqbcK0ZHV7JR-00001P-cortex-a34-2.obj
+09-02 21:48:29.217 25970 26340 W RPCS3   : ProgressMessageDialog::ProgressBarSetMsg(0, Progress: module 18 of 233 (15m remaining))
+09-02 21:48:29.222 25970 25970 I S3PPU   : event=install_ppu_active progress_id=3000 msg=Progress: module 18 of 233 (15m remainin percent=7 max=100 session=S3-1788365677285-d8e7
+09-02 21:48:33.792 25970 25999 I RPCS3   : LLVM: Compiled module v7-kusa-39aggqRWGugqbcK0ZHV7JR-00001P-cortex-a34-2.obj
+09-02 21:48:33.792 25970 25999 W RPCS3   : LLVM: Compiling module /storage/emulated/0/Android/data/com.zenithblue.sambas3/files/cache/cache/BLUS30443/ppu-U8pStuqfrkhA3fGiHfGZz99SofxM-EBOOT.BIN/v7-kusa-dQaoTECZViQn7snbg2MmFG-00001P-cortex-a34-2.obj
+09-02 21:48:33.797 25970 26340 W RPCS3   : ProgressMessageDialog::ProgressBarSetMsg(0, Progress: module 19 of 233 (15m remaining))
+09-02 21:48:33.800 25970 25970 I S3PPU   : event=install_ppu_active progress_id=3000 msg=Progress: module 19 of 233 (15m remainin percent=8 max=100 session=S3-1788365677285-d8e7
+09-02 21:48:38.330 25970 25999 I RPCS3   : LLVM: Compiled module v7-kusa-dQaoTECZViQn7snbg2MmFG-00001P-cortex-a34-2.obj
+09-02 21:48:38.330 25970 25999 W RPCS3   : LLVM: Compiling module /storage/emulated/0/Android/data/com.zenithblue.sambas3/files/cache/cache/BLUS30443/ppu-U8pStuqfrkhA3fGiHfGZz99SofxM-EBOOT.BIN/v7-kusa-N7KaSpfNrfpQZCAp8QPWEA-00001P-cortex-a34-2.obj
+09-02 21:48:38.337 25970 26340 W RPCS3   : ProgressMessageDialog::ProgressBarSetMsg(0, Progress: module 20 of 233 (15m remaining))
+09-02 21:48:38.338 25970 25970 I S3PPU   : event=install_ppu_active progress_id=3000 msg=Progress: module 20 of 233 (15m remainin percent=8 max=100 session=S3-1788365677285-d8e7
+09-02 21:48:42.596 25970 25999 I RPCS3   : LLVM: Compiled module v7-kusa-N7KaSpfNrfpQZCAp8QPWEA-00001P-cortex-a34-2.obj
+09-02 21:48:42.596 25970 25999 W RPCS3   : LLVM: Compiling module /storage/emulated/0/Android/data/com.zenithblue.sambas3/files/cache/cache/BLUS30443/ppu-U8pStuqfrkhA3fGiHfGZz99SofxM-EBOOT.BIN/v7-kusa-Yj2q2i7Nhi3baEh7SY2NH7-00001P-cortex-a34-2.obj
+09-02 21:48:42.601 25970 26340 W RPCS3   : ProgressMessageDialog::ProgressBarSetMsg(0, Progress: module 21 of 233 (15m remaining))
+09-02 21:48:42.603 25970 25970 I S3PPU   : event=install_ppu_active progress_id=3000 msg=Progress: module 21 of 233 (15m remainin percent=9 max=100 session=S3-1788365677285-d8e7
+09-02 21:48:47.005 25970 25999 I RPCS3   : LLVM: Compiled module v7-kusa-Yj2q2i7Nhi3baEh7SY2NH7-00001P-cortex-a34-2.obj
+09-02 21:48:47.005 25970 25999 W RPCS3   : LLVM: Compiling module /storage/emulated/0/Android/data/com.zenithblue.sambas3/files/cache/cache/BLUS30443/ppu-U8pStuqfrkhA3fGiHfGZz99SofxM-EBOOT.BIN/v7-kusa-Wc67tcer4Tn1CkaRMdpn4s-00001P-cortex-a34-2.obj
+09-02 21:48:47.007 25970 26340 W RPCS3   : ProgressMessageDialog::ProgressBarSetMsg(0, Progress: module 22 of 233 (15m remaining))
+09-02 21:48:47.014 25970 25970 I S3PPU   : event=install_ppu_active progress_id=3000 msg=Progress: module 22 of 233 (15m remainin percent=9 max=100 session=S3-1788365677285-d8e7
+09-02 21:48:51.838 25970 25999 I RPCS3   : LLVM: Compiled module v7-kusa-Wc67tcer4Tn1CkaRMdpn4s-00001P-cortex-a34-2.obj
+09-02 21:48:51.838 25970 25999 W RPCS3   : LLVM: Compiling module /storage/emulated/0/Android/data/com.zenithblue.sambas3/files/cache/cache/BLUS30443/ppu-U8pStuqfrkhA3fGiHfGZz99SofxM-EBOOT.BIN/v7-kusa-6g2qF26LXApevJP0VYvfh7-00001P-cortex-a34-2.obj
+09-02 21:48:51.847 25970 26340 W RPCS3   : ProgressMessageDialog::ProgressBarSetMsg(0, Progress: module 23 of 233 (15m remaining))
+09-02 21:48:51.850 25970 25970 I S3PPU   : event=install_ppu_active progress_id=3000 msg=Progress: module 23 of 233 (15m remainin percent=9 max=100 session=S3-1788365677285-d8e7
+09-02 21:48:56.447 25970 25999 I RPCS3   : LLVM: Compiled module v7-kusa-6g2qF26LXApevJP0VYvfh7-00001P-cortex-a34-2.obj
+09-02 21:48:56.447 25970 25999 W RPCS3   : LLVM: Compiling module /storage/emulated/0/Android/data/com.zenithblue.sambas3/files/cache/cache/BLUS30443/ppu-U8pStuqfrkhA3fGiHfGZz99SofxM-EBOOT.BIN/v7-kusa-17NfMU7NCnYm9062XWE07F-00001P-cortex-a34-2.obj
+09-02 21:48:56.457 25970 26340 W RPCS3   : ProgressMessageDialog::ProgressBarSetMsg(0, Progress: module 24 of 233 (15m remaining))
+09-02 21:48:56.461 25970 25970 I S3PPU   : event=install_ppu_active progress_id=3000 msg=Progress: module 24 of 233 (15m remainin percent=10 max=100 session=S3-1788365677285-d8e7
+09-02 21:49:00.963 25970 25999 I RPCS3   : LLVM: Compiled module v7-kusa-17NfMU7NCnYm9062XWE07F-00001P-cortex-a34-2.obj
+09-02 21:49:00.963 25970 25999 W RPCS3   : LLVM: Compiling module /storage/emulated/0/Android/data/com.zenithblue.sambas3/files/cache/cache/BLUS30443/ppu-U8pStuqfrkhA3fGiHfGZz99SofxM-EBOOT.BIN/v7-kusa-Q6w3wvG7je88Z8NnUYij0x-00001P-cortex-a34-2.obj
+09-02 21:49:00.968 25970 26340 W RPCS3   : ProgressMessageDialog::ProgressBarSetMsg(0, Progress: module 25 of 233 (15m remaining))
+09-02 21:49:00.972 25970 25970 I S3PPU   : event=install_ppu_active progress_id=3000 msg=Progress: module 25 of 233 (15m remainin percent=10 max=100 session=S3-1788365677285-d8e7
+09-02 21:49:05.786 25970 25999 I RPCS3   : LLVM: Compiled module v7-kusa-Q6w3wvG7je88Z8NnUYij0x-00001P-cortex-a34-2.obj
+09-02 21:49:05.786 25970 25999 W RPCS3   : LLVM: Compiling module /storage/emulated/0/Android/data/com.zenithblue.sambas3/files/cache/cache/BLUS30443/ppu-U8pStuqfrkhA3fGiHfGZz99SofxM-EBOOT.BIN/v7-kusa-TarWJtfuz1K73SjXQr1seb-00001P-cortex-a34-2.obj
+09-02 21:49:05.788 25970 26340 W RPCS3   : ProgressMessageDialog::ProgressBarSetMsg(0, Progress: module 26 of 233 (15m remaining))
+09-02 21:49:05.789 25970 25970 I S3PPU   : event=install_ppu_active progress_id=3000 msg=Progress: module 26 of 233 (15m remainin percent=11 max=100 session=S3-1788365677285-d8e7
+09-02 21:49:10.391 25970 25999 I RPCS3   : LLVM: Compiled module v7-kusa-TarWJtfuz1K73SjXQr1seb-00001P-cortex-a34-2.obj
+09-02 21:49:10.391 25970 25999 W RPCS3   : LLVM: Compiling module /storage/emulated/0/Android/data/com.zenithblue.sambas3/files/cache/cache/BLUS30443/ppu-U8pStuqfrkhA3fGiHfGZz99SofxM-EBOOT.BIN/v7-kusa-883Gwufkanxm00fWX1R6HM-00001P-cortex-a34-2.obj
+09-02 21:49:10.397 25970 26340 W RPCS3   : ProgressMessageDialog::ProgressBarSetMsg(0, Progress: module 27 of 233 (15m remaining))
+09-02 21:49:10.399 25970 25970 I S3PPU   : event=install_ppu_active progress_id=3000 msg=Progress: module 27 of 233 (15m remainin percent=11 max=100 session=S3-1788365677285-d8e7
+09-02 21:49:15.332 25970 25999 I RPCS3   : LLVM: Compiled module v7-kusa-883Gwufkanxm00fWX1R6HM-00001P-cortex-a34-2.obj
+09-02 21:49:15.332 25970 25999 W RPCS3   : LLVM: Compiling module /storage/emulated/0/Android/data/com.zenithblue.sambas3/files/cache/cache/BLUS30443/ppu-U8pStuqfrkhA3fGiHfGZz99SofxM-EBOOT.BIN/v7-kusa-2pxrYVKwNgqonMRG5kP26L-00001P-cortex-a34-2.obj
+09-02 21:49:15.337 25970 26340 W RPCS3   : ProgressMessageDialog::ProgressBarSetMsg(0, Progress: module 28 of 233 (15m remaining))
+09-02 21:49:15.338 25970 25970 I S3PPU   : event=install_ppu_active progress_id=3000 msg=Progress: module 28 of 233 (15m remainin percent=12 max=100 session=S3-1788365677285-d8e7
+09-02 21:49:20.076 25970 25999 I RPCS3   : LLVM: Compiled module v7-kusa-2pxrYVKwNgqonMRG5kP26L-00001P-cortex-a34-2.obj
+09-02 21:49:20.076 25970 25999 W RPCS3   : LLVM: Compiling module /storage/emulated/0/Android/data/com.zenithblue.sambas3/files/cache/cache/BLUS30443/ppu-U8pStuqfrkhA3fGiHfGZz99SofxM-EBOOT.BIN/v7-kusa-SgYyxCVQLquSYm5NK60J17-00001P-cortex-a34-2.obj
+09-02 21:49:20.083 25970 26340 W RPCS3   : ProgressMessageDialog::ProgressBarSetMsg(0, Progress: module 29 of 233 (15m remaining))
+09-02 21:49:20.094 25970 25970 I S3PPU   : event=install_ppu_active progress_id=3000 msg=Progress: module 29 of 233 (15m remainin percent=12 max=100 session=S3-1788365677285-d8e7
+09-02 21:49:24.658 25970 25999 I RPCS3   : LLVM: Compiled module v7-kusa-SgYyxCVQLquSYm5NK60J17-00001P-cortex-a34-2.obj
+09-02 21:49:24.658 25970 25999 W RPCS3   : LLVM: Compiling module /storage/emulated/0/Android/data/com.zenithblue.sambas3/files/cache/cache/BLUS30443/ppu-U8pStuqfrkhA3fGiHfGZz99SofxM-EBOOT.BIN/v7-kusa-EL7pj7EGirMH7AS4qzPgoL-00001P-cortex-a34-2.obj
+09-02 21:49:24.659 25970 26340 W RPCS3   : ProgressMessageDialog::ProgressBarSetMsg(0, Progress: module 30 of 233 (15m remaining))
+09-02 21:49:24.664 25970 25970 I S3PPU   : event=install_ppu_active progress_id=3000 msg=Progress: module 30 of 233 (15m remainin percent=12 max=100 session=S3-1788365677285-d8e7
+09-02 21:49:29.395 25970 25999 I RPCS3   : LLVM: Compiled module v7-kusa-EL7pj7EGirMH7AS4qzPgoL-00001P-cortex-a34-2.obj
+09-02 21:49:29.395 25970 25999 W RPCS3   : LLVM: Compiling module /storage/emulated/0/Android/data/com.zenithblue.sambas3/files/cache/cache/BLUS30443/ppu-U8pStuqfrkhA3fGiHfGZz99SofxM-EBOOT.BIN/v7-kusa-HEaYvyvf9aysjHchnrj8k9-00001P-cortex-a34-2.obj
+09-02 21:49:29.397 25970 26340 W RPCS3   : ProgressMessageDialog::ProgressBarSetMsg(0, Progress: module 31 of 233 (15m remaining))
+09-02 21:49:29.400 25970 25970 I S3PPU   : event=install_ppu_active progress_id=3000 msg=Progress: module 31 of 233 (15m remainin percent=13 max=100 session=S3-1788365677285-d8e7
+09-02 21:49:33.970 25970 25999 I RPCS3   : LLVM: Compiled module v7-kusa-HEaYvyvf9aysjHchnrj8k9-00001P-cortex-a34-2.obj
+09-02 21:49:33.970 25970 25999 W RPCS3   : LLVM: Compiling module /storage/emulated/0/Android/data/com.zenithblue.sambas3/files/cache/cache/BLUS30443/ppu-U8pStuqfrkhA3fGiHfGZz99SofxM-EBOOT.BIN/v7-kusa-bbiCiSb3jRArzoKYfPYRwC-00001P-cortex-a34-2.obj
+09-02 21:49:33.977 25970 26340 W RPCS3   : ProgressMessageDialog::ProgressBarSetMsg(0, Progress: module 32 of 233 (15m remaining))
+09-02 21:49:33.978 25970 25970 I S3PPU   : event=install_ppu_active progress_id=3000 msg=Progress: module 32 of 233 (15m remainin percent=13 max=100 session=S3-1788365677285-d8e7
+09-02 21:49:38.658 25970 25999 I RPCS3   : LLVM: Compiled module v7-kusa-bbiCiSb3jRArzoKYfPYRwC-00001P-cortex-a34-2.obj
+09-02 21:49:38.658 25970 25999 W RPCS3   : LLVM: Compiling module /storage/emulated/0/Android/data/com.zenithblue.sambas3/files/cache/cache/BLUS30443/ppu-U8pStuqfrkhA3fGiHfGZz99SofxM-EBOOT.BIN/v7-kusa-rHH9UThnooK2kR3rCcMfzR-00001P-cortex-a34-2.obj
+09-02 21:49:38.670 25970 26340 W RPCS3   : ProgressMessageDialog::ProgressBarSetMsg(0, Progress: module 33 of 233 (15m remaining))
+09-02 21:49:38.671 25970 25970 I S3PPU   : event=install_ppu_active progress_id=3000 msg=Progress: module 33 of 233 (15m remainin percent=14 max=100 session=S3-1788365677285-d8e7
+09-02 21:49:43.726 25970 25999 I RPCS3   : LLVM: Compiled module v7-kusa-rHH9UThnooK2kR3rCcMfzR-00001P-cortex-a34-2.obj
+09-02 21:49:43.727 25970 25999 W RPCS3   : LLVM: Compiling module /storage/emulated/0/Android/data/com.zenithblue.sambas3/files/cache/cache/BLUS30443/ppu-U8pStuqfrkhA3fGiHfGZz99SofxM-EBOOT.BIN/v7-kusa-rdQxcRA0Y16nmi332LXbqE-00001P-cortex-a34-2.obj
+09-02 21:49:43.728 25970 26340 W RPCS3   : ProgressMessageDialog::ProgressBarSetMsg(0, Progress: module 34 of 233 (15m remaining))
+09-02 21:49:43.731 25970 25970 I S3PPU   : event=install_ppu_active progress_id=3000 msg=Progress: module 34 of 233 (15m remainin percent=14 max=100 session=S3-1788365677285-d8e7
+09-02 21:49:48.523 25970 25999 I RPCS3   : LLVM: Compiled module v7-kusa-rdQxcRA0Y16nmi332LXbqE-00001P-cortex-a34-2.obj
+09-02 21:49:48.523 25970 25999 W RPCS3   : LLVM: Compiling module /storage/emulated/0/Android/data/com.zenithblue.sambas3/files/cache/cache/BLUS30443/ppu-U8pStuqfrkhA3fGiHfGZz99SofxM-EBOOT.BIN/v7-kusa-s9qJtzJ794j1drciE0Ke4k-00001P-cortex-a34-2.obj
+09-02 21:49:48.527 25970 26340 W RPCS3   : ProgressMessageDialog::ProgressBarSetMsg(0, Progress: module 35 of 233 (14m remaining))
+09-02 21:49:48.536 25970 25970 I S3PPU   : event=install_ppu_active progress_id=3000 msg=Progress: module 35 of 233 (14m remainin percent=15 max=100 session=S3-1788365677285-d8e7
+09-02 21:49:53.716 25970 25999 I RPCS3   : LLVM: Compiled module v7-kusa-s9qJtzJ794j1drciE0Ke4k-00001P-cortex-a34-2.obj
+09-02 21:49:53.716 25970 25999 W RPCS3   : LLVM: Compiling module /storage/emulated/0/Android/data/com.zenithblue.sambas3/files/cache/cache/BLUS30443/ppu-U8pStuqfrkhA3fGiHfGZz99SofxM-EBOOT.BIN/v7-kusa-NfjHQbshoAQLg6NWJsrErc-00001P-cortex-a34-2.obj
+09-02 21:49:53.717 25970 26340 W RPCS3   : ProgressMessageDialog::ProgressBarSetMsg(0, Progress: module 36 of 233 (14m remaining))
+09-02 21:49:53.726 25970 25970 I S3PPU   : event=install_ppu_active progress_id=3000 msg=Progress: module 36 of 233 (14m remainin percent=15 max=100 session=S3-1788365677285-d8e7
+09-02 21:49:58.589 25970 25999 I RPCS3   : LLVM: Compiled module v7-kusa-NfjHQbshoAQLg6NWJsrErc-00001P-cortex-a34-2.obj
+09-02 21:49:58.589 25970 25999 W RPCS3   : LLVM: Compiling module /storage/emulated/0/Android/data/com.zenithblue.sambas3/files/cache/cache/BLUS30443/ppu-U8pStuqfrkhA3fGiHfGZz99SofxM-EBOOT.BIN/v7-kusa-AdXpJf8v70jbYmEcxAnhYU-00001P-cortex-a34-2.obj
+09-02 21:49:58.602 25970 26340 W RPCS3   : ProgressMessageDialog::ProgressBarSetMsg(0, Progress: module 37 of 233 (14m remaining))
+09-02 21:49:58.606 25970 25970 I S3PPU   : event=install_ppu_active progress_id=3000 msg=Progress: module 37 of 233 (14m remainin percent=15 max=100 session=S3-1788365677285-d8e7
+09-02 21:50:03.437 25970 25999 I RPCS3   : LLVM: Compiled module v7-kusa-AdXpJf8v70jbYmEcxAnhYU-00001P-cortex-a34-2.obj
+09-02 21:50:03.438 25970 25999 W RPCS3   : LLVM: Compiling module /storage/emulated/0/Android/data/com.zenithblue.sambas3/files/cache/cache/BLUS30443/ppu-U8pStuqfrkhA3fGiHfGZz99SofxM-EBOOT.BIN/v7-kusa-RzdYgyMud3sh9E6CEHPw3L-00001P-cortex-a34-2.obj
+09-02 21:50:03.447 25970 26340 W RPCS3   : ProgressMessageDialog::ProgressBarSetMsg(0, Progress: module 38 of 233 (14m remaining))
+09-02 21:50:03.449 25970 25970 I S3PPU   : event=install_ppu_active progress_id=3000 msg=Progress: module 38 of 233 (14m remainin percent=16 max=100 session=S3-1788365677285-d8e7
+09-02 21:50:08.341 25970 25999 I RPCS3   : LLVM: Compiled module v7-kusa-RzdYgyMud3sh9E6CEHPw3L-00001P-cortex-a34-2.obj
+09-02 21:50:08.341 25970 25999 W RPCS3   : LLVM: Compiling module /storage/emulated/0/Android/data/com.zenithblue.sambas3/files/cache/cache/BLUS30443/ppu-U8pStuqfrkhA3fGiHfGZz99SofxM-EBOOT.BIN/v7-kusa-8gGNuPuFsohjbUyTZeiCHK-00001P-cortex-a34-2.obj
+09-02 21:50:08.351 25970 26340 W RPCS3   : ProgressMessageDialog::ProgressBarSetMsg(0, Progress: module 39 of 233 (14m remaining))
+09-02 21:50:08.360 25970 25970 I S3PPU   : event=install_ppu_active progress_id=3000 msg=Progress: module 39 of 233 (14m remainin percent=16 max=100 session=S3-1788365677285-d8e7
+09-02 21:50:12.389 25970 25999 I RPCS3   : LLVM: Compiled module v7-kusa-8gGNuPuFsohjbUyTZeiCHK-00001P-cortex-a34-2.obj
+09-02 21:50:12.389 25970 25999 W RPCS3   : LLVM: Compiling module /storage/emulated/0/Android/data/com.zenithblue.sambas3/files/cache/cache/BLUS30443/ppu-U8pStuqfrkhA3fGiHfGZz99SofxM-EBOOT.BIN/v7-kusa-QjbyVS2pHnJWRYXvYLeq8W-00001P-cortex-a34-2.obj
+09-02 21:50:12.389 25970 26340 W RPCS3   : ProgressMessageDialog::ProgressBarSetMsg(0, Progress: module 40 of 233 (14m remaining))
+09-02 21:50:12.391 25970 25970 I S3PPU   : event=install_ppu_active progress_id=3000 msg=Progress: module 40 of 233 (14m remainin percent=17 max=100 session=S3-1788365677285-d8e7
+09-02 21:50:17.020 25970 25999 I RPCS3   : LLVM: Compiled module v7-kusa-QjbyVS2pHnJWRYXvYLeq8W-00001P-cortex-a34-2.obj
+09-02 21:50:17.020 25970 25999 W RPCS3   : LLVM: Compiling module /storage/emulated/0/Android/data/com.zenithblue.sambas3/files/cache/cache/BLUS30443/ppu-U8pStuqfrkhA3fGiHfGZz99SofxM-EBOOT.BIN/v7-kusa-TfVf8EQKL2y6XnR2fZnudJ-00001P-cortex-a34-2.obj
+09-02 21:50:17.027 25970 26340 W RPCS3   : ProgressMessageDialog::ProgressBarSetMsg(0, Progress: module 41 of 233 (14m remaining))
+09-02 21:50:17.028 25970 25970 I S3PPU   : event=install_ppu_active progress_id=3000 msg=Progress: module 41 of 233 (14m remainin percent=17 max=100 session=S3-1788365677285-d8e7
+09-02 21:50:22.168 25970 25999 I RPCS3   : LLVM: Compiled module v7-kusa-TfVf8EQKL2y6XnR2fZnudJ-00001P-cortex-a34-2.obj
+09-02 21:50:22.168 25970 25999 W RPCS3   : LLVM: Compiling module /storage/emulated/0/Android/data/com.zenithblue.sambas3/files/cache/cache/BLUS30443/ppu-U8pStuqfrkhA3fGiHfGZz99SofxM-EBOOT.BIN/v7-kusa-qnNSmyF3tQMYaQw27gg5he-00001P-cortex-a34-2.obj
+09-02 21:50:22.177 25970 26340 W RPCS3   : ProgressMessageDialog::ProgressBarSetMsg(0, Progress: module 42 of 233 (14m remaining))
+09-02 21:50:22.187 25970 25970 I S3PPU   : event=install_ppu_active progress_id=3000 msg=Progress: module 42 of 233 (14m remainin percent=18 max=100 session=S3-1788365677285-d8e7
+09-02 21:50:26.443 25970 25999 I RPCS3   : LLVM: Compiled module v7-kusa-qnNSmyF3tQMYaQw27gg5he-00001P-cortex-a34-2.obj
+09-02 21:50:26.443 25970 25999 W RPCS3   : LLVM: Compiling module /storage/emulated/0/Android/data/com.zenithblue.sambas3/files/cache/cache/BLUS30443/ppu-U8pStuqfrkhA3fGiHfGZz99SofxM-EBOOT.BIN/v7-kusa-WdXe821E5ue8ZGsJMUa2bM-00001P-cortex-a34-2.obj
+09-02 21:50:26.447 25970 26340 W RPCS3   : ProgressMessageDialog::ProgressBarSetMsg(0, Progress: module 43 of 233 (14m remaining))
+09-02 21:50:26.450 25970 25970 I S3PPU   : event=install_ppu_active progress_id=3000 msg=Progress: module 43 of 233 (14m remainin percent=18 max=100 session=S3-1788365677285-d8e7
+09-02 21:50:30.589 25970 25999 I RPCS3   : LLVM: Compiled module v7-kusa-WdXe821E5ue8ZGsJMUa2bM-00001P-cortex-a34-2.obj
+09-02 21:50:30.589 25970 25999 W RPCS3   : LLVM: Compiling module /storage/emulated/0/Android/data/com.zenithblue.sambas3/files/cache/cache/BLUS30443/ppu-U8pStuqfrkhA3fGiHfGZz99SofxM-EBOOT.BIN/v7-kusa-nyYF4qnqPan4ud89u7pNNA-00001P-cortex-a34-2.obj
+09-02 21:50:30.597 25970 26340 W RPCS3   : ProgressMessageDialog::ProgressBarSetMsg(0, Progress: module 44 of 233 (14m remaining))
+09-02 21:50:30.598 25970 25970 I S3PPU   : event=install_ppu_active progress_id=3000 msg=Progress: module 44 of 233 (14m remainin percent=18 max=100 session=S3-1788365677285-d8e7
+09-02 21:50:36.419 25970 25999 I RPCS3   : LLVM: Compiled module v7-kusa-nyYF4qnqPan4ud89u7pNNA-00001P-cortex-a34-2.obj
+09-02 21:50:36.419 25970 25999 W RPCS3   : LLVM: Compiling module /storage/emulated/0/Android/data/com.zenithblue.sambas3/files/cache/cache/BLUS30443/ppu-U8pStuqfrkhA3fGiHfGZz99SofxM-EBOOT.BIN/v7-kusa-E945VA4pFkWgF0je44jx5X-00001P-cortex-a34-2.obj
+09-02 21:50:36.427 25970 26340 W RPCS3   : ProgressMessageDialog::ProgressBarSetMsg(0, Progress: module 45 of 233 (14m remaining))
+09-02 21:50:36.432 25970 25970 I S3PPU   : event=install_ppu_active progress_id=3000 msg=Progress: module 45 of 233 (14m remainin percent=19 max=100 session=S3-1788365677285-d8e7
+09-02 21:50:42.925 25970 25999 I RPCS3   : LLVM: Compiled module v7-kusa-E945VA4pFkWgF0je44jx5X-00001P-cortex-a34-2.obj
+09-02 21:50:42.925 25970 25999 W RPCS3   : LLVM: Compiling module /storage/emulated/0/Android/data/com.zenithblue.sambas3/files/cache/cache/BLUS30443/ppu-U8pStuqfrkhA3fGiHfGZz99SofxM-EBOOT.BIN/v7-kusa-brhUhat9StEgmZweqx9Ldn-00001P-cortex-a34-2.obj
+09-02 21:50:42.927 25970 26340 W RPCS3   : ProgressMessageDialog::ProgressBarSetMsg(0, Progress: module 46 of 233 (14m remaining))
+09-02 21:50:42.931 25970 25970 I S3PPU   : event=install_ppu_active progress_id=3000 msg=Progress: module 46 of 233 (14m remainin percent=19 max=100 session=S3-1788365677285-d8e7
+09-02 21:50:48.526 25970 25999 I RPCS3   : LLVM: Compiled module v7-kusa-brhUhat9StEgmZweqx9Ldn-00001P-cortex-a34-2.obj
+09-02 21:50:48.526 25970 25999 W RPCS3   : LLVM: Compiling module /storage/emulated/0/Android/data/com.zenithblue.sambas3/files/cache/cache/BLUS30443/ppu-U8pStuqfrkhA3fGiHfGZz99SofxM-EBOOT.BIN/v7-kusa-Nm6LX0fifaNaCJzqucupvw-00001P-cortex-a34-2.obj
+09-02 21:50:48.527 25970 26340 W RPCS3   : ProgressMessageDialog::ProgressBarSetMsg(0, Progress: module 47 of 233 (14m remaining))
+09-02 21:50:48.534 25970 25970 I S3PPU   : event=install_ppu_active progress_id=3000 msg=Progress: module 47 of 233 (14m remainin percent=20 max=100 session=S3-1788365677285-d8e7
+09-02 21:50:53.331 25970 25999 I RPCS3   : LLVM: Compiled module v7-kusa-Nm6LX0fifaNaCJzqucupvw-00001P-cortex-a34-2.obj
+09-02 21:50:53.331 25970 25999 W RPCS3   : LLVM: Compiling module /storage/emulated/0/Android/data/com.zenithblue.sambas3/files/cache/cache/BLUS30443/ppu-U8pStuqfrkhA3fGiHfGZz99SofxM-EBOOT.BIN/v7-kusa-RHGpUQti4NLMWnyi4vMFYY-00001P-cortex-a34-2.obj
+09-02 21:50:53.337 25970 26340 W RPCS3   : ProgressMessageDialog::ProgressBarSetMsg(0, Progress: module 48 of 233 (14m remaining))
+09-02 21:50:53.339 25970 25970 I S3PPU   : event=install_ppu_active progress_id=3000 msg=Progress: module 48 of 233 (14m remainin percent=20 max=100 session=S3-1788365677285-d8e7
+09-02 21:50:58.221 25970 25999 I RPCS3   : LLVM: Compiled module v7-kusa-RHGpUQti4NLMWnyi4vMFYY-00001P-cortex-a34-2.obj
+09-02 21:50:58.222 25970 25999 W RPCS3   : LLVM: Compiling module /storage/emulated/0/Android/data/com.zenithblue.sambas3/files/cache/cache/BLUS30443/ppu-U8pStuqfrkhA3fGiHfGZz99SofxM-EBOOT.BIN/v7-kusa-LqTPTv3dWhbCjU5qGYonuq-00001P-cortex-a34-2.obj
+09-02 21:50:58.227 25970 26340 W RPCS3   : ProgressMessageDialog::ProgressBarSetMsg(0, Progress: module 49 of 233 (14m remaining))
+09-02 21:50:58.230 25970 25970 I S3PPU   : event=install_ppu_active progress_id=3000 msg=Progress: module 49 of 233 (14m remainin percent=21 max=100 session=S3-1788365677285-d8e7
+09-02 21:51:02.802 25970 25999 I RPCS3   : LLVM: Compiled module v7-kusa-LqTPTv3dWhbCjU5qGYonuq-00001P-cortex-a34-2.obj
+09-02 21:51:02.802 25970 25999 W RPCS3   : LLVM: Compiling module /storage/emulated/0/Android/data/com.zenithblue.sambas3/files/cache/cache/BLUS30443/ppu-U8pStuqfrkhA3fGiHfGZz99SofxM-EBOOT.BIN/v7-kusa-Pev9S4ss818MJQbofpxyUu-00001P-cortex-a34-2.obj
+09-02 21:51:02.809 25970 26340 W RPCS3   : ProgressMessageDialog::ProgressBarSetMsg(0, Progress: module 50 of 233 (14m remaining))
+09-02 21:51:02.810 25970 25970 I S3PPU   : event=install_ppu_active progress_id=3000 msg=Progress: module 50 of 233 (14m remainin percent=21 max=100 session=S3-1788365677285-d8e7
+09-02 21:51:07.365 25970 25999 I RPCS3   : LLVM: Compiled module v7-kusa-Pev9S4ss818MJQbofpxyUu-00001P-cortex-a34-2.obj
+09-02 21:51:07.365 25970 25999 W RPCS3   : LLVM: Compiling module /storage/emulated/0/Android/data/com.zenithblue.sambas3/files/cache/cache/BLUS30443/ppu-U8pStuqfrkhA3fGiHfGZz99SofxM-EBOOT.BIN/v7-kusa-sJhcqmUWxjdfnWZVgupXiH-00001P-cortex-a34-2.obj
+09-02 21:51:07.367 25970 26340 W RPCS3   : ProgressMessageDialog::ProgressBarSetMsg(0, Progress: module 51 of 233 (14m remaining))
+09-02 21:51:07.369 25970 25970 I S3PPU   : event=install_ppu_active progress_id=3000 msg=Progress: module 51 of 233 (14m remainin percent=21 max=100 session=S3-1788365677285-d8e7
+09-02 21:51:11.821 25970 25999 I RPCS3   : LLVM: Compiled module v7-kusa-sJhcqmUWxjdfnWZVgupXiH-00001P-cortex-a34-2.obj
+09-02 21:51:11.821 25970 25999 W RPCS3   : LLVM: Compiling module /storage/emulated/0/Android/data/com.zenithblue.sambas3/files/cache/cache/BLUS30443/ppu-U8pStuqfrkhA3fGiHfGZz99SofxM-EBOOT.BIN/v7-kusa-Ug2VXYRR7HQRnQZrZ080fi-00001P-cortex-a34-2.obj
+09-02 21:51:11.829 25970 26340 W RPCS3   : ProgressMessageDialog::ProgressBarSetMsg(0, Progress: module 52 of 233 (14m remaining))
+09-02 21:51:11.830 25970 25970 I S3PPU   : event=install_ppu_active progress_id=3000 msg=Progress: module 52 of 233 (14m remainin percent=22 max=100 session=S3-1788365677285-d8e7
+09-02 21:51:16.679 25970 25999 I RPCS3   : LLVM: Compiled module v7-kusa-Ug2VXYRR7HQRnQZrZ080fi-00001P-cortex-a34-2.obj
+09-02 21:51:16.679 25970 25999 W RPCS3   : LLVM: Compiling module /storage/emulated/0/Android/data/com.zenithblue.sambas3/files/cache/cache/BLUS30443/ppu-U8pStuqfrkhA3fGiHfGZz99SofxM-EBOOT.BIN/v7-kusa-oib0yuY1mSwJxhfA6ddUdU-00001P-cortex-a34-2.obj
+09-02 21:51:16.687 25970 26340 W RPCS3   : ProgressMessageDialog::ProgressBarSetMsg(0, Progress: module 53 of 233 (13m remaining))
+09-02 21:51:16.690 25970 25970 I S3PPU   : event=install_ppu_active progress_id=3000 msg=Progress: module 53 of 233 (13m remainin percent=22 max=100 session=S3-1788365677285-d8e7
+09-02 21:51:21.771 25970 25999 I RPCS3   : LLVM: Compiled module v7-kusa-oib0yuY1mSwJxhfA6ddUdU-00001P-cortex-a34-2.obj
+09-02 21:51:21.771 25970 25999 W RPCS3   : LLVM: Compiling module /storage/emulated/0/Android/data/com.zenithblue.sambas3/files/cache/cache/BLUS30443/ppu-U8pStuqfrkhA3fGiHfGZz99SofxM-EBOOT.BIN/v7-kusa-5mameQb4h2FjC0zVPrW3Fi-00001P-cortex-a34-2.obj
+09-02 21:51:21.779 25970 26340 W RPCS3   : ProgressMessageDialog::ProgressBarSetMsg(0, Progress: module 54 of 233 (13m remaining))
+09-02 21:51:21.780 25970 25970 I S3PPU   : event=install_ppu_active progress_id=3000 msg=Progress: module 54 of 233 (13m remainin percent=23 max=100 session=S3-1788365677285-d8e7
+09-02 21:51:26.669 25970 25999 I RPCS3   : LLVM: Compiled module v7-kusa-5mameQb4h2FjC0zVPrW3Fi-00001P-cortex-a34-2.obj
+09-02 21:51:26.669 25970 25999 W RPCS3   : LLVM: Compiling module /storage/emulated/0/Android/data/com.zenithblue.sambas3/files/cache/cache/BLUS30443/ppu-U8pStuqfrkhA3fGiHfGZz99SofxM-EBOOT.BIN/v7-kusa-hyaYmfd7aHw7MrgULNH4qC-00001P-cortex-a34-2.obj
+09-02 21:51:26.677 25970 26340 W RPCS3   : ProgressMessageDialog::ProgressBarSetMsg(0, Progress: module 55 of 233 (13m remaining))
+09-02 21:51:26.684 25970 25970 I S3PPU   : event=install_ppu_active progress_id=3000 msg=Progress: module 55 of 233 (13m remainin percent=23 max=100 session=S3-1788365677285-d8e7
+09-02 21:51:31.556 25970 25999 I RPCS3   : LLVM: Compiled module v7-kusa-hyaYmfd7aHw7MrgULNH4qC-00001P-cortex-a34-2.obj
+09-02 21:51:31.556 25970 25999 W RPCS3   : LLVM: Compiling module /storage/emulated/0/Android/data/com.zenithblue.sambas3/files/cache/cache/BLUS30443/ppu-U8pStuqfrkhA3fGiHfGZz99SofxM-EBOOT.BIN/v7-kusa-etZMSzViLGNbNMo6Ebd1sy-00001P-cortex-a34-2.obj
+09-02 21:51:31.563 25970 26340 W RPCS3   : ProgressMessageDialog::ProgressBarSetMsg(0, Progress: module 56 of 233 (13m remaining))
+09-02 21:51:31.565 25970 25970 I S3PPU   : event=install_ppu_active progress_id=3000 msg=Progress: module 56 of 233 (13m remainin percent=24 max=100 session=S3-1788365677285-d8e7
+09-02 21:51:36.697 25970 25999 I RPCS3   : LLVM: Compiled module v7-kusa-etZMSzViLGNbNMo6Ebd1sy-00001P-cortex-a34-2.obj
+09-02 21:51:36.697 25970 25999 W RPCS3   : LLVM: Compiling module /storage/emulated/0/Android/data/com.zenithblue.sambas3/files/cache/cache/BLUS30443/ppu-U8pStuqfrkhA3fGiHfGZz99SofxM-EBOOT.BIN/v7-kusa-fCP1TM9eTmYV3Kp6ignSsp-00001P-cortex-a34-2.obj
+09-02 21:51:36.707 25970 26340 W RPCS3   : ProgressMessageDialog::ProgressBarSetMsg(0, Progress: module 57 of 233 (13m remaining))
+09-02 21:51:36.709 25970 25970 I S3PPU   : event=install_ppu_active progress_id=3000 msg=Progress: module 57 of 233 (13m remainin percent=24 max=100 session=S3-1788365677285-d8e7
+09-02 21:51:41.726 25970 25999 I RPCS3   : LLVM: Compiled module v7-kusa-fCP1TM9eTmYV3Kp6ignSsp-00001P-cortex-a34-2.obj
+09-02 21:51:41.727 25970 25999 W RPCS3   : LLVM: Compiling module /storage/emulated/0/Android/data/com.zenithblue.sambas3/files/cache/cache/BLUS30443/ppu-U8pStuqfrkhA3fGiHfGZz99SofxM-EBOOT.BIN/v7-kusa-SVd5xfLAibKUNPi94uc8RM-00001P-cortex-a34-2.obj
+09-02 21:51:41.727 25970 26340 W RPCS3   : ProgressMessageDialog::ProgressBarSetMsg(0, Progress: module 58 of 233 (13m remaining))
+09-02 21:51:41.733 25970 25970 I S3PPU   : event=install_ppu_active progress_id=3000 msg=Progress: module 58 of 233 (13m remainin percent=24 max=100 session=S3-1788365677285-d8e7
+09-02 21:51:47.120 25970 25999 I RPCS3   : LLVM: Compiled module v7-kusa-SVd5xfLAibKUNPi94uc8RM-00001P-cortex-a34-2.obj
+09-02 21:51:47.120 25970 25999 W RPCS3   : LLVM: Compiling module /storage/emulated/0/Android/data/com.zenithblue.sambas3/files/cache/cache/BLUS30443/ppu-U8pStuqfrkhA3fGiHfGZz99SofxM-EBOOT.BIN/v7-kusa-cyRtdfRyXSqSCXgSKUmbxo-00001P-cortex-a34-2.obj
+09-02 21:51:47.127 25970 26340 W RPCS3   : ProgressMessageDialog::ProgressBarSetMsg(0, Progress: module 59 of 233 (13m remaining))
+09-02 21:51:47.134 25970 25970 I S3PPU   : event=install_ppu_active progress_id=3000 msg=Progress: module 59 of 233 (13m remainin percent=25 max=100 session=S3-1788365677285-d8e7
+09-02 21:51:51.849 25970 25999 I RPCS3   : LLVM: Compiled module v7-kusa-cyRtdfRyXSqSCXgSKUmbxo-00001P-cortex-a34-2.obj
+09-02 21:51:51.849 25970 25999 W RPCS3   : LLVM: Compiling module /storage/emulated/0/Android/data/com.zenithblue.sambas3/files/cache/cache/BLUS30443/ppu-U8pStuqfrkhA3fGiHfGZz99SofxM-EBOOT.BIN/v7-kusa-TH1bRCkPqP6LFQmvJqa81g-00001P-cortex-a34-2.obj
+09-02 21:51:51.857 25970 26340 W RPCS3   : ProgressMessageDialog::ProgressBarSetMsg(0, Progress: module 60 of 233 (13m remaining))
+09-02 21:51:51.861 25970 25970 I S3PPU   : event=install_ppu_active progress_id=3000 msg=Progress: module 60 of 233 (13m remainin percent=25 max=100 session=S3-1788365677285-d8e7
+09-02 21:51:56.409 25970 25999 I RPCS3   : LLVM: Compiled module v7-kusa-TH1bRCkPqP6LFQmvJqa81g-00001P-cortex-a34-2.obj
+09-02 21:51:56.409 25970 25999 W RPCS3   : LLVM: Compiling module /storage/emulated/0/Android/data/com.zenithblue.sambas3/files/cache/cache/BLUS30443/ppu-U8pStuqfrkhA3fGiHfGZz99SofxM-EBOOT.BIN/v7-kusa-Jzxbmh3wsbAiFkRyVJshYp-00001P-cortex-a34-2.obj
+09-02 21:51:56.417 25970 26340 W RPCS3   : ProgressMessageDialog::ProgressBarSetMsg(0, Progress: module 61 of 233 (13m remaining))
+09-02 21:51:56.418 25970 25970 I S3PPU   : event=install_ppu_active progress_id=3000 msg=Progress: module 61 of 233 (13m remainin percent=26 max=100 session=S3-1788365677285-d8e7
+09-02 21:52:01.297 25970 25999 I RPCS3   : LLVM: Compiled module v7-kusa-Jzxbmh3wsbAiFkRyVJshYp-00001P-cortex-a34-2.obj
+09-02 21:52:01.297 25970 25999 W RPCS3   : LLVM: Compiling module /storage/emulated/0/Android/data/com.zenithblue.sambas3/files/cache/cache/BLUS30443/ppu-U8pStuqfrkhA3fGiHfGZz99SofxM-EBOOT.BIN/v7-kusa-KmVhQxsY9e5Tahbet3LtSA-00001P-cortex-a34-2.obj
+09-02 21:52:01.307 25970 26340 W RPCS3   : ProgressMessageDialog::ProgressBarSetMsg(0, Progress: module 62 of 233 (13m remaining))
+09-02 21:52:01.311 25970 25970 I S3PPU   : event=install_ppu_active progress_id=3000 msg=Progress: module 62 of 233 (13m remainin percent=26 max=100 session=S3-1788365677285-d8e7
+09-02 21:52:06.497 25970 25999 I RPCS3   : LLVM: Compiled module v7-kusa-KmVhQxsY9e5Tahbet3LtSA-00001P-cortex-a34-2.obj
+09-02 21:52:06.497 25970 25999 W RPCS3   : LLVM: Compiling module /storage/emulated/0/Android/data/com.zenithblue.sambas3/files/cache/cache/BLUS30443/ppu-U8pStuqfrkhA3fGiHfGZz99SofxM-EBOOT.BIN/v7-kusa-KytysPELqRLH4PNcgEgQLp-00001P-cortex-a34-2.obj
+09-02 21:52:06.507 25970 26340 W RPCS3   : ProgressMessageDialog::ProgressBarSetMsg(0, Progress: module 63 of 233 (13m remaining))
+09-02 21:52:06.508 25970 25970 I S3PPU   : event=install_ppu_active progress_id=3000 msg=Progress: module 63 of 233 (13m remainin percent=27 max=100 session=S3-1788365677285-d8e7
+09-02 21:52:11.898 25970 25999 I RPCS3   : LLVM: Compiled module v7-kusa-KytysPELqRLH4PNcgEgQLp-00001P-cortex-a34-2.obj
+09-02 21:52:11.898 25970 25999 W RPCS3   : LLVM: Compiling module /storage/emulated/0/Android/data/com.zenithblue.sambas3/files/cache/cache/BLUS30443/ppu-U8pStuqfrkhA3fGiHfGZz99SofxM-EBOOT.BIN/v7-kusa-eMEqbSM95JktTTYKvQ5jJm-00001P-cortex-a34-2.obj
+09-02 21:52:11.907 25970 26340 W RPCS3   : ProgressMessageDialog::ProgressBarSetMsg(0, Progress: module 64 of 233 (13m remaining))
+09-02 21:52:11.909 25970 25970 I S3PPU   : event=install_ppu_active progress_id=3000 msg=Progress: module 64 of 233 (13m remainin percent=27 max=100 session=S3-1788365677285-d8e7
+09-02 21:52:17.316 25970 25999 I RPCS3   : LLVM: Compiled module v7-kusa-eMEqbSM95JktTTYKvQ5jJm-00001P-cortex-a34-2.obj
+09-02 21:52:17.316 25970 25999 W RPCS3   : LLVM: Compiling module /storage/emulated/0/Android/data/com.zenithblue.sambas3/files/cache/cache/BLUS30443/ppu-U8pStuqfrkhA3fGiHfGZz99SofxM-EBOOT.BIN/v7-kusa-knZk5jCbewRdm1iZv1JFQ5-00001P-cortex-a34-2.obj
+09-02 21:52:17.320 25970 26340 W RPCS3   : ProgressMessageDialog::ProgressBarSetMsg(0, Progress: module 65 of 233 (13m remaining))
+09-02 21:52:17.324 25970 25970 I S3PPU   : event=install_ppu_active progress_id=3000 msg=Progress: module 65 of 233 (13m remainin percent=27 max=100 session=S3-1788365677285-d8e7
+09-02 21:52:22.485 25970 25999 I RPCS3   : LLVM: Compiled module v7-kusa-knZk5jCbewRdm1iZv1JFQ5-00001P-cortex-a34-2.obj
+09-02 21:52:22.485 25970 25999 W RPCS3   : LLVM: Compiling module /storage/emulated/0/Android/data/com.zenithblue.sambas3/files/cache/cache/BLUS30443/ppu-U8pStuqfrkhA3fGiHfGZz99SofxM-EBOOT.BIN/v7-kusa-TTfi5oNZ1ZghpaP7WFsYoM-00001P-cortex-a34-2.obj
+09-02 21:52:22.487 25970 26340 W RPCS3   : ProgressMessageDialog::ProgressBarSetMsg(0, Progress: module 66 of 233 (13m remaining))
+09-02 21:52:22.493 25970 25970 I S3PPU   : event=install_ppu_active progress_id=3000 msg=Progress: module 66 of 233 (13m remainin percent=28 max=100 session=S3-1788365677285-d8e7
+09-02 21:52:27.851 25970 25999 I RPCS3   : LLVM: Compiled module v7-kusa-TTfi5oNZ1ZghpaP7WFsYoM-00001P-cortex-a34-2.obj
+09-02 21:52:27.852 25970 25999 W RPCS3   : LLVM: Compiling module /storage/emulated/0/Android/data/com.zenithblue.sambas3/files/cache/cache/BLUS30443/ppu-U8pStuqfrkhA3fGiHfGZz99SofxM-EBOOT.BIN/v7-kusa-X4QdHZaVUFVnUkprrRVaw4-00001P-cortex-a34-2.obj
+09-02 21:52:27.857 25970 26340 W RPCS3   : ProgressMessageDialog::ProgressBarSetMsg(0, Progress: module 67 of 233 (13m remaining))
+09-02 21:52:27.860 25970 25970 I S3PPU   : event=install_ppu_active progress_id=3000 msg=Progress: module 67 of 233 (13m remainin percent=28 max=100 session=S3-1788365677285-d8e7
+09-02 21:52:32.873 25970 25999 I RPCS3   : LLVM: Compiled module v7-kusa-X4QdHZaVUFVnUkprrRVaw4-00001P-cortex-a34-2.obj
+09-02 21:52:32.873 25970 25999 W RPCS3   : LLVM: Compiling module /storage/emulated/0/Android/data/com.zenithblue.sambas3/files/cache/cache/BLUS30443/ppu-U8pStuqfrkhA3fGiHfGZz99SofxM-EBOOT.BIN/v7-kusa-p0uNbWr85FPK0dUfZ2HU1Y-00001P-cortex-a34-2.obj
+09-02 21:52:32.877 25970 26340 W RPCS3   : ProgressMessageDialog::ProgressBarSetMsg(0, Progress: module 68 of 233 (13m remaining))
+09-02 21:52:32.880 25970 25970 I S3PPU   : event=install_ppu_active progress_id=3000 msg=Progress: module 68 of 233 (13m remainin percent=29 max=100 session=S3-1788365677285-d8e7
+09-02 21:52:38.158 25970 25999 I RPCS3   : LLVM: Compiled module v7-kusa-p0uNbWr85FPK0dUfZ2HU1Y-00001P-cortex-a34-2.obj
+09-02 21:52:38.158 25970 25999 W RPCS3   : LLVM: Compiling module /storage/emulated/0/Android/data/com.zenithblue.sambas3/files/cache/cache/BLUS30443/ppu-U8pStuqfrkhA3fGiHfGZz99SofxM-EBOOT.BIN/v7-kusa-kGrCLRXGP3tnit0gENc4y1-00001P-cortex-a34-2.obj
+09-02 21:52:38.167 25970 26340 W RPCS3   : ProgressMessageDialog::ProgressBarSetMsg(0, Progress: module 69 of 233 (12m remaining))
+09-02 21:52:38.171 25970 25970 I S3PPU   : event=install_ppu_active progress_id=3000 msg=Progress: module 69 of 233 (12m remainin percent=29 max=100 session=S3-1788365677285-d8e7
+09-02 21:52:42.785 25970 25999 I RPCS3   : LLVM: Compiled module v7-kusa-kGrCLRXGP3tnit0gENc4y1-00001P-cortex-a34-2.obj
+09-02 21:52:42.785 25970 25999 W RPCS3   : LLVM: Compiling module /storage/emulated/0/Android/data/com.zenithblue.sambas3/files/cache/cache/BLUS30443/ppu-U8pStuqfrkhA3fGiHfGZz99SofxM-EBOOT.BIN/v7-kusa-qWyCYAew1TJgrsrmHEwbw0-00001P-cortex-a34-2.obj
+09-02 21:52:42.787 25970 26340 W RPCS3   : ProgressMessageDialog::ProgressBarSetMsg(0, Progress: module 70 of 233 (12m remaining))
+09-02 21:52:42.793 25970 25970 I S3PPU   : event=install_ppu_active progress_id=3000 msg=Progress: module 70 of 233 (12m remainin percent=30 max=100 session=S3-1788365677285-d8e7
+09-02 21:52:48.014 25970 25999 I RPCS3   : LLVM: Compiled module v7-kusa-qWyCYAew1TJgrsrmHEwbw0-00001P-cortex-a34-2.obj
+09-02 21:52:48.014 25970 25999 W RPCS3   : LLVM: Compiling module /storage/emulated/0/Android/data/com.zenithblue.sambas3/files/cache/cache/BLUS30443/ppu-U8pStuqfrkhA3fGiHfGZz99SofxM-EBOOT.BIN/v7-kusa-N1LhdJtxTsF4p26qFC0Cpk-00001P-cortex-a34-2.obj
+09-02 21:52:48.017 25970 26340 W RPCS3   : ProgressMessageDialog::ProgressBarSetMsg(0, Progress: module 71 of 233 (12m remaining))
+09-02 21:52:48.020 25970 25970 I S3PPU   : event=install_ppu_active progress_id=3000 msg=Progress: module 71 of 233 (12m remainin percent=30 max=100 session=S3-1788365677285-d8e7
+09-02 21:52:52.578 25970 25999 I RPCS3   : LLVM: Compiled module v7-kusa-N1LhdJtxTsF4p26qFC0Cpk-00001P-cortex-a34-2.obj
+09-02 21:52:52.578 25970 25999 W RPCS3   : LLVM: Compiling module /storage/emulated/0/Android/data/com.zenithblue.sambas3/files/cache/cache/BLUS30443/ppu-U8pStuqfrkhA3fGiHfGZz99SofxM-EBOOT.BIN/v7-kusa-QoGYu8ccesmHiurFzUQ5AM-00001P-cortex-a34-2.obj
+09-02 21:52:52.587 25970 26340 W RPCS3   : ProgressMessageDialog::ProgressBarSetMsg(0, Progress: module 72 of 233 (12m remaining))
+09-02 21:52:52.589 25970 25970 I S3PPU   : event=install_ppu_active progress_id=3000 msg=Progress: module 72 of 233 (12m remainin percent=30 max=100 session=S3-1788365677285-d8e7
+09-02 21:52:57.299 25970 25999 I RPCS3   : LLVM: Compiled module v7-kusa-QoGYu8ccesmHiurFzUQ5AM-00001P-cortex-a34-2.obj
+09-02 21:52:57.299 25970 25999 W RPCS3   : LLVM: Compiling module /storage/emulated/0/Android/data/com.zenithblue.sambas3/files/cache/cache/BLUS30443/ppu-U8pStuqfrkhA3fGiHfGZz99SofxM-EBOOT.BIN/v7-kusa-00VKNZVjE1YWTS1QonpV13-00001P-cortex-a34-2.obj
+09-02 21:52:57.307 25970 26340 W RPCS3   : ProgressMessageDialog::ProgressBarSetMsg(0, Progress: module 73 of 233 (12m remaining))
+09-02 21:52:57.308 25970 25970 I S3PPU   : event=install_ppu_active progress_id=3000 msg=Progress: module 73 of 233 (12m remainin percent=31 max=100 session=S3-1788365677285-d8e7
+09-02 21:53:02.393 25970 25999 I RPCS3   : LLVM: Compiled module v7-kusa-00VKNZVjE1YWTS1QonpV13-00001P-cortex-a34-2.obj
+09-02 21:53:02.393 25970 25999 W RPCS3   : LLVM: Compiling module /storage/emulated/0/Android/data/com.zenithblue.sambas3/files/cache/cache/BLUS30443/ppu-U8pStuqfrkhA3fGiHfGZz99SofxM-EBOOT.BIN/v7-kusa-QQWVKN3jQHwVdUcHsaxa5K-00001P-cortex-a34-2.obj
+09-02 21:53:02.397 25970 26340 W RPCS3   : ProgressMessageDialog::ProgressBarSetMsg(0, Progress: module 74 of 233 (12m remaining))
+09-02 21:53:02.398 25970 25970 I S3PPU   : event=install_ppu_active progress_id=3000 msg=Progress: module 74 of 233 (12m remainin percent=31 max=100 session=S3-1788365677285-d8e7
+09-02 21:53:07.543 25970 25999 I RPCS3   : LLVM: Compiled module v7-kusa-QQWVKN3jQHwVdUcHsaxa5K-00001P-cortex-a34-2.obj
+09-02 21:53:07.543 25970 25999 W RPCS3   : LLVM: Compiling module /storage/emulated/0/Android/data/com.zenithblue.sambas3/files/cache/cache/BLUS30443/ppu-U8pStuqfrkhA3fGiHfGZz99SofxM-EBOOT.BIN/v7-kusa-b6sCMVnMMztaTyKyt1QW1t-00001P-cortex-a34-2.obj
+09-02 21:53:07.547 25970 26340 W RPCS3   : ProgressMessageDialog::ProgressBarSetMsg(0, Progress: module 75 of 233 (12m remaining))
+09-02 21:53:07.551 25970 25970 I S3PPU   : event=install_ppu_active progress_id=3000 msg=Progress: module 75 of 233 (12m remainin percent=32 max=100 session=S3-1788365677285-d8e7
+09-02 21:53:12.675 25970 25999 I RPCS3   : LLVM: Compiled module v7-kusa-b6sCMVnMMztaTyKyt1QW1t-00001P-cortex-a34-2.obj
+09-02 21:53:12.675 25970 25999 W RPCS3   : LLVM: Compiling module /storage/emulated/0/Android/data/com.zenithblue.sambas3/files/cache/cache/BLUS30443/ppu-U8pStuqfrkhA3fGiHfGZz99SofxM-EBOOT.BIN/v7-kusa-Mit53Kfdnzm8M1NhrhPiGa-00001P-cortex-a34-2.obj
+09-02 21:53:12.679 25970 26340 W RPCS3   : ProgressMessageDialog::ProgressBarSetMsg(0, Progress: module 76 of 233 (12m remaining))
+09-02 21:53:12.684 25970 25970 I S3PPU   : event=install_ppu_active progress_id=3000 msg=Progress: module 76 of 233 (12m remainin percent=32 max=100 session=S3-1788365677285-d8e7
+09-02 21:53:17.815 25970 25999 I RPCS3   : LLVM: Compiled module v7-kusa-Mit53Kfdnzm8M1NhrhPiGa-00001P-cortex-a34-2.obj
+09-02 21:53:17.815 25970 25999 W RPCS3   : LLVM: Compiling module /storage/emulated/0/Android/data/com.zenithblue.sambas3/files/cache/cache/BLUS30443/ppu-U8pStuqfrkhA3fGiHfGZz99SofxM-EBOOT.BIN/v7-kusa-Pjbf0ycz1aqJ1ayfpoqbYb-00001P-cortex-a34-2.obj
+09-02 21:53:17.821 25970 26340 W RPCS3   : ProgressMessageDialog::ProgressBarSetMsg(0, Progress: module 77 of 233 (12m remaining))
+09-02 21:53:17.827 25970 25970 I S3PPU   : event=install_ppu_active progress_id=3000 msg=Progress: module 77 of 233 (12m remainin percent=33 max=100 session=S3-1788365677285-d8e7
+09-02 21:53:22.904 25970 25999 I RPCS3   : LLVM: Compiled module v7-kusa-Pjbf0ycz1aqJ1ayfpoqbYb-00001P-cortex-a34-2.obj
+09-02 21:53:22.904 25970 25999 W RPCS3   : LLVM: Compiling module /storage/emulated/0/Android/data/com.zenithblue.sambas3/files/cache/cache/BLUS30443/ppu-U8pStuqfrkhA3fGiHfGZz99SofxM-EBOOT.BIN/v7-kusa-sLEm0wYYMukMfTPubVq5zs-00001P-cortex-a34-2.obj
+09-02 21:53:22.908 25970 26340 W RPCS3   : ProgressMessageDialog::ProgressBarSetMsg(0, Progress: module 78 of 233 (12m remaining))
+09-02 21:53:22.909 25970 25970 I S3PPU   : event=install_ppu_active progress_id=3000 msg=Progress: module 78 of 233 (12m remainin percent=33 max=100 session=S3-1788365677285-d8e7
+09-02 21:53:28.028 25970 25999 I RPCS3   : LLVM: Compiled module v7-kusa-sLEm0wYYMukMfTPubVq5zs-00001P-cortex-a34-2.obj
+09-02 21:53:28.028 25970 25999 W RPCS3   : LLVM: Compiling module /storage/emulated/0/Android/data/com.zenithblue.sambas3/files/cache/cache/BLUS30443/ppu-U8pStuqfrkhA3fGiHfGZz99SofxM-EBOOT.BIN/v7-kusa-7w4UYQXuRE5cEWd0bv3J8L-00001P-cortex-a34-2.obj
+09-02 21:53:28.037 25970 26340 W RPCS3   : ProgressMessageDialog::ProgressBarSetMsg(0, Progress: module 79 of 233 (12m remaining))
+09-02 21:53:28.043 25970 25970 I S3PPU   : event=install_ppu_active progress_id=3000 msg=Progress: module 79 of 233 (12m remainin percent=33 max=100 session=S3-1788365677285-d8e7
+09-02 21:53:33.138 25970 25999 I RPCS3   : LLVM: Compiled module v7-kusa-7w4UYQXuRE5cEWd0bv3J8L-00001P-cortex-a34-2.obj
+09-02 21:53:33.138 25970 25999 W RPCS3   : LLVM: Compiling module /storage/emulated/0/Android/data/com.zenithblue.sambas3/files/cache/cache/BLUS30443/ppu-U8pStuqfrkhA3fGiHfGZz99SofxM-EBOOT.BIN/v7-kusa-MXCVy4M6eSVnCitmCisjYr-00001P-cortex-a34-2.obj
+09-02 21:53:33.147 25970 26340 W RPCS3   : ProgressMessageDialog::ProgressBarSetMsg(0, Progress: module 80 of 233 (12m remaining))
+09-02 21:53:33.148 25970 25970 I S3PPU   : event=install_ppu_active progress_id=3000 msg=Progress: module 80 of 233 (12m remainin percent=34 max=100 session=S3-1788365677285-d8e7
+09-02 21:53:38.127 25970 25999 I RPCS3   : LLVM: Compiled module v7-kusa-MXCVy4M6eSVnCitmCisjYr-00001P-cortex-a34-2.obj
+09-02 21:53:38.128 25970 25999 W RPCS3   : LLVM: Compiling module /storage/emulated/0/Android/data/com.zenithblue.sambas3/files/cache/cache/BLUS30443/ppu-U8pStuqfrkhA3fGiHfGZz99SofxM-EBOOT.BIN/v7-kusa-cqfQ3f1hpteqzpQxMcJiFH-00001P-cortex-a34-2.obj
+09-02 21:53:38.130 25970 26340 W RPCS3   : ProgressMessageDialog::ProgressBarSetMsg(0, Progress: module 81 of 233 (12m remaining))
+09-02 21:53:38.134 25970 25970 I S3PPU   : event=install_ppu_active progress_id=3000 msg=Progress: module 81 of 233 (12m remainin percent=34 max=100 session=S3-1788365677285-d8e7
+09-02 21:53:43.062 25970 25999 I RPCS3   : LLVM: Compiled module v7-kusa-cqfQ3f1hpteqzpQxMcJiFH-00001P-cortex-a34-2.obj
+09-02 21:53:43.062 25970 25999 W RPCS3   : LLVM: Compiling module /storage/emulated/0/Android/data/com.zenithblue.sambas3/files/cache/cache/BLUS30443/ppu-U8pStuqfrkhA3fGiHfGZz99SofxM-EBOOT.BIN/v7-kusa-q1n8woxAcSRQ3NSuPGimoS-00001P-cortex-a34-2.obj
+09-02 21:53:43.071 25970 26340 W RPCS3   : ProgressMessageDialog::ProgressBarSetMsg(0, Progress: module 82 of 233 (12m remaining))
+09-02 21:53:43.074 25970 25970 I S3PPU   : event=install_ppu_active progress_id=3000 msg=Progress: module 82 of 233 (12m remainin percent=35 max=100 session=S3-1788365677285-d8e7
+09-02 21:53:48.172 25970 25999 I RPCS3   : LLVM: Compiled module v7-kusa-q1n8woxAcSRQ3NSuPGimoS-00001P-cortex-a34-2.obj
+09-02 21:53:48.172 25970 25999 W RPCS3   : LLVM: Compiling module /storage/emulated/0/Android/data/com.zenithblue.sambas3/files/cache/cache/BLUS30443/ppu-U8pStuqfrkhA3fGiHfGZz99SofxM-EBOOT.BIN/v7-kusa-bbKTxk1qUtNaHNFYH8TqLp-00001P-cortex-a34-2.obj
+09-02 21:53:48.177 25970 26340 W RPCS3   : ProgressMessageDialog::ProgressBarSetMsg(0, Progress: module 83 of 233 (11m remaining))
+09-02 21:53:48.178 25970 25970 I S3PPU   : event=install_ppu_active progress_id=3000 msg=Progress: module 83 of 233 (11m remainin percent=35 max=100 session=S3-1788365677285-d8e7
+09-02 21:53:53.241 25970 25999 I RPCS3   : LLVM: Compiled module v7-kusa-bbKTxk1qUtNaHNFYH8TqLp-00001P-cortex-a34-2.obj
+09-02 21:53:53.241 25970 25999 W RPCS3   : LLVM: Compiling module /storage/emulated/0/Android/data/com.zenithblue.sambas3/files/cache/cache/BLUS30443/ppu-U8pStuqfrkhA3fGiHfGZz99SofxM-EBOOT.BIN/v7-kusa-3Un80ek3J0cpuKjup0zrSP-00001P-cortex-a34-2.obj
+09-02 21:53:53.247 25970 26340 W RPCS3   : ProgressMessageDialog::ProgressBarSetMsg(0, Progress: module 84 of 233 (11m remaining))
+09-02 21:53:53.251 25970 25970 I S3PPU   : event=install_ppu_active progress_id=3000 msg=Progress: module 84 of 233 (11m remainin percent=36 max=100 session=S3-1788365677285-d8e7
+09-02 21:53:58.305 25970 25999 I RPCS3   : LLVM: Compiled module v7-kusa-3Un80ek3J0cpuKjup0zrSP-00001P-cortex-a34-2.obj
+09-02 21:53:58.305 25970 25999 W RPCS3   : LLVM: Compiling module /storage/emulated/0/Android/data/com.zenithblue.sambas3/files/cache/cache/BLUS30443/ppu-U8pStuqfrkhA3fGiHfGZz99SofxM-EBOOT.BIN/v7-kusa-cug6iU2fnyy1jhK26LZ1Qy-00001P-cortex-a34-2.obj
+09-02 21:53:58.307 25970 26340 W RPCS3   : ProgressMessageDialog::ProgressBarSetMsg(0, Progress: module 85 of 233 (11m remaining))
+09-02 21:53:58.309 25970 25970 I S3PPU   : event=install_ppu_active progress_id=3000 msg=Progress: module 85 of 233 (11m remainin percent=36 max=100 session=S3-1788365677285-d8e7
+09-02 21:54:02.681 25970 25999 I RPCS3   : LLVM: Compiled module v7-kusa-cug6iU2fnyy1jhK26LZ1Qy-00001P-cortex-a34-2.obj
+09-02 21:54:02.681 25970 25999 W RPCS3   : LLVM: Compiling module /storage/emulated/0/Android/data/com.zenithblue.sambas3/files/cache/cache/BLUS30443/ppu-U8pStuqfrkhA3fGiHfGZz99SofxM-EBOOT.BIN/v7-kusa-UcfedQFmswg0XWigsNvzUm-00001P-cortex-a34-2.obj
+09-02 21:54:02.687 25970 26340 W RPCS3   : ProgressMessageDialog::ProgressBarSetMsg(0, Progress: module 86 of 233 (11m remaining))
+09-02 21:54:02.695 25970 25970 I S3PPU   : event=install_ppu_active progress_id=3000 msg=Progress: module 86 of 233 (11m remainin percent=36 max=100 session=S3-1788365677285-d8e7
+09-02 21:54:07.623 25970 25999 I RPCS3   : LLVM: Compiled module v7-kusa-UcfedQFmswg0XWigsNvzUm-00001P-cortex-a34-2.obj
+09-02 21:54:07.623 25970 25999 W RPCS3   : LLVM: Compiling module /storage/emulated/0/Android/data/com.zenithblue.sambas3/files/cache/cache/BLUS30443/ppu-U8pStuqfrkhA3fGiHfGZz99SofxM-EBOOT.BIN/v7-kusa-ri9zs1PbzMufRK6sm91pNi-00001P-cortex-a34-2.obj
+09-02 21:54:07.627 25970 26340 W RPCS3   : ProgressMessageDialog::ProgressBarSetMsg(0, Progress: module 87 of 233 (11m remaining))
+09-02 21:54:07.628 25970 25970 I S3PPU   : event=install_ppu_active progress_id=3000 msg=Progress: module 87 of 233 (11m remainin percent=37 max=100 session=S3-1788365677285-d8e7
+09-02 21:54:12.790 25970 25999 I RPCS3   : LLVM: Compiled module v7-kusa-ri9zs1PbzMufRK6sm91pNi-00001P-cortex-a34-2.obj
+09-02 21:54:12.790 25970 25999 W RPCS3   : LLVM: Compiling module /storage/emulated/0/Android/data/com.zenithblue.sambas3/files/cache/cache/BLUS30443/ppu-U8pStuqfrkhA3fGiHfGZz99SofxM-EBOOT.BIN/v7-kusa-KWxG1f6txxzdZc379wXpdH-00001P-cortex-a34-2.obj
+09-02 21:54:12.797 25970 26340 W RPCS3   : ProgressMessageDialog::ProgressBarSetMsg(0, Progress: module 88 of 233 (11m remaining))
+09-02 21:54:12.801 25970 25970 I S3PPU   : event=install_ppu_active progress_id=3000 msg=Progress: module 88 of 233 (11m remainin percent=37 max=100 session=S3-1788365677285-d8e7
+09-02 21:54:17.865 25970 25999 I RPCS3   : LLVM: Compiled module v7-kusa-KWxG1f6txxzdZc379wXpdH-00001P-cortex-a34-2.obj
+09-02 21:54:17.865 25970 25999 W RPCS3   : LLVM: Compiling module /storage/emulated/0/Android/data/com.zenithblue.sambas3/files/cache/cache/BLUS30443/ppu-U8pStuqfrkhA3fGiHfGZz99SofxM-EBOOT.BIN/v7-kusa-Q43Q7g9diPyKvr6L2XHwsJ-00001P-cortex-a34-2.obj
+09-02 21:54:17.869 25970 26340 W RPCS3   : ProgressMessageDialog::ProgressBarSetMsg(0, Progress: module 89 of 233 (11m remaining))
+09-02 21:54:17.871 25970 25970 I S3PPU   : event=install_ppu_active progress_id=3000 msg=Progress: module 89 of 233 (11m remainin percent=38 max=100 session=S3-1788365677285-d8e7
+09-02 21:54:22.711 25970 25999 I RPCS3   : LLVM: Compiled module v7-kusa-Q43Q7g9diPyKvr6L2XHwsJ-00001P-cortex-a34-2.obj
+09-02 21:54:22.711 25970 25999 W RPCS3   : LLVM: Compiling module /storage/emulated/0/Android/data/com.zenithblue.sambas3/files/cache/cache/BLUS30443/ppu-U8pStuqfrkhA3fGiHfGZz99SofxM-EBOOT.BIN/v7-kusa-cPCiEkM7aymdKGqoFe1uuV-00001P-cortex-a34-2.obj
+09-02 21:54:22.718 25970 25970 I S3PPU   : event=install_ppu_active progress_id=3000 msg=Progress: module 90 of 233 (11m remainin percent=38 max=100 session=S3-1788365677285-d8e7
+09-02 21:54:22.725 25970 26340 W RPCS3   : ProgressMessageDialog::ProgressBarSetMsg(0, Progress: module 90 of 233 (11m remaining))
+09-02 21:54:27.597 25970 25999 I RPCS3   : LLVM: Compiled module v7-kusa-cPCiEkM7aymdKGqoFe1uuV-00001P-cortex-a34-2.obj
+09-02 21:54:27.597 25970 25999 W RPCS3   : LLVM: Compiling module /storage/emulated/0/Android/data/com.zenithblue.sambas3/files/cache/cache/BLUS30443/ppu-U8pStuqfrkhA3fGiHfGZz99SofxM-EBOOT.BIN/v7-kusa-r0e8WNWx8KUhMQo6MySb4P-00001P-cortex-a34-2.obj
+09-02 21:54:27.607 25970 26340 W RPCS3   : ProgressMessageDialog::ProgressBarSetMsg(0, Progress: module 91 of 233 (11m remaining))
+09-02 21:54:27.608 25970 25970 I S3PPU   : event=install_ppu_active progress_id=3000 msg=Progress: module 91 of 233 (11m remainin percent=39 max=100 session=S3-1788365677285-d8e7
+09-02 21:54:32.993 25970 25999 I RPCS3   : LLVM: Compiled module v7-kusa-r0e8WNWx8KUhMQo6MySb4P-00001P-cortex-a34-2.obj
+09-02 21:54:32.993 25970 25999 W RPCS3   : LLVM: Compiling module /storage/emulated/0/Android/data/com.zenithblue.sambas3/files/cache/cache/BLUS30443/ppu-U8pStuqfrkhA3fGiHfGZz99SofxM-EBOOT.BIN/v7-kusa-qcYgt8CQMV4F576EHAAcb6-00001P-cortex-a34-2.obj
+09-02 21:54:32.999 25970 26340 W RPCS3   : ProgressMessageDialog::ProgressBarSetMsg(0, Progress: module 92 of 233 (11m remaining))
+09-02 21:54:33.000 25970 25970 I S3PPU   : event=install_ppu_active progress_id=3000 msg=Progress: module 92 of 233 (11m remainin percent=39 max=100 session=S3-1788365677285-d8e7
+09-02 21:54:37.675 25970 25999 I RPCS3   : LLVM: Compiled module v7-kusa-qcYgt8CQMV4F576EHAAcb6-00001P-cortex-a34-2.obj
+09-02 21:54:37.675 25970 25999 W RPCS3   : LLVM: Compiling module /storage/emulated/0/Android/data/com.zenithblue.sambas3/files/cache/cache/BLUS30443/ppu-U8pStuqfrkhA3fGiHfGZz99SofxM-EBOOT.BIN/v7-kusa-HFxiAAUMisF9FFgc4U20uG-00001P-cortex-a34-2.obj
+09-02 21:54:37.677 25970 26340 W RPCS3   : ProgressMessageDialog::ProgressBarSetMsg(0, Progress: module 93 of 233 (11m remaining))
+09-02 21:54:37.681 25970 25970 I S3PPU   : event=install_ppu_active progress_id=3000 msg=Progress: module 93 of 233 (11m remainin percent=39 max=100 session=S3-1788365677285-d8e7
+09-02 21:54:42.153 25970 25999 I RPCS3   : LLVM: Compiled module v7-kusa-HFxiAAUMisF9FFgc4U20uG-00001P-cortex-a34-2.obj
+09-02 21:54:42.153 25970 25999 W RPCS3   : LLVM: Compiling module /storage/emulated/0/Android/data/com.zenithblue.sambas3/files/cache/cache/BLUS30443/ppu-U8pStuqfrkhA3fGiHfGZz99SofxM-EBOOT.BIN/v7-kusa-6x2YxC5eg95pjPcp9FnJwi-00001P-cortex-a34-2.obj
+09-02 21:54:42.157 25970 26340 W RPCS3   : ProgressMessageDialog::ProgressBarSetMsg(0, Progress: module 94 of 233 (11m remaining))
+09-02 21:54:42.158 25970 25970 I S3PPU   : event=install_ppu_active progress_id=3000 msg=Progress: module 94 of 233 (11m remainin percent=40 max=100 session=S3-1788365677285-d8e7
+09-02 21:54:46.990 25970 25999 I RPCS3   : LLVM: Compiled module v7-kusa-6x2YxC5eg95pjPcp9FnJwi-00001P-cortex-a34-2.obj
+09-02 21:54:46.990 25970 25999 W RPCS3   : LLVM: Compiling module /storage/emulated/0/Android/data/com.zenithblue.sambas3/files/cache/cache/BLUS30443/ppu-U8pStuqfrkhA3fGiHfGZz99SofxM-EBOOT.BIN/v7-kusa-fXqyMcSHjCQFk3C309LMGK-00001P-cortex-a34-2.obj
+09-02 21:54:46.997 25970 26340 W RPCS3   : ProgressMessageDialog::ProgressBarSetMsg(0, Progress: module 95 of 233 (11m remaining))
+09-02 21:54:46.999 25970 25970 I S3PPU   : event=install_ppu_active progress_id=3000 msg=Progress: module 95 of 233 (11m remainin percent=40 max=100 session=S3-1788365677285-d8e7
+09-02 21:54:52.049 25970 25999 I RPCS3   : LLVM: Compiled module v7-kusa-fXqyMcSHjCQFk3C309LMGK-00001P-cortex-a34-2.obj
+09-02 21:54:52.050 25970 25999 W RPCS3   : LLVM: Compiling module /storage/emulated/0/Android/data/com.zenithblue.sambas3/files/cache/cache/BLUS30443/ppu-U8pStuqfrkhA3fGiHfGZz99SofxM-EBOOT.BIN/v7-kusa-WuMig8AH8uMiXqxootWeTx-00001P-cortex-a34-2.obj
+09-02 21:54:52.057 25970 26340 W RPCS3   : ProgressMessageDialog::ProgressBarSetMsg(0, Progress: module 96 of 233 (10m remaining))
+09-02 21:54:52.058 25970 25970 I S3PPU   : event=install_ppu_active progress_id=3000 msg=Progress: module 96 of 233 (10m remainin percent=41 max=100 session=S3-1788365677285-d8e7
+09-02 21:54:57.146 25970 25999 I RPCS3   : LLVM: Compiled module v7-kusa-WuMig8AH8uMiXqxootWeTx-00001P-cortex-a34-2.obj
+09-02 21:54:57.146 25970 25999 W RPCS3   : LLVM: Compiling module /storage/emulated/0/Android/data/com.zenithblue.sambas3/files/cache/cache/BLUS30443/ppu-U8pStuqfrkhA3fGiHfGZz99SofxM-EBOOT.BIN/v7-kusa-eMQML8RiLZEg11LkCpc5JS-00001P-cortex-a34-2.obj
+09-02 21:54:57.147 25970 26340 W RPCS3   : ProgressMessageDialog::ProgressBarSetMsg(0, Progress: module 97 of 233 (10m remaining))
+09-02 21:54:57.153 25970 25970 I S3PPU   : event=install_ppu_active progress_id=3000 msg=Progress: module 97 of 233 (10m remainin percent=41 max=100 session=S3-1788365677285-d8e7
+09-02 21:55:02.371 25970 25999 I RPCS3   : LLVM: Compiled module v7-kusa-eMQML8RiLZEg11LkCpc5JS-00001P-cortex-a34-2.obj
+09-02 21:55:02.371 25970 25999 W RPCS3   : LLVM: Compiling module /storage/emulated/0/Android/data/com.zenithblue.sambas3/files/cache/cache/BLUS30443/ppu-U8pStuqfrkhA3fGiHfGZz99SofxM-EBOOT.BIN/v7-kusa-paEtgmZ81EEMqfELAGxAKy-00001P-cortex-a34-2.obj
+09-02 21:55:02.377 25970 26340 W RPCS3   : ProgressMessageDialog::ProgressBarSetMsg(0, Progress: module 98 of 233 (10m remaining))
+09-02 21:55:02.380 25970 25970 I S3PPU   : event=install_ppu_active progress_id=3000 msg=Progress: module 98 of 233 (10m remainin percent=42 max=100 session=S3-1788365677285-d8e7
+09-02 21:55:07.378 25970 25999 I RPCS3   : LLVM: Compiled module v7-kusa-paEtgmZ81EEMqfELAGxAKy-00001P-cortex-a34-2.obj
+09-02 21:55:07.378 25970 25999 W RPCS3   : LLVM: Compiling module /storage/emulated/0/Android/data/com.zenithblue.sambas3/files/cache/cache/BLUS30443/ppu-U8pStuqfrkhA3fGiHfGZz99SofxM-EBOOT.BIN/v7-kusa-bkPwSyNNqbPnMLQAvuc904-0004Xr-cortex-a34-2.obj
+09-02 21:55:07.387 25970 26340 W RPCS3   : ProgressMessageDialog::ProgressBarSetMsg(0, Progress: module 99 of 233 (10m remaining))
+09-02 21:55:07.388 25970 25970 I S3PPU   : event=install_ppu_active progress_id=3000 msg=Progress: module 99 of 233 (10m remainin percent=42 max=100 session=S3-1788365677285-d8e7
+09-02 21:55:13.814 25970 25999 I scudo   : Can't populate more pages for size class 3120.
+09-02 21:55:13.923 25970 25999 I scudo   : Can't populate more pages for size class 4112.
+09-02 21:55:14.035 25970 25999 I scudo   : Can't populate more pages for size class 4624.
+09-02 21:55:14.133 25970 25999 I scudo   : Can't populate more pages for size class 7120.
+09-02 21:55:14.219 25970 25999 I scudo   : Can't populate more pages for size class 8720.
+09-02 21:55:14.288 25970 25999 I scudo   : Can't populate more pages for size class 11664.
+09-02 21:55:14.345 25970 25999 I scudo   : Can't populate more pages for size class 14224.
+09-02 21:55:14.396 25970 25999 I scudo   : Can't populate more pages for size class 16400.
+09-02 21:55:14.447 25970 25999 I scudo   : Can't populate more pages for size class 18448.
+09-02 21:55:14.485 25970 25999 I scudo   : Can't populate more pages for size class 23056.
+09-02 21:55:14.519 25970 25999 I scudo   : Can't populate more pages for size class 29456.
+09-02 21:55:14.543 25970 25999 I scudo   : Can't populate more pages for size class 33296.
+09-02 21:55:14.559 25970 25999 I scudo   : Can't populate more pages for size class 65552.
+09-02 21:55:14.811 25970 25999 F libc    : Fatal signal 6 (SIGABRT), code -1 (SI_QUEUE) in tid 25999 (Thread-6), pid 25970 (ithblue.sambas3)
+09-02 21:55:14.882 25970 25983 E libc++abi: terminating due to uncaught exception of type St9bad_alloc: std::bad_alloc
+09-02 21:55:14.889 25970 25989 E libc++abi: terminating due to uncaught exception of type St9bad_alloc: std::bad_alloc
+09-02 21:55:15.715 27040 27040 F DEBUG   : esr: 0000000092000006 (Data Abort Exception 0x24)
+09-02 21:55:15.715 27040 27040 F DEBUG   : signal 6 (SIGABRT), code -1 (SI_QUEUE), fault addr --------
+09-02 21:55:15.715 27040 27040 F DEBUG   :       #01 pc 00000000044956ac  /data/app/~~moIId_P1Xta3Zr4qVe5ZXA==/com.zenithblue.sambas3-3-u81uW3ksLh99doItQhNw==/lib/arm64/librpcsx-android.so (llvm::report_bad_alloc_error(char const*, bool)+128) (BuildId: c519f557ef8b98ed2ebfc64d928336e1e7514fd2)
+09-02 21:55:15.998  6088  6088 I Zygote  : Process 25970 exited due to signal 6 (Aborted)

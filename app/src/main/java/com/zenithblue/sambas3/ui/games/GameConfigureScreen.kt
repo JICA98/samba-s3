@@ -216,7 +216,7 @@ fun GameConfigureScreen(
                     IconButton(onClick = { resetAllMenuOpen = true }) {
                         Icon(
                             painter = painterResource(id = R.drawable.ic_menu),
-                            contentDescription = null,
+                            contentDescription = "Game options menu",
                             tint = RPCSXColors.primary
                         )
                     }

@@ -1,0 +1,62 @@
+09-02 21:55:14.811 25970 25999 F libc    : Fatal signal 6 (SIGABRT), code -1 (SI_QUEUE) in tid 25999 (Thread-6), pid 25970 (ithblue.sambas3)
+09-02 21:55:15.715 27040 27040 F DEBUG   :       #01 pc 00000000044956ac  /data/app/~~moIId_P1Xta3Zr4qVe5ZXA==/com.zenithblue.sambas3-3-u81uW3ksLh99doItQhNw==/lib/arm64/librpcsx-android.so (llvm::report_bad_alloc_error(char const*, bool)+128) (BuildId: c519f557ef8b98ed2ebfc64d928336e1e7514fd2)
+09-02 22:32:44.947 28326 28390 F libc    : Fatal signal 6 (SIGABRT), code -1 (SI_QUEUE) in tid 28390 (Thread-6), pid 28326 (ithblue.sambas3)
+09-02 22:32:45.752 30985 30985 F DEBUG   :       #01 pc 0000000006854834  /data/app/~~3dMTkjLlLLb33hXiMxwbuA==/com.zenithblue.sambas3-j63tPHREEOTUQwbgbRhsFA==/lib/arm64/librpcsx-android.so (llvm::report_bad_alloc_error(char const*, bool)+128) (BuildId: 3ba4d769e30bc2cf68cb8fdf899a9842dfba0ba1)
+09-02 22:56:33.843   490   792 W RPCS3   : ProgressMessageDialog::ProgressBarSetMsg(0, Progress: module 85 of 233 (14m remaining))
+09-02 22:56:33.852   490   490 I S3PPU   : event=install_ppu_active progress_id=3000 msg=Progress: module 85 of 233 (14m remainin percent=36 max=100 session=S3-1788369403263-ce5b
+09-02 22:56:38.695   490   792 W RPCS3   : ProgressMessageDialog::ProgressBarSetMsg(0, Progress: module 86 of 233 (13m remaining))
+09-02 22:56:38.696   490   490 I S3PPU   : event=install_ppu_active progress_id=3000 msg=Progress: module 86 of 233 (13m remainin percent=36 max=100 session=S3-1788369403263-ce5b
+09-02 22:56:44.213   490   792 W RPCS3   : ProgressMessageDialog::ProgressBarSetMsg(0, Progress: module 87 of 233 (13m remaining))
+09-02 22:56:44.214   490   490 I S3PPU   : event=install_ppu_active progress_id=3000 msg=Progress: module 87 of 233 (13m remainin percent=37 max=100 session=S3-1788369403263-ce5b
+09-02 22:56:49.953   490   792 W RPCS3   : ProgressMessageDialog::ProgressBarSetMsg(0, Progress: module 88 of 233 (13m remaining))
+09-02 22:56:49.957   490   490 I S3PPU   : event=install_ppu_active progress_id=3000 msg=Progress: module 88 of 233 (13m remainin percent=37 max=100 session=S3-1788369403263-ce5b
+09-02 22:56:55.634   490   792 W RPCS3   : ProgressMessageDialog::ProgressBarSetMsg(0, Progress: module 89 of 233 (13m remaining))
+09-02 22:56:55.641   490   490 I S3PPU   : event=install_ppu_active progress_id=3000 msg=Progress: module 89 of 233 (13m remainin percent=38 max=100 session=S3-1788369403263-ce5b
+09-02 22:57:01.063   490   792 W RPCS3   : ProgressMessageDialog::ProgressBarSetMsg(0, Progress: module 90 of 233 (13m remaining))
+09-02 22:57:01.064   490   490 I S3PPU   : event=install_ppu_active progress_id=3000 msg=Progress: module 90 of 233 (13m remainin percent=38 max=100 session=S3-1788369403263-ce5b
+09-02 22:57:06.493   490   792 W RPCS3   : ProgressMessageDialog::ProgressBarSetMsg(0, Progress: module 91 of 233 (13m remaining))
+09-02 22:57:06.502   490   490 I S3PPU   : event=install_ppu_active progress_id=3000 msg=Progress: module 91 of 233 (13m remainin percent=39 max=100 session=S3-1788369403263-ce5b
+09-02 22:57:12.463   490   792 W RPCS3   : ProgressMessageDialog::ProgressBarSetMsg(0, Progress: module 92 of 233 (13m remaining))
+09-02 22:57:12.465   490   490 I S3PPU   : event=install_ppu_active progress_id=3000 msg=Progress: module 92 of 233 (13m remainin percent=39 max=100 session=S3-1788369403263-ce5b
+09-02 22:57:17.653   490   792 W RPCS3   : ProgressMessageDialog::ProgressBarSetMsg(0, Progress: module 93 of 233 (13m remaining))
+09-02 22:57:17.661   490   490 I S3PPU   : event=install_ppu_active progress_id=3000 msg=Progress: module 93 of 233 (13m remainin percent=39 max=100 session=S3-1788369403263-ce5b
+09-02 22:57:22.673   490   792 W RPCS3   : ProgressMessageDialog::ProgressBarSetMsg(0, Progress: module 94 of 233 (13m remaining))
+09-02 22:57:22.677   490   490 I S3PPU   : event=install_ppu_active progress_id=3000 msg=Progress: module 94 of 233 (13m remainin percent=40 max=100 session=S3-1788369403263-ce5b
+09-02 22:57:28.094   490   792 W RPCS3   : ProgressMessageDialog::ProgressBarSetMsg(0, Progress: module 95 of 233 (13m remaining))
+09-02 22:57:28.102   490   490 I S3PPU   : event=install_ppu_active progress_id=3000 msg=Progress: module 95 of 233 (13m remainin percent=40 max=100 session=S3-1788369403263-ce5b
+09-02 22:57:33.689   490   569 D RPCS3   : S3PPU install_step=5 more_work=1 title=BLUS30443
+09-02 22:57:33.693   490   792 W RPCS3   : ProgressMessageDialog::ProgressBarSetMsg(0, Progress: module 96 of 233 (12m remaining))
+09-02 22:57:33.707   490   490 I S3PPU   : event=install_ppu_active progress_id=3000 msg=Progress: module 96 of 233 (12m remainin percent=41 max=100 session=S3-1788369403263-ce5b
+09-02 22:57:37.901   490   569 D RPCS3   : S3PPU install_progress pdone=96 ptotal=233 step_workload=16 modules_total=233 cached=96 uncached_remaining=137 more=1
+09-02 22:57:37.903   490   792 W RPCS3   : ProgressMessageDialog::ProgressBarSetMsg(0, Progress: module 96 of 233 (13m remaining))
+09-02 22:57:37.913   490   490 I S3PPU   : event=install_ppu_active progress_id=3000 msg=Progress: module 96 of 233 (13m remainin percent=41 max=100 session=S3-1788369403263-ce5b
+09-02 22:57:43.534   490   792 W RPCS3   : ProgressMessageDialog::ProgressBarSetMsg(0, Progress: module 97 of 233 (12m remaining))
+09-02 22:57:43.534   490   490 I S3PPU   : event=install_ppu_active progress_id=3000 msg=Progress: module 97 of 233 (12m remainin percent=41 max=100 session=S3-1788369403263-ce5b
+09-02 22:57:49.313   490   792 W RPCS3   : ProgressMessageDialog::ProgressBarSetMsg(0, Progress: module 98 of 233 (12m remaining))
+09-02 22:57:49.314   490   490 I S3PPU   : event=install_ppu_active progress_id=3000 msg=Progress: module 98 of 233 (12m remainin percent=42 max=100 session=S3-1788369403263-ce5b
+09-02 22:57:54.903   490   792 W RPCS3   : ProgressMessageDialog::ProgressBarSetMsg(0, Progress: module 99 of 233 (12m remaining))
+09-02 22:57:54.912   490   490 I S3PPU   : event=install_ppu_active progress_id=3000 msg=Progress: module 99 of 233 (12m remainin percent=42 max=100 session=S3-1788369403263-ce5b
+09-02 22:58:02.680   490   569 I scudo   : Can't populate more pages for size class 3120.
+09-02 22:58:02.801   490   569 I scudo   : Can't populate more pages for size class 4112.
+09-02 22:58:02.929   490   569 I scudo   : Can't populate more pages for size class 4624.
+09-02 22:58:03.032   490   569 I scudo   : Can't populate more pages for size class 7120.
+09-02 22:58:03.115   490   569 I scudo   : Can't populate more pages for size class 8720.
+09-02 22:58:03.190   490   569 I scudo   : Can't populate more pages for size class 11664.
+09-02 22:58:03.250   490   569 I scudo   : Can't populate more pages for size class 14224.
+09-02 22:58:03.301   490   569 I scudo   : Can't populate more pages for size class 16400.
+09-02 22:58:03.354   490   569 I scudo   : Can't populate more pages for size class 18448.
+09-02 22:58:03.398   490   569 I scudo   : Can't populate more pages for size class 23056.
+09-02 22:58:03.431   490   569 I scudo   : Can't populate more pages for size class 29456.
+09-02 22:58:03.465   490   569 I scudo   : Can't populate more pages for size class 33296.
+09-02 22:58:03.482   490   569 I scudo   : Can't populate more pages for size class 65552.
+09-02 22:58:03.763   490   569 I scudo   : Scudo ERROR: internal map failure (error desc=Out of memory)
+09-02 22:58:03.763   490   569 F libc    : Fatal signal 6 (SIGABRT), code -1 (SI_QUEUE) in tid 569 (Thread-6), pid 490 (ithblue.sambas3)
+09-02 22:58:03.862   490   509 E libc++abi: terminating due to uncaught exception of type St9bad_alloc: std::bad_alloc
+09-02 22:58:03.898   490   523 E libc++abi: terminating due to uncaught exception of type St9bad_alloc: std::bad_alloc
+09-02 22:58:04.702  2471  2471 F DEBUG   :       #01 pc 000000000005ce2c  /apex/com.android.runtime/lib64/bionic/libc.so (scudo::die()+8) (BuildId: 0601bdb9deff47820c143e47a687ef5f)
+09-02 22:58:04.702  2471  2471 F DEBUG   :       #02 pc 000000000005d79c  /apex/com.android.runtime/lib64/bionic/libc.so (scudo::reportRawError(char const*)+28) (BuildId: 0601bdb9deff47820c143e47a687ef5f)
+09-02 22:58:04.702  2471  2471 F DEBUG   :       #03 pc 000000000005de8c  /apex/com.android.runtime/lib64/bionic/libc.so (scudo::reportMapError(unsigned long)+172) (BuildId: 0601bdb9deff47820c143e47a687ef5f)
+09-02 22:58:04.702  2471  2471 F DEBUG   :       #04 pc 000000000005d3ec  /apex/com.android.runtime/lib64/bionic/libc.so (scudo::MemMapLinux::remapImpl(unsigned long, unsigned long, char const*, unsigned long)+208) (BuildId: 0601bdb9deff47820c143e47a687ef5f)
+09-02 22:58:04.702  2471  2471 F DEBUG   :       #05 pc 0000000000061bf8  /apex/com.android.runtime/lib64/bionic/libc.so (scudo::MapAllocator<scudo::SecondaryConfig<scudo::AndroidNormalConfig>>::allocate(scudo::Options const&, unsigned long, unsigned long, unsigned long*, scudo::FillContentsMode)+412) (BuildId: 0601bdb9deff47820c143e47a687ef5f)
+09-02 22:58:04.702  2471  2471 F DEBUG   :       #06 pc 000000000005ef84  /apex/com.android.runtime/lib64/bionic/libc.so (scudo::Allocator<scudo::AndroidNormalConfig, &scudo_malloc_postinit>::allocate(unsigned long, scudo::Chunk::Origin, unsigned long, bool)+896) (BuildId: 0601bdb9deff47820c143e47a687ef5f)
+09-02 22:58:04.702  2471  2471 F DEBUG   :       #07 pc 000000000005f374  /apex/com.android.runtime/lib64/bionic/libc.so (scudo_posix_memalign+64) (BuildId: 0601bdb9deff47820c143e47a687ef5f)

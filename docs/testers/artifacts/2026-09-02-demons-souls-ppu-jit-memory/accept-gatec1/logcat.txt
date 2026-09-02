@@ -1,0 +1,66 @@
+09-02 21:55:14.811 25970 25999 F libc    : Fatal signal 6 (SIGABRT), code -1 (SI_QUEUE) in tid 25999 (Thread-6), pid 25970 (ithblue.sambas3)
+09-02 21:55:15.715 27040 27040 F DEBUG   : signal 6 (SIGABRT), code -1 (SI_QUEUE), fault addr --------
+09-02 21:55:15.715 27040 27040 F DEBUG   :       #01 pc 00000000044956ac  /data/app/~~moIId_P1Xta3Zr4qVe5ZXA==/com.zenithblue.sambas3-3-u81uW3ksLh99doItQhNw==/lib/arm64/librpcsx-android.so (llvm::report_bad_alloc_error(char const*, bool)+128) (BuildId: c519f557ef8b98ed2ebfc64d928336e1e7514fd2)
+09-02 22:21:35.185  6218  6260 I ActivityManager: Background started FGS: Allowed [callingPackage: com.zenithblue.sambas3; callingUid: 10243; uidState: TOP ; uidBFSL: [BFSL]; intent: Intent { dat=content://com.android.externalstorage.documents/... flg=0x1 xflg=0x4 cmp=com.zenithblue.sambas3/.PrecompilerService (has extras) }; code:PROC_STATE_TOP; tempAllowListReason:<null>; allowWiu:12; targetSdkVersion:35; callerTargetSdkVersion:35; startForegroundCount:0; bindFromPackage:null: isBindService:false]
+09-02 22:21:35.218  6218  6260 I ActivityManager: Background started FGS: Allowed [callingPackage: com.zenithblue.sambas3; callingUid: 10243; uidState: TOP ; uidBFSL: [BFSL]; intent: Intent { dat=content://com.android.externalstorage.documents/... cmp=com.zenithblue.sambas3/.PrecompilerService }; code:PROC_STATE_TOP; tempAllowListReason:<null>; allowWiu:12; targetSdkVersion:35; callerTargetSdkVersion:35; startForegroundCount:0; bindFromPackage:null: isBindService:false]
+09-02 22:21:35.219  6218  6751 I ActivityManager: Background started FGS: Allowed [callingPackage: com.zenithblue.sambas3; callingUid: 10243; uidState: TOP ; uidBFSL: [BFSL]; intent: Intent { dat=content://com.android.externalstorage.documents/... cmp=com.zenithblue.sambas3/.PrecompilerService }; code:PROC_STATE_TOP; tempAllowListReason:<null>; allowWiu:12; targetSdkVersion:35; callerTargetSdkVersion:35; startForegroundCount:1; bindFromPackage:null: isBindService:false]
+09-02 22:23:57.336 28326 30034 W RPCS3   : ProgressMessageDialog::ProgressBarSetMsg(0, Progress: module 8 of 32 (2m remaining))
+09-02 22:23:57.340 28326 28326 I S3PPU   : event=install_ppu_active progress_id=3000 msg=Progress: module 8 of 32 (2m remaining) percent=25 max=100 session=S3-1788367015251-6524
+09-02 22:24:01.716 28326 30034 W RPCS3   : ProgressMessageDialog::ProgressBarSetMsg(0, Progress: module 9 of 32 (1m 53s remaining))
+09-02 22:24:01.725 28326 28326 I S3PPU   : event=install_ppu_active progress_id=3000 msg=Progress: module 9 of 32 (1m 53s remaini percent=28 max=100 session=S3-1788367015251-6524
+09-02 22:24:06.456 28326 30034 W RPCS3   : ProgressMessageDialog::ProgressBarSetMsg(0, Progress: module 10 of 32 (1m 48s remaining))
+09-02 22:24:06.463 28326 28326 I S3PPU   : event=install_ppu_active progress_id=3000 msg=Progress: module 10 of 32 (1m 48s remain percent=31 max=100 session=S3-1788367015251-6524
+09-02 22:24:11.116 28326 30034 W RPCS3   : ProgressMessageDialog::ProgressBarSetMsg(0, Progress: module 11 of 32 (1m 43s remaining))
+09-02 22:24:11.120 28326 28326 I S3PPU   : event=install_ppu_active progress_id=3000 msg=Progress: module 11 of 32 (1m 43s remain percent=34 max=100 session=S3-1788367015251-6524
+09-02 22:24:16.126 28326 30034 W RPCS3   : ProgressMessageDialog::ProgressBarSetMsg(0, Progress: module 12 of 32 (1m 38s remaining))
+09-02 22:24:16.127 28326 28326 I S3PPU   : event=install_ppu_active progress_id=3000 msg=Progress: module 12 of 32 (1m 38s remain percent=37 max=100 session=S3-1788367015251-6524
+09-02 22:24:21.726 28326 30034 W RPCS3   : ProgressMessageDialog::ProgressBarSetMsg(0, Progress: module 13 of 32 (1m 34s remaining))
+09-02 22:24:21.729 28326 28326 I S3PPU   : event=install_ppu_active progress_id=3000 msg=Progress: module 13 of 32 (1m 34s remain percent=40 max=100 session=S3-1788367015251-6524
+09-02 22:24:27.097 28326 30034 W RPCS3   : ProgressMessageDialog::ProgressBarSetMsg(0, Progress: module 14 of 32 (1m 29s remaining))
+09-02 22:24:27.098 28326 28326 I S3PPU   : event=install_ppu_active progress_id=3000 msg=Progress: module 14 of 32 (1m 29s remain percent=43 max=100 session=S3-1788367015251-6524
+09-02 22:24:32.686 28326 30034 W RPCS3   : ProgressMessageDialog::ProgressBarSetMsg(0, Progress: module 15 of 32 (1m 25s remaining))
+09-02 22:24:32.687 28326 28326 I S3PPU   : event=install_ppu_active progress_id=3000 msg=Progress: module 15 of 32 (1m 25s remain percent=46 max=100 session=S3-1788367015251-6524
+09-02 22:24:38.436 28326 30034 W RPCS3   : ProgressMessageDialog::ProgressBarSetMsg(0, Progress: module 16 of 32 (1m 21s remaining))
+09-02 22:24:38.437 28326 28326 I S3PPU   : event=install_ppu_active progress_id=3000 msg=Progress: module 16 of 32 (1m 21s remain percent=50 max=100 session=S3-1788367015251-6524
+09-02 22:24:43.846 28326 30034 W RPCS3   : ProgressMessageDialog::ProgressBarSetMsg(0, Progress: module 17 of 32 (1m 16s remaining))
+09-02 22:24:43.847 28326 28326 I S3PPU   : event=install_ppu_active progress_id=3000 msg=Progress: module 17 of 32 (1m 16s remain percent=53 max=100 session=S3-1788367015251-6524
+09-02 22:24:49.276 28326 30034 W RPCS3   : ProgressMessageDialog::ProgressBarSetMsg(0, Progress: module 18 of 32 (1m 11s remaining))
+09-02 22:24:49.277 28326 28326 I S3PPU   : event=install_ppu_active progress_id=3000 msg=Progress: module 18 of 32 (1m 11s remain percent=56 max=100 session=S3-1788367015251-6524
+09-02 22:24:54.597 28326 30034 W RPCS3   : ProgressMessageDialog::ProgressBarSetMsg(0, Progress: module 19 of 32 (1m  6s remaining))
+09-02 22:24:54.598 28326 28326 I S3PPU   : event=install_ppu_active progress_id=3000 msg=Progress: module 19 of 32 (1m  6s remain percent=59 max=100 session=S3-1788367015251-6524
+09-02 22:24:59.797 28326 30034 W RPCS3   : ProgressMessageDialog::ProgressBarSetMsg(0, Progress: module 20 of 32 (1m  1s remaining))
+09-02 22:24:59.814 28326 28326 I S3PPU   : event=install_ppu_active progress_id=3000 msg=Progress: module 20 of 32 (1m  1s remain percent=62 max=100 session=S3-1788367015251-6524
+09-02 22:25:04.726 28326 30034 W RPCS3   : ProgressMessageDialog::ProgressBarSetMsg(0, Progress: module 21 of 32 (56s remaining))
+09-02 22:25:04.727 28326 28326 I S3PPU   : event=install_ppu_active progress_id=3000 msg=Progress: module 21 of 32 (56s remaining percent=65 max=100 session=S3-1788367015251-6524
+09-02 22:25:09.857 28326 30034 W RPCS3   : ProgressMessageDialog::ProgressBarSetMsg(0, Progress: module 22 of 32 (51s remaining))
+09-02 22:25:09.868 28326 28326 I S3PPU   : event=install_ppu_active progress_id=3000 msg=Progress: module 22 of 32 (51s remaining percent=68 max=100 session=S3-1788367015251-6524
+09-02 22:25:15.398 28326 30034 W RPCS3   : ProgressMessageDialog::ProgressBarSetMsg(0, Progress: module 23 of 32 (46s remaining))
+09-02 22:25:15.409 28326 28326 I S3PPU   : event=install_ppu_active progress_id=3000 msg=Progress: module 23 of 32 (46s remaining percent=71 max=100 session=S3-1788367015251-6524
+09-02 22:25:20.749 28326 30034 W RPCS3   : ProgressMessageDialog::ProgressBarSetMsg(0, Progress: module 24 of 32 (41s remaining))
+09-02 22:25:20.759 28326 28326 I S3PPU   : event=install_ppu_active progress_id=3000 msg=Progress: module 24 of 32 (41s remaining percent=75 max=100 session=S3-1788367015251-6524
+09-02 22:25:25.926 28326 30034 W RPCS3   : ProgressMessageDialog::ProgressBarSetMsg(0, Progress: module 25 of 32 (36s remaining))
+09-02 22:25:25.927 28326 28326 I S3PPU   : event=install_ppu_active progress_id=3000 msg=Progress: module 25 of 32 (36s remaining percent=78 max=100 session=S3-1788367015251-6524
+09-02 22:25:31.466 28326 30034 W RPCS3   : ProgressMessageDialog::ProgressBarSetMsg(0, Progress: module 26 of 32 (31s remaining))
+09-02 22:25:31.474 28326 28326 I S3PPU   : event=install_ppu_active progress_id=3000 msg=Progress: module 26 of 32 (31s remaining percent=81 max=100 session=S3-1788367015251-6524
+09-02 22:25:36.816 28326 30034 W RPCS3   : ProgressMessageDialog::ProgressBarSetMsg(0, Progress: module 27 of 32 (25s remaining))
+09-02 22:25:36.824 28326 28326 I S3PPU   : event=install_ppu_active progress_id=3000 msg=Progress: module 27 of 32 (25s remaining percent=84 max=100 session=S3-1788367015251-6524
+09-02 22:25:42.726 28326 30034 W RPCS3   : ProgressMessageDialog::ProgressBarSetMsg(0, Progress: module 28 of 32 (20s remaining))
+09-02 22:25:42.730 28326 28326 I S3PPU   : event=install_ppu_active progress_id=3000 msg=Progress: module 28 of 32 (20s remaining percent=87 max=100 session=S3-1788367015251-6524
+09-02 22:25:48.296 28326 30034 W RPCS3   : ProgressMessageDialog::ProgressBarSetMsg(0, Progress: module 29 of 32 (15s remaining))
+09-02 22:25:48.297 28326 28326 I S3PPU   : event=install_ppu_active progress_id=3000 msg=Progress: module 29 of 32 (15s remaining percent=90 max=100 session=S3-1788367015251-6524
+09-02 22:25:53.607 28326 30034 W RPCS3   : ProgressMessageDialog::ProgressBarSetMsg(0, Progress: module 30 of 32 (10s remaining))
+09-02 22:25:53.617 28326 28326 I S3PPU   : event=install_ppu_active progress_id=3000 msg=Progress: module 30 of 32 (10s remaining percent=93 max=100 session=S3-1788367015251-6524
+09-02 22:25:59.126 28326 30034 W RPCS3   : ProgressMessageDialog::ProgressBarSetMsg(0, Progress: module 31 of 32 (5s remaining))
+09-02 22:25:59.130 28326 28326 I S3PPU   : event=install_ppu_active progress_id=3000 msg=Progress: module 31 of 32 (5s remaining) percent=96 max=100 session=S3-1788367015251-6524
+09-02 22:26:04.493 28326 28390 D RPCS3   : S3PPU install_step=0 more_work=1 title=BLUS30443
+09-02 22:26:04.496 28326 30034 W RPCS3   : ProgressMessageDialog::ProgressBarSetMsg(0, Progress: module 32 of 32 (done))
+09-02 22:26:04.497 28326 28326 I S3PPU   : event=install_ppu_active progress_id=3000 msg=Progress: module 32 of 32 (done) percent=100 max=100 session=S3-1788367015251-6524
+09-02 22:26:04.529 28326 28326 I S3PPU   : event=install_ppu_active progress_id=3000 msg=Progress: analyzing... percent=0 max=100 session=S3-1788367015251-6524
+09-02 22:26:06.072 28326 28326 I S3PPU   : event=install_ppu_active progress_id=3000 msg=Progress: module 0 of 32 percent=0 max=100 session=S3-1788367015251-6524
+09-02 22:26:06.073 28326 30034 W RPCS3   : ProgressMessageDialog::ProgressBarSetMsg(0, Progress: module 0 of 32)
+09-02 22:26:11.518 28326 30034 W RPCS3   : ProgressMessageDialog::ProgressBarSetMsg(0, Progress: module 1 of 32 (3m remaining))
+09-02 22:26:11.519 28326 28326 I S3PPU   : event=install_ppu_active progress_id=3000 msg=Progress: module 1 of 32 (3m remaining) percent=3 max=100 session=S3-1788367015251-6524
+09-02 22:26:17.359 28326 30034 W RPCS3   : ProgressMessageDialog::ProgressBarSetMsg(0, Progress: module 2 of 32 (3m remaining))
+09-02 22:26:17.367 28326 28326 I S3PPU   : event=install_ppu_active progress_id=3000 msg=Progress: module 2 of 32 (3m remaining) percent=6 max=100 session=S3-1788367015251-6524
+09-02 22:26:22.890 28326 30034 W RPCS3   : ProgressMessageDialog::ProgressBarSetMsg(0, Progress: module 3 of 32 (2m remaining))
+09-02 22:26:22.891 28326 28326 I S3PPU   : event=install_ppu_active progress_id=3000 msg=Progress: module 3 of 32 (2m remaining) percent=9 max=100 session=S3-1788367015251-6524

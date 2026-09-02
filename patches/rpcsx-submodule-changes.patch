@@ -1,1501 +1,314 @@
 diff --git a/android/src/rpcsx-android.cpp b/android/src/rpcsx-android.cpp
-index 8308a4798..6708cc23b 100644
+index 8308a4798..4b92af31a 100644
 --- a/android/src/rpcsx-android.cpp
 +++ b/android/src/rpcsx-android.cpp
-@@ -7,6 +7,8 @@
- #include "Emu/Audio/Null/NullAudioBackend.h"
- #include "Emu/Cell/PPUAnalyser.h"
- #include "Emu/Cell/SPURecompiler.h"
-+#include "Emu/Cell/PPUThread.h"
-+#include "Emu/Cell/SPUThread.h"
- #include "Emu/IdManager.h"
- #include "Emu/Io/KeyboardHandler.h"
- #include "Emu/Io/Null/NullKeyboardHandler.h"
-@@ -51,6 +53,7 @@
- #include "util/File.h"
- #include "util/JIT.h"
- #include "util/StrFmt.h"
-+#include "util/yaml.hpp"
+@@ -1648,7 +1648,8 @@ extern void ppu_precompile(std::vector<std::string> &dir_queue,
+                            std::vector<ppu_module<lv2_obj> *> *loaded_prx);
+ extern bool ppu_initialize(const ppu_module<lv2_obj> &, bool check_only = false,
+                            u64 file_size = 0);
+-extern void ppu_finalize(const ppu_module<lv2_obj> &);
++extern void ppu_finalize(const ppu_module<lv2_obj> &,
++                         bool force_mem_release = false);
+ extern bool ppu_load_rel_exec(const ppu_rel_object &);
  
- #include <cctype>
- #include <ctime>
-@@ -80,6 +83,7 @@
- #include "Emu/NP/rpcn_config.h"
- #include "Emu/NP/rpcn_client.h"
- #include "util/video_provider.h"
-+#include "util/cpu_stats.hpp"
+ class CompilationQueue {
+@@ -1765,8 +1766,15 @@ private:
+     // captures this context when its thread starts; setting it later around
+     // ppu_precompile can misclassify install PPU work as runtime work and
+     // create the second (2000) notification.
++    // Gate C: Demon's Souls / large titles OOM around ~99 LLVM objs even with
++    // 1 worker. Bound each ppu_initialize to 32 new objs, finalize+retry until
++    // cache-complete. Kotlin still sees one INSTALL job / FGS 3000.
++    // A1/Gate-C evidence: even llvm=1 OOMs near ~99 objs; 32-obj steps still
++    // SIGABRT'd once on device — keep steps smaller so finalize can reclaim.
++    constexpr u32 kInstallStepMaxNewModules = 16;
+     SystemProgressContext installProgressContext{
+-        CompileOrigin::INSTALL, allocate_compile_job_id(), pendingInstallTitleId};
++        CompileOrigin::INSTALL, allocate_compile_job_id(), pendingInstallTitleId,
++        kInstallStepMaxNewModules};
+     set_system_progress_context(installProgressContext);
+     struct InstallProgressContextGuard {
+       ~InstallProgressContextGuard() { clear_system_progress_context(); }
+@@ -1838,8 +1846,22 @@ private:
+                         _main.applied_patches, std::vector<u32>{})) {
+         Emu.ConfigurePPUCache();
+         Emu.SetTestMode();
+-        rpcsx_android.error("Going to precompile main PPU module");
+-        ppu_initialize(_main);
++        rpcsx_android.error("Going to precompile main PPU module (multistep)");
++        // Cache-driven steps: each call compiles ≤install_step_max_new new objs,
++        // persists them, then ppu_finalize releases JIT module state before the
++        // next step. Never marks COMPLETED until no more_work remains.
++        for (u32 step = 0;; ++step) {
++          set_ppu_install_step_more_work(false);
++          ppu_initialize(_main);
++          const bool more = get_ppu_install_step_more_work();
++          ppu_finalize(_main, true);
++          rpcsx_android.notice(
++              "S3PPU install_step=%u more_work=%d title=%s", step,
++              more ? 1 : 0, pendingInstallTitleId);
++          if (!more) {
++            break;
++          }
++        }
+         mod_list.emplace_back(&_main);
+       }
+     }
+diff --git a/rpcs3/Emu/Cell/PPUThread.cpp b/rpcs3/Emu/Cell/PPUThread.cpp
+index d2768d8b0..89ec8a0f9 100644
+--- a/rpcs3/Emu/Cell/PPUThread.cpp
++++ b/rpcs3/Emu/Cell/PPUThread.cpp
+@@ -16,6 +16,7 @@
+ #include "Emu/VFS.h"
+ #include "Emu/system_progress.hpp"
+ #include "Emu/system_utils.hpp"
++#include "Emu/compile_progress.hpp"
+ #include "Emu/System.h"
+ #include "PPUThread.h"
+ #include "PPUInterpreter.h"
+@@ -132,7 +133,19 @@ namespace
+ 				? std::max<u32>(2, std::min<u32>(6, hardware_threads - 2))
+ 				: hardware_threads;
+ 		const u32 policy_limit = policy == ppu_compile_policy::foreground ? foreground_candidate : max_threads;
+-		return std::min<u32>(::narrow<u32>(workload_size), std::min(max_threads, policy_limit));
++		u32 effective = std::min<u32>(::narrow<u32>(workload_size), std::min(max_threads, policy_limit));
++
++#if defined(__ANDROID__)
++		// INSTALL-origin only: never raise a user-requested lower limit; cap concurrent
++		// aux JIT arenas (3×256MiB each) that cause Scudo map / bad_alloc on large titles.
++		// Runtime / prelaunch keep the user's Max LLVM Compile Threads unchanged.
++		if (get_system_progress_context().origin == CompileOrigin::INSTALL)
++		{
++			constexpr u32 kAndroidInstallSafeCap = 2;
++			effective = std::min(effective, kAndroidInstallSafeCap);
++		}
++#endif
++		return effective;
+ 	}
  
- #include <algorithm>
- #include <android/log.h>
-@@ -93,6 +97,7 @@
- #include <functional>
- #include <iterator>
- #include <cerrno>
-+#include <map>
- #include <jni.h>
- #include <mutex>
- #include <optional>
-@@ -110,6 +115,11 @@
- extern bool boot_last_savestate(bool testing);
- namespace cfg { class _base; }
- static cfg::_base* find_cfg_node(cfg::_base *root, std::string_view path);
-+static std::string global_settings_path();
-+static bool read_settings_file(const std::string& path, std::string& contents);
-+static bool load_settings_root(cfg_root& root, const std::string& path);
-+static bool valid_settings_title_id(std::string_view title_id);
-+static void log_effective_boot_settings(std::string_view phase, int result);
+ 	static jit_codegen_level ppu_jit_codegen_level()
+@@ -4841,7 +4854,17 @@ extern void ppu_precompile(std::vector<std::string>& dir_queue, std::vector<ppu_
+ 					{
+ 						obj.clear(), src.close(); // Clear decrypted file and elf object memory
+ 						file_allocation = {};     // release used file memory
+-						ppu_initialize(*prx, false, file_size, memory_limit);
++						for (;;)
++						{
++							set_ppu_install_step_more_work(false);
++							ppu_initialize(*prx, false, file_size, memory_limit);
++							const bool more = get_ppu_install_step_more_work();
++							if (!more)
++							{
++								break;
++							}
++							ppu_finalize(*prx, true);
++						}
+ 						ppu_finalize(*prx, true);
+ 						continue;
+ 					}
+@@ -4887,7 +4910,17 @@ extern void ppu_precompile(std::vector<std::string>& dir_queue, std::vector<ppu_
+ 							break;
+ 						}
  
- struct AtExit {
-   std::function<void()> cb;
-@@ -155,6 +165,7 @@ static constexpr int FRONTEND_EVENT_EMULATOR_ACTION_ERROR = 4;
- static constexpr int FRONTEND_EVENT_SAVESTATE_COMMITTED = 5;
- static constexpr int FRONTEND_EVENT_SAVESTATE_FAILED = 6;
- static constexpr int FRONTEND_EVENT_RENDERER_ERROR = 7;
-+static constexpr int FRONTEND_EVENT_TROPHY_UNLOCKED = 8;
+-						ppu_initialize(*ovlm, false, file_size, memory_limit);
++						for (;;)
++						{
++							set_ppu_install_step_more_work(false);
++							ppu_initialize(*ovlm, false, file_size, memory_limit);
++							const bool more = get_ppu_install_step_more_work();
++							if (!more)
++							{
++								break;
++							}
++							ppu_finalize(*ovlm, true);
++						}
+ 						ppu_finalize(*ovlm, true);
+ 						break;
+ 					}
+@@ -5021,7 +5054,17 @@ extern void ppu_precompile(std::vector<std::string>& dir_queue, std::vector<ppu_
  
- static atomic_t<bool> g_frontend_menu_active{false};
- static atomic_t<bool> g_frontend_menu_paused_emu{false};
-@@ -164,6 +175,77 @@ static std::mutex g_ingame_settings_mutex;
- static std::optional<std::string> g_ingame_settings_backup;
- static bool g_ingame_settings_dirty = false;
+ 						_main.name = ' '; // Make ppu_finalize work
+ 						Emu.ConfigurePPUCache();
+-						ppu_initialize(_main, false, file_size, memory_limit);
++						for (;;)
++						{
++							set_ppu_install_step_more_work(false);
++							ppu_initialize(_main, false, file_size, memory_limit);
++							const bool more = get_ppu_install_step_more_work();
++							if (!more)
++							{
++								break;
++							}
++							ppu_finalize(_main, true);
++						}
+ 						spu_cache::initialize(false);
+ 						ppu_finalize(_main, true);
+ 						_main = {};
+@@ -5336,6 +5379,14 @@ bool ppu_initialize(const ppu_module<lv2_obj>& info, bool check_only, u64 file_s
  
-+// Android consumes a prepared snapshot. The JNI getter only serializes the
-+// latest cached values; metric acquisition is rate-limited and entirely idle
-+// until the Kotlin monitor subscribes.
-+struct android_perf_metrics_state
+ 	bool has_mfvscr = false;
+ 
++#if defined(__ANDROID__)
++	// INSTALL Gate C progress: full module count (cached + uncached) so UI shows
++	// real "module X of TOTAL", not the per-step batch size.
++	u32 install_modules_total = 0;
++	u32 install_uncached_remaining = 0;
++	u32 install_cached_count = 0;
++#endif
++
+ 	const bool is_being_used_in_emulation = vm::base(info.segs[0].addr) == info.segs[0].ptr;
+ 	const ppu_compile_policy compile_policy = is_being_used_in_emulation
+ 		? ppu_compile_policy::background
+@@ -5895,6 +5946,16 @@ bool ppu_initialize(const ppu_module<lv2_obj>& info, bool check_only, u64 file_s
+ 
+ 		module_counter++;
+ 
++#if defined(__ANDROID__)
++		{
++			const auto ctx = get_system_progress_context();
++			if (ctx.origin == CompileOrigin::INSTALL && ctx.install_step_max_new > 0)
++			{
++				install_modules_total++;
++			}
++		}
++#endif
++
+ 		if (!check_only)
+ 		{
+ 			link_workload.emplace_back(obj_name, false);
+@@ -5903,6 +5964,15 @@ bool ppu_initialize(const ppu_module<lv2_obj>& info, bool check_only, u64 file_s
+ 		// Check object file
+ 		if (jit_compiler::check(cache_path + obj_name))
+ 		{
++#if defined(__ANDROID__)
++			{
++				const auto ctx = get_system_progress_context();
++				if (ctx.origin == CompileOrigin::INSTALL && ctx.install_step_max_new > 0)
++				{
++					install_cached_count++;
++				}
++			}
++#endif
+ 			if (!is_being_used_in_emulation && !check_only)
+ 			{
+ 				ppu_log.success("LLVM: Module exists: %s", obj_name);
+@@ -5917,6 +5987,24 @@ bool ppu_initialize(const ppu_module<lv2_obj>& info, bool check_only, u64 file_s
+ 			return true;
+ 		}
+ 
++#if defined(__ANDROID__)
++		// INSTALL Gate C: count every uncached module for real progress totals, but
++		// only enqueue up to install_step_max_new into this step's workload.
++		{
++			const auto ctx = get_system_progress_context();
++			if (ctx.origin == CompileOrigin::INSTALL && ctx.install_step_max_new > 0)
++			{
++				install_uncached_remaining++;
++				if (workload.size() >= ctx.install_step_max_new)
++				{
++					set_ppu_install_step_more_work(true);
++					link_workload.pop_back();
++					continue; // keep counting remaining uncached for overall total
++				}
++			}
++		}
++#endif
++
+ 		// Remember, used in ppu_initialize(void)
+ 		compiled_new = true;
+ 
+@@ -5945,7 +6033,41 @@ bool ppu_initialize(const ppu_module<lv2_obj>& info, bool check_only, u64 file_s
+ 		atomic_t<u64> work_done = 0;
+ 
+ 		// Update progress dialog
++#if defined(__ANDROID__)
++		{
++			const auto ctx = get_system_progress_context();
++			if (ctx.origin == CompileOrigin::INSTALL && ctx.install_step_max_new > 0)
++			{
++				// Full title total (cached + uncached). Credit cache hits once so the
++				// bar reflects real progress, not the 32-module step window.
++				const u32 overall = install_modules_total
++					? install_modules_total
++					: (+g_progr_pdone + install_uncached_remaining);
++				const u32 cur_total = +g_progr_ptotal;
++				if (overall > cur_total)
++				{
++					g_progr_ptotal += (overall - cur_total);
++				}
++				// On the first step of a session, advance pdone for already-cached objs.
++				if (+g_progr_pdone == 0 && install_cached_count > 0)
++				{
++					g_progr_pdone += install_cached_count;
++				}
++				ppu_log.notice(
++					"S3PPU install_progress pdone=%u ptotal=%u step_workload=%zu "
++					"modules_total=%u cached=%u uncached_remaining=%u more=%d",
++					+g_progr_pdone, +g_progr_ptotal, workload.size(),
++					install_modules_total, install_cached_count,
++					install_uncached_remaining, get_ppu_install_step_more_work() ? 1 : 0);
++			}
++			else
++			{
++				g_progr_ptotal += ::size32(workload);
++			}
++		}
++#else
+ 		g_progr_ptotal += ::size32(workload);
++#endif
+ 
+ 		*progress_dialog = get_localized_string(localized_string_id::PROGRESS_DIALOG_COMPILING_PPU_MODULES);
+ 
+diff --git a/rpcs3/Emu/compile_progress.cpp b/rpcs3/Emu/compile_progress.cpp
+index dc7a56339..416d3e4ec 100644
+--- a/rpcs3/Emu/compile_progress.cpp
++++ b/rpcs3/Emu/compile_progress.cpp
+@@ -50,6 +50,17 @@ u64 allocate_compile_job_id()
+ static std::mutex g_ctx_mutex;
+ static SystemProgressContext g_current_ctx{CompileOrigin::RUNTIME, 0, ""};
+ static bool g_has_ctx = false;
++static std::atomic<bool> g_ppu_install_step_more_work{false};
++
++void set_ppu_install_step_more_work(bool more)
 +{
-+    std::mutex mutex;
-+    bool enabled = false;
-+    u32 interval_ms = 300;
-+    u64 last_update_us = 0;
-+    u64 last_crosscheck_log_us = 0;
-+    u64 last_timestamp_us = 0;
-+    u64 last_presented_frame_count = 0;
-+    u64 last_present_timestamp_us = 0;
-+    bool sample_ready = false;
-+    bool frame_sample_ready = false;
-+    bool was_paused = false;
-+    u64 ppu_cycles = 0;
-+    u64 spu_cycles = 0;
-+    u64 rsx_cycles = 0;
-+    u64 total_threads = 0;
-+    f32 fps = 0.f;
-+    f32 frametime_ms = 0.f;
-+    f32 host_cpu = 0.f;
-+    f32 ppu_cpu = 0.f;
-+    f32 spu_cpu = 0.f;
-+    f32 rsx_cpu = 0.f;
-+    u32 ppu_threads = 0;
-+    u32 spu_threads = 0;
-+    u32 rsx_load = 0;
-+    struct timed_sample
-+    {
-+        u64 timestamp_us = 0;
-+        f32 value = 0.f;
-+    };
-+
-+    u64 presented_frame_count = 0;
-+    u64 vblank_count = 0;
-+    u64 vblank_delta = 0;
-+    std::deque<timed_sample> fps_samples;
-+    std::deque<timed_sample> frametime_samples;
-+    std::deque<timed_sample> pending_frametime_samples;
-+    utils::cpu_stats cpu_stats{};
-+};
-+
-+static android_perf_metrics_state g_android_perf;
-+// The RSX flip path is hot. Keep the disabled path to one relaxed atomic
-+// load, and only take the telemetry mutex while the monitor is subscribed.
-+static std::atomic<bool> g_android_perf_frame_sampling_enabled{false};
-+
-+extern "C" void _rpcsx_android_perf_frame_presented(u64 timestamp_us)
-+{
-+    if (!g_android_perf_frame_sampling_enabled.load(std::memory_order_relaxed))
-+        return;
-+
-+    std::lock_guard lock(g_android_perf.mutex);
-+    if (!g_android_perf.enabled)
-+        return;
-+
-+    if (g_android_perf.last_present_timestamp_us != 0 && timestamp_us > g_android_perf.last_present_timestamp_us)
-+    {
-+        const f32 frame_time_ms = static_cast<f32>(timestamp_us - g_android_perf.last_present_timestamp_us) / 1000.f;
-+        g_android_perf.frametime_samples.push_back({timestamp_us, frame_time_ms});
-+        g_android_perf.pending_frametime_samples.push_back({timestamp_us, frame_time_ms});
-+        while (g_android_perf.frametime_samples.size() > 240)
-+            g_android_perf.frametime_samples.pop_front();
-+    }
-+
-+    g_android_perf.last_present_timestamp_us = timestamp_us;
-+    ++g_android_perf.presented_frame_count;
++    g_ppu_install_step_more_work.store(more, std::memory_order_release);
 +}
 +
- static void emit_prelaunch_ppu_event(
-     CompilePhase phase,
-     u64 job_id,
-@@ -1293,6 +1375,10 @@ struct destructive_guard {
-   ~destructive_guard() { end_destructive(); }
++bool get_ppu_install_step_more_work()
++{
++    return g_ppu_install_step_more_work.load(std::memory_order_acquire);
++}
+ 
+ void set_system_progress_context(const SystemProgressContext& ctx)
+ {
+@@ -76,6 +87,7 @@ void clear_system_progress_context()
+     std::lock_guard<std::mutex> lock(g_ctx_mutex);
+     g_current_ctx = SystemProgressContext{CompileOrigin::RUNTIME, 0, ""};
+     g_has_ctx = false;
++    g_ppu_install_step_more_work.store(false, std::memory_order_release);
+ }
+ 
+ // --- Snapshot builder ---
+diff --git a/rpcs3/Emu/compile_progress.hpp b/rpcs3/Emu/compile_progress.hpp
+index 9210b5d10..7b4e6a9e7 100644
+--- a/rpcs3/Emu/compile_progress.hpp
++++ b/rpcs3/Emu/compile_progress.hpp
+@@ -66,12 +66,18 @@ struct SystemProgressContext
+     CompileOrigin origin = CompileOrigin::RUNTIME;
+     u64 jobId = 0;
+     std::string titleId; // associated title for install jobs; empty => Emu.GetTitleID() fallback
++    /** INSTALL only: max newly-compiled LLVM objs per ppu_initialize call (0 = unlimited). */
++    u32 install_step_max_new = 0;
  };
  
-+static std::string android_get_trophies_for_set(std::string tropName,
-+                                                const std::string& titleId,
-+                                                const char* querySource = "title");
-+
- static void emit_frontend_event(int type, const std::string* payload)
- {
-     // Dispatch via main thread processor to ensure JNI env is valid.
-@@ -1319,6 +1405,33 @@ extern "C" void _rpcsx_android_renderer_error(int error_code, const char* messag
-   emit_frontend_event(FRONTEND_EVENT_RENDERER_ERROR, &detail);
- }
+ void set_system_progress_context(const SystemProgressContext& ctx);
+ SystemProgressContext get_system_progress_context();
+ void clear_system_progress_context();
  
-+extern "C" void _rpcsx_android_trophy_unlocked(int trophy_id, const char* trophy_set)
-+{
-+    const std::string set = trophy_set ? trophy_set : "";
-+    nlohmann::json payload{{"id", trophy_id}, {"trophySet", set},
-+                           {"titleId", Emu.GetTitleID()}, {"rpcS3UserId", Emu.GetUsr()}};
-+    // Include the resolved item metadata in the one-shot event when the
-+    // trophy files are readable. Kotlin still refreshes the complete set;
-+    // this keeps the event useful to notification consumers without polling.
-+    try {
-+        const auto snapshot = nlohmann::json::parse(android_get_trophies_for_set(set, Emu.GetTitleID(), "live"));
-+        for (const auto& entry : snapshot.value("trophies", nlohmann::json::array())) {
-+            if (entry.value("id", -1) == trophy_id) {
-+                payload["name"] = entry.value("name", "");
-+                payload["grade"] = entry.value("grade", "");
-+                payload["iconPath"] = entry.value("iconPath", "");
-+                break;
-+            }
-+        }
-+    } catch (...) {}
-+    rpcsx_android.notice("S3TROPHY unlock title=%s set=%s id=%d name='%s' grade=%s",
-+                        Emu.GetTitleID(), set, trophy_id,
-+                        payload.value("name", "").c_str(),
-+                        payload.value("grade", "").c_str());
-+    const std::string serialized = payload.dump();
-+    emit_frontend_event(FRONTEND_EVENT_TROPHY_UNLOCKED, &serialized);
-+}
-+
- 
- static void invokeAsync(std::function<void(JNIEnv *)> cb) {
-   g_mainThreadProcessor.push(std::move(cb));
-@@ -2307,7 +2420,14 @@ extern "C" int _rpcsx_boot(std::string_view path_) {
-     path.pop_back();
-   }
- 
--  return static_cast<int>(Emu.BootGame(path, "", false, cfg_mode::global));
-+  __android_log_print(ANDROID_LOG_INFO, "S3CFG", "boot_enter path=%s", path.c_str());
-+
-+  // Let RPCS3 load the canonical global config followed by the sparse
-+  // title-specific custom config for this game.
-+  const auto result = Emu.BootGame(path, "", false, cfg_mode::custom);
-+  log_effective_boot_settings("fresh", static_cast<int>(result));
-+  __android_log_print(ANDROID_LOG_INFO, "S3CFG", "boot_return result=%d", static_cast<int>(result));
-+  return static_cast<int>(result);
- }
- 
- // Recovery boot for a savestate created by Android.  A savestate stores the
-@@ -2328,9 +2448,40 @@ extern "C" int _rpcsx_bootSavestate(std::string_view savestate_path_,
-   Emu.SetContinuousMode(true);
-   Emu.SetForceBoot(true);
-   const std::string savestate_path(savestate_path_);
--  const auto result = Emu.BootGame(savestate_path, "", true, cfg_mode::global);
-+  // Savestate recovery follows the same global + title custom-config path as
-+  // a normal boot. The saved title id is resolved by Load().
-+  const auto result = Emu.BootGame(savestate_path, "", true, cfg_mode::custom);
-+  log_effective_boot_settings("savestate", static_cast<int>(result));
-   rpcsx_android.notice("S3SAVE recovery-boot path='%s' result=%d",
-                        savestate_path.c_str(), static_cast<int>(result));
-+
-+  // A restored PPU normally releases the boot handoff after all restored
-+  // threads enter the scheduler.  On Android, some restores can leave one
-+  // thread in the savestate bootstrap path indefinitely: BootGame() has
-+  // returned successfully, but the emulator remains in Starting and no
-+  // thread emits the normal "Final Thread" handoff.  Keep the normal path
-+  // intact, but give it a bounded recovery path through the serialized core
-+  // lifecycle worker.  The emulation identifier prevents a late watchdog
-+  // from touching a subsequent boot after this one was stopped.
-+  if (result == game_boot_result::no_errors && Emu.IsStarting()) {
-+    const auto emu_id = Emu.GetEmulationIdentifier();
-+    std::thread([emu_id, savestate_path]() {
-+      std::this_thread::sleep_for(std::chrono::seconds(30));
-+      g_coreDispatch.push([emu_id, savestate_path]() {
-+        if (Emu.GetEmulationIdentifier() != emu_id || !Emu.IsStarting()) {
-+          return;
-+        }
-+
-+        rpcsx_android.warning(
-+            "S3SAVE recovery-finalize watchdog path='%s' emu_id=%llu",
-+            savestate_path.c_str(), static_cast<unsigned long long>(emu_id));
-+        Emu.FinalizeRunRequest();
-+        rpcsx_android.notice("S3SAVE recovery-finalize state=%d",
-+                             static_cast<int>(Emu.GetStatus(false)));
-+      });
-+    }).detach();
-+  }
-+
-   return static_cast<int>(result);
- }
- 
-@@ -3461,14 +3612,37 @@ extern "C" int _rpcsx_prepareRuntimePpu(const char* path, u64 sessionId)
-         title_id.c_str(),
-         path);
- 
--    const auto result =
--        Emu.PreparePpuOnly(
-+    Emulator::ppu_preflight_result result;
-+    {
-+        // PreparePpuOnly does not run the normal Load() config phase. Give its
-+        // isolated compiler session the same global + sparse title values, then
-+        // restore the stopped live tree so this preflight cannot become global.
-+        const std::string previous_config = g_cfg.to_string();
-+        cfg_root effective;
-+        if (load_settings_root(effective, global_settings_path())) {
-+            std::string title_config;
-+            if (valid_settings_title_id(title_id) &&
-+                read_settings_file(
-+                    rpcs3::utils::get_custom_config_path(title_id), title_config)) {
-+                effective.from_string(title_config, false);
-+            }
-+            g_cfg.from_string(effective.to_string(), false);
-+            rpcsx_android.notice("S3CFG boot scope=game title=%s phase=PPU_PREPARE",
-+                                 title_id.c_str());
-+        }
-+        struct RestoreConfig {
-+            const std::string& serialized;
-+            ~RestoreConfig() { g_cfg.from_string(serialized, false); }
-+        } restore{previous_config};
-+
-+        result = Emu.PreparePpuOnly(
-             path,
-             title_id,
-             [sessionId]()
-             {
-                 return g_prelaunch_canceled && g_prelaunch_session == sessionId;
-             });
-+    }
- 
-     const bool stopped = Emu.IsStopped(true);
- 
-@@ -3562,8 +3736,24 @@ extern "C" std::string _rpcsx_systemInfo() {
-   return result;
- }
- 
-+static std::vector<std::string> split_settings_path(std::string_view path) {
-+  std::vector<std::string> result;
-+  while (true) {
-+    const auto separator = path.find("@@");
-+    result.emplace_back(path.substr(0, separator));
-+    if (separator == std::string_view::npos) break;
-+    path.remove_prefix(separator + 2);
-+  }
-+  return result;
-+}
-+
-+static std::string normalize_settings_path(std::string_view path) {
-+  if (path.starts_with("@@")) path.remove_prefix(2);
-+  return std::string(path);
-+}
-+
- static cfg::_base *find_cfg_node(cfg::_base *root, std::string_view path) {
--  auto pathList = fmt::split(path, {"@@"});
-+  auto pathList = split_settings_path(path);
-   std::ranges::reverse(pathList);
- 
-   while (!pathList.empty()) {
-@@ -3597,50 +3787,416 @@ static cfg::_base *find_cfg_node(cfg::_base *root, std::string_view path) {
-   return root;
- }
- 
--extern "C" void _rpcsx_loginUser(std::string_view userId) {
--  Emu.SetUsr(std::string(userId));
-+// Settings edited by Samba are backed by RPCS3's own files. Keep this helper
-+// layer independent from the live g_cfg tree so the launcher can inspect the
-+// canonical global config after a title-specific runtime config was active.
-+using sparse_settings_map = std::map<std::string, std::string>;
-+
-+static std::string global_settings_path() {
-+  return fs::get_config_dir(true) + "config.yml";
- }
- 
--extern "C" std::string _rpcsx_getUser() { return Emu.GetUsr(); }
-+static bool valid_settings_title_id(std::string_view title_id) {
-+  if (title_id.size() < 3 || title_id.size() > 64) return false;
-+  return std::ranges::all_of(title_id, [](unsigned char c) {
-+    return std::isalnum(c) || c == '_' || c == '.' || c == '-';
-+  });
-+}
- 
--extern "C" std::string _rpcsx_settingsGet(std::string_view path) {
--  auto root = find_cfg_node(&g_cfg, path);
-+static bool read_settings_file(const std::string& path, std::string& contents) {
-+  fs::file file{path};
-+  if (!file) return false;
-+  contents = file.to_string();
-+  return true;
-+}
- 
--  if (root == nullptr) {
--    return nullptr;
-+static bool load_settings_root(cfg_root& root, const std::string& path) {
-+  root.from_default();
-+  std::string contents;
-+  if (!read_settings_file(path, contents)) return true;
-+  if (root.from_string(contents)) return true;
-+  rpcsx_android.error("S3CFG failed to parse settings file %s", path.c_str());
-+  return false;
-+}
-+
-+static bool save_settings_file(const std::string& path, const std::string& contents) {
-+  if (!fs::create_path(fs::get_parent_dir(path))) return false;
-+  fs::pending_file pending{path};
-+  if (!pending.file) return false;
-+  pending.file.write(contents.c_str(), contents.size());
-+  return pending.commit();
-+}
-+
-+static std::string encoded_cfg_value(const cfg::_base* node) {
-+  if (!node) return {};
-+  const auto json = node->to_json();
-+  const auto type = json.value("type", "");
-+  if (type == "bool") return json.value("value", false) ? "true" : "false";
-+  if (type == "enum" || type == "string") {
-+    return nlohmann::json(json.value("value", "")).dump();
-+  }
-+  const auto value = json.find("value");
-+  if (value == json.end()) return {};
-+  return value->is_string() ? value->get<std::string>() : value->dump();
-+}
-+
-+static void log_effective_boot_settings(std::string_view phase, int result) {
-+  const auto value_for = [](std::string_view path) {
-+    return encoded_cfg_value(find_cfg_node(&g_cfg, path));
-+  };
-+  const std::string frame_limit = value_for("@@Video@@Frame limit");
-+  const std::string resolution = value_for("@@Video@@Resolution");
-+  const std::string aspect_ratio = value_for("@@Video@@Aspect ratio");
-+  const std::string renderer = value_for("@@Video@@Renderer");
-+  const std::string ppu_decoder = value_for("@@Core@@PPU Decoder");
-+  const std::string audio_renderer = value_for("@@Audio@@Renderer");
-+  const std::string serialized = g_cfg.to_string();
-+  const auto effective_hash = std::hash<std::string>{}(serialized);
-+  __android_log_print(
-+      ANDROID_LOG_INFO, "S3CFG",
-+      "boot phase=%s result=%d generation=%llu title=%s effectiveHash=%zu "
-+      "frameLimit=%s resolution=%s aspect=%s renderer=%s ppuDecoder=%s audioRenderer=%s",
-+      std::string(phase).c_str(), result,
-+      static_cast<unsigned long long>(g_emu_generation.load()),
-+      Emu.GetTitleID().c_str(), effective_hash, frame_limit.c_str(),
-+      resolution.c_str(), aspect_ratio.c_str(), renderer.c_str(),
-+      ppu_decoder.c_str(), audio_renderer.c_str());
-+}
-+
-+static std::string encoded_yaml_value(const cfg::_base* schema_node,
-+                                      const YAML::Node& value) {
-+  if (!schema_node || !value.IsScalar()) return {};
-+  switch (schema_node->get_type()) {
-+    case cfg::type::_bool: {
-+      std::string scalar = value.Scalar();
-+      std::ranges::transform(scalar, scalar.begin(), [](unsigned char c) {
-+        return static_cast<char>(std::tolower(c));
-+      });
-+      return scalar == "true" ? "true" : "false";
-+    }
-+    case cfg::type::_enum:
-+    case cfg::type::string:
-+      return nlohmann::json(value.Scalar()).dump();
-+    default:
-+      return value.Scalar();
-   }
-+}
- 
--  return root->to_json().dump(4);
-+static void collect_sparse_yaml(const YAML::Node& yaml,
-+                                const std::string& base_path,
-+                                cfg_root& schema,
-+                                sparse_settings_map& result) {
-+  if (!yaml.IsMap()) return;
-+  for (const auto& pair : yaml) {
-+    if (!pair.first.IsScalar()) continue;
-+    const std::string key = pair.first.Scalar();
-+    const std::string path = base_path.empty() ? key : base_path + "@@" + key;
-+    if (pair.second.IsMap()) {
-+      collect_sparse_yaml(pair.second, path, schema, result);
-+      continue;
-+    }
-+    if (!pair.second.IsScalar()) continue;
-+    if (auto* node = find_cfg_node(&schema, path)) {
-+      const std::string encoded = encoded_yaml_value(node, pair.second);
-+      if (!encoded.empty()) result[path] = encoded;
-+    }
-+  }
- }
- 
--extern "C" bool _rpcsx_settingsSet(std::string_view path,
--                                   std::string_view valueString) {
-+static sparse_settings_map load_sparse_title_settings(std::string_view title_id,
-+                                                       cfg_root& global) {
-+  sparse_settings_map result;
-+  if (!valid_settings_title_id(title_id)) return result;
-+
-+  const std::string path = rpcs3::utils::get_custom_config_path(std::string(title_id));
-+  std::string contents;
-+  if (!read_settings_file(path, contents)) return result;
-+  const auto [yaml, error] = yaml_load(contents);
-+  if (!error.empty()) {
-+    rpcsx_android.error("S3CFG failed to parse title config %s: %s", path.c_str(), error.c_str());
-+    return result;
-+  }
-+
-+  cfg_root schema;
-+  schema.from_default();
-+  collect_sparse_yaml(yaml, "", schema, result);
-+  for (auto it = result.begin(); it != result.end();) {
-+    auto* global_node = find_cfg_node(&global, it->first);
-+    if (global_node && encoded_cfg_value(global_node) == it->second) {
-+      it = result.erase(it);
-+    } else {
-+      ++it;
-+    }
-+  }
-+  return result;
-+}
-+
-+static YAML::Node sparse_settings_yaml(const sparse_settings_map& values) {
-+  YAML::Node root{YAML::NodeType::Map};
-+  for (const auto& [path, encoded] : values) {
-+    const auto parts = split_settings_path(path);
-+    if (parts.empty()) continue;
-+    YAML::Node current = root;
-+    for (std::size_t i = 0; i + 1 < parts.size(); ++i) {
-+      const std::string key = parts[i];
-+      if (!current[key] || !current[key].IsMap()) {
-+        current[key] = YAML::Node{YAML::NodeType::Map};
-+      }
-+      // yaml-cpp's Node assignment copies node data; reset() rebinds the
-+      // traversal handle without replacing the root map.
-+      current.reset(current[key]);
-+    }
-+    try {
-+      const auto json_value = nlohmann::json::parse(encoded);
-+      if (json_value.is_boolean()) {
-+        current[parts.back()] = json_value.get<bool>();
-+      } else if (json_value.is_number_integer()) {
-+        current[parts.back()] = json_value.get<s64>();
-+      } else if (json_value.is_number_float()) {
-+        current[parts.back()] = json_value.get<double>();
-+      } else if (json_value.is_string()) {
-+        current[parts.back()] = json_value.get<std::string>();
-+      } else {
-+        continue;
-+      }
-+    } catch (...) {
-+      continue;
-+    }
-+  }
-+  return root;
-+}
-+
-+static std::string settings_map_json(const sparse_settings_map& values) {
-+  nlohmann::ordered_json result = nlohmann::ordered_json::object();
-+  for (const auto& [path, value] : values) result[path] = value;
-+  return result.dump(4);
-+}
-+
-+static bool save_sparse_title_settings(std::string_view title_id,
-+                                       const sparse_settings_map& values) {
-+  if (!valid_settings_title_id(title_id)) return false;
-+  const std::string config_path =
-+      rpcs3::utils::get_custom_config_path(std::string(title_id));
-+  if (values.empty()) {
-+    fs::remove_file(config_path);
-+    return true;
-+  }
-+
-+  YAML::Emitter emitter;
-+  emitter << sparse_settings_yaml(values);
-+  return save_settings_file(config_path, {emitter.c_str(), emitter.size()});
-+}
-+
-+static sparse_settings_map live_sparse_title_settings(cfg_root& global) {
-+  sparse_settings_map values;
-+  const auto [yaml, error] = yaml_load(g_cfg.to_string());
-+  if (!error.empty()) return values;
-+
-+  cfg_root schema;
-+  schema.from_default();
-+  collect_sparse_yaml(yaml, "", schema, values);
-+  for (auto it = values.begin(); it != values.end();) {
-+    auto* global_node = find_cfg_node(&global, it->first);
-+    if (global_node && encoded_cfg_value(global_node) == it->second) {
-+      it = values.erase(it);
-+    } else {
-+      ++it;
-+    }
-+  }
-+  return values;
-+}
-+
-+static bool set_global_setting(std::string_view path,
-+                               std::string_view value_string) {
-+  cfg_root global;
-+  if (!load_settings_root(global, global_settings_path())) return false;
-+  auto* node = find_cfg_node(&global, path);
-+  if (!node || node->get_type() == cfg::type::node) return false;
-+
-   nlohmann::json value;
-   try {
--    value = nlohmann::json::parse(valueString);
-+    value = nlohmann::json::parse(value_string);
-   } catch (...) {
--    rpcsx_android.error("settingsSet: node %s passed with invalid json '%s'",
--                        path, valueString);
-+    rpcsx_android.error("S3CFG global write invalid JSON path=%s value=%s",
-+                        std::string(path).c_str(), std::string(value_string).c_str());
-     return false;
-   }
-+  if (!node->from_json(value, false)) return false;
- 
--  auto root = find_cfg_node(&g_cfg, path);
-+  const std::string serialized = global.to_string();
-+  if (!save_settings_file(global_settings_path(), serialized)) return false;
- 
--  if (root == nullptr) {
--    rpcsx_android.error("settingsSet: node %s not found", path);
-+  cfg_root persisted;
-+  if (!load_settings_root(persisted, global_settings_path())) return false;
-+  const auto* persisted_node = find_cfg_node(&persisted, path);
-+  const std::string read_back = encoded_cfg_value(persisted_node);
-+  if (read_back != encoded_cfg_value(node)) {
-+    rpcsx_android.error("S3CFG global read-back mismatch path=%s requested=%s readBack=%s",
-+                        std::string(path).c_str(), std::string(value_string).c_str(),
-+                        read_back.c_str());
-     return false;
-   }
- 
--  if (!root->from_json(value, !Emu.IsStopped())) {
--    rpcsx_android.error("settingsSet: node %s not accepts value '%s'", path,
--                        value.dump());
--    return false;
-+  // A stopped live tree is only a working cache. Keep it aligned for callers
-+  // that still use settingsGet(), while never replacing an active title config.
-+  if (Emu.IsStopped()) {
-+    g_cfg.from_string(serialized, false);
-+    g_cfg.name = global_settings_path();
-+    g_backup_cfg.from_string(g_cfg.to_string());
-   }
-+  rpcsx_android.notice("S3CFG write scope=global path=%s requested=%s readBack=%s applyPhase=NEXT_EMULATION_BOOT",
-+                       std::string(path).c_str(), std::string(value_string).c_str(),
-+                       read_back.c_str());
-+  return true;
-+}
- 
--  Emulator::SaveSettings(g_cfg.to_string(), "");
-+static bool set_title_setting(std::string_view title_id,
-+                              std::string_view path,
-+                              std::string_view value_string) {
-+  if (!valid_settings_title_id(title_id) || path.empty()) return false;
-+
-+  // Compose callers use @@-prefixed paths while sparse YAML maps use the
-+  // canonical root-relative form. Normalize before touching the map so the
-+  // in-memory candidate and disk readback compare identically.
-+  const std::string normalized_path = normalize_settings_path(path);
-+
-+  cfg_root global;
-+  if (!load_settings_root(global, global_settings_path())) return false;
-+  auto* schema_node = find_cfg_node(&global, normalized_path);
-+  if (!schema_node || schema_node->get_type() == cfg::type::node) return false;
-+  const std::string global_encoded = encoded_cfg_value(schema_node);
-+
-+  sparse_settings_map values = load_sparse_title_settings(title_id, global);
-+  if (value_string.empty()) {
-+    values.erase(normalized_path);
-+  } else {
-+    nlohmann::json value;
-+    try {
-+      value = nlohmann::json::parse(value_string);
-+    } catch (...) {
-+      return false;
-+    }
-+    if (!schema_node->from_json(value, false)) return false;
-+    const std::string encoded = encoded_cfg_value(schema_node);
-+    auto* global_node = find_cfg_node(&global, normalized_path);
-+    if (global_node && encoded == global_encoded) {
-+      values.erase(normalized_path);
-+    } else {
-+      values[normalized_path] = encoded;
-+    }
-+  }
-+
-+  if (!save_sparse_title_settings(title_id, values)) return false;
-+  cfg_root persisted_global;
-+  if (!load_settings_root(persisted_global, global_settings_path())) return false;
-+  const auto persisted_values = load_sparse_title_settings(title_id, persisted_global);
-+  if (persisted_values != values) {
-+    rpcsx_android.error("S3CFG game read-back mismatch title=%s path=%s",
-+                        std::string(title_id).c_str(), std::string(path).c_str());
-+    return false;
-+  }
-+  const auto read_back_it = persisted_values.find(normalized_path);
-+  const std::string read_back = read_back_it == persisted_values.end()
-+                                    ? "<global>"
-+                                    : read_back_it->second;
-+  rpcsx_android.notice("S3CFG write scope=game title=%s path=%s requested=%s applyPhase=NEXT_EMULATION_BOOT",
-+                       std::string(title_id).c_str(), std::string(path).c_str(),
-+                       value_string.empty() ? "<clear>" : std::string(value_string).c_str());
-+  rpcsx_android.notice("S3CFG read-back scope=game title=%s path=%s readBack=%s applyPhase=NEXT_EMULATION_BOOT",
-+                       std::string(title_id).c_str(), std::string(path).c_str(), read_back.c_str());
-   return true;
- }
- 
-+extern "C" std::string _rpcsx_settingsGetGlobal(std::string_view path) {
-+  cfg_root global;
-+  if (!load_settings_root(global, global_settings_path())) return "{}";
-+  auto* node = find_cfg_node(&global, path);
-+  return node ? node->to_json().dump(4) : "{}";
-+}
-+
-+extern "C" bool _rpcsx_settingsSetGlobal(std::string_view path,
-+                                          std::string_view value_string) {
-+  std::unique_lock lifecycle_lock(g_emulator_lifecycle_mutex);
-+  return set_global_setting(path, value_string);
-+}
-+
-+extern "C" std::string _rpcsx_gameSettingsOverridesGet(std::string_view title_id) {
-+  cfg_root global;
-+  if (!load_settings_root(global, global_settings_path())) return "{}";
-+  return settings_map_json(load_sparse_title_settings(title_id, global));
-+}
-+
-+extern "C" bool _rpcsx_gameSettingsOverrideSet(std::string_view title_id,
-+                                                std::string_view path,
-+                                                std::string_view value_string) {
-+  std::unique_lock lifecycle_lock(g_emulator_lifecycle_mutex);
-+  return set_title_setting(title_id, path, value_string);
-+}
-+
-+extern "C" bool _rpcsx_gameSettingsOverrideClear(std::string_view title_id,
-+                                                  std::string_view path) {
-+  std::unique_lock lifecycle_lock(g_emulator_lifecycle_mutex);
-+  return set_title_setting(title_id, path, {});
-+}
-+
-+extern "C" bool _rpcsx_gameSettingsOverridesClear(std::string_view title_id) {
-+  std::unique_lock lifecycle_lock(g_emulator_lifecycle_mutex);
-+  if (!valid_settings_title_id(title_id)) return false;
-+  const std::string path = rpcs3::utils::get_custom_config_path(std::string(title_id));
-+  return fs::remove_file(path) || !fs::is_file(path);
-+}
-+
-+extern "C" std::string _rpcsx_settingsGetEffective(std::string_view title_id,
-+                                                    std::string_view path) {
-+  const std::string normalized_path = normalize_settings_path(path);
-+  cfg_root effective;
-+  if (!load_settings_root(effective, global_settings_path())) return "{}";
-+  cfg_root global;
-+  if (!load_settings_root(global, global_settings_path())) return "{}";
-+  sparse_settings_map overrides;
-+  if (valid_settings_title_id(title_id)) {
-+    overrides = load_sparse_title_settings(title_id, global);
-+    if (!overrides.empty()) {
-+      std::string title_config;
-+      const std::string config_path = rpcs3::utils::get_custom_config_path(std::string(title_id));
-+      if (read_settings_file(config_path, title_config)) effective.from_string(title_config, false);
-+    }
-+  }
-+  auto* node = find_cfg_node(&effective, normalized_path);
-+  const auto* global_node = find_cfg_node(&global, normalized_path);
-+  const std::string global_value = encoded_cfg_value(global_node);
-+  const auto override_it = overrides.find(normalized_path);
-+  const std::string override_value = override_it == overrides.end() ? "" : override_it->second;
-+  rpcsx_android.notice(
-+      "S3CFG effective title=%s path=%s source=%s global=%s override=%s effective=%s",
-+      std::string(title_id).c_str(), std::string(path).c_str(),
-+      override_it == overrides.end() ? "global" : "override",
-+      global_value.c_str(), override_value.c_str(), encoded_cfg_value(node).c_str());
-+  return node ? node->to_json().dump(4) : "{}";
-+}
-+
-+extern "C" void _rpcsx_loginUser(std::string_view userId) {
-+  Emu.SetUsr(std::string(userId));
-+}
-+
-+extern "C" std::string _rpcsx_getUser() { return Emu.GetUsr(); }
-+
-+extern "C" std::string _rpcsx_settingsGet(std::string_view path) {
-+  auto root = find_cfg_node(&g_cfg, path);
-+
-+  if (root == nullptr) {
-+    return "{}";
-+  }
-+
-+  return root->to_json().dump(4);
-+}
-+
-+extern "C" bool _rpcsx_settingsSet(std::string_view path,
-+                                   std::string_view valueString) {
-+  std::unique_lock lifecycle_lock(g_emulator_lifecycle_mutex);
-+  return set_global_setting(path, valueString);
-+}
-+
- extern "C" std::string _rpcsx_getVersion() {
-   return rx::getVersion().toString();
- }
-@@ -3921,6 +4477,10 @@ extern "C" bool _rpcsx_restartGame()
-                              (u64)id, new_gen, (int)::gettid());
-         Emu.SetContinuousMode(true);
-         Emu.Restart(false);
-+        // Restart re-enters the same custom-config boot path internally. Keep
-+        // an explicit lifecycle marker so validation can distinguish a fresh
-+        // launch from a restart that should resolve the same title override.
-+        log_effective_boot_settings("restart", 0);
-         sstate_log(id, "restart", "done");
-     });
-     return true;
-@@ -4193,151 +4753,429 @@ extern "C" bool _rpcsx_loadSaveState(int slot)
-                              (u64)id, new_gen, (int)::gettid(), path.c_str());
-         Emu.SetContinuousMode(true);
-         Emu.SetForceBoot(true);
--        Emu.BootGame(path, "", true);
-+        // Savestate recovery is a full game boot as well; keep the same
-+        // global + title custom-config resolver as normal and explicit
-+        // savestate boots.
-+        const auto result = Emu.BootGame(path, "", true, cfg_mode::custom);
-+        log_effective_boot_settings("load", static_cast<int>(result));
-         sstate_log(id, "load", "boot_returned");
-     });
-     return true;
- }
- 
--extern "C" std::string _rpcsx_getCurrentTrophies()
-+extern "C" bool _rpcsx_setPerfMetricsEnabled(bool enabled, int interval_ms)
-+{
-+    std::lock_guard lock(g_android_perf.mutex);
-+    const bool was_enabled = g_android_perf.enabled;
-+    g_android_perf.enabled = enabled;
-+    g_android_perf.interval_ms = std::clamp<u32>(interval_ms > 0 ? static_cast<u32>(interval_ms) : 300u, 250u, 1000u);
-+    if (!enabled)
-+    {
-+        g_android_perf_frame_sampling_enabled.store(false, std::memory_order_relaxed);
-+        g_android_perf.last_update_us = 0;
-+        g_android_perf.last_crosscheck_log_us = 0;
-+        g_android_perf.last_timestamp_us = 0;
-+        g_android_perf.last_presented_frame_count = 0;
-+        g_android_perf.last_present_timestamp_us = 0;
-+        g_android_perf.fps_samples.clear();
-+        g_android_perf.frametime_samples.clear();
-+        g_android_perf.pending_frametime_samples.clear();
-+        g_android_perf.presented_frame_count = 0;
-+        g_android_perf.vblank_count = 0;
-+        g_android_perf.vblank_delta = 0;
-+        g_android_perf.sample_ready = false;
-+        g_android_perf.frame_sample_ready = false;
-+        g_android_perf.was_paused = false;
-+        g_android_perf.ppu_cycles = 0;
-+        g_android_perf.spu_cycles = 0;
-+        g_android_perf.rsx_cycles = 0;
-+        g_android_perf.cpu_stats.reset();
-+        rpcsx_android.notice("S3PERF native_export=1 enabled=0");
-+    }
-+    else
-+    {
-+        if (!was_enabled) {
-+            g_android_perf.last_update_us = 0;
-+            g_android_perf.last_crosscheck_log_us = 0;
-+            g_android_perf.last_timestamp_us = 0;
-+            g_android_perf.last_presented_frame_count = 0;
-+            g_android_perf.last_present_timestamp_us = 0;
-+            g_android_perf.sample_ready = false;
-+            g_android_perf.frame_sample_ready = false;
-+            g_android_perf.fps_samples.clear();
-+            g_android_perf.frametime_samples.clear();
-+            g_android_perf.pending_frametime_samples.clear();
-+            g_android_perf.presented_frame_count = 0;
-+            g_android_perf.vblank_count = 0;
-+            g_android_perf.vblank_delta = 0;
-+            g_android_perf.was_paused = false;
-+            g_android_perf.ppu_cycles = 0;
-+            g_android_perf.spu_cycles = 0;
-+            g_android_perf.rsx_cycles = 0;
-+            g_android_perf.cpu_stats.reset();
-+        }
-+        g_android_perf_frame_sampling_enabled.store(true, std::memory_order_relaxed);
-+        rpcsx_android.notice("S3PERF native_export=1 version=2 interval_ms=%u source=emu_flip", g_android_perf.interval_ms);
-+    }
-+    return true;
-+}
-+
-+static nlohmann::json android_perf_snapshot_json()
- {
-     nlohmann::json j;
--    std::string tropName;
--    try {
--        if (auto* cur = g_fxo->try_get<current_trophy_name>()) {
--            std::lock_guard lock(cur->mtx);
--            tropName = cur->name;
-+    j["version"] = 2;
-+    j["enabled"] = g_android_perf.enabled;
-+    j["timestampUs"] = g_android_perf.last_update_us;
-+    j["presentedFrameCount"] = g_android_perf.presented_frame_count;
-+    j["vblankCount"] = g_android_perf.vblank_count;
-+    j["vblankDelta"] = g_android_perf.vblank_delta;
-+    j["frameSampleFresh"] = g_android_perf.frame_sample_ready;
-+    j["fpsSource"] = "emu_flip";
-+    j["frameTimeSource"] = "emu_flip_intervals";
-+    if (g_android_perf.sample_ready) {
-+        j["hostCpu"] = g_android_perf.host_cpu;
-+        j["ppuCpu"] = g_android_perf.ppu_cpu;
-+        j["spuCpu"] = g_android_perf.spu_cpu;
-+        j["rsxCpu"] = g_android_perf.rsx_cpu;
-+        j["ppuThreads"] = g_android_perf.ppu_threads;
-+        j["spuThreads"] = g_android_perf.spu_threads;
-+        j["hostThreads"] = g_android_perf.total_threads;
-+        j["rsxLoad"] = g_android_perf.rsx_load;
-+    }
-+    if (g_android_perf.frame_sample_ready) {
-+        j["fps"] = g_android_perf.fps;
-+        j["frametimeMs"] = g_android_perf.frametime_ms;
-+    }
-+    j["fpsSamples"] = nlohmann::json::array();
-+    for (const auto& sample : g_android_perf.fps_samples)
-+        j["fpsSamples"].push_back({{"timestampUs", sample.timestamp_us}, {"value", sample.value}});
-+    j["frametimeSamples"] = nlohmann::json::array();
-+    for (const auto& sample : g_android_perf.frametime_samples)
-+        j["frametimeSamples"].push_back({{"timestampUs", sample.timestamp_us}, {"value", sample.value}});
-+    return j;
-+}
-+
-+static void android_perf_log_crosscheck_locked(u64 now_us)
-+{
-+    if (!g_android_perf.frame_sample_ready || g_android_perf.last_crosscheck_log_us != 0 &&
-+        now_us - g_android_perf.last_crosscheck_log_us < 1'000'000ull)
-+        return;
-+
-+    g_android_perf.last_crosscheck_log_us = now_us;
-+    rpcsx_android.notice("S3PERF crosscheck source=emu_flip presented=%llu native_fps=%.3f native_frametime_ms=%.3f",
-+                         (u64)g_android_perf.presented_frame_count, g_android_perf.fps, g_android_perf.frametime_ms);
-+}
-+
-+extern "C" std::string _rpcsx_getPerfMetricsJson()
-+{
-+    std::lock_guard lock(g_android_perf.mutex);
-+    if (!g_android_perf.enabled)
-+        return nlohmann::json{{"version", 1}, {"enabled", false}}.dump();
-+
-+    const u64 now = get_system_time();
-+    if (g_android_perf.last_update_us != 0 && now - g_android_perf.last_update_us < g_android_perf.interval_ms * 1000ull)
-+    {
-+        android_perf_log_crosscheck_locked(now);
-+        return android_perf_snapshot_json().dump();
-+    }
-+
-+    const auto rsx = g_fxo ? g_fxo->try_get<rsx::thread>() : nullptr;
-+    if (!rsx || (!Emu.IsRunning() && !Emu.IsPaused()))
-+    {
-+        android_perf_log_crosscheck_locked(now);
-+        return android_perf_snapshot_json().dump();
-+    }
-+
-+    const u64 vblank = rsx->vblank_count.load();
-+    g_android_perf.vblank_delta = vblank >= g_android_perf.vblank_count ? vblank - g_android_perf.vblank_count : 0;
-+    g_android_perf.vblank_count = vblank;
-+
-+    // A paused emulator must not keep reporting the last running FPS. Drop
-+    // the pending frame interval so the first frame after resume cannot turn
-+    // the pause duration into a fabricated frametime spike.
-+    if (Emu.IsPaused())
-+    {
-+        g_android_perf.last_presented_frame_count = g_android_perf.presented_frame_count;
-+        g_android_perf.last_present_timestamp_us = 0;
-+        g_android_perf.last_timestamp_us = now;
-+        g_android_perf.pending_frametime_samples.clear();
-+        g_android_perf.fps_samples.clear();
-+        g_android_perf.frametime_samples.clear();
-+        g_android_perf.frame_sample_ready = false;
-+        g_android_perf.was_paused = true;
-+    }
-+    else if (g_android_perf.was_paused)
-+    {
-+        // Establish a new baseline after pause. The next polling interval
-+        // will contain only frames presented after this reset.
-+        g_android_perf.last_presented_frame_count = g_android_perf.presented_frame_count;
-+        g_android_perf.last_present_timestamp_us = 0;
-+        g_android_perf.last_timestamp_us = now;
-+        g_android_perf.pending_frametime_samples.clear();
-+        g_android_perf.frame_sample_ready = false;
-+        g_android_perf.was_paused = false;
-+    }
-+    else if (g_android_perf.last_timestamp_us != 0 && now > g_android_perf.last_timestamp_us)
-+    {
-+        const u64 elapsed = now - g_android_perf.last_timestamp_us;
-+        const u64 frames = g_android_perf.presented_frame_count >= g_android_perf.last_presented_frame_count
-+            ? g_android_perf.presented_frame_count - g_android_perf.last_presented_frame_count
-+            : 0;
-+
-+        g_android_perf.frame_sample_ready = frames > 0;
-+        if (frames > 0)
-+        {
-+            g_android_perf.fps = static_cast<f32>(frames) * 1'000'000.f / static_cast<f32>(elapsed);
-+
-+            f32 interval_sum = 0.f;
-+            u32 interval_count = 0;
-+            while (!g_android_perf.pending_frametime_samples.empty())
-+            {
-+                interval_sum += g_android_perf.pending_frametime_samples.front().value;
-+                g_android_perf.pending_frametime_samples.pop_front();
-+                ++interval_count;
-+            }
-+            if (interval_count > 0)
-+                g_android_perf.frametime_ms = interval_sum / static_cast<f32>(interval_count);
-+
-+            g_android_perf.fps_samples.push_back({now, g_android_perf.fps});
-+            while (g_android_perf.fps_samples.size() > 60)
-+                g_android_perf.fps_samples.pop_front();
-         }
--    } catch (...) {}
-+    }
-+    else
-+    {
-+        g_android_perf.pending_frametime_samples.clear();
-+        g_android_perf.frame_sample_ready = false;
-+    }
-+    g_android_perf.last_presented_frame_count = g_android_perf.presented_frame_count;
-+    g_android_perf.last_timestamp_us = now;
-+    g_android_perf.last_update_us = now;
-+    g_android_perf.total_threads = utils::cpu_stats::get_current_thread_count();
-+    g_android_perf.ppu_cycles = 0;
-+    g_android_perf.spu_cycles = 0;
-+    g_android_perf.rsx_cycles = rsx->get_cycles();
-+    g_android_perf.ppu_threads = idm::select<named_thread<ppu_thread>>([&](u32, named_thread<ppu_thread>& ppu)
-+    {
-+        g_android_perf.ppu_cycles += thread_ctrl::get_cycles(ppu);
-+    });
-+    g_android_perf.spu_threads = idm::select<named_thread<spu_thread>>([&](u32, named_thread<spu_thread>& spu)
-+    {
-+        g_android_perf.spu_cycles += thread_ctrl::get_cycles(spu);
-+    });
-+    const u64 total_cycles = std::max<u64>(1, g_android_perf.ppu_cycles + g_android_perf.spu_cycles + g_android_perf.rsx_cycles);
-+    g_android_perf.host_cpu = static_cast<f32>(g_android_perf.cpu_stats.get_usage());
-+    g_android_perf.ppu_cpu = std::clamp(g_android_perf.host_cpu * g_android_perf.ppu_cycles / total_cycles, 0.f, 100.f);
-+    g_android_perf.spu_cpu = std::clamp(g_android_perf.host_cpu * g_android_perf.spu_cycles / total_cycles, 0.f, 100.f);
-+    g_android_perf.rsx_cpu = std::clamp(g_android_perf.host_cpu * g_android_perf.rsx_cycles / total_cycles, 0.f, 100.f);
-+    g_android_perf.rsx_load = rsx->get_load();
-+    g_android_perf.sample_ready = g_android_perf.last_timestamp_us != 0;
-+    android_perf_log_crosscheck_locked(now);
-+    return android_perf_snapshot_json().dump();
-+}
-+
-+extern "C" std::string _rpcsx_getTrophiesForTitle(const char* requested_title_id);
-+
-+static std::string android_get_trophies_for_set(std::string tropName,
-+                                                const std::string& titleId,
-+                                                const char* querySource)
-+{
-+    const auto started = std::chrono::steady_clock::now();
-+    nlohmann::json j;
-     if (tropName.empty()) {
-+        j["status"] = "initializing";
-         j["available"] = false;
-         return j.dump();
-     }
--    j["available"] = true;
-+    j["available"] = false;
-+    j["status"] = "unavailable";
-+    j["titleId"] = titleId;
-     j["trophySet"] = tropName;
-+    j["trophySetId"] = tropName;
-+    j["querySource"] = querySource ? querySource : "title";
-+    j["rpcS3UserId"] = Emu.GetUsr();
-     j["gameName"] = "";
--    j["total"] = 0;
--    j["unlocked"] = 0;
--    j["percent"] = 0;
-     nlohmann::json arr = nlohmann::json::array();
-     try {
--        const std::string trophy_path = "/dev_hdd0/home/" + Emu.GetUsr() + "/trophy/" + tropName;
--        const std::string vfs_path = vfs::get(trophy_path + "/");
--        if (!vfs_path.empty()) {
--            TROPUSRLoader loader;
-+        const std::string trophy_path = rpcs3::utils::get_hdd0_dir() + "home/" + Emu.GetUsr() + "/trophy/" + tropName;
-+        const std::string vfs_path = trophy_path + "/";
-+        if (fs::is_dir(vfs_path)) {
-             const std::string tropusr_path = trophy_path + "/TROPUSR.DAT";
-             const std::string tropconf_path = trophy_path + "/TROPCONF.SFM";
--            auto res = loader.Load(tropusr_path, tropconf_path);
--            if (res.success) {
--                fs::file config(vfs::get(tropconf_path));
--                if (config) {
--                    std::string xmlStr = config.to_string();
--                    // Use same logic as overlay_trophy_list_dialog::load_trophies
--                    // Parse via pugi-like rXmlNode? Use TROPUSRLoader data + xml parsing via std::string search fallback.
--                    // Simpler: use loader counts and load details via sceNpTrophy helpers if available.
--                    u32 count = loader.GetTrophiesCount();
--                    u32 unlocked = loader.GetUnlockedTrophiesCount();
-+            fs::stat_t tropusr_stat{};
-+            const bool tropusr_exists = fs::get_stat(tropusr_path, tropusr_stat) && !tropusr_stat.is_directory;
-+            j["tropusrPath"] = tropusr_path;
-+            j["tropusrExists"] = tropusr_exists;
-+            j["tropusrSize"] = tropusr_exists ? tropusr_stat.size : 0;
-+            j["tropusrMtime"] = tropusr_exists ? tropusr_stat.mtime : 0;
-+            j["tropusrGeneration"] = tropusr_exists ? fmt::format("{}:{}", tropusr_stat.size, tropusr_stat.mtime) : "";
-+            std::unique_ptr<TROPUSRLoader> loader;
-+            // During gameplay prefer the VFS-backed loader so an unlock is
-+            // visible immediately from the live RPCSX context. The same
-+            // physical file is the fallback and is the only source used after
-+            // a clean stop, when the game VFS has been unmounted.
-+            if (Emu.IsRunning() || Emu.IsPaused()) {
-+                loader = std::make_unique<TROPUSRLoader>();
-+                if (!loader->Load("/dev_hdd0/home/" + Emu.GetUsr() + "/trophy/" + tropName + "/TROPUSR.DAT",
-+                                  "/dev_hdd0/home/" + Emu.GetUsr() + "/trophy/" + tropName + "/TROPCONF.SFM").success) {
-+                    loader.reset();
-+                }
-+            }
-+            if (!loader && tropusr_exists) {
-+                loader = std::make_unique<TROPUSRLoader>();
-+                if (!loader->LoadPhysical(tropusr_path)) loader.reset();
-+            }
-+            fs::file config(tropconf_path);
-+            if (config) {
-+                    u32 count = loader ? loader->GetTrophiesCount() : 0;
-+                    u32 unlocked = loader ? loader->GetUnlockedTrophiesCount() : 0;
-                     j["total"] = count;
-                     j["unlocked"] = unlocked;
-                     j["percent"] = count ? (100 * unlocked / count) : 0;
--                    // Try to get game name from TROPCONF.SFM
--                    // Quick parse for title-name
--                    auto findTag = [&](const std::string& tag) -> std::string {
--                        std::string open = "<" + tag + ">";
--                        std::string close = "</" + tag + ">";
--                        auto a = xmlStr.find(open);
--                        if (a == std::string::npos) return "";
--                        a += open.size();
--                        auto b = xmlStr.find(close, a);
--                        if (b == std::string::npos) return "";
--                        return xmlStr.substr(a, b-a);
--                    };
--                    std::string gameName = findTag("title-name");
--                    if (!gameName.empty()) j["gameName"] = gameName;
--                    // Build trophy entries by scanning <trophy> tags
--                    size_t pos = 0;
--                    u32 parsed = 0;
--                    while (parsed < count && (pos = xmlStr.find("<trophy", pos)) != std::string::npos) {
--                        size_t endTag = xmlStr.find(">", pos);
--                        if (endTag == std::string::npos) break;
--                        std::string trophyOpen = xmlStr.substr(pos, endTag - pos + 1);
--                        auto getAttr = [&](const std::string& attr) -> std::string {
--                            std::string key = attr + "=\"";
--                            auto p = trophyOpen.find(key);
--                            if (p == std::string::npos) return "";
--                            p += key.size();
--                            auto q = trophyOpen.find("\"", p);
--                            if (q == std::string::npos) return "";
--                            return trophyOpen.substr(p, q-p);
--                        };
--                        std::string idStr = getAttr("id");
--                        std::string hiddenStr = getAttr("hidden");
--                        std::string ttype = getAttr("ttype");
--                        std::string pidStr = getAttr("pid");
--                        int id = idStr.empty() ? (int)parsed : std::atoi(idStr.c_str());
--                        bool hidden = (hiddenStr == "y");
--                        std::string grade = "bronze";
--                        if (ttype == "B") grade = "bronze";
--                        else if (ttype == "S") grade = "silver";
--                        else if (ttype == "G") grade = "gold";
--                        else if (ttype == "P") grade = "platinum";
--                        bool platinumRelevant = false;
--                        try { int pid = pidStr.empty() ? -1 : std::atoi(pidStr.c_str()); platinumRelevant = pid >= 0; } catch (...) {}
--                        // Find name/detail inside trophy block
--                        size_t trophyEnd = xmlStr.find("</trophy>", endTag);
--                        std::string trophyBlock = (trophyEnd != std::string::npos) ? xmlStr.substr(endTag, trophyEnd - endTag) : "";
--                        std::string name = "";
--                        std::string desc = "";
--                        auto extractInside = [&](const std::string& tag) -> std::string {
--                            std::string o = "<" + tag + ">";
--                            std::string c = "</" + tag + ">";
--                            auto aa = trophyBlock.find(o);
--                            if (aa == std::string::npos) return "";
--                            aa += o.size();
--                            auto bb = trophyBlock.find(c, aa);
--                            if (bb == std::string::npos) return "";
--                            return trophyBlock.substr(aa, bb-aa);
--                        };
--                        if (hidden) {
--                            name = "Hidden trophy";
--                            desc = "This trophy is hidden";
--                        } else {
--                            name = extractInside("name");
--                            desc = extractInside("detail");
-+
-+                    trophy_xml_document document;
-+                    if (!document.Read(config.to_string())) {
-+                        j["status"] = "parse_failed";
-+                    } else if (auto root = document.GetRoot()) {
-+                        for (std::shared_ptr<rXmlNode> node = root->GetChildren(); node; node = node->GetNext()) {
-+                            if (node->GetName() == "title-name") {
-+                                j["gameName"] = node->GetNodeContent();
-+                            }
-+                            if (node->GetName() != "trophy") continue;
-+                            const std::string idAttr = node->GetAttribute("id");
-+                            const int id = idAttr.empty() ? static_cast<int>(arr.size()) : std::atoi(idAttr.c_str());
-+                            const bool hidden = node->GetAttribute("hidden") == "y";
-+                            const std::string type = node->GetAttribute("ttype");
-+                            const std::string grade = type == "P" ? "platinum" : type == "G" ? "gold" : type == "S" ? "silver" : "bronze";
-+                            const std::string pid = node->GetAttribute("pid");
-+                            std::string name = "Hidden trophy";
-+                            std::string description = "This trophy is hidden";
-+                            if (!hidden) {
-+                                name.clear();
-+                                description.clear();
-+                                for (std::shared_ptr<rXmlNode> child = node->GetChildren(); child; child = child->GetNext()) {
-+                                    if (child->GetName() == "name") name = child->GetNodeContent();
-+                                    else if (child->GetName() == "detail") description = child->GetNodeContent();
-+                                }
-+                            }
-+                            nlohmann::json entry;
-+                            entry["id"] = id;
-+                            entry["name"] = name;
-+                            entry["description"] = description;
-+                            entry["grade"] = grade;
-+                            entry["unlocked"] = loader && !!loader->GetTrophyUnlockState(id);
-+                            entry["hidden"] = hidden;
-+                            entry["platinumRelevant"] = !pid.empty() && std::atoi(pid.c_str()) >= 0;
-+                            entry["unlockTimestamp"] = loader ? loader->GetTrophyTimestamp(id) : 0;
-+                            entry["iconPath"] = vfs_path + fmt::format("TROP%03d.PNG", id);
-+                            arr.push_back(entry);
-                         }
--                        bool unlockedFlag = false;
--                        try { unlockedFlag = loader.GetTrophyUnlockState(id); } catch (...) {}
--                        nlohmann::json entry;
--                        entry["id"] = id;
--                        entry["name"] = name;
--                        entry["description"] = desc;
--                        entry["grade"] = grade;
--                        entry["unlocked"] = unlockedFlag;
--                        entry["hidden"] = hidden;
--                        entry["platinumRelevant"] = platinumRelevant;
--                        std::string iconPath = vfs_path + fmt::format("TROP%03d.PNG", id);
--                        entry["iconPath"] = iconPath;
--                        arr.push_back(entry);
--                        pos = (trophyEnd == std::string::npos) ? endTag + 1 : trophyEnd + 9;
--                        parsed++;
-+                        j["available"] = !arr.empty();
-+                        j["status"] = arr.empty() ? "empty" : "ready";
-                     }
-                 }
-             }
--        }
-     } catch (const std::exception& e) {
-         rpcsx_android.error("getCurrentTrophies failed: %s", e.what());
-     } catch (...) {}
-     j["trophies"] = arr;
--    if (!j.contains("total") || j["total"].get<int>()==0) {
-+    if (!j.contains("total") || j["total"].get<int>() == 0) {
-         j["total"] = arr.size();
-         int unlocked = 0;
-         for (auto &e : arr) if (e["unlocked"].get<bool>()) unlocked++;
-         j["unlocked"] = unlocked;
-         j["percent"] = arr.empty() ? 0 : (100 * unlocked / (int)arr.size());
-     }
-+    if (arr.empty() && j["status"] == "unavailable") j["status"] = "no_trophy_set";
-+    j["unlockedIds"] = nlohmann::json::array();
-+    for (const auto& entry : arr) {
-+        if (entry.value("unlocked", false)) j["unlockedIds"].push_back(entry.value("id", -1));
-+    }
-+    j["queryDurationMs"] = std::chrono::duration_cast<std::chrono::milliseconds>(
-+        std::chrono::steady_clock::now() - started).count();
-+    rpcsx_android.notice(
-+        "S3TROPHY source=%s title=%s user=%s set=%s TROPUSR=%s exists=%d size=%llu mtime=%lld generation=%s total=%d unlocked=%d unlockedIds=%s durationMs=%lld",
-+        j.value("querySource", "title").c_str(), titleId.c_str(), Emu.GetUsr().c_str(),
-+        j.value("trophySetId", "").c_str(), j.value("tropusrPath", "").c_str(),
-+        j.value("tropusrExists", false) ? 1 : 0,
-+        (unsigned long long)j.value("tropusrSize", 0ULL),
-+        (long long)j.value("tropusrMtime", 0LL), j.value("tropusrGeneration", "").c_str(),
-+        j.value("total", 0), j.value("unlocked", 0), j.value("unlockedIds", nlohmann::json::array()).dump().c_str(),
-+        (long long)j.value("queryDurationMs", 0LL));
-     return j.dump();
- }
- 
-+extern "C" std::string _rpcsx_getCurrentTrophies()
-+{
-+    std::string tropName;
-+    try {
-+        if (auto* cur = g_fxo->try_get<current_trophy_name>()) {
-+            std::lock_guard lock(cur->mtx);
-+            tropName = cur->name;
-+        }
-+    } catch (...) {}
-+    const std::string title_id = Emu.GetTitleID();
-+    if (!tropName.empty()) return android_get_trophies_for_set(std::move(tropName), title_id, "live");
-+
-+    // Disc-backed games can expose the trophy set through Emu.GetDir() before
-+    // current_trophy_name is populated. Read the actual mounted TROPDIR.
-+    try {
-+        const std::string trophy_root = rpcs3::utils::get_games_dir() + title_id + "/PS3_GAME/TROPDIR/";
-+        for (const auto& entry : fs::dir(trophy_root)) {
-+            if (entry.is_directory && entry.name != "." && entry.name != "..")
-+                return android_get_trophies_for_set(entry.name, title_id, "live");
-+        }
-+    } catch (...) {}
-+
-+    // Some titles only publish the trophy set name through the runtime after
-+    // sceNpTrophy has initialized. Resolve the current title through the
-+    // installed/disc TROPDIR as a real fallback instead of exposing a
-+    // permanently "initializing" page.
-+    return _rpcsx_getTrophiesForTitle(title_id.c_str());
-+}
-+
-+extern "C" std::string _rpcsx_getTrophiesForTitle(const char* requested_title_id)
-+{
-+    const std::string title_id = requested_title_id ? requested_title_id : "";
-+    nlohmann::json unavailable{
-+        {"available", false}, {"status", "no_trophy_set"}, {"titleId", title_id},
-+        {"trophies", nlohmann::json::array()}
-+    };
-+    if (title_id.empty()) return unavailable.dump();
-+
-+    try {
-+        const std::string root = rpcs3::utils::get_hdd0_dir() + "home/" + Emu.GetUsr() + "/trophy/";
-+        for (const auto& entry : fs::dir(root)) {
-+            if (!entry.is_directory || entry.name == "." || entry.name == "..") continue;
-+            const std::string trophy_set = entry.name;
-+            const std::string conf_path = root + trophy_set + "/TROPCONF.SFM";
-+            fs::file config(conf_path);
-+            if (!config) continue;
-+
-+            trophy_xml_document document;
-+            if (!document.Read(config.to_string())) continue;
-+            auto xml_root = document.GetRoot();
-+            if (!xml_root) continue;
-+            bool matches = false;
-+            for (std::shared_ptr<rXmlNode> node = xml_root->GetChildren(); node; node = node->GetNext()) {
-+                if (node->GetName() == "title-id" && node->GetNodeContent() == title_id) {
-+                    matches = true;
-+                    break;
-+                }
-+            }
-+            if (!matches) {
-+                const std::string disc_path = rpcs3::utils::get_games_dir() + title_id + "/PS3_GAME/TROPDIR/" + trophy_set + "/TROPHY.TRP";
-+                const std::string installed_path = rpcs3::utils::get_hdd0_dir() + "game/" + title_id + "/TROPDIR/" + trophy_set + "/TROPHY.TRP";
-+                matches = fs::is_file(disc_path) || fs::is_file(installed_path);
-+            }
-+            if (matches) return android_get_trophies_for_set(trophy_set, title_id, "title");
-+        }
-+    } catch (const std::exception& e) {
-+        rpcsx_android.error("getTrophiesForTitle failed: %s", e.what());
-+    } catch (...) {}
-+    return unavailable.dump();
-+}
-+
- extern "C" std::string _rpcsx_getFriends()
- {
-     nlohmann::json j;
-@@ -4446,6 +5284,14 @@ extern "C" bool _rpcsx_settingsSetTransient(std::string_view path, std::string_v
-         rpcsx_android.error("settingsSetTransient: node %s not accepts value", std::string(path).c_str());
-         return false;
-     }
-+    const std::string read_back = encoded_cfg_value(root);
-+    rpcsx_android.notice(
-+        "S3CFG write scope=game title=%s path=%s requested=%s readBack=%s "
-+        "applyPhase=%s emuState=%d",
-+        Emu.GetTitleID().c_str(), std::string(path).c_str(),
-+        std::string(valueString).c_str(), read_back.c_str(),
-+        Emu.IsStopped() ? "NEXT_EMULATION_BOOT" : "LIVE",
-+        static_cast<int>(Emu.GetStatus(false)));
-     // Update dirty flag
-     {
-         std::lock_guard lock(g_ingame_settings_mutex);
-@@ -4461,10 +5307,22 @@ extern "C" bool _rpcsx_commitInGameSettingsSession()
-     std::lock_guard lock(g_ingame_settings_mutex);
-     if (!g_ingame_settings_backup) return false;
-     try {
--        Emu.GetCallbacks().save_emu_settings();
-+        // The active g_cfg is an effective global + title tree. Persist only
-+        // its differences from config.yml so a later global edit continues to
-+        // flow to every title using Use Global.
-+        const std::string title_id = Emu.GetTitleID();
-+        cfg_root global;
-+        if (!valid_settings_title_id(title_id) ||
-+            !load_settings_root(global, global_settings_path()) ||
-+            !save_sparse_title_settings(title_id, live_sparse_title_settings(global))) {
-+            rpcsx_android.error("S3CFG commit scope=game title=%s failed to save sparse config",
-+                                 title_id.c_str());
-+            return false;
-+        }
-         g_ingame_settings_backup = g_cfg.to_string();
-         g_ingame_settings_dirty = false;
--        rpcsx_android.notice("FRONTEND_MENU commitSettings");
-+        rpcsx_android.notice("S3CFG commit scope=game title=%s applyPhase=NEXT_EMULATION_BOOT",
-+                             title_id.c_str());
-         return true;
-     } catch (...) { return false; }
- }
-diff --git a/android/src/samba-build-id.cpp b/android/src/samba-build-id.cpp
-index 8aca7dc59..e75a116af 100644
---- a/android/src/samba-build-id.cpp
-+++ b/android/src/samba-build-id.cpp
-@@ -1,7 +1,9 @@
- #include <string>
- 
-+// Samba S3 core build identity — overwritten by build_rpcsx.sh at build time.
-+// Fallback placeholder ensures old binaries are detectable.
- static std::string g_samba_build_id =
--    "rpcsx=27441815c12cca1a4dcb3daec82b513b1a35eed7 samba=62a70942d8c121a7e58c74b6a4e2700cf369c0ae patch_sha256=6468572dbc6dec3ea7d0ad996adeb57dffd96a090d10482ea04d7013abecd5f0 build_type=Debug";
-+    "rpcsx=e8ae1481ab7ba04d5c6bef89dd852aabba2c88ff samba=unknown patch_sha256=unknown build_type=release";
- 
- extern "C" const char* _rpcsx_sambaBuildId() {
-     return g_samba_build_id.c_str();
-diff --git a/ps3fw/sceNpTrophy.cpp b/ps3fw/sceNpTrophy.cpp
-index b6f295e4c..f4048c7e2 100644
---- a/ps3fw/sceNpTrophy.cpp
-+++ b/ps3fw/sceNpTrophy.cpp
-@@ -27,6 +27,8 @@
- 
- LOG_CHANNEL(sceNpTrophy);
- 
-+extern "C" void _rpcsx_android_trophy_unlocked(int trophy_id, const char* trophy_set);
-+
- TrophyNotificationBase::~TrophyNotificationBase() {}
- 
- struct trophy_context_t
-@@ -1140,6 +1142,7 @@ error_code sceNpTrophyUnlockTrophy(ppu_thread& ppu, u32 context, u32 handle,
- 	if (ctxt->tropusr->UnlockTrophy(trophyId, tick->tick, tick->tick))
- 	{
- 		sceNpTrophy.notice("Trophy %d unlocked", trophyId);
-+		_rpcsx_android_trophy_unlocked(trophyId, ctxt->trp_name.c_str());
- 	}
- 
- 	// TODO: Make sure that unlocking platinum trophies is properly implemented
-@@ -1160,6 +1163,7 @@ error_code sceNpTrophyUnlockTrophy(ppu_thread& ppu, u32 context, u32 handle,
- 				tick->tick))
- 		{
- 			sceNpTrophy.success("You unlocked a platinum trophy! Hooray!!!");
-+			_rpcsx_android_trophy_unlocked(unlocked_platinum_id, ctxt->trp_name.c_str());
- 		}
- 	}
- 
-diff --git a/rpcs3/Emu/RSX/RSXThread.cpp b/rpcs3/Emu/RSX/RSXThread.cpp
-index adbf67a19..dfc4a1f55 100644
---- a/rpcs3/Emu/RSX/RSXThread.cpp
-+++ b/rpcs3/Emu/RSX/RSXThread.cpp
-@@ -49,6 +49,10 @@ extern CellGcmOffsetTable offsetTable;
- extern thread_local std::string (*g_tls_log_prefix)();
- extern atomic_t<u32> g_lv2_preempts_taken;
- 
-+#if defined(__ANDROID__)
-+extern "C" void _rpcsx_android_perf_frame_presented(u64 timestamp_us);
-+#endif
-+
- LOG_CHANNEL(perf_log, "PERF");
- 
- template <>
-@@ -2398,6 +2402,16 @@ namespace rsx
- 		}
- 
- 		last_host_flip_timestamp = get_system_time();
-+
-+#if defined(__ANDROID__)
-+		// This is the same guest emu_flip event used by RPCS3's performance
-+		// counters. It represents a rendered/presented emulator frame, unlike
-+		// vblank_count, which is only a display timing counter.
-+		if (info.emu_flip)
-+		{
-+			_rpcsx_android_perf_frame_presented(last_host_flip_timestamp);
-+		}
-+#endif
- 	}
- 
- 	void thread::check_zcull_status(bool framebuffer_swap)
-diff --git a/rpcs3/Loader/TROPUSR.cpp b/rpcs3/Loader/TROPUSR.cpp
-index b94dd35c4..a8d19fbe0 100644
---- a/rpcs3/Loader/TROPUSR.cpp
-+++ b/rpcs3/Loader/TROPUSR.cpp
-@@ -74,6 +74,21 @@ TROPUSRLoader::load_result TROPUSRLoader::Load(std::string_view filepath, std::s
- 	return res;
- }
- 
-+bool TROPUSRLoader::LoadPhysical(std::string_view filepath)
-+{
-+	// This path is deliberately read-only. Calling Load() while the VFS is
-+	// unmounted can fall through to Generate(), which would replace a valid
-+	// user's trophy history with an empty file.
-+	if (!m_file.open(std::string(filepath)))
-+	{
-+		return false;
-+	}
-+
-+	const bool valid = LoadHeader() && LoadTableHeaders() && LoadTables();
-+	m_file.close();
-+	return valid;
-+}
-+
- bool TROPUSRLoader::LoadHeader()
- {
- 	if (!m_file)
-diff --git a/rpcs3/Loader/TROPUSR.h b/rpcs3/Loader/TROPUSR.h
-index 2465b7dc6..c3e4cb483 100644
---- a/rpcs3/Loader/TROPUSR.h
-+++ b/rpcs3/Loader/TROPUSR.h
-@@ -96,6 +96,10 @@ public:
- 	};
- 
- 	[[nodiscard]] load_result Load(std::string_view filepath, std::string_view configpath);
-+	// Read an existing physical TROPUSR.DAT without consulting the emulator VFS
-+	// and, importantly, without generating or overwriting a missing file. The
-+	// Android title browser uses this after a game has been cleanly stopped.
-+	[[nodiscard]] bool LoadPhysical(std::string_view filepath);
- 	[[nodiscard]] bool Save(std::string_view filepath);
- 
- 	[[nodiscard]] u32 GetTrophiesCount() const;
-diff --git a/rpcs3/util/cpu_stats.cpp b/rpcs3/util/cpu_stats.cpp
-index 69814e65f..38d808393 100644
---- a/rpcs3/util/cpu_stats.cpp
-+++ b/rpcs3/util/cpu_stats.cpp
-@@ -97,6 +97,36 @@ namespace utils
- #endif
- 	}
- 
-+	void cpu_stats::reset()
-+	{
-+#ifdef _WIN32
-+		if (m_cpu_query)
-+		{
-+			PdhCloseQuery(m_cpu_query);
-+			m_cpu_query = nullptr;
-+			m_cpu_cores = nullptr;
-+		}
-+
-+		FILETIME ftime, fsys, fuser;
-+		GetSystemTimeAsFileTime(&ftime);
-+		memcpy(&m_last_cpu, &ftime, sizeof(FILETIME));
-+		GetProcessTimes(GetCurrentProcess(), &ftime, &ftime, &fsys, &fuser);
-+		memcpy(&m_sys_cpu, &fsys, sizeof(FILETIME));
-+		memcpy(&m_usr_cpu, &fuser, sizeof(FILETIME));
-+#else
-+		struct tms timeSample;
-+		m_last_cpu = times(&timeSample);
-+		m_sys_cpu = timeSample.tms_stime;
-+		m_usr_cpu = timeSample.tms_utime;
-+#ifdef __linux__
-+		m_previous_idle_time_total = 0;
-+		m_previous_total_time_total = 0;
-+		m_previous_idle_times_per_cpu.clear();
-+		m_previous_total_times_per_cpu.clear();
-+#endif
-+#endif
-+	}
-+
- 	void cpu_stats::init_cpu_query()
- 	{
- #ifdef _WIN32
-diff --git a/rpcs3/util/cpu_stats.hpp b/rpcs3/util/cpu_stats.hpp
-index 260e88a35..93320a76c 100644
---- a/rpcs3/util/cpu_stats.hpp
-+++ b/rpcs3/util/cpu_stats.hpp
-@@ -29,6 +29,8 @@ namespace utils
- 	public:
- 		cpu_stats();
- 		~cpu_stats();
-+		// Restart the sampling baseline without reallocating the collector.
-+		void reset();
- 
- 		double get_usage();
- 
++/** Set when an INSTALL-bounded ppu_initialize left uncached modules for a later step. */
++void set_ppu_install_step_more_work(bool more);
++bool get_ppu_install_step_more_work();
++
+ // Helper that computes PpuProgressSnapshot exactly once, preserving time_left_queue
+ // smoothing state. Both the RSX UI and the Android bridge consume the same snapshot.
+ // Must be called before the show_overlay_message early-continue so the Android path

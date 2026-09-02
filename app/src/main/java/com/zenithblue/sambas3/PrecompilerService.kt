@@ -21,6 +21,7 @@ import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import com.zenithblue.sambas3.utils.Telemetry
 import kotlin.concurrent.thread
+// PreRuntimePpuState / PpuReadinessStore used when INSTALL terminal is FAILED.
 
 enum class PrecompilerServiceAction {
     InstallFirmware,
@@ -89,6 +90,7 @@ class PrecompilerService : Service() {
     private var isForeground = false
     private var installPpuSeen = false
     private var lastInstallTitleId: String? = null
+    private var lastInstallJobId: Long? = null
     private var currentInstallIsFirmware = false
     @Volatile private var jobStartId: Int? = null
     private val mainHandler = android.os.Handler(android.os.Looper.getMainLooper())
@@ -389,24 +391,64 @@ class PrecompilerService : Service() {
         if (!st.ppuActive) {
             if (installPpuSeen) {
                 installPpuSeen = false
-                val terminalTitleId = lastInstallTitleId ?: st.titleId
+                val expectedTitle = lastInstallTitleId
+                val expectedJob = lastInstallJobId
+                val terminalTitleId = st.titleId ?: lastInstallTitleId
                 lastInstallTitleId = null
+                lastInstallJobId = null
+                val decision = InstallPpuTerminalLogic.decide(
+                    installPpuWasSeen = true,
+                    ppuActive = false,
+                    outcome = st.outcome,
+                    terminalTitleId = terminalTitleId,
+                    terminalJobId = st.jobId,
+                    expectedTitleId = expectedTitle,
+                    expectedJobId = expectedJob,
+                )
+                Log.i(
+                    TAG,
+                    "install_ppu_terminal outcome=${st.outcome} title=$terminalTitleId job=${st.jobId} " +
+                        "markReady=${decision.markPreRuntimeReady} reason=${decision.reason}"
+                )
                 if (currentInstallIsFirmware) {
                     FirmwareRepository.progressChannel.value = null
                 } else {
                     GameRepository.activeInstallProgress.value = null
-                    // Import session reached Ready — keep one stable card through READY then remove session,
-                    // letting the real Game (merged via progressId) remain as sole card.
-                    ImportSessionStore.updatePhase(NOTIF_INSTALL.toLong(), ImportPhase.READY, resolvedTitleId = terminalTitleId)
-                    // Delay removal so GamesScreen can merge before session disappears
-                    mainHandler.postDelayed({ ImportSessionStore.remove(NOTIF_INSTALL.toLong()) }, 1200)
-                    // Chain to headless prelaunch preparation on Home (no Activity, no Surface)
-                    if (terminalTitleId != null) {
-                        try {
-                            com.zenithblue.sambas3.ppu.ImportPpuPreparationCoordinator.onInstallPpuSuccess(this@PrecompilerService, terminalTitleId)
-                        } catch (e: Exception) {
-                            Log.w(TAG, "Coordinator trigger failed: ${e.message}")
+                    if (decision.markPreRuntimeReady) {
+                        // Import session reached Ready — keep one stable card through READY then remove session,
+                        // letting the real Game (merged via progressId) remain as sole card.
+                        ImportSessionStore.updatePhase(NOTIF_INSTALL.toLong(), ImportPhase.READY, resolvedTitleId = terminalTitleId)
+                        // Delay removal so GamesScreen can merge before session disappears
+                        mainHandler.postDelayed({ ImportSessionStore.remove(NOTIF_INSTALL.toLong()) }, 1200)
+                        if (terminalTitleId != null) {
+                            try {
+                                com.zenithblue.sambas3.ppu.ImportPpuPreparationCoordinator.onInstallPpuSuccess(
+                                    this@PrecompilerService,
+                                    terminalTitleId
+                                )
+                            } catch (e: Exception) {
+                                Log.w(TAG, "Coordinator trigger failed: ${e.message}")
+                            }
                         }
+                    } else {
+                        // FAILED/CANCELED/stale/wrong-title/wrong-job — never manufacture PreRuntime READY.
+                        if (st.outcome == CompileOutcome.FAILED && !terminalTitleId.isNullOrBlank()) {
+                            try {
+                                PpuReadinessStore.setPreRuntimeState(
+                                    this@PrecompilerService,
+                                    terminalTitleId,
+                                    PreRuntimePpuState.FAILED
+                                )
+                            } catch (e: Exception) {
+                                Log.w(TAG, "Failed to persist FAILED preRuntime: ${e.message}")
+                            }
+                        }
+                        ImportSessionStore.remove(NOTIF_INSTALL.toLong())
+                        Log.w(
+                            TAG,
+                            "install_ppu_not_ready reason=${decision.reason} outcome=${st.outcome} " +
+                                "title=$terminalTitleId — PreRuntime READY not set"
+                        )
                     }
                 }
                 jobStartId?.let { stopForegroundAndSelf(it) }
@@ -419,6 +461,7 @@ class PrecompilerService : Service() {
         }
         installPpuSeen = true
         if (st.titleId != null) lastInstallTitleId = st.titleId
+        if (st.jobId > 0L) lastInstallJobId = st.jobId
         val title = getString(R.string.compiling_ppu_title)
         val msg = st.ppuMsg ?: title
         ProgressRepository.updateForeground(

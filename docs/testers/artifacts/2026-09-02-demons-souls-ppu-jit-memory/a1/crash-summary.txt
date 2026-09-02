@@ -1,0 +1,55 @@
+09-02 21:54:22.718 25970 25970 I S3PPU   : event=install_ppu_active progress_id=3000 msg=Progress: module 90 of 233 (11m remainin percent=38 max=100 session=S3-1788365677285-d8e7
+09-02 21:54:22.725 25970 26340 W RPCS3   : ProgressMessageDialog::ProgressBarSetMsg(0, Progress: module 90 of 233 (11m remaining))
+09-02 21:54:27.607 25970 26340 W RPCS3   : ProgressMessageDialog::ProgressBarSetMsg(0, Progress: module 91 of 233 (11m remaining))
+09-02 21:54:27.608 25970 25970 I S3PPU   : event=install_ppu_active progress_id=3000 msg=Progress: module 91 of 233 (11m remainin percent=39 max=100 session=S3-1788365677285-d8e7
+09-02 21:54:32.999 25970 26340 W RPCS3   : ProgressMessageDialog::ProgressBarSetMsg(0, Progress: module 92 of 233 (11m remaining))
+09-02 21:54:33.000 25970 25970 I S3PPU   : event=install_ppu_active progress_id=3000 msg=Progress: module 92 of 233 (11m remainin percent=39 max=100 session=S3-1788365677285-d8e7
+09-02 21:54:37.677 25970 26340 W RPCS3   : ProgressMessageDialog::ProgressBarSetMsg(0, Progress: module 93 of 233 (11m remaining))
+09-02 21:54:37.681 25970 25970 I S3PPU   : event=install_ppu_active progress_id=3000 msg=Progress: module 93 of 233 (11m remainin percent=39 max=100 session=S3-1788365677285-d8e7
+09-02 21:54:42.157 25970 26340 W RPCS3   : ProgressMessageDialog::ProgressBarSetMsg(0, Progress: module 94 of 233 (11m remaining))
+09-02 21:54:42.158 25970 25970 I S3PPU   : event=install_ppu_active progress_id=3000 msg=Progress: module 94 of 233 (11m remainin percent=40 max=100 session=S3-1788365677285-d8e7
+09-02 21:54:46.997 25970 26340 W RPCS3   : ProgressMessageDialog::ProgressBarSetMsg(0, Progress: module 95 of 233 (11m remaining))
+09-02 21:54:46.999 25970 25970 I S3PPU   : event=install_ppu_active progress_id=3000 msg=Progress: module 95 of 233 (11m remainin percent=40 max=100 session=S3-1788365677285-d8e7
+09-02 21:54:52.057 25970 26340 W RPCS3   : ProgressMessageDialog::ProgressBarSetMsg(0, Progress: module 96 of 233 (10m remaining))
+09-02 21:54:52.058 25970 25970 I S3PPU   : event=install_ppu_active progress_id=3000 msg=Progress: module 96 of 233 (10m remainin percent=41 max=100 session=S3-1788365677285-d8e7
+09-02 21:54:57.147 25970 26340 W RPCS3   : ProgressMessageDialog::ProgressBarSetMsg(0, Progress: module 97 of 233 (10m remaining))
+09-02 21:54:57.153 25970 25970 I S3PPU   : event=install_ppu_active progress_id=3000 msg=Progress: module 97 of 233 (10m remainin percent=41 max=100 session=S3-1788365677285-d8e7
+09-02 21:55:02.377 25970 26340 W RPCS3   : ProgressMessageDialog::ProgressBarSetMsg(0, Progress: module 98 of 233 (10m remaining))
+09-02 21:55:02.380 25970 25970 I S3PPU   : event=install_ppu_active progress_id=3000 msg=Progress: module 98 of 233 (10m remainin percent=42 max=100 session=S3-1788365677285-d8e7
+09-02 21:55:07.387 25970 26340 W RPCS3   : ProgressMessageDialog::ProgressBarSetMsg(0, Progress: module 99 of 233 (10m remaining))
+09-02 21:55:07.388 25970 25970 I S3PPU   : event=install_ppu_active progress_id=3000 msg=Progress: module 99 of 233 (10m remainin percent=42 max=100 session=S3-1788365677285-d8e7
+09-02 21:55:13.814 25970 25999 I scudo   : Can't populate more pages for size class 3120.
+09-02 21:55:13.923 25970 25999 I scudo   : Can't populate more pages for size class 4112.
+09-02 21:55:14.035 25970 25999 I scudo   : Can't populate more pages for size class 4624.
+09-02 21:55:14.133 25970 25999 I scudo   : Can't populate more pages for size class 7120.
+09-02 21:55:14.219 25970 25999 I scudo   : Can't populate more pages for size class 8720.
+09-02 21:55:14.288 25970 25999 I scudo   : Can't populate more pages for size class 11664.
+09-02 21:55:14.345 25970 25999 I scudo   : Can't populate more pages for size class 14224.
+09-02 21:55:14.396 25970 25999 I scudo   : Can't populate more pages for size class 16400.
+09-02 21:55:14.447 25970 25999 I scudo   : Can't populate more pages for size class 18448.
+09-02 21:55:14.485 25970 25999 I scudo   : Can't populate more pages for size class 23056.
+09-02 21:55:14.519 25970 25999 I scudo   : Can't populate more pages for size class 29456.
+09-02 21:55:14.543 25970 25999 I scudo   : Can't populate more pages for size class 33296.
+09-02 21:55:14.559 25970 25999 I scudo   : Can't populate more pages for size class 65552.
+09-02 21:55:14.811 25970 25999 F libc    : Fatal signal 6 (SIGABRT), code -1 (SI_QUEUE) in tid 25999 (Thread-6), pid 25970 (ithblue.sambas3)
+09-02 21:55:14.882 25970 25983 E libc++abi: terminating due to uncaught exception of type St9bad_alloc: std::bad_alloc
+09-02 21:55:14.889 25970 25989 E libc++abi: terminating due to uncaught exception of type St9bad_alloc: std::bad_alloc
+09-02 21:55:15.715 27040 27040 F DEBUG   :       #01 pc 00000000044956ac  /data/app/~~moIId_P1Xta3Zr4qVe5ZXA==/com.zenithblue.sambas3-3-u81uW3ksLh99doItQhNw==/lib/arm64/librpcsx-android.so (llvm::report_bad_alloc_error(char const*, bool)+128) (BuildId: c519f557ef8b98ed2ebfc64d928336e1e7514fd2)
+09-02 21:55:13.814 25970 25999 I scudo   : Can't populate more pages for size class 3120.
+09-02 21:55:13.923 25970 25999 I scudo   : Can't populate more pages for size class 4112.
+09-02 21:55:14.035 25970 25999 I scudo   : Can't populate more pages for size class 4624.
+09-02 21:55:14.133 25970 25999 I scudo   : Can't populate more pages for size class 7120.
+09-02 21:55:14.219 25970 25999 I scudo   : Can't populate more pages for size class 8720.
+09-02 21:55:14.288 25970 25999 I scudo   : Can't populate more pages for size class 11664.
+09-02 21:55:14.345 25970 25999 I scudo   : Can't populate more pages for size class 14224.
+09-02 21:55:14.396 25970 25999 I scudo   : Can't populate more pages for size class 16400.
+09-02 21:55:14.447 25970 25999 I scudo   : Can't populate more pages for size class 18448.
+09-02 21:55:14.485 25970 25999 I scudo   : Can't populate more pages for size class 23056.
+09-02 21:55:14.519 25970 25999 I scudo   : Can't populate more pages for size class 29456.
+09-02 21:55:14.543 25970 25999 I scudo   : Can't populate more pages for size class 33296.
+09-02 21:55:14.559 25970 25999 I scudo   : Can't populate more pages for size class 65552.
+09-02 21:55:14.811 25970 25999 F libc    : Fatal signal 6 (SIGABRT), code -1 (SI_QUEUE) in tid 25999 (Thread-6), pid 25970 (ithblue.sambas3)
+09-02 21:55:14.882 25970 25983 E libc++abi: terminating due to uncaught exception of type St9bad_alloc: std::bad_alloc
+09-02 21:55:14.889 25970 25989 E libc++abi: terminating due to uncaught exception of type St9bad_alloc: std::bad_alloc
+09-02 21:55:15.715 27040 27040 F DEBUG   : pid: 25970, tid: 25999, name: Thread-6  >>> com.zenithblue.sambas3 <<<
+09-02 21:55:15.715 27040 27040 F DEBUG   :       #01 pc 00000000044956ac  /data/app/~~moIId_P1Xta3Zr4qVe5ZXA==/com.zenithblue.sambas3-3-u81uW3ksLh99doItQhNw==/lib/arm64/librpcsx-android.so (llvm::report_bad_alloc_error(char const*, bool)+128) (BuildId: c519f557ef8b98ed2ebfc64d928336e1e7514fd2)
