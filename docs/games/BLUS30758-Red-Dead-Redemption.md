@@ -5,11 +5,11 @@
 | Field | Value |
 |---|---|
 | Title | Red Dead Redemption: Game of the Year Edition |
-| TitleID | `BLUS30758` (also applicable to `BLES01294`, `BLUS30418`, `BLES00680`, `BLJM60233`, `BLJM60395`, `BLAS50404`) |
+| TitleID | `BLUS30758` (validated on-device; also mapped to `BLES01294`, `BLUS30418`, `BLES00680`, `BLJM60233`, `BLJM60395`, `BLAS50404` as family mapping, NOT individually device-tested) |
 | Path | `/storage/emulated/0/PS3/Red Dead Redemption - Game of the Year Edition (USA) (EnFrDeEsIt)/Red Dead Redemption - Game of the Year Edition (USA) (En,Fr,De,Es,It).iso` |
 | Tested Device | `7d6afed8` (`adb-7d6afed8-mU47CV._adb-tls-connect._tcp`) — OnePlus Pad 2 (`OPD2403`), Qualcomm Snapdragon 8 Gen 3 (`SM8650` / `pineapple`), 12 GB RAM, Android 16 |
 | GPU & Driver | Qualcomm Adreno (TM) 750 with **Mesa Turnip 26.3 - Latest** (`libvulkan_freedreno.so`, Vulkan 1.3.279) |
-| Current Result | **PASS — 3D Rendering & Intro Sequence Verified**; boots cleanly, builds PPU/SPU cache, renders animated 3D Revolver cylinder, purple Rockstar Games 3D logo, and yellow Rockstar San Diego 3D logo without crash or driver fault |
+| Current Result | **PARTIAL PASS — boot/intro 3D rendering verified.** Proves PPU/SPU compile, revolver intro, Rockstar Games + Rockstar San Diego logos. Does NOT yet prove Press Start, main menu, new/load game, controllable 3D gameplay, 10+/20-min stability, or repeat boot — those stages are tracked below and remain open. |
 | Renderer | Vulkan, 1280×720, 100% scale, Async Shader Recompiler, Write & Read Color Buffers enabled, Driver Wake-Up Delay 200, Max SPURS Threads 4 |
 | Logs & Captures | `docs/games/BLUS30758/` |
 
@@ -86,16 +86,26 @@ Added automated curated overrides for all Red Dead Redemption game IDs (`BLUS307
 ```kotlin
 // Red Dead Redemption: requires Write Color Buffers & Read Color Buffers for in-game lighting/menus,
 // Driver Wake-Up Delay: 200 to prevent SPU/driver sync deadlock, SPU loop detection: true,
-// Relaxed ZCULL Sync: true for framerate, Max SPURS Threads: 4 to prevent CPU starvation on mobile
+// Relaxed ZCULL Sync: true for framerate, Max SPURS Threads: 4 to prevent CPU starvation on mobile.
+// Handle RSX Memory Tiling: false — on the tested Adreno/Turnip path enabling tiling reproduces a
+// DMA-fence vk::wait_for_event stall; keep disabled for this title (crash avoidance, not a general
+// claim about tiling emulation on unified-memory GPUs).
 "BLUS30758", "BLES01294", "BLUS30418", "BLES00680", "BLJM60233", "BLJM60395", "BLAS50404" -> mapOf(
     "Video@@Write Color Buffers" to "true",
     "Video@@Read Color Buffers" to "true",
+    "Video@@Handle RSX Memory Tiling" to "false",
     "Video@@Driver Wake-Up Delay" to "200",
     "Core@@SPU loop detection" to "true",
     "Video@@Relaxed ZCULL Sync" to "true",
     "Core@@Max SPURS Threads" to "4"
 )
 ```
+
+Compatibility defaults are product-owned data, separate from explicit user
+overrides: user per-title values win at boot, Reset/Clear operate on user
+state only, and the profile is applied through a crash-safe scoped
+global-config lease (snapshot → apply → exact restore on exit, stale-lease
+recovery before the next boot), so no RDR value leaks into other titles.
 
 ### 2. Settings Backend Audit Registration (`SettingsBackendAudit.kt`)
 Registered `Core@@Max SPURS Threads` and `Core@@Preferred SPU Threads` in `knownSettings`:
@@ -108,11 +118,52 @@ KnownSetting("Core@@Preferred SPU Threads", "int"),
 ```
 
 ### 3. GPU Driver Configuration
-Configured SambaS3 to load Mesa **Turnip 26.3** (`turnip-26.3/libvulkan_freedreno.so`) for the Adreno 750, bypassing Qualcomm's proprietary driver crash.
+SambaS3 resolves a title/device-scoped compatibility driver at boot
+(`GpuDriverSelection.resolveCompatBootDriverForBoot`): RDR-family title +
+Adreno GPU + user still on system/default + validated installed bundled
+Turnip ⇒ Turnip applies for THIS boot only. The stored global driver
+preference is never mutated and is re-applied on exit. Explicit user driver
+choice always wins; Mali/non-Adreno titles are never overridden. If the
+validated Turnip is absent, the boot falls back to the system driver and logs
+`reason=turnip-missing` (the title is NOT reported fixed in that state).
+
+Previously the Turnip test was manual device state. The resolver makes the
+safe-driver behavior product logic instead of test setup.
 
 ---
 
-## 3. On-Device Verification
+## 3. Acceptance Stages (explicit — no single PASS before all are green)
+
+| Stage | Status | Evidence |
+|---|---|---|
+| Boot + PPU/SPU compile | PASS | `rdr_loading_ppu.png`, `rdr_building_spu.png` |
+| Revolver intro 3D | PASS | `rdr_revolver_intro.png` |
+| Rockstar Games logo | PASS | `rdr_rockstar_games_logo.png` |
+| Rockstar San Diego logo | PASS | `rdr_rockstar_sandiego_logo.png` |
+| Press Start | OPEN | — |
+| Main menu | OPEN | — |
+| New/load game → controllable 3D gameplay | OPEN | — |
+| 10-min gameplay | OPEN | — |
+| 20-min gameplay (unchanged build) | OPEN | — |
+| Repeat boot | OPEN | — |
+| Background/resume + clean exit | OPEN | — |
+
+## 4. Curated Profile Evidence Table
+
+| Setting | Candidate | Evidence | Final classification |
+|---|---|---|---|
+| Write Color Buffers | true | Required for lighting/menus on DS + RDR intro render | Required for correct rendering |
+| Read Color Buffers | true | RAGE deferred passes read back render targets | Required for correct rendering |
+| Handle RSX Memory Tiling | false | `tiling=true` reproduces `vk::wait_for_event` DMA-fence stall on tested Adreno/Turnip path | Required for crash avoidance (title-scoped) |
+| Driver Wake-Up Delay | 200 | Prevents SPU/RSX race on command submission | Required for crash avoidance |
+| SPU loop detection | true | Optimizes SPU spin loops | Recommended for performance |
+| Max SPURS Threads | 4 | 6 threads pegged 8-core mobile CPU (~700%), starved UI; 4 restores headroom | Recommended for performance (device-specific) |
+| Relaxed ZCULL Sync | true | Prevents ZCULL sync stalls | Recommended for performance |
+| GPU driver | Bundled Turnip 26.3 (boot-only) | Qualcomm `vulkan.adreno.so` SIGSEGV in descriptor/pipeline path; Turnip compiles cleanly | Device-specific driver workaround |
+
+---
+
+## 5. On-Device Verification
 
 ### Test Device Specifications
 - **Device Serial:** `7d6afed8` (`adb-7d6afed8-mU47CV._adb-tls-connect._tcp`)
@@ -163,7 +214,7 @@ From `TTY.log` and `RPCSX.log` during test execution:
 
 ---
 
-## 4. Summary of Configuration Guidelines
+## 6. Summary of Configuration Guidelines
 
 | Setting | Recommended Value | Why |
 |---|---|---|

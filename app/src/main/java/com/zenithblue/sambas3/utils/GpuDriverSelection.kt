@@ -11,6 +11,12 @@ private const val TAG = "GpuDriverSelection"
 /**
  * Applies the stored GPU driver selection to the native emulator.
  * Handles Adreno 830 SYSMEM hint for the experimental A8XX package when catalog requires it.
+ *
+ * RDR compatibility (Red Dead Redemption on known-bad Adreno system drivers):
+ * [resolveCompatBootDriver] answers whether this boot should use a validated
+ * bundled Turnip INSTEAD of the stored selection. It is boot-only: it never
+ * writes GeneralSettings. [restoreStoredSelection] re-applies the stored
+ * selection after the compat-booted title exits.
  */
 object GpuDriverSelection {
 
@@ -85,6 +91,131 @@ object GpuDriverSelection {
         val entry = catalog.drivers.find { it.id == metadata.bundledId } ?: return false
         val info = AdrenoGpuDetector.detect()
         return AdrenoGpuDetector.shouldForceSysmem(entry, info)
+    }
+
+    // ── RDR compatibility driver (boot-only, never persisted) ──────────────
+
+    /** RDR family; only BLUS30758 has on-device Turnip validation, the rest are family mapping. */
+    val RDR_COMPAT_FAMILY = setOf(
+        "BLUS30758", "BLES01294", "BLUS30418", "BLES00680", "BLJM60233", "BLJM60395", "BLAS50404"
+    )
+
+    /** Device-validated member of the RDR family. */
+    const val RDR_VALIDATED_TITLE = "BLUS30758"
+
+    data class CurrentDriverSelection(val selectedLabel: String, val driverPath: String) {
+        companion object {
+            fun read(): CurrentDriverSelection = CurrentDriverSelection(
+                selectedLabel = (GeneralSettings["selected_gpu_driver"] as? String)?.ifBlank { "Default" } ?: "Default",
+                driverPath = (GeneralSettings["gpu_driver_path"] as? String).orEmpty()
+            )
+        }
+    }
+
+    data class CompatBootDriverSpec(
+        val entryId: String,
+        val libraryName: String,
+        val label: String,
+        val reason: String,
+    )
+
+    data class CompatBootDriver(
+        val driverDir: File,
+        val libraryName: String,
+        val label: String,
+        val bundledId: String,
+        val reason: String,
+    )
+
+    fun isRdrCompatTitle(titleId: String?): Boolean =
+        !titleId.isNullOrBlank() && RDR_COMPAT_FAMILY.contains(titleId.uppercase())
+
+    /**
+     * Pure compatibility decision. Non-null only when ALL hold:
+     * RDR-family title + Adreno GPU + user still on system/default + a
+     * compatible installed bundled Turnip validates. Explicit user driver
+     * choice always wins (null). Mali/non-Adreno always null.
+     */
+    fun resolveCompatBootDriver(
+        titleId: String?,
+        gpuInfo: AdrenoGpuInfo,
+        current: CurrentDriverSelection,
+        compatibleEntries: List<BundledGpuDriverEntry>,
+        installedBundledIds: Set<String>,
+    ): CompatBootDriverSpec? {
+        if (!isRdrCompatTitle(titleId)) return null
+        if (!gpuInfo.isAdreno) {
+            Log.i(TAG, "S3GPU compat title=$titleId verdict=system reason=non-adreno")
+            return null
+        }
+        if (current.selectedLabel != "Default" || current.driverPath.isNotBlank()) {
+            Log.i(TAG, "S3GPU compat title=$titleId verdict=stored reason=explicit-user-driver")
+            return null
+        }
+        val entry = chooseCompatEntry(compatibleEntries, installedBundledIds)
+        if (entry == null) {
+            Log.w(TAG, "S3GPU compat title=$titleId verdict=system reason=turnip-missing")
+            return null
+        }
+        val reason = "rdr-adreno-system+turnip:${entry.id}"
+        Log.i(TAG, "S3GPU compat title=$titleId verdict=turnip entry=${entry.id} reason=$reason")
+        return CompatBootDriverSpec(entry.id, entry.libraryName, entry.displayName, reason)
+    }
+
+    /**
+     * Rank compatible entries: recommended role first, then compatibility
+     * role; experimental entries are never auto-selected. First entry whose
+     * bundled id is installed wins.
+     */
+    internal fun chooseCompatEntry(
+        compatibleEntries: List<BundledGpuDriverEntry>,
+        installedBundledIds: Set<String>,
+    ): BundledGpuDriverEntry? {
+        val installed = compatibleEntries.filter { it.id in installedBundledIds && !it.isExperimental }
+        return installed.minByOrNull { entry ->
+            when {
+                entry.isRecommended -> 0
+                entry.isCompatibility -> 1
+                else -> 2
+            }
+        }
+    }
+
+    /**
+     * Device wrapper: loads catalog + installed set, validates the library,
+     * and returns the boot-only driver. Never writes GeneralSettings.
+     */
+    fun resolveCompatBootDriverForBoot(context: Context, titleId: String?): CompatBootDriver? {
+        val info = AdrenoGpuDetector.detect()
+        val current = CurrentDriverSelection.read()
+        val entries = GpuDriverHelper.compatibleBundledEntries(context, info)
+        val installed = GpuDriverHelper.getInstalledDrivers(context)
+        val installedIds = installed.values.mapNotNull { it.bundledId }.toSet()
+        val spec = resolveCompatBootDriver(titleId, info, current, entries, installedIds) ?: return null
+        val dir = installed.entries.firstOrNull { it.value.bundledId == spec.entryId }?.key ?: return null
+        if (!GpuDriverHelper.validateInstalledLibrary(dir, spec.libraryName)) {
+            Log.w(TAG, "S3GPU compat title=$titleId entry=${spec.entryId} verdict=system reason=library-invalid")
+            return null
+        }
+        return CompatBootDriver(dir, spec.libraryName, spec.label, spec.entryId, spec.reason)
+    }
+
+    /**
+     * Apply a compat driver for this boot only (no preference mutation), or
+     * re-apply the stored selection after a compat-booted title exits.
+     */
+    fun applyCompatBootDriver(override: CompatBootDriver, nativeLibraryDir: String): Boolean {
+        val ok = RPCSX.instance.setCustomDriver(override.driverDir.path, override.libraryName, nativeLibraryDir)
+        Log.i(TAG, "S3GPU compat-apply label=${override.label} ok=$ok")
+        return ok
+    }
+
+    fun restoreStoredSelection(context: Context, nativeLibraryDir: String): Boolean {
+        val beforeLabel = (GeneralSettings["selected_gpu_driver"] as? String)?.ifBlank { "Default" } ?: "Default"
+        val ok = applyStoredSelection(context, nativeLibraryDir)
+        val afterLabel = (GeneralSettings["selected_gpu_driver"] as? String)?.ifBlank { "Default" } ?: "Default"
+        Log.i(TAG, "S3GPU restore-stored before=$beforeLabel after=$afterLabel ok=$ok")
+        return ok
     }
 
     private fun applySysmemIfNeeded(context: Context, driverDir: File) {

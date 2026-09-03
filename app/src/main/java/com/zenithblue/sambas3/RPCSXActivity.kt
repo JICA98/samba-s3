@@ -29,6 +29,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.zenithblue.sambas3.databinding.ActivityRpcs3Binding
 import com.zenithblue.sambas3.dialogs.AlertDialogQueue
 import com.zenithblue.sambas3.gameconfig.GameSettingsOverrides
+import com.zenithblue.sambas3.utils.GpuDriverSelection
 import com.zenithblue.sambas3.overlay.State
 import com.zenithblue.sambas3.ppu.FreshBootFramePhase
 import com.zenithblue.sambas3.ppu.FreshBootFrameValidator
@@ -124,6 +125,9 @@ class RPCSXActivity : ComponentActivity(), EmulationHost {
     private var isRecoveryRecreate = false
     private var finishReason = EmulatorActivityFinishReason.None
     private var externalStopReason: EmulatorStopReason? = null
+    // True when this boot applied a title/device-scoped compatibility driver
+    // override (boot-only Turnip). Restored to the stored selection on exit.
+    private var compatDriverApplied = false
     private val interactionLock = InteractionLock()
     private var operationUiState: SavestateOperationUiState = SavestateOperationUiState.Hidden
     override val activityInstanceId = NEXT_ACTIVITY_ID.incrementAndGet()
@@ -534,6 +538,20 @@ class RPCSXActivity : ComponentActivity(), EmulationHost {
                 // over a snapshot. Exact originals return on clean exit.
                 GameSettingsOverrides.beginScopedLeaseForBoot(this@RPCSXActivity, gameTitleId)
             }
+            if (!intent.getBooleanExtra(EXTRA_SAFE_RETRY, false)) {
+                // Title/device-scoped compatibility driver: RDR on a known-bad
+                // Adreno system driver boots a validated bundled Turnip for
+                // THIS boot only. The stored global driver preference is never
+                // mutated; it is re-applied on exit (see restoreCompatDriver).
+                compatDriverApplied = runCatching {
+                    val override = GpuDriverSelection.resolveCompatBootDriverForBoot(
+                        this@RPCSXActivity, gameTitleId
+                    )
+                    if (override != null) {
+                        GpuDriverSelection.applyCompatBootDriver(override, applicationInfo.nativeLibraryDir)
+                    } else false
+                }.getOrDefault(false)
+            }
             val bootResult = BootResult.fromInt(
                 if (bootMode != EmulatorBootMode.FreshGame) {
                     bootSavestateSerialized(bootPath, gamePath)
@@ -942,6 +960,7 @@ class RPCSXActivity : ComponentActivity(), EmulationHost {
         }
         GameSessionService.stop(this)
         try { GameSettingsOverrides.endScopedLeaseAfterBoot(this) } catch (_: Exception) {}
+        restoreCompatDriver()
         Log.i("S3HOST", "finish-external-stop activity=$activityInstanceId requestId=$requestId")
         finish()
     }
@@ -1302,6 +1321,20 @@ class RPCSXActivity : ComponentActivity(), EmulationHost {
             RPCSX.instance.bootSavestate(savestatePath, originalGamePath)
         }
 
+    /**
+     * Re-apply the stored GPU driver selection after a compat-override boot
+     * exits. No-op unless this activity applied a boot-only override.
+     */
+    private fun restoreCompatDriver() {
+        if (!compatDriverApplied) return
+        compatDriverApplied = false
+        try {
+            GpuDriverSelection.restoreStoredSelection(this, applicationInfo.nativeLibraryDir)
+        } catch (e: Exception) {
+            Log.w("S3GPU", "compat-restore failed: ${e.message}")
+        }
+    }
+
     /** Map a semantic menu command to coordinator intents. Returns true if consumed. */
     private fun handleMenuCommand(command: MenuCommand): Boolean {
         return when (command) {
@@ -1412,6 +1445,7 @@ class RPCSXActivity : ComponentActivity(), EmulationHost {
             RPCSX.state.value = nativeState
             if (nativeState == EmulatorState.Stopped && !isRecoveryRecreate) {
                 try { GameSettingsOverrides.endScopedLeaseAfterBoot(this) } catch (_: Exception) {}
+                restoreCompatDriver()
                 val myPath = try { intent.getStringExtra("path") } catch (_: Exception) { null }
                 if (myPath != null && RPCSX.activeGame.value == myPath) {
                     Log.i("S3LIFE", "onDestroy Stopped clearing stale activeGame=$myPath")

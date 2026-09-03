@@ -106,10 +106,14 @@ object GameSettingsOverrides {
             )
             // Red Dead Redemption: requires Write Color Buffers & Read Color Buffers for in-game lighting/menus,
             // Driver Wake-Up Delay: 200 to prevent SPU/driver sync deadlock, SPU loop detection: true,
-            // Relaxed ZCULL Sync: true for framerate, Max SPURS Threads: 4 to prevent CPU starvation on mobile
+            // Relaxed ZCULL Sync: true for framerate, Max SPURS Threads: 4 to prevent CPU starvation on mobile.
+            // Handle RSX Memory Tiling: false — on the tested Adreno/Turnip path enabling tiling reproduces a
+            // DMA-fence vk::wait_for_event stall; keep disabled for this title (crash avoidance, not a general
+            // claim about tiling emulation on unified-memory GPUs).
             "BLUS30758", "BLES01294", "BLUS30418", "BLES00680", "BLJM60233", "BLJM60395", "BLAS50404" -> mapOf(
                 "Video@@Write Color Buffers" to "true",
                 "Video@@Read Color Buffers" to "true",
+                "Video@@Handle RSX Memory Tiling" to "false",
                 "Video@@Driver Wake-Up Delay" to "200",
                 "Core@@SPU loop detection" to "true",
                 "Video@@Relaxed ZCULL Sync" to "true",
