@@ -495,6 +495,9 @@ extern "C" JNIEXPORT jboolean JNICALL Java_com_zenithblue_sambas3_RPCSX_settings
 
 extern "C" JNIEXPORT jstring JNICALL
 Java_com_zenithblue_sambas3_RPCSX_settingsGetGlobal(JNIEnv *env, jobject, jstring jpath) {
+  // Settings-compatibility fallback (not PPU): packaged cores export only
+  // _rpcsx_settingsGet/_rpcsx_settingsSet today, so Global reads fall back to
+  // the base settings node. Keep until the core gains real Global symbols.
   if (!rpcsxLib.settingsGetGlobal) {
     if (rpcsxLib.settingsGet) {
       return wrap(env, rpcsxLib.settingsGet(unwrap(env, jpath)));
@@ -506,6 +509,7 @@ Java_com_zenithblue_sambas3_RPCSX_settingsGetGlobal(JNIEnv *env, jobject, jstrin
 
 extern "C" JNIEXPORT jboolean JNICALL
 Java_com_zenithblue_sambas3_RPCSX_settingsSetGlobal(JNIEnv *env, jobject, jstring jpath, jstring jvalue) {
+  // Settings-compatibility fallback (not PPU): see settingsGetGlobal above.
   if (!rpcsxLib.settingsSetGlobal) {
     if (rpcsxLib.settingsSet) {
       return rpcsxLib.settingsSet(unwrap(env, jpath), unwrap(env, jvalue));
@@ -546,6 +550,9 @@ Java_com_zenithblue_sambas3_RPCSX_gameSettingsOverridesClear(
 extern "C" JNIEXPORT jstring JNICALL
 Java_com_zenithblue_sambas3_RPCSX_settingsGetEffective(
     JNIEnv *env, jobject, jstring jtitleId, jstring jpath) {
+  // Settings-compatibility fallback (not PPU): without a core Effective
+  // symbol, resolve through Global/base nodes. Per-title isolation is owned
+  // app-side by the scoped settings lease (GameSettingsOverrides).
   if (!rpcsxLib.settingsGetEffective) {
     if (rpcsxLib.settingsGetGlobal) {
       return wrap(env, rpcsxLib.settingsGetGlobal(unwrap(env, jpath)));
