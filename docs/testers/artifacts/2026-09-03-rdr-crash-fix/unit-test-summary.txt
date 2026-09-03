@@ -1,0 +1,2 @@
+app/build/test-results/testStandardDebugUnitTest: suites=70 tests=428 skipped=0 failures=0 errors=0
+app/build/test-results/testPlaystoreDebugUnitTest: suites=69 tests=425 skipped=0 failures=0 errors=0

@@ -1,0 +1,6 @@
+model=2311DRK48I brand=POCO android=16 sdk=36 vulkan=mali soc=MT6897 Mali-G615 MC6
+serial=Y5WWBMJVOZSK4HU8
+PS3 dir:
+God of War III (USA) (v02.00).iso
+Grand Theft Auto - San Andreas (USA) (En,Fr,De,Es,It,Ru).iso
+PS3UPDAT.PUP
