@@ -529,8 +529,10 @@ class RPCSXActivity : ComponentActivity(), EmulationHost {
             val gameTitleId = GameSettingsOverrides.resolveTitleId(gamePath, this@RPCSXActivity)
                 ?: GameSettingsOverrides.resolveTitleId(bootPath, this@RPCSXActivity)
             if (!gameTitleId.isNullOrBlank()) {
-                Log.i("S3BOOT", "applying per-game overrides and curated defaults for $gameTitleId")
-                GameSettingsOverrides.applyForGame(this@RPCSXActivity, gameTitleId)
+                // Scoped settings lease: a crashed session's globals are
+                // restored first, then the resolved title profile is applied
+                // over a snapshot. Exact originals return on clean exit.
+                GameSettingsOverrides.beginScopedLeaseForBoot(this@RPCSXActivity, gameTitleId)
             }
             val bootResult = BootResult.fromInt(
                 if (bootMode != EmulatorBootMode.FreshGame) {
@@ -939,6 +941,7 @@ class RPCSXActivity : ComponentActivity(), EmulationHost {
             EmulatorActivityFinishReason.ExplicitExit
         }
         GameSessionService.stop(this)
+        try { GameSettingsOverrides.endScopedLeaseAfterBoot(this) } catch (_: Exception) {}
         Log.i("S3HOST", "finish-external-stop activity=$activityInstanceId requestId=$requestId")
         finish()
     }
@@ -1408,6 +1411,7 @@ class RPCSXActivity : ComponentActivity(), EmulationHost {
             val nativeState = RPCSX.getState()
             RPCSX.state.value = nativeState
             if (nativeState == EmulatorState.Stopped && !isRecoveryRecreate) {
+                try { GameSettingsOverrides.endScopedLeaseAfterBoot(this) } catch (_: Exception) {}
                 val myPath = try { intent.getStringExtra("path") } catch (_: Exception) { null }
                 if (myPath != null && RPCSX.activeGame.value == myPath) {
                     Log.i("S3LIFE", "onDestroy Stopped clearing stale activeGame=$myPath")

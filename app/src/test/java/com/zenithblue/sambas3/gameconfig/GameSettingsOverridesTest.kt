@@ -266,6 +266,163 @@ class GameSettingsOverridesTest {
 
     // ── resolveTitleId segment heuristic lives in TitleIdResolverTest ────────
 
+    // ── Compatibility / explicit-user separation (§56) ─────────────────────
+
+    @Test
+    fun explicit_user_map_excludes_compat_and_user_value_wins_resolved() {
+        val wcb = "Video@@Write Color Buffers"
+        // No explicit state: explicit map empty, resolved falls back to compat.
+        assertTrue(GameSettingsOverrides.explicitUserOverrides(store, emptyMap(), "BLUS30758").isEmpty())
+        assertEquals("true", GameSettingsOverrides.resolvedBootOverrides(store, emptyMap(), "BLUS30758")[wcb])
+
+        // Explicit user value overrides compatibility.
+        GameSettingsOverrides.recordGame(store, "BLUS30758", wcb, "false", "true")
+        assertEquals("false", GameSettingsOverrides.explicitUserOverrides(store, emptyMap(), "BLUS30758")[wcb])
+        assertEquals("false", GameSettingsOverrides.resolvedBootOverrides(store, emptyMap(), "BLUS30758")[wcb])
+
+        // Native tier wins over the app-owned tier on conflict.
+        assertEquals(
+            "native",
+            GameSettingsOverrides.explicitUserOverrides(store, mapOf(wcb to "native"), "BLUS30758")[wcb]
+        )
+
+        // Clear explicit value succeeds and resolved falls back to compat.
+        appliedCalls.clear()
+        assertTrue(
+            GameSettingsOverrides.clearGameSetting(store, "BLUS30758", wcb, "false", recordingSetter())
+        )
+        assertTrue(GameSettingsOverrides.explicitUserOverrides(store, emptyMap(), "BLUS30758").isEmpty())
+        assertEquals("true", GameSettingsOverrides.resolvedBootOverrides(store, emptyMap(), "BLUS30758")[wcb])
+    }
+
+    // ── Reset on a curated title (§57) ─────────────────────────────────────
+
+    @Test
+    fun clear_all_on_curated_title_succeeds_and_keeps_profile_separate() {
+        GameSettingsOverrides.clearGame(store, "BLUS30758")
+        assertTrue(GameSettingsOverrides.explicitUserOverrides(store, emptyMap(), "BLUS30758").isEmpty())
+        assertEquals("true", GameSettingsOverrides.compatibilityDefaultsForTitle("BLUS30758")["Video@@Write Color Buffers"])
+        assertEquals("true", GameSettingsOverrides.resolvedBootOverrides(store, emptyMap(), "BLUS30758")["Video@@Write Color Buffers"])
+
+        GameSettingsOverrides.clearGame(store, "BLUS30443")
+        assertTrue(GameSettingsOverrides.explicitUserOverrides(store, emptyMap(), "BLUS30443").isEmpty())
+        assertEquals("true", GameSettingsOverrides.compatibilityDefaultsForTitle("BLUS30443")["Video@@Write Color Buffers"])
+    }
+
+    // ── Backend-apply failure must not be masked (§58) ─────────────────────
+
+    @Test
+    fun failed_backend_apply_is_not_masked_by_local_mirror() {
+        val leaseStore = InMemoryStore()
+        val globals = mutableMapOf("Video@@Write Color Buffers" to "false")
+        val begin = GameSettingsOverrides.beginScopedLease(
+            leaseStore,
+            "BLUS30758",
+            mapOf("Video@@Write Color Buffers" to "true"),
+            readGlobal = { globals[it] },
+            writeGlobal = { _, _ -> false },
+            nowMs = 1000L,
+            sessionId = 42L
+        )
+        assertFalse(begin.allApplied)
+        assertEquals(false, begin.perKeyOk["Video@@Write Color Buffers"])
+        // Backend still holds the old value: no fake success.
+        assertEquals("false", globals["Video@@Write Color Buffers"])
+    }
+
+    // ── Scoped restore + crash recovery (§59) ──────────────────────────────
+
+    @Test
+    fun scoped_lease_restores_exact_globals_and_recovers_after_crash() {
+        val leaseStore = InMemoryStore()
+        val globals = mutableMapOf(
+            "Video@@Write Color Buffers" to "false",
+            "Video@@Read Color Buffers" to "false",
+            "Video@@Driver Wake-Up Delay" to "0"
+        )
+        val read: (String) -> String? = { globals[it] }
+        val write: (String, String) -> Boolean = { p, v -> globals[p] = v; true }
+        val resolved = mapOf(
+            "Video@@Write Color Buffers" to "true",
+            "Video@@Read Color Buffers" to "true",
+            "Video@@Driver Wake-Up Delay" to "200"
+        )
+
+        val begin = GameSettingsOverrides.beginScopedLease(leaseStore, "BLUS30758", resolved, read, write, nowMs = 1234L, sessionId = 999L)
+        assertTrue(begin.allApplied)
+        assertEquals("true", globals["Video@@Write Color Buffers"])
+        assertEquals("200", globals["Video@@Driver Wake-Up Delay"])
+
+        val end = GameSettingsOverrides.endScopedLease(leaseStore, read, write)
+        assertTrue(end.hadLease)
+        assertTrue(end.allRestored)
+        assertTrue(end.leaseCleared)
+        assertEquals("false", globals["Video@@Write Color Buffers"])
+        assertEquals("false", globals["Video@@Read Color Buffers"])
+        assertEquals("0", globals["Video@@Driver Wake-Up Delay"])
+
+        // Crash path: lease persists across "death", next boot recovers it.
+        GameSettingsOverrides.beginScopedLease(leaseStore, "BLUS30758", resolved, read, write, nowMs = 2000L, sessionId = 1000L)
+        assertEquals("true", globals["Video@@Write Color Buffers"])
+        assertTrue(GameSettingsOverrides.recoverStaleLease(leaseStore, read, write))
+        assertEquals("false", globals["Video@@Write Color Buffers"])
+        assertNull(GameSettingsOverrides.readLease(leaseStore))
+    }
+
+    @Test
+    fun lease_skips_keys_absent_before_boot() {
+        val leaseStore = InMemoryStore()
+        val globals = mutableMapOf<String, String>()
+        val begin = GameSettingsOverrides.beginScopedLease(
+            leaseStore, "BLUS30758",
+            mapOf("Video@@Write Color Buffers" to "true"),
+            readGlobal = { globals[it] },
+            writeGlobal = { p, v -> globals[p] = v; true },
+            nowMs = 1L, sessionId = 2L
+        )
+        assertTrue(begin.allApplied)
+        val end = GameSettingsOverrides.endScopedLease(leaseStore, { globals[it] }, { p, v -> globals[p] = v; true })
+        assertTrue(end.allRestored)
+        assertTrue(end.leaseCleared)
+    }
+
+    // ── Cross-title isolation (§61) ─────────────────────────────────────────
+
+    @Test
+    fun cross_title_sequence_does_not_leak() {
+        val leaseStore = InMemoryStore()
+        val globals = mutableMapOf(
+            "Video@@Write Color Buffers" to "false",
+            "Video@@Read Color Buffers" to "false",
+            "Video@@Driver Wake-Up Delay" to "0"
+        )
+        val read: (String) -> String? = { globals[it] }
+        val write: (String, String) -> Boolean = { p, v -> globals[p] = v; true }
+
+        // RDR boots with its profile, then exits and restores exact globals.
+        val rdrResolved = GameSettingsOverrides.resolvedBootOverrides(store, emptyMap(), "BLUS30758")
+        assertTrue(rdrResolved.isNotEmpty())
+        GameSettingsOverrides.beginScopedLease(leaseStore, "BLUS30758", rdrResolved, read, write, nowMs = 1L, sessionId = 1L)
+        assertEquals("true", globals["Video@@Write Color Buffers"])
+        GameSettingsOverrides.endScopedLease(leaseStore, read, write)
+        assertEquals("false", globals["Video@@Write Color Buffers"])
+        assertEquals("0", globals["Video@@Driver Wake-Up Delay"])
+
+        // Demon's Souls sees only its own compatibility value.
+        val dsResolved = GameSettingsOverrides.resolvedBootOverrides(store, emptyMap(), "BLUS30443")
+        assertEquals(mapOf("Video@@Write Color Buffers" to "true"), dsResolved)
+        GameSettingsOverrides.beginScopedLease(leaseStore, "BLUS30443", dsResolved, read, write, nowMs = 2L, sessionId = 2L)
+        assertEquals("true", globals["Video@@Write Color Buffers"])
+        assertEquals("false", globals["Video@@Read Color Buffers"])
+        GameSettingsOverrides.endScopedLease(leaseStore, read, write)
+
+        // Generic title: nothing applies, globals untouched.
+        assertTrue(GameSettingsOverrides.resolvedBootOverrides(store, emptyMap(), "BLUS30441").isEmpty())
+        assertEquals("false", globals["Video@@Write Color Buffers"])
+        assertEquals("false", globals["Video@@Read Color Buffers"])
+        assertEquals("0", globals["Video@@Driver Wake-Up Delay"])
+    }
+
     private companion object {
         const val TITLE_ID = "BLUS30441"
         const val OTHER_TITLE = "BLES00001"
