@@ -17,6 +17,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.cancel
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import com.zenithblue.sambas3.utils.Telemetry
@@ -149,6 +150,18 @@ class PrecompilerService : Service() {
             afd?.close()
         } catch (e: Exception) {
             Log.w(TAG, "openAssetFileDescriptor failed uri=$uri: ${e.message}")
+        }
+        if (uri.scheme == "file" || uri.scheme == null) {
+            try {
+                val f = uri.path?.let { java.io.File(it) }
+                if (f != null && f.exists()) {
+                    val pfd = android.os.ParcelFileDescriptor.open(f, android.os.ParcelFileDescriptor.MODE_READ_ONLY)
+                    Log.i(TAG, "open direct file ok path=${f.absolutePath} statSize=${pfd.statSize}")
+                    return OpenedFd(pfd.fd, listOf(pfd), "file direct statSize=${pfd.statSize}")
+                }
+            } catch (e: Exception) {
+                Log.w(TAG, "open direct file failed uri=$uri: ${e.message}")
+            }
         }
         return null
     }
@@ -354,6 +367,43 @@ class PrecompilerService : Service() {
                 } catch (_: Exception) {
                 }
                 mainHandler.post { stopForegroundAndSelf(startId) }
+            } else if (!isFwInstall) {
+                var session = ImportSessionStore.find(installProgress)
+                var titleId = session?.resolvedTitleId ?: session?.provisionalTitleId
+                var gamePath = session?.installedPath
+                if (titleId == null || gamePath == null) {
+                    val game = GameRepository.list().firstOrNull { g ->
+                        g.findProgress(GameProgressType.Install)?.any { it.id == installProgress } == true
+                    }
+                    if (game != null) {
+                        gamePath = gamePath ?: game.info.path
+                        titleId = titleId ?: GameIdentity.titleIdOrNull(game.info.path, game.info.name.value)
+                    }
+                }
+
+                if (!titleId.isNullOrBlank() && !gamePath.isNullOrBlank()) {
+                    Log.i(TAG, "Stage A complete. Launching Stage B (PpuInstallOrchestrator) title=$titleId path=$gamePath")
+                    val logicalJobId = System.currentTimeMillis()
+                    lastInstallTitleId = titleId
+                    lastInstallJobId = logicalJobId
+                    installPpuSeen = true
+
+                    serviceScope.launch {
+                        val ok = com.zenithblue.sambas3.ppu.PpuInstallOrchestrator.execute(
+                            this@PrecompilerService,
+                            titleId = titleId,
+                            gamePath = gamePath,
+                            logicalJobId = logicalJobId
+                        )
+                        Log.i(TAG, "Stage B PpuInstallOrchestrator finished ok=$ok for $titleId")
+                        if (!ok) {
+                            stopForegroundAndSelf(startId)
+                        }
+                    }
+                } else {
+                    Log.w(TAG, "Stage A complete but could not resolve titleId ($titleId) or gamePath ($gamePath)")
+                    stopForegroundAndSelf(startId)
+                }
             }
         }
 

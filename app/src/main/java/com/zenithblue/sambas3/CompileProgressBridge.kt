@@ -53,6 +53,30 @@ object CompileProgressBridge {
     val installState: StateFlow<CompileState> = _installState.asStateFlow()
     private var installPpuJobId: Long? = null
 
+    fun updateInstallStateForExternalWorker(
+        titleId: String?,
+        jobId: Long,
+        moduleDone: Int,
+        moduleTotal: Int,
+        percent: Int,
+        message: String?,
+        active: Boolean,
+        outcome: CompileOutcome = CompileOutcome.NONE
+    ) {
+        val cur = _installState.value
+        _installState.value = cur.copy(
+            ppuActive = active,
+            titleId = titleId ?: cur.titleId,
+            ppuPercent = percent.coerceIn(0, 100),
+            ppuMax = 100,
+            ppuMsg = message ?: cur.ppuMsg,
+            moduleDone = moduleDone,
+            moduleTotal = moduleTotal,
+            outcome = outcome,
+            jobId = jobId
+        )
+    }
+
     // Prelaunch-origin PPU state — headless preparation on Home, no RPCSXActivity
     private val _prelaunchState = MutableStateFlow(CompileState())
     val prelaunchState: StateFlow<CompileState> = _prelaunchState.asStateFlow()

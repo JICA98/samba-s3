@@ -9,6 +9,8 @@
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE_DATA_SYNC" />
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE_SPECIAL_USE" />
+    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
+    <uses-permission android:name="android.permission.MANAGE_EXTERNAL_STORAGE" tools:ignore="ScopedStorage" />
 
 
     <uses-feature android:name="android.hardware.gamepad" android:required="false" />
@@ -34,6 +36,11 @@
             android:foregroundServiceType="dataSync"
             android:exported="false">
         </service>
+        <service
+            android:name=".ppu.PpuBatchWorkerService"
+            android:process=":ppu_compile"
+            android:exported="false"
+            android:stopWithTask="false" />
         <service
             android:name=".CompilationMonitorService"
             android:foregroundServiceType="specialUse"

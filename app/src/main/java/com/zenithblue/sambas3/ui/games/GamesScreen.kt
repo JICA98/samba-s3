@@ -1917,7 +1917,9 @@ fun bootGame(context: android.content.Context, game: Game, savestatePath: String
         return
     }
     GameRepository.onBoot(game)
-    val emulatorWindow = Intent(context, RPCSXActivity::class.java)
+    val emulatorWindow = Intent(context, RPCSXActivity::class.java).apply {
+        addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+    }
     emulatorWindow.putExtra("path", game.info.path)
     emulatorWindow.putExtra(RPCSXActivity.EXTRA_ORIGINAL_GAME_PATH, game.info.path)
     if (savestatePath != null) {

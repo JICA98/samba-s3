@@ -1,8 +1,17 @@
 diff --git a/android/src/rpcsx-android.cpp b/android/src/rpcsx-android.cpp
-index 8308a4798..4b92af31a 100644
+index 8308a4798..66c316f4a 100644
 --- a/android/src/rpcsx-android.cpp
 +++ b/android/src/rpcsx-android.cpp
-@@ -1648,7 +1648,8 @@ extern void ppu_precompile(std::vector<std::string> &dir_queue,
+@@ -55,6 +55,8 @@
+ #include <cctype>
+ #include <ctime>
+ #include <utility>
++#include <fstream>
++#include <sstream>
+ 
+ #define STB_IMAGE_WRITE_IMPLEMENTATION
+ #define STBI_ONLY_PNG
+@@ -1648,7 +1650,8 @@ extern void ppu_precompile(std::vector<std::string> &dir_queue,
                             std::vector<ppu_module<lv2_obj> *> *loaded_prx);
  extern bool ppu_initialize(const ppu_module<lv2_obj> &, bool check_only = false,
                             u64 file_size = 0);
@@ -12,7 +21,7 @@ index 8308a4798..4b92af31a 100644
  extern bool ppu_load_rel_exec(const ppu_rel_object &);
  
  class CompilationQueue {
-@@ -1765,8 +1766,15 @@ private:
+@@ -1765,8 +1768,15 @@ private:
      // captures this context when its thread starts; setting it later around
      // ppu_precompile can misclassify install PPU work as runtime work and
      // create the second (2000) notification.
@@ -29,7 +38,7 @@ index 8308a4798..4b92af31a 100644
      set_system_progress_context(installProgressContext);
      struct InstallProgressContextGuard {
        ~InstallProgressContextGuard() { clear_system_progress_context(); }
-@@ -1838,8 +1846,22 @@ private:
+@@ -1838,8 +1848,22 @@ private:
                          _main.applied_patches, std::vector<u32>{})) {
          Emu.ConfigurePPUCache();
          Emu.SetTestMode();
@@ -54,8 +63,278 @@ index 8308a4798..4b92af31a 100644
          mod_list.emplace_back(&_main);
        }
      }
+@@ -2829,10 +2853,7 @@ static bool installPkg(JNIEnv *env, fs::file &&file, jlong progressId) {
+   if (worker()) {
+     auto paths = std::vector(bootable_paths.begin(), bootable_paths.end());
+     collectGameInfo(env, progress.getProgressId(), paths);
+-
+-    for (auto &path : paths) {
+-      g_compilationQueue.push(progress, std::move(path));
+-    }
++    progress.report(100, 100, "Files installed");
+   }
+ 
+   return true;
+@@ -2943,7 +2964,7 @@ static bool installRap(JNIEnv *env, fs::file &&file, jlong progressId,
+   }
+ 
+   collectGameInfo(env, progress.getProgressId(), {std::string(rootPath)});
+-  g_compilationQueue.push(progress, std::move(ebootPath));
++  progress.report(100, 100, "Files installed");
+   return true;
+ }
+ 
+@@ -3042,8 +3063,7 @@ static bool installIso(JNIEnv *env, fs::file &&file, jlong progressId) {
+ 
+   progress.report(0, 0, "Publishing installed game");
+   collectGameInfo(env, progress.getProgressId(), {finalPath});
+-  progress.report(0, 0, "Preparing PPU compilation");
+-  g_compilationQueue.push(progress, std::move(ebootPath));
++  progress.report(100, 100, "Files installed");
+   return true;
+ }
+ 
+@@ -3363,6 +3383,224 @@ extern "C" int _rpcsx_extractIsoPreview(int fd, const char* destPath) {
+   return 0;
+ }
+ 
++static std::string g_compile_batch_result_json;
++static std::atomic<bool> g_install_batch_canceled{false};
++
++extern "C" void _rpcsx_cancelInstallPpuBatch() {
++  g_install_batch_canceled.store(true, std::memory_order_release);
++}
++
++struct ProcessMemStats {
++  u64 vm_size_kb = 0;
++  u64 vm_rss_kb = 0;
++  u64 map_count = 0;
++};
++
++static ProcessMemStats read_process_mem_stats() {
++  ProcessMemStats stats{};
++  std::ifstream status("/proc/self/status");
++  std::string line;
++  while (std::getline(status, line)) {
++    if (line.compare(0, 7, "VmSize:") == 0) {
++      std::sscanf(line.c_str(), "VmSize: %llu", &stats.vm_size_kb);
++    } else if (line.compare(0, 6, "VmRSS:") == 0) {
++      std::sscanf(line.c_str(), "VmRSS: %llu", &stats.vm_rss_kb);
++    }
++  }
++  std::ifstream maps("/proc/self/maps");
++  while (std::getline(maps, line)) {
++    stats.map_count++;
++  }
++  return stats;
++}
++
++static std::string build_batch_result_json(
++    const std::string& status,
++    u32 total_modules,
++    u32 cached_before,
++    u32 cached_after,
++    u32 compiled_this_batch,
++    const ProcessMemStats& start_mem,
++    const ProcessMemStats& end_mem,
++    const std::string& message) {
++  std::ostringstream ss;
++  ss << "{"
++     << "\"status\":\"" << status << "\","
++     << "\"totalModules\":" << total_modules << ","
++     << "\"cachedBefore\":" << cached_before << ","
++     << "\"cachedAfter\":" << cached_after << ","
++     << "\"compiledThisBatch\":" << compiled_this_batch << ","
++     << "\"startVmSizeKb\":" << start_mem.vm_size_kb << ","
++     << "\"endVmSizeKb\":" << end_mem.vm_size_kb << ","
++     << "\"peakVmRssKb\":" << (end_mem.vm_rss_kb > start_mem.vm_rss_kb ? end_mem.vm_rss_kb : start_mem.vm_rss_kb) << ","
++     << "\"startMapCount\":" << start_mem.map_count << ","
++     << "\"endMapCount\":" << end_mem.map_count << ","
++     << "\"message\":\"" << message << "\""
++     << "}";
++  return ss.str();
++}
++
++extern "C" const char* _rpcsx_compileInstallPpuBatch(
++    const char* title_id,
++    const char* game_path,
++    u64 logical_job_id,
++    u32 max_new_objects) {
++  ProcessMemStats start_mem = read_process_mem_stats();
++
++  if (!game_path || !*game_path) {
++    g_compile_batch_result_json = build_batch_result_json(
++        "failed", 0, 0, 0, 0, start_mem, start_mem, "invalid_game_path");
++    return g_compile_batch_result_json.c_str();
++  }
++
++  std::unique_lock lifecycle_lock(g_emulator_lifecycle_mutex, std::try_to_lock);
++  if (!lifecycle_lock.owns_lock()) {
++    g_compile_batch_result_json = build_batch_result_json(
++        "busy", 0, 0, 0, 0, start_mem, start_mem, "lifecycle_mutex_busy");
++    return g_compile_batch_result_json.c_str();
++  }
++
++  if (!Emu.IsStopped(true)) {
++    g_compile_batch_result_json = build_batch_result_json(
++        "busy", 0, 0, 0, 0, start_mem, start_mem, "emulator_not_stopped");
++    return g_compile_batch_result_json.c_str();
++  }
++
++  g_install_batch_canceled.store(false, std::memory_order_release);
++
++  std::string ebootPath = locateEbootPath(game_path);
++  if (ebootPath.empty() && std::filesystem::is_regular_file(game_path)) {
++    ebootPath = game_path;
++  }
++  if (ebootPath.empty() || !std::filesystem::is_regular_file(ebootPath)) {
++    g_compile_batch_result_json = build_batch_result_json(
++        "failed", 0, 0, 0, 0, start_mem, start_mem, "missing_eboot_file");
++    return g_compile_batch_result_json.c_str();
++  }
++
++  auto rootPath = std::filesystem::path(ebootPath);
++  if (rootPath.filename() == "USRDIR") {
++    rootPath = rootPath.parent_path();
++  } else if (!std::filesystem::is_directory(rootPath)) {
++    rootPath = rootPath.parent_path();
++    if (rootPath.filename() == "USRDIR") {
++      rootPath = rootPath.parent_path();
++    }
++  }
++
++  std::string title;
++  if (title_id && *title_id) {
++    title = title_id;
++  } else {
++    auto sfo = locateParamSfoPath(rootPath.string());
++    if (!sfo.empty()) {
++      const auto psf = psf::load_object(sfo);
++      title = std::string(psf::get_string(psf, "TITLE_ID"));
++    }
++  }
++  if (title.empty()) {
++    title = Emu.GetTitleID();
++  }
++  if (title.empty()) {
++    title = "UNKNOWN";
++  }
++  Emu.SetTitleID(title);
++
++  const u32 step_max = max_new_objects > 0 ? max_new_objects : 16;
++  SystemProgressContext context{CompileOrigin::INSTALL, logical_job_id, title, step_max};
++  set_system_progress_context(context);
++  reset_ppu_install_batch_stats();
++  set_ppu_install_step_more_work(false);
++
++  struct BatchContextGuard {
++    ~BatchContextGuard() { clear_system_progress_context(); }
++  } batch_guard;
++
++  g_fxo->init<named_thread<progress_dialog_server>>();
++  g_fxo->init<main_ppu_module<lv2_obj>>();
++  g_fxo->init(false, nullptr);
++  Emu.SetState(system_state::running);
++
++  auto &_main = *ensure(g_fxo->try_get<main_ppu_module<lv2_obj>>());
++
++  fs::file src{ebootPath};
++  src = decrypt_self(src);
++  const ppu_exec_object obj = src;
++  if (obj != elf_error::ok || !ppu_load_exec(obj, true, ebootPath)) {
++    g_fxo->reset();
++    Emu.SetState(system_state::stopped);
++    auto end_mem = read_process_mem_stats();
++    g_compile_batch_result_json = build_batch_result_json(
++        "failed", 0, 0, 0, 0, start_mem, end_mem, "failed_to_load_executable");
++    return g_compile_batch_result_json.c_str();
++  }
++  _main.path = ebootPath;
++
++  std::vector<std::string> dir_queue;
++  dir_queue.push_back(rootPath.string());
++  for (auto &entry : std::filesystem::recursive_directory_iterator(rootPath)) {
++    if (entry.is_directory()) {
++      dir_queue.push_back(entry.path().string());
++    }
++  }
++
++  std::vector<ppu_module<lv2_obj> *> mod_list;
++  bool more_work = false;
++
++  if (_main.analyse(0, _main.elf_entry, _main.seg0_code_end,
++                    _main.applied_patches, std::vector<u32>{},
++                    []() { return g_install_batch_canceled.load(); })) {
++    Emu.ConfigurePPUCache();
++    Emu.SetTestMode();
++
++    set_ppu_install_step_more_work(false);
++    ppu_initialize(_main);
++    more_work = get_ppu_install_step_more_work();
++    ppu_finalize(_main, true);
++    mod_list.emplace_back(&_main);
++  } else {
++    g_fxo->reset();
++    Emu.SetState(system_state::stopped);
++    auto end_mem = read_process_mem_stats();
++    const bool was_canceled = g_install_batch_canceled.load();
++    g_compile_batch_result_json = build_batch_result_json(
++        was_canceled ? "canceled" : "failed", 0, 0, 0, 0, start_mem, end_mem,
++        was_canceled ? "canceled_during_analyse" : "failed_to_analyse_executable");
++    return g_compile_batch_result_json.c_str();
++  }
++
++  if (!more_work && !g_install_batch_canceled.load()) {
++    ppu_precompile(dir_queue, mod_list.empty() ? nullptr : &mod_list);
++    more_work = get_ppu_install_step_more_work();
++  }
++
++  g_fxo->reset();
++  Emu.SetState(system_state::stopped);
++
++  auto stats = get_ppu_install_batch_stats();
++  auto end_mem = read_process_mem_stats();
++
++  std::string status = "all_complete";
++  if (g_install_batch_canceled.load()) {
++    status = "canceled";
++  } else if (more_work) {
++    status = "more_work";
++  }
++
++  __android_log_print(
++      ANDROID_LOG_INFO, "S3PPUBATCH",
++      "compile_batch_terminal status=%s title=%s total=%u cached_before=%u compiled=%u cached_after=%u "
++      "vm_start=%llu vm_end=%llu rss=%llu maps=%llu",
++      status.c_str(), title.c_str(), stats.total_modules, stats.cached_before, stats.compiled_this_batch,
++      stats.cached_after, (unsigned long long)start_mem.vm_size_kb, (unsigned long long)end_mem.vm_size_kb,
++      (unsigned long long)end_mem.vm_rss_kb, (unsigned long long)end_mem.map_count);
++
++  g_compile_batch_result_json = build_batch_result_json(
++      status, stats.total_modules, stats.cached_before, stats.cached_after, stats.compiled_this_batch,
++      start_mem, end_mem, status);
++  return g_compile_batch_result_json.c_str();
++}
++
+ extern "C" int _rpcsx_prepareRuntimePpu(const char* path, u64 sessionId)
+ {
+     if (!path || !*path)
+diff --git a/android/src/samba-build-id.cpp b/android/src/samba-build-id.cpp
+index 8aca7dc59..2c0d98b33 100644
+--- a/android/src/samba-build-id.cpp
++++ b/android/src/samba-build-id.cpp
+@@ -1,8 +1,6 @@
+ #include <string>
+-
+ static std::string g_samba_build_id =
+-    "rpcsx=27441815c12cca1a4dcb3daec82b513b1a35eed7 samba=62a70942d8c121a7e58c74b6a4e2700cf369c0ae patch_sha256=6468572dbc6dec3ea7d0ad996adeb57dffd96a090d10482ea04d7013abecd5f0 build_type=Debug";
+-
++    "rpcsx=657b26a0d197c29d42cdcf3b3f6e8ad5c6765bbc samba=4033d8335239844b03bce62d346d405859582f48 patch_sha256=0cd4cc1866223f575ed1c00551f4f9820c9190539fbaf60b8bca4752f3117d40 build_type=Debug";
+ extern "C" const char* _rpcsx_sambaBuildId() {
+     return g_samba_build_id.c_str();
+ }
 diff --git a/rpcs3/Emu/Cell/PPUThread.cpp b/rpcs3/Emu/Cell/PPUThread.cpp
-index d2768d8b0..89ec8a0f9 100644
+index d2768d8b0..c0f7c2981 100644
 --- a/rpcs3/Emu/Cell/PPUThread.cpp
 +++ b/rpcs3/Emu/Cell/PPUThread.cpp
 @@ -16,6 +16,7 @@
@@ -87,7 +366,7 @@ index d2768d8b0..89ec8a0f9 100644
  	}
  
  	static jit_codegen_level ppu_jit_codegen_level()
-@@ -4841,7 +4854,17 @@ extern void ppu_precompile(std::vector<std::string>& dir_queue, std::vector<ppu_
+@@ -4841,8 +4854,33 @@ extern void ppu_precompile(std::vector<std::string>& dir_queue, std::vector<ppu_
  					{
  						obj.clear(), src.close(); // Clear decrypted file and elf object memory
  						file_allocation = {};     // release used file memory
@@ -102,11 +381,27 @@ index d2768d8b0..89ec8a0f9 100644
 +								break;
 +							}
 +							ppu_finalize(*prx, true);
++#if defined(__ANDROID__)
++							if (get_system_progress_context().origin == CompileOrigin::INSTALL &&
++							    get_system_progress_context().install_step_max_new > 0)
++							{
++								break;
++							}
++#endif
 +						}
  						ppu_finalize(*prx, true);
++#if defined(__ANDROID__)
++						if (get_system_progress_context().origin == CompileOrigin::INSTALL &&
++						    get_system_progress_context().install_step_max_new > 0 &&
++						    get_ppu_install_step_more_work())
++						{
++							break;
++						}
++#endif
  						continue;
  					}
-@@ -4887,7 +4910,17 @@ extern void ppu_precompile(std::vector<std::string>& dir_queue, std::vector<ppu_
+ 
+@@ -4887,7 +4925,24 @@ extern void ppu_precompile(std::vector<std::string>& dir_queue, std::vector<ppu_
  							break;
  						}
  
@@ -121,11 +416,18 @@ index d2768d8b0..89ec8a0f9 100644
 +								break;
 +							}
 +							ppu_finalize(*ovlm, true);
++#if defined(__ANDROID__)
++							if (get_system_progress_context().origin == CompileOrigin::INSTALL &&
++							    get_system_progress_context().install_step_max_new > 0)
++							{
++								break;
++							}
++#endif
 +						}
  						ppu_finalize(*ovlm, true);
  						break;
  					}
-@@ -5021,7 +5054,17 @@ extern void ppu_precompile(std::vector<std::string>& dir_queue, std::vector<ppu_
+@@ -5021,7 +5076,24 @@ extern void ppu_precompile(std::vector<std::string>& dir_queue, std::vector<ppu_
  
  						_main.name = ' '; // Make ppu_finalize work
  						Emu.ConfigurePPUCache();
@@ -140,11 +442,18 @@ index d2768d8b0..89ec8a0f9 100644
 +								break;
 +							}
 +							ppu_finalize(_main, true);
++#if defined(__ANDROID__)
++							if (get_system_progress_context().origin == CompileOrigin::INSTALL &&
++							    get_system_progress_context().install_step_max_new > 0)
++							{
++								break;
++							}
++#endif
 +						}
  						spu_cache::initialize(false);
  						ppu_finalize(_main, true);
  						_main = {};
-@@ -5336,6 +5379,14 @@ bool ppu_initialize(const ppu_module<lv2_obj>& info, bool check_only, u64 file_s
+@@ -5336,6 +5408,14 @@ bool ppu_initialize(const ppu_module<lv2_obj>& info, bool check_only, u64 file_s
  
  	bool has_mfvscr = false;
  
@@ -159,7 +468,7 @@ index d2768d8b0..89ec8a0f9 100644
  	const bool is_being_used_in_emulation = vm::base(info.segs[0].addr) == info.segs[0].ptr;
  	const ppu_compile_policy compile_policy = is_being_used_in_emulation
  		? ppu_compile_policy::background
-@@ -5895,6 +5946,16 @@ bool ppu_initialize(const ppu_module<lv2_obj>& info, bool check_only, u64 file_s
+@@ -5895,6 +5975,16 @@ bool ppu_initialize(const ppu_module<lv2_obj>& info, bool check_only, u64 file_s
  
  		module_counter++;
  
@@ -176,7 +485,7 @@ index d2768d8b0..89ec8a0f9 100644
  		if (!check_only)
  		{
  			link_workload.emplace_back(obj_name, false);
-@@ -5903,6 +5964,15 @@ bool ppu_initialize(const ppu_module<lv2_obj>& info, bool check_only, u64 file_s
+@@ -5903,6 +5993,15 @@ bool ppu_initialize(const ppu_module<lv2_obj>& info, bool check_only, u64 file_s
  		// Check object file
  		if (jit_compiler::check(cache_path + obj_name))
  		{
@@ -192,7 +501,7 @@ index d2768d8b0..89ec8a0f9 100644
  			if (!is_being_used_in_emulation && !check_only)
  			{
  				ppu_log.success("LLVM: Module exists: %s", obj_name);
-@@ -5917,6 +5987,24 @@ bool ppu_initialize(const ppu_module<lv2_obj>& info, bool check_only, u64 file_s
+@@ -5917,6 +6016,24 @@ bool ppu_initialize(const ppu_module<lv2_obj>& info, bool check_only, u64 file_s
  			return true;
  		}
  
@@ -217,7 +526,7 @@ index d2768d8b0..89ec8a0f9 100644
  		// Remember, used in ppu_initialize(void)
  		compiled_new = true;
  
-@@ -5945,7 +6033,41 @@ bool ppu_initialize(const ppu_module<lv2_obj>& info, bool check_only, u64 file_s
+@@ -5945,7 +6062,41 @@ bool ppu_initialize(const ppu_module<lv2_obj>& info, bool check_only, u64 file_s
  		atomic_t<u64> work_done = 0;
  
  		// Update progress dialog
@@ -259,15 +568,38 @@ index d2768d8b0..89ec8a0f9 100644
  
  		*progress_dialog = get_localized_string(localized_string_id::PROGRESS_DIALOG_COMPILING_PPU_MODULES);
  
+@@ -6126,6 +6277,20 @@ bool ppu_initialize(const ppu_module<lv2_obj>& info, bool check_only, u64 file_s
+ 	{
+ 		if (!is_being_used_in_emulation || (cpu ? cpu->state.all_of(cpu_flag::exit) : Emu.IsStopped()))
+ 		{
++#if defined(__ANDROID__)
++			{
++				const auto ctx = get_system_progress_context();
++				if (ctx.origin == CompileOrigin::INSTALL && ctx.install_step_max_new > 0)
++				{
++					InstallPpuBatchStats stats;
++					stats.total_modules = install_modules_total ? install_modules_total : +g_progr_ptotal;
++					stats.cached_before = install_cached_count;
++					stats.compiled_this_batch = static_cast<u32>(workload.size());
++					stats.cached_after = stats.cached_before + stats.compiled_this_batch;
++					set_ppu_install_batch_stats(stats);
++				}
++			}
++#endif
+ 			return compiled_new;
+ 		}
+ 
 diff --git a/rpcs3/Emu/compile_progress.cpp b/rpcs3/Emu/compile_progress.cpp
-index dc7a56339..416d3e4ec 100644
+index dc7a56339..cabbb7afd 100644
 --- a/rpcs3/Emu/compile_progress.cpp
 +++ b/rpcs3/Emu/compile_progress.cpp
-@@ -50,6 +50,17 @@ u64 allocate_compile_job_id()
+@@ -50,6 +50,37 @@ u64 allocate_compile_job_id()
  static std::mutex g_ctx_mutex;
  static SystemProgressContext g_current_ctx{CompileOrigin::RUNTIME, 0, ""};
  static bool g_has_ctx = false;
 +static std::atomic<bool> g_ppu_install_step_more_work{false};
++static std::mutex g_batch_stats_mutex;
++static InstallPpuBatchStats g_batch_stats{};
 +
 +void set_ppu_install_step_more_work(bool more)
 +{
@@ -278,22 +610,41 @@ index dc7a56339..416d3e4ec 100644
 +{
 +    return g_ppu_install_step_more_work.load(std::memory_order_acquire);
 +}
++
++void set_ppu_install_batch_stats(const InstallPpuBatchStats& stats)
++{
++    std::lock_guard<std::mutex> lock(g_batch_stats_mutex);
++    g_batch_stats = stats;
++}
++
++InstallPpuBatchStats get_ppu_install_batch_stats()
++{
++    std::lock_guard<std::mutex> lock(g_batch_stats_mutex);
++    return g_batch_stats;
++}
++
++void reset_ppu_install_batch_stats()
++{
++    std::lock_guard<std::mutex> lock(g_batch_stats_mutex);
++    g_batch_stats = {};
++}
  
  void set_system_progress_context(const SystemProgressContext& ctx)
  {
-@@ -76,6 +87,7 @@ void clear_system_progress_context()
+@@ -76,6 +107,8 @@ void clear_system_progress_context()
      std::lock_guard<std::mutex> lock(g_ctx_mutex);
      g_current_ctx = SystemProgressContext{CompileOrigin::RUNTIME, 0, ""};
      g_has_ctx = false;
 +    g_ppu_install_step_more_work.store(false, std::memory_order_release);
++    reset_ppu_install_batch_stats();
  }
  
  // --- Snapshot builder ---
 diff --git a/rpcs3/Emu/compile_progress.hpp b/rpcs3/Emu/compile_progress.hpp
-index 9210b5d10..7b4e6a9e7 100644
+index 9210b5d10..b8ca86352 100644
 --- a/rpcs3/Emu/compile_progress.hpp
 +++ b/rpcs3/Emu/compile_progress.hpp
-@@ -66,12 +66,18 @@ struct SystemProgressContext
+@@ -66,12 +66,30 @@ struct SystemProgressContext
      CompileOrigin origin = CompileOrigin::RUNTIME;
      u64 jobId = 0;
      std::string titleId; // associated title for install jobs; empty => Emu.GetTitleID() fallback
@@ -308,6 +659,18 @@ index 9210b5d10..7b4e6a9e7 100644
 +/** Set when an INSTALL-bounded ppu_initialize left uncached modules for a later step. */
 +void set_ppu_install_step_more_work(bool more);
 +bool get_ppu_install_step_more_work();
++
++struct InstallPpuBatchStats
++{
++    u32 total_modules = 0;
++    u32 cached_before = 0;
++    u32 cached_after = 0;
++    u32 compiled_this_batch = 0;
++};
++
++void set_ppu_install_batch_stats(const InstallPpuBatchStats& stats);
++InstallPpuBatchStats get_ppu_install_batch_stats();
++void reset_ppu_install_batch_stats();
 +
  // Helper that computes PpuProgressSnapshot exactly once, preserving time_left_queue
  // smoothing state. Both the RSX UI and the Android bridge consume the same snapshot.

@@ -67,6 +67,8 @@ struct RPCSXApi {
     int (*extractIsoPreview)(int fd, const char* destPath);
     int (*prepareRuntimePpu)(const char* path, unsigned long long sessionId);
     bool (*cancelRuntimePpuPreparation)(unsigned long long sessionId);
+    const char* (*compileInstallPpuBatch)(const char* titleId, const char* gamePath, unsigned long long logicalJobId, unsigned int maxNewObjects);
+    void (*cancelInstallPpuBatch)();
   // Frontend Home Menu ownership — optional symbols
   bool (*beginFrontendMenu)();
   void (*endFrontendMenu)(bool resumeIfOwned);
@@ -172,6 +174,8 @@ struct RPCSXLibrary : RPCSXApi {
     result.extractIsoPreview = reinterpret_cast<decltype(extractIsoPreview)>(dlsym(handle, "_rpcsx_extractIsoPreview"));
     result.prepareRuntimePpu = reinterpret_cast<decltype(prepareRuntimePpu)>(dlsym(handle, "_rpcsx_prepareRuntimePpu"));
     result.cancelRuntimePpuPreparation = reinterpret_cast<decltype(cancelRuntimePpuPreparation)>(dlsym(handle, "_rpcsx_cancelRuntimePpuPreparation"));
+    result.compileInstallPpuBatch = reinterpret_cast<decltype(compileInstallPpuBatch)>(dlsym(handle, "_rpcsx_compileInstallPpuBatch"));
+    result.cancelInstallPpuBatch = reinterpret_cast<decltype(cancelInstallPpuBatch)>(dlsym(handle, "_rpcsx_cancelInstallPpuBatch"));
     result.setCompileProgressListener = reinterpret_cast<decltype(setCompileProgressListener)>(dlsym(handle, "_rpcsx_setCompileProgressListener"));
     result.supportsCompileProgressEvents = reinterpret_cast<decltype(supportsCompileProgressEvents)>(dlsym(handle, "_rpcsx_supportsCompileProgressEvents"));
     result.beginFrontendMenu = reinterpret_cast<decltype(beginFrontendMenu)>(dlsym(handle, "_rpcsx_beginFrontendMenu"));
@@ -491,13 +495,23 @@ extern "C" JNIEXPORT jboolean JNICALL Java_com_zenithblue_sambas3_RPCSX_settings
 
 extern "C" JNIEXPORT jstring JNICALL
 Java_com_zenithblue_sambas3_RPCSX_settingsGetGlobal(JNIEnv *env, jobject, jstring jpath) {
-  if (!rpcsxLib.settingsGetGlobal) return wrap(env, std::string("{}"));
+  if (!rpcsxLib.settingsGetGlobal) {
+    if (rpcsxLib.settingsGet) {
+      return wrap(env, rpcsxLib.settingsGet(unwrap(env, jpath)));
+    }
+    return wrap(env, std::string("{}"));
+  }
   return wrap(env, rpcsxLib.settingsGetGlobal(unwrap(env, jpath)));
 }
 
 extern "C" JNIEXPORT jboolean JNICALL
 Java_com_zenithblue_sambas3_RPCSX_settingsSetGlobal(JNIEnv *env, jobject, jstring jpath, jstring jvalue) {
-  if (!rpcsxLib.settingsSetGlobal) return false;
+  if (!rpcsxLib.settingsSetGlobal) {
+    if (rpcsxLib.settingsSet) {
+      return rpcsxLib.settingsSet(unwrap(env, jpath), unwrap(env, jvalue));
+    }
+    return false;
+  }
   return rpcsxLib.settingsSetGlobal(unwrap(env, jpath), unwrap(env, jvalue));
 }
 
@@ -532,7 +546,15 @@ Java_com_zenithblue_sambas3_RPCSX_gameSettingsOverridesClear(
 extern "C" JNIEXPORT jstring JNICALL
 Java_com_zenithblue_sambas3_RPCSX_settingsGetEffective(
     JNIEnv *env, jobject, jstring jtitleId, jstring jpath) {
-  if (!rpcsxLib.settingsGetEffective) return wrap(env, std::string("{}"));
+  if (!rpcsxLib.settingsGetEffective) {
+    if (rpcsxLib.settingsGetGlobal) {
+      return wrap(env, rpcsxLib.settingsGetGlobal(unwrap(env, jpath)));
+    }
+    if (rpcsxLib.settingsGet) {
+      return wrap(env, rpcsxLib.settingsGet(unwrap(env, jpath)));
+    }
+    return wrap(env, std::string("{}"));
+  }
   return wrap(env, rpcsxLib.settingsGetEffective(unwrap(env, jtitleId), unwrap(env, jpath)));
 }
 
@@ -715,4 +737,30 @@ Java_com_zenithblue_sambas3_RPCSX_cancelRuntimePpuPreparation(JNIEnv *env, jobje
     return false;
   }
   return rpcsxLib.cancelRuntimePpuPreparation(static_cast<unsigned long long>(sessionId));
+}
+
+extern "C" JNIEXPORT jstring JNICALL
+Java_com_zenithblue_sambas3_RPCSX_compileInstallPpuBatch(
+    JNIEnv *env, jobject, jstring jTitleId, jstring jGamePath, jlong logicalJobId, jint maxNewObjects) {
+  if (!rpcsxLib.compileInstallPpuBatch) {
+    __android_log_print(ANDROID_LOG_WARN, "RPCSX-UI", "compileInstallPpuBatch not available in core (old .so)");
+    return wrap(env, std::string("{\"status\":\"failed\",\"message\":\"symbol_not_found\"}"));
+  }
+  std::string title = unwrap(env, jTitleId);
+  std::string path = unwrap(env, jGamePath);
+  const char* res = rpcsxLib.compileInstallPpuBatch(
+      title.c_str(),
+      path.c_str(),
+      static_cast<unsigned long long>(logicalJobId),
+      static_cast<unsigned int>(maxNewObjects));
+  return wrap(env, res ? std::string(res) : std::string("{\"status\":\"failed\",\"message\":\"null_result\"}"));
+}
+
+extern "C" JNIEXPORT void JNICALL
+Java_com_zenithblue_sambas3_RPCSX_cancelInstallPpuBatch(JNIEnv *env, jobject) {
+  if (!rpcsxLib.cancelInstallPpuBatch) {
+    __android_log_print(ANDROID_LOG_WARN, "RPCSX-UI", "cancelInstallPpuBatch not available");
+    return;
+  }
+  rpcsxLib.cancelInstallPpuBatch();
 }

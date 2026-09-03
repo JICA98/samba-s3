@@ -135,6 +135,8 @@ class RPCSX {
     // Headless prelaunch runtime PPU preparation — reuses boot-discoverable PPU logic, no Surface/RSX/audio.
     external fun prepareRuntimePpu(path: String, sessionId: Long): Int
     external fun cancelRuntimePpuPreparation(sessionId: Long): Boolean
+    external fun compileInstallPpuBatch(titleId: String, gamePath: String, logicalJobId: Long, maxNewObjects: Int): String
+    external fun cancelInstallPpuBatch()
 
     /** Global writes are accepted only after the native config read-back matches. */
     fun settingsSetGlobalAndVerify(path: String, value: String): Boolean {
