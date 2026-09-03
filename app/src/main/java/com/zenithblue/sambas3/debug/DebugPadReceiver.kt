@@ -13,6 +13,8 @@ import com.zenithblue.sambas3.BuildConfig
 import com.zenithblue.sambas3.Digital2Flags
 import com.zenithblue.sambas3.GameRepository
 import com.zenithblue.sambas3.LogMonitor
+import com.zenithblue.sambas3.PpuReadinessStore
+import com.zenithblue.sambas3.PreRuntimePpuState
 import com.zenithblue.sambas3.PrecompilerService
 import com.zenithblue.sambas3.PrecompilerServiceAction
 import com.zenithblue.sambas3.RPCSX
@@ -64,7 +66,7 @@ class DebugPadReceiver(private val onDebugFatal: (() -> Unit)? = null) : Broadca
             handleSettingsProbe(intent)
             return
         }
-        if (action == ACTION_REMOVE_GAME || action == ACTION_INSTALL_FILE) {
+        if (action == ACTION_REMOVE_GAME || action == ACTION_INSTALL_FILE || action == ACTION_CLEAR_PPU_CACHE || action == ACTION_BOOT_GAME) {
             handleLibraryProbe(context, intent)
             return
         }
@@ -129,8 +131,8 @@ class DebugPadReceiver(private val onDebugFatal: (() -> Unit)? = null) : Broadca
                     uriExtra.isNotEmpty() -> android.net.Uri.parse(uriExtra)
                     path.isNotEmpty() -> {
                         val file = java.io.File(path)
-                        if (!file.isFile) {
-                            Log.w("S3LIB_HARNESS", "install path=$path not_file")
+                        if (!file.exists()) {
+                            Log.w("S3LIB_HARNESS", "install path=$path not_found")
                             return
                         }
                         android.net.Uri.fromFile(file)
@@ -142,6 +144,49 @@ class DebugPadReceiver(private val onDebugFatal: (() -> Unit)? = null) : Broadca
                 }
                 PrecompilerService.start(ctx, PrecompilerServiceAction.Install, uri)
                 Log.i("S3LIB_HARNESS", "install started uri=$uri")
+            }
+            ACTION_CLEAR_PPU_CACHE -> {
+                val title = intent.getStringExtra("title")?.trim().orEmpty()
+                if (title.isEmpty()) {
+                    Log.w("S3LIB_HARNESS", "clear_cache missing title=")
+                    return
+                }
+                var r = RPCSX.rootDirectory
+                if (r.isEmpty()) {
+                    r = ctx.getExternalFilesDir(null)?.toString() ?: ""
+                }
+                if (r.isNotEmpty() && !r.endsWith("/")) r += "/"
+                val cacheDir = java.io.File(r, "cache/cache/$title")
+                val manifestFile = java.io.File(r, "cache/cache/ppu_manifest/$title.json")
+                val sessionFile = java.io.File(ctx.filesDir, "ppu-install/session.json")
+                val cOk = cacheDir.deleteRecursively()
+                val mOk = manifestFile.delete()
+                val sOk = sessionFile.delete()
+                PpuReadinessStore.setPreRuntimeState(ctx, title, PreRuntimePpuState.NOT_DONE)
+                Log.i("S3LIB_HARNESS", "clear_cache title=$title cacheDeleted=$cOk manifestDeleted=$mOk sessionDeleted=$sOk")
+            }
+            ACTION_BOOT_GAME -> {
+                val title = intent.getStringExtra("title")?.trim().orEmpty()
+                val path = intent.getStringExtra("path")?.trim().orEmpty()
+                val game = GameRepository.list().firstOrNull { g ->
+                    (title.isNotEmpty() && g.info.path.contains(title, ignoreCase = true)) ||
+                    (path.isNotEmpty() && g.info.path.equals(path, ignoreCase = true))
+                }
+                if (game != null) {
+                    com.zenithblue.sambas3.ui.games.bootGame(ctx, game)
+                    Log.i("S3LIB_HARNESS", "boot title=$title ok=true path=${game.info.path}")
+                } else if (path.isNotEmpty()) {
+                    val fallbackIntent = Intent(ctx, com.zenithblue.sambas3.RPCSXActivity::class.java).apply {
+                        putExtra("path", path)
+                        putExtra(com.zenithblue.sambas3.RPCSXActivity.EXTRA_ORIGINAL_GAME_PATH, path)
+                        putExtra(com.zenithblue.sambas3.RPCSXActivity.EXTRA_BOOT_MODE, com.zenithblue.sambas3.EmulatorBootMode.FreshGame.name)
+                        addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                    }
+                    ctx.startActivity(fallbackIntent)
+                    Log.i("S3LIB_HARNESS", "boot direct path ok=true path=$path")
+                } else {
+                    Log.w("S3LIB_HARNESS", "boot title=$title not_found")
+                }
             }
         }
     }
@@ -273,6 +318,10 @@ class DebugPadReceiver(private val onDebugFatal: (() -> Unit)? = null) : Broadca
         const val ACTION_REMOVE_GAME = "com.zenithblue.sambas3.DEBUG_REMOVE_GAME"
         /** Debug-only: start PrecompilerService Install for a filesystem ISO/folder path. */
         const val ACTION_INSTALL_FILE = "com.zenithblue.sambas3.DEBUG_INSTALL_FILE"
+        /** Debug-only: clear PPU cache and manifest for a given titleId. */
+        const val ACTION_CLEAR_PPU_CACHE = "com.zenithblue.sambas3.DEBUG_CLEAR_PPU_CACHE"
+        /** Debug-only: boot an imported title via bootGame. */
+        const val ACTION_BOOT_GAME = "com.zenithblue.sambas3.DEBUG_BOOT_GAME"
 
         fun register(context: Context, onDebugFatal: (() -> Unit)? = null): DebugPadReceiver {
             val r = DebugPadReceiver(onDebugFatal)
@@ -294,6 +343,8 @@ class DebugPadReceiver(private val onDebugFatal: (() -> Unit)? = null) : Broadca
                 addAction(ACTION_SETTINGS_CLEAR_ALL)
                 addAction(ACTION_REMOVE_GAME)
                 addAction(ACTION_INSTALL_FILE)
+                addAction(ACTION_CLEAR_PPU_CACHE)
+                addAction(ACTION_BOOT_GAME)
                 addAction(PREFIX + "CROSS")
                 addAction(PREFIX + "CIRCLE")
                 addAction(PREFIX + "SQUARE")

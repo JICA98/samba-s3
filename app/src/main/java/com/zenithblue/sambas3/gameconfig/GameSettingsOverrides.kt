@@ -86,6 +86,31 @@ object GameSettingsOverrides {
     }
 
     /**
+     * Curated game-specific defaults that are strictly required for playable rendering.
+     * For example, Demon's Souls requires Write Color Buffers: true to avoid rendering a black 3D screen.
+     */
+    fun curatedDefaultsForTitle(titleId: String?): Map<String, String> {
+        if (titleId.isNullOrBlank()) return emptyMap()
+        return when (titleId.uppercase()) {
+            "BLUS30443", "BLES00932", "BCAS20071", "BCJS30022", "BCJS70013", "BCAS20096" -> mapOf(
+                "Video@@Write Color Buffers" to "true"
+            )
+            // Red Dead Redemption: requires Write Color Buffers & Read Color Buffers for in-game lighting/menus,
+            // Driver Wake-Up Delay: 200 to prevent SPU/driver sync deadlock, SPU loop detection: true,
+            // Relaxed ZCULL Sync: true for framerate, Max SPURS Threads: 4 to prevent CPU starvation on mobile
+            "BLUS30758", "BLES01294", "BLUS30418", "BLES00680", "BLJM60233", "BLJM60395", "BLAS50404" -> mapOf(
+                "Video@@Write Color Buffers" to "true",
+                "Video@@Read Color Buffers" to "true",
+                "Video@@Driver Wake-Up Delay" to "200",
+                "Core@@SPU loop detection" to "true",
+                "Video@@Relaxed ZCULL Sync" to "true",
+                "Core@@Max SPURS Threads" to "4"
+            )
+            else -> emptyMap()
+        }
+    }
+
+    /**
      * Record a committed value into the PER-TITLE tier, capturing the previous
      * effective encoded value into the shared BASELINE map on first override.
      */
@@ -98,11 +123,14 @@ object GameSettingsOverrides {
     ): Boolean {
         if (titleId.isBlank() || path.isBlank()) return false
         return runCatching {
-            val wrote = RPCSX.instance.gameSettingsOverrideSet(titleId, path, encoded)
+            val wroteNative = runCatching {
+                RPCSX.instance.gameSettingsOverrideSet(titleId, path, encoded)
+            }.getOrDefault(false)
+            recordGame(storeFactory(context), titleId, path, encoded, previousEncoded)
             val readBack = gameOverrides(context, titleId)[path]
             val matched = readBack == encoded
-            Log.i(TAG, "S3CFG write scope=game title=$titleId path=$path requested=$encoded readBack=$readBack matched=$matched")
-            wrote && matched
+            Log.i(TAG, "S3CFG write scope=game title=$titleId path=$path requested=$encoded readBack=$readBack matched=$matched native=$wroteNative")
+            matched
         }.getOrDefault(false)
     }
 
@@ -141,10 +169,13 @@ object GameSettingsOverrides {
     ): Boolean {
         if (titleId.isNullOrBlank() || path.isBlank()) return false
         return runCatching {
-            val cleared = RPCSX.instance.gameSettingsOverrideClear(titleId, path)
+            val clearedNative = runCatching {
+                RPCSX.instance.gameSettingsOverrideClear(titleId, path)
+            }.getOrDefault(false)
+            val clearedLocal = clearGameSetting(storeFactory(context), titleId, path, fallbackEncoded)
             val remains = gameOverrides(context, titleId).containsKey(path)
-            Log.i(TAG, "S3CFG clear scope=game title=$titleId path=$path cleared=${cleared && !remains}")
-            cleared && !remains
+            Log.i(TAG, "S3CFG clear scope=game title=$titleId path=$path clearedNative=$clearedNative clearedLocal=$clearedLocal remains=$remains")
+            !remains
         }.getOrDefault(false)
     }
 
@@ -180,9 +211,10 @@ object GameSettingsOverrides {
     fun clearGame(context: Context, titleId: String): Boolean {
         if (titleId.isBlank()) return false
         return runCatching {
-            val cleared = RPCSX.instance.gameSettingsOverridesClear(titleId)
+            runCatching { RPCSX.instance.gameSettingsOverridesClear(titleId) }
+            clearGame(storeFactory(context), titleId)
             val remains = gameOverrides(context, titleId).isNotEmpty()
-            cleared && !remains
+            !remains
         }.getOrDefault(false)
     }
 
@@ -195,7 +227,7 @@ object GameSettingsOverrides {
 
     fun gameOverrides(context: Context, titleId: String): Map<String, String> {
         if (titleId.isBlank()) return emptyMap()
-        return runCatching {
+        val nativeMap = runCatching {
             val json = JSONObject(RPCSX.instance.gameSettingsOverridesGet(titleId))
             buildMap {
                 json.keys().forEach { path ->
@@ -203,6 +235,9 @@ object GameSettingsOverrides {
                 }
             }
         }.getOrDefault(emptyMap())
+        val localMap = gameOverrides(storeFactory(context), titleId)
+        val curated = curatedDefaultsForTitle(titleId)
+        return curated + localMap + nativeMap
     }
 
     internal fun gameOverrides(store: OverrideTierStore, titleId: String): Map<String, String> {
@@ -225,16 +260,16 @@ object GameSettingsOverrides {
     // ── Boot replay ──────────────────────────────────────────────────────────
 
     /**
-     * Full ordered replay: recommended defaults -> baseline -> global -> per-title.
-     * Call PRE-BOOT while Emu.IsStopped() so restart-required nodes accept their
-     * values. Rejections are logged, never thrown.
+     * Replay per-title overrides and curated defaults for [titleIdOrNull] before boot.
      */
-    @Deprecated("RPCS3 loads custom_configs/config_<TITLE_ID>.yml during custom boot")
     fun applyForGame(
         context: Context,
         titleIdOrNull: String?,
         setter: (path: String, value: String) -> Boolean = settingsSetter
-    ) = Unit
+    ) {
+        val ladder = ladderSequence(storeFactory(context), titleIdOrNull)
+        applyLadder(ladder, setter)
+    }
 
     internal fun applyForGame(
         store: OverrideTierStore,
@@ -246,16 +281,15 @@ object GameSettingsOverrides {
     }
 
     /**
-     * Replay ONLY the per-title tier. Used exclusively by post-boot learning so no
-     * restart-required node is written while Running (defaults/baseline/global were
-     * already applied pre-boot).
+     * Replay ONLY the per-title tier.
      */
-    @Deprecated("RPCS3 loads custom_configs/config_<TITLE_ID>.yml during custom boot")
     fun applyTitleTier(
         context: Context,
         titleId: String?,
         setter: (path: String, value: String) -> Boolean = settingsSetter
-    ) = Unit
+    ) {
+        applyTitleTier(storeFactory(context), titleId, setter)
+    }
 
     internal fun applyTitleTier(
         store: OverrideTierStore,
@@ -266,12 +300,16 @@ object GameSettingsOverrides {
         val title = SettingsValueCodec.decodeOverrideMap(
             store.getString(KEY_GAME_PREFIX + titleId) ?: "{}"
         )
-        applyLadder(title.map { it.key to it.value }.asSequence(), setter)
+        val curated = curatedDefaultsForTitle(titleId)
+        applyLadder((curated + title).map { it.key to it.value }.asSequence(), setter)
     }
 
     private fun ladderSequence(store: OverrideTierStore, titleIdOrNull: String?): Sequence<Pair<String, String>> =
         sequence {
             yieldAll(recommendedDefaults.entries.map { it.key to it.value })
+            if (!titleIdOrNull.isNullOrBlank()) {
+                yieldAll(curatedDefaultsForTitle(titleIdOrNull).entries.map { it.key to it.value })
+            }
             yieldAll(
                 SettingsValueCodec.decodeOverrideMap(store.getString(KEY_BASELINE) ?: "{}")
                     .map { it.key to it.value }

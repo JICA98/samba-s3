@@ -8,6 +8,8 @@ This directory tracks **per-title** compatibility, configs and loop results on t
 |---|---|
 | `_template.md` | Copy for new titles. |
 | `BLUS31584-GTA-San-Andreas.md` | GTA SA — **in-game pass** after replacing the truncated `PS3DataMain.obb`; shader/steady-state FPS optimization remains open. |
+| `BLUS30443-Demons-Souls.md` | Demon's Souls — **in-game pass** after Write Color Buffers fix, JNI fallback bridge, and pre-boot curated defaults. |
+| `BLUS30758-Red-Dead-Redemption.md` | Red Dead Redemption — **3D rendering pass** on Turnip 26.3, WCB/RCB enabled, RSX tiling disabled, and Max SPURS Threads 4. |
 | `GPU-COMPATIBILITY.md` | Global SambaS3 GPU-family forecast and verification matrix for Adreno, Mali/Immortalis, Xclipse/AMD and PowerVR. |
 | `<TITLEID>-<slug>.md` | Other titles as they are triaged. |
 

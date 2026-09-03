@@ -526,6 +526,12 @@ class RPCSXActivity : ComponentActivity(), EmulationHost {
             if (bootMode != EmulatorBootMode.FreshGame) {
                 Log.i("S3HOMELOAD", "boot-savestate-begin path=$bootPath original=$gamePath")
             }
+            val gameTitleId = GameSettingsOverrides.resolveTitleId(gamePath, this@RPCSXActivity)
+                ?: GameSettingsOverrides.resolveTitleId(bootPath, this@RPCSXActivity)
+            if (!gameTitleId.isNullOrBlank()) {
+                Log.i("S3BOOT", "applying per-game overrides and curated defaults for $gameTitleId")
+                GameSettingsOverrides.applyForGame(this@RPCSXActivity, gameTitleId)
+            }
             val bootResult = BootResult.fromInt(
                 if (bootMode != EmulatorBootMode.FreshGame) {
                     bootSavestateSerialized(bootPath, gamePath)
@@ -639,14 +645,17 @@ class RPCSXActivity : ComponentActivity(), EmulationHost {
             }
 
             var attempt = 0
-            val frameDeadline = System.currentTimeMillis() + FRESH_BOOT_FIRST_FRAME_TIMEOUT_MS
+            var frameDeadline = System.currentTimeMillis() + FRESH_BOOT_FIRST_FRAME_TIMEOUT_MS
             while (
                 state.phase == FreshBootFramePhase.WaitingForFirstFrame &&
                 System.currentTimeMillis() < frameDeadline &&
                 !Thread.interrupted()
             ) {
-                // If Runtime PPU starts late, pause the frame window.
-                val runtimeActive = runCatching { CompileProgressBridge.state.value.ppuActive }.getOrDefault(false)
+                // If Runtime PPU or SPU/Shader starts late, pause the frame window.
+                val runtimeActive = runCatching {
+                    val st = CompileProgressBridge.state.value
+                    st.ppuActive || st.shaderActive
+                }.getOrDefault(false)
                 if (runtimeActive) {
                     Log.i("S3BOOTFRAME", "event=runtime_ppu_begin title=$titleId late=1")
                     state = FreshBootFrameValidator.onRuntimePpuBegin(
@@ -654,7 +663,10 @@ class RPCSXActivity : ComponentActivity(), EmulationHost {
                         surfaceLeaseManager.currentGeneration,
                     )
                     while (
-                        runCatching { CompileProgressBridge.state.value.ppuActive }.getOrDefault(false) &&
+                        runCatching {
+                            val st = CompileProgressBridge.state.value
+                            st.ppuActive || st.shaderActive
+                        }.getOrDefault(false) &&
                         System.currentTimeMillis() < runtimeWaitDeadline &&
                         !Thread.interrupted()
                     ) {
@@ -668,6 +680,7 @@ class RPCSXActivity : ComponentActivity(), EmulationHost {
                         state,
                         surfaceLeaseManager.currentGeneration,
                     )
+                    frameDeadline = System.currentTimeMillis() + FRESH_BOOT_FIRST_FRAME_TIMEOUT_MS
                     continue
                 }
                 val expectedGen = state.surfaceGeneration
@@ -1684,7 +1697,7 @@ class RPCSXActivity : ComponentActivity(), EmulationHost {
         private const val FRAME_COPY_TIMEOUT_MS = 2_000L
         private const val FIRST_FRAME_TIMEOUT_MS = 120_000L
         /** First-frame window after Runtime PPU is idle (fresh boot only). */
-        private const val FRESH_BOOT_FIRST_FRAME_TIMEOUT_MS = 45_000L
+        private const val FRESH_BOOT_FIRST_FRAME_TIMEOUT_MS = 120_000L
         /** Upper bound waiting for in-Activity Runtime PPU before frame probes. */
         private const val RUNTIME_PPU_WAIT_TIMEOUT_MS = 30 * 60_000L
         private val NEXT_ACTIVITY_ID = AtomicLong(0L)

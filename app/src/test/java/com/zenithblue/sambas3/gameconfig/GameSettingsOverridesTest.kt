@@ -234,6 +234,36 @@ class GameSettingsOverridesTest {
         assertNull(GameSettingsOverrides.resolveTitleId("/x/y/ab", learnedLookup = null))
     }
 
+    @Test
+    fun curated_defaults_require_write_color_buffers_for_demons_souls_and_rdr() {
+        val demonTitles = listOf("BLUS30443", "BLES00932", "BCAS20071", "BCJS30022", "BCJS70013", "BCAS20096")
+        for (title in demonTitles) {
+            val defaults = GameSettingsOverrides.curatedDefaultsForTitle(title)
+            assertEquals("true", defaults["Video@@Write Color Buffers"])
+        }
+        val rdrTitles = listOf("BLUS30758", "BLES01294", "BLUS30418", "BLES00680", "BLJM60233", "BLJM60395", "BLAS50404")
+        for (title in rdrTitles) {
+            val defaults = GameSettingsOverrides.curatedDefaultsForTitle(title)
+            assertEquals("true", defaults["Video@@Write Color Buffers"])
+            assertEquals("true", defaults["Video@@Read Color Buffers"])
+            assertEquals("200", defaults["Video@@Driver Wake-Up Delay"])
+            assertEquals("true", defaults["Core@@SPU loop detection"])
+            assertEquals("true", defaults["Video@@Relaxed ZCULL Sync"])
+            assertEquals("4", defaults["Core@@Max SPURS Threads"])
+        }
+        assertTrue(GameSettingsOverrides.curatedDefaultsForTitle("BLUS30441").isEmpty())
+        assertTrue(GameSettingsOverrides.curatedDefaultsForTitle(null).isEmpty())
+
+        appliedCalls.clear()
+        GameSettingsOverrides.applyForGame(store, "BLUS30758", recordingSetter())
+        assertTrue(appliedCalls.contains("Video@@Write Color Buffers" to "true"))
+        assertTrue(appliedCalls.contains("Video@@Read Color Buffers" to "true"))
+        assertTrue(appliedCalls.contains("Video@@Driver Wake-Up Delay" to "200"))
+        assertTrue(appliedCalls.contains("Core@@SPU loop detection" to "true"))
+        assertTrue(appliedCalls.contains("Video@@Relaxed ZCULL Sync" to "true"))
+        assertTrue(appliedCalls.contains("Core@@Max SPURS Threads" to "4"))
+    }
+
     // ── resolveTitleId segment heuristic lives in TitleIdResolverTest ────────
 
     private companion object {
