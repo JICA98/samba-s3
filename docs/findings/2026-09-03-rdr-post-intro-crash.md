@@ -93,9 +93,33 @@ Only `BLUS30758` is device-validated; sibling IDs are family mapping.
 
 ## 8. Gameplay validation
 
-Intro stages PASS (prior screenshots preserved). Press Start → 20-min
-gameplay, repeat boot, background/resume, clean exit remain OPEN pending the
-Adreno reference device with the title installed. No PASS is claimed for them.
+Intro stages PASS (prior screenshots preserved). **Tablet session 2026-09-03
+(HEAD build `2b05d7b` code, OnePlus Pad 2, Turnip explicitly selected):**
+
+- Boot `NoErrors`, SPU cache 6888 modules, Bink logo audio, Press Start
+  milestone `22.714s` → **Press Start: PASS** (first acceptance stage
+  beyond the intro proven on the new code).
+- Input past Press Start (X then START on the pad overlay) → game view went
+  **black and stayed black** (observer-confirmed, ~10:30–10:45), pad overlay
+  alive, process alive, audio streaming, **no fatal signal / SIGSEGV /
+  DEVICE_LOST / freeze marker** in 13 MB of logcat.
+- RSX went log-silent after 10:29:17 (last: `RSX is not idle while setting
+  tile` + one recovered `vk::wait_for_event` timeout at 10:29:40, count=1
+  for the whole run). System compositor showed `VulkanManager semaphore`
+  failures from 10:43; on-device screenshots stopped working while the game
+  ran (compositor distress) and recovered after the reboot.
+- ~10:47 the **whole tablet rebooted** mid-session. Post-reboot Home shows
+  the `UNEXPECTED_TERMINATION` recovery card (journal working as designed);
+  BACKEND evidence tab: no fatal captured (nothing app-fatal preceded the
+  reboot).
+- Classification: suspected **GPU hard hang (Turnip/Adreno 750) → SoC
+  reset**, NOT proven (kernel logs unavailable). The fence-timeout +
+  semaphore-failure + black-frame + dead-screencap cascade points below the
+  app, at the driver/GPU. No app code change is claimed as the fix for this.
+
+Main menu, new/load game, controllable 3D gameplay, 10/20-min stability,
+repeat boot, background/resume, clean exit remain **OPEN — RDR MUST STILL BE
+TESTED AND FIXED** on the reference device. Do not call RDR fixed.
 
 ## 9. Cross-title regression
 
@@ -117,9 +141,13 @@ baseline permissions (screenshot `00-home-smoke.png`, `apk-permissions.txt`).
 
 ## 11. Remaining risks
 
-1. Post-intro RDR stages unverified — need reference Adreno device + title.
+1. **RDR MUST STILL BE TESTED AND FIXED.** Post-Press Start black screen +
+   full-device reboot observed 2026-09-03 on the reference tablet; menu and
+   everything after it are unverified. Suspected GPU hard hang (Turnip),
+   not proven — needs kernel logs + a cautious retest (short sessions,
+   observer present, DS regression first as a lighter comparison).
 2. `Max SPURS Threads=4` is a performance recommendation; re-measure default
-   vs 4 with `top -H` during the 20-min run.
+   vs 4 with `top -H` during a future stable run.
 3. Core still lacks Global/per-title settings symbols, so isolation is
    app-side (lease); revisit if the core gains real `settingsGetGlobal` etc.
 4. Turnip-absent fallback boots the known-crashing system driver by necessity;

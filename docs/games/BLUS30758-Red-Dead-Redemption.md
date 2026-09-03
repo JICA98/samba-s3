@@ -9,7 +9,7 @@
 | Path | `/storage/emulated/0/PS3/Red Dead Redemption - Game of the Year Edition (USA) (EnFrDeEsIt)/Red Dead Redemption - Game of the Year Edition (USA) (En,Fr,De,Es,It).iso` |
 | Tested Device | `7d6afed8` (`adb-7d6afed8-mU47CV._adb-tls-connect._tcp`) — OnePlus Pad 2 (`OPD2403`), Qualcomm Snapdragon 8 Gen 3 (`SM8650` / `pineapple`), 12 GB RAM, Android 16 |
 | GPU & Driver | Qualcomm Adreno (TM) 750 with **Mesa Turnip 26.3 - Latest** (`libvulkan_freedreno.so`, Vulkan 1.3.279) |
-| Current Result | **PARTIAL PASS — boot/intro 3D rendering verified.** Proves PPU/SPU compile, revolver intro, Rockstar Games + Rockstar San Diego logos. Does NOT yet prove Press Start, main menu, new/load game, controllable 3D gameplay, 10+/20-min stability, or repeat boot — those stages are tracked below and remain open. |
+| Current Result | **PARTIAL PASS — boot/intro/Press Start verified on HEAD build.** Proves PPU/SPU compile, revolver intro, Rockstar Games + Rockstar San Diego logos, Press Start milestone (22.7s). Does NOT yet prove main menu, new/load game, controllable 3D gameplay, 10+/20-min stability, or repeat boot — those stages are tracked below and remain open. **A post-Press Start black-screen + full-device reboot was observed on 2026-09-03 (see §3/§8); RDR MUST STILL BE TESTED AND FIXED.** |
 | Renderer | Vulkan, 1280×720, 100% scale, Async Shader Recompiler, Write & Read Color Buffers enabled, Driver Wake-Up Delay 200, Max SPURS Threads 4 |
 | Logs & Captures | `docs/games/BLUS30758/` |
 
@@ -140,9 +140,9 @@ safe-driver behavior product logic instead of test setup.
 | Revolver intro 3D | PASS | `rdr_revolver_intro.png` |
 | Rockstar Games logo | PASS | `rdr_rockstar_games_logo.png` |
 | Rockstar San Diego logo | PASS | `rdr_rockstar_sandiego_logo.png` |
-| Press Start | OPEN | — |
-| Main menu | OPEN | — |
-| New/load game → controllable 3D gameplay | OPEN | — |
+| Press Start | PASS (2026-09-03 tablet run, `[STARTUP] Time to Press Start: 22.714 seconds`, S3GAMECFG lease 7/7, Turnip Adreno 750 driver 26.2.99) | `tablet-rdr-session-evidence.txt` |
+| Main menu | OPEN — post-Press Start input led to a persistent black game screen on 2026-09-03; needs retest + fix | — |
+| New/load game → controllable 3D gameplay | OPEN — blocked on menu fix | — |
 | 10-min gameplay | OPEN | — |
 | 20-min gameplay (unchanged build) | OPEN | — |
 | Repeat boot | OPEN | — |
