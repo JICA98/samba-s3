@@ -60,12 +60,8 @@ fi
 if [ -f "$RPCSX_DIR/android/src/samba-build-id.cpp" ]; then
     cat >"$RPCSX_DIR/android/src/samba-build-id.cpp" <<'EOF_PLACEHOLDER'
 #include <string>
-
-// Samba S3 core build identity — overwritten by build_rpcsx.sh at build time.
-// Fallback placeholder ensures old binaries are detectable.
 static std::string g_samba_build_id =
-    "rpcsx=e8ae1481ab7ba04d5c6bef89dd852aabba2c88ff samba=unknown patch_sha256=unknown build_type=release";
-
+    "rpcsx=657b26a0d197c29d42cdcf3b3f6e8ad5c6765bbc samba=4033d8335239844b03bce62d346d405859582f48 patch_sha256=0cd4cc1866223f575ed1c00551f4f9820c9190539fbaf60b8bca4752f3117d40 build_type=Debug";
 extern "C" const char* _rpcsx_sambaBuildId() {
     return g_samba_build_id.c_str();
 }

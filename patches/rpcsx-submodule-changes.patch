@@ -1,5 +1,5 @@
 diff --git a/android/src/rpcsx-android.cpp b/android/src/rpcsx-android.cpp
-index 8308a4798..66c316f4a 100644
+index 8308a4798..71ebab2f9 100644
 --- a/android/src/rpcsx-android.cpp
 +++ b/android/src/rpcsx-android.cpp
 @@ -55,6 +55,8 @@
@@ -319,20 +319,15 @@ index 8308a4798..66c316f4a 100644
  extern "C" int _rpcsx_prepareRuntimePpu(const char* path, u64 sessionId)
  {
      if (!path || !*path)
-diff --git a/android/src/samba-build-id.cpp b/android/src/samba-build-id.cpp
-index 8aca7dc59..2c0d98b33 100644
---- a/android/src/samba-build-id.cpp
-+++ b/android/src/samba-build-id.cpp
-@@ -1,8 +1,6 @@
- #include <string>
--
- static std::string g_samba_build_id =
--    "rpcsx=27441815c12cca1a4dcb3daec82b513b1a35eed7 samba=62a70942d8c121a7e58c74b6a4e2700cf369c0ae patch_sha256=6468572dbc6dec3ea7d0ad996adeb57dffd96a090d10482ea04d7013abecd5f0 build_type=Debug";
--
-+    "rpcsx=657b26a0d197c29d42cdcf3b3f6e8ad5c6765bbc samba=4033d8335239844b03bce62d346d405859582f48 patch_sha256=0cd4cc1866223f575ed1c00551f4f9820c9190539fbaf60b8bca4752f3117d40 build_type=Debug";
- extern "C" const char* _rpcsx_sambaBuildId() {
-     return g_samba_build_id.c_str();
- }
+@@ -3607,7 +3845,7 @@ extern "C" std::string _rpcsx_settingsGet(std::string_view path) {
+   auto root = find_cfg_node(&g_cfg, path);
+ 
+   if (root == nullptr) {
+-    return nullptr;
++    return "{}";
+   }
+ 
+   return root->to_json().dump(4);
 diff --git a/rpcs3/Emu/Cell/PPUThread.cpp b/rpcs3/Emu/Cell/PPUThread.cpp
 index d2768d8b0..c0f7c2981 100644
 --- a/rpcs3/Emu/Cell/PPUThread.cpp
@@ -589,6 +584,76 @@ index d2768d8b0..c0f7c2981 100644
  			return compiled_new;
  		}
  
+diff --git a/rpcs3/Emu/RSX/VK/VKTextureCache.cpp b/rpcs3/Emu/RSX/VK/VKTextureCache.cpp
+index 72b6bcf40..f58605836 100644
+--- a/rpcs3/Emu/RSX/VK/VKTextureCache.cpp
++++ b/rpcs3/Emu/RSX/VK/VKTextureCache.cpp
+@@ -1246,10 +1246,23 @@ namespace vk
+ 			return false;
+ #ifndef __APPLE__
+ 		case CELL_GCM_TEXTURE_R5G6B5:
++		case CELL_GCM_TEXTURE_R6G5B5:
+ 			return (vk_format == VK_FORMAT_R5G6B5_UNORM_PACK16);
++		case CELL_GCM_TEXTURE_A1R5G5B5:
++		case CELL_GCM_TEXTURE_D1R5G5B5:
++			return (vk_format == VK_FORMAT_A1R5G5B5_UNORM_PACK16);
++		case CELL_GCM_TEXTURE_R5G5B5A1:
++			return (vk_format == VK_FORMAT_R5G5B5A1_UNORM_PACK16);
++		case CELL_GCM_TEXTURE_A4R4G4B4:
++			return (vk_format == VK_FORMAT_R4G4B4A4_UNORM_PACK16);
+ #else
+-		// R5G6B5 is not supported by Metal
++		// formats that are not supported by Metal
+ 		case CELL_GCM_TEXTURE_R5G6B5:
++		case CELL_GCM_TEXTURE_R6G5B5:
++		case CELL_GCM_TEXTURE_A1R5G5B5:
++		case CELL_GCM_TEXTURE_D1R5G5B5:
++		case CELL_GCM_TEXTURE_R5G5B5A1:
++		case CELL_GCM_TEXTURE_A4R4G4B4:
+ 			return (vk_format == VK_FORMAT_B8G8R8A8_UNORM);
+ #endif
+ 		case CELL_GCM_TEXTURE_W16_Z16_Y16_X16_FLOAT:
+diff --git a/rpcs3/Emu/RSX/VK/VKTextureCache.h b/rpcs3/Emu/RSX/VK/VKTextureCache.h
+index b4b05be4a..c6579afbd 100644
+--- a/rpcs3/Emu/RSX/VK/VKTextureCache.h
++++ b/rpcs3/Emu/RSX/VK/VKTextureCache.h
+@@ -336,6 +336,11 @@ namespace vk
+ 					rsx::convert_linear_swizzle<u32, false>(tmp_data.data(), data, width, height, rsx_pitch);
+ 					break;
+ 				case CELL_GCM_TEXTURE_R5G6B5:
++				case CELL_GCM_TEXTURE_R6G5B5:
++				case CELL_GCM_TEXTURE_A1R5G5B5:
++				case CELL_GCM_TEXTURE_D1R5G5B5:
++				case CELL_GCM_TEXTURE_R5G5B5A1:
++				case CELL_GCM_TEXTURE_A4R4G4B4:
+ 				case CELL_GCM_TEXTURE_DEPTH16:
+ 					rsx::convert_linear_swizzle<u16, false>(tmp_data.data(), data, width, height, rsx_pitch);
+ 					break;
+diff --git a/rpcs3/Emu/RSX/VK/vkutils/sync.cpp b/rpcs3/Emu/RSX/VK/vkutils/sync.cpp
+index 6df7e3334..a9f1f8758 100644
+--- a/rpcs3/Emu/RSX/VK/vkutils/sync.cpp
++++ b/rpcs3/Emu/RSX/VK/vkutils/sync.cpp
+@@ -203,10 +203,16 @@ namespace vk
+ 		m_backend = dev.get_synchronization2_support() ? sync_backend::events_v2 : sync_backend::events_v1;
+ 
+ 		if (domain == sync_domain::host &&
+-			vk::get_driver_vendor() == vk::driver_vendor::AMD &&
+-			vk::get_chip_family() < vk::chip_class::AMD_navi1x)
+-		{
+-			// Events don't work quite right on AMD drivers
++			((vk::get_driver_vendor() == vk::driver_vendor::AMD &&
++			vk::get_chip_family() < vk::chip_class::AMD_navi1x) ||
++#if defined(__ANDROID__) || defined(ANDROID)
++			true
++#else
++			false
++#endif
++			))
++		{
++			// Events don't work quite right on AMD and Android/Turnip drivers
+ 			m_backend = sync_backend::gpu_label;
+ 
+ 			m_label = std::make_unique<vk::gpu_label>(globals::get_shared_label_pool(dev));
 diff --git a/rpcs3/Emu/compile_progress.cpp b/rpcs3/Emu/compile_progress.cpp
 index dc7a56339..cabbb7afd 100644
 --- a/rpcs3/Emu/compile_progress.cpp

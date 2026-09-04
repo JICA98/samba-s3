@@ -11,11 +11,14 @@ import android.util.Log
 import android.util.Base64
 import com.zenithblue.sambas3.BuildConfig
 import com.zenithblue.sambas3.Digital2Flags
+import com.zenithblue.sambas3.EmulatorBootMode
+import com.zenithblue.sambas3.EmulatorState
 import com.zenithblue.sambas3.GameRepository
 import com.zenithblue.sambas3.LogMonitor
 import com.zenithblue.sambas3.PrecompilerService
 import com.zenithblue.sambas3.PrecompilerServiceAction
 import com.zenithblue.sambas3.RPCSX
+import com.zenithblue.sambas3.RPCSXActivity
 import com.zenithblue.sambas3.gameconfig.SettingsBackendAudit
 import com.zenithblue.sambas3.utils.FileUtil
 import org.json.JSONObject
@@ -27,6 +30,9 @@ import org.json.JSONObject
  *  - com.zenithblue.sambas3.DEBUG_PAD  with extras d1,d2,lx,ly,rx,ry (ints)
  *  - com.zenithblue.sambas3.DEBUG_PAD_CROSS (+ CIRCLE/SQUARE/TRIANGLE/START/SELECT/PS/L1/R1/L2/R2/UP/DOWN/LEFT/RIGHT/L3/R3)
  *    → press 120ms then release (deterministic for loop scripts).
+ *  - com.zenithblue.sambas3.DEBUG_BOOT_GAME with extras path/originalGamePath
+ *    → in-process boot (same extras as GamesScreen.bootGame); shell am start
+ *    of RPCSXActivity is blocked by exported=false.
  *
  * Example:
  *  adb shell am broadcast -a com.zenithblue.sambas3.DEBUG_PAD_CROSS
@@ -61,11 +67,15 @@ class DebugPadReceiver(private val onDebugFatal: (() -> Unit)? = null) : Broadca
             return
         }
         if (action.startsWith(ACTION_SETTINGS_PREFIX)) {
-            handleSettingsProbe(intent)
+            handleSettingsProbe(context, intent)
             return
         }
         if (action == ACTION_REMOVE_GAME || action == ACTION_INSTALL_FILE) {
             handleLibraryProbe(context, intent)
+            return
+        }
+        if (action == ACTION_BOOT_GAME) {
+            handleBootGame(context, intent)
             return
         }
         when {
@@ -146,7 +156,43 @@ class DebugPadReceiver(private val onDebugFatal: (() -> Unit)? = null) : Broadca
         }
     }
 
-    private fun handleSettingsProbe(intent: Intent) {
+    /**
+     * Debug-only: boot a game in-process with the same extras as
+     * GamesScreen.bootGame. Shell `am start` of RPCSXActivity is blocked by
+     * exported=false on recent Android, so automation must go through this
+     * in-process path (probed by scripts/debug-launch-game.sh).
+     */
+    private fun handleBootGame(context: Context?, intent: Intent) {
+        if (!BuildConfig.DEBUG) {
+            Log.w("S3BOOT", "boot ignored in non-debug build")
+            return
+        }
+        val app = context?.applicationContext ?: return
+        val path = intent.getStringExtra("originalGamePath")?.trim().orEmpty()
+            .ifEmpty { intent.getStringExtra("path")?.trim().orEmpty() }
+        if (path.isEmpty()) {
+            Log.w("S3BOOT", "boot missing path=")
+            return
+        }
+        val nativeState = runCatching { RPCSX.getState() }.getOrNull()
+        if (nativeState != EmulatorState.Stopped) {
+            Log.w("S3BOOT", "boot blocked nativeState=${nativeState ?: "Unknown"} path=$path")
+            return
+        }
+        runCatching {
+            GameRepository.list().firstOrNull { it.info.path == path }?.let { GameRepository.onBoot(it) }
+        }
+        val boot = Intent(app, RPCSXActivity::class.java).apply {
+            addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+            putExtra("path", path)
+            putExtra(RPCSXActivity.EXTRA_ORIGINAL_GAME_PATH, path)
+            putExtra(RPCSXActivity.EXTRA_BOOT_MODE, EmulatorBootMode.FreshGame.name)
+        }
+        app.startActivity(boot)
+        Log.w("S3BOOT", "boot started path=$path")
+    }
+
+    private fun handleSettingsProbe(context: Context?, intent: Intent) {
         if (!BuildConfig.DEBUG) {
             Log.w("S3CFG_HARNESS", "ignored in non-debug build")
             return
@@ -204,16 +250,22 @@ class DebugPadReceiver(private val onDebugFatal: (() -> Unit)? = null) : Broadca
                 val rawValue = intent.getStringExtra("value") ?: return
                 val value = encodeProbeValue(path, rawValue)
                 val ok = RPCSX.instance.gameSettingsOverrideSet(title, path, value)
+                val stored = context?.let {
+                    com.zenithblue.sambas3.gameconfig.GameSettingsOverrides.recordGame(it, title, path, value, null)
+                } ?: false
                 Log.i(
                     "S3CFG_HARNESS",
-                    "write scope=game title=$title path=$path requested=$value ok=$ok overrides=${RPCSX.instance.gameSettingsOverridesGet(title)}"
+                    "write scope=game title=$title path=$path requested=$value ok=$ok stored=$stored overrides=${RPCSX.instance.gameSettingsOverridesGet(title)}"
                 )
             }
             ACTION_SETTINGS_CLEAR_GAME -> {
                 val ok = RPCSX.instance.gameSettingsOverrideClear(title, path)
+                val cleared = context?.let {
+                    com.zenithblue.sambas3.gameconfig.GameSettingsOverrides.clearGameSetting(it, title, path, "")
+                } ?: false
                 Log.i(
                     "S3CFG_HARNESS",
-                    "clear scope=game title=$title path=$path ok=$ok overrides=${RPCSX.instance.gameSettingsOverridesGet(title)}"
+                    "clear scope=game title=$title path=$path ok=$ok cleared=$cleared overrides=${RPCSX.instance.gameSettingsOverridesGet(title)}"
                 )
             }
             ACTION_SETTINGS_CLEAR_ALL -> {
@@ -273,6 +325,8 @@ class DebugPadReceiver(private val onDebugFatal: (() -> Unit)? = null) : Broadca
         const val ACTION_REMOVE_GAME = "com.zenithblue.sambas3.DEBUG_REMOVE_GAME"
         /** Debug-only: start PrecompilerService Install for a filesystem ISO/folder path. */
         const val ACTION_INSTALL_FILE = "com.zenithblue.sambas3.DEBUG_INSTALL_FILE"
+        /** Debug-only: boot a game in-process (same extras as GamesScreen.bootGame). */
+        const val ACTION_BOOT_GAME = "com.zenithblue.sambas3.DEBUG_BOOT_GAME"
 
         fun register(context: Context, onDebugFatal: (() -> Unit)? = null): DebugPadReceiver {
             val r = DebugPadReceiver(onDebugFatal)
@@ -294,6 +348,7 @@ class DebugPadReceiver(private val onDebugFatal: (() -> Unit)? = null) : Broadca
                 addAction(ACTION_SETTINGS_CLEAR_ALL)
                 addAction(ACTION_REMOVE_GAME)
                 addAction(ACTION_INSTALL_FILE)
+                addAction(ACTION_BOOT_GAME)
                 addAction(PREFIX + "CROSS")
                 addAction(PREFIX + "CIRCLE")
                 addAction(PREFIX + "SQUARE")
