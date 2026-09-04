@@ -249,28 +249,43 @@ class DebugPadReceiver(private val onDebugFatal: (() -> Unit)? = null) : Broadca
             ACTION_SETTINGS_WRITE_GAME -> {
                 val rawValue = intent.getStringExtra("value") ?: return
                 val value = encodeProbeValue(path, rawValue)
-                val ok = RPCSX.instance.gameSettingsOverrideSet(title, path, value)
+                // Single owner: GameSettingsOverrides.recordGame performs the
+                // best-effort native write + app-tier persist (no separate native call).
                 val stored = context?.let {
                     com.zenithblue.sambas3.gameconfig.GameSettingsOverrides.recordGame(it, title, path, value, null)
                 } ?: false
                 Log.i(
                     "S3CFG_HARNESS",
-                    "write scope=game title=$title path=$path requested=$value ok=$ok stored=$stored overrides=${RPCSX.instance.gameSettingsOverridesGet(title)}"
+                    "write scope=game title=$title path=$path requested=$value stored=$stored overrides=${RPCSX.instance.gameSettingsOverridesGet(title)}"
                 )
             }
             ACTION_SETTINGS_CLEAR_GAME -> {
-                val ok = RPCSX.instance.gameSettingsOverrideClear(title, path)
+                // Single owner: clearGameSetting performs native clear + app-tier
+                // clear + live re-apply (no separate native call).
                 val cleared = context?.let {
                     com.zenithblue.sambas3.gameconfig.GameSettingsOverrides.clearGameSetting(it, title, path, "")
                 } ?: false
                 Log.i(
                     "S3CFG_HARNESS",
-                    "clear scope=game title=$title path=$path ok=$ok cleared=$cleared overrides=${RPCSX.instance.gameSettingsOverridesGet(title)}"
+                    "clear scope=game title=$title path=$path cleared=$cleared overrides=${RPCSX.instance.gameSettingsOverridesGet(title)}"
                 )
             }
             ACTION_SETTINGS_CLEAR_ALL -> {
-                val ok = RPCSX.instance.gameSettingsOverridesClear(title)
-                Log.i("S3CFG_HARNESS", "clear-all scope=game title=$title ok=$ok")
+                // Must clear BOTH tiers: native title state AND persisted app tier
+                // (SharedPreferences game.<TITLE>). clearGame owns both.
+                val cleared = context?.let {
+                    val ok = com.zenithblue.sambas3.gameconfig.GameSettingsOverrides.clearGame(it, title)
+                    val explicit = com.zenithblue.sambas3.gameconfig.GameSettingsOverrides.explicitUserOverrides(it, title)
+                    Log.i(
+                        "S3CFG_HARNESS",
+                        "clear-all scope=game title=$title ok=$ok explicit=$explicit native=${RPCSX.instance.gameSettingsOverridesGet(title)}"
+                    )
+                    ok
+                } ?: run {
+                    val ok = RPCSX.instance.gameSettingsOverridesClear(title)
+                    Log.i("S3CFG_HARNESS", "clear-all scope=game title=$title ok=$ok (no context)")
+                    ok
+                }
             }
         }
     }
