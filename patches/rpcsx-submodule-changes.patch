@@ -630,10 +630,10 @@ index b4b05be4a..c6579afbd 100644
  					rsx::convert_linear_swizzle<u16, false>(tmp_data.data(), data, width, height, rsx_pitch);
  					break;
 diff --git a/rpcs3/Emu/RSX/VK/vkutils/sync.cpp b/rpcs3/Emu/RSX/VK/vkutils/sync.cpp
-index 6df7e3334..a9f1f8758 100644
+index 6df7e3334..260fb229d 100644
 --- a/rpcs3/Emu/RSX/VK/vkutils/sync.cpp
 +++ b/rpcs3/Emu/RSX/VK/vkutils/sync.cpp
-@@ -203,10 +203,16 @@ namespace vk
+@@ -203,12 +203,26 @@ namespace vk
  		m_backend = dev.get_synchronization2_support() ? sync_backend::events_v2 : sync_backend::events_v1;
  
  		if (domain == sync_domain::host &&
@@ -653,7 +653,17 @@ index 6df7e3334..a9f1f8758 100644
 +			// Events don't work quite right on AMD and Android/Turnip drivers
  			m_backend = sync_backend::gpu_label;
  
++			// One-time runtime proof for SambaS3 validation (low volume: first host event only).
++			static bool s_s3vksync_logged = false;
++			if (!s_s3vksync_logged)
++			{
++				s_s3vksync_logged = true;
++				rsx_log.notice("S3VKSYNC domain=host backend=gpu_label reason=android driver_vendor=%u", static_cast<unsigned>(vk::get_driver_vendor()));
++			}
++
  			m_label = std::make_unique<vk::gpu_label>(globals::get_shared_label_pool(dev));
+ 			return;
+ 		}
 diff --git a/rpcs3/Emu/compile_progress.cpp b/rpcs3/Emu/compile_progress.cpp
 index dc7a56339..cabbb7afd 100644
 --- a/rpcs3/Emu/compile_progress.cpp
