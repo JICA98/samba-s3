@@ -74,7 +74,11 @@ android {
     }
 
     buildTypes {
+        debug {
+            buildConfigField("boolean", "DIRECT_ISO_LOADING", "true")
+        }
         release {
+            buildConfigField("boolean", "DIRECT_ISO_LOADING", "false")
             isMinifyEnabled = true
             isShrinkResources = true
             proguardFiles(

@@ -46,6 +46,10 @@ class AndroidSystemMetricsCollector(private val context: Context) : MonitoringSy
     private var lastPower = PowerSample()
     private var lastFrequencies: List<Long> = emptyList()
     private var lastSwap = SwapSample()
+    private var procStatReadable = true
+    private var zramReadable = true
+    private var gpuLoadReadable = true
+    private var gpuFreqReadable = true
     private var lastGpu: GpuHardwareMetrics? = null
 
     override fun start() {
@@ -135,7 +139,14 @@ class AndroidSystemMetricsCollector(private val context: Context) : MonitoringSy
         }
         if (now - lastSwapMs >= 2_000L) {
             val memInfo = readMemInfo()
-            lastSwap = SwapSample(memInfo["SwapTotal"]?.minus(memInfo["SwapFree"] ?: 0L), memInfo["SwapTotal"], runCatching { zramFile.readText().trim().split(Regex("\\s+"))[2].toLong() }.getOrNull())
+            val zram = if (zramReadable) {
+                runCatching { zramFile.readText().trim().split(Regex("\\s+"))[2].toLong() }
+                    .getOrElse {
+                        zramReadable = false
+                        null
+                    }
+            } else null
+            lastSwap = SwapSample(memInfo["SwapTotal"]?.minus(memInfo["SwapFree"] ?: 0L), memInfo["SwapTotal"], zram)
             lastSwapMs = now
         }
         return AndroidSystemMetrics(
@@ -149,7 +160,12 @@ class AndroidSystemMetricsCollector(private val context: Context) : MonitoringSy
     }
 
     private fun readSystemCpu(): Float? {
-        val fields = runCatching { File("/proc/stat").useLines { it.firstOrNull()?.trim()?.split(Regex("\\s+")) } }.getOrNull() ?: return null
+        if (!procStatReadable) return null
+        val fields = runCatching { File("/proc/stat").useLines { it.firstOrNull()?.trim()?.split(Regex("\\s+")) } }.getOrNull()
+        if (fields == null) {
+            procStatReadable = false
+            return null
+        }
         if (fields.size < 5 || fields[0] != "cpu") return null
         val idle = fields[4].toLongOrNull() ?: return null
         val total = fields.drop(1).mapNotNull { it.toLongOrNull() }.sum()
@@ -192,8 +208,20 @@ class AndroidSystemMetricsCollector(private val context: Context) : MonitoringSy
     }
 
     private fun readGpu(): GpuHardwareMetrics? {
-        val load = gpuFiles.first?.let { runCatching { it.readText().trim().removeSuffix("%").toInt() }.getOrNull() }
-        val freq = gpuFiles.second?.let { runCatching { it.readText().trim().toLong() }.getOrNull() }
+        val load = if (gpuLoadReadable && gpuFiles.first != null) {
+            runCatching { gpuFiles.first!!.readText().trim().removeSuffix("%").toInt() }
+                .getOrElse {
+                    gpuLoadReadable = false
+                    null
+                }
+        } else null
+        val freq = if (gpuFreqReadable && gpuFiles.second != null) {
+            runCatching { gpuFiles.second!!.readText().trim().toLong() }
+                .getOrElse {
+                    gpuFreqReadable = false
+                    null
+                }
+        } else null
         return if (load != null || freq != null) GpuHardwareMetrics(load, freq) else null
     }
 

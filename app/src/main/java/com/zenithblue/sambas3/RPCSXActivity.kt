@@ -552,14 +552,57 @@ class RPCSXActivity : ComponentActivity(), EmulationHost {
                     } else false
                 }.getOrDefault(false)
             }
+            val effectiveBootPath: String
+            val effectiveOriginalGamePath: String
+            // Direct-ISO applies to every boot mode: a savestate boot still needs the
+            // disc mounted, and the core resolves the game through the original path.
+            // Gate the .iso/sourceUri fallback on the debug flag so release installed
+            // games that merely recorded a sourceUri never take the direct path.
+            val isDirectIso = gameInfo?.sourceMode?.value == GameSourceMode.DIRECT_ISO ||
+                (com.zenithblue.sambas3.BuildConfig.DIRECT_ISO_LOADING &&
+                    (gamePath.endsWith(".iso", ignoreCase = true) ||
+                        bootPath.endsWith(".iso", ignoreCase = true)) &&
+                    gameInfo?.sourceUri?.value != null)
+            if (isDirectIso) {
+                val uriStr = gameInfo?.sourceUri?.value ?: gamePath
+                val uri = if (uriStr.startsWith("content://") || uriStr.startsWith("file://")) {
+                    android.net.Uri.parse(uriStr)
+                } else {
+                    android.net.Uri.fromFile(java.io.File(uriStr))
+                }
+                Log.i("S3ISO", "boot_source=DIRECT_ISO uri=$uri mode=$bootMode")
+                val session = runCatching {
+                    com.zenithblue.sambas3.iso.DirectIsoSession.acquire(this@RPCSXActivity, uri)
+                }.getOrElse { err ->
+                    Log.e("S3ISO", "unavailable reason=${err.message}")
+                    runOnUiThread {
+                        android.widget.Toast.makeText(
+                            this@RPCSXActivity,
+                            "ISO unavailable. Reconnect storage or select the ISO again.",
+                            android.widget.Toast.LENGTH_LONG
+                        ).show()
+                        failBootAndReturnHome("direct-iso-unavailable")
+                    }
+                    return@thread
+                }
+                effectiveBootPath = session.procFdPath
+                effectiveOriginalGamePath = session.procFdPath
+            } else {
+                effectiveBootPath = bootPath
+                effectiveOriginalGamePath = gamePath
+            }
+
             val bootResult = BootResult.fromInt(
                 if (bootMode != EmulatorBootMode.FreshGame) {
-                    bootSavestateSerialized(bootPath, gamePath)
+                    bootSavestateSerialized(bootPath, effectiveOriginalGamePath)
                 } else {
-                    bootSerialized(bootPath)
+                    bootSerialized(effectiveBootPath)
                 }
             )
             if (bootResult != BootResult.NoErrors) {
+                if (isDirectIso) {
+                    com.zenithblue.sambas3.iso.DirectIsoSession.release("boot-failed")
+                }
                 Log.w("S3HOMELOAD", "direct-boot-return result=$bootResult source=$bootPath")
                 if (bootMode != EmulatorBootMode.FreshGame) {
                     Log.w("S3HOMELOAD", "boot-savestate-return result=$bootResult")
@@ -828,6 +871,7 @@ class RPCSXActivity : ComponentActivity(), EmulationHost {
     /** Boot/load failures return to Home; RPCSXActivity never owns recovery presentation. */
     private fun failBootAndReturnHome(reason: String) {
         if (!terminalFailure.compareAndSet(false, true)) return
+        com.zenithblue.sambas3.iso.DirectIsoSession.release("fail-boot-$reason")
         interactionLock.lock(EmulatorInteractionLock.CrashView)
         val failureEventId = "boot-failure-${System.currentTimeMillis()}-${activityInstanceId}"
         EmulationSessionJournal.markFailure(this, failureEventId)
@@ -1485,6 +1529,14 @@ class RPCSXActivity : ComponentActivity(), EmulationHost {
         bootThread?.interrupt()
         try { bootThread?.join(2000) } catch (_: Exception) {}
         try { if (bootThread?.isAlive == true) Log.w("S3LIFE", "bootThread still alive after onDestroy join timeout") } catch (_: Exception) {}
+        // Release the direct-ISO FD only after the core no longer needs the disc.
+        // Releasing before kill/stop completes would break in-flight disc reads.
+        val nativeStopped = runCatching { RPCSX.getState() }.getOrDefault(EmulatorState.Stopped) == EmulatorState.Stopped
+        if (nativeStopped) {
+            com.zenithblue.sambas3.iso.DirectIsoSession.release("activity-destroyed-stopped")
+        } else {
+            Log.w("S3ISO", "fd_session_retained reason=core-still-alive fd=${com.zenithblue.sambas3.iso.DirectIsoSession.current()?.fd}")
+        }
     }
 
     private fun isMenuOpen(): Boolean = coordinator.state.value.isOpen

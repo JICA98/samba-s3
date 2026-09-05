@@ -353,6 +353,47 @@ fun GamesScreen(
         }
     }
 
+    val directIsoPickerLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.OpenDocument()
+    ) { uri: Uri? ->
+        if (uri != null) {
+            var persisted = false
+            try {
+                context.contentResolver.takePersistableUriPermission(
+                    uri,
+                    Intent.FLAG_GRANT_READ_URI_PERMISSION
+                )
+                persisted = context.contentResolver.persistedUriPermissions.any {
+                    it.uri == uri && it.isReadPermission
+                }
+            } catch (e: Exception) {
+                android.util.Log.e("S3ISO", "unavailable reason=persist-failed ${e.message}")
+            }
+            android.util.Log.i("S3ISO", "source_selected uri=$uri")
+            android.util.Log.i("S3ISO", "permission_persisted=$persisted uri=$uri")
+            kotlin.concurrent.thread(name = "sambas3-direct-iso-register") {
+                val result = runCatching {
+                    com.zenithblue.sambas3.iso.DirectIsoManager.validateAndRegister(context, uri)
+                }
+                context.mainExecutor.execute {
+                    result.onSuccess { game ->
+                        android.widget.Toast.makeText(
+                            context,
+                            "Direct ISO registered: ${game.info.name.value ?: "Game"}",
+                            android.widget.Toast.LENGTH_SHORT
+                        ).show()
+                    }.onFailure { err ->
+                        android.widget.Toast.makeText(
+                            context,
+                            "Failed to register ISO: ${err.message ?: "Unknown error"}",
+                            android.widget.Toast.LENGTH_LONG
+                        ).show()
+                    }
+                }
+            }
+        }
+    }
+
     val isoPickerLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.GetContent()
     ) { uri: Uri? ->
@@ -1277,7 +1318,11 @@ fun GamesScreen(
                 },
                 onImportIso = {
                     showImportDialog = false
-                    isoPickerLauncher.launch("*/*")
+                    if (com.zenithblue.sambas3.BuildConfig.DIRECT_ISO_LOADING) {
+                        directIsoPickerLauncher.launch(arrayOf("*/*"))
+                    } else {
+                        isoPickerLauncher.launch("*/*")
+                    }
                 }
             )
         }

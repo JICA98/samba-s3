@@ -317,17 +317,41 @@ class DebugPadReceiver(private val onDebugFatal: (() -> Unit)? = null) : Broadca
             Log.w("S3BOOT", "boot blocked nativeState=${nativeState ?: "Unknown"} path=$path request_id=$requestId")
             return
         }
+        var bootPath = path
         runCatching {
-            GameRepository.list().firstOrNull { it.info.path == path }?.let { GameRepository.onBoot(it) }
+            if (path.endsWith(".iso", ignoreCase = true)) {
+                val existing = GameRepository.list().firstOrNull { it.info.path == path || it.info.sourceUri.value == path }
+                if (existing != null) {
+                    GameRepository.onBoot(existing)
+                    bootPath = existing.info.path
+                } else {
+                    val registered = runCatching {
+                        com.zenithblue.sambas3.iso.DirectIsoManager.registerFromFilePath(app, java.io.File(path))
+                    }.getOrNull()
+                    val resolved = registered?.let { reg ->
+                        GameRepository.list().firstOrNull { g ->
+                            g.info.path == reg.info.path || g.info.sourceUri.value == reg.info.sourceUri.value
+                        } ?: reg
+                    }
+                    if (resolved != null) {
+                        GameRepository.onBoot(resolved)
+                        // Boot the canonical library entry so RPCSXActivity resolves
+                        // the DIRECT_ISO sourceUri/session instead of the raw path.
+                        bootPath = resolved.info.path
+                    }
+                }
+            } else {
+                GameRepository.list().firstOrNull { it.info.path == path }?.let { GameRepository.onBoot(it) }
+            }
         }
         val boot = Intent(app, RPCSXActivity::class.java).apply {
             addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-            putExtra("path", path)
-            putExtra(RPCSXActivity.EXTRA_ORIGINAL_GAME_PATH, path)
+            putExtra("path", bootPath)
+            putExtra(RPCSXActivity.EXTRA_ORIGINAL_GAME_PATH, bootPath)
             putExtra(RPCSXActivity.EXTRA_BOOT_MODE, EmulatorBootMode.FreshGame.name)
         }
         app.startActivity(boot)
-        Log.w("S3BOOT", "boot started path=$path request_id=$requestId")
+        Log.w("S3BOOT", "boot started path=$bootPath request_id=$requestId")
     }
 
     private fun handleSettingsProbe(context: Context?, intent: Intent) {

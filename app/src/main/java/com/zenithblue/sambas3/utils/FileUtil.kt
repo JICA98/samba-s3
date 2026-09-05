@@ -604,6 +604,31 @@ object FileUtil {
                 val r = File(RPCSX.rootDirectory).canonicalFile
                 root = r
                 val rawPath = game.info.path
+                if (game.info.sourceMode.value == com.zenithblue.sambas3.GameSourceMode.DIRECT_ISO) {
+                    val tid = com.zenithblue.sambas3.GameIdentity.titleIdOrNull(game.info.path, game.info.name.value)
+                    if (tid != null) {
+                        File(r, "cache/cache/$tid").deleteRecursively()
+                        File(r, "cache/cache/ppu_manifest/$tid.json").delete()
+                    }
+                    game.info.iconPath.value?.let { icon ->
+                        if (icon.startsWith(r.absolutePath) || icon.contains("direct_iso_icons")) {
+                            File(icon).delete()
+                        }
+                    }
+                    val uriStr = game.info.sourceUri.value ?: game.info.path
+                    val otherUses = com.zenithblue.sambas3.GameRepository.list().any { other ->
+                        other != game && (other.info.sourceUri.value == uriStr || other.info.path == uriStr)
+                    }
+                    if (!otherUses && (uriStr.startsWith("content://") || uriStr.startsWith("file://"))) {
+                        runCatching {
+                            context.contentResolver.releasePersistableUriPermission(
+                                android.net.Uri.parse(uriStr),
+                                android.content.Intent.FLAG_GRANT_READ_URI_PERMISSION
+                            )
+                        }
+                    }
+                    return@runCatching true
+                }
                 // Never delete external/source URIs or placeholder
                 if (rawPath == "$" || rawPath.startsWith("content://") || rawPath.startsWith("content:")) {
                     throw IOException("Only imported games can be removed (external/source path not removable)")

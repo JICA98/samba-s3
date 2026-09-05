@@ -23,18 +23,28 @@ enum class GameFlag {
 }
 
 @Serializable
+enum class GameSourceMode {
+    INSTALLED,
+    DIRECT_ISO
+}
+
+@Serializable
 data class GameInfo @Keep constructor(
     val path: String,
     var name: String? = null,
     var iconPath: String? = null,
-    var gameFlags: Int = 0
+    var gameFlags: Int = 0,
+    val sourceUri: String? = null,
+    val sourceMode: GameSourceMode = GameSourceMode.INSTALLED
 )
 
 data class GameInfoStore(
     val path: String,
     val name: MutableState<String?> = mutableStateOf(null),
     val iconPath: MutableState<String?> = mutableStateOf(null),
-    val gameFlags: MutableIntState = mutableIntStateOf(0)
+    val gameFlags: MutableIntState = mutableIntStateOf(0),
+    val sourceUri: MutableState<String?> = mutableStateOf(null),
+    val sourceMode: MutableState<GameSourceMode> = mutableStateOf(GameSourceMode.INSTALLED)
 )
 
 enum class GameProgressType {
@@ -69,16 +79,25 @@ data class Game(
     fun hasFlag(flag: GameFlag) = (info.gameFlags.intValue and (1 shl flag.ordinal)) != 0
 }
 
-private fun toStore(info: GameInfo) =
+internal fun toStore(info: GameInfo) =
     GameInfoStore(
         info.path,
         mutableStateOf(info.name),
         mutableStateOf(info.iconPath),
-        mutableIntStateOf(info.gameFlags)
+        mutableIntStateOf(info.gameFlags),
+        mutableStateOf(info.sourceUri),
+        mutableStateOf(info.sourceMode)
     )
 
-private fun toInfo(store: GameInfoStore) =
-    GameInfo(store.path, store.name.value, store.iconPath.value, store.gameFlags.intValue)
+internal fun toInfo(store: GameInfoStore) =
+    GameInfo(
+        store.path,
+        store.name.value,
+        store.iconPath.value,
+        store.gameFlags.intValue,
+        store.sourceUri.value,
+        store.sourceMode.value
+    )
 
 internal object GameIdentity {
     private val titleIdPattern = Regex("(?<![A-Za-z0-9])([A-Za-z]{4}\\d{5})(?![A-Za-z0-9])")
@@ -126,7 +145,9 @@ class GameRepository {
                     File(RPCSX.rootDirectory + "games.json").writeText(
                         Json.encodeToString(instance.games.map { game ->
                             toInfo(game.info)
-                        }.filter { info -> info.path != "$" && !info.path.startsWith("content://") })
+                        }.filter { info ->
+                            info.path != "$" && (info.sourceMode == GameSourceMode.DIRECT_ISO || !info.path.startsWith("content://"))
+                        })
                     )
                 }
             } catch (e: Exception) {
@@ -265,6 +286,11 @@ class GameRepository {
                 return
             }
 
+            if (existsGame.info.sourceMode.value == GameSourceMode.DIRECT_ISO && info.sourceMode != GameSourceMode.DIRECT_ISO) {
+                // Keep DIRECT_ISO entry; do not replace with internal scan
+                return
+            }
+
             if (existsGame.info.path != info.path &&
                 GameIdentity.preferPath(info.path, existsGame.info.path)
             ) {
@@ -280,6 +306,8 @@ class GameRepository {
             existsGame.info.name.value = info.name ?: existsGame.info.name.value
             existsGame.info.iconPath.value = info.iconPath ?: existsGame.info.iconPath.value
             existsGame.info.gameFlags.intValue = info.gameFlags
+            if (info.sourceUri != null) existsGame.info.sourceUri.value = info.sourceUri
+            if (info.sourceMode == GameSourceMode.DIRECT_ISO) existsGame.info.sourceMode.value = GameSourceMode.DIRECT_ISO
             val hadProgress = existsGame.findProgress(GameProgressType.Install) != null
             addInstallProgressIfNeeded(existsGame, progressId)
             if (progressId >= 0 && !hadProgress && existsGame.findProgress(GameProgressType.Install) != null && Telemetry.isEnabled) {
@@ -313,6 +341,12 @@ class GameRepository {
                 val key = GameIdentity.key(game.info.path, game.info.name.value)
                 val existing = unique[key]
                 if (existing == null) {
+                    unique[key] = game
+                } else if (existing.info.sourceMode.value == GameSourceMode.DIRECT_ISO) {
+                    copyProgress(game, existing)
+                    unique[key] = existing
+                } else if (game.info.sourceMode.value == GameSourceMode.DIRECT_ISO) {
+                    copyProgress(existing, game)
                     unique[key] = game
                 } else if (GameIdentity.preferPath(game.info.path, existing.info.path)) {
                     copyProgress(existing, game)
@@ -378,14 +412,16 @@ class GameRepository {
 
         fun find(path: String): Game? {
             synchronized(instance) {
-                return instance.games.find { game -> game.info.path == path }
+                return instance.games.find { game ->
+                    game.info.path == path || game.info.sourceUri.value == path
+                }
             }
         }
 
         fun list() = instance.games
 
         fun clear() {
-            instance.games.clear()
+            instance.games.removeIf { it.info.sourceMode.value != GameSourceMode.DIRECT_ISO }
         }
     }
 }

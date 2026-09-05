@@ -67,7 +67,8 @@ class MonitoringRepository(
                         // Paused is deliberately not a valid fresh telemetry
                         // state. Keeping the old emulator snapshot visible
                         // while paused makes FPS look fabricated.
-                        val running = stateProvider() == EmulatorState.Running
+                        val state = stateProvider()
+                        val running = state == EmulatorState.Running || state == EmulatorState.Loading || state == EmulatorState.Starting
                         if (running && !wasRunning) generation++
                         if (!running && wasRunning) history.clear()
                         wasRunning = running
