@@ -446,6 +446,12 @@ static int s3_interceptor_queueBuffer(
     int fenceFd) {
   uint64_t now_us = get_time_us();
   on_frame_presented(now_us);
+  static std::atomic<int> s_intercept_hits{0};
+  if (s_intercept_hits.fetch_add(1) < 3) {
+    __android_log_print(ANDROID_LOG_INFO, "S3PERF",
+                        "queueBuffer interceptor fired win=%p total=%llu", window,
+                        (unsigned long long)g_presented_frames.load());
+  }
   if (orig_queueBuffer != nullptr) {
     return orig_queueBuffer(window, buffer, fenceFd);
   }
@@ -455,6 +461,12 @@ static int s3_interceptor_queueBuffer(
 static int s3_hooked_queueBuffer(void* window, void* buffer, int fenceFd) {
   uint64_t now_us = get_time_us();
   on_frame_presented(now_us);
+  static std::atomic<int> s_slot_hits{0};
+  if (s_slot_hits.fetch_add(1) < 3) {
+    __android_log_print(ANDROID_LOG_INFO, "S3PERF",
+                        "queueBuffer slot hook fired win=%p total=%llu", window,
+                        (unsigned long long)g_presented_frames.load());
+  }
   if (g_orig_queueBuffer != nullptr) {
     return g_orig_queueBuffer(window, buffer, fenceFd);
   }
@@ -466,10 +478,13 @@ static int s3_hooked_queueBuffer(void* window, void* buffer, int fenceFd) {
 static void try_hook_native_window(ANativeWindow* win) {
   if (win == nullptr) return;
 
-  static auto set_interceptor = reinterpret_cast<pfn_ANativeWindow_setQueueBufferInterceptor>(
+  static auto set_interceptor_hook = reinterpret_cast<pfn_ANativeWindow_setQueueBufferInterceptor>(
       dlsym(RTLD_DEFAULT, "ANativeWindow_setQueueBufferInterceptor"));
-  if (set_interceptor != nullptr) {
-    int ret = set_interceptor(win, s3_interceptor_queueBuffer, nullptr);
+  __android_log_print(ANDROID_LOG_INFO, "S3PERF",
+                      "try_hook win=%p interceptor_api=%p hooked_window=%p",
+                      win, (void*)set_interceptor_hook, g_hooked_window);
+  if (set_interceptor_hook != nullptr) {
+    int ret = set_interceptor_hook(win, s3_interceptor_queueBuffer, nullptr);
     __android_log_print(ANDROID_LOG_INFO, "S3PERF",
                         "ANativeWindow_setQueueBufferInterceptor registered: ret=%d", ret);
     if (ret == 0) {
@@ -1445,6 +1460,14 @@ Java_com_zenithblue_sambas3_RPCSX_getPerfMetricsJson(JNIEnv *env, jobject) {
       return wrap(env, str);
     }
   }
+  return wrap(env, s3_perf::build_fallback_json());
+}
+
+extern "C" JNIEXPORT jstring JNICALL
+Java_com_zenithblue_sambas3_RPCSX_getFallbackPerfJson(JNIEnv *env, jobject) {
+  // Surface-measured frames (ANativeWindow queueBuffer hook). The core export
+  // reports emu_flip counters; when it reports presented=0 while frames are
+  // visibly presenting, the UI merges this fallback's fresh fps/samples.
   return wrap(env, s3_perf::build_fallback_json());
 }
 

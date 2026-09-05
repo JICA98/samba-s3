@@ -128,6 +128,8 @@ class RPCSX {
     external fun hasTrophyExports(): Boolean
     /** Optional structured performance snapshot from newer runtime cores. */
     external fun getPerfMetricsJson(): String?
+    /** Surface-measured fallback (ANativeWindow presents) used when the core export has no frame data. */
+    external fun getFallbackPerfJson(): String?
     /** Enables the core-side metrics snapshot producer only while the UI monitor is active. */
     external fun setPerfMetricsEnabled(enabled: Boolean, intervalMs: Int): Boolean
     // ISO preview probe — extracts only PS3_GAME/ICON0.PNG to cache, size capped 16 MiB, no install/PPU.
