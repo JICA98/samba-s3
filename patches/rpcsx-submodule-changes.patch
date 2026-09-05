@@ -328,6 +328,20 @@ index 8308a4798..71ebab2f9 100644
    }
  
    return root->to_json().dump(4);
+diff --git a/android/src/samba-build-id.cpp b/android/src/samba-build-id.cpp
+index 8aca7dc59..2c0d98b33 100644
+--- a/android/src/samba-build-id.cpp
++++ b/android/src/samba-build-id.cpp
+@@ -1,8 +1,6 @@
+ #include <string>
+-
+ static std::string g_samba_build_id =
+-    "rpcsx=27441815c12cca1a4dcb3daec82b513b1a35eed7 samba=62a70942d8c121a7e58c74b6a4e2700cf369c0ae patch_sha256=6468572dbc6dec3ea7d0ad996adeb57dffd96a090d10482ea04d7013abecd5f0 build_type=Debug";
+-
++    "rpcsx=657b26a0d197c29d42cdcf3b3f6e8ad5c6765bbc samba=4033d8335239844b03bce62d346d405859582f48 patch_sha256=0cd4cc1866223f575ed1c00551f4f9820c9190539fbaf60b8bca4752f3117d40 build_type=Debug";
+ extern "C" const char* _rpcsx_sambaBuildId() {
+     return g_samba_build_id.c_str();
+ }
 diff --git a/rpcs3/Emu/Cell/PPUThread.cpp b/rpcs3/Emu/Cell/PPUThread.cpp
 index d2768d8b0..c0f7c2981 100644
 --- a/rpcs3/Emu/Cell/PPUThread.cpp
@@ -630,11 +644,16 @@ index b4b05be4a..c6579afbd 100644
  					rsx::convert_linear_swizzle<u16, false>(tmp_data.data(), data, width, height, rsx_pitch);
  					break;
 diff --git a/rpcs3/Emu/RSX/VK/vkutils/sync.cpp b/rpcs3/Emu/RSX/VK/vkutils/sync.cpp
-index 6df7e3334..260fb229d 100644
+index 6df7e3334..56e23fd85 100644
 --- a/rpcs3/Emu/RSX/VK/vkutils/sync.cpp
 +++ b/rpcs3/Emu/RSX/VK/vkutils/sync.cpp
-@@ -203,12 +203,26 @@ namespace vk
+@@ -201,14 +201,39 @@ namespace vk
+ 		: m_device(&dev), m_domain(domain)
+ 	{
  		m_backend = dev.get_synchronization2_support() ? sync_backend::events_v2 : sync_backend::events_v1;
++		const auto gpu_name = dev.gpu().get_name();
++		const auto driver_name = dev.gpu().get_driver_name();
++		const bool is_turnip = gpu_name.find("Turnip") != umax || driver_name.find("Turnip") != umax;
  
  		if (domain == sync_domain::host &&
 -			vk::get_driver_vendor() == vk::driver_vendor::AMD &&
@@ -642,28 +661,62 @@ index 6df7e3334..260fb229d 100644
 -		{
 -			// Events don't work quite right on AMD drivers
 +			((vk::get_driver_vendor() == vk::driver_vendor::AMD &&
-+			vk::get_chip_family() < vk::chip_class::AMD_navi1x) ||
++			  vk::get_chip_family() < vk::chip_class::AMD_navi1x)
 +#if defined(__ANDROID__) || defined(ANDROID)
-+			true
-+#else
-+			false
++			 || is_turnip
 +#endif
 +			))
 +		{
-+			// Events don't work quite right on AMD and Android/Turnip drivers
++			// Host polling of VkEvent is unreliable on Android Vulkan drivers
++			// (notably Turnip). Use a mapped, GPU-written label instead. The
++			// explicit host-read barrier in gpu_label::signal keeps the mapped
++			// value coherent for the CPU polling loop.
  			m_backend = sync_backend::gpu_label;
  
-+			// One-time runtime proof for SambaS3 validation (low volume: first host event only).
++			// One-time runtime proof (low volume: first host event only).
 +			static bool s_s3vksync_logged = false;
 +			if (!s_s3vksync_logged)
 +			{
 +				s_s3vksync_logged = true;
-+				rsx_log.notice("S3VKSYNC domain=host backend=gpu_label reason=android driver_vendor=%u", static_cast<unsigned>(vk::get_driver_vendor()));
++				rsx_log.notice("S3VKSYNC domain=host backend=gpu_label reason=%s gpu=%s driver=%s driver_vendor=%u",
++#if defined(__ANDROID__) || defined(ANDROID)
++					"android",
++#else
++					"amd-legacy",
++#endif
++					gpu_name.c_str(), driver_name.c_str(),
++					static_cast<unsigned>(vk::get_driver_vendor()));
 +			}
 +
  			m_label = std::make_unique<vk::gpu_label>(globals::get_shared_label_pool(dev));
  			return;
  		}
+@@ -456,6 +481,25 @@ namespace vk
+ 			::size32(image_memory_barriers), image_memory_barriers.data());
+ 
+ 		VK_GET_SYMBOL(vkCmdFillBuffer)(cmd, m_buffer_handle, m_buffer_offset, 4, label_constants::set_);
++
++		// The label is read by the CPU through a mapped pointer.  The transfer
++		// write above therefore needs an explicit device-to-host dependency;
++		// HOST_VISIBLE + HOST_COHERENT removes cache management, but does not
++		// replace the Vulkan domain operation.  Without this barrier Turnip can
++		// leave the CPU polling a stale reset value while the command buffer is
++		// already submitted.
++		const VkMemoryBarrier host_read_barrier =
++			{
++				.sType = VK_STRUCTURE_TYPE_MEMORY_BARRIER,
++				.srcAccessMask = VK_ACCESS_TRANSFER_WRITE_BIT,
++				.dstAccessMask = VK_ACCESS_HOST_READ_BIT};
++		VK_GET_SYMBOL(vkCmdPipelineBarrier)(cmd,
++			VK_PIPELINE_STAGE_TRANSFER_BIT,
++			VK_PIPELINE_STAGE_HOST_BIT,
++			0,
++			1, &host_read_barrier,
++			0, nullptr,
++			0, nullptr);
+ 	}
+ 
+ 	gpu_debug_marker::gpu_debug_marker(gpu_debug_marker_pool& pool, std::string message)
 diff --git a/rpcs3/Emu/compile_progress.cpp b/rpcs3/Emu/compile_progress.cpp
 index dc7a56339..cabbb7afd 100644
 --- a/rpcs3/Emu/compile_progress.cpp

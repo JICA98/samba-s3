@@ -9,7 +9,11 @@
 | Device | serial, model, SoC, exact GPU and driver (`Y5WWBMJVOZSK4HU8`: Dimensity 8300 Ultra / Mali-G615 MC6) |
 | Renderer | Vulkan plus the hardware physical-device line from `rpcsx_backend.log` (`Cubeb` is audio, not a graphics renderer) |
 | Baseline config | `config.yml` snippet (Video + Core) |
-| Loop script | `scripts/get-samba-logs.sh` + `input tap 1632,873` ×3 |
+| Loop script | `scripts/debug-launch-game.sh`, `scripts/debug-pad.sh`, `scripts/get-samba-logs.sh`, `scripts/debug-stop-game.sh` |
+| Core identity | Runtime S3CORE, local/unstripped and APK/loaded core hashes |
+| GPU result scope | Architecture, exact GPU, actual runtime driver version (not package label) |
+| Gameplay gates | Visible menu → new/load → world → movement/camera → 10m/20m → repeat/resume/clean exit |
+| Restoration | Before/after global settings, explicit title overrides, stored driver preference |
 | In-game target | First controllable frame after cutscene (no `Access violation`) |
 | Game-data validation | Record sizes/hashes for large archives before settings triage |
 
@@ -49,7 +53,7 @@ Or direct `config.yml` diff for testing.
 
 ## Debug Notes
 
-- Controller: `1632,873` (1920×1080), or `adb broadcast DEBUG_PAD`.
+- Controller: `scripts/debug-pad.sh SERIAL BUTTON`; require matching request-ID acknowledgement plus visible game response. No coordinate assumptions.
 - Logs: `./scripts/get-samba-logs.sh Y5WWBMJVOZSK4HU8 /tmp/out` → attach `rpcsx_backend.log` window.
 - Upstream: `rpcsx-android.cpp:107 LogListener` → `logcat -b main` → `LogMonitor.kt:298` → `rpcsx_backend.log`.
 

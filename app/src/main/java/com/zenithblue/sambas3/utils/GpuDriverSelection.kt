@@ -20,11 +20,50 @@ private const val TAG = "GpuDriverSelection"
  */
 object GpuDriverSelection {
 
+    /** Debug-only Turnip diagnostics persisted across the next warm boot. */
+    private val allowedTurnipDebugOptions = setOf(
+        "nir", "nobin", "sysmem", "gmem", "forcebin", "layout", "nolrz",
+        "nolrzfc", "perf", "flushall", "syncdraw", "rast_order",
+        "unaligned_store", "log_skip_gmem_ops", "3d_load", "fdm",
+        "noconcurrentresolves", "noconcurrentunresolves", "nobinmerging"
+    )
+
+    fun setDebugTurnipOptions(raw: String?): Result<String> {
+        val value = raw.orEmpty().trim()
+        if (value.isEmpty() || value == "-" || value.equals("clear", ignoreCase = true)) {
+            GeneralSettings["gpu_driver_tu_debug"] = ""
+            return runCatching {
+                Os.unsetenv("TU_DEBUG")
+                ""
+            }
+        }
+        val options = value.split(',').map { it.trim().lowercase() }.filter { it.isNotEmpty() }
+        if (options.isEmpty() || options.any { it !in allowedTurnipDebugOptions }) {
+            val bad = options.firstOrNull { it !in allowedTurnipDebugOptions } ?: value
+            return Result.failure(IllegalArgumentException("unsupported TU_DEBUG option: $bad"))
+        }
+        val normalized = options.distinct().joinToString(",")
+        GeneralSettings["gpu_driver_tu_debug"] = normalized
+        return runCatching {
+            Os.setenv("TU_DEBUG", normalized, true)
+            normalized
+        }
+    }
+
+    private fun applyDebugTurnipOptions() {
+        val options = (GeneralSettings["gpu_driver_tu_debug"] as? String).orEmpty().trim()
+        if (options.isEmpty()) return
+        runCatching { Os.setenv("TU_DEBUG", options, true) }
+            .onSuccess { Log.i(TAG, "TU_DEBUG=$options (debug diagnostic)") }
+            .onFailure { Log.w(TAG, "Failed to apply debug TU_DEBUG: ${it.message}") }
+    }
+
     fun applyStoredSelection(context: Context, nativeLibraryDir: String): Boolean {
         val path = GeneralSettings["gpu_driver_path"] as? String
         val name = GeneralSettings["gpu_driver_name"] as? String
         if (path.isNullOrBlank() || name.isNullOrBlank()) {
             clearSysmemEnv()
+            applyDebugTurnipOptions()
             return RPCSX.instance.setCustomDriver("", "", nativeLibraryDir)
         }
 
@@ -37,6 +76,7 @@ object GpuDriverSelection {
         }
 
         applySysmemIfNeeded(context, driverDir)
+        applyDebugTurnipOptions()
         return RPCSX.instance.setCustomDriver(path, name, nativeLibraryDir)
     }
 

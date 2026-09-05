@@ -1,4 +1,10 @@
-# Red Dead Redemption: Game of the Year Edition (BLUS30758) — Black Screen / Crash Fix & On-Device Validation Log
+# Red Dead Redemption: Game of the Year Edition (BLUS30758) — Black Screen / Crash Investigation
+
+**2026-09-05:** The null-settings fix and runtime gpu_label selection are verified,
+but post-intro black output remains. A native backtrace sampled RSX in Turnip's
+fence-status path. Gameplay is not verified. See the
+[current validation](../findings/2026-09-04-rdr-adreno750-gpulabel-validation.md)
+and [exact GPU/driver record](BLUS30758/ADRENO-750-TURNIP.md).
 
 **Goal:** Diagnose and eliminate crashes and black screens during boot, configure optimal GPU driver and emulator parameters, and validate PPU/SPU compilation, intro sequence, and 3D rendering on Snapdragon 8 Gen 3 reference device `7d6afed8`.
 

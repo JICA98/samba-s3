@@ -9,6 +9,9 @@ import android.os.Looper
 import android.os.SystemClock
 import android.util.Log
 import android.util.Base64
+import androidx.lifecycle.LifecycleOwner
+import androidx.lifecycle.lifecycleScope
+import kotlinx.coroutines.launch
 import com.zenithblue.sambas3.BuildConfig
 import com.zenithblue.sambas3.Digital2Flags
 import com.zenithblue.sambas3.EmulatorBootMode
@@ -42,6 +45,45 @@ import org.json.JSONObject
 class DebugPadReceiver(private val onDebugFatal: (() -> Unit)? = null) : BroadcastReceiver() {
     override fun onReceive(context: Context?, intent: Intent?) {
         val action = intent?.action ?: return
+        val requestId = intent.getStringExtra("request_id").orEmpty()
+        if (!BuildConfig.DEBUG) return
+        if (action == ACTION_STOP_GAME) {
+            val owner = context as? LifecycleOwner ?: return
+            owner.lifecycleScope.launch {
+                val stopped = com.zenithblue.sambas3.session.EmulatorStopCoordinator.stop(
+                    context, com.zenithblue.sambas3.session.EmulatorStopReason.HomeStop
+                )
+                Log.w("S3BOOT", "stop completed ok=$stopped request_id=$requestId")
+            }
+            return
+        }
+        if (action == ACTION_DRIVER_SYSMEM) {
+            if (context == null || RPCSX.getState() != EmulatorState.Stopped) {
+                Log.w("S3BOOT", "sysmem blocked: core must be stopped request_id=$requestId")
+                return
+            }
+            val enabled = intent.getBooleanExtra("enabled", false)
+            com.zenithblue.sambas3.utils.GeneralSettings["gpu_driver_force_sysmem"] = enabled
+            val applied = com.zenithblue.sambas3.utils.GpuDriverSelection.applyStoredSelection(
+                context, context.applicationInfo.nativeLibraryDir
+            )
+            Log.w("S3BOOT", "sysmem enabled=$enabled applied=$applied request_id=$requestId")
+            return
+        }
+        if (action == ACTION_DRIVER_TU_DEBUG) {
+            if (RPCSX.getState() != EmulatorState.Stopped) {
+                Log.w("S3BOOT", "tu_debug blocked: core must be stopped request_id=$requestId")
+                return
+            }
+            val value = intent.getStringExtra("value").orEmpty()
+            val result = com.zenithblue.sambas3.utils.GpuDriverSelection.setDebugTurnipOptions(value)
+            result.onSuccess { applied ->
+                Log.w("S3BOOT", "tu_debug value=${applied.ifEmpty { "<clear>" }} applied=true request_id=$requestId")
+            }.onFailure { error ->
+                Log.w("S3BOOT", "tu_debug value=$value applied=false error=${error.message} request_id=$requestId")
+            }
+            return
+        }
         if (action == ACTION_FATAL) {
             if (BuildConfig.DEBUG) onDebugFatal?.invoke()
             else Log.w("DebugPad", "DEBUG_FATAL ignored in non-debug build")
@@ -86,8 +128,8 @@ class DebugPadReceiver(private val onDebugFatal: (() -> Unit)? = null) : Broadca
                 val ly = intent.getIntExtra("ly", 127)
                 val rx = intent.getIntExtra("rx", 127)
                 val ry = intent.getIntExtra("ry", 127)
-                Log.w("DebugPad", "PAD d1=$d1 d2=$d2 lx=$lx ly=$ly rx=$rx ry=$ry")
                 RPCSX.instance.overlayPadData(d1, d2, lx, ly, rx, ry)
+                Log.w("DebugPad", "PAD d1=$d1 d2=$d2 lx=$lx ly=$ly rx=$rx ry=$ry request_id=$requestId")
             }
             action.startsWith(PREFIX) -> {
                 val suffix = action.removePrefix(PREFIX)
@@ -95,11 +137,11 @@ class DebugPadReceiver(private val onDebugFatal: (() -> Unit)? = null) : Broadca
                     Log.w("DebugPad", "unknown button $suffix")
                     return
                 }
-                Log.w("DebugPad", "BUTTON $suffix d1=$d1 d2=$d2 press 120ms")
                 RPCSX.instance.overlayPadData(d1, d2, 127, 127, 127, 127)
+                Log.w("DebugPad", "BUTTON $suffix d1=$d1 d2=$d2 press 120ms request_id=$requestId")
                 Handler(Looper.getMainLooper()).postDelayed({
                     RPCSX.instance.overlayPadData(0, 0, 127, 127, 127, 127)
-                    Log.w("DebugPad", "BUTTON $suffix release")
+                    Log.w("DebugPad", "BUTTON $suffix release request_id=$requestId")
                 }, 120)
             }
         }
@@ -163,6 +205,7 @@ class DebugPadReceiver(private val onDebugFatal: (() -> Unit)? = null) : Broadca
      * in-process path (probed by scripts/debug-launch-game.sh).
      */
     private fun handleBootGame(context: Context?, intent: Intent) {
+        val requestId = intent.getStringExtra("request_id").orEmpty()
         if (!BuildConfig.DEBUG) {
             Log.w("S3BOOT", "boot ignored in non-debug build")
             return
@@ -176,7 +219,7 @@ class DebugPadReceiver(private val onDebugFatal: (() -> Unit)? = null) : Broadca
         }
         val nativeState = runCatching { RPCSX.getState() }.getOrNull()
         if (nativeState != EmulatorState.Stopped) {
-            Log.w("S3BOOT", "boot blocked nativeState=${nativeState ?: "Unknown"} path=$path")
+            Log.w("S3BOOT", "boot blocked nativeState=${nativeState ?: "Unknown"} path=$path request_id=$requestId")
             return
         }
         runCatching {
@@ -189,7 +232,7 @@ class DebugPadReceiver(private val onDebugFatal: (() -> Unit)? = null) : Broadca
             putExtra(RPCSXActivity.EXTRA_BOOT_MODE, EmulatorBootMode.FreshGame.name)
         }
         app.startActivity(boot)
-        Log.w("S3BOOT", "boot started path=$path")
+        Log.w("S3BOOT", "boot started path=$path request_id=$requestId")
     }
 
     private fun handleSettingsProbe(context: Context?, intent: Intent) {
@@ -342,6 +385,9 @@ class DebugPadReceiver(private val onDebugFatal: (() -> Unit)? = null) : Broadca
         const val ACTION_INSTALL_FILE = "com.zenithblue.sambas3.DEBUG_INSTALL_FILE"
         /** Debug-only: boot a game in-process (same extras as GamesScreen.bootGame). */
         const val ACTION_BOOT_GAME = "com.zenithblue.sambas3.DEBUG_BOOT_GAME"
+        const val ACTION_STOP_GAME = "com.zenithblue.sambas3.DEBUG_STOP_GAME"
+        const val ACTION_DRIVER_SYSMEM = "com.zenithblue.sambas3.DEBUG_DRIVER_SYSMEM"
+        const val ACTION_DRIVER_TU_DEBUG = "com.zenithblue.sambas3.DEBUG_DRIVER_TU_DEBUG"
 
         fun register(context: Context, onDebugFatal: (() -> Unit)? = null): DebugPadReceiver {
             val r = DebugPadReceiver(onDebugFatal)
@@ -364,6 +410,9 @@ class DebugPadReceiver(private val onDebugFatal: (() -> Unit)? = null) : Broadca
                 addAction(ACTION_REMOVE_GAME)
                 addAction(ACTION_INSTALL_FILE)
                 addAction(ACTION_BOOT_GAME)
+                addAction(ACTION_STOP_GAME)
+                addAction(ACTION_DRIVER_SYSMEM)
+                addAction(ACTION_DRIVER_TU_DEBUG)
                 addAction(PREFIX + "CROSS")
                 addAction(PREFIX + "CIRCLE")
                 addAction(PREFIX + "SQUARE")

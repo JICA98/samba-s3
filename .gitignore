@@ -25,6 +25,13 @@ samba-s3-release.jks
 # Native binaries
 *.so
 app/src/main/jniLibs/
+*.apk
+*.aab
+
+# Local test artifacts and dumps
+artifacts/
+__pycache__/
+*.py[cod]
 
 # Approved Turnip driver inputs and packaged Play assets (binaries)
 drivers/input/*.zip

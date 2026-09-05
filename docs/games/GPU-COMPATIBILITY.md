@@ -1,5 +1,16 @@
 # SambaS3 — Android GPU Compatibility Matrix
 
+## RDR validation update — 2026-09-05
+
+This per-game result is separate from the architecture forecasts and older GTA results below.
+
+| Game | Title | GPU architecture | Exact GPU | Runtime driver | Furthest visible stage | Stability |
+|---|---|---|---|---|---|---|---|
+| RDR GOTY | BLUS30758 | Adreno A7xx | Adreno 750 | Turnip 26.2.99 (package label 26.3) | Intro; post-intro black persists with gpu_label active | No controllable gameplay or 10/20m pass |
+
+See [exact device record](BLUS30758/ADRENO-750-TURNIP.md). The all-Android
+gpu_label change has not yet passed cross-driver regression validation.
+
 **Last updated:** 2026-08-24  
 **Verified devices:** 
 - MediaTek Dimensity 8300 Ultra (`MT6897Z_A/ZA`), Arm Mali-G615 MC6, Valhall generation 4, vendor Vulkan driver `44.1.0` — Grove Street verified 2026-08-24 (Y5WWBMJVOZSK4HU8)

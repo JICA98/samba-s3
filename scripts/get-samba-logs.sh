@@ -9,6 +9,11 @@
 #   OUTDIR defaults to /tmp/samba-logs-<timestamp>.
 set -euo pipefail
 
+# A disconnected Wi-Fi transport or wedged dumpsys must not hang the collector.
+ADB_TIMEOUT_S="${ADB_TIMEOUT_S:-20}"
+[[ "$ADB_TIMEOUT_S" =~ ^[1-9][0-9]*$ ]] || { echo 'Invalid ADB_TIMEOUT_S' >&2; exit 1; }
+adb() { timeout "$ADB_TIMEOUT_S" adb "$@"; }
+
 device_count() { adb devices | awk 'NR>1 && $2=="device"{c++} END{print c+0}'; }
 first_device() { adb devices | awk 'NR>1 && $2=="device"{print $1; exit}'; }
 
@@ -26,15 +31,24 @@ if [[ -z "$SERIAL" ]]; then
   SERIAL="$(first_device)"
 fi
 if [[ -z "$SERIAL" ]]; then echo "No device"; exit 1; fi
+[[ "$(adb -s "$SERIAL" get-state)" == device ]] || { echo "Device unavailable: $SERIAL" >&2; exit 1; }
 mkdir -p "$OUTDIR"
 BASE="/storage/emulated/0/Android/data/com.zenithblue.sambas3/files"
 PKG="com.zenithblue.sambas3"
 
 echo "[*] Collecting from $SERIAL -> $OUTDIR"
+# Save the most volatile evidence before pulling large rotated logs.
+RUN_PID="$(adb -s "$SERIAL" shell pidof "$PKG" 2>/dev/null | tr -d '\r' || true)"
+if [[ "$RUN_PID" =~ ^[0-9]+$ ]]; then
+  adb -s "$SERIAL" logcat -d --pid="$RUN_PID" > "$OUTDIR/logcat-process.log" 2>&1 || true
+  adb -s "$SERIAL" shell top -H -b -n 1 -p "$RUN_PID" > "$OUTDIR/threads-top.txt" 2>&1 || true
+  adb -s "$SERIAL" shell run-as "$PKG" cat "/proc/$RUN_PID/maps" > "$OUTDIR/process-maps.txt" 2>&1 || true
+fi
 {
   echo "serial=$SERIAL"
   echo "date=$(date -u +%Y-%m-%dT%H:%M:%SZ)"
   echo "pkg=$PKG"
+  echo "pid=$RUN_PID"
   adb -s "$SERIAL" shell getprop ro.build.fingerprint 2>/dev/null | sed 's/^/fingerprint=/'
   adb -s "$SERIAL" shell getprop ro.soc.model 2>/dev/null | sed 's/^/soc=/'
   adb -s "$SERIAL" shell getprop ro.build.version.release 2>/dev/null | sed 's/^/android=/'
@@ -55,7 +69,7 @@ adb -s "$SERIAL" shell "ls -l $BASE/logs/" > "$OUTDIR/logs-ls.txt" 2>/dev/null |
 
 # --- 2. Legacy emulator logs (cache) ---
 for f in TTY.log RPCSX.log RPCSX.old.log RPCSX.log.gz; do
-  adb -s "$SERIAL" shell "cat $BASE/cache/$f" > "$OUTDIR/cache-$f" 2>/dev/null || true
+  pull_one "$BASE/cache/$f" "$OUTDIR/cache-$f"
 done
 adb -s "$SERIAL" shell "ls -l $BASE/cache/; echo ---; ls $BASE/cache/shaderlog/ 2>/dev/null | head; echo ---; du -sh $BASE/cache/ppu_progs $BASE/cache/spu_progs 2>/dev/null" > "$OUTDIR/cache-ls.txt" 2>/dev/null || true
 
@@ -85,8 +99,12 @@ adb -s "$SERIAL" shell "ls -l /sys/fs/pstore/ 2>/dev/null; echo ---; cat /sys/fs
 echo "[*] Files:"
 ls -lh "$OUTDIR" | awk '{print $9, $5}'
 echo ""
+echo "--- Current core log: sync, GPU, crash, and boot evidence (not stale app rotations) ---"
+grep -a -n -E 'S3CORE|S3VKSYNC|wait_for_event|VkPresent|VK_ERROR|DEVICE_LOST|Fatal signal|Access violation|Time to Press Start|Renderer initialized' \
+  "$OUTDIR/cache-RPCSX.log" "$OUTDIR/logcat-process.log" 2>/dev/null | tail -n 40 || true
+echo ""
 echo "--- Backend FATAL/Access violation (backend + rotated, last 30) ---"
-cat "$OUTDIR"/rpcsx_backend.log* 2>/dev/null | grep -a -i -n "Access violation\|F \/\|Fatal signal\|SIGSEGV\|SIGABRT" | tail -n 30 || echo "(none)"
+cat "$OUTDIR"/rpcsx_backend.log* 2>/dev/null | grep -a -i -n "Access violation\|F /\|Fatal signal\|SIGSEGV\|SIGABRT" | tail -n 30 || echo "(none)"
 echo ""
 echo "--- Frontend/JNI errors (app log + rotated, last 20) ---"
 cat "$OUTDIR"/rpcsx_app.log* 2>/dev/null | grep -a -i -n "FATAL\|AndroidRuntime\|Emulation has been frozen\|renderer.*error\|frontend.*error" | tail -n 20 || echo "(none)"
@@ -101,6 +119,6 @@ echo "--- Crash buffer (last 20) ---"
 grep -a -i -n "FATAL\|sambas3\|Build fingerprint" "$OUTDIR/logcat-crash.log" 2>/dev/null | tail -n 20 || echo "(empty crash buffer)"
 echo ""
 echo "--- Exit-info summary ---"
-grep -a -i -A3 "reason=\|rss=" "$OUTDIR/exit-info.txt" 2>/dev/null | head -n 40 || echo "(no exit-info)"
+grep -a -i -A3 "reason=\|rss=" "$OUTDIR/exit-info.txt" 2>/dev/null | sed -n '1,40p' || echo "(no exit-info)"
 echo ""
 echo "[*] Done: $OUTDIR"

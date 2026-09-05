@@ -850,9 +850,17 @@ class RPCSXActivity : ComponentActivity(), EmulationHost {
         }
         Log.i("S3RECOVERY", "failure return stop=$stopped")
         if (!stopped) {
-            runOnUiThread {
-                Log.e("S3RECOVERY", "failure return retained Activity because native Stopped was not proven")
-            }
+            // A wedged RSX thread can prevent the native state machine from
+            // reaching Stopped (for example after a display-driver timeout).
+            // Keeping this fullscreen Activity alive leaves the tablet on a
+            // black, non-interactive surface forever.  This path is only used
+            // after a fatal/boot failure, so terminate the process once the
+            // coordinator has exhausted its bounded stop attempts.  Kill from
+            // this IO coroutine rather than only from runOnUiThread: the main
+            // thread may itself be blocked in the failed presentation path.
+            Log.e("S3RECOVERY", "native stop unproven; terminating failed emulator process")
+            runCatching { runOnUiThread { finishAndRemoveTask() } }
+            android.os.Process.killProcess(android.os.Process.myPid())
         }
     }
 

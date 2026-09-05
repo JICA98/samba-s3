@@ -26,6 +26,7 @@ import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.HorizontalDivider
@@ -93,6 +94,7 @@ fun GpuDriversScreen(
     var selectedDriver by remember { mutableStateOf(GeneralSettings["selected_gpu_driver"].string("Default")) }
     var selectedTab by remember { mutableStateOf(DriverTab.Installed) }
     var isInstalling by remember { mutableStateOf(false) }
+    var pendingDelete by remember { mutableStateOf<Pair<java.io.File, com.zenithblue.sambas3.utils.GpuDriverMetadata>?>(null) }
 
     var snapshot by remember { mutableStateOf<DriverCatalogSnapshot?>(null) }
     var isLoadingCatalog by remember { mutableStateOf(false) }
@@ -302,18 +304,7 @@ fun GpuDriversScreen(
                         if (canDelete) {
                             Row(modifier = Modifier.fillMaxWidth().padding(top = 6.dp), horizontalArrangement = Arrangement.End) {
                                 TextButton(
-                                    onClick = {
-                                        scope.launch(Dispatchers.IO) {
-                                            if (GpuDriverHelper.deleteDriver(context, file, metadata)) {
-                                                val updated = GpuDriverHelper.getInstalledDrivers(context)
-                                                val sel = GeneralSettings["selected_gpu_driver"].string("Default")
-                                                withContext(Dispatchers.Main) {
-                                                    drivers = updated
-                                                    selectedDriver = sel
-                                                }
-                                            }
-                                        }
-                                    }
+                                    onClick = { pendingDelete = file to metadata }
                                 ) { Text("DELETE", color = MaterialTheme.colorScheme.error) }
                             }
                         }
@@ -521,6 +512,39 @@ fun GpuDriversScreen(
                 }
             }
         }
+    }
+
+    pendingDelete?.let { (file, metadata) ->
+        AlertDialog(
+            onDismissRequest = { pendingDelete = null },
+            title = { Text("Uninstall GPU driver?") },
+            text = {
+                Text(
+                    if (metadata.label == selectedDriver) {
+                        "${metadata.uiTitle} is selected. Samba S3 will switch to the system driver before uninstalling it."
+                    } else {
+                        "Remove ${metadata.uiTitle} from Samba S3's private driver storage?"
+                    }
+                )
+            },
+            confirmButton = {
+                TextButton(onClick = {
+                    pendingDelete = null
+                    scope.launch(Dispatchers.IO) {
+                        if (metadata.label == selectedDriver) GpuDriverHelper.resetToSystemDriver(context)
+                        val deleted = GpuDriverHelper.deleteDriver(context, file, metadata)
+                        val updated = GpuDriverHelper.getInstalledDrivers(context)
+                        val sel = GeneralSettings["selected_gpu_driver"].string("Default")
+                        withContext(Dispatchers.Main) {
+                            drivers = updated
+                            selectedDriver = sel
+                            snackbarHostState.showSnackbar(if (deleted) "GPU driver uninstalled" else "GPU driver could not be uninstalled")
+                        }
+                    }
+                }) { Text("UNINSTALL") }
+            },
+            dismissButton = { TextButton(onClick = { pendingDelete = null }) { Text("CANCEL") } },
+        )
     }
 }
 

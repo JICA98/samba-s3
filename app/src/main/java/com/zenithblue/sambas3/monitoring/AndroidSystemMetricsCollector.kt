@@ -1,6 +1,5 @@
 package com.zenithblue.sambas3.monitoring
 
-import android.app.ActivityManager
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
@@ -17,7 +16,6 @@ import kotlin.math.abs
 
 /** Multi-rate telemetry; the repository may sample quickly without re-reading expensive sources. */
 class AndroidSystemMetricsCollector(private val context: Context) : MonitoringSystemSource {
-    private val activityManager: ActivityManager? = context.getSystemService(ActivityManager::class.java)
     private val batteryManager: BatteryManager? = context.getSystemService(BatteryManager::class.java)
     private val powerManager: PowerManager? = context.getSystemService(PowerManager::class.java)
     private val cpuFrequencyFiles = File("/sys/devices/system/cpu").listFiles().orEmpty()
@@ -90,9 +88,17 @@ class AndroidSystemMetricsCollector(private val context: Context) : MonitoringSy
             lastCpuMs = now
         }
         if (now - lastMemoryMs >= 1_000L) {
-            val memory = ActivityManager.MemoryInfo()
-            if (runCatching { activityManager?.getMemoryInfo(memory) }.getOrNull() != null) {
-                lastMemory = MemorySample(memory.totalMem - memory.availMem, memory.totalMem, memory.availMem)
+            // Do not call ActivityManager.getMemoryInfo() from the telemetry
+            // worker.  That crosses Binder into system_server; when Android is
+            // recovering from a GPU/display hang, system_server can be dead.
+            // On Android 16 this can trigger a CheckJNI abort while reporting
+            // DeadSystemException, which kills SambaS3 instead of returning a
+            // recoverable telemetry sample.  /proc/meminfo is local and safe.
+            val memInfo = readMemInfo()
+            val total = memInfo["MemTotal"]
+            val available = memInfo["MemAvailable"] ?: memInfo["MemFree"]
+            if (total != null && available != null && total >= available) {
+                lastMemory = MemorySample(total - available, total, available)
             }
             lastMemoryMs = now
         }
