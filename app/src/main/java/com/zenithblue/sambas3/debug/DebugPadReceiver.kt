@@ -23,6 +23,13 @@ import com.zenithblue.sambas3.PrecompilerServiceAction
 import com.zenithblue.sambas3.RPCSX
 import com.zenithblue.sambas3.RPCSXActivity
 import com.zenithblue.sambas3.gameconfig.SettingsBackendAudit
+import com.zenithblue.sambas3.monitoring.FpsGraphScale
+import com.zenithblue.sambas3.monitoring.MonitoringLayout
+import com.zenithblue.sambas3.monitoring.MonitoringMetric
+import com.zenithblue.sambas3.monitoring.MonitoringOverlaySettings
+import com.zenithblue.sambas3.monitoring.MonitoringPosition
+import com.zenithblue.sambas3.monitoring.MonitoringPreset
+import com.zenithblue.sambas3.monitoring.MonitoringPresets
 import com.zenithblue.sambas3.utils.FileUtil
 import org.json.JSONObject
 
@@ -82,6 +89,10 @@ class DebugPadReceiver(private val onDebugFatal: (() -> Unit)? = null) : Broadca
             }.onFailure { error ->
                 Log.w("S3BOOT", "tu_debug value=$value applied=false error=${error.message} request_id=$requestId")
             }
+            return
+        }
+        if (action == ACTION_MONITOR_SET) {
+            handleMonitorSet(context, intent)
             return
         }
         if (action == ACTION_FATAL) {
@@ -196,6 +207,90 @@ class DebugPadReceiver(private val onDebugFatal: (() -> Unit)? = null) : Broadca
                 Log.i("S3LIB_HARNESS", "install started uri=$uri")
             }
         }
+    }
+
+    private fun handleMonitorSet(context: Context?, intent: Intent) {
+        val requestId = intent.getStringExtra("request_id").orEmpty()
+        if (context == null) return
+        var current = MonitoringOverlaySettings.read(context)
+        if (intent.hasExtra("enabled")) {
+            current = current.copy(enabled = intent.getBooleanExtra("enabled", false))
+        }
+        if (intent.hasExtra("preset")) {
+            val presetName = intent.getStringExtra("preset").orEmpty()
+            val preset = runCatching { MonitoringPreset.valueOf(presetName) }.getOrNull()
+            if (preset != null && preset != MonitoringPreset.Custom) {
+                current = current.copy(
+                    enabledMetrics = MonitoringPresets.forPreset(preset),
+                    graphMetrics = current.graphMetrics.filterTo(mutableSetOf()) { it in MonitoringPresets.forPreset(preset) }
+                )
+            }
+        }
+        if (intent.hasExtra("metrics")) {
+            val raw = intent.getStringExtra("metrics").orEmpty()
+            val metrics = if (raw.equals("all", ignoreCase = true)) {
+                MonitoringMetric.entries.toSet()
+            } else if (raw.equals("none", ignoreCase = true)) {
+                emptySet()
+            } else {
+                raw.split(',').map { it.trim() }.filter { it.isNotEmpty() }
+                    .mapNotNull { name -> runCatching { MonitoringMetric.valueOf(name) }.getOrNull() }
+                    .toSet()
+            }
+            current = current.copy(enabledMetrics = metrics)
+        }
+        if (intent.hasExtra("graphs")) {
+            val raw = intent.getStringExtra("graphs").orEmpty()
+            val graphs = if (raw.equals("all", ignoreCase = true)) {
+                setOf(MonitoringMetric.Fps, MonitoringMetric.FrameTime)
+            } else if (raw.equals("none", ignoreCase = true)) {
+                emptySet()
+            } else {
+                raw.split(',').map { it.trim() }.filter { it.isNotEmpty() }
+                    .mapNotNull { name -> runCatching { MonitoringMetric.valueOf(name) }.getOrNull() }
+                    .toSet()
+            }
+            current = current.copy(graphMetrics = graphs)
+        }
+        if (intent.hasExtra("position")) {
+            val posName = intent.getStringExtra("position").orEmpty()
+            runCatching { MonitoringPosition.valueOf(posName) }.getOrNull()?.let {
+                current = current.copy(position = it)
+            }
+        }
+        if (intent.hasExtra("layout")) {
+            val layoutName = intent.getStringExtra("layout").orEmpty()
+            runCatching { MonitoringLayout.valueOf(layoutName) }.getOrNull()?.let {
+                current = current.copy(layout = it)
+            }
+        }
+        if (intent.hasExtra("update_ms")) {
+            val ms = intent.getLongExtra("update_ms", current.updateMs).coerceIn(250L, 1000L)
+            current = current.copy(updateMs = ms)
+        }
+        if (intent.hasExtra("opacity")) {
+            val op = intent.getFloatExtra("opacity", current.opacity).coerceIn(0.05f, 1.0f)
+            current = current.copy(opacity = op)
+        }
+        if (intent.hasExtra("text_scale")) {
+            val ts = intent.getFloatExtra("text_scale", current.textScale).coerceIn(0.75f, 1.25f)
+            current = current.copy(textScale = ts)
+        }
+        if (intent.hasExtra("history")) {
+            val h = intent.getIntExtra("history", current.graphHistorySeconds).coerceIn(5, 30)
+            current = current.copy(graphHistorySeconds = h)
+        }
+        if (intent.hasExtra("fps_scale")) {
+            val scName = intent.getStringExtra("fps_scale").orEmpty()
+            runCatching { FpsGraphScale.valueOf(scName) }.getOrNull()?.let {
+                current = current.copy(fpsScaleMode = it)
+            }
+        }
+        if (intent.hasExtra("hide_with_menu")) {
+            current = current.copy(hideWithMenu = intent.getBooleanExtra("hide_with_menu", true))
+        }
+        MonitoringOverlaySettings.write(context, current)
+        Log.w("S3MONITOR_DEBUG", "applied enabled=${current.enabled} preset=${current.preset} pos=${current.position} layout=${current.layout} request_id=$requestId")
     }
 
     /**
@@ -388,6 +483,7 @@ class DebugPadReceiver(private val onDebugFatal: (() -> Unit)? = null) : Broadca
         const val ACTION_STOP_GAME = "com.zenithblue.sambas3.DEBUG_STOP_GAME"
         const val ACTION_DRIVER_SYSMEM = "com.zenithblue.sambas3.DEBUG_DRIVER_SYSMEM"
         const val ACTION_DRIVER_TU_DEBUG = "com.zenithblue.sambas3.DEBUG_DRIVER_TU_DEBUG"
+        const val ACTION_MONITOR_SET = "com.zenithblue.sambas3.DEBUG_MONITOR_SET"
 
         fun register(context: Context, onDebugFatal: (() -> Unit)? = null): DebugPadReceiver {
             val r = DebugPadReceiver(onDebugFatal)
@@ -413,6 +509,7 @@ class DebugPadReceiver(private val onDebugFatal: (() -> Unit)? = null) : Broadca
                 addAction(ACTION_STOP_GAME)
                 addAction(ACTION_DRIVER_SYSMEM)
                 addAction(ACTION_DRIVER_TU_DEBUG)
+                addAction(ACTION_MONITOR_SET)
                 addAction(PREFIX + "CROSS")
                 addAction(PREFIX + "CIRCLE")
                 addAction(PREFIX + "SQUARE")

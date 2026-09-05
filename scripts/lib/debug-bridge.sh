@@ -35,8 +35,9 @@ bridge_shell() {
 bridge_capture() {
   BRIDGE_TMP="$(mktemp -d /tmp/samba-bridge-XXXXXX)"
   BRIDGE_LOG="$BRIDGE_TMP/logcat.txt"
-  adb -s "$SERIAL" logcat -T 1 -v brief "$1:V" '*:S' > "$BRIDGE_LOG" 2>&1 &
+  adb -s "$SERIAL" logcat -T 20 -v brief "$1:V" '*:S' > "$BRIDGE_LOG" 2>&1 &
   BRIDGE_PID=$!
+  sleep 0.1
 }
 
 bridge_cleanup() {

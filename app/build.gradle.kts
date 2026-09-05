@@ -2,7 +2,6 @@ import java.util.Properties
 
 plugins {
     alias(libs.plugins.android.application)
-    alias(libs.plugins.kotlin.android)
     alias(libs.plugins.compose.compiler)
     id("org.jetbrains.kotlin.plugin.serialization")
     id("kotlin-parcelize")
@@ -10,13 +9,13 @@ plugins {
 
 android {
     namespace = "com.zenithblue.sambas3"
-    compileSdk = 36
+    compileSdk = 37
     ndkVersion = "30.0.14904198"
 
     defaultConfig {
         applicationId = "com.zenithblue.sambas3"
         minSdk = 29
-        targetSdk = 35
+        targetSdk = 37
         versionCode = 20260722
         versionName = "${System.getenv("RX_VERSION") ?: "2026.07.22"}${if (System.getenv("RX_SHA") != null) "-" + System.getenv("RX_SHA") else ""}"
 

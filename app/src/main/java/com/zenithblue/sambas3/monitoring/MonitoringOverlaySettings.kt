@@ -5,6 +5,7 @@ import androidx.core.content.edit
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import java.util.concurrent.atomic.AtomicBoolean
 
 enum class MonitoringPreset { Minimal, Performance, Developer, Custom }
 enum class MonitoringPosition { TopLeft, TopCenter, TopRight, BottomLeft, BottomCenter, BottomRight }
@@ -29,13 +30,24 @@ data class MonitoringSettings(
 object MonitoringOverlaySettings {
     private const val PREFS = "monitoring_overlay"
     private val changes = MutableStateFlow(MonitoringSettings())
+    private val initialized = AtomicBoolean(false)
+
     fun state(context: Context): StateFlow<MonitoringSettings> {
         // SharedPreferences is the durable source; the flow is the single
         // in-process source used by both the activity and settings screens.
-        val stored = read(context)
-        if (changes.value != stored) changes.value = stored
+        if (initialized.compareAndSet(false, true)) {
+            changes.value = read(context)
+        }
         return changes.asStateFlow()
     }
+
+    fun syncFromStorage(context: Context): MonitoringSettings {
+        val stored = read(context)
+        changes.value = stored
+        initialized.set(true)
+        return stored
+    }
+
     fun read(context: Context): MonitoringSettings {
         val p = context.getSharedPreferences(PREFS, Context.MODE_PRIVATE)
         return MonitoringSettings(
@@ -47,28 +59,40 @@ object MonitoringOverlaySettings {
             graphMetrics = if (p.contains("graphMetrics")) decodeMetrics(p.getString("graphMetrics", "")) else if (p.getBoolean("graphs", false)) setOf(MonitoringMetric.Fps, MonitoringMetric.FrameTime) else emptySet(),
             position = runCatching { MonitoringPosition.valueOf(p.getString("position", MonitoringPosition.TopLeft.name)!!) }.getOrDefault(MonitoringPosition.TopLeft),
             layout = runCatching { MonitoringLayout.valueOf(p.getString("layout", MonitoringLayout.Compact.name)!!) }.getOrDefault(MonitoringLayout.Compact),
-            updateMs = p.getLong("updateMs", 300L).coerceIn(250L, 1000L), opacity = p.getFloat("opacity", .72f).coerceIn(.05f, 1f),
+            updateMs = p.getLong("updateMs", 300L).coerceIn(250L, 1000L),
+            opacity = p.getFloat("opacity", .72f).coerceIn(.05f, 1f),
             textScale = p.getFloat("textScale", .88f).coerceIn(.75f, 1.25f),
             graphHistorySeconds = p.getInt("graphHistorySeconds", 10).coerceIn(5, 30),
             fpsScaleMode = runCatching { FpsGraphScale.valueOf(p.getString("fpsScaleMode", FpsGraphScale.TargetWindow.name)!!) }.getOrDefault(FpsGraphScale.TargetWindow),
             hideWithMenu = p.getBoolean("hideWithMenu", true)
         )
     }
+
     fun write(context: Context, settings: MonitoringSettings) {
         changes.value = settings
-        context.getSharedPreferences(PREFS, Context.MODE_PRIVATE).edit {
-        putBoolean("enabled", settings.enabled)
-            .putString("enabledMetrics", encodeMetrics(settings.enabledMetrics))
-            .putString("graphMetrics", encodeMetrics(settings.graphMetrics))
-            .putString("preset", settings.preset.name).putString("position", settings.position.name)
-            .putString("layout", settings.layout.name).putLong("updateMs", settings.updateMs)
-            .putFloat("opacity", settings.opacity).putFloat("textScale", settings.textScale)
-            .putInt("graphHistorySeconds", settings.graphHistorySeconds)
-            .putString("fpsScaleMode", settings.fpsScaleMode.name)
-            .putBoolean("graphs", settings.showGraphs).putBoolean("hideWithMenu", settings.hideWithMenu)
+        context.getSharedPreferences(PREFS, Context.MODE_PRIVATE).edit(commit = true) {
+            putBoolean("enabled", settings.enabled)
+                .putString("enabledMetrics", encodeMetrics(settings.enabledMetrics))
+                .putString("graphMetrics", encodeMetrics(settings.graphMetrics))
+                .putString("preset", settings.preset.name)
+                .putString("position", settings.position.name)
+                .putString("layout", settings.layout.name)
+                .putLong("updateMs", settings.updateMs)
+                .putFloat("opacity", settings.opacity)
+                .putFloat("textScale", settings.textScale)
+                .putInt("graphHistorySeconds", settings.graphHistorySeconds)
+                .putString("fpsScaleMode", settings.fpsScaleMode.name)
+                .putBoolean("graphs", settings.showGraphs)
+                .putBoolean("hideWithMenu", settings.hideWithMenu)
         }
     }
 
     private fun encodeMetrics(metrics: Set<MonitoringMetric>): String = metrics.joinToString(",") { it.name }
-    private fun decodeMetrics(value: String?): Set<MonitoringMetric> = value.orEmpty().split(',').mapNotNull { name -> runCatching { MonitoringMetric.valueOf(name) }.getOrNull() }.toSet()
+    private fun decodeMetrics(value: String?): Set<MonitoringMetric> =
+        value.orEmpty()
+            .split(',')
+            .map { it.trim() }
+            .filter { it.isNotEmpty() }
+            .mapNotNull { name -> runCatching { MonitoringMetric.valueOf(name) }.getOrNull() }
+            .toSet()
 }

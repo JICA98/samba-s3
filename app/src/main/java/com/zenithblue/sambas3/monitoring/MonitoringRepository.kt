@@ -98,7 +98,6 @@ class MonitoringRepository(
                 } finally {
                     system.stop()
                     perf.setEnabled(false, intervalMs)
-                    history.clear()
                     wasRunning = false
                     androidAvailabilityLogged = false
                 }
@@ -111,6 +110,9 @@ class MonitoringRepository(
         job = null
         system.stop()
         perf.setEnabled(false, 300L)
+        history.clear()
+        wasRunning = false
+        generation = 0L
     }
 
     private fun hasEmulatorValue(metrics: EmulatorMetrics, metric: MonitoringMetric): Boolean = when (metric) {
