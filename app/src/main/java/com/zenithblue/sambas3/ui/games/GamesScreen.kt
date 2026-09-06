@@ -49,6 +49,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.blur
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.clipToBounds
 import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.draw.drawWithContent
 import androidx.compose.ui.draw.scale
@@ -61,6 +62,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.graphics.ColorMatrix
 import androidx.compose.ui.graphics.SolidColor
+import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.input.key.Key
 import androidx.compose.ui.input.key.KeyEventType
@@ -936,27 +938,12 @@ fun GamesScreen(
                 model = fullscreenAmbientModel,
                 contentDescription = null,
                 contentScale = ContentScale.Crop,
-                modifier = Modifier
-                    .fillMaxSize()
-                    .alpha(if (selectedBgPreview != null) 0.75f else 0.55f),
+                modifier = Modifier.fillMaxSize(),
                 onError = { err ->
                     val title = (currentItem as? PagerItem.GameItem)?.game?.info?.name?.value
                     val path = (currentItem as? PagerItem.GameItem)?.game?.info?.path
                     Log.w("GamePreview", "preview error title=$title path=$path err=${err.result.throwable?.message}")
                 }
-            )
-            Box(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .background(
-                        Brush.verticalGradient(
-                            listOf(
-                                Color.Black.copy(alpha = 0.5f),
-                                Color.Black.copy(alpha = 0.25f),
-                                Color.Black.copy(alpha = 0.7f),
-                            )
-                        )
-                    )
             )
         }
 
@@ -967,7 +954,7 @@ fun GamesScreen(
                 .drawBehind {
                     drawRect(
                         brush = Brush.radialGradient(
-                            colors = listOf(Color.Transparent, Color(0xCC000000)),
+                            colors = listOf(Color.Transparent, Color(0x66000000)),
                             center = Offset(size.width / 2, size.height / 2),
                             radius = size.width
                         ),
@@ -977,15 +964,14 @@ fun GamesScreen(
         )
 
         Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .windowInsetsPadding(WindowInsets.safeDrawing)
+            modifier = Modifier.fillMaxSize()
         ) {
             // Top Nav Bar: SambaS3 brand, active Game Title & Tag, Clock & Settings
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
                     .alpha(bootAlpha)
+                    .windowInsetsPadding(WindowInsets.safeDrawing.only(WindowInsetsSides.Horizontal + WindowInsetsSides.Top))
                     .padding(horizontal = 20.dp, vertical = 10.dp),
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically
@@ -1122,12 +1108,13 @@ fun GamesScreen(
                         query = searchQuery,
                         onQueryChange = { searchQuery = it },
                         isExpanded = isSearchExpanded,
-                        onExpandedChange = { isSearchExpanded = it }
+                        onExpandedChange = { isSearchExpanded = it },
+                        ambientModel = fullscreenAmbientModel
                     )
 
-                    Surface(
+                    FrostedGlassBox(
+                        ambientModel = fullscreenAmbientModel,
                         shape = RoundedCornerShape(4.dp),
-                        color = RPCSXColors.surfaceElevated.copy(alpha = 0.85f),
                         border = BorderStroke(1.dp, if (isGridView) RPCSXColors.primary else RPCSXColors.surfaceOverlay),
                         modifier = Modifier
                             .clickable {
@@ -1151,7 +1138,8 @@ fun GamesScreen(
                     }
 
                     ImportTopBarButton(
-                        onClick = { showImportDialog = true }
+                        onClick = { showImportDialog = true },
+                        ambientModel = fullscreenAmbientModel
                     )
 
                     Text(
@@ -1160,21 +1148,26 @@ fun GamesScreen(
                         color = RPCSXColors.textSecondary
                     )
 
-                    Row(
-                        verticalAlignment = Alignment.CenterVertically,
+                    FrostedGlassBox(
+                        ambientModel = fullscreenAmbientModel,
+                        shape = RoundedCornerShape(4.dp),
+                        border = BorderStroke(1.dp, RPCSXColors.surfaceOverlay),
                         modifier = Modifier
-                            .clip(RoundedCornerShape(4.dp))
                             .clickable { navigateToSettings?.invoke() }
-                            .padding(horizontal = 4.dp, vertical = 2.dp),
-                        horizontalArrangement = Arrangement.spacedBy(4.dp)
                     ) {
-                        ControllerGlyphBadge(glyph = "START")
-                        Icon(
-                            painter = painterResource(R.drawable.ic_settings),
-                            contentDescription = "Settings",
-                            tint = RPCSXColors.primary,
-                            modifier = Modifier.size(18.dp)
-                        )
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            modifier = Modifier.padding(horizontal = 6.dp, vertical = 4.dp),
+                            horizontalArrangement = Arrangement.spacedBy(4.dp)
+                        ) {
+                            ControllerGlyphBadge(glyph = "START")
+                            Icon(
+                                painter = painterResource(R.drawable.ic_settings),
+                                contentDescription = "Settings",
+                                tint = RPCSXColors.primary,
+                                modifier = Modifier.size(18.dp)
+                            )
+                        }
                     }
                 }
             }
@@ -1379,24 +1372,60 @@ fun GamesScreen(
                 }
             }
 
-            // Hint Strip
-            Row(
+            // Hint Strip (Frosted Glass Bottom Bar)
+            Box(
                 modifier = Modifier
                     .fillMaxWidth()
                     .alpha(bootAlpha)
-                    .background(RPCSXColors.surfaceContainerHigh)
-                    .drawBehind {
-                        drawLine(
-                            color = RPCSXColors.outlineVariant,
-                            start = Offset(0f, 0f),
-                            end = Offset(size.width, 0f),
-                            strokeWidth = 1.dp.toPx()
-                        )
-                    }
-                    .padding(horizontal = 16.dp, vertical = 2.dp),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically
+                    .clipToBounds()
             ) {
+                if (fullscreenAmbientModel != null) {
+                    AsyncImage(
+                        model = fullscreenAmbientModel,
+                        contentDescription = null,
+                        contentScale = ContentScale.Crop,
+                        alignment = Alignment.BottomCenter,
+                        modifier = Modifier
+                            .matchParentSize()
+                            .blur(radius = 16.dp)
+                            .alpha(0.95f)
+                    )
+                }
+
+                Box(
+                    modifier = Modifier
+                        .matchParentSize()
+                        .background(
+                            Brush.verticalGradient(
+                                listOf(
+                                    Color(0xFF0C101D).copy(alpha = 0.65f),
+                                    Color(0xFF0C101D).copy(alpha = 0.85f)
+                                )
+                            )
+                        )
+                )
+
+                Box(
+                    modifier = Modifier
+                        .matchParentSize()
+                        .drawBehind {
+                            drawLine(
+                                color = Color.White.copy(alpha = 0.2f),
+                                start = Offset(0f, 0f),
+                                end = Offset(size.width, 0f),
+                                strokeWidth = 1.dp.toPx()
+                            )
+                        }
+                )
+
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .windowInsetsPadding(WindowInsets.safeDrawing.only(WindowInsetsSides.Horizontal + WindowInsetsSides.Bottom))
+                        .padding(horizontal = 20.dp, vertical = 6.dp),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
                 val fwVersion by remember { FirmwareRepository.version }
                 val fwProgressId by remember { FirmwareRepository.progressChannel }
                 val fwProgressEntry = ProgressRepository.getItem(fwProgressId)?.value
@@ -1517,7 +1546,7 @@ fun GamesScreen(
                         Text(
                             text = stringResource(R.string.firmware) + " " + fwVersion,
                             style = AppTypography.labelSmall,
-                            color = RPCSXColors.textSecondary
+                            color = Color.White.copy(alpha = 0.85f)
                         )
                     } else if (isFwInstalling) {
                         Text(
@@ -1691,6 +1720,7 @@ fun GamesScreen(
                             }
                         }
                     }
+                }
                 }
             }
         }
@@ -2140,8 +2170,51 @@ fun InfoBadge(text: String, color: Color = RPCSXColors.textSecondary) {
 }
 
 @Composable
+fun FrostedGlassBox(
+    ambientModel: Any?,
+    modifier: Modifier = Modifier,
+    shape: Shape = RoundedCornerShape(4.dp),
+    border: BorderStroke? = null,
+    alignment: Alignment = Alignment.TopEnd,
+    content: @Composable BoxScope.() -> Unit
+) {
+    Box(
+        modifier = modifier
+            .clip(shape)
+            .then(if (border != null) Modifier.border(border, shape) else Modifier)
+    ) {
+        if (ambientModel != null) {
+            AsyncImage(
+                model = ambientModel,
+                contentDescription = null,
+                contentScale = ContentScale.Crop,
+                alignment = alignment,
+                modifier = Modifier
+                    .matchParentSize()
+                    .blur(radius = 16.dp)
+                    .alpha(0.95f)
+            )
+        }
+        Box(
+            modifier = Modifier
+                .matchParentSize()
+                .background(
+                    Brush.verticalGradient(
+                        listOf(
+                            Color(0xFF0C101D).copy(alpha = 0.65f),
+                            Color(0xFF0C101D).copy(alpha = 0.85f)
+                        )
+                    )
+                )
+        )
+        content()
+    }
+}
+
+@Composable
 fun ImportTopBarButton(
     onClick: () -> Unit,
+    ambientModel: Any? = null,
     modifier: Modifier = Modifier
 ) {
     val interactionSource = remember { MutableInteractionSource() }
@@ -2176,59 +2249,45 @@ fun ImportTopBarButton(
                 )
         )
 
-        // Subtle ambient gold bloom
-        Box(
-            modifier = Modifier
-                .matchParentSize()
-                .blur(radius = 8.dp)
-                .background(
-                    RPCSXColors.focusGlow.copy(alpha = 0.12f),
-                    RoundedCornerShape(4.dp)
-                )
-        )
-
-        // Crisp foreground container per design_3.md (surface-elevated + gold border)
-        Row(
-            modifier = Modifier
-                .background(
-                    color = RPCSXColors.surfaceElevated.copy(alpha = 0.95f),
-                    shape = RoundedCornerShape(4.dp)
-                )
-                .border(
-                    border = BorderStroke(1.dp, RPCSXColors.primary),
-                    shape = RoundedCornerShape(4.dp)
-                )
-                .padding(horizontal = 9.dp, vertical = 5.dp),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(7.dp)
+        // Frosted glass foreground container per design_3.md (surface-elevated + gold border)
+        FrostedGlassBox(
+            ambientModel = ambientModel,
+            shape = RoundedCornerShape(4.dp),
+            border = BorderStroke(1.dp, RPCSXColors.primary)
         ) {
-            // Controller mapping indicator: SELECT button pill
-            Surface(
-                color = RPCSXColors.primaryMuted,
-                shape = RoundedCornerShape(3.dp),
-                border = BorderStroke(1.dp, RPCSXColors.primary.copy(alpha = 0.7f))
+            Row(
+                modifier = Modifier.padding(horizontal = 9.dp, vertical = 5.dp),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(7.dp)
             ) {
+                // Controller mapping indicator: SELECT button pill
+                Surface(
+                    color = RPCSXColors.primaryMuted,
+                    shape = RoundedCornerShape(3.dp),
+                    border = BorderStroke(1.dp, RPCSXColors.primary.copy(alpha = 0.7f))
+                ) {
+                    Text(
+                        text = "SELECT",
+                        modifier = Modifier.padding(horizontal = 4.dp, vertical = 1.dp),
+                        style = AppTypography.labelSmall.copy(
+                            fontSize = 9.sp,
+                            fontWeight = FontWeight.Bold,
+                            letterSpacing = 0.6.sp
+                        ),
+                        color = RPCSXColors.primary
+                    )
+                }
+
                 Text(
-                    text = "SELECT",
-                    modifier = Modifier.padding(horizontal = 4.dp, vertical = 1.dp),
+                    text = "IMPORT",
                     style = AppTypography.labelSmall.copy(
-                        fontSize = 9.sp,
+                        fontSize = 12.sp,
                         fontWeight = FontWeight.Bold,
-                        letterSpacing = 0.6.sp
+                        letterSpacing = 1.sp
                     ),
-                    color = RPCSXColors.primary
+                    color = RPCSXColors.textPrimary
                 )
             }
-
-            Text(
-                text = "IMPORT",
-                style = AppTypography.labelSmall.copy(
-                    fontSize = 12.sp,
-                    fontWeight = FontWeight.Bold,
-                    letterSpacing = 1.sp
-                ),
-                color = RPCSXColors.textPrimary
-            )
         }
     }
 }
@@ -2259,6 +2318,7 @@ fun MinimalSearchBar(
     onQueryChange: (String) -> Unit,
     isExpanded: Boolean,
     onExpandedChange: (Boolean) -> Unit,
+    ambientModel: Any? = null,
     modifier: Modifier = Modifier
 ) {
     val focusRequester = remember { FocusRequester() }
@@ -2270,93 +2330,92 @@ fun MinimalSearchBar(
     }
 
     if (isExpanded) {
-        Row(
-            modifier = modifier
-                .height(34.dp)
-                .background(
-                    color = RPCSXColors.surfaceElevated.copy(alpha = 0.95f),
-                    shape = RoundedCornerShape(4.dp)
-                )
-                .border(
-                    border = BorderStroke(1.dp, RPCSXColors.primary),
-                    shape = RoundedCornerShape(4.dp)
-                )
-                .padding(horizontal = 7.dp),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(5.dp)
+        FrostedGlassBox(
+            ambientModel = ambientModel,
+            shape = RoundedCornerShape(4.dp),
+            border = BorderStroke(1.dp, RPCSXColors.primary),
+            modifier = modifier.height(34.dp)
         ) {
-            ControllerGlyphBadge(glyph = "△")
-
-            Icon(
-                painter = painterResource(R.drawable.ic_search),
-                contentDescription = "Search",
-                tint = RPCSXColors.primary,
-                modifier = Modifier.size(15.dp)
-            )
-
-            Box(
+            Row(
                 modifier = Modifier
-                    .widthIn(min = 90.dp, max = 190.dp),
-                contentAlignment = Alignment.CenterStart
+                    .fillMaxHeight()
+                    .padding(horizontal = 7.dp),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(5.dp)
             ) {
-                if (query.isEmpty()) {
-                    Text(
-                        text = "SEARCH...",
-                        style = AppTypography.labelSmall.copy(
-                            fontSize = 11.sp,
-                            letterSpacing = 0.8.sp,
-                            color = RPCSXColors.textSecondary.copy(alpha = 0.7f)
-                        )
-                    )
-                }
-                BasicTextField(
-                    value = query,
-                    onValueChange = onQueryChange,
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .focusRequester(focusRequester),
-                    singleLine = true,
-                    textStyle = AppTypography.bodyMedium.copy(
-                        fontSize = 13.sp,
-                        fontWeight = FontWeight.SemiBold,
-                        color = RPCSXColors.textPrimary
-                    ),
-                    cursorBrush = SolidColor(RPCSXColors.primary),
-                    keyboardOptions = KeyboardOptions(imeAction = ImeAction.Search),
-                    keyboardActions = KeyboardActions(onSearch = { /* done */ })
-                )
-            }
+                ControllerGlyphBadge(glyph = "△")
 
-            if (query.isNotEmpty()) {
-                IconButton(
-                    onClick = { onQueryChange("") },
-                    modifier = Modifier.size(18.dp)
+                Icon(
+                    painter = painterResource(R.drawable.ic_search),
+                    contentDescription = "Search",
+                    tint = RPCSXColors.primary,
+                    modifier = Modifier.size(15.dp)
+                )
+
+                Box(
+                    modifier = Modifier
+                        .widthIn(min = 90.dp, max = 190.dp),
+                    contentAlignment = Alignment.CenterStart
                 ) {
-                    Icon(
-                        painter = painterResource(R.drawable.ic_close),
-                        contentDescription = "Clear",
-                        tint = RPCSXColors.textSecondary,
-                        modifier = Modifier.size(12.dp)
+                    if (query.isEmpty()) {
+                        Text(
+                            text = "SEARCH...",
+                            style = AppTypography.labelSmall.copy(
+                                fontSize = 11.sp,
+                                letterSpacing = 0.8.sp,
+                                color = RPCSXColors.textSecondary.copy(alpha = 0.7f)
+                            )
+                        )
+                    }
+                    BasicTextField(
+                        value = query,
+                        onValueChange = onQueryChange,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .focusRequester(focusRequester),
+                        singleLine = true,
+                        textStyle = AppTypography.bodyMedium.copy(
+                            fontSize = 13.sp,
+                            fontWeight = FontWeight.SemiBold,
+                            color = RPCSXColors.textPrimary
+                        ),
+                        cursorBrush = SolidColor(RPCSXColors.primary),
+                        keyboardOptions = KeyboardOptions(imeAction = ImeAction.Search),
+                        keyboardActions = KeyboardActions(onSearch = { /* done */ })
                     )
                 }
-            } else {
-                IconButton(
-                    onClick = { onExpandedChange(false) },
-                    modifier = Modifier.size(18.dp)
-                ) {
-                    Icon(
-                        painter = painterResource(R.drawable.ic_close),
-                        contentDescription = "Close search",
-                        tint = RPCSXColors.textSecondary,
-                        modifier = Modifier.size(12.dp)
-                    )
+
+                if (query.isNotEmpty()) {
+                    IconButton(
+                        onClick = { onQueryChange("") },
+                        modifier = Modifier.size(18.dp)
+                    ) {
+                        Icon(
+                            painter = painterResource(R.drawable.ic_close),
+                            contentDescription = "Clear",
+                            tint = RPCSXColors.textSecondary,
+                            modifier = Modifier.size(12.dp)
+                        )
+                    }
+                } else {
+                    IconButton(
+                        onClick = { onExpandedChange(false) },
+                        modifier = Modifier.size(18.dp)
+                    ) {
+                        Icon(
+                            painter = painterResource(R.drawable.ic_close),
+                            contentDescription = "Close search",
+                            tint = RPCSXColors.textSecondary,
+                            modifier = Modifier.size(12.dp)
+                        )
+                    }
                 }
             }
         }
     } else {
-        Surface(
+        FrostedGlassBox(
+            ambientModel = ambientModel,
             shape = RoundedCornerShape(4.dp),
-            color = RPCSXColors.surfaceElevated.copy(alpha = 0.85f),
             border = BorderStroke(1.dp, RPCSXColors.surfaceOverlay),
             modifier = modifier
                 .clickable { onExpandedChange(true) }
