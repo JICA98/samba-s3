@@ -123,12 +123,10 @@ object DirectIsoManager {
             // playable when an unusual image has no readable TITLE_ID metadata.
             val readinessKey = GameIdentity.titleIdOrNull(canonicalPath, titleName)
                 ?: GameIdentity.key(canonicalPath, titleName)
-            PpuReadinessStore.setPreRuntimeState(appCtx, readinessKey, PreRuntimePpuState.READY)
-            // PRELAUNCH batching accepts installed directories. A direct ISO is
-            // intentionally never extracted/copied, so its virtual library path
-            // cannot be sent to that worker. Let the normal direct-disc boot own
-            // first-run compilation instead of trapping the card in PREPARE PPU.
-            PpuReadinessStore.setRuntimeState(appCtx, readinessKey, RuntimePpuState.IDLE_AFTER_COMPILE)
+            // Direct ISO still needs isolated INSTALL + PRELAUNCH batches. Do not
+            // manufacture Ready — that hid compile-on-start from Home/Launch.
+            PpuReadinessStore.setPreRuntimeState(appCtx, readinessKey, PreRuntimePpuState.NOT_DONE)
+            PpuReadinessStore.setRuntimeState(appCtx, readinessKey, RuntimePpuState.NOT_STARTED)
 
             GameRepository.add(arrayOf(gameInfo), progressId = -1)
             Log.i(TAG, "registered titleId=$titleId mode=DIRECT_ISO path=$canonicalPath uri=$uri")
@@ -142,7 +140,16 @@ object DirectIsoManager {
         return validateAndRegister(context, Uri.fromFile(file))
     }
 
-    /** Migrates direct-ISO entries saved by builds that incorrectly left START blocked. */
+    fun shouldResetFakeReady(
+        pre: PreRuntimePpuState,
+        runtime: RuntimePpuState,
+        hasCacheObjects: Boolean,
+    ): Boolean {
+        if (hasCacheObjects) return false
+        return pre == PreRuntimePpuState.READY || runtime == RuntimePpuState.IDLE_AFTER_COMPILE
+    }
+
+    /** Clears manufactured Ready on Direct ISO titles that never compiled cache. */
     fun reconcileLaunchReadiness(context: Context) {
         if (!com.zenithblue.sambas3.BuildConfig.DIRECT_ISO_LOADING) return
         GameRepository.list()
@@ -150,11 +157,12 @@ object DirectIsoManager {
             .forEach { game ->
                 val key = GameIdentity.titleIdOrNull(game.info.path, game.info.name.value)
                     ?: GameIdentity.key(game.info.path, game.info.name.value)
-                if (PpuReadinessStore.getPreRuntimeState(context, key) != PreRuntimePpuState.READY) {
-                    PpuReadinessStore.setPreRuntimeState(context, key, PreRuntimePpuState.READY)
-                }
-                if (PpuReadinessStore.getRuntimeState(context, key) != RuntimePpuState.IDLE_AFTER_COMPILE) {
-                    PpuReadinessStore.setRuntimeState(context, key, RuntimePpuState.IDLE_AFTER_COMPILE)
+                val pre = PpuReadinessStore.getPreRuntimeState(context, key)
+                val runtime = PpuReadinessStore.getRuntimeState(context, key)
+                val hasCache = com.zenithblue.sambas3.ppu.PpuCompilePathResolver.hasCompiledCache(key)
+                if (shouldResetFakeReady(pre, runtime, hasCache)) {
+                    PpuReadinessStore.setPreRuntimeState(context, key, PreRuntimePpuState.NOT_DONE)
+                    PpuReadinessStore.setRuntimeState(context, key, RuntimePpuState.NOT_STARTED)
                 }
             }
     }

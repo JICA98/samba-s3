@@ -38,6 +38,19 @@ object PpuWorkerNativeBootstrap {
             }
 
             RPCSX.initialized = true
+            // Compile events are queued on the native main-thread processor.
+            // Without this pump, Binder never sees module totals and the UI
+            // stays at Compiling 0%.
+            kotlin.concurrent.thread(name = "rpcsx-mtp-worker", isDaemon = true) {
+                try {
+                    RPCSX.instance.startMainThreadProcessor()
+                } catch (e: Exception) {
+                    Log.e(TAG, "Worker main-thread processor failed: ${e.message}", e)
+                }
+            }
+            // process() registers the owner before it waits; give it a moment
+            // so the first compile events are not queued on a dead pump.
+            Thread.sleep(80)
             Log.i(TAG, "Worker native bootstrap succeeded. root=${RPCSX.rootDirectory} user=$user")
             true
         } catch (e: Exception) {

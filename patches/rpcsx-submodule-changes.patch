@@ -1,5 +1,5 @@
 diff --git a/android/src/rpcsx-android.cpp b/android/src/rpcsx-android.cpp
-index 8308a4798..2e4bd635c 100644
+index 8308a4798..eaf5a452e 100644
 --- a/android/src/rpcsx-android.cpp
 +++ b/android/src/rpcsx-android.cpp
 @@ -55,6 +55,8 @@
@@ -11,7 +11,28 @@ index 8308a4798..2e4bd635c 100644
  
  #define STB_IMAGE_WRITE_IMPLEMENTATION
  #define STBI_ONLY_PNG
-@@ -1648,7 +1650,8 @@ extern void ppu_precompile(std::vector<std::string> &dir_queue,
+@@ -914,6 +916,20 @@ static void collectGamePaths(std::vector<std::string> &paths,
+   }
+ }
+ 
++static void collect_fs_directories(const std::string& root, std::vector<std::string>& out) {
++  std::string normalized = root;
++  if (!normalized.empty() && normalized.back() != '/') {
++    normalized += '/';
++  }
++  out.push_back(normalized);
++  for (const auto& entry : fs::dir(normalized)) {
++    if (!entry.is_directory || entry.name == "." || entry.name == "..") {
++      continue;
++    }
++    collect_fs_directories(normalized + std::string(entry.name), out);
++  }
++}
++
+ static std::string locateEbootPath(std::string_view root) {
+   if (std::filesystem::is_regular_file(root)) {
+     return std::string(root);
+@@ -1648,7 +1664,8 @@ extern void ppu_precompile(std::vector<std::string> &dir_queue,
                             std::vector<ppu_module<lv2_obj> *> *loaded_prx);
  extern bool ppu_initialize(const ppu_module<lv2_obj> &, bool check_only = false,
                             u64 file_size = 0);
@@ -21,7 +42,7 @@ index 8308a4798..2e4bd635c 100644
  extern bool ppu_load_rel_exec(const ppu_rel_object &);
  
  class CompilationQueue {
-@@ -1765,8 +1768,15 @@ private:
+@@ -1765,8 +1782,15 @@ private:
      // captures this context when its thread starts; setting it later around
      // ppu_precompile can misclassify install PPU work as runtime work and
      // create the second (2000) notification.
@@ -38,7 +59,7 @@ index 8308a4798..2e4bd635c 100644
      set_system_progress_context(installProgressContext);
      struct InstallProgressContextGuard {
        ~InstallProgressContextGuard() { clear_system_progress_context(); }
-@@ -1838,8 +1848,22 @@ private:
+@@ -1838,8 +1862,22 @@ private:
                          _main.applied_patches, std::vector<u32>{})) {
          Emu.ConfigurePPUCache();
          Emu.SetTestMode();
@@ -63,7 +84,7 @@ index 8308a4798..2e4bd635c 100644
          mod_list.emplace_back(&_main);
        }
      }
-@@ -2829,10 +2853,7 @@ static bool installPkg(JNIEnv *env, fs::file &&file, jlong progressId) {
+@@ -2829,10 +2867,7 @@ static bool installPkg(JNIEnv *env, fs::file &&file, jlong progressId) {
    if (worker()) {
      auto paths = std::vector(bootable_paths.begin(), bootable_paths.end());
      collectGameInfo(env, progress.getProgressId(), paths);
@@ -75,7 +96,7 @@ index 8308a4798..2e4bd635c 100644
    }
  
    return true;
-@@ -2943,7 +2964,7 @@ static bool installRap(JNIEnv *env, fs::file &&file, jlong progressId,
+@@ -2943,7 +2978,7 @@ static bool installRap(JNIEnv *env, fs::file &&file, jlong progressId,
    }
  
    collectGameInfo(env, progress.getProgressId(), {std::string(rootPath)});
@@ -84,7 +105,7 @@ index 8308a4798..2e4bd635c 100644
    return true;
  }
  
-@@ -3042,8 +3063,7 @@ static bool installIso(JNIEnv *env, fs::file &&file, jlong progressId) {
+@@ -3042,8 +3077,7 @@ static bool installIso(JNIEnv *env, fs::file &&file, jlong progressId) {
  
    progress.report(0, 0, "Publishing installed game");
    collectGameInfo(env, progress.getProgressId(), {finalPath});
@@ -94,7 +115,7 @@ index 8308a4798..2e4bd635c 100644
    return true;
  }
  
-@@ -3363,6 +3383,323 @@ extern "C" int _rpcsx_extractIsoPreview(int fd, const char* destPath) {
+@@ -3363,6 +3397,339 @@ extern "C" int _rpcsx_extractIsoPreview(int fd, const char* destPath) {
    return 0;
  }
  
@@ -183,31 +204,52 @@ index 8308a4798..2e4bd635c 100644
 +
 +  g_install_batch_canceled.store(false, std::memory_order_release);
 +
-+  std::string ebootPath = locateEbootPath(game_path);
-+  if (ebootPath.empty() && std::filesystem::is_regular_file(game_path)) {
-+    ebootPath = game_path;
++  std::string compileRoot = Emu.ResolvePpuCompileRoot(game_path);
++  std::string ebootPath;
++  std::string rootPathStr;
++  if (!compileRoot.empty()) {
++    rootPathStr = compileRoot;
++    if (Emu.GetElfPathFromDir(ebootPath, compileRoot) != game_boot_result::no_errors) {
++      ebootPath.clear();
++    }
 +  }
-+  if (ebootPath.empty() || !std::filesystem::is_regular_file(ebootPath)) {
++  if (ebootPath.empty()) {
++    ebootPath = locateEbootPath(game_path);
++    if (ebootPath.empty() && std::filesystem::is_regular_file(game_path)) {
++      ebootPath = game_path;
++    }
++  }
++  if (ebootPath.empty() || !fs::is_file(ebootPath)) {
 +    g_compile_batch_result_json = build_batch_result_json(
 +        "failed", 0, 0, 0, 0, start_mem, start_mem, "missing_eboot_file");
 +    return g_compile_batch_result_json.c_str();
 +  }
 +
-+  auto rootPath = std::filesystem::path(ebootPath);
-+  if (rootPath.filename() == "USRDIR") {
-+    rootPath = rootPath.parent_path();
-+  } else if (!std::filesystem::is_directory(rootPath)) {
-+    rootPath = rootPath.parent_path();
++  auto rootPath = std::filesystem::path(rootPathStr.empty() ? ebootPath : rootPathStr);
++  if (rootPathStr.empty()) {
 +    if (rootPath.filename() == "USRDIR") {
 +      rootPath = rootPath.parent_path();
++    } else if (!std::filesystem::is_directory(rootPath)) {
++      rootPath = rootPath.parent_path();
++      if (rootPath.filename() == "USRDIR") {
++        rootPath = rootPath.parent_path();
++      }
 +    }
++    rootPathStr = rootPath.string();
 +  }
 +
 +  std::string title;
 +  if (title_id && *title_id) {
 +    title = title_id;
 +  } else {
-+    auto sfo = locateParamSfoPath(rootPath.string());
++    auto sfo = locateParamSfoPath(rootPathStr.empty() ? rootPath.string() : rootPathStr);
++    if (sfo.empty()) {
++      const std::string root = rootPathStr.empty() ? rootPath.string() : rootPathStr;
++      const std::string a = root + (root.ends_with("/") ? "PS3_GAME/PARAM.SFO" : "/PS3_GAME/PARAM.SFO");
++      const std::string b = root + (root.ends_with("/") ? "PARAM.SFO" : "/PARAM.SFO");
++      if (fs::is_file(a)) sfo = a;
++      else if (fs::is_file(b)) sfo = b;
++    }
 +    if (!sfo.empty()) {
 +      const auto psf = psf::load_object(sfo);
 +      title = std::string(psf::get_string(psf, "TITLE_ID"));
@@ -252,12 +294,7 @@ index 8308a4798..2e4bd635c 100644
 +  _main.path = ebootPath;
 +
 +  std::vector<std::string> dir_queue;
-+  dir_queue.push_back(rootPath.string());
-+  for (auto &entry : std::filesystem::recursive_directory_iterator(rootPath)) {
-+    if (entry.is_directory()) {
-+      dir_queue.push_back(entry.path().string());
-+    }
-+  }
++  collect_fs_directories(rootPathStr.empty() ? rootPath.string() : rootPathStr, dir_queue);
 +
 +  std::vector<ppu_module<lv2_obj> *> mod_list;
 +  bool more_work = false;
@@ -324,7 +361,7 @@ index 8308a4798..2e4bd635c 100644
 +{
 +  const ProcessMemStats start_mem = read_process_mem_stats();
 +
-+  if (!game_path || !*game_path || !std::filesystem::is_directory(game_path)) {
++  if (!game_path || !*game_path) {
 +    g_compile_batch_result_json = build_batch_result_json(
 +        "failed", 0, 0, 0, 0, start_mem, start_mem, "invalid_game_path");
 +    return g_compile_batch_result_json.c_str();
@@ -418,7 +455,7 @@ index 8308a4798..2e4bd635c 100644
  extern "C" int _rpcsx_prepareRuntimePpu(const char* path, u64 sessionId)
  {
      if (!path || !*path)
-@@ -3607,7 +3944,7 @@ extern "C" std::string _rpcsx_settingsGet(std::string_view path) {
+@@ -3607,7 +3974,7 @@ extern "C" std::string _rpcsx_settingsGet(std::string_view path) {
    auto root = find_cfg_node(&g_cfg, path);
  
    if (root == nullptr) {
@@ -427,7 +464,7 @@ index 8308a4798..2e4bd635c 100644
    }
  
    return root->to_json().dump(4);
-@@ -4199,145 +4536,185 @@ extern "C" bool _rpcsx_loadSaveState(int slot)
+@@ -4199,145 +4566,185 @@ extern "C" bool _rpcsx_loadSaveState(int slot)
      return true;
  }
  
@@ -755,7 +792,7 @@ index 8aca7dc59..2c0d98b33 100644
      return g_samba_build_id.c_str();
  }
 diff --git a/rpcs3/Emu/Cell/PPUThread.cpp b/rpcs3/Emu/Cell/PPUThread.cpp
-index d2768d8b0..dfecf9ebf 100644
+index d2768d8b0..2f5564d88 100644
 --- a/rpcs3/Emu/Cell/PPUThread.cpp
 +++ b/rpcs3/Emu/Cell/PPUThread.cpp
 @@ -16,6 +16,7 @@
@@ -942,7 +979,7 @@ index d2768d8b0..dfecf9ebf 100644
 +			    ctx.install_step_max_new > 0)
 +			{
 +				install_uncached_remaining++;
-+				if (workload.size() >= ctx.install_step_max_new)
++				if (ppu_batch_new_enqueued() >= ctx.install_step_max_new)
 +				{
 +					set_ppu_install_step_more_work(true);
 +					link_workload.pop_back();
@@ -955,7 +992,48 @@ index d2768d8b0..dfecf9ebf 100644
  		// Remember, used in ppu_initialize(void)
  		compiled_new = true;
  
-@@ -5945,7 +6070,42 @@ bool ppu_initialize(const ppu_module<lv2_obj>& info, bool check_only, u64 file_s
+@@ -5925,6 +6050,16 @@ bool ppu_initialize(const ppu_module<lv2_obj>& info, bool check_only, u64 file_s
+ 
+ 		// Fill workload list for compilation
+ 		workload.emplace_back(std::move(obj_name), std::move(part));
++#if defined(__ANDROID__)
++		{
++			const auto ctx = get_system_progress_context();
++			if ((ctx.origin == CompileOrigin::INSTALL || ctx.origin == CompileOrigin::PRELAUNCH) &&
++			    ctx.install_step_max_new > 0)
++			{
++				ppu_batch_note_enqueued();
++			}
++		}
++#endif
+ 	}
+ 
+ 	if (check_only)
+@@ -5932,6 +6067,23 @@ bool ppu_initialize(const ppu_module<lv2_obj>& info, bool check_only, u64 file_s
+ 		return false;
+ 	}
+ 
++#if defined(__ANDROID__)
++	{
++		const auto ctx = get_system_progress_context();
++		if ((ctx.origin == CompileOrigin::INSTALL || ctx.origin == CompileOrigin::PRELAUNCH) &&
++		    ctx.install_step_max_new > 0)
++		{
++			InstallPpuBatchStats prev = get_ppu_install_batch_stats();
++			InstallPpuBatchStats stats;
++			stats.total_modules = prev.total_modules + (install_modules_total ? install_modules_total : 0);
++			stats.cached_before = prev.cached_before ? prev.cached_before : install_cached_count;
++			stats.compiled_this_batch = ppu_batch_new_enqueued();
++			stats.cached_after = stats.cached_before + stats.compiled_this_batch;
++			set_ppu_install_batch_stats(stats);
++		}
++	}
++#endif
++
+ 	if (g_progr_ftotal_bits && file_size)
+ 	{
+ 		g_progr_fknown_bits += file_size;
+@@ -5945,7 +6097,42 @@ bool ppu_initialize(const ppu_module<lv2_obj>& info, bool check_only, u64 file_s
  		atomic_t<u64> work_done = 0;
  
  		// Update progress dialog
@@ -997,28 +1075,6 @@ index d2768d8b0..dfecf9ebf 100644
 +#endif
  
  		*progress_dialog = get_localized_string(localized_string_id::PROGRESS_DIALOG_COMPILING_PPU_MODULES);
- 
-@@ -6126,6 +6286,21 @@ bool ppu_initialize(const ppu_module<lv2_obj>& info, bool check_only, u64 file_s
- 	{
- 		if (!is_being_used_in_emulation || (cpu ? cpu->state.all_of(cpu_flag::exit) : Emu.IsStopped()))
- 		{
-+#if defined(__ANDROID__)
-+			{
-+				const auto ctx = get_system_progress_context();
-+				if ((ctx.origin == CompileOrigin::INSTALL || ctx.origin == CompileOrigin::PRELAUNCH) &&
-+				    ctx.install_step_max_new > 0)
-+				{
-+					InstallPpuBatchStats stats;
-+					stats.total_modules = install_modules_total ? install_modules_total : +g_progr_ptotal;
-+					stats.cached_before = install_cached_count;
-+					stats.compiled_this_batch = static_cast<u32>(workload.size());
-+					stats.cached_after = stats.cached_before + stats.compiled_this_batch;
-+					set_ppu_install_batch_stats(stats);
-+				}
-+			}
-+#endif
- 			return compiled_new;
- 		}
  
 diff --git a/rpcs3/Emu/RSX/VK/VKTextureCache.cpp b/rpcs3/Emu/RSX/VK/VKTextureCache.cpp
 index 72b6bcf40..f58605836 100644
@@ -1140,7 +1196,7 @@ index 6df7e3334..56e23fd85 100644
  
  	gpu_debug_marker::gpu_debug_marker(gpu_debug_marker_pool& pool, std::string message)
 diff --git a/rpcs3/Emu/System.cpp b/rpcs3/Emu/System.cpp
-index 21a47f932..af655e357 100644
+index 21a47f932..ec45a010c 100644
 --- a/rpcs3/Emu/System.cpp
 +++ b/rpcs3/Emu/System.cpp
 @@ -90,7 +90,7 @@ extern void spu_load_exec(const spu_exec_object&);
@@ -1152,7 +1208,49 @@ index 21a47f932..af655e357 100644
  extern void ppu_unload_prx(const lv2_prx&);
  extern shared_ptr<lv2_prx> ppu_load_prx(const ppu_prx_object&, bool virtual_load, const std::string&, s64 = 0, utils::serial* = nullptr);
  extern std::pair<shared_ptr<lv2_overlay>, CellError> ppu_load_overlay(const ppu_exec_object&, bool virtual_load, const std::string& path, s64 = 0, utils::serial* = nullptr);
-@@ -475,6 +475,17 @@ static bool run_ppu_precompile_stage(
+@@ -436,6 +436,41 @@ build_ppu_preflight_plan(
+     return plan;
+ }
+ 
++static std::string mount_iso_as_bdvd(const std::string& path)
++{
++	fs::file file(path);
++	if (!file || getFileType(file) != FileType::Iso)
++	{
++		return {};
++	}
++
++	file.seek(0);
++	shared_ptr<fs::device_base> iso_device = stx::make_shared<iso_dev>(
++		*ensure(iso_dev::open(std::make_unique<file_block_dev>(std::move(file)))));
++	auto mount_path = iso_device->fs_prefix + "/";
++	sys_log.notice("Mounting iso: '%s' -> '%s'", path, mount_path);
++	fs::set_virtual_device(iso_device->fs_prefix, iso_device);
++	vfs::mount("/dev_bdvd", mount_path);
++	return mount_path;
++}
++
++std::string Emulator::ResolvePpuCompileRoot(const std::string& path)
++{
++	if (path.empty())
++	{
++		return {};
++	}
++	if (fs::is_dir(path))
++	{
++		return path;
++	}
++	if (!fs::is_file(path))
++	{
++		return {};
++	}
++	return mount_iso_as_bdvd(path);
++}
++
+ static bool run_ppu_precompile_stage(
+ 	Emulator& emu,
+ 	std::vector<std::string> dir_queue,
+@@ -475,6 +510,17 @@ static bool run_ppu_precompile_stage(
  
  		ppu_initialize(main);
  
@@ -1170,17 +1268,93 @@ index 21a47f932..af655e357 100644
  		mod_list.emplace_back(
  			&main);
  	}
+@@ -513,9 +559,12 @@ Emulator::PreparePpuOnly(
+     const std::string& title_hint,
+     const std::function<bool()>& canceled)
+ {
++    const std::string resolved_path =
++        ResolvePpuCompileRoot(game_path);
++
+     if (
+-        game_path.empty() ||
+-        !fs::is_dir(game_path))
++        resolved_path.empty() ||
++        !fs::is_dir(resolved_path))
+     {
+         return
+             ppu_preflight_result::
+@@ -580,8 +629,8 @@ Emulator::PreparePpuOnly(
+         old_app_version
+     };
+ 
+-    m_path = game_path;
+-    m_path_original = game_path;
++    m_path = resolved_path;
++    m_path_original = resolved_path;
+ 
+     m_title_id =
+         title_hint;
+@@ -592,8 +641,8 @@ Emulator::PreparePpuOnly(
+         psf::registry _psf = psf::load_object(m_sfo_dir + "/PARAM.SFO");
+         if (_psf.empty())
+         {
+-            std::string alt = game_path + "/PS3_GAME/PARAM.SFO";
+-            if (!fs::is_file(alt)) alt = game_path + "/PARAM.SFO";
++            std::string alt = resolved_path + "/PS3_GAME/PARAM.SFO";
++            if (!fs::is_file(alt)) alt = resolved_path + "/PARAM.SFO";
+             _psf = psf::load_object(alt);
+         }
+         if (!_psf.empty())
+@@ -1471,19 +1520,12 @@ game_boot_result Emulator::BootGame(std::string path, const std::string& title_i
+ 
+ 	if (fs::is_file(path))
+ 	{
+-		fs::file file(path);
+-		if (getFileType(file) == FileType::Iso)
++		if (std::string mount_path = mount_iso_as_bdvd(path); !mount_path.empty())
+ 		{
+-			shared_ptr<fs::device_base> iso_device = stx::make_shared<iso_dev>(*ensure(iso_dev::open(std::make_unique<file_block_dev>(std::move(file)))));
+-
+-			auto mount_path = iso_device->fs_prefix + "/";
+-			sys_log.notice("Mounting iso: '%s' -> '%s'", path, mount_path);
+-			fs::set_virtual_device(iso_device->fs_prefix, iso_device);
+-			vfs::mount("/dev_bdvd", mount_path);
+-			path = mount_path;
++			path = std::move(mount_path);
+ 			direct = false;
+ 
+-			for (auto& item : fs::dir(mount_path))
++			for (auto& item : fs::dir(path))
+ 			{
+ 				sys_log.notice("%s", item.name);
+ 			}
+diff --git a/rpcs3/Emu/System.h b/rpcs3/Emu/System.h
+index 804981160..b81783502 100644
+--- a/rpcs3/Emu/System.h
++++ b/rpcs3/Emu/System.h
+@@ -525,6 +525,10 @@ public:
+ 		const std::string& game_path,
+ 		const std::string& title_hint,
+ 		const std::function<bool()>& canceled);
++	// Directory root for isolated PPU compile. Directories are returned as-is.
++	// PS3 ISO files are mounted as a virtual disc (same as BootGame) and the
++	// mount path is returned. Empty string means the path cannot be compiled.
++	std::string ResolvePpuCompileRoot(const std::string& path);
+ 	u32 AddGamesFromDir(const std::string& path);
+ 	game_boot_result AddGame(const std::string& path);
+ 	game_boot_result AddGameToYml(const std::string& path);
 diff --git a/rpcs3/Emu/compile_progress.cpp b/rpcs3/Emu/compile_progress.cpp
-index dc7a56339..cabbb7afd 100644
+index dc7a56339..4f89182ed 100644
 --- a/rpcs3/Emu/compile_progress.cpp
 +++ b/rpcs3/Emu/compile_progress.cpp
-@@ -50,6 +50,37 @@ u64 allocate_compile_job_id()
+@@ -50,6 +50,49 @@ u64 allocate_compile_job_id()
  static std::mutex g_ctx_mutex;
  static SystemProgressContext g_current_ctx{CompileOrigin::RUNTIME, 0, ""};
  static bool g_has_ctx = false;
 +static std::atomic<bool> g_ppu_install_step_more_work{false};
 +static std::mutex g_batch_stats_mutex;
 +static InstallPpuBatchStats g_batch_stats{};
++static std::atomic<u32> g_ppu_batch_new_enqueued{0};
 +
 +void set_ppu_install_step_more_work(bool more)
 +{
@@ -1208,11 +1382,22 @@ index dc7a56339..cabbb7afd 100644
 +{
 +    std::lock_guard<std::mutex> lock(g_batch_stats_mutex);
 +    g_batch_stats = {};
++    g_ppu_batch_new_enqueued.store(0, std::memory_order_release);
++}
++
++u32 ppu_batch_new_enqueued()
++{
++    return g_ppu_batch_new_enqueued.load(std::memory_order_acquire);
++}
++
++void ppu_batch_note_enqueued()
++{
++    g_ppu_batch_new_enqueued.fetch_add(1, std::memory_order_acq_rel);
 +}
  
  void set_system_progress_context(const SystemProgressContext& ctx)
  {
-@@ -76,6 +107,8 @@ void clear_system_progress_context()
+@@ -76,6 +119,8 @@ void clear_system_progress_context()
      std::lock_guard<std::mutex> lock(g_ctx_mutex);
      g_current_ctx = SystemProgressContext{CompileOrigin::RUNTIME, 0, ""};
      g_has_ctx = false;
@@ -1222,10 +1407,10 @@ index dc7a56339..cabbb7afd 100644
  
  // --- Snapshot builder ---
 diff --git a/rpcs3/Emu/compile_progress.hpp b/rpcs3/Emu/compile_progress.hpp
-index 9210b5d10..bfff62dad 100644
+index 9210b5d10..d1121bc48 100644
 --- a/rpcs3/Emu/compile_progress.hpp
 +++ b/rpcs3/Emu/compile_progress.hpp
-@@ -66,12 +66,30 @@ struct SystemProgressContext
+@@ -66,12 +66,33 @@ struct SystemProgressContext
      CompileOrigin origin = CompileOrigin::RUNTIME;
      u64 jobId = 0;
      std::string titleId; // associated title for install jobs; empty => Emu.GetTitleID() fallback
@@ -1252,6 +1437,9 @@ index 9210b5d10..bfff62dad 100644
 +void set_ppu_install_batch_stats(const InstallPpuBatchStats& stats);
 +InstallPpuBatchStats get_ppu_install_batch_stats();
 +void reset_ppu_install_batch_stats();
++/** Process-wide count of new LLVM objects enqueued in this INSTALL/PRELAUNCH batch. */
++u32 ppu_batch_new_enqueued();
++void ppu_batch_note_enqueued();
 +
  // Helper that computes PpuProgressSnapshot exactly once, preserving time_left_queue
  // smoothing state. Both the RSX UI and the Android bridge consume the same snapshot.

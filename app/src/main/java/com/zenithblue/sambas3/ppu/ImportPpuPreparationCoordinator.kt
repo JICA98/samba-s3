@@ -65,7 +65,7 @@ object ImportPpuPreparationCoordinator {
             publishState()
             return
         }
-        startRuntimeBatches(appContext, titleId, path)
+        startRuntimeBatches(appContext, titleId, PpuCompilePathResolver.resolveForWorker(path, titleId))
     }
 
     /** Home/Launch Center action. It starts the required batch phase; it never boots gameplay. */
@@ -91,10 +91,11 @@ object ImportPpuPreparationCoordinator {
             )
         )
 
+        val compilePath = PpuCompilePathResolver.resolveForWorker(game.info.path, titleId)
         when (action) {
-            PpuUserAction.REBUILD_INSTALL_PPU -> startInstallBatches(appContext, titleId, game.info.path)
+            PpuUserAction.REBUILD_INSTALL_PPU -> startInstallBatches(appContext, titleId, compilePath)
             PpuUserAction.PREPARE_RUNTIME,
-            PpuUserAction.RETRY_RUNTIME_PREPARATION -> startRuntimeBatches(appContext, titleId, game.info.path)
+            PpuUserAction.RETRY_RUNTIME_PREPARATION -> startRuntimeBatches(appContext, titleId, compilePath)
             else -> Unit
         }
         Log.i(TAG, "requestPreparation title=$titleId action=$action path=${game.info.path}")
@@ -182,7 +183,9 @@ object ImportPpuPreparationCoordinator {
     }.getOrNull()
 
     private fun resolvePathForTitle(titleId: String, game: Game?): String? {
-        game?.info?.path?.takeIf { it.isNotBlank() }?.let { return it }
+        game?.info?.path?.takeIf { it.isNotBlank() }?.let {
+            return PpuCompilePathResolver.resolveForWorker(it, titleId)
+        }
         val candidate = File(RPCSX.rootDirectory, "config/games/$titleId")
         return candidate.absolutePath.takeIf { candidate.isDirectory }
     }

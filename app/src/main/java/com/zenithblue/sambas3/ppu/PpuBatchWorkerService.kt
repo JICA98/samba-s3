@@ -66,11 +66,17 @@ class PpuBatchWorkerService : Service() {
                 try {
                     RPCSX.instance.setCompileProgressListener { domain, phase, origin, jobId, value, max, message, evtTitleId, fileDone, fileTotal, moduleDone, moduleTotal ->
                         try {
-                            if (phase == RPCSX.COMPILE_PHASE_PROGRESS) {
+                            if (phase == RPCSX.COMPILE_PHASE_PROGRESS || phase == RPCSX.COMPILE_PHASE_BEGIN) {
+                                val total = when {
+                                    moduleTotal > 0 -> moduleTotal
+                                    value in 1..99 && moduleDone > 0 ->
+                                        (moduleDone * 100 / value.toInt()).coerceAtLeast(moduleDone)
+                                    else -> 0
+                                }
                                 callback?.onProgress(
                                     logicalSessionId,
                                     logicalJobId,
-                                    moduleTotal,
+                                    total,
                                     moduleDone,
                                     message ?: "Compiling"
                                 )
@@ -83,18 +89,33 @@ class PpuBatchWorkerService : Service() {
 
                 val safeTitle = titleId ?: ""
                 val safePath = gamePath ?: ""
+                val (nativePath, releaseNativePath) = try {
+                    PpuCompilePathResolver.materializeNativePath(this@PpuBatchWorkerService, safePath)
+                } catch (e: Exception) {
+                    Log.e(TAG, "Failed to open compile path=$safePath: ${e.message}", e)
+                    try {
+                        callback?.onBatchFinished(
+                            logicalSessionId,
+                            logicalJobId,
+                            batchIndex,
+                            """{"status":"failed","message":"iso_unavailable"}"""
+                        )
+                    } catch (_: Exception) {}
+                    scheduleExit(myPid)
+                    return@thread
+                }
                 val resultJson = try {
                     if (compileOrigin == RPCSX.COMPILE_ORIGIN_PRELAUNCH) {
                         RPCSX.instance.compileRuntimePpuBatch(
                             safeTitle,
-                            safePath,
+                            nativePath,
                             logicalJobId,
                             maxNewObjects
                         )
                     } else {
                         RPCSX.instance.compileInstallPpuBatch(
                             safeTitle,
-                            safePath,
+                            nativePath,
                             logicalJobId,
                             maxNewObjects
                         )
@@ -102,6 +123,8 @@ class PpuBatchWorkerService : Service() {
                 } catch (e: Exception) {
                     Log.e(TAG, "PPU batch threw origin=$compileOrigin: ${e.message}", e)
                     """{"status":"failed","message":"${e.message}"}"""
+                } finally {
+                    releaseNativePath?.invoke()
                 }
 
                 Log.i(

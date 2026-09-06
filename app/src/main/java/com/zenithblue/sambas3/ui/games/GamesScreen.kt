@@ -456,6 +456,10 @@ fun GamesScreen(
     val installPpu by CompileProgressBridge.installState.collectAsState()
     val prelaunchPpu by CompileProgressBridge.prelaunchState.collectAsState()
     val runtimePpu by CompileProgressBridge.state.collectAsState()
+    val ppuReadinessRevision by PpuReadinessStore.revision.collectAsState()
+    val ppuCoordinatorRevision by com.zenithblue.sambas3.ppu.ImportPpuPreparationCoordinator.coordinatorRevision.collectAsState()
+    @Suppress("UNUSED_VARIABLE")
+    val ppuUiRevision = ppuReadinessRevision + ppuCoordinatorRevision
     val activeInstallId by GameRepository.activeInstallProgress
     val activeInstallEntry = ProgressRepository.getItem(activeInstallId)?.value
     val isPackageInstalling = activeInstallId != null
@@ -785,6 +789,51 @@ fun GamesScreen(
                             }
                             InfoBadge(text = activeGame.info.path.substringAfterLast("/"))
                         }
+                        val homeTitleId = GameIdentity.titleIdOrNull(activeGame.info.path, activeGame.info.name.value)
+                        val homeAvailability = com.zenithblue.sambas3.ppu.GameRunEligibilityHelper.evaluateAvailability(
+                            context, activeGame, installPpu.ppuActive, prelaunchPpu, runtimePpu,
+                            emulatorState.value, emulatorActiveGame.value
+                        )
+                        val homePpuUi = com.zenithblue.sambas3.ui.games.launch.LaunchPpuPresentation.build(
+                            homeTitleId,
+                            homeAvailability,
+                            com.zenithblue.sambas3.ui.games.launch.LaunchRuntimeInputs(
+                                installPpu = installPpu,
+                                prelaunchPpu = prelaunchPpu,
+                                runtimePpu = runtimePpu,
+                                emulatorState = emulatorState.value,
+                                activeGame = emulatorActiveGame.value,
+                                waitingForIdle = com.zenithblue.sambas3.ppu.ImportPpuPreparationCoordinator.waitingForIdle,
+                                deferredForFgs = com.zenithblue.sambas3.ppu.ImportPpuPreparationCoordinator.deferredForFgs,
+                                fgsStartDenied = CompileProgressBridge.fgsStartDenied,
+                                preRuntimeState = homeTitleId?.let {
+                                    runCatching { PpuReadinessStore.getPreRuntimeState(context, it) }
+                                        .getOrDefault(PreRuntimePpuState.NOT_DONE)
+                                } ?: PreRuntimePpuState.NOT_DONE,
+                                runtimeReadyState = homeTitleId?.let {
+                                    runCatching { PpuReadinessStore.getRuntimeState(context, it) }
+                                        .getOrDefault(RuntimePpuState.NOT_STARTED)
+                                } ?: RuntimePpuState.NOT_STARTED,
+                                validatedByRealBootFrame = homeTitleId?.let {
+                                    runCatching { PpuReadinessStore.isRuntimeValidated(context, it) }.getOrDefault(false)
+                                } ?: false,
+                            ),
+                        )
+                        Text(
+                            text = "Install PPU: ${com.zenithblue.sambas3.ui.games.launch.LaunchPpuPresentation.phaseStatusText(homePpuUi.installPpu)}",
+                            style = AppTypography.labelSmall,
+                            color = RPCSXColors.textSecondary,
+                            modifier = Modifier.padding(top = 6.dp),
+                            maxLines = 1,
+                            overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis,
+                        )
+                        Text(
+                            text = "Runtime PPU: ${com.zenithblue.sambas3.ui.games.launch.LaunchPpuPresentation.phaseStatusText(homePpuUi.runtimePpu)}",
+                            style = AppTypography.labelSmall,
+                            color = RPCSXColors.textSecondary,
+                            maxLines = 1,
+                            overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis,
+                        )
                     }
                 } else if (currentItem is PagerItem.AddGame) {
                     Column(
@@ -886,14 +935,25 @@ fun GamesScreen(
                             style = AppTypography.labelSmall,
                             color = RPCSXColors.primary
                         )
-                        LinearProgressIndicator(
-                            progress = { (installPpu.ppuPercent / 100f).coerceIn(0f, 1f) },
-                            modifier = Modifier
-                                .widthIn(min = 80.dp, max = 200.dp)
-                                .clip(RoundedCornerShape(4.dp)),
-                            color = RPCSXColors.primary,
-                            trackColor = RPCSXColors.surfaceOverlay,
-                        )
+                        val installFrac = com.zenithblue.sambas3.ui.games.launch.LaunchPpuPresentation.compileBarFraction(installPpu)
+                        if (installFrac != null) {
+                            LinearProgressIndicator(
+                                progress = { installFrac },
+                                modifier = Modifier
+                                    .widthIn(min = 80.dp, max = 200.dp)
+                                    .clip(RoundedCornerShape(4.dp)),
+                                color = RPCSXColors.primary,
+                                trackColor = RPCSXColors.surfaceOverlay,
+                            )
+                        } else {
+                            LinearProgressIndicator(
+                                modifier = Modifier
+                                    .widthIn(min = 80.dp, max = 200.dp)
+                                    .clip(RoundedCornerShape(4.dp)),
+                                color = RPCSXColors.primary,
+                                trackColor = RPCSXColors.surfaceOverlay,
+                            )
+                        }
                         installPpu.ppuMsg?.let {
                             Text(
                                 text = it,
@@ -918,6 +978,29 @@ fun GamesScreen(
                             trackColor = RPCSXColors.surfaceOverlay,
                         )
                         prelaunchPpu.ppuMsg?.let {
+                            Text(
+                                text = it,
+                                style = AppTypography.labelSmall,
+                                color = RPCSXColors.textSecondary,
+                                maxLines = 1,
+                                overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis
+                            )
+                        }
+                    } else if (runtimePpu.ppuActive) {
+                        Text(
+                            text = stringResource(R.string.compiling_ppu_title),
+                            style = AppTypography.labelSmall,
+                            color = RPCSXColors.primary
+                        )
+                        LinearProgressIndicator(
+                            progress = { (runtimePpu.ppuPercent / 100f).coerceIn(0f, 1f) },
+                            modifier = Modifier
+                                .widthIn(min = 80.dp, max = 200.dp)
+                                .clip(RoundedCornerShape(4.dp)),
+                            color = RPCSXColors.primary,
+                            trackColor = RPCSXColors.surfaceOverlay,
+                        )
+                        runtimePpu.ppuMsg?.let {
                             Text(
                                 text = it,
                                 style = AppTypography.labelSmall,
@@ -1695,14 +1778,62 @@ fun GameCard(
         prelaunchTitle != null -> !isPlaceholder && gameKey.equals(prelaunchTitle, ignoreCase = true)
         else -> false
     }
-    val showCompileOverlay = isImporting || isRuntimeGameCompile || usingPrelaunchPpu
+    val showCompileOverlay = com.zenithblue.sambas3.ui.games.launch.LaunchPpuPresentation.homeCardShowsCompileOverlay(
+        isImporting = isImporting,
+        isRuntimeGameCompile = isRuntimeGameCompile,
+        usingPrelaunchPpu = usingPrelaunchPpu,
+        usingInstallPpu = usingInstallPpu,
+    )
+    val context = LocalContext.current
+    val readinessRevision by PpuReadinessStore.revision.collectAsState()
+    val coordinatorRevision by com.zenithblue.sambas3.ppu.ImportPpuPreparationCoordinator.coordinatorRevision.collectAsState()
+    @Suppress("UNUSED_VARIABLE")
+    val cardPpuRev = readinessRevision + coordinatorRevision
+    val cardTitleId = try {
+        com.zenithblue.sambas3.GameIdentity.titleIdOrNull(game.info.path, game.info.name.value)
+    } catch (_: Exception) { null }
+    val cardAvailability = com.zenithblue.sambas3.ppu.GameRunEligibilityHelper.evaluateAvailability(
+        context, game, installPpu.ppuActive, prelaunchPpu, runtimeCompile,
+        RPCSX.state.value, RPCSX.activeGame.value
+    )
+    val cardPpuUi = com.zenithblue.sambas3.ui.games.launch.LaunchPpuPresentation.build(
+        cardTitleId,
+        cardAvailability,
+        com.zenithblue.sambas3.ui.games.launch.LaunchRuntimeInputs(
+            installPpu = installPpu,
+            prelaunchPpu = prelaunchPpu,
+            runtimePpu = runtimeCompile,
+            emulatorState = RPCSX.state.value,
+            activeGame = RPCSX.activeGame.value,
+            waitingForIdle = com.zenithblue.sambas3.ppu.ImportPpuPreparationCoordinator.waitingForIdle,
+            deferredForFgs = com.zenithblue.sambas3.ppu.ImportPpuPreparationCoordinator.deferredForFgs,
+            fgsStartDenied = CompileProgressBridge.fgsStartDenied,
+            preRuntimeState = cardTitleId?.let {
+                runCatching { PpuReadinessStore.getPreRuntimeState(context, it) }
+                    .getOrDefault(PreRuntimePpuState.NOT_DONE)
+            } ?: PreRuntimePpuState.NOT_DONE,
+            runtimeReadyState = cardTitleId?.let {
+                runCatching { PpuReadinessStore.getRuntimeState(context, it) }
+                    .getOrDefault(RuntimePpuState.NOT_STARTED)
+            } ?: RuntimePpuState.NOT_STARTED,
+            validatedByRealBootFrame = cardTitleId?.let {
+                runCatching { PpuReadinessStore.isRuntimeValidated(context, it) }.getOrDefault(false)
+            } ?: false,
+        ),
+    )
     val progressValue = when {
+        usingRuntimePpu && runtimeCompile.moduleTotal > 0 -> runtimeCompile.moduleDone.toLong()
+        usingInstallPpu && installPpu.moduleTotal > 0 -> installPpu.moduleDone.toLong()
+        usingPrelaunchPpu && prelaunchPpu.moduleTotal > 0 -> prelaunchPpu.moduleDone.toLong()
         usingRuntimePpu -> runtimeCompile.ppuPercent.toLong()
         usingInstallPpu -> installPpu.ppuPercent.toLong()
         usingPrelaunchPpu -> prelaunchPpu.ppuPercent.toLong()
         else -> progressEntry?.value?.longValue ?: 0
     }
     val progressMax = when {
+        usingRuntimePpu && runtimeCompile.moduleTotal > 0 -> runtimeCompile.moduleTotal.toLong()
+        usingInstallPpu && installPpu.moduleTotal > 0 -> installPpu.moduleTotal.toLong()
+        usingPrelaunchPpu && prelaunchPpu.moduleTotal > 0 -> prelaunchPpu.moduleTotal.toLong()
         usingRuntimePpu -> runtimeCompile.ppuMax.toLong()
         usingInstallPpu -> installPpu.ppuMax.toLong()
         usingPrelaunchPpu -> prelaunchPpu.ppuMax.toLong()
@@ -1931,6 +2062,31 @@ fun GameCard(
                         }
                     }
                 }
+            }
+        }
+
+        if (!showCompileOverlay) {
+            Column(
+                modifier = Modifier
+                    .align(Alignment.BottomCenter)
+                    .fillMaxWidth()
+                    .background(Color.Black.copy(alpha = 0.72f))
+                    .padding(horizontal = 8.dp, vertical = 6.dp)
+            ) {
+                Text(
+                    text = "Install PPU  ${com.zenithblue.sambas3.ui.games.launch.LaunchPpuPresentation.phaseStatusText(cardPpuUi.installPpu)}",
+                    style = AppTypography.labelSmall.copy(fontSize = 9.sp),
+                    color = RPCSXColors.textSecondary,
+                    maxLines = 1,
+                    overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis
+                )
+                Text(
+                    text = "Runtime PPU  ${com.zenithblue.sambas3.ui.games.launch.LaunchPpuPresentation.phaseStatusText(cardPpuUi.runtimePpu)}",
+                    style = AppTypography.labelSmall.copy(fontSize = 9.sp),
+                    color = RPCSXColors.textSecondary,
+                    maxLines = 1,
+                    overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis
+                )
             }
         }
 

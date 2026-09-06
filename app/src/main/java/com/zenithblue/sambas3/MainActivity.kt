@@ -63,9 +63,9 @@ class MainActivity : ComponentActivity() {
 
             lifecycleScope.launch {
                 GameRepository.load()
-                // Direct debug sources have no installed directory for the
-                // isolated PRELAUNCH worker. Repair old persisted entries so
-                // their launch card cannot get stuck on PREPARE PPU.
+                // Direct ISO entries from older builds manufactured Ready.
+                // Reset those lies when no PPU cache objects exist so Home
+                // and Launch Center show PREPARE PPU instead of fake done.
                 com.zenithblue.sambas3.iso.DirectIsoManager.reconcileLaunchReadiness(
                     this@MainActivity
                 )

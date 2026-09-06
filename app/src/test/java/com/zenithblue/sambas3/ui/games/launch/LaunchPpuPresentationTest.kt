@@ -264,6 +264,58 @@ class LaunchPpuPresentationTest {
     }
 
     @Test
+    fun homeOverlay_includesInstallPpuWithoutImportRow() {
+        assertTrue(
+            LaunchPpuPresentation.homeCardShowsCompileOverlay(
+                isImporting = false,
+                isRuntimeGameCompile = false,
+                usingPrelaunchPpu = false,
+                usingInstallPpu = true,
+            )
+        )
+        assertFalse(
+            LaunchPpuPresentation.homeCardShowsCompileOverlay(
+                isImporting = false,
+                isRuntimeGameCompile = false,
+                usingPrelaunchPpu = false,
+                usingInstallPpu = false,
+            )
+        )
+    }
+
+    @Test
+    fun phaseStatusText_compilingPrefersModuleDetailOverZeroPercent() {
+        val compiling = PpuPhaseUi("Install PPU", PpuPhaseState.Compiling, 0, "module 7")
+        assertEquals("module 7", LaunchPpuPresentation.phaseStatusText(compiling))
+        val withPct = PpuPhaseUi("Install PPU", PpuPhaseState.Compiling, 42, "module 12 of 80")
+        assertEquals("module 12 of 80", LaunchPpuPresentation.phaseStatusText(withPct))
+        val ready = PpuPhaseUi("Runtime PPU", PpuPhaseState.Ready, null, "Ready")
+        assertEquals("Ready", LaunchPpuPresentation.phaseStatusText(ready))
+    }
+
+    @Test
+    fun compileProgressPercent_usesModuleCounts() {
+        val state = CompileProgressBridge.CompileState(
+            ppuActive = true,
+            ppuPercent = 0,
+            moduleDone = 7,
+            moduleTotal = 80,
+            ppuMsg = "module 7 of 80",
+        )
+        assertEquals(8, LaunchPpuPresentation.compileProgressPercent(state))
+        assertEquals("module 7 of 80", LaunchPpuPresentation.compileProgressDetail(state))
+        val unknown = CompileProgressBridge.CompileState(
+            ppuActive = true,
+            ppuPercent = 0,
+            moduleDone = 7,
+            moduleTotal = 0,
+            ppuMsg = "module 7",
+        )
+        assertEquals(null, LaunchPpuPresentation.compileProgressPercent(unknown))
+        assertEquals("module 7", LaunchPpuPresentation.compileProgressDetail(unknown))
+    }
+
+    @Test
     fun invalidated_mapsInstallNotReady_notPreparing() {
         val inputs = idleInputs(pre = PreRuntimePpuState.INVALIDATED, rt = RuntimePpuState.NOT_STARTED)
         val ui = LaunchPpuPresentation.build(

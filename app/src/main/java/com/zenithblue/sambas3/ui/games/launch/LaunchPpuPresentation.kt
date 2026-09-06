@@ -97,8 +97,8 @@ object LaunchPpuPresentation {
             installForThis -> PpuPhaseUi(
                 label = "Install PPU",
                 state = PpuPhaseState.Compiling,
-                progress = inputs.installPpu.ppuPercent.coerceIn(0, 100),
-                detail = inputs.installPpu.ppuMsg ?: "Compiling ${inputs.installPpu.ppuPercent}%"
+                progress = compileProgressPercent(inputs.installPpu),
+                detail = compileProgressDetail(inputs.installPpu)
             )
             foreignInstall -> PpuPhaseUi(
                 label = "Install PPU",
@@ -161,10 +161,12 @@ object LaunchPpuPresentation {
             prelaunchForThis || runtimeActiveForThis -> PpuPhaseUi(
                 label = "Runtime PPU",
                 state = PpuPhaseState.Compiling,
-                progress = (if (runtimeActiveForThis) inputs.runtimePpu else inputs.prelaunchPpu)
-                    .ppuPercent.coerceIn(0, 100),
-                detail = (if (runtimeActiveForThis) inputs.runtimePpu.ppuMsg else inputs.prelaunchPpu.ppuMsg)
-                    ?: "Compiling"
+                progress = compileProgressPercent(
+                    if (runtimeActiveForThis) inputs.runtimePpu else inputs.prelaunchPpu
+                ),
+                detail = compileProgressDetail(
+                    if (runtimeActiveForThis) inputs.runtimePpu else inputs.prelaunchPpu
+                ),
             )
             foreignPrelaunch -> PpuPhaseUi(
                 label = "Runtime PPU",
@@ -246,6 +248,42 @@ object LaunchPpuPresentation {
             statusLine = statusLine,
         )
     }
+
+    fun compileProgressPercent(state: CompileProgressBridge.CompileState): Int? {
+        if (state.moduleTotal > 0) {
+            return (state.moduleDone * 100 / state.moduleTotal).coerceIn(0, 100)
+        }
+        return state.ppuPercent.takeIf { it > 0 }
+    }
+
+    fun compileBarFraction(state: CompileProgressBridge.CompileState): Float? {
+        if (state.moduleTotal > 0) {
+            return (state.moduleDone.toFloat() / state.moduleTotal.toFloat()).coerceIn(0f, 1f)
+        }
+        return state.ppuPercent.takeIf { it > 0 }?.div(100f)
+    }
+
+    fun compileProgressDetail(state: CompileProgressBridge.CompileState): String {
+        state.ppuMsg?.takeIf { it.isNotBlank() }?.let { return it }
+        val pct = compileProgressPercent(state)
+        return if (pct != null) "Compiling ${pct}%" else "Compiling"
+    }
+
+    fun phaseStatusText(phase: PpuPhaseUi): String = when {
+        phase.state == PpuPhaseState.Compiling && !phase.detail.isNullOrBlank() ->
+            phase.detail
+        phase.state == PpuPhaseState.Compiling && phase.progress != null && phase.progress > 0 ->
+            "Compiling  ${phase.progress}%"
+        !phase.detail.isNullOrBlank() -> phase.detail
+        else -> phase.state.name
+    }
+
+    fun homeCardShowsCompileOverlay(
+        isImporting: Boolean,
+        isRuntimeGameCompile: Boolean,
+        usingPrelaunchPpu: Boolean,
+        usingInstallPpu: Boolean,
+    ): Boolean = isImporting || isRuntimeGameCompile || usingPrelaunchPpu || usingInstallPpu
 
     fun compactEmptySaves(hasExistingSaves: Boolean): Boolean = !hasExistingSaves
 }
