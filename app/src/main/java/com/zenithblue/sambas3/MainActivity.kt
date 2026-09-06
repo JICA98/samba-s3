@@ -3,6 +3,7 @@ package com.zenithblue.sambas3
 import android.app.Notification
 import android.app.NotificationChannel
 import android.app.NotificationManager
+import android.os.Build
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -22,6 +23,12 @@ class MainActivity : ComponentActivity() {
     private var debugPadReceiver: DebugPadReceiver? = null
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
+        // Legacy filesystem imports need the runtime read grant on Android 10–12.
+        // Android 13+ ignores READ_EXTERNAL_STORAGE; SAF grants the selected URI.
+        if (Build.VERSION.SDK_INT <= Build.VERSION_CODES.S) {
+            Permission.ExternalStorageRead.requestPermission(this)
+        }
 
         GeneralSettings.init(this)
         WindowCompat.setDecorFitsSystemWindows(window, false)
@@ -56,6 +63,12 @@ class MainActivity : ComponentActivity() {
 
             lifecycleScope.launch {
                 GameRepository.load()
+                // Direct debug sources have no installed directory for the
+                // isolated PRELAUNCH worker. Repair old persisted entries so
+                // their launch card cannot get stuck on PREPARE PPU.
+                com.zenithblue.sambas3.iso.DirectIsoManager.reconcileLaunchReadiness(
+                    this@MainActivity
+                )
             }
 
             FirmwareRepository.load()

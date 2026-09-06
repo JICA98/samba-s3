@@ -37,4 +37,23 @@ class GameIdentityTest {
             )
         )
     }
+
+    @Test
+    fun displayNameRemovesEncodedDocumentProviderPrefix() {
+        assertEquals(
+            "GTA-SA",
+            GameIdentity.displayName(
+                "/data/data/com.zenithblue.sambas3/config/games/DIS035A6B",
+                "PRIMARY%3ADOWNLOAD%2FSAMBAS3TEST%2FGTA-SA",
+            ),
+        )
+    }
+
+    @Test
+    fun displayNameKeepsNormalTitles() {
+        assertEquals(
+            "Red Dead Redemption",
+            GameIdentity.displayName("/games/BLUS30758", "Red Dead Redemption"),
+        )
+    }
 }

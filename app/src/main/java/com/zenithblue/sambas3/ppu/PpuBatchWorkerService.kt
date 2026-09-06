@@ -29,6 +29,7 @@ class PpuBatchWorkerService : Service() {
             userId: String?,
             batchIndex: Int,
             maxNewObjects: Int,
+            compileOrigin: Int,
             manifestKey: String?,
             callback: IPpuBatchCallback?
         ) {
@@ -36,7 +37,7 @@ class PpuBatchWorkerService : Service() {
             Log.i(
                 "S3PPUBATCH",
                 "batch=$batchIndex pid=$myPid worker=$serviceInstanceId state=START " +
-                    "session=$logicalSessionId job=$logicalJobId title=$titleId maxNew=$maxNewObjects"
+                    "session=$logicalSessionId job=$logicalJobId title=$titleId maxNew=$maxNewObjects origin=$compileOrigin"
             )
 
             thread(name = "ppu-batch-worker-$batchIndex") {
@@ -83,14 +84,23 @@ class PpuBatchWorkerService : Service() {
                 val safeTitle = titleId ?: ""
                 val safePath = gamePath ?: ""
                 val resultJson = try {
-                    RPCSX.instance.compileInstallPpuBatch(
-                        safeTitle,
-                        safePath,
-                        logicalJobId,
-                        maxNewObjects
-                    )
+                    if (compileOrigin == RPCSX.COMPILE_ORIGIN_PRELAUNCH) {
+                        RPCSX.instance.compileRuntimePpuBatch(
+                            safeTitle,
+                            safePath,
+                            logicalJobId,
+                            maxNewObjects
+                        )
+                    } else {
+                        RPCSX.instance.compileInstallPpuBatch(
+                            safeTitle,
+                            safePath,
+                            logicalJobId,
+                            maxNewObjects
+                        )
+                    }
                 } catch (e: Exception) {
-                    Log.e(TAG, "compileInstallPpuBatch threw: ${e.message}", e)
+                    Log.e(TAG, "PPU batch threw origin=$compileOrigin: ${e.message}", e)
                     """{"status":"failed","message":"${e.message}"}"""
                 }
 

@@ -75,7 +75,7 @@ class PpuReadinessStoreRecoveryTest {
     }
 
     @Test
-    fun stale_compiling_after_reconciliation_becomes_retry_on_real_boot() {
+    fun stale_compiling_after_reconciliation_requires_batched_retry() {
         // Key must match the BLxx##### title-id pattern so GameIdentity resolves it
         val key = "BLUS99999"
         PpuReadinessStore.setPreRuntimeState(ctx, key, PreRuntimePpuState.READY)
@@ -83,7 +83,8 @@ class PpuReadinessStoreRecoveryTest {
         val recovered = PpuReadinessStore.recoverInterruptedRuntimePreparations(ctx)
         assertTrue(recovered.contains(key))
         assertEquals(RuntimePpuState.FAILED, PpuReadinessStore.getRuntimeState(ctx, key))
-        // Install READY + runtime FAILED → real-boot retry, not headless Failed UI
+        // Install READY + runtime FAILED must retry the isolated Kotlin batch
+        // before a real emulator boot is allowed.
         val game = Game(GameInfoStore("/files/config/games/$key", androidx.compose.runtime.mutableStateOf("Test"), androidx.compose.runtime.mutableStateOf(null), androidx.compose.runtime.mutableIntStateOf(0)))
         val availability = GameRunEligibilityHelper.evaluateAvailability(
             ctx, game, installPpuActive = false,
@@ -92,7 +93,8 @@ class PpuReadinessStoreRecoveryTest {
             emulatorState = EmulatorState.Stopped,
             activeGame = null
         )
-        assertTrue(availability is GameLaunchAvailability.Ready)
+        assertTrue(availability is GameLaunchAvailability.Failed)
+        assertTrue((availability as GameLaunchAvailability.Failed).retryable)
         assertFalse(PpuReadinessStore.isRuntimeValidated(ctx, key))
     }
 }

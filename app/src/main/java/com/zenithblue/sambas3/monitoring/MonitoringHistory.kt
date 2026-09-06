@@ -36,6 +36,7 @@ class MonitoringHistory {
     private fun appendNewSamples(target: ArrayDeque<TimedSample>, samples: List<TimedSample>, windowStart: Long) {
         val lastTimestamp = target.lastOrNull()?.timestampUs ?: Long.MIN_VALUE
         samples.asSequence()
+            .filter { it.timestampUs >= 0L && it.value.isFinite() && it.value >= 0f }
             .filter { it.timestampUs > lastTimestamp }
             .sortedBy { it.timestampUs }
             .forEach { target.addLast(it) }

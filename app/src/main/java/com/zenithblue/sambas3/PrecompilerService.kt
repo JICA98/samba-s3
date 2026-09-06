@@ -92,6 +92,7 @@ class PrecompilerService : Service() {
     private var installPpuSeen = false
     private var lastInstallTitleId: String? = null
     private var lastInstallJobId: Long? = null
+    private var lastInstallGamePath: String? = null
     private var currentInstallIsFirmware = false
     @Volatile private var jobStartId: Int? = null
     private val mainHandler = android.os.Handler(android.os.Looper.getMainLooper())
@@ -386,6 +387,7 @@ class PrecompilerService : Service() {
                     val logicalJobId = System.currentTimeMillis()
                     lastInstallTitleId = titleId
                     lastInstallJobId = logicalJobId
+                    lastInstallGamePath = gamePath
                     installPpuSeen = true
 
                     serviceScope.launch {
@@ -443,9 +445,11 @@ class PrecompilerService : Service() {
                 installPpuSeen = false
                 val expectedTitle = lastInstallTitleId
                 val expectedJob = lastInstallJobId
+                val expectedGamePath = lastInstallGamePath
                 val terminalTitleId = st.titleId ?: lastInstallTitleId
                 lastInstallTitleId = null
                 lastInstallJobId = null
+                lastInstallGamePath = null
                 val decision = InstallPpuTerminalLogic.decide(
                     installPpuWasSeen = true,
                     ppuActive = false,
@@ -474,7 +478,8 @@ class PrecompilerService : Service() {
                             try {
                                 com.zenithblue.sambas3.ppu.ImportPpuPreparationCoordinator.onInstallPpuSuccess(
                                     this@PrecompilerService,
-                                    terminalTitleId
+                                    terminalTitleId,
+                                    expectedGamePath,
                                 )
                             } catch (e: Exception) {
                                 Log.w(TAG, "Coordinator trigger failed: ${e.message}")

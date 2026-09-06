@@ -59,4 +59,23 @@ class MonitoringHistoryTest {
         assertEquals(listOf(1_000_000L, 2_000_000L, 3_000_000L, 4_000_000L), history.fps().map { it.timestampUs })
         assertEquals(listOf(60f, 59f, 58f, 57f), history.fps().map { it.value })
     }
+
+    @Test
+    fun invalid_graph_samples_are_not_forwarded_to_rendering() {
+        val history = MonitoringHistory()
+        history.append(
+            EmulatorMetrics(
+                timestampNs = 3_000_000_000L,
+                fpsTimedSamples = listOf(
+                    TimedSample(1_000_000L, Float.NaN),
+                    TimedSample(2_000_000L, Float.POSITIVE_INFINITY),
+                    TimedSample(3_000_000L, 60f),
+                )
+            ),
+            10,
+            setOf(MonitoringMetric.Fps)
+        )
+
+        assertEquals(listOf(TimedSample(3_000_000L, 60f)), history.fps())
+    }
 }

@@ -14,6 +14,7 @@ import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
 import com.zenithblue.sambas3.utils.Telemetry
 import java.io.File
+import java.net.URLDecoder
 import java.security.InvalidParameterException
 import kotlin.concurrent.thread
 
@@ -102,8 +103,32 @@ internal fun toInfo(store: GameInfoStore) =
 internal object GameIdentity {
     private val titleIdPattern = Regex("(?<![A-Za-z0-9])([A-Za-z]{4}\\d{5})(?![A-Za-z0-9])")
 
+    /**
+     * Returns a compact human-facing title for metadata that came from a
+     * document-provider URI. Some providers persist the URI-encoded tree name
+     * (for example PRIMARY%3ADOWNLOAD%2FSAMBAS3TEST%2FGTA-SA) as PARAM.SFO
+     * metadata. Keep the raw value for identity/debugging, but never render it
+     * as the title in the UI.
+     */
+    fun displayName(path: String, name: String?): String {
+        val raw = name?.trim().orEmpty()
+        val decoded = runCatching { URLDecoder.decode(raw, Charsets.UTF_8.name()) }
+            .getOrDefault(raw)
+            .trim()
+        val looksLikeProviderPath = raw.contains('%') ||
+            decoded.contains('/') || decoded.contains('\\') || decoded.contains(':')
+        val candidate = if (looksLikeProviderPath) {
+            decoded.substringAfterLast('/').substringAfterLast('\\').substringAfterLast(':')
+        } else {
+            decoded
+        }
+        return candidate.trim().ifBlank {
+            path.substringAfterLast('/').substringAfterLast('\\').ifBlank { "Unknown game" }
+        }
+    }
+
     fun key(path: String, name: String?): String {
-        val titleId = titleIdPattern.find("$path ${name.orEmpty()}")
+        val titleId = titleIdPattern.find("$path ${decode(name)}")
             ?.groupValues
             ?.getOrNull(1)
             ?.uppercase()
@@ -111,9 +136,13 @@ internal object GameIdentity {
     }
 
     fun titleIdOrNull(path: String, name: String?): String? {
-        return titleIdPattern.find("$path ${name.orEmpty()}")
+        return titleIdPattern.find("$path ${decode(name)}")
             ?.groupValues?.getOrNull(1)?.uppercase()
     }
+
+    private fun decode(value: String?): String =
+        runCatching { URLDecoder.decode(value.orEmpty(), Charsets.UTF_8.name()) }
+            .getOrDefault(value.orEmpty())
 
     fun preferPath(candidate: String, existing: String): Boolean {
         val candidateIsIso = candidate.endsWith(".iso", ignoreCase = true)
@@ -146,7 +175,9 @@ class GameRepository {
                         Json.encodeToString(instance.games.map { game ->
                             toInfo(game.info)
                         }.filter { info ->
-                            info.path != "$" && (info.sourceMode == GameSourceMode.DIRECT_ISO || !info.path.startsWith("content://"))
+                            info.path != "$" &&
+                                (BuildConfig.DIRECT_ISO_LOADING || info.sourceMode != GameSourceMode.DIRECT_ISO) &&
+                                (info.sourceMode == GameSourceMode.DIRECT_ISO || !info.path.startsWith("content://"))
                         })
                     )
                 }
@@ -158,11 +189,31 @@ class GameRepository {
         suspend fun load() {
             withContext(Dispatchers.IO) {
                 try {
-                    instance.games.clear()
-                    instance.games += Json.decodeFromString<Array<GameInfo>>(
+                    val loadedGames = Json.decodeFromString<Array<GameInfo>>(
                         File(RPCSX.rootDirectory + "games.json").readText()
-                    ).map { info -> Game(toStore(info)) }
+                    ).filter { info ->
+                        // A release build must not activate direct-ISO metadata
+                        // left behind by a debug build sharing the same app data.
+                        BuildConfig.DIRECT_ISO_LOADING || info.sourceMode != GameSourceMode.DIRECT_ISO
+                    }.map { info -> Game(toStore(info)) }
                     synchronized(instance) {
+                        // load() runs asynchronously during MainActivity startup. Keep
+                        // a direct ISO selected while that read is in flight; otherwise
+                        // the late disk snapshot silently deletes the freshly imported
+                        // SAF-backed entry from both memory and games.json.
+                        val liveDirectIso = instance.games.filter {
+                            it.info.sourceMode.value == GameSourceMode.DIRECT_ISO
+                        }
+                        instance.games.clear()
+                        instance.games += loadedGames
+                        liveDirectIso.forEach { direct ->
+                            if (instance.games.none {
+                                    it.info.path == direct.info.path ||
+                                        it.info.sourceUri.value == direct.info.sourceUri.value
+                                }) {
+                                instance.games += direct
+                            }
+                        }
                         deduplicateGamesLocked()
                     }
                     // Persist the normalized list so a source ISO cannot reappear as
@@ -272,6 +323,10 @@ class GameRepository {
             }
             val existsGame = instance.games.find { game ->
                 game.info.path == info.path ||
+                    (info.sourceMode == GameSourceMode.DIRECT_ISO &&
+                        info.sourceUri != null &&
+                        game.info.sourceMode.value == GameSourceMode.DIRECT_ISO &&
+                        game.info.sourceUri.value == info.sourceUri) ||
                     (game.info.path != "$" && !game.info.path.startsWith("content://") &&
                         GameIdentity.key(game.info.path, game.info.name.value) == identity)
             }
@@ -291,8 +346,12 @@ class GameRepository {
                 return
             }
 
+            val sameDirectIsoSource = info.sourceMode == GameSourceMode.DIRECT_ISO &&
+                info.sourceUri != null &&
+                existsGame.info.sourceMode.value == GameSourceMode.DIRECT_ISO &&
+                existsGame.info.sourceUri.value == info.sourceUri
             if (existsGame.info.path != info.path &&
-                GameIdentity.preferPath(info.path, existsGame.info.path)
+                (sameDirectIsoSource || GameIdentity.preferPath(info.path, existsGame.info.path))
             ) {
                 val replacement = Game(toStore(info))
                 copyProgress(existsGame, replacement)

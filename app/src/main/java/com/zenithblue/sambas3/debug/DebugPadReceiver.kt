@@ -4,11 +4,13 @@ import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
+import android.net.Uri
 import android.os.Handler
 import android.os.Looper
 import android.os.SystemClock
 import android.util.Log
 import android.util.Base64
+import android.provider.OpenableColumns
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.lifecycleScope
 import kotlinx.coroutines.launch
@@ -16,7 +18,9 @@ import com.zenithblue.sambas3.BuildConfig
 import com.zenithblue.sambas3.Digital2Flags
 import com.zenithblue.sambas3.EmulatorBootMode
 import com.zenithblue.sambas3.EmulatorState
+import com.zenithblue.sambas3.GameIdentity
 import com.zenithblue.sambas3.GameRepository
+import com.zenithblue.sambas3.GameSourceMode
 import com.zenithblue.sambas3.LogMonitor
 import com.zenithblue.sambas3.PrecompilerService
 import com.zenithblue.sambas3.PrecompilerServiceAction
@@ -32,6 +36,7 @@ import com.zenithblue.sambas3.monitoring.MonitoringPreset
 import com.zenithblue.sambas3.monitoring.MonitoringPresets
 import com.zenithblue.sambas3.utils.FileUtil
 import org.json.JSONObject
+import java.io.File
 
 /**
  * Agent ADB bridge for controller injection — no coordinate taps.
@@ -318,15 +323,38 @@ class DebugPadReceiver(private val onDebugFatal: (() -> Unit)? = null) : Broadca
             return
         }
         var bootPath = path
-        runCatching {
+        val resolution = runCatching {
             if (path.endsWith(".iso", ignoreCase = true)) {
                 val existing = GameRepository.list().firstOrNull { it.info.path == path || it.info.sourceUri.value == path }
+                    ?: findRegisteredDirectIso(app, File(path).name)
                 if (existing != null) {
-                    GameRepository.onBoot(existing)
-                    bootPath = existing.info.path
+                    // Re-parse legacy/fallback registrations before boot. This lets
+                    // debug-launch-game.sh validate the real import path and migrates
+                    // old DISO ids after parser fixes instead of silently reusing them.
+                    val resolved = if (
+                        existing.info.sourceMode.value == GameSourceMode.DIRECT_ISO &&
+                        GameIdentity.titleIdOrNull(existing.info.path, existing.info.name.value) == null
+                    ) {
+                        val sourceUri = existing.info.sourceUri.value
+                            ?: error("Direct ISO registration has no persisted source URI")
+                        com.zenithblue.sambas3.iso.DirectIsoManager.validateAndRegister(
+                            app,
+                            Uri.parse(sourceUri),
+                        )
+                    } else {
+                        existing
+                    }
+                    GameRepository.onBoot(resolved)
+                    bootPath = resolved.info.path
                 } else {
                     val registered = runCatching {
-                        com.zenithblue.sambas3.iso.DirectIsoManager.registerFromFilePath(app, java.io.File(path))
+                        val fileUri = Uri.fromFile(File(path))
+                        val documentUri = com.zenithblue.sambas3.iso.DirectIsoSession.resolveDocumentUri(app, fileUri)
+                        if (documentUri != null && documentUri != fileUri) {
+                            com.zenithblue.sambas3.iso.DirectIsoManager.validateAndRegister(app, documentUri)
+                        } else {
+                            com.zenithblue.sambas3.iso.DirectIsoManager.registerFromFilePath(app, File(path))
+                        }
                     }.getOrNull()
                     val resolved = registered?.let { reg ->
                         GameRepository.list().firstOrNull { g ->
@@ -344,6 +372,14 @@ class DebugPadReceiver(private val onDebugFatal: (() -> Unit)? = null) : Broadca
                 GameRepository.list().firstOrNull { it.info.path == path }?.let { GameRepository.onBoot(it) }
             }
         }
+        if (resolution.isFailure) {
+            Log.e(
+                "S3BOOT",
+                "boot ISO registration failed path=$path request_id=$requestId",
+                resolution.exceptionOrNull(),
+            )
+            return
+        }
         val boot = Intent(app, RPCSXActivity::class.java).apply {
             addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
             putExtra("path", bootPath)
@@ -352,6 +388,27 @@ class DebugPadReceiver(private val onDebugFatal: (() -> Unit)? = null) : Broadca
         }
         app.startActivity(boot)
         Log.w("S3BOOT", "boot started path=$bootPath request_id=$requestId")
+    }
+
+    /** Resolve a raw debug path back to the persisted SAF-backed direct ISO entry. */
+    private fun findRegisteredDirectIso(context: Context, displayName: String): com.zenithblue.sambas3.Game? {
+        if (displayName.isBlank()) return null
+        return GameRepository.list().firstOrNull { game ->
+            game.info.sourceMode.value == com.zenithblue.sambas3.GameSourceMode.DIRECT_ISO &&
+                game.info.sourceUri.value?.let { source ->
+                    runCatching {
+                        context.contentResolver.query(
+                            Uri.parse(source),
+                            arrayOf(OpenableColumns.DISPLAY_NAME),
+                            null,
+                            null,
+                            null
+                        )?.use { cursor ->
+                            cursor.moveToFirst() && cursor.getString(0).equals(displayName, ignoreCase = true)
+                        } == true
+                    }.getOrDefault(false)
+                } == true
+        }
     }
 
     private fun handleSettingsProbe(context: Context?, intent: Intent) {

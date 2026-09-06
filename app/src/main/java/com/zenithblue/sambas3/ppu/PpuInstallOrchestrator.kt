@@ -157,7 +157,8 @@ object PpuInstallOrchestrator {
                             lastKnownCompleted = completedModules,
                             workerTotal = cbTotal,
                             cachedBefore = completedModules,
-                            currentBatchCompiled = cbCompleted
+                            // Native moduleDone already includes cache hits in this fresh process.
+                            currentBatchCompiled = (cbCompleted - completedModules).coerceAtLeast(0)
                         )
                         updateProgressUi(appContext, safeTitle, logicalJobId, reduced)
                     }
@@ -195,6 +196,7 @@ object PpuInstallOrchestrator {
                         user,
                         batchIndex,
                         currentBatchSize,
+                        RPCSX.COMPILE_ORIGIN_INSTALL,
                         currentManifestKey,
                         callback
                     )
@@ -387,9 +389,10 @@ object PpuInstallOrchestrator {
         )
 
         if (decision.markPreRuntimeReady) {
+            PpuReadinessStore.setPreRuntimeState(context, titleId, PreRuntimePpuState.READY)
+            PpuReadinessStore.setRuntimeState(context, titleId, com.zenithblue.sambas3.RuntimePpuState.NOT_STARTED)
             ImportSessionStore.updatePhase(NOTIF_INSTALL, ImportPhase.READY, resolvedTitleId = titleId)
             mainHandler.postDelayed({ ImportSessionStore.remove(NOTIF_INSTALL) }, 1200)
-            ImportPpuPreparationCoordinator.onInstallPpuSuccess(context, titleId)
         }
     }
 

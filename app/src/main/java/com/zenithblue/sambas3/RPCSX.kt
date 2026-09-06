@@ -138,6 +138,7 @@ class RPCSX {
     external fun prepareRuntimePpu(path: String, sessionId: Long): Int
     external fun cancelRuntimePpuPreparation(sessionId: Long): Boolean
     external fun compileInstallPpuBatch(titleId: String, gamePath: String, logicalJobId: Long, maxNewObjects: Int): String
+    external fun compileRuntimePpuBatch(titleId: String, gamePath: String, logicalJobId: Long, maxNewObjects: Int): String
     external fun cancelInstallPpuBatch()
 
     /** Global writes are accepted only after the native config read-back matches. */

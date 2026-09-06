@@ -10,12 +10,14 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
+import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
@@ -23,6 +25,7 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.HorizontalDivider
@@ -40,10 +43,12 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import coil3.compose.AsyncImage
 import coil3.request.ImageRequest
 import com.zenithblue.sambas3.R
+import com.zenithblue.sambas3.GameIdentity
 import com.zenithblue.sambas3.RPCSXColors
 import com.zenithblue.sambas3.ui.ingame.SaveSlot
 import java.io.File
@@ -70,16 +75,17 @@ fun GameLaunchCenter(
         contentAlignment = Alignment.Center,
     ) {
         Surface(
-            shape = RoundedCornerShape(22.dp),
+            shape = RoundedCornerShape(16.dp),
             color = RPCSXColors.surfaceElevated,
             border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant),
             modifier = Modifier
-                .fillMaxWidth(.95f)
-                .widthIn(max = 960.dp)
-                .padding(12.dp)
+                .fillMaxWidth(.68f)
+                .fillMaxHeight(.72f)
+                .widthIn(max = 560.dp)
+                .padding(4.dp)
                 .navigationBarsPadding(),
         ) {
-            Column(Modifier.padding(horizontal = 20.dp, vertical = 16.dp)) {
+            Column(Modifier.padding(horizontal = 12.dp, vertical = 8.dp)) {
                 // Fixed header
                 Row(
                     Modifier.fillMaxWidth(),
@@ -88,19 +94,27 @@ fun GameLaunchCenter(
                 ) {
                     Column(Modifier.weight(1f)) {
                         Text(
-                            (snapshot.game.info.name.value ?: "Unknown game").uppercase(),
+                            GameIdentity.displayName(
+                                snapshot.game.info.path,
+                                snapshot.game.info.name.value,
+                            ).uppercase(),
                             color = RPCSXColors.primary,
-                            style = MaterialTheme.typography.headlineSmall,
+                            style = MaterialTheme.typography.titleMedium,
+                            maxLines = 1,
+                            overflow = TextOverflow.Ellipsis,
                         )
                         Text(
                             snapshot.titleId ?: snapshot.game.info.path.substringAfterLast('/'),
                             color = RPCSXColors.textSecondary,
+                            style = MaterialTheme.typography.bodySmall,
+                            maxLines = 1,
+                            overflow = TextOverflow.Ellipsis,
                         )
                     }
                     TextButton(onClick = onDismiss) { Text("CLOSE") }
                 }
                 HorizontalDivider(
-                    Modifier.padding(vertical = 10.dp),
+                    Modifier.padding(vertical = 6.dp),
                     color = MaterialTheme.colorScheme.outlineVariant,
                 )
 
@@ -113,50 +127,69 @@ fun GameLaunchCenter(
                     Text(
                         "LAUNCH PROFILE",
                         color = RPCSXColors.primary,
-                        style = MaterialTheme.typography.titleMedium,
+                        style = MaterialTheme.typography.labelLarge,
                     )
                     snapshot.settings.forEach { setting ->
                         Row(
                             Modifier.fillMaxWidth().padding(top = 6.dp),
                             horizontalArrangement = Arrangement.SpaceBetween,
                         ) {
-                            Text(setting.label, color = RPCSXColors.textSecondary)
-                            Text("${setting.value}  ${setting.source}", color = RPCSXColors.textPrimary)
+                            Text(
+                                setting.label,
+                                color = RPCSXColors.textSecondary,
+                                style = MaterialTheme.typography.bodySmall,
+                                modifier = Modifier.weight(1f),
+                                maxLines = 1,
+                                overflow = TextOverflow.Ellipsis,
+                            )
+                            Text(
+                                "${setting.value}  ${setting.source}",
+                                color = RPCSXColors.textPrimary,
+                                style = MaterialTheme.typography.bodySmall,
+                                maxLines = 1,
+                                overflow = TextOverflow.Ellipsis,
+                            )
                         }
                     }
                     Row(
                         Modifier.fillMaxWidth().padding(top = 8.dp),
                         horizontalArrangement = Arrangement.SpaceBetween,
                     ) {
-                        Text("GPU driver", color = RPCSXColors.textSecondary)
+                        Text(
+                            "GPU driver",
+                            color = RPCSXColors.textSecondary,
+                            style = MaterialTheme.typography.bodySmall,
+                        )
                         Text(
                             snapshot.selectedDriver + if (snapshot.driverSysmem) "  SYSMEM" else "",
                             color = RPCSXColors.textPrimary,
+                            style = MaterialTheme.typography.bodySmall,
                         )
                     }
                     OutlinedButton(onClick = onAchievements, modifier = Modifier.padding(top = 8.dp)) {
                         Text("ACHIEVEMENTS")
                     }
 
-                    Spacer(Modifier.height(12.dp))
+                    Spacer(Modifier.height(8.dp))
                     Text(
                         "PPU PREPARATION",
                         color = RPCSXColors.primary,
-                        style = MaterialTheme.typography.titleMedium,
+                        style = MaterialTheme.typography.labelLarge,
                     )
                     PpuPhaseRow(ppuUi.installPpu)
                     PpuPhaseRow(ppuUi.runtimePpu)
 
-                    Spacer(Modifier.height(12.dp))
+                    Spacer(Modifier.height(8.dp))
                     Text(
                         "SAVES",
                         color = RPCSXColors.primary,
-                        style = MaterialTheme.typography.titleMedium,
+                        style = MaterialTheme.typography.labelLarge,
                     )
                     if (existingSaves.isEmpty()) {
                         Text(
                             "No saved states yet",
                             color = RPCSXColors.textSecondary,
+                            style = MaterialTheme.typography.bodySmall,
                             modifier = Modifier.padding(vertical = 8.dp),
                         )
                     } else {
@@ -190,18 +223,20 @@ fun GameLaunchCenter(
 
                 // Fixed primary-action footer — START always visible
                 HorizontalDivider(
-                    Modifier.padding(vertical = 10.dp),
+                    Modifier.padding(vertical = 6.dp),
                     color = MaterialTheme.colorScheme.outlineVariant,
                 )
                 Row(
-                    Modifier.fillMaxWidth(),
+                    Modifier
+                        .fillMaxWidth()
+                        .horizontalScroll(rememberScrollState()),
                     horizontalArrangement = Arrangement.spacedBy(12.dp, Alignment.End),
                     verticalAlignment = Alignment.CenterVertically,
                 ) {
                     when (ppuUi.prepareAction) {
-                        PrepareAction.ReimportOrRebuild -> {
+                        PrepareAction.Prepare -> {
                             if (onPrepare != null) {
-                                OutlinedButton(onClick = onPrepare) { Text("RE-IMPORT") }
+                                OutlinedButton(onClick = onPrepare) { Text("PREPARE PPU") }
                             }
                         }
                         PrepareAction.PreparingInstall -> {
@@ -220,21 +255,18 @@ fun GameLaunchCenter(
                             ) { Text("CONTINUE SLOT ${slot.slot}") }
                         }
                     }
-                    val startLabel = when (ppuUi.primaryStartLabel) {
-                        PrimaryStartLabel.StartAndPrepare -> "START & PREPARE"
-                        PrimaryStartLabel.RetryOnStart -> "RETRY ON START"
-                        PrimaryStartLabel.Start -> "START"
-                    }
                     Button(
                         onClick = onFreshPlay,
                         enabled = ppuUi.startEnabled && snapshot.canPlayFresh,
-                    ) { Text(startLabel) }
+                        contentPadding = ButtonDefaults.ContentPadding,
+                    ) { Text("START", style = MaterialTheme.typography.labelMedium) }
                 }
                 val footerStatus = snapshot.blockReason ?: ppuUi.statusLine
                 if (footerStatus != null) {
                     Text(
                         footerStatus.uppercase(),
                         color = RPCSXColors.errorColor,
+                        style = MaterialTheme.typography.bodySmall,
                         modifier = Modifier.padding(top = 8.dp),
                     )
                 }
@@ -262,8 +294,8 @@ private fun PpuPhaseRow(phase: PpuPhaseUi) {
         horizontalArrangement = Arrangement.SpaceBetween,
         verticalAlignment = Alignment.CenterVertically,
     ) {
-        Text(phase.label, color = RPCSXColors.textSecondary)
-        Text(statusText, color = color)
+        Text(phase.label, color = RPCSXColors.textSecondary, style = MaterialTheme.typography.bodySmall)
+        Text(statusText, color = color, style = MaterialTheme.typography.bodySmall)
     }
 }
 

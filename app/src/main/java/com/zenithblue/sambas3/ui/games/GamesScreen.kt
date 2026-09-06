@@ -140,6 +140,11 @@ fun buildLibraryPagerItems(
     }
 }
 
+private fun isSystemFirmwareEntry(game: Game): Boolean {
+    val path = game.info.path.lowercase()
+    return path.endsWith("/vsh.self") || path.contains("/dev_flash/")
+}
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun GamesScreen(
@@ -371,6 +376,16 @@ fun GamesScreen(
             }
             android.util.Log.i("S3ISO", "source_selected uri=$uri")
             android.util.Log.i("S3ISO", "permission_persisted=$persisted uri=$uri")
+            if (uri.scheme == "content" && !persisted) {
+                context.mainExecutor.execute {
+                    android.widget.Toast.makeText(
+                        context,
+                        "This provider did not grant persistent read access. Select the ISO again from Documents.",
+                        android.widget.Toast.LENGTH_LONG
+                    ).show()
+                }
+                return@rememberLauncherForActivityResult
+            }
             kotlin.concurrent.thread(name = "sambas3-direct-iso-register") {
                 val result = runCatching {
                     com.zenithblue.sambas3.iso.DirectIsoManager.validateAndRegister(context, uri)
@@ -455,7 +470,11 @@ fun GamesScreen(
     // BLOCKER B fix: do not memoize mutable SnapshotStateList with remember(games) or remember(size).
     // Derive directly during composition so placeholder add/remove/replace is observed.
     // Hide legacy "$" placeholder entirely — pending UI is now ImportSession/PendingImport, not a fake Game.
-    val visibleGames: List<Game> = games.filterNot { it.info.path == "$" }
+    // Native firmware collection exposes vsh.self as a "game". It is not
+    // playable and its card incorrectly showed VSH as a game.
+    val visibleGames: List<Game> = games.filterNot {
+        it.info.path == "$" || isSystemFirmwareEntry(it)
+    }
     // Merge source ISO candidates (folder scan) — installed wins over duplicate titleId
     val installedTitleIds = visibleGames.mapNotNull { com.zenithblue.sambas3.GameIdentity.titleIdOrNull(it.info.path, it.info.name.value) }.map { it.uppercase() }.toSet()
     // Dedupe: hide source candidate if same titleId already installed or currently importing (pending)
@@ -752,7 +771,10 @@ fun GamesScreen(
                         Text(
                             text = when {
                                 activeGame.info.path == "$" -> "IMPORTING..."
-                                else -> (activeGame.info.name.value ?: "UNKNOWN GAME").uppercase()
+                                else -> GameIdentity.displayName(
+                                    activeGame.info.path,
+                                    activeGame.info.name.value,
+                                ).uppercase()
                             },
                             style = AppTypography.headlineMedium.copy(letterSpacing = 2.sp),
                             color = RPCSXColors.primary
@@ -1026,20 +1048,17 @@ fun GamesScreen(
                                 HintButton(text = "PREPARING", icon = "X", color = RPCSXColors.textDisabled, onClick = { })
                             }
                             is com.zenithblue.sambas3.ppu.GameLaunchAvailability.NeedsPreparation -> {
-                                HintButton(text = "RE-IMPORT", icon = "X", color = RPCSXColors.primary, onClick = {
-                                    // Install phase only — never manufacture READY / start headless Runtime.
+                                HintButton(text = "PREPARE PPU", icon = "X", color = RPCSXColors.primary, onClick = {
                                     hintGame?.let {
                                         com.zenithblue.sambas3.ppu.ImportPpuPreparationCoordinator.requestPreparation(context, it)
                                     }
-                                    showImportDialog = true
                                 })
                             }
                             is com.zenithblue.sambas3.ppu.GameLaunchAvailability.Failed -> {
-                                HintButton(text = "RE-IMPORT", icon = "X", color = RPCSXColors.errorColor, onClick = {
+                                HintButton(text = "RETRY PPU", icon = "X", color = RPCSXColors.errorColor, onClick = {
                                     hintGame?.let {
                                         com.zenithblue.sambas3.ppu.ImportPpuPreparationCoordinator.requestPreparation(context, it)
                                     }
-                                    showImportDialog = true
                                 })
                             }
                             is com.zenithblue.sambas3.ppu.GameLaunchAvailability.Ready -> {
@@ -1058,7 +1077,6 @@ fun GamesScreen(
                                             hintGame?.let {
                                                 com.zenithblue.sambas3.ppu.ImportPpuPreparationCoordinator.requestPreparation(context, it)
                                             }
-                                            showImportDialog = true
                                         }
                                     }
                                 )
@@ -1102,9 +1120,12 @@ fun GamesScreen(
                 snapshot = GameLaunchRepository.snapshot(context, game, launchInputs),
                 onDismiss = { launchCenterGame = null },
                 onFreshPlay = {
-                    // START / START & PREPARE / RETRY ON START — real Activity only, never headless.
-                    launchCenterGame = null
-                    bootingGame = game
+                    val action = com.zenithblue.sambas3.ppu.ImportPpuPreparationCoordinator
+                        .requestPreparation(context, game)
+                    if (com.zenithblue.sambas3.ppu.PpuUserActionDecision.canEnterRealBoot(action)) {
+                        launchCenterGame = null
+                        bootingGame = game
+                    }
                 },
                 onContinue = { slot ->
                     launchCenterGame = null
@@ -1131,10 +1152,7 @@ fun GamesScreen(
                     stoppedTrophies = null
                 },
                 onPrepare = {
-                    // Re-import / rebuild install PPU — phase-aware, no headless Runtime.
                     com.zenithblue.sambas3.ppu.ImportPpuPreparationCoordinator.requestPreparation(context, game)
-                    launchCenterGame = null
-                    showImportDialog = true
                 },
             )
         }

@@ -556,13 +556,14 @@ class RPCSXActivity : ComponentActivity(), EmulationHost {
             val effectiveOriginalGamePath: String
             // Direct-ISO applies to every boot mode: a savestate boot still needs the
             // disc mounted, and the core resolves the game through the original path.
-            // Gate the .iso/sourceUri fallback on the debug flag so release installed
-            // games that merely recorded a sourceUri never take the direct path.
-            val isDirectIso = gameInfo?.sourceMode?.value == GameSourceMode.DIRECT_ISO ||
-                (com.zenithblue.sambas3.BuildConfig.DIRECT_ISO_LOADING &&
-                    (gamePath.endsWith(".iso", ignoreCase = true) ||
+            // The entire direct-source branch is debug/test-only. Release builds
+            // must retain the legacy installed-path behavior, even if app data
+            // came from an earlier debug build.
+            val isDirectIso = com.zenithblue.sambas3.BuildConfig.DIRECT_ISO_LOADING &&
+                (gameInfo?.sourceMode?.value == GameSourceMode.DIRECT_ISO ||
+                    ((gamePath.endsWith(".iso", ignoreCase = true) ||
                         bootPath.endsWith(".iso", ignoreCase = true)) &&
-                    gameInfo?.sourceUri?.value != null)
+                        gameInfo?.sourceUri?.value != null))
             if (isDirectIso) {
                 val uriStr = gameInfo?.sourceUri?.value ?: gamePath
                 val uri = if (uriStr.startsWith("content://") || uriStr.startsWith("file://")) {

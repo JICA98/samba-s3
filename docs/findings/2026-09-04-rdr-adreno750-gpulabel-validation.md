@@ -106,6 +106,17 @@ regression. The existing settingsGet probe passed (see artifact record), but
 that does not establish RDR compatibility. Android-wide gpu_label safety is
 not proven.
 
+## 2026-09-05 driver-scope correction
+
+An intermediate diagnostic forced the Android `gpu_label` host-event fallback on
+all GPUs. That broad scope was reverted after the Mali control run recorded an
+application exit status 11 during the experiment. The current source limits the
+fallback to drivers whose reported GPU or driver name contains `Turnip`, while
+preserving the Mali event path. The subsequent narrow-build Mali run
+(`/tmp/mali-rdr-turnip-narrow-20260905`) initialized the renderer and remained
+alive through collection; this is a regression check, not proof of RDR
+compatibility.
+
 ## 2026-09-05 second-device comparison
 
 The updated Standard Debug APK was installed on

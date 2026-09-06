@@ -8,6 +8,7 @@ import android.system.Os
 import android.system.OsConstants
 import android.util.Log
 import com.zenithblue.sambas3.Game
+import com.zenithblue.sambas3.GameIdentity
 import com.zenithblue.sambas3.GameInfo
 import com.zenithblue.sambas3.GameRepository
 import com.zenithblue.sambas3.GameSourceMode
@@ -38,6 +39,9 @@ object DirectIsoManager {
     )
 
     fun validateAndRegister(context: Context, uri: Uri): Game {
+        check(com.zenithblue.sambas3.BuildConfig.DIRECT_ISO_LOADING) {
+            "Direct ISO loading is available only in debug/test builds"
+        }
         val appCtx = context.applicationContext
         val effectiveUri = DirectIsoSession.resolveDocumentUri(context, uri) ?: uri
         val pfd = try {
@@ -93,7 +97,7 @@ object DirectIsoManager {
                 RPCSX.instance.extractIsoPreview(descriptor.fd, iconDest.absolutePath)
             }.getOrDefault(-1)
 
-            if (previewResult == 2) {
+            if (previewResult == -1 || previewResult == 1 || previewResult == 2) {
                 val msg = "Core rejected file: not a supported PS3 ISO"
                 Log.e(TAG, "unavailable reason=$msg")
                 throw IllegalArgumentException(msg)
@@ -115,9 +119,16 @@ object DirectIsoManager {
                 sourceMode = GameSourceMode.DIRECT_ISO
             )
 
-            // Setup PPU readiness so game is immediately playable in Launch Center
-            PpuReadinessStore.setPreRuntimeState(appCtx, titleId, PreRuntimePpuState.READY)
-            PpuReadinessStore.setRuntimeState(appCtx, titleId, RuntimePpuState.NOT_STARTED)
+            // Use the same key as Launch Center. This also keeps fallback DISO ids
+            // playable when an unusual image has no readable TITLE_ID metadata.
+            val readinessKey = GameIdentity.titleIdOrNull(canonicalPath, titleName)
+                ?: GameIdentity.key(canonicalPath, titleName)
+            PpuReadinessStore.setPreRuntimeState(appCtx, readinessKey, PreRuntimePpuState.READY)
+            // PRELAUNCH batching accepts installed directories. A direct ISO is
+            // intentionally never extracted/copied, so its virtual library path
+            // cannot be sent to that worker. Let the normal direct-disc boot own
+            // first-run compilation instead of trapping the card in PREPARE PPU.
+            PpuReadinessStore.setRuntimeState(appCtx, readinessKey, RuntimePpuState.IDLE_AFTER_COMPILE)
 
             GameRepository.add(arrayOf(gameInfo), progressId = -1)
             Log.i(TAG, "registered titleId=$titleId mode=DIRECT_ISO path=$canonicalPath uri=$uri")
@@ -129,6 +140,23 @@ object DirectIsoManager {
 
     fun registerFromFilePath(context: Context, file: File): Game {
         return validateAndRegister(context, Uri.fromFile(file))
+    }
+
+    /** Migrates direct-ISO entries saved by builds that incorrectly left START blocked. */
+    fun reconcileLaunchReadiness(context: Context) {
+        if (!com.zenithblue.sambas3.BuildConfig.DIRECT_ISO_LOADING) return
+        GameRepository.list()
+            .filter { it.info.sourceMode.value == GameSourceMode.DIRECT_ISO }
+            .forEach { game ->
+                val key = GameIdentity.titleIdOrNull(game.info.path, game.info.name.value)
+                    ?: GameIdentity.key(game.info.path, game.info.name.value)
+                if (PpuReadinessStore.getPreRuntimeState(context, key) != PreRuntimePpuState.READY) {
+                    PpuReadinessStore.setPreRuntimeState(context, key, PreRuntimePpuState.READY)
+                }
+                if (PpuReadinessStore.getRuntimeState(context, key) != RuntimePpuState.IDLE_AFTER_COMPILE) {
+                    PpuReadinessStore.setRuntimeState(context, key, RuntimePpuState.IDLE_AFTER_COMPILE)
+                }
+            }
     }
 
     private fun queryDisplayName(context: Context, uri: Uri): String {
@@ -160,7 +188,7 @@ object DirectIsoManager {
             // Read PVD at sector 16 (32768)
             val pvdBuffer = ByteBuffer.allocate(SECTOR_SIZE).order(ByteOrder.LITTLE_ENDIAN)
             channel.position(16L * SECTOR_SIZE)
-            if (channel.read(pvdBuffer) < SECTOR_SIZE) return null
+            if (!readFully(channel, pvdBuffer)) return null
             pvdBuffer.flip()
 
             val pvdBytes = pvdBuffer.array()
@@ -183,7 +211,7 @@ object DirectIsoManager {
             // Read root directory extent
             val rootDirBytes = ByteArray(min(rootLength, 65536))
             channel.position(rootLba.toLong() * SECTOR_SIZE)
-            channel.read(ByteBuffer.wrap(rootDirBytes))
+            if (!readFully(channel, ByteBuffer.wrap(rootDirBytes))) return null
 
             val ps3GameEntry = findDirectoryRecord(rootDirBytes, "PS3_GAME") ?: return null
             val ps3GameLba = ps3GameEntry.first
@@ -192,7 +220,7 @@ object DirectIsoManager {
             // Read PS3_GAME directory extent
             val ps3GameBytes = ByteArray(min(ps3GameLength, 65536))
             channel.position(ps3GameLba.toLong() * SECTOR_SIZE)
-            channel.read(ByteBuffer.wrap(ps3GameBytes))
+            if (!readFully(channel, ByteBuffer.wrap(ps3GameBytes))) return null
 
             val sfoEntry = findDirectoryRecord(ps3GameBytes, "PARAM.SFO") ?: return null
             val sfoLba = sfoEntry.first
@@ -201,13 +229,21 @@ object DirectIsoManager {
             // Read PARAM.SFO
             val sfoBytes = ByteArray(min(sfoLength, 65536))
             channel.position(sfoLba.toLong() * SECTOR_SIZE)
-            channel.read(ByteBuffer.wrap(sfoBytes))
+            if (!readFully(channel, ByteBuffer.wrap(sfoBytes))) return null
 
             parseParamSfo(sfoBytes)
         } catch (e: Exception) {
             Log.w(TAG, "parseIso9660Metadata failed: ${e.message}")
             null
         }
+    }
+
+    private fun readFully(channel: java.nio.channels.FileChannel, buffer: ByteBuffer): Boolean {
+        while (buffer.hasRemaining()) {
+            val count = channel.read(buffer)
+            if (count <= 0) return false
+        }
+        return true
     }
 
     private fun findDirectoryRecord(data: ByteArray, targetName: String): Pair<Int, Int>? {
@@ -225,9 +261,13 @@ object DirectIsoManager {
                 val rawName = String(data, offset + 33, nameLen, Charsets.US_ASCII)
                 val cleanName = rawName.substringBefore(';')
                 if (cleanName.equals(targetName, ignoreCase = true)) {
-                    val bb = ByteBuffer.wrap(data, offset, recordLen).order(ByteOrder.LITTLE_ENDIAN)
-                    val lba = bb.getInt(2)
-                    val len = bb.getInt(10)
+                    // ByteBuffer.wrap(array, offset, length) does not make absolute
+                    // getInt(2) relative to offset; it still indexes from array[0].
+                    // Directory records after the first entry therefore used bogus
+                    // extents and PARAM.SFO could never be reached.
+                    val bb = ByteBuffer.wrap(data).order(ByteOrder.LITTLE_ENDIAN)
+                    val lba = bb.getInt(offset + 2)
+                    val len = bb.getInt(offset + 10)
                     return lba to len
                 }
             }
@@ -266,7 +306,9 @@ object DirectIsoManager {
 
             val valPos = dataTableStart + dataOffset
             if (valPos + dataLen <= data.size) {
-                if (dataFormat == 0x0204) { // UTF-8 string
+                // PS3 PARAM.SFO files in the wild use both 0x0204 and
+                // 0x0404 for UTF-8 string fields.
+                if (dataFormat == 0x0204 || dataFormat == 0x0404 || (dataFormat and 0x00FF) == 0x04) {
                     val strVal = String(data, valPos, dataLen, Charsets.UTF_8).trimEnd('\u0000')
                     if (key == "TITLE_ID") titleId = strVal
                     else if (key == "TITLE") titleName = strVal

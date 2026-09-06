@@ -82,6 +82,53 @@ object CompileProgressBridge {
     val prelaunchState: StateFlow<CompileState> = _prelaunchState.asStateFlow()
     private var prelaunchPpuJobId: Long? = null
 
+    /** Mirrors PRELAUNCH progress produced in the isolated :ppu_compile process. */
+    fun updatePrelaunchStateForExternalWorker(
+        context: Context?,
+        titleId: String?,
+        jobId: Long,
+        moduleDone: Int,
+        moduleTotal: Int,
+        percent: Int,
+        message: String?,
+        active: Boolean,
+        outcome: CompileOutcome = CompileOutcome.NONE,
+    ) {
+        val cur = _prelaunchState.value
+        val wasActive = cur.ppuActive
+        if (active) prelaunchPpuJobId = jobId else if (prelaunchPpuJobId == jobId) prelaunchPpuJobId = null
+        _prelaunchState.value = cur.copy(
+            ppuActive = active,
+            titleId = titleId ?: cur.titleId,
+            ppuPercent = percent.coerceIn(0, 100),
+            ppuMax = 100,
+            ppuMsg = message ?: cur.ppuMsg,
+            moduleDone = moduleDone,
+            moduleTotal = moduleTotal,
+            outcome = outcome,
+            jobId = jobId,
+        )
+        if (active && !wasActive) {
+            requestMonitorStart(
+                context?.applicationContext,
+                NativeEvent(
+                    domain = RPCSX.COMPILE_DOMAIN_PPU,
+                    phase = RPCSX.COMPILE_PHASE_BEGIN,
+                    origin = RPCSX.COMPILE_ORIGIN_PRELAUNCH,
+                    jobId = jobId,
+                    value = percent.toLong(),
+                    max = 100,
+                    message = message,
+                    titleId = titleId,
+                    fileDone = 0,
+                    fileTotal = 0,
+                    moduleDone = moduleDone,
+                    moduleTotal = moduleTotal,
+                )
+            )
+        }
+    }
+
     // Keep latest runtime event for service cold start promotion
     @Volatile
     private var latestRuntimeEvent: NativeEvent? = null

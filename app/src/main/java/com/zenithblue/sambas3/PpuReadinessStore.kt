@@ -13,10 +13,9 @@ import java.io.File
 enum class PreRuntimePpuState { NOT_DONE, IN_PROGRESS, READY, INVALIDATED, FAILED }
 /**
  * Runtime PPU readiness.
- * IDLE_AFTER_COMPILE alone is not validated readiness — only a real RPCSXActivity
- * boot that reaches a Runtime PPU terminal (when needed) plus stable first-frame
- * proof may set [PpuStateEntry.validatedByRealBootFrame].
- * Legacy headless IDLE entries load with validatedByRealBootFrame=false.
+ * IDLE_AFTER_COMPILE means the Kotlin PRELAUNCH batches completed and gameplay
+ * may start. [PpuStateEntry.validatedByRealBootFrame] separately records that a
+ * later real RPCSXActivity boot reached a stable frame.
  */
 enum class RuntimePpuState { NOT_STARTED, COMPILING, IDLE_AFTER_COMPILE, FAILED }
 

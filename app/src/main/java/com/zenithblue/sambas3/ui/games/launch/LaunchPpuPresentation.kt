@@ -40,16 +40,13 @@ data class PpuPhaseUi(
 )
 
 enum class PrepareAction {
-    /** Install phase needs re-import / rebuild — not headless Runtime. */
-    ReimportOrRebuild,
+    Prepare,
     PreparingInstall,
     PreparingRuntime,
 }
 
 enum class PrimaryStartLabel {
     Start,
-    StartAndPrepare,
-    RetryOnStart,
 }
 
 data class LaunchPpuUi(
@@ -192,10 +189,9 @@ object LaunchPpuPresentation {
                 label = "Runtime PPU",
                 state = PpuPhaseState.Failed,
                 progress = null,
-                detail = "Retry on start"
+                detail = "Preparation failed"
             )
-            inputs.validatedByRealBootFrame &&
-                inputs.runtimeReadyState == RuntimePpuState.IDLE_AFTER_COMPILE &&
+            inputs.runtimeReadyState == RuntimePpuState.IDLE_AFTER_COMPILE &&
                 inputs.preRuntimeState == PreRuntimePpuState.READY -> PpuPhaseUi(
                 label = "Runtime PPU",
                 state = PpuPhaseState.Ready,
@@ -206,7 +202,7 @@ object LaunchPpuPresentation {
                 label = "Runtime PPU",
                 state = PpuPhaseState.NotReady,
                 progress = null,
-                detail = "Will prepare on start"
+                detail = "Needs preparation"
             )
             else -> PpuPhaseUi(
                 label = "Runtime PPU",
@@ -223,25 +219,17 @@ object LaunchPpuPresentation {
             prelaunchForThis || runtimeActiveForThis || inputs.waitingForIdle ||
                 (inputs.runtimeReadyState == RuntimePpuState.COMPILING) -> PrepareAction.PreparingRuntime
             availability is GameLaunchAvailability.Failed ||
-                availability is GameLaunchAvailability.NeedsPreparation -> PrepareAction.ReimportOrRebuild
+                availability is GameLaunchAvailability.NeedsPreparation -> PrepareAction.Prepare
             else -> null
         }
 
-        val primaryStartLabel = when {
-            !startEnabled -> PrimaryStartLabel.Start
-            inputs.validatedByRealBootFrame &&
-                inputs.runtimeReadyState == RuntimePpuState.IDLE_AFTER_COMPILE ->
-                PrimaryStartLabel.Start
-            inputs.runtimeReadyState == RuntimePpuState.FAILED ->
-                PrimaryStartLabel.RetryOnStart
-            else -> PrimaryStartLabel.StartAndPrepare
-        }
+        val primaryStartLabel = PrimaryStartLabel.Start
 
         val statusLine = when {
             startEnabled -> null
-            availability is GameLaunchAvailability.Failed -> availability.reason ?: "Install PPU failed — re-import required"
+            availability is GameLaunchAvailability.Failed -> availability.reason ?: "PPU preparation failed — retry"
             installForThis || prelaunchForThis || runtimeActiveForThis || inputs.waitingForIdle -> null
-            availability is GameLaunchAvailability.NeedsPreparation -> "Re-import required"
+            availability is GameLaunchAvailability.NeedsPreparation -> "PPU preparation required"
             availability is GameLaunchAvailability.PreparingPpu -> "PPU not ready"
             availability is GameLaunchAvailability.EngineBusy -> "Emulator busy"
             availability is GameLaunchAvailability.Importing -> "Import still in progress"

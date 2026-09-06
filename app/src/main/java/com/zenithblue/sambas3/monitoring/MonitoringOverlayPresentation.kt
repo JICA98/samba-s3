@@ -45,27 +45,29 @@ object MonitoringOverlayPresentation {
         frameTimeHistory: List<TimedSample>
     ): List<MonitoringGraphEntry> = buildList {
         if (MonitoringMetric.Fps in graphMetrics) {
-            val current = emulator.fps?.let { String.format(Locale.US, "%.1f", it) }
+            val samples = validGraphSamples(fpsHistory)
+            val current = finiteNonNegative(emulator.fps)?.let { String.format(Locale.US, "%.1f", it) }
             add(
                 MonitoringGraphEntry(
                     metric = MonitoringMetric.Fps,
                     label = "FPS",
                     currentValue = current,
-                    isPlaceholder = fpsHistory.size < 2,
-                    samples = fpsHistory,
+                    isPlaceholder = samples.size < 2,
+                    samples = samples,
                     isFrameTime = false
                 )
             )
         }
         if (MonitoringMetric.FrameTime in graphMetrics) {
-            val current = emulator.frameTimeMs?.let { String.format(Locale.US, "%.1f ms", it) }
+            val samples = validGraphSamples(frameTimeHistory)
+            val current = finiteNonNegative(emulator.frameTimeMs)?.let { String.format(Locale.US, "%.1f ms", it) }
             add(
                 MonitoringGraphEntry(
                     metric = MonitoringMetric.FrameTime,
                     label = "FRAME",
                     currentValue = current,
-                    isPlaceholder = frameTimeHistory.size < 2,
-                    samples = frameTimeHistory,
+                    isPlaceholder = samples.size < 2,
+                    samples = samples,
                     isFrameTime = true
                 )
             )
@@ -77,8 +79,8 @@ object MonitoringOverlayPresentation {
         e: EmulatorMetrics,
         a: AndroidSystemMetrics
     ): String? = when (metric) {
-        MonitoringMetric.Fps -> e.fps?.let { String.format(Locale.US, "%.1f", it) }
-        MonitoringMetric.FrameTime -> e.frameTimeMs?.let { String.format(Locale.US, "%.1f ms", it) }
+        MonitoringMetric.Fps -> finiteNonNegative(e.fps)?.let { String.format(Locale.US, "%.1f", it) }
+        MonitoringMetric.FrameTime -> finiteNonNegative(e.frameTimeMs)?.let { String.format(Locale.US, "%.1f ms", it) }
         MonitoringMetric.RpcsxHostCpu -> pct(e.hostCpuPercent)
         MonitoringMetric.PpuCpu -> pct(e.ppuCpuPercent)
         MonitoringMetric.SpuCpu -> pct(e.spuCpuPercent)
@@ -101,17 +103,25 @@ object MonitoringOverlayPresentation {
         MonitoringMetric.SwapTotal -> bytes(a.swapTotalBytes)
         MonitoringMetric.ZramUsed -> bytes(a.zramUsedBytes)
         MonitoringMetric.BatteryPercent -> a.batteryPercent?.let { "$it%" }
-        MonitoringMetric.BatteryTemperature -> a.batteryTemperatureC?.let { String.format(Locale.US, "%.1f°C", it) }
-        MonitoringMetric.BatteryPower -> a.batteryPowerW?.let {
+        MonitoringMetric.BatteryTemperature -> finite(a.batteryTemperatureC)?.let { String.format(Locale.US, "%.1f°C", it) }
+        MonitoringMetric.BatteryPower -> finiteNonNegative(a.batteryPowerW)?.let {
             val arrow = if (a.charging == true) "↑" else if (a.charging == false) "↓" else ""
             if (arrow.isNotEmpty()) String.format(Locale.US, "%.1fW %s", it, arrow)
             else String.format(Locale.US, "%.1fW", it)
         }
         MonitoringMetric.ThermalStatus -> a.thermalStatus?.let(::thermalLabel)
-        MonitoringMetric.ThermalHeadroom -> a.thermalHeadroom?.let { String.format(Locale.US, "%.1f", it) }
+        MonitoringMetric.ThermalHeadroom -> finite(a.thermalHeadroom)?.let { String.format(Locale.US, "%.1f", it) }
     }
 
-    private fun pct(value: Float?): String? = value?.let { String.format(Locale.US, "%.0f%%", it) }
+    private fun pct(value: Float?): String? = finiteNonNegative(value)?.let { String.format(Locale.US, "%.0f%%", it) }
+
+    private fun finite(value: Float?): Float? = value?.takeIf { it.isFinite() }
+
+    private fun finiteNonNegative(value: Float?): Float? = value?.takeIf { it.isFinite() && it >= 0f }
+
+    private fun validGraphSamples(samples: List<TimedSample>): List<TimedSample> = samples.filter {
+        it.timestampUs >= 0L && it.value.isFinite() && it.value >= 0f
+    }
 
     private fun bytes(value: Long?): String? = value?.let {
         if (it >= 1_000_000_000L) String.format(Locale.US, "%.1fG", it / 1_000_000_000f)

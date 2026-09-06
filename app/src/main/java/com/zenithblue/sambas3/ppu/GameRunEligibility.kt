@@ -77,18 +77,20 @@ object GameRunEligibilityHelper {
         )
 
         return when (action) {
-            PpuUserAction.START,
-            PpuUserAction.START_AND_PREPARE_RUNTIME,
-            PpuUserAction.RETRY_RUNTIME_ON_REAL_BOOT ->
+            PpuUserAction.START ->
                 GameRunEligibility(true, GameRunEligibility.Status.READY)
             PpuUserAction.WAIT_FOR_ACTIVE_JOB ->
                 GameRunEligibility(false, GameRunEligibility.Status.PREPARING_PPU)
-            PpuUserAction.REIMPORT_OR_REBUILD_INSTALL_PPU -> when {
+            PpuUserAction.REBUILD_INSTALL_PPU -> when {
                 preRuntime == PreRuntimePpuState.FAILED ->
                     GameRunEligibility(false, GameRunEligibility.Status.FAILED)
                 else ->
                     GameRunEligibility(false, GameRunEligibility.Status.NEEDS_PREPARATION)
             }
+            PpuUserAction.PREPARE_RUNTIME ->
+                GameRunEligibility(false, GameRunEligibility.Status.NEEDS_PREPARATION)
+            PpuUserAction.RETRY_RUNTIME_PREPARATION ->
+                GameRunEligibility(false, GameRunEligibility.Status.FAILED)
             PpuUserAction.NONE ->
                 GameRunEligibility(false, GameRunEligibility.Status.NEEDS_PREPARATION)
         }
@@ -141,15 +143,16 @@ object GameRunEligibilityHelper {
             )
         )
         return when (action) {
-            PpuUserAction.START,
-            PpuUserAction.START_AND_PREPARE_RUNTIME,
-            PpuUserAction.RETRY_RUNTIME_ON_REAL_BOOT -> GameLaunchAvailability.Ready
+            PpuUserAction.START -> GameLaunchAvailability.Ready
             PpuUserAction.WAIT_FOR_ACTIVE_JOB -> GameLaunchAvailability.PreparingPpu(prelaunchState)
-            PpuUserAction.REIMPORT_OR_REBUILD_INSTALL_PPU -> when {
+            PpuUserAction.REBUILD_INSTALL_PPU -> when {
                 pre == PreRuntimePpuState.FAILED ->
-                    GameLaunchAvailability.Failed(true, "Install PPU failed — re-import required")
+                    GameLaunchAvailability.Failed(true, "Install PPU failed — retry preparation")
                 else -> GameLaunchAvailability.NeedsPreparation
             }
+            PpuUserAction.PREPARE_RUNTIME -> GameLaunchAvailability.NeedsPreparation
+            PpuUserAction.RETRY_RUNTIME_PREPARATION ->
+                GameLaunchAvailability.Failed(true, "Runtime PPU failed — retry preparation")
             PpuUserAction.NONE -> GameLaunchAvailability.NeedsPreparation
         }
     }

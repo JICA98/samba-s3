@@ -20,60 +20,55 @@ class PpuUserActionDecisionTest {
     ) = PpuActionInputs(pre, rt, validated, install, prelaunch, runtime, waiting)
 
     @Test
-    fun notDone_mapsToReimport_neverHeadless() {
+    fun notDone_mapsToInstallPreparation() {
         val action = PpuUserActionDecision.decide(
             inputs(PreRuntimePpuState.NOT_DONE, RuntimePpuState.NOT_STARTED)
         )
-        assertEquals(PpuUserAction.REIMPORT_OR_REBUILD_INSTALL_PPU, action)
-        assertFalse(PpuUserActionDecision.allowsHeadlessRuntimePpu(action))
+        assertEquals(PpuUserAction.REBUILD_INSTALL_PPU, action)
         assertFalse(PpuUserActionDecision.canEnterRealBoot(action))
     }
 
     @Test
-    fun invalidated_mapsToReimport_neverHeadless() {
+    fun invalidated_mapsToInstallPreparation() {
         val action = PpuUserActionDecision.decide(
             inputs(PreRuntimePpuState.INVALIDATED, RuntimePpuState.NOT_STARTED)
         )
-        assertEquals(PpuUserAction.REIMPORT_OR_REBUILD_INSTALL_PPU, action)
-        assertFalse(PpuUserActionDecision.allowsHeadlessRuntimePpu(action))
+        assertEquals(PpuUserAction.REBUILD_INSTALL_PPU, action)
     }
 
     @Test
-    fun preFailed_mapsToReimport_neverHeadless() {
+    fun preFailed_mapsToInstallRetry() {
         val action = PpuUserActionDecision.decide(
             inputs(PreRuntimePpuState.FAILED, RuntimePpuState.NOT_STARTED)
         )
-        assertEquals(PpuUserAction.REIMPORT_OR_REBUILD_INSTALL_PPU, action)
-        assertFalse(PpuUserActionDecision.allowsHeadlessRuntimePpu(action))
+        assertEquals(PpuUserAction.REBUILD_INSTALL_PPU, action)
     }
 
     @Test
-    fun readyNotStarted_mapsToStartAndPrepare() {
+    fun readyNotStarted_mapsToRuntimePreparation() {
         val action = PpuUserActionDecision.decide(
             inputs(PreRuntimePpuState.READY, RuntimePpuState.NOT_STARTED)
         )
-        assertEquals(PpuUserAction.START_AND_PREPARE_RUNTIME, action)
-        assertTrue(PpuUserActionDecision.canEnterRealBoot(action))
-        assertFalse(PpuUserActionDecision.allowsHeadlessRuntimePpu(action))
+        assertEquals(PpuUserAction.PREPARE_RUNTIME, action)
+        assertFalse(PpuUserActionDecision.canEnterRealBoot(action))
     }
 
     @Test
-    fun readyRuntimeFailed_mapsToRetryOnRealBoot() {
+    fun readyRuntimeFailed_mapsToRuntimePreparationRetry() {
         val action = PpuUserActionDecision.decide(
             inputs(PreRuntimePpuState.READY, RuntimePpuState.FAILED)
         )
-        assertEquals(PpuUserAction.RETRY_RUNTIME_ON_REAL_BOOT, action)
-        assertTrue(PpuUserActionDecision.canEnterRealBoot(action))
-        assertFalse(PpuUserActionDecision.allowsHeadlessRuntimePpu(action))
+        assertEquals(PpuUserAction.RETRY_RUNTIME_PREPARATION, action)
+        assertFalse(PpuUserActionDecision.canEnterRealBoot(action))
     }
 
     @Test
-    fun legacyIdleWithoutValidation_mapsToStartAndPrepare() {
+    fun kotlinPreparedIdleWithoutFrameValidation_mapsToStart() {
         val action = PpuUserActionDecision.decide(
             inputs(PreRuntimePpuState.READY, RuntimePpuState.IDLE_AFTER_COMPILE, validated = false)
         )
-        assertEquals(PpuUserAction.START_AND_PREPARE_RUNTIME, action)
-        assertFalse(PpuUserActionDecision.allowsHeadlessRuntimePpu(action))
+        assertEquals(PpuUserAction.START, action)
+        assertTrue(PpuUserActionDecision.canEnterRealBoot(action))
     }
 
     @Test
@@ -116,9 +111,9 @@ class PpuUserActionDecisionTest {
     }
 
     @Test
-    fun noActionAllowsHeadless() {
+    fun onlyStartCanEnterRealBoot() {
         PpuUserAction.entries.forEach {
-            assertFalse(PpuUserActionDecision.allowsHeadlessRuntimePpu(it))
+            assertEquals(it == PpuUserAction.START, PpuUserActionDecision.canEnterRealBoot(it))
         }
     }
 }

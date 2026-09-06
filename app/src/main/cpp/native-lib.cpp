@@ -69,6 +69,8 @@ typedef int (*pfn_fstatat)(int dirfd, const char* path, struct stat* buf, int fl
 typedef int (*pfn_access)(const char* path, int mode);
 typedef int (*pfn_statvfs)(const char* path, struct statvfs* buf);
 typedef int (*pfn_statfs)(const char* path, struct statfs* buf);
+typedef char* (*pfn_realpath)(const char* path, char* resolved_path);
+typedef ssize_t (*pfn_readlink)(const char* path, char* buf, size_t bufsiz);
 
 static pfn_open g_orig_open = nullptr;
 static pfn_open_2 g_orig_open_2 = nullptr;
@@ -79,6 +81,8 @@ static pfn_fstatat g_orig_fstatat = nullptr;
 static pfn_access g_orig_access = nullptr;
 static pfn_statvfs g_orig_statvfs = nullptr;
 static pfn_statfs g_orig_statfs = nullptr;
+static pfn_realpath g_orig_realpath = nullptr;
+static pfn_readlink g_orig_readlink = nullptr;
 
 static int hooked_open(const char* path, int flags, ...) {
   mode_t mode = 0;
@@ -236,6 +240,41 @@ static int hooked_statfs(const char* path, struct statfs* buf) {
   return ::statfs(path, buf);
 }
 
+static char* hooked_realpath(const char* path, char* resolved_path) {
+  int target_fd = -1;
+  if (is_proc_fd_path(path, &target_fd)) {
+    (void)target_fd;
+    const size_t length = strlen(path);
+    if (resolved_path == nullptr) {
+      resolved_path = static_cast<char*>(malloc(length + 1));
+      if (resolved_path == nullptr) return nullptr;
+    }
+    memcpy(resolved_path, path, length + 1);
+    __android_log_print(ANDROID_LOG_INFO, "S3HOOK",
+                        "hooked realpath(\"%s\") -> preserved proc fd path",
+                        path);
+    return resolved_path;
+  }
+  if (g_orig_realpath) return g_orig_realpath(path, resolved_path);
+  return ::realpath(path, resolved_path);
+}
+
+static ssize_t hooked_readlink(const char* path, char* buf, size_t bufsiz) {
+  int target_fd = -1;
+  if (is_proc_fd_path(path, &target_fd)) {
+    (void)target_fd;
+    const size_t length = strlen(path);
+    const size_t copied = std::min(length, bufsiz);
+    if (copied > 0) memcpy(buf, path, copied);
+    __android_log_print(ANDROID_LOG_INFO, "S3HOOK",
+                        "hooked readlink(\"%s\") -> preserved proc fd path",
+                        path);
+    return static_cast<ssize_t>(copied);
+  }
+  if (g_orig_readlink) return g_orig_readlink(path, buf, bufsiz);
+  return ::readlink(path, buf, bufsiz);
+}
+
 static void install_direct_iso_hooks(void* symbol_inside_core) {
   if (symbol_inside_core == nullptr) return;
 
@@ -326,6 +365,10 @@ static void install_direct_iso_hooks(void* symbol_inside_core) {
         target_hook = reinterpret_cast<void*>(hooked_statvfs);
       } else if (strcmp(sym_name, "statfs") == 0) {
         target_hook = reinterpret_cast<void*>(hooked_statfs);
+      } else if (strcmp(sym_name, "realpath") == 0) {
+        target_hook = reinterpret_cast<void*>(hooked_realpath);
+      } else if (strcmp(sym_name, "readlink") == 0) {
+        target_hook = reinterpret_cast<void*>(hooked_readlink);
       }
 
       if (target_hook != nullptr) {
@@ -349,6 +392,8 @@ static void install_direct_iso_hooks(void* symbol_inside_core) {
           else if (strcmp(sym_name, "access") == 0 && !g_orig_access) g_orig_access = reinterpret_cast<pfn_access>(*slot);
           else if (strcmp(sym_name, "statvfs") == 0 && !g_orig_statvfs) g_orig_statvfs = reinterpret_cast<pfn_statvfs>(*slot);
           else if (strcmp(sym_name, "statfs") == 0 && !g_orig_statfs) g_orig_statfs = reinterpret_cast<pfn_statfs>(*slot);
+          else if (strcmp(sym_name, "realpath") == 0 && !g_orig_realpath) g_orig_realpath = reinterpret_cast<pfn_realpath>(*slot);
+          else if (strcmp(sym_name, "readlink") == 0 && !g_orig_readlink) g_orig_readlink = reinterpret_cast<pfn_readlink>(*slot);
 
           *slot = target_hook;
           hooked_count++;
@@ -785,6 +830,7 @@ struct RPCSXApi {
     int (*prepareRuntimePpu)(const char* path, unsigned long long sessionId);
     bool (*cancelRuntimePpuPreparation)(unsigned long long sessionId);
     const char* (*compileInstallPpuBatch)(const char* titleId, const char* gamePath, unsigned long long logicalJobId, unsigned int maxNewObjects);
+    const char* (*compileRuntimePpuBatch)(const char* titleId, const char* gamePath, unsigned long long logicalJobId, unsigned int maxNewObjects);
     void (*cancelInstallPpuBatch)();
   // Frontend Home Menu ownership — optional symbols
   bool (*beginFrontendMenu)();
@@ -892,6 +938,7 @@ struct RPCSXLibrary : RPCSXApi {
     result.prepareRuntimePpu = reinterpret_cast<decltype(prepareRuntimePpu)>(dlsym(handle, "_rpcsx_prepareRuntimePpu"));
     result.cancelRuntimePpuPreparation = reinterpret_cast<decltype(cancelRuntimePpuPreparation)>(dlsym(handle, "_rpcsx_cancelRuntimePpuPreparation"));
     result.compileInstallPpuBatch = reinterpret_cast<decltype(compileInstallPpuBatch)>(dlsym(handle, "_rpcsx_compileInstallPpuBatch"));
+    result.compileRuntimePpuBatch = reinterpret_cast<decltype(compileRuntimePpuBatch)>(dlsym(handle, "_rpcsx_compileRuntimePpuBatch"));
     result.cancelInstallPpuBatch = reinterpret_cast<decltype(cancelInstallPpuBatch)>(dlsym(handle, "_rpcsx_cancelInstallPpuBatch"));
     result.setCompileProgressListener = reinterpret_cast<decltype(setCompileProgressListener)>(dlsym(handle, "_rpcsx_setCompileProgressListener"));
     result.supportsCompileProgressEvents = reinterpret_cast<decltype(supportsCompileProgressEvents)>(dlsym(handle, "_rpcsx_supportsCompileProgressEvents"));
@@ -1519,6 +1566,23 @@ Java_com_zenithblue_sambas3_RPCSX_compileInstallPpuBatch(
   std::string title = unwrap(env, jTitleId);
   std::string path = unwrap(env, jGamePath);
   const char* res = rpcsxLib.compileInstallPpuBatch(
+      title.c_str(),
+      path.c_str(),
+      static_cast<unsigned long long>(logicalJobId),
+      static_cast<unsigned int>(maxNewObjects));
+  return wrap(env, res ? std::string(res) : std::string("{\"status\":\"failed\",\"message\":\"null_result\"}"));
+}
+
+extern "C" JNIEXPORT jstring JNICALL
+Java_com_zenithblue_sambas3_RPCSX_compileRuntimePpuBatch(
+    JNIEnv *env, jobject, jstring jTitleId, jstring jGamePath, jlong logicalJobId, jint maxNewObjects) {
+  if (!rpcsxLib.compileRuntimePpuBatch) {
+    __android_log_print(ANDROID_LOG_WARN, "RPCSX-UI", "compileRuntimePpuBatch not available in core (old .so)");
+    return wrap(env, std::string("{\"status\":\"failed\",\"message\":\"symbol_not_found\"}"));
+  }
+  std::string title = unwrap(env, jTitleId);
+  std::string path = unwrap(env, jGamePath);
+  const char* res = rpcsxLib.compileRuntimePpuBatch(
       title.c_str(),
       path.c_str(),
       static_cast<unsigned long long>(logicalJobId),

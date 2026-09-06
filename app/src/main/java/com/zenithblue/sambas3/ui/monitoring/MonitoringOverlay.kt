@@ -108,7 +108,7 @@ fun MonitoringOverlayPreview(settings: MonitoringSettings) {
     val alignment = monitoringAlignment(settings.position)
     Box(
         modifier = Modifier
-            .fillMaxWidth()
+            .fillMaxSize()
             .padding(6.dp),
         contentAlignment = alignment
     ) {

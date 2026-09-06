@@ -130,25 +130,24 @@ class LaunchPpuPresentationTest {
     }
 
     @Test
-    fun installReadyRuntimeNotStarted_willPrepareOnStart() {
+    fun installReadyRuntimeNotStarted_requiresPreparation() {
         val inputs = idleInputs(
             pre = PreRuntimePpuState.READY,
             rt = RuntimePpuState.NOT_STARTED,
         )
         val ui = LaunchPpuPresentation.build(
             "BLUS30443",
-            GameLaunchAvailability.Ready,
+            GameLaunchAvailability.NeedsPreparation,
             inputs,
         )
         assertEquals(PpuPhaseState.Ready, ui.installPpu.state)
-        assertEquals("Will prepare on start", ui.runtimePpu.detail)
-        assertTrue(ui.startEnabled)
-        assertEquals(PrimaryStartLabel.StartAndPrepare, ui.primaryStartLabel)
-        assertNull(ui.prepareAction)
+        assertEquals("Needs preparation", ui.runtimePpu.detail)
+        assertFalse(ui.startEnabled)
+        assertEquals(PrepareAction.Prepare, ui.prepareAction)
     }
 
     @Test
-    fun legacyIdleWithoutValidation_willPrepareOnStart() {
+    fun kotlinPreparedIdleWithoutValidation_isReadyToStart() {
         val inputs = idleInputs(
             pre = PreRuntimePpuState.READY,
             rt = RuntimePpuState.IDLE_AFTER_COMPILE,
@@ -159,42 +158,41 @@ class LaunchPpuPresentationTest {
             GameLaunchAvailability.Ready,
             inputs,
         )
-        assertEquals("Will prepare on start", ui.runtimePpu.detail)
-        assertEquals(PrimaryStartLabel.StartAndPrepare, ui.primaryStartLabel)
+        assertEquals("Ready", ui.runtimePpu.detail)
+        assertEquals(PrimaryStartLabel.Start, ui.primaryStartLabel)
     }
 
     @Test
-    fun needsPreparation_showsReimportAction() {
+    fun needsPreparation_showsPrepareAction() {
         val inputs = idleInputs()
         val ui = LaunchPpuPresentation.build(
             "BLUS30443",
             GameLaunchAvailability.NeedsPreparation,
             inputs,
         )
-        assertEquals(PrepareAction.ReimportOrRebuild, ui.prepareAction)
+        assertEquals(PrepareAction.Prepare, ui.prepareAction)
         assertFalse(ui.startEnabled)
-        assertEquals("Re-import required", ui.statusLine)
+        assertEquals("PPU preparation required", ui.statusLine)
     }
 
     @Test
-    fun installFailed_showsReimport_runtimeFailedWithInstallReady_retryOnStart() {
+    fun failedPhases_showRetryPreparation() {
         val installFailed = LaunchPpuPresentation.build(
             "BLUS30443",
-            GameLaunchAvailability.Failed(true, "Install PPU failed — re-import required"),
+            GameLaunchAvailability.Failed(true, "Install PPU failed — retry preparation"),
             idleInputs(pre = PreRuntimePpuState.FAILED, rt = RuntimePpuState.NOT_STARTED),
         )
-        assertEquals(PrepareAction.ReimportOrRebuild, installFailed.prepareAction)
+        assertEquals(PrepareAction.Prepare, installFailed.prepareAction)
         assertFalse(installFailed.startEnabled)
 
         val runtimeFailed = LaunchPpuPresentation.build(
             "BLUS30443",
-            GameLaunchAvailability.Ready,
+            GameLaunchAvailability.Failed(true, "Runtime PPU failed — retry preparation"),
             idleInputs(pre = PreRuntimePpuState.READY, rt = RuntimePpuState.FAILED),
         )
-        assertEquals("Retry on start", runtimeFailed.runtimePpu.detail)
-        assertTrue(runtimeFailed.startEnabled)
-        assertEquals(PrimaryStartLabel.RetryOnStart, runtimeFailed.primaryStartLabel)
-        assertNull(runtimeFailed.prepareAction)
+        assertEquals("Preparation failed", runtimeFailed.runtimePpu.detail)
+        assertFalse(runtimeFailed.startEnabled)
+        assertEquals(PrepareAction.Prepare, runtimeFailed.prepareAction)
     }
 
     @Test

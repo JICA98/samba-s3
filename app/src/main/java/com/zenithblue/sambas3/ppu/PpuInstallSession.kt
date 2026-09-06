@@ -16,7 +16,14 @@ enum class PpuSessionPhase {
 }
 
 @Serializable
+enum class PpuBatchKind {
+    INSTALL,
+    RUNTIME,
+}
+
+@Serializable
 data class PpuInstallSession(
+    val kind: PpuBatchKind = PpuBatchKind.INSTALL,
     val sessionId: Long,
     val jobId: Long,
     val titleId: String,
