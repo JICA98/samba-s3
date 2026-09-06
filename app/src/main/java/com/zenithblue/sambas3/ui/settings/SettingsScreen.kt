@@ -14,6 +14,7 @@ import androidx.compose.runtime.mutableStateListOf
 import com.zenithblue.sambas3.ui.user.UsersScreen
 import com.zenithblue.sambas3.ui.drivers.GpuDriversScreen
 import com.zenithblue.sambas3.ui.settings.LogMonitorScreen
+import com.zenithblue.sambas3.ui.crash.CrashLogsHistoryScreen
 import androidx.compose.animation.animateContentSize
 import androidx.compose.animation.core.RepeatMode
 import androidx.compose.animation.core.animateFloat
@@ -1344,6 +1345,18 @@ fun SettingsScreen(
                     )
                 }
 
+                item(key = "crash_logs") {
+                    HomePreference(
+                        title = "Crash Logs History",
+                        icon = { Icon(painterResource(R.drawable.ic_restore), null) },
+                        description = "View diagnostics, backtraces, and logs for all crashed game sessions.",
+                        onClick = {
+                            navigateTo("crash_logs")
+                        },
+                        onFocusChanged = { if (it) onFocusedKeyChanged("crash_logs") }
+                    )
+                }
+
                 item(key = "monitoring") {
                     HomePreference(
                         title = "Performance Monitor",
@@ -1457,6 +1470,13 @@ fun SettingsScreen(
                         }
                         "logs" -> {
                             LogMonitorScreen(
+                                navigateBack = { onActiveSettingKeyChanged(null) },
+                                isInSplitPane = true,
+                                onOpenCrashLogs = { onActiveSettingKeyChanged("crash_logs") }
+                            )
+                        }
+                        "crash_logs" -> {
+                            CrashLogsHistoryScreen(
                                 navigateBack = { onActiveSettingKeyChanged(null) },
                                 isInSplitPane = true
                             )

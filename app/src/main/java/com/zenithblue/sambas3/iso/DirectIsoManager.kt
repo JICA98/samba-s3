@@ -109,6 +109,11 @@ object DirectIsoManager {
                 null
             }
 
+            val pic1Dest = File(iconsDir, "${titleId}_pic1.png")
+            runCatching {
+                extractIsoPic1(descriptor, pic1Dest)
+            }
+
             val canonicalPath = "direct_iso/$titleId"
             val gameInfo = GameInfo(
                 path = canonicalPath,
@@ -243,6 +248,79 @@ object DirectIsoManager {
         } catch (e: Exception) {
             Log.w(TAG, "parseIso9660Metadata failed: ${e.message}")
             null
+        }
+    }
+
+    fun extractIsoPic1(pfd: ParcelFileDescriptor, dest: File): Boolean {
+        if (dest.isFile && dest.length() > 0) return true
+        return try {
+            val fis = FileInputStream(pfd.fileDescriptor)
+            val channel = fis.channel
+
+            val pvdBuffer = ByteBuffer.allocate(SECTOR_SIZE).order(ByteOrder.LITTLE_ENDIAN)
+            channel.position(16L * SECTOR_SIZE)
+            if (!readFully(channel, pvdBuffer)) return false
+            pvdBuffer.flip()
+
+            val pvdBytes = pvdBuffer.array()
+            if (pvdBytes[1] != 'C'.code.toByte() ||
+                pvdBytes[2] != 'D'.code.toByte() ||
+                pvdBytes[3] != '0'.code.toByte() ||
+                pvdBytes[4] != '0'.code.toByte() ||
+                pvdBytes[5] != '1'.code.toByte()
+            ) {
+                return false
+            }
+
+            val rootRecordOffset = 156
+            val rootLba = pvdBuffer.getInt(rootRecordOffset + 2)
+            val rootLength = pvdBuffer.getInt(rootRecordOffset + 10)
+            if (rootLba <= 0 || rootLength <= 0) return false
+
+            val rootDirBytes = ByteArray(min(rootLength, 65536))
+            channel.position(rootLba.toLong() * SECTOR_SIZE)
+            if (!readFully(channel, ByteBuffer.wrap(rootDirBytes))) return false
+
+            val ps3GameEntry = findDirectoryRecord(rootDirBytes, "PS3_GAME") ?: return false
+            val ps3GameLba = ps3GameEntry.first
+            val ps3GameLength = ps3GameEntry.second
+
+            val ps3GameBytes = ByteArray(min(ps3GameLength, 65536))
+            channel.position(ps3GameLba.toLong() * SECTOR_SIZE)
+            if (!readFully(channel, ByteBuffer.wrap(ps3GameBytes))) return false
+
+            val pic1Entry = findDirectoryRecord(ps3GameBytes, "PIC1.PNG") ?: return false
+            val pic1Lba = pic1Entry.first
+            val pic1Length = pic1Entry.second
+            if (pic1Lba <= 0 || pic1Length <= 0 || pic1Length > 16 * 1024 * 1024) return false
+
+            val pic1Bytes = ByteArray(pic1Length)
+            channel.position(pic1Lba.toLong() * SECTOR_SIZE)
+            if (!readFully(channel, ByteBuffer.wrap(pic1Bytes))) return false
+
+            dest.parentFile?.mkdirs()
+            val tmp = File(dest.parentFile, "${dest.name}.tmp")
+            tmp.writeBytes(pic1Bytes)
+            if (!tmp.renameTo(dest)) {
+                dest.delete()
+                tmp.renameTo(dest)
+            }
+            Log.i(TAG, "extractIsoPic1 extracted $pic1Length bytes to ${dest.absolutePath}")
+            true
+        } catch (e: Exception) {
+            Log.w(TAG, "extractIsoPic1 failed: ${e.message}")
+            false
+        }
+    }
+
+    fun extractIsoPic1(context: Context, uri: Uri, dest: File): Boolean {
+        if (dest.isFile && dest.length() > 0) return true
+        return try {
+            val pfd = context.contentResolver.openFileDescriptor(uri, "r") ?: return false
+            pfd.use { extractIsoPic1(it, dest) }
+        } catch (e: Exception) {
+            Log.w(TAG, "extractIsoPic1 from uri failed: ${e.message}")
+            false
         }
     }
 

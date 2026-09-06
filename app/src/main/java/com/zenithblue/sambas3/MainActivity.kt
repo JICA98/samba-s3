@@ -131,6 +131,18 @@ class MainActivity : ComponentActivity() {
             }
         }
 
+        try {
+            com.zenithblue.sambas3.ppu.ImportPpuPreparationCoordinator.reconcileInterruptedState(this)
+        } catch (e: Exception) {
+            android.util.Log.w("Main", "PPU interrupted-state recovery failed: ${e.message}")
+        }
+
+        lifecycleScope.launch(kotlinx.coroutines.Dispatchers.IO) {
+            try { com.zenithblue.sambas3.logging.LogBroker.ensureStarted(this@MainActivity) } catch (e: Exception) {
+                android.util.Log.w("Main", "LogBroker start failed: ${e.message}")
+            }
+        }
+
         // Never gate Home on diagnostics. Recovery analysis is deliberately
         // started after AppNavHost has entered composition.
         lifecycleScope.launch {
@@ -160,7 +172,7 @@ class MainActivity : ComponentActivity() {
         unregisterUsbEventListener()
         try { debugPadReceiver?.let { unregisterReceiver(it) } } catch (_: Exception) {}
         debugPadReceiver = null
-        LogMonitor.stop()
+        try { LogMonitor.flushWriters() } catch (_: Exception) {}
     }
 
     override fun dispatchKeyEvent(event: android.view.KeyEvent): Boolean {

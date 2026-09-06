@@ -102,6 +102,7 @@
     <string name="ingame_resume">Resume</string>
     <string name="ingame_settings">Settings</string>
     <string name="ingame_monitoring">Performance Monitor</string>
+    <string name="ingame_live_logs">Live Logs</string>
     <string name="ingame_controller">Controller</string>
     <string name="ingame_friends">Friends</string>
     <string name="ingame_achievements">Achievements</string>

@@ -67,4 +67,31 @@ class GameLaunchEligibilityBusyTest {
         )
         assertEquals(GameLaunchAvailability.NeedsPreparation, availability)
     }
+
+    @Test
+    fun orphaned_in_progress_without_live_job_is_retryable() {
+        val key = "BCUS98125"
+        PpuReadinessStore.removeEntry(context, key)
+        PpuReadinessStore.setPreRuntimeState(context, key, PreRuntimePpuState.IN_PROGRESS)
+        PpuReadinessStore.setRuntimeState(context, key, RuntimePpuState.NOT_STARTED)
+        val game = Game(
+            GameInfoStore(
+                "/files/config/games/$key",
+                androidx.compose.runtime.mutableStateOf("inFAMOUS 2"),
+                androidx.compose.runtime.mutableStateOf(null),
+                androidx.compose.runtime.mutableIntStateOf(0),
+            )
+        )
+        val availability = GameRunEligibilityHelper.evaluateAvailability(
+            context,
+            game,
+            installPpuActive = false,
+            prelaunchState = CompileProgressBridge.CompileState(),
+            runtimeState = CompileProgressBridge.CompileState(),
+            emulatorState = EmulatorState.Stopped,
+            activeGame = null,
+        )
+        assertTrue(availability is GameLaunchAvailability.Failed)
+        assertTrue((availability as GameLaunchAvailability.Failed).retryable)
+    }
 }

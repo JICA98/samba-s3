@@ -20,6 +20,7 @@ sealed interface InGameMenuIntent {
 
     data object OpenSettings : InGameMenuIntent
     data object OpenMonitoring : InGameMenuIntent
+    data object OpenLiveLogs : InGameMenuIntent
     data object OpenController : InGameMenuIntent
     data object OpenConfigureGame : InGameMenuIntent
     data object OpenTrophies : InGameMenuIntent
@@ -154,6 +155,7 @@ fun mainRowDescriptors(cap: InGameMenuCapabilities): List<MainRowDescriptor> = b
     add(MainRowDescriptor(com.zenithblue.sambas3.R.string.configure_game, com.zenithblue.sambas3.R.drawable.tune, true, true, InGameMenuIntent.OpenConfigureGame))
     add(MainRowDescriptor(com.zenithblue.sambas3.R.string.ingame_settings, com.zenithblue.sambas3.R.drawable.ic_settings, true, true, InGameMenuIntent.OpenSettings))
     add(MainRowDescriptor(com.zenithblue.sambas3.R.string.ingame_monitoring, com.zenithblue.sambas3.R.drawable.ic_video, true, true, InGameMenuIntent.OpenMonitoring))
+    add(MainRowDescriptor(com.zenithblue.sambas3.R.string.ingame_live_logs, com.zenithblue.sambas3.R.drawable.ic_terminal, true, true, InGameMenuIntent.OpenLiveLogs))
     add(MainRowDescriptor(com.zenithblue.sambas3.R.string.ingame_controller, com.zenithblue.sambas3.R.drawable.tune, true, true, InGameMenuIntent.OpenController))
     if (cap.friendsAvailable) {
         add(MainRowDescriptor(com.zenithblue.sambas3.R.string.ingame_friends, com.zenithblue.sambas3.R.drawable.ic_settings, true, true, InGameMenuIntent.OpenFriends))
@@ -209,6 +211,7 @@ class InGameMenuCoordinator(
             is InGameMenuIntent.Back -> handleBackInternal()
             is InGameMenuIntent.OpenSettings -> pushPage(InGamePage.Settings)
             is InGameMenuIntent.OpenMonitoring -> pushPage(InGamePage.Monitoring)
+            is InGameMenuIntent.OpenLiveLogs -> pushPage(InGamePage.LiveLogs)
             is InGameMenuIntent.OpenController -> pushPage(InGamePage.Controller)
             is InGameMenuIntent.OpenConfigureGame -> pushPage(InGamePage.ConfigureGame)
             is InGameMenuIntent.OpenTrophies -> pushPage(InGamePage.Trophies)

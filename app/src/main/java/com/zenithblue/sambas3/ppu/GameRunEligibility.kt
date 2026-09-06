@@ -82,7 +82,8 @@ object GameRunEligibilityHelper {
             PpuUserAction.WAIT_FOR_ACTIVE_JOB ->
                 GameRunEligibility(false, GameRunEligibility.Status.PREPARING_PPU)
             PpuUserAction.REBUILD_INSTALL_PPU -> when {
-                preRuntime == PreRuntimePpuState.FAILED ->
+                preRuntime == PreRuntimePpuState.FAILED ||
+                    preRuntime == PreRuntimePpuState.IN_PROGRESS ->
                     GameRunEligibility(false, GameRunEligibility.Status.FAILED)
                 else ->
                     GameRunEligibility(false, GameRunEligibility.Status.NEEDS_PREPARATION)
@@ -146,13 +147,13 @@ object GameRunEligibilityHelper {
             PpuUserAction.START -> GameLaunchAvailability.Ready
             PpuUserAction.WAIT_FOR_ACTIVE_JOB -> GameLaunchAvailability.PreparingPpu(prelaunchState)
             PpuUserAction.REBUILD_INSTALL_PPU -> when {
-                pre == PreRuntimePpuState.FAILED ->
-                    GameLaunchAvailability.Failed(true, "Install PPU failed — retry preparation")
+                pre == PreRuntimePpuState.FAILED || pre == PreRuntimePpuState.IN_PROGRESS ->
+                    GameLaunchAvailability.Failed(true, "Install PPU interrupted — retry to resume")
                 else -> GameLaunchAvailability.NeedsPreparation
             }
             PpuUserAction.PREPARE_RUNTIME -> GameLaunchAvailability.NeedsPreparation
             PpuUserAction.RETRY_RUNTIME_PREPARATION ->
-                GameLaunchAvailability.Failed(true, "Runtime PPU failed — retry preparation")
+                GameLaunchAvailability.Failed(true, "Runtime PPU interrupted — retry to resume")
             PpuUserAction.NONE -> GameLaunchAvailability.NeedsPreparation
         }
     }

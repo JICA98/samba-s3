@@ -4,6 +4,11 @@ import android.content.ClipData
 import android.content.Intent
 import android.content.ActivityNotFoundException
 import android.net.Uri
+import android.view.InputDevice
+import android.view.KeyEvent
+import android.view.MotionEvent
+import android.view.View
+import androidx.activity.compose.BackHandler
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
@@ -11,24 +16,34 @@ import androidx.core.content.FileProvider
 import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
-import androidx.compose.animation.core.infiniteRepeatable
-import androidx.compose.animation.core.rememberInfiniteTransition
-import androidx.compose.animation.core.RepeatMode
-import androidx.compose.animation.core.animateFloat
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.combinedClickable
+import androidx.compose.foundation.focusable
+import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.interaction.collectIsPressedAsState
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.lazy.LazyRow
+import androidx.compose.foundation.lazy.itemsIndexed
+import androidx.compose.foundation.lazy.grid.GridCells
+import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
+import androidx.compose.foundation.lazy.grid.itemsIndexed
+import androidx.compose.foundation.lazy.grid.rememberLazyGridState
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.BasicTextField
+import androidx.compose.foundation.text.KeyboardActions
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
@@ -38,13 +53,26 @@ import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.draw.drawWithContent
 import androidx.compose.ui.draw.scale
 import androidx.compose.ui.draw.shadow
+import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.graphics.ColorMatrix
+import androidx.compose.ui.graphics.SolidColor
+import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.input.key.Key
+import androidx.compose.ui.input.key.KeyEventType
+import androidx.compose.ui.input.key.key
+import androidx.compose.ui.input.key.onPreviewKeyEvent
+import androidx.compose.ui.input.key.type
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalView
+import androidx.compose.ui.text.input.ImeAction
+import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.window.DialogProperties
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -90,8 +118,8 @@ sealed class PagerItem {
     data class GameItem(val game: Game) : PagerItem() {
         override val stableKey: String get() = "game:${com.zenithblue.sambas3.GameIdentity.key(game.info.path, game.info.name.value)}"
     }
-    data class AddGame(val disabled: Boolean = false) : PagerItem() {
-        override val stableKey: String get() = if (disabled) "add:disabled" else "add"
+    data class AddGame(val disabled: Boolean = false, val position: String = "end") : PagerItem() {
+        override val stableKey: String get() = if (disabled) "add:disabled:$position" else "add:$position"
     }
     data object FirmwareCard : PagerItem() {
         override val stableKey: String get() = "firmware"
@@ -117,26 +145,17 @@ fun buildLibraryPagerItems(
     pendingImports: List<PagerItem.PendingImport> = emptyList(),
     hasFw: Boolean,
     isFwInstalling: Boolean,
-    showBothEnds: Boolean
+    showBothEnds: Boolean = false
 ): List<PagerItem> = buildList {
     val hasLibrary = visibleGames.isNotEmpty() || sourceCandidates.isNotEmpty() || pendingImports.isNotEmpty()
     if (!hasLibrary) {
         if (!hasFw) add(PagerItem.FirmwareCard)
-        else if (isFwInstalling) add(PagerItem.AddGame(disabled = true))
-        else add(PagerItem.AddGame())
+        else if (isFwInstalling) add(PagerItem.AddGame(disabled = true, position = "single"))
+        else add(PagerItem.AddGame(position = "single"))
     } else {
-        if (showBothEnds) {
-            add(PagerItem.AddGame())
-            addAll(visibleGames.map { PagerItem.GameItem(it) })
-            addAll(pendingImports)
-            addAll(sourceCandidates)
-            add(PagerItem.AddGame())
-        } else {
-            addAll(visibleGames.map { PagerItem.GameItem(it) })
-            addAll(pendingImports)
-            addAll(sourceCandidates)
-            add(PagerItem.AddGame())
-        }
+        addAll(visibleGames.map { PagerItem.GameItem(it) })
+        addAll(pendingImports)
+        addAll(sourceCandidates)
     }
 }
 
@@ -155,6 +174,7 @@ fun GamesScreen(
     navigateToDrivers: (() -> Unit)? = null,
     navigateToPatches: (() -> Unit)? = null,
     navigateToLogs: (() -> Unit)? = null,
+    navigateToCrashLogs: (() -> Unit)? = null,
     emulatorState: State<EmulatorState> = mutableStateOf(EmulatorState.Stopped),
     emulatorActiveGame: State<String?> = mutableStateOf(null)
 ) {
@@ -471,7 +491,7 @@ fun GamesScreen(
     // BLOCKER D: observe pending import sessions — one stable card per import
     val importSessions by com.zenithblue.sambas3.ImportSessionStore.sessions.collectAsState()
 
-    // BLOCKER B fix: do not memoize mutable SnapshotStateList with remember(games) or remember(size).
+    // Blocker B fix: do not memoize mutable SnapshotStateList with remember(games) or remember(size).
     // Derive directly during composition so placeholder add/remove/replace is observed.
     // Hide legacy "$" placeholder entirely — pending UI is now ImportSession/PendingImport, not a fake Game.
     // Native firmware collection exposes vsh.self as a "game". It is not
@@ -479,6 +499,26 @@ fun GamesScreen(
     val visibleGames: List<Game> = games.filterNot {
         it.info.path == "$" || isSystemFirmwareEntry(it)
     }
+
+    var isGridView by rememberSaveable {
+        mutableStateOf(com.zenithblue.sambas3.utils.GeneralSettings["home_view_mode"] as? String == "grid")
+    }
+    var isSearchExpanded by rememberSaveable { mutableStateOf(false) }
+    var searchQuery by rememberSaveable { mutableStateOf("") }
+    var focusedGridIndex by rememberSaveable { mutableIntStateOf(0) }
+
+    val filteredGames: List<Game> = remember(visibleGames, searchQuery) {
+        if (searchQuery.isBlank()) visibleGames
+        else {
+            val q = searchQuery.trim().lowercase()
+            visibleGames.filter { game ->
+                val name = (game.info.name.value ?: "").lowercase()
+                val path = game.info.path.lowercase()
+                name.contains(q) || path.contains(q)
+            }
+        }
+    }
+
     // Merge source ISO candidates (folder scan) — installed wins over duplicate titleId
     val installedTitleIds = visibleGames.mapNotNull { com.zenithblue.sambas3.GameIdentity.titleIdOrNull(it.info.path, it.info.name.value) }.map { it.uppercase() }.toSet()
     // Dedupe: hide source candidate if same titleId already installed or currently importing (pending)
@@ -488,6 +528,15 @@ fun GamesScreen(
         val tid = cand.titleId?.uppercase()
         if (tid != null && tid in allInstalledOrPendingIds) return@mapNotNull null
         PagerItem.SourceCandidate(cand.titleId, cand.folderName, cand.sourceUri?.toString() ?: cand.folderName, cand.sourceKind)
+    }
+    val filteredSourceCandidates: List<PagerItem.SourceCandidate> = remember(sourceCandidateItems, searchQuery) {
+        if (searchQuery.isBlank()) sourceCandidateItems
+        else {
+            val q = searchQuery.trim().lowercase()
+            sourceCandidateItems.filter { cand ->
+                cand.displayName.lowercase().contains(q) || (cand.titleId?.lowercase()?.contains(q) == true)
+            }
+        }
     }
     // Pending imports — hide if same title already installed (installed wins, PPU shows on Game card via installPpu)
     val pendingItems: List<PagerItem.PendingImport> = importSessions.mapNotNull { sess ->
@@ -499,10 +548,21 @@ fun GamesScreen(
         }
         PagerItem.PendingImport(sess.progressId, prov ?: resolved, sess.sourceName)
     }
-    val showBothEnds = (visibleGames.size + sourceCandidateItems.size + pendingItems.size) > 5
-    val pagerItems: List<PagerItem> = buildLibraryPagerItems(visibleGames, sourceCandidateItems, pendingItems, hasFw, isFwInstalling, showBothEnds)
-    val initialPage = if (showBothEnds) 1 else 0
+    val filteredPendingItems: List<PagerItem.PendingImport> = remember(pendingItems, searchQuery) {
+        if (searchQuery.isBlank()) pendingItems
+        else {
+            val q = searchQuery.trim().lowercase()
+            pendingItems.filter { sess ->
+                (sess.displayName?.lowercase()?.contains(q) == true) || (sess.provisionalTitleId?.lowercase()?.contains(q) == true)
+            }
+        }
+    }
+    val showBothEnds = (filteredGames.size + filteredSourceCandidates.size + filteredPendingItems.size) > 5
+    val pagerItems: List<PagerItem> = buildLibraryPagerItems(filteredGames, filteredSourceCandidates, filteredPendingItems, hasFw, isFwInstalling, showBothEnds)
+    val initialPage = 0
     val pagerState = rememberPagerState(initialPage = initialPage, pageCount = { pagerItems.size })
+    val configuration = androidx.compose.ui.platform.LocalConfiguration.current
+    val isTablet = configuration.screenWidthDp >= 800 && configuration.screenHeightDp >= 580
     // Clamp pager when list shrinks (removal crash safety — F1)
     LaunchedEffect(pagerItems.size) {
         if (pagerItems.isNotEmpty()) {
@@ -512,41 +572,391 @@ fun GamesScreen(
             }
         }
     }
+    LaunchedEffect(filteredGames.size) {
+        if (filteredGames.isNotEmpty()) {
+            focusedGridIndex = focusedGridIndex.coerceIn(0, filteredGames.lastIndex)
+        } else {
+            focusedGridIndex = 0
+        }
+    }
     val currentItem = pagerItems.getOrNull(pagerState.currentPage)
-    val selectedIconPath = (currentItem as? PagerItem.GameItem)?.game?.info?.iconPath?.value
+    val selectedGame = if (isGridView) {
+        filteredGames.getOrNull(focusedGridIndex) ?: filteredGames.firstOrNull()
+    } else {
+        (currentItem as? PagerItem.GameItem)?.game
+    }
+    val selectedIconPath = selectedGame?.info?.iconPath?.value
     val selectedPreview = remember(selectedIconPath) { GamePreviewRepository.resolveInstalledPreview(selectedIconPath) }
     val selectedCoilModel: Any? = when (selectedPreview) {
         is GamePreviewModel.LocalFile -> selectedPreview.file
         is GamePreviewModel.ContentUri -> selectedPreview.uri
         is GamePreviewModel.None -> null
     }
+    val selectedBgPreview by androidx.compose.runtime.produceState<Any?>(
+        initialValue = null,
+        key1 = selectedGame?.info?.path,
+        key2 = selectedIconPath
+    ) {
+        value = if (selectedGame != null) {
+            kotlinx.coroutines.withContext(kotlinx.coroutines.Dispatchers.IO) {
+                when (val bg = GamePreviewRepository.resolveBackground(context, selectedGame)) {
+                    is GamePreviewModel.LocalFile -> bg.file
+                    is GamePreviewModel.ContentUri -> bg.uri
+                    is GamePreviewModel.None -> null
+                }
+            }
+        } else null
+    }
+    val fullscreenAmbientModel = selectedBgPreview ?: selectedCoilModel
+
+    val homeScope = rememberCoroutineScope()
+
+    fun navigateLibraryLeft() {
+        if (showImportDialog || scanningFolder || scannedFolderGames != null || detailsState != null || launchCenterGame != null) return
+        val current = pagerState.currentPage
+        if (current > 0) {
+            homeScope.launch {
+                try { pagerState.animateScrollToPage(current - 1) } catch (_: Exception) {}
+            }
+        }
+    }
+
+    fun navigateLibraryRight() {
+        if (showImportDialog || scanningFolder || scannedFolderGames != null || detailsState != null || launchCenterGame != null) return
+        val current = pagerState.currentPage
+        if (current < pagerItems.lastIndex) {
+            homeScope.launch {
+                try { pagerState.animateScrollToPage(current + 1) } catch (_: Exception) {}
+            }
+        }
+    }
+
+    val rootFocusRequester = remember { FocusRequester() }
+    LaunchedEffect(Unit) {
+        try { rootFocusRequester.requestFocus() } catch (_: Exception) {}
+    }
+
+    val gridColumns = if (isTablet) 5 else 4
+
+    fun navigateGrid(deltaX: Int, deltaY: Int) {
+        if (showImportDialog || scanningFolder || scannedFolderGames != null || detailsState != null || launchCenterGame != null) return
+        if (filteredGames.isEmpty()) return
+
+        val current = focusedGridIndex
+        val total = filteredGames.size
+        val col = current % gridColumns
+        val row = current / gridColumns
+        val totalRows = (total + gridColumns - 1) / gridColumns
+
+        var target = current
+
+        if (deltaX < 0) {
+            if (col > 0) target = current - 1
+        } else if (deltaX > 0) {
+            if (col < gridColumns - 1 && current + 1 < total) target = current + 1
+        }
+
+        if (deltaY < 0) {
+            if (row > 0) target = (row - 1) * gridColumns + col
+        } else if (deltaY > 0) {
+            if (row < totalRows - 1) {
+                val candidate = (row + 1) * gridColumns + col
+                target = if (candidate < total) candidate else total - 1
+            }
+        }
+
+        if (target != current) {
+            focusedGridIndex = target
+        }
+    }
+
+    BackHandler(enabled = isSearchExpanded) {
+        if (searchQuery.isNotEmpty()) {
+            searchQuery = ""
+        } else {
+            isSearchExpanded = false
+        }
+    }
+
+    var stickArmedX by remember { mutableStateOf(true) }
+    var stickArmedY by remember { mutableStateOf(true) }
+    var stickHoldStartTimeX by remember { mutableLongStateOf(0L) }
+    var stickHoldStartTimeY by remember { mutableLongStateOf(0L) }
+    var lastStickStepTimeX by remember { mutableLongStateOf(0L) }
+    var lastStickStepTimeY by remember { mutableLongStateOf(0L) }
+    var lastKeyRepeatTime by remember { mutableLongStateOf(0L) }
+
+    val currentView = LocalView.current
+    DisposableEffect(currentView) {
+        val motionListener = View.OnGenericMotionListener { _, event ->
+            if (showImportDialog || scanningFolder || scannedFolderGames != null || detailsState != null || launchCenterGame != null) {
+                return@OnGenericMotionListener false
+            }
+            val source = event.source
+            val isGamepadOrJoystick = (source and InputDevice.SOURCE_GAMEPAD != 0) ||
+                (source and InputDevice.SOURCE_JOYSTICK != 0)
+            if (!isGamepadOrJoystick) return@OnGenericMotionListener false
+
+            // Left Stick ONLY (not Hat / D-pad):
+            val rawX = event.getAxisValue(MotionEvent.AXIS_X)
+            val rawY = event.getAxisValue(MotionEvent.AXIS_Y)
+            val now = android.os.SystemClock.uptimeMillis()
+
+            // Horizontal Axis
+            if (rawX < -0.55f) {
+                if (stickArmedX) {
+                    stickArmedX = false
+                    stickHoldStartTimeX = now
+                    lastStickStepTimeX = now
+                    if (isGridView) navigateGrid(deltaX = -1, deltaY = 0) else navigateLibraryLeft()
+                } else if (now - stickHoldStartTimeX > 380L && now - lastStickStepTimeX > 200L) {
+                    lastStickStepTimeX = now
+                    if (isGridView) navigateGrid(deltaX = -1, deltaY = 0) else navigateLibraryLeft()
+                }
+            } else if (rawX > 0.55f) {
+                if (stickArmedX) {
+                    stickArmedX = false
+                    stickHoldStartTimeX = now
+                    lastStickStepTimeX = now
+                    if (isGridView) navigateGrid(deltaX = 1, deltaY = 0) else navigateLibraryRight()
+                } else if (now - stickHoldStartTimeX > 380L && now - lastStickStepTimeX > 200L) {
+                    lastStickStepTimeX = now
+                    if (isGridView) navigateGrid(deltaX = 1, deltaY = 0) else navigateLibraryRight()
+                }
+            } else if (abs(rawX) < 0.20f) {
+                stickArmedX = true
+            }
+
+            // Vertical Axis (Grid only)
+            if (isGridView) {
+                if (rawY < -0.55f) {
+                    if (stickArmedY) {
+                        stickArmedY = false
+                        stickHoldStartTimeY = now
+                        lastStickStepTimeY = now
+                        navigateGrid(deltaX = 0, deltaY = -1)
+                    } else if (now - stickHoldStartTimeY > 380L && now - lastStickStepTimeY > 200L) {
+                        lastStickStepTimeY = now
+                        navigateGrid(deltaX = 0, deltaY = -1)
+                    }
+                } else if (rawY > 0.55f) {
+                    if (stickArmedY) {
+                        stickArmedY = false
+                        stickHoldStartTimeY = now
+                        lastStickStepTimeY = now
+                        navigateGrid(deltaX = 0, deltaY = 1)
+                    } else if (now - stickHoldStartTimeY > 380L && now - lastStickStepTimeY > 200L) {
+                        lastStickStepTimeY = now
+                        navigateGrid(deltaX = 0, deltaY = 1)
+                    }
+                } else if (abs(rawY) < 0.20f) {
+                    stickArmedY = true
+                }
+            }
+
+            false
+        }
+
+        val keyListener = View.OnKeyListener { _, keyCode, event ->
+            if (event.action != KeyEvent.ACTION_DOWN) return@OnKeyListener false
+            if (showImportDialog || scanningFolder || scannedFolderGames != null || detailsState != null || launchCenterGame != null) {
+                return@OnKeyListener false
+            }
+            if (event.repeatCount > 0) {
+                val now = android.os.SystemClock.uptimeMillis()
+                if (now - lastKeyRepeatTime < 200L) return@OnKeyListener true
+                lastKeyRepeatTime = now
+            }
+            when (keyCode) {
+                KeyEvent.KEYCODE_BUTTON_START -> {
+                    navigateToSettings?.invoke()
+                    true
+                }
+                KeyEvent.KEYCODE_BUTTON_SELECT -> {
+                    showImportDialog = true
+                    true
+                }
+                KeyEvent.KEYCODE_BUTTON_Y -> {
+                    isSearchExpanded = !isSearchExpanded
+                    if (!isSearchExpanded) searchQuery = ""
+                    true
+                }
+                KeyEvent.KEYCODE_BUTTON_X -> {
+                    isGridView = !isGridView
+                    com.zenithblue.sambas3.utils.GeneralSettings.setValue("home_view_mode", if (isGridView) "grid" else "carousel")
+                    true
+                }
+                KeyEvent.KEYCODE_DPAD_LEFT, KeyEvent.KEYCODE_BUTTON_L1 -> {
+                    if (isGridView) navigateGrid(deltaX = -1, deltaY = 0) else navigateLibraryLeft()
+                    true
+                }
+                KeyEvent.KEYCODE_DPAD_RIGHT, KeyEvent.KEYCODE_BUTTON_R1 -> {
+                    if (isGridView) navigateGrid(deltaX = 1, deltaY = 0) else navigateLibraryRight()
+                    true
+                }
+                KeyEvent.KEYCODE_DPAD_UP -> {
+                    if (isGridView) { navigateGrid(deltaX = 0, deltaY = -1); true } else false
+                }
+                KeyEvent.KEYCODE_DPAD_DOWN -> {
+                    if (isGridView) { navigateGrid(deltaX = 0, deltaY = 1); true } else false
+                }
+                KeyEvent.KEYCODE_BUTTON_A, KeyEvent.KEYCODE_DPAD_CENTER, KeyEvent.KEYCODE_ENTER -> {
+                    if (isGridView) {
+                        val g = filteredGames.getOrNull(focusedGridIndex)
+                        if (g != null && g.info.path != "$" && g.findProgress(GameProgressType.Install) == null) {
+                            launchCenterGame = g
+                            true
+                        } else false
+                    } else {
+                        when (val item = currentItem) {
+                            is PagerItem.GameItem -> {
+                                val g = item.game
+                                if (g.info.path != "$" && g.findProgress(GameProgressType.Install) == null) {
+                                    launchCenterGame = g
+                                    true
+                                } else false
+                            }
+                            is PagerItem.FirmwareCard -> {
+                                installFwLauncher?.launch("*/*")
+                                true
+                            }
+                            else -> false
+                        }
+                    }
+                }
+                KeyEvent.KEYCODE_BUTTON_B, KeyEvent.KEYCODE_BACK -> {
+                    if (isSearchExpanded) {
+                        if (searchQuery.isNotEmpty()) searchQuery = "" else isSearchExpanded = false
+                        true
+                    } else false
+                }
+                else -> false
+            }
+        }
+
+        currentView.setOnGenericMotionListener(motionListener)
+        currentView.setOnKeyListener(keyListener)
+        onDispose {
+            currentView.setOnGenericMotionListener(null)
+            currentView.setOnKeyListener(null)
+        }
+    }
 
     Box(
         modifier = Modifier
             .fillMaxSize()
             .background(RPCSXColors.background)
+            .focusRequester(rootFocusRequester)
+            .focusable()
+            .onPreviewKeyEvent { keyEvent ->
+                if (keyEvent.type != KeyEventType.KeyDown) return@onPreviewKeyEvent false
+                val code = keyEvent.nativeKeyEvent.keyCode
+                if (showImportDialog || scanningFolder || scannedFolderGames != null || detailsState != null || launchCenterGame != null) {
+                    return@onPreviewKeyEvent false
+                }
+                if (keyEvent.nativeKeyEvent.repeatCount > 0) {
+                    val now = android.os.SystemClock.uptimeMillis()
+                    if (now - lastKeyRepeatTime < 200L) return@onPreviewKeyEvent true
+                    lastKeyRepeatTime = now
+                }
+                when {
+                    keyEvent.key == Key.ButtonStart || code == KeyEvent.KEYCODE_BUTTON_START -> {
+                        navigateToSettings?.invoke()
+                        true
+                    }
+                    keyEvent.key == Key.ButtonSelect || code == KeyEvent.KEYCODE_BUTTON_SELECT -> {
+                        showImportDialog = true
+                        true
+                    }
+                    // Triangle (Y): Search toggle
+                    keyEvent.key == Key.ButtonY || code == KeyEvent.KEYCODE_BUTTON_Y -> {
+                        isSearchExpanded = !isSearchExpanded
+                        if (!isSearchExpanded) searchQuery = ""
+                        true
+                    }
+                    // Square (X): Grid / Carousel toggle
+                    keyEvent.key == Key.ButtonX || code == KeyEvent.KEYCODE_BUTTON_X -> {
+                        isGridView = !isGridView
+                        com.zenithblue.sambas3.utils.GeneralSettings.setValue("home_view_mode", if (isGridView) "grid" else "carousel")
+                        true
+                    }
+                    keyEvent.key == Key.DirectionLeft || code == KeyEvent.KEYCODE_DPAD_LEFT || code == KeyEvent.KEYCODE_BUTTON_L1 -> {
+                        if (isGridView) navigateGrid(deltaX = -1, deltaY = 0) else navigateLibraryLeft()
+                        true
+                    }
+                    keyEvent.key == Key.DirectionRight || code == KeyEvent.KEYCODE_DPAD_RIGHT || code == KeyEvent.KEYCODE_BUTTON_R1 -> {
+                        if (isGridView) navigateGrid(deltaX = 1, deltaY = 0) else navigateLibraryRight()
+                        true
+                    }
+                    keyEvent.key == Key.DirectionUp || code == KeyEvent.KEYCODE_DPAD_UP -> {
+                        if (isGridView) { navigateGrid(deltaX = 0, deltaY = -1); true } else false
+                    }
+                    keyEvent.key == Key.DirectionDown || code == KeyEvent.KEYCODE_DPAD_DOWN -> {
+                        if (isGridView) { navigateGrid(deltaX = 0, deltaY = 1); true } else false
+                    }
+                    keyEvent.key == Key.ButtonA || keyEvent.key == Key.DirectionCenter || keyEvent.key == Key.Enter ||
+                    code == KeyEvent.KEYCODE_BUTTON_A || code == KeyEvent.KEYCODE_DPAD_CENTER || code == KeyEvent.KEYCODE_ENTER -> {
+                        if (isGridView) {
+                            val g = filteredGames.getOrNull(focusedGridIndex)
+                            if (g != null && g.info.path != "$" && g.findProgress(GameProgressType.Install) == null) {
+                                launchCenterGame = g
+                                true
+                            } else false
+                        } else {
+                            when (val item = currentItem) {
+                                is PagerItem.GameItem -> {
+                                    val g = item.game
+                                    if (g.info.path != "$" && g.findProgress(GameProgressType.Install) == null) {
+                                        launchCenterGame = g
+                                        true
+                                    } else false
+                                }
+                                is PagerItem.FirmwareCard -> {
+                                    installFwLauncher?.launch("*/*")
+                                    true
+                                }
+                                else -> false
+                            }
+                        }
+                    }
+                    keyEvent.key == Key.ButtonB || keyEvent.key == Key.Back ||
+                    code == KeyEvent.KEYCODE_BUTTON_B || code == KeyEvent.KEYCODE_BACK -> {
+                        if (isSearchExpanded) {
+                            if (searchQuery.isNotEmpty()) searchQuery = "" else isSearchExpanded = false
+                            true
+                        } else false
+                    }
+                    else -> false
+                }
+            }
     ) {
-        // Frosted enlarged cover of focused game
-        if (selectedCoilModel != null) {
+        // Crisp cover/artwork of focused game as home background
+        if (fullscreenAmbientModel != null) {
             AsyncImage(
-                model = selectedCoilModel,
+                model = fullscreenAmbientModel,
                 contentDescription = null,
                 contentScale = ContentScale.Crop,
                 modifier = Modifier
                     .fillMaxSize()
-                    .scale(1.45f)
-                    .blur(radius = 36.dp)
-                    .alpha(0.55f),
+                    .alpha(if (selectedBgPreview != null) 0.75f else 0.55f),
                 onError = { err ->
                     val title = (currentItem as? PagerItem.GameItem)?.game?.info?.name?.value
                     val path = (currentItem as? PagerItem.GameItem)?.game?.info?.path
-                    Log.w("GamePreview", "frosted preview error title=$title path=$path err=${err.result.throwable?.message}")
+                    Log.w("GamePreview", "preview error title=$title path=$path err=${err.result.throwable?.message}")
                 }
             )
             Box(
                 modifier = Modifier
                     .fillMaxSize()
-                    .background(Color.Black.copy(alpha = 0.5f))
+                    .background(
+                        Brush.verticalGradient(
+                            listOf(
+                                Color.Black.copy(alpha = 0.5f),
+                                Color.Black.copy(alpha = 0.25f),
+                                Color.Black.copy(alpha = 0.7f),
+                            )
+                        )
+                    )
             )
         }
 
@@ -566,78 +976,205 @@ fun GamesScreen(
                 }
         )
 
-        Column(modifier = Modifier.fillMaxSize()) {
-            if (recoveryState !is HomeRecoveryState.None) {
-                CrashRecoveryCard(
-                    state = recoveryState,
-                    onContinueSave = {
-                        val latest = recoveryGame?.let {
-                            GameSavestateRepository.slots(context, it)
-                                .filter { save -> save.exists && save.path != null }
-                                .maxByOrNull { save -> save.mtimeMs }
-                        }
-                        launchRecovery(recoveryGame, latest?.path, latest?.slot, RecoveryAction.ContinueSave)
-                    },
-                    onRetry = {
-                        val failure = recoveryState as? HomeRecoveryState.LoadFailure
-                        launchRecovery(
-                            recoveryGame,
-                            failure?.savestatePath,
-                            failure?.slot,
-                            if (failure != null) RecoveryAction.Retry else RecoveryAction.Retry,
-                        )
-                    },
-                    onPlayFresh = { launchRecovery(recoveryGame, null, null, RecoveryAction.PlayFresh) },
-                    onChooseSave = {
-                        if (recoveryGame != null) launchCenterGame = recoveryGame
-                        else HomeRecoveryRepository.markActionFailed(context, recoverySession, "Choose a save from the library")
-                    },
-                    onDetails = { detailsState = recoveryState },
-                    onViewLogs = { navigateToLogs?.invoke() },
-                    onDismiss = { HomeRecoveryRepository.dismiss(context) },
-                )
-            }
-            (stopState as? com.zenithblue.sambas3.session.EmulatorStopState.Failed)?.let { failedStop ->
-                StopFailureCard(
-                    state = failedStop,
-                    onRecheck = {
-                        recoveryScope.launch {
-                            EmulatorStopCoordinator.stop(context, failedStop.reason)
-                        }
-                    },
-                    onViewLogs = { navigateToLogs?.invoke() },
-                    onForceClose = {
-                        Log.e("S3STOP", "user requested force-close requestId=${failedStop.requestId}")
-                        android.os.Process.killProcess(android.os.Process.myPid())
-                    },
-                )
-            }
-            // Top Nav Bar
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .windowInsetsPadding(WindowInsets.safeDrawing)
+        ) {
+            // Top Nav Bar: SambaS3 brand, active Game Title & Tag, Clock & Settings
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
                     .alpha(bootAlpha)
-                    .padding(horizontal = 24.dp, vertical = 16.dp),
+                    .padding(horizontal = 20.dp, vertical = 10.dp),
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                // Left: Logo + App Name + Active Game Title & Tag
+                Row(
+                    modifier = Modifier.weight(1f, fill = false),
+                    verticalAlignment = Alignment.CenterVertically,
+                ) {
                     Image(
                         painter = painterResource(R.mipmap.ic_sambas3_foreground),
                         contentDescription = null,
-                        modifier = Modifier.size(28.dp)
+                        modifier = Modifier.size(24.dp)
                     )
-                    Text("SambaS3", style = AppTypography.displayLarge.copy(letterSpacing = 4.sp), color = RPCSXColors.primary)
+                    Spacer(Modifier.width(6.dp))
+                    Text(
+                        "SambaS3",
+                        style = AppTypography.titleMedium.copy(letterSpacing = 1.sp, fontSize = 16.sp, fontWeight = FontWeight.Bold),
+                        color = RPCSXColors.primary
+                    )
+
+                    if (!isTablet && !isSearchExpanded) {
+                        val displayedGame = if (isGridView) {
+                            filteredGames.getOrNull(focusedGridIndex) ?: filteredGames.firstOrNull()
+                        } else {
+                            (currentItem as? PagerItem.GameItem)?.game
+                        }
+                        if (displayedGame != null) {
+                            val activeGame = displayedGame
+                            val isActiveGameRunning = isRunning && emulatorActiveGame.value == activeGame.info.path
+                            val titleText = when {
+                                activeGame.info.path == "$" -> "IMPORTING..."
+                                else -> GameIdentity.displayName(
+                                    activeGame.info.path,
+                                    activeGame.info.name.value,
+                                ).uppercase()
+                            }
+                            val tag = activeGame.info.path.substringAfterLast("/")
+
+                            Spacer(Modifier.width(10.dp))
+                            Box(
+                                modifier = Modifier
+                                    .width(1.dp)
+                                    .height(16.dp)
+                                    .background(RPCSXColors.outlineVariant.copy(alpha = 0.6f))
+                            )
+                            Spacer(Modifier.width(10.dp))
+                            Text(
+                                text = titleText,
+                                style = AppTypography.titleMedium.copy(
+                                    fontSize = 15.sp,
+                                    fontWeight = FontWeight.Bold,
+                                    letterSpacing = 0.5.sp
+                                ),
+                                color = Color.White,
+                                maxLines = 1,
+                                overflow = TextOverflow.Ellipsis,
+                                softWrap = false,
+                                modifier = Modifier.weight(1f, fill = false),
+                            )
+                            Spacer(Modifier.width(8.dp))
+                            InfoBadge(text = tag)
+                            if (isActiveGameRunning) {
+                                Spacer(Modifier.width(8.dp))
+                                InfoBadge(text = "RUNNING", color = RPCSXColors.errorColor)
+                            }
+                        } else if (!isGridView) {
+                            when (currentItem) {
+                                is PagerItem.SourceCandidate -> {
+                                    Spacer(Modifier.width(10.dp))
+                                    Box(
+                                        modifier = Modifier
+                                            .width(1.dp)
+                                            .height(16.dp)
+                                            .background(RPCSXColors.outlineVariant.copy(alpha = 0.6f))
+                                    )
+                                    Spacer(Modifier.width(10.dp))
+                                    Text(
+                                        text = currentItem.displayName.uppercase(),
+                                        style = AppTypography.titleMedium.copy(
+                                            fontSize = 15.sp,
+                                            fontWeight = FontWeight.Bold,
+                                            letterSpacing = 0.5.sp
+                                        ),
+                                        color = Color.White,
+                                        maxLines = 1,
+                                        overflow = TextOverflow.Ellipsis,
+                                        softWrap = false,
+                                        modifier = Modifier.weight(1f, fill = false),
+                                    )
+                                    currentItem.titleId?.let { id ->
+                                        Spacer(Modifier.width(8.dp))
+                                        InfoBadge(text = id)
+                                    }
+                                }
+                                is PagerItem.PendingImport -> {
+                                    Spacer(Modifier.width(10.dp))
+                                    Box(
+                                        modifier = Modifier
+                                            .width(1.dp)
+                                            .height(16.dp)
+                                            .background(RPCSXColors.outlineVariant.copy(alpha = 0.6f))
+                                    )
+                                    Spacer(Modifier.width(10.dp))
+                                    Text(
+                                        text = (currentItem.displayName ?: currentItem.provisionalTitleId ?: "IMPORTING").uppercase(),
+                                        style = AppTypography.titleMedium.copy(
+                                            fontSize = 15.sp,
+                                            fontWeight = FontWeight.Bold,
+                                            letterSpacing = 0.5.sp
+                                        ),
+                                        color = Color.White,
+                                        maxLines = 1,
+                                        overflow = TextOverflow.Ellipsis,
+                                        softWrap = false,
+                                        modifier = Modifier.weight(1f, fill = false),
+                                    )
+                                    Spacer(Modifier.width(8.dp))
+                                    InfoBadge(text = "IMPORTING")
+                                }
+                                else -> {}
+                            }
+                        }
+                    }
                 }
 
-                Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(24.dp)) {
+                // Right: Search Bar, View Toggle, Import Game Button, Clock & Settings
+                Row(
+                    modifier = Modifier.wrapContentWidth(),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(10.dp)
+                ) {
+                    MinimalSearchBar(
+                        query = searchQuery,
+                        onQueryChange = { searchQuery = it },
+                        isExpanded = isSearchExpanded,
+                        onExpandedChange = { isSearchExpanded = it }
+                    )
+
+                    Surface(
+                        shape = RoundedCornerShape(4.dp),
+                        color = RPCSXColors.surfaceElevated.copy(alpha = 0.85f),
+                        border = BorderStroke(1.dp, if (isGridView) RPCSXColors.primary else RPCSXColors.surfaceOverlay),
+                        modifier = Modifier
+                            .clickable {
+                                isGridView = !isGridView
+                                com.zenithblue.sambas3.utils.GeneralSettings.setValue("home_view_mode", if (isGridView) "grid" else "carousel")
+                            }
+                    ) {
+                        Row(
+                            modifier = Modifier.padding(horizontal = 6.dp, vertical = 4.dp),
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.spacedBy(4.dp)
+                        ) {
+                            ControllerGlyphBadge(glyph = "□")
+                            Icon(
+                                painter = painterResource(if (isGridView) R.drawable.ic_menu else R.drawable.ic_grid_on),
+                                contentDescription = if (isGridView) "Switch to carousel view" else "Switch to grid view",
+                                tint = if (isGridView) RPCSXColors.primary else RPCSXColors.textSecondary,
+                                modifier = Modifier.size(15.dp)
+                            )
+                        }
+                    }
+
+                    ImportTopBarButton(
+                        onClick = { showImportDialog = true }
+                    )
+
                     Text(
                         SimpleDateFormat("h:mm a", Locale.getDefault()).format(Date()),
                         style = AppTypography.labelMedium,
                         color = RPCSXColors.textSecondary
                     )
-                    IconButton(onClick = { navigateToSettings?.invoke() }) {
-                        Icon(painterResource(R.drawable.ic_settings), contentDescription = "Settings", tint = RPCSXColors.primary)
+
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        modifier = Modifier
+                            .clip(RoundedCornerShape(4.dp))
+                            .clickable { navigateToSettings?.invoke() }
+                            .padding(horizontal = 4.dp, vertical = 2.dp),
+                        horizontalArrangement = Arrangement.spacedBy(4.dp)
+                    ) {
+                        ControllerGlyphBadge(glyph = "START")
+                        Icon(
+                            painter = painterResource(R.drawable.ic_settings),
+                            contentDescription = "Settings",
+                            tint = RPCSXColors.primary,
+                            modifier = Modifier.size(18.dp)
+                        )
                     }
                 }
             }
@@ -676,21 +1213,91 @@ fun GamesScreen(
                         }
                     }
                 }
+            } else if (filteredGames.isEmpty() && searchQuery.isNotBlank()) {
+                Box(
+                    modifier = Modifier.fillMaxWidth().weight(1f),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Column(
+                        horizontalAlignment = Alignment.CenterHorizontally,
+                        verticalArrangement = Arrangement.spacedBy(12.dp),
+                        modifier = Modifier.padding(24.dp)
+                    ) {
+                        Text(
+                            text = "NO GAMES MATCHING \"$searchQuery\"",
+                            style = AppTypography.headlineMedium.copy(
+                                fontSize = 16.sp,
+                                fontWeight = FontWeight.Bold,
+                                letterSpacing = 1.sp
+                            ),
+                            color = RPCSXColors.textSecondary,
+                            textAlign = TextAlign.Center
+                        )
+                        OutlinedButton(
+                            onClick = { searchQuery = "" },
+                            shape = RoundedCornerShape(4.dp),
+                            border = BorderStroke(1.dp, RPCSXColors.primary),
+                            colors = ButtonDefaults.outlinedButtonColors(
+                                contentColor = RPCSXColors.primary
+                            )
+                        ) {
+                            Text("CLEAR SEARCH", style = AppTypography.labelSmall.copy(fontWeight = FontWeight.Bold))
+                        }
+                    }
+                }
+            } else if (isGridView) {
+                GamesGridView(
+                    games = filteredGames,
+                    focusedIndex = focusedGridIndex,
+                    onFocusChange = { focusedGridIndex = it },
+                    onPlayGame = { game ->
+                        if (game.info.path != "$" && game.findProgress(GameProgressType.Install) == null) {
+                            launchCenterGame = game
+                        }
+                    },
+                    onConfigureGame = { game -> configureGameTarget = game },
+                    emulatorActiveGame = emulatorActiveGame.value,
+                    gameplayRunning = gameplayRunning,
+                    isTablet = isTablet,
+                    modifier = Modifier.fillMaxWidth().weight(1f)
+                )
+            } else if (isTablet) {
+                TabletHomeScreen(
+                    pagerItems = pagerItems,
+                    pagerState = pagerState,
+                    currentItem = currentItem,
+                    onPlayGame = { game ->
+                        if (game.info.path != "$" && game.findProgress(GameProgressType.Install) == null) {
+                            launchCenterGame = game
+                        }
+                    },
+                    onConfigureGame = { game -> configureGameTarget = game },
+                    onImportGame = { showImportDialog = true },
+                    onInstallFirmware = { installFwLauncher?.launch("*/*") },
+                    emulatorActiveGame = emulatorActiveGame.value,
+                    gameplayRunning = gameplayRunning,
+                    installPpu = installPpu,
+                    prelaunchPpu = prelaunchPpu,
+                    runtimePpu = runtimePpu,
+                    fullscreenAmbientModel = fullscreenAmbientModel,
+                    modifier = Modifier.fillMaxWidth().weight(1f)
+                )
             } else {
                 BoxWithConstraints(modifier = Modifier.fillMaxWidth().weight(1f)) {
                     // On wide/landscape screens maxHeight is small, so drive size from the
                     // smaller of width and height to keep cards a reasonable, readable size.
                     val isLandscape = maxWidth > maxHeight
                     val itemSize = if (isLandscape) {
-                        // In landscape: constrain by height but allow more room
-                        val h = (maxHeight - 32.dp).coerceAtLeast(120.dp)
-                        h
+                        // Sized so focused card (scaled 1.12x) fits with >20dp clearance from top and bottom bars
+                        val maxAllowedHeight = (maxHeight - 36.dp) / 1.15f
+                        maxAllowedHeight.coerceIn(140.dp, 360.dp)
                     } else {
-                        (maxHeight - 64.dp) * 0.8f
+                        (maxHeight - 48.dp) * 0.85f
                     }
                     val itemHeight = itemSize
                     val itemWidth = itemHeight * (if (isLandscape) 0.75f else 0.85f)
                     val horizontalPadding = if (maxWidth > itemWidth) (maxWidth - itemWidth) / 2 else 0.dp
+                    val verticalPadding = ((maxHeight - itemHeight) / 2).coerceAtLeast(16.dp)
                     val coroutineScope = rememberCoroutineScope()
 
                     HorizontalPager(
@@ -698,9 +1305,9 @@ fun GamesScreen(
                         modifier = Modifier.fillMaxSize().scale(bootScale),
                         contentPadding = PaddingValues(
                             horizontal = horizontalPadding,
-                            vertical = if (isLandscape) 8.dp else 32.dp
+                            vertical = verticalPadding
                         ),
-                        pageSpacing = 16.dp,
+                        pageSpacing = 24.dp,
                         verticalAlignment = Alignment.CenterVertically,
                         key = { idx -> pagerItems.getOrNull(idx)?.stableKey ?: "page:$idx" }
                     ) { page ->
@@ -711,7 +1318,17 @@ fun GamesScreen(
                                 GameCard(
                                     game = item.game,
                                     distance = distance,
-                                    onClick = { coroutineScope.launch { pagerState.animateScrollToPage(page) } },
+                                    ambientBgModel = fullscreenAmbientModel,
+                                    onClick = {
+                                        if (distance == 0) {
+                                            val g = item.game
+                                            if (g.info.path != "$" && g.findProgress(GameProgressType.Install) == null) {
+                                                launchCenterGame = g
+                                            }
+                                        } else {
+                                            coroutineScope.launch { pagerState.animateScrollToPage(page) }
+                                        }
+                                    },
                                     onPlay = {
                                         val g = item.game
                                         if (g.info.path == "$" || g.findProgress(GameProgressType.Install) != null) return@GameCard
@@ -758,148 +1375,6 @@ fun GamesScreen(
                                 )
                             }
                         }
-                    }
-                }
-
-                // Focused Game Info
-                if (currentItem is PagerItem.GameItem) {
-                    val activeGame = currentItem.game
-                    val isActiveGameRunning = isRunning && emulatorActiveGame.value == activeGame.info.path
-                    Column(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .alpha(bootAlpha)
-                            .padding(top = 16.dp, bottom = 16.dp),
-                        horizontalAlignment = Alignment.CenterHorizontally
-                    ) {
-                        Text(
-                            text = when {
-                                activeGame.info.path == "$" -> "IMPORTING..."
-                                else -> GameIdentity.displayName(
-                                    activeGame.info.path,
-                                    activeGame.info.name.value,
-                                ).uppercase()
-                            },
-                            style = AppTypography.headlineMedium.copy(letterSpacing = 2.sp),
-                            color = RPCSXColors.primary
-                        )
-                        Row(horizontalArrangement = Arrangement.spacedBy(12.dp), modifier = Modifier.padding(top = 8.dp)) {
-                            if (isActiveGameRunning) {
-                                InfoBadge(text = "RUNNING", color = RPCSXColors.errorColor)
-                            }
-                            InfoBadge(text = activeGame.info.path.substringAfterLast("/"))
-                        }
-                        val homeTitleId = GameIdentity.titleIdOrNull(activeGame.info.path, activeGame.info.name.value)
-                        val homeAvailability = com.zenithblue.sambas3.ppu.GameRunEligibilityHelper.evaluateAvailability(
-                            context, activeGame, installPpu.ppuActive, prelaunchPpu, runtimePpu,
-                            emulatorState.value, emulatorActiveGame.value
-                        )
-                        val homePpuUi = com.zenithblue.sambas3.ui.games.launch.LaunchPpuPresentation.build(
-                            homeTitleId,
-                            homeAvailability,
-                            com.zenithblue.sambas3.ui.games.launch.LaunchRuntimeInputs(
-                                installPpu = installPpu,
-                                prelaunchPpu = prelaunchPpu,
-                                runtimePpu = runtimePpu,
-                                emulatorState = emulatorState.value,
-                                activeGame = emulatorActiveGame.value,
-                                waitingForIdle = com.zenithblue.sambas3.ppu.ImportPpuPreparationCoordinator.waitingForIdle,
-                                deferredForFgs = com.zenithblue.sambas3.ppu.ImportPpuPreparationCoordinator.deferredForFgs,
-                                fgsStartDenied = CompileProgressBridge.fgsStartDenied,
-                                preRuntimeState = homeTitleId?.let {
-                                    runCatching { PpuReadinessStore.getPreRuntimeState(context, it) }
-                                        .getOrDefault(PreRuntimePpuState.NOT_DONE)
-                                } ?: PreRuntimePpuState.NOT_DONE,
-                                runtimeReadyState = homeTitleId?.let {
-                                    runCatching { PpuReadinessStore.getRuntimeState(context, it) }
-                                        .getOrDefault(RuntimePpuState.NOT_STARTED)
-                                } ?: RuntimePpuState.NOT_STARTED,
-                                validatedByRealBootFrame = homeTitleId?.let {
-                                    runCatching { PpuReadinessStore.isRuntimeValidated(context, it) }.getOrDefault(false)
-                                } ?: false,
-                            ),
-                        )
-                        Text(
-                            text = "Install PPU: ${com.zenithblue.sambas3.ui.games.launch.LaunchPpuPresentation.phaseStatusText(homePpuUi.installPpu)}",
-                            style = AppTypography.labelSmall,
-                            color = RPCSXColors.textSecondary,
-                            modifier = Modifier.padding(top = 6.dp),
-                            maxLines = 1,
-                            overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis,
-                        )
-                        Text(
-                            text = "Runtime PPU: ${com.zenithblue.sambas3.ui.games.launch.LaunchPpuPresentation.phaseStatusText(homePpuUi.runtimePpu)}",
-                            style = AppTypography.labelSmall,
-                            color = RPCSXColors.textSecondary,
-                            maxLines = 1,
-                            overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis,
-                        )
-                    }
-                } else if (currentItem is PagerItem.AddGame) {
-                    Column(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .alpha(bootAlpha)
-                            .padding(top = 16.dp, bottom = 16.dp),
-                        horizontalAlignment = Alignment.CenterHorizontally
-                    ) {
-                        Text(
-                            text = if (currentItem.disabled) "WAITING FOR FIRMWARE..." else "ADD GAME",
-                            style = AppTypography.headlineMedium.copy(letterSpacing = 2.sp),
-                            color = if (currentItem.disabled) RPCSXColors.textDisabled else RPCSXColors.textSecondary
-                        )
-                    }
-                } else if (currentItem is PagerItem.FirmwareCard) {
-                    Column(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .alpha(bootAlpha)
-                            .padding(top = 16.dp, bottom = 16.dp),
-                        horizontalAlignment = Alignment.CenterHorizontally
-                    ) {
-                        Text(
-                            text = "INSTALL FIRMWARE",
-                            style = AppTypography.headlineMedium.copy(letterSpacing = 2.sp),
-                            color = RPCSXColors.textSecondary
-                        )
-                    }
-                } else if (currentItem is PagerItem.SourceCandidate) {
-                    Column(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .alpha(bootAlpha)
-                            .padding(top = 16.dp, bottom = 16.dp),
-                        horizontalAlignment = Alignment.CenterHorizontally
-                    ) {
-                        Text(
-                            text = currentItem.displayName.uppercase(),
-                            style = AppTypography.headlineMedium.copy(letterSpacing = 2.sp),
-                            color = RPCSXColors.primary
-                        )
-                        Row(horizontalArrangement = Arrangement.spacedBy(8.dp), modifier = Modifier.padding(top = 8.dp)) {
-                            InfoBadge(text = "ISO", color = RPCSXColors.textSecondary)
-                            InfoBadge(text = "Not installed")
-                            if (currentItem.titleId != null) InfoBadge(text = currentItem.titleId!!)
-                        }
-                        Text(
-                            text = "Pre-runtime PPU: Not done  •  Runtime PPU: Not started",
-                            style = AppTypography.labelSmall,
-                            color = RPCSXColors.textSecondary,
-                            modifier = Modifier.padding(top = 4.dp)
-                        )
-                    }
-                } else if (currentItem is PagerItem.PendingImport) {
-                    Column(
-                        modifier = Modifier.fillMaxWidth().alpha(bootAlpha).padding(top = 16.dp, bottom = 16.dp),
-                        horizontalAlignment = Alignment.CenterHorizontally
-                    ) {
-                        Text(text = (currentItem.displayName ?: "IMPORTING...").uppercase(), style = AppTypography.headlineMedium.copy(letterSpacing = 2.sp), color = RPCSXColors.primary)
-                        if (currentItem.provisionalTitleId != null) {
-                            Box(modifier = Modifier.padding(top = 4.dp)) {
-                                InfoBadge(text = currentItem.provisionalTitleId!!)
-                            }
-                        }
-                        Text(text = "Import in progress — same card will show PPU", style = AppTypography.labelSmall, color = RPCSXColors.textSecondary, modifier = Modifier.padding(top = 4.dp))
                     }
                 }
             }
@@ -954,15 +1429,13 @@ fun GamesScreen(
                                 trackColor = RPCSXColors.surfaceOverlay,
                             )
                         }
-                        installPpu.ppuMsg?.let {
-                            Text(
-                                text = it,
-                                style = AppTypography.labelSmall,
-                                color = RPCSXColors.textSecondary,
-                                maxLines = 1,
-                                overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis
-                            )
-                        }
+                        Text(
+                            text = com.zenithblue.sambas3.ui.games.launch.LaunchPpuPresentation.compileProgressLine(installPpu),
+                            style = AppTypography.labelSmall,
+                            color = RPCSXColors.textSecondary,
+                            maxLines = 1,
+                            overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis
+                        )
                     } else if (prelaunchPpu.ppuActive) {
                         Text(
                             text = "Preparing PPU",
@@ -977,15 +1450,13 @@ fun GamesScreen(
                             color = RPCSXColors.primary,
                             trackColor = RPCSXColors.surfaceOverlay,
                         )
-                        prelaunchPpu.ppuMsg?.let {
-                            Text(
-                                text = it,
-                                style = AppTypography.labelSmall,
-                                color = RPCSXColors.textSecondary,
-                                maxLines = 1,
-                                overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis
-                            )
-                        }
+                        Text(
+                            text = com.zenithblue.sambas3.ui.games.launch.LaunchPpuPresentation.compileProgressLine(prelaunchPpu),
+                            style = AppTypography.labelSmall,
+                            color = RPCSXColors.textSecondary,
+                            maxLines = 1,
+                            overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis
+                        )
                     } else if (runtimePpu.ppuActive) {
                         Text(
                             text = stringResource(R.string.compiling_ppu_title),
@@ -1000,15 +1471,13 @@ fun GamesScreen(
                             color = RPCSXColors.primary,
                             trackColor = RPCSXColors.surfaceOverlay,
                         )
-                        runtimePpu.ppuMsg?.let {
-                            Text(
-                                text = it,
-                                style = AppTypography.labelSmall,
-                                color = RPCSXColors.textSecondary,
-                                maxLines = 1,
-                                overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis
-                            )
-                        }
+                        Text(
+                            text = com.zenithblue.sambas3.ui.games.launch.LaunchPpuPresentation.compileProgressLine(runtimePpu),
+                            style = AppTypography.labelSmall,
+                            color = RPCSXColors.textSecondary,
+                            maxLines = 1,
+                            overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis
+                        )
                     } else if (isPackageInstalling) {
                         Text(
                             text = stringResource(R.string.package_installation),
@@ -1120,54 +1589,175 @@ fun GamesScreen(
                             }
                         })
                     } else {
-                        val hintGame = (currentItem as? PagerItem.GameItem)?.game
+                        val hintGame = if (isGridView) {
+                            filteredGames.getOrNull(focusedGridIndex) ?: filteredGames.firstOrNull()
+                        } else {
+                            (currentItem as? PagerItem.GameItem)?.game
+                        }
+                        val hintTitleId = hintGame?.let {
+                            runCatching {
+                                com.zenithblue.sambas3.GameIdentity.titleIdOrNull(it.info.path, it.info.name.value)
+                            }.getOrNull()
+                        }
                         val hintAvailability = hintGame?.let {
                             com.zenithblue.sambas3.ppu.GameRunEligibilityHelper.evaluateAvailability(
                                 context, it, installPpu.ppuActive, prelaunchPpu, runtimePpu, emulatorState.value, emulatorActiveGame.value
                             )
                         }
-                        when (hintAvailability) {
-                            is com.zenithblue.sambas3.ppu.GameLaunchAvailability.PreparingPpu, is com.zenithblue.sambas3.ppu.GameLaunchAvailability.WaitingForEngineIdle, is com.zenithblue.sambas3.ppu.GameLaunchAvailability.Importing, is com.zenithblue.sambas3.ppu.GameLaunchAvailability.EngineBusy -> {
-                                HintButton(text = "PREPARING", icon = "X", color = RPCSXColors.textDisabled, onClick = { })
+                        val hintPpuUi = hintGame?.let { game ->
+                            com.zenithblue.sambas3.ui.games.launch.LaunchPpuPresentation.build(
+                                hintTitleId,
+                                hintAvailability ?: com.zenithblue.sambas3.ppu.GameLaunchAvailability.NeedsPreparation,
+                                com.zenithblue.sambas3.ui.games.launch.LaunchRuntimeInputs(
+                                    installPpu = installPpu,
+                                    prelaunchPpu = prelaunchPpu,
+                                    runtimePpu = runtimePpu,
+                                    emulatorState = emulatorState.value,
+                                    activeGame = emulatorActiveGame.value,
+                                    waitingForIdle = com.zenithblue.sambas3.ppu.ImportPpuPreparationCoordinator.waitingForIdle,
+                                    deferredForFgs = com.zenithblue.sambas3.ppu.ImportPpuPreparationCoordinator.deferredForFgs,
+                                    fgsStartDenied = CompileProgressBridge.fgsStartDenied,
+                                    preRuntimeState = hintTitleId?.let {
+                                        runCatching { PpuReadinessStore.getPreRuntimeState(context, it) }
+                                            .getOrDefault(PreRuntimePpuState.NOT_DONE)
+                                    } ?: PreRuntimePpuState.NOT_DONE,
+                                    runtimeReadyState = hintTitleId?.let {
+                                        runCatching { PpuReadinessStore.getRuntimeState(context, it) }
+                                            .getOrDefault(RuntimePpuState.NOT_STARTED)
+                                    } ?: RuntimePpuState.NOT_STARTED,
+                                    validatedByRealBootFrame = hintTitleId?.let {
+                                        runCatching { PpuReadinessStore.isRuntimeValidated(context, it) }.getOrDefault(false)
+                                    } ?: false,
+                                    activeCompileTitleId = com.zenithblue.sambas3.ppu.ImportPpuPreparationCoordinator.activeTitleId,
+                                    stoppingCompile = com.zenithblue.sambas3.ppu.ImportPpuPreparationCoordinator.stopping,
+                                ),
+                            )
+                        }
+                        when (hintPpuUi?.prepareAction) {
+                            com.zenithblue.sambas3.ui.games.launch.PrepareAction.Stop -> {
+                                HintButton(text = "STOP PPU", icon = "■", color = RPCSXColors.errorColor, onClick = {
+                                    com.zenithblue.sambas3.ppu.ImportPpuPreparationCoordinator.requestStop(context)
+                                })
                             }
-                            is com.zenithblue.sambas3.ppu.GameLaunchAvailability.NeedsPreparation -> {
+                            com.zenithblue.sambas3.ui.games.launch.PrepareAction.Stopping -> {
+                                HintButton(text = "STOPPING...", icon = "■", color = RPCSXColors.errorColor, onClick = {
+                                    com.zenithblue.sambas3.ppu.ImportPpuPreparationCoordinator.requestStop(context)
+                                })
+                            }
+                            com.zenithblue.sambas3.ui.games.launch.PrepareAction.Locked -> {
+                                HintButton(text = "WAITING", icon = "X", color = RPCSXColors.textDisabled, onClick = { })
+                            }
+                            com.zenithblue.sambas3.ui.games.launch.PrepareAction.Prepare -> {
                                 HintButton(text = "PREPARE PPU", icon = "X", color = RPCSXColors.primary, onClick = {
                                     hintGame?.let {
                                         com.zenithblue.sambas3.ppu.ImportPpuPreparationCoordinator.requestPreparation(context, it)
                                     }
                                 })
                             }
-                            is com.zenithblue.sambas3.ppu.GameLaunchAvailability.Failed -> {
+                            com.zenithblue.sambas3.ui.games.launch.PrepareAction.Retry -> {
                                 HintButton(text = "RETRY PPU", icon = "X", color = RPCSXColors.errorColor, onClick = {
                                     hintGame?.let {
                                         com.zenithblue.sambas3.ppu.ImportPpuPreparationCoordinator.requestPreparation(context, it)
                                     }
                                 })
                             }
-                            is com.zenithblue.sambas3.ppu.GameLaunchAvailability.Ready -> {
-                                HintButton(text = "PLAY", icon = "X", color = RPCSXColors.primary, onClick = { launchCenterGame = hintGame })
+                            com.zenithblue.sambas3.ui.games.launch.PrepareAction.PreparingInstall,
+                            com.zenithblue.sambas3.ui.games.launch.PrepareAction.PreparingRuntime -> {
+                                HintButton(text = "PREPARING", icon = "X", color = RPCSXColors.textDisabled, onClick = { })
                             }
-                            else -> {
-                                val isPlayable = hintAvailability == null || hintAvailability is com.zenithblue.sambas3.ppu.GameLaunchAvailability.Ready
-                                HintButton(
-                                    text = "PLAY",
-                                    icon = "X",
-                                    color = if (isPlayable || hintGame == null) RPCSXColors.primary else RPCSXColors.textDisabled,
-                                    onClick = {
-                                        if (hintGame != null && hintAvailability is com.zenithblue.sambas3.ppu.GameLaunchAvailability.Ready) {
-                                            launchCenterGame = hintGame
-                                        } else if (hintAvailability is com.zenithblue.sambas3.ppu.GameLaunchAvailability.NeedsPreparation) {
-                                            hintGame?.let {
-                                                com.zenithblue.sambas3.ppu.ImportPpuPreparationCoordinator.requestPreparation(context, it)
+                            null -> when (hintAvailability) {
+                                is com.zenithblue.sambas3.ppu.GameLaunchAvailability.PreparingPpu,
+                                is com.zenithblue.sambas3.ppu.GameLaunchAvailability.WaitingForEngineIdle,
+                                is com.zenithblue.sambas3.ppu.GameLaunchAvailability.Importing,
+                                is com.zenithblue.sambas3.ppu.GameLaunchAvailability.EngineBusy -> {
+                                    HintButton(text = "PREPARING", icon = "X", color = RPCSXColors.textDisabled, onClick = { })
+                                }
+                                is com.zenithblue.sambas3.ppu.GameLaunchAvailability.Ready -> {
+                                    HintButton(text = "PLAY", icon = "X", color = RPCSXColors.primary, onClick = { launchCenterGame = hintGame })
+                                }
+                                else -> {
+                                    val isPlayable = hintAvailability == null || hintAvailability is com.zenithblue.sambas3.ppu.GameLaunchAvailability.Ready
+                                    HintButton(
+                                        text = "PLAY",
+                                        icon = "X",
+                                        color = if (isPlayable || hintGame == null) RPCSXColors.primary else RPCSXColors.textDisabled,
+                                        onClick = {
+                                            if (hintGame != null && hintAvailability is com.zenithblue.sambas3.ppu.GameLaunchAvailability.Ready) {
+                                                launchCenterGame = hintGame
                                             }
                                         }
-                                    }
-                                )
+                                    )
+                                }
                             }
                         }
                     }
-                    HintButton(text = "OPTIONS", icon = "△", color = RPCSXColors.textSecondary, onClick = { navigateToSettings?.invoke() })
                 }
+            }
+        }
+
+        // Floating Crash Recovery / Stop Failure Banner
+        if (recoveryState !is HomeRecoveryState.None) {
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(top = 10.dp)
+                    .align(Alignment.TopCenter)
+                    .navigationBarsPadding(),
+                contentAlignment = Alignment.TopCenter,
+            ) {
+                CrashRecoveryCard(
+                    state = recoveryState,
+                    onContinueSave = {
+                        val latest = recoveryGame?.let {
+                            GameSavestateRepository.slots(context, it)
+                                .filter { save -> save.exists && save.path != null }
+                                .maxByOrNull { save -> save.mtimeMs }
+                        }
+                        launchRecovery(recoveryGame, latest?.path, latest?.slot, RecoveryAction.ContinueSave)
+                    },
+                    onRetry = {
+                        val failure = recoveryState as? HomeRecoveryState.LoadFailure
+                        launchRecovery(
+                            recoveryGame,
+                            failure?.savestatePath,
+                            failure?.slot,
+                            if (failure != null) RecoveryAction.Retry else RecoveryAction.Retry,
+                        )
+                    },
+                    onPlayFresh = { launchRecovery(recoveryGame, null, null, RecoveryAction.PlayFresh) },
+                    onChooseSave = {
+                        if (recoveryGame != null) launchCenterGame = recoveryGame
+                        else HomeRecoveryRepository.markActionFailed(context, recoverySession, "Choose a save from the library")
+                    },
+                    onDetails = { detailsState = recoveryState },
+                    onViewLogs = { navigateToLogs?.invoke() },
+                    onOpenAllCrashLogs = { navigateToCrashLogs?.invoke() ?: navigateToLogs?.invoke() },
+                    onDismiss = { HomeRecoveryRepository.dismiss(context) },
+                )
+            }
+        }
+        (stopState as? com.zenithblue.sambas3.session.EmulatorStopState.Failed)?.let { failedStop ->
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(top = 10.dp)
+                    .align(Alignment.TopCenter)
+                    .navigationBarsPadding(),
+                contentAlignment = Alignment.TopCenter,
+            ) {
+                StopFailureCard(
+                    state = failedStop,
+                    onRecheck = {
+                        recoveryScope.launch {
+                            EmulatorStopCoordinator.stop(context, failedStop.reason)
+                        }
+                    },
+                    onViewLogs = { navigateToLogs?.invoke() },
+                    onForceClose = {
+                        Log.e("S3STOP", "user requested force-close requestId=${failedStop.requestId}")
+                        android.os.Process.killProcess(android.os.Process.myPid())
+                    },
+                )
             }
         }
 
@@ -1198,6 +1788,8 @@ fun GamesScreen(
                 validatedByRealBootFrame = titleId?.let {
                     runCatching { PpuReadinessStore.isRuntimeValidated(context, it) }.getOrDefault(false)
                 } ?: false,
+                activeCompileTitleId = com.zenithblue.sambas3.ppu.ImportPpuPreparationCoordinator.activeTitleId,
+                stoppingCompile = com.zenithblue.sambas3.ppu.ImportPpuPreparationCoordinator.stopping,
             )
             GameLaunchCenter(
                 snapshot = GameLaunchRepository.snapshot(context, game, launchInputs),
@@ -1237,6 +1829,9 @@ fun GamesScreen(
                 onPrepare = {
                     com.zenithblue.sambas3.ppu.ImportPpuPreparationCoordinator.requestPreparation(context, game)
                 },
+                onStop = {
+                    com.zenithblue.sambas3.ppu.ImportPpuPreparationCoordinator.requestStop(context)
+                },
             )
         }
 
@@ -1264,6 +1859,10 @@ fun GamesScreen(
                 },
                 onSafeRetry = { safeRetryRecovery(state) },
                 onViewLogs = { navigateToLogs?.invoke() },
+                onOpenAllCrashLogs = {
+                    detailsState = null
+                    navigateToCrashLogs?.invoke() ?: navigateToLogs?.invoke()
+                },
                 onExportReport = { exportRecoveryReport(state) },
                 onDismiss = { detailsState = null },
             )
@@ -1541,22 +2140,472 @@ fun InfoBadge(text: String, color: Color = RPCSXColors.textSecondary) {
 }
 
 @Composable
+fun ImportTopBarButton(
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier
+) {
+    val interactionSource = remember { MutableInteractionSource() }
+    val isPressed by interactionSource.collectIsPressedAsState()
+    val scale by animateFloatAsState(
+        targetValue = if (isPressed) 0.94f else 1f,
+        animationSpec = tween(120)
+    )
+
+    Box(
+        contentAlignment = Alignment.Center,
+        modifier = modifier
+            .graphicsLayer {
+                scaleX = scale
+                scaleY = scale
+            }
+            .clickable(
+                interactionSource = interactionSource,
+                indication = null,
+                onClick = onClick
+            )
+            .padding(4.dp)
+    ) {
+        // Diffuse tube-TV gold glow outline bloom (design_3.md focus-glow)
+        Box(
+            modifier = Modifier
+                .matchParentSize()
+                .blur(radius = 6.dp)
+                .border(
+                    BorderStroke(1.5.dp, RPCSXColors.focusGlow.copy(alpha = 0.65f)),
+                    RoundedCornerShape(4.dp)
+                )
+        )
+
+        // Subtle ambient gold bloom
+        Box(
+            modifier = Modifier
+                .matchParentSize()
+                .blur(radius = 8.dp)
+                .background(
+                    RPCSXColors.focusGlow.copy(alpha = 0.12f),
+                    RoundedCornerShape(4.dp)
+                )
+        )
+
+        // Crisp foreground container per design_3.md (surface-elevated + gold border)
+        Row(
+            modifier = Modifier
+                .background(
+                    color = RPCSXColors.surfaceElevated.copy(alpha = 0.95f),
+                    shape = RoundedCornerShape(4.dp)
+                )
+                .border(
+                    border = BorderStroke(1.dp, RPCSXColors.primary),
+                    shape = RoundedCornerShape(4.dp)
+                )
+                .padding(horizontal = 9.dp, vertical = 5.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(7.dp)
+        ) {
+            // Controller mapping indicator: SELECT button pill
+            Surface(
+                color = RPCSXColors.primaryMuted,
+                shape = RoundedCornerShape(3.dp),
+                border = BorderStroke(1.dp, RPCSXColors.primary.copy(alpha = 0.7f))
+            ) {
+                Text(
+                    text = "SELECT",
+                    modifier = Modifier.padding(horizontal = 4.dp, vertical = 1.dp),
+                    style = AppTypography.labelSmall.copy(
+                        fontSize = 9.sp,
+                        fontWeight = FontWeight.Bold,
+                        letterSpacing = 0.6.sp
+                    ),
+                    color = RPCSXColors.primary
+                )
+            }
+
+            Text(
+                text = "IMPORT",
+                style = AppTypography.labelSmall.copy(
+                    fontSize = 12.sp,
+                    fontWeight = FontWeight.Bold,
+                    letterSpacing = 1.sp
+                ),
+                color = RPCSXColors.textPrimary
+            )
+        }
+    }
+}
+
+@Composable
+fun ControllerGlyphBadge(glyph: String, color: Color = RPCSXColors.primary) {
+    Surface(
+        shape = RoundedCornerShape(3.dp),
+        color = RPCSXColors.primaryMuted,
+        border = BorderStroke(1.dp, color.copy(alpha = 0.7f))
+    ) {
+        Text(
+            text = glyph,
+            modifier = Modifier.padding(horizontal = 4.dp, vertical = 1.dp),
+            style = AppTypography.labelSmall.copy(
+                fontSize = 9.sp,
+                fontWeight = FontWeight.Bold,
+                letterSpacing = 0.5.sp
+            ),
+            color = color
+        )
+    }
+}
+
+@Composable
+fun MinimalSearchBar(
+    query: String,
+    onQueryChange: (String) -> Unit,
+    isExpanded: Boolean,
+    onExpandedChange: (Boolean) -> Unit,
+    modifier: Modifier = Modifier
+) {
+    val focusRequester = remember { FocusRequester() }
+
+    LaunchedEffect(isExpanded) {
+        if (isExpanded) {
+            try { focusRequester.requestFocus() } catch (_: Exception) {}
+        }
+    }
+
+    if (isExpanded) {
+        Row(
+            modifier = modifier
+                .height(34.dp)
+                .background(
+                    color = RPCSXColors.surfaceElevated.copy(alpha = 0.95f),
+                    shape = RoundedCornerShape(4.dp)
+                )
+                .border(
+                    border = BorderStroke(1.dp, RPCSXColors.primary),
+                    shape = RoundedCornerShape(4.dp)
+                )
+                .padding(horizontal = 7.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(5.dp)
+        ) {
+            ControllerGlyphBadge(glyph = "△")
+
+            Icon(
+                painter = painterResource(R.drawable.ic_search),
+                contentDescription = "Search",
+                tint = RPCSXColors.primary,
+                modifier = Modifier.size(15.dp)
+            )
+
+            Box(
+                modifier = Modifier
+                    .widthIn(min = 90.dp, max = 190.dp),
+                contentAlignment = Alignment.CenterStart
+            ) {
+                if (query.isEmpty()) {
+                    Text(
+                        text = "SEARCH...",
+                        style = AppTypography.labelSmall.copy(
+                            fontSize = 11.sp,
+                            letterSpacing = 0.8.sp,
+                            color = RPCSXColors.textSecondary.copy(alpha = 0.7f)
+                        )
+                    )
+                }
+                BasicTextField(
+                    value = query,
+                    onValueChange = onQueryChange,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .focusRequester(focusRequester),
+                    singleLine = true,
+                    textStyle = AppTypography.bodyMedium.copy(
+                        fontSize = 13.sp,
+                        fontWeight = FontWeight.SemiBold,
+                        color = RPCSXColors.textPrimary
+                    ),
+                    cursorBrush = SolidColor(RPCSXColors.primary),
+                    keyboardOptions = KeyboardOptions(imeAction = ImeAction.Search),
+                    keyboardActions = KeyboardActions(onSearch = { /* done */ })
+                )
+            }
+
+            if (query.isNotEmpty()) {
+                IconButton(
+                    onClick = { onQueryChange("") },
+                    modifier = Modifier.size(18.dp)
+                ) {
+                    Icon(
+                        painter = painterResource(R.drawable.ic_close),
+                        contentDescription = "Clear",
+                        tint = RPCSXColors.textSecondary,
+                        modifier = Modifier.size(12.dp)
+                    )
+                }
+            } else {
+                IconButton(
+                    onClick = { onExpandedChange(false) },
+                    modifier = Modifier.size(18.dp)
+                ) {
+                    Icon(
+                        painter = painterResource(R.drawable.ic_close),
+                        contentDescription = "Close search",
+                        tint = RPCSXColors.textSecondary,
+                        modifier = Modifier.size(12.dp)
+                    )
+                }
+            }
+        }
+    } else {
+        Surface(
+            shape = RoundedCornerShape(4.dp),
+            color = RPCSXColors.surfaceElevated.copy(alpha = 0.85f),
+            border = BorderStroke(1.dp, RPCSXColors.surfaceOverlay),
+            modifier = modifier
+                .clickable { onExpandedChange(true) }
+        ) {
+            Row(
+                modifier = Modifier.padding(horizontal = 6.dp, vertical = 4.dp),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(4.dp)
+            ) {
+                ControllerGlyphBadge(glyph = "△")
+                Icon(
+                    painter = painterResource(R.drawable.ic_search),
+                    contentDescription = "Search",
+                    tint = RPCSXColors.primary,
+                    modifier = Modifier.size(15.dp)
+                )
+            }
+        }
+    }
+}
+
+@Composable
+fun GamesGridView(
+    games: List<Game>,
+    focusedIndex: Int,
+    onFocusChange: (Int) -> Unit,
+    onPlayGame: (Game) -> Unit,
+    onConfigureGame: (Game) -> Unit,
+    emulatorActiveGame: String?,
+    gameplayRunning: Boolean,
+    isTablet: Boolean,
+    modifier: Modifier = Modifier
+) {
+    val gridState = rememberLazyGridState()
+    LaunchedEffect(focusedIndex) {
+        if (focusedIndex in games.indices) {
+            try { gridState.animateScrollToItem(focusedIndex) } catch (_: Exception) {}
+        }
+    }
+
+    val columns = if (isTablet) 5 else 4
+    LazyVerticalGrid(
+        columns = GridCells.Fixed(columns),
+        state = gridState,
+        contentPadding = PaddingValues(horizontal = 20.dp, vertical = 14.dp),
+        horizontalArrangement = Arrangement.spacedBy(14.dp),
+        verticalArrangement = Arrangement.spacedBy(14.dp),
+        modifier = modifier.fillMaxSize()
+    ) {
+        itemsIndexed(
+            items = games,
+            key = { _, game -> GameIdentity.key(game.info.path, game.info.name.value) }
+        ) { index, game ->
+            val isFocused = index == focusedIndex
+            GridGameCard(
+                game = game,
+                isFocused = isFocused,
+                isRunning = gameplayRunning && emulatorActiveGame == game.info.path,
+                onClick = {
+                    onFocusChange(index)
+                    onPlayGame(game)
+                },
+                onConfigure = {
+                    onFocusChange(index)
+                    onConfigureGame(game)
+                }
+            )
+        }
+    }
+}
+
+@OptIn(ExperimentalFoundationApi::class)
+@Composable
+fun GridGameCard(
+    game: Game,
+    isFocused: Boolean,
+    isRunning: Boolean,
+    onClick: () -> Unit,
+    onConfigure: () -> Unit,
+    modifier: Modifier = Modifier
+) {
+    val context = LocalContext.current
+    val rawIconPath = game.info.iconPath.value
+    val installedPreview = remember(rawIconPath) { GamePreviewRepository.resolveInstalledPreview(rawIconPath) }
+    val coilModel: Any? = when (installedPreview) {
+        is GamePreviewModel.LocalFile -> installedPreview.file
+        is GamePreviewModel.ContentUri -> installedPreview.uri
+        is GamePreviewModel.None -> null
+    }
+    val bgPreview by androidx.compose.runtime.produceState<Any?>(
+        initialValue = null,
+        key1 = game.info.path,
+        key2 = rawIconPath
+    ) {
+        value = kotlinx.coroutines.withContext(kotlinx.coroutines.Dispatchers.IO) {
+            when (val bg = GamePreviewRepository.resolveBackground(context, game)) {
+                is GamePreviewModel.LocalFile -> bg.file
+                is GamePreviewModel.ContentUri -> bg.uri
+                is GamePreviewModel.None -> null
+            }
+        }
+    }
+    val cardBgModel = bgPreview ?: coilModel
+
+    val title = GameIdentity.displayName(game.info.path, game.info.name.value).uppercase()
+    val tag = game.info.path.substringAfterLast("/")
+
+    val scale by animateFloatAsState(if (isFocused) 1.04f else 1.0f, animationSpec = tween(200))
+
+    val glowIntensity by animateDpAsState(
+        targetValue = if (isFocused) 16.dp else 0.dp,
+        animationSpec = tween(200)
+    )
+
+    Surface(
+        shape = RoundedCornerShape(8.dp),
+        color = RPCSXColors.surface,
+        border = BorderStroke(
+            if (isFocused) 2.dp else 1.dp,
+            if (isFocused) RPCSXColors.focusRing else RPCSXColors.surfaceOverlay
+        ),
+        shadowElevation = glowIntensity,
+        modifier = modifier
+            .fillMaxWidth()
+            .scale(scale)
+            .combinedClickable(
+                onClick = onClick,
+                onLongClick = onConfigure
+            )
+    ) {
+        Column(modifier = Modifier.fillMaxWidth()) {
+            // Artwork container (16:9)
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .aspectRatio(16f / 9f)
+                    .clip(RoundedCornerShape(topStart = 8.dp, topEnd = 8.dp))
+                    .background(RPCSXColors.background)
+            ) {
+                if (cardBgModel != null) {
+                    // Blurred background artwork inside card
+                    AsyncImage(
+                        model = cardBgModel,
+                        contentDescription = null,
+                        contentScale = ContentScale.Crop,
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .scale(1.15f)
+                            .blur(radius = 16.dp)
+                            .alpha(if (bgPreview != null) 0.65f else 0.45f)
+                    )
+                    // Contrast overlay
+                    Box(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .background(Color.Black.copy(alpha = if (bgPreview != null) 0.35f else 0.25f))
+                    )
+                    // Crisp foreground icon/artwork
+                    if (coilModel != null) {
+                        AsyncImage(
+                            model = coilModel,
+                            contentDescription = title,
+                            contentScale = ContentScale.Fit,
+                            modifier = Modifier
+                                .fillMaxSize()
+                                .padding(4.dp)
+                        )
+                    }
+                } else {
+                    Box(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .background(RPCSXColors.surfaceElevated),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Icon(
+                            painter = painterResource(R.drawable.gamepad),
+                            contentDescription = null,
+                            tint = RPCSXColors.textSecondary,
+                            modifier = Modifier.size(36.dp)
+                        )
+                    }
+                }
+
+                if (isRunning) {
+                    Box(
+                        modifier = Modifier
+                            .align(Alignment.TopEnd)
+                            .padding(6.dp)
+                    ) {
+                        InfoBadge(text = "RUNNING", color = RPCSXColors.errorColor)
+                    }
+                }
+            }
+
+            // Bottom title & tag bar
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .background(
+                        if (isFocused) RPCSXColors.surfaceOverlay else RPCSXColors.surface
+                    )
+                    .padding(horizontal = 10.dp, vertical = 8.dp),
+                verticalArrangement = Arrangement.spacedBy(3.dp)
+            ) {
+                Text(
+                    text = title,
+                    style = AppTypography.bodyMedium.copy(
+                        fontWeight = FontWeight.Bold,
+                        fontSize = 13.sp,
+                        letterSpacing = 0.5.sp
+                    ),
+                    color = if (isFocused) RPCSXColors.focusRing else RPCSXColors.textPrimary,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis
+                )
+
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Text(
+                        text = tag,
+                        style = AppTypography.labelSmall.copy(
+                            fontSize = 9.sp,
+                            color = RPCSXColors.textSecondary
+                        ),
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis
+                    )
+                }
+            }
+        }
+    }
+}
+
+@Composable
 fun FirmwareCard(distance: Int, onClick: () -> Unit) {
     val isFocused = distance == 0
     val targetScale = if (isFocused) 1.12f else if (distance == 1) 0.95f else 0.85f
-    val targetAlpha = if (isFocused) 1.0f else if (distance == 1) 0.6f else 0.4f
+    val targetAlpha = if (isFocused) 1.0f else if (distance == 1) 0.85f else 0.65f
 
     val scale by animateFloatAsState(targetScale, animationSpec = tween(300))
     val alpha by animateFloatAsState(targetAlpha, animationSpec = tween(300))
 
-    val infiniteTransition = rememberInfiniteTransition()
-    val glowIntensity by infiniteTransition.animateFloat(
-        initialValue = 15f,
-        targetValue = 35f,
-        animationSpec = infiniteRepeatable(
-            animation = tween(1000, easing = androidx.compose.animation.core.FastOutSlowInEasing),
-            repeatMode = RepeatMode.Reverse
-        )
+    val glowIntensity by animateDpAsState(
+        targetValue = if (isFocused) 20.dp else 0.dp,
+        animationSpec = tween(200)
     )
 
     BoxWithConstraints(
@@ -1566,7 +2615,7 @@ fun FirmwareCard(distance: Int, onClick: () -> Unit) {
             .alpha(alpha)
             .clickable(onClick = onClick)
             .shadow(
-                elevation = if (isFocused) glowIntensity.dp else 0.dp,
+                elevation = glowIntensity,
                 spotColor = RPCSXColors.focusGlow,
                 ambientColor = RPCSXColors.focusGlow,
                 shape = RoundedCornerShape(8.dp)
@@ -1659,19 +2708,14 @@ fun HintButton(text: String, icon: String, color: Color, onClick: () -> Unit) {
 fun AddGameCard(distance: Int, onClick: () -> Unit, disabled: Boolean = false) {
     val isFocused = distance == 0
     val targetScale = if (isFocused) 1.12f else if (distance == 1) 0.95f else 0.85f
-    val targetAlpha = if (isFocused) 1.0f else if (distance == 1) 0.6f else 0.4f
+    val targetAlpha = if (isFocused) 1.0f else if (distance == 1) 0.85f else 0.65f
 
     val scale by animateFloatAsState(targetScale, animationSpec = tween(300))
     val alpha by animateFloatAsState(targetAlpha, animationSpec = tween(300))
 
-    val infiniteTransition = rememberInfiniteTransition()
-    val glowIntensity by infiniteTransition.animateFloat(
-        initialValue = 15f,
-        targetValue = 35f,
-        animationSpec = infiniteRepeatable(
-            animation = tween(1000, easing = androidx.compose.animation.core.FastOutSlowInEasing),
-            repeatMode = RepeatMode.Reverse
-        )
+    val glowIntensity by animateDpAsState(
+        targetValue = if (isFocused) 20.dp else 0.dp,
+        animationSpec = tween(200)
     )
 
     BoxWithConstraints(
@@ -1681,7 +2725,7 @@ fun AddGameCard(distance: Int, onClick: () -> Unit, disabled: Boolean = false) {
             .alpha(alpha)
             .clickable(onClick = onClick)
             .shadow(
-                elevation = if (isFocused) glowIntensity.dp else 0.dp,
+                elevation = glowIntensity,
                 spotColor = RPCSXColors.focusGlow,
                 ambientColor = RPCSXColors.focusGlow,
                 shape = RoundedCornerShape(8.dp)
@@ -1738,6 +2782,289 @@ fun AddGameCard(distance: Int, onClick: () -> Unit, disabled: Boolean = false) {
     }
 }
 
+@Composable
+private fun TabletHomeScreen(
+    pagerItems: List<PagerItem>,
+    pagerState: androidx.compose.foundation.pager.PagerState,
+    currentItem: PagerItem?,
+    onPlayGame: (Game) -> Unit,
+    onConfigureGame: (Game) -> Unit,
+    onImportGame: () -> Unit,
+    onInstallFirmware: () -> Unit,
+    emulatorActiveGame: String?,
+    gameplayRunning: Boolean,
+    installPpu: CompileProgressBridge.CompileState,
+    prelaunchPpu: CompileProgressBridge.CompileState,
+    runtimePpu: CompileProgressBridge.CompileState,
+    fullscreenAmbientModel: Any? = null,
+    modifier: Modifier = Modifier,
+) {
+    val coroutineScope = rememberCoroutineScope()
+    val context = LocalContext.current
+
+    Column(
+        modifier = modifier
+            .fillMaxSize()
+            .padding(horizontal = 24.dp, vertical = 8.dp),
+        verticalArrangement = Arrangement.SpaceBetween,
+    ) {
+        // Spotlight Header Area
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 16.dp, vertical = 4.dp),
+            verticalArrangement = Arrangement.spacedBy(8.dp)
+        ) {
+            when (currentItem) {
+                is PagerItem.GameItem -> {
+                    val game = currentItem.game
+                    val isRunning = gameplayRunning && emulatorActiveGame == game.info.path
+                    val title = GameIdentity.displayName(game.info.path, game.info.name.value)
+                    val titleId = GameIdentity.titleIdOrNull(game.info.path, game.info.name.value)
+                        ?: game.info.path.substringAfterLast("/")
+
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Column(modifier = Modifier.weight(1f, fill = false), verticalArrangement = Arrangement.spacedBy(6.dp)) {
+                            Text(
+                                text = title,
+                                style = MaterialTheme.typography.headlineMedium.copy(
+                                    fontWeight = FontWeight.Bold,
+                                    fontSize = 30.sp,
+                                    letterSpacing = 0.5.sp
+                                ),
+                                color = Color.White,
+                                maxLines = 1,
+                                overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis
+                            )
+
+                            // Metadata Tags Row
+                            Row(
+                                horizontalArrangement = Arrangement.spacedBy(10.dp),
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                InfoBadge(text = titleId, color = RPCSXColors.primary)
+                                val isIso = game.info.path.endsWith(".iso", ignoreCase = true) || game.info.path.startsWith("direct_iso")
+                                InfoBadge(text = if (isIso) "PS3 ISO" else "INSTALLED")
+                                if (isRunning) {
+                                    InfoBadge(text = "RUNNING", color = RPCSXColors.errorColor)
+                                }
+                                val cardAvailability = com.zenithblue.sambas3.ppu.GameRunEligibilityHelper.evaluateAvailability(
+                                    context, game, installPpu.ppuActive, prelaunchPpu, runtimePpu,
+                                    RPCSX.state.value, RPCSX.activeGame.value
+                                )
+                                val isReady = cardAvailability is com.zenithblue.sambas3.ppu.GameLaunchAvailability.Ready ||
+                                    cardAvailability is com.zenithblue.sambas3.ppu.GameLaunchAvailability.GameplayRunning
+                                InfoBadge(
+                                    text = if (isReady) "READY TO PLAY" else "PREPARATION NEEDED",
+                                    color = if (isReady) RPCSXColors.primary else Color(0xFFE5A93C)
+                                )
+                            }
+                        }
+
+                        // Action Buttons
+                        Row(
+                            horizontalArrangement = Arrangement.spacedBy(14.dp),
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Button(
+                                onClick = { onPlayGame(game) },
+                                shape = RoundedCornerShape(10.dp),
+                                colors = ButtonDefaults.buttonColors(
+                                    containerColor = RPCSXColors.primary,
+                                    contentColor = Color.Black
+                                ),
+                                contentPadding = PaddingValues(horizontal = 24.dp, vertical = 12.dp),
+                                modifier = Modifier.height(48.dp)
+                            ) {
+                                Icon(
+                                    painter = painterResource(R.drawable.gamepad),
+                                    contentDescription = null,
+                                    modifier = Modifier.size(20.dp)
+                                )
+                                Spacer(Modifier.width(8.dp))
+                                Text(
+                                    if (isRunning) "RESUME (X)" else "PLAY GAME (X)",
+                                    style = MaterialTheme.typography.titleSmall.copy(fontWeight = FontWeight.Bold)
+                                )
+                            }
+
+                            OutlinedButton(
+                                onClick = { onConfigureGame(game) },
+                                shape = RoundedCornerShape(10.dp),
+                                contentPadding = PaddingValues(horizontal = 18.dp, vertical = 12.dp),
+                                modifier = Modifier.height(48.dp)
+                            ) {
+                                Icon(
+                                    painter = painterResource(R.drawable.ic_settings),
+                                    contentDescription = null,
+                                    modifier = Modifier.size(18.dp)
+                                )
+                                Spacer(Modifier.width(8.dp))
+                                Text(
+                                    "OPTIONS (▲)",
+                                    style = MaterialTheme.typography.titleSmall.copy(fontWeight = FontWeight.Bold)
+                                )
+                            }
+                        }
+                    }
+                }
+                is PagerItem.AddGame -> {
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
+                            Text(
+                                text = "ADD GAMES TO SAMBAS3",
+                                style = MaterialTheme.typography.headlineMedium.copy(
+                                    fontWeight = FontWeight.Bold,
+                                    fontSize = 30.sp
+                                ),
+                                color = Color.White
+                            )
+                            Text(
+                                text = "Import PS3 disc ISO images or scanned game folders from your storage or SD card.",
+                                style = MaterialTheme.typography.bodyMedium,
+                                color = RPCSXColors.textSecondary
+                            )
+                        }
+
+                        Button(
+                            onClick = onImportGame,
+                            shape = RoundedCornerShape(10.dp),
+                            colors = ButtonDefaults.buttonColors(
+                                containerColor = RPCSXColors.primary,
+                                contentColor = Color.Black
+                            ),
+                            contentPadding = PaddingValues(horizontal = 24.dp, vertical = 12.dp),
+                            modifier = Modifier.height(48.dp)
+                        ) {
+                            Text("IMPORT GAME (ISO / FOLDER)", style = MaterialTheme.typography.titleSmall.copy(fontWeight = FontWeight.Bold))
+                        }
+                    }
+                }
+                is PagerItem.FirmwareCard -> {
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
+                            Text(
+                                text = "PS3 SYSTEM FIRMWARE",
+                                style = MaterialTheme.typography.headlineMedium.copy(
+                                    fontWeight = FontWeight.Bold,
+                                    fontSize = 30.sp
+                                ),
+                                color = Color.White
+                            )
+                            Text(
+                                text = "PlayStation 3 firmware (PS3UPDAT.PUP) is required to run games.",
+                                style = MaterialTheme.typography.bodyMedium,
+                                color = RPCSXColors.textSecondary
+                            )
+                        }
+
+                        Button(
+                            onClick = onInstallFirmware,
+                            shape = RoundedCornerShape(10.dp),
+                            colors = ButtonDefaults.buttonColors(
+                                containerColor = RPCSXColors.primary,
+                                contentColor = Color.Black
+                            ),
+                            contentPadding = PaddingValues(horizontal = 24.dp, vertical = 12.dp),
+                            modifier = Modifier.height(48.dp)
+                        ) {
+                            Text("INSTALL FIRMWARE (PUP)", style = MaterialTheme.typography.titleSmall.copy(fontWeight = FontWeight.Bold))
+                        }
+                    }
+                }
+                else -> {}
+            }
+        }
+
+        // Expanded Main Stage Cards Carousel (Large, Expansive & Centered)
+        BoxWithConstraints(
+            modifier = Modifier
+                .fillMaxWidth()
+                .weight(1f),
+            contentAlignment = Alignment.Center
+        ) {
+            val itemHeight = ((maxHeight - 32.dp) / 1.14f).coerceIn(240.dp, 440.dp)
+            val itemWidth = itemHeight * 0.75f
+            val horizontalPadding = if (maxWidth > itemWidth) (maxWidth - itemWidth) / 2 else 0.dp
+            val verticalPadding = ((maxHeight - itemHeight) / 2).coerceAtLeast(16.dp)
+
+            HorizontalPager(
+                state = pagerState,
+                modifier = Modifier.fillMaxSize(),
+                contentPadding = PaddingValues(
+                    horizontal = horizontalPadding,
+                    vertical = verticalPadding
+                ),
+                pageSpacing = 36.dp,
+                verticalAlignment = Alignment.CenterVertically,
+                key = { idx -> pagerItems.getOrNull(idx)?.stableKey ?: "page:$idx" }
+            ) { page ->
+                val distance = abs(page - pagerState.currentPage)
+                val item = pagerItems.getOrNull(page) ?: return@HorizontalPager
+                when (item) {
+                    is PagerItem.GameItem -> {
+                        GameCard(
+                            game = item.game,
+                            distance = distance,
+                            ambientBgModel = fullscreenAmbientModel,
+                            onClick = {
+                                if (distance == 0) {
+                                    onPlayGame(item.game)
+                                } else {
+                                    coroutineScope.launch { pagerState.animateScrollToPage(page) }
+                                }
+                            },
+                            onPlay = { onPlayGame(item.game) },
+                            isRunning = gameplayRunning && emulatorActiveGame == item.game.info.path,
+                            onConfigure = { onConfigureGame(item.game) }
+                        )
+                    }
+                    is PagerItem.AddGame -> {
+                        AddGameCard(
+                            distance = distance,
+                            onClick = if (item.disabled) ({}) else onImportGame,
+                            disabled = item.disabled
+                        )
+                    }
+                    is PagerItem.FirmwareCard -> {
+                        FirmwareCard(
+                            distance = distance,
+                            onClick = onInstallFirmware
+                        )
+                    }
+                    is PagerItem.SourceCandidate -> {
+                        SourceCandidateCard(
+                            item = item,
+                            distance = distance,
+                            onClick = { coroutineScope.launch { pagerState.animateScrollToPage(page) } },
+                            onImport = {}
+                        )
+                    }
+                    is PagerItem.PendingImport -> {
+                        PendingImportCard(
+                            item = item,
+                            distance = distance,
+                            onClick = { coroutineScope.launch { pagerState.animateScrollToPage(page) } }
+                        )
+                    }
+                }
+            }
+        }
+    }
+}
+
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun GameCard(
@@ -1746,11 +3073,12 @@ fun GameCard(
     onClick: () -> Unit,
     onPlay: () -> Unit,
     isRunning: Boolean = false,
+    ambientBgModel: Any? = null,
     onConfigure: () -> Unit = {}
 ) {
     val isFocused = distance == 0
     val targetScale = if (isFocused) 1.12f else if (distance == 1) 0.95f else 0.85f
-    val targetAlpha = if (isFocused) 1.0f else if (distance == 1) 0.6f else 0.4f
+    val targetAlpha = if (isFocused) 1.0f else if (distance == 1) 0.9f else 0.7f
 
     val scale by animateFloatAsState(targetScale, animationSpec = tween(300))
     val alpha by animateFloatAsState(targetAlpha, animationSpec = tween(300))
@@ -1819,6 +3147,8 @@ fun GameCard(
             validatedByRealBootFrame = cardTitleId?.let {
                 runCatching { PpuReadinessStore.isRuntimeValidated(context, it) }.getOrDefault(false)
             } ?: false,
+            activeCompileTitleId = com.zenithblue.sambas3.ppu.ImportPpuPreparationCoordinator.activeTitleId,
+            stoppingCompile = com.zenithblue.sambas3.ppu.ImportPpuPreparationCoordinator.stopping,
         ),
     )
     val progressValue = when {
@@ -1840,10 +3170,10 @@ fun GameCard(
         else -> progressEntry?.max?.longValue ?: 0
     }
     val progressMessage = when {
-        usingRuntimePpu -> runtimeCompile.ppuMsg ?: stringResource(R.string.compiling_ppu_title)
+        usingRuntimePpu -> com.zenithblue.sambas3.ui.games.launch.LaunchPpuPresentation.compileProgressLine(runtimeCompile)
         usingRuntimeShader -> runtimeCompile.shaderMsg ?: stringResource(R.string.compiling_shaders_desc)
-        usingInstallPpu -> installPpu.ppuMsg ?: stringResource(R.string.compiling_ppu_title)
-        usingPrelaunchPpu -> prelaunchPpu.ppuMsg ?: "Preparing PPU"
+        usingInstallPpu -> com.zenithblue.sambas3.ui.games.launch.LaunchPpuPresentation.compileProgressLine(installPpu)
+        usingPrelaunchPpu -> com.zenithblue.sambas3.ui.games.launch.LaunchPpuPresentation.compileProgressLine(prelaunchPpu)
         else -> progressEntry?.message?.value
     }
     val isIndeterminate = when {
@@ -1861,14 +3191,9 @@ fun GameCard(
         if (isFocused) ColorMatrix() else ColorMatrix().apply { setToSaturation(0f) }
     }
 
-    val infiniteTransition = rememberInfiniteTransition()
-    val glowIntensity by infiniteTransition.animateFloat(
-        initialValue = 15f,
-        targetValue = 35f,
-        animationSpec = infiniteRepeatable(
-            animation = tween(1000, easing = androidx.compose.animation.core.FastOutSlowInEasing),
-            repeatMode = RepeatMode.Reverse
-        )
+    val glowIntensity by animateDpAsState(
+        targetValue = if (isFocused) 20.dp else 0.dp,
+        animationSpec = tween(200)
     )
 
     // Fill the pager page; the pager itself is already sized correctly for the aspect ratio
@@ -1882,7 +3207,7 @@ fun GameCard(
                 onLongClick = onConfigure
             )
             .shadow(
-                elevation = if (isFocused) glowIntensity.dp else 0.dp,
+                elevation = glowIntensity,
                 spotColor = RPCSXColors.focusGlow,
                 ambientColor = RPCSXColors.focusGlow,
                 shape = RoundedCornerShape(8.dp)
@@ -1908,48 +3233,70 @@ fun GameCard(
                 is GamePreviewModel.ContentUri -> installedPreview.uri
                 is GamePreviewModel.None -> null
             }
-            if (coilModel != null) {
+            val bgPreview by androidx.compose.runtime.produceState<Any?>(
+                initialValue = null,
+                key1 = game.info.path,
+                key2 = rawIconPath
+            ) {
+                value = kotlinx.coroutines.withContext(kotlinx.coroutines.Dispatchers.IO) {
+                    when (val bg = GamePreviewRepository.resolveBackground(context, game)) {
+                        is GamePreviewModel.LocalFile -> bg.file
+                        is GamePreviewModel.ContentUri -> bg.uri
+                        is GamePreviewModel.None -> null
+                    }
+                }
+            }
+            val cardBgModel = bgPreview ?: ambientBgModel ?: coilModel
+            val isIconSameAsBg = bgPreview == null || bgPreview == coilModel
+
+            if (cardBgModel != null) {
                 Box(modifier = Modifier.fillMaxSize()) {
-                    // Blurred ambient background
+                    // Blurred artwork background inside the game card
                     AsyncImage(
-                        model = coilModel,
+                        model = cardBgModel,
                         contentDescription = null,
                         contentScale = ContentScale.Crop,
                         colorFilter = ColorFilter.colorMatrix(colorMatrix),
                         modifier = Modifier
                             .fillMaxSize()
-                            .scale(1.3f)
-                            .blur(radius = 16.dp)
-                            .alpha(0.5f),
+                            .scale(1.15f)
+                            .blur(radius = if (isFocused) 16.dp else 24.dp)
+                            .alpha(if (bgPreview != null) 0.75f else 0.7f),
                         onError = { err ->
-                            val exists = if (installedPreview is GamePreviewModel.LocalFile) installedPreview.file.exists() else false
-                            val len = if (installedPreview is GamePreviewModel.LocalFile && exists) installedPreview.file.length() else -1L
-                            Log.e("GamePreview", "installed AsyncImage error title=${game.info.name.value} path=${game.info.path} raw=$rawIconPath model=$installedPreview exists=$exists len=$len err=${err.result.throwable?.message}")
+                            Log.e("GamePreview", "installed AsyncImage error title=${game.info.name.value} path=${game.info.path} raw=$rawIconPath model=$installedPreview exists=false len=-1 err=${err.result.throwable?.message}")
                         }
                     )
 
-                    // Dark overlay
+                    // Dark overlay for contrast
                     Box(
                         modifier = Modifier
                             .fillMaxSize()
-                            .background(Color.Black.copy(alpha = 0.2f))
+                            .background(
+                                Brush.verticalGradient(
+                                    listOf(
+                                        Color.Black.copy(alpha = 0.45f),
+                                        Color.Black.copy(alpha = 0.25f),
+                                        Color.Black.copy(alpha = 0.55f),
+                                    )
+                                )
+                            )
                     )
 
-                    // Crisp foreground image
-                    AsyncImage(
-                        model = coilModel,
-                        contentDescription = null,
-                        contentScale = ContentScale.Fit,
-                        colorFilter = ColorFilter.colorMatrix(colorMatrix),
-                        modifier = Modifier
-                            .fillMaxSize()
-                            .padding(if (isCompact) 8.dp else 16.dp),
-                        onError = { err ->
-                            val exists = if (installedPreview is GamePreviewModel.LocalFile) installedPreview.file.exists() else false
-                            val len = if (installedPreview is GamePreviewModel.LocalFile && exists) installedPreview.file.length() else -1L
-                            Log.e("GamePreview", "installed AsyncImage error title=${game.info.name.value} path=${game.info.path} raw=$rawIconPath model=$installedPreview exists=$exists len=$len err=${err.result.throwable?.message}")
-                        }
-                    )
+                    // Crisp foreground icon badge
+                    if (coilModel != null) {
+                        AsyncImage(
+                            model = coilModel,
+                            contentDescription = null,
+                            contentScale = ContentScale.Fit,
+                            colorFilter = ColorFilter.colorMatrix(colorMatrix),
+                            modifier = Modifier
+                                .fillMaxSize()
+                                .padding(if (isCompact) 8.dp else 16.dp),
+                            onError = { err ->
+                                Log.e("GamePreview", "installed AsyncImage error title=${game.info.name.value} path=${game.info.path} raw=$rawIconPath model=$installedPreview exists=false len=-1 err=${err.result.throwable?.message}")
+                            }
+                        )
+                    }
                 }
             } else if (rawIconPath != null) {
                 Log.w("GamePreview", "installed preview None title=${game.info.name.value} path=${game.info.path} raw=$rawIconPath model=$installedPreview")
@@ -2011,7 +3358,7 @@ fun GameCard(
                                 style = AppTypography.labelSmall.copy(fontSize = 9.sp),
                                 color = RPCSXColors.textSecondary,
                                 textAlign = TextAlign.Center,
-                                maxLines = 1,
+                                maxLines = 2,
                                 overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis
                             )
                         }
@@ -2074,14 +3421,14 @@ fun GameCard(
                     .padding(horizontal = 8.dp, vertical = 6.dp)
             ) {
                 Text(
-                    text = "Install PPU  ${com.zenithblue.sambas3.ui.games.launch.LaunchPpuPresentation.phaseStatusText(cardPpuUi.installPpu)}",
+                    text = "Install PPU  ${com.zenithblue.sambas3.ui.games.launch.LaunchPpuPresentation.phaseStatusLine(cardPpuUi.installPpu)}",
                     style = AppTypography.labelSmall.copy(fontSize = 9.sp),
                     color = RPCSXColors.textSecondary,
                     maxLines = 1,
                     overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis
                 )
                 Text(
-                    text = "Runtime PPU  ${com.zenithblue.sambas3.ui.games.launch.LaunchPpuPresentation.phaseStatusText(cardPpuUi.runtimePpu)}",
+                    text = "Runtime PPU  ${com.zenithblue.sambas3.ui.games.launch.LaunchPpuPresentation.phaseStatusLine(cardPpuUi.runtimePpu)}",
                     style = AppTypography.labelSmall.copy(fontSize = 9.sp),
                     color = RPCSXColors.textSecondary,
                     maxLines = 1,
@@ -2160,17 +3507,12 @@ fun SourceCandidateCard(
 ) {
     val isFocused = distance == 0
     val targetScale = if (isFocused) 1.12f else if (distance == 1) 0.95f else 0.85f
-    val targetAlpha = if (isFocused) 1.0f else if (distance == 1) 0.6f else 0.4f
+    val targetAlpha = if (isFocused) 1.0f else if (distance == 1) 0.85f else 0.65f
     val scale by animateFloatAsState(targetScale, animationSpec = tween(300))
     val alpha by animateFloatAsState(targetAlpha, animationSpec = tween(300))
-    val infiniteTransition = rememberInfiniteTransition()
-    val glowIntensity by infiniteTransition.animateFloat(
-        initialValue = 15f,
-        targetValue = 35f,
-        animationSpec = infiniteRepeatable(
-            animation = tween(1000, easing = androidx.compose.animation.core.FastOutSlowInEasing),
-            repeatMode = RepeatMode.Reverse
-        )
+    val glowIntensity by animateDpAsState(
+        targetValue = if (isFocused) 20.dp else 0.dp,
+        animationSpec = tween(200)
     )
     val context = LocalContext.current
     var preview by remember(item.sourceUri) { mutableStateOf<GamePreviewModel>(GamePreviewModel.None) }
@@ -2202,7 +3544,7 @@ fun SourceCandidateCard(
             .alpha(alpha)
             .combinedClickable(onClick = { if (isFocused) onImport() else onClick() })
             .shadow(
-                elevation = if (isFocused) glowIntensity.dp else 0.dp,
+                elevation = glowIntensity,
                 spotColor = RPCSXColors.focusGlow,
                 ambientColor = RPCSXColors.focusGlow,
                 shape = RoundedCornerShape(8.dp)
@@ -2280,13 +3622,12 @@ fun PendingImportCard(
 ) {
     val isFocused = distance == 0
     val targetScale = if (isFocused) 1.12f else if (distance == 1) 0.95f else 0.85f
-    val targetAlpha = if (isFocused) 1.0f else if (distance == 1) 0.6f else 0.4f
+    val targetAlpha = if (isFocused) 1.0f else if (distance == 1) 0.85f else 0.65f
     val scale by animateFloatAsState(targetScale, animationSpec = tween(300))
     val alpha by animateFloatAsState(targetAlpha, animationSpec = tween(300))
-    val infiniteTransition = rememberInfiniteTransition()
-    val glowIntensity by infiniteTransition.animateFloat(
-        initialValue = 15f, targetValue = 35f,
-        animationSpec = infiniteRepeatable(animation = tween(1000, easing = androidx.compose.animation.core.FastOutSlowInEasing), repeatMode = RepeatMode.Reverse)
+    val glowIntensity by animateDpAsState(
+        targetValue = if (isFocused) 20.dp else 0.dp,
+        animationSpec = tween(200)
     )
     // Observe install PPU + generic install progress for same progressId
     val installPpu by CompileProgressBridge.installState.collectAsState()
@@ -2298,7 +3639,7 @@ fun PendingImportCard(
     val title = if (isPpu) "COMPILING PPU" else "IMPORTING..."
     BoxWithConstraints(
         modifier = Modifier.fillMaxSize().scale(scale).alpha(alpha).combinedClickable(onClick = onClick)
-            .shadow(elevation = if (isFocused) glowIntensity.dp else 0.dp, spotColor = RPCSXColors.focusGlow, ambientColor = RPCSXColors.focusGlow, shape = RoundedCornerShape(8.dp))
+            .shadow(elevation = glowIntensity, spotColor = RPCSXColors.focusGlow, ambientColor = RPCSXColors.focusGlow, shape = RoundedCornerShape(8.dp))
             .border(width = if (isFocused) 2.dp else 1.dp, color = if (isFocused) RPCSXColors.focusRing else RPCSXColors.surfaceOverlay, shape = RoundedCornerShape(8.dp))
     ) {
         Surface(shape = RoundedCornerShape(8.dp), color = RPCSXColors.surface, modifier = Modifier.fillMaxSize()) {
@@ -2320,65 +3661,355 @@ fun PendingImportCard(
     }
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ImportMethodDialog(
     onDismiss: () -> Unit,
     onImportFolder: () -> Unit,
     onImportIso: () -> Unit
 ) {
-    AlertDialog(
+    var focusedIndex by remember { mutableIntStateOf(0) } // 0 = Folder, 1 = ISO, 2 = Cancel
+    val focusRequester = remember { FocusRequester() }
+
+    LaunchedEffect(Unit) {
+        try { focusRequester.requestFocus() } catch (_: Exception) {}
+    }
+
+    BackHandler {
+        onDismiss()
+    }
+
+    BasicAlertDialog(
         onDismissRequest = onDismiss,
-        title = {
-            Text(
-                "IMPORT GAME",
-                style = AppTypography.headlineMedium,
-                color = RPCSXColors.primary
-            )
-        },
-        text = {
+        properties = DialogProperties(usePlatformDefaultWidth = false),
+        modifier = Modifier
+            .width(480.dp)
+            .padding(16.dp)
+            .focusRequester(focusRequester)
+            .focusable()
+            .onPreviewKeyEvent { keyEvent ->
+                if (keyEvent.type == KeyEventType.KeyDown) {
+                    val code = keyEvent.nativeKeyEvent.keyCode
+                    when {
+                        keyEvent.key == Key.DirectionUp || code == KeyEvent.KEYCODE_DPAD_UP -> {
+                            focusedIndex = (focusedIndex - 1).coerceAtLeast(0)
+                            true
+                        }
+                        keyEvent.key == Key.DirectionDown || code == KeyEvent.KEYCODE_DPAD_DOWN -> {
+                            focusedIndex = (focusedIndex + 1).coerceAtMost(2)
+                            true
+                        }
+                        keyEvent.key == Key.DirectionCenter ||
+                        keyEvent.key == Key.ButtonA ||
+                        keyEvent.key == Key.Enter ||
+                        code == KeyEvent.KEYCODE_DPAD_CENTER ||
+                        code == KeyEvent.KEYCODE_BUTTON_A ||
+                        code == KeyEvent.KEYCODE_ENTER -> {
+                            when (focusedIndex) {
+                                0 -> onImportFolder()
+                                1 -> onImportIso()
+                                2 -> onDismiss()
+                            }
+                            true
+                        }
+                        keyEvent.key == Key.Back ||
+                        keyEvent.key == Key.ButtonB ||
+                        code == KeyEvent.KEYCODE_BACK ||
+                        code == KeyEvent.KEYCODE_BUTTON_B -> {
+                            onDismiss()
+                            true
+                        }
+                        else -> false
+                    }
+                } else false
+            }
+    ) {
+        Surface(
+            shape = RoundedCornerShape(12.dp),
+            color = RPCSXColors.surfaceElevated,
+            border = BorderStroke(1.5.dp, RPCSXColors.primary.copy(alpha = 0.6f)),
+            shadowElevation = 16.dp
+        ) {
             Column(
+                modifier = Modifier
+                    .background(
+                        Brush.verticalGradient(
+                            listOf(
+                                Color(0xFF161E38),
+                                RPCSXColors.surfaceElevated,
+                                RPCSXColors.surface
+                            )
+                        )
+                    )
+                    .verticalScroll(rememberScrollState())
+                    .padding(horizontal = 20.dp, vertical = 16.dp),
                 verticalArrangement = Arrangement.spacedBy(12.dp)
             ) {
-                Text(
-                    "Choose how you'd like to import a game.",
-                    style = AppTypography.bodyLarge,
-                    color = RPCSXColors.textSecondary
+                // Header: Title + Close Button
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Text(
+                        text = "IMPORT GAME",
+                        style = AppTypography.headlineMedium.copy(
+                            fontWeight = FontWeight.Bold,
+                            fontSize = 18.sp,
+                            letterSpacing = 1.2.sp
+                        ),
+                        color = RPCSXColors.primary
+                    )
+
+                    IconButton(
+                        onClick = onDismiss,
+                        modifier = Modifier.size(24.dp)
+                    ) {
+                        Icon(
+                            painter = painterResource(R.drawable.ic_close),
+                            contentDescription = "Close",
+                            tint = RPCSXColors.textSecondary,
+                            modifier = Modifier.size(16.dp)
+                        )
+                    }
+                }
+
+                // Fine gold gradient divider
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(1.dp)
+                        .background(
+                            Brush.horizontalGradient(
+                                listOf(
+                                    Color.Transparent,
+                                    RPCSXColors.primary.copy(alpha = 0.5f),
+                                    Color.Transparent
+                                )
+                            )
+                        )
                 )
-                Spacer(modifier = Modifier.height(8.dp))
-                Button(
-                    onClick = onImportFolder,
-                    modifier = Modifier.fillMaxWidth(),
-                    shape = RoundedCornerShape(4.dp),
-                    colors = ButtonDefaults.buttonColors(
-                        containerColor = RPCSXColors.primary,
-                        contentColor = RPCSXColors.onPrimary
-                    )
+
+                // Option 1: Game Folder
+                ImportOptionTile(
+                    title = "GAME FOLDER",
+                    formatTag = "PS3_GAME",
+                    iconRes = R.drawable.ic_folder,
+                    isFocused = focusedIndex == 0,
+                    onClick = onImportFolder
+                )
+
+                // Option 2: ISO Image
+                ImportOptionTile(
+                    title = "ISO FILE",
+                    formatTag = "DISC IMAGE",
+                    iconRes = R.drawable.hard_drive,
+                    isFocused = focusedIndex == 1,
+                    onClick = onImportIso
+                )
+
+                // Footer: Controller hints + Ghost Cancel button
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(top = 2.dp),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
                 ) {
-                    Text("IMPORT FOLDER", style = AppTypography.labelSmall)
-                }
-                Button(
-                    onClick = onImportIso,
-                    modifier = Modifier.fillMaxWidth(),
-                    shape = RoundedCornerShape(4.dp),
-                    colors = ButtonDefaults.buttonColors(
-                        containerColor = RPCSXColors.primary,
-                        contentColor = RPCSXColors.onPrimary
-                    )
-                ) {
-                    Text("IMPORT ISO FILE", style = AppTypography.labelSmall)
+                    // Controller hints
+                    Row(
+                        horizontalArrangement = Arrangement.spacedBy(12.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.spacedBy(5.dp)
+                        ) {
+                            Surface(
+                                shape = RoundedCornerShape(3.dp),
+                                color = RPCSXColors.primary.copy(alpha = 0.22f),
+                                border = BorderStroke(1.dp, RPCSXColors.primary)
+                            ) {
+                                Text(
+                                    text = "✕",
+                                    modifier = Modifier.padding(horizontal = 4.dp, vertical = 1.dp),
+                                    style = AppTypography.labelSmall.copy(fontSize = 10.sp, fontWeight = FontWeight.Bold),
+                                    color = RPCSXColors.primary
+                                )
+                            }
+                            Text(
+                                text = "SELECT",
+                                style = AppTypography.labelSmall.copy(fontSize = 11.sp, fontWeight = FontWeight.SemiBold),
+                                color = RPCSXColors.textSecondary
+                            )
+                        }
+
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.spacedBy(5.dp)
+                        ) {
+                            Surface(
+                                shape = RoundedCornerShape(3.dp),
+                                color = RPCSXColors.textSecondary.copy(alpha = 0.15f),
+                                border = BorderStroke(1.dp, RPCSXColors.textSecondary)
+                            ) {
+                                Text(
+                                    text = "○",
+                                    modifier = Modifier.padding(horizontal = 4.dp, vertical = 1.dp),
+                                    style = AppTypography.labelSmall.copy(fontSize = 10.sp, fontWeight = FontWeight.Bold),
+                                    color = RPCSXColors.textSecondary
+                                )
+                            }
+                            Text(
+                                text = "CANCEL",
+                                style = AppTypography.labelSmall.copy(fontSize = 11.sp, fontWeight = FontWeight.SemiBold),
+                                color = RPCSXColors.textSecondary
+                            )
+                        }
+                    }
+
+                    // Cancel Ghost Button per design_3.md
+                    TextButton(
+                        onClick = onDismiss,
+                        shape = RoundedCornerShape(4.dp),
+                        colors = ButtonDefaults.textButtonColors(
+                            containerColor = if (focusedIndex == 2) RPCSXColors.primaryMuted else Color.Transparent,
+                            contentColor = if (focusedIndex == 2) RPCSXColors.primary else RPCSXColors.textSecondary
+                        ),
+                        border = if (focusedIndex == 2) BorderStroke(1.dp, RPCSXColors.focusRing) else null,
+                        contentPadding = PaddingValues(horizontal = 10.dp, vertical = 4.dp)
+                    ) {
+                        Text(
+                            text = "CANCEL",
+                            style = AppTypography.labelSmall.copy(
+                                fontWeight = FontWeight.Bold,
+                                letterSpacing = 0.8.sp
+                            )
+                        )
+                    }
                 }
             }
-        },
-        confirmButton = {},
-        dismissButton = {
-            TextButton(
-                onClick = onDismiss,
-                shape = RoundedCornerShape(4.dp)
+        }
+    }
+}
+
+@Composable
+private fun ImportOptionTile(
+    title: String,
+    formatTag: String,
+    iconRes: Int,
+    isFocused: Boolean,
+    onClick: () -> Unit
+) {
+    val borderColor = if (isFocused) RPCSXColors.focusRing else RPCSXColors.surfaceOverlay
+    val borderWidth = if (isFocused) 2.dp else 1.dp
+    val cardBg = if (isFocused) {
+        Brush.horizontalGradient(
+            listOf(
+                RPCSXColors.surfaceOverlay,
+                Color(0xFF1F2B52)
+            )
+        )
+    } else {
+        Brush.horizontalGradient(
+            listOf(
+                RPCSXColors.surface,
+                Color(0xFF11172A)
+            )
+        )
+    }
+
+    Box(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clickable(onClick = onClick)
+    ) {
+        if (isFocused) {
+            Box(
+                modifier = Modifier
+                    .matchParentSize()
+                    .blur(8.dp)
+                    .background(
+                        color = RPCSXColors.focusGlow.copy(alpha = 0.35f),
+                        shape = RoundedCornerShape(8.dp)
+                    )
+            )
+        }
+
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .background(cardBg, RoundedCornerShape(8.dp))
+                .border(BorderStroke(borderWidth, borderColor), RoundedCornerShape(8.dp))
+                .padding(horizontal = 14.dp, vertical = 10.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(12.dp)
+        ) {
+            Box(
+                modifier = Modifier
+                    .size(36.dp)
+                    .background(
+                        if (isFocused) RPCSXColors.primary.copy(alpha = 0.22f) else RPCSXColors.surfaceElevated,
+                        RoundedCornerShape(6.dp)
+                    )
+                    .border(
+                        BorderStroke(
+                            1.dp,
+                            if (isFocused) RPCSXColors.primary else RPCSXColors.surfaceOverlay
+                        ),
+                        RoundedCornerShape(6.dp)
+                    ),
+                contentAlignment = Alignment.Center
             ) {
-                Text("CANCEL", style = AppTypography.labelSmall, color = RPCSXColors.textSecondary)
+                Icon(
+                    painter = painterResource(iconRes),
+                    contentDescription = null,
+                    tint = if (isFocused) RPCSXColors.primary else RPCSXColors.textSecondary,
+                    modifier = Modifier.size(20.dp)
+                )
             }
-        },
-        containerColor = RPCSXColors.surfaceElevated,
-        shape = RoundedCornerShape(12.dp)
-    )
+
+            Text(
+                text = title,
+                style = AppTypography.bodyMedium.copy(
+                    fontSize = 14.sp,
+                    fontWeight = FontWeight.Bold,
+                    letterSpacing = 0.8.sp
+                ),
+                color = if (isFocused) RPCSXColors.focusRing else RPCSXColors.textPrimary,
+                maxLines = 1,
+                softWrap = false,
+                overflow = TextOverflow.Ellipsis,
+                modifier = Modifier.weight(1f)
+            )
+
+            Surface(
+                shape = RoundedCornerShape(3.dp),
+                color = if (isFocused) RPCSXColors.primaryMuted else RPCSXColors.surfaceElevated,
+                border = BorderStroke(
+                    1.dp,
+                    if (isFocused) RPCSXColors.primary.copy(alpha = 0.6f) else RPCSXColors.surfaceOverlay
+                )
+            ) {
+                Text(
+                    text = formatTag,
+                    modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp),
+                    style = AppTypography.labelSmall.copy(
+                        fontSize = 9.sp,
+                        fontWeight = FontWeight.Bold
+                    ),
+                    color = if (isFocused) RPCSXColors.primary else RPCSXColors.textSecondary,
+                    maxLines = 1,
+                    softWrap = false
+                )
+            }
+
+            Icon(
+                painter = painterResource(R.drawable.ic_keyboard_arrow_right),
+                contentDescription = null,
+                tint = if (isFocused) RPCSXColors.focusRing else RPCSXColors.textDisabled,
+                modifier = Modifier.size(16.dp)
+            )
+        }
+    }
 }

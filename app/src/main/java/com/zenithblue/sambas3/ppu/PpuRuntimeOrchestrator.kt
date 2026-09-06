@@ -8,6 +8,7 @@ import com.zenithblue.sambas3.PpuReadinessStore
 import com.zenithblue.sambas3.RPCSX
 import com.zenithblue.sambas3.RuntimePpuState
 import com.zenithblue.sambas3.UserRepository
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
@@ -25,10 +26,35 @@ object PpuRuntimeOrchestrator {
     private var activeSessionId: Long? = null
 
     @Volatile
+    private var activeLogicalJobId: Long? = null
+
+    @Volatile
+    private var activeConnection: PpuBatchWorkerConnection? = null
+
+    @Volatile
     private var canceled = false
 
     fun cancel(sessionId: Long) {
-        if (activeSessionId == sessionId) canceled = true
+        requestCancel()
+        Log.i(TAG, "Cancellation requested for session=$sessionId active=$activeSessionId")
+    }
+
+    fun prepareForNewJob() {
+        canceled = false
+    }
+
+    fun requestCancel(context: Context? = null) {
+        canceled = true
+        val sid = activeSessionId ?: activeLogicalJobId ?: 0L
+        val conn = activeConnection
+        Log.i(TAG, "requestCancel session=$sid pid=${conn?.workerPid}")
+        conn?.killWorkerProcess()
+        if (context != null) {
+            PpuWorkerProcessKiller.kill(context, conn?.workerPid)
+        }
+        Thread {
+            runCatching { conn?.worker?.cancel(sid) }
+        }.start()
     }
 
     suspend fun execute(
@@ -55,7 +81,12 @@ object PpuRuntimeOrchestrator {
         val acquiredLock = fileLock
 
         try {
-            canceled = false
+            if (canceled) {
+                Log.i(TAG, "execute aborted — already canceled title=$safeTitle")
+                markCanceled(appContext, safeTitle, logicalJobId)
+                return@withContext false
+            }
+            activeLogicalJobId = logicalJobId
             val manifestKey = runCatching { RPCSX.instance.getPpuManifestKey(safeTitle) }
                 .getOrNull().orEmpty()
             var loaded = PpuInstallSessionStore.load(appContext, PpuBatchKind.RUNTIME)
@@ -85,6 +116,7 @@ object PpuRuntimeOrchestrator {
             var batchSize = session.batchSize
             var failuresAtMinimum = 0
             var bindFailures = 0
+            val nativeWindow = PpuNativeProgressWindow()
             val user = runCatching { UserRepository.getUserFromSettings() }.getOrDefault("00000001")
 
             PpuReadinessStore.setRuntimeState(appContext, safeTitle, RuntimePpuState.COMPILING)
@@ -92,6 +124,7 @@ object PpuRuntimeOrchestrator {
             Log.i("S3PPUSESSION", "origin=PRELAUNCH session=$sessionId title=$safeTitle state=START batch=$batchIndex")
 
             while (!canceled) {
+                nativeWindow.reset()
                 val resultDeferred = CompletableDeferred<JSONObject>()
                 val exitDeferred = CompletableDeferred<WorkerDeathReason>()
                 var connection: PpuBatchWorkerConnection? = null
@@ -115,8 +148,15 @@ object PpuRuntimeOrchestrator {
                     continue
                 }
 
+                activeConnection = connection
                 val worker = try {
                     connection.connectionReady.await()
+                } catch (e: CancellationException) {
+                    canceled = true
+                    connection.killWorkerProcess()
+                    if (activeConnection === connection) activeConnection = null
+                    markCanceled(appContext, safeTitle, logicalJobId)
+                    throw e
                 } catch (e: Exception) {
                     connection.unbind()
                     bindFailures++
@@ -128,6 +168,15 @@ object PpuRuntimeOrchestrator {
                     continue
                 }
                 bindFailures = 0
+                runCatching {
+                    val pid = worker.workerPid
+                    if (pid > 0) connection.workerPid = pid
+                }
+                if (canceled) {
+                    connection.killWorkerProcess()
+                    markCanceled(appContext, safeTitle, logicalJobId)
+                    return@withContext false
+                }
 
                 val callback = object : IPpuBatchCallback.Stub() {
                     override fun onBatchStarted(
@@ -136,6 +185,7 @@ object PpuRuntimeOrchestrator {
                         workerInstanceId: String?,
                         cbBatchIndex: Int,
                     ) {
+                        if (workerPid > 0) connection.workerPid = workerPid
                         Log.i("S3PPUBATCH", "origin=PRELAUNCH batch=$cbBatchIndex pid=$workerPid state=STARTED")
                     }
 
@@ -146,23 +196,26 @@ object PpuRuntimeOrchestrator {
                         cbCompleted: Int,
                         message: String?,
                     ) {
-                        if (cbTotal > 0 && totalModules == 0) totalModules = cbTotal
+                        if (canceled) return
+                        val (absDone, absTotal) = nativeWindow.absorb(cbCompleted, cbTotal)
+                        if (absTotal > totalModules) totalModules = absTotal
                         val progress = PpuOverallProgressReducer.reduceLiveProgress(
                             titleTotal = totalModules,
                             lastKnownCompleted = completedModules,
-                            workerTotal = cbTotal,
+                            workerTotal = absTotal,
                             cachedBefore = completedModules,
-                            // Native moduleDone is absolute (cached + newly compiled), not a delta.
-                            currentBatchCompiled = (cbCompleted - completedModules).coerceAtLeast(0),
+                            currentBatchCompiled = (absDone - completedModules).coerceAtLeast(0),
                         )
+                        completedModules = maxOf(completedModules, progress.completedModules)
+                        totalModules = maxOf(totalModules, progress.totalModules)
+                        val shown = PpuOverallProgressReducer.liveDisplay(progress)
                         updateProgress(
                             appContext,
                             safeTitle,
                             logicalJobId,
-                            progress.completedModules,
-                            progress.totalModules,
-                            progress.percent,
-                            message,
+                            shown.completedModules,
+                            shown.totalModules,
+                            shown.percent,
                             active = true,
                         )
                     }
@@ -209,20 +262,30 @@ object PpuRuntimeOrchestrator {
                     )
                 }
 
-                val result = resultDeferred.await()
+                val result = try {
+                    resultDeferred.await()
+                } catch (e: CancellationException) {
+                    canceled = true
+                    connection.killWorkerProcess()
+                    markCanceled(appContext, safeTitle, logicalJobId)
+                    throw e
+                } finally {
+                    if (activeConnection === connection) activeConnection = null
+                }
                 val death = exitDeferred.await()
                 connection.unbind()
 
                 val workerTotal = result.optInt("totalModules", 0)
                 val cachedAfter = result.optInt("cachedAfter", 0)
-                if (workerTotal > 0) totalModules = workerTotal
+                if (workerTotal > totalModules) totalModules = workerTotal
                 val reduced = PpuOverallProgressReducer.reduceBatchFinished(
                     titleTotal = totalModules,
                     lastKnownCompleted = completedModules,
                     workerTotal = workerTotal,
                     cachedAfter = cachedAfter,
                 )
-                completedModules = reduced.completedModules
+                completedModules = maxOf(completedModules, reduced.completedModules)
+                totalModules = maxOf(totalModules, reduced.totalModules)
                 updateProgress(
                     appContext,
                     safeTitle,
@@ -241,6 +304,11 @@ object PpuRuntimeOrchestrator {
                     updatedMs = System.currentTimeMillis(),
                 )
                 PpuInstallSessionStore.save(appContext, session)
+
+                if (canceled || status == "canceled") {
+                    markCanceled(appContext, safeTitle, logicalJobId)
+                    return@withContext false
+                }
 
                 if (death is WorkerDeathReason.Unexpected) {
                     val oldSize = batchSize
@@ -283,8 +351,14 @@ object PpuRuntimeOrchestrator {
 
             markCanceled(appContext, safeTitle, logicalJobId)
             false
+        } catch (e: CancellationException) {
+            canceled = true
+            markCanceled(appContext, safeTitle, logicalJobId)
+            throw e
         } finally {
             activeSessionId = null
+            activeLogicalJobId = null
+            activeConnection = null
             acquiredLock.close()
         }
     }
@@ -300,16 +374,41 @@ object PpuRuntimeOrchestrator {
         active: Boolean,
         outcome: CompileOutcome = CompileOutcome.NONE,
     ) {
+        val cur = CompileProgressBridge.prelaunchState.value
+        val merged = if (active && cur.ppuActive &&
+            (cur.titleId.isNullOrBlank() || cur.titleId.equals(titleId, ignoreCase = true))
+        ) {
+            PpuOverallProgressReducer.mergeMonotonic(
+                OverallProgress(cur.moduleTotal, cur.moduleDone, cur.ppuPercent),
+                OverallProgress(total, done, percent),
+            )
+        } else {
+            OverallProgress(total, done, percent)
+        }
+        val moduleMsg = message ?: if (merged.totalModules > 0) {
+            "module ${merged.completedModules} of ${merged.totalModules}"
+        } else {
+            "Preparing Runtime PPU"
+        }
+        val remaining = if (active) {
+            PpuRemainingTimeTracker.observeRuntime(
+                titleId, merged.completedModules, merged.totalModules, active = true,
+            )
+        } else {
+            PpuRemainingTimeTracker.resetRuntime()
+            null
+        }
         CompileProgressBridge.updatePrelaunchStateForExternalWorker(
             context = context,
             titleId = titleId,
             jobId = jobId,
-            moduleDone = done,
-            moduleTotal = total,
-            percent = percent,
-            message = message ?: if (total > 0) "Runtime PPU module $done of $total" else "Preparing Runtime PPU",
+            moduleDone = merged.completedModules,
+            moduleTotal = merged.totalModules,
+            percent = merged.percent,
+            message = moduleMsg,
             active = active,
             outcome = outcome,
+            remainingLabel = remaining,
         )
     }
 
@@ -333,7 +432,7 @@ object PpuRuntimeOrchestrator {
     private fun markCanceled(context: Context, titleId: String, jobId: Long) {
         updateProgress(
             context, titleId, jobId, 0, 0, 0,
-            "Runtime PPU canceled", false, CompileOutcome.CANCELED,
+            "Runtime PPU stopped — retry to resume", false, CompileOutcome.CANCELED,
         )
         PpuReadinessStore.setRuntimeState(context, titleId, RuntimePpuState.FAILED)
     }

@@ -242,59 +242,55 @@ object PpuReadinessStore {
         return cache.toMap()
     }
 
+    /**
+     * Process death / force-stop leaves IN_PROGRESS and COMPILING persisted with
+     * no live worker. Flip those to FAILED so Home and Launch Center show retry
+     * instead of waiting forever. Cached objects stay on disk for resume.
+     */
     @Synchronized
     fun recoverInterruptedRuntimePreparations(
         context: Context
     ): List<String> {
         ensureLoaded(context)
 
-        val recovered =
-            mutableListOf<String>()
+        val recovered = mutableListOf<String>()
+        val now = System.currentTimeMillis()
+        val updated = cache.mapValues { (key, entry) ->
+            val pre = runCatching {
+                PreRuntimePpuState.valueOf(entry.preRuntime)
+            }.getOrDefault(PreRuntimePpuState.NOT_DONE)
+            val runtime = runCatching {
+                RuntimePpuState.valueOf(entry.runtime)
+            }.getOrDefault(RuntimePpuState.NOT_STARTED)
 
-        val updated =
-            cache.mapValues {
-                    (key, entry) ->
-
-                val runtime =
-                    runCatching {
-                        RuntimePpuState.valueOf(
-                            entry.runtime
-                        )
-                    }.getOrDefault(
-                        RuntimePpuState.NOT_STARTED
-                    )
-
-                if (
-                    runtime ==
-                    RuntimePpuState.COMPILING
-                ) {
+            when {
+                pre == PreRuntimePpuState.IN_PROGRESS -> {
                     recovered += key
-
                     entry.copy(
-                        runtime =
-                            RuntimePpuState
-                                .FAILED
-                                .name,
-                        updatedMs =
-                            System.currentTimeMillis()
+                        preRuntime = PreRuntimePpuState.FAILED.name,
+                        runtime = RuntimePpuState.NOT_STARTED.name,
+                        validatedByRealBootFrame = false,
+                        updatedMs = now,
                     )
-                } else {
-                    entry
                 }
-            }.toMutableMap()
+                runtime == RuntimePpuState.COMPILING -> {
+                    recovered += key
+                    entry.copy(
+                        runtime = RuntimePpuState.FAILED.name,
+                        updatedMs = now,
+                    )
+                }
+                else -> entry
+            }
+        }.toMutableMap()
 
-        if (
-            recovered.isNotEmpty()
-        ) {
+        if (recovered.isNotEmpty()) {
             cache = updated
-
             save(context)
             bumpRevision()
-
             Log.w(
                 "PpuReadinessStore",
-                "Recovered interrupted runtime PPU " +
-                    "preparations: $recovered"
+                "Recovered interrupted PPU preparations: $recovered",
             )
         }
 

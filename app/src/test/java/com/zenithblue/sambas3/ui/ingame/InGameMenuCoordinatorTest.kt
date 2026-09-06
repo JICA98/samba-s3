@@ -461,6 +461,17 @@ class InGameMenuCoordinatorTest {
     }
 
     @Test
+    fun live_logs_row_is_present_and_navigable() {
+        val rows = mainRowDescriptors(InGameMenuCapabilities.EMPTY)
+        assertTrue(rows.any { it.labelRes == com.zenithblue.sambas3.R.string.ingame_live_logs })
+        openMain()
+        coordinator.dispatch(InGameMenuIntent.OpenLiveLogs)
+        assertEquals(InGamePage.LiveLogs, coordinator.state.value.currentPage)
+        coordinator.dispatch(InGameMenuIntent.Back)
+        assertEquals(InGamePage.Main, coordinator.state.value.currentPage)
+    }
+
+    @Test
     fun conditional_rows_follow_capabilities() {
         val rows = mainRowDescriptors(InGameMenuCapabilities.EMPTY.copy(trophiesAvailable = false, friendsAvailable = false))
         assertTrue(rows.any { it.labelRes == com.zenithblue.sambas3.R.string.ingame_achievements })

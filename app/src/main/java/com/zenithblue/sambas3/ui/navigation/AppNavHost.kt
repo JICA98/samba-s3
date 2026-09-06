@@ -80,6 +80,7 @@ import com.zenithblue.sambas3.ui.games.GamesScreen
 import com.zenithblue.sambas3.ui.settings.ADVANCED_SETTINGS_ROUTE
 import com.zenithblue.sambas3.ui.settings.AdvancedSettingsScreen
 import com.zenithblue.sambas3.ui.settings.LogMonitorScreen
+import com.zenithblue.sambas3.ui.crash.CrashLogsHistoryScreen
 import com.zenithblue.sambas3.ui.settings.PatchManagerScreen
 import com.zenithblue.sambas3.ui.settings.ControllerSettings
 import com.zenithblue.sambas3.ui.settings.SettingsScreen
@@ -155,7 +156,8 @@ fun AppNavHost(initialRoute: String? = null) {
             navigateToDrivers = { },
             navigateToPatches = { },
             navigateToLogs = { },
-            drawerState
+            navigateToCrashLogs = { },
+            drawerState = drawerState
         )
 
         return
@@ -186,6 +188,7 @@ fun AppNavHost(initialRoute: String? = null) {
                 navigateToDrivers = { navigateTo("drivers") },
                 navigateToPatches = { navigateTo("patches") },
                 navigateToLogs = { navigateTo("logs") },
+                navigateToCrashLogs = { navigateTo("crash_logs") },
                 drawerState
             )
         }
@@ -283,6 +286,15 @@ fun AppNavHost(initialRoute: String? = null) {
             route = "logs"
         ) {
             LogMonitorScreen(
+                navigateBack = navController::navigateUp,
+                onOpenCrashLogs = { navigateTo("crash_logs") },
+            )
+        }
+
+        composable(
+            route = "crash_logs"
+        ) {
+            CrashLogsHistoryScreen(
                 navigateBack = navController::navigateUp
             )
         }
@@ -313,6 +325,7 @@ fun GamesDestination(
     navigateToDrivers: () -> Unit,
     navigateToPatches: () -> Unit,
     navigateToLogs: () -> Unit,
+    navigateToCrashLogs: () -> Unit = {},
     drawerState: androidx.compose.material3.DrawerState
 ) {
     val context = LocalContext.current
@@ -371,6 +384,7 @@ fun GamesDestination(
         navigateToDrivers = navigateToDrivers,
         navigateToPatches = navigateToPatches,
         navigateToLogs = navigateToLogs,
+        navigateToCrashLogs = navigateToCrashLogs,
         emulatorState = RPCSX.state,
         emulatorActiveGame = RPCSX.activeGame
     )

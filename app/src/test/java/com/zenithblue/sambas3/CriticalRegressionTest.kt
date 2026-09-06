@@ -126,6 +126,14 @@ class CriticalRegressionTest {
         // stableKey uniqueness
         val keys = items.map { it.stableKey }
         assertEquals(keys.size, keys.toSet().size)
+
+        // Test with showBothEnds = true explicitly (AddGame cards removed from home page pager)
+        val itemsBothEnds = com.zenithblue.sambas3.ui.games.buildLibraryPagerItems(visible, source, pending, hasFw = true, isFwInstalling = false, showBothEnds = true)
+        val keysBothEnds = itemsBothEnds.map { it.stableKey }
+        assertEquals(keysBothEnds.size, keysBothEnds.toSet().size)
+        assertFalse(keysBothEnds.contains("add:start"))
+        assertFalse(keysBothEnds.contains("add:end"))
+        assertEquals(visible.size + source.size + pending.size, itemsBothEnds.size)
         // When empty, should contain add card
         val emptyItems = com.zenithblue.sambas3.ui.games.buildLibraryPagerItems(emptyList(), emptyList(), emptyList(), hasFw = true, isFwInstalling = false, showBothEnds = false)
         assertTrue(emptyItems.any { it is com.zenithblue.sambas3.ui.games.PagerItem.AddGame })

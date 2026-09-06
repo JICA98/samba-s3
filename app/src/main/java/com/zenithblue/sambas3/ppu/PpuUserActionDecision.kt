@@ -40,21 +40,19 @@ object PpuUserActionDecision {
         return when (inputs.preRuntime) {
             PreRuntimePpuState.NOT_DONE,
             PreRuntimePpuState.INVALIDATED,
-            PreRuntimePpuState.FAILED ->
-                PpuUserAction.REBUILD_INSTALL_PPU
-
+            PreRuntimePpuState.FAILED,
+            // Persisted IN_PROGRESS with no live worker is a force-stop leftover.
             PreRuntimePpuState.IN_PROGRESS ->
-                PpuUserAction.WAIT_FOR_ACTIVE_JOB
+                PpuUserAction.REBUILD_INSTALL_PPU
 
             PreRuntimePpuState.READY -> when {
                 inputs.runtime == RuntimePpuState.IDLE_AFTER_COMPILE ->
                     PpuUserAction.START
 
-                inputs.runtime == RuntimePpuState.FAILED ->
+                // Persisted COMPILING with no live worker is a force-stop leftover.
+                inputs.runtime == RuntimePpuState.FAILED ||
+                    inputs.runtime == RuntimePpuState.COMPILING ->
                     PpuUserAction.RETRY_RUNTIME_PREPARATION
-
-                inputs.runtime == RuntimePpuState.COMPILING ->
-                    PpuUserAction.WAIT_FOR_ACTIVE_JOB
 
                 else -> PpuUserAction.PREPARE_RUNTIME
             }

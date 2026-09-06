@@ -175,6 +175,7 @@ sealed interface InGamePage {
     data object ConfigureGame : InGamePage
     data object Settings : InGamePage
     data object Monitoring : InGamePage
+    data object LiveLogs : InGamePage
     data object Controller : InGamePage
     data object Trophies : InGamePage
     data object Friends : InGamePage

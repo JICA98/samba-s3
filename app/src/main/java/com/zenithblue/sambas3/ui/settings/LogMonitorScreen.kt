@@ -39,6 +39,7 @@ import androidx.compose.material3.FilterChipDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
@@ -71,6 +72,7 @@ import com.zenithblue.sambas3.LogMonitor
 import com.zenithblue.sambas3.LogSource
 import com.zenithblue.sambas3.R
 import com.zenithblue.sambas3.RPCSXColors
+import com.zenithblue.sambas3.logging.statusLabel
 
 // ---------------------------------------------------------------------------
 // Level / source color helpers
@@ -110,6 +112,7 @@ fun LogMonitorScreen(
     modifier: Modifier = Modifier,
     navigateBack: () -> Unit,
     isInSplitPane: Boolean = false,
+    onOpenCrashLogs: (() -> Unit)? = null,
 ) {
     var selectedLevel by remember { mutableStateOf<LogLevel?>(null) }
     var selectedSource by remember { mutableStateOf<LogSource?>(null) }
@@ -118,12 +121,21 @@ fun LogMonitorScreen(
 
     val context = LocalContext.current
     DisposableEffect(context) {
-        // Log capture is an explicit diagnostic surface. Keeping logcat
-        // parsing and three disk writers alive during every game session
-        // adds avoidable CPU, I/O, and battery pressure.
-        LogMonitor.start(context)
-        onDispose { LogMonitor.stop() }
+        com.zenithblue.sambas3.logging.LogBroker.ensureStarted(context)
+        com.zenithblue.sambas3.logging.LogBroker.retainStream()
+        val latest = com.zenithblue.sambas3.logging.LogSessionStore.latest(context)
+        if (latest != null) {
+            com.zenithblue.sambas3.logging.LogBroker.hydrateSession(context, latest.sessionId)
+        }
+        onDispose {
+            com.zenithblue.sambas3.logging.LogBroker.releaseStream()
+        }
     }
+    val logSession = remember {
+        com.zenithblue.sambas3.logging.LogBroker.currentManifest
+            ?: com.zenithblue.sambas3.logging.LogSessionStore.latest(context)
+    }
+    val sourceStatus by com.zenithblue.sambas3.logging.LogBroker.status.collectAsState()
 
     val allLogs by LogMonitor.logs.collectAsState()
     val filtered by remember(allLogs, selectedLevel, selectedSource) {
@@ -157,6 +169,37 @@ fun LogMonitorScreen(
                 .fillMaxSize()
                 .background(RPCSXColors.background)
         ) {
+            if (logSession != null) {
+                Column(Modifier.padding(horizontal = 12.dp, vertical = 8.dp), verticalArrangement = Arrangement.spacedBy(2.dp)) {
+                    Text(
+                        logSession.gameTitleSnapshot,
+                        color = RPCSXColors.primary,
+                        fontFamily = FontFamily.Monospace,
+                        fontWeight = FontWeight.Bold,
+                        fontSize = 13.sp,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis,
+                    )
+                    val meta = listOfNotNull(
+                        logSession.titleId,
+                        logSession.terminalState.name,
+                        logSession.driverLabel,
+                    ).joinToString(" · ")
+                    Text(meta, color = RPCSXColors.textSecondary, fontFamily = FontFamily.Monospace, fontSize = 10.sp)
+                    val statusLine = sourceStatus.entries.joinToString("  ") { (kind, status) ->
+                        "${kind.label}: ${kind.statusLabel(status)}"
+                    }.ifBlank { "Sources warming up" }
+                    Text(statusLine, color = RPCSXColors.textSecondary, fontFamily = FontFamily.Monospace, fontSize = 10.sp, maxLines = 2, overflow = TextOverflow.Ellipsis)
+                }
+            } else if (allLogs.isEmpty()) {
+                Text(
+                    "No log session yet. Launch a game to capture App / RPCSX logs. Existing files are listed below if present.",
+                    color = RPCSXColors.textSecondary,
+                    modifier = Modifier.padding(horizontal = 12.dp, vertical = 8.dp),
+                    fontFamily = FontFamily.Monospace,
+                    fontSize = 11.sp,
+                )
+            }
             // Filters header: summary + expand/collapse
             Row(
                 modifier = Modifier
@@ -348,6 +391,17 @@ fun LogMonitorScreen(
                 fontSize = 18.sp,
                 letterSpacing = 2.sp
             )
+            Spacer(Modifier.weight(1f))
+            if (onOpenCrashLogs != null) {
+                OutlinedButton(
+                    onClick = onOpenCrashLogs,
+                    modifier = Modifier.height(32.dp),
+                    shape = RoundedCornerShape(6.dp),
+                    contentPadding = PaddingValues(horizontal = 10.dp, vertical = 2.dp),
+                ) {
+                    Text("CRASH HISTORY", style = MaterialTheme.typography.labelSmall)
+                }
+            }
         }
     }
 
@@ -579,7 +633,12 @@ private fun LogBottomBar(
  */
 private fun shareLogFiles(context: Context) {
     LogMonitor.flushWriters()
-    val files = LogMonitor.getAllLogFiles()
+    val sessionFiles = com.zenithblue.sambas3.logging.LogSessionStore.latest(context)
+        ?.artifacts
+        ?.map { java.io.File(it.path) }
+        ?.filter { it.isFile }
+        ?: emptyList()
+    val files = (LogMonitor.getAllLogFiles() + sessionFiles).distinctBy { it.absolutePath }
     if (files.isEmpty()) {
         Toast.makeText(context, context.getString(R.string.log_not_found), Toast.LENGTH_SHORT).show()
         return

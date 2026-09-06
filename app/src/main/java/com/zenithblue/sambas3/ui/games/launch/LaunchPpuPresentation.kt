@@ -5,6 +5,7 @@ import com.zenithblue.sambas3.EmulatorState
 import com.zenithblue.sambas3.PreRuntimePpuState
 import com.zenithblue.sambas3.RuntimePpuState
 import com.zenithblue.sambas3.ppu.GameLaunchAvailability
+import com.zenithblue.sambas3.ppu.PpuRemainingTime
 
 /** Live compile + emulator inputs for Launch Center snapshot mapping. */
 data class LaunchRuntimeInputs(
@@ -19,6 +20,8 @@ data class LaunchRuntimeInputs(
     val preRuntimeState: PreRuntimePpuState = PreRuntimePpuState.NOT_DONE,
     val runtimeReadyState: RuntimePpuState = RuntimePpuState.NOT_STARTED,
     val validatedByRealBootFrame: Boolean = false,
+    val activeCompileTitleId: String? = null,
+    val stoppingCompile: Boolean = false,
 )
 
 enum class PpuPhaseState {
@@ -37,12 +40,17 @@ data class PpuPhaseUi(
     val state: PpuPhaseState,
     val progress: Int?,
     val detail: String?,
+    val remainingLabel: String? = null,
 )
 
 enum class PrepareAction {
     Prepare,
+    Retry,
     PreparingInstall,
     PreparingRuntime,
+    Stop,
+    Stopping,
+    Locked,
 }
 
 enum class PrimaryStartLabel {
@@ -70,6 +78,20 @@ object LaunchPpuPresentation {
         return stateTitleId.equals(currentTitleId, ignoreCase = true)
     }
 
+    fun liveCompileOwnerTitleId(inputs: LaunchRuntimeInputs): String? {
+        inputs.activeCompileTitleId?.takeIf { it.isNotBlank() }?.let { return it }
+        if (inputs.installPpu.ppuActive) {
+            inputs.installPpu.titleId?.takeIf { it.isNotBlank() }?.let { return it }
+        }
+        if (inputs.prelaunchPpu.ppuActive) {
+            inputs.prelaunchPpu.titleId?.takeIf { it.isNotBlank() }?.let { return it }
+        }
+        if (inputs.runtimePpu.ppuActive) {
+            inputs.runtimePpu.titleId?.takeIf { it.isNotBlank() }?.let { return it }
+        }
+        return null
+    }
+
     fun installActiveForTitle(install: CompileProgressBridge.CompileState, titleId: String?): Boolean {
         if (!install.ppuActive) return false
         // Unknown ownership → treat as busy/waiting rather than attributing foreign % to this title.
@@ -89,40 +111,53 @@ object LaunchPpuPresentation {
         inputs: LaunchRuntimeInputs,
     ): LaunchPpuUi {
         val installForThis = installActiveForTitle(inputs.installPpu, titleId)
-        val foreignInstall = inputs.installPpu.ppuActive && !installForThis && !inputs.installPpu.titleId.isNullOrBlank()
         val prelaunchForThis = prelaunchActiveForTitle(inputs.prelaunchPpu, titleId)
         val foreignPrelaunch = inputs.prelaunchPpu.ppuActive && !prelaunchForThis && !inputs.prelaunchPpu.titleId.isNullOrBlank()
+        val runtimeActiveForThis = inputs.runtimePpu.ppuActive &&
+            (inputs.runtimePpu.titleId.isNullOrBlank() || ownsTitle(inputs.runtimePpu.titleId, titleId))
+        val ownerTitleId = liveCompileOwnerTitleId(inputs)
+        val thisOwnsLive = ownsTitle(ownerTitleId, titleId)
+        val anyLiveCompile = inputs.installPpu.ppuActive ||
+            inputs.prelaunchPpu.ppuActive ||
+            inputs.runtimePpu.ppuActive ||
+            inputs.waitingForIdle ||
+            inputs.stoppingCompile ||
+            !ownerTitleId.isNullOrBlank()
+        val thisCompiling = installForThis || prelaunchForThis || runtimeActiveForThis ||
+            (thisOwnsLive && anyLiveCompile)
+        val foreignBusy = anyLiveCompile && !thisCompiling
+        val foreignWaitDetail = "Waiting — another game is compiling"
 
         val installFinal = when {
             installForThis -> PpuPhaseUi(
                 label = "Install PPU",
                 state = PpuPhaseState.Compiling,
                 progress = compileProgressPercent(inputs.installPpu),
-                detail = compileProgressDetail(inputs.installPpu)
+                detail = compileProgressDetail(inputs.installPpu),
+                remainingLabel = inputs.installPpu.remainingLabel,
             )
-            foreignInstall -> PpuPhaseUi(
+            foreignBusy && inputs.preRuntimeState != PreRuntimePpuState.READY -> PpuPhaseUi(
                 label = "Install PPU",
                 state = PpuPhaseState.Waiting,
                 progress = null,
-                detail = "Waiting"
+                detail = foreignWaitDetail
             )
-            inputs.preRuntimeState == PreRuntimePpuState.FAILED -> PpuPhaseUi(
+            inputs.preRuntimeState == PreRuntimePpuState.FAILED ||
+                inputs.preRuntimeState == PreRuntimePpuState.IN_PROGRESS -> PpuPhaseUi(
                 label = "Install PPU",
                 state = PpuPhaseState.Failed,
                 progress = null,
-                detail = "Failed"
+                detail = if (inputs.preRuntimeState == PreRuntimePpuState.IN_PROGRESS) {
+                    "Interrupted — retry to resume"
+                } else {
+                    "Failed"
+                }
             )
             inputs.preRuntimeState == PreRuntimePpuState.READY -> PpuPhaseUi(
                 label = "Install PPU",
                 state = PpuPhaseState.Ready,
                 progress = null,
                 detail = "Ready"
-            )
-            inputs.preRuntimeState == PreRuntimePpuState.IN_PROGRESS -> PpuPhaseUi(
-                label = "Install PPU",
-                state = PpuPhaseState.Preparing,
-                progress = null,
-                detail = "Preparing"
             )
             inputs.preRuntimeState == PreRuntimePpuState.INVALIDATED ||
                 inputs.preRuntimeState == PreRuntimePpuState.NOT_DONE -> PpuPhaseUi(
@@ -138,9 +173,6 @@ object LaunchPpuPresentation {
                 detail = "Not ready"
             )
         }
-
-        val runtimeActiveForThis = inputs.runtimePpu.ppuActive &&
-            (inputs.runtimePpu.titleId.isNullOrBlank() || ownsTitle(inputs.runtimePpu.titleId, titleId))
 
         val runtimeUi = when {
             installForThis -> PpuPhaseUi(
@@ -158,21 +190,21 @@ object LaunchPpuPresentation {
                     progress = null,
                     detail = "Waiting to continue preparation"
                 )
-            prelaunchForThis || runtimeActiveForThis -> PpuPhaseUi(
-                label = "Runtime PPU",
-                state = PpuPhaseState.Compiling,
-                progress = compileProgressPercent(
-                    if (runtimeActiveForThis) inputs.runtimePpu else inputs.prelaunchPpu
-                ),
-                detail = compileProgressDetail(
-                    if (runtimeActiveForThis) inputs.runtimePpu else inputs.prelaunchPpu
-                ),
-            )
-            foreignPrelaunch -> PpuPhaseUi(
+            prelaunchForThis || runtimeActiveForThis -> {
+                val compiling = if (runtimeActiveForThis) inputs.runtimePpu else inputs.prelaunchPpu
+                PpuPhaseUi(
+                    label = "Runtime PPU",
+                    state = PpuPhaseState.Compiling,
+                    progress = compileProgressPercent(compiling),
+                    detail = compileProgressDetail(compiling),
+                    remainingLabel = compiling.remainingLabel,
+                )
+            }
+            foreignPrelaunch || foreignBusy -> PpuPhaseUi(
                 label = "Runtime PPU",
                 state = PpuPhaseState.Waiting,
                 progress = null,
-                detail = "Waiting"
+                detail = foreignWaitDetail
             )
             inputs.waitingForIdle -> PpuPhaseUi(
                 label = "Runtime PPU",
@@ -180,18 +212,17 @@ object LaunchPpuPresentation {
                 progress = null,
                 detail = "Preparing"
             )
-            inputs.runtimeReadyState == RuntimePpuState.COMPILING -> PpuPhaseUi(
-                label = "Runtime PPU",
-                state = PpuPhaseState.Finalizing,
-                progress = null,
-                detail = "Finalizing"
-            )
-            inputs.runtimeReadyState == RuntimePpuState.FAILED &&
+            (inputs.runtimeReadyState == RuntimePpuState.FAILED ||
+                inputs.runtimeReadyState == RuntimePpuState.COMPILING) &&
                 inputs.preRuntimeState == PreRuntimePpuState.READY -> PpuPhaseUi(
                 label = "Runtime PPU",
                 state = PpuPhaseState.Failed,
                 progress = null,
-                detail = "Preparation failed"
+                detail = if (inputs.runtimeReadyState == RuntimePpuState.COMPILING) {
+                    "Interrupted — retry to resume"
+                } else {
+                    "Preparation failed"
+                }
             )
             inputs.runtimeReadyState == RuntimePpuState.IDLE_AFTER_COMPILE &&
                 inputs.preRuntimeState == PreRuntimePpuState.READY -> PpuPhaseUi(
@@ -214,14 +245,17 @@ object LaunchPpuPresentation {
             )
         }
 
-        val startEnabled = availability is GameLaunchAvailability.Ready
+        val startEnabled = availability is GameLaunchAvailability.Ready &&
+            !foreignBusy &&
+            !thisCompiling &&
+            !inputs.stoppingCompile
 
         val prepareAction: PrepareAction? = when {
-            installForThis -> PrepareAction.PreparingInstall
-            prelaunchForThis || runtimeActiveForThis || inputs.waitingForIdle ||
-                (inputs.runtimeReadyState == RuntimePpuState.COMPILING) -> PrepareAction.PreparingRuntime
-            availability is GameLaunchAvailability.Failed ||
-                availability is GameLaunchAvailability.NeedsPreparation -> PrepareAction.Prepare
+            inputs.stoppingCompile && (thisCompiling || thisOwnsLive) -> PrepareAction.Stopping
+            thisCompiling -> PrepareAction.Stop
+            foreignBusy -> PrepareAction.Locked
+            availability is GameLaunchAvailability.Failed -> PrepareAction.Retry
+            availability is GameLaunchAvailability.NeedsPreparation -> PrepareAction.Prepare
             else -> null
         }
 
@@ -229,8 +263,10 @@ object LaunchPpuPresentation {
 
         val statusLine = when {
             startEnabled -> null
+            inputs.stoppingCompile && (thisCompiling || thisOwnsLive) -> "Stopping PPU compilation"
+            thisCompiling -> null
+            foreignBusy -> "Another game is compiling PPU"
             availability is GameLaunchAvailability.Failed -> availability.reason ?: "PPU preparation failed — retry"
-            installForThis || prelaunchForThis || runtimeActiveForThis || inputs.waitingForIdle -> null
             availability is GameLaunchAvailability.NeedsPreparation -> "PPU preparation required"
             availability is GameLaunchAvailability.PreparingPpu -> "PPU not ready"
             availability is GameLaunchAvailability.EngineBusy -> "Emulator busy"
@@ -269,6 +305,9 @@ object LaunchPpuPresentation {
         return if (pct != null) "Compiling ${pct}%" else "Compiling"
     }
 
+    fun compileProgressLine(state: CompileProgressBridge.CompileState): String =
+        PpuRemainingTime.progressLine(compileProgressDetail(state), state.remainingLabel)
+
     fun phaseStatusText(phase: PpuPhaseUi): String = when {
         phase.state == PpuPhaseState.Compiling && !phase.detail.isNullOrBlank() ->
             phase.detail
@@ -277,6 +316,9 @@ object LaunchPpuPresentation {
         !phase.detail.isNullOrBlank() -> phase.detail
         else -> phase.state.name
     }
+
+    fun phaseStatusLine(phase: PpuPhaseUi): String =
+        PpuRemainingTime.progressLine(phaseStatusText(phase), phase.remainingLabel)
 
     fun homeCardShowsCompileOverlay(
         isImporting: Boolean,

@@ -118,6 +118,9 @@ class GameLaunchSnapshotLiveInputsTest {
         val snap = GameLaunchRepository.snapshot(ctx, game(), inputs)
         assertTrue(snap.ppuUi.runtimePpu.progress == null || snap.ppuUi.runtimePpu.progress != 99)
         assertEquals(PpuPhaseState.Waiting, snap.ppuUi.runtimePpu.state)
+        assertEquals(PrepareAction.Locked, snap.ppuUi.prepareAction)
+        assertFalse(snap.canPlayFresh)
+        assertEquals("Waiting", snap.ppuStatus)
     }
 
     @Test

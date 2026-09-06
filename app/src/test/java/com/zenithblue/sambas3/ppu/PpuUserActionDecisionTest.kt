@@ -111,6 +111,32 @@ class PpuUserActionDecisionTest {
     }
 
     @Test
+    fun inProgressWithoutLiveJob_mapsToInstallRetry() {
+        val action = PpuUserActionDecision.decide(
+            inputs(PreRuntimePpuState.IN_PROGRESS, RuntimePpuState.NOT_STARTED)
+        )
+        assertEquals(PpuUserAction.REBUILD_INSTALL_PPU, action)
+        assertFalse(PpuUserActionDecision.canEnterRealBoot(action))
+    }
+
+    @Test
+    fun inProgressWithLiveInstall_mapsToWait() {
+        val action = PpuUserActionDecision.decide(
+            inputs(PreRuntimePpuState.IN_PROGRESS, RuntimePpuState.NOT_STARTED, install = true)
+        )
+        assertEquals(PpuUserAction.WAIT_FOR_ACTIVE_JOB, action)
+    }
+
+    @Test
+    fun compilingWithoutLiveJob_mapsToRuntimeRetry() {
+        val action = PpuUserActionDecision.decide(
+            inputs(PreRuntimePpuState.READY, RuntimePpuState.COMPILING)
+        )
+        assertEquals(PpuUserAction.RETRY_RUNTIME_PREPARATION, action)
+        assertFalse(PpuUserActionDecision.canEnterRealBoot(action))
+    }
+
+    @Test
     fun onlyStartCanEnterRealBoot() {
         PpuUserAction.entries.forEach {
             assertEquals(it == PpuUserAction.START, PpuUserActionDecision.canEnterRealBoot(it))

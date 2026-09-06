@@ -29,7 +29,7 @@ class PpuReadinessStoreRecoveryTest {
         RPCSX.rootDirectory = tmpRoot
         PpuReadinessStore.load(ctx)
         // clear any existing entries for our test keys
-        listOf("TEST_COMP", "TEST_IDLE", "TEST_NOTSTARTED", "TEST_FAILED", "TEST_RECOVERY", "BLUS99999").forEach {
+        listOf("TEST_COMP", "TEST_IDLE", "TEST_NOTSTARTED", "TEST_FAILED", "TEST_RECOVERY", "TEST_INSTALL", "BLUS99999", "BCUS98125").forEach {
             PpuReadinessStore.removeEntry(ctx, it)
         }
     }
@@ -37,6 +37,16 @@ class PpuReadinessStoreRecoveryTest {
     @After
     fun tearDown() {
         RPCSX.rootDirectory = oldRoot
+    }
+
+    @Test
+    fun in_progress_install_becomes_failed_after_recovery() {
+        PpuReadinessStore.setPreRuntimeState(ctx, "TEST_INSTALL", PreRuntimePpuState.IN_PROGRESS)
+        assertEquals(PreRuntimePpuState.IN_PROGRESS, PpuReadinessStore.getPreRuntimeState(ctx, "TEST_INSTALL"))
+        val recovered = PpuReadinessStore.recoverInterruptedRuntimePreparations(ctx)
+        assertTrue(recovered.contains("TEST_INSTALL"))
+        assertEquals(PreRuntimePpuState.FAILED, PpuReadinessStore.getPreRuntimeState(ctx, "TEST_INSTALL"))
+        assertEquals(RuntimePpuState.NOT_STARTED, PpuReadinessStore.getRuntimeState(ctx, "TEST_INSTALL"))
     }
 
     @Test
@@ -96,5 +106,33 @@ class PpuReadinessStoreRecoveryTest {
         assertTrue(availability is GameLaunchAvailability.Failed)
         assertTrue((availability as GameLaunchAvailability.Failed).retryable)
         assertFalse(PpuReadinessStore.isRuntimeValidated(ctx, key))
+    }
+
+    @Test
+    fun stale_install_in_progress_after_reconciliation_is_retryable() {
+        val key = "BCUS98125"
+        PpuReadinessStore.setPreRuntimeState(ctx, key, PreRuntimePpuState.IN_PROGRESS)
+        PpuReadinessStore.setRuntimeState(ctx, key, RuntimePpuState.NOT_STARTED)
+        val recovered = PpuReadinessStore.recoverInterruptedRuntimePreparations(ctx)
+        assertTrue(recovered.contains(key))
+        assertEquals(PreRuntimePpuState.FAILED, PpuReadinessStore.getPreRuntimeState(ctx, key))
+        val game = Game(GameInfoStore("/files/config/games/$key", androidx.compose.runtime.mutableStateOf("inFAMOUS 2"), androidx.compose.runtime.mutableStateOf(null), androidx.compose.runtime.mutableIntStateOf(0)))
+        val availability = GameRunEligibilityHelper.evaluateAvailability(
+            ctx, game, installPpuActive = false,
+            prelaunchState = com.zenithblue.sambas3.CompileProgressBridge.CompileState(ppuActive = false),
+            runtimeState = com.zenithblue.sambas3.CompileProgressBridge.CompileState(ppuActive = false),
+            emulatorState = EmulatorState.Stopped,
+            activeGame = null
+        )
+        assertTrue(availability is GameLaunchAvailability.Failed)
+        assertTrue((availability as GameLaunchAvailability.Failed).retryable)
+        val action = com.zenithblue.sambas3.ppu.PpuUserActionDecision.decide(
+            com.zenithblue.sambas3.ppu.PpuActionInputs(
+                preRuntime = PpuReadinessStore.getPreRuntimeState(ctx, key),
+                runtime = PpuReadinessStore.getRuntimeState(ctx, key),
+                validatedByRealBootFrame = false,
+            )
+        )
+        assertEquals(com.zenithblue.sambas3.ppu.PpuUserAction.REBUILD_INSTALL_PPU, action)
     }
 }

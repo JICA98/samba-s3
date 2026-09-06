@@ -197,6 +197,7 @@ class RPCSXActivity : ComponentActivity(), EmulationHost {
         binding.surfaceHost.translationZ = 0f
         binding.monitoringOverlay.translationZ = 1f
         binding.padOverlay.translationZ = 2f
+        binding.liveLogsOverlay.translationZ = 2.5f
         binding.menuToggle.translationZ = 3f
         binding.oscToggle.translationZ = 3f
         binding.transitionOverlay.translationZ = 100f
@@ -229,6 +230,24 @@ class RPCSXActivity : ComponentActivity(), EmulationHost {
                     Log.i("S3PERF", "monitor enabled=${monitorSettings.enabled} intervalMs=${monitorSettings.updateMs}")
                 }
                 MonitoringOverlay(monitoringRepository, monitorSettings, menuState.isOpen)
+            }
+        }
+
+        binding.liveLogsOverlay.visibility = View.GONE
+        binding.liveLogsOverlay.isClickable = false
+        binding.liveLogsOverlay.isFocusable = false
+        binding.liveLogsOverlay.setViewCompositionStrategy(
+            ViewCompositionStrategy.DisposeOnViewTreeLifecycleDestroyed
+        )
+        binding.liveLogsOverlay.setContent {
+            RPCSXTheme {
+                val liveSettings by com.zenithblue.sambas3.logging.LiveLogOverlaySettings.state(this@RPCSXActivity).collectAsStateWithLifecycle()
+                val menuState by coordinator.state.collectAsStateWithLifecycle()
+                LaunchedEffect(liveSettings.enabled, liveSettings.editMode, liveSettings.locked) {
+                    binding.liveLogsOverlay.visibility = if (liveSettings.enabled) View.VISIBLE else View.GONE
+                    binding.liveLogsOverlay.interceptTouches = liveSettings.enabled && liveSettings.editMode && !liveSettings.locked
+                }
+                com.zenithblue.sambas3.ui.logging.LiveLogOverlayHost(menuState.isOpen)
             }
         }
 
@@ -401,21 +420,35 @@ class RPCSXActivity : ComponentActivity(), EmulationHost {
         }
         val gamePath = originalGamePath
         val gameInfo = GameRepository.find(gamePath)?.info
+        val gameTitle = GameIdentity.displayName(originalGamePath, gameInfo?.name?.value)
+        val titleId = GameIdentity.titleIdOrNull(originalGamePath, gameInfo?.name?.value)
         GameSessionService.start(
             this,
             gamePath,
-            gameInfo?.name?.value,
+            gameTitle,
             gameInfo?.iconPath?.value
         )
         RPCSX.lastPlayedGame = gamePath
-        EmulationSessionJournal.begin(
+        val session = EmulationSessionJournal.begin(
             this,
             originalGamePath,
-            GameIdentity.titleIdOrNull(originalGamePath, null),
-            originalGamePath.substringAfterLast('/'),
+            titleId,
+            gameTitle,
             activityInstanceId,
             surfaceLeaseManager.currentGeneration
         )
+        try {
+            com.zenithblue.sambas3.logging.LogBroker.beginGameSession(
+                this,
+                session.sessionId,
+                originalGamePath,
+                gameTitle,
+                gameInfo?.iconPath?.value,
+                bootMode.name,
+            )
+        } catch (e: Exception) {
+            Log.w("S3LOG", "log session begin failed: ${e.message}")
+        }
         logSessionSnapshot("activity-created")
         if (bootMode != EmulatorBootMode.FreshGame) {
             pendingRecovery?.let {

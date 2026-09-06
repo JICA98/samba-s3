@@ -67,7 +67,7 @@ fun CompileStatusChip(
                     trackColor = RPCSXColors.surfaceOverlay
                 )
                 Text(
-                    text = state.ppuMsg ?: stringResource(R.string.compiling_ppu_title),
+                    text = com.zenithblue.sambas3.ui.games.launch.LaunchPpuPresentation.compileProgressLine(state),
                     style = AppTypography.labelSmall,
                     color = RPCSXColors.textSecondary,
                     maxLines = 2,
