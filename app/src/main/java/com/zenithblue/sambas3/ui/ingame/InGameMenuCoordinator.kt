@@ -425,6 +425,35 @@ class InGameMenuCoordinator(
         return true
     }
 
+    /** 2D grid selection move for multi-column menus (e.g. 2-column Main panel). */
+    fun moveSelection2D(dx: Int, dy: Int, columns: Int = 2): Boolean {
+        val s = _state.value
+        val page = s.currentPage ?: return false
+        val count = s.itemCounts[page] ?: return false
+        if (count <= 0) return false
+        val cur = s.selectedIndex.coerceIn(0, count - 1)
+        val curRow = cur / columns
+        val curCol = cur % columns
+        val totalRows = (count + columns - 1) / columns
+
+        var nextCol = curCol + dx
+        var nextRow = curRow + dy
+
+        if (dx != 0) {
+            nextCol = nextCol.coerceIn(0, columns - 1)
+        }
+        if (dy != 0) {
+            nextRow = ((nextRow % totalRows) + totalRows) % totalRows
+        }
+
+        var next = nextRow * columns + nextCol
+        if (next >= count) {
+            next = if (dx > 0) cur else count - 1
+        }
+        _state.update { it.copy(selectedIndex = next) }
+        return true
+    }
+
     fun jumpSelection(delta: Int): Boolean = moveSelection(delta)
 
     fun activateSelected(): Boolean {

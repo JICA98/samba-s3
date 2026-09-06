@@ -16,8 +16,12 @@ import kotlin.math.abs
 
 /** Multi-rate telemetry; the repository may sample quickly without re-reading expensive sources. */
 class AndroidSystemMetricsCollector(private val context: Context) : MonitoringSystemSource {
-    private val batteryManager: BatteryManager? = context.getSystemService(BatteryManager::class.java)
-    private val powerManager: PowerManager? = context.getSystemService(PowerManager::class.java)
+    private val batteryManager: BatteryManager? =
+        context.getSystemService(BatteryManager::class.java)
+            ?: context.getSystemService(Context.BATTERY_SERVICE) as? BatteryManager
+    private val powerManager: PowerManager? =
+        context.getSystemService(PowerManager::class.java)
+            ?: context.getSystemService(Context.POWER_SERVICE) as? PowerManager
     private val cpuFrequencyFiles = File("/sys/devices/system/cpu").listFiles().orEmpty()
         .filter { it.name.matches(Regex("cpu\\d+")) }
         .map { File(it, "cpufreq/scaling_cur_freq") }
@@ -47,10 +51,15 @@ class AndroidSystemMetricsCollector(private val context: Context) : MonitoringSy
     private var lastFrequencies: List<Long> = emptyList()
     private var lastSwap = SwapSample()
     private var procStatReadable = true
+    private var procStatRetryMs = 0L
     private var zramReadable = true
+    private var zramRetryMs = 0L
     private var gpuLoadReadable = true
     private var gpuFreqReadable = true
+    private var gpuRetryMs = 0L
     private var lastGpu: GpuHardwareMetrics? = null
+    private var lastEnergyNwh: Long? = null
+    private var lastEnergyMs: Long = 0L
 
     override fun start() {
         if (active) return
@@ -116,19 +125,17 @@ class AndroidSystemMetricsCollector(private val context: Context) : MonitoringSy
         }
         if (now - lastPowerMs >= 1_000L) {
             val sample = battery
-            val currentUa = runCatching { batteryManager?.getLongProperty(BatteryManager.BATTERY_PROPERTY_CURRENT_NOW) }.getOrNull()?.takeIf { it != 0L }
+            val currentUa = readBatteryCurrentUa()
             val voltageMv = sample?.voltageMv?.takeIf { it > 0 }
+            val instantPower = if (voltageMv != null && currentUa != null) {
+                abs(voltageMv * currentUa / 1_000_000_000f).takeIf { it >= 0.05f }
+            } else null
             lastPower = PowerSample(
                 temperatureC = sample?.temperatureC,
-                // Some Android builds expose a placeholder/quantized current
-                // value that formats to 0.0 W. Treat that as unavailable so
-                // the overlay never presents a fabricated power reading.
-                powerW = if (voltageMv != null && currentUa != null) {
-                    abs(voltageMv * currentUa / 1_000_000_000f).takeIf { it >= 0.1f }
-                } else null,
+                powerW = instantPower ?: readEnergyPowerW(now),
                 percent = sample?.percent, charging = sample?.charging,
-                thermalStatus = if (android.os.Build.VERSION.SDK_INT >= 29) runCatching { powerManager?.currentThermalStatus }.getOrNull() else null,
-                thermalHeadroom = if (android.os.Build.VERSION.SDK_INT >= 30) runCatching { powerManager?.getThermalHeadroom(0) }.getOrNull() else null
+                thermalStatus = readThermalStatus(),
+                thermalHeadroom = readThermalHeadroom()
             )
             lastPowerMs = now
         }
@@ -139,13 +146,7 @@ class AndroidSystemMetricsCollector(private val context: Context) : MonitoringSy
         }
         if (now - lastSwapMs >= 2_000L) {
             val memInfo = readMemInfo()
-            val zram = if (zramReadable) {
-                runCatching { zramFile.readText().trim().split(Regex("\\s+"))[2].toLong() }
-                    .getOrElse {
-                        zramReadable = false
-                        null
-                    }
-            } else null
+            val zram = readZramBytes(now)
             lastSwap = SwapSample(memInfo["SwapTotal"]?.minus(memInfo["SwapFree"] ?: 0L), memInfo["SwapTotal"], zram)
             lastSwapMs = now
         }
@@ -160,10 +161,15 @@ class AndroidSystemMetricsCollector(private val context: Context) : MonitoringSy
     }
 
     private fun readSystemCpu(): Float? {
-        if (!procStatReadable) return null
+        val now = SystemClock.elapsedRealtime()
+        if (!procStatReadable) {
+            if (now < procStatRetryMs) return null
+            procStatReadable = true
+        }
         val fields = runCatching { File("/proc/stat").useLines { it.firstOrNull()?.trim()?.split(Regex("\\s+")) } }.getOrNull()
         if (fields == null) {
             procStatReadable = false
+            procStatRetryMs = now + 8_000L
             return null
         }
         if (fields.size < 5 || fields[0] != "cpu") return null
@@ -199,30 +205,119 @@ class AndroidSystemMetricsCollector(private val context: Context) : MonitoringSy
     private fun readSelfRss(): Long? = runCatching { File("/proc/self/status").useLines { lines -> lines.firstOrNull { it.startsWith("VmRSS:") }?.filter { it.isDigit() }?.toLongOrNull()?.times(1024L) } }.getOrNull()
 
     private fun discoverGpuFiles(): Pair<File?, File?> {
-        val kgsl = File("/sys/class/kgsl/kgsl-3d0")
-        val load = File(kgsl, "gpu_busy_percentage").takeIf { it.isFile }
-        val freq = File(kgsl, "devfreq/cur_freq").takeIf { it.isFile }
-        if (load != null || freq != null) return load to freq
-        val generic = File("/sys/class/devfreq").listFiles().orEmpty().firstOrNull { it.name.contains("gpu", true) || it.name.contains("mali", true) }
-        return generic?.let { File(it, "load").takeIf(File::isFile) } to generic?.let { File(it, "cur_freq").takeIf(File::isFile) }
+        val kgslRoots = listOf(
+            File("/sys/class/kgsl/kgsl-3d0"),
+            File("/sys/devices/virtual/kgsl/kgsl-3d0"),
+        )
+        val loadCandidates = listOf("gpu_busy_percentage", "gpu_busy", "gpubusy")
+        val freqCandidates = listOf("devfreq/cur_freq", "gpuclk", "freq", "cur_freq")
+        for (root in kgslRoots) {
+            val load = loadCandidates.firstNotNullOfOrNull { name -> File(root, name).takeIf { it.isFile && it.canRead() } }
+            val freq = freqCandidates.firstNotNullOfOrNull { name -> File(root, name).takeIf { it.isFile && it.canRead() } }
+            if (load != null || freq != null) return load to freq
+        }
+        val devfreq = File("/sys/class/devfreq").listFiles().orEmpty()
+            .firstOrNull { it.name.contains("gpu", true) || it.name.contains("mali", true) || it.name.contains("kgsl", true) }
+        val mali = File("/sys/class/misc/mali0/device")
+        val genericLoad = listOf(
+            devfreq?.let { File(it, "load") },
+            File(mali, "utilization"),
+            File(mali, "gpuinfo"),
+        ).firstOrNull { it != null && it.isFile && it.canRead() }
+        val genericFreq = listOf(
+            devfreq?.let { File(it, "cur_freq") },
+            File(mali, "clock"),
+        ).firstOrNull { it != null && it.isFile && it.canRead() }
+        return genericLoad to genericFreq
     }
 
     private fun readGpu(): GpuHardwareMetrics? {
+        val now = SystemClock.elapsedRealtime()
+        if ((!gpuLoadReadable || !gpuFreqReadable) && now >= gpuRetryMs) {
+            gpuLoadReadable = true
+            gpuFreqReadable = true
+        }
         val load = if (gpuLoadReadable && gpuFiles.first != null) {
-            runCatching { gpuFiles.first!!.readText().trim().removeSuffix("%").toInt() }
-                .getOrElse {
-                    gpuLoadReadable = false
-                    null
-                }
+            runCatching {
+                gpuFiles.first!!.readText().trim().removeSuffix("%").split(Regex("\\s+")).first().toInt()
+            }.getOrElse {
+                gpuLoadReadable = false
+                gpuRetryMs = now + 8_000L
+                null
+            }
         } else null
         val freq = if (gpuFreqReadable && gpuFiles.second != null) {
-            runCatching { gpuFiles.second!!.readText().trim().toLong() }
+            runCatching { normalizeGpuHz(gpuFiles.second!!.readText().trim().toLong()) }
                 .getOrElse {
                     gpuFreqReadable = false
+                    gpuRetryMs = now + 8_000L
                     null
                 }
         } else null
         return if (load != null || freq != null) GpuHardwareMetrics(load, freq) else null
+    }
+
+    private fun readBatteryCurrentUa(): Long? {
+        val now = runCatching { batteryManager?.getLongProperty(BatteryManager.BATTERY_PROPERTY_CURRENT_NOW) }.getOrNull()
+        if (now != null && now != 0L && now != Long.MIN_VALUE) return now
+        val avg = runCatching { batteryManager?.getLongProperty(BatteryManager.BATTERY_PROPERTY_CURRENT_AVERAGE) }.getOrNull()
+        return avg?.takeIf { it != 0L && it != Long.MIN_VALUE }
+    }
+
+    private fun readEnergyPowerW(nowMs: Long): Float? {
+        val energy = runCatching { batteryManager?.getLongProperty(BatteryManager.BATTERY_PROPERTY_ENERGY_COUNTER) }
+            .getOrNull()?.takeIf { it > 0L } ?: return null
+        val prev = lastEnergyNwh
+        val prevMs = lastEnergyMs
+        lastEnergyNwh = energy
+        lastEnergyMs = nowMs
+        if (prev == null || prevMs <= 0L || nowMs <= prevMs) return null
+        val dtSec = (nowMs - prevMs) / 1000.0
+        if (dtSec < 0.5) return null
+        // ENERGY_COUNTER is nWh. nWh / s → 3.6e-6 W.
+        val watts = abs((energy - prev) / dtSec) * 3.6e-6
+        return watts.toFloat().takeIf { it.isFinite() && it >= 0.05f && it < 50f }
+    }
+
+    private fun readThermalStatus(): Int? {
+        if (android.os.Build.VERSION.SDK_INT < 29) return null
+        return runCatching { powerManager?.currentThermalStatus }.getOrNull()
+    }
+
+    private fun readThermalHeadroom(): Float? {
+        if (android.os.Build.VERSION.SDK_INT < 30) return null
+        val pm = powerManager ?: return null
+        val immediate = runCatching { pm.getThermalHeadroom(0) }.getOrNull()
+        val value = if (immediate != null && immediate.isFinite()) immediate else {
+            runCatching { pm.getThermalHeadroom(1) }.getOrNull()
+        }
+        return value?.takeIf { it.isFinite() }
+    }
+
+    private fun readZramBytes(now: Long): Long? {
+        if (!zramReadable) {
+            if (now < zramRetryMs) return null
+            zramReadable = true
+        }
+        val mm = runCatching {
+            val parts = zramFile.readText().trim().split(Regex("\\s+"))
+            parts.getOrNull(2)?.toLongOrNull() ?: parts.getOrNull(0)?.toLongOrNull()
+        }.getOrNull()
+        if (mm != null) return mm
+        val used = runCatching { File("/sys/block/zram0/mem_used_total").readText().trim().toLong() }.getOrNull()
+        if (used != null) return used
+        zramReadable = false
+        zramRetryMs = now + 8_000L
+        return null
+    }
+
+    companion object {
+        fun normalizeGpuHz(raw: Long): Long = when {
+            raw >= 10_000_000L -> raw
+            raw >= 10_000L -> raw * 1_000L
+            raw > 0L -> raw * 1_000_000L
+            else -> raw
+        }
     }
 
     private data class MemorySample(val used: Long? = null, val total: Long? = null, val available: Long? = null)

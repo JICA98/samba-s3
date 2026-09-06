@@ -22,6 +22,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.drawscope.Stroke
+import androidx.compose.ui.platform.LocalConfiguration
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -31,8 +33,8 @@ import com.zenithblue.sambas3.monitoring.AndroidSystemMetrics
 import com.zenithblue.sambas3.monitoring.EmulatorMetrics
 import com.zenithblue.sambas3.monitoring.MonitoringGraphEntry
 import com.zenithblue.sambas3.monitoring.MonitoringGraphMath
-import com.zenithblue.sambas3.monitoring.MonitoringLayout
 import com.zenithblue.sambas3.monitoring.MonitoringOverlayPresentation
+import com.zenithblue.sambas3.monitoring.OverlayLayoutMetrics
 import com.zenithblue.sambas3.monitoring.MonitoringPosition
 import com.zenithblue.sambas3.monitoring.MonitoringRepository
 import com.zenithblue.sambas3.monitoring.MonitoringSettings
@@ -59,7 +61,7 @@ fun MonitoringOverlay(
     BoxWithConstraints(
         modifier = Modifier
             .fillMaxSize()
-            .padding(6.dp),
+            .padding(4.dp),
         contentAlignment = alignment
     ) {
         MetricPanel(
@@ -67,7 +69,8 @@ fun MonitoringOverlay(
             a = snapshot.android,
             fpsHistory = snapshot.fpsHistory,
             frameHistory = snapshot.frameTimeHistory,
-            settings = settings
+            settings = settings,
+            screenWidthDp = maxWidth.value,
         )
     }
 }
@@ -106,10 +109,10 @@ fun MonitoringOverlayPreview(settings: MonitoringSettings) {
     )
     val history = listOf(TimedSample(900_000L, 59.7f), TimedSample(1_000_000L, 59.8f))
     val alignment = monitoringAlignment(settings.position)
-    Box(
+    BoxWithConstraints(
         modifier = Modifier
             .fillMaxSize()
-            .padding(6.dp),
+            .padding(4.dp),
         contentAlignment = alignment
     ) {
         MetricPanel(
@@ -117,7 +120,8 @@ fun MonitoringOverlayPreview(settings: MonitoringSettings) {
             a = android,
             fpsHistory = history,
             frameHistory = history.map { it.copy(value = 16.8f) },
-            settings = settings
+            settings = settings,
+            screenWidthDp = maxWidth.value,
         )
     }
 }
@@ -128,49 +132,52 @@ private fun MetricPanel(
     a: AndroidSystemMetrics,
     fpsHistory: List<TimedSample>,
     frameHistory: List<TimedSample>,
-    settings: MonitoringSettings
+    settings: MonitoringSettings,
+    screenWidthDp: Float,
 ) {
+    val density = LocalDensity.current
+    val fontScale = LocalConfiguration.current.fontScale
+    val layout = MonitoringOverlayPresentation.overlayLayout(
+        layout = settings.layout,
+        screenWidthDp = screenWidthDp,
+        density = density.density,
+        fontScale = fontScale,
+        textScale = settings.textScale,
+    )
     val bg = Color.Black.copy(alpha = settings.opacity.coerceIn(.05f, 1f))
-    val panelWidth = when (settings.layout) {
-        MonitoringLayout.Compact -> 220.dp
-        MonitoringLayout.Grid -> 260.dp
-        MonitoringLayout.Detailed -> 320.dp
-    }
     val displayEntries = MonitoringOverlayPresentation.buildDisplayEntries(settings.enabledMetrics, e, a)
     val graphEntries = MonitoringOverlayPresentation.buildGraphEntries(settings.graphMetrics, e, fpsHistory, frameHistory)
-    val columns = when (settings.layout) {
-        MonitoringLayout.Compact -> 4
-        MonitoringLayout.Grid, MonitoringLayout.Detailed -> 2
-    }
+    val labelStyle = MaterialTheme.typography.labelSmall.copy(fontSize = layout.labelSp.sp)
+    val valueStyle = MaterialTheme.typography.labelMedium.copy(fontSize = layout.valueSp.sp)
 
     Column(
         modifier = Modifier
-            .width(panelWidth)
+            .width(layout.panelWidthDp.dp)
             .background(bg)
-            .padding(horizontal = 7.dp, vertical = 5.dp),
-        verticalArrangement = Arrangement.spacedBy(3.dp)
+            .padding(horizontal = layout.padHDp.dp, vertical = layout.padVDp.dp),
+        verticalArrangement = Arrangement.spacedBy(layout.rowGapDp.dp)
     ) {
-        displayEntries.chunked(columns).forEach { row ->
+        displayEntries.chunked(layout.columns).forEach { row ->
             Row(
-                horizontalArrangement = Arrangement.spacedBy(7.dp),
+                horizontalArrangement = Arrangement.spacedBy(layout.colGapDp.dp),
                 modifier = Modifier.fillMaxWidth()
             ) {
                 row.forEach { entry ->
                     Metric(
                         label = entry.label,
                         value = entry.displayValue,
-                        scale = settings.textScale,
-                        detailed = settings.layout == MonitoringLayout.Detailed,
+                        labelStyle = labelStyle,
+                        valueStyle = valueStyle,
                         modifier = Modifier.weight(1f)
                     )
                 }
-                repeat(columns - row.size) {
+                repeat(layout.columns - row.size) {
                     Spacer(modifier = Modifier.weight(1f))
                 }
             }
         }
         graphEntries.forEach { graph ->
-            GraphView(graph = graph, settings = settings)
+            GraphView(graph = graph, settings = settings, layout = layout, labelStyle = labelStyle)
         }
     }
 }
@@ -179,21 +186,21 @@ private fun MetricPanel(
 private fun Metric(
     label: String,
     value: String,
-    scale: Float,
-    detailed: Boolean,
+    labelStyle: TextStyle,
+    valueStyle: TextStyle,
     modifier: Modifier = Modifier
 ) {
     Column(modifier) {
         Text(
             text = label,
             color = RPCSXColors.textSecondary,
-            style = MaterialTheme.typography.labelSmall.scaled(scale),
+            style = labelStyle,
             maxLines = 1
         )
         Text(
             text = value,
             color = Color.White,
-            style = (if (detailed) MaterialTheme.typography.bodySmall else MaterialTheme.typography.labelMedium).scaled(scale),
+            style = valueStyle,
             maxLines = 1
         )
     }
@@ -202,7 +209,9 @@ private fun Metric(
 @Composable
 private fun GraphView(
     graph: MonitoringGraphEntry,
-    settings: MonitoringSettings
+    settings: MonitoringSettings,
+    layout: OverlayLayoutMetrics,
+    labelStyle: TextStyle,
 ) {
     val color = if (graph.isFrameTime) Color(0xFFFFC857) else Color(0xFF73E6B5)
     Column(Modifier.fillMaxWidth()) {
@@ -213,18 +222,18 @@ private fun GraphView(
             Text(
                 text = graph.label,
                 color = RPCSXColors.textSecondary,
-                style = MaterialTheme.typography.labelSmall.scaled(settings.textScale)
+                style = labelStyle
             )
             Text(
                 text = graph.currentValue ?: "—",
                 color = RPCSXColors.textSecondary,
-                style = MaterialTheme.typography.labelSmall.scaled(settings.textScale)
+                style = labelStyle
             )
         }
         Box(
             modifier = Modifier
                 .fillMaxWidth()
-                .height(38.dp)
+                .height(layout.graphHeightDp.dp)
                 .background(Color.White.copy(alpha = .06f)),
             contentAlignment = Alignment.Center
         ) {
@@ -232,7 +241,7 @@ private fun GraphView(
                 Text(
                     text = "COLLECTING...",
                     color = Color.White.copy(alpha = 0.35f),
-                    style = MaterialTheme.typography.labelSmall.scaled(settings.textScale)
+                    style = labelStyle
                 )
             } else {
                 val samples = graph.samples
@@ -257,11 +266,9 @@ private fun GraphView(
                         androidx.compose.ui.geometry.Offset(0f, size.height / 2),
                         androidx.compose.ui.geometry.Offset(size.width, size.height / 2)
                     )
-                    drawPath(path, color, style = Stroke(width = 1.5.dp.toPx()))
+                    drawPath(path, color, style = Stroke(width = layout.strokeDp.dp.toPx()))
                 }
             }
         }
     }
 }
-
-private fun TextStyle.scaled(scale: Float) = copy(fontSize = (fontSize.value * scale.coerceIn(.75f, 1.25f)).sp)

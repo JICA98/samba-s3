@@ -12,10 +12,13 @@ object PerformanceMetricsParser {
         val json = JSONObject(raw)
         val timestampUs = json.optLong("timestampUs", 0L).takeIf { it >= 0L } ?: 0L
         val version = json.optInt("version", -1)
-        val frameSourceTrusted = version >= 2 && json.optString("fpsSource", "") == "emu_flip"
+        val fpsSource = json.optString("fpsSource", "")
+        val frameSourceTrusted = version >= 2 && fpsSource in TRUSTED_FPS_SOURCES
         val frameSampleFresh = json.optBoolean("frameSampleFresh", false)
         val fpsSamples = samples(json.optJSONArray("fpsSamples"), timestampUs, MAX_FPS_SAMPLES)
         val frameTimeSamples = samples(json.optJSONArray("frametimeSamples"), timestampUs, MAX_FRAME_TIME_SAMPLES)
+        val fps = finitePositive(json, "fps").takeIf { frameSourceTrusted && frameSampleFresh }
+        val frameTimeMs = finitePositive(json, "frametimeMs").takeIf { frameSourceTrusted && frameSampleFresh }
         ParsedMetrics(
             version = version,
             timestampUs = timestampUs,
@@ -24,9 +27,9 @@ object PerformanceMetricsParser {
                 presentedFrameCount = json.optLong("presentedFrameCount", Long.MIN_VALUE).takeIf { it >= 0L },
                 vblankCount = json.optLong("vblankCount", Long.MIN_VALUE).takeIf { it >= 0L },
                 vblankDelta = json.optLong("vblankDelta", Long.MIN_VALUE).takeIf { it >= 0L },
-                fpsSource = json.optString("fpsSource", "").takeIf { it.isNotBlank() },
-                fps = finiteNonNegative(json, "fps").takeIf { frameSourceTrusted && frameSampleFresh },
-                frameTimeMs = finiteNonNegative(json, "frametimeMs").takeIf { frameSourceTrusted && frameSampleFresh },
+                fpsSource = fpsSource.takeIf { it.isNotBlank() },
+                fps = fps,
+                frameTimeMs = frameTimeMs,
                 hostCpuPercent = finiteNonNegative(json, "hostCpu"),
                 ppuCpuPercent = finiteNonNegative(json, "ppuCpu"),
                 spuCpuPercent = finiteNonNegative(json, "spuCpu"),
@@ -45,8 +48,13 @@ object PerformanceMetricsParser {
 
     data class ParsedMetrics(val version: Int, val timestampUs: Long, val metrics: EmulatorMetrics)
 
+    private val TRUSTED_FPS_SOURCES = setOf("emu_flip", "surface", "vk_present")
+
     private fun finiteNonNegative(json: JSONObject, key: String): Float? =
         json.optDouble(key, Double.NaN).toFloat().takeIf { it.isFinite() && it >= 0f }
+
+    private fun finitePositive(json: JSONObject, key: String): Float? =
+        json.optDouble(key, Double.NaN).toFloat().takeIf { it.isFinite() && it > 0f }
 
     private fun nonNegativeInt(json: JSONObject, key: String): Int? =
         json.optInt(key, Int.MIN_VALUE).takeIf { it >= 0 }

@@ -37,6 +37,12 @@
 #include <adrenotools/priv.h>
 #endif
 
+namespace s3_perf {
+void* hooked_vkGetDeviceProcAddr(void* device, const char* pName);
+void set_orig_vkGetDeviceProcAddr(void* fn);
+void on_frame_presented(uint64_t now_us, int source);
+}
+
 namespace s3_iso_hook {
 
 static bool is_proc_fd_path(const char* path, int* out_fd) {
@@ -369,6 +375,8 @@ static void install_direct_iso_hooks(void* symbol_inside_core) {
         target_hook = reinterpret_cast<void*>(hooked_realpath);
       } else if (strcmp(sym_name, "readlink") == 0) {
         target_hook = reinterpret_cast<void*>(hooked_readlink);
+      } else if (strcmp(sym_name, "vkGetDeviceProcAddr") == 0) {
+        target_hook = reinterpret_cast<void*>(s3_perf::hooked_vkGetDeviceProcAddr);
       }
 
       if (target_hook != nullptr) {
@@ -394,6 +402,7 @@ static void install_direct_iso_hooks(void* symbol_inside_core) {
           else if (strcmp(sym_name, "statfs") == 0 && !g_orig_statfs) g_orig_statfs = reinterpret_cast<pfn_statfs>(*slot);
           else if (strcmp(sym_name, "realpath") == 0 && !g_orig_realpath) g_orig_realpath = reinterpret_cast<pfn_realpath>(*slot);
           else if (strcmp(sym_name, "readlink") == 0 && !g_orig_readlink) g_orig_readlink = reinterpret_cast<pfn_readlink>(*slot);
+          else if (strcmp(sym_name, "vkGetDeviceProcAddr") == 0) s3_perf::set_orig_vkGetDeviceProcAddr(*slot);
 
           *slot = target_hook;
           hooked_count++;
@@ -429,6 +438,7 @@ static std::atomic<uint64_t> g_presented_frames{0};
 static std::atomic<uint64_t> g_last_present_us{0};
 static std::atomic<float> g_latest_fps{0.0f};
 static std::atomic<float> g_latest_frametime_ms{0.0f};
+static std::atomic<int> g_fps_source{0}; // 0 unknown, 1 surface, 2 vk_present, 3 emu_flip
 
 static std::deque<TimedSample> g_fps_samples;
 static std::deque<TimedSample> g_frametime_samples;
@@ -437,17 +447,31 @@ static std::deque<uint64_t> g_frame_timestamps_us;
 static int (*g_orig_queueBuffer)(void* window, void* buffer, int fenceFd) = nullptr;
 static void* g_hooked_window = nullptr;
 
+using PFN_vkVoidFunction = void* (*)();
+using PFN_vkGetDeviceProcAddr = PFN_vkVoidFunction (*)(void* device, const char* name);
+using PFN_vkQueuePresentKHR = int (*)(void* queue, const void* present_info);
+
+static PFN_vkGetDeviceProcAddr g_orig_vkGetDeviceProcAddr = nullptr;
+static PFN_vkQueuePresentKHR g_orig_vkQueuePresentKHR = nullptr;
+
 static uint64_t get_time_us() {
   using namespace std::chrono;
   return duration_cast<microseconds>(steady_clock::now().time_since_epoch()).count();
 }
 
-static void on_frame_presented(uint64_t now_us) {
+void on_frame_presented(uint64_t now_us, int source) {
+  // Vulkan present and ANativeWindow queueBuffer can fire for the same flip.
+  uint64_t prev_us = g_last_present_us.load(std::memory_order_relaxed);
+  if (prev_us > 0 && now_us >= prev_us && (now_us - prev_us) < 800ULL) {
+    return;
+  }
+
   g_presented_frames.fetch_add(1, std::memory_order_relaxed);
+  if (source > 0) g_fps_source.store(source, std::memory_order_relaxed);
 
   std::lock_guard<std::mutex> lock(g_perf_mutex);
-  uint64_t prev_us = g_last_present_us.exchange(now_us, std::memory_order_relaxed);
-  if (prev_us > 0 && now_us > prev_us) {
+  prev_us = g_last_present_us.exchange(now_us, std::memory_order_relaxed);
+  if (prev_us > 0 && now_us > prev_us && (now_us - prev_us) >= 800ULL) {
     float ft_ms = static_cast<float>(now_us - prev_us) / 1000.0f;
     g_latest_frametime_ms.store(ft_ms, std::memory_order_relaxed);
 
@@ -478,6 +502,36 @@ static void on_frame_presented(uint64_t now_us) {
   }
 }
 
+static int hooked_vkQueuePresentKHR(void* queue, const void* present_info) {
+  on_frame_presented(get_time_us(), 2);
+  if (g_orig_vkQueuePresentKHR != nullptr) {
+    return g_orig_vkQueuePresentKHR(queue, present_info);
+  }
+  return 0;
+}
+
+void set_orig_vkGetDeviceProcAddr(void* fn) {
+  if (fn != nullptr && g_orig_vkGetDeviceProcAddr == nullptr) {
+    g_orig_vkGetDeviceProcAddr = reinterpret_cast<PFN_vkGetDeviceProcAddr>(fn);
+  }
+}
+
+void* hooked_vkGetDeviceProcAddr(void* device, const char* pName) {
+  PFN_vkVoidFunction fn = nullptr;
+  if (g_orig_vkGetDeviceProcAddr != nullptr) {
+    fn = g_orig_vkGetDeviceProcAddr(device, pName);
+  }
+  if (pName != nullptr && fn != nullptr && strcmp(pName, "vkQueuePresentKHR") == 0) {
+    g_orig_vkQueuePresentKHR = reinterpret_cast<PFN_vkQueuePresentKHR>(fn);
+    static std::atomic<int> s_vk_hook_logs{0};
+    if (s_vk_hook_logs.fetch_add(1) < 3) {
+      __android_log_print(ANDROID_LOG_INFO, "S3PERF", "wrapped vkQueuePresentKHR orig=%p", fn);
+    }
+    return reinterpret_cast<void*>(hooked_vkQueuePresentKHR);
+  }
+  return reinterpret_cast<void*>(fn);
+}
+
 typedef int (*pfn_ANativeWindow_setQueueBufferInterceptor)(
     ANativeWindow* window,
     int (*interceptor)(ANativeWindow*, int (*)(ANativeWindow*, void*, int), void*, void*, int),
@@ -490,7 +544,7 @@ static int s3_interceptor_queueBuffer(
     void* buffer,
     int fenceFd) {
   uint64_t now_us = get_time_us();
-  on_frame_presented(now_us);
+  on_frame_presented(now_us, 1);
   static std::atomic<int> s_intercept_hits{0};
   if (s_intercept_hits.fetch_add(1) < 3) {
     __android_log_print(ANDROID_LOG_INFO, "S3PERF",
@@ -505,7 +559,7 @@ static int s3_interceptor_queueBuffer(
 
 static int s3_hooked_queueBuffer(void* window, void* buffer, int fenceFd) {
   uint64_t now_us = get_time_us();
-  on_frame_presented(now_us);
+  on_frame_presented(now_us, 1);
   static std::atomic<int> s_slot_hits{0};
   if (s_slot_hits.fetch_add(1) < 3) {
     __android_log_print(ANDROID_LOG_INFO, "S3PERF",
@@ -523,8 +577,20 @@ static int s3_hooked_queueBuffer(void* window, void* buffer, int fenceFd) {
 static void try_hook_native_window(ANativeWindow* win) {
   if (win == nullptr) return;
 
-  static auto set_interceptor_hook = reinterpret_cast<pfn_ANativeWindow_setQueueBufferInterceptor>(
-      dlsym(RTLD_DEFAULT, "ANativeWindow_setQueueBufferInterceptor"));
+  static pfn_ANativeWindow_setQueueBufferInterceptor set_interceptor_hook = nullptr;
+  static std::once_flag interceptor_once;
+  std::call_once(interceptor_once, []() {
+    set_interceptor_hook = reinterpret_cast<pfn_ANativeWindow_setQueueBufferInterceptor>(
+        dlsym(RTLD_DEFAULT, "ANativeWindow_setQueueBufferInterceptor"));
+    if (set_interceptor_hook == nullptr) {
+      void* nw = dlopen("libnativewindow.so", RTLD_NOW | RTLD_NOLOAD);
+      if (nw == nullptr) nw = dlopen("libnativewindow.so", RTLD_NOW);
+      if (nw != nullptr) {
+        set_interceptor_hook = reinterpret_cast<pfn_ANativeWindow_setQueueBufferInterceptor>(
+            dlsym(nw, "ANativeWindow_setQueueBufferInterceptor"));
+      }
+    }
+  });
   __android_log_print(ANDROID_LOG_INFO, "S3PERF",
                       "try_hook win=%p interceptor_api=%p hooked_window=%p",
                       win, (void*)set_interceptor_hook, g_hooked_window);
@@ -743,7 +809,7 @@ static std::string build_fallback_json() {
        << "\"timestampUs\":" << now_us << ","
        << "\"presentedFrameCount\":" << frames << ","
        << "\"frameSampleFresh\":" << (fresh ? "true" : "false") << ","
-       << "\"fpsSource\":\"emu_flip\","
+       << "\"fpsSource\":\"" << (g_fps_source.load() == 2 ? "vk_present" : (g_fps_source.load() == 3 ? "emu_flip" : "surface")) << "\","
        << "\"hostCpu\":" << g_cpu_stats.proc_cpu << ","
        << "\"ppuCpu\":" << g_cpu_stats.ppu_cpu << ","
        << "\"spuCpu\":" << g_cpu_stats.spu_cpu << ","
@@ -1486,6 +1552,13 @@ Java_com_zenithblue_sambas3_RPCSX_hasLoadSaveStateExport(JNIEnv *, jobject) {
 extern "C" JNIEXPORT jboolean JNICALL
 Java_com_zenithblue_sambas3_RPCSX_hasSurfaceEventV2Export(JNIEnv *, jobject) {
   return rpcsxLib.surfaceEventV2 ? JNI_TRUE : JNI_FALSE;
+}
+
+extern "C" void _rpcsx_android_perf_frame_presented() {
+  using namespace std::chrono;
+  const uint64_t now_us =
+      duration_cast<microseconds>(steady_clock::now().time_since_epoch()).count();
+  s3_perf::on_frame_presented(now_us, 3);
 }
 
 extern "C" JNIEXPORT jboolean JNICALL

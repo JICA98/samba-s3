@@ -14,8 +14,9 @@ object PerformanceMetricsMerger {
     data class MergedMetrics(val metrics: EmulatorMetrics, val frameSourceFallback: Boolean)
 
     fun merge(core: EmulatorMetrics, fallback: EmulatorMetrics): MergedMetrics {
-        val useFallbackFrames = core.fps == null && fallback.fps != null
-        val useFallbackFrameTime = core.frameTimeMs == null && fallback.frameTimeMs != null
+        val useFallbackFrames = (core.fps == null || core.fps <= 0f) && fallback.fps != null && fallback.fps > 0f
+        val useFallbackFrameTime = (core.frameTimeMs == null || core.frameTimeMs <= 0f) &&
+            fallback.frameTimeMs != null && fallback.frameTimeMs > 0f
         val useFallbackFpsSamples = core.fpsSamples.isEmpty() && fallback.fpsSamples.isNotEmpty()
         val useFallbackFrameSamples = core.frameTimeSamples.isEmpty() && fallback.frameTimeSamples.isNotEmpty()
         val useFallbackTimedFps = core.fpsTimedSamples.isEmpty() && fallback.fpsTimedSamples.isNotEmpty()

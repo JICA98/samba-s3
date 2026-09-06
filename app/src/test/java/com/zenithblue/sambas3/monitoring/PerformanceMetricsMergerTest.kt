@@ -52,6 +52,15 @@ class PerformanceMetricsMergerTest {
     }
 
     @Test
+    fun `zero core fps falls back to surface measurement`() {
+        val core = coreEmpty().copy(fps = 0f, frameTimeMs = 0f)
+        val (merged, usedFallback) = PerformanceMetricsMerger.merge(core, fallbackFresh())
+        assertTrue(usedFallback)
+        assertEquals(59.9f, merged.fps)
+        assertEquals(16.7f, merged.frameTimeMs)
+    }
+
+    @Test
     fun `populated core frames are never replaced`() {
         val core = coreEmpty().copy(
             fps = 30f,

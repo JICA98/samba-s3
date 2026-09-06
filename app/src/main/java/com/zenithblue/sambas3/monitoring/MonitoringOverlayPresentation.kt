@@ -10,6 +10,19 @@ data class MonitoringDisplayEntry(
     val displayValue: String get() = value ?: "—"
 }
 
+data class OverlayLayoutMetrics(
+    val panelWidthDp: Float,
+    val padHDp: Float,
+    val padVDp: Float,
+    val rowGapDp: Float,
+    val colGapDp: Float,
+    val graphHeightDp: Float,
+    val labelSp: Float,
+    val valueSp: Float,
+    val columns: Int,
+    val strokeDp: Float,
+)
+
 data class MonitoringGraphEntry(
     val metric: MonitoringMetric,
     val label: String,
@@ -20,6 +33,55 @@ data class MonitoringGraphEntry(
 )
 
 object MonitoringOverlayPresentation {
+
+    /**
+     * Sizes the in-game overlay from screen width (dp) so Compact/Grid/Detailed
+     * stay proportional on every density. High-DPI phones no longer get a huge
+     * Material-sp panel; system font scale is clamped so it cannot blow up HUD text.
+     */
+    fun overlayLayout(
+        layout: MonitoringLayout,
+        screenWidthDp: Float,
+        density: Float,
+        fontScale: Float,
+        textScale: Float,
+    ): OverlayLayoutMetrics {
+        val widthFrac = when (layout) {
+            MonitoringLayout.Compact -> 0.20f
+            MonitoringLayout.Grid -> 0.26f
+            MonitoringLayout.Detailed -> 0.32f
+        }
+        val minW = when (layout) {
+            MonitoringLayout.Compact -> 132f
+            MonitoringLayout.Grid -> 156f
+            MonitoringLayout.Detailed -> 188f
+        }
+        val maxW = when (layout) {
+            MonitoringLayout.Compact -> 188f
+            MonitoringLayout.Grid -> 220f
+            MonitoringLayout.Detailed -> 252f
+        }
+        val densityAdj = (1.5f / density.coerceIn(1.0f, 4.0f)).coerceIn(0.55f, 1.15f)
+        val panel = (screenWidthDp * widthFrac * densityAdj).coerceIn(minW, maxW)
+        val userScale = textScale.coerceIn(0.50f, 1.25f)
+        val fontAdj = userScale / fontScale.coerceIn(1.0f, 1.35f)
+        val detailed = layout == MonitoringLayout.Detailed
+        return OverlayLayoutMetrics(
+            panelWidthDp = panel,
+            padHDp = (4.5f * userScale).coerceIn(3f, 7f),
+            padVDp = (3.5f * userScale).coerceIn(2.5f, 6f),
+            rowGapDp = (2.0f * userScale).coerceIn(1.5f, 4f),
+            colGapDp = (5.0f * userScale).coerceIn(3.5f, 8f),
+            graphHeightDp = (26f * userScale).coerceIn(20f, 36f),
+            labelSp = 7.0f * fontAdj,
+            valueSp = (if (detailed) 9.0f else 8.0f) * fontAdj,
+            columns = when (layout) {
+                MonitoringLayout.Compact -> 4
+                MonitoringLayout.Grid, MonitoringLayout.Detailed -> 2
+            },
+            strokeDp = 1.1f,
+        )
+    }
 
     fun buildDisplayEntries(
         enabledMetrics: Set<MonitoringMetric>,

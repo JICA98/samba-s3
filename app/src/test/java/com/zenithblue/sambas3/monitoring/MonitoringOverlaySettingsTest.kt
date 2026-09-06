@@ -95,7 +95,7 @@ class MonitoringOverlaySettingsTest {
         val outOfBounds = MonitoringSettings(
             updateMs = 50L,      // Min is 250
             opacity = 2.0f,      // Max is 1.0
-            textScale = 0.5f,    // Min is 0.75
+            textScale = 0.4f,    // Min is 0.50
             graphHistorySeconds = 60 // Max is 30
         )
 
@@ -104,7 +104,7 @@ class MonitoringOverlaySettingsTest {
 
         assertEquals(250L, readBack.updateMs)
         assertEquals(1.0f, readBack.opacity, 0.001f)
-        assertEquals(0.75f, readBack.textScale, 0.001f)
+        assertEquals(0.50f, readBack.textScale, 0.001f)
         assertEquals(30, readBack.graphHistorySeconds)
     }
 }

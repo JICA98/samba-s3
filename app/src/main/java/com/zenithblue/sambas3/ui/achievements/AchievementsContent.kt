@@ -1,6 +1,8 @@
 package com.zenithblue.sambas3.ui.achievements
 
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
@@ -100,15 +102,38 @@ fun AchievementsContent(snapshot: TrophySnapshot?, loading: Boolean, onClose: ()
         else -> AchievementUiState.Empty(snapshot.emptyReason())
     }
 
-    Column(modifier.fillMaxSize().padding(horizontal = 16.dp, vertical = 12.dp)) {
-        Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.SpaceBetween) {
+    Column(modifier.fillMaxSize()) {
+        Row(
+            Modifier.fillMaxWidth(),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.SpaceBetween
+        ) {
             Column(Modifier.weight(1f)) {
-                Text(snapshot?.gameName?.ifBlank { "ACHIEVEMENTS" }?.uppercase() ?: "ACHIEVEMENTS", color = RPCSXColors.primary, style = MaterialTheme.typography.titleLarge, maxLines = 1)
-                snapshot?.let { Text("${it.unlocked}/${it.total} unlocked · ${it.percent}%", color = RPCSXColors.textSecondary, fontSize = 12.sp) }
+                Text(
+                    text = snapshot?.gameName?.ifBlank { "ACHIEVEMENTS" }?.uppercase() ?: "ACHIEVEMENTS",
+                    color = RPCSXColors.primary,
+                    style = MaterialTheme.typography.titleLarge,
+                    fontWeight = FontWeight.Bold,
+                    letterSpacing = 1.sp,
+                    maxLines = 1
+                )
+                snapshot?.let { Text("${it.unlocked}/${it.total} unlocked · ${it.percent}% completed", color = RPCSXColors.textSecondary, fontSize = 12.sp) }
             }
-            TextButton(onClick = onClose) { Text("CLOSE") }
+            Surface(
+                onClick = onClose,
+                shape = RoundedCornerShape(8.dp),
+                color = RPCSXColors.primary.copy(alpha = 0.15f),
+                border = BorderStroke(1.dp, RPCSXColors.primary.copy(alpha = 0.4f)),
+                modifier = Modifier.height(32.dp)
+            ) {
+                Box(Modifier.padding(horizontal = 14.dp).fillMaxHeight(), contentAlignment = Alignment.Center) {
+                    Text("BACK", color = RPCSXColors.primary, style = MaterialTheme.typography.labelSmall, fontWeight = FontWeight.Bold)
+                }
+            }
         }
-        HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
+
+        HorizontalDivider(color = Color(0x22FFFFFF), modifier = Modifier.padding(vertical = 8.dp))
+
         when (val state = uiState) {
             AchievementUiState.Loading -> Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) { CircularProgressIndicator(color = RPCSXColors.primary) }
             is AchievementUiState.Failed -> EmptyAchievements(state.message)
@@ -121,10 +146,15 @@ fun AchievementsContent(snapshot: TrophySnapshot?, loading: Boolean, onClose: ()
                 if (visible.isEmpty()) EmptyAchievements("No trophies match this filter")
                 else BoxWithConstraints(Modifier.fillMaxSize()) {
                     if (maxWidth >= 700.dp) {
-                        Row(Modifier.fillMaxSize(), horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-                            TrophyList(visible, selectedId, Modifier.widthIn(min = 280.dp, max = 420.dp).fillMaxHeight()) { selectedId = it.id }
-                            Surface(Modifier.weight(1f).fillMaxHeight(), color = RPCSXColors.surface, shape = RoundedCornerShape(14.dp)) {
-                                TrophyDetail(visible.firstOrNull { it.id == selectedId } ?: visible.first(), Modifier.fillMaxSize().padding(16.dp))
+                        Row(Modifier.fillMaxSize(), horizontalArrangement = Arrangement.spacedBy(14.dp)) {
+                            TrophyList(visible, selectedId, Modifier.widthIn(min = 320.dp, max = 460.dp).fillMaxHeight()) { selectedId = it.id }
+                            Surface(
+                                modifier = Modifier.weight(1f).fillMaxHeight(),
+                                color = Color(0x28141926),
+                                shape = RoundedCornerShape(14.dp),
+                                border = BorderStroke(1.dp, Color(0x25FFFFFF))
+                            ) {
+                                TrophyDetail(visible.firstOrNull { it.id == selectedId } ?: visible.first(), Modifier.fillMaxSize().padding(18.dp))
                             }
                         }
                     } else TrophyList(visible, selectedId, Modifier.fillMaxSize()) { selectedId = it.id }
@@ -136,7 +166,12 @@ fun AchievementsContent(snapshot: TrophySnapshot?, loading: Boolean, onClose: ()
     if (uiState is AchievementUiState.Ready && selectedId != null) {
         BoxWithConstraints(Modifier.fillMaxSize()) {
             if (maxWidth < 700.dp) uiState.snapshot.trophies.firstOrNull { it.id == selectedId }?.let { selected ->
-                AlertDialog(onDismissRequest = { selectedId = null }, title = { Text(selected.name) }, text = { TrophyDetail(selected, Modifier.fillMaxWidth()) }, confirmButton = { TextButton(onClick = { selectedId = null }) { Text("CLOSE") } })
+                AlertDialog(
+                    onDismissRequest = { selectedId = null },
+                    title = { Text(selected.name) },
+                    text = { TrophyDetail(selected, Modifier.fillMaxWidth()) },
+                    confirmButton = { TextButton(onClick = { selectedId = null }) { Text("CLOSE") } }
+                )
             }
         }
     }
@@ -159,17 +194,47 @@ private val TrophyEmptyReason.label: String
 
 @Composable
 private fun AchievementSummary(snapshot: TrophySnapshot) {
-    Column(Modifier.fillMaxWidth().padding(vertical = 10.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
-        Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) { Text("PROGRESS", color = RPCSXColors.textSecondary, fontSize = 11.sp, fontWeight = FontWeight.Bold); Text(snapshot.titleId, color = RPCSXColors.textSecondary, fontSize = 11.sp) }
-        Box(Modifier.fillMaxWidth().height(8.dp).clip(RoundedCornerShape(8.dp)).background(RPCSXColors.surfaceOverlay)) { Box(Modifier.fillMaxWidth(snapshot.percent / 100f).fillMaxHeight().background(RPCSXColors.primary)) }
-        Text("BRONZE ${snapshot.gradeCount("bronze", true)}  ·  SILVER ${snapshot.gradeCount("silver", true)}  ·  GOLD ${snapshot.gradeCount("gold", true)}  ·  PLATINUM ${snapshot.gradeCount("platinum", true)}", color = RPCSXColors.textSecondary, fontSize = 11.sp)
+    Column(Modifier.fillMaxWidth().padding(bottom = 8.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
+        Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
+            Text("PROGRESS", color = RPCSXColors.textSecondary, fontSize = 11.sp, fontWeight = FontWeight.Bold)
+            Text(snapshot.titleId, color = RPCSXColors.textSecondary, fontSize = 11.sp)
+        }
+        Box(Modifier.fillMaxWidth().height(6.dp).clip(RoundedCornerShape(6.dp)).background(Color(0x30FFFFFF))) {
+            Box(Modifier.fillMaxWidth(snapshot.percent / 100f).fillMaxHeight().background(RPCSXColors.primary))
+        }
+        Text(
+            "BRONZE ${snapshot.gradeCount("bronze", true)}  ·  SILVER ${snapshot.gradeCount("silver", true)}  ·  GOLD ${snapshot.gradeCount("gold", true)}  ·  PLATINUM ${snapshot.gradeCount("platinum", true)}",
+            color = RPCSXColors.textSecondary,
+            fontSize = 11.sp
+        )
     }
 }
 
 @Composable
-private fun FilterBar(filter: AchievementFilter, showHidden: Boolean, sort: AchievementSort, hasTimestamps: Boolean, onFilter: (AchievementFilter) -> Unit, onHidden: () -> Unit, onSort: (AchievementSort) -> Unit) {
-    Row(Modifier.fillMaxWidth().horizontalScroll(rememberScrollState()).padding(bottom = 8.dp), horizontalArrangement = Arrangement.spacedBy(6.dp)) {
-        listOf(AchievementFilter.ALL, AchievementFilter.UNLOCKED, AchievementFilter.LOCKED, AchievementFilter.BRONZE, AchievementFilter.SILVER, AchievementFilter.GOLD, AchievementFilter.PLATINUM).forEach { candidate -> FilterChip(candidate.name, filter == candidate) { onFilter(candidate) } }
+private fun FilterBar(
+    filter: AchievementFilter,
+    showHidden: Boolean,
+    sort: AchievementSort,
+    hasTimestamps: Boolean,
+    onFilter: (AchievementFilter) -> Unit,
+    onHidden: () -> Unit,
+    onSort: (AchievementSort) -> Unit
+) {
+    Row(
+        Modifier.fillMaxWidth().horizontalScroll(rememberScrollState()).padding(bottom = 8.dp),
+        horizontalArrangement = Arrangement.spacedBy(6.dp)
+    ) {
+        listOf(
+            AchievementFilter.ALL,
+            AchievementFilter.UNLOCKED,
+            AchievementFilter.LOCKED,
+            AchievementFilter.BRONZE,
+            AchievementFilter.SILVER,
+            AchievementFilter.GOLD,
+            AchievementFilter.PLATINUM
+        ).forEach { candidate ->
+            FilterChip(candidate.name, filter == candidate) { onFilter(candidate) }
+        }
         FilterChip(if (showHidden) "HIDDEN ON" else "SHOW HIDDEN", showHidden, onHidden)
         val next = when (sort) {
             AchievementSort.DEFAULT -> AchievementSort.UNLOCKED_FIRST
@@ -184,38 +249,117 @@ private fun FilterBar(filter: AchievementFilter, showHidden: Boolean, sort: Achi
 
 @Composable
 private fun FilterChip(label: String, selected: Boolean, onClick: () -> Unit) {
-    Surface(color = if (selected) RPCSXColors.primary.copy(alpha = .22f) else RPCSXColors.surface, shape = RoundedCornerShape(50), modifier = Modifier.clickable(onClick = onClick)) {
-        Text(label, color = if (selected) RPCSXColors.primary else RPCSXColors.textSecondary, fontSize = 10.sp, fontWeight = FontWeight.Bold, modifier = Modifier.padding(horizontal = 10.dp, vertical = 7.dp))
+    Surface(
+        color = if (selected) RPCSXColors.primary.copy(alpha = .22f) else Color(0x28FFFFFF),
+        border = BorderStroke(1.dp, if (selected) RPCSXColors.primary.copy(alpha = 0.6f) else Color(0x20FFFFFF)),
+        shape = RoundedCornerShape(8.dp),
+        modifier = Modifier.clickable(onClick = onClick)
+    ) {
+        Text(
+            label,
+            color = if (selected) RPCSXColors.primary else RPCSXColors.textSecondary,
+            fontSize = 10.sp,
+            fontWeight = FontWeight.Bold,
+            modifier = Modifier.padding(horizontal = 10.dp, vertical = 6.dp)
+        )
     }
 }
 
 @Composable
 private fun TrophyList(trophies: List<TrophyEntry>, selectedId: Int?, modifier: Modifier, onSelected: (TrophyEntry) -> Unit) {
-    LazyColumn(modifier, verticalArrangement = Arrangement.spacedBy(6.dp)) { items(trophies, key = { it.id }) { trophy -> TrophyRow(trophy, selectedId == trophy.id) { onSelected(trophy) } } }
+    LazyColumn(modifier, verticalArrangement = Arrangement.spacedBy(6.dp)) {
+        items(trophies, key = { it.id }) { trophy ->
+            TrophyRow(trophy, selectedId == trophy.id) { onSelected(trophy) }
+        }
+    }
 }
 
 @Composable
 private fun TrophyRow(trophy: TrophyEntry, selected: Boolean, onClick: () -> Unit) {
     val state = if (trophy.unlocked) "unlocked" else "locked"
-    Row(Modifier.fillMaxWidth().clip(RoundedCornerShape(12.dp)).background(if (selected) RPCSXColors.primary.copy(alpha = .14f) else RPCSXColors.surface).clickable(onClick = onClick).padding(8.dp).semantics { contentDescription = "${trophy.name}, ${trophy.grade}, $state" }, verticalAlignment = Alignment.CenterVertically) {
-        TrophyIcon(trophy, 56.dp); Spacer(Modifier.width(10.dp))
-        Column(Modifier.weight(1f)) { Text(trophy.name, color = if (trophy.unlocked) RPCSXColors.textPrimary else RPCSXColors.textSecondary, fontWeight = FontWeight.Bold, fontSize = 13.sp, maxLines = 2); Text("${trophy.grade.uppercase()} · ${state.uppercase()}", color = if (trophy.unlocked) RPCSXColors.primary else RPCSXColors.textSecondary, fontSize = 10.sp) }
+    Surface(
+        shape = RoundedCornerShape(10.dp),
+        color = if (selected) RPCSXColors.primary.copy(alpha = .20f) else Color(0x28FFFFFF),
+        border = BorderStroke(1.dp, if (selected) RPCSXColors.focusRing else Color(0x20FFFFFF)),
+        modifier = Modifier.fillMaxWidth().clickable(onClick = onClick)
+    ) {
+        Row(
+            Modifier.padding(10.dp).semantics { contentDescription = "${trophy.name}, ${trophy.grade}, $state" },
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            TrophyIcon(trophy, 48.dp)
+            Spacer(Modifier.width(12.dp))
+            Column(Modifier.weight(1f)) {
+                Text(
+                    trophy.name,
+                    color = if (trophy.unlocked) Color.White else RPCSXColors.textSecondary,
+                    fontWeight = FontWeight.Bold,
+                    fontSize = 13.sp,
+                    maxLines = 2
+                )
+                Text(
+                    "${trophy.grade.uppercase()} · ${state.uppercase()}",
+                    color = if (trophy.unlocked) RPCSXColors.primary else RPCSXColors.textSecondary.copy(alpha = 0.7f),
+                    fontSize = 10.sp,
+                    fontWeight = FontWeight.SemiBold
+                )
+            }
+        }
     }
 }
 
 @Composable
 private fun TrophyDetail(trophy: TrophyEntry, modifier: Modifier) {
-    Column(modifier, verticalArrangement = Arrangement.spacedBy(10.dp)) { TrophyIcon(trophy, 82.dp); Text(trophy.name, color = RPCSXColors.textPrimary, style = MaterialTheme.typography.titleMedium); Text("${trophy.grade.uppercase()} · ${if (trophy.unlocked) "UNLOCKED" else "LOCKED"}", color = if (trophy.unlocked) RPCSXColors.primary else RPCSXColors.textSecondary, fontWeight = FontWeight.Bold, fontSize = 11.sp); Text(trophy.description, color = RPCSXColors.textSecondary); if (trophy.hidden) Text("HIDDEN TROPHY", color = RPCSXColors.textSecondary, fontSize = 10.sp) }
+    Column(modifier, verticalArrangement = Arrangement.spacedBy(10.dp)) {
+        TrophyIcon(trophy, 72.dp)
+        Text(trophy.name, color = Color.White, style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
+        Text(
+            "${trophy.grade.uppercase()} · ${if (trophy.unlocked) "UNLOCKED" else "LOCKED"}",
+            color = if (trophy.unlocked) RPCSXColors.primary else RPCSXColors.textSecondary,
+            fontWeight = FontWeight.Bold,
+            fontSize = 11.sp
+        )
+        Text(trophy.description, color = RPCSXColors.textSecondary, fontSize = 13.sp)
+        if (trophy.hidden) {
+            Text("HIDDEN TROPHY", color = RPCSXColors.textSecondary, fontSize = 10.sp)
+        }
+    }
 }
 
 @Composable
 private fun TrophyIcon(trophy: TrophyEntry, size: Dp) {
     val context = LocalContext.current
     val path = trophy.iconPath?.takeIf { File(it).isFile }
-    Box(Modifier.size(size).clip(RoundedCornerShape(9.dp)).background(Color.DarkGray).alpha(if (trophy.unlocked) 1f else .62f), contentAlignment = Alignment.Center) {
-        if (path != null) AsyncImage(ImageRequest.Builder(context).data(File(path)).build(), contentDescription = "${trophy.name} icon", modifier = Modifier.fillMaxSize(), contentScale = ContentScale.Crop) else Icon(painterResource(R.drawable.ic_star), contentDescription = null, tint = RPCSXColors.primary)
+    Box(
+        Modifier
+            .size(size)
+            .clip(RoundedCornerShape(8.dp))
+            .background(Color(0x30000000))
+            .border(1.dp, Color(0x22FFFFFF), RoundedCornerShape(8.dp))
+            .alpha(if (trophy.unlocked) 1f else .62f),
+        contentAlignment = Alignment.Center
+    ) {
+        if (path != null) {
+            AsyncImage(
+                ImageRequest.Builder(context).data(File(path)).build(),
+                contentDescription = "${trophy.name} icon",
+                modifier = Modifier.fillMaxSize(),
+                contentScale = ContentScale.Crop
+            )
+        } else {
+            Icon(
+                painterResource(R.drawable.ic_star),
+                contentDescription = null,
+                tint = RPCSXColors.primary,
+                modifier = Modifier.size(size * 0.5f)
+            )
+        }
     }
 }
 
 @Composable
-private fun EmptyAchievements(message: String) { Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) { Text(message, color = RPCSXColors.textSecondary, modifier = Modifier.padding(20.dp)) } }
+private fun EmptyAchievements(message: String) {
+    Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+        Text(message, color = RPCSXColors.textSecondary, modifier = Modifier.padding(20.dp))
+    }
+}

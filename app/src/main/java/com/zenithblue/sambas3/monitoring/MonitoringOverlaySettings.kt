@@ -18,7 +18,7 @@ data class MonitoringSettings(
     val layout: MonitoringLayout = MonitoringLayout.Compact,
     val updateMs: Long = 300L,
     val opacity: Float = .72f,
-    val textScale: Float = .88f,
+    val textScale: Float = .70f,
     val graphHistorySeconds: Int = 10,
     val fpsScaleMode: FpsGraphScale = FpsGraphScale.TargetWindow,
     val hideWithMenu: Boolean = true
@@ -61,7 +61,7 @@ object MonitoringOverlaySettings {
             layout = runCatching { MonitoringLayout.valueOf(p.getString("layout", MonitoringLayout.Compact.name)!!) }.getOrDefault(MonitoringLayout.Compact),
             updateMs = p.getLong("updateMs", 300L).coerceIn(250L, 1000L),
             opacity = p.getFloat("opacity", .72f).coerceIn(.05f, 1f),
-            textScale = p.getFloat("textScale", .88f).coerceIn(.75f, 1.25f),
+            textScale = p.getFloat("textScale", .70f).coerceIn(.50f, 1.25f),
             graphHistorySeconds = p.getInt("graphHistorySeconds", 10).coerceIn(5, 30),
             fpsScaleMode = runCatching { FpsGraphScale.valueOf(p.getString("fpsScaleMode", FpsGraphScale.TargetWindow.name)!!) }.getOrDefault(FpsGraphScale.TargetWindow),
             hideWithMenu = p.getBoolean("hideWithMenu", true)

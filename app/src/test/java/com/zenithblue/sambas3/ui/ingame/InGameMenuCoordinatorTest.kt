@@ -365,6 +365,38 @@ class InGameMenuCoordinatorTest {
     }
 
     @Test
+    fun selection_2d_navigates_grid_columns_and_rows() {
+        openMain()
+        coordinator.dispatch(InGameMenuIntent.ReportItemCount(InGamePage.Main, 10))
+        // Starts at index 0 (row 0, col 0)
+        assertEquals(0, coordinator.state.value.selectedIndex)
+
+        // Move right -> (row 0, col 1) = index 1
+        assertTrue(coordinator.moveSelection2D(dx = 1, dy = 0, columns = 2))
+        assertEquals(1, coordinator.state.value.selectedIndex)
+
+        // Move right again -> clamped at col 1
+        assertTrue(coordinator.moveSelection2D(dx = 1, dy = 0, columns = 2))
+        assertEquals(1, coordinator.state.value.selectedIndex)
+
+        // Move down -> (row 1, col 1) = index 3
+        assertTrue(coordinator.moveSelection2D(dx = 0, dy = 1, columns = 2))
+        assertEquals(3, coordinator.state.value.selectedIndex)
+
+        // Move left -> (row 1, col 0) = index 2
+        assertTrue(coordinator.moveSelection2D(dx = -1, dy = 0, columns = 2))
+        assertEquals(2, coordinator.state.value.selectedIndex)
+
+        // Move up -> (row 0, col 0) = index 0
+        assertTrue(coordinator.moveSelection2D(dx = 0, dy = -1, columns = 2))
+        assertEquals(0, coordinator.state.value.selectedIndex)
+
+        // Move up from top row wraps to bottom row -> (row 4, col 0) = index 8
+        assertTrue(coordinator.moveSelection2D(dx = 0, dy = -1, columns = 2))
+        assertEquals(8, coordinator.state.value.selectedIndex)
+    }
+
+    @Test
     fun selection_rejected_without_reported_item_count() {
         openMain()
         assertFalse(coordinator.moveSelection(1))

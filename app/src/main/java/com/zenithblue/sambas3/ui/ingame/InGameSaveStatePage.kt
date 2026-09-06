@@ -10,11 +10,13 @@ import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.aspectRatio
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.safeDrawingPadding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
@@ -68,68 +70,84 @@ fun InGameSaveStatePage(
     val suspendMode = capabilities?.suspendMode == true
     val canSave = capabilities?.canSave != false
 
-    Box(
-        modifier = Modifier.fillMaxSize().background(Color.Black.copy(alpha = 0.70f)),
-        contentAlignment = Alignment.Center
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .safeDrawingPadding()
+            .padding(horizontal = 20.dp, vertical = 12.dp)
     ) {
-        Surface(
-            shape = RoundedCornerShape(20.dp),
-            color = RPCSXColors.surfaceElevated,
-            border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant),
-            modifier = Modifier
-                .widthIn(max = 960.dp)
-                .fillMaxWidth(0.94f)
-                .heightIn(max = 720.dp)
+        // Header
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically
         ) {
-            Column(modifier = Modifier.fillMaxSize().padding(vertical = 8.dp)) {
-                Row(
-                    modifier = Modifier.fillMaxWidth().padding(horizontal = 20.dp, vertical = 16.dp),
-                    horizontalArrangement = Arrangement.SpaceBetween,
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
+            Column {
+                Text(
+                    "SAVE STATE",
+                    color = RPCSXColors.primary,
+                    style = MaterialTheme.typography.titleLarge,
+                    fontWeight = FontWeight.Bold,
+                    letterSpacing = 1.5.sp
+                )
+                Text(
+                    "Instant slot snapshot for current emulation session",
+                    color = RPCSXColors.textSecondary,
+                    fontSize = 12.sp
+                )
+            }
+            Surface(
+                onClick = onBack,
+                shape = RoundedCornerShape(8.dp),
+                color = RPCSXColors.primary.copy(alpha = 0.15f),
+                border = BorderStroke(1.dp, RPCSXColors.primary.copy(alpha = 0.4f)),
+                modifier = Modifier.height(32.dp)
+            ) {
+                Box(Modifier.padding(horizontal = 14.dp).fillMaxHeight(), contentAlignment = Alignment.Center) {
                     Text(
-                        "SAVE STATE",
+                        "BACK",
                         color = RPCSXColors.primary,
-                        fontFamily = FontFamily.Monospace,
-                        fontWeight = FontWeight.Bold,
-                        fontSize = 14.sp,
-                        letterSpacing = 2.sp
+                        style = MaterialTheme.typography.labelSmall,
+                        fontWeight = FontWeight.Bold
                     )
-                    TextButton(onClick = onBack) { Text("Back") }
                 }
-                HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
+            }
+        }
 
-                if (suspendMode) {
-                    TextButton(
-                        onClick = {
-                            pendingSlot = 0
+        HorizontalDivider(
+            modifier = Modifier.padding(vertical = 10.dp),
+            color = Color(0x22FFFFFF)
+        )
+
+        if (suspendMode) {
+            TextButton(
+                onClick = {
+                    pendingSlot = 0
+                    showSaveConfirm = true
+                },
+                enabled = canSave,
+                modifier = Modifier.fillMaxWidth().padding(horizontal = 20.dp, vertical = 8.dp)
+            ) {
+                Text("SAVE STATE AND EXIT", color = if (canSave) RPCSXColors.primary else Color.Gray)
+            }
+        } else {
+            LazyVerticalGrid(
+                columns = GridCells.Adaptive(minSize = 340.dp),
+                modifier = Modifier.fillMaxWidth().weight(1f),
+                contentPadding = PaddingValues(vertical = 6.dp),
+                horizontalArrangement = Arrangement.spacedBy(12.dp),
+                verticalArrangement = Arrangement.spacedBy(12.dp)
+            ) {
+                items(slots, key = { it.slot }) { slot ->
+                    SaveSlotCard(
+                        slot = slot,
+                        canSave = canSave,
+                        onSave = {
+                            pendingSlot = slot.slot
                             showSaveConfirm = true
                         },
-                        enabled = canSave,
-                        modifier = Modifier.fillMaxWidth().padding(horizontal = 20.dp, vertical = 8.dp)
-                    ) {
-                        Text("SAVE STATE AND EXIT", color = if (canSave) RPCSXColors.primary else Color.Gray)
-                    }
-                } else {
-                    LazyVerticalGrid(
-                        columns = GridCells.Adaptive(minSize = 320.dp),
-                        modifier = Modifier.fillMaxWidth().weight(1f),
-                        contentPadding = PaddingValues(12.dp),
-                        horizontalArrangement = Arrangement.spacedBy(8.dp),
-                        verticalArrangement = Arrangement.spacedBy(8.dp)
-                    ) {
-                        items(slots, key = { it.slot }) { slot ->
-                            SaveSlotCard(
-                                slot = slot,
-                                canSave = canSave,
-                                onSave = {
-                                    pendingSlot = slot.slot
-                                    showSaveConfirm = true
-                                },
-                                onLoad = { onLoad(slot.slot) }
-                            )
-                        }
-                    }
+                        onLoad = { onLoad(slot.slot) }
+                    )
                 }
             }
         }
@@ -167,39 +185,68 @@ private fun SaveSlotCard(
     onSave: () -> Unit,
     onLoad: () -> Unit
 ) {
-    Card(
+    Surface(
         shape = RoundedCornerShape(14.dp),
-        colors = CardDefaults.cardColors(containerColor = RPCSXColors.surface),
-        border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.7f)),
+        color = Color(0x28FFFFFF),
+        border = BorderStroke(1.dp, Color(0x25FFFFFF)),
         modifier = Modifier.fillMaxWidth()
     ) {
         Row(
-            modifier = Modifier.fillMaxWidth().padding(10.dp),
+            modifier = Modifier.fillMaxWidth().padding(12.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            SaveSlotPreview(slot, Modifier.width(148.dp).aspectRatio(16f / 9f))
-            Spacer(Modifier.width(12.dp))
+            SaveSlotPreview(slot, Modifier.width(140.dp).aspectRatio(16f / 9f))
+            Spacer(Modifier.width(14.dp))
             Column(modifier = Modifier.weight(1f)) {
                 Text(
                     "SLOT " + slot.slot,
-                    color = RPCSXColors.textPrimary,
-                    fontFamily = FontFamily.Monospace,
+                    color = RPCSXColors.primary,
+                    style = MaterialTheme.typography.titleMedium,
                     fontWeight = FontWeight.Bold,
-                    fontSize = 14.sp
+                    letterSpacing = 0.5.sp
                 )
-                Spacer(Modifier.height(4.dp))
+                Spacer(Modifier.height(3.dp))
                 Text(
-                    if (slot.exists) formatSlotTime(slot.mtimeMs) else "Empty",
-                    color = RPCSXColors.textSecondary,
-                    fontSize = 12.sp
+                    if (slot.exists) formatSlotTime(slot.mtimeMs) else "Empty Slot",
+                    color = if (slot.exists) RPCSXColors.textPrimary else RPCSXColors.textSecondary,
+                    fontSize = 12.sp,
+                    maxLines = 1
                 )
                 if (slot.exists) {
-                    Text(formatSize(slot.sizeBytes), color = RPCSXColors.textSecondary, fontSize = 12.sp)
+                    Text(formatSize(slot.sizeBytes), color = RPCSXColors.textSecondary, fontSize = 11.sp)
                 }
-                Spacer(Modifier.height(4.dp))
-                Row(horizontalArrangement = Arrangement.spacedBy(2.dp)) {
-                    TextButton(onClick = onSave, enabled = canSave) { Text("SAVE") }
-                    TextButton(onClick = onLoad, enabled = slot.exists) { Text("LOAD") }
+                Spacer(Modifier.height(6.dp))
+                Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                    Surface(
+                        onClick = onSave,
+                        enabled = canSave,
+                        shape = RoundedCornerShape(6.dp),
+                        color = if (canSave) RPCSXColors.primary.copy(alpha = 0.20f) else Color(0x10FFFFFF),
+                        border = BorderStroke(0.5.dp, if (canSave) RPCSXColors.primary.copy(alpha = 0.5f) else Color.Transparent)
+                    ) {
+                        Text(
+                            "SAVE",
+                            color = if (canSave) RPCSXColors.primary else Color.Gray,
+                            style = MaterialTheme.typography.labelSmall,
+                            fontWeight = FontWeight.Bold,
+                            modifier = Modifier.padding(horizontal = 10.dp, vertical = 4.dp)
+                        )
+                    }
+                    Surface(
+                        onClick = onLoad,
+                        enabled = slot.exists,
+                        shape = RoundedCornerShape(6.dp),
+                        color = if (slot.exists) Color(0x25FFFFFF) else Color(0x10FFFFFF),
+                        border = BorderStroke(0.5.dp, if (slot.exists) Color(0x35FFFFFF) else Color.Transparent)
+                    ) {
+                        Text(
+                            "LOAD",
+                            color = if (slot.exists) RPCSXColors.textPrimary else Color.Gray,
+                            style = MaterialTheme.typography.labelSmall,
+                            fontWeight = FontWeight.Bold,
+                            modifier = Modifier.padding(horizontal = 10.dp, vertical = 4.dp)
+                        )
+                    }
                 }
             }
         }
@@ -219,9 +266,9 @@ private fun SaveSlotPreview(slot: SaveSlot, modifier: Modifier = Modifier) {
     }
     Box(
         modifier = modifier
-            .clip(RoundedCornerShape(10.dp))
-            .background(RPCSXColors.surfaceOverlay)
-            .border(1.dp, MaterialTheme.colorScheme.outlineVariant, RoundedCornerShape(10.dp)),
+            .clip(RoundedCornerShape(8.dp))
+            .background(Color(0x30000000))
+            .border(1.dp, Color(0x22FFFFFF), RoundedCornerShape(8.dp)),
         contentAlignment = Alignment.Center
     ) {
         if (request != null) {
@@ -235,8 +282,8 @@ private fun SaveSlotPreview(slot: SaveSlot, modifier: Modifier = Modifier) {
             Icon(
                 painter = painterResource(R.drawable.ic_save),
                 contentDescription = "Slot " + slot.slot + " has no saved state",
-                tint = RPCSXColors.textSecondary,
-                modifier = Modifier.size(28.dp)
+                tint = RPCSXColors.textSecondary.copy(alpha = 0.5f),
+                modifier = Modifier.size(24.dp)
             )
         }
     }

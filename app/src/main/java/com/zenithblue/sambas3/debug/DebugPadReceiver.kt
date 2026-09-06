@@ -278,7 +278,7 @@ class DebugPadReceiver(private val onDebugFatal: (() -> Unit)? = null) : Broadca
             current = current.copy(opacity = op)
         }
         if (intent.hasExtra("text_scale")) {
-            val ts = intent.getFloatExtra("text_scale", current.textScale).coerceIn(0.75f, 1.25f)
+            val ts = intent.getFloatExtra("text_scale", current.textScale).coerceIn(0.50f, 1.25f)
             current = current.copy(textScale = ts)
         }
         if (intent.hasExtra("history")) {

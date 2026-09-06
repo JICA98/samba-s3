@@ -263,7 +263,10 @@ class RPCSXActivity : ComponentActivity(), EmulationHost {
                 val uiState by coordinator.state.collectAsStateWithLifecycle()
                 InGameMenuHost(
                     uiState = uiState,
-                    gamePath = intent.getStringExtra("path"),
+                    gamePath = intent.getStringExtra("path")
+                        ?: (if (::originalGamePath.isInitialized) originalGamePath else null)
+                        ?: intent.getStringExtra(RPCSXActivity.EXTRA_ORIGINAL_GAME_PATH)
+                        ?: RPCSX.activeGame.value,
                     core = coreGateway,
                     onIntent = coordinator::dispatch
                 )
@@ -1426,6 +1429,8 @@ class RPCSXActivity : ComponentActivity(), EmulationHost {
         return when (command) {
             is MenuCommand.Previous -> coordinator.moveSelection(-1)
             is MenuCommand.Next -> coordinator.moveSelection(1)
+            is MenuCommand.Left -> false
+            is MenuCommand.Right -> false
             is MenuCommand.PageUp -> coordinator.jumpSelection(-10)
             is MenuCommand.PageDown -> coordinator.jumpSelection(10)
             is MenuCommand.Activate -> {
@@ -1466,9 +1471,6 @@ class RPCSXActivity : ComponentActivity(), EmulationHost {
                     false
                 }
             }
-
-            is MenuCommand.Left -> false
-            is MenuCommand.Right -> false
         }
     }
 

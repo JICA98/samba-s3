@@ -12,6 +12,43 @@ import org.junit.Test
 class MonitoringOverlayPresentationTest {
 
     @Test
+    fun overlayLayout_scalesAllModesFromScreenWidthAndDensity() {
+        val compact = MonitoringOverlayPresentation.overlayLayout(
+            MonitoringLayout.Compact, screenWidthDp = 800f, density = 3.5f, fontScale = 1f, textScale = 0.70f,
+        )
+        val grid = MonitoringOverlayPresentation.overlayLayout(
+            MonitoringLayout.Grid, screenWidthDp = 800f, density = 3.5f, fontScale = 1f, textScale = 0.70f,
+        )
+        val detailed = MonitoringOverlayPresentation.overlayLayout(
+            MonitoringLayout.Detailed, screenWidthDp = 800f, density = 3.5f, fontScale = 1f, textScale = 0.70f,
+        )
+        assertEquals(4, compact.columns)
+        assertEquals(2, grid.columns)
+        assertEquals(2, detailed.columns)
+        assertTrue(compact.panelWidthDp < grid.panelWidthDp)
+        assertTrue(grid.panelWidthDp < detailed.panelWidthDp)
+        assertTrue(compact.panelWidthDp <= 188f)
+        assertTrue(detailed.panelWidthDp <= 252f)
+        assertTrue(compact.labelSp < compact.valueSp)
+        val hugeFont = MonitoringOverlayPresentation.overlayLayout(
+            MonitoringLayout.Compact, screenWidthDp = 800f, density = 3.5f, fontScale = 1.3f, textScale = 0.70f,
+        )
+        assertTrue(hugeFont.labelSp < compact.labelSp)
+        val lowDpi = MonitoringOverlayPresentation.overlayLayout(
+            MonitoringLayout.Compact, screenWidthDp = 800f, density = 1.5f, fontScale = 1f, textScale = 0.70f,
+        )
+        assertTrue(lowDpi.panelWidthDp >= compact.panelWidthDp)
+    }
+
+    @Test
+    fun gpuFrequencyUnitsNormalizeToHz() {
+        assertEquals(490_000_000L, AndroidSystemMetricsCollector.normalizeGpuHz(490_000_000L))
+        assertEquals(490_000_000L, AndroidSystemMetricsCollector.normalizeGpuHz(490_000L))
+        assertEquals(490_000_000L, AndroidSystemMetricsCollector.normalizeGpuHz(490L))
+    }
+
+
+    @Test
     fun `every monitoring metric maps to exactly one predictable visible representation`() {
         assertEquals(28, MonitoringMetric.entries.size)
         assertEquals(28, MonitoringMetricDescriptors.all.size)
