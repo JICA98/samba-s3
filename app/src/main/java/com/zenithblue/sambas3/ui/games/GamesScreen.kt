@@ -938,12 +938,29 @@ fun GamesScreen(
                 model = fullscreenAmbientModel,
                 contentDescription = null,
                 contentScale = ContentScale.Crop,
-                modifier = Modifier.fillMaxSize(),
+                modifier = Modifier
+                    .fillMaxSize()
+                    .alpha(if (selectedBgPreview != null) 0.85f else 0.7f),
                 onError = { err ->
                     val title = (currentItem as? PagerItem.GameItem)?.game?.info?.name?.value
                     val path = (currentItem as? PagerItem.GameItem)?.game?.info?.path
                     Log.w("GamePreview", "preview error title=$title path=$path err=${err.result.throwable?.message}")
                 }
+            )
+
+            // Subtle dark cinematic tint for readability
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .background(
+                        Brush.verticalGradient(
+                            listOf(
+                                Color.Black.copy(alpha = 0.35f),
+                                Color.Black.copy(alpha = 0.15f),
+                                Color.Black.copy(alpha = 0.35f),
+                            )
+                        )
+                    )
             )
         }
 
@@ -954,7 +971,7 @@ fun GamesScreen(
                 .drawBehind {
                     drawRect(
                         brush = Brush.radialGradient(
-                            colors = listOf(Color.Transparent, Color(0x66000000)),
+                            colors = listOf(Color.Transparent, Color(0x99000000)),
                             center = Offset(size.width / 2, size.height / 2),
                             radius = size.width
                         ),
@@ -964,14 +981,15 @@ fun GamesScreen(
         )
 
         Column(
-            modifier = Modifier.fillMaxSize()
+            modifier = Modifier
+                .fillMaxSize()
+                .windowInsetsPadding(WindowInsets.safeDrawing)
         ) {
             // Top Nav Bar: SambaS3 brand, active Game Title & Tag, Clock & Settings
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
                     .alpha(bootAlpha)
-                    .windowInsetsPadding(WindowInsets.safeDrawing.only(WindowInsetsSides.Horizontal + WindowInsetsSides.Top))
                     .padding(horizontal = 20.dp, vertical = 10.dp),
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically
@@ -1421,8 +1439,7 @@ fun GamesScreen(
                 Row(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .windowInsetsPadding(WindowInsets.safeDrawing.only(WindowInsetsSides.Horizontal + WindowInsetsSides.Bottom))
-                        .padding(horizontal = 20.dp, vertical = 6.dp),
+                        .padding(horizontal = 16.dp, vertical = 6.dp),
                     horizontalArrangement = Arrangement.SpaceBetween,
                     verticalAlignment = Alignment.CenterVertically
                 ) {
