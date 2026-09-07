@@ -3,6 +3,10 @@ package com.zenithblue.sambas3.utils
 import android.os.Build
 import android.util.Log
 import java.io.File
+import javax.microedition.khronos.egl.EGL10
+import javax.microedition.khronos.egl.EGLConfig
+import javax.microedition.khronos.egl.EGLContext
+import javax.microedition.khronos.opengles.GL10
 
 /**
  * Best-effort Adreno GPU family / model detection for filtering bundled drivers.
@@ -22,7 +26,10 @@ object AdrenoGpuDetector {
             it.equals("arm64-v8a", ignoreCase = true) || it.equals("aarch64", ignoreCase = true)
         }
 
-        val raw = readGpuModel()
+        val eglRenderer = queryGpuRendererFromEgl()
+
+        val raw = eglRenderer
+            ?: readGpuModel()
             ?: listOf(
                 Build.HARDWARE,
                 Build.BOARD,
@@ -31,7 +38,7 @@ object AdrenoGpuDetector {
                 System.getProperty("ro.chipname"),
             ).filterNotNull().joinToString(" ").ifBlank { null }
 
-        val gpuId = extractGpuId(raw)
+        val gpuId = extractGpuId(raw) ?: extractGpuId(readGpuModel())
         val family = familyFromGpuId(gpuId) ?: familyFromText(raw)
         val isAdreno = family != GpuFamily.UNKNOWN ||
             (raw?.contains("adreno", ignoreCase = true) == true) ||
@@ -47,6 +54,68 @@ object AdrenoGpuDetector {
             isAdreno = isAdreno,
             isArm64 = isArm64,
         )
+    }
+
+    private fun queryGpuRendererFromEgl(): String? {
+        return try {
+            val egl = EGLContext.getEGL() as? EGL10 ?: return null
+            val display = egl.eglGetDisplay(EGL10.EGL_DEFAULT_DISPLAY)
+            if (display == EGL10.EGL_NO_DISPLAY) return null
+            if (!egl.eglInitialize(display, IntArray(2))) return null
+
+            val configAttributes = intArrayOf(
+                EGL10.EGL_RENDERABLE_TYPE, 0x4, // EGL_OPENGL_ES2_BIT
+                EGL10.EGL_NONE,
+            )
+
+            val configs = arrayOfNulls<EGLConfig>(1)
+            val numConfig = IntArray(1)
+            if (!egl.eglChooseConfig(display, configAttributes, configs, 1, numConfig) || numConfig[0] == 0) {
+                egl.eglTerminate(display)
+                return null
+            }
+            val config = configs[0] ?: run {
+                egl.eglTerminate(display)
+                return null
+            }
+
+            val contextAttributes = intArrayOf(0x3098, 2, EGL10.EGL_NONE) // EGL_CONTEXT_CLIENT_VERSION = 2
+            val context = egl.eglCreateContext(display, config, EGL10.EGL_NO_CONTEXT, contextAttributes)
+            if (context == EGL10.EGL_NO_CONTEXT) {
+                egl.eglTerminate(display)
+                return null
+            }
+
+            val surface = egl.eglCreatePbufferSurface(
+                display,
+                config,
+                intArrayOf(EGL10.EGL_WIDTH, 1, EGL10.EGL_HEIGHT, 1, EGL10.EGL_NONE),
+            )
+            if (surface == EGL10.EGL_NO_SURFACE) {
+                egl.eglDestroyContext(display, context)
+                egl.eglTerminate(display)
+                return null
+            }
+
+            egl.eglMakeCurrent(display, surface, surface, context)
+            val gl = context.gl as GL10
+            val renderer = gl.glGetString(GL10.GL_RENDERER)?.trim()
+
+            egl.eglMakeCurrent(
+                display,
+                EGL10.EGL_NO_SURFACE,
+                EGL10.EGL_NO_SURFACE,
+                EGL10.EGL_NO_CONTEXT,
+            )
+            egl.eglDestroySurface(display, surface)
+            egl.eglDestroyContext(display, context)
+            egl.eglTerminate(display)
+
+            renderer?.takeIf { it.isNotBlank() }
+        } catch (t: Throwable) {
+            Log.w(TAG, "Failed to query GPU renderer from EGL", t)
+            null
+        }
     }
 
     fun isCompatible(entry: BundledGpuDriverEntry, info: AdrenoGpuInfo): Boolean {

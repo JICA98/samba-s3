@@ -1,0 +1,44 @@
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="120dp"
+    android:height="120dp"
+    android:viewportWidth="96"
+    android:viewportHeight="96">
+  <!-- Outer ambient circle glow -->
+  <path
+      android:fillColor="#1AE5A93C"
+      android:pathData="M48,6 A42,42 0 1,1 47.99,6 Z"/>
+
+  <!-- Chip Pins Top / Bottom / Left / Right -->
+  <path
+      android:strokeColor="#E5A93C"
+      android:strokeWidth="1.5"
+      android:strokeLineCap="round"
+      android:pathData="M36,18 L36,26 M44,18 L44,26 M52,18 L52,26 M60,18 L60,26
+                       M36,70 L36,78 M44,70 L44,78 M52,70 L52,78 M60,70 L60,78
+                       M18,36 L26,36 M18,44 L26,44 M18,52 L26,52 M18,60 L26,60
+                       M70,36 L78,36 M70,44 L78,44 M70,52 L78,52 M70,60 L78,60"/>
+
+  <!-- Main Chip Body -->
+  <path
+      android:fillColor="#161B22"
+      android:strokeColor="#FFFFFF"
+      android:strokeWidth="1.5"
+      android:pathData="M26,26 H70 V70 H26 Z"/>
+
+  <!-- Silicon Die Core -->
+  <path
+      android:fillColor="#1F2937"
+      android:strokeColor="#E5A93C"
+      android:strokeWidth="1.2"
+      android:pathData="M35,35 H61 V61 H35 Z"/>
+
+  <!-- Core Circuit Pattern / Cell Engine -->
+  <path
+      android:fillColor="#E5A93C"
+      android:pathData="M44,44 H52 V52 H44 Z"/>
+  <path
+      android:strokeColor="#E5A93C"
+      android:strokeWidth="1"
+      android:strokeLineCap="round"
+      android:pathData="M40,40 L44,44 M56,40 L52,44 M40,56 L44,52 M56,56 L52,52"/>
+</vector>

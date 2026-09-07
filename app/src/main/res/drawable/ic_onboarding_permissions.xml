@@ -1,0 +1,25 @@
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="96dp"
+    android:height="96dp"
+    android:viewportWidth="48"
+    android:viewportHeight="48">
+  <!-- Subtle circular ambient backing -->
+  <path
+      android:fillColor="#18E5A93C"
+      android:pathData="M24,4 A20,20 0 1,1 23.99,4 Z"/>
+
+  <!-- Minimal, clean notification bell -->
+  <path
+      android:fillColor="#E5A93C"
+      android:pathData="M24,9 C20.7,9 18,11.7 18,15 L18,24 L14,28 L14,30 L34,30 L34,28 L30,24 L30,15 C30,11.7 27.3,9 24,9 Z"/>
+
+  <!-- Bell clapper -->
+  <path
+      android:fillColor="#E5A93C"
+      android:pathData="M21,31.5 C21,33.1 22.3,34.5 24,34.5 C25.7,34.5 27,33.1 27,31.5 Z"/>
+
+  <!-- Clean green notification indicator dot -->
+  <path
+      android:fillColor="#56D364"
+      android:pathData="M33,13 A3.5,3.5 0 1,1 32.99,13 Z"/>
+</vector>

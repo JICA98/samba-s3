@@ -1,0 +1,62 @@
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="120dp"
+    android:height="120dp"
+    android:viewportWidth="96"
+    android:viewportHeight="96">
+  <!-- Outer ambient circle glow -->
+  <path
+      android:fillColor="#1AE5A93C"
+      android:pathData="M48,6 A42,42 0 1,1 47.99,6 Z"/>
+
+  <!-- Trophy Cup Body -->
+  <path
+      android:fillColor="#1F2937"
+      android:strokeColor="#E5A93C"
+      android:strokeWidth="1.8"
+      android:pathData="M34,22 H62 V42 C62,50 56,56 48,56 C40,56 34,50 34,42 Z"/>
+
+  <!-- Trophy Handles -->
+  <path
+      android:strokeColor="#E5A93C"
+      android:strokeWidth="1.5"
+      android:pathData="M34,26 H26 C23.8,26 22,27.8 22,30 V36 C22,40.4 25.6,44 30,44 H34
+                       M62,26 H70 C72.2,26 74,27.8 74,30 V36 C74,40.4 70.4,44 66,44 H62"/>
+
+  <!-- Trophy Stem and Base -->
+  <path
+      android:fillColor="#E5A93C"
+      android:pathData="M45,56 H51 V66 H45 Z"/>
+  <path
+      android:fillColor="#161B22"
+      android:strokeColor="#FFFFFF"
+      android:strokeWidth="1.5"
+      android:pathData="M32,66 H64 V74 H32 Z"/>
+
+  <!-- Golden Star in Trophy Cup -->
+  <path
+      android:fillColor="#E5A93C"
+      android:pathData="M48,28 L50.5,33.5 L56.5,34.2 L52,38.4 L53.2,44.3 L48,41.4 L42.8,44.3 L44,38.4 L39.5,34.2 L45.5,33.5 Z"/>
+
+  <!-- PlayStation Sacred Symbols floating around -->
+  <!-- Triangle -->
+  <path
+      android:strokeColor="#56D364"
+      android:strokeWidth="1.2"
+      android:pathData="M24,18 L28,24 H20 Z"/>
+  <!-- Square -->
+  <path
+      android:strokeColor="#F85149"
+      android:strokeWidth="1.2"
+      android:pathData="M70,18 H76 V24 H70 Z"/>
+  <!-- Circle -->
+  <path
+      android:strokeColor="#E5A93C"
+      android:strokeWidth="1.2"
+      android:pathData="M18,56 A3,3 0 1,1 17.99,56 Z"/>
+  <!-- Cross -->
+  <path
+      android:strokeColor="#388BFD"
+      android:strokeWidth="1.2"
+      android:strokeLineCap="round"
+      android:pathData="M74,54 L78,58 M78,54 L74,58"/>
+</vector>

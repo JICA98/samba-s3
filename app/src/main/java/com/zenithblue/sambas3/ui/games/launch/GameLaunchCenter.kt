@@ -21,11 +21,13 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.navigationBarsPadding
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
@@ -58,6 +60,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.scale
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.key.Key
 import androidx.compose.ui.input.key.KeyEventType
@@ -107,6 +110,41 @@ fun GameLaunchCenter(
     onPrepare: (() -> Unit)? = null,
     onStop: (() -> Unit)? = null,
 ) {
+    val context = LocalContext.current
+    val rawIconPath = snapshot.game.info.iconPath.value
+    val installedPreview = remember(rawIconPath) {
+        GamePreviewRepository.resolveInstalledPreview(rawIconPath)
+    }
+    val coilModel: Any? = when (installedPreview) {
+        is GamePreviewModel.LocalFile -> installedPreview.file
+        is GamePreviewModel.ContentUri -> installedPreview.uri
+        is GamePreviewModel.None -> null
+    }
+
+    val titleId = remember(snapshot) {
+        snapshot.titleId ?: snapshot.game.info.path.substringAfterLast('/')
+    }
+    val bgPreview by produceState<Any?>(
+        initialValue = null,
+        key1 = snapshot.game.info.path,
+        key2 = rawIconPath
+    ) {
+        value = kotlinx.coroutines.withContext(kotlinx.coroutines.Dispatchers.IO) {
+            if (titleId.isNotBlank()) {
+                val directIsoPic1 = File(context.filesDir, "direct_iso_icons/${titleId}_pic1.png")
+                if (directIsoPic1.isFile && directIsoPic1.length() > 0) {
+                    return@withContext directIsoPic1
+                }
+            }
+            when (val bg = GamePreviewRepository.resolveBackground(context, snapshot.game)) {
+                is GamePreviewModel.LocalFile -> if (bg.file.exists() && bg.file.length() > 0) bg.file else null
+                is GamePreviewModel.ContentUri -> bg.uri
+                is GamePreviewModel.None -> null
+            }
+        }
+    }
+    val previewBgModel: Any = bgPreview ?: R.drawable.default_wallpaper
+
     val ppuUi = snapshot.ppuUi
     val existingSaves = snapshot.saveSlots.filter { it.exists }
     val hasContinue = snapshot.latestSave != null && existingSaves.isNotEmpty()
@@ -309,13 +347,13 @@ fun GameLaunchCenter(
     Box(
         Modifier
             .fillMaxSize()
-            .background(Color.Black.copy(alpha = .78f)),
+            .background(Color.Black.copy(alpha = .45f)),
         contentAlignment = Alignment.Center,
     ) {
         Surface(
             shape = RoundedCornerShape(16.dp),
-            color = RPCSXColors.surfaceElevated,
-            border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant),
+            color = Color.Transparent,
+            border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.6f)),
             modifier = Modifier
                 .fillMaxWidth(.92f)
                 .fillMaxHeight(.90f)
@@ -346,107 +384,129 @@ fun GameLaunchCenter(
                     }
                 },
         ) {
-            Row(
-                Modifier
-                    .fillMaxSize()
-                    .padding(14.dp),
-                horizontalArrangement = Arrangement.spacedBy(14.dp),
-            ) {
-                // LEFT PANE: Game Card, Title, ID, and Secondary Action Buttons
-                Column(
+            Box(Modifier.fillMaxSize()) {
+                // Frosted glass background layer
+                Box(
                     modifier = Modifier
-                        .width(260.dp)
-                        .fillMaxHeight(),
-                    verticalArrangement = Arrangement.SpaceBetween,
+                        .matchParentSize()
+                        .background(
+                            Brush.verticalGradient(
+                                listOf(
+                                    Color(0xF20E1626),
+                                    Color(0xF8080C14)
+                                )
+                            )
+                        )
+                )
+
+                // Ambient blurred glow orbs (glassmorphism blur without external image)
+                Box(
+                    modifier = Modifier
+                        .size(320.dp)
+                        .offset(x = (-40).dp, y = (-30).dp)
+                        .blur(60.dp)
+                        .background(
+                            Brush.radialGradient(
+                                colors = listOf(
+                                    RPCSXColors.primary.copy(alpha = 0.18f),
+                                    Color.Transparent
+                                )
+                            ),
+                            shape = CircleShape
+                        )
+                )
+                Box(
+                    modifier = Modifier
+                        .size(340.dp)
+                        .align(Alignment.BottomEnd)
+                        .offset(x = 60.dp, y = 40.dp)
+                        .blur(70.dp)
+                        .background(
+                            Brush.radialGradient(
+                                colors = listOf(
+                                    Color(0x301A3660),
+                                    Color.Transparent
+                                )
+                            ),
+                            shape = CircleShape
+                        )
+                )
+
+                Row(
+                    Modifier
+                        .fillMaxSize()
+                        .padding(14.dp),
+                    horizontalArrangement = Arrangement.spacedBy(14.dp),
                 ) {
+                    // LEFT PANE: Game Card, Title, ID, and Secondary Action Buttons
                     Column(
                         modifier = Modifier
-                            .weight(1f, fill = false)
-                            .verticalScroll(rememberScrollState()),
+                            .width(260.dp)
+                            .fillMaxHeight(),
+                        verticalArrangement = Arrangement.SpaceBetween,
                     ) {
-                        // Game Artwork Card (matching home screen GameCard style)
-                        val rawIconPath = snapshot.game.info.iconPath.value
-                        val installedPreview = remember(rawIconPath) {
-                            GamePreviewRepository.resolveInstalledPreview(rawIconPath)
-                        }
-                        val coilModel: Any? = when (installedPreview) {
-                            is GamePreviewModel.LocalFile -> installedPreview.file
-                            is GamePreviewModel.ContentUri -> installedPreview.uri
-                            is GamePreviewModel.None -> null
-                        }
-
-                        val context = LocalContext.current
-                        val bgPreview by androidx.compose.runtime.produceState<Any?>(
-                            initialValue = null,
-                            key1 = snapshot.game.info.path,
-                            key2 = rawIconPath
-                        ) {
-                            value = kotlinx.coroutines.withContext(kotlinx.coroutines.Dispatchers.IO) {
-                                when (val bg = GamePreviewRepository.resolveBackground(context, snapshot.game)) {
-                                    is GamePreviewModel.LocalFile -> bg.file
-                                    is GamePreviewModel.ContentUri -> bg.uri
-                                    is GamePreviewModel.None -> null
-                                }
-                            }
-                        }
-                        val backgroundModel = bgPreview ?: coilModel
-
-                        Surface(
-                            shape = RoundedCornerShape(10.dp),
-                            color = RPCSXColors.surface,
-                            border = BorderStroke(1.dp, RPCSXColors.surfaceOverlay),
+                        Column(
                             modifier = Modifier
-                                .fillMaxWidth()
-                                .aspectRatio(16f / 9f)
-                                .clip(RoundedCornerShape(10.dp)),
+                                .weight(1f, fill = false)
+                                .verticalScroll(rememberScrollState()),
                         ) {
-                            if (backgroundModel != null) {
-                                Box(modifier = Modifier.fillMaxSize()) {
-                                    // Blurred ambient background (PIC1.PNG artwork or ICON0.PNG fallback)
-                                    AsyncImage(
-                                        model = backgroundModel,
-                                        contentDescription = null,
-                                        contentScale = ContentScale.Crop,
-                                        modifier = Modifier
-                                            .fillMaxSize()
-                                            .scale(1.15f)
-                                            .blur(radius = 16.dp)
-                                            .alpha(if (bgPreview != null) 0.65f else 0.45f),
-                                    )
-                                    // Dark contrast overlay
+                            // Game Artwork Card (matching home screen GameCard style)
+                            Surface(
+                                shape = RoundedCornerShape(10.dp),
+                                color = Color.Black.copy(alpha = 0.35f),
+                                border = BorderStroke(1.dp, RPCSXColors.surfaceOverlay),
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .aspectRatio(16f / 9f)
+                                    .clip(RoundedCornerShape(10.dp)),
+                            ) {
+                                if (coilModel != null || bgPreview != null) {
+                                    Box(modifier = Modifier.fillMaxSize()) {
+                                        // Blurred ambient background (PIC1.PNG artwork or default_wallpaper fallback)
+                                        AsyncImage(
+                                            model = previewBgModel,
+                                            contentDescription = null,
+                                            contentScale = ContentScale.Crop,
+                                            modifier = Modifier
+                                                .fillMaxSize()
+                                                .scale(1.15f)
+                                                .blur(radius = 16.dp)
+                                                .alpha(if (bgPreview != null) 0.65f else 0.50f),
+                                        )
+                                        // Dark contrast overlay
+                                        Box(
+                                            modifier = Modifier
+                                                .fillMaxSize()
+                                                .background(Color.Black.copy(alpha = if (bgPreview != null) 0.35f else 0.30f)),
+                                        )
+                                        // Crisp foreground artwork
+                                        if (coilModel != null) {
+                                            AsyncImage(
+                                                model = coilModel,
+                                                contentDescription = "Game cover",
+                                                contentScale = ContentScale.Fit,
+                                                modifier = Modifier
+                                                    .fillMaxSize()
+                                                    .padding(6.dp),
+                                            )
+                                        }
+                                    }
+                                } else {
                                     Box(
                                         modifier = Modifier
                                             .fillMaxSize()
-                                            .background(Color.Black.copy(alpha = if (bgPreview != null) 0.35f else 0.25f)),
-                                    )
-                                    // Crisp foreground artwork
-                                    if (coilModel != null) {
-                                        AsyncImage(
-                                            model = coilModel,
-                                            contentDescription = "Game cover",
-                                            contentScale = ContentScale.Fit,
-                                            modifier = Modifier
-                                                .fillMaxSize()
-                                                .padding(6.dp),
+                                            .background(RPCSXColors.surfaceOverlay),
+                                        contentAlignment = Alignment.Center,
+                                    ) {
+                                        Icon(
+                                            painter = painterResource(R.drawable.gamepad),
+                                            contentDescription = null,
+                                            tint = RPCSXColors.textSecondary,
+                                            modifier = Modifier.size(44.dp),
                                         )
                                     }
                                 }
-                            } else {
-                                Box(
-                                    modifier = Modifier
-                                        .fillMaxSize()
-                                        .background(RPCSXColors.surfaceOverlay),
-                                    contentAlignment = Alignment.Center,
-                                ) {
-                                    Icon(
-                                        painter = painterResource(R.drawable.gamepad),
-                                        contentDescription = null,
-                                        tint = RPCSXColors.textSecondary,
-                                        modifier = Modifier.size(44.dp),
-                                    )
-                                }
                             }
-                        }
 
                         Spacer(Modifier.height(8.dp))
                         Text(
@@ -886,6 +946,7 @@ fun GameLaunchCenter(
             }
         }
     }
+}
 }
 
 @Composable

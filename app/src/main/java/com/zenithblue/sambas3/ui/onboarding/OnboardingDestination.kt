@@ -232,13 +232,33 @@ private fun buildDeviceInfo(context: Context, gpu: com.zenithblue.sambas3.utils.
         Build.VERSION.SDK_INT,
     )
 
+    val rawGpu = gpuLabel(context, gpu)
+    val isMediaTek = soc.contains("mediatek", ignoreCase = true) ||
+        soc.contains("mt6", ignoreCase = true) ||
+        soc.contains("dimensity", ignoreCase = true) ||
+        soc.contains("helio", ignoreCase = true)
+    val finalGpu = if (isMediaTek && (rawGpu.contains("unknown", ignoreCase = true) || rawGpu.isBlank())) {
+        "ARM Mali GPU"
+    } else {
+        rawGpu
+    }
+
+    val properSocName = HardwareInfoResolver.resolveProperSocName(soc, finalGpu)
+    val socLogoRes = HardwareInfoResolver.resolveSocLogo(soc, gpu.rawModel ?: "", gpu.isAdreno)
+    val cpuLogoRes = HardwareInfoResolver.resolveCpuLogo(soc)
+    val gpuLogoRes = HardwareInfoResolver.resolveGpuLogo(soc, finalGpu, gpu.isAdreno)
+
     return OnboardingDeviceInfo(
         deviceName = deviceName,
         soc = soc,
+        properSocName = properSocName,
         architecture = architecture,
-        gpu = gpuLabel(context, gpu),
+        gpu = finalGpu,
         ram = ram,
         android = android,
+        socLogoRes = socLogoRes,
+        cpuLogoRes = cpuLogoRes,
+        gpuLogoRes = gpuLogoRes,
     )
 }
 
