@@ -468,18 +468,6 @@ fun SettingsDetailPane(
             actionLabel = "CONFIGURE OVERLAY",
             actionIconRes = R.drawable.ic_video
         )
-        "debug_controller" -> SettingDetailInfo(
-            title = "Debug Controller",
-            category = "AUTOMATION & TESTING",
-            description = "Agent ADB bridge for pad injection (DEBUG_PAD broadcasts) and coordinate calibration. Test controller without restarting game.",
-            iconRes = R.drawable.gamepad,
-            status = "READY",
-            backend = "ADB / BROADCAST",
-            subsystem = "DEBUG RECEIVER",
-            target = "INSPECTION BRIDGE",
-            actionLabel = "OPEN DEBUG BRIDGE",
-            actionIconRes = R.drawable.gamepad
-        )
         "patches" -> SettingDetailInfo(
             title = stringResource(R.string.patch_manager),
             category = "COMMUNITY ENHANCEMENTS",
@@ -1724,7 +1712,6 @@ fun SettingsScreen(
                     Toast.makeText(context, context.getString(R.string.log_not_found), Toast.LENGTH_SHORT).show()
                 }
             }
-            "debug_controller" -> navigateTo("debug_controller")
             "patches" -> navigateTo("patches")
         }
     }
@@ -1741,7 +1728,6 @@ fun SettingsScreen(
             "logs",
             "crash_logs",
             "share_logs",
-            "debug_controller",
             if (!BuildConfig.IS_PLAYSTORE_BUILD) "patches" else null
         )
     }
@@ -1775,8 +1761,7 @@ fun SettingsScreen(
                     7 -> 8
                     8 -> 9
                     9 -> 9
-                    10 -> if (totalItems > 11) 11 else 10
-                    11 -> 11
+                    10 -> 10
                     else -> current
                 }
             }
@@ -1793,7 +1778,6 @@ fun SettingsScreen(
                     8 -> 7
                     9 -> 8
                     10 -> 10
-                    11 -> 10
                     else -> current
                 }
             }
@@ -1807,10 +1791,9 @@ fun SettingsScreen(
                     5 -> 8
                     6 -> 9
                     7 -> 10
-                    8 -> if (totalItems > 11) 11 else 10
-                    9 -> if (totalItems > 11) 11 else 10
+                    8 -> 10
+                    9 -> 10
                     10 -> 10
-                    11 -> 11
                     else -> current
                 }
             }
@@ -1827,7 +1810,6 @@ fun SettingsScreen(
                     8 -> 5
                     9 -> 6
                     10 -> 7
-                    11 -> 8
                     else -> current
                 }
             }
@@ -2301,28 +2283,15 @@ fun SettingsScreen(
                         }
                     )
                 }
-                item(key = "debug_controller") {
-                    SettingsNavCard(
-                        title = "Debug — Controller",
-                        subtitle = "Agent ADB bridge & tap calibration",
-                        iconRes = R.drawable.gamepad,
-                        isSelected = focusedIndex == 10,
-                        onClick = {
-                            focusedIndex = 10
-                            onFocusedKeyChanged("debug_controller")
-                            executeAction("debug_controller")
-                        }
-                    )
-                }
                 if (!BuildConfig.IS_PLAYSTORE_BUILD) {
                     item(key = "patches") {
                         SettingsNavCard(
                             title = stringResource(R.string.patch_manager),
                             subtitle = stringResource(R.string.patch_manager_description),
                             iconRes = R.drawable.ic_build,
-                            isSelected = focusedIndex == 11,
+                            isSelected = focusedIndex == 10,
                             onClick = {
-                                focusedIndex = 11
+                                focusedIndex = 10
                                 onFocusedKeyChanged("patches")
                                 executeAction("patches")
                             }
