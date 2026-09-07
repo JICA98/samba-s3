@@ -45,6 +45,7 @@ sealed interface InGameMenuIntent {
     data class SettingsTransientSet(val path: String, val value: String) : InGameMenuIntent
     data object RequestDirtyCheck : InGameMenuIntent
     data class ReportItemCount(val page: InGamePage, val count: Int) : InGameMenuIntent
+    data class SelectIndex(val index: Int) : InGameMenuIntent
 }
 
 sealed interface InGameMenuHostEffect {
@@ -104,6 +105,7 @@ data class InGameMenuUiState(
     val settingsActive: Boolean = false,
     val settingsDirty: Boolean = false,
     val selectedIndex: Int = 0,
+    val pageSelections: Map<InGamePage, Int> = emptyMap(),
     val itemCounts: Map<InGamePage, Int> = emptyMap(),
     val settingsTreeJson: String? = null,
     val settingsLoading: Boolean = false,
@@ -247,6 +249,14 @@ class InGameMenuCoordinator(
             is InGameMenuIntent.ReportItemCount -> _state.update {
                 it.copy(itemCounts = it.itemCounts + (intent.page to intent.count))
             }
+
+            is InGameMenuIntent.SelectIndex -> _state.update {
+                val curPage = (it.session as? MenuSessionState.Open)?.pageStack?.lastOrNull()
+                it.copy(
+                    selectedIndex = intent.index,
+                    pageSelections = if (curPage != null) it.pageSelections + (curPage to intent.index) else it.pageSelections
+                )
+            }
         }
     }
 
@@ -368,12 +378,19 @@ class InGameMenuCoordinator(
     private fun pushPage(page: InGamePage) {
         val s = _state.value
         val open = s.session as? MenuSessionState.Open ?: return
-        if (open.pageStack.lastOrNull() == page) return
+        val curPage = open.pageStack.lastOrNull()
+        if (curPage == page) return
         _state.update { st ->
             val stack = (st.session as? MenuSessionState.Open)?.pageStack ?: return@update st
+            val updatedSelections = if (curPage != null) {
+                st.pageSelections + (curPage to st.selectedIndex)
+            } else {
+                st.pageSelections
+            }
             st.copy(
                 session = open.copy(pageStack = stack + page),
-                selectedIndex = 0
+                pageSelections = updatedSelections,
+                selectedIndex = updatedSelections[page] ?: 0
             )
         }
         if (page == InGamePage.Settings) scope.launch { enterSettings() }
@@ -407,9 +424,21 @@ class InGameMenuCoordinator(
         _state.update { st ->
             val open = st.session as? MenuSessionState.Open ?: return@update st
             if (open.pageStack.size <= 1) return@update st
+            val curPage = open.pageStack.lastOrNull()
+            val newStack = open.pageStack.dropLast(1)
+            val returnPage = newStack.lastOrNull()
+            val updatedSelections = if (curPage != null) {
+                st.pageSelections + (curPage to st.selectedIndex)
+            } else {
+                st.pageSelections
+            }
+            val restoredIndex = if (returnPage != null) {
+                updatedSelections[returnPage] ?: 0
+            } else 0
             st.copy(
-                session = open.copy(pageStack = open.pageStack.dropLast(1)),
-                selectedIndex = 0
+                session = open.copy(pageStack = newStack),
+                pageSelections = updatedSelections,
+                selectedIndex = restoredIndex
             )
         }
     }
@@ -421,7 +450,12 @@ class InGameMenuCoordinator(
         val count = s.itemCounts[page] ?: return false
         if (count <= 0) return false
         val next = ((s.selectedIndex + delta) % count + count) % count
-        _state.update { it.copy(selectedIndex = next) }
+        _state.update {
+            it.copy(
+                selectedIndex = next,
+                pageSelections = it.pageSelections + (page to next)
+            )
+        }
         return true
     }
 
@@ -450,7 +484,12 @@ class InGameMenuCoordinator(
         if (next >= count) {
             next = if (dx > 0) cur else count - 1
         }
-        _state.update { it.copy(selectedIndex = next) }
+        _state.update {
+            it.copy(
+                selectedIndex = next,
+                pageSelections = it.pageSelections + (page to next)
+            )
+        }
         return true
     }
 

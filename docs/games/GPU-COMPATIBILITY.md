@@ -11,7 +11,15 @@ This per-game result is separate from the architecture forecasts and older GTA r
 See [exact device record](BLUS30758/ADRENO-750-TURNIP.md). The all-Android
 gpu_label change has not yet passed cross-driver regression validation.
 
-**Last updated:** 2026-08-24  
+## The Last of Us validation update — 2026-09-07
+
+| Game | Title ID | GPU architecture | Exact GPU | Runtime driver | Update | Result |
+|---|---|---|---|---|---|---|
+| The Last of Us | BCUS98174 | Qualcomm Adreno 7xx | Adreno 750 | Turnip 26.2.99 | 1.11 | **Fail:** SPU null DMA access followed by RSX-thread SIGSEGV; no stable or controllable 30 FPS gameplay pass |
+
+See the [exact log-backed device record](BCUS98174/qualcomm-adreno/adreno-750/README.md). The tested accuracy profile is not a curated SambaS3 override because it did not produce a stable run.
+
+**Last updated:** 2026-09-07
 **Verified devices:** 
 - MediaTek Dimensity 8300 Ultra (`MT6897Z_A/ZA`), Arm Mali-G615 MC6, Valhall generation 4, vendor Vulkan driver `44.1.0` — Grove Street verified 2026-08-24 (Y5WWBMJVOZSK4HU8)
 - Qualcomm Snapdragon 8 Gen 3 (`SM8650`), Adreno (TM) 750, driver `512.762.41` — GTA intro-to-Ballas verified 2026-08-24 (OPD2403 7d6afed8, staged ISO import with verified `PS3DataMain.obb` 1,479,813,213 bytes)  

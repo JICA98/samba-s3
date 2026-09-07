@@ -588,12 +588,6 @@ fun GamesScreen(
         (currentItem as? PagerItem.GameItem)?.game
     }
     val selectedIconPath = selectedGame?.info?.iconPath?.value
-    val selectedPreview = remember(selectedIconPath) { GamePreviewRepository.resolveInstalledPreview(selectedIconPath) }
-    val selectedCoilModel: Any? = when (selectedPreview) {
-        is GamePreviewModel.LocalFile -> selectedPreview.file
-        is GamePreviewModel.ContentUri -> selectedPreview.uri
-        is GamePreviewModel.None -> null
-    }
     val selectedBgPreview by androidx.compose.runtime.produceState<Any?>(
         initialValue = null,
         key1 = selectedGame?.info?.path,
@@ -609,7 +603,7 @@ fun GamesScreen(
             }
         } else null
     }
-    val fullscreenAmbientModel = selectedBgPreview ?: selectedCoilModel
+    val fullscreenAmbientModel: Any = selectedBgPreview ?: R.drawable.default_wallpaper
 
     val homeScope = rememberCoroutineScope()
 
@@ -932,37 +926,35 @@ fun GamesScreen(
                 }
             }
     ) {
-        // Crisp cover/artwork of focused game as home background
-        if (fullscreenAmbientModel != null) {
-            AsyncImage(
-                model = fullscreenAmbientModel,
-                contentDescription = null,
-                contentScale = ContentScale.Crop,
-                modifier = Modifier
-                    .fillMaxSize()
-                    .alpha(if (selectedBgPreview != null) 0.85f else 0.7f),
-                onError = { err ->
-                    val title = (currentItem as? PagerItem.GameItem)?.game?.info?.name?.value
-                    val path = (currentItem as? PagerItem.GameItem)?.game?.info?.path
-                    Log.w("GamePreview", "preview error title=$title path=$path err=${err.result.throwable?.message}")
-                }
-            )
+        // Crisp cover/artwork of focused game as home background (or default wallpaper fallback)
+        AsyncImage(
+            model = fullscreenAmbientModel,
+            contentDescription = null,
+            contentScale = ContentScale.Crop,
+            modifier = Modifier
+                .fillMaxSize()
+                .alpha(0.85f),
+            onError = { err ->
+                val title = (currentItem as? PagerItem.GameItem)?.game?.info?.name?.value
+                val path = (currentItem as? PagerItem.GameItem)?.game?.info?.path
+                Log.w("GamePreview", "preview error title=$title path=$path err=${err.result.throwable?.message}")
+            }
+        )
 
-            // Subtle dark cinematic tint for readability
-            Box(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .background(
-                        Brush.verticalGradient(
-                            listOf(
-                                Color.Black.copy(alpha = 0.35f),
-                                Color.Black.copy(alpha = 0.15f),
-                                Color.Black.copy(alpha = 0.35f),
-                            )
+        // Subtle dark cinematic tint for readability
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .background(
+                    Brush.verticalGradient(
+                        listOf(
+                            Color.Black.copy(alpha = 0.35f),
+                            Color.Black.copy(alpha = 0.15f),
+                            Color.Black.copy(alpha = 0.35f),
                         )
                     )
-            )
-        }
+                )
+        )
 
         // Vignette
         Box(
@@ -1192,34 +1184,56 @@ fun GamesScreen(
 
             if (visibleGames.isEmpty()) {
                 Box(modifier = Modifier.fillMaxWidth().weight(1f), contentAlignment = Alignment.Center) {
-                    Column(
-                        horizontalAlignment = Alignment.CenterHorizontally,
-                        verticalArrangement = Arrangement.spacedBy(16.dp),
-                        modifier = Modifier.padding(horizontal = 24.dp),
+                    FrostedGlassBox(
+                        ambientModel = fullscreenAmbientModel,
+                        shape = RoundedCornerShape(12.dp),
+                        border = BorderStroke(1.dp, RPCSXColors.primary.copy(alpha = 0.4f)),
+                        alignment = Alignment.Center,
                     ) {
-                        Text(
-                            text = stringResource(R.string.no_games_yet),
-                            style = AppTypography.bodyLarge,
-                            textAlign = TextAlign.Center,
-                            color = RPCSXColors.textSecondary,
-                        )
-                        Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-                            Button(
-                                onClick = { showImportDialog = true },
-                                colors = ButtonDefaults.buttonColors(
-                                    containerColor = RPCSXColors.primary,
-                                    contentColor = RPCSXColors.background,
+                        Column(
+                            horizontalAlignment = Alignment.CenterHorizontally,
+                            verticalArrangement = Arrangement.spacedBy(16.dp),
+                            modifier = Modifier.padding(horizontal = 32.dp, vertical = 24.dp),
+                        ) {
+                            Text(
+                                text = stringResource(R.string.no_games_yet),
+                                style = AppTypography.titleMedium.copy(
+                                    fontWeight = FontWeight.SemiBold,
+                                    letterSpacing = 0.5.sp
                                 ),
+                                textAlign = TextAlign.Center,
+                                color = RPCSXColors.textPrimary,
+                            )
+                            Row(
+                                horizontalArrangement = Arrangement.spacedBy(12.dp),
+                                verticalAlignment = Alignment.CenterVertically
                             ) {
-                                Text(stringResource(R.string.import_game_action))
-                            }
-                            OutlinedButton(
-                                onClick = { folderPickerLauncher.launch(null) },
-                                colors = ButtonDefaults.outlinedButtonColors(
-                                    contentColor = RPCSXColors.primary,
-                                ),
-                            ) {
-                                Text(stringResource(R.string.game_folder_scan_action))
+                                Button(
+                                    onClick = { showImportDialog = true },
+                                    shape = RoundedCornerShape(6.dp),
+                                    colors = ButtonDefaults.buttonColors(
+                                        containerColor = RPCSXColors.primary,
+                                        contentColor = RPCSXColors.background,
+                                    ),
+                                ) {
+                                    Text(
+                                        text = stringResource(R.string.import_game_action),
+                                        style = AppTypography.labelMedium.copy(fontWeight = FontWeight.Bold)
+                                    )
+                                }
+                                OutlinedButton(
+                                    onClick = { folderPickerLauncher.launch(null) },
+                                    shape = RoundedCornerShape(6.dp),
+                                    border = BorderStroke(1.dp, RPCSXColors.primary),
+                                    colors = ButtonDefaults.outlinedButtonColors(
+                                        contentColor = RPCSXColors.primary,
+                                    ),
+                                ) {
+                                    Text(
+                                        text = stringResource(R.string.game_folder_scan_action),
+                                        style = AppTypography.labelMedium.copy(fontWeight = FontWeight.Bold)
+                                    )
+                                }
                             }
                         }
                     }
@@ -1229,30 +1243,37 @@ fun GamesScreen(
                     modifier = Modifier.fillMaxWidth().weight(1f),
                     contentAlignment = Alignment.Center
                 ) {
-                    Column(
-                        horizontalAlignment = Alignment.CenterHorizontally,
-                        verticalArrangement = Arrangement.spacedBy(12.dp),
-                        modifier = Modifier.padding(24.dp)
+                    FrostedGlassBox(
+                        ambientModel = fullscreenAmbientModel,
+                        shape = RoundedCornerShape(12.dp),
+                        border = BorderStroke(1.dp, RPCSXColors.surfaceOverlay),
+                        alignment = Alignment.Center,
                     ) {
-                        Text(
-                            text = "NO GAMES MATCHING \"$searchQuery\"",
-                            style = AppTypography.headlineMedium.copy(
-                                fontSize = 16.sp,
-                                fontWeight = FontWeight.Bold,
-                                letterSpacing = 1.sp
-                            ),
-                            color = RPCSXColors.textSecondary,
-                            textAlign = TextAlign.Center
-                        )
-                        OutlinedButton(
-                            onClick = { searchQuery = "" },
-                            shape = RoundedCornerShape(4.dp),
-                            border = BorderStroke(1.dp, RPCSXColors.primary),
-                            colors = ButtonDefaults.outlinedButtonColors(
-                                contentColor = RPCSXColors.primary
-                            )
+                        Column(
+                            horizontalAlignment = Alignment.CenterHorizontally,
+                            verticalArrangement = Arrangement.spacedBy(12.dp),
+                            modifier = Modifier.padding(horizontal = 32.dp, vertical = 24.dp)
                         ) {
-                            Text("CLEAR SEARCH", style = AppTypography.labelSmall.copy(fontWeight = FontWeight.Bold))
+                            Text(
+                                text = "NO GAMES MATCHING \"$searchQuery\"",
+                                style = AppTypography.headlineMedium.copy(
+                                    fontSize = 16.sp,
+                                    fontWeight = FontWeight.Bold,
+                                    letterSpacing = 1.sp
+                                ),
+                                color = RPCSXColors.textSecondary,
+                                textAlign = TextAlign.Center
+                            )
+                            OutlinedButton(
+                                onClick = { searchQuery = "" },
+                                shape = RoundedCornerShape(6.dp),
+                                border = BorderStroke(1.dp, RPCSXColors.primary),
+                                colors = ButtonDefaults.outlinedButtonColors(
+                                    contentColor = RPCSXColors.primary
+                                )
+                            ) {
+                                Text("CLEAR SEARCH", style = AppTypography.labelSmall.copy(fontWeight = FontWeight.Bold))
+                            }
                         }
                     }
                 }
@@ -3322,8 +3343,7 @@ fun GameCard(
                     }
                 }
             }
-            val cardBgModel = bgPreview ?: ambientBgModel ?: coilModel
-            val isIconSameAsBg = bgPreview == null || bgPreview == coilModel
+            val cardBgModel = bgPreview ?: coilModel
 
             if (cardBgModel != null) {
                 Box(modifier = Modifier.fillMaxSize()) {

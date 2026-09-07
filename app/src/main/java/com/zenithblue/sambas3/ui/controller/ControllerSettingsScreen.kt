@@ -23,6 +23,12 @@ import androidx.compose.foundation.layout.safeDrawingPadding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.safeDrawing
+import androidx.compose.foundation.layout.windowInsetsPadding
+import androidx.compose.ui.res.painterResource
+import androidx.compose.material3.Icon
+import com.zenithblue.sambas3.R
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
@@ -251,26 +257,30 @@ fun ControllerSettingsScreen(
                         }
                     }
                 }
-                if (isInSplitPane) {
-                    Surface(
-                        onClick = navigateBack,
-                        shape = RoundedCornerShape(8.dp),
-                        color = RPCSXColors.primary.copy(alpha = 0.15f),
-                        border = BorderStroke(1.dp, RPCSXColors.primary.copy(alpha = 0.4f)),
-                        modifier = Modifier.height(32.dp)
+                Surface(
+                    onClick = navigateBack,
+                    shape = RoundedCornerShape(8.dp),
+                    color = RPCSXColors.primary.copy(alpha = 0.15f),
+                    border = BorderStroke(1.dp, RPCSXColors.primary.copy(alpha = 0.4f)),
+                    modifier = Modifier.height(32.dp)
+                ) {
+                    Row(
+                        modifier = Modifier.padding(horizontal = 10.dp),
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(4.dp)
                     ) {
-                        Row(
-                            modifier = Modifier.padding(horizontal = 12.dp),
-                            verticalAlignment = Alignment.CenterVertically,
-                            horizontalArrangement = Arrangement.spacedBy(4.dp)
-                        ) {
-                            Text(
-                                text = "BACK",
-                                color = RPCSXColors.primary,
-                                style = MaterialTheme.typography.labelSmall,
-                                fontWeight = FontWeight.Bold
-                            )
-                        }
+                        Icon(
+                            painter = painterResource(id = R.drawable.ic_keyboard_arrow_left),
+                            contentDescription = null,
+                            tint = RPCSXColors.primary,
+                            modifier = Modifier.size(16.dp)
+                        )
+                        Text(
+                            text = "BACK",
+                            color = RPCSXColors.primary,
+                            style = MaterialTheme.typography.labelSmall,
+                            fontWeight = FontWeight.Bold
+                        )
                     }
                 }
             }
@@ -419,17 +429,14 @@ fun ControllerSettingsScreen(
         }
     }
 
-    if (isInSplitPane) {
-        Surface(color = Color.Transparent, modifier = Modifier.fillMaxSize().safeDrawingPadding().padding(horizontal = 16.dp, vertical = 8.dp)) { content() }
-    } else {
-        Scaffold(
-            topBar = {
-                LargeTopAppBar(
-                    title = { Text("Controls") },
-                    navigationIcon = { TextButton(onClick = navigateBack) { Text("BACK") } },
-                )
-            },
-        ) { padding -> Box(Modifier.padding(padding)) { content() } }
+    Surface(
+        color = RPCSXColors.background,
+        modifier = Modifier
+            .fillMaxSize()
+            .windowInsetsPadding(WindowInsets.safeDrawing)
+            .padding(horizontal = 16.dp, vertical = 8.dp)
+    ) {
+        content()
     }
 
     val captured = candidate

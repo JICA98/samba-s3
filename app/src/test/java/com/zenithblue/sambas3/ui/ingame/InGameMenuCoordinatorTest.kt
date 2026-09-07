@@ -354,6 +354,26 @@ class InGameMenuCoordinatorTest {
     }
 
     @Test
+    fun page_navigation_preserves_and_restores_selected_position() {
+        openMain()
+        coordinator.dispatch(InGameMenuIntent.ReportItemCount(InGamePage.Main, 8))
+        // Move to index 3 on Main
+        coordinator.moveSelection(3)
+        assertEquals(3, coordinator.state.value.selectedIndex)
+
+        // Navigate to Monitoring
+        coordinator.dispatch(InGameMenuIntent.OpenMonitoring)
+        awaitCondition { coordinator.state.value.currentPage == InGamePage.Monitoring }
+        assertEquals(0, coordinator.state.value.selectedIndex)
+
+        // Navigate back to Main
+        coordinator.dispatch(InGameMenuIntent.Back)
+        awaitCondition { coordinator.state.value.currentPage == InGamePage.Main }
+        // Restored back to index 3!
+        assertEquals(3, coordinator.state.value.selectedIndex)
+    }
+
+    @Test
     fun selection_wraps_within_exact_item_count() {
         openMain()
         coordinator.dispatch(InGameMenuIntent.ReportItemCount(InGamePage.Main, 5))

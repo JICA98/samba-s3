@@ -148,53 +148,59 @@ fun InGameMenuHost(
                     is GamePreviewModel.None -> Unit
                 }
             }
-            // 4. Check direct_iso_icons/${titleId}.png
-            if (!titleId.isNullOrBlank()) {
-                val directIsoIcon = File(context.filesDir, "direct_iso_icons/${titleId}.png")
-                if (directIsoIcon.isFile && directIsoIcon.length() > 0) {
-                    return@withContext directIsoIcon
-                }
-            }
             null
         }
     }
-    val artworkModel = bgPreview ?: gameIconModel
+    val menuBgModel: Any = bgPreview ?: R.drawable.default_wallpaper
 
     Box(
         modifier = Modifier
             .fillMaxSize()
-            .background(Color.Black.copy(alpha = 0.70f))
+            .background(Color.Black)
     ) {
-        // Edge-to-edge ambient artwork background
-        if (artworkModel != null) {
-            AsyncImage(
-                model = artworkModel,
-                contentDescription = null,
-                contentScale = ContentScale.Crop,
-                modifier = Modifier
-                    .fillMaxSize()
-                    .scale(1.05f)
-                    .alpha(0.40f)
-            )
-        }
+        // Edge-to-edge ambient artwork background (or default wallpaper fallback)
+        AsyncImage(
+            model = menuBgModel,
+            contentDescription = null,
+            contentScale = ContentScale.Crop,
+            modifier = Modifier
+                .fillMaxSize()
+                .scale(1.02f)
+                .alpha(0.85f)
+        )
 
-        // Dark frosted gradient overlay
+        // Dark frosted gradient overlay: darker on left for menu readability, subtler on right
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .background(
+                    Brush.horizontalGradient(
+                        listOf(
+                            Color(0xF0080B12),
+                            Color(0xD0080B12),
+                            Color(0x70080B12)
+                        )
+                    )
+                )
+        )
+
+        // Top/bottom dark gradient for header and footer readability
         Box(
             modifier = Modifier
                 .fillMaxSize()
                 .background(
                     Brush.verticalGradient(
                         listOf(
-                            Color(0xF20F121A),
-                            Color(0xEB111520),
-                            Color(0xF5080A0F)
+                            Color.Black.copy(alpha = 0.45f),
+                            Color.Transparent,
+                            Color.Black.copy(alpha = 0.55f)
                         )
                     )
                 )
         )
 
         when (uiState.currentPage) {
-            InGamePage.Main -> InGameMainPanel(uiState, game, gamePath, gameIconModel, artworkModel, onIntent)
+            InGamePage.Main -> InGameMainPanel(uiState, game, gamePath, gameIconModel, onIntent)
             InGamePage.Settings -> InGameSettingsPage(uiState, core, onIntent)
             InGamePage.Monitoring -> com.zenithblue.sambas3.ui.monitoring.MonitoringSettingsScreen(
                 navigateBack = { onIntent(InGameMenuIntent.Back) },
@@ -232,14 +238,13 @@ private fun InGameMainPanel(
     game: com.zenithblue.sambas3.Game?,
     gamePath: String?,
     gameIconModel: Any?,
-    artworkModel: Any?,
     onIntent: (InGameMenuIntent) -> Unit
 ) {
     var showExitConfirm by remember { mutableStateOf(false) }
     var showRestartConfirm by remember { mutableStateOf(false) }
     val cap = uiState.capabilities
-    val listState = rememberLazyListState()
     val selected = uiState.selectedIndex
+    val listState = rememberLazyListState(initialFirstVisibleItemIndex = selected.coerceAtLeast(0))
 
     val rows = remember(cap) { mainRowDescriptors(cap) }
 
@@ -258,18 +263,6 @@ private fun InGameMainPanel(
         game?.let { GameIdentity.displayName(it.info.path, it.info.name.value) }
             ?: gamePath?.trimEnd('/')?.substringAfterLast('/')?.trim()?.takeIf { it.isNotBlank() }
             ?: fallbackTitle
-    }
-
-    val titleId = remember(game, gamePath) {
-        gamePath?.let { GameIdentity.titleIdOrNull(it, game?.info?.name?.value) }
-            ?: game?.info?.path?.substringAfterLast('/')
-    }
-
-    val isIso = remember(game, gamePath) {
-        game?.info?.sourceMode?.value == com.zenithblue.sambas3.GameSourceMode.DIRECT_ISO ||
-            gamePath?.contains("direct_iso", ignoreCase = true) == true ||
-            gamePath?.endsWith(".iso", ignoreCase = true) == true ||
-            game?.info?.sourceUri?.value?.endsWith(".iso", ignoreCase = true) == true
     }
 
     Column(
@@ -316,34 +309,13 @@ private fun InGameMainPanel(
                 }
 
                 Column(verticalArrangement = Arrangement.Center) {
-                    Row(
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.spacedBy(8.dp)
-                    ) {
-                        Text(
-                            text = "MENU",
-                            color = RPCSXColors.primary,
-                            style = MaterialTheme.typography.titleLarge,
-                            fontWeight = FontWeight.Black,
-                            letterSpacing = 1.5.sp,
-                        )
-                        if (isIso) {
-                            Surface(
-                                shape = RoundedCornerShape(4.dp),
-                                color = RPCSXColors.primary.copy(alpha = 0.2f),
-                                border = BorderStroke(0.5.dp, RPCSXColors.primary.copy(alpha = 0.5f)),
-                            ) {
-                                Text(
-                                    text = "ISO",
-                                    color = RPCSXColors.primary,
-                                    fontSize = 9.sp,
-                                    fontWeight = FontWeight.Bold,
-                                    letterSpacing = 1.sp,
-                                    modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp)
-                                )
-                            }
-                        }
-                    }
+                    Text(
+                        text = "MENU",
+                        color = RPCSXColors.primary,
+                        style = MaterialTheme.typography.titleLarge,
+                        fontWeight = FontWeight.Black,
+                        letterSpacing = 1.5.sp,
+                    )
                     Text(
                         text = gameTitle,
                         color = Color.White,
@@ -390,17 +362,15 @@ private fun InGameMainPanel(
             color = Color(0x22FFFFFF)
         )
 
-        // 21:9 Widescreen Two-Column Layout: Single-column left-aligned menu on left, Stats & Hero on right
-        Row(
+        // Menu layout: Left-aligned menu list against ambient tinted artwork background
+        Box(
             modifier = Modifier
                 .weight(1f)
-                .fillMaxWidth(),
-            horizontalArrangement = Arrangement.spacedBy(20.dp)
+                .fillMaxWidth()
         ) {
-            // Single Column Menu (Left-aligned)
             LazyColumn(
                 modifier = Modifier
-                    .width(360.dp)
+                    .widthIn(min = 360.dp, max = 420.dp)
                     .fillMaxHeight(),
                 state = listState,
                 verticalArrangement = Arrangement.spacedBy(6.dp),
@@ -416,6 +386,7 @@ private fun InGameMainPanel(
                         showArrow = row.showArrow,
                         isDestructive = row.intent == InGameMenuIntent.Exit || row.intent == InGameMenuIntent.Restart,
                         onClick = {
+                            onIntent(InGameMenuIntent.SelectIndex(index))
                             if (row.intent == InGameMenuIntent.Exit) {
                                 showExitConfirm = true
                             } else if (row.intent == InGameMenuIntent.Restart) {
@@ -425,120 +396,6 @@ private fun InGameMainPanel(
                             }
                         }
                     )
-                }
-            }
-
-            // Right side: Hero Artwork & Session Stats Card (SS3-D-008 inspired)
-            Surface(
-                shape = RoundedCornerShape(16.dp),
-                color = Color(0x28141926),
-                border = BorderStroke(1.dp, Color(0x22FFFFFF)),
-                modifier = Modifier
-                    .weight(1f)
-                    .fillMaxHeight()
-            ) {
-                Column(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .padding(16.dp),
-                    verticalArrangement = Arrangement.SpaceBetween
-                ) {
-                    Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
-                        // Game Cover / Artwork Banner
-                        Surface(
-                            shape = RoundedCornerShape(12.dp),
-                            color = Color(0x20000000),
-                            border = BorderStroke(1.dp, Color(0x25FFFFFF)),
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .height(140.dp)
-                        ) {
-                            if (artworkModel != null) {
-                                AsyncImage(
-                                    model = artworkModel,
-                                    contentDescription = gameTitle,
-                                    contentScale = ContentScale.Crop,
-                                    modifier = Modifier.fillMaxSize()
-                                )
-                            } else if (gameIconModel != null) {
-                                AsyncImage(
-                                    model = gameIconModel,
-                                    contentDescription = gameTitle,
-                                    contentScale = ContentScale.Fit,
-                                    modifier = Modifier.fillMaxSize().padding(12.dp)
-                                )
-                            }
-                        }
-
-                        Text(
-                            text = gameTitle,
-                            color = Color.White,
-                            style = MaterialTheme.typography.titleMedium,
-                            fontWeight = FontWeight.Bold,
-                            maxLines = 2,
-                            overflow = TextOverflow.Ellipsis
-                        )
-
-                        Row(
-                            horizontalArrangement = Arrangement.spacedBy(8.dp),
-                            verticalAlignment = Alignment.CenterVertically
-                        ) {
-                            if (isIso) {
-                                Surface(
-                                    shape = RoundedCornerShape(4.dp),
-                                    color = RPCSXColors.primary.copy(alpha = 0.2f),
-                                    border = BorderStroke(0.5.dp, RPCSXColors.primary.copy(alpha = 0.5f))
-                                ) {
-                                    Text(
-                                        "ISO",
-                                        color = RPCSXColors.primary,
-                                        fontSize = 10.sp,
-                                        fontWeight = FontWeight.Bold,
-                                        modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp)
-                                    )
-                                }
-                            }
-                            titleId?.let { id ->
-                                Text(
-                                    id.uppercase(),
-                                    color = RPCSXColors.textSecondary,
-                                    fontSize = 11.sp,
-                                    fontFamily = FontFamily.Monospace
-                                )
-                            }
-                        }
-                    }
-
-                    // Session / Emulation Status Strip
-                    Surface(
-                        shape = RoundedCornerShape(10.dp),
-                        color = Color(0x20000000),
-                        border = BorderStroke(1.dp, Color(0x18FFFFFF)),
-                        modifier = Modifier.fillMaxWidth()
-                    ) {
-                        Row(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(12.dp),
-                            horizontalArrangement = Arrangement.SpaceAround,
-                            verticalAlignment = Alignment.CenterVertically
-                        ) {
-                            Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                                Text("TARGET", color = RPCSXColors.textSecondary, fontSize = 9.sp, fontWeight = FontWeight.Bold)
-                                Text("60 FPS", color = RPCSXColors.primary, fontSize = 13.sp, fontWeight = FontWeight.Bold)
-                            }
-                            Box(Modifier.width(1.dp).height(24.dp).background(Color(0x20FFFFFF)))
-                            Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                                Text("STATE", color = RPCSXColors.textSecondary, fontSize = 9.sp, fontWeight = FontWeight.Bold)
-                                Text("PAUSED", color = RPCSXColors.focusRing, fontSize = 13.sp, fontWeight = FontWeight.Bold)
-                            }
-                            Box(Modifier.width(1.dp).height(24.dp).background(Color(0x20FFFFFF)))
-                            Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                                Text("CORE", color = RPCSXColors.textSecondary, fontSize = 9.sp, fontWeight = FontWeight.Bold)
-                                Text("RPCSX", color = Color.White, fontSize = 13.sp, fontWeight = FontWeight.Bold)
-                            }
-                        }
-                    }
                 }
             }
         }

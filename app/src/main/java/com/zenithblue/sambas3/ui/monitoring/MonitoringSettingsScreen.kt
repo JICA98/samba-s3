@@ -12,6 +12,17 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.safeDrawingPadding
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.safeDrawing
+import androidx.compose.foundation.layout.windowInsetsPadding
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.TopAppBarDefaults
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.font.FontFamily
+import com.zenithblue.sambas3.R
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
@@ -276,10 +287,28 @@ fun MonitoringSettingsScreen(navigateBack: () -> Unit, isInSplitPane: Boolean = 
         Surface(color = Color.Transparent, modifier = Modifier.fillMaxSize().safeDrawingPadding()) { content() }
     } else {
         Scaffold(
+            modifier = Modifier.windowInsetsPadding(WindowInsets.safeDrawing),
             topBar = {
-                LargeTopAppBar(
-                    title = { Text("Performance Monitor") },
-                    navigationIcon = { TextButton(onClick = navigateBack) { Text("BACK") } }
+                TopAppBar(
+                    title = {
+                        Text(
+                            "PERFORMANCE MONITOR",
+                            color = RPCSXColors.primary,
+                            fontFamily = FontFamily.Monospace,
+                            fontWeight = FontWeight.Bold,
+                            fontSize = 16.sp
+                        )
+                    },
+                    navigationIcon = {
+                        IconButton(onClick = navigateBack) {
+                            Icon(
+                                painter = painterResource(id = R.drawable.ic_keyboard_arrow_left),
+                                contentDescription = "Back",
+                                tint = RPCSXColors.primary
+                            )
+                        }
+                    },
+                    colors = TopAppBarDefaults.topAppBarColors(containerColor = Color.Transparent)
                 )
             }
         ) { padding -> Box(Modifier.padding(padding)) { content() } }
