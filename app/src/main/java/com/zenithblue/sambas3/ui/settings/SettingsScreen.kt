@@ -1681,20 +1681,9 @@ fun SettingsScreen(
             "logs" -> navigateTo("logs")
             "crash_logs" -> navigateTo("crash_logs")
             "share_logs" -> {
-                val file = DocumentFile.fromSingleUri(
-                    context, DocumentsContract.buildDocumentUri(
-                        AppDataDocumentProvider.AUTHORITY,
-                        "${AppDataDocumentProvider.ROOT_ID}/cache/RPCSX${if (RPCSX.lastPlayedGame.isNotEmpty()) "" else ".old"}.log"
-                    )
-                )
-                if (file != null && file.exists() && file.length() != 0L) {
-                    val intent = Intent(Intent.ACTION_SEND).apply {
-                        setDataAndType(file.uri, "text/plain")
-                        addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
-                        putExtra(Intent.EXTRA_STREAM, file.uri)
-                    }
-                    context.startActivity(Intent.createChooser(intent, context.getString(R.string.share_log)))
-                } else {
+                val sessionId = com.zenithblue.sambas3.logging.LogBroker.currentSessionId
+                    ?: com.zenithblue.sambas3.logging.LogSessionStore.latest(context)?.sessionId
+                if (sessionId == null || !com.zenithblue.sambas3.logging.SessionExport.shareSession(context, sessionId)) {
                     Toast.makeText(context, context.getString(R.string.log_not_found), Toast.LENGTH_SHORT).show()
                 }
             }

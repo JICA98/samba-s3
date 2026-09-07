@@ -84,4 +84,15 @@ class LogSessionStoreTest {
         assertEquals(LogSessionTerminal.RUNNING, read?.terminalState)
         assertTrue(read?.gameTitleSnapshot?.isNotBlank() == true)
     }
+
+    @Test
+    fun sameTitleGetsDistinctSessionIds() {
+        val a = LogSessionStore.begin(context, "t1", "/g", "BLUS", "Same", null, null, null, null, null, 1, nowMs = 1L)
+        val b = LogSessionStore.begin(context, "t2", "/g", "BLUS", "Same", null, null, null, null, null, 1, nowMs = 2L)
+        assertTrue(a.sessionId != b.sessionId)
+        LogSessionStore.finalize(context, "t1", LogSessionTerminal.CLEAN_STOP, "InGameExit")
+        LogSessionStore.finalize(context, "t2", LogSessionTerminal.FAILED, "CrashExit")
+        assertEquals(LogSessionTerminal.CLEAN_STOP, LogSessionStore.read(context, "t1")?.terminalState)
+        assertEquals(LogSessionTerminal.FAILED, LogSessionStore.read(context, "t2")?.terminalState)
+    }
 }

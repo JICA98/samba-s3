@@ -33,6 +33,7 @@ sealed interface HomeRecoveryState {
         val slot: Int?,
         val reason: String,
         val report: CrashReport? = null,
+        val sessionId: String? = null,
     ) : HomeRecoveryState
 
     data class ActionRunning(val action: RecoveryAction) : HomeRecoveryState

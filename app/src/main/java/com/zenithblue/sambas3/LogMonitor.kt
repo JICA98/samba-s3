@@ -175,6 +175,8 @@ object LogMonitor {
     private const val MAX_UI_ENTRIES = 1000
     private const val CHANNEL_CAPACITY = 8192
     private const val BATCH_SIZE = 20
+    private const val FLUSH_BYTES = 32 * 1024L
+    private const val FLUSH_INTERVAL_MS = 2_000L
 
     private val _logs = MutableStateFlow<List<LogEntry>>(emptyList())
     val logs: StateFlow<List<LogEntry>> = _logs.asStateFlow()
@@ -195,6 +197,7 @@ object LogMonitor {
 
     private val writers = mutableMapOf<LogFileCategory, BufferedWriter>()
     private val writeSizes = mutableMapOf<LogFileCategory, Long>()
+    private val lastFlushAtMs = mutableMapOf<LogFileCategory, Long>()
     private var entryIdCounter = 0L
 
     // ------------------------------------------------------------------
@@ -261,8 +264,15 @@ object LogMonitor {
             val line = "[${mapped.timestamp}] ${mapped.level.letter}/${mapped.tag}: ${mapped.message}\n"
             runCatching {
                 w.write(line)
-                writeSizes[cat] = (writeSizes[cat] ?: 0L) + line.length
-                if (mapped.id % 16L == 0L) w.flush()
+                val added = line.toByteArray(Charsets.UTF_8).size.toLong()
+                val next = (writeSizes[cat] ?: 0L) + added
+                writeSizes[cat] = next
+                val now = System.currentTimeMillis()
+                val last = lastFlushAtMs[cat] ?: 0L
+                if (added >= FLUSH_BYTES || now - last >= FLUSH_INTERVAL_MS) {
+                    w.flush()
+                    lastFlushAtMs[cat] = now
+                }
             }
         }
         val all = _logs.value

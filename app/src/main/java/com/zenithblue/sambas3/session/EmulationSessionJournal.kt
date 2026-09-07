@@ -49,6 +49,7 @@ object EmulationSessionJournal {
     private const val TERMINAL = "terminal"
 
     @Volatile private var cached: EmulationSessionRecord? = null
+    private val lock = Any()
 
     fun begin(context: Context, gamePath: String, titleId: String?, gameName: String?, activityInstanceId: Long, surfaceGeneration: Long): EmulationSessionRecord {
         val now = System.currentTimeMillis()
@@ -156,7 +157,9 @@ object EmulationSessionJournal {
     }
 
     fun read(context: Context): EmulationSessionRecord? {
-        val json = context.getSharedPreferences(PREFS, Context.MODE_PRIVATE).getString(ACTIVE, null)
+        val json = synchronized(lock) {
+            context.getSharedPreferences(PREFS, Context.MODE_PRIVATE).getString(ACTIVE, null)
+        }
         if (json == null) {
             // The durable marker is authoritative. Never resurrect an old
             // process-local record after the marker has been cleared.
@@ -239,7 +242,9 @@ object EmulationSessionJournal {
             put("failureAtMs", record.failureAtMs ?: 0L)
             put("stoppedAtMs", record.stoppedAtMs ?: 0L)
         }
-        context.getSharedPreferences(PREFS, Context.MODE_PRIVATE).edit().putString(ACTIVE, j.toString()).apply()
+        synchronized(lock) {
+            context.getSharedPreferences(PREFS, Context.MODE_PRIVATE).edit().putString(ACTIVE, j.toString()).commit()
+        }
         Log.i(TAG, "journal state=${record.state} session=${record.sessionId} game=${record.gamePath} clean=${record.cleanTermination}")
     }
 

@@ -5,11 +5,44 @@ import com.zenithblue.sambas3.RPCSX
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.isActive
 import java.io.File
+import java.util.concurrent.atomic.AtomicBoolean
 import kotlin.coroutines.coroutineContext
+
+data class BoundTailer(
+    val tailer: LogFileTailer,
+    val kind: LogSourceKind,
+    val generation: String,
+    val boundSessionId: String?,
+    val path: String,
+)
 
 object BackendFileSource {
     private const val DEFAULT_IDLE_DELAY_MS = 10_000L
-    private const val ACTIVE_STREAMING_DELAY_MS = 2_000L
+    private const val ACTIVE_STREAMING_DELAY_MS = 250L
+    private const val BURST_MAX_LINES = 2_000
+    private const val ITERATION_BYTE_BUDGET = 256 * 1024
+
+    private val wake = AtomicBoolean(false)
+    @Volatile private var latestTailers: Map<String, BoundTailer> = emptyMap()
+
+    fun wake() {
+        wake.set(true)
+    }
+
+    suspend fun drainOnce() {
+        val current = latestTailers
+        for ((_, bound) in current) {
+            bound.tailer.drain().forEach { line ->
+                LogBroker.engine.emit(
+                    message = line,
+                    source = bound.kind,
+                    sessionId = bound.boundSessionId,
+                    artifactId = File(bound.path).name,
+                    boundSessionId = bound.boundSessionId,
+                )
+            }
+        }
+    }
 
     suspend fun run(
         context: Context,
@@ -18,29 +51,40 @@ object BackendFileSource {
         isStreaming: () -> Boolean = { false },
     ) {
         engine.setStatus(LogSourceKind.RPCSX_BACKEND, LogSourceStatus.Waiting)
-        val tailers = LinkedHashMap<String, Pair<LogFileTailer, LogSourceKind>>()
+        val tailers = LinkedHashMap<String, BoundTailer>()
+        latestTailers = tailers
         var lines = 0L
         var bytes = 0L
         var scans = 0
         while (coroutineContext.isActive) {
-            if (!isStreaming()) {
+            val forced = wake.getAndSet(false)
+            if (!isStreaming() && !forced) {
                 delay(DEFAULT_IDLE_DELAY_MS)
                 continue
             }
-            if (scans % 5 == 0) {
+            if (forced || scans % 5 == 0) {
                 val roots = roots(context)
                 val discovered = LogArtifactDiscovery.scan(roots, sinceMs = null, maxFiles = 16)
+                val liveSession = sessionId()
                 for (item in discovered) {
                     if (item.compressed) continue
                     val path = item.file.absolutePath
                     if (path in tailers) continue
                     if (isIgnoredArtifact(item.file)) continue
-                    tailers[path] = LogFileTailer(item.file, startAtEnd = true) to item.kind
+                    val generation = "${item.file.name}-${item.file.length()}-${item.file.lastModified()}"
+                    tailers[path] = BoundTailer(
+                        tailer = LogFileTailer(item.file, startAtEnd = false),
+                        kind = item.kind,
+                        generation = generation,
+                        boundSessionId = liveSession,
+                        path = path,
+                    )
                     engine.setStatus(
                         item.kind,
                         if (item.file.length() > 0L) LogSourceStatus.Quiet(0) else LogSourceStatus.Waiting,
                     )
                 }
+                latestTailers = tailers.toMap()
                 if (tailers.isEmpty()) {
                     engine.setStatus(
                         LogSourceKind.RPCSX_BACKEND,
@@ -49,30 +93,35 @@ object BackendFileSource {
                 }
             }
             scans++
-            for ((path, pair) in tailers) {
-                val (tailer, kind) = pair
-                val newLines = tailer.poll(maxLines = 200)
+            var iterationBytes = 0
+            for ((path, bound) in tailers) {
+                val newLines = try {
+                    bound.tailer.poll(maxLines = BURST_MAX_LINES)
+                } catch (e: Exception) {
+                    engine.setStatus(bound.kind, LogSourceStatus.ParseError(e.message ?: "io"))
+                    emptyList()
+                }
                 for (line in newLines) {
                     engine.emit(
                         message = line,
-                        source = kind,
-                        sessionId = sessionId(),
+                        source = bound.kind,
+                        sessionId = bound.boundSessionId ?: sessionId(),
                         artifactId = File(path).name,
+                        boundSessionId = bound.boundSessionId,
                     )
                     lines++
-                    bytes += line.length
+                    val size = line.toByteArray(Charsets.UTF_8).size
+                    bytes += size
+                    iterationBytes += size
                 }
                 if (newLines.isNotEmpty()) {
-                    engine.setStatus(kind, LogSourceStatus.Active(lines, bytes))
+                    engine.setStatus(bound.kind, LogSourceStatus.Active(lines, bytes))
                 }
+                if (iterationBytes >= ITERATION_BYTE_BUDGET) break
             }
             delay(ACTIVE_STREAMING_DELAY_MS)
         }
-        for ((_, pair) in tailers) {
-            pair.first.drain().forEach { line ->
-                engine.emit(message = line, source = pair.second, sessionId = sessionId())
-            }
-        }
+        drainOnce()
         engine.setStatus(LogSourceKind.RPCSX_BACKEND, LogSourceStatus.Ended(lines, bytes))
     }
 

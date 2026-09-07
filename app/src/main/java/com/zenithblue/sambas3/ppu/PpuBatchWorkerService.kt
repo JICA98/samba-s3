@@ -61,9 +61,10 @@ class PpuBatchWorkerService : Service() {
                 return
             }
             activeLogicalSessionId.set(logicalSessionId)
+            val workerEpoch = "worker-$serviceInstanceId-$logicalSessionId-$batchIndex"
             Log.i(
                 "S3PPUBATCH",
-                "batch=$batchIndex pid=$myPid worker=$serviceInstanceId state=START " +
+                "batch=$batchIndex pid=$myPid worker=$serviceInstanceId epoch=$workerEpoch state=START " +
                     "session=$logicalSessionId job=$logicalJobId title=$titleId maxNew=$maxNewObjects origin=$compileOrigin"
             )
             PpuDiagnosticLog.emit(

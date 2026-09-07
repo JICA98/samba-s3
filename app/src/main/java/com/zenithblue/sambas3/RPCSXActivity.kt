@@ -161,6 +161,7 @@ class RPCSXActivity : ComponentActivity(), EmulationHost {
         }
         if (!RPCSX.initialized) {
             try {
+                com.zenithblue.sambas3.logging.LogBroker.ensureStarted(this)
                 RPCSX.nativeLibDirectory = packageManager.getApplicationInfo(packageName, 0).nativeLibraryDir
                 if (RPCSX.openLibrary()) {
                     RPCSX.instance.initialize(RPCSX.rootDirectory, UserRepository.getUserFromSettings())
@@ -920,6 +921,8 @@ class RPCSXActivity : ComponentActivity(), EmulationHost {
                 bootRequest.savestatePath,
                 bootRequest.slot,
                 reason,
+                sessionId = EmulationSessionJournal.read(this@RPCSXActivity)?.sessionId
+                    ?: com.zenithblue.sambas3.logging.LogBroker.currentSessionId,
             )
             stopAndFinishAfterFailure(EmulatorStopReason.BootFailureCleanup)
         }

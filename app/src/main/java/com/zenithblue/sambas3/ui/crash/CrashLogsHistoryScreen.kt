@@ -1,10 +1,6 @@
 package com.zenithblue.sambas3.ui.crash
 
-import android.content.Context
-import android.content.Intent
-import android.net.Uri
 import android.view.KeyEvent
-import android.widget.Toast
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -59,17 +55,17 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.core.content.FileProvider
 import coil3.compose.AsyncImage
-import com.zenithblue.sambas3.LogMonitor
 import com.zenithblue.sambas3.R
 import com.zenithblue.sambas3.RPCSXColors
-import com.zenithblue.sambas3.crash.CrashClassification
-import com.zenithblue.sambas3.crash.CrashReport
+import com.zenithblue.sambas3.crash.CrashEvidenceCollector
 import com.zenithblue.sambas3.ui.common.SambaScreenScaffold
+import com.zenithblue.sambas3.logging.LogBroker
 import com.zenithblue.sambas3.logging.LogSessionManifest
 import com.zenithblue.sambas3.logging.LogSessionStore
 import com.zenithblue.sambas3.logging.LogSessionTerminal
+import com.zenithblue.sambas3.logging.SessionDiagnostics
+import com.zenithblue.sambas3.logging.SessionExport
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import java.io.File
@@ -81,11 +77,12 @@ import java.util.Locale
 fun CrashLogsHistoryScreen(
     navigateBack: () -> Unit,
     isInSplitPane: Boolean = false,
+    initialSessionId: String? = null,
 ) {
     val context = LocalContext.current
     var sessions by remember { mutableStateOf<List<LogSessionManifest>>(emptyList()) }
     var loading by remember { mutableStateOf(true) }
-    var selectedSessionId by remember { mutableStateOf<String?>(null) }
+    var selectedSessionId by remember { mutableStateOf(initialSessionId) }
     var filterCrashesOnly by remember { mutableStateOf(true) }
     var showClearConfirm by remember { mutableStateOf(false) }
 
@@ -105,7 +102,7 @@ fun CrashLogsHistoryScreen(
         }
     }
 
-    LaunchedEffect(Unit) {
+    LaunchedEffect(Unit, initialSessionId) {
         loadSessions()
     }
 
@@ -117,8 +114,8 @@ fun CrashLogsHistoryScreen(
         sessions.firstOrNull { it.sessionId == selectedSessionId }
     }
 
-    val selectedReport = remember(selectedManifest) {
-        selectedManifest?.let { reportForManifest(context, it) }
+    val selectedReport = remember(selectedManifest?.sessionId, selectedManifest?.revision) {
+        selectedManifest?.let { CrashEvidenceCollector.reportForManifest(context, it) }
     }
 
     fun selectSession(delta: Int) {
@@ -155,7 +152,7 @@ fun CrashLogsHistoryScreen(
                 }
                 KeyEvent.KEYCODE_BUTTON_Y -> {
                     if (selectedManifest != null) {
-                        shareSessionFiles(context, selectedManifest)
+                                        SessionExport.shareSession(context, selectedManifest.sessionId, selectedManifest.revision)
                         true
                     } else false
                 }
@@ -292,7 +289,7 @@ fun CrashLogsHistoryScreen(
                                     }
                                     Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                                         OutlinedButton(
-                                            onClick = { shareSessionFiles(context, selectedManifest) },
+                                            onClick = { SessionExport.shareSession(context, selectedManifest.sessionId, selectedManifest.revision) },
                                             modifier = Modifier.height(32.dp),
                                             shape = RoundedCornerShape(6.dp),
                                             contentPadding = PaddingValues(horizontal = 10.dp, vertical = 2.dp),
@@ -331,16 +328,18 @@ fun CrashLogsHistoryScreen(
         AlertDialog(
             onDismissRequest = { showClearConfirm = false },
             title = { Text("Clear All Log Sessions?") },
-            text = { Text("This will permanently remove saved session logs and crash reports.") },
+            text = { Text("Deletes eligible sealed session reports. Active, finalizing, and exporting sessions are kept. The internal crash_reports fallback store is not cleared.") },
             confirmButton = {
                 TextButton(
                     onClick = {
                         showClearConfirm = false
-                        LogSessionStore.sessionsRoot(context).deleteRecursively()
-                        sessions = emptyList()
-                        selectedSessionId = null
+                        val active = LogBroker.currentSessionId
+                        val ids = sessions.map { it.sessionId }
+                        LogSessionStore.deleteEligible(context, ids, activeSessionId = active)
+                        sessions = LogSessionStore.list(context)
+                        selectedSessionId = sessions.firstOrNull()?.sessionId
                     }
-                ) { Text("CLEAR ALL", color = RPCSXColors.errorColor) }
+                ) { Text("CLEAR SEALED", color = RPCSXColors.errorColor) }
             },
             dismissButton = {
                 TextButton(onClick = { showClearConfirm = false }) { Text("CANCEL") }
@@ -469,102 +468,11 @@ private fun CrashSessionCard(
     }
 }
 
-private fun isCrashSession(manifest: LogSessionManifest): Boolean {
-    return manifest.terminalState == LogSessionTerminal.CRASHED ||
-        manifest.terminalState == LogSessionTerminal.FAILED ||
-        manifest.terminalState == LogSessionTerminal.INTERRUPTED ||
-        (manifest.stopReason != null && manifest.stopReason != "user-exit" && manifest.stopReason != "clean")
-}
+private fun isCrashSession(manifest: LogSessionManifest): Boolean =
+    SessionDiagnostics.isCrashSession(manifest)
 
 private fun formatDate(ms: Long): String {
     if (ms <= 0L) return "Unknown"
     val sdf = SimpleDateFormat("MMM d, h:mm a", Locale.getDefault())
     return sdf.format(Date(ms))
-}
-
-private fun reportForManifest(context: Context, manifest: LogSessionManifest): CrashReport {
-    val dir = LogSessionStore.sessionDir(context, manifest.sessionId)
-    val sources = mutableMapOf<String, File>()
-
-    manifest.artifacts.forEach { artifact ->
-        val file = File(artifact.path)
-        if (file.isFile && file.length() > 0) {
-            sources[artifact.id.ifBlank { file.name }] = file
-        }
-    }
-
-    File(dir, "manifest.json").takeIf { it.isFile && it.length() > 0 }?.let {
-        sources["manifest.json"] = it
-    }
-
-    dir.listFiles()?.forEach { file ->
-        if (file.isFile && file.name != "game_icon.bin") {
-            if (!sources.values.any { it.absolutePath == file.absolutePath }) {
-                sources[file.name] = file
-            }
-        }
-    }
-
-    val crashDir = File(context.filesDir, "crash_reports/${manifest.sessionId}")
-    if (crashDir.isDirectory) {
-        crashDir.listFiles()?.forEach { file ->
-            if (file.isFile && !sources.values.any { it.absolutePath == file.absolutePath }) {
-                sources[file.name] = file
-            }
-        }
-    }
-
-    if (sources.isEmpty()) {
-        LogMonitor.getAllLogFiles().forEach { file ->
-            if (file.isFile && file.length() > 0) {
-                sources[file.name] = file
-            }
-        }
-    }
-
-    val statusText = manifest.terminalState.name
-    return CrashReport(
-        directory = dir,
-        classification = CrashClassification.UNEXPECTED_TERMINATION,
-        summary = manifest.stopReason ?: statusText,
-        cause = manifest.stopReason ?: "Session terminated ($statusText)",
-        sources = sources,
-        gameTitle = manifest.gameTitleSnapshot,
-        titleId = manifest.titleId,
-        gameIconPath = manifest.gameIconSnapshotPath,
-    )
-}
-
-private fun shareSessionFiles(context: Context, manifest: LogSessionManifest) {
-    val report = reportForManifest(context, manifest)
-    val files = report.sources.values.filter { it.isFile && it.length() > 0 }
-    if (files.isEmpty()) {
-        Toast.makeText(context, "No log files available to share", Toast.LENGTH_SHORT).show()
-        return
-    }
-
-    val authority = "${context.packageName}.provider"
-    val uris = ArrayList<Uri>(files.size)
-    for (file in files) {
-        try {
-            uris.add(FileProvider.getUriForFile(context, authority, file))
-        } catch (_: Exception) {}
-    }
-
-    if (uris.isEmpty()) {
-        Toast.makeText(context, "Cannot prepare log files for sharing", Toast.LENGTH_SHORT).show()
-        return
-    }
-
-    val intent = Intent(Intent.ACTION_SEND_MULTIPLE).apply {
-        type = "text/plain"
-        putParcelableArrayListExtra(Intent.EXTRA_STREAM, uris)
-        addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
-    }
-
-    try {
-        context.startActivity(Intent.createChooser(intent, "Share Crash Logs"))
-    } catch (_: Exception) {
-        Toast.makeText(context, "No app available to handle sharing", Toast.LENGTH_SHORT).show()
-    }
 }

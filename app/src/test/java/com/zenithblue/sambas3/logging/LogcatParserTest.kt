@@ -18,6 +18,8 @@ class LogcatParserTest {
         assertEquals("RPCS3", parsed.tag)
         assertEquals("Access violation", parsed.message)
         assertEquals("09-06 12:01:02.345", parsed.timestampText)
+        assertEquals(1234, parsed.pid)
+        assertEquals(5678, parsed.tid)
         assertNotNull(parsed.timestampMs)
         assertEquals(0L, parser.parseErrors)
     }

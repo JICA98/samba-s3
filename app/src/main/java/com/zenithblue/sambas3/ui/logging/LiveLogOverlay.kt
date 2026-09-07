@@ -64,8 +64,10 @@ fun LiveLogOverlay(
     val source = remember(settings.sourceFilter) {
         runCatching { LogSourceKind.valueOf(settings.sourceFilter) }.getOrNull()
     }
-    val visible = remember(snapshot, minLevel, source, settings.maxLines) {
+    val sessionId = LogBroker.currentSessionId
+    val visible = remember(snapshot, minLevel, source, settings.maxLines, sessionId) {
         snapshot.asReversed().asSequence()
+            .filter { sessionId == null || it.sessionId == sessionId || it.sessionId == null }
             .filter { it.level.priority >= minLevel.priority }
             .filter { source == null || settings.sourceFilter == "ALL" || it.source == source }
             .take(settings.maxLines)
@@ -73,8 +75,10 @@ fun LiveLogOverlay(
             .asReversed()
     }
     val dropped = LogBroker.engine.droppedCount()
+    val persistDropped = LogBroker.engine.persistDroppedCount()
     val listState = rememberLazyListState()
-    LaunchedEffect(visible.size, settings.autoscroll) {
+    val lastEventId = visible.lastOrNull()?.sequence
+    LaunchedEffect(lastEventId, settings.autoscroll) {
         if (settings.autoscroll && visible.isNotEmpty()) {
             listState.scrollToItem(visible.lastIndex)
         }
@@ -121,7 +125,11 @@ fun LiveLogOverlay(
                 verticalAlignment = Alignment.CenterVertically,
             ) {
                 Text(
-                    "LIVE LOGS" + if (dropped > 0) " · dropped $dropped" else "",
+                    buildString {
+                        append("LIVE LOGS")
+                        if (dropped > 0) append(" · display $dropped")
+                        if (persistDropped > 0) append(" · persist $persistDropped")
+                    },
                     color = RPCSXColors.primary,
                     fontFamily = FontFamily.Monospace,
                     fontSize = (10 * clamped.fontScale).sp,

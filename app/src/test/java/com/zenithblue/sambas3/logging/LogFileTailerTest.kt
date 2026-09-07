@@ -103,4 +103,16 @@ class LogFileTailerTest {
         file.appendText("new\n")
         assertEquals(listOf("new"), tailer.poll())
     }
+
+    @Test
+    fun copyTruncateRegrowIsNewGeneration() {
+        val file = tmp.newFile("rotate.log")
+        file.writeText("one\ntwo\n")
+        val tailer = LogFileTailer(file, startAtEnd = false)
+        assertEquals(listOf("one", "two"), tailer.poll())
+        file.writeText("three\n")
+        assertEquals(listOf("three"), tailer.poll())
+        file.appendText("four\n")
+        assertEquals(listOf("four"), tailer.poll())
+    }
 }

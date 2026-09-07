@@ -55,7 +55,21 @@ fun InGameLiveLogsPage(onBack: () -> Unit) {
     val settings by LiveLogOverlaySettings.state(context).collectAsStateWithLifecycle()
     val snapshot by LogBroker.snapshot.collectAsStateWithLifecycle()
     fun save(next: LiveLogOverlaySettingsData) = LiveLogOverlaySettings.write(context, next)
-    val preview = remember(snapshot) { snapshot.takeLast(16) }
+    val minLevel = remember(settings.minLevel) {
+        runCatching { LogLevel.valueOf(settings.minLevel) }.getOrDefault(LogLevel.INFO)
+    }
+    val source = remember(settings.sourceFilter) {
+        runCatching { LogSourceKind.valueOf(settings.sourceFilter) }.getOrNull()
+    }
+    val sessionId = LogBroker.currentSessionId
+    val preview = remember(snapshot, minLevel, source, sessionId) {
+        snapshot.asSequence()
+            .filter { sessionId == null || it.sessionId == sessionId || it.sessionId == null }
+            .filter { it.level.priority >= minLevel.priority }
+            .filter { source == null || settings.sourceFilter == "ALL" || it.source == source }
+            .toList()
+            .takeLast(16)
+    }
 
     Column(
         Modifier

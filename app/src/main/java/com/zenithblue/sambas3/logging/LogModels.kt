@@ -51,6 +51,16 @@ data class LogArtifact(
     val compressed: Boolean,
     val liveTailSupported: Boolean,
     val finalStatus: String,
+    val relativePath: String? = null,
+    val originalFilename: String = "",
+    val role: String = "raw",
+    val producer: String? = null,
+    val generation: String? = null,
+    val sealed: Boolean = false,
+    val sha256: String? = null,
+    val encoding: String = "utf-8",
+    val firstCursor: Long? = null,
+    val lastCursor: Long? = null,
 )
 
 enum class LogSessionTerminal {
@@ -79,6 +89,15 @@ data class LogSessionManifest(
     val driverLabel: String? = null,
     val artifacts: List<LogArtifact> = emptyList(),
     val droppedLines: Long = 0L,
+    val revision: Long = 1L,
+    val captureState: CaptureState = CaptureState.RECORDING,
+    val captureError: String? = null,
+    val processInstanceId: String? = null,
+    val producerEpoch: String? = null,
+    val displayDroppedLines: Long = 0L,
+    val persistenceDroppedLines: Long = 0L,
+    val appliedDriverLabel: String? = null,
+    val unknownTerminalRaw: String? = null,
 )
 
 fun LogSourceKind.toLegacySource(): LogSource = when (this) {

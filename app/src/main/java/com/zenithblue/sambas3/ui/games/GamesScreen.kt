@@ -181,8 +181,8 @@ fun GamesScreen(
     navigateToSettings: (() -> Unit)? = null,
     navigateToDrivers: (() -> Unit)? = null,
     navigateToPatches: (() -> Unit)? = null,
-    navigateToLogs: (() -> Unit)? = null,
-    navigateToCrashLogs: (() -> Unit)? = null,
+    navigateToLogs: ((String?) -> Unit)? = null,
+    navigateToCrashLogs: ((String?) -> Unit)? = null,
     emulatorState: State<EmulatorState> = mutableStateOf(EmulatorState.Stopped),
     emulatorActiveGame: State<String?> = mutableStateOf(null)
 ) {
@@ -333,50 +333,26 @@ fun GamesScreen(
         launchRecovery(game, selectedSave, selectedSlot, RecoveryAction.SafeRetry)
     }
 
+    fun recoverySessionId(state: HomeRecoveryState): String? = when (state) {
+        is HomeRecoveryState.ConfirmedCrash -> state.session.sessionId
+        is HomeRecoveryState.Interrupted -> state.session.sessionId
+        is HomeRecoveryState.ActionFailed -> state.session?.sessionId
+        is HomeRecoveryState.LoadFailure -> state.sessionId ?: state.report?.sessionId
+        else -> null
+    }
+
     fun exportRecoveryReport(state: HomeRecoveryState) {
-        val session = when (state) {
-            is HomeRecoveryState.ConfirmedCrash -> state.session
-            is HomeRecoveryState.Interrupted -> state.session
-            is HomeRecoveryState.ActionFailed -> state.session
-            else -> null
-        }
-        if (session == null) {
+        val sessionId = recoverySessionId(state)
+        if (sessionId.isNullOrBlank()) {
             android.widget.Toast.makeText(context, "No session report is available", android.widget.Toast.LENGTH_SHORT).show()
             return
         }
         detailsState = null
         recoveryScope.launch(Dispatchers.IO) {
-            val report = runCatching { com.zenithblue.sambas3.crash.CrashEvidenceCollector.collect(context, session) }.getOrNull()
-            val files = report?.sources?.values?.filter { it.isFile }?.distinctBy { it.absolutePath }.orEmpty()
-            withContext(Dispatchers.Main) {
-                if (files.isEmpty()) {
+            val ok = com.zenithblue.sambas3.logging.SessionExport.shareSession(context, sessionId)
+            if (!ok) {
+                withContext(Dispatchers.Main) {
                     android.widget.Toast.makeText(context, "Report could not be collected", android.widget.Toast.LENGTH_SHORT).show()
-                    return@withContext
-                }
-                val authority = "${context.packageName}.provider"
-                val uris = runCatching { files.map { FileProvider.getUriForFile(context, authority, it) } }.getOrElse {
-                    android.widget.Toast.makeText(context, "Report sharing failed: ${it.message}", android.widget.Toast.LENGTH_LONG).show()
-                    return@withContext
-                }
-                val intent = if (uris.size == 1) {
-                    Intent(Intent.ACTION_SEND).apply {
-                        type = "text/plain"
-                        putExtra(Intent.EXTRA_STREAM, uris.single())
-                        clipData = ClipData.newUri(context.contentResolver, "crash-report", uris.single())
-                    }
-                } else {
-                    Intent(Intent.ACTION_SEND_MULTIPLE).apply {
-                        type = "text/plain"
-                        putParcelableArrayListExtra(Intent.EXTRA_STREAM, ArrayList(uris))
-                        clipData = ClipData.newUri(context.contentResolver, "crash-report", uris.first()).also { clip ->
-                            uris.drop(1).forEach { clip.addItem(ClipData.Item(it)) }
-                        }
-                    }
-                }.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
-                try {
-                    context.startActivity(Intent.createChooser(intent, "Export recovery report"))
-                } catch (_: ActivityNotFoundException) {
-                    android.widget.Toast.makeText(context, "No app can export this report", android.widget.Toast.LENGTH_SHORT).show()
                 }
             }
         }
@@ -1855,8 +1831,8 @@ fun GamesScreen(
                         else HomeRecoveryRepository.markActionFailed(context, recoverySession, "Choose a save from the library")
                     },
                     onDetails = { detailsState = recoveryState },
-                    onViewLogs = { navigateToLogs?.invoke() },
-                    onOpenAllCrashLogs = { navigateToCrashLogs?.invoke() ?: navigateToLogs?.invoke() },
+                    onViewLogs = { navigateToCrashLogs?.invoke(recoverySessionId(recoveryState)) ?: navigateToLogs?.invoke(recoverySessionId(recoveryState)) },
+                    onOpenAllCrashLogs = { navigateToCrashLogs?.invoke(recoverySessionId(recoveryState)) ?: navigateToLogs?.invoke(recoverySessionId(recoveryState)) },
                     onDismiss = { HomeRecoveryRepository.dismiss(context) },
                 )
             }
@@ -1877,7 +1853,7 @@ fun GamesScreen(
                             EmulatorStopCoordinator.stop(context, failedStop.reason)
                         }
                     },
-                    onViewLogs = { navigateToLogs?.invoke() },
+                    onViewLogs = { navigateToCrashLogs?.invoke(com.zenithblue.sambas3.logging.LogBroker.currentSessionId) ?: navigateToLogs?.invoke(com.zenithblue.sambas3.logging.LogBroker.currentSessionId) },
                     onForceClose = {
                         Log.e("S3STOP", "user requested force-close requestId=${failedStop.requestId}")
                         android.os.Process.killProcess(android.os.Process.myPid())
@@ -1992,10 +1968,10 @@ fun GamesScreen(
                     if (recoveryGame != null) launchCenterGame = recoveryGame
                 },
                 onSafeRetry = { safeRetryRecovery(state) },
-                onViewLogs = { navigateToLogs?.invoke() },
+                onViewLogs = { navigateToCrashLogs?.invoke(recoverySessionId(state)) ?: navigateToLogs?.invoke(recoverySessionId(state)) },
                 onOpenAllCrashLogs = {
                     detailsState = null
-                    navigateToCrashLogs?.invoke() ?: navigateToLogs?.invoke()
+                    navigateToCrashLogs?.invoke(recoverySessionId(state)) ?: navigateToLogs?.invoke(recoverySessionId(state))
                 },
                 onExportReport = { exportRecoveryReport(state) },
                 onDismiss = { detailsState = null },

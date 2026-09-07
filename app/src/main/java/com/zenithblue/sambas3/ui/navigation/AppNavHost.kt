@@ -154,8 +154,8 @@ fun AppNavHost(initialRoute: String? = null) {
             navigateToSettings = { },
             navigateToDrivers = { },
             navigateToPatches = { },
-            navigateToLogs = { },
-            navigateToCrashLogs = { },
+            navigateToLogs = { _ -> },
+            navigateToCrashLogs = { _ -> },
             drawerState = drawerState
         )
 
@@ -186,8 +186,12 @@ fun AppNavHost(initialRoute: String? = null) {
                 navigateToSettings = { navigateTo("settings") },
                 navigateToDrivers = { navigateTo("drivers") },
                 navigateToPatches = { navigateTo("patches") },
-                navigateToLogs = { navigateTo("logs") },
-                navigateToCrashLogs = { navigateTo("crash_logs") },
+                navigateToLogs = { sessionId ->
+                    navigateTo(if (sessionId.isNullOrBlank()) "logs" else "logs/${Uri.encode(sessionId)}")
+                },
+                navigateToCrashLogs = { sessionId ->
+                    navigateTo(if (sessionId.isNullOrBlank()) "crash_logs" else "crash_logs/${Uri.encode(sessionId)}")
+                },
                 drawerState
             )
         }
@@ -281,20 +285,33 @@ fun AppNavHost(initialRoute: String? = null) {
             )
         }
 
-        composable(
-            route = "logs"
-        ) {
+        composable(route = "logs") {
             LogMonitorScreen(
                 navigateBack = navController::navigateUp,
                 onOpenCrashLogs = { navigateTo("crash_logs") },
             )
         }
-
         composable(
-            route = "crash_logs"
-        ) {
+            route = "logs/{sessionId}",
+            arguments = listOf(navArgument("sessionId") { type = NavType.StringType }),
+        ) { entry ->
+            LogMonitorScreen(
+                navigateBack = navController::navigateUp,
+                onOpenCrashLogs = { navigateTo("crash_logs/${entry.arguments?.getString("sessionId").orEmpty()}") },
+                selectedSessionId = Uri.decode(entry.arguments?.getString("sessionId").orEmpty()).ifBlank { null },
+            )
+        }
+
+        composable(route = "crash_logs") {
+            CrashLogsHistoryScreen(navigateBack = navController::navigateUp)
+        }
+        composable(
+            route = "crash_logs/{sessionId}",
+            arguments = listOf(navArgument("sessionId") { type = NavType.StringType }),
+        ) { entry ->
             CrashLogsHistoryScreen(
-                navigateBack = navController::navigateUp
+                navigateBack = navController::navigateUp,
+                initialSessionId = Uri.decode(entry.arguments?.getString("sessionId").orEmpty()).ifBlank { null },
             )
         }
 
@@ -323,8 +340,8 @@ fun GamesDestination(
     navigateToSettings: () -> Unit,
     navigateToDrivers: () -> Unit,
     navigateToPatches: () -> Unit,
-    navigateToLogs: () -> Unit,
-    navigateToCrashLogs: () -> Unit = {},
+    navigateToLogs: (String?) -> Unit,
+    navigateToCrashLogs: (String?) -> Unit = {},
     drawerState: androidx.compose.material3.DrawerState
 ) {
     val context = LocalContext.current

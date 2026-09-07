@@ -87,6 +87,12 @@ fun StopFailureCard(
                     ),
                 ) { Text("RECHECK", style = MaterialTheme.typography.labelSmall) }
                 OutlinedButton(
+                    onClick = onViewLogs,
+                    contentPadding = PaddingValues(horizontal = 10.dp, vertical = 2.dp),
+                    modifier = Modifier.height(28.dp),
+                    shape = RoundedCornerShape(6.dp)
+                ) { Text("VIEW LOGS", style = MaterialTheme.typography.labelSmall) }
+                OutlinedButton(
                     onClick = onForceClose,
                     contentPadding = PaddingValues(horizontal = 10.dp, vertical = 2.dp),
                     modifier = Modifier.height(28.dp),

@@ -14,6 +14,14 @@ class HomeRecoveryDecisionTest {
     }
 
     @Test
+    fun typedFatalWinsOverExpectedStopping() {
+        assertEquals(
+            RecoveryDecision.CONFIRMED_CRASH,
+            HomeRecoveryDecision.decide(EmulationSessionState.STOPPING, "InGameExit", true, CrashClassification.CONFIRMED_CRASH),
+        )
+    }
+
+    @Test
     fun cleanStopWinsOverOldFatalEvidence() {
         assertEquals(RecoveryDecision.NONE, HomeRecoveryDecision.decide(EmulationSessionState.STOPPING, "HomeStop", true, CrashClassification.CLEAN_STOP))
     }

@@ -14,6 +14,8 @@ data class ParsedLogcatLine(
     val message: String,
     val raw: Boolean,
     val continuation: Boolean,
+    val pid: Int? = null,
+    val tid: Int? = null,
 )
 
 /**
@@ -44,9 +46,11 @@ class LogcatParser(
         if (match != null) {
             lastWasStructured = true
             val ts = match.groupValues[1]
-            val level = LogLevel.fromChar(match.groupValues[2][0])
-            val tag = match.groupValues[3].trim()
-            val message = match.groupValues[4]
+            val pid = match.groupValues[2].toIntOrNull()
+            val tid = match.groupValues[3].toIntOrNull()
+            val level = LogLevel.fromChar(match.groupValues[4][0])
+            val tag = match.groupValues[5].trim()
+            val message = match.groupValues[6]
             return ParsedLogcatLine(
                 timestampText = ts,
                 timestampMs = parseTimestampMs(ts, nowMs()),
@@ -55,6 +59,8 @@ class LogcatParser(
                 message = message,
                 raw = false,
                 continuation = false,
+                pid = pid,
+                tid = tid,
             )
         }
         parseErrors++
@@ -87,7 +93,7 @@ class LogcatParser(
     companion object {
         // MM-DD HH:MM:SS.mmm  PID  TID  LEVEL TAG : MSG
         private val THREADTIME = Regex(
-            """^(\d{2}-\d{2} \d{2}:\d{2}:\d{2}\.\d{3})\s+\d+\s+\d+\s+([VDIWEF])\s+(.+?)\s*:\s*(.*)$"""
+            """^(\d{2}-\d{2} \d{2}:\d{2}:\d{2}\.\d{3})\s+(\d+)\s+(\d+)\s+([VDIWEF])\s+(.+?)\s*:\s*(.*)$"""
         )
 
         private fun looksLikeHeader(line: String): Boolean =

@@ -110,8 +110,10 @@ fun CrashRecoveryCard(
         is HomeRecoveryState.ActionRunning -> "Preparing emulator..."
         HomeRecoveryState.None -> ""
     }
+    val diagnosticSessionId = report?.sessionId ?: session?.sessionId ?: (state as? HomeRecoveryState.LoadFailure)?.sessionId
     val logHint = when {
-        report == null -> "No logs"
+        report == null && diagnosticSessionId != null -> "Logs not yet analyzed"
+        report == null -> "No report object"
         report.sources.isEmpty() -> "No log files"
         else -> "${report.sources.size} log source${if (report.sources.size == 1) "" else "s"}"
     }
@@ -304,6 +306,14 @@ fun CrashRecoveryCard(
                             border = BorderStroke(1.dp, Color(0x35FFFFFF)),
                             colors = ButtonDefaults.outlinedButtonColors(contentColor = Color.White),
                         ) { Text("DETAILS", style = MaterialTheme.typography.labelSmall) }
+                        OutlinedButton(
+                            onClick = onViewLogs,
+                            contentPadding = PaddingValues(horizontal = 10.dp, vertical = 2.dp),
+                            modifier = Modifier.height(28.dp),
+                            shape = RoundedCornerShape(6.dp),
+                            border = BorderStroke(1.dp, Color(0x35FFFFFF)),
+                            colors = ButtonDefaults.outlinedButtonColors(contentColor = Color.White),
+                        ) { Text("VIEW LOGS", style = MaterialTheme.typography.labelSmall) }
                         if (onOpenAllCrashLogs != null) {
                             OutlinedButton(
                                 onClick = onOpenAllCrashLogs,

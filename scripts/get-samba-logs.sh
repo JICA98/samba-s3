@@ -17,13 +17,27 @@ adb() { timeout "$ADB_TIMEOUT_S" adb "$@"; }
 device_count() { adb devices | awk 'NR>1 && $2=="device"{c++} END{print c+0}'; }
 first_device() { adb devices | awk 'NR>1 && $2=="device"{print $1; exit}'; }
 
-if [[ "${1:-}" == "-h" || "${1:-}" == "--help" ]]; then
-  echo "Usage: $0 [SERIAL] [OUTDIR]"
-  exit 0
-fi
-
-SERIAL="${1:-}"
-OUTDIR="${2:-/tmp/samba-logs-$(date +%Y%m%d-%H%M%S)}"
+SESSION_ID=""
+SERIAL=""
+OUTDIR=""
+while [[ $# -gt 0 ]]; do
+  case "$1" in
+    -h|--help)
+      echo "Usage: $0 [--session ID] [--list-sessions] [SERIAL] [OUTDIR]"
+      exit 0
+      ;;
+    --session)
+      SESSION_ID="${2:-}"; shift 2 ;;
+    --list-sessions)
+      LIST_SESSIONS=1; shift ;;
+    *)
+      if [[ -z "$SERIAL" ]]; then SERIAL="$1"
+      elif [[ -z "$OUTDIR" ]]; then OUTDIR="$1"
+      fi
+      shift ;;
+  esac
+done
+OUTDIR="${OUTDIR:-/tmp/samba-logs-$(date +%Y%m%d-%H%M%S)}"
 if [[ -z "$SERIAL" ]]; then
   n=$(device_count)
   if [[ "$n" -eq 0 ]]; then echo "No device"; exit 1; fi
@@ -35,6 +49,28 @@ if [[ -z "$SERIAL" ]]; then echo "No device"; exit 1; fi
 mkdir -p "$OUTDIR"
 BASE="/storage/emulated/0/Android/data/com.zenithblue.sambas3/files"
 PKG="com.zenithblue.sambas3"
+cmd_status() { # name command...
+  local name="$1"; shift
+  local started; started="$(date -u +%Y-%m-%dT%H:%M:%SZ)"
+  local out="$OUTDIR/cmd-$name.txt"
+  set +e
+  "$@" > "$out" 2>&1
+  local rc=$?
+  set -e
+  echo "$name rc=$rc time=$started" >> "$OUTDIR/acquisition-status.txt"
+  return 0
+}
+
+if [[ "${LIST_SESSIONS:-0}" == "1" ]]; then
+  adb -s "$SERIAL" shell "ls -1 $BASE/logs/sessions 2>/dev/null" || true
+  exit 0
+fi
+
+if [[ -n "$SESSION_ID" ]]; then
+  mkdir -p "$OUTDIR/session"
+  cmd_status "session-tree" adb -s "$SERIAL" shell "ls -R $BASE/logs/sessions/$SESSION_ID" || true
+  adb -s "$SERIAL" pull "$BASE/logs/sessions/$SESSION_ID" "$OUTDIR/session/" >/dev/null 2>&1 || echo "session-pull rc=1 time=$(date -u +%Y-%m-%dT%H:%M:%SZ)" >> "$OUTDIR/acquisition-status.txt"
+fi
 
 echo "[*] Collecting from $SERIAL -> $OUTDIR"
 # Save the most volatile evidence before pulling large rotated logs.

@@ -64,7 +64,6 @@ import androidx.compose.ui.unit.sp
 import com.zenithblue.sambas3.R
 import com.zenithblue.sambas3.RPCSXColors
 import com.zenithblue.sambas3.crash.CrashEvidenceCollector
-import com.zenithblue.sambas3.crash.CrashLogReader
 import com.zenithblue.sambas3.crash.CrashReport
 import com.zenithblue.sambas3.session.EmulationSessionRecord
 import kotlinx.coroutines.Dispatchers
@@ -83,12 +82,16 @@ fun CrashDetailsSheet(
     onDismiss: () -> Unit,
 ) {
     val context = LocalContext.current
-    var report by remember(initialReport, session?.sessionId) { mutableStateOf(initialReport) }
-    LaunchedEffect(session?.sessionId, initialReport) {
-        if (session != null) {
-            report = withContext(Dispatchers.IO) {
-                runCatching { CrashEvidenceCollector.collect(context, session) }.getOrNull()
-            }
+    var report by remember(initialReport?.sessionId, initialReport?.revision, session?.sessionId) {
+        mutableStateOf(initialReport)
+    }
+    LaunchedEffect(initialReport?.sessionId, initialReport?.revision, session?.sessionId) {
+        if (report != null) return@LaunchedEffect
+        val sessionId = session?.sessionId ?: return@LaunchedEffect
+        report = withContext(Dispatchers.IO) {
+            val manifest = com.zenithblue.sambas3.logging.LogSessionStore.read(context, sessionId)
+            manifest?.let { CrashEvidenceCollector.reportForManifest(context, it) }
+                ?: CrashEvidenceCollector.collectSummary(context, session)
         }
     }
 
@@ -204,30 +207,56 @@ fun CrashDetailsSheet(
                                 }
                             }
                         }
-                        Surface(
-                            onClick = onDismiss,
-                            shape = RoundedCornerShape(8.dp),
-                            color = Color(0x22FFFFFF),
-                            border = BorderStroke(1.dp, Color(0x35FFFFFF)),
-                            modifier = Modifier.height(30.dp),
-                        ) {
-                            Row(
-                                modifier = Modifier.padding(horizontal = 12.dp, vertical = 4.dp),
-                                verticalAlignment = Alignment.CenterVertically,
-                                horizontalArrangement = Arrangement.spacedBy(4.dp),
+                        Row(horizontalArrangement = Arrangement.spacedBy(6.dp), verticalAlignment = Alignment.CenterVertically) {
+                            if (onViewLogs != null) {
+                                OutlinedButton(
+                                    onClick = onViewLogs,
+                                    modifier = Modifier.height(30.dp),
+                                    contentPadding = PaddingValues(horizontal = 8.dp, vertical = 2.dp),
+                                    shape = RoundedCornerShape(8.dp),
+                                ) { Text("VIEW LOGS", fontSize = 10.sp) }
+                            }
+                            if (onExportReport != null) {
+                                OutlinedButton(
+                                    onClick = onExportReport,
+                                    modifier = Modifier.height(30.dp),
+                                    contentPadding = PaddingValues(horizontal = 8.dp, vertical = 2.dp),
+                                    shape = RoundedCornerShape(8.dp),
+                                ) { Text("EXPORT", fontSize = 10.sp) }
+                            }
+                            if (onOpenAllCrashLogs != null) {
+                                OutlinedButton(
+                                    onClick = onOpenAllCrashLogs,
+                                    modifier = Modifier.height(30.dp),
+                                    contentPadding = PaddingValues(horizontal = 8.dp, vertical = 2.dp),
+                                    shape = RoundedCornerShape(8.dp),
+                                ) { Text("ALL LOGS", fontSize = 10.sp) }
+                            }
+                            Surface(
+                                onClick = onDismiss,
+                                shape = RoundedCornerShape(8.dp),
+                                color = Color(0x22FFFFFF),
+                                border = BorderStroke(1.dp, Color(0x35FFFFFF)),
+                                modifier = Modifier.height(30.dp),
                             ) {
-                                Icon(
-                                    painter = painterResource(R.drawable.ic_close),
-                                    contentDescription = "Close",
-                                    tint = Color.White,
-                                    modifier = Modifier.size(13.dp),
-                                )
-                                Text(
-                                    "CLOSE",
-                                    color = Color.White,
-                                    fontSize = 11.sp,
-                                    fontWeight = FontWeight.Bold,
-                                )
+                                Row(
+                                    modifier = Modifier.padding(horizontal = 12.dp, vertical = 4.dp),
+                                    verticalAlignment = Alignment.CenterVertically,
+                                    horizontalArrangement = Arrangement.spacedBy(4.dp),
+                                ) {
+                                    Icon(
+                                        painter = painterResource(R.drawable.ic_close),
+                                        contentDescription = "Close",
+                                        tint = Color.White,
+                                        modifier = Modifier.size(13.dp),
+                                    )
+                                    Text(
+                                        "CLOSE",
+                                        color = Color.White,
+                                        fontSize = 11.sp,
+                                        fontWeight = FontWeight.Bold,
+                                    )
+                                }
                             }
                         }
                     }
@@ -275,22 +304,26 @@ fun CrashDetailsSheet(
 @Composable
 fun CrashLogPane(report: CrashReport, initialTab: Int, modifier: Modifier = Modifier) {
     val names = listOf("SUMMARY", "BACKEND", "VULKAN/GPU", "APP", "SYSTEM", "DEVICE")
-    var tab by remember(report.directory.absolutePath) { mutableIntStateOf(initialTab) }
-    var query by remember(report.directory.absolutePath) { mutableStateOf("") }
-    var offset by remember(report.directory.absolutePath, tab) { mutableStateOf(0L) }
-    var totalBytes by remember(report.directory.absolutePath, tab) { mutableStateOf(0L) }
-    var text by remember(report.directory.absolutePath, tab) { mutableStateOf("Loading log evidence…") }
-    var isLoading by remember(report.directory.absolutePath, tab) { mutableStateOf(true) }
+    val viewKey = "${report.sessionId.orEmpty()}:${report.revision}:${report.directory.absolutePath}"
+    var tab by remember(viewKey) { mutableIntStateOf(initialTab) }
+    var query by remember(viewKey) { mutableStateOf("") }
+    var offset by remember(viewKey, tab) { mutableStateOf(0L) }
+    var totalBytes by remember(viewKey, tab) { mutableStateOf(0L) }
+    var text by remember(viewKey, tab) { mutableStateOf("Loading log evidence…") }
+    var isLoading by remember(viewKey, tab) { mutableStateOf(true) }
+    var noMatch by remember(viewKey, tab) { mutableStateOf(false) }
+    var selectedArtifact by remember(viewKey, tab) { mutableStateOf<String?>(null) }
+    var searchToken by remember(viewKey, tab) { mutableIntStateOf(0) }
 
-    LaunchedEffect(report.directory.absolutePath, tab, query) {
+    LaunchedEffect(viewKey, tab, query, selectedArtifact, searchToken) {
         isLoading = true
-        Log.i("CrashLogUI", "Category switched: tab=$tab (${names.getOrElse(tab) { "UNKNOWN" }}), dir=${report.directory.name}, query='$query'")
-        val (foundOffset, fileBytes, content) = resolveCategoryContent(report, tab, query)
-        offset = foundOffset
-        totalBytes = fileBytes
-        text = content
+        noMatch = false
+        val resolved = resolveCategoryContent(report, tab, query, selectedArtifact, offset.takeIf { searchToken > 0 })
+        offset = resolved.offset
+        totalBytes = resolved.totalBytes
+        text = resolved.text
+        noMatch = resolved.noMatch
         isLoading = false
-        Log.i("CrashLogUI", "Category loaded: tab=$tab (${names.getOrElse(tab) { "UNKNOWN" }}), offset=$offset, bytes=$totalBytes, chars=${content.length}")
     }
 
     Row(
@@ -394,14 +427,51 @@ fun CrashLogPane(report: CrashReport, initialTab: Int, modifier: Modifier = Modi
                         .weight(1f)
                         .height(38.dp),
                 )
-                Spacer(Modifier.width(12.dp))
-                Text(
-                    text = if (totalBytes > 0L) "Offset %,d B · %,d KB total".format(offset, (totalBytes + 1023) / 1024)
-                    else "Category overview",
-                    color = RPCSXColors.textSecondary,
-                    style = MaterialTheme.typography.bodySmall.copy(fontSize = 10.sp),
-                )
+                Spacer(Modifier.width(8.dp))
+                OutlinedButton(
+                    onClick = {
+                        offset = 0L
+                        searchToken++
+                    },
+                    modifier = Modifier.height(32.dp),
+                    contentPadding = PaddingValues(horizontal = 8.dp),
+                ) { Text("BEGIN", fontSize = 10.sp) }
+                OutlinedButton(
+                    onClick = {
+                        offset = (totalBytes - 256L * 1024L).coerceAtLeast(0L)
+                        searchToken++
+                    },
+                    modifier = Modifier.height(32.dp),
+                    contentPadding = PaddingValues(horizontal = 8.dp),
+                ) { Text("END", fontSize = 10.sp) }
+                OutlinedButton(
+                    onClick = {
+                        offset = (offset - 256L * 1024L).coerceAtLeast(0L)
+                        searchToken++
+                    },
+                    modifier = Modifier.height(32.dp),
+                    contentPadding = PaddingValues(horizontal = 8.dp),
+                ) { Text("PREV", fontSize = 10.sp) }
+                OutlinedButton(
+                    onClick = {
+                        offset = (offset + 256L * 1024L).coerceAtMost(totalBytes)
+                        searchToken++
+                    },
+                    modifier = Modifier.height(32.dp),
+                    contentPadding = PaddingValues(horizontal = 8.dp),
+                ) { Text("NEXT", fontSize = 10.sp) }
             }
+            Text(
+                text = buildString {
+                    if (noMatch) append("No matches  ·  ")
+                    if (totalBytes > 0L) append("Offset %,d B · %,d KB total".format(offset, (totalBytes + 1023) / 1024))
+                    else append("Category overview")
+                    report.diagnostics?.let { append("  ·  ${it.outcome.name}") }
+                    report.rawStopReason?.let { append("  ·  reason=$it") }
+                },
+                color = if (noMatch) RPCSXColors.errorColor else RPCSXColors.textSecondary,
+                style = MaterialTheme.typography.bodySmall.copy(fontSize = 10.sp),
+            )
 
             Surface(
                 shape = RoundedCornerShape(10.dp),
@@ -433,209 +503,6 @@ fun CrashLogPane(report: CrashReport, initialTab: Int, modifier: Modifier = Modi
                     }
                 }
             }
-        }
-    }
-}
-
-private suspend fun resolveCategoryContent(
-    report: CrashReport,
-    tabIndex: Int,
-    query: String,
-): Triple<Long, Long, String> = withContext(Dispatchers.IO) {
-    val names = listOf("SUMMARY", "BACKEND", "VULKAN/GPU", "APP", "SYSTEM", "DEVICE")
-    val tabName = names.getOrElse(tabIndex) { "UNKNOWN" }
-    Log.d("CrashLogUI", "resolveCategoryContent started for tab=$tabIndex ($tabName), dir=${report.directory.name}, query='$query'")
-
-    when (tabIndex) {
-        0 -> { // SUMMARY
-            val summaryFile = report.sources["summary.txt"]
-            val rawText = if (summaryFile != null && summaryFile.isFile && summaryFile.length() > 0) {
-                val reader = CrashLogReader(summaryFile)
-                val off = if (query.isNotBlank()) reader.find(query).coerceAtLeast(0L) else 0L
-                reader.read(off, 256 * 1024)
-            } else ""
-
-            val cleanSummary = if (rawText.isNotBlank()) {
-                rawText.lines().filter { line ->
-                    !line.contains("PNG") &&
-                    !line.contains("IHDR") &&
-                    !line.contains("IDAT") &&
-                    line.none { it.code in 0..8 || it.code in 14..31 }
-                }.joinToString("\n").trim()
-            } else ""
-
-            val synthesized = buildString {
-                appendLine("══════════════════════════════════════════════════════════════")
-                appendLine("                 SAMBAS3 SESSION DIAGNOSTICS                  ")
-                appendLine("══════════════════════════════════════════════════════════════")
-                appendLine()
-                appendLine("Game:            ${report.gameTitle ?: "Unknown"}")
-                appendLine("Title ID:        ${report.titleId ?: "Unknown"}")
-                appendLine("Classification:  ${report.classification.name.replace('_', ' ')}")
-                appendLine("Status Summary:  ${report.summary}")
-                appendLine("Likely Cause:    ${report.cause}")
-                appendLine("Session Folder:  ${report.directory.name}")
-                appendLine()
-                if (cleanSummary.isNotBlank()) {
-                    appendLine("--------------------------------------------------------------")
-                    appendLine("INCIDENT SUMMARY")
-                    appendLine("--------------------------------------------------------------")
-                    appendLine(cleanSummary)
-                    appendLine()
-                }
-                appendLine("--------------------------------------------------------------")
-                appendLine("CAPTURED LOG ARTIFACTS (${report.sources.size})")
-                appendLine("--------------------------------------------------------------")
-                if (report.sources.isEmpty()) {
-                    appendLine("No log artifacts were captured for this session.")
-                } else {
-                    report.sources.forEach { (name, file) ->
-                        val sizeStr = if (file.isFile) "%,d bytes (%.1f KB)".format(file.length(), file.length() / 1024.0) else "Missing"
-                        appendLine("  • %-26s : %s".format(name, sizeStr))
-                    }
-                }
-                appendLine()
-                appendLine("--------------------------------------------------------------")
-                appendLine("SUBSYSTEM NAVIGATION")
-                appendLine("--------------------------------------------------------------")
-                appendLine("Select the BACKEND, APP, or DEVICE tabs above to view individual")
-                appendLine("subsystem logs and telemetry.")
-            }
-            Log.i("CrashLogUI", "SUMMARY synthesized diagnostic overview (${report.sources.size} artifacts)")
-            Triple(0L, synthesized.toByteArray().size.toLong(), synthesized)
-        }
-        1 -> { // BACKEND
-            val file = report.sources.entries.firstOrNull {
-                it.key.contains("backend", ignoreCase = true) ||
-                it.key.equals("RPCSX.log", ignoreCase = true) ||
-                it.key.equals("RPCS3.log", ignoreCase = true) ||
-                it.key.contains("tty", ignoreCase = true)
-            }?.value ?: report.sources.values.firstOrNull { it.isFile && it.name.endsWith(".log") && !it.name.contains("app", ignoreCase = true) }
-
-            if (file != null && file.isFile) {
-                val reader = CrashLogReader(file)
-                val off = if (query.isNotBlank()) reader.find(query).coerceAtLeast(0L) else 0L
-                val text = reader.read(off, 256 * 1024)
-                Log.i("CrashLogUI", "BACKEND matched file='${file.name}' size=${file.length()} off=$off")
-                Triple(off, file.length(), text.ifEmpty { "[BACKEND LOG EMPTY]\n\nFile is 0 bytes." })
-            } else {
-                Log.w("CrashLogUI", "BACKEND: no backend log file found in sources=${report.sources.keys}")
-                val msg = "[BACKEND / ENGINE SUBSYSTEM]\n\nNo RPCSX engine log was captured for this session.\n\nCaptured files: ${report.sources.keys.joinToString(", ")}"
-                Triple(0L, 0L, msg)
-            }
-        }
-        2 -> { // VULKAN/GPU
-            val file = report.sources.entries.firstOrNull {
-                it.key.contains("vulkan", ignoreCase = true) ||
-                it.key.contains("gpu", ignoreCase = true) ||
-                it.key.contains("turnip", ignoreCase = true) ||
-                it.key.contains("mesa", ignoreCase = true) ||
-                it.key.contains("freedreno", ignoreCase = true) ||
-                it.key.contains("adreno", ignoreCase = true)
-            }?.value
-
-            if (file != null && file.isFile) {
-                val reader = CrashLogReader(file)
-                val off = if (query.isNotBlank()) reader.find(query).coerceAtLeast(0L) else 0L
-                val text = reader.read(off, 256 * 1024)
-                Log.i("CrashLogUI", "VULKAN/GPU matched file='${file.name}' size=${file.length()}")
-                Triple(off, file.length(), text.ifEmpty { "[VULKAN LOG EMPTY]" })
-            } else {
-                Log.i("CrashLogUI", "VULKAN/GPU: no dedicated file in sources=${report.sources.keys}; showing diagnostic note")
-                val msg = buildString {
-                    appendLine("[VULKAN / GPU SUBSYSTEM]")
-                    appendLine("--------------------------------------------------------------")
-                    appendLine("No standalone GPU driver log file was captured for this session.")
-                    appendLine()
-                    appendLine("Subsystem Notes:")
-                    appendLine("• Vulkan instance initialization, swapchain, and pipeline compile")
-                    appendLine("  events are logged directly into the BACKEND log.")
-                    appendLine("• Dedicated Turnip / Adreno driver logs appear when custom driver")
-                    appendLine("  logging or validation layers are enabled.")
-                    appendLine("• Switch to the BACKEND tab to inspect graphics engine events.")
-                }
-                Triple(0L, 0L, msg)
-            }
-        }
-        3 -> { // APP
-            val file = report.sources.entries.firstOrNull {
-                it.key.contains("app", ignoreCase = true) ||
-                it.key.contains("sambas3", ignoreCase = true) ||
-                it.key.contains("android", ignoreCase = true) ||
-                it.key.contains("ui", ignoreCase = true)
-            }?.value
-
-            if (file != null && file.isFile) {
-                val reader = CrashLogReader(file)
-                val off = if (query.isNotBlank()) reader.find(query).coerceAtLeast(0L) else 0L
-                val text = reader.read(off, 256 * 1024)
-                Log.i("CrashLogUI", "APP matched file='${file.name}' size=${file.length()}")
-                Triple(off, file.length(), text.ifEmpty { "[APP LOG EMPTY]" })
-            } else {
-                Log.w("CrashLogUI", "APP: no app log file in sources=${report.sources.keys}")
-                val msg = "[APP / FRONTEND SUBSYSTEM]\n\nNo Android UI logs recorded for this session."
-                Triple(0L, 0L, msg)
-            }
-        }
-        4 -> { // SYSTEM
-            val file = report.sources.entries.firstOrNull {
-                it.key.contains("system", ignoreCase = true) ||
-                it.key.contains("broker-ring-tail", ignoreCase = true) ||
-                it.key.contains("logcat", ignoreCase = true) ||
-                it.key.contains("ring", ignoreCase = true) ||
-                it.key.contains("tombstone", ignoreCase = true)
-            }?.value
-
-            if (file != null && file.isFile) {
-                val reader = CrashLogReader(file)
-                val off = if (query.isNotBlank()) reader.find(query).coerceAtLeast(0L) else 0L
-                val text = reader.read(off, 256 * 1024)
-                Log.i("CrashLogUI", "SYSTEM matched file='${file.name}' size=${file.length()}")
-                Triple(off, file.length(), text.ifEmpty { "[SYSTEM LOG EMPTY]" })
-            } else {
-                Log.i("CrashLogUI", "SYSTEM: no system dump file in sources=${report.sources.keys}")
-                val msg = buildString {
-                    appendLine("[SYSTEM / OS SUBSYSTEM]")
-                    appendLine("--------------------------------------------------------------")
-                    appendLine("No system logcat or ring tail dump was recorded.")
-                    appendLine()
-                    appendLine("Subsystem Notes:")
-                    appendLine("• Process exit dumps are captured on unexpected native termination.")
-                    appendLine("• Real-time application log stream is available under Settings > Logs.")
-                }
-                Triple(0L, 0L, msg)
-            }
-        }
-        5 -> { // DEVICE
-            val file = report.sources.entries.firstOrNull {
-                it.key.equals("metadata.json", ignoreCase = true) ||
-                it.key.equals("manifest.json", ignoreCase = true) ||
-                it.key.contains("metadata", ignoreCase = true) ||
-                it.key.contains("manifest", ignoreCase = true)
-            }?.value
-
-            if (file != null && file.isFile) {
-                val text = runCatching { file.readText() }.getOrDefault("")
-                Log.i("CrashLogUI", "DEVICE matched file='${file.name}' size=${file.length()}")
-                Triple(0L, file.length(), text.ifEmpty { "[METADATA EMPTY]" })
-            } else {
-                Log.i("CrashLogUI", "DEVICE: no metadata.json in sources; showing device telemetry")
-                val msg = buildString {
-                    appendLine("[DEVICE & ENVIRONMENT TELEMETRY]")
-                    appendLine("--------------------------------------------------------------")
-                    appendLine("Device Model   : ${android.os.Build.MANUFACTURER} ${android.os.Build.MODEL} (${android.os.Build.DEVICE})")
-                    appendLine("Android OS     : Android ${android.os.Build.VERSION.RELEASE} (API ${android.os.Build.VERSION.SDK_INT})")
-                    appendLine("Board / SoC    : ${android.os.Build.BOARD} / ${android.os.Build.HARDWARE}")
-                    appendLine("Supported ABIs : ${android.os.Build.SUPPORTED_ABIS.joinToString(", ")}")
-                    appendLine("App Version    : ${com.zenithblue.sambas3.BuildConfig.VERSION_NAME} (${com.zenithblue.sambas3.BuildConfig.VERSION_CODE})")
-                    appendLine("Flavor         : ${com.zenithblue.sambas3.BuildConfig.FLAVOR}")
-                    appendLine("Session Folder : ${report.directory.name}")
-                }
-                Triple(0L, 0L, msg)
-            }
-        }
-        else -> {
-            Triple(0L, 0L, "Unknown category")
         }
     }
 }

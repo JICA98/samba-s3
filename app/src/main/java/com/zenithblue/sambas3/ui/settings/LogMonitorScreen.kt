@@ -1,10 +1,6 @@
 package com.zenithblue.sambas3.ui.settings
 
-import android.content.ActivityNotFoundException
-import android.content.ClipData
 import android.content.Context
-import android.content.Intent
-import android.net.Uri
 import android.view.KeyEvent
 import android.widget.Toast
 import androidx.compose.animation.AnimatedVisibility
@@ -66,15 +62,17 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.core.content.FileProvider
 import com.zenithblue.sambas3.LogEntry
 import com.zenithblue.sambas3.LogLevel
 import com.zenithblue.sambas3.LogMonitor
 import com.zenithblue.sambas3.LogSource
 import com.zenithblue.sambas3.R
 import com.zenithblue.sambas3.RPCSXColors
+import com.zenithblue.sambas3.logging.SessionExport
 import com.zenithblue.sambas3.logging.statusLabel
 import com.zenithblue.sambas3.ui.common.SambaScreenScaffold
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 
 // ---------------------------------------------------------------------------
 // Level / source color helpers
@@ -115,6 +113,7 @@ fun LogMonitorScreen(
     navigateBack: () -> Unit,
     isInSplitPane: Boolean = false,
     onOpenCrashLogs: (() -> Unit)? = null,
+    selectedSessionId: String? = null,
 ) {
     var selectedLevel by remember { mutableStateOf<LogLevel?>(null) }
     var selectedSource by remember { mutableStateOf<LogSource?>(null) }
@@ -122,24 +121,34 @@ fun LogMonitorScreen(
     var filtersExpanded by remember { mutableStateOf(false) }
 
     val context = LocalContext.current
+    var historicalEntries by remember { mutableStateOf<List<com.zenithblue.sambas3.logging.UnifiedLogEntry>>(emptyList()) }
     DisposableEffect(context) {
         com.zenithblue.sambas3.logging.LogBroker.ensureStarted(context)
         com.zenithblue.sambas3.logging.LogBroker.retainStream()
-        val latest = com.zenithblue.sambas3.logging.LogSessionStore.latest(context)
-        if (latest != null) {
-            com.zenithblue.sambas3.logging.LogBroker.hydrateSession(context, latest.sessionId)
-        }
         onDispose {
             com.zenithblue.sambas3.logging.LogBroker.releaseStream()
         }
     }
-    val logSession = remember {
-        com.zenithblue.sambas3.logging.LogBroker.currentManifest
-            ?: com.zenithblue.sambas3.logging.LogSessionStore.latest(context)
+    val liveSnapshot by com.zenithblue.sambas3.logging.LogBroker.snapshot.collectAsState()
+    val requestedId = selectedSessionId
+        ?: com.zenithblue.sambas3.logging.LogBroker.currentSessionId
+        ?: com.zenithblue.sambas3.logging.LogSessionStore.latest(context)?.sessionId
+    val logSession = remember(requestedId) {
+        requestedId?.let { com.zenithblue.sambas3.logging.LogSessionStore.read(context, it) }
+            ?: com.zenithblue.sambas3.logging.LogBroker.currentManifest
+    }
+    val viewingHistory = logSession != null && logSession.sessionId != com.zenithblue.sambas3.logging.LogBroker.currentSessionId
+    LaunchedEffect(requestedId, viewingHistory) {
+        historicalEntries = if (viewingHistory && requestedId != null) {
+            withContext(kotlinx.coroutines.Dispatchers.IO) {
+                com.zenithblue.sambas3.logging.LogBroker.hydrateSession(context, requestedId)
+            }
+        } else emptyList()
     }
     val sourceStatus by com.zenithblue.sambas3.logging.LogBroker.status.collectAsState()
 
-    val allLogs by LogMonitor.logs.collectAsState()
+    val unified = if (viewingHistory) historicalEntries else liveSnapshot.filter { requestedId == null || it.sessionId == requestedId || it.sessionId == null }
+    val allLogs = remember(unified) { unified.map { com.zenithblue.sambas3.logging.LogBroker.toLogEntry(it) } }
     val filtered by remember(allLogs, selectedLevel, selectedSource) {
         derivedStateOf {
             allLogs.filter { e ->
@@ -151,7 +160,8 @@ fun LogMonitorScreen(
 
     val listState = rememberLazyListState()
 
-    LaunchedEffect(filtered.size, autoScroll) {
+    val lastEventId = filtered.lastOrNull()?.id
+    LaunchedEffect(lastEventId, autoScroll) {
         if (autoScroll && filtered.isNotEmpty()) {
             listState.animateScrollToItem(filtered.size - 1)
         }
@@ -393,7 +403,8 @@ fun LogMonitorScreen(
                 autoScroll = autoScroll,
                 onAutoScrollToggle = { autoScroll = !autoScroll },
                 onClear = { LogMonitor.clearLogs() },
-                showBackHint = false
+                showBackHint = false,
+                sessionId = logSession?.sessionId,
             )
         }
     }
@@ -508,6 +519,7 @@ private fun LogBottomBar(
     onAutoScrollToggle: () -> Unit,
     onClear: () -> Unit,
     showBackHint: Boolean,
+    sessionId: String? = null,
 ) {
     val context = LocalContext.current
     Column(
@@ -587,7 +599,7 @@ private fun LogBottomBar(
 
             IconButton(
                 onClick = {
-                    shareLogFiles(context)
+                    shareLogFiles(context, sessionId)
                 },
                 modifier = Modifier.size(36.dp)
             ) {
@@ -610,64 +622,12 @@ private fun LogBottomBar(
  * Share on-disk log files via system chooser.
  * Requires FileProvider authority `${packageName}.provider` + external-files logs path.
  */
-private fun shareLogFiles(context: Context) {
-    LogMonitor.flushWriters()
-    val sessionFiles = com.zenithblue.sambas3.logging.LogSessionStore.latest(context)
-        ?.artifacts
-        ?.map { java.io.File(it.path) }
-        ?.filter { it.isFile }
-        ?: emptyList()
-    val files = (LogMonitor.getAllLogFiles() + sessionFiles).distinctBy { it.absolutePath }
-    if (files.isEmpty()) {
+private fun shareLogFiles(context: Context, sessionId: String?) {
+    val id = sessionId ?: com.zenithblue.sambas3.logging.LogBroker.currentSessionId
+        ?: com.zenithblue.sambas3.logging.LogSessionStore.latest(context)?.sessionId
+    if (id == null) {
         Toast.makeText(context, context.getString(R.string.log_not_found), Toast.LENGTH_SHORT).show()
         return
     }
-
-    val authority = "${context.packageName}.provider"
-    val uris = ArrayList<Uri>(files.size)
-    for (file in files) {
-        try {
-            uris.add(FileProvider.getUriForFile(context, authority, file))
-        } catch (e: IllegalArgumentException) {
-            Toast.makeText(
-                context,
-                "Cannot share ${file.name}: ${e.message}",
-                Toast.LENGTH_LONG
-            ).show()
-            return
-        }
-    }
-    if (uris.isEmpty()) {
-        Toast.makeText(context, context.getString(R.string.log_not_found), Toast.LENGTH_SHORT).show()
-        return
-    }
-
-    val intent = if (uris.size == 1) {
-        Intent(Intent.ACTION_SEND).apply {
-            type = "text/plain"
-            putExtra(Intent.EXTRA_STREAM, uris[0])
-            clipData = ClipData.newUri(context.contentResolver, "log", uris[0])
-            addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
-        }
-    } else {
-        Intent(Intent.ACTION_SEND_MULTIPLE).apply {
-            type = "text/plain"
-            putParcelableArrayListExtra(Intent.EXTRA_STREAM, uris)
-            // ClipData needed so FLAG_GRANT_READ_URI_PERMISSION applies to all URIs
-            clipData = ClipData.newUri(context.contentResolver, "log", uris[0]).also { clip ->
-                for (i in 1 until uris.size) {
-                    clip.addItem(ClipData.Item(uris[i]))
-                }
-            }
-            addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
-        }
-    }
-
-    try {
-        context.startActivity(
-            Intent.createChooser(intent, context.getString(R.string.log_share_all))
-        )
-    } catch (_: ActivityNotFoundException) {
-        Toast.makeText(context, context.getString(R.string.no_activity_to_handle_action), Toast.LENGTH_SHORT).show()
-    }
+    SessionExport.shareSession(context, id)
 }

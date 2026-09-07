@@ -78,6 +78,12 @@ class MainActivity : ComponentActivity() {
                 packageManager.getApplicationInfo(packageName, 0).nativeLibraryDir
             RPCSX.nativeLibDirectory = nativeLibraryDir
 
+            try {
+                com.zenithblue.sambas3.logging.LogBroker.ensureStarted(this@MainActivity)
+            } catch (e: Exception) {
+                android.util.Log.w("Main", "LogBroker pre-init start failed: ${e.message}")
+            }
+
             RPCSX.openLibrary()
             // S3CORE build ID — must log after dlopen so stale cores are immediately visible in logcat
             try {

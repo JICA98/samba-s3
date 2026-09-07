@@ -23,6 +23,7 @@ object PpuWorkerNativeBootstrap {
             val nativeLibDir = appContext.packageManager.getApplicationInfo(appContext.packageName, 0).nativeLibraryDir
             RPCSX.nativeLibDirectory = nativeLibDir
 
+            runCatching { com.zenithblue.sambas3.logging.LogBroker.ensureStarted(appContext) }
             if (!RPCSX.openLibrary()) {
                 Log.e(TAG, "Failed to open librpcsx-android.so in worker process")
                 return false
