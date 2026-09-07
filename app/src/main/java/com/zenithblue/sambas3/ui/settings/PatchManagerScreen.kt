@@ -1,6 +1,7 @@
 package com.zenithblue.sambas3.ui.settings
 
 import android.widget.Toast
+import android.view.KeyEvent
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.background
@@ -23,10 +24,7 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
-import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBar
-import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -36,7 +34,6 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontFamily
@@ -47,6 +44,7 @@ import com.zenithblue.sambas3.PatchGroup
 import com.zenithblue.sambas3.PatchRepository
 import com.zenithblue.sambas3.R
 import com.zenithblue.sambas3.RPCSXColors
+import com.zenithblue.sambas3.ui.common.SambaScreenScaffold
 import com.zenithblue.sambas3.ui.settings.components.preference.SwitchPreference
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -75,7 +73,6 @@ fun PatchManagerScreen(
 ) {
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
-    val scrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior()
 
     var loading by remember { mutableStateOf(true) }
     var groups by remember { mutableStateOf<List<GameGroup>>(emptyList()) }
@@ -346,63 +343,66 @@ fun PatchManagerScreen(
     }
 
     if (isInSplitPane) {
-        // No nested back/title — Settings pane already labels the selection.
-        PatchListBody()
-    } else {
-        Scaffold(
-            modifier = Modifier.nestedScroll(scrollBehavior.nestedScrollConnection),
-            topBar = {
-                TopAppBar(
-                    title = {
-                        Text(
-                            "PATCH MANAGER",
-                            style = MaterialTheme.typography.titleLarge.copy(
-                                fontFamily = FontFamily.Monospace,
-                                fontWeight = FontWeight.Bold,
-                                letterSpacing = androidx.compose.ui.unit.TextUnit(
-                                    2f,
-                                    androidx.compose.ui.unit.TextUnitType.Sp
-                                )
-                            )
-                        )
-                    },
-                    navigationIcon = {
-                        IconButton(onClick = navigateBack) {
-                            Icon(
-                                painter = painterResource(R.drawable.ic_keyboard_arrow_left),
-                                contentDescription = "Back"
-                            )
-                        }
-                    },
-                    actions = {
-                        IconButton(onClick = { downloadOfficial() }) {
-                            Icon(
-                                painter = painterResource(R.drawable.ic_cloud_download),
-                                contentDescription = "Download patches"
-                            )
-                        }
-                        IconButton(onClick = { importLauncher.launch("*/*") }) {
-                            Icon(
-                                painter = painterResource(R.drawable.ic_add),
-                                contentDescription = "Import patch"
-                            )
-                        }
-                    },
-                    colors = TopAppBarDefaults.topAppBarColors(
-                        containerColor = RPCSXColors.background,
-                        titleContentColor = RPCSXColors.textPrimary,
-                        navigationIconContentColor = RPCSXColors.primary,
-                        actionIconContentColor = RPCSXColors.textSecondary,
-                    ),
-                    scrollBehavior = scrollBehavior,
-                )
+        SambaScreenScaffold(
+            title = "PATCH MANAGER",
+            iconRes = R.drawable.tune,
+            onBack = navigateBack,
+            compact = true,
+            showHints = false,
+            actions = {
+                IconButton(onClick = { downloadOfficial() }) {
+                    Icon(
+                        painter = painterResource(R.drawable.ic_cloud_download),
+                        contentDescription = "Download patches",
+                        tint = RPCSXColors.textSecondary,
+                    )
+                }
+                IconButton(onClick = { importLauncher.launch("*/*") }) {
+                    Icon(
+                        painter = painterResource(R.drawable.ic_add),
+                        contentDescription = "Import patch",
+                        tint = RPCSXColors.textSecondary,
+                    )
+                }
             },
-            containerColor = RPCSXColors.background,
-            bottomBar = {
-                ControllerHintStrip(
-                    hints = listOf(R.drawable.cross to "Toggle", R.drawable.circle to "Back")
-                )
-            }
+        ) {
+            PatchListBody()
+        }
+    } else {
+        SambaScreenScaffold(
+            title = "PATCH MANAGER",
+            iconRes = R.drawable.tune,
+            onBack = navigateBack,
+            hints = listOf(
+                R.drawable.cross to "Toggle",
+                R.drawable.triangle to "Update",
+                R.drawable.circle to "Back"
+            ),
+            onGamepadKey = { keyCode ->
+                when (keyCode) {
+                    KeyEvent.KEYCODE_BUTTON_Y -> {
+                        downloadOfficial()
+                        true
+                    }
+                    else -> false
+                }
+            },
+            actions = {
+                IconButton(onClick = { downloadOfficial() }) {
+                    Icon(
+                        painter = painterResource(R.drawable.ic_cloud_download),
+                        contentDescription = "Download patches",
+                        tint = RPCSXColors.primary,
+                    )
+                }
+                IconButton(onClick = { importLauncher.launch("*/*") }) {
+                    Icon(
+                        painter = painterResource(R.drawable.ic_add),
+                        contentDescription = "Import patch",
+                        tint = RPCSXColors.textSecondary,
+                    )
+                }
+            },
         ) { padding ->
             PatchListBody(contentPadding = padding)
         }

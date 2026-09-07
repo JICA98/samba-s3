@@ -5,6 +5,7 @@ import android.content.ClipData
 import android.content.Context
 import android.content.Intent
 import android.net.Uri
+import android.view.KeyEvent
 import android.widget.Toast
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.expandVertically
@@ -28,9 +29,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentHeight
-import androidx.compose.foundation.layout.WindowInsets
-import androidx.compose.foundation.layout.safeDrawing
-import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.lazy.rememberLazyListState
@@ -76,6 +74,7 @@ import com.zenithblue.sambas3.LogSource
 import com.zenithblue.sambas3.R
 import com.zenithblue.sambas3.RPCSXColors
 import com.zenithblue.sambas3.logging.statusLabel
+import com.zenithblue.sambas3.ui.common.SambaScreenScaffold
 
 // ---------------------------------------------------------------------------
 // Level / source color helpers
@@ -170,7 +169,7 @@ fun LogMonitorScreen(
         Column(
             modifier = modifier
                 .fillMaxSize()
-                .background(RPCSXColors.background)
+                .background(Color.Transparent)
         ) {
             if (logSession != null) {
                 Column(Modifier.padding(horizontal = 12.dp, vertical = 8.dp), verticalArrangement = Arrangement.spacedBy(2.dp)) {
@@ -354,47 +353,28 @@ fun LogMonitorScreen(
         }
     }
 
-    @Composable
-    fun TopBar() {
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(56.dp)
-                .background(RPCSXColors.background)
-                .drawBehind {
-                    drawLine(
-                        color = RPCSXColors.outlineVariant,
-                        start = Offset(0f, size.height),
-                        end = Offset(size.width, size.height),
-                        strokeWidth = 1.dp.toPx()
-                    )
+    // Full-screen scaffold: unified top bar (below notch), ambient blur behind,
+    // controller hints above the gesture nav bar. B/BACK handled by scaffold.
+    SambaScreenScaffold(
+        title = stringResource(R.string.log_monitor),
+        iconRes = R.drawable.ic_terminal,
+        onBack = navigateBack,
+        compact = isInSplitPane,
+        showHints = !isInSplitPane,
+        hints = listOf(
+            R.drawable.cross to "Select",
+            R.drawable.circle to "Back"
+        ),
+        onGamepadKey = { keyCode ->
+            when (keyCode) {
+                KeyEvent.KEYCODE_BUTTON_Y -> {
+                    autoScroll = !autoScroll
+                    true
                 }
-                .padding(horizontal = 8.dp),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            IconButton(onClick = navigateBack) {
-                Icon(
-                    painter = painterResource(R.drawable.ic_keyboard_arrow_left),
-                    contentDescription = null,
-                    tint = RPCSXColors.primary
-                )
+                else -> false
             }
-            Icon(
-                painter = painterResource(R.drawable.ic_terminal),
-                contentDescription = null,
-                tint = RPCSXColors.primary,
-                modifier = Modifier.size(20.dp)
-            )
-            Spacer(Modifier.width(8.dp))
-            Text(
-                text = stringResource(R.string.log_monitor).uppercase(),
-                color = RPCSXColors.primary,
-                fontFamily = FontFamily.Monospace,
-                fontWeight = FontWeight.Bold,
-                fontSize = 18.sp,
-                letterSpacing = 2.sp
-            )
-            Spacer(Modifier.weight(1f))
+        },
+        actions = {
             if (onOpenCrashLogs != null) {
                 OutlinedButton(
                     onClick = onOpenCrashLogs,
@@ -405,21 +385,17 @@ fun LogMonitorScreen(
                     Text("CRASH HISTORY", style = MaterialTheme.typography.labelSmall)
                 }
             }
+        },
+    ) {
+        Column(modifier = Modifier.fillMaxSize()) {
+            LogContent(modifier = Modifier.weight(1f))
+            LogBottomBar(
+                autoScroll = autoScroll,
+                onAutoScrollToggle = { autoScroll = !autoScroll },
+                onClear = { LogMonitor.clearLogs() },
+                showBackHint = false
+            )
         }
-    }
-
-    // Pin action bar under content so Clear / Auto-scroll / Share never get clipped
-    Column(modifier = modifier.fillMaxSize().windowInsetsPadding(WindowInsets.safeDrawing)) {
-        if (!isInSplitPane) {
-            TopBar()
-        }
-        LogContent(modifier = Modifier.weight(1f))
-        LogBottomBar(
-            autoScroll = autoScroll,
-            onAutoScrollToggle = { autoScroll = !autoScroll },
-            onClear = { LogMonitor.clearLogs() },
-            showBackHint = !isInSplitPane
-        )
     }
 }
 

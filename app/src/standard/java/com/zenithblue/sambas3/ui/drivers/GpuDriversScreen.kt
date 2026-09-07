@@ -2,6 +2,7 @@ package com.zenithblue.sambas3.ui.drivers
 
 import android.net.Uri
 import android.util.Log
+import android.view.KeyEvent
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.clickable
@@ -17,9 +18,6 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.layout.WindowInsets
-import androidx.compose.foundation.layout.safeDrawing
-import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
@@ -38,14 +36,12 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
-import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Tab
 import androidx.compose.material3.TabRow
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
-import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -65,6 +61,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.zenithblue.sambas3.R
 import com.zenithblue.sambas3.RPCSX
+import com.zenithblue.sambas3.RPCSXColors
 import com.zenithblue.sambas3.dialogs.AlertDialogQueue
 import com.zenithblue.sambas3.drivers.catalog.DriverCatalogSnapshot
 import com.zenithblue.sambas3.drivers.catalog.DriverGpuFilter
@@ -72,6 +69,7 @@ import com.zenithblue.sambas3.drivers.catalog.DriverSourceId
 import com.zenithblue.sambas3.drivers.catalog.DriverVariantFilter
 import com.zenithblue.sambas3.drivers.download.DriverDownloadRegistry
 import com.zenithblue.sambas3.drivers.download.DriverDownloadState
+import com.zenithblue.sambas3.ui.common.SambaScreenScaffold
 import com.zenithblue.sambas3.utils.GeneralSettings
 import com.zenithblue.sambas3.utils.GeneralSettings.string
 import com.zenithblue.sambas3.utils.GpuDriverHelper
@@ -484,26 +482,42 @@ fun GpuDriversScreen(
         }
     }
 
-    Scaffold(
-        modifier = Modifier.windowInsetsPadding(WindowInsets.safeDrawing),
-        snackbarHost = { SnackbarHost(hostState = snackbarHostState) },
-        topBar = {
-            TopAppBar(
-                title = { Text(stringResource(R.string.custom_driver), fontWeight = FontWeight.Medium) },
-                navigationIcon = {
-                    IconButton(onClick = navigateBack) {
-                        Icon(painter = painterResource(id = R.drawable.ic_keyboard_arrow_left), contentDescription = null)
-                    }
-                },
-                actions = {
-                    IconButton(onClick = { driverPickerLauncher.launch("application/zip") }) {
-                        Icon(painter = painterResource(id = R.drawable.ic_add), contentDescription = "Import Driver")
-                    }
+    SambaScreenScaffold(
+        title = stringResource(R.string.custom_driver),
+        iconRes = R.drawable.memory,
+        onBack = navigateBack,
+        compact = isInSplitPane,
+        showHints = !isInSplitPane,
+        hints = listOf(
+            R.drawable.cross to "Select",
+            R.drawable.l1 to "Tabs",
+            R.drawable.circle to "Back"
+        ),
+        onGamepadKey = { keyCode ->
+            when (keyCode) {
+                KeyEvent.KEYCODE_BUTTON_L1 -> {
+                    selectedTab = DriverTab.Installed
+                    true
                 }
-            )
-        }
-    ) { paddingValues ->
-        Column(modifier = Modifier.fillMaxSize().padding(paddingValues).padding(horizontal = 16.dp)) {
+                KeyEvent.KEYCODE_BUTTON_R1 -> {
+                    selectedTab = DriverTab.Browse
+                    true
+                }
+                else -> false
+            }
+        },
+        actions = {
+            IconButton(onClick = { driverPickerLauncher.launch("application/zip") }) {
+                Icon(
+                    painter = painterResource(id = R.drawable.ic_add),
+                    contentDescription = "Import Driver",
+                    tint = RPCSXColors.primary,
+                )
+            }
+        },
+    ) {
+        Column(modifier = Modifier.fillMaxSize().padding(horizontal = 16.dp)) {
+            SnackbarHost(hostState = snackbarHostState)
             TabRow(selectedTabIndex = selectedTab.ordinal) {
                 Tab(selected = selectedTab == DriverTab.Installed, onClick = { selectedTab = DriverTab.Installed }, text = { Text("Installed") })
                 Tab(selected = selectedTab == DriverTab.Browse, onClick = { selectedTab = DriverTab.Browse }, text = { Text("Browse Drivers") })

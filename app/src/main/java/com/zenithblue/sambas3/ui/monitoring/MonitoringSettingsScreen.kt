@@ -11,17 +11,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.safeDrawingPadding
-import androidx.compose.foundation.layout.WindowInsets
-import androidx.compose.foundation.layout.safeDrawing
-import androidx.compose.foundation.layout.windowInsetsPadding
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
-import androidx.compose.material3.TopAppBar
-import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.text.font.FontFamily
 import com.zenithblue.sambas3.R
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -29,10 +19,8 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.HorizontalDivider
-import androidx.compose.material3.LargeTopAppBar
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
-import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Slider
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Switch
@@ -51,6 +39,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.zenithblue.sambas3.RPCSXColors
+import com.zenithblue.sambas3.ui.common.SambaScreenScaffold
 import com.zenithblue.sambas3.monitoring.FpsGraphScale
 import com.zenithblue.sambas3.monitoring.MonitoringLayout
 import com.zenithblue.sambas3.monitoring.MonitoringMetric
@@ -89,51 +78,11 @@ fun MonitoringSettingsScreen(navigateBack: () -> Unit, isInSplitPane: Boolean = 
                 .padding(horizontal = 16.dp, vertical = 8.dp),
             verticalArrangement = Arrangement.spacedBy(10.dp)
         ) {
-            // Top Bar
-            Row(
-                Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Column {
-                    Text(
-                        "PERFORMANCE MONITOR",
-                        color = RPCSXColors.primary,
-                        style = MaterialTheme.typography.titleLarge,
-                        fontWeight = FontWeight.Bold,
-                        letterSpacing = 1.sp
-                    )
-                    Text(
-                        "Choose each metric independently. Presets are templates.",
-                        color = RPCSXColors.textSecondary,
-                        fontSize = 12.sp
-                    )
-                }
-                Row(horizontalArrangement = Arrangement.spacedBy(8.dp), verticalAlignment = Alignment.CenterVertically) {
-                    OutlinedButton(
-                        onClick = {
-                            save(MonitoringSettings())
-                            intervalDraft = 300f
-                            opacityDraft = .72f
-                            textScaleDraft = .70f
-                        },
-                        shape = RoundedCornerShape(8.dp)
-                    ) {
-                        Text("RESET", color = RPCSXColors.textSecondary, style = MaterialTheme.typography.labelSmall)
-                    }
-                    Surface(
-                        onClick = navigateBack,
-                        shape = RoundedCornerShape(8.dp),
-                        color = RPCSXColors.primary.copy(alpha = 0.15f),
-                        border = BorderStroke(1.dp, RPCSXColors.primary.copy(alpha = 0.4f)),
-                        modifier = Modifier.height(32.dp)
-                    ) {
-                        Box(Modifier.padding(horizontal = 14.dp).fillMaxHeight(), contentAlignment = Alignment.Center) {
-                            Text("DONE", color = RPCSXColors.primary, style = MaterialTheme.typography.labelSmall, fontWeight = FontWeight.Bold)
-                        }
-                    }
-                }
-            }
+            Text(
+                "Choose each metric independently. Presets are templates.",
+                color = RPCSXColors.textSecondary,
+                fontSize = 12.sp
+            )
 
             // 21:9 Widescreen Two-Column Split Layout
             Row(
@@ -284,34 +233,64 @@ fun MonitoringSettingsScreen(navigateBack: () -> Unit, isInSplitPane: Boolean = 
     }
 
     if (isInSplitPane) {
-        Surface(color = Color.Transparent, modifier = Modifier.fillMaxSize().safeDrawingPadding()) { content() }
-    } else {
-        Scaffold(
-            modifier = Modifier.windowInsetsPadding(WindowInsets.safeDrawing),
-            topBar = {
-                TopAppBar(
-                    title = {
-                        Text(
-                            "PERFORMANCE MONITOR",
-                            color = RPCSXColors.primary,
-                            fontFamily = FontFamily.Monospace,
-                            fontWeight = FontWeight.Bold,
-                            fontSize = 16.sp
-                        )
-                    },
-                    navigationIcon = {
-                        IconButton(onClick = navigateBack) {
-                            Icon(
-                                painter = painterResource(id = R.drawable.ic_keyboard_arrow_left),
-                                contentDescription = "Back",
-                                tint = RPCSXColors.primary
-                            )
-                        }
-                    },
-                    colors = TopAppBarDefaults.topAppBarColors(containerColor = Color.Transparent)
+        SambaScreenScaffold(
+            title = "PERFORMANCE MONITOR",
+            iconRes = R.drawable.ic_video,
+            onBack = navigateBack,
+            compact = true,
+            showHints = false,
+            actions = {
+                MonitoringResetAction(
+                    onReset = {
+                        save(MonitoringSettings())
+                        intervalDraft = 300f
+                        opacityDraft = .72f
+                        textScaleDraft = .70f
+                    }
                 )
-            }
-        ) { padding -> Box(Modifier.padding(padding)) { content() } }
+            },
+        ) { content() }
+    } else {
+        SambaScreenScaffold(
+            title = "PERFORMANCE MONITOR",
+            iconRes = R.drawable.ic_video,
+            onBack = navigateBack,
+            hints = listOf(
+                R.drawable.cross to "Toggle",
+                R.drawable.circle to "Back"
+            ),
+            actions = {
+                MonitoringResetAction(
+                    onReset = {
+                        save(MonitoringSettings())
+                        intervalDraft = 300f
+                        opacityDraft = .72f
+                        textScaleDraft = .70f
+                    }
+                )
+                Surface(
+                    onClick = navigateBack,
+                    shape = RoundedCornerShape(8.dp),
+                    color = RPCSXColors.primary.copy(alpha = 0.15f),
+                    border = BorderStroke(1.dp, RPCSXColors.primary.copy(alpha = 0.4f)),
+                    modifier = Modifier.height(32.dp)
+                ) {
+                    Box(Modifier.padding(horizontal = 14.dp).fillMaxHeight(), contentAlignment = Alignment.Center) {
+                        Text("DONE", color = RPCSXColors.primary, style = MaterialTheme.typography.labelSmall, fontWeight = FontWeight.Bold)
+                    }
+                }
+            },
+        ) { content() }
+    }
+}
+
+@Composable
+private fun MonitoringResetAction(onReset: () -> Unit) {
+    OutlinedButton(
+        onClick = onReset,
+        shape = RoundedCornerShape(8.dp)
+    ) {
+        Text("RESET", color = RPCSXColors.textSecondary, style = MaterialTheme.typography.labelSmall)
     }
 }
 

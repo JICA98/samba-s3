@@ -19,15 +19,8 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.safeDrawingPadding
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
-import androidx.compose.foundation.layout.WindowInsets
-import androidx.compose.foundation.layout.safeDrawing
-import androidx.compose.foundation.layout.windowInsetsPadding
-import androidx.compose.ui.res.painterResource
-import androidx.compose.material3.Icon
 import com.zenithblue.sambas3.R
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -67,6 +60,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.zenithblue.sambas3.RPCSXColors
+import com.zenithblue.sambas3.ui.common.SambaScreenScaffold
 import com.zenithblue.sambas3.input.ConnectedInputDevice
 import com.zenithblue.sambas3.input.ControllerDeviceRepository
 import com.zenithblue.sambas3.input.ControllerFamily
@@ -234,54 +228,10 @@ fun ControllerSettingsScreen(
                 },
             verticalArrangement = Arrangement.spacedBy(10.dp),
         ) {
-            // Top Bar
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Row(
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.spacedBy(16.dp)
-                ) {
-                    Text(
-                        text = "CONTROLS",
-                        color = RPCSXColors.primary,
-                        style = MaterialTheme.typography.titleLarge,
-                        fontWeight = FontWeight.Bold,
-                        letterSpacing = 1.sp
-                    )
-                    Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
-                        listOf("Mapping", "Profiles", "Advanced").forEach { value ->
-                            FilterChip(selected = tab == value, onClick = { tab = value }, label = { Text(value) })
-                        }
-                    }
-                }
-                Surface(
-                    onClick = navigateBack,
-                    shape = RoundedCornerShape(8.dp),
-                    color = RPCSXColors.primary.copy(alpha = 0.15f),
-                    border = BorderStroke(1.dp, RPCSXColors.primary.copy(alpha = 0.4f)),
-                    modifier = Modifier.height(32.dp)
-                ) {
-                    Row(
-                        modifier = Modifier.padding(horizontal = 10.dp),
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.spacedBy(4.dp)
-                    ) {
-                        Icon(
-                            painter = painterResource(id = R.drawable.ic_keyboard_arrow_left),
-                            contentDescription = null,
-                            tint = RPCSXColors.primary,
-                            modifier = Modifier.size(16.dp)
-                        )
-                        Text(
-                            text = "BACK",
-                            color = RPCSXColors.primary,
-                            style = MaterialTheme.typography.labelSmall,
-                            fontWeight = FontWeight.Bold
-                        )
-                    }
+            // Sub-tabs (top bar is provided by the scaffold)
+            Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+                listOf("Mapping", "Profiles", "Advanced").forEach { value ->
+                    FilterChip(selected = tab == value, onClick = { tab = value }, label = { Text(value) })
                 }
             }
 
@@ -429,14 +379,47 @@ fun ControllerSettingsScreen(
         }
     }
 
-    Surface(
-        color = RPCSXColors.background,
-        modifier = Modifier
-            .fillMaxSize()
-            .windowInsetsPadding(WindowInsets.safeDrawing)
-            .padding(horizontal = 16.dp, vertical = 8.dp)
+    fun cycleTab(delta: Int) {
+        val tabs = listOf("Mapping", "Profiles", "Advanced")
+        val next = (tabs.indexOf(tab).coerceAtLeast(0) + delta).mod(tabs.size)
+        tab = tabs[next]
+    }
+
+    SambaScreenScaffold(
+        title = "CONTROLS",
+        iconRes = R.drawable.gamepad,
+        onBack = navigateBack,
+        compact = isInSplitPane,
+        showHints = !isInSplitPane,
+        hints = listOf(
+            R.drawable.cross to "Select",
+            R.drawable.l1 to "Tabs",
+            R.drawable.circle to "Back"
+        ),
+        isBackAllowed = { captureTarget == null },
+        onGamepadKey = { keyCode ->
+            when {
+                captureTarget != null -> false
+                keyCode == KeyEvent.KEYCODE_BUTTON_L1 -> {
+                    cycleTab(-1)
+                    true
+                }
+                keyCode == KeyEvent.KEYCODE_BUTTON_R1 -> {
+                    cycleTab(1)
+                    true
+                }
+                else -> false
+            }
+        },
     ) {
-        content()
+        Surface(
+            color = Color.Transparent,
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(horizontal = 16.dp, vertical = 8.dp)
+        ) {
+            content()
+        }
     }
 
     val captured = candidate

@@ -19,6 +19,7 @@ import androidx.compose.foundation.layout.WindowInsetsSides
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.only
 import androidx.compose.foundation.layout.safeDrawing
+import androidx.compose.foundation.layout.statusBars
 import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.GridItemSpan
@@ -186,7 +187,7 @@ fun ControllerHintStrip(
                     strokeWidth = 1.dp.toPx()
                 )
             }
-            .windowInsetsPadding(WindowInsets.safeDrawing.only(WindowInsetsSides.Horizontal))
+            .windowInsetsPadding(WindowInsets.safeDrawing.only(WindowInsetsSides.Horizontal + WindowInsetsSides.Bottom))
             .padding(horizontal = 16.dp),
         horizontalArrangement = Arrangement.End,
         verticalAlignment = Alignment.CenterVertically
@@ -225,51 +226,7 @@ fun ControllerHintStrip(
 
 @Composable
 private fun AmbientSettingsBackground() {
-    Box(
-        modifier = Modifier
-            .fillMaxSize()
-            .background(
-                Brush.verticalGradient(
-                    listOf(
-                        Color(0xFF080B14),
-                        Color(0xFF0B101E),
-                        Color(0xFF060810)
-                    )
-                )
-            )
-    ) {
-        Box(
-            modifier = Modifier
-                .size(380.dp)
-                .offset(x = (-60).dp, y = (-40).dp)
-                .blur(70.dp)
-                .background(
-                    Brush.radialGradient(
-                        colors = listOf(
-                            com.zenithblue.sambas3.RPCSXColors.primary.copy(alpha = 0.20f),
-                            Color.Transparent
-                        )
-                    ),
-                    shape = CircleShape
-                )
-        )
-        Box(
-            modifier = Modifier
-                .size(420.dp)
-                .align(Alignment.BottomEnd)
-                .offset(x = 80.dp, y = 60.dp)
-                .blur(80.dp)
-                .background(
-                    Brush.radialGradient(
-                        colors = listOf(
-                            Color(0x281A3660),
-                            Color.Transparent
-                        )
-                    ),
-                    shape = CircleShape
-                )
-        )
-    }
+    com.zenithblue.sambas3.ui.common.SambaAmbientBackground()
 }
 
 private data class SettingDetailInfo(
@@ -1194,10 +1151,29 @@ fun AdvancedSettingsScreen(
 
     @Composable
     fun AdvancedTopBar(compact: Boolean = false) {
+        if (!isSearching) {
+            com.zenithblue.sambas3.ui.common.SambaTopBar(
+                title = displayTitle,
+                iconRes = R.drawable.tune,
+                onBack = navigateBack,
+                compact = compact,
+                actions = {
+                    IconButton(onClick = { isSearching = true }) {
+                        Icon(
+                            painter = painterResource(id = R.drawable.ic_search),
+                            contentDescription = "Search",
+                            tint = com.zenithblue.sambas3.RPCSXColors.primary
+                        )
+                    }
+                }
+            )
+            return
+        }
+        // Search mode: same unified container, back exits search.
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .height(if (compact) 48.dp else 54.dp)
+                .height(if (compact) 48.dp else 52.dp)
                 .background(Color(0xEE090C16))
                 .drawBehind {
                     drawLine(
@@ -1207,6 +1183,7 @@ fun AdvancedSettingsScreen(
                         strokeWidth = 1.dp.toPx()
                     )
                 }
+                .windowInsetsPadding(WindowInsets.statusBars)
                 .windowInsetsPadding(WindowInsets.safeDrawing.only(WindowInsetsSides.Horizontal))
                 .padding(horizontal = if (compact) 8.dp else 16.dp),
             verticalAlignment = Alignment.CenterVertically
@@ -1219,12 +1196,8 @@ fun AdvancedSettingsScreen(
             ) {
                 IconButton(
                     onClick = {
-                        if (isSearching) {
-                            isSearching = false
-                            searchQuery = ""
-                        } else {
-                            navigateBack()
-                        }
+                        isSearching = false
+                        searchQuery = ""
                     },
                     modifier = Modifier.fillMaxSize()
                 ) {
@@ -1237,75 +1210,43 @@ fun AdvancedSettingsScreen(
                 }
             }
 
-            if (isSearching) {
-                Spacer(modifier = Modifier.width(8.dp))
-                var expanded by remember { mutableStateOf(false) }
-                CompositionLocalProvider(
-                    LocalTextStyle provides MaterialTheme.typography.bodyLarge.copy(fontSize = 16.sp)
-                ) {
-                    SearchBar(
-                        expanded = expanded,
-                        onExpandedChange = {},
-                        modifier = Modifier
-                            .weight(1f)
-                            .animateContentSize(),
-                        windowInsets = WindowInsets(0, 0, 0, 0),
-                        inputField = {
-                            SearchBarDefaults.InputField(
-                                query = searchQuery,
-                                onQueryChange = { searchQuery = it },
-                                onSearch = { expanded = false },
-                                placeholder = { Text(stringResource(R.string.search)) },
-                                leadingIcon = {
-                                    Icon(painter = painterResource(id = R.drawable.ic_search), null)
-                                },
-                                trailingIcon = {
-                                    IconButton(onClick = {
-                                        if (searchQuery.isNotEmpty()) {
-                                            searchQuery = ""
-                                        } else {
-                                            isSearching = false
-                                        }
-                                    }) {
-                                        Icon(painter = painterResource(id = R.drawable.ic_close), null)
+            Spacer(modifier = Modifier.width(8.dp))
+            var expanded by remember { mutableStateOf(false) }
+            CompositionLocalProvider(
+                LocalTextStyle provides MaterialTheme.typography.bodyLarge.copy(fontSize = 16.sp)
+            ) {
+                SearchBar(
+                    expanded = expanded,
+                    onExpandedChange = {},
+                    modifier = Modifier
+                        .weight(1f)
+                        .animateContentSize(),
+                    windowInsets = WindowInsets(0, 0, 0, 0),
+                    inputField = {
+                        SearchBarDefaults.InputField(
+                            query = searchQuery,
+                            onQueryChange = { searchQuery = it },
+                            onSearch = { expanded = false },
+                            placeholder = { Text(stringResource(R.string.search)) },
+                            leadingIcon = {
+                                Icon(painter = painterResource(id = R.drawable.ic_search), null)
+                            },
+                            trailingIcon = {
+                                IconButton(onClick = {
+                                    if (searchQuery.isNotEmpty()) {
+                                        searchQuery = ""
+                                    } else {
+                                        isSearching = false
                                     }
-                                },
-                                expanded = expanded,
-                                onExpandedChange = {}
-                            )
-                        }
-                    ) {}
-                }
-            } else {
-                if (!compact) {
-                    Spacer(modifier = Modifier.width(12.dp))
-                    Icon(
-                        painter = painterResource(id = R.drawable.tune),
-                        contentDescription = null,
-                        tint = com.zenithblue.sambas3.RPCSXColors.primary,
-                        modifier = Modifier.size(22.dp)
-                    )
-                    Spacer(modifier = Modifier.width(10.dp))
-                } else {
-                    Spacer(modifier = Modifier.width(8.dp))
-                }
-                Text(
-                    text = displayTitle.uppercase(),
-                    color = com.zenithblue.sambas3.RPCSXColors.primary,
-                    fontFamily = androidx.compose.ui.text.font.FontFamily.Monospace,
-                    fontWeight = FontWeight.Bold,
-                    fontSize = if (compact) 14.sp else 17.sp,
-                    letterSpacing = 2.sp,
-                    maxLines = 1,
-                    modifier = Modifier.weight(1f)
-                )
-                IconButton(onClick = { isSearching = true }) {
-                    Icon(
-                        painter = painterResource(id = R.drawable.ic_search),
-                        contentDescription = "Search",
-                        tint = com.zenithblue.sambas3.RPCSXColors.primary
-                    )
-                }
+                                }) {
+                                    Icon(painter = painterResource(id = R.drawable.ic_close), null)
+                                }
+                            },
+                            expanded = expanded,
+                            onExpandedChange = {}
+                        )
+                    }
+                ) {}
             }
         }
     }
@@ -1408,24 +1349,68 @@ fun AdvancedSettingsScreen(
         }
     }
 
+    // Controller: Circle/BACK exits search or goes back.
+    // Focus is requested so D-pad/stick traversal works immediately.
+    val advancedFocus = remember { FocusRequester() }
+    val advancedView = LocalView.current
+    fun handleAdvancedKey(keyCode: Int): Boolean {
+        return when (keyCode) {
+            KeyEvent.KEYCODE_BUTTON_B, KeyEvent.KEYCODE_BACK -> {
+                if (isSearching) {
+                    isSearching = false
+                    searchQuery = ""
+                } else {
+                    navigateBack()
+                }
+                true
+            }
+            else -> false
+        }
+    }
+    DisposableEffect(advancedView) {
+        val listener = View.OnKeyListener { _, keyCode, event ->
+            if (event.action != KeyEvent.ACTION_DOWN) return@OnKeyListener false
+            handleAdvancedKey(keyCode)
+        }
+        advancedView.setOnKeyListener(listener)
+        onDispose { advancedView.setOnKeyListener(null) }
+    }
+    LaunchedEffect(Unit) {
+        try { advancedFocus.requestFocus() } catch (_: Exception) {}
+    }
+    val advancedKeyModifier = Modifier
+        .fillMaxSize()
+        .focusRequester(advancedFocus)
+        .focusable()
+        .onPreviewKeyEvent { keyEvent ->
+            if (keyEvent.type != KeyEventType.KeyDown) return@onPreviewKeyEvent false
+            handleAdvancedKey(keyEvent.nativeKeyEvent.keyCode)
+        }
+
     if (isInSplitPane) {
-        Column(modifier = Modifier.fillMaxSize()) {
-            AdvancedTopBar(compact = true)
-            AdvancedSettingsContent(keys = filteredKeys, contentPadding = PaddingValues(0.dp))
+        Box(modifier = advancedKeyModifier) {
+            AmbientSettingsBackground()
+            Column(modifier = Modifier.fillMaxSize()) {
+                AdvancedTopBar(compact = true)
+                AdvancedSettingsContent(keys = filteredKeys, contentPadding = PaddingValues(0.dp))
+            }
         }
     } else {
-        Scaffold(
-            modifier = modifier,
-            topBar = { AdvancedTopBar() },
-            bottomBar = {
-                ControllerHintStrip(
-                    hints = listOf(
-                        R.drawable.cross to "Select",
-                        R.drawable.circle to "Back"
+        Box(modifier = advancedKeyModifier) {
+            AmbientSettingsBackground()
+            Scaffold(
+                modifier = modifier.windowInsetsPadding(WindowInsets.safeDrawing),
+                containerColor = Color.Transparent,
+                topBar = { AdvancedTopBar() },
+                bottomBar = {
+                    ControllerHintStrip(
+                        hints = listOf(
+                            R.drawable.cross to "Select",
+                            R.drawable.circle to "Back"
+                        )
                     )
-                )
-            }
-        ) { contentPadding ->
+                }
+            ) { contentPadding ->
             val folderCount = remember(settings) {
                 settings.keys().asSequence().count { key ->
                     isSettingsFolder(settings.optJSONObject(key))
@@ -1436,6 +1421,7 @@ fun AdvancedSettingsScreen(
                 WideAdvancedBody(contentPadding = contentPadding)
             } else {
                 AdvancedSettingsContent(keys = filteredKeys, contentPadding = contentPadding)
+            }
             }
         }
     }

@@ -3,6 +3,7 @@ package com.zenithblue.sambas3.ui.crash
 import android.content.Context
 import android.content.Intent
 import android.net.Uri
+import android.view.KeyEvent
 import android.widget.Toast
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
@@ -18,10 +19,6 @@ import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.navigationBarsPadding
-import androidx.compose.foundation.layout.WindowInsets
-import androidx.compose.foundation.layout.safeDrawing
-import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -42,7 +39,6 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
-import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
@@ -70,6 +66,7 @@ import com.zenithblue.sambas3.R
 import com.zenithblue.sambas3.RPCSXColors
 import com.zenithblue.sambas3.crash.CrashClassification
 import com.zenithblue.sambas3.crash.CrashReport
+import com.zenithblue.sambas3.ui.common.SambaScreenScaffold
 import com.zenithblue.sambas3.logging.LogSessionManifest
 import com.zenithblue.sambas3.logging.LogSessionStore
 import com.zenithblue.sambas3.logging.LogSessionTerminal
@@ -124,75 +121,80 @@ fun CrashLogsHistoryScreen(
         selectedManifest?.let { reportForManifest(context, it) }
     }
 
-    Surface(
-        modifier = Modifier
-            .fillMaxSize()
-            .windowInsetsPadding(WindowInsets.safeDrawing),
-        color = RPCSXColors.background,
-    ) {
-        Column(Modifier.fillMaxSize()) {
-            // Header Bar
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(56.dp)
-                    .background(RPCSXColors.surfaceElevated)
-                    .padding(horizontal = 16.dp),
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.SpaceBetween,
-            ) {
-                Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-                    if (!isInSplitPane) {
-                        IconButton(onClick = navigateBack) {
-                            Icon(
-                                painter = painterResource(R.drawable.ic_keyboard_arrow_left),
-                                contentDescription = "Back",
-                                tint = RPCSXColors.primary,
-                            )
-                        }
-                    }
-                    Text(
-                        "CRASH LOGS & HISTORY",
-                        color = RPCSXColors.primary,
-                        style = MaterialTheme.typography.titleMedium,
-                        fontWeight = FontWeight.Bold,
-                        letterSpacing = 1.sp,
-                    )
+    fun selectSession(delta: Int) {
+        if (displaySessions.isEmpty()) return
+        val current = displaySessions.indexOfFirst { it.sessionId == selectedSessionId }
+        val next = if (current < 0) {
+            if (delta > 0) 0 else displaySessions.size - 1
+        } else {
+            (current + delta).coerceIn(0, displaySessions.size - 1)
+        }
+        selectedSessionId = displaySessions[next].sessionId
+    }
+
+    SambaScreenScaffold(
+        title = "CRASH LOGS & HISTORY",
+        iconRes = R.drawable.ic_restore,
+        onBack = navigateBack,
+        compact = isInSplitPane,
+        showHints = !isInSplitPane,
+        hints = listOf(
+            R.drawable.cross to "Open",
+            R.drawable.l1 to "Session",
+            R.drawable.circle to "Back"
+        ),
+        onGamepadKey = { keyCode ->
+            when (keyCode) {
+                KeyEvent.KEYCODE_BUTTON_L1 -> {
+                    selectSession(-1)
+                    true
                 }
-
-                Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                    FilterChip(
-                        selected = filterCrashesOnly,
-                        onClick = {
-                            filterCrashesOnly = !filterCrashesOnly
-                            if (filterCrashesOnly && selectedManifest != null && !isCrashSession(selectedManifest)) {
-                                selectedSessionId = sessions.firstOrNull { isCrashSession(it) }?.sessionId
-                            }
-                        },
-                        label = {
-                            Text(
-                                if (filterCrashesOnly) "CRASHES ONLY" else "ALL SESSIONS",
-                                style = MaterialTheme.typography.labelSmall,
-                            )
-                        },
-                        colors = FilterChipDefaults.filterChipColors(
-                            selectedContainerColor = RPCSXColors.primary.copy(alpha = 0.2f),
-                            selectedLabelColor = RPCSXColors.primary,
-                        ),
-                    )
-
-                    if (sessions.isNotEmpty()) {
-                        IconButton(onClick = { showClearConfirm = true }) {
-                            Icon(
-                                painter = painterResource(R.drawable.ic_delete),
-                                contentDescription = "Clear All Sessions",
-                                tint = RPCSXColors.textSecondary,
-                            )
-                        }
+                KeyEvent.KEYCODE_BUTTON_R1 -> {
+                    selectSession(1)
+                    true
+                }
+                KeyEvent.KEYCODE_BUTTON_Y -> {
+                    if (selectedManifest != null) {
+                        shareSessionFiles(context, selectedManifest)
+                        true
+                    } else false
+                }
+                else -> false
+            }
+        },
+        actions = {
+            FilterChip(
+                selected = filterCrashesOnly,
+                onClick = {
+                    filterCrashesOnly = !filterCrashesOnly
+                    if (filterCrashesOnly && selectedManifest != null && !isCrashSession(selectedManifest)) {
+                        selectedSessionId = sessions.firstOrNull { isCrashSession(it) }?.sessionId
                     }
+                },
+                label = {
+                    Text(
+                        if (filterCrashesOnly) "CRASHES ONLY" else "ALL SESSIONS",
+                        style = MaterialTheme.typography.labelSmall,
+                    )
+                },
+                colors = FilterChipDefaults.filterChipColors(
+                    selectedContainerColor = RPCSXColors.primary.copy(alpha = 0.2f),
+                    selectedLabelColor = RPCSXColors.primary,
+                ),
+            )
+
+            if (sessions.isNotEmpty()) {
+                IconButton(onClick = { showClearConfirm = true }) {
+                    Icon(
+                        painter = painterResource(R.drawable.ic_delete),
+                        contentDescription = "Clear All Sessions",
+                        tint = RPCSXColors.textSecondary,
+                    )
                 }
             }
-
+        },
+    ) {
+        Column(Modifier.fillMaxSize()) {
             HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
 
             if (loading) {

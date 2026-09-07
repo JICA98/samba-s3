@@ -6,22 +6,14 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.RadioButton
-import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -30,17 +22,16 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import com.zenithblue.sambas3.EmulatorState
 import com.zenithblue.sambas3.R
 import com.zenithblue.sambas3.RPCSX
 import com.zenithblue.sambas3.User
 import com.zenithblue.sambas3.UserRepository
 import com.zenithblue.sambas3.dialogs.AlertDialogQueue
+import com.zenithblue.sambas3.ui.common.SambaScreenScaffold
+import com.zenithblue.sambas3.ui.common.SambaSplitBody
 
 @Composable
 fun UserItem(
@@ -127,34 +118,27 @@ fun UsersScreen(
     }
 
     if (isInSplitPane) {
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(16.dp)
-        ) {
-            UsersContent(modifier = Modifier.weight(1f))
+        SambaSplitBody {
+            Column(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(16.dp)
+            ) {
+                UsersContent(modifier = Modifier.weight(1f))
+            }
         }
     } else {
-        Scaffold(
-            modifier = Modifier.windowInsetsPadding(WindowInsets.navigationBars),
-            topBar = {
-                TopAppBar(
-                    title = {
-                        Text(stringResource(R.string.users))
-                    },
-                    navigationIcon = {
-                        IconButton(onClick = navigateBack) {
-                            Icon(
-                                painter = painterResource(id = R.drawable.ic_keyboard_arrow_left),
-                                contentDescription = null
-                            )
-                        }
-                    }
-                )
-            }
-        ) { innerPadding ->
+        SambaScreenScaffold(
+            title = stringResource(R.string.users),
+            iconRes = R.drawable.ic_person,
+            onBack = navigateBack,
+            hints = listOf(
+                R.drawable.cross to "Select",
+                R.drawable.circle to "Back"
+            )
+        ) {
             Column(
-                modifier = Modifier.padding(innerPadding)
+                modifier = Modifier.fillMaxSize()
             ) {
                 UsersContent()
             }
