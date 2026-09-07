@@ -36,6 +36,7 @@ import androidx.compose.foundation.lazy.grid.rememberLazyGridState
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.text.KeyboardActions
@@ -56,6 +57,7 @@ import androidx.compose.ui.draw.scale
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
+import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
@@ -67,14 +69,20 @@ import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.input.key.Key
 import androidx.compose.ui.input.key.KeyEventType
 import androidx.compose.ui.input.key.key
+import androidx.compose.ui.input.key.onKeyEvent
 import androidx.compose.ui.input.key.onPreviewKeyEvent
 import androidx.compose.ui.input.key.type
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.window.DialogProperties
+import androidx.compose.ui.window.Popup
+import androidx.compose.ui.window.PopupProperties
+import androidx.compose.ui.unit.IntOffset
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -107,8 +115,9 @@ import com.zenithblue.sambas3.ui.crash.CrashDetailsSheet
 import com.zenithblue.sambas3.ui.crash.CrashRecoveryCard
 import com.zenithblue.sambas3.ui.crash.StopFailureCard
 import com.zenithblue.sambas3.session.EmulatorStopCoordinator
+import com.zenithblue.sambas3.iso.DirectIsoManager
 import com.zenithblue.sambas3.utils.FileUtil
-import com.zenithblue.sambas3.utils.GameFolderMatch
+import com.zenithblue.sambas3.utils.ScannedFoldersRepository
 import kotlin.math.abs
 import kotlin.concurrent.thread
 import java.text.SimpleDateFormat
@@ -149,15 +158,12 @@ fun buildLibraryPagerItems(
     isFwInstalling: Boolean,
     showBothEnds: Boolean = false
 ): List<PagerItem> = buildList {
-    val hasLibrary = visibleGames.isNotEmpty() || sourceCandidates.isNotEmpty() || pendingImports.isNotEmpty()
+    val hasLibrary = visibleGames.isNotEmpty() || pendingImports.isNotEmpty()
     if (!hasLibrary) {
         if (!hasFw) add(PagerItem.FirmwareCard)
-        else if (isFwInstalling) add(PagerItem.AddGame(disabled = true, position = "single"))
-        else add(PagerItem.AddGame(position = "single"))
     } else {
         addAll(visibleGames.map { PagerItem.GameItem(it) })
         addAll(pendingImports)
-        addAll(sourceCandidates)
     }
 }
 
@@ -192,7 +198,11 @@ fun GamesScreen(
     val recoveryState by HomeRecoveryRepository.state.collectAsState()
     val stopState by EmulatorStopCoordinator.state.collectAsState()
     var detailsState by remember { mutableStateOf<HomeRecoveryState?>(null) }
-    LaunchedEffect(Unit) { HomeRecoveryRepository.refresh(context) }
+    LaunchedEffect(Unit) {
+        HomeRecoveryRepository.refresh(context)
+        ScannedFoldersRepository.load(context)
+    }
+    val scannedFolders by ScannedFoldersRepository.foldersFlow.collectAsState()
 
     if (rpcsxLibrary == null) {
         // Loading screen while library is missing
@@ -248,9 +258,9 @@ fun GamesScreen(
     }
     val recoveryScope = rememberCoroutineScope()
     var showImportDialog by remember { mutableStateOf(false) }
-    var scannedFolderGames by remember { mutableStateOf<List<GameFolderMatch>?>(null) }
-    var scannedFolderUri by remember { mutableStateOf<Uri?>(null) }
+    var folderImportResult by remember { mutableStateOf<DirectIsoManager.IsoFolderImportResult?>(null) }
     var scanningFolder by remember { mutableStateOf(false) }
+    var isFoldersExpanded by remember { mutableStateOf(false) }
     var configureGameTarget by remember { mutableStateOf<Game?>(null) }
     var configuringGame by remember { mutableStateOf(false) }
     var removeGameTarget by remember { mutableStateOf<Game?>(null) }
@@ -410,15 +420,18 @@ fun GamesScreen(
             }
             kotlin.concurrent.thread(name = "sambas3-direct-iso-register") {
                 val result = runCatching {
-                    com.zenithblue.sambas3.iso.DirectIsoManager.validateAndRegister(context, uri)
+                    DirectIsoManager.registerDirectIso(context, uri)
                 }
                 context.mainExecutor.execute {
-                    result.onSuccess { game ->
-                        android.widget.Toast.makeText(
-                            context,
-                            "Direct ISO registered: ${game.info.name.value ?: "Game"}",
-                            android.widget.Toast.LENGTH_SHORT
-                        ).show()
+                    result.onSuccess { registered ->
+                        val name = registered.game.info.name.value ?: "Game"
+                        val message = when (registered) {
+                            is DirectIsoManager.DirectIsoRegisterResult.AlreadyImported ->
+                                context.getString(R.string.game_already_imported, name)
+                            is DirectIsoManager.DirectIsoRegisterResult.Registered ->
+                                "Direct ISO registered: $name"
+                        }
+                        android.widget.Toast.makeText(context, message, android.widget.Toast.LENGTH_LONG).show()
                     }.onFailure { err ->
                         android.widget.Toast.makeText(
                             context,
@@ -428,21 +441,6 @@ fun GamesScreen(
                     }
                 }
             }
-        }
-    }
-
-    val isoPickerLauncher = rememberLauncherForActivityResult(
-        contract = ActivityResultContracts.GetContent()
-    ) { uri: Uri? ->
-        if (uri != null) {
-            try {
-                context.contentResolver.takePersistableUriPermission(
-                    uri,
-                    Intent.FLAG_GRANT_READ_URI_PERMISSION
-                )
-            } catch (_: Exception) {
-            }
-            PrecompilerService.start(context, PrecompilerServiceAction.Install, uri)
         }
     }
 
@@ -458,14 +456,30 @@ fun GamesScreen(
             } catch (_: SecurityException) {
                 // Some providers return a readable tree without persistable access.
             }
-            scannedFolderUri = uri
-            scannedFolderGames = null
+            folderImportResult = null
             scanningFolder = true
             thread(name = "sambas3-folder-scan") {
-                val matches = FileUtil.scanGameFolder(context, uri)
+                val result = ScannedFoldersRepository.addAndImport(context, uri)
                 context.mainExecutor.execute {
-                    scannedFolderGames = matches
+                    folderImportResult = result
                     scanningFolder = false
+                }
+            }
+        }
+    }
+
+    val triggerRefresh = {
+        if (!scanningFolder) {
+            if (scannedFolders.isEmpty()) {
+                folderPickerLauncher.launch(null)
+            } else {
+                scanningFolder = true
+                thread(name = "sambas3-folder-refresh") {
+                    val result = ScannedFoldersRepository.refreshAll(context)
+                    context.mainExecutor.execute {
+                        folderImportResult = result
+                        scanningFolder = false
+                    }
                 }
             }
         }
@@ -485,10 +499,6 @@ fun GamesScreen(
     val activeInstallId by GameRepository.activeInstallProgress
     val activeInstallEntry = ProgressRepository.getItem(activeInstallId)?.value
     val isPackageInstalling = activeInstallId != null
-
-    // BLOCKER C: observe persisted ISO candidates as StateFlow (JSON) and merge with Home
-    val candidateList by com.zenithblue.sambas3.utils.LibraryCandidatesRepository.candidatesFlow.collectAsState()
-    LaunchedEffect(Unit) { com.zenithblue.sambas3.utils.LibraryCandidatesRepository.refresh(context) }
 
     // BLOCKER D: observe pending import sessions — one stable card per import
     val importSessions by com.zenithblue.sambas3.ImportSessionStore.sessions.collectAsState()
@@ -521,25 +531,7 @@ fun GamesScreen(
         }
     }
 
-    // Merge source ISO candidates (folder scan) — installed wins over duplicate titleId
     val installedTitleIds = visibleGames.mapNotNull { com.zenithblue.sambas3.GameIdentity.titleIdOrNull(it.info.path, it.info.name.value) }.map { it.uppercase() }.toSet()
-    // Dedupe: hide source candidate if same titleId already installed or currently importing (pending)
-    val pendingTitleIds = (importSessions.mapNotNull { it.provisionalTitleId?.uppercase() } + importSessions.mapNotNull { it.resolvedTitleId?.uppercase() }).toSet()
-    val allInstalledOrPendingIds = installedTitleIds + pendingTitleIds
-    val sourceCandidateItems: List<PagerItem.SourceCandidate> = candidateList.mapNotNull { cand ->
-        val tid = cand.titleId?.uppercase()
-        if (tid != null && tid in allInstalledOrPendingIds) return@mapNotNull null
-        PagerItem.SourceCandidate(cand.titleId, cand.folderName, cand.sourceUri?.toString() ?: cand.folderName, cand.sourceKind)
-    }
-    val filteredSourceCandidates: List<PagerItem.SourceCandidate> = remember(sourceCandidateItems, searchQuery) {
-        if (searchQuery.isBlank()) sourceCandidateItems
-        else {
-            val q = searchQuery.trim().lowercase()
-            sourceCandidateItems.filter { cand ->
-                cand.displayName.lowercase().contains(q) || (cand.titleId?.lowercase()?.contains(q) == true)
-            }
-        }
-    }
     // Pending imports — hide if same title already installed (installed wins, PPU shows on Game card via installPpu)
     val pendingItems: List<PagerItem.PendingImport> = importSessions.mapNotNull { sess ->
         val prov = sess.provisionalTitleId?.uppercase()
@@ -559,8 +551,8 @@ fun GamesScreen(
             }
         }
     }
-    val showBothEnds = (filteredGames.size + filteredSourceCandidates.size + filteredPendingItems.size) > 5
-    val pagerItems: List<PagerItem> = buildLibraryPagerItems(filteredGames, filteredSourceCandidates, filteredPendingItems, hasFw, isFwInstalling, showBothEnds)
+    val showBothEnds = (filteredGames.size + filteredPendingItems.size) > 5
+    val pagerItems: List<PagerItem> = buildLibraryPagerItems(filteredGames, emptyList(), filteredPendingItems, hasFw, isFwInstalling, showBothEnds)
     val initialPage = 0
     val pagerState = rememberPagerState(initialPage = initialPage, pageCount = { pagerItems.size })
     val configuration = androidx.compose.ui.platform.LocalConfiguration.current
@@ -608,7 +600,7 @@ fun GamesScreen(
     val homeScope = rememberCoroutineScope()
 
     fun navigateLibraryLeft() {
-        if (showImportDialog || scanningFolder || scannedFolderGames != null || detailsState != null || launchCenterGame != null) return
+        if (showImportDialog || scanningFolder || folderImportResult != null || detailsState != null || launchCenterGame != null) return
         val current = pagerState.currentPage
         if (current > 0) {
             homeScope.launch {
@@ -618,7 +610,7 @@ fun GamesScreen(
     }
 
     fun navigateLibraryRight() {
-        if (showImportDialog || scanningFolder || scannedFolderGames != null || detailsState != null || launchCenterGame != null) return
+        if (showImportDialog || scanningFolder || folderImportResult != null || detailsState != null || launchCenterGame != null) return
         val current = pagerState.currentPage
         if (current < pagerItems.lastIndex) {
             homeScope.launch {
@@ -635,7 +627,7 @@ fun GamesScreen(
     val gridColumns = if (isTablet) 5 else 4
 
     fun navigateGrid(deltaX: Int, deltaY: Int) {
-        if (showImportDialog || scanningFolder || scannedFolderGames != null || detailsState != null || launchCenterGame != null) return
+        if (showImportDialog || scanningFolder || folderImportResult != null || detailsState != null || launchCenterGame != null) return
         if (filteredGames.isEmpty()) return
 
         val current = focusedGridIndex
@@ -666,6 +658,10 @@ fun GamesScreen(
         }
     }
 
+    BackHandler(enabled = isFoldersExpanded) {
+        isFoldersExpanded = false
+    }
+
     BackHandler(enabled = isSearchExpanded) {
         if (searchQuery.isNotEmpty()) {
             searchQuery = ""
@@ -676,6 +672,8 @@ fun GamesScreen(
 
     var stickArmedX by remember { mutableStateOf(true) }
     var stickArmedY by remember { mutableStateOf(true) }
+    var triggerArmedL2 by remember { mutableStateOf(true) }
+    var triggerArmedR2 by remember { mutableStateOf(true) }
     var stickHoldStartTimeX by remember { mutableLongStateOf(0L) }
     var stickHoldStartTimeY by remember { mutableLongStateOf(0L) }
     var lastStickStepTimeX by remember { mutableLongStateOf(0L) }
@@ -685,13 +683,44 @@ fun GamesScreen(
     val currentView = LocalView.current
     DisposableEffect(currentView) {
         val motionListener = View.OnGenericMotionListener { _, event ->
-            if (showImportDialog || scanningFolder || scannedFolderGames != null || detailsState != null || launchCenterGame != null) {
+            if (showImportDialog || scanningFolder || folderImportResult != null || detailsState != null || launchCenterGame != null) {
                 return@OnGenericMotionListener false
             }
             val source = event.source
             val isGamepadOrJoystick = (source and InputDevice.SOURCE_GAMEPAD != 0) ||
                 (source and InputDevice.SOURCE_JOYSTICK != 0)
             if (!isGamepadOrJoystick) return@OnGenericMotionListener false
+
+            // Trigger Axes (L2 / R2 analog triggers on gamepads)
+            val l2Val = maxOf(
+                event.getAxisValue(MotionEvent.AXIS_LTRIGGER),
+                event.getAxisValue(MotionEvent.AXIS_BRAKE),
+                event.getAxisValue(MotionEvent.AXIS_THROTTLE).coerceAtLeast(0f),
+            )
+            val r2Val = maxOf(
+                event.getAxisValue(MotionEvent.AXIS_RTRIGGER),
+                event.getAxisValue(MotionEvent.AXIS_GAS),
+            )
+
+            if (l2Val > 0.50f) {
+                if (triggerArmedL2) {
+                    triggerArmedL2 = false
+                    isFoldersExpanded = !isFoldersExpanded
+                    return@OnGenericMotionListener true
+                }
+            } else if (l2Val < 0.20f) {
+                triggerArmedL2 = true
+            }
+
+            if (r2Val > 0.50f) {
+                if (triggerArmedR2) {
+                    triggerArmedR2 = false
+                    triggerRefresh()
+                    return@OnGenericMotionListener true
+                }
+            } else if (r2Val < 0.20f) {
+                triggerArmedR2 = true
+            }
 
             // Left Stick ONLY (not Hat / D-pad):
             val rawX = event.getAxisValue(MotionEvent.AXIS_X)
@@ -755,7 +784,7 @@ fun GamesScreen(
 
         val keyListener = View.OnKeyListener { _, keyCode, event ->
             if (event.action != KeyEvent.ACTION_DOWN) return@OnKeyListener false
-            if (showImportDialog || scanningFolder || scannedFolderGames != null || detailsState != null || launchCenterGame != null) {
+            if (showImportDialog || scanningFolder || folderImportResult != null || detailsState != null || launchCenterGame != null) {
                 return@OnKeyListener false
             }
             if (event.repeatCount > 0) {
@@ -780,6 +809,14 @@ fun GamesScreen(
                 KeyEvent.KEYCODE_BUTTON_X -> {
                     isGridView = !isGridView
                     com.zenithblue.sambas3.utils.GeneralSettings.setValue("home_view_mode", if (isGridView) "grid" else "carousel")
+                    true
+                }
+                KeyEvent.KEYCODE_BUTTON_L2, KeyEvent.KEYCODE_BUTTON_THUMBL -> {
+                    isFoldersExpanded = !isFoldersExpanded
+                    true
+                }
+                KeyEvent.KEYCODE_BUTTON_R2, KeyEvent.KEYCODE_BUTTON_THUMBR -> {
+                    triggerRefresh()
                     true
                 }
                 KeyEvent.KEYCODE_DPAD_LEFT, KeyEvent.KEYCODE_BUTTON_L1 -> {
@@ -821,7 +858,10 @@ fun GamesScreen(
                     }
                 }
                 KeyEvent.KEYCODE_BUTTON_B, KeyEvent.KEYCODE_BACK -> {
-                    if (isSearchExpanded) {
+                    if (isFoldersExpanded) {
+                        isFoldersExpanded = false
+                        true
+                    } else if (isSearchExpanded) {
                         if (searchQuery.isNotEmpty()) searchQuery = "" else isSearchExpanded = false
                         true
                     } else false
@@ -847,7 +887,7 @@ fun GamesScreen(
             .onPreviewKeyEvent { keyEvent ->
                 if (keyEvent.type != KeyEventType.KeyDown) return@onPreviewKeyEvent false
                 val code = keyEvent.nativeKeyEvent.keyCode
-                if (showImportDialog || scanningFolder || scannedFolderGames != null || detailsState != null || launchCenterGame != null) {
+                if (showImportDialog || scanningFolder || folderImportResult != null || detailsState != null || launchCenterGame != null) {
                     return@onPreviewKeyEvent false
                 }
                 if (keyEvent.nativeKeyEvent.repeatCount > 0) {
@@ -874,6 +914,16 @@ fun GamesScreen(
                     keyEvent.key == Key.ButtonX || code == KeyEvent.KEYCODE_BUTTON_X -> {
                         isGridView = !isGridView
                         com.zenithblue.sambas3.utils.GeneralSettings.setValue("home_view_mode", if (isGridView) "grid" else "carousel")
+                        true
+                    }
+                    keyEvent.key == Key.ButtonL2 || code == KeyEvent.KEYCODE_BUTTON_L2 ||
+                    code == KeyEvent.KEYCODE_BUTTON_THUMBL -> {
+                        isFoldersExpanded = !isFoldersExpanded
+                        true
+                    }
+                    keyEvent.key == Key.ButtonR2 || code == KeyEvent.KEYCODE_BUTTON_R2 ||
+                    code == KeyEvent.KEYCODE_BUTTON_THUMBR -> {
+                        triggerRefresh()
                         true
                     }
                     keyEvent.key == Key.DirectionLeft || code == KeyEvent.KEYCODE_DPAD_LEFT || code == KeyEvent.KEYCODE_BUTTON_L1 -> {
@@ -917,7 +967,10 @@ fun GamesScreen(
                     }
                     keyEvent.key == Key.ButtonB || keyEvent.key == Key.Back ||
                     code == KeyEvent.KEYCODE_BUTTON_B || code == KeyEvent.KEYCODE_BACK -> {
-                        if (isSearchExpanded) {
+                        if (isFoldersExpanded) {
+                            isFoldersExpanded = false
+                            true
+                        } else if (isSearchExpanded) {
                             if (searchQuery.isNotEmpty()) searchQuery = "" else isSearchExpanded = false
                             true
                         } else false
@@ -1121,31 +1174,6 @@ fun GamesScreen(
                         onExpandedChange = { isSearchExpanded = it },
                         ambientModel = fullscreenAmbientModel
                     )
-
-                    FrostedGlassBox(
-                        ambientModel = fullscreenAmbientModel,
-                        shape = RoundedCornerShape(4.dp),
-                        border = BorderStroke(1.dp, if (isGridView) RPCSXColors.primary else RPCSXColors.surfaceOverlay),
-                        modifier = Modifier
-                            .clickable {
-                                isGridView = !isGridView
-                                com.zenithblue.sambas3.utils.GeneralSettings.setValue("home_view_mode", if (isGridView) "grid" else "carousel")
-                            }
-                    ) {
-                        Row(
-                            modifier = Modifier.padding(horizontal = 6.dp, vertical = 4.dp),
-                            verticalAlignment = Alignment.CenterVertically,
-                            horizontalArrangement = Arrangement.spacedBy(4.dp)
-                        ) {
-                            ControllerGlyphBadge(glyph = "□")
-                            Icon(
-                                painter = painterResource(if (isGridView) R.drawable.ic_menu else R.drawable.ic_grid_on),
-                                contentDescription = if (isGridView) "Switch to carousel view" else "Switch to grid view",
-                                tint = if (isGridView) RPCSXColors.primary else RPCSXColors.textSecondary,
-                                modifier = Modifier.size(15.dp)
-                            )
-                        }
-                    }
 
                     ImportTopBarButton(
                         onClick = { showImportDialog = true },
@@ -1383,22 +1411,7 @@ fun GamesScreen(
                                     onClick = { installFwLauncher?.launch("*/*") }
                                 )
                             }
-                            is PagerItem.SourceCandidate -> {
-                                SourceCandidateCard(
-                                    item = item,
-                                    distance = distance,
-                                    onClick = { coroutineScope.launch { pagerState.animateScrollToPage(page) } },
-                                    onImport = {
-                                        val uri = try { android.net.Uri.parse(item.sourceUri) } catch (_: Exception) { null }
-                                        if (uri != null) {
-                                            try {
-                                                context.contentResolver.takePersistableUriPermission(uri, android.content.Intent.FLAG_GRANT_READ_URI_PERMISSION)
-                                            } catch (_: Exception) {}
-                                            PrecompilerService.start(context, PrecompilerServiceAction.Install, uri)
-                                        }
-                                    }
-                                )
-                            }
+                            is PagerItem.SourceCandidate -> { }
                             is PagerItem.PendingImport -> {
                                 PendingImportCard(
                                     item = item,
@@ -1634,7 +1647,50 @@ fun GamesScreen(
                         )
                     }
                 }
-                Row(horizontalArrangement = Arrangement.spacedBy(24.dp)) {
+                Row(
+                    horizontalArrangement = Arrangement.spacedBy(12.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                ) {
+                    IsoFoldersTopBarButton(
+                        folders = scannedFolders,
+                        ambientModel = fullscreenAmbientModel,
+                        expanded = isFoldersExpanded,
+                        onExpandedChange = { isFoldersExpanded = it },
+                        onAddFolder = { folderPickerLauncher.launch(null) },
+                        onRemoveFolder = { treeUri -> ScannedFoldersRepository.remove(context, treeUri) },
+                    )
+                    RefreshFoldersTopBarButton(
+                        enabled = scannedFolders.isNotEmpty() && !scanningFolder,
+                        ambientModel = fullscreenAmbientModel,
+                        onClick = triggerRefresh,
+                    )
+                    FrostedGlassBox(
+                        ambientModel = fullscreenAmbientModel,
+                        shape = RoundedCornerShape(4.dp),
+                        border = null,
+                        modifier = Modifier.clickable {
+                            isGridView = !isGridView
+                            com.zenithblue.sambas3.utils.GeneralSettings.setValue("home_view_mode", if (isGridView) "grid" else "carousel")
+                        },
+                    ) {
+                        Row(
+                            modifier = Modifier.padding(horizontal = 7.dp, vertical = 4.dp),
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.spacedBy(4.dp)
+                        ) {
+                            Image(
+                                painter = painterResource(R.drawable.square),
+                                contentDescription = "Square",
+                                modifier = Modifier.size(14.dp),
+                            )
+                            Icon(
+                                painter = painterResource(if (isGridView) R.drawable.ic_menu else R.drawable.ic_grid_on),
+                                contentDescription = if (isGridView) "Switch to carousel view" else "Switch to grid view",
+                                tint = if (isGridView) RPCSXColors.primary else RPCSXColors.textSecondary,
+                                modifier = Modifier.size(15.dp)
+                            )
+                        }
+                    }
                     if (currentItem is PagerItem.FirmwareCard) {
                         HintButton(text = "INSTALL", icon = "X", color = RPCSXColors.primary, onClick = { installFwLauncher?.launch("*/*") })
                     } else if (currentItem is PagerItem.AddGame) {
@@ -2080,115 +2136,524 @@ fun GamesScreen(
         if (showImportDialog) {
             ImportMethodDialog(
                 onDismiss = { showImportDialog = false },
-                onImportFolder = {
-                    showImportDialog = false
-                    folderPickerLauncher.launch(null)
-                },
                 onImportIso = {
                     showImportDialog = false
                     if (com.zenithblue.sambas3.BuildConfig.DIRECT_ISO_LOADING) {
                         directIsoPickerLauncher.launch(arrayOf("*/*"))
                     } else {
-                        isoPickerLauncher.launch("*/*")
+                        android.widget.Toast.makeText(
+                            context,
+                            context.getString(R.string.iso_direct_required),
+                            android.widget.Toast.LENGTH_LONG
+                        ).show()
                     }
                 }
             )
         }
 
         if (scanningFolder) {
-            AlertDialog(
-                onDismissRequest = {},
-                title = { Text(stringResource(R.string.game_folder_scan_title)) },
-                text = {
-                    Row(
-                        horizontalArrangement = Arrangement.spacedBy(12.dp),
-                        verticalAlignment = Alignment.CenterVertically,
-                    ) {
-                        CircularProgressIndicator(
-                            modifier = Modifier.size(24.dp),
-                            color = RPCSXColors.primary,
-                        )
-                        Text(stringResource(R.string.game_folder_scanning))
-                    }
-                },
-                confirmButton = {},
+            ScanningFoldersOverlay(
+                ambientModel = fullscreenAmbientModel,
             )
         }
 
-        scannedFolderGames?.let { matches ->
+        folderImportResult?.let { result ->
             GameFolderScanDialog(
-                matches = matches,
-                onDismiss = {
-                    scannedFolderGames = null
-                    scannedFolderUri = null
-                },
-                onImport = {
-                    scannedFolderUri?.let { FileUtil.installPackages(context, it) }
-                    scannedFolderGames = null
-                    scannedFolderUri = null
-                },
+                result = result,
+                ambientModel = fullscreenAmbientModel,
+                onDismiss = { folderImportResult = null },
             )
+        }
+    }
+}
+
+private fun Modifier.gamepadClickable(onClick: () -> Unit): Modifier = this.onKeyEvent { event ->
+    if (event.type == KeyEventType.KeyDown &&
+        (event.nativeKeyEvent.keyCode == KeyEvent.KEYCODE_BUTTON_A ||
+         event.nativeKeyEvent.keyCode == KeyEvent.KEYCODE_DPAD_CENTER ||
+         event.nativeKeyEvent.keyCode == KeyEvent.KEYCODE_ENTER)
+    ) {
+        onClick()
+        true
+    } else false
+}
+
+@Composable
+private fun ScanningFoldersOverlay(
+    ambientModel: Any? = null,
+) {
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(Color.Black.copy(alpha = 0.58f)),
+        contentAlignment = Alignment.Center,
+    ) {
+        Box(
+            modifier = Modifier
+                .size(300.dp)
+                .blur(70.dp)
+                .background(
+                    Brush.radialGradient(
+                        listOf(
+                            RPCSXColors.primary.copy(alpha = 0.22f),
+                            Color.Transparent,
+                        )
+                    ),
+                    shape = CircleShape,
+                )
+        )
+
+        Surface(
+            shape = RoundedCornerShape(16.dp),
+            color = Color(0xF20E1524),
+            border = BorderStroke(1.dp, RPCSXColors.primary.copy(alpha = 0.35f)),
+            modifier = Modifier
+                .widthIn(min = 320.dp, max = 420.dp)
+                .padding(16.dp),
+            shadowElevation = 24.dp,
+        ) {
+            Box(Modifier.fillMaxWidth()) {
+                if (ambientModel != null) {
+                    AsyncImage(
+                        model = ambientModel,
+                        contentDescription = null,
+                        contentScale = ContentScale.Crop,
+                        modifier = Modifier
+                            .matchParentSize()
+                            .blur(20.dp)
+                            .alpha(0.35f),
+                    )
+                }
+                Box(
+                    modifier = Modifier
+                        .matchParentSize()
+                        .background(
+                            Brush.verticalGradient(
+                                listOf(
+                                    Color(0xF00D121F),
+                                    Color(0xF8080C14),
+                                )
+                            )
+                        )
+                )
+
+                Column(
+                    modifier = Modifier.padding(24.dp),
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    verticalArrangement = Arrangement.spacedBy(16.dp),
+                ) {
+                    Box(
+                        modifier = Modifier
+                            .size(58.dp)
+                            .background(RPCSXColors.primary.copy(alpha = 0.14f), CircleShape),
+                        contentAlignment = Alignment.Center,
+                    ) {
+                        CircularProgressIndicator(
+                            modifier = Modifier.size(38.dp),
+                            color = RPCSXColors.primary,
+                            strokeWidth = 3.dp,
+                            trackColor = Color(0x22FFFFFF),
+                        )
+                        Icon(
+                            painter = painterResource(R.drawable.ic_refresh),
+                            contentDescription = null,
+                            tint = RPCSXColors.primary,
+                            modifier = Modifier.size(18.dp),
+                        )
+                    }
+
+                    Column(
+                        horizontalAlignment = Alignment.CenterHorizontally,
+                        verticalArrangement = Arrangement.spacedBy(4.dp),
+                    ) {
+                        Text(
+                            text = stringResource(R.string.game_folder_scan_title).uppercase(),
+                            style = AppTypography.headlineSmall.copy(
+                                fontSize = 15.sp,
+                                fontWeight = FontWeight.Bold,
+                                letterSpacing = 1.2.sp,
+                            ),
+                            color = RPCSXColors.textPrimary,
+                        )
+                        Text(
+                            text = stringResource(R.string.game_folder_scanning),
+                            style = AppTypography.bodySmall.copy(fontSize = 12.sp),
+                            color = RPCSXColors.textSecondary,
+                            textAlign = TextAlign.Center,
+                        )
+                    }
+
+                    Surface(
+                        shape = RoundedCornerShape(8.dp),
+                        color = Color.White.copy(alpha = 0.05f),
+                        border = BorderStroke(1.dp, Color(0x18FFFFFF)),
+                        modifier = Modifier.fillMaxWidth(),
+                    ) {
+                        Row(
+                            modifier = Modifier.padding(horizontal = 12.dp, vertical = 10.dp),
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.spacedBy(10.dp),
+                        ) {
+                            Icon(
+                                painter = painterResource(R.drawable.ic_folder),
+                                contentDescription = null,
+                                tint = RPCSXColors.primary,
+                                modifier = Modifier.size(18.dp),
+                            )
+                            Text(
+                                text = "Indexing PS3 disc images and JB folder structures...",
+                                style = AppTypography.labelSmall.copy(fontSize = 11.sp),
+                                color = RPCSXColors.textSecondary,
+                            )
+                        }
+                    }
+                }
+            }
         }
     }
 }
 
 @Composable
 private fun GameFolderScanDialog(
-    matches: List<GameFolderMatch>,
+    result: DirectIsoManager.IsoFolderImportResult,
+    ambientModel: Any? = null,
     onDismiss: () -> Unit,
-    onImport: () -> Unit,
 ) {
-    AlertDialog(
-        onDismissRequest = onDismiss,
-        title = { Text(stringResource(R.string.game_folder_scan_title)) },
-        text = {
-            Column(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .heightIn(max = 420.dp)
-                    .verticalScroll(rememberScrollState()),
-                verticalArrangement = Arrangement.spacedBy(8.dp),
-            ) {
-                if (matches.isEmpty()) {
-                    Text(stringResource(R.string.game_folder_no_games))
-                } else {
-                    Text(stringResource(R.string.game_folder_found_count, matches.size))
-                    matches.forEach { match ->
-                        Surface(
-                            color = RPCSXColors.surfaceElevated,
-                            shape = RoundedCornerShape(6.dp),
-                            modifier = Modifier.fillMaxWidth(),
+    val focusRequester = remember { FocusRequester() }
+    var isDoneFocused by remember { mutableStateOf(false) }
+
+    LaunchedEffect(Unit) {
+        try { focusRequester.requestFocus() } catch (_: Exception) {}
+    }
+
+    BackHandler {
+        onDismiss()
+    }
+
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(Color.Black.copy(alpha = 0.62f))
+            .focusRequester(focusRequester)
+            .focusable()
+            .onPreviewKeyEvent { keyEvent ->
+                if (keyEvent.type == KeyEventType.KeyDown) {
+                    val code = keyEvent.nativeKeyEvent.keyCode
+                    when (code) {
+                        KeyEvent.KEYCODE_BUTTON_A,
+                        KeyEvent.KEYCODE_DPAD_CENTER,
+                        KeyEvent.KEYCODE_ENTER,
+                        KeyEvent.KEYCODE_BUTTON_B,
+                        KeyEvent.KEYCODE_BACK -> {
+                            onDismiss()
+                            true
+                        }
+                        else -> false
+                    }
+                } else false
+            },
+        contentAlignment = Alignment.Center,
+    ) {
+        Box(
+            modifier = Modifier
+                .size(360.dp)
+                .blur(80.dp)
+                .background(
+                    Brush.radialGradient(
+                        listOf(
+                            RPCSXColors.primary.copy(alpha = 0.18f),
+                            Color.Transparent,
+                        )
+                    ),
+                    shape = CircleShape,
+                )
+        )
+
+        Surface(
+            shape = RoundedCornerShape(16.dp),
+            color = Color(0xF20E1524),
+            border = BorderStroke(1.dp, RPCSXColors.primary.copy(alpha = 0.45f)),
+            modifier = Modifier
+                .widthIn(min = 400.dp, max = 540.dp)
+                .fillMaxWidth(0.88f)
+                .padding(16.dp),
+            shadowElevation = 28.dp,
+        ) {
+            Box(Modifier.fillMaxWidth()) {
+                if (ambientModel != null) {
+                    AsyncImage(
+                        model = ambientModel,
+                        contentDescription = null,
+                        contentScale = ContentScale.Crop,
+                        modifier = Modifier
+                            .matchParentSize()
+                            .blur(24.dp)
+                            .alpha(0.35f),
+                    )
+                }
+                Box(
+                    modifier = Modifier
+                        .matchParentSize()
+                        .background(
+                            Brush.verticalGradient(
+                                listOf(
+                                    Color(0xF00F1524),
+                                    Color(0xF8080C14),
+                                )
+                            )
+                        )
+                )
+
+                Column(
+                    modifier = Modifier.padding(horizontal = 20.dp, vertical = 18.dp),
+                    verticalArrangement = Arrangement.spacedBy(14.dp),
+                ) {
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                    ) {
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.spacedBy(8.dp),
                         ) {
-                            Column(modifier = Modifier.padding(10.dp)) {
+                            Surface(
+                                shape = RoundedCornerShape(6.dp),
+                                color = RPCSXColors.primary.copy(alpha = 0.15f),
+                                modifier = Modifier.size(32.dp),
+                            ) {
+                                Box(contentAlignment = Alignment.Center) {
+                                    Icon(
+                                        painter = painterResource(R.drawable.ic_folder),
+                                        contentDescription = null,
+                                        tint = RPCSXColors.primary,
+                                        modifier = Modifier.size(18.dp),
+                                    )
+                                }
+                            }
+                            Column {
                                 Text(
-                                    text = match.folderName,
-                                    style = AppTypography.bodyLarge,
+                                    text = stringResource(R.string.game_folder_scan_title).uppercase(),
+                                    style = AppTypography.headlineSmall.copy(
+                                        fontSize = 14.sp,
+                                        fontWeight = FontWeight.Bold,
+                                        letterSpacing = 1.sp,
+                                    ),
                                     color = RPCSXColors.textPrimary,
                                 )
-                                match.titleId?.let {
+                                Text(
+                                    text = "Folder refresh finished",
+                                    style = AppTypography.labelSmall.copy(fontSize = 10.sp),
+                                    color = RPCSXColors.textSecondary,
+                                )
+                            }
+                        }
+
+                        Row(
+                            horizontalArrangement = Arrangement.spacedBy(6.dp),
+                            verticalAlignment = Alignment.CenterVertically,
+                        ) {
+                            if (result.importedCount > 0) {
+                                Surface(
+                                    shape = RoundedCornerShape(4.dp),
+                                    color = Color(0x2656D364),
+                                    border = BorderStroke(1.dp, Color(0x5056D364)),
+                                ) {
                                     Text(
-                                        text = it,
-                                        style = AppTypography.labelMedium,
-                                        color = RPCSXColors.textSecondary,
+                                        text = "+${result.importedCount} NEW",
+                                        style = AppTypography.labelSmall.copy(fontSize = 9.sp, fontWeight = FontWeight.Bold),
+                                        color = Color(0xFF56D364),
+                                        modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp),
+                                    )
+                                }
+                            }
+                            if (result.alreadyImportedCount > 0) {
+                                Surface(
+                                    shape = RoundedCornerShape(4.dp),
+                                    color = Color(0x22E5A93C),
+                                    border = BorderStroke(1.dp, Color(0x50E5A93C)),
+                                ) {
+                                    Text(
+                                        text = "${result.alreadyImportedCount} INDEXED",
+                                        style = AppTypography.labelSmall.copy(fontSize = 9.sp, fontWeight = FontWeight.Bold),
+                                        color = Color(0xFFE5A93C),
+                                        modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp),
+                                    )
+                                }
+                            }
+                            if (result.failedCount > 0) {
+                                Surface(
+                                    shape = RoundedCornerShape(4.dp),
+                                    color = Color(0x26F85149),
+                                    border = BorderStroke(1.dp, Color(0x50F85149)),
+                                ) {
+                                    Text(
+                                        text = "${result.failedCount} FAILED",
+                                        style = AppTypography.labelSmall.copy(fontSize = 9.sp, fontWeight = FontWeight.Bold),
+                                        color = Color(0xFFF85149),
+                                        modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp),
                                     )
                                 }
                             }
                         }
                     }
+
+                    Column(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .heightIn(max = 280.dp)
+                            .verticalScroll(rememberScrollState()),
+                        verticalArrangement = Arrangement.spacedBy(8.dp),
+                    ) {
+                        if (result.entries.isEmpty()) {
+                            Surface(
+                                shape = RoundedCornerShape(8.dp),
+                                color = Color.White.copy(alpha = 0.04f),
+                                border = BorderStroke(1.dp, Color(0x18FFFFFF)),
+                                modifier = Modifier.fillMaxWidth(),
+                            ) {
+                                Column(
+                                    modifier = Modifier.padding(18.dp),
+                                    horizontalAlignment = Alignment.CenterHorizontally,
+                                    verticalArrangement = Arrangement.spacedBy(6.dp),
+                                ) {
+                                    Icon(
+                                        painter = painterResource(R.drawable.ic_check_circle),
+                                        contentDescription = null,
+                                        tint = RPCSXColors.primary,
+                                        modifier = Modifier.size(24.dp),
+                                    )
+                                    Text(
+                                        text = stringResource(R.string.game_folder_no_games),
+                                        style = AppTypography.bodyMedium.copy(fontWeight = FontWeight.SemiBold, fontSize = 13.sp),
+                                        color = RPCSXColors.textPrimary,
+                                        textAlign = TextAlign.Center,
+                                    )
+                                    Text(
+                                        text = "All game directories are already indexed in your library.",
+                                        style = AppTypography.bodySmall.copy(fontSize = 11.sp),
+                                        color = RPCSXColors.textSecondary,
+                                        textAlign = TextAlign.Center,
+                                    )
+                                }
+                            }
+                        } else {
+                            result.entries.forEach { entry ->
+                                val statusLabel: String
+                                val statusColor: Color
+                                val statusBg: Color
+                                val statusIcon: Int
+                                when (entry.status) {
+                                    DirectIsoManager.IsoImportStatus.IMPORTED -> {
+                                        statusLabel = stringResource(R.string.onboarding_iso_status_imported)
+                                        statusColor = Color(0xFF56D364)
+                                        statusBg = Color(0x2256D364)
+                                        statusIcon = R.drawable.ic_check_circle
+                                    }
+                                    DirectIsoManager.IsoImportStatus.ALREADY_IMPORTED -> {
+                                        statusLabel = stringResource(R.string.onboarding_iso_status_already)
+                                        statusColor = Color(0xFFE5A93C)
+                                        statusBg = Color(0x22E5A93C)
+                                        statusIcon = R.drawable.ic_check_circle
+                                    }
+                                    DirectIsoManager.IsoImportStatus.FAILED -> {
+                                        statusLabel = entry.message ?: stringResource(R.string.onboarding_iso_status_failed_generic)
+                                        statusColor = RPCSXColors.errorColor
+                                        statusBg = Color(0x26F85149)
+                                        statusIcon = R.drawable.circle
+                                    }
+                                }
+
+                                Surface(
+                                    shape = RoundedCornerShape(8.dp),
+                                    color = Color.White.copy(alpha = 0.04f),
+                                    border = BorderStroke(1.dp, Color(0x18FFFFFF)),
+                                    modifier = Modifier.fillMaxWidth(),
+                                ) {
+                                    Row(
+                                        modifier = Modifier.padding(horizontal = 12.dp, vertical = 10.dp),
+                                        verticalAlignment = Alignment.CenterVertically,
+                                        horizontalArrangement = Arrangement.spacedBy(10.dp),
+                                    ) {
+                                        Icon(
+                                            painter = painterResource(statusIcon),
+                                            contentDescription = null,
+                                            tint = statusColor,
+                                            modifier = Modifier.size(18.dp),
+                                        )
+
+                                        Column(modifier = Modifier.weight(1f)) {
+                                            Text(
+                                                text = entry.displayName,
+                                                style = AppTypography.bodyMedium.copy(fontWeight = FontWeight.SemiBold, fontSize = 12.sp),
+                                                color = RPCSXColors.textPrimary,
+                                                maxLines = 1,
+                                                overflow = TextOverflow.Ellipsis,
+                                            )
+                                            entry.titleId?.let { tid ->
+                                                Text(
+                                                    text = tid,
+                                                    style = AppTypography.labelSmall.copy(fontSize = 10.sp),
+                                                    color = RPCSXColors.textSecondary,
+                                                )
+                                            }
+                                        }
+
+                                        Surface(
+                                            shape = RoundedCornerShape(4.dp),
+                                            color = statusBg,
+                                            border = BorderStroke(1.dp, statusColor.copy(alpha = 0.5f)),
+                                        ) {
+                                            Text(
+                                                text = statusLabel.uppercase(),
+                                                style = AppTypography.labelSmall.copy(fontSize = 9.sp, fontWeight = FontWeight.Bold),
+                                                color = statusColor,
+                                                modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp),
+                                                maxLines = 1,
+                                                overflow = TextOverflow.Ellipsis,
+                                            )
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+
+                    Surface(
+                        onClick = onDismiss,
+                        shape = RoundedCornerShape(8.dp),
+                        color = if (isDoneFocused) Color(0xFFFFCC00) else Color(0xFFFFB800),
+                        border = if (isDoneFocused) BorderStroke(2.dp, Color.White) else BorderStroke(1.dp, Color(0x60FFFFFF)),
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(40.dp)
+                            .onFocusChanged { isDoneFocused = it.isFocused }
+                            .gamepadClickable(onDismiss),
+                    ) {
+                        Row(
+                            modifier = Modifier.fillMaxSize(),
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.Center,
+                        ) {
+                            Icon(
+                                painter = painterResource(R.drawable.cross),
+                                contentDescription = null,
+                                tint = Color(0xFF0D1117),
+                                modifier = Modifier.size(13.dp),
+                            )
+                            Spacer(Modifier.width(6.dp))
+                            Text(
+                                text = stringResource(android.R.string.ok).uppercase(),
+                                fontWeight = FontWeight.ExtraBold,
+                                fontSize = 13.sp,
+                                color = Color(0xFF0D1117),
+                            )
+                        }
+                    }
                 }
             }
-        },
-        confirmButton = {
-            TextButton(onClick = onImport, enabled = matches.isNotEmpty()) {
-                Text(stringResource(R.string.game_folder_import_found))
-            }
-        },
-        dismissButton = {
-            TextButton(onClick = onDismiss) {
-                Text(stringResource(android.R.string.cancel))
-            }
-        },
-    )
+        }
+    }
 }
 
 @Composable
@@ -2326,6 +2791,263 @@ fun ImportTopBarButton(
                     color = RPCSXColors.textPrimary
                 )
             }
+        }
+    }
+}
+
+@Composable
+private fun IsoFoldersTopBarButton(
+    folders: List<com.zenithblue.sambas3.utils.ScannedFolder>,
+    ambientModel: Any? = null,
+    expanded: Boolean,
+    onExpandedChange: (Boolean) -> Unit,
+    onAddFolder: () -> Unit,
+    onRemoveFolder: (String) -> Unit,
+) {
+    var buttonHeightPx by remember { mutableIntStateOf(0) }
+    val density = LocalDensity.current
+    val popupGapPx = with(density) { 8.dp.roundToPx() }
+    Box(modifier = Modifier.onSizeChanged { buttonHeightPx = it.height }) {
+        FrostedGlassBox(
+            ambientModel = ambientModel,
+            shape = RoundedCornerShape(4.dp),
+            border = null,
+            modifier = Modifier.clickable { onExpandedChange(!expanded) },
+        ) {
+            Row(
+                modifier = Modifier.padding(horizontal = 7.dp, vertical = 4.dp),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(4.dp),
+            ) {
+                Image(
+                    painter = painterResource(R.drawable.l2),
+                    contentDescription = "L2",
+                    modifier = Modifier.size(15.dp),
+                )
+                Icon(
+                    painter = painterResource(R.drawable.ic_folder),
+                    contentDescription = stringResource(R.string.iso_folders),
+                    tint = RPCSXColors.primary,
+                    modifier = Modifier.size(15.dp),
+                )
+                Text(
+                    text = stringResource(R.string.iso_folders).uppercase(),
+                    style = AppTypography.labelSmall.copy(
+                        fontSize = 11.sp,
+                        fontWeight = FontWeight.Bold,
+                        letterSpacing = 0.8.sp,
+                    ),
+                    color = RPCSXColors.textPrimary,
+                )
+                if (folders.isNotEmpty()) {
+                    Text(
+                        text = folders.size.toString(),
+                        style = AppTypography.labelSmall.copy(fontSize = 10.sp, fontWeight = FontWeight.Bold),
+                        color = RPCSXColors.primary,
+                    )
+                }
+                Icon(
+                    painter = painterResource(if (expanded) R.drawable.ic_keyboard_arrow_down else R.drawable.ic_keyboard_arrow_up),
+                    contentDescription = null,
+                    tint = RPCSXColors.textSecondary,
+                    modifier = Modifier.size(14.dp),
+                )
+            }
+        }
+        if (expanded) {
+            Popup(
+                alignment = Alignment.BottomStart,
+                offset = IntOffset(0, -(buttonHeightPx + popupGapPx)),
+                onDismissRequest = { onExpandedChange(false) },
+                properties = PopupProperties(focusable = true, dismissOnClickOutside = true),
+            ) {
+                val menuShape = RoundedCornerShape(10.dp)
+                Box(
+                    modifier = Modifier
+                        .widthIn(min = 240.dp, max = 340.dp)
+                        .clip(menuShape)
+                        .border(BorderStroke(1.dp, Color(0x33FFFFFF)), menuShape)
+                ) {
+                    if (ambientModel != null) {
+                        AsyncImage(
+                            model = ambientModel,
+                            contentDescription = null,
+                            contentScale = ContentScale.Crop,
+                            alignment = Alignment.BottomStart,
+                            modifier = Modifier
+                                .matchParentSize()
+                                .blur(radius = 28.dp)
+                                .alpha(0.95f),
+                        )
+                    }
+                    Box(
+                        modifier = Modifier
+                            .matchParentSize()
+                            .background(
+                                Brush.verticalGradient(
+                                    listOf(
+                                        Color(0xCC0C101D),
+                                        Color(0xE60C101D),
+                                    )
+                                )
+                            )
+                    )
+                    Column(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(horizontal = 10.dp, vertical = 8.dp),
+                        verticalArrangement = Arrangement.spacedBy(4.dp),
+                    ) {
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(horizontal = 4.dp, vertical = 4.dp),
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.SpaceBetween,
+                        ) {
+                            Text(
+                                text = stringResource(R.string.iso_folders).uppercase(),
+                                style = AppTypography.labelSmall.copy(
+                                    fontSize = 10.sp,
+                                    fontWeight = FontWeight.Bold,
+                                    letterSpacing = 1.sp,
+                                ),
+                                color = RPCSXColors.primary,
+                            )
+                            Row(
+                                verticalAlignment = Alignment.CenterVertically,
+                                horizontalArrangement = Arrangement.spacedBy(3.dp),
+                            ) {
+                                Image(
+                                    painter = painterResource(R.drawable.l2),
+                                    contentDescription = null,
+                                    modifier = Modifier.size(12.dp),
+                                )
+                                Text(
+                                    text = "CLOSE",
+                                    style = AppTypography.labelSmall.copy(fontSize = 9.sp),
+                                    color = RPCSXColors.textSecondary,
+                                )
+                            }
+                        }
+                        if (folders.isEmpty()) {
+                            Text(
+                                text = stringResource(R.string.iso_folders_empty),
+                                color = RPCSXColors.textSecondary,
+                                style = AppTypography.labelSmall,
+                                modifier = Modifier.padding(horizontal = 8.dp, vertical = 10.dp),
+                            )
+                        } else {
+                            folders.forEach { folder ->
+                                Row(
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .clip(RoundedCornerShape(6.dp))
+                                        .background(Color.White.copy(alpha = 0.04f))
+                                        .padding(horizontal = 8.dp, vertical = 8.dp),
+                                    verticalAlignment = Alignment.CenterVertically,
+                                    horizontalArrangement = Arrangement.spacedBy(8.dp),
+                                ) {
+                                    Icon(
+                                        painter = painterResource(R.drawable.ic_folder),
+                                        contentDescription = null,
+                                        tint = RPCSXColors.primary,
+                                        modifier = Modifier.size(14.dp),
+                                    )
+                                    Text(
+                                        text = folder.displayName,
+                                        color = RPCSXColors.textPrimary,
+                                        style = AppTypography.labelSmall,
+                                        maxLines = 1,
+                                        overflow = TextOverflow.Ellipsis,
+                                        modifier = Modifier.weight(1f),
+                                    )
+                                    Icon(
+                                        painter = painterResource(R.drawable.ic_delete),
+                                        contentDescription = stringResource(R.string.iso_folders_remove),
+                                        tint = RPCSXColors.errorColor,
+                                        modifier = Modifier
+                                            .size(16.dp)
+                                            .clickable { onRemoveFolder(folder.treeUri) },
+                                    )
+                                }
+                            }
+                        }
+                        Box(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .height(1.dp)
+                                .background(
+                                    Brush.horizontalGradient(
+                                        listOf(
+                                            Color.Transparent,
+                                            RPCSXColors.primary.copy(alpha = 0.45f),
+                                            Color.Transparent,
+                                        )
+                                    )
+                                )
+                        )
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .clip(RoundedCornerShape(6.dp))
+                                .clickable {
+                                    onExpandedChange(false)
+                                    onAddFolder()
+                                }
+                                .padding(horizontal = 8.dp, vertical = 8.dp),
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.spacedBy(8.dp),
+                        ) {
+                            Icon(
+                                painter = painterResource(R.drawable.ic_add),
+                                contentDescription = null,
+                                tint = RPCSXColors.primary,
+                                modifier = Modifier.size(16.dp),
+                            )
+                            Text(
+                                text = stringResource(R.string.iso_folders_add),
+                                color = RPCSXColors.primary,
+                                style = AppTypography.labelSmall.copy(fontWeight = FontWeight.Bold),
+                            )
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+
+@Composable
+private fun RefreshFoldersTopBarButton(
+    enabled: Boolean,
+    ambientModel: Any? = null,
+    onClick: () -> Unit,
+) {
+    FrostedGlassBox(
+        ambientModel = ambientModel,
+        shape = RoundedCornerShape(4.dp),
+        border = null,
+        modifier = Modifier.clickable(enabled = enabled, onClick = onClick),
+    ) {
+        Row(
+            modifier = Modifier.padding(horizontal = 7.dp, vertical = 4.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(4.dp),
+        ) {
+            Image(
+                painter = painterResource(R.drawable.r2),
+                contentDescription = "R2",
+                modifier = Modifier
+                    .size(15.dp)
+                    .alpha(if (enabled) 1f else 0.4f),
+            )
+            Icon(
+                painter = painterResource(R.drawable.ic_refresh),
+                contentDescription = stringResource(R.string.iso_folders_refresh),
+                tint = if (enabled) RPCSXColors.primary else RPCSXColors.textDisabled,
+                modifier = Modifier.size(15.dp),
+            )
         }
     }
 }
@@ -3141,14 +3863,7 @@ private fun TabletHomeScreen(
                             onClick = onInstallFirmware
                         )
                     }
-                    is PagerItem.SourceCandidate -> {
-                        SourceCandidateCard(
-                            item = item,
-                            distance = distance,
-                            onClick = { coroutineScope.launch { pagerState.animateScrollToPage(page) } },
-                            onImport = {}
-                        )
-                    }
+                    is PagerItem.SourceCandidate -> { }
                     is PagerItem.PendingImport -> {
                         PendingImportCard(
                             item = item,
@@ -3595,122 +4310,6 @@ fun bootGame(context: android.content.Context, game: Game, savestatePath: String
 }
 
 @Composable
-fun SourceCandidateCard(
-    item: PagerItem.SourceCandidate,
-    distance: Int,
-    onClick: () -> Unit,
-    onImport: () -> Unit
-) {
-    val isFocused = distance == 0
-    val targetScale = if (isFocused) 1.12f else if (distance == 1) 0.95f else 0.85f
-    val targetAlpha = if (isFocused) 1.0f else if (distance == 1) 0.85f else 0.65f
-    val scale by animateFloatAsState(targetScale, animationSpec = tween(300))
-    val alpha by animateFloatAsState(targetAlpha, animationSpec = tween(300))
-    val glowIntensity by animateDpAsState(
-        targetValue = if (isFocused) 20.dp else 0.dp,
-        animationSpec = tween(200)
-    )
-    val context = LocalContext.current
-    var preview by remember(item.sourceUri) { mutableStateOf<GamePreviewModel>(GamePreviewModel.None) }
-    LaunchedEffect(item.sourceUri, item.sourceKind) {
-        try {
-            val uri = try { Uri.parse(item.sourceUri) } catch (_: Exception) { null }
-            if (uri != null) {
-                val kind = item.sourceKind ?: if (item.sourceUri.endsWith(".iso", ignoreCase = true) || item.displayName.endsWith(".iso", ignoreCase = true)) com.zenithblue.sambas3.utils.GameSourceKind.ISO else com.zenithblue.sambas3.utils.GameSourceKind.DIRECTORY
-                val result = GamePreviewRepository.resolvePreview(context, uri, kind)
-                preview = result
-                if (result is GamePreviewModel.None) {
-                    Log.d("GamePreview", "candidate preview None for ${item.displayName} uri=${item.sourceUri} kind=$kind")
-                }
-            }
-        } catch (e: Exception) {
-            Log.w("GamePreview", "candidate preview failed ${item.displayName}: ${e.message}")
-            preview = GamePreviewModel.None
-        }
-    }
-    val coilModel: Any? = when (preview) {
-        is GamePreviewModel.LocalFile -> (preview as GamePreviewModel.LocalFile).file
-        is GamePreviewModel.ContentUri -> (preview as GamePreviewModel.ContentUri).uri
-        is GamePreviewModel.None -> null
-    }
-    BoxWithConstraints(
-        modifier = Modifier
-            .fillMaxSize()
-            .scale(scale)
-            .alpha(alpha)
-            .combinedClickable(onClick = { if (isFocused) onImport() else onClick() })
-            .shadow(
-                elevation = glowIntensity,
-                spotColor = RPCSXColors.focusGlow,
-                ambientColor = RPCSXColors.focusGlow,
-                shape = RoundedCornerShape(8.dp)
-            )
-            .border(
-                width = if (isFocused) 2.dp else 1.dp,
-                color = if (isFocused) RPCSXColors.focusRing else RPCSXColors.surfaceOverlay,
-                shape = RoundedCornerShape(8.dp)
-            )
-    ) {
-        Surface(shape = RoundedCornerShape(8.dp), color = RPCSXColors.surface, modifier = Modifier.fillMaxSize()) {
-            Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                // Preview artwork — blurred background + crisp foreground, fallback to text-only if None
-                if (coilModel != null) {
-                    AsyncImage(
-                        model = coilModel,
-                        contentDescription = null,
-                        contentScale = ContentScale.Crop,
-                        modifier = Modifier.fillMaxSize().blur(radius = 16.dp).alpha(0.55f),
-                        onError = { err ->
-                            Log.w("GamePreview", "candidate preview load failed ${item.displayName} uri=${item.sourceUri} err=${err.result.throwable?.message}")
-                        }
-                    )
-                    Box(modifier = Modifier.fillMaxSize().background(Color.Black.copy(alpha = 0.35f)))
-                    AsyncImage(
-                        model = coilModel,
-                        contentDescription = null,
-                        contentScale = ContentScale.Fit,
-                        modifier = Modifier.fillMaxSize().padding(12.dp),
-                        onError = { err ->
-                            Log.w("GamePreview", "candidate preview load failed fg ${item.displayName} err=${err.result.throwable?.message}")
-                        }
-                    )
-                    // Dark scrim for text readability
-                    Box(modifier = Modifier.fillMaxSize().background(Color.Black.copy(alpha = 0.25f)))
-                }
-                Column(horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(10.dp), modifier = Modifier.padding(16.dp)) {
-                    Text(
-                        text = item.displayName.uppercase().take(28),
-                        style = AppTypography.headlineMedium.copy(letterSpacing = 1.sp),
-                        color = RPCSXColors.primary,
-                        textAlign = TextAlign.Center,
-                        maxLines = 2
-                    )
-                    Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
-                        InfoBadge(text = "ISO", color = RPCSXColors.textSecondary)
-                        if (item.titleId != null) InfoBadge(text = item.titleId!!)
-                    }
-                    Text("Not installed", style = AppTypography.labelSmall, color = RPCSXColors.textSecondary)
-                    Column(horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(2.dp)) {
-                        Text("Pre-runtime PPU: Not done", style = AppTypography.labelSmall.copy(fontSize = 10.sp), color = RPCSXColors.textSecondary)
-                        Text("Runtime PPU: Not started", style = AppTypography.labelSmall.copy(fontSize = 10.sp), color = RPCSXColors.textSecondary)
-                    }
-                    if (isFocused) {
-                        Button(
-                            onClick = onImport,
-                            colors = ButtonDefaults.buttonColors(containerColor = RPCSXColors.primary, contentColor = RPCSXColors.background),
-                            shape = RoundedCornerShape(4.dp)
-                        ) { Text("IMPORT", style = AppTypography.labelSmall) }
-                    }
-                }
-            }
-        }
-        if (isFocused) {
-            Box(modifier = Modifier.fillMaxSize().background(Brush.linearGradient(listOf(Color.White.copy(alpha = 0.1f), Color.Transparent))))
-        }
-    }
-}
-
-@Composable
 fun PendingImportCard(
     item: PagerItem.PendingImport,
     distance: Int,
@@ -3761,10 +4360,9 @@ fun PendingImportCard(
 @Composable
 fun ImportMethodDialog(
     onDismiss: () -> Unit,
-    onImportFolder: () -> Unit,
     onImportIso: () -> Unit
 ) {
-    var focusedIndex by remember { mutableIntStateOf(0) } // 0 = Folder, 1 = ISO, 2 = Cancel
+    var focusedIndex by remember { mutableIntStateOf(0) } // 0 = ISO, 1 = Cancel
     val focusRequester = remember { FocusRequester() }
 
     LaunchedEffect(Unit) {
@@ -3792,7 +4390,7 @@ fun ImportMethodDialog(
                             true
                         }
                         keyEvent.key == Key.DirectionDown || code == KeyEvent.KEYCODE_DPAD_DOWN -> {
-                            focusedIndex = (focusedIndex + 1).coerceAtMost(2)
+                            focusedIndex = (focusedIndex + 1).coerceAtMost(1)
                             true
                         }
                         keyEvent.key == Key.DirectionCenter ||
@@ -3802,9 +4400,8 @@ fun ImportMethodDialog(
                         code == KeyEvent.KEYCODE_BUTTON_A ||
                         code == KeyEvent.KEYCODE_ENTER -> {
                             when (focusedIndex) {
-                                0 -> onImportFolder()
-                                1 -> onImportIso()
-                                2 -> onDismiss()
+                                0 -> onImportIso()
+                                1 -> onDismiss()
                             }
                             true
                         }
@@ -3886,21 +4483,11 @@ fun ImportMethodDialog(
                         )
                 )
 
-                // Option 1: Game Folder
-                ImportOptionTile(
-                    title = "GAME FOLDER",
-                    formatTag = "PS3_GAME",
-                    iconRes = R.drawable.ic_folder,
-                    isFocused = focusedIndex == 0,
-                    onClick = onImportFolder
-                )
-
-                // Option 2: ISO Image
                 ImportOptionTile(
                     title = "ISO FILE",
                     formatTag = "DISC IMAGE",
                     iconRes = R.drawable.hard_drive,
-                    isFocused = focusedIndex == 1,
+                    isFocused = focusedIndex == 0,
                     onClick = onImportIso
                 )
 
@@ -3969,10 +4556,10 @@ fun ImportMethodDialog(
                         onClick = onDismiss,
                         shape = RoundedCornerShape(4.dp),
                         colors = ButtonDefaults.textButtonColors(
-                            containerColor = if (focusedIndex == 2) RPCSXColors.primaryMuted else Color.Transparent,
-                            contentColor = if (focusedIndex == 2) RPCSXColors.primary else RPCSXColors.textSecondary
+                            containerColor = if (focusedIndex == 1) RPCSXColors.primaryMuted else Color.Transparent,
+                            contentColor = if (focusedIndex == 1) RPCSXColors.primary else RPCSXColors.textSecondary
                         ),
-                        border = if (focusedIndex == 2) BorderStroke(1.dp, RPCSXColors.focusRing) else null,
+                        border = if (focusedIndex == 1) BorderStroke(1.dp, RPCSXColors.focusRing) else null,
                         contentPadding = PaddingValues(horizontal = 10.dp, vertical = 4.dp)
                     ) {
                         Text(

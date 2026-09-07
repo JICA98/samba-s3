@@ -1,5 +1,6 @@
 package com.zenithblue.sambas3
 
+import com.zenithblue.sambas3.iso.DirectIsoManager
 import com.zenithblue.sambas3.iso.DirectIsoSession
 import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.encodeToString
@@ -107,6 +108,80 @@ class DirectIsoTest {
         // Unit tests run against the debug variant, where direct ISO loading must be on.
         // Release keeps the legacy install/copy path (verified via release build type config).
         assertTrue(BuildConfig.DIRECT_ISO_LOADING)
+    }
+
+    @Test
+    fun matchExistingGame_detectsSameUriAndTitleId() {
+        assertTrue(
+            DirectIsoManager.matchExistingGame(
+                gamePath = "direct_iso/BLUS31584",
+                gameName = "GTA San Andreas",
+                gameSourceUri = "content://tree/doc/gta.iso",
+                incomingUri = "content://tree/doc/gta.iso",
+                incomingTitleId = null,
+            )
+        )
+        assertTrue(
+            DirectIsoManager.matchExistingGame(
+                gamePath = "direct_iso/BLUS31584",
+                gameName = "GTA San Andreas",
+                gameSourceUri = "content://other/iso",
+                incomingUri = "content://tree/doc/gta.iso",
+                incomingTitleId = "BLUS31584",
+            )
+        )
+        assertTrue(
+            DirectIsoManager.matchExistingGame(
+                gamePath = "/files/config/games/BLUS31584",
+                gameName = "GTA San Andreas",
+                gameSourceUri = null,
+                incomingUri = "content://tree/doc/gta.iso",
+                incomingTitleId = "BLUS31584",
+            )
+        )
+        assertFalse(
+            DirectIsoManager.matchExistingGame(
+                gamePath = "direct_iso/BCUS98114",
+                gameName = "Other",
+                gameSourceUri = "content://other/iso",
+                incomingUri = "content://tree/doc/gta.iso",
+                incomingTitleId = "BLUS31584",
+            )
+        )
+    }
+
+    @Test
+    fun mergeFolderResults_prefersImportedAndDedupesTitleId() {
+        val first = DirectIsoManager.IsoFolderImportResult(
+            entries = listOf(
+                DirectIsoManager.IsoImportEntry("A.iso", "BLUS31584", "content://a", DirectIsoManager.IsoImportStatus.FAILED, "bad"),
+            )
+        )
+        val second = DirectIsoManager.IsoFolderImportResult(
+            entries = listOf(
+                DirectIsoManager.IsoImportEntry("A-fixed.iso", "BLUS31584", "content://a2", DirectIsoManager.IsoImportStatus.IMPORTED),
+                DirectIsoManager.IsoImportEntry("B.iso", "BCUS98114", "content://b", DirectIsoManager.IsoImportStatus.ALREADY_IMPORTED),
+            )
+        )
+        val merged = DirectIsoManager.mergeFolderResults(first, second)
+        assertEquals(2, merged.entries.size)
+        assertEquals(DirectIsoManager.IsoImportStatus.IMPORTED, merged.entries.first { it.titleId == "BLUS31584" }.status)
+        assertEquals(1, merged.importedCount)
+        assertEquals(1, merged.alreadyImportedCount)
+    }
+
+    @Test
+    fun isoFolderImportResult_countsStatuses() {
+        val result = DirectIsoManager.IsoFolderImportResult(
+            entries = listOf(
+                DirectIsoManager.IsoImportEntry("A.iso", "BLUS31584", "content://a", DirectIsoManager.IsoImportStatus.IMPORTED),
+                DirectIsoManager.IsoImportEntry("B.iso", "BLUS31584", "content://b", DirectIsoManager.IsoImportStatus.ALREADY_IMPORTED),
+                DirectIsoManager.IsoImportEntry("C.iso", null, "content://c", DirectIsoManager.IsoImportStatus.FAILED, "bad iso"),
+            )
+        )
+        assertEquals(1, result.importedCount)
+        assertEquals(1, result.alreadyImportedCount)
+        assertEquals(1, result.failedCount)
     }
 
     @Test

@@ -60,7 +60,11 @@ import com.zenithblue.sambas3.AppTypography
 import com.zenithblue.sambas3.FirmwareStatus
 import com.zenithblue.sambas3.R
 import com.zenithblue.sambas3.RPCSXColors
+import coil3.compose.AsyncImage
+import com.zenithblue.sambas3.iso.DirectIsoManager
 import com.zenithblue.sambas3.utils.GameFolderMatch
+import com.zenithblue.sambas3.utils.ScannedFolder
+import java.io.File
 
 data class OnboardingDeviceInfo(
     val deviceName: String,
@@ -211,6 +215,8 @@ fun OnboardingPageContent(
     gameCount: Int,
     scannedGames: List<GameFolderMatch>?,
     scanningGames: Boolean,
+    isoImportResult: DirectIsoManager.IsoFolderImportResult?,
+    scannedFolders: List<ScannedFolder> = emptyList(),
     runtimeAvailable: Boolean,
     firmwareActionEnabled: Boolean,
     gameFolderActionEnabled: Boolean,
@@ -253,11 +259,11 @@ fun OnboardingPageContent(
         5 -> OnboardingHeroMeta(
             iconRes = R.drawable.hw_game_folder,
             title = stringResource(R.string.onboarding_page_games),
-            subtitle = "Locate and scan your PS3 game directory.",
+            subtitle = "Select a folder of PS3 ISO files. They are indexed in place.",
             stepLabel = "STEP 6 OF 7",
         )
         else -> OnboardingHeroMeta(
-            iconRes = R.drawable.ic_onboarding_complete,
+            iconRes = R.drawable.hw_controller_icon,
             title = stringResource(R.string.onboarding_page_complete),
             subtitle = "Setup is complete. Ready to play PS3 games.",
             stepLabel = "STEP 7 OF 7",
@@ -300,6 +306,8 @@ fun OnboardingPageContent(
                         gameCount = gameCount,
                         scannedGames = scannedGames,
                         scanningGames = scanningGames,
+                        isoImportResult = isoImportResult,
+                        scannedFolders = scannedFolders,
                         runtimeAvailable = runtimeAvailable,
                         firmwareActionEnabled = firmwareActionEnabled,
                         gameFolderActionEnabled = gameFolderActionEnabled,
@@ -336,6 +344,8 @@ fun OnboardingPageContent(
                         gameCount = gameCount,
                         scannedGames = scannedGames,
                         scanningGames = scanningGames,
+                        isoImportResult = isoImportResult,
+                        scannedFolders = scannedFolders,
                         runtimeAvailable = runtimeAvailable,
                         firmwareActionEnabled = firmwareActionEnabled,
                         gameFolderActionEnabled = gameFolderActionEnabled,
@@ -364,6 +374,8 @@ private fun RenderPageBody(
     gameCount: Int,
     scannedGames: List<GameFolderMatch>?,
     scanningGames: Boolean,
+    isoImportResult: DirectIsoManager.IsoFolderImportResult?,
+    scannedFolders: List<ScannedFolder> = emptyList(),
     runtimeAvailable: Boolean,
     firmwareActionEnabled: Boolean,
     gameFolderActionEnabled: Boolean,
@@ -391,6 +403,8 @@ private fun RenderPageBody(
             gameCount = gameCount,
             scannedGames = scannedGames,
             scanningGames = scanningGames,
+            isoImportResult = isoImportResult,
+            scannedFolders = scannedFolders,
             runtimeAvailable = runtimeAvailable,
             actionEnabled = gameFolderActionEnabled,
             onSelectFolder = onSelectGameFolder,
@@ -543,11 +557,21 @@ private fun HeroShowcase(
                         }
                     }
                 } else {
-                    Image(
-                        painter = painterResource(hero.iconRes),
-                        contentDescription = null,
-                        modifier = Modifier.size(96.dp),
-                    )
+                    Surface(
+                        shape = RoundedCornerShape(20.dp),
+                        color = Color(0xCC0D111A),
+                        border = BorderStroke(1.5.dp, Brush.verticalGradient(listOf(RPCSXColors.primary, Color(0x33E5A93C)))),
+                        modifier = Modifier.size(92.dp),
+                    ) {
+                        Box(contentAlignment = Alignment.Center, modifier = Modifier.fillMaxSize().padding(12.dp)) {
+                            Image(
+                                painter = painterResource(R.drawable.hw_controller_icon),
+                                contentDescription = null,
+                                modifier = Modifier.fillMaxSize(),
+                                contentScale = ContentScale.Fit,
+                            )
+                        }
+                    }
                 }
 
                 Spacer(Modifier.height(10.dp))
@@ -656,9 +680,10 @@ private fun CompactHeroHeader(hero: OnboardingHeroMeta, page: Int, deviceInfo: O
                 )
             } else {
                 Image(
-                    painter = painterResource(hero.iconRes),
+                    painter = painterResource(R.drawable.hw_controller_icon),
                     contentDescription = null,
                     modifier = Modifier.size(38.dp),
+                    contentScale = ContentScale.Fit,
                 )
             }
             Column(modifier = Modifier.weight(1f)) {
@@ -1413,6 +1438,8 @@ private fun GameLibraryPage(
     gameCount: Int,
     scannedGames: List<GameFolderMatch>?,
     scanningGames: Boolean,
+    isoImportResult: DirectIsoManager.IsoFolderImportResult?,
+    scannedFolders: List<ScannedFolder> = emptyList(),
     runtimeAvailable: Boolean,
     actionEnabled: Boolean,
     onSelectFolder: () -> Unit,
@@ -1460,34 +1487,68 @@ private fun GameLibraryPage(
             }
         }
 
-        scannedGames?.let { matches ->
+        Text(
+            text = stringResource(R.string.onboarding_game_library_intro),
+            style = AppTypography.bodySmall.copy(fontSize = 11.sp),
+            color = RPCSXColors.textSecondary,
+        )
+
+        if (scannedFolders.isNotEmpty()) {
+            Text(
+                text = stringResource(R.string.scanned_folders_count, scannedFolders.size).uppercase(),
+                style = AppTypography.labelSmall.copy(fontSize = 9.sp, letterSpacing = 0.8.sp),
+                color = RPCSXColors.textSecondary,
+            )
+            scannedFolders.forEach { folder ->
+                Text(
+                    text = "• ${folder.displayName}",
+                    style = AppTypography.bodySmall.copy(fontSize = 11.sp),
+                    color = RPCSXColors.textPrimary,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis,
+                )
+            }
+        }
+
+        val scannedEntries = isoImportResult?.entries.orEmpty().ifEmpty {
+            scannedGames.orEmpty().map { match ->
+                DirectIsoManager.IsoImportEntry(
+                    displayName = match.folderName,
+                    titleId = match.titleId,
+                    uri = match.sourceUri?.toString().orEmpty(),
+                    status = DirectIsoManager.IsoImportStatus.IMPORTED,
+                )
+            }
+        }
+        if (isoImportResult != null || !scannedGames.isNullOrEmpty()) {
             Surface(
                 modifier = Modifier.fillMaxWidth(),
                 shape = RoundedCornerShape(8.dp),
                 color = RPCSXColors.surfaceElevated.copy(alpha = 0.7f),
                 border = BorderStroke(1.dp, Color(0x3330363D)),
             ) {
-                Column(modifier = Modifier.padding(10.dp), verticalArrangement = Arrangement.spacedBy(4.dp)) {
-                    Text(
-                        text = "SCANNED DIRECTORIES (${matches.size})",
-                        style = AppTypography.labelSmall.copy(fontSize = 9.sp, letterSpacing = 0.8.sp),
-                        color = RPCSXColors.textSecondary,
-                    )
-                    if (matches.isEmpty()) {
+                Column(modifier = Modifier.padding(10.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
+                    if (isoImportResult != null) {
                         Text(
-                            text = stringResource(R.string.onboarding_no_games_found),
+                            text = stringResource(
+                                R.string.iso_folder_import_summary,
+                                isoImportResult.importedCount,
+                                isoImportResult.alreadyImportedCount,
+                                isoImportResult.failedCount,
+                            ).uppercase(),
+                            style = AppTypography.labelSmall.copy(fontSize = 9.sp, letterSpacing = 0.8.sp),
+                            color = RPCSXColors.textSecondary,
+                        )
+                    }
+                    if (scannedEntries.isEmpty()) {
+                        Text(
+                            text = stringResource(R.string.onboarding_no_isos_found),
                             style = AppTypography.bodySmall.copy(fontSize = 11.sp),
                             color = RPCSXColors.textSecondary,
                         )
                     } else {
-                        matches.take(3).forEach { match ->
-                            Text(
-                                text = "• ${match.titleId ?: "Game"}: ${match.folderName}",
-                                style = AppTypography.bodySmall.copy(fontSize = 11.sp),
-                                color = RPCSXColors.textPrimary,
-                                maxLines = 1,
-                                overflow = TextOverflow.Ellipsis,
-                            )
+                        scannedEntries.forEach { entry ->
+                            ScannedGameRow(entry)
                         }
                     }
                 }
@@ -1524,13 +1585,73 @@ private fun GameLibraryPage(
                 Spacer(Modifier.width(8.dp))
                 Text(
                     text = stringResource(
-                        if (scanningGames) R.string.onboarding_scanning_games else R.string.onboarding_scan_game_folder
+                        when {
+                            scanningGames -> R.string.onboarding_importing_games
+                            scannedFolders.isNotEmpty() -> R.string.onboarding_add_another_folder
+                            else -> R.string.onboarding_import_iso_folder
+                        }
                     ),
                     fontWeight = FontWeight.Bold,
                     fontSize = 13.sp,
                     color = if (actionEnabled && !scanningGames) Color.Black else RPCSXColors.textDisabled,
                 )
             }
+        }
+    }
+}
+
+@Composable
+private fun ScannedGameRow(entry: DirectIsoManager.IsoImportEntry) {
+    val statusLabel = when (entry.status) {
+        DirectIsoManager.IsoImportStatus.IMPORTED ->
+            stringResource(R.string.onboarding_iso_status_imported)
+        DirectIsoManager.IsoImportStatus.ALREADY_IMPORTED ->
+            stringResource(R.string.onboarding_iso_status_already)
+        DirectIsoManager.IsoImportStatus.FAILED ->
+            entry.message?.let { stringResource(R.string.onboarding_iso_status_failed, it) }
+                ?: stringResource(R.string.onboarding_iso_status_failed_generic)
+    }
+    val statusColor = when (entry.status) {
+        DirectIsoManager.IsoImportStatus.IMPORTED -> Color(0xFF56D364)
+        DirectIsoManager.IsoImportStatus.ALREADY_IMPORTED -> Color(0xFFE5A93C)
+        DirectIsoManager.IsoImportStatus.FAILED -> RPCSXColors.errorColor
+    }
+    val iconModel: Any = entry.iconPath
+        ?.takeIf { it.isNotBlank() }
+        ?.let { path -> File(path).takeIf { it.isFile } }
+        ?: R.drawable.hw_game_folder
+    Row(
+        modifier = Modifier.fillMaxWidth(),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(10.dp),
+    ) {
+        Surface(
+            shape = RoundedCornerShape(6.dp),
+            color = Color(0xFF161B22),
+            modifier = Modifier.size(48.dp),
+        ) {
+            AsyncImage(
+                model = iconModel,
+                contentDescription = null,
+                contentScale = ContentScale.Crop,
+                modifier = Modifier.fillMaxSize(),
+            )
+        }
+        Column(modifier = Modifier.weight(1f)) {
+            Text(
+                text = entry.displayName,
+                style = AppTypography.bodySmall.copy(fontSize = 12.sp, fontWeight = FontWeight.Bold),
+                color = RPCSXColors.textPrimary,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis,
+            )
+            Text(
+                text = listOfNotNull(entry.titleId, statusLabel).joinToString(" · "),
+                style = AppTypography.labelSmall.copy(fontSize = 10.sp),
+                color = statusColor,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis,
+            )
         }
     }
 }

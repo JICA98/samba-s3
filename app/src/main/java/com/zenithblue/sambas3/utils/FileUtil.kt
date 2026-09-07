@@ -212,10 +212,9 @@ object FileUtil {
     }
 
     /**
-     * Finds every PS3 game directory and ISO file below a selected SAF tree without copying
-     * or indexing anything. The result is used as a preview before the caller
-     * decides whether to import it. ISO detection is case-insensitive and does not
-     * read the full multi-GB file (bounded header probe, fallback to filename).
+     * Recursively finds every PS3 game directory and ISO file below a selected SAF tree,
+     * including nested subfolders, without copying or indexing anything. ISO detection
+     * is case-insensitive and does not read the full multi-GB file (filename probe).
      */
     fun scanGameFolder(context: Context, rootFolderUri: Uri): List<GameFolderMatch> {
         return try {

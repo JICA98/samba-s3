@@ -98,7 +98,6 @@ import com.zenithblue.sambas3.ui.onboarding.ONBOARDING_ROUTE
 import com.zenithblue.sambas3.ui.onboarding.OnboardingDestination
 import com.zenithblue.sambas3.ui.onboarding.OnboardingEntry
 import com.zenithblue.sambas3.ui.onboarding.OnboardingPrefs
-import com.zenithblue.sambas3.utils.FileUtil
 import androidx.navigation.NavType
 import androidx.navigation.navArgument
 import org.json.JSONObject
@@ -368,10 +367,12 @@ fun GamesDestination(
         contract = ActivityResultContracts.OpenDocumentTree(),
         onResult = { uri: Uri? ->
             uri?.let {
-                // TODO: FileUtil.saveGameFolderUri(prefs, it)
                 val takeFlags = Intent.FLAG_GRANT_READ_URI_PERMISSION
-                context.contentResolver.takePersistableUriPermission(it, takeFlags)
-                FileUtil.installPackages(context, it)
+                try {
+                    context.contentResolver.takePersistableUriPermission(it, takeFlags)
+                } catch (_: SecurityException) {
+                }
+                // Folder ISO import is handled in GamesScreen via Direct ISO (no copy).
             }
         }
     )

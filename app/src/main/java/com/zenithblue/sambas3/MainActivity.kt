@@ -60,6 +60,7 @@ class MainActivity : ComponentActivity() {
 
             // Restore persisted ISO candidates (folder scan) without creating fake Games.
             try { com.zenithblue.sambas3.utils.LibraryCandidatesRepository.load(this@MainActivity) } catch (_: Exception) {}
+            try { com.zenithblue.sambas3.utils.ScannedFoldersRepository.load(this@MainActivity) } catch (_: Exception) {}
 
             lifecycleScope.launch {
                 GameRepository.load()

@@ -15,15 +15,20 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.navigationBarsPadding
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.selection.SelectionContainer
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
@@ -45,13 +50,18 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.blur
+import androidx.compose.ui.draw.scale
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.zenithblue.sambas3.R
 import com.zenithblue.sambas3.RPCSXColors
 import com.zenithblue.sambas3.crash.CrashEvidenceCollector
 import com.zenithblue.sambas3.crash.CrashLogReader
@@ -85,172 +95,176 @@ fun CrashDetailsSheet(
     Box(
         Modifier
             .fillMaxSize()
-            .background(Color.Black.copy(alpha = .78f)),
+            .background(Color.Black.copy(alpha = .60f)),
         contentAlignment = Alignment.Center,
     ) {
+        Box(
+            modifier = Modifier
+                .size(380.dp)
+                .offset(x = (-40).dp, y = (-30).dp)
+                .blur(80.dp)
+                .background(
+                    Brush.radialGradient(
+                        listOf(
+                            RPCSXColors.primary.copy(alpha = 0.18f),
+                            Color.Transparent,
+                        )
+                    ),
+                    shape = CircleShape,
+                )
+        )
+        Box(
+            modifier = Modifier
+                .size(400.dp)
+                .align(Alignment.BottomEnd)
+                .offset(x = 60.dp, y = 40.dp)
+                .blur(90.dp)
+                .background(
+                    Brush.radialGradient(
+                        listOf(
+                            Color(0x301A3660),
+                            Color.Transparent,
+                        )
+                    ),
+                    shape = CircleShape,
+                )
+        )
+
         Surface(
             shape = RoundedCornerShape(16.dp),
-            color = RPCSXColors.surfaceElevated,
-            border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant),
+            color = Color.Transparent,
+            border = BorderStroke(1.dp, Color(0x38FFFFFF)),
             modifier = Modifier
-                .fillMaxWidth(.92f)
-                .fillMaxHeight(.90f)
-                .widthIn(max = 920.dp)
+                .fillMaxWidth(.95f)
+                .fillMaxHeight(.94f)
                 .padding(4.dp)
                 .navigationBarsPadding(),
         ) {
-            Column(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(14.dp),
-            ) {
-                // Header
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.SpaceBetween,
-                    verticalAlignment = Alignment.CenterVertically,
-                ) {
-                    val rawTitle = report?.gameTitle
-                        ?: session?.gameName
-                        ?: session?.gamePath?.substringAfterLast('/')
-                        ?: "GAME"
-                    val headerId = report?.titleId ?: session?.titleId
-                    val displayTitle = if (rawTitle.isNotBlank()) rawTitle else headerId ?: "GAME"
-                    val showId = !headerId.isNullOrBlank() && !headerId.equals(displayTitle, ignoreCase = true)
-
-                    Column(Modifier.weight(1f)) {
-                        Text(
-                            "RECOVERY DETAILS",
-                            color = RPCSXColors.primary,
-                            style = MaterialTheme.typography.titleMedium,
-                            fontWeight = FontWeight.Bold,
-                        )
-                        Row(
-                            verticalAlignment = Alignment.CenterVertically,
-                            horizontalArrangement = Arrangement.spacedBy(6.dp),
-                        ) {
-                            Text(
-                                displayTitle.uppercase(),
-                                color = RPCSXColors.textPrimary,
-                                style = MaterialTheme.typography.bodyMedium,
-                                fontWeight = FontWeight.SemiBold,
-                                maxLines = 1,
-                                overflow = TextOverflow.Ellipsis,
+            Box(Modifier.fillMaxSize()) {
+                Box(
+                    modifier = Modifier
+                        .matchParentSize()
+                        .background(
+                            Brush.verticalGradient(
+                                listOf(
+                                    Color(0xF20E1626),
+                                    Color(0xF8080C14),
+                                )
                             )
-                            if (showId) {
+                        )
+                )
+
+                Column(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(horizontal = 14.dp, vertical = 10.dp),
+                ) {
+                    // Header
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically,
+                    ) {
+                        val rawTitle = report?.gameTitle
+                            ?: session?.gameName
+                            ?: session?.gamePath?.substringAfterLast('/')
+                            ?: "GAME"
+                        val headerId = report?.titleId ?: session?.titleId
+                        val displayTitle = if (rawTitle.isNotBlank()) rawTitle else headerId ?: "GAME"
+                        val showId = !headerId.isNullOrBlank() && !headerId.equals(displayTitle, ignoreCase = true)
+
+                        Column(Modifier.weight(1f)) {
+                            Text(
+                                "RECOVERY DETAILS",
+                                color = RPCSXColors.primary,
+                                style = MaterialTheme.typography.labelSmall.copy(
+                                    fontWeight = FontWeight.Bold,
+                                    letterSpacing = 1.2.sp,
+                                    fontSize = 11.sp,
+                                ),
+                            )
+                            Row(
+                                verticalAlignment = Alignment.CenterVertically,
+                                horizontalArrangement = Arrangement.spacedBy(6.dp),
+                            ) {
                                 Text(
-                                    "($headerId)",
-                                    color = RPCSXColors.textSecondary,
-                                    style = MaterialTheme.typography.bodySmall,
+                                    displayTitle.uppercase(),
+                                    color = RPCSXColors.textPrimary,
+                                    style = MaterialTheme.typography.bodyMedium,
+                                    fontWeight = FontWeight.SemiBold,
+                                    maxLines = 1,
+                                    overflow = TextOverflow.Ellipsis,
+                                )
+                                if (showId) {
+                                    Text(
+                                        "($headerId)",
+                                        color = RPCSXColors.textSecondary,
+                                        style = MaterialTheme.typography.bodySmall,
+                                    )
+                                }
+                            }
+                        }
+                        Surface(
+                            onClick = onDismiss,
+                            shape = RoundedCornerShape(8.dp),
+                            color = Color(0x22FFFFFF),
+                            border = BorderStroke(1.dp, Color(0x35FFFFFF)),
+                            modifier = Modifier.height(30.dp),
+                        ) {
+                            Row(
+                                modifier = Modifier.padding(horizontal = 12.dp, vertical = 4.dp),
+                                verticalAlignment = Alignment.CenterVertically,
+                                horizontalArrangement = Arrangement.spacedBy(4.dp),
+                            ) {
+                                Icon(
+                                    painter = painterResource(R.drawable.ic_close),
+                                    contentDescription = "Close",
+                                    tint = Color.White,
+                                    modifier = Modifier.size(13.dp),
+                                )
+                                Text(
+                                    "CLOSE",
+                                    color = Color.White,
+                                    fontSize = 11.sp,
+                                    fontWeight = FontWeight.Bold,
                                 )
                             }
                         }
                     }
-                    TextButton(onClick = onDismiss) {
-                        Text("CLOSE", color = RPCSXColors.primary, style = MaterialTheme.typography.labelMedium)
-                    }
-                }
 
-                HorizontalDivider(
-                    Modifier.padding(vertical = 4.dp),
-                    color = MaterialTheme.colorScheme.outlineVariant,
-                )
-
-                if (loadFailure != null) {
-                    Text(
-                        loadFailure,
-                        color = RPCSXColors.errorColor,
-                        style = MaterialTheme.typography.bodySmall,
-                        modifier = Modifier.padding(bottom = 4.dp),
+                    HorizontalDivider(
+                        Modifier.padding(vertical = 6.dp),
+                        color = Color(0x18FFFFFF),
                     )
-                }
-                val attached = report
-                if (attached != null && attached.sources.isEmpty()) {
-                    Text(
-                        "No log artifacts were attached to this session.",
-                        color = RPCSXColors.errorColor,
-                        style = MaterialTheme.typography.bodySmall,
-                        modifier = Modifier.padding(bottom = 4.dp),
-                    )
-                }
 
-                // Action buttons row
-                Row(
-                    Modifier
-                        .fillMaxWidth()
-                        .horizontalScroll(rememberScrollState())
-                        .padding(bottom = 4.dp),
-                    horizontalArrangement = Arrangement.spacedBy(8.dp),
-                ) {
-                    onChooseSave?.let {
-                        OutlinedButton(
-                            onClick = it,
-                            shape = RoundedCornerShape(8.dp),
-                            contentPadding = PaddingValues(horizontal = 12.dp, vertical = 2.dp),
-                            modifier = Modifier.height(30.dp),
-                        ) { Text("CHOOSE SAVE", style = MaterialTheme.typography.labelSmall) }
-                    }
-                    onSafeRetry?.let {
-                        OutlinedButton(
-                            onClick = it,
-                            shape = RoundedCornerShape(8.dp),
-                            contentPadding = PaddingValues(horizontal = 12.dp, vertical = 2.dp),
-                            modifier = Modifier.height(30.dp),
-                        ) { Text("SAFE RETRY", style = MaterialTheme.typography.labelSmall) }
-                    }
-                    onOpenAllCrashLogs?.let {
-                        OutlinedButton(
-                            onClick = it,
-                            shape = RoundedCornerShape(8.dp),
-                            contentPadding = PaddingValues(horizontal = 12.dp, vertical = 2.dp),
-                            modifier = Modifier.height(30.dp),
-                        ) { Text("ALL CRASH LOGS", style = MaterialTheme.typography.labelSmall) }
-                    }
-                    onExportReport?.let {
-                        OutlinedButton(
-                            onClick = it,
-                            shape = RoundedCornerShape(8.dp),
-                            contentPadding = PaddingValues(horizontal = 12.dp, vertical = 2.dp),
-                            modifier = Modifier.height(30.dp),
-                        ) { Text("EXPORT REPORT", style = MaterialTheme.typography.labelSmall) }
-                    }
-                }
-
-                // Log pane taking all available space
-                Box(
-                    Modifier
-                        .fillMaxWidth()
-                        .weight(1f),
-                ) {
-                    report?.let { CrashLogPane(it, 0, Modifier.fillMaxSize()) }
-                        ?: Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                            Text("Collecting diagnostics...", color = RPCSXColors.textSecondary)
-                        }
-                }
-
-                // Footer
-                HorizontalDivider(
-                    Modifier.padding(vertical = 4.dp),
-                    color = MaterialTheme.colorScheme.outlineVariant,
-                )
-                Row(
-                    Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.End,
-                    verticalAlignment = Alignment.CenterVertically,
-                ) {
-                    Button(
-                        onClick = onDismiss,
-                        shape = RoundedCornerShape(8.dp),
-                        colors = ButtonDefaults.buttonColors(
-                            containerColor = RPCSXColors.primary,
-                            contentColor = Color.Black,
-                        ),
-                        contentPadding = PaddingValues(horizontal = 22.dp, vertical = 6.dp),
-                    ) {
+                    if (loadFailure != null) {
                         Text(
-                            "CLOSE",
-                            style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.Bold),
+                            loadFailure,
+                            color = RPCSXColors.errorColor,
+                            style = MaterialTheme.typography.bodySmall,
+                            modifier = Modifier.padding(bottom = 4.dp),
                         )
+                    }
+                    val attached = report
+                    if (attached != null && attached.sources.isEmpty()) {
+                        Text(
+                            "No log artifacts were attached to this session.",
+                            color = RPCSXColors.errorColor,
+                            style = MaterialTheme.typography.bodySmall,
+                            modifier = Modifier.padding(bottom = 4.dp),
+                        )
+                    }
+
+                    // Main log pane with Left Sidebar taking all available space
+                    Box(
+                        Modifier
+                            .fillMaxWidth()
+                            .weight(1f),
+                    ) {
+                        report?.let { CrashLogPane(it, 0, Modifier.fillMaxSize()) }
+                            ?: Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                                Text("Collecting diagnostics...", color = RPCSXColors.textSecondary)
+                            }
                     }
                 }
             }
@@ -279,96 +293,142 @@ fun CrashLogPane(report: CrashReport, initialTab: Int, modifier: Modifier = Modi
         Log.i("CrashLogUI", "Category loaded: tab=$tab (${names.getOrElse(tab) { "UNKNOWN" }}), offset=$offset, bytes=$totalBytes, chars=${content.length}")
     }
 
-    Column(modifier, verticalArrangement = Arrangement.spacedBy(6.dp)) {
-        ScrollableTabRow(
-            selectedTabIndex = tab,
-            edgePadding = 0.dp,
-            containerColor = Color.Transparent,
-            contentColor = RPCSXColors.primary,
-            indicator = { tabPositions ->
-                if (tab in tabPositions.indices) {
-                    TabRowDefaults.SecondaryIndicator(
-                        modifier = Modifier.tabIndicatorOffset(tabPositions[tab]),
-                        color = RPCSXColors.primary,
-                    )
-                }
-            },
-            divider = {},
+    Row(
+        modifier = modifier.fillMaxSize(),
+        horizontalArrangement = Arrangement.spacedBy(10.dp),
+    ) {
+        // Left Sidebar: Categories (minimal footprint)
+        Surface(
+            shape = RoundedCornerShape(10.dp),
+            color = Color(0x18FFFFFF),
+            border = BorderStroke(1.dp, Color(0x1EFFFFFF)),
+            modifier = Modifier
+                .width(132.dp)
+                .fillMaxHeight(),
         ) {
-            names.forEachIndexed { index, name ->
-                Tab(
-                    selected = tab == index,
-                    onClick = {
-                        if (tab != index) {
-                            Log.i("CrashLogUI", "Tab clicked: switching from $tab to $index ($name)")
-                            tab = index
-                        }
-                    },
-                    text = {
-                        Text(
-                            name,
-                            color = if (tab == index) RPCSXColors.primary else RPCSXColors.textSecondary,
-                            style = MaterialTheme.typography.labelSmall,
-                            fontWeight = if (tab == index) FontWeight.Bold else FontWeight.Normal,
-                        )
-                    }
+            Column(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(6.dp)
+                    .verticalScroll(rememberScrollState()),
+                verticalArrangement = Arrangement.spacedBy(4.dp),
+            ) {
+                Text(
+                    text = "CATEGORIES",
+                    style = MaterialTheme.typography.labelSmall.copy(
+                        fontSize = 9.sp,
+                        fontWeight = FontWeight.Bold,
+                        letterSpacing = 1.sp,
+                    ),
+                    color = RPCSXColors.textSecondary,
+                    modifier = Modifier.padding(horizontal = 6.dp, vertical = 4.dp),
                 )
+
+                names.forEachIndexed { index, name ->
+                    val isSelected = tab == index
+                    Surface(
+                        onClick = {
+                            if (tab != index) {
+                                tab = index
+                            }
+                        },
+                        shape = RoundedCornerShape(6.dp),
+                        color = if (isSelected) Color(0x28E5A93C) else Color.Transparent,
+                        border = if (isSelected) BorderStroke(1.dp, RPCSXColors.primary.copy(alpha = 0.8f)) else null,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(34.dp),
+                    ) {
+                        Box(
+                            modifier = Modifier
+                                .fillMaxSize()
+                                .padding(horizontal = 8.dp),
+                            contentAlignment = Alignment.CenterStart,
+                        ) {
+                            Text(
+                                text = name,
+                                color = if (isSelected) RPCSXColors.primary else RPCSXColors.textSecondary,
+                                style = MaterialTheme.typography.labelSmall.copy(
+                                    fontSize = 10.5.sp,
+                                    fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Medium,
+                                ),
+                                maxLines = 1,
+                                overflow = TextOverflow.Ellipsis,
+                            )
+                        }
+                    }
+                }
             }
         }
 
-        Row(
-            Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.SpaceBetween,
-            verticalAlignment = Alignment.CenterVertically,
-        ) {
-            OutlinedTextField(
-                value = query,
-                onValueChange = { query = it },
-                singleLine = true,
-                placeholder = { Text("Search this category…", style = MaterialTheme.typography.bodySmall) },
-                shape = RoundedCornerShape(8.dp),
-                colors = OutlinedTextFieldDefaults.colors(
-                    focusedBorderColor = RPCSXColors.primary,
-                    unfocusedBorderColor = MaterialTheme.colorScheme.outlineVariant,
-                ),
-                modifier = Modifier
-                    .weight(1f)
-                    .height(44.dp),
-            )
-            Spacer(Modifier.width(12.dp))
-            Text(
-                if (totalBytes > 0L) "Offset %,d B · %,d KB total".format(offset, (totalBytes + 1023) / 1024)
-                else "Showing category info",
-                color = RPCSXColors.textSecondary,
-                style = MaterialTheme.typography.bodySmall.copy(fontSize = 11.sp),
-            )
-        }
-
-        Surface(
-            shape = RoundedCornerShape(8.dp),
-            color = RPCSXColors.surface,
-            border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f)),
+        // Right Main Area: Search + Complete Tall Log View
+        Column(
             modifier = Modifier
                 .weight(1f)
-                .fillMaxWidth(),
+                .fillMaxHeight(),
+            verticalArrangement = Arrangement.spacedBy(6.dp),
         ) {
-            key(report.directory.absolutePath, tab) {
-                val listState = androidx.compose.foundation.lazy.rememberLazyListState()
-                androidx.compose.foundation.lazy.LazyColumn(
-                    state = listState,
+            Row(
+                Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                OutlinedTextField(
+                    value = query,
+                    onValueChange = { query = it },
+                    singleLine = true,
+                    placeholder = {
+                        Text(
+                            "Search ${names.getOrElse(tab) { "" }}…",
+                            style = MaterialTheme.typography.bodySmall.copy(fontSize = 11.sp),
+                        )
+                    },
+                    shape = RoundedCornerShape(8.dp),
+                    colors = OutlinedTextFieldDefaults.colors(
+                        focusedBorderColor = RPCSXColors.primary,
+                        unfocusedBorderColor = Color(0x28FFFFFF),
+                        focusedContainerColor = Color(0x18000000),
+                        unfocusedContainerColor = Color(0x10000000),
+                    ),
                     modifier = Modifier
-                        .fillMaxSize()
-                        .padding(8.dp),
-                ) {
-                    item {
-                        SelectionContainer {
-                            Text(
-                                text = text,
-                                color = RPCSXColors.textPrimary,
-                                fontFamily = FontFamily.Monospace,
-                                fontSize = 11.sp,
-                                lineHeight = 15.sp,
-                            )
+                        .weight(1f)
+                        .height(38.dp),
+                )
+                Spacer(Modifier.width(12.dp))
+                Text(
+                    text = if (totalBytes > 0L) "Offset %,d B · %,d KB total".format(offset, (totalBytes + 1023) / 1024)
+                    else "Category overview",
+                    color = RPCSXColors.textSecondary,
+                    style = MaterialTheme.typography.bodySmall.copy(fontSize = 10.sp),
+                )
+            }
+
+            Surface(
+                shape = RoundedCornerShape(10.dp),
+                color = Color(0x35000000),
+                border = BorderStroke(1.dp, Color(0x18FFFFFF)),
+                modifier = Modifier
+                    .weight(1f)
+                    .fillMaxWidth(),
+            ) {
+                key(report.directory.absolutePath, tab) {
+                    val listState = androidx.compose.foundation.lazy.rememberLazyListState()
+                    androidx.compose.foundation.lazy.LazyColumn(
+                        state = listState,
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .padding(10.dp),
+                    ) {
+                        item {
+                            SelectionContainer {
+                                Text(
+                                    text = text,
+                                    color = RPCSXColors.textPrimary,
+                                    fontFamily = FontFamily.Monospace,
+                                    fontSize = 11.5.sp,
+                                    lineHeight = 16.sp,
+                                )
+                            }
                         }
                     }
                 }

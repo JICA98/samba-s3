@@ -17,6 +17,8 @@ import com.zenithblue.sambas3.PreRuntimePpuState
 import com.zenithblue.sambas3.RPCSX
 import com.zenithblue.sambas3.RuntimePpuState
 import com.zenithblue.sambas3.toStore
+import com.zenithblue.sambas3.utils.GameFolderMatch
+import com.zenithblue.sambas3.utils.GameSourceKind
 import java.io.File
 import java.io.FileInputStream
 import java.nio.ByteBuffer
@@ -38,7 +40,145 @@ object DirectIsoManager {
         val fileSize: Long
     )
 
+    enum class IsoImportStatus { IMPORTED, ALREADY_IMPORTED, FAILED }
+
+    data class IsoImportEntry(
+        val displayName: String,
+        val titleId: String?,
+        val uri: String,
+        val status: IsoImportStatus,
+        val message: String? = null,
+        val iconPath: String? = null,
+    )
+
+    data class IsoFolderImportResult(
+        val entries: List<IsoImportEntry>,
+        val skippedDirectories: Int = 0,
+    ) {
+        val importedCount: Int get() = entries.count { it.status == IsoImportStatus.IMPORTED }
+        val alreadyImportedCount: Int get() = entries.count { it.status == IsoImportStatus.ALREADY_IMPORTED }
+        val failedCount: Int get() = entries.count { it.status == IsoImportStatus.FAILED }
+    }
+
+    sealed class DirectIsoRegisterResult {
+        abstract val game: Game
+        data class Registered(override val game: Game) : DirectIsoRegisterResult()
+        data class AlreadyImported(override val game: Game) : DirectIsoRegisterResult()
+    }
+
+    fun matchExistingGame(
+        gamePath: String,
+        gameName: String?,
+        gameSourceUri: String?,
+        incomingUri: String,
+        incomingTitleId: String?,
+    ): Boolean {
+        if (!gameSourceUri.isNullOrBlank() && gameSourceUri == incomingUri) return true
+        if (gamePath == incomingUri) return true
+        val id = incomingTitleId?.uppercase()?.takeIf { it.isNotBlank() } ?: return false
+        if (gamePath.equals("direct_iso/$id", ignoreCase = true)) return true
+        if (gamePath.substringAfterLast('/').equals(id, ignoreCase = true)) return true
+        return GameIdentity.titleIdOrNull(gamePath, gameName)?.uppercase() == id
+    }
+
+    fun findExisting(uri: Uri, titleId: String?): Game? {
+        val incoming = uri.toString()
+        return GameRepository.list().firstOrNull { game ->
+            matchExistingGame(
+                gamePath = game.info.path,
+                gameName = game.info.name.value,
+                gameSourceUri = game.info.sourceUri.value,
+                incomingUri = incoming,
+                incomingTitleId = titleId,
+            )
+        }
+    }
+
+    fun importIsoMatches(context: Context, matches: List<GameFolderMatch>): IsoFolderImportResult {
+        check(com.zenithblue.sambas3.BuildConfig.DIRECT_ISO_LOADING) {
+            "Direct ISO loading is available only in debug/test builds"
+        }
+        val skippedDirectories = matches.count { it.sourceKind == GameSourceKind.DIRECTORY }
+        val entries = matches.mapNotNull { match ->
+            if (match.sourceKind != GameSourceKind.ISO) return@mapNotNull null
+            val uri = match.sourceUri ?: return@mapNotNull IsoImportEntry(
+                displayName = match.folderName,
+                titleId = match.titleId,
+                uri = "",
+                status = IsoImportStatus.FAILED,
+                message = "Missing ISO URI",
+            )
+            try {
+                when (val result = registerDirectIso(context, uri, match.titleId)) {
+                    is DirectIsoRegisterResult.AlreadyImported -> IsoImportEntry(
+                        displayName = result.game.info.name.value ?: match.folderName,
+                        titleId = match.titleId ?: GameIdentity.titleIdOrNull(result.game.info.path, result.game.info.name.value),
+                        uri = uri.toString(),
+                        status = IsoImportStatus.ALREADY_IMPORTED,
+                        iconPath = result.game.info.iconPath.value,
+                    )
+                    is DirectIsoRegisterResult.Registered -> IsoImportEntry(
+                        displayName = result.game.info.name.value ?: match.folderName,
+                        titleId = match.titleId ?: GameIdentity.titleIdOrNull(result.game.info.path, result.game.info.name.value),
+                        uri = uri.toString(),
+                        status = IsoImportStatus.IMPORTED,
+                        iconPath = result.game.info.iconPath.value,
+                    )
+                }
+            } catch (e: Exception) {
+                Log.e(TAG, "folder ISO import failed name=${match.folderName}: ${e.message}")
+                IsoImportEntry(
+                    displayName = match.folderName,
+                    titleId = match.titleId,
+                    uri = uri.toString(),
+                    status = IsoImportStatus.FAILED,
+                    message = e.message ?: "Unknown error",
+                )
+            }
+        }
+        return IsoFolderImportResult(entries = entries, skippedDirectories = skippedDirectories)
+    }
+
+    fun mergeFolderResults(
+        first: IsoFolderImportResult?,
+        second: IsoFolderImportResult,
+    ): IsoFolderImportResult {
+        if (first == null) return second
+        fun key(entry: IsoImportEntry): String =
+            entry.titleId?.uppercase() ?: entry.uri.ifBlank { entry.displayName.lowercase() }
+        fun rank(status: IsoImportStatus): Int = when (status) {
+            IsoImportStatus.IMPORTED -> 2
+            IsoImportStatus.ALREADY_IMPORTED -> 1
+            IsoImportStatus.FAILED -> 0
+        }
+        val merged = LinkedHashMap<String, IsoImportEntry>()
+        (first.entries + second.entries).forEach { entry ->
+            val existing = merged[key(entry)]
+            if (existing == null || rank(entry.status) >= rank(existing.status)) {
+                merged[key(entry)] = entry
+            }
+        }
+        return IsoFolderImportResult(
+            entries = merged.values.toList(),
+            skippedDirectories = first.skippedDirectories + second.skippedDirectories,
+        )
+    }
+
+    fun registerDirectIso(context: Context, uri: Uri, provisionalTitleId: String? = null): DirectIsoRegisterResult {
+        val nameHint = runCatching { queryDisplayName(context.applicationContext, uri) }.getOrNull()
+        val earlyId = provisionalTitleId ?: nameHint?.let { extractTitleIdFromText(it) }
+        findExisting(uri, earlyId)?.let { existing ->
+            Log.i(TAG, "already_imported titleId=${earlyId ?: existing.info.path} uri=$uri")
+            return DirectIsoRegisterResult.AlreadyImported(existing)
+        }
+        return registerOpenedIso(context, uri)
+    }
+
     fun validateAndRegister(context: Context, uri: Uri): Game {
+        return registerDirectIso(context, uri).game
+    }
+
+    private fun registerOpenedIso(context: Context, uri: Uri): DirectIsoRegisterResult {
         check(com.zenithblue.sambas3.BuildConfig.DIRECT_ISO_LOADING) {
             "Direct ISO loading is available only in debug/test builds"
         }
@@ -90,6 +230,11 @@ object DirectIsoManager {
             val titleName = parsedMeta?.second
                 ?: displayName.removeSuffix(".iso").removeSuffix(".ISO")
 
+            findExisting(effectiveUri, titleId)?.let { existing ->
+                Log.i(TAG, "already_imported titleId=$titleId uri=$effectiveUri")
+                return DirectIsoRegisterResult.AlreadyImported(existing)
+            }
+
             // Icon extraction via RPCSX.instance.extractIsoPreview
             val iconsDir = File(appCtx.filesDir, "direct_iso_icons").apply { if (!exists()) mkdirs() }
             val iconDest = File(iconsDir, "${titleId}.png")
@@ -136,8 +281,8 @@ object DirectIsoManager {
             GameRepository.add(arrayOf(gameInfo), progressId = -1)
             Log.i(TAG, "registered titleId=$titleId mode=DIRECT_ISO path=$canonicalPath uri=$uri")
 
-            return GameRepository.find(canonicalPath)
-                ?: Game(toStore(gameInfo))
+            val registered = GameRepository.find(canonicalPath) ?: Game(toStore(gameInfo))
+            return DirectIsoRegisterResult.Registered(registered)
         }
     }
 

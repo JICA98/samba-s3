@@ -34,9 +34,11 @@ import com.zenithblue.sambas3.utils.GeneralSettings.string
 import com.zenithblue.sambas3.utils.GpuFamily
 import com.zenithblue.sambas3.utils.BundledDriverVisibility
 import com.zenithblue.sambas3.utils.GpuDriverSelection
-import com.zenithblue.sambas3.utils.FileUtil
+import com.zenithblue.sambas3.iso.DirectIsoManager
 import com.zenithblue.sambas3.utils.GameFolderMatch
+import com.zenithblue.sambas3.utils.ScannedFoldersRepository
 import com.zenithblue.sambas3.utils.Telemetry
+import androidx.compose.runtime.collectAsState
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -74,6 +76,9 @@ fun OnboardingDestination(
     val gameCount = GameRepository.list().count { it.info.path != "$" }
     var scannedGames by remember { mutableStateOf<List<GameFolderMatch>?>(null) }
     var scanningGames by remember { mutableStateOf(false) }
+    var isoImportResult by remember { mutableStateOf<DirectIsoManager.IsoFolderImportResult?>(null) }
+    val scannedFolders by ScannedFoldersRepository.foldersFlow.collectAsState()
+    LaunchedEffect(Unit) { ScannedFoldersRepository.load(context) }
 
     var driverInfo by remember {
         mutableStateOf(defaultDriverInfo(context, detectedGpu))
@@ -116,10 +121,19 @@ fun OnboardingDestination(
                 // is still handed to the same import path used by GamesDestination.
             }
             scanningGames = true
+            val previousResult = isoImportResult
             driverScope.launch(Dispatchers.IO) {
-                val matches = FileUtil.scanGameFolder(context, uri)
+                val result = ScannedFoldersRepository.addAndImport(context, uri)
                 withContext(Dispatchers.Main) {
-                    scannedGames = matches
+                    isoImportResult = DirectIsoManager.mergeFolderResults(previousResult, result)
+                    scannedGames = result.entries.map { entry ->
+                        GameFolderMatch(
+                            folderName = entry.displayName,
+                            titleId = entry.titleId,
+                            sourceUri = entry.uri.takeIf { it.isNotBlank() }?.let { android.net.Uri.parse(it) },
+                            sourceKind = com.zenithblue.sambas3.utils.GameSourceKind.ISO,
+                        )
+                    }
                     scanningGames = false
                 }
             }
@@ -180,6 +194,8 @@ fun OnboardingDestination(
         gameCount = gameCount,
         scannedGames = scannedGames,
         scanningGames = scanningGames,
+        isoImportResult = isoImportResult,
+        scannedFolders = scannedFolders,
         runtimeAvailable = runtimeAvailable,
         firmwareActionEnabled = runtimeAvailable && !firmwareInstalling,
         gameFolderActionEnabled = runtimeAvailable,

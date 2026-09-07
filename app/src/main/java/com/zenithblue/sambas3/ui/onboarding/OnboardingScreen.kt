@@ -18,7 +18,6 @@ import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.safeDrawing
 import androidx.compose.foundation.layout.size
@@ -42,7 +41,6 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.blur
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.focus.onFocusChanged
@@ -61,7 +59,11 @@ import com.zenithblue.sambas3.AppTypography
 import com.zenithblue.sambas3.FirmwareStatus
 import com.zenithblue.sambas3.R
 import com.zenithblue.sambas3.RPCSXColors
+import com.zenithblue.sambas3.iso.DirectIsoManager
 import com.zenithblue.sambas3.utils.GameFolderMatch
+import com.zenithblue.sambas3.utils.ScannedFolder
+import androidx.compose.ui.draw.alpha
+import androidx.compose.ui.layout.ContentScale
 import kotlinx.coroutines.launch
 
 @Composable
@@ -78,6 +80,8 @@ fun OnboardingScreen(
     gameCount: Int,
     scannedGames: List<GameFolderMatch>?,
     scanningGames: Boolean,
+    isoImportResult: DirectIsoManager.IsoFolderImportResult?,
+    scannedFolders: List<ScannedFolder> = emptyList(),
     runtimeAvailable: Boolean,
     firmwareActionEnabled: Boolean,
     gameFolderActionEnabled: Boolean,
@@ -127,11 +131,6 @@ fun OnboardingScreen(
     Box(
         modifier = Modifier
             .fillMaxSize()
-            .background(
-                Brush.radialGradient(
-                    colors = listOf(Color(0xFF131824), Color(0xFF080B10)),
-                )
-            )
             .windowInsetsPadding(WindowInsets.safeDrawing)
             .focusRequester(rootFocusRequester)
             .focusable()
@@ -166,21 +165,26 @@ fun OnboardingScreen(
                 }
             },
     ) {
-        // Ambient background blur glow orbs
-        Box(
+        Image(
+            painter = painterResource(R.drawable.default_wallpaper),
+            contentDescription = null,
+            contentScale = ContentScale.Crop,
             modifier = Modifier
-                .offset(x = (-30).dp, y = (-20).dp)
-                .size(260.dp)
-                .blur(70.dp)
-                .background(RPCSXColors.primary.copy(alpha = 0.14f), CircleShape)
+                .fillMaxSize()
+                .alpha(0.85f),
         )
         Box(
             modifier = Modifier
-                .align(Alignment.BottomEnd)
-                .offset(x = 60.dp, y = 60.dp)
-                .size(280.dp)
-                .blur(80.dp)
-                .background(Color(0xFF2468D2).copy(alpha = 0.10f), CircleShape)
+                .fillMaxSize()
+                .background(
+                    Brush.verticalGradient(
+                        listOf(
+                            Color.Black.copy(alpha = 0.45f),
+                            Color.Black.copy(alpha = 0.22f),
+                            Color.Black.copy(alpha = 0.55f),
+                        )
+                    )
+                )
         )
 
         Column(
@@ -267,6 +271,8 @@ fun OnboardingScreen(
                     gameCount = gameCount,
                     scannedGames = scannedGames,
                     scanningGames = scanningGames,
+                    isoImportResult = isoImportResult,
+                    scannedFolders = scannedFolders,
                     runtimeAvailable = runtimeAvailable,
                     firmwareActionEnabled = firmwareActionEnabled,
                     gameFolderActionEnabled = gameFolderActionEnabled,

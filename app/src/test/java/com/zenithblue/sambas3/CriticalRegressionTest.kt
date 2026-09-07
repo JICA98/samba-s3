@@ -126,17 +126,20 @@ class CriticalRegressionTest {
         // stableKey uniqueness
         val keys = items.map { it.stableKey }
         assertEquals(keys.size, keys.toSet().size)
+        assertTrue(items.none { it is com.zenithblue.sambas3.ui.games.PagerItem.SourceCandidate })
 
-        // Test with showBothEnds = true explicitly (AddGame cards removed from home page pager)
+        // Test with showBothEnds = true explicitly (AddGame and ISO candidate cards removed from home pager)
         val itemsBothEnds = com.zenithblue.sambas3.ui.games.buildLibraryPagerItems(visible, source, pending, hasFw = true, isFwInstalling = false, showBothEnds = true)
         val keysBothEnds = itemsBothEnds.map { it.stableKey }
         assertEquals(keysBothEnds.size, keysBothEnds.toSet().size)
         assertFalse(keysBothEnds.contains("add:start"))
         assertFalse(keysBothEnds.contains("add:end"))
-        assertEquals(visible.size + source.size + pending.size, itemsBothEnds.size)
-        // When empty, should contain add card
+        assertEquals(visible.size + pending.size, itemsBothEnds.size)
+        assertTrue(itemsBothEnds.none { it is com.zenithblue.sambas3.ui.games.PagerItem.SourceCandidate })
+        // When empty with firmware, the old Add Game copy-import card is gone
         val emptyItems = com.zenithblue.sambas3.ui.games.buildLibraryPagerItems(emptyList(), emptyList(), emptyList(), hasFw = true, isFwInstalling = false, showBothEnds = false)
-        assertTrue(emptyItems.any { it is com.zenithblue.sambas3.ui.games.PagerItem.AddGame })
+        assertTrue(emptyItems.none { it is com.zenithblue.sambas3.ui.games.PagerItem.AddGame })
+        assertTrue(emptyItems.isEmpty())
         // When firmware missing, first item is FirmwareCard
         val fwItems = com.zenithblue.sambas3.ui.games.buildLibraryPagerItems(emptyList(), emptyList(), emptyList(), hasFw = false, isFwInstalling = false, showBothEnds = false)
         assertTrue(fwItems.first() is com.zenithblue.sambas3.ui.games.PagerItem.FirmwareCard)
