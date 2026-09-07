@@ -13,6 +13,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.RadioButton
+import androidx.compose.material3.RadioButtonDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -27,6 +28,7 @@ import androidx.compose.ui.unit.dp
 import com.zenithblue.sambas3.EmulatorState
 import com.zenithblue.sambas3.R
 import com.zenithblue.sambas3.RPCSX
+import com.zenithblue.sambas3.RPCSXColors
 import com.zenithblue.sambas3.User
 import com.zenithblue.sambas3.UserRepository
 import com.zenithblue.sambas3.dialogs.AlertDialogQueue
@@ -52,14 +54,20 @@ fun UserItem(
     ) {
         RadioButton(
             selected = isActive,
-            onClick = setActive
+            onClick = setActive,
+            colors = RadioButtonDefaults.colors(
+                selectedColor = RPCSXColors.primary,
+                unselectedColor = RPCSXColors.textSecondary
+            )
         )
         Text(
             text = user.username,
+            color = RPCSXColors.textPrimary,
             modifier = Modifier.weight(1f)
         )
         Text(
             text = user.userId,
+            color = RPCSXColors.textSecondary,
             modifier = Modifier.weight(1f)
         )
     }
