@@ -93,6 +93,7 @@ enum class LaunchFocusTarget {
     DRIVER,
     PATCHES,
     TROPHIES,
+    CLEAR_CACHE,
     CLOSE
 }
 
@@ -107,6 +108,8 @@ fun GameLaunchCenter(
     onDriver: () -> Unit,
     onPatches: () -> Unit,
     onAchievements: () -> Unit,
+    onClearCache: () -> Unit,
+    canClearCache: Boolean,
     onPrepare: (() -> Unit)? = null,
     onStop: (() -> Unit)? = null,
 ) {
@@ -165,10 +168,10 @@ fun GameLaunchCenter(
             LaunchFocusTarget.START -> {
                 if (ppuUi.prepareAction == PrepareAction.Prepare || ppuUi.prepareAction == PrepareAction.Retry) {
                     onPrepare?.invoke()
-                } else if (ppuUi.prepareAction == PrepareAction.Stop ||
-                    ppuUi.prepareAction == PrepareAction.Stopping
-                ) {
+                } else if (ppuUi.prepareAction == PrepareAction.Stop) {
                     onStop?.invoke()
+                } else if (ppuUi.prepareAction == PrepareAction.Stopping) {
+                    // Idempotent no-op while the owner waits for verified worker exit.
                 } else if (ppuUi.startEnabled && snapshot.canPlayFresh) {
                     onFreshPlay()
                 }
@@ -182,6 +185,7 @@ fun GameLaunchCenter(
             LaunchFocusTarget.DRIVER -> onDriver()
             LaunchFocusTarget.PATCHES -> onPatches()
             LaunchFocusTarget.TROPHIES -> onAchievements()
+            LaunchFocusTarget.CLEAR_CACHE -> if (canClearCache) onClearCache()
             LaunchFocusTarget.CLOSE -> onDismiss()
         }
     }
@@ -191,6 +195,7 @@ fun GameLaunchCenter(
             LaunchFocusTarget.START, LaunchFocusTarget.CONTINUE -> focusedTarget = LaunchFocusTarget.CLOSE
             LaunchFocusTarget.PATCHES -> focusedTarget = LaunchFocusTarget.CONFIG
             LaunchFocusTarget.TROPHIES -> focusedTarget = LaunchFocusTarget.DRIVER
+            LaunchFocusTarget.CLEAR_CACHE -> focusedTarget = LaunchFocusTarget.PATCHES
             LaunchFocusTarget.DRIVER, LaunchFocusTarget.CONFIG -> focusedTarget = LaunchFocusTarget.CLOSE
             LaunchFocusTarget.CLOSE -> {}
         }
@@ -201,7 +206,8 @@ fun GameLaunchCenter(
             LaunchFocusTarget.CLOSE -> focusedTarget = LaunchFocusTarget.START
             LaunchFocusTarget.CONFIG -> focusedTarget = LaunchFocusTarget.PATCHES
             LaunchFocusTarget.DRIVER -> focusedTarget = LaunchFocusTarget.TROPHIES
-            LaunchFocusTarget.PATCHES, LaunchFocusTarget.TROPHIES -> focusedTarget = if (hasContinue) LaunchFocusTarget.CONTINUE else LaunchFocusTarget.START
+            LaunchFocusTarget.PATCHES, LaunchFocusTarget.TROPHIES -> focusedTarget = LaunchFocusTarget.CLEAR_CACHE
+            LaunchFocusTarget.CLEAR_CACHE -> focusedTarget = if (hasContinue) LaunchFocusTarget.CONTINUE else LaunchFocusTarget.START
             LaunchFocusTarget.START, LaunchFocusTarget.CONTINUE -> {}
         }
     }
@@ -211,6 +217,7 @@ fun GameLaunchCenter(
             LaunchFocusTarget.START -> focusedTarget = if (hasContinue) LaunchFocusTarget.CONTINUE else LaunchFocusTarget.TROPHIES
             LaunchFocusTarget.CONTINUE -> focusedTarget = LaunchFocusTarget.TROPHIES
             LaunchFocusTarget.TROPHIES -> focusedTarget = LaunchFocusTarget.PATCHES
+            LaunchFocusTarget.CLEAR_CACHE -> focusedTarget = LaunchFocusTarget.PATCHES
             LaunchFocusTarget.DRIVER -> focusedTarget = LaunchFocusTarget.CONFIG
             LaunchFocusTarget.CLOSE -> focusedTarget = LaunchFocusTarget.CONFIG
             LaunchFocusTarget.CONFIG, LaunchFocusTarget.PATCHES -> {}
@@ -223,6 +230,7 @@ fun GameLaunchCenter(
             LaunchFocusTarget.PATCHES -> focusedTarget = LaunchFocusTarget.TROPHIES
             LaunchFocusTarget.DRIVER -> focusedTarget = if (hasContinue) LaunchFocusTarget.CONTINUE else LaunchFocusTarget.START
             LaunchFocusTarget.TROPHIES -> focusedTarget = if (hasContinue) LaunchFocusTarget.CONTINUE else LaunchFocusTarget.START
+            LaunchFocusTarget.CLEAR_CACHE -> focusedTarget = if (hasContinue) LaunchFocusTarget.CONTINUE else LaunchFocusTarget.START
             LaunchFocusTarget.CONTINUE -> focusedTarget = LaunchFocusTarget.START
             LaunchFocusTarget.START, LaunchFocusTarget.CLOSE -> {}
         }
@@ -624,6 +632,26 @@ fun GameLaunchCenter(
                             ) {
                                 Text("TROPHIES", style = MaterialTheme.typography.labelSmall, maxLines = 1)
                             }
+                        }
+                        val isClearCacheFocused = focusedTarget == LaunchFocusTarget.CLEAR_CACHE
+                        OutlinedButton(
+                            onClick = onClearCache,
+                            enabled = canClearCache,
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .height(34.dp),
+                            contentPadding = PaddingValues(horizontal = 4.dp, vertical = 0.dp),
+                            shape = RoundedCornerShape(8.dp),
+                            border = BorderStroke(
+                                if (isClearCacheFocused) 2.dp else 1.dp,
+                                if (isClearCacheFocused) RPCSXColors.focusRing else RPCSXColors.errorColor.copy(alpha = 0.7f),
+                            ),
+                            colors = ButtonDefaults.outlinedButtonColors(
+                                containerColor = if (isClearCacheFocused) RPCSXColors.errorColor.copy(alpha = 0.12f) else Color.Transparent,
+                                contentColor = RPCSXColors.errorColor,
+                            ),
+                        ) {
+                            Text("CLEAR CACHE", style = MaterialTheme.typography.labelSmall, maxLines = 1)
                         }
                     }
                 }

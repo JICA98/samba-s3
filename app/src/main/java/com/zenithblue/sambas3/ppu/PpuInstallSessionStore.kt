@@ -33,12 +33,9 @@ object PpuInstallSessionStore {
     fun save(context: Context, session: PpuInstallSession) {
         try {
             val target = sessionFile(context, session.kind)
-            val temp = File(target.parentFile, "session.json.tmp")
             val text = json.encodeToString(session)
-            temp.writeText(text)
-            if (!temp.renameTo(target)) {
-                target.delete()
-                temp.renameTo(target)
+            if (!PpuAtomicFiles.writeUtf8(target, text)) {
+                Log.e(TAG, "Failed to persist session for ${session.titleId}")
             }
         } catch (e: Exception) {
             Log.e(TAG, "Failed to save session: ${e.message}", e)
@@ -51,5 +48,11 @@ object PpuInstallSessionStore {
             val f = sessionFile(context, kind)
             if (f.exists()) f.delete()
         } catch (_: Exception) {}
+    }
+
+    @Synchronized
+    fun clearIfTitle(context: Context, titleId: String, kind: PpuBatchKind) {
+        val session = load(context, kind) ?: return
+        if (session.titleId.equals(titleId, ignoreCase = true)) clear(context, kind)
     }
 }

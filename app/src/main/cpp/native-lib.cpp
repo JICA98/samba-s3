@@ -849,6 +849,7 @@ struct RPCSXApi {
   bool (*initialize)(std::string_view rootDir, std::string_view user);
   bool (*processCompilationQueue)(JNIEnv *env);
   bool (*startMainThreadProcessor)(JNIEnv *env);
+  bool (*isMainThreadProcessorReady)();
   bool (*setCompileProgressListener)(JNIEnv *env, jobject callback);
   bool (*supportsCompileProgressEvents)(JNIEnv *env, jobject thiz);
   bool (*collectGameInfo)(JNIEnv *env, std::string_view rootDir,
@@ -961,6 +962,7 @@ struct RPCSXLibrary : RPCSXApi {
     result.initialize = reinterpret_cast<decltype(initialize)>(dlsym(handle, "_rpcsx_initialize"));
     result.processCompilationQueue = reinterpret_cast<decltype(processCompilationQueue)>(dlsym(handle, "_rpcsx_processCompilationQueue"));
     result.startMainThreadProcessor = reinterpret_cast<decltype(startMainThreadProcessor)>(dlsym(handle, "_rpcsx_startMainThreadProcessor"));
+    result.isMainThreadProcessorReady = reinterpret_cast<decltype(isMainThreadProcessorReady)>(dlsym(handle, "_rpcsx_isMainThreadProcessorReady"));
     result.collectGameInfo = reinterpret_cast<decltype(collectGameInfo)>(dlsym(handle, "_rpcsx_collectGameInfo"));
     result.shutdown = reinterpret_cast<decltype(shutdown)>(dlsym(handle, "_rpcsx_shutdown"));
     result.boot = reinterpret_cast<decltype(boot)>(dlsym(handle, "_rpcsx_boot"));
@@ -1100,6 +1102,12 @@ Java_com_zenithblue_sambas3_RPCSX_processCompilationQueue(JNIEnv *env, jobject) 
 extern "C" JNIEXPORT jboolean JNICALL
 Java_com_zenithblue_sambas3_RPCSX_startMainThreadProcessor(JNIEnv *env, jobject) {
   return rpcsxLib.startMainThreadProcessor(env);
+}
+
+extern "C" JNIEXPORT jboolean JNICALL
+Java_com_zenithblue_sambas3_RPCSX_isMainThreadProcessorReady(JNIEnv *, jobject) {
+  if (!rpcsxLib.isMainThreadProcessorReady) return JNI_FALSE;
+  return rpcsxLib.isMainThreadProcessorReady() ? JNI_TRUE : JNI_FALSE;
 }
 
 extern "C" JNIEXPORT jboolean JNICALL Java_com_zenithblue_sambas3_RPCSX_collectGameInfo(

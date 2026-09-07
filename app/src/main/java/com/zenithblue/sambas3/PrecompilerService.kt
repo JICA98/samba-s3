@@ -390,18 +390,12 @@ class PrecompilerService : Service() {
                     lastInstallGamePath = gamePath
                     installPpuSeen = true
 
-                    serviceScope.launch {
-                        val ok = com.zenithblue.sambas3.ppu.PpuInstallOrchestrator.execute(
-                            this@PrecompilerService,
-                            titleId = titleId,
-                            gamePath = gamePath,
-                            logicalJobId = logicalJobId
-                        )
-                        Log.i(TAG, "Stage B PpuInstallOrchestrator finished ok=$ok for $titleId")
-                        if (!ok) {
-                            stopForegroundAndSelf(startId)
-                        }
-                    }
+                    com.zenithblue.sambas3.ppu.ImportPpuPreparationCoordinator.requestInstallFromImport(
+                        this@PrecompilerService,
+                        titleId,
+                        gamePath,
+                    )
+                    Log.i(TAG, "Stage B handed to coordinator title=$titleId path=$gamePath job=$logicalJobId")
                 } else {
                     Log.w(TAG, "Stage A complete but could not resolve titleId ($titleId) or gamePath ($gamePath)")
                     stopForegroundAndSelf(startId)
@@ -475,14 +469,20 @@ class PrecompilerService : Service() {
                         // Delay removal so GamesScreen can merge before session disappears
                         mainHandler.postDelayed({ ImportSessionStore.remove(NOTIF_INSTALL.toLong()) }, 1200)
                         if (terminalTitleId != null) {
-                            try {
-                                com.zenithblue.sambas3.ppu.ImportPpuPreparationCoordinator.onInstallPpuSuccess(
-                                    this@PrecompilerService,
-                                    terminalTitleId,
-                                    expectedGamePath,
-                                )
-                            } catch (e: Exception) {
-                                Log.w(TAG, "Coordinator trigger failed: ${e.message}")
+                            val owner = com.zenithblue.sambas3.ppu.PpuPreparationOwners.registry.peek()
+                            val coordinatorOwns = owner != null &&
+                                !owner.retired &&
+                                owner.titleId.equals(terminalTitleId, ignoreCase = true)
+                            if (!coordinatorOwns) {
+                                try {
+                                    com.zenithblue.sambas3.ppu.ImportPpuPreparationCoordinator.onInstallPpuSuccess(
+                                        this@PrecompilerService,
+                                        terminalTitleId,
+                                        expectedGamePath,
+                                    )
+                                } catch (e: Exception) {
+                                    Log.w(TAG, "Coordinator trigger failed: ${e.message}")
+                                }
                             }
                         }
                     } else {

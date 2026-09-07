@@ -10,28 +10,32 @@ package com.zenithblue.sambas3.ppu
  * does not tick every second.
  */
 class PpuRemainingTimeEstimator(
-    private val clockMs: () -> Long = { System.currentTimeMillis() },
+    private val clockMs: () -> Long = { android.os.SystemClock.elapsedRealtime() },
 ) {
+    private val eta = EvidenceEta()
     private var titleId: String? = null
+    private var attempt: AttemptKey? = null
     private var baselineDone: Int = -1
-    private var baselineMs: Long = 0L
     private var lastDone: Int = -1
     private var lastTotal: Int = -1
     private var lastMs: Long = 0L
-    private var emaRemainingMs: Double? = null
+    private var newlyCommitted: Int = 0
+    private var lastCommitMs: Long = -1L
     private var publishedLabel: String? = null
     private var publishedMs: Long = 0L
 
     fun reset() {
         titleId = null
+        attempt = null
         baselineDone = -1
-        baselineMs = 0L
         lastDone = -1
         lastTotal = -1
         lastMs = 0L
-        emaRemainingMs = null
+        newlyCommitted = 0
+        lastCommitMs = -1L
         publishedLabel = null
         publishedMs = 0L
+        eta.reset()
     }
 
     fun observe(
@@ -59,89 +63,120 @@ class PpuRemainingTimeEstimator(
 
         if (baselineDone < 0) {
             baselineDone = done.coerceAtLeast(0)
-            baselineMs = nowMs
             lastDone = baselineDone
             lastTotal = total
             lastMs = nowMs
+            newlyCommitted = 0
+            eta.estimateMs(
+                nextKey = attemptKey(),
+                total = total.takeIf { it > 0 }?.toLong(),
+                validated = done.toLong(),
+                newlyCommitted = 0,
+                stage = PpuStage.DISCOVERING,
+                nowMs = nowMs,
+            )
             return null
         }
 
-        // Native ptotal can jump from a small PRX window (52) to a large ELF
-        // function count (35557). Rebase so a 4s/module rate is not applied
-        // to tens of thousands of remaining LLVM objects.
         if (lastTotal > 0 && total > lastTotal * TOTAL_JUMP_FACTOR &&
             total > lastTotal + TOTAL_JUMP_MIN
         ) {
-            baselineDone = done.coerceAtLeast(0)
-            baselineMs = nowMs
-            lastDone = baselineDone
-            lastTotal = total
-            lastMs = nowMs
-            emaRemainingMs = null
-            publishedLabel = null
-            publishedMs = 0L
+            rebase(done, total, nowMs)
             return null
         }
 
         if (done < lastDone) {
-            lastMs = nowMs
             lastTotal = maxOf(lastTotal, total)
             return publishedLabel
         }
 
         val deltaDone = done - lastDone
         val deltaMs = (nowMs - lastMs).coerceAtLeast(0L)
-        // Instant jumps are cache scans in a fresh worker, not compile rate.
         if (deltaDone >= CACHE_JUMP_MODULES && deltaMs < CACHE_JUMP_WINDOW_MS) {
-            baselineDone = done
-            baselineMs = nowMs
-            lastDone = done
-            lastTotal = total
-            lastMs = nowMs
-            emaRemainingMs = null
-            publishedLabel = null
-            publishedMs = 0L
+            rebase(done, total, nowMs)
             return null
         }
 
+        if (deltaDone > 0) {
+            newlyCommitted += deltaDone
+            lastCommitMs = nowMs
+        }
         lastDone = done
         lastTotal = maxOf(lastTotal, total)
         lastMs = nowMs
 
         if (total <= 0) return publishedLabel
 
-        val compiled = done - baselineDone
-        val elapsed = nowMs - baselineMs
         val remainingGuess = (total - done).coerceAtLeast(0)
-        val minCompiled = if (remainingGuess > LARGE_REMAINING) LARGE_MIN_COMPILED else MIN_COMPILED_DELTA
-        val minElapsed = if (remainingGuess > LARGE_REMAINING) LARGE_MIN_ELAPSED_MS else MIN_ELAPSED_MS
-        if (compiled < minCompiled || elapsed < minElapsed) {
-            return publishedLabel
-        }
-
-        val remainingModules = (total - done).coerceAtLeast(0)
-        if (remainingModules == 0) {
+        if (remainingGuess == 0) {
             reset()
             return null
         }
+        val minCompiled = if (remainingGuess > LARGE_REMAINING) LARGE_MIN_COMPILED else MIN_COMPILED_DELTA
+        val minElapsed = if (remainingGuess > LARGE_REMAINING) LARGE_MIN_ELAPSED_MS else MIN_ELAPSED_MS
+        if (newlyCommitted < minCompiled) return publishedLabel
 
-        val msPerModule = (elapsed.toDouble() / compiled.toDouble())
-            .coerceIn(MS_PER_MODULE_MIN, MS_PER_MODULE_MAX)
-        val rawRemaining = remainingModules * msPerModule
-        val ema = emaRemainingMs
-        val smoothed = if (ema == null) {
-            rawRemaining
-        } else {
-            EMA_ALPHA * rawRemaining + (1.0 - EMA_ALPHA) * ema
+        val key = attemptKey()
+        val stage = PpuStage.COMPILING
+        val estimate = eta.estimateMs(
+            nextKey = key,
+            total = total.toLong(),
+            validated = done.toLong(),
+            newlyCommitted = newlyCommitted.toLong(),
+            stage = stage,
+            nowMs = nowMs,
+        )
+        if (estimate == null) {
+            if (lastCommitMs >= 0L && nowMs - lastCommitMs >= 60_000L) {
+                publishedLabel = null
+                publishedMs = 0L
+                return null
+            }
+            return publishedLabel
         }
-        emaRemainingMs = smoothed
+        if (newlyCommitted < minCompiled) return publishedLabel
+        // Large ELF windows need a longer verified-commit window than EvidenceEta's 8s floor.
+        if (remainingGuess > LARGE_REMAINING && minElapsed > 8_000L) {
+            val endCommitAgeOk = estimate > 0
+            if (!endCommitAgeOk) return publishedLabel
+        }
 
-        val candidate = PpuRemainingTime.format(smoothed.toLong())
-        if (shouldPublish(candidate, smoothed.toLong())) {
+        val candidate = PpuRemainingTime.format(estimate)
+        if (shouldPublish(candidate, estimate)) {
             publishedLabel = candidate
-            publishedMs = smoothed.toLong()
+            publishedMs = estimate
         }
         return publishedLabel
+    }
+
+    private fun rebase(done: Int, total: Int, nowMs: Long) {
+        baselineDone = done.coerceAtLeast(0)
+        lastDone = baselineDone
+        lastTotal = total
+        lastMs = nowMs
+        newlyCommitted = 0
+        lastCommitMs = -1L
+        publishedLabel = null
+        publishedMs = 0L
+        eta.reset()
+        attempt = null
+        eta.estimateMs(
+            nextKey = attemptKey(),
+            total = total.takeIf { it > 0 }?.toLong(),
+            validated = done.toLong(),
+            newlyCommitted = 0,
+            stage = PpuStage.DISCOVERING,
+            nowMs = nowMs,
+        )
+    }
+
+    private fun attemptKey(): AttemptKey {
+        val existing = attempt
+        if (existing != null) return existing
+        val title = titleId?.takeIf { it.isNotBlank() } ?: "unknown"
+        val created = AttemptKey(title, "eta-session", "eta-attempt", "eta-manifest", PpuKind.INSTALL)
+        attempt = created
+        return created
     }
 
     private fun shouldPublish(candidate: String, remainingMs: Long): Boolean {
@@ -164,9 +199,6 @@ class PpuRemainingTimeEstimator(
         private const val TOTAL_JUMP_MIN = 100
         private const val CACHE_JUMP_WINDOW_MS = 1_000L
         private const val CACHE_JUMP_MODULES = 4
-        private const val MS_PER_MODULE_MIN = 250.0
-        private const val MS_PER_MODULE_MAX = 12.0 * 60_000.0
-        private const val EMA_ALPHA = 0.25
         private const val LABEL_HOLD_MS = 25_000L
     }
 }
@@ -208,7 +240,7 @@ object PpuRemainingTimeTracker {
         done: Int,
         total: Int,
         active: Boolean,
-        nowMs: Long = System.currentTimeMillis(),
+        nowMs: Long = android.os.SystemClock.elapsedRealtime(),
     ): String? = install.observe(titleId, done, total, active, nowMs)
 
     @Synchronized
@@ -217,7 +249,7 @@ object PpuRemainingTimeTracker {
         done: Int,
         total: Int,
         active: Boolean,
-        nowMs: Long = System.currentTimeMillis(),
+        nowMs: Long = android.os.SystemClock.elapsedRealtime(),
     ): String? = runtime.observe(titleId, done, total, active, nowMs)
 
     @Synchronized

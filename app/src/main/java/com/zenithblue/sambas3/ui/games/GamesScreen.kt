@@ -266,6 +266,9 @@ fun GamesScreen(
     var removeGameTarget by remember { mutableStateOf<Game?>(null) }
     var removingGame by remember { mutableStateOf(false) }
     var removeGameFailed by remember { mutableStateOf(false) }
+    var clearCacheTarget by remember { mutableStateOf<Game?>(null) }
+    var clearingCache by remember { mutableStateOf(false) }
+    var clearCacheFailed by remember { mutableStateOf(false) }
     // Gameplay ownership — STOP only when actual game is running/paused, not compile-only engine busy
     val gameplayRunning = emulatorActiveGame.value != null && (emulatorState.value == EmulatorState.Running || emulatorState.value == EmulatorState.Paused)
     val isRunning = gameplayRunning // legacy alias, but STOP must use gameplayRunning
@@ -1763,9 +1766,7 @@ fun GamesScreen(
                                 })
                             }
                             com.zenithblue.sambas3.ui.games.launch.PrepareAction.Stopping -> {
-                                HintButton(text = "STOPPING...", icon = "■", color = RPCSXColors.errorColor, onClick = {
-                                    com.zenithblue.sambas3.ppu.ImportPpuPreparationCoordinator.requestStop(context)
-                                })
+                                HintButton(text = "STOPPING...", icon = "■", color = RPCSXColors.textDisabled, onClick = { })
                             }
                             com.zenithblue.sambas3.ui.games.launch.PrepareAction.Locked -> {
                                 HintButton(text = "WAITING", icon = "X", color = RPCSXColors.textDisabled, onClick = { })
@@ -1950,6 +1951,15 @@ fun GamesScreen(
                     stoppedTrophiesLoading = true
                     stoppedTrophies = null
                 },
+                onClearCache = {
+                    clearCacheTarget = game
+                },
+                canClearCache = !gameplayRunning &&
+                    !CompileProgressBridge.installState.value.ppuActive &&
+                    !CompileProgressBridge.prelaunchState.value.ppuActive &&
+                    !CompileProgressBridge.state.value.ppuActive &&
+                    !com.zenithblue.sambas3.ppu.ImportPpuPreparationCoordinator.stopping &&
+                    !com.zenithblue.sambas3.ppu.ImportPpuPreparationCoordinator.hasActiveOwner(),
                 onPrepare = {
                     com.zenithblue.sambas3.ppu.ImportPpuPreparationCoordinator.requestPreparation(context, game)
                 },
@@ -2127,6 +2137,82 @@ fun GamesScreen(
                 text = { Text(stringResource(R.string.remove_game_failed)) },
                 confirmButton = {
                     TextButton(onClick = { removeGameFailed = false }) {
+                        Text(stringResource(android.R.string.ok))
+                    }
+                },
+            )
+        }
+
+        if (clearCacheTarget != null) {
+            val target = clearCacheTarget
+            AlertDialog(
+                onDismissRequest = { if (!clearingCache) clearCacheTarget = null },
+                title = { Text(stringResource(R.string.clear_game_cache)) },
+                text = {
+                    Text(
+                        stringResource(
+                            R.string.clear_game_cache_warning,
+                            target?.info?.name?.value
+                                ?: target?.info?.path?.substringAfterLast('/')
+                                ?: "game",
+                        )
+                    )
+                },
+                confirmButton = {
+                    TextButton(
+                        enabled = !clearingCache,
+                        onClick = {
+                            val game = clearCacheTarget ?: return@TextButton
+                            val title = GameIdentity.titleIdOrNull(game.info.path, game.info.name.value)
+                            val busy = gameplayRunning ||
+                                CompileProgressBridge.installState.value.ppuActive ||
+                                CompileProgressBridge.prelaunchState.value.ppuActive ||
+                                CompileProgressBridge.state.value.ppuActive ||
+                                com.zenithblue.sambas3.ppu.ImportPpuPreparationCoordinator.stopping ||
+                                com.zenithblue.sambas3.ppu.ImportPpuPreparationCoordinator.hasActiveOwner()
+                            if (title == null || busy) {
+                                clearCacheTarget = null
+                                clearCacheFailed = true
+                                return@TextButton
+                            }
+                            clearingCache = true
+                            recoveryScope.launch(Dispatchers.IO) {
+                                val success = com.zenithblue.sambas3.utils.GameCacheManager.clear(context, title)
+                                withContext(Dispatchers.Main) {
+                                    clearingCache = false
+                                    clearCacheTarget = null
+                                    clearCacheFailed = !success
+                                }
+                            }
+                        },
+                    ) {
+                        if (clearingCache) {
+                            CircularProgressIndicator(
+                                modifier = Modifier.size(18.dp),
+                                color = RPCSXColors.primary,
+                                strokeWidth = 2.dp,
+                            )
+                        } else {
+                            Text(stringResource(R.string.clear_game_cache))
+                        }
+                    }
+                },
+                dismissButton = {
+                    TextButton(
+                        enabled = !clearingCache,
+                        onClick = { clearCacheTarget = null },
+                    ) { Text(stringResource(android.R.string.cancel)) }
+                },
+            )
+        }
+
+        if (clearCacheFailed) {
+            AlertDialog(
+                onDismissRequest = { clearCacheFailed = false },
+                title = { Text(stringResource(R.string.error)) },
+                text = { Text(stringResource(R.string.clear_game_cache_failed)) },
+                confirmButton = {
+                    TextButton(onClick = { clearCacheFailed = false }) {
                         Text(stringResource(android.R.string.ok))
                     }
                 },

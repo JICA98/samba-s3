@@ -286,10 +286,11 @@ object LaunchPpuPresentation {
     }
 
     fun compileProgressPercent(state: CompileProgressBridge.CompileState): Int? {
-        if (state.moduleTotal > 0) {
-            return (state.moduleDone * 100 / state.moduleTotal).coerceIn(0, 100)
+        if (state.moduleTotal <= 0) {
+            return state.ppuPercent.takeIf { it in 1..99 }
         }
-        return state.ppuPercent.takeIf { it > 0 }
+        if (state.moduleDone >= state.moduleTotal) return 99
+        return (state.moduleDone * 100 / state.moduleTotal).coerceIn(0, 99)
     }
 
     fun compileBarFraction(state: CompileProgressBridge.CompileState): Float? {
@@ -301,8 +302,13 @@ object LaunchPpuPresentation {
 
     fun compileProgressDetail(state: CompileProgressBridge.CompileState): String {
         state.ppuMsg?.takeIf { it.isNotBlank() }?.let { return it }
-        val pct = compileProgressPercent(state)
-        return if (pct != null) "Compiling ${pct}%" else "Compiling"
+        val done = state.moduleDone.toLong()
+        val total = state.moduleTotal.toLong()
+        return when {
+            total <= 0L -> "Discovering required PPU objects… $done objects validated"
+            done >= total -> "Verifying cache… $done of $total objects validated"
+            else -> "Compiling PPU objects… $done of $total validated"
+        }
     }
 
     fun compileProgressLine(state: CompileProgressBridge.CompileState): String =

@@ -73,13 +73,27 @@ object PpuOverallProgressReducer {
         return OverallProgress(effectiveTotal, completed, pct)
     }
 
-    /** Live UI must not sit at N/N 100% while the worker is still compiling more ELFs. */
-    fun liveDisplay(progress: OverallProgress): OverallProgress {
-        if (progress.totalModules > 0 && progress.completedModules >= progress.totalModules) {
-            val total = progress.completedModules + 1
-            return OverallProgress(total, progress.completedModules, (progress.completedModules * 100 / total).coerceIn(0, 99))
+    /**
+     * Live UI. Unknown totals stay indeterminate. Known done==total before a
+     * terminal receipt is verifying (same denominator, percent capped at 99).
+     * Never invents N+1 required objects.
+     */
+    fun liveDisplay(
+        progress: OverallProgress,
+        discoveryComplete: Boolean = progress.totalModules > 0,
+        terminal: Boolean = false,
+    ): OverallProgress {
+        if (terminal) {
+            return progress.copy(percent = 100)
         }
-        return progress
+        if (!discoveryComplete || progress.totalModules <= 0) {
+            return progress.copy(percent = 0)
+        }
+        if (progress.completedModules >= progress.totalModules) {
+            return OverallProgress(progress.totalModules, progress.completedModules, 99)
+        }
+        val pct = (progress.completedModules * 100 / progress.totalModules).coerceIn(0, 99)
+        return OverallProgress(progress.totalModules, progress.completedModules, pct)
     }
 
     fun mergeMonotonic(previous: OverallProgress?, next: OverallProgress): OverallProgress {

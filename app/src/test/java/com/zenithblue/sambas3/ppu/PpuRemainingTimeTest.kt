@@ -117,6 +117,19 @@ class PpuRemainingTimeTest {
     }
 
     @Test
+    fun observe_unchangedSamplesDoNotGrowEstimate() {
+        var now = 1_000_000L
+        val est = PpuRemainingTimeEstimator { now }
+        est.observe("BLUS30758", 0, 100, true, now)
+        now += 10_000
+        val first = est.observe("BLUS30758", 2, 100, true, now)
+        assertNotNull(first)
+        now += 60_000
+        val later = est.observe("BLUS30758", 2, 100, true, now)
+        assertNull(later)
+    }
+
+    @Test
     fun observe_clearsWhenComplete() {
         var now = 1_000_000L
         val est = PpuRemainingTimeEstimator { now }

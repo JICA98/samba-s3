@@ -35,6 +35,9 @@
     <string name="remove_game">Remove game</string>
     <string name="remove_game_confirmation">Remove %1$s and its generated cache from this device? You can import it again later.</string>
     <string name="remove_game_failed">The game could not be removed. Only games imported into SambaS3 storage can be removed here.</string>
+    <string name="clear_game_cache">Clear cache</string>
+    <string name="clear_game_cache_warning">Clear all generated cache for %1$s? Use this only for testing or troubleshooting. Game data, saves, and trophies are preserved, but the next launch must rebuild PPU and graphics caches and may take a long time. Do not interrupt the rebuild.</string>
+    <string name="clear_game_cache_failed">The cache could not be cleared. Stop the game and any PPU preparation, then try again.</string>
 
     <!-- GamesScreen -->
     <string name="deleting_game">Deleting Game</string>

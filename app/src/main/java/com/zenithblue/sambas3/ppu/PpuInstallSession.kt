@@ -37,5 +37,7 @@ data class PpuInstallSession(
     val lastWorkerPid: Int? = null,
     val lastWorkerInstanceId: String? = null,
     val crashCount: Int = 0,
+    val attemptId: String = "",
+    val logicalSessionId: String = "",
     val updatedMs: Long = System.currentTimeMillis()
 )

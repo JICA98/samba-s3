@@ -161,13 +161,13 @@ object CompileProgressBridge {
                     jobMatches = ppuJobId == jobId,
                 )
                 if (!decision.shouldClearUiActive) return@Runnable
-                // UI-only: never persist Runtime ready / validatedByRealBootFrame from watchdog.
-                Log.w(TAG, decision.logMessage ?: "PPU watchdog clear UI only job=$jobId")
+                Log.w(TAG, decision.logMessage ?: "PPU watchdog finalizing job=$jobId")
                 Log.w(TAG, "PPU watchdog missing_terminal=1 establishes_validated_ready=0 job=$jobId")
-                ppuJobId = null
-                ppuDoneWatchdog = null
-                if (shaderJobIds.isEmpty()) latestRuntimeEvent = null
-                _state.value = CompileState(ppuActive = false, shaderActive = cur.shaderActive, shaderMsg = cur.shaderMsg, titleId = null)
+                _state.value = cur.copy(
+                    ppuMsg = "Verifying cache… waiting for compiler process",
+                    remainingLabel = null,
+                    ppuPercent = 99,
+                )
             }
         }
         ppuDoneWatchdog = r

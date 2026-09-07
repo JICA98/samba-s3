@@ -143,8 +143,29 @@ class PpuOverallProgressReducerTest {
         val full = OverallProgress(totalModules = 52, completedModules = 52, percent = 100)
         val shown = PpuOverallProgressReducer.liveDisplay(full)
         assertEquals(52, shown.completedModules)
-        assertEquals(53, shown.totalModules)
-        assertTrue(shown.percent < 100)
+        assertEquals(52, shown.totalModules)
+        assertEquals(99, shown.percent)
+    }
+
+    @Test
+    fun liveDisplay_photographedNearFinishDoesNotInventOneMoreObject() {
+        val mgs = PpuOverallProgressReducer.liveDisplay(OverallProgress(192, 192, 100))
+        assertEquals(192, mgs.totalModules)
+        assertEquals(192, mgs.completedModules)
+        val later = PpuOverallProgressReducer.liveDisplay(OverallProgress(208, 208, 100))
+        assertEquals(208, later.totalModules)
+        assertEquals(99, later.percent)
+    }
+
+    @Test
+    fun liveDisplay_unknownTotalHasNoFabricatedDenominator() {
+        val shown = PpuOverallProgressReducer.liveDisplay(
+            OverallProgress(0, 192, 0),
+            discoveryComplete = false,
+        )
+        assertEquals(0, shown.totalModules)
+        assertEquals(192, shown.completedModules)
+        assertEquals(0, shown.percent)
     }
 
     @Test

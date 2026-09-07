@@ -80,7 +80,9 @@ object PpuReadinessStore {
         try {
             val f = file(context)
             val data = PpuStateFile(entries = cache.toMap())
-            f.writeText(json.encodeToString(data))
+            if (!com.zenithblue.sambas3.ppu.PpuAtomicFiles.writeUtf8(f, json.encodeToString(data))) {
+                Log.e("PpuReadinessStore", "save failed; last good file kept")
+            }
         } catch (e: Exception) {
             Log.e("PpuReadinessStore", "save failed", e)
         }
