@@ -1763,11 +1763,16 @@ class RPCSXActivity : ComponentActivity(), EmulationHost {
      * capability bits too, so use the resolved device identity rather than
      * only the event source mask.
      */
-    private fun isExternalKeyboardEvent(event: KeyEvent, routed: RoutedInputMapper?): Boolean =
-        !event.device.isVirtual && (
+    private fun isExternalKeyboardEvent(event: KeyEvent, routed: RoutedInputMapper?): Boolean {
+        // InputDevice.getDevice() may return null if Android removes the device
+        // between queuing and dispatching this event (also common for adb input).
+        // Resolve it once so a transient disconnect cannot crash the game process.
+        val device = event.device ?: return false
+        return !device.isVirtual && (
             routed?.device?.family == ControllerFamily.KEYBOARD ||
-                ControllerDeviceRepository.toConnected(event.device)?.family == ControllerFamily.KEYBOARD
+                ControllerDeviceRepository.toConnected(device)?.family == ControllerFamily.KEYBOARD
             )
+    }
 
     /** Intercept before child views can interpret Enter, arrows, Tab, Home, etc. */
     override fun dispatchKeyEvent(event: KeyEvent): Boolean {
