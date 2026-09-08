@@ -580,6 +580,96 @@ class InGameMenuCoordinatorTest {
         job.cancel()
         assertTrue(effects.contains(InGameMenuHostEffect.WaitForPhysicalNeutralThenArmGameplay))
     }
+
+    // ── SaveStates page: controller selection + save-confirm prompt ────────
+
+    private fun openSavestates(slotCaps: SaveStateCapabilities = gateway.caps.savestate!!) {
+        gateway.caps = gateway.caps.copy(savestate = slotCaps)
+        openMain()
+        coordinator.dispatch(InGameMenuIntent.OpenSaveStates)
+        awaitCondition { coordinator.state.value.currentPage == InGamePage.SaveStates }
+    }
+
+    @Test
+    fun savestates_activate_requests_confirm_for_selected_slot() {
+        openSavestates(
+            SaveStateCapabilities(true, false, true, listOf(SaveSlot(0, false, "s0"), SaveSlot(1, true, "s1")))
+        )
+        coordinator.dispatch(InGameMenuIntent.ReportItemCount(InGamePage.SaveStates, 2))
+        coordinator.dispatch(InGameMenuIntent.SelectIndex(1))
+        assertEquals(InGameMenuIntent.RequestSaveConfirm(1), coordinator.activateSelectedIntent())
+    }
+
+    @Test
+    fun savestates_activate_requires_reported_item_count() {
+        openSavestates()
+        assertNull(coordinator.activateSelectedIntent())
+    }
+
+    @Test
+    fun savestates_activate_rejected_when_cannot_save() {
+        openSavestates(SaveStateCapabilities(true, false, false, listOf(SaveSlot(0, true, "s0"))))
+        coordinator.dispatch(InGameMenuIntent.ReportItemCount(InGamePage.SaveStates, 1))
+        assertNull(coordinator.activateSelectedIntent())
+    }
+
+    @Test
+    fun save_confirm_activate_saves_and_closes() {
+        openSavestates()
+        coordinator.dispatch(InGameMenuIntent.ReportItemCount(InGamePage.SaveStates, 1))
+        coordinator.dispatch(InGameMenuIntent.RequestSaveConfirm(0))
+        assertEquals(0, coordinator.state.value.saveConfirmSlot)
+        assertTrue(coordinator.handleSaveConfirmCommand(MenuCommand.Activate))
+        awaitCondition { coordinator.state.value.session is MenuSessionState.Closed }
+        assertEquals(listOf(0), gateway.saveCalls)
+    }
+
+    @Test
+    fun save_confirm_back_dismisses_and_keeps_session_open() {
+        openSavestates()
+        coordinator.dispatch(InGameMenuIntent.ReportItemCount(InGamePage.SaveStates, 1))
+        coordinator.dispatch(InGameMenuIntent.RequestSaveConfirm(0))
+        assertTrue(coordinator.handleSaveConfirmCommand(MenuCommand.Back))
+        assertNull(coordinator.state.value.saveConfirmSlot)
+        assertTrue(coordinator.state.value.isOpen)
+        coordinator.dispatch(InGameMenuIntent.Back)
+        awaitCondition { coordinator.state.value.currentPage == InGamePage.Main }
+    }
+
+    @Test
+    fun save_confirm_swallows_navigation_commands() {
+        openSavestates(
+            SaveStateCapabilities(true, false, true, listOf(SaveSlot(0, false, "s0"), SaveSlot(1, true, "s1")))
+        )
+        coordinator.dispatch(InGameMenuIntent.ReportItemCount(InGamePage.SaveStates, 2))
+        coordinator.dispatch(InGameMenuIntent.RequestSaveConfirm(0))
+        assertTrue(coordinator.handleSaveConfirmCommand(MenuCommand.Next))
+        assertEquals(0, coordinator.state.value.selectedIndex)
+        assertEquals(0, coordinator.state.value.saveConfirmSlot)
+        assertTrue(coordinator.state.value.isOpen)
+    }
+
+    @Test
+    fun back_intent_dismisses_save_confirm_before_popping_page() {
+        openSavestates()
+        coordinator.dispatch(InGameMenuIntent.ReportItemCount(InGamePage.SaveStates, 1))
+        coordinator.dispatch(InGameMenuIntent.RequestSaveConfirm(0))
+        coordinator.dispatch(InGameMenuIntent.Back)
+        assertNull(coordinator.state.value.saveConfirmSlot)
+        assertEquals(InGamePage.SaveStates, coordinator.state.value.currentPage)
+    }
+
+    @Test
+    fun request_save_confirm_validates_slot_and_page() {
+        openSavestates()
+        coordinator.dispatch(InGameMenuIntent.RequestSaveConfirm(9))
+        assertNull(coordinator.state.value.saveConfirmSlot)
+        coordinator.dispatch(InGameMenuIntent.ReportItemCount(InGamePage.SaveStates, 1))
+        coordinator.dispatch(InGameMenuIntent.RequestSaveConfirm(0))
+        assertEquals(0, coordinator.state.value.saveConfirmSlot)
+        coordinator.dispatch(InGameMenuIntent.DismissSaveConfirm)
+        assertNull(coordinator.state.value.saveConfirmSlot)
+    }
 }
 
 class ClosePolicyTest {

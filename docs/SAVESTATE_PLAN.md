@@ -115,10 +115,11 @@ device logs with `grep S3SSTATE` for phase evidence.
 ```
 <config>/savestates/<TITLE>/<TITLE>_1_<slot>.SAVESTAT[.zst|.gz]
 ```
-- The core always writes the newest state to **slot 0**
-  (`System.cpp`: `get_savestate_file(m_title_id, m_path, 0, 0)` — hardcoded id 0).
-- Slots 1..4 are produced by **renaming** the fresh slot-0 file after the save
-  completes (zero core changes, no serialization risk).
+- The Android frontend passes the selected slot through `Emulator::Kill()` as
+  the absolute savestate ID. The serializer therefore writes directly to that
+  slot without using slot 0 as staging.
+- Direct slot writes keep every existing slot independent. In particular,
+  saving slot 1 no longer moves or replaces the snapshot stored in slot 0.
 
 ### 2.2 Backend (`rpcsx-android.cpp`) — ALREADY EDITED (this session)
 - `kSaveStateSlotCount = 5`; helpers `slotSavestatePath(slot)` /
@@ -126,11 +127,10 @@ device logs with `grep S3SSTATE` for phase evidence.
 - `_rpcsx_getSaveStateInfo()` → slots 0..4 with `exists` + label
   (`Slot N — <dd Mon HH:MM>` from file mtime).
 - `_rpcsx_saveState(slot)`:
-  `Kill(false, true)`; in `after_kill_callback`: rename slot-0 file → slot N
-  (remove old target first), then `SetContinuousMode(true); SetForceBoot(true);
-  BootGame(slot_path, "", true)` — full `BootGame → Init → Load` path (mounts
-  guaranteed), replacing the old `Restart()` route.
-  Suspend mode (`savestate.suspend_emu`): save + rename, no reboot.
+  `Kill(false, true, nullptr, slot)` writes the selected absolute ID directly;
+  `after_kill_callback` validates that exact slot, then the Android activity
+  boots the committed path through the full `BootGame → Init → Load` path.
+  Suspend mode (`savestate.suspend_emu`): direct-slot save, no reboot.
 - `_rpcsx_loadSaveState(slot)`: resolve slot file (must exist), then
   `GracefulShutdown(false,false,false,true)` + `BootGame(path, "", true)`.
 - Capabilities JSON (`j["savestate"]`) now uses the same `saveStateSlotsJson()`
@@ -175,7 +175,7 @@ gameplay; PPU link reports `failed=0`.
 
 ### P3 — validation matrix (tablet device `7d6afed8`, wifi serial
 `adb-7d6afed8-mU47CV._adb-tls-connect._tcp`)
-1. ✅ Save slot 2 → rename to slot file verified; auto-boot from slot file
+1. ✅ Save slot 2 → selected slot file verified; auto-boot from slot file
    reaches PPU linking + LLVM cache reuse (blocks on P2).
 2. ✅ Slot labels with dates in UI; empty slots disable LOAD.
 3. ✅ Direct LOAD from slot 3 → live gameplay after PPU link/apply.

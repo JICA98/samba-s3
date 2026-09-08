@@ -218,9 +218,15 @@ fun InGameMenuHost(
             InGamePage.Friends -> InGameFriendsPage(core = core, onBack = { onIntent(InGameMenuIntent.Back) })
             InGamePage.SaveStates -> InGameSaveStatePage(
                 capabilities = uiState.capabilities.savestate,
+                selectedIndex = uiState.selectedIndex,
+                confirmSlot = uiState.saveConfirmSlot,
                 onBack = { onIntent(InGameMenuIntent.Back) },
+                onReportCount = { onIntent(InGameMenuIntent.ReportItemCount(InGamePage.SaveStates, it)) },
+                onSelect = { onIntent(InGameMenuIntent.SelectIndex(it)) },
+                onRequestSave = { onIntent(InGameMenuIntent.RequestSaveConfirm(it)) },
                 onSave = { onIntent(InGameMenuIntent.SaveState(it)) },
-                onLoad = { onIntent(InGameMenuIntent.LoadState(it)) }
+                onLoad = { onIntent(InGameMenuIntent.LoadState(it)) },
+                onDismissConfirm = { onIntent(InGameMenuIntent.DismissSaveConfirm) }
             )
             null -> Unit
         }

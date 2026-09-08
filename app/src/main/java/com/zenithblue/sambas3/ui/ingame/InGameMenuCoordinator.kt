@@ -35,6 +35,8 @@ sealed interface InGameMenuIntent {
 
     data class SaveState(val slot: Int) : InGameMenuIntent
     data class LoadState(val slot: Int) : InGameMenuIntent
+    data class RequestSaveConfirm(val slot: Int) : InGameMenuIntent
+    data object DismissSaveConfirm : InGameMenuIntent
 
     // Settings transaction
     data object SettingsSave : InGameMenuIntent
@@ -116,7 +118,8 @@ data class InGameMenuUiState(
     val settingsTreeJson: String? = null,
     val settingsLoading: Boolean = false,
     val showDirtyDialog: Boolean = false,
-    val settingsWriteError: String? = null
+    val settingsWriteError: String? = null,
+    val saveConfirmSlot: Int? = null
 ) {
     val isOpen: Boolean get() = session is MenuSessionState.Opening || session is MenuSessionState.Open
     val currentPage: InGamePage? get() = (session as? MenuSessionState.Open)?.pageStack?.lastOrNull()
@@ -237,6 +240,17 @@ class InGameMenuCoordinator(
             is InGameMenuIntent.LoadState -> closeAndRun(CloseReason.LoadState, intent.slot) { requestId ->
                 core.loadState(intent.slot, checkNotNull(requestId))
             }
+
+            is InGameMenuIntent.RequestSaveConfirm -> _state.update {
+                val open = it.session as? MenuSessionState.Open ?: return@update it
+                val savestate = it.capabilities.savestate
+                val valid = open.pageStack.lastOrNull() == InGamePage.SaveStates &&
+                    savestate?.canSave != false &&
+                    (savestate?.suspendMode == true || savestate?.slots?.any { s -> s.slot == intent.slot } == true)
+                if (valid) it.copy(saveConfirmSlot = intent.slot) else it
+            }
+
+            is InGameMenuIntent.DismissSaveConfirm -> _state.update { it.copy(saveConfirmSlot = null) }
 
             is InGameMenuIntent.SettingsSave -> scope.launch { settingsSave() }
             is InGameMenuIntent.SettingsDiscard -> scope.launch { settingsDiscard() }
@@ -413,7 +427,8 @@ class InGameMenuCoordinator(
             st.copy(
                 session = open.copy(pageStack = stack + page),
                 pageSelections = updatedSelections,
-                selectedIndex = updatedSelections[page] ?: 0
+                selectedIndex = updatedSelections[page] ?: 0,
+                saveConfirmSlot = null
             )
         }
         if (page == InGamePage.Settings) scope.launch { enterSettings() }
@@ -422,6 +437,10 @@ class InGameMenuCoordinator(
     private fun handleBackInternal() {
         val s = _state.value
         val open = s.session as? MenuSessionState.Open ?: return
+        if (s.saveConfirmSlot != null) {
+            _state.update { it.copy(saveConfirmSlot = null) }
+            return
+        }
         when (open.pageStack.lastOrNull()) {
             InGamePage.Settings -> {
                 if (s.showDirtyDialog) return
@@ -461,7 +480,8 @@ class InGameMenuCoordinator(
             st.copy(
                 session = open.copy(pageStack = newStack),
                 pageSelections = updatedSelections,
-                selectedIndex = restoredIndex
+                selectedIndex = restoredIndex,
+                saveConfirmSlot = null
             )
         }
     }
@@ -528,9 +548,41 @@ class InGameMenuCoordinator(
     /** Resolve the currently selected main-menu row to its intent. */
     fun activateSelectedIntent(): InGameMenuIntent? {
         val s = _state.value
-        if (s.currentPage != InGamePage.Main) return null
-        val rows = mainRowDescriptors(s.capabilities)
-        return rows.getOrNull(s.selectedIndex)?.takeIf { it.enabled }?.intent
+        return when (s.currentPage) {
+            InGamePage.Main -> mainRowDescriptors(s.capabilities)
+                .getOrNull(s.selectedIndex)
+                ?.takeIf { it.enabled }?.intent
+
+            InGamePage.SaveStates -> {
+                val savestate = s.capabilities.savestate ?: return null
+                if (savestate.canSave == false) return null
+                val count = s.itemCounts[InGamePage.SaveStates] ?: return null
+                if (s.selectedIndex !in 0 until count) return null
+                val slot = if (savestate.suspendMode) {
+                    0
+                } else {
+                    savestate.slots.getOrNull(s.selectedIndex)?.slot ?: return null
+                }
+                InGameMenuIntent.RequestSaveConfirm(slot)
+            }
+
+            else -> null
+        }
+    }
+
+    /** While a save-confirm prompt is open it owns all menu commands. */
+    fun handleSaveConfirmCommand(command: MenuCommand): Boolean {
+        val slot = _state.value.saveConfirmSlot ?: return false
+        when (command) {
+            is MenuCommand.Activate -> {
+                _state.update { it.copy(saveConfirmSlot = null) }
+                dispatch(InGameMenuIntent.SaveState(slot))
+            }
+
+            is MenuCommand.Back -> _state.update { it.copy(saveConfirmSlot = null) }
+            else -> Unit
+        }
+        return true
     }
 
     // ── Settings transaction (exactly-once semantics, §14) ──────────────────

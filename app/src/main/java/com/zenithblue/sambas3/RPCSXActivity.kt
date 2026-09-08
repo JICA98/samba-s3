@@ -400,9 +400,13 @@ class RPCSXActivity : ComponentActivity(), EmulationHost {
                             operationUiState = SavestateOperationUiState.Loading(effect.slot, null, "Restoring saved state...")
                             if (runCatching { RPCSX.instance.hasLoadSaveStateTerminalExport() }.getOrDefault(false)) {
                                 Log.i("S3SAVE", "manual-load accepted requestId=${effect.requestId} slot=${effect.slot} awaiting=native-terminal")
+                                // The native terminal success is emitted only after the
+                                // restored guest reaches Running. This watchdog can fail
+                                // a hung core, but never declares modern-core success.
+                                watchManualLoad(record, allowFrameCompletion = false)
                             } else {
                                 Log.w("S3SAVE", "manual-load accepted requestId=${effect.requestId} slot=${effect.slot} fallback=frame-confirmation")
-                                watchManualLoad(record)
+                                watchManualLoad(record, allowFrameCompletion = true)
                             }
                         }
                     }
@@ -1289,7 +1293,10 @@ class RPCSXActivity : ComponentActivity(), EmulationHost {
      * the completion gate; a process death before that gate leaves COMMITTED
      * armed for the next Activity launch.
      */
-    private fun watchManualLoad(record: PendingSavestateRecovery) {
+    private fun watchManualLoad(
+        record: PendingSavestateRecovery,
+        allowFrameCompletion: Boolean,
+    ) {
         bootThread?.interrupt()
         bootThread = thread(name = "S3 Manual Savestate Confirm") {
             val expectedGeneration = surfaceLeaseManager.currentGeneration
@@ -1298,13 +1305,13 @@ class RPCSXActivity : ComponentActivity(), EmulationHost {
             var stable = 0
             while (System.currentTimeMillis() < deadline && !Thread.interrupted()) {
                 val running = runCatching { RPCSX.getState() == EmulatorState.Running }.getOrDefault(false)
-                val copied = if (running && System.currentTimeMillis() >= notBefore) {
+                val copied = if (allowFrameCompletion && running && System.currentTimeMillis() >= notBefore) {
                     probeCurrentFrame(expectedGeneration)
                 } else {
                     false
                 }
                 if (running && copied) stable++ else stable = 0
-                if (stable >= 6) {
+                if (allowFrameCompletion && stable >= 6) {
                     Log.i(
                         "S3SAVE",
                         "manual-load legacy-frame-confirmed requestId=${record.requestId} slot=${record.slot} generation=$expectedGeneration"
@@ -1526,11 +1533,19 @@ class RPCSXActivity : ComponentActivity(), EmulationHost {
 
     /** Map a semantic menu command to coordinator intents. Returns true if consumed. */
     private fun handleMenuCommand(command: MenuCommand): Boolean {
+        if (coordinator.handleSaveConfirmCommand(command)) return true
+        // ponytail: savestate grid assumed 2 columns; adaptive grid may differ on wide screens.
+        val onSavestatesGrid =
+            coordinator.state.value.currentPage == com.zenithblue.sambas3.ui.ingame.InGamePage.SaveStates
         return when (command) {
-            is MenuCommand.Previous -> coordinator.moveSelection(-1)
-            is MenuCommand.Next -> coordinator.moveSelection(1)
-            is MenuCommand.Left -> false
-            is MenuCommand.Right -> false
+            is MenuCommand.Previous ->
+                if (onSavestatesGrid) coordinator.moveSelection2D(dx = 0, dy = -1) else coordinator.moveSelection(-1)
+            is MenuCommand.Next ->
+                if (onSavestatesGrid) coordinator.moveSelection2D(dx = 0, dy = 1) else coordinator.moveSelection(1)
+            is MenuCommand.Left ->
+                if (onSavestatesGrid) coordinator.moveSelection2D(dx = -1, dy = 0) else false
+            is MenuCommand.Right ->
+                if (onSavestatesGrid) coordinator.moveSelection2D(dx = 1, dy = 0) else false
             is MenuCommand.PageUp -> coordinator.jumpSelection(-10)
             is MenuCommand.PageDown -> coordinator.jumpSelection(10)
             is MenuCommand.Activate -> {
@@ -1553,13 +1568,27 @@ class RPCSXActivity : ComponentActivity(), EmulationHost {
                 true
             }
 
-            // Page actions: SAVE (Square) / DISCARD (Triangle) on Settings; otherwise unconsumed.
+            // Page actions: SAVE (Square) / DISCARD (Triangle) on Settings,
+            // LOAD (Square) on the savestate grid; otherwise unconsumed.
             is MenuCommand.PageAction1 -> {
-                if (coordinator.state.value.currentPage == com.zenithblue.sambas3.ui.ingame.InGamePage.Settings) {
-                    coordinator.dispatch(InGameMenuIntent.SettingsSave)
-                    true
-                } else {
-                    false
+                when (coordinator.state.value.currentPage) {
+                    com.zenithblue.sambas3.ui.ingame.InGamePage.Settings -> {
+                        coordinator.dispatch(InGameMenuIntent.SettingsSave)
+                        true
+                    }
+
+                    com.zenithblue.sambas3.ui.ingame.InGamePage.SaveStates -> {
+                        val st = coordinator.state.value
+                        val slot = st.capabilities.savestate?.slots?.getOrNull(st.selectedIndex)
+                        if (slot?.exists == true) {
+                            coordinator.dispatch(InGameMenuIntent.LoadState(slot.slot))
+                            true
+                        } else {
+                            false
+                        }
+                    }
+
+                    else -> false
                 }
             }
 

@@ -1,5 +1,5 @@
 diff --git a/android/src/rpcsx-android.cpp b/android/src/rpcsx-android.cpp
-index 8308a4798..982ddc0c0 100644
+index 8308a4798..f1e6d9299 100644
 --- a/android/src/rpcsx-android.cpp
 +++ b/android/src/rpcsx-android.cpp
 @@ -55,6 +55,8 @@
@@ -8,7 +8,7 @@ index 8308a4798..982ddc0c0 100644
  #include <utility>
 +#include <fstream>
 +#include <sstream>
-
+ 
  #define STB_IMAGE_WRITE_IMPLEMENTATION
  #define STBI_ONLY_PNG
 @@ -155,6 +157,7 @@ static constexpr int FRONTEND_EVENT_EMULATOR_ACTION_ERROR = 4;
@@ -16,7 +16,7 @@ index 8308a4798..982ddc0c0 100644
  static constexpr int FRONTEND_EVENT_SAVESTATE_FAILED = 6;
  static constexpr int FRONTEND_EVENT_RENDERER_ERROR = 7;
 +static constexpr int FRONTEND_EVENT_SAVESTATE_LOAD_TERMINAL = 9;
-
+ 
  static atomic_t<bool> g_frontend_menu_active{false};
  static atomic_t<bool> g_frontend_menu_paused_emu{false};
 @@ -914,6 +917,20 @@ static void collectGamePaths(std::vector<std::string> &paths,
@@ -52,7 +52,16 @@ index 8308a4798..982ddc0c0 100644
    JNIEnv* ownerEnv() const { return owner_env; }
  
    u32 queueDepth() {
-@@ -1648,7 +1670,8 @@ extern void ppu_precompile(std::vector<std::string> &dir_queue,
+@@ -1310,6 +1332,8 @@ static void emit_frontend_event(int type, const std::string* payload)
+     });
+ }
+ 
++static void finish_pending_savestate_load_if_running();
++
+ // Vulkan's unrecoverable Android surface errors are surfaced to Kotlin so a
+ // single Activity recreation can recover the durable savestate transition.
+ extern "C" void _rpcsx_android_renderer_error(int error_code, const char* message)
+@@ -1648,7 +1672,8 @@ extern void ppu_precompile(std::vector<std::string> &dir_queue,
                             std::vector<ppu_module<lv2_obj> *> *loaded_prx);
  extern bool ppu_initialize(const ppu_module<lv2_obj> &, bool check_only = false,
                             u64 file_size = 0);
@@ -62,7 +71,7 @@ index 8308a4798..982ddc0c0 100644
  extern bool ppu_load_rel_exec(const ppu_rel_object &);
  
  class CompilationQueue {
-@@ -1765,8 +1788,15 @@ private:
+@@ -1765,8 +1790,15 @@ private:
      // captures this context when its thread starts; setting it later around
      // ppu_precompile can misclassify install PPU work as runtime work and
      // create the second (2000) notification.
@@ -79,7 +88,7 @@ index 8308a4798..982ddc0c0 100644
      set_system_progress_context(installProgressContext);
      struct InstallProgressContextGuard {
        ~InstallProgressContextGuard() { clear_system_progress_context(); }
-@@ -1838,8 +1868,22 @@ private:
+@@ -1838,8 +1870,22 @@ private:
                          _main.applied_patches, std::vector<u32>{})) {
          Emu.ConfigurePPUCache();
          Emu.SetTestMode();
@@ -104,7 +113,15 @@ index 8308a4798..982ddc0c0 100644
          mod_list.emplace_back(&_main);
        }
      }
-@@ -2280,6 +2324,10 @@ extern "C" bool _rpcsx_startMainThreadProcessor(JNIEnv *env) {
+@@ -1892,6 +1938,7 @@ static void setupCallbacks() {
+       .on_resume = [](auto...) {},
+       .on_stop = [](auto...) {},
+       .on_ready = [](auto...) {},
++      .on_started = [] { finish_pending_savestate_load_if_running(); },
+       .on_missing_fw = [](auto...) {},
+       .on_emulation_stop_no_response = [](auto...) {},
+       .on_save_state_progress = [](auto...) {},
+@@ -2280,6 +2327,10 @@ extern "C" bool _rpcsx_startMainThreadProcessor(JNIEnv *env) {
    return true;
  }
  
@@ -115,7 +132,7 @@ index 8308a4798..982ddc0c0 100644
  extern "C" bool _rpcsx_collectGameInfo(JNIEnv *env, std::string_view rootDir,
                                         long progressId) {
    std::unique_lock lifecycleLock(g_emulator_lifecycle_mutex);
-@@ -2829,10 +2877,7 @@ static bool installPkg(JNIEnv *env, fs::file &&file, jlong progressId) {
+@@ -2829,10 +2880,7 @@ static bool installPkg(JNIEnv *env, fs::file &&file, jlong progressId) {
    if (worker()) {
      auto paths = std::vector(bootable_paths.begin(), bootable_paths.end());
      collectGameInfo(env, progress.getProgressId(), paths);
@@ -127,7 +144,7 @@ index 8308a4798..982ddc0c0 100644
    }
  
    return true;
-@@ -2943,7 +2988,7 @@ static bool installRap(JNIEnv *env, fs::file &&file, jlong progressId,
+@@ -2943,7 +2991,7 @@ static bool installRap(JNIEnv *env, fs::file &&file, jlong progressId,
    }
  
    collectGameInfo(env, progress.getProgressId(), {std::string(rootPath)});
@@ -136,7 +153,7 @@ index 8308a4798..982ddc0c0 100644
    return true;
  }
  
-@@ -3042,8 +3087,7 @@ static bool installIso(JNIEnv *env, fs::file &&file, jlong progressId) {
+@@ -3042,8 +3090,7 @@ static bool installIso(JNIEnv *env, fs::file &&file, jlong progressId) {
  
    progress.report(0, 0, "Publishing installed game");
    collectGameInfo(env, progress.getProgressId(), {finalPath});
@@ -146,7 +163,7 @@ index 8308a4798..982ddc0c0 100644
    return true;
  }
  
-@@ -3363,6 +3407,391 @@ extern "C" int _rpcsx_extractIsoPreview(int fd, const char* destPath) {
+@@ -3363,6 +3410,391 @@ extern "C" int _rpcsx_extractIsoPreview(int fd, const char* destPath) {
    return 0;
  }
  
@@ -538,7 +555,7 @@ index 8308a4798..982ddc0c0 100644
  extern "C" int _rpcsx_prepareRuntimePpu(const char* path, u64 sessionId)
  {
      if (!path || !*path)
-@@ -3607,7 +4036,7 @@ extern "C" std::string _rpcsx_settingsGet(std::string_view path) {
+@@ -3607,7 +4039,7 @@ extern "C" std::string _rpcsx_settingsGet(std::string_view path) {
    auto root = find_cfg_node(&g_cfg, path);
  
    if (root == nullptr) {
@@ -547,49 +564,193 @@ index 8308a4798..982ddc0c0 100644
    }
  
    return root->to_json().dump(4);
-@@ -4150,7 +4579,7 @@ extern "C" bool _rpcsx_saveState(int slot)
+@@ -3955,9 +4387,8 @@ extern "C" bool _rpcsx_gracefulShutdown()
+ }
+ 
+ // Multi-slot savestate support.
+-// The core always writes the newest state to get_savestate_file(..., 0, 0)
+-// (id 0). Higher slots are produced by renaming that file after the save
+-// completes. Slot files follow the core naming scheme:
++// Each frontend slot is passed to the core as the absolute savestate ID. Slot
++// files follow the core naming scheme:
+ //   <config>/savestates/<TITLE>/<TITLE>_1_<slot>.SAVESTAT.zst
+ static constexpr int kSaveStateSlotCount = 5;
+ 
+@@ -4074,20 +4505,9 @@ extern "C" bool _rpcsx_saveState(int slot)
+         Emu.after_kill_callback = [slot, suspendMode, id]()
+         {
+             const destructive_guard clear_busy;
+-            const std::string fresh = slotSavestatePathCompressed(0);
+-            if (slot > 0 && !fresh.empty())
+-            {
+-                const std::string target = slotSavestatePath(slot);
+-                if (!target.empty())
+-                {
+-                    fs::remove_file(target + ".zst");
+-                    fs::remove_file(target + ".gz");
+-                    if (fs::file{fresh})
+-                        fs::rename(fresh, target + ".zst", true);
+-                }
+-            }
++            const std::string slot_path = slotSavestatePath(slot);
+             const std::string boot_path =
+-                slot > 0 ? slotSavestatePathCompressed(slot) : fresh;
++                slot_path.empty() ? std::string{} : slot_path + ".zst";
+             if (boot_path.empty())
+             {
+                 rpcsx_android.error("S3SAVE id=%llu phase=failed slot=%d reason=missing_slot_file",
+@@ -4111,6 +4531,10 @@ extern "C" bool _rpcsx_saveState(int slot)
+                 return;
+             }
+ 
++            // New saves are always zstd. Once the exact new file is valid,
++            // discard an obsolete gzip version so the slot has one authority.
++            fs::remove_file(slot_path + ".gz");
++
+             sstate_log(id, "save", "core_stopped");
+             rpcsx_android.notice("S3SAVE id=%llu phase=file-committed slot=%d path='%s' size=%llu",
+                                  (u64)id, slot, boot_path, (u64)info.size);
+@@ -4144,13 +4568,71 @@ extern "C" bool _rpcsx_saveState(int slot)
+         {
+             Emu.SetContinuousMode(true);
+         }
+-        Emu.Kill(false, true);
++        Emu.Kill(false, true, nullptr, slot);
+         sstate_log(id, "save", "kill_complete");
+     });
      return true;
  }
-
+ 
 -extern "C" bool _rpcsx_loadSaveState(int slot)
++struct pending_savestate_load
++{
++    u64 native_request_id;
++    u64 frontend_request_id;
++    u64 generation;
++    int slot;
++    std::string path;
++};
++
++static std::mutex g_pending_savestate_load_mutex;
++static std::optional<pending_savestate_load> g_pending_savestate_load;
++
++static void finish_pending_savestate_load(bool success, std::string reason)
++{
++    std::optional<pending_savestate_load> pending;
++    {
++        std::lock_guard lock(g_pending_savestate_load_mutex);
++        if (!g_pending_savestate_load)
++        {
++            return;
++        }
++        pending = std::move(g_pending_savestate_load);
++        g_pending_savestate_load.reset();
++    }
++
++    const u64 request_id = pending->frontend_request_id
++        ? pending->frontend_request_id
++        : pending->native_request_id;
++    nlohmann::json terminal{
++        {"requestId", request_id},
++        {"nativeRequestId", pending->native_request_id},
++        {"slot", pending->slot},
++        {"success", success},
++        {"reason", reason},
++        {"path", pending->path},
++    };
++    const std::string payload = terminal.dump();
++    sstate_log(pending->native_request_id, "load",
++               success ? "terminal_success" : "terminal_failure",
++               fmt::format(" request_id={} slot={} generation={} reason={}",
++                           request_id, pending->slot, pending->generation, reason).c_str());
++    emit_frontend_event(FRONTEND_EVENT_SAVESTATE_LOAD_TERMINAL, &payload);
++    end_destructive();
++}
++
++static void finish_pending_savestate_load_if_running()
++{
++    {
++        std::lock_guard lock(g_pending_savestate_load_mutex);
++        if (!g_pending_savestate_load ||
++            g_pending_savestate_load->generation != g_emu_generation.load())
++        {
++            return;
++        }
++    }
++    finish_pending_savestate_load(true, "running");
++}
++
 +static bool rpcsx_load_save_state(int slot, u64 frontend_request_id)
  {
      if (slot < 0 || slot >= kSaveStateSlotCount)
          slot = 0;
-@@ -4172,7 +4601,7 @@ extern "C" bool _rpcsx_loadSaveState(int slot)
+@@ -4172,172 +4654,246 @@ extern "C" bool _rpcsx_loadSaveState(int slot)
      sstate_log(id, "load", "file_resolved", fmt::format(" path='{}'", path).c_str());
      g_frontend_menu_active = false;
      g_frontend_menu_paused_emu = false;
 -    g_coreDispatch.push([path, id]()
-+    g_coreDispatch.push([path, id, frontend_request_id, slot]()
++    auto boot = [path, id, frontend_request_id, slot]()
      {
-         // One atomic core-owned transition on this serialized thread:
-         // shutdown the old generation, then boot the savestate through
-@@ -4193,151 +4622,218 @@ extern "C" bool _rpcsx_loadSaveState(int slot)
+-        // One atomic core-owned transition on this serialized thread:
+-        // shutdown the old generation, then boot the savestate through
+-        // the full BootGame -> Init path so VFS is mounted before load.
+-        const destructive_guard clear_busy;
+-        sstate_log(id, "load", "main_enter",
+-                   fmt::format(" emu_stopped=%d", (int)Emu.IsStopped()).c_str());
+-        if (!Emu.IsStopped())
+-        {
+-            sstate_log(id, "load", "shutdown_begin");
+-            Emu.GracefulShutdown(false, false, false, true);
+-            sstate_log(id, "load", "shutdown_end",
+-                       fmt::format(" is_stopped=%d", (int)Emu.IsStopped()).c_str());
+-        }
++        // The old generation is fully stopped before this callback is queued.
++        // Starting earlier leaves its join thread and host resources alive,
++        // which can deadlock the restored PPU/SPU cache warmup.
+         sstate_log(id, "load", "boot_begin", fmt::format(" path='{}'", path).c_str());
+         const u64 new_gen = g_emu_generation.fetch_add(1) + 1;
++        {
++            std::lock_guard lock(g_pending_savestate_load_mutex);
++            g_pending_savestate_load = pending_savestate_load{
++                id, frontend_request_id, new_gen, slot, path};
++        }
+         rpcsx_android.notice("S3LIFE id=%llu action=load phase=boot_begin new_gen=%llu tid=%d path='%s'",
                               (u64)id, new_gen, (int)::gettid(), path.c_str());
          Emu.SetContinuousMode(true);
          Emu.SetForceBoot(true);
 -        Emu.BootGame(path, "", true);
 -        sstate_log(id, "load", "boot_returned");
 +        const auto result = Emu.BootGame(path, "", true);
-+        const bool success = result == game_boot_result::no_errors;
-+        const u64 request_id = frontend_request_id ? frontend_request_id : id;
-+        const std::string reason = success
-+            ? "ok"
-+            : fmt::format("boot-result-{}", static_cast<u32>(result));
-+        nlohmann::json terminal{
-+            {"requestId", request_id},
-+            {"nativeRequestId", id},
-+            {"slot", slot},
-+            {"success", success},
-+            {"reason", reason},
-+            {"path", path},
++        if (result != game_boot_result::no_errors)
++        {
++            finish_pending_savestate_load(
++                false, fmt::format("boot-result-{}", static_cast<u32>(result)));
++            return;
++        }
++        sstate_log(id, "load", "boot_accepted",
++                   fmt::format(" generation={}", new_gen).c_str());
++    };
++
++    g_coreDispatch.push([id, boot = std::move(boot)]() mutable
++    {
++        sstate_log(id, "load", "main_enter",
++                   fmt::format(" emu_stopped=%d", (int)Emu.IsStopped()).c_str());
++        if (Emu.IsStopped())
++        {
++            boot();
++            return;
++        }
++
++        // GracefulShutdown can return while the previous join thread is still
++        // draining. Chain boot from Kill's callback instead of racing it.
++        sstate_log(id, "load", "shutdown_begin");
++        Emu.after_kill_callback = [boot = std::move(boot)]() mutable
++        {
++            g_coreDispatch.push(std::move(boot));
 +        };
-+        const std::string payload = terminal.dump();
-+        sstate_log(id, "load", success ? "terminal_success" : "terminal_failure",
-+                   fmt::format(" request_id={} slot={} result={}", request_id, slot,
-+                               static_cast<u32>(result)).c_str());
-+        emit_frontend_event(FRONTEND_EVENT_SAVESTATE_LOAD_TERMINAL, &payload);
++        Emu.GracefulShutdown(false, false, false, true);
++        sstate_log(id, "load", "shutdown_queued",
++                   fmt::format(" is_stopped=%d", (int)Emu.IsStopped()).c_str());
      });
      return true;
  }
@@ -913,6 +1074,20 @@ index 8308a4798..982ddc0c0 100644
  extern "C" std::string _rpcsx_getFriends()
  {
      nlohmann::json j;
+diff --git a/android/src/samba-build-id.cpp b/android/src/samba-build-id.cpp
+index 8aca7dc59..0b93578d9 100644
+--- a/android/src/samba-build-id.cpp
++++ b/android/src/samba-build-id.cpp
+@@ -1,8 +1,6 @@
+ #include <string>
+-
+ static std::string g_samba_build_id =
+-    "rpcsx=27441815c12cca1a4dcb3daec82b513b1a35eed7 samba=62a70942d8c121a7e58c74b6a4e2700cf369c0ae patch_sha256=6468572dbc6dec3ea7d0ad996adeb57dffd96a090d10482ea04d7013abecd5f0 build_type=Debug";
+-
++    "rpcsx=657b26a0d197c29d42cdcf3b3f6e8ad5c6765bbc samba=d658f7773b054f3640aa2f93767d8b7bc4c34364 patch_sha256=c82a4148d359441eec7e78f0432a793ab9d82f2f9c00747898e439a05179803c build_type=Debug";
+ extern "C" const char* _rpcsx_sambaBuildId() {
+     return g_samba_build_id.c_str();
+ }
 diff --git a/rpcs3/Emu/Cell/PPUThread.cpp b/rpcs3/Emu/Cell/PPUThread.cpp
 index d2768d8b0..caaef4c15 100644
 --- a/rpcs3/Emu/Cell/PPUThread.cpp
@@ -1400,7 +1575,7 @@ index 6df7e3334..56e23fd85 100644
  
  	gpu_debug_marker::gpu_debug_marker(gpu_debug_marker_pool& pool, std::string message)
 diff --git a/rpcs3/Emu/System.cpp b/rpcs3/Emu/System.cpp
-index 21a47f932..ec45a010c 100644
+index 21a47f932..969910fd7 100644
 --- a/rpcs3/Emu/System.cpp
 +++ b/rpcs3/Emu/System.cpp
 @@ -90,7 +90,7 @@ extern void spu_load_exec(const spu_exec_object&);
@@ -1532,11 +1707,102 @@ index 21a47f932..ec45a010c 100644
  			{
  				sys_log.notice("%s", item.name);
  			}
+@@ -3140,10 +3182,15 @@ void Emulator::FinalizeRunRequest()
+ 
+ 	lv2_obj::make_scheduler_ready();
+ 
+-	m_state.compare_and_swap_test(system_state::starting, system_state::running);
++	const bool became_running = m_state.compare_and_swap_test(system_state::starting, system_state::running);
+ 
+ 	m_ar.reset();
+ 
++	if (became_running)
++	{
++		GetCallbacks().on_started();
++	}
++
+ 	if (!autostart)
+ 	{
+ 		Pause();
+@@ -3534,6 +3581,11 @@ extern bool check_if_vdec_contexts_exist();
+ extern bool try_lock_spu_threads_in_a_state_compatible_with_savestates(bool revert_lock = false, std::vector<std::pair<shared_ptr<named_thread<spu_thread>>, u32>>* out_list = nullptr);
+ 
+ void Emulator::Kill(bool allow_autoexit, bool savestate, savestate_stage* save_stage)
++{
++	Kill(allow_autoexit, savestate, save_stage, 0);
++}
++
++void Emulator::Kill(bool allow_autoexit, bool savestate, savestate_stage* save_stage, s64 savestate_id)
+ {
+ 	static const auto make_ptr = [](auto ptr)
+ 	{
+@@ -3580,7 +3632,7 @@ void Emulator::Kill(bool allow_autoexit, bool savestate, savestate_stage* save_s
+ 			std::shared_ptr<std::shared_ptr<void>> pause_thread = std::make_shared<std::shared_ptr<void>>();
+ 			sstate_trace("prepare-created");
+ 
+-			*pause_thread = make_ptr(new named_thread("Savestate Prepare Thread"sv, [pause_thread, allow_autoexit, this, sstate_trace, post_core_lifecycle]() mutable
++			*pause_thread = make_ptr(new named_thread("Savestate Prepare Thread"sv, [pause_thread, allow_autoexit, savestate_id, this, sstate_trace, post_core_lifecycle]() mutable
+ 				{
+ 					sstate_trace("prepare-entry");
+ 					struct scoped_success_guard
+@@ -3678,13 +3730,13 @@ void Emulator::Kill(bool allow_autoexit, bool savestate, savestate_stage* save_s
+ 					success_guard.save_state_success = true;
+ 
+ 					sstate_trace("prepared-kill-dispatch-before");
+-					post_core_lifecycle([allow_autoexit, this, paused_spus, sstate_trace]()
++					post_core_lifecycle([allow_autoexit, savestate_id, this, paused_spus, sstate_trace]()
+ 						{
+ 							sstate_trace("prepared-kill-callback-entry");
+ 							savestate_stage stage{};
+ 							stage.prepared = true;
+ 							stage.paused_spus = paused_spus;
+-							Kill(allow_autoexit, true, &stage);
++							Kill(allow_autoexit, true, &stage, savestate_id);
+ 							sstate_trace("prepared-kill-callback-exit");
+ 						});
+ 					sstate_trace("prepared-kill-dispatch-after");
+@@ -3799,7 +3851,7 @@ void Emulator::Kill(bool allow_autoexit, bool savestate, savestate_stage* save_s
+ 	// There is no race condition because it is only accessed by the same thread
+ 	std::shared_ptr<std::shared_ptr<void>> join_thread = std::make_shared<std::shared_ptr<void>>();
+ 
+-	*join_thread = make_ptr(new named_thread("Emulation Join Thread"sv, [join_thread, savestate, allow_autoexit, save_stage = save_stage ? *save_stage : savestate_stage{}, this]() mutable
++	*join_thread = make_ptr(new named_thread("Emulation Join Thread"sv, [join_thread, savestate, allow_autoexit, savestate_id, save_stage = save_stage ? *save_stage : savestate_stage{}, this]() mutable
+ 		{
+ 			fs::pending_file file;
+ 
+@@ -3912,7 +3964,7 @@ void Emulator::Kill(bool allow_autoexit, bool savestate, savestate_stage* save_s
+ 			{
+ 				set_progress_message("Creating File");
+ 
+-				path = get_savestate_file(m_title_id, m_path, 0, 0);
++				path = get_savestate_file(m_title_id, m_path, savestate_id, 0);
+ 
+ 				// The function is meant for reading files, so if there is no ZST file it would not return compressed file path
+ 			    // So this is the only place where the result is edited if need to be
 diff --git a/rpcs3/Emu/System.h b/rpcs3/Emu/System.h
-index 804981160..b81783502 100644
+index 804981160..d35b3d49e 100644
 --- a/rpcs3/Emu/System.h
 +++ b/rpcs3/Emu/System.h
-@@ -525,6 +525,10 @@ public:
+@@ -78,6 +78,9 @@ struct EmuCallbacks
+ 	std::function<void()> on_resume;
+ 	std::function<void()> on_stop;
+ 	std::function<void()> on_ready;
++	// Called only after the restored guest has reached running state, not just
++	// after its file/header was accepted by Load().
++	std::function<void()> on_started;
+ 	std::function<void()> on_missing_fw;
+ 	std::function<void(std::shared_ptr<atomic_t<bool>>, int)> on_emulation_stop_no_response;
+ 	std::function<void(std::shared_ptr<atomic_t<bool>>, stx::shared_ptr<utils::serial>, stx::atomic_ptr<std::string>*, std::shared_ptr<void>)> on_save_state_progress;
+@@ -452,6 +455,8 @@ public:
+ 	void Resume();
+ 	void GracefulShutdown(bool allow_autoexit = true, bool async_op = false, bool savestate = false, bool continuous_mode = false);
+ 	void Kill(bool allow_autoexit = true, bool savestate = false, savestate_stage* stage = nullptr);
++	// Platform frontends with explicit slots can select the absolute savestate ID.
++	void Kill(bool allow_autoexit, bool savestate, savestate_stage* stage, s64 savestate_id);
+ 	game_boot_result Restart(bool graceful = true);
+ 	bool Quit(bool force_quit);
+ 	static void CleanUp();
+@@ -525,6 +530,10 @@ public:
  		const std::string& game_path,
  		const std::string& title_hint,
  		const std::function<bool()>& canceled);
