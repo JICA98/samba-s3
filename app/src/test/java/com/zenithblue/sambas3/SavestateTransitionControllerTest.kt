@@ -54,6 +54,16 @@ class SavestateTransitionControllerTest {
     }
 
     @Test
+    fun in_game_load_requires_the_matching_native_terminal_result() {
+        val controller = SavestateTransitionController()
+        assertTrue(controller.beginInGameLoad(51L, 3, "/saved-slot"))
+        assertFalse(controller.inGameLoadCompleted(50L, 3))
+        assertFalse(controller.inGameLoadCompleted(51L, 2))
+        assertTrue(controller.inGameLoadCompleted(51L, 3))
+        assertEquals(SavestateTransitionController.Phase.Completed, controller.state.phase)
+    }
+
+    @Test
     fun failure_is_terminal_until_reset() {
         val controller = SavestateTransitionController()
         assertTrue(controller.begin(41L, 1))

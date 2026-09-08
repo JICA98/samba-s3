@@ -114,7 +114,8 @@ object PendingSavestateRecoveryStore {
         slot: Int,
         originalGamePath: String,
         savestatePath: String,
-        titleId: String = ""
+        titleId: String = "",
+        requestId: Long = System.currentTimeMillis(),
     ): PendingSavestateRecovery? {
         val file = File(savestatePath)
         if (savestatePath.isBlank() || !file.isFile || file.length() <= 0L) {
@@ -122,8 +123,9 @@ object PendingSavestateRecoveryStore {
             return null
         }
         val now = System.currentTimeMillis()
+        val id = requestId.takeIf { it > 0L } ?: now
         write(context, JSONObject().apply {
-            put("requestId", now)
+            put("requestId", id)
             put("slot", slot)
             put("originalGamePath", originalGamePath)
             put("savestatePath", savestatePath)
@@ -135,7 +137,7 @@ object PendingSavestateRecoveryStore {
             put("retryCount", 0)
             put("titleId", titleId)
         })
-        Log.i(TAG, "S3SAVE manual-load marker armed requestId=$now slot=$slot path=$savestatePath")
+        Log.i(TAG, "S3SAVE manual-load marker armed requestId=$id slot=$slot path=$savestatePath")
         return read(context)
     }
 

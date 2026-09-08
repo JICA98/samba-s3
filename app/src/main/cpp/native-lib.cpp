@@ -912,6 +912,7 @@ struct RPCSXApi {
   std::string (*getSaveStateInfo)();
   bool (*saveState)(int slot);
   bool (*loadSaveState)(int slot);
+  bool (*loadSaveStateWithRequest)(int slot, unsigned long long requestId);
   std::string (*getCurrentTrophies)();
   std::string (*getTrophiesForTitle)(const char* titleId);
   std::string (*getFriends)();
@@ -1022,6 +1023,7 @@ struct RPCSXLibrary : RPCSXApi {
     result.getSaveStateInfo = reinterpret_cast<decltype(getSaveStateInfo)>(dlsym(handle, "_rpcsx_getSaveStateInfo"));
     result.saveState = reinterpret_cast<decltype(saveState)>(dlsym(handle, "_rpcsx_saveState"));
     result.loadSaveState = reinterpret_cast<decltype(loadSaveState)>(dlsym(handle, "_rpcsx_loadSaveState"));
+    result.loadSaveStateWithRequest = reinterpret_cast<decltype(loadSaveStateWithRequest)>(dlsym(handle, "_rpcsx_loadSaveStateWithRequest"));
     result.getCurrentTrophies = reinterpret_cast<decltype(getCurrentTrophies)>(dlsym(handle, "_rpcsx_getCurrentTrophies"));
     result.getTrophiesForTitle = reinterpret_cast<decltype(getTrophiesForTitle)>(dlsym(handle, "_rpcsx_getTrophiesForTitle"));
     result.getFriends = reinterpret_cast<decltype(getFriends)>(dlsym(handle, "_rpcsx_getFriends"));
@@ -1211,6 +1213,13 @@ Java_com_zenithblue_sambas3_RPCSX_saveState(JNIEnv*, jobject, jint slot) {
 }
 extern "C" JNIEXPORT jboolean JNICALL
 Java_com_zenithblue_sambas3_RPCSX_loadSaveState(JNIEnv*, jobject, jint slot) {
+  return rpcsxLib.loadSaveState ? rpcsxLib.loadSaveState(slot) : false;
+}
+extern "C" JNIEXPORT jboolean JNICALL
+Java_com_zenithblue_sambas3_RPCSX_loadSaveStateWithRequest(JNIEnv*, jobject, jint slot, jlong requestId) {
+  if (rpcsxLib.loadSaveStateWithRequest) {
+    return rpcsxLib.loadSaveStateWithRequest(slot, static_cast<unsigned long long>(requestId));
+  }
   return rpcsxLib.loadSaveState ? rpcsxLib.loadSaveState(slot) : false;
 }
 extern "C" JNIEXPORT jstring JNICALL
@@ -1555,6 +1564,11 @@ Java_com_zenithblue_sambas3_RPCSX_hasBootSavestateExport(JNIEnv *, jobject) {
 extern "C" JNIEXPORT jboolean JNICALL
 Java_com_zenithblue_sambas3_RPCSX_hasLoadSaveStateExport(JNIEnv *, jobject) {
   return rpcsxLib.loadSaveState ? JNI_TRUE : JNI_FALSE;
+}
+
+extern "C" JNIEXPORT jboolean JNICALL
+Java_com_zenithblue_sambas3_RPCSX_hasLoadSaveStateTerminalExport(JNIEnv *, jobject) {
+  return rpcsxLib.loadSaveStateWithRequest ? JNI_TRUE : JNI_FALSE;
 }
 
 extern "C" JNIEXPORT jboolean JNICALL

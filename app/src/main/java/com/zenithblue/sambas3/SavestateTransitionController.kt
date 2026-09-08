@@ -16,6 +16,7 @@ class SavestateTransitionController {
         SavedAwaitingSurfaceReset,
         CreatingFreshSurface,
         BootingSavedState,
+        LoadingInGame,
         AwaitingFirstFrame,
         Completed,
         Failed
@@ -49,6 +50,29 @@ class SavestateTransitionController {
             return false
         }
         state = State(Phase.AwaitingFirstFrame, requestId, slot, path)
+        return true
+    }
+
+    /**
+     * In-game LOAD does not replace the Android surface, but it still has to
+     * be correlated with one native terminal event.  Keeping it in the same
+     * controller rejects a late callback from an older request.
+     */
+    @Synchronized
+    fun beginInGameLoad(requestId: Long, slot: Int, path: String): Boolean {
+        if (path.isBlank()) return false
+        if (state.phase == Phase.LoadingInGame && matches(requestId, slot)) return true
+        if (state.phase != Phase.Idle && state.phase != Phase.Completed && state.phase != Phase.Failed) {
+            return false
+        }
+        state = State(Phase.LoadingInGame, requestId, slot, path)
+        return true
+    }
+
+    @Synchronized
+    fun inGameLoadCompleted(requestId: Long, slot: Int): Boolean {
+        if (!matches(requestId, slot) || state.phase != Phase.LoadingInGame) return false
+        state = state.copy(phase = Phase.Completed)
         return true
     }
 

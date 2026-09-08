@@ -137,6 +137,24 @@ class PendingSavestateRecoveryStoreTest {
     }
 
     @Test
+    fun manual_load_preserves_the_caller_request_id_for_native_correlation() {
+        stateFile.writeBytes(ByteArray(8) { 9 })
+
+        val record = PendingSavestateRecoveryStore.armCommitted(
+            context,
+            3,
+            "/games/BLUS31584",
+            stateFile.path,
+            "BLUS31584",
+            requestId = 987_654L
+        )
+
+        assertNotNull(record)
+        assertEquals(987_654L, record!!.requestId)
+        assertEquals(987_654L, PendingSavestateRecoveryStore.read(context)!!.requestId)
+    }
+
+    @Test
     fun explicit_stop_cancels_marker_but_preserves_save_file() {
         stateFile.writeBytes(ByteArray(8) { 5 })
         PendingSavestateRecoveryStore.armCommitted(

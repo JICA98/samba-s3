@@ -25,6 +25,7 @@ private class FakeGateway : InGameMenuCoreGateway {
     var transientCount = 0
     var dirty = false
     var loadCalls = mutableListOf<Int>()
+    var loadAccepted = true
     var saveCalls = mutableListOf<Int>()
     var restartCalls = 0
     var shutdownCalls = 0
@@ -68,7 +69,7 @@ private class FakeGateway : InGameMenuCoreGateway {
 
     override suspend fun loadState(slot: Int): Result<Boolean> {
         loadCalls.add(slot)
-        return Result.success(true)
+        return Result.success(loadAccepted)
     }
     override suspend fun trophies(): Result<TrophiesData?> = Result.success(null)
     override suspend fun friends(): Result<FriendsData?> = Result.success(null)
@@ -300,6 +301,38 @@ class InGameMenuCoordinatorTest {
         } as InGameMenuHostEffect.SavestateLoadAccepted
         assertEquals(3, accepted.slot)
         assertEquals(path, accepted.savestatePath)
+        assertTrue(accepted.requestId > 0L)
+        job.cancel()
+    }
+
+    @Test
+    fun rejected_load_emits_a_terminal_failure_after_the_loading_transition_begins() = runBlocking {
+        gateway.caps = gateway.caps.copy(
+            savestate = SaveStateCapabilities(
+                supported = true,
+                suspendMode = false,
+                canSave = true,
+                slots = listOf(SaveSlot(1, true, "Slot 1", "/states/slot-1.zst"))
+            )
+        )
+        gateway.loadAccepted = false
+        val effects = mutableListOf<InGameMenuHostEffect>()
+        val job = launch { coordinator.effects.collect { effects.add(it) } }
+        kotlinx.coroutines.yield()
+        openMain()
+
+        coordinator.dispatch(InGameMenuIntent.LoadState(1))
+        withTimeout(2000) {
+            while (effects.none { it is InGameMenuHostEffect.SavestateTransitionFailed }) {
+                kotlinx.coroutines.delay(10)
+            }
+        }
+
+        assertEquals(
+            "request-rejected",
+            (effects.first { it is InGameMenuHostEffect.SavestateTransitionFailed }
+                as InGameMenuHostEffect.SavestateTransitionFailed).reason
+        )
         job.cancel()
     }
 

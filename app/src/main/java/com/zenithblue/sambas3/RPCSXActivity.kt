@@ -113,6 +113,7 @@ class RPCSXActivity : ComponentActivity(), EmulationHost {
     private var debugPadReceiver: DebugPadReceiver? = null
     private lateinit var surfaceLeaseManager: SurfaceLeaseManager
     private lateinit var originalGamePath: String
+    private var directIsoUri: android.net.Uri? = null
     private var recoverySavestatePath: String? = null
     private var userSavestatePath: String? = null
     private var userSavestateSlot: Int? = null
@@ -348,31 +349,61 @@ class RPCSXActivity : ComponentActivity(), EmulationHost {
                     }
 
                     is com.zenithblue.sambas3.ui.ingame.InGameMenuHostEffect.BeginSavestateLoadTransition -> {
-                        if (interactionLock.lock(EmulatorInteractionLock.SavestateLoading)) {
-                            recoveryTransitionActive = true
-                            operationUiState = SavestateOperationUiState.Loading(effect.slot, effect.previewPath, "Preparing saved state...")
-                            EmulationSessionJournal.update(this@RPCSXActivity, EmulationSessionState.LOADING)
-                            neutralizeForwardedPad()
-                            binding.padOverlay.setMenuMode(true)
-                            showTransitionOverlay("Loading Slot ${effect.slot}...")
-                            Log.i("S3SAVE", "manual-load transition begin slot=${effect.slot} path=${effect.savestatePath}")
+                        if (!interactionLock.lock(EmulatorInteractionLock.SavestateLoading)) {
+                            Log.e("S3SAVE", "manual-load transition rejected requestId=${effect.requestId} slot=${effect.slot}")
+                            return@onEach
                         }
-                    }
-
-                    is com.zenithblue.sambas3.ui.ingame.InGameMenuHostEffect.SavestateLoadAccepted -> {
+                        if (!transitionController.beginInGameLoad(
+                                effect.requestId,
+                                effect.slot,
+                                effect.savestatePath
+                            )
+                        ) {
+                            failTransition("manual-load-transition-busy")
+                            Log.e("S3SAVE", "manual-load transition controller rejected requestId=${effect.requestId} slot=${effect.slot}")
+                            return@onEach
+                        }
                         val titleId = runCatching { RPCSX.instance.getTitleId() }.getOrDefault("")
                         val record = PendingSavestateRecoveryStore.armCommitted(
                             this@RPCSXActivity,
                             effect.slot,
                             originalGamePath,
                             effect.savestatePath,
-                            titleId
+                            titleId,
+                            effect.requestId
                         )
                         if (record == null) {
-                            Log.w("S3SAVE", "manual-load recovery marker not armed slot=${effect.slot}")
+                            failTransition("invalid-savestate-file")
+                            Log.e("S3SAVE", "manual-load marker rejected requestId=${effect.requestId} slot=${effect.slot}")
+                            return@onEach
+                        }
+                        recoveryTransitionActive = true
+                        operationUiState = SavestateOperationUiState.Loading(effect.slot, effect.previewPath, "Preparing saved state...")
+                        EmulationSessionJournal.update(this@RPCSXActivity, EmulationSessionState.LOADING)
+                        neutralizeForwardedPad()
+                        binding.padOverlay.setMenuMode(true)
+                        showTransitionOverlay("Loading Slot ${effect.slot}...")
+                        Log.i("S3SAVE", "manual-load transition begin requestId=${effect.requestId} slot=${effect.slot} path=${effect.savestatePath}")
+                    }
+
+                    is com.zenithblue.sambas3.ui.ingame.InGameMenuHostEffect.SavestateLoadAccepted -> {
+                        val record = PendingSavestateRecoveryStore.read(this@RPCSXActivity)
+                            ?.takeIf {
+                                it.requestId == effect.requestId &&
+                                    it.slot == effect.slot &&
+                                    it.savestatePath == effect.savestatePath
+                            }
+                        if (record == null) {
+                            failTransition("manual-load-marker-missing")
+                            Log.e("S3SAVE", "manual-load marker missing requestId=${effect.requestId} slot=${effect.slot}")
                         } else {
                             operationUiState = SavestateOperationUiState.Loading(effect.slot, null, "Restoring saved state...")
-                            watchManualLoad(record)
+                            if (runCatching { RPCSX.instance.hasLoadSaveStateTerminalExport() }.getOrDefault(false)) {
+                                Log.i("S3SAVE", "manual-load accepted requestId=${effect.requestId} slot=${effect.slot} awaiting=native-terminal")
+                            } else {
+                                Log.w("S3SAVE", "manual-load accepted requestId=${effect.requestId} slot=${effect.slot} fallback=frame-confirmation")
+                                watchManualLoad(record)
+                            }
                         }
                     }
 
@@ -424,6 +455,19 @@ class RPCSXActivity : ComponentActivity(), EmulationHost {
         }
         val gamePath = originalGamePath
         val gameInfo = GameRepository.find(gamePath)?.info
+        val directIsoEnabled = com.zenithblue.sambas3.BuildConfig.DIRECT_ISO_LOADING &&
+            (gameInfo?.sourceMode?.value == GameSourceMode.DIRECT_ISO ||
+                (gamePath.endsWith(".iso", ignoreCase = true) && gameInfo?.sourceUri?.value != null))
+        directIsoUri = if (directIsoEnabled) {
+            val source = gameInfo?.sourceUri?.value ?: gamePath
+            if (source.startsWith("content://") || source.startsWith("file://")) {
+                android.net.Uri.parse(source)
+            } else {
+                android.net.Uri.fromFile(java.io.File(source))
+            }
+        } else {
+            null
+        }
         val gameTitle = GameIdentity.displayName(originalGamePath, gameInfo?.name?.value)
         val titleId = GameIdentity.titleIdOrNull(originalGamePath, gameInfo?.name?.value)
         GameSessionService.start(
@@ -596,18 +640,9 @@ class RPCSXActivity : ComponentActivity(), EmulationHost {
             // The entire direct-source branch is debug/test-only. Release builds
             // must retain the legacy installed-path behavior, even if app data
             // came from an earlier debug build.
-            val isDirectIso = com.zenithblue.sambas3.BuildConfig.DIRECT_ISO_LOADING &&
-                (gameInfo?.sourceMode?.value == GameSourceMode.DIRECT_ISO ||
-                    ((gamePath.endsWith(".iso", ignoreCase = true) ||
-                        bootPath.endsWith(".iso", ignoreCase = true)) &&
-                        gameInfo?.sourceUri?.value != null))
-            if (isDirectIso) {
-                val uriStr = gameInfo?.sourceUri?.value ?: gamePath
-                val uri = if (uriStr.startsWith("content://") || uriStr.startsWith("file://")) {
-                    android.net.Uri.parse(uriStr)
-                } else {
-                    android.net.Uri.fromFile(java.io.File(uriStr))
-                }
+            val directSource = directIsoUri
+            if (directSource != null) {
+                val uri = directSource
                 Log.i("S3ISO", "boot_source=DIRECT_ISO uri=$uri mode=$bootMode")
                 val session = runCatching {
                     com.zenithblue.sambas3.iso.DirectIsoSession.acquire(this@RPCSXActivity, uri)
@@ -621,6 +656,11 @@ class RPCSXActivity : ComponentActivity(), EmulationHost {
                         ).show()
                         failBootAndReturnHome("direct-iso-unavailable")
                     }
+                    return@thread
+                }
+                if (com.zenithblue.sambas3.iso.DirectIsoSession.currentLive() !== session) {
+                    Log.e("S3ISO", "fd_invalid before-native-boot uri=$uri")
+                    runOnUiThread { failBootAndReturnHome("direct-iso-fd-invalid") }
                     return@thread
                 }
                 effectiveBootPath = session.procFdPath
@@ -638,7 +678,7 @@ class RPCSXActivity : ComponentActivity(), EmulationHost {
                 }
             )
             if (bootResult != BootResult.NoErrors) {
-                if (isDirectIso) {
+                if (directSource != null) {
                     com.zenithblue.sambas3.iso.DirectIsoSession.release("boot-failed")
                 }
                 Log.w("S3HOMELOAD", "direct-boot-return result=$bootResult source=$bootPath")
@@ -864,6 +904,10 @@ class RPCSXActivity : ComponentActivity(), EmulationHost {
                         PendingSavestateRecoveryStore.markRequestFailure(this, payload ?: "native-save-failed")
                         failTransition(payload ?: "native-save-failed")
                         Log.e("S3SAVE", "completion failed payload=$payload")
+                    }
+
+                    RPCSX.FRONTEND_EVENT_SAVESTATE_LOAD_TERMINAL -> runOnUiThread {
+                        handleManualLoadTerminal(payload)
                     }
 
                     RPCSX.FRONTEND_EVENT_TROPHY_UNLOCKED -> runOnUiThread { TrophyEvents.notifyUnlocked(payload) }
@@ -1141,9 +1185,16 @@ class RPCSXActivity : ComponentActivity(), EmulationHost {
         }
         bootThread?.interrupt()
         bootThread = thread(name = "S3 Saved-state Boot") {
+            val restoreOriginalPath = activeRestoreOriginalGamePath()
+            if (restoreOriginalPath == null) {
+                val reason = "direct-iso-fd-invalid"
+                PendingSavestateRecoveryStore.markFailure(this@RPCSXActivity, reason)
+                runOnUiThread { failTransition(reason) }
+                return@thread
+            }
             Log.i("S3RENDER", "boot-savestate-begin requestId=${record.requestId} generation=${surfaceLeaseManager.currentGeneration} path=${record.savestatePath}")
             val result = BootResult.fromInt(
-                bootSavestateSerialized(record.savestatePath, originalGamePath)
+                bootSavestateSerialized(record.savestatePath, restoreOriginalPath)
             )
             if (result != BootResult.NoErrors) {
                 PendingSavestateRecoveryStore.markFailure(this@RPCSXActivity, result.name)
@@ -1157,6 +1208,18 @@ class RPCSXActivity : ComponentActivity(), EmulationHost {
             Log.i("S3RENDER", "boot-savestate-return requestId=${record.requestId} state=${RPCSX.getState()}")
             runOnUiThread { confirmRecoveryFrameAndClear() }
         }
+    }
+
+    /** Keeps the Direct ISO owner alive and rejects a stale proc-FD before restore. */
+    private fun activeRestoreOriginalGamePath(): String? {
+        if (directIsoUri == null) return originalGamePath
+        val session = com.zenithblue.sambas3.iso.DirectIsoSession.currentLive(directIsoUri)
+        if (session == null) {
+            Log.e("S3ISO", "restore fd unavailable uri=$directIsoUri")
+            return null
+        }
+        Log.i("S3ISO", "restore fd retained fd=${session.fd} procFd=${session.procFdPath}")
+        return session.procFdPath
     }
 
     private fun confirmRecoveryFrameAndClear() {
@@ -1242,22 +1305,12 @@ class RPCSXActivity : ComponentActivity(), EmulationHost {
                 }
                 if (running && copied) stable++ else stable = 0
                 if (stable >= 6) {
-                    runCatching { RPCSX.instance.clearSavestateProgress() }
-                    PendingSavestateRecoveryStore.clear(this@RPCSXActivity)
                     Log.i(
                         "S3SAVE",
-                        "manual-load first-frame-confirmed slot=${record.slot} generation=$expectedGeneration"
+                        "manual-load legacy-frame-confirmed requestId=${record.requestId} slot=${record.slot} generation=$expectedGeneration"
                     )
                     runOnUiThread {
-                        recoveryTransitionActive = false
-                        operationUiState = SavestateOperationUiState.Hidden
-                        interactionLock.unlock()
-                        binding.transitionOverlay.animate().alpha(0f).setDuration(160L).withEndAction {
-                            binding.transitionOverlay.visibility = View.GONE
-                            binding.transitionOverlay.alpha = 1f
-                            EmulationSessionJournal.update(this@RPCSXActivity, EmulationSessionState.RUNNING)
-                            inputGate.waitForNeutral()
-                        }.start()
+                        completeManualLoad(record, "legacy-frame-confirmation")
                     }
                     return@thread
                 }
@@ -1268,12 +1321,56 @@ class RPCSXActivity : ComponentActivity(), EmulationHost {
                 }
             }
             if (!Thread.interrupted()) {
-                Log.e(
-                    "S3SAVE",
-                    "manual-load confirmation timeout slot=${record.slot}; exact slot kept for recovery"
-                )
+                val reason = "manual-load-timeout"
+                Log.e("S3SAVE", "$reason requestId=${record.requestId} slot=${record.slot}; exact slot kept for recovery")
+                PendingSavestateRecoveryStore.markFailure(this@RPCSXActivity, reason)
+                runOnUiThread { failTransition(reason) }
             }
         }
+    }
+
+    /** Native load completion is authoritative; frame probing is legacy-core fallback only. */
+    private fun handleManualLoadTerminal(payload: String?) {
+        val event = runCatching { org.json.JSONObject(payload ?: "") }.getOrElse {
+            Log.e("S3SAVE", "manual-load terminal rejected malformed payload=$payload")
+            return
+        }
+        val requestId = event.optLong("requestId", -1L)
+        val slot = event.optInt("slot", -1)
+        val success = event.optBoolean("success", false)
+        val reason = event.optString("reason", "native-load-failed")
+        val record = PendingSavestateRecoveryStore.read(this)
+        if (record == null || record.requestId != requestId || record.slot != slot) {
+            Log.w("S3SAVE", "manual-load terminal ignored stale requestId=$requestId slot=$slot")
+            return
+        }
+        if (!success) {
+            PendingSavestateRecoveryStore.markFailure(this, reason)
+            failTransition(reason)
+            Log.e("S3SAVE", "manual-load terminal failure requestId=$requestId slot=$slot reason=$reason")
+            return
+        }
+        completeManualLoad(record, "native-terminal")
+    }
+
+    private fun completeManualLoad(record: PendingSavestateRecovery, source: String) {
+        if (!transitionController.inGameLoadCompleted(record.requestId, record.slot)) {
+            Log.w("S3SAVE", "manual-load completion ignored stale requestId=${record.requestId} slot=${record.slot} source=$source")
+            return
+        }
+        runCatching { RPCSX.instance.clearSavestateProgress() }
+        PendingSavestateRecoveryStore.clear(this)
+        clearLoadRecoveryAfterFirstFrame()
+        Log.i("S3SAVE", "manual-load completed requestId=${record.requestId} slot=${record.slot} source=$source")
+        recoveryTransitionActive = false
+        operationUiState = SavestateOperationUiState.Hidden
+        interactionLock.unlock()
+        binding.transitionOverlay.animate().alpha(0f).setDuration(160L).withEndAction {
+            binding.transitionOverlay.visibility = View.GONE
+            binding.transitionOverlay.alpha = 1f
+            EmulationSessionJournal.update(this, EmulationSessionState.RUNNING)
+            inputGate.waitForNeutral()
+        }.start()
     }
 
     private fun showTransitionOverlay(label: String) {

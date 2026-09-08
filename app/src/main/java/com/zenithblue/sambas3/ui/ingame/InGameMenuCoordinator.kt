@@ -11,6 +11,7 @@ import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import java.util.concurrent.atomic.AtomicLong
 
 sealed interface InGameMenuIntent {
     data object Open : InGameMenuIntent
@@ -65,11 +66,16 @@ sealed interface InGameMenuHostEffect {
     ) : InGameMenuHostEffect
     data class SavestateRequestAccepted(val slot: Int) : InGameMenuHostEffect
     data class BeginSavestateLoadTransition(
+        val requestId: Long,
         val slot: Int,
         val savestatePath: String,
         val previewPath: String?
     ) : InGameMenuHostEffect
-    data class SavestateLoadAccepted(val slot: Int, val savestatePath: String) : InGameMenuHostEffect
+    data class SavestateLoadAccepted(
+        val requestId: Long,
+        val slot: Int,
+        val savestatePath: String
+    ) : InGameMenuHostEffect
     data class SavestateTransitionFailed(val reason: String) : InGameMenuHostEffect
 }
 
@@ -204,6 +210,7 @@ class InGameMenuCoordinator(
     // duplicates are rejected until the menu is re-opened.
     @Volatile
     private var destructivePending = false
+    private val nextLoadRequestId = AtomicLong(System.currentTimeMillis())
 
     fun dispatch(intent: InGameMenuIntent) {
         when (intent) {
@@ -219,15 +226,17 @@ class InGameMenuCoordinator(
             is InGameMenuIntent.OpenTrophies -> pushPage(InGamePage.Trophies)
             is InGameMenuIntent.OpenFriends -> pushPage(InGamePage.Friends)
             is InGameMenuIntent.OpenSaveStates -> pushPage(InGamePage.SaveStates)
-            is InGameMenuIntent.RequestScreenshot -> closeAndRun(CloseReason.Screenshot) { core.requestScreenshot() }
-            is InGameMenuIntent.ToggleRecording -> closeAndRun(CloseReason.Recording) { core.toggleRecording() }
-            is InGameMenuIntent.Restart -> closeAndRun(CloseReason.Restart) { core.restart() }
+            is InGameMenuIntent.RequestScreenshot -> closeAndRun(CloseReason.Screenshot) { _ -> core.requestScreenshot() }
+            is InGameMenuIntent.ToggleRecording -> closeAndRun(CloseReason.Recording) { _ -> core.toggleRecording() }
+            is InGameMenuIntent.Restart -> closeAndRun(CloseReason.Restart) { _ -> core.restart() }
             // Shutdown ownership belongs to EmulatorStopCoordinator. The
             // Activity effect below waits for native Stopped, so this intent
             // only closes the menu and requests that single terminal path.
-            is InGameMenuIntent.Exit -> closeAndRun(CloseReason.Exit) { Result.success(true) }
-            is InGameMenuIntent.SaveState -> closeAndRun(CloseReason.SaveState, intent.slot) { core.saveState(intent.slot) }
-            is InGameMenuIntent.LoadState -> closeAndRun(CloseReason.LoadState, intent.slot) { core.loadState(intent.slot) }
+            is InGameMenuIntent.Exit -> closeAndRun(CloseReason.Exit) { _ -> Result.success(true) }
+            is InGameMenuIntent.SaveState -> closeAndRun(CloseReason.SaveState, intent.slot) { _ -> core.saveState(intent.slot) }
+            is InGameMenuIntent.LoadState -> closeAndRun(CloseReason.LoadState, intent.slot) { requestId ->
+                core.loadState(intent.slot, checkNotNull(requestId))
+            }
 
             is InGameMenuIntent.SettingsSave -> scope.launch { settingsSave() }
             is InGameMenuIntent.SettingsDiscard -> scope.launch { settingsDiscard() }
@@ -317,7 +326,11 @@ class InGameMenuCoordinator(
         }
     }
 
-    private fun closeAndRun(reason: CloseReason, saveSlot: Int? = null, action: suspend () -> Result<Boolean>) {
+    private fun closeAndRun(
+        reason: CloseReason,
+        saveSlot: Int? = null,
+        action: suspend (requestId: Long?) -> Result<Boolean>
+    ) {
         val s = _state.value
         if (s.session !is MenuSessionState.Open && s.session !is MenuSessionState.Opening) return
         val destructive = reason == CloseReason.Restart ||
@@ -328,6 +341,11 @@ class InGameMenuCoordinator(
         if (destructive && destructivePending) return
         if (destructive) destructivePending = true
         scope.launch {
+            val loadRequestId = if (reason == CloseReason.LoadState) {
+                nextLoadRequestId.incrementAndGet()
+            } else {
+                null
+            }
             val slotInfo = saveSlot?.let { slot ->
                 (s.session as? MenuSessionState.Open)?.capabilities?.savestate
                     ?.slots?.firstOrNull { it.slot == slot }
@@ -344,22 +362,27 @@ class InGameMenuCoordinator(
             }
             if (reason == CloseReason.LoadState && slotInfo?.path != null) {
                 _effects.emit(InGameMenuHostEffect.BeginSavestateLoadTransition(
+                    checkNotNull(loadRequestId),
                     slotInfo.slot,
                     slotInfo.path,
                     slotInfo.previewPath
                 ))
             }
             closeInternal(reason)
-            val ok = action().getOrDefault(false)
+            val ok = action(loadRequestId).getOrDefault(false)
             if (reason == CloseReason.SaveState && ok) {
                 _effects.emit(InGameMenuHostEffect.SavestateRequestAccepted(saveSlot ?: 0))
             }
             if (reason == CloseReason.LoadState && ok) {
                 slotInfo?.path?.takeIf { it.isNotBlank() }?.let { path ->
-                    _effects.emit(InGameMenuHostEffect.SavestateLoadAccepted(slotInfo.slot, path))
+                    _effects.emit(InGameMenuHostEffect.SavestateLoadAccepted(
+                        checkNotNull(loadRequestId),
+                        slotInfo.slot,
+                        path
+                    ))
                 }
             }
-            if (reason == CloseReason.SaveState && !ok) {
+            if ((reason == CloseReason.SaveState || reason == CloseReason.LoadState) && !ok) {
                 _effects.emit(InGameMenuHostEffect.SavestateTransitionFailed("request-rejected"))
             }
             // Host follow-ups that need the Activity:

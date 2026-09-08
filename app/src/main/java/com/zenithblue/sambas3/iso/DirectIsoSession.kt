@@ -3,6 +3,7 @@ package com.zenithblue.sambas3.iso
 import android.content.Context
 import android.net.Uri
 import android.os.ParcelFileDescriptor
+import android.system.Os
 import android.util.Log
 import java.io.File
 
@@ -89,6 +90,29 @@ object DirectIsoSession {
 
     @Synchronized
     fun current(): Session? = activeSession
+
+    /**
+     * A proc-FD path is only usable while its ParcelFileDescriptor is still
+     * open. Validate at every native boot/restore boundary rather than
+     * allowing a stale descriptor to reach the core.
+     */
+    @Synchronized
+    fun currentLive(expectedUri: Uri? = null): Session? {
+        val session = activeSession ?: return null
+        if (expectedUri != null && session.uri != expectedUri) {
+            Log.e(TAG, "fd_invalid expected_uri=$expectedUri active_uri=${session.uri} reason=session-mismatch")
+            return null
+        }
+        val live = runCatching {
+            Os.fstat(session.pfd.fileDescriptor)
+            true
+        }.getOrElse { error ->
+            Log.e(TAG, "fd_invalid fd=${session.fd} procFd=${session.procFdPath} reason=${error.message}")
+            false
+        }
+        if (live) Log.i(TAG, "fd_valid fd=${session.fd} procFd=${session.procFdPath}")
+        return session.takeIf { live }
+    }
 
     @Synchronized
     fun release(reason: String) {

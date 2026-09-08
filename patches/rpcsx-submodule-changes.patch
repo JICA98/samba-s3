@@ -1,5 +1,5 @@
 diff --git a/android/src/rpcsx-android.cpp b/android/src/rpcsx-android.cpp
-index 8308a479887121b9099fefcf53f9816b207b5ad9..32b55cdbcd2340b0de1b84022d4b270d50bb84ca 100644
+index 8308a4798..982ddc0c0 100644
 --- a/android/src/rpcsx-android.cpp
 +++ b/android/src/rpcsx-android.cpp
 @@ -55,6 +55,8 @@
@@ -8,10 +8,18 @@ index 8308a479887121b9099fefcf53f9816b207b5ad9..32b55cdbcd2340b0de1b84022d4b270d
  #include <utility>
 +#include <fstream>
 +#include <sstream>
- 
+
  #define STB_IMAGE_WRITE_IMPLEMENTATION
  #define STBI_ONLY_PNG
-@@ -914,6 +916,20 @@ static void collectGamePaths(std::vector<std::string> &paths,
+@@ -155,6 +157,7 @@ static constexpr int FRONTEND_EVENT_EMULATOR_ACTION_ERROR = 4;
+ static constexpr int FRONTEND_EVENT_SAVESTATE_COMMITTED = 5;
+ static constexpr int FRONTEND_EVENT_SAVESTATE_FAILED = 6;
+ static constexpr int FRONTEND_EVENT_RENDERER_ERROR = 7;
++static constexpr int FRONTEND_EVENT_SAVESTATE_LOAD_TERMINAL = 9;
+
+ static atomic_t<bool> g_frontend_menu_active{false};
+ static atomic_t<bool> g_frontend_menu_paused_emu{false};
+@@ -914,6 +917,20 @@ static void collectGamePaths(std::vector<std::string> &paths,
    }
  }
  
@@ -32,7 +40,7 @@ index 8308a479887121b9099fefcf53f9816b207b5ad9..32b55cdbcd2340b0de1b84022d4b270d
  static std::string locateEbootPath(std::string_view root) {
    if (std::filesystem::is_regular_file(root)) {
      return std::string(root);
-@@ -1123,6 +1139,11 @@ public:
+@@ -1123,6 +1140,11 @@ public:
      return owner_tid.load(std::memory_order_acquire) == ::gettid();
    }
  
@@ -44,7 +52,7 @@ index 8308a479887121b9099fefcf53f9816b207b5ad9..32b55cdbcd2340b0de1b84022d4b270d
    JNIEnv* ownerEnv() const { return owner_env; }
  
    u32 queueDepth() {
-@@ -1648,7 +1669,8 @@ extern void ppu_precompile(std::vector<std::string> &dir_queue,
+@@ -1648,7 +1670,8 @@ extern void ppu_precompile(std::vector<std::string> &dir_queue,
                             std::vector<ppu_module<lv2_obj> *> *loaded_prx);
  extern bool ppu_initialize(const ppu_module<lv2_obj> &, bool check_only = false,
                             u64 file_size = 0);
@@ -54,7 +62,7 @@ index 8308a479887121b9099fefcf53f9816b207b5ad9..32b55cdbcd2340b0de1b84022d4b270d
  extern bool ppu_load_rel_exec(const ppu_rel_object &);
  
  class CompilationQueue {
-@@ -1765,8 +1787,15 @@ private:
+@@ -1765,8 +1788,15 @@ private:
      // captures this context when its thread starts; setting it later around
      // ppu_precompile can misclassify install PPU work as runtime work and
      // create the second (2000) notification.
@@ -71,7 +79,7 @@ index 8308a479887121b9099fefcf53f9816b207b5ad9..32b55cdbcd2340b0de1b84022d4b270d
      set_system_progress_context(installProgressContext);
      struct InstallProgressContextGuard {
        ~InstallProgressContextGuard() { clear_system_progress_context(); }
-@@ -1838,8 +1867,22 @@ private:
+@@ -1838,8 +1868,22 @@ private:
                          _main.applied_patches, std::vector<u32>{})) {
          Emu.ConfigurePPUCache();
          Emu.SetTestMode();
@@ -96,7 +104,7 @@ index 8308a479887121b9099fefcf53f9816b207b5ad9..32b55cdbcd2340b0de1b84022d4b270d
          mod_list.emplace_back(&_main);
        }
      }
-@@ -2280,6 +2323,10 @@ extern "C" bool _rpcsx_startMainThreadProcessor(JNIEnv *env) {
+@@ -2280,6 +2324,10 @@ extern "C" bool _rpcsx_startMainThreadProcessor(JNIEnv *env) {
    return true;
  }
  
@@ -107,7 +115,7 @@ index 8308a479887121b9099fefcf53f9816b207b5ad9..32b55cdbcd2340b0de1b84022d4b270d
  extern "C" bool _rpcsx_collectGameInfo(JNIEnv *env, std::string_view rootDir,
                                         long progressId) {
    std::unique_lock lifecycleLock(g_emulator_lifecycle_mutex);
-@@ -2829,10 +2876,7 @@ static bool installPkg(JNIEnv *env, fs::file &&file, jlong progressId) {
+@@ -2829,10 +2877,7 @@ static bool installPkg(JNIEnv *env, fs::file &&file, jlong progressId) {
    if (worker()) {
      auto paths = std::vector(bootable_paths.begin(), bootable_paths.end());
      collectGameInfo(env, progress.getProgressId(), paths);
@@ -119,7 +127,7 @@ index 8308a479887121b9099fefcf53f9816b207b5ad9..32b55cdbcd2340b0de1b84022d4b270d
    }
  
    return true;
-@@ -2943,7 +2987,7 @@ static bool installRap(JNIEnv *env, fs::file &&file, jlong progressId,
+@@ -2943,7 +2988,7 @@ static bool installRap(JNIEnv *env, fs::file &&file, jlong progressId,
    }
  
    collectGameInfo(env, progress.getProgressId(), {std::string(rootPath)});
@@ -128,7 +136,7 @@ index 8308a479887121b9099fefcf53f9816b207b5ad9..32b55cdbcd2340b0de1b84022d4b270d
    return true;
  }
  
-@@ -3042,8 +3086,7 @@ static bool installIso(JNIEnv *env, fs::file &&file, jlong progressId) {
+@@ -3042,8 +3087,7 @@ static bool installIso(JNIEnv *env, fs::file &&file, jlong progressId) {
  
    progress.report(0, 0, "Publishing installed game");
    collectGameInfo(env, progress.getProgressId(), {finalPath});
@@ -138,7 +146,7 @@ index 8308a479887121b9099fefcf53f9816b207b5ad9..32b55cdbcd2340b0de1b84022d4b270d
    return true;
  }
  
-@@ -3363,6 +3406,391 @@ extern "C" int _rpcsx_extractIsoPreview(int fd, const char* destPath) {
+@@ -3363,6 +3407,391 @@ extern "C" int _rpcsx_extractIsoPreview(int fd, const char* destPath) {
    return 0;
  }
  
@@ -530,7 +538,7 @@ index 8308a479887121b9099fefcf53f9816b207b5ad9..32b55cdbcd2340b0de1b84022d4b270d
  extern "C" int _rpcsx_prepareRuntimePpu(const char* path, u64 sessionId)
  {
      if (!path || !*path)
-@@ -3607,7 +4035,7 @@ extern "C" std::string _rpcsx_settingsGet(std::string_view path) {
+@@ -3607,7 +4036,7 @@ extern "C" std::string _rpcsx_settingsGet(std::string_view path) {
    auto root = find_cfg_node(&g_cfg, path);
  
    if (root == nullptr) {
@@ -539,16 +547,55 @@ index 8308a479887121b9099fefcf53f9816b207b5ad9..32b55cdbcd2340b0de1b84022d4b270d
    }
  
    return root->to_json().dump(4);
-@@ -4199,145 +4627,185 @@ extern "C" bool _rpcsx_loadSaveState(int slot)
+@@ -4150,7 +4579,7 @@ extern "C" bool _rpcsx_saveState(int slot)
+     return true;
+ }
+
+-extern "C" bool _rpcsx_loadSaveState(int slot)
++static bool rpcsx_load_save_state(int slot, u64 frontend_request_id)
+ {
+     if (slot < 0 || slot >= kSaveStateSlotCount)
+         slot = 0;
+@@ -4172,7 +4601,7 @@ extern "C" bool _rpcsx_loadSaveState(int slot)
+     sstate_log(id, "load", "file_resolved", fmt::format(" path='{}'", path).c_str());
+     g_frontend_menu_active = false;
+     g_frontend_menu_paused_emu = false;
+-    g_coreDispatch.push([path, id]()
++    g_coreDispatch.push([path, id, frontend_request_id, slot]()
+     {
+         // One atomic core-owned transition on this serialized thread:
+         // shutdown the old generation, then boot the savestate through
+@@ -4193,151 +4622,218 @@ extern "C" bool _rpcsx_loadSaveState(int slot)
+                              (u64)id, new_gen, (int)::gettid(), path.c_str());
+         Emu.SetContinuousMode(true);
+         Emu.SetForceBoot(true);
+-        Emu.BootGame(path, "", true);
+-        sstate_log(id, "load", "boot_returned");
++        const auto result = Emu.BootGame(path, "", true);
++        const bool success = result == game_boot_result::no_errors;
++        const u64 request_id = frontend_request_id ? frontend_request_id : id;
++        const std::string reason = success
++            ? "ok"
++            : fmt::format("boot-result-{}", static_cast<u32>(result));
++        nlohmann::json terminal{
++            {"requestId", request_id},
++            {"nativeRequestId", id},
++            {"slot", slot},
++            {"success", success},
++            {"reason", reason},
++            {"path", path},
++        };
++        const std::string payload = terminal.dump();
++        sstate_log(id, "load", success ? "terminal_success" : "terminal_failure",
++                   fmt::format(" request_id={} slot={} result={}", request_id, slot,
++                               static_cast<u32>(result)).c_str());
++        emit_frontend_event(FRONTEND_EVENT_SAVESTATE_LOAD_TERMINAL, &payload);
+     });
      return true;
  }
  
 -extern "C" std::string _rpcsx_getCurrentTrophies()
-+extern "C" std::string _rpcsx_getTrophiesForTitle(const char* requested_title_id);
-+
-+static std::string android_get_trophies_for_set(std::string trophy_set,
-+                                                const std::string& title_id,
-+                                                const char* query_source)
++extern "C" bool _rpcsx_loadSaveState(int slot)
  {
 -    nlohmann::json j;
 -    std::string tropName;
@@ -574,6 +621,20 @@ index 8308a479887121b9099fefcf53f9816b207b5ad9..32b55cdbcd2340b0de1b84022d4b270d
 -        const std::string vfs_path = vfs::get(trophy_path + "/");
 -        if (!vfs_path.empty()) {
 -            TROPUSRLoader loader;
++    return rpcsx_load_save_state(slot, 0);
++}
++
++extern "C" bool _rpcsx_loadSaveStateWithRequest(int slot, u64 request_id)
++{
++    return rpcsx_load_save_state(slot, request_id);
++}
++
++extern "C" std::string _rpcsx_getTrophiesForTitle(const char* requested_title_id);
++
++static std::string android_get_trophies_for_set(std::string trophy_set,
++                                                const std::string& title_id,
++                                                const char* query_source)
++{
 +    const auto started = std::chrono::steady_clock::now();
 +    nlohmann::json j{{"available", false}, {"status", "unavailable"},
 +                     {"titleId", title_id}, {"trophySet", trophy_set},
@@ -853,7 +914,7 @@ index 8308a479887121b9099fefcf53f9816b207b5ad9..32b55cdbcd2340b0de1b84022d4b270d
  {
      nlohmann::json j;
 diff --git a/rpcs3/Emu/Cell/PPUThread.cpp b/rpcs3/Emu/Cell/PPUThread.cpp
-index d2768d8b0d48591d2c1affe6a9e48d6535446f51..caaef4c15e7c15cedfcff4692c84c912636a6079 100644
+index d2768d8b0..caaef4c15 100644
 --- a/rpcs3/Emu/Cell/PPUThread.cpp
 +++ b/rpcs3/Emu/Cell/PPUThread.cpp
 @@ -16,6 +16,7 @@
@@ -1220,7 +1281,7 @@ index d2768d8b0d48591d2c1affe6a9e48d6535446f51..caaef4c15e7c15cedfcff4692c84c912
  		{
  			thread_ctrl::set_name(old_name);
 diff --git a/rpcs3/Emu/RSX/VK/VKTextureCache.cpp b/rpcs3/Emu/RSX/VK/VKTextureCache.cpp
-index 72b6bcf40aacdb348b4f7c9375ad5f26a33ea9e2..f586058367b80f4022c18c01140f567d2f0ce8b7 100644
+index 72b6bcf40..f58605836 100644
 --- a/rpcs3/Emu/RSX/VK/VKTextureCache.cpp
 +++ b/rpcs3/Emu/RSX/VK/VKTextureCache.cpp
 @@ -1246,10 +1246,23 @@ namespace vk
@@ -1249,7 +1310,7 @@ index 72b6bcf40aacdb348b4f7c9375ad5f26a33ea9e2..f586058367b80f4022c18c01140f567d
  #endif
  		case CELL_GCM_TEXTURE_W16_Z16_Y16_X16_FLOAT:
 diff --git a/rpcs3/Emu/RSX/VK/VKTextureCache.h b/rpcs3/Emu/RSX/VK/VKTextureCache.h
-index b4b05be4a020b773a166f0b2c39c6c35daeb9916..c6579afbd6a05c9135f008e0e0d74b2a2539b6bc 100644
+index b4b05be4a..c6579afbd 100644
 --- a/rpcs3/Emu/RSX/VK/VKTextureCache.h
 +++ b/rpcs3/Emu/RSX/VK/VKTextureCache.h
 @@ -336,6 +336,11 @@ namespace vk
@@ -1265,7 +1326,7 @@ index b4b05be4a020b773a166f0b2c39c6c35daeb9916..c6579afbd6a05c9135f008e0e0d74b2a
  					rsx::convert_linear_swizzle<u16, false>(tmp_data.data(), data, width, height, rsx_pitch);
  					break;
 diff --git a/rpcs3/Emu/RSX/VK/vkutils/sync.cpp b/rpcs3/Emu/RSX/VK/vkutils/sync.cpp
-index 6df7e3334abfe71a04b240708dcee11b38cebdf8..56e23fd857d8a2c4473a6e63b5df1da5df175513 100644
+index 6df7e3334..56e23fd85 100644
 --- a/rpcs3/Emu/RSX/VK/vkutils/sync.cpp
 +++ b/rpcs3/Emu/RSX/VK/vkutils/sync.cpp
 @@ -201,14 +201,39 @@ namespace vk
@@ -1339,7 +1400,7 @@ index 6df7e3334abfe71a04b240708dcee11b38cebdf8..56e23fd857d8a2c4473a6e63b5df1da5
  
  	gpu_debug_marker::gpu_debug_marker(gpu_debug_marker_pool& pool, std::string message)
 diff --git a/rpcs3/Emu/System.cpp b/rpcs3/Emu/System.cpp
-index 21a47f9329285ec2a53b2db84ca0cfaa1ec4db7b..ec45a010cf426772a15607878d6ab956b3d80ce3 100644
+index 21a47f932..ec45a010c 100644
 --- a/rpcs3/Emu/System.cpp
 +++ b/rpcs3/Emu/System.cpp
 @@ -90,7 +90,7 @@ extern void spu_load_exec(const spu_exec_object&);
@@ -1472,7 +1533,7 @@ index 21a47f9329285ec2a53b2db84ca0cfaa1ec4db7b..ec45a010cf426772a15607878d6ab956
  				sys_log.notice("%s", item.name);
  			}
 diff --git a/rpcs3/Emu/System.h b/rpcs3/Emu/System.h
-index 8049811606a6d7e4567b87756009b9f70155b24a..b81783502f10f4cfe7454a0f11089f3fea0ed448 100644
+index 804981160..b81783502 100644
 --- a/rpcs3/Emu/System.h
 +++ b/rpcs3/Emu/System.h
 @@ -525,6 +525,10 @@ public:
@@ -1487,7 +1548,7 @@ index 8049811606a6d7e4567b87756009b9f70155b24a..b81783502f10f4cfe7454a0f11089f3f
  	game_boot_result AddGame(const std::string& path);
  	game_boot_result AddGameToYml(const std::string& path);
 diff --git a/rpcs3/Emu/compile_progress.cpp b/rpcs3/Emu/compile_progress.cpp
-index dc7a5633924b71acf9c700b024d6af8ac7b0926d..ff6272533c89f22299baa149599c5835ff822f74 100644
+index dc7a56339..ff6272533 100644
 --- a/rpcs3/Emu/compile_progress.cpp
 +++ b/rpcs3/Emu/compile_progress.cpp
 @@ -50,6 +50,80 @@ u64 allocate_compile_job_id()
@@ -1581,7 +1642,7 @@ index dc7a5633924b71acf9c700b024d6af8ac7b0926d..ff6272533c89f22299baa149599c5835
  
  // --- Snapshot builder ---
 diff --git a/rpcs3/Emu/compile_progress.hpp b/rpcs3/Emu/compile_progress.hpp
-index 9210b5d105842e808630aed8a324d7d598f00248..53b103fdfc0452e29c896d0c4309b0d29d9b22f5 100644
+index 9210b5d10..53b103fdf 100644
 --- a/rpcs3/Emu/compile_progress.hpp
 +++ b/rpcs3/Emu/compile_progress.hpp
 @@ -66,12 +66,42 @@ struct SystemProgressContext
@@ -1628,7 +1689,7 @@ index 9210b5d105842e808630aed8a324d7d598f00248..53b103fdfc0452e29c896d0c4309b0d2
  // smoothing state. Both the RSX UI and the Android bridge consume the same snapshot.
  // Must be called before the show_overlay_message early-continue so the Android path
 diff --git a/rpcs3/Loader/TROPUSR.cpp b/rpcs3/Loader/TROPUSR.cpp
-index b94dd35c458277df01c06abb7ac59530aebc37c9..23b9265c6961e699131148871c0e201a03dec84b 100644
+index b94dd35c4..23b9265c6 100644
 --- a/rpcs3/Loader/TROPUSR.cpp
 +++ b/rpcs3/Loader/TROPUSR.cpp
 @@ -74,6 +74,18 @@ TROPUSRLoader::load_result TROPUSRLoader::Load(std::string_view filepath, std::s
@@ -1651,7 +1712,7 @@ index b94dd35c458277df01c06abb7ac59530aebc37c9..23b9265c6961e699131148871c0e201a
  {
  	if (!m_file)
 diff --git a/rpcs3/Loader/TROPUSR.h b/rpcs3/Loader/TROPUSR.h
-index 2465b7dc66bd1caa768a673cf219b609bfcbcd00..3378ecbb962c209555d75147a7c6fb07c737a0d4 100644
+index 2465b7dc6..3378ecbb9 100644
 --- a/rpcs3/Loader/TROPUSR.h
 +++ b/rpcs3/Loader/TROPUSR.h
 @@ -96,6 +96,9 @@ public:

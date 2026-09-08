@@ -172,6 +172,9 @@ class RPCSX {
     external fun getSaveStateInfo(): String
     external fun saveState(slot: Int): Boolean
     external fun loadSaveState(slot: Int): Boolean
+    /** Uses the request-aware core export when available, otherwise the legacy load export. */
+    external fun loadSaveStateWithRequest(slot: Int, requestId: Long): Boolean
+    external fun hasLoadSaveStateTerminalExport(): Boolean
     external fun getCurrentTrophies(): String
     /** Reads the installed RPCS3 trophy set for a stopped title without booting it. */
     external fun getTrophiesForTitle(titleId: String): String
@@ -223,6 +226,7 @@ class RPCSX {
         const val FRONTEND_EVENT_EMULATOR_ACTION_ERROR = 4
         const val FRONTEND_EVENT_SAVESTATE_COMMITTED = 5
         const val FRONTEND_EVENT_SAVESTATE_FAILED = 6
+        const val FRONTEND_EVENT_SAVESTATE_LOAD_TERMINAL = 9
         const val FRONTEND_EVENT_RENDERER_ERROR = 7
         const val FRONTEND_EVENT_TROPHY_UNLOCKED = 8
 

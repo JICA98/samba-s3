@@ -29,6 +29,8 @@ interface InGameMenuCoreGateway {
     suspend fun saveStateInfo(): Result<SaveStateCapabilities?>
     suspend fun saveState(slot: Int): Result<Boolean>
     suspend fun loadState(slot: Int): Result<Boolean>
+    /** Optional request-scoped load API; old cores fall back to [loadState]. */
+    suspend fun loadState(slot: Int, requestId: Long): Result<Boolean> = loadState(slot)
 
     suspend fun trophies(): Result<TrophiesData?>
     suspend fun friends(): Result<FriendsData?>
@@ -56,6 +58,7 @@ interface RpcsxBridge {
     fun getSaveStateInfo(): String
     fun saveState(slot: Int): Boolean
     fun loadSaveState(slot: Int): Boolean
+    fun loadSaveStateWithRequest(slot: Int, requestId: Long): Boolean
     fun getCurrentTrophies(): String
     fun getFriends(): String
     fun friendAction(action: String, username: String): Boolean
@@ -80,6 +83,8 @@ class RpcsxBridgeAdapter(private val rpcsx: RPCSX = RPCSX.instance) : RpcsxBridg
     override fun getSaveStateInfo(): String = rpcsx.getSaveStateInfo()
     override fun saveState(slot: Int): Boolean = rpcsx.saveState(slot)
     override fun loadSaveState(slot: Int): Boolean = rpcsx.loadSaveState(slot)
+    override fun loadSaveStateWithRequest(slot: Int, requestId: Long): Boolean =
+        rpcsx.loadSaveStateWithRequest(slot, requestId)
     override fun getCurrentTrophies(): String = rpcsx.getCurrentTrophies()
     override fun getFriends(): String = rpcsx.getFriends()
     override fun friendAction(action: String, username: String): Boolean = rpcsx.friendAction(action, username)
@@ -118,6 +123,9 @@ class RpcsxInGameMenuCoreGateway(private val bridge: RpcsxBridge) : InGameMenuCo
 
     override suspend fun saveState(slot: Int): Result<Boolean> = io { bridge.saveState(slot) }
     override suspend fun loadState(slot: Int): Result<Boolean> = io { bridge.loadSaveState(slot) }
+    override suspend fun loadState(slot: Int, requestId: Long): Result<Boolean> = io {
+        bridge.loadSaveStateWithRequest(slot, requestId)
+    }
 
     override suspend fun trophies(): Result<TrophiesData?> = runCatching {
         AchievementRepository.current(force = true)
