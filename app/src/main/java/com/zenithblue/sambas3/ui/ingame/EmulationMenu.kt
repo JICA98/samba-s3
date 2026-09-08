@@ -1,11 +1,13 @@
 package com.zenithblue.sambas3.ui.ingame
 
+import android.graphics.Bitmap
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
@@ -58,6 +60,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
+import androidx.compose.ui.window.DialogProperties
 import coil3.compose.AsyncImage
 import com.zenithblue.sambas3.GameIdentity
 import com.zenithblue.sambas3.GameRepository
@@ -66,6 +69,7 @@ import com.zenithblue.sambas3.RPCSXColors
 import com.zenithblue.sambas3.ui.games.GameConfigureOverlay
 import com.zenithblue.sambas3.ui.games.preview.GamePreviewModel
 import com.zenithblue.sambas3.ui.games.preview.GamePreviewRepository
+import com.zenithblue.sambas3.ui.components.DialogBackgroundBlur
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import java.io.File
@@ -79,6 +83,7 @@ import java.io.File
 fun InGameMenuHost(
     uiState: InGameMenuUiState,
     gamePath: String?,
+    pausedFrame: Bitmap?,
     core: InGameMenuCoreGateway,
     onIntent: (InGameMenuIntent) -> Unit
 ) {
@@ -151,7 +156,7 @@ fun InGameMenuHost(
             null
         }
     }
-    val menuBgModel: Any = bgPreview ?: R.drawable.default_wallpaper
+    val menuBgModel: Any = pausedFrame ?: bgPreview ?: R.drawable.default_wallpaper
 
     Box(
         modifier = Modifier
@@ -166,6 +171,7 @@ fun InGameMenuHost(
             modifier = Modifier
                 .fillMaxSize()
                 .scale(1.02f)
+                .blur(if (pausedFrame != null) 18.dp else 0.dp)
                 .alpha(0.85f)
         )
 
@@ -200,7 +206,7 @@ fun InGameMenuHost(
         )
 
         when (uiState.currentPage) {
-            InGamePage.Main -> InGameMainPanel(uiState, game, gamePath, gameIconModel, onIntent)
+            InGamePage.Main -> InGameMainPanel(uiState, game, gamePath, gameIconModel, pausedFrame, onIntent)
             InGamePage.Settings -> InGameSettingsPage(uiState, core, onIntent)
             InGamePage.Monitoring -> com.zenithblue.sambas3.ui.monitoring.MonitoringSettingsScreen(
                 navigateBack = { onIntent(InGameMenuIntent.Back) },
@@ -220,13 +226,15 @@ fun InGameMenuHost(
                 capabilities = uiState.capabilities.savestate,
                 selectedIndex = uiState.selectedIndex,
                 confirmSlot = uiState.saveConfirmSlot,
+                loadUnavailableSlot = uiState.loadUnavailableSlot,
                 onBack = { onIntent(InGameMenuIntent.Back) },
                 onReportCount = { onIntent(InGameMenuIntent.ReportItemCount(InGamePage.SaveStates, it)) },
                 onSelect = { onIntent(InGameMenuIntent.SelectIndex(it)) },
                 onRequestSave = { onIntent(InGameMenuIntent.RequestSaveConfirm(it)) },
                 onSave = { onIntent(InGameMenuIntent.SaveState(it)) },
-                onLoad = { onIntent(InGameMenuIntent.LoadState(it)) },
-                onDismissConfirm = { onIntent(InGameMenuIntent.DismissSaveConfirm) }
+                onLoad = { onIntent(InGameMenuIntent.RequestLoad(it)) },
+                onDismissConfirm = { onIntent(InGameMenuIntent.DismissSaveConfirm) },
+                onDismissLoadUnavailable = { onIntent(InGameMenuIntent.DismissLoadUnavailable) }
             )
             null -> Unit
         }
@@ -244,6 +252,7 @@ private fun InGameMainPanel(
     game: com.zenithblue.sambas3.Game?,
     gamePath: String?,
     gameIconModel: Any?,
+    pausedFrame: Bitmap?,
     onIntent: (InGameMenuIntent) -> Unit
 ) {
     var showExitConfirm by remember { mutableStateOf(false) }
@@ -404,6 +413,15 @@ private fun InGameMainPanel(
                     )
                 }
             }
+
+            PausedFramePreview(
+                pausedFrame = pausedFrame,
+                modifier = Modifier
+                    .align(Alignment.CenterEnd)
+                    .fillMaxWidth(0.46f)
+                    .widthIn(min = 280.dp, max = 560.dp)
+                    .aspectRatio(16f / 9f)
+            )
         }
 
         // Footer with status and quick button hints
@@ -497,6 +515,67 @@ private fun InGameMainPanel(
 }
 
 @Composable
+private fun PausedFramePreview(pausedFrame: Bitmap?, modifier: Modifier = Modifier) {
+    Surface(
+        modifier = modifier,
+        shape = RoundedCornerShape(14.dp),
+        color = Color(0xD90D0A12),
+        border = BorderStroke(1.dp, RPCSXColors.primary.copy(alpha = 0.42f)),
+        shadowElevation = 16.dp
+    ) {
+        Box(Modifier.fillMaxSize()) {
+            if (pausedFrame != null) {
+                AsyncImage(
+                    model = pausedFrame,
+                    contentDescription = "Paused gameplay preview",
+                    contentScale = ContentScale.Crop,
+                    modifier = Modifier.fillMaxSize()
+                )
+                Box(
+                    Modifier
+                        .fillMaxSize()
+                        .background(
+                            Brush.verticalGradient(
+                                listOf(Color.Transparent, Color.Transparent, Color(0xD9000000))
+                            )
+                        )
+                )
+            } else {
+                Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                    Text(
+                        "CAPTURING PAUSED FRAME…",
+                        color = RPCSXColors.textSecondary,
+                        style = MaterialTheme.typography.labelSmall,
+                        fontFamily = FontFamily.Monospace,
+                        letterSpacing = 0.8.sp
+                    )
+                }
+            }
+            Row(
+                modifier = Modifier.align(Alignment.BottomStart).padding(14.dp),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+                Box(
+                    Modifier
+                        .size(7.dp)
+                        .clip(RoundedCornerShape(50))
+                        .background(RPCSXColors.primary)
+                )
+                Text(
+                    "PAUSED FRAME",
+                    color = RPCSXColors.textPrimary,
+                    style = MaterialTheme.typography.labelSmall,
+                    fontFamily = FontFamily.Monospace,
+                    fontWeight = FontWeight.Bold,
+                    letterSpacing = 1.sp
+                )
+            }
+        }
+    }
+}
+
+@Composable
 private fun CustomConfirmDialog(
     title: String,
     message: String,
@@ -506,7 +585,11 @@ private fun CustomConfirmDialog(
     onConfirm: () -> Unit,
     onDismiss: () -> Unit
 ) {
-    Dialog(onDismissRequest = onDismiss) {
+    Dialog(
+        onDismissRequest = onDismiss,
+        properties = DialogProperties(usePlatformDefaultWidth = false)
+    ) {
+        DialogBackgroundBlur(36)
         Surface(
             shape = RoundedCornerShape(16.dp),
             color = Color(0xF8111520),

@@ -3,13 +3,15 @@ package com.zenithblue.sambas3.ui.settings.components.base
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.spring
 import androidx.compose.animation.core.tween
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.BasicAlertDialog
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -27,6 +29,8 @@ import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.DialogProperties
+import com.zenithblue.sambas3.RPCSXColors
+import com.zenithblue.sambas3.ui.components.DialogBackgroundBlur
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -40,10 +44,17 @@ fun BaseDialogPreference(
 ) {
     BasicAlertDialog(
         onDismissRequest = onDismissRequest,
-        modifier = modifier,
-        properties = properties
+        properties = DialogProperties(
+            dismissOnBackPress = properties.dismissOnBackPress,
+            dismissOnClickOutside = properties.dismissOnClickOutside,
+            securePolicy = properties.securePolicy,
+            usePlatformDefaultWidth = false,
+            decorFitsSystemWindows = properties.decorFitsSystemWindows
+        )
     ) {
+        DialogBackgroundBlur()
         DialogContent(
+            modifier = modifier,
             icon = icon,
             title = title,
             content = content
@@ -70,14 +81,17 @@ private fun DialogContent(
 
     Surface(
         modifier = modifier
+            .widthIn(max = 520.dp)
+            .fillMaxWidth(0.88f)
             .graphicsLayer {
                 scaleX = scale
                 scaleY = scale
                 this.alpha = alpha
             },
-        shape = RoundedCornerShape(28.dp),
-        color = MaterialTheme.colorScheme.surfaceContainerHigh,
-        tonalElevation = 6.dp
+        shape = RoundedCornerShape(18.dp),
+        color = Color(0xF20D0A12),
+        border = BorderStroke(1.dp, RPCSXColors.primary.copy(alpha = 0.38f)),
+        shadowElevation = 24.dp
     ) {
         Column(
             modifier = Modifier
@@ -92,8 +106,9 @@ private fun DialogContent(
                 ) {
                     icon?.let {
                         Surface(
-                            shape = CircleShape,
-                            color = MaterialTheme.colorScheme.secondaryContainer
+                            shape = RoundedCornerShape(10.dp),
+                            color = RPCSXColors.primary.copy(alpha = 0.14f),
+                            border = BorderStroke(1.dp, RPCSXColors.primary.copy(alpha = 0.32f))
                         ) {
                             Box(
                                 modifier = Modifier
@@ -101,7 +116,7 @@ private fun DialogContent(
                                 contentAlignment = Alignment.Center
                             ) {
                                 CompositionLocalProvider(
-                                    LocalContentColor provides MaterialTheme.colorScheme.onSecondaryContainer
+                                    LocalContentColor provides RPCSXColors.primary
                                 ) {
                                     icon()
                                 }

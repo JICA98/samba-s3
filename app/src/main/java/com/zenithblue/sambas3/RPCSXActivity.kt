@@ -17,6 +17,8 @@ import androidx.activity.ComponentActivity
 import androidx.activity.OnBackPressedCallback
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.platform.ViewCompositionStrategy
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowCompat
@@ -133,6 +135,7 @@ class RPCSXActivity : ComponentActivity(), EmulationHost {
     private var operationUiState: SavestateOperationUiState = SavestateOperationUiState.Hidden
     override val activityInstanceId = NEXT_ACTIVITY_ID.incrementAndGet()
     private var transitionBitmap: Bitmap? = null
+    private var menuPreviewBitmap by mutableStateOf<Bitmap?>(null)
     private val transitionController = SavestateTransitionController()
     private lateinit var thumbnailStore: SavestateThumbnailStore
     private val bootMutex = Any()
@@ -269,6 +272,7 @@ class RPCSXActivity : ComponentActivity(), EmulationHost {
                         ?: (if (::originalGamePath.isInitialized) originalGamePath else null)
                         ?: intent.getStringExtra(RPCSXActivity.EXTRA_ORIGINAL_GAME_PATH)
                         ?: RPCSX.activeGame.value,
+                    pausedFrame = menuPreviewBitmap,
                     core = coreGateway,
                     onIntent = coordinator::dispatch
                 )
@@ -281,10 +285,12 @@ class RPCSXActivity : ComponentActivity(), EmulationHost {
                 when (effect) {
                     is com.zenithblue.sambas3.ui.ingame.InGameMenuHostEffect.ShowOverlay -> {
                         binding.ingameOverlay.visibility = View.VISIBLE
+                        captureMenuPreview()
                     }
 
                     is com.zenithblue.sambas3.ui.ingame.InGameMenuHostEffect.HideOverlay -> {
                         binding.ingameOverlay.visibility = View.GONE
+                        replaceMenuPreview(null)
                     }
 
                     is com.zenithblue.sambas3.ui.ingame.InGameMenuHostEffect.EnterPadMenuMode -> {
@@ -1409,6 +1415,34 @@ class RPCSXActivity : ComponentActivity(), EmulationHost {
         }
     }
 
+    private fun captureMenuPreview() {
+        val frame = surfaceLeaseManager.currentFrame ?: run {
+            replaceMenuPreview(null)
+            Log.w("S3MENU", "paused-frame capture skipped: no active frame")
+            return
+        }
+        requestFrameCopy(frame) { bitmap, success ->
+            if (success && bitmap != null && coordinator.state.value.isOpen) {
+                replaceMenuPreview(bitmap)
+                Log.i("S3MENU", "paused-frame captured generation=${frame.generation} ${bitmap.width}x${bitmap.height}")
+            } else {
+                bitmap?.recycle()
+                Log.w("S3MENU", "paused-frame capture failed generation=${frame.generation}")
+            }
+        }
+    }
+
+    private fun replaceMenuPreview(next: Bitmap?) {
+        val previous = menuPreviewBitmap
+        if (previous === next) return
+        menuPreviewBitmap = next
+        if (previous != null && !previous.isRecycled) {
+            Handler(Looper.getMainLooper()).postDelayed({
+                if (menuPreviewBitmap !== previous && !previous.isRecycled) previous.recycle()
+            }, 500L)
+        }
+    }
+
     /**
      * PixelCopy is also the first-frame proof: Running alone can be true while
      * the renderer thread has already lost its BufferQueue.
@@ -1533,6 +1567,7 @@ class RPCSXActivity : ComponentActivity(), EmulationHost {
 
     /** Map a semantic menu command to coordinator intents. Returns true if consumed. */
     private fun handleMenuCommand(command: MenuCommand): Boolean {
+        if (coordinator.handleLoadUnavailableCommand(command)) return true
         if (coordinator.handleSaveConfirmCommand(command)) return true
         // ponytail: savestate grid assumed 2 columns; adaptive grid may differ on wide screens.
         val onSavestatesGrid =
@@ -1580,8 +1615,8 @@ class RPCSXActivity : ComponentActivity(), EmulationHost {
                     com.zenithblue.sambas3.ui.ingame.InGamePage.SaveStates -> {
                         val st = coordinator.state.value
                         val slot = st.capabilities.savestate?.slots?.getOrNull(st.selectedIndex)
-                        if (slot?.exists == true) {
-                            coordinator.dispatch(InGameMenuIntent.LoadState(slot.slot))
+                        if (slot != null) {
+                            coordinator.dispatch(InGameMenuIntent.RequestLoad(slot.slot))
                             true
                         } else {
                             false
@@ -1650,6 +1685,8 @@ class RPCSXActivity : ComponentActivity(), EmulationHost {
         if (::monitoringRepository.isInitialized) monitoringRepository.stop()
         transitionBitmap?.recycle()
         transitionBitmap = null
+        menuPreviewBitmap?.recycle()
+        menuPreviewBitmap = null
         try { surfaceLeaseManager.destroy() } catch (_: Exception) {}
         super.onDestroy()
         AlertDialogQueue.hostsSuppressed = false

@@ -1,5 +1,5 @@
 diff --git a/android/src/rpcsx-android.cpp b/android/src/rpcsx-android.cpp
-index 8308a4798..687be6ff4 100644
+index 8308a4798..1c1ed3ae7 100644
 --- a/android/src/rpcsx-android.cpp
 +++ b/android/src/rpcsx-android.cpp
 @@ -55,6 +55,8 @@
@@ -159,7 +159,34 @@ index 8308a4798..687be6ff4 100644
    }
 
    Emu.SetContinuousMode(true);
-@@ -2829,10 +2894,7 @@ static bool installPkg(JNIEnv *env, fs::file &&file, jlong progressId) {
+@@ -2461,18 +2526,22 @@ extern "C" bool _rpcsx_beginFrontendMenu()
+
+     g_frontend_menu_paused_emu = false;
+
+-    rpcsx_android.notice("FRONTEND_MENU begin pauseDuringMenu=%d isPaused=%d", (int)g_cfg.misc.pause_during_home_menu.get(), (int)Emu.IsPaused());
++    // The Android frontend presents this as a pause menu, so opening it must
++    // always stop guest execution. Track whether this menu performed the
++    // transition: a game that was already paused must remain paused on close.
++    const bool was_running = Emu.IsRunning();
++    rpcsx_android.notice("FRONTEND_MENU begin isPaused=%d wasRunning=%d", (int)Emu.IsPaused(), (int)was_running);
+
+-    if (g_cfg.misc.pause_during_home_menu.get())
++    if (was_running)
+     {
+         Emu.BlockingCallFromMainThread([]()
+         {
+             if (Emu.IsRunning())
+                 Emu.Pause(false, false);
+         });
+-        g_frontend_menu_paused_emu = Emu.IsPaused();
+-        rpcsx_android.notice("FRONTEND_MENU begin pausedByMenu=%d", (int)g_frontend_menu_paused_emu.load());
+     }
++    g_frontend_menu_paused_emu = was_running && Emu.IsPaused();
++    rpcsx_android.notice("FRONTEND_MENU begin pausedByMenu=%d", (int)g_frontend_menu_paused_emu.load());
+
+     return true;
+ }
+@@ -2829,10 +2898,7 @@ static bool installPkg(JNIEnv *env, fs::file &&file, jlong progressId) {
    if (worker()) {
      auto paths = std::vector(bootable_paths.begin(), bootable_paths.end());
      collectGameInfo(env, progress.getProgressId(), paths);
@@ -171,7 +198,7 @@ index 8308a4798..687be6ff4 100644
    }
 
    return true;
-@@ -2943,7 +3005,7 @@ static bool installRap(JNIEnv *env, fs::file &&file, jlong progressId,
+@@ -2943,7 +3009,7 @@ static bool installRap(JNIEnv *env, fs::file &&file, jlong progressId,
    }
 
    collectGameInfo(env, progress.getProgressId(), {std::string(rootPath)});
@@ -180,7 +207,7 @@ index 8308a4798..687be6ff4 100644
    return true;
  }
 
-@@ -3042,8 +3104,7 @@ static bool installIso(JNIEnv *env, fs::file &&file, jlong progressId) {
+@@ -3042,8 +3108,7 @@ static bool installIso(JNIEnv *env, fs::file &&file, jlong progressId) {
 
    progress.report(0, 0, "Publishing installed game");
    collectGameInfo(env, progress.getProgressId(), {finalPath});
@@ -190,7 +217,7 @@ index 8308a4798..687be6ff4 100644
    return true;
  }
 
-@@ -3363,6 +3424,391 @@ extern "C" int _rpcsx_extractIsoPreview(int fd, const char* destPath) {
+@@ -3363,6 +3428,391 @@ extern "C" int _rpcsx_extractIsoPreview(int fd, const char* destPath) {
    return 0;
  }
 
@@ -582,7 +609,7 @@ index 8308a4798..687be6ff4 100644
  extern "C" int _rpcsx_prepareRuntimePpu(const char* path, u64 sessionId)
  {
      if (!path || !*path)
-@@ -3607,7 +4053,7 @@ extern "C" std::string _rpcsx_settingsGet(std::string_view path) {
+@@ -3607,7 +4057,7 @@ extern "C" std::string _rpcsx_settingsGet(std::string_view path) {
    auto root = find_cfg_node(&g_cfg, path);
 
    if (root == nullptr) {
@@ -591,7 +618,16 @@ index 8308a4798..687be6ff4 100644
    }
 
    return root->to_json().dump(4);
-@@ -3955,9 +4401,8 @@ extern "C" bool _rpcsx_gracefulShutdown()
+@@ -3828,7 +4278,7 @@ extern "C" std::string _rpcsx_inGameMenuCapabilities()
+     nlohmann::json j;
+     j["apiVersion"] = 1;
+     j["frontendOwnsHomeMenu"] = true;
+-    j["pauseDuringMenu"] = g_cfg.misc.pause_during_home_menu.get();
++    j["pauseDuringMenu"] = true;
+     j["screenshot"] = true;
+     // recording — g_user_asked_for_recording has no consumer in this core's
+     // render path and g_recording_mode is never started, so advertising
+@@ -3955,9 +4405,8 @@ extern "C" bool _rpcsx_gracefulShutdown()
  }
 
  // Multi-slot savestate support.
@@ -603,7 +639,7 @@ index 8308a4798..687be6ff4 100644
  //   <config>/savestates/<TITLE>/<TITLE>_1_<slot>.SAVESTAT.zst
  static constexpr int kSaveStateSlotCount = 5;
 
-@@ -4074,20 +4519,9 @@ extern "C" bool _rpcsx_saveState(int slot)
+@@ -4074,20 +4523,9 @@ extern "C" bool _rpcsx_saveState(int slot)
          Emu.after_kill_callback = [slot, suspendMode, id]()
          {
              const destructive_guard clear_busy;
@@ -626,7 +662,7 @@ index 8308a4798..687be6ff4 100644
              if (boot_path.empty())
              {
                  rpcsx_android.error("S3SAVE id=%llu phase=failed slot=%d reason=missing_slot_file",
-@@ -4111,6 +4545,10 @@ extern "C" bool _rpcsx_saveState(int slot)
+@@ -4111,6 +4549,10 @@ extern "C" bool _rpcsx_saveState(int slot)
                  return;
              }
 
@@ -637,7 +673,7 @@ index 8308a4798..687be6ff4 100644
              sstate_log(id, "save", "core_stopped");
              rpcsx_android.notice("S3SAVE id=%llu phase=file-committed slot=%d path='%s' size=%llu",
                                   (u64)id, slot, boot_path, (u64)info.size);
-@@ -4144,13 +4582,71 @@ extern "C" bool _rpcsx_saveState(int slot)
+@@ -4144,13 +4586,71 @@ extern "C" bool _rpcsx_saveState(int slot)
          {
              Emu.SetContinuousMode(true);
          }
@@ -711,7 +747,7 @@ index 8308a4798..687be6ff4 100644
  {
      if (slot < 0 || slot >= kSaveStateSlotCount)
          slot = 0;
-@@ -4172,172 +4668,246 @@ extern "C" bool _rpcsx_loadSaveState(int slot)
+@@ -4172,172 +4672,246 @@ extern "C" bool _rpcsx_loadSaveState(int slot)
      sstate_log(id, "load", "file_resolved", fmt::format(" path='{}'", path).c_str());
      g_frontend_menu_active = false;
      g_frontend_menu_paused_emu = false;

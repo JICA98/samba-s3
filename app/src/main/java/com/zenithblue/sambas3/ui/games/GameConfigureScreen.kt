@@ -1,6 +1,7 @@
 package com.zenithblue.sambas3.ui.games
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.selection.selectable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -8,6 +9,7 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -19,6 +21,7 @@ import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.RadioButton
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
@@ -29,9 +32,11 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -98,6 +103,21 @@ private val CURATED_SECTIONS = listOf(
         )
     )
 )
+
+internal data class FrameLimitUiText(val title: String, val description: String)
+
+internal fun frameLimitUiText(value: String): FrameLimitUiText = when (value) {
+    "30" -> FrameLimitUiText("30 FPS", "Cap presentation at 30 frames per second")
+    "50" -> FrameLimitUiText("50 FPS", "Cap presentation at 50 frames per second")
+    "60" -> FrameLimitUiText("60 FPS", "Cap presentation at 60 frames per second")
+    "120" -> FrameLimitUiText("120 FPS", "Cap presentation at 120 frames per second")
+    "Display" -> FrameLimitUiText("Display refresh", "Match the device display refresh rate")
+    "Auto" -> FrameLimitUiText("Auto · recommended", "Follow the game's emulated timing")
+    "PS3 Native" -> FrameLimitUiText("PS3 native pacing", "Use the title's original console cadence")
+    "Infinite" -> FrameLimitUiText("Uncapped", "Remove the renderer frame ceiling")
+    "Off" -> FrameLimitUiText("Limiter off", "Disable the explicit frontend limiter")
+    else -> FrameLimitUiText(value, "Frame pacing mode")
+}
 
 /**
  * Per-game Configure Game page: curated tri-state rows (Use Global vs Override),
@@ -409,7 +429,21 @@ private fun CuratedRow(
                         }
                     },
                     onValueChange = { value -> onCommit(path, node, value) },
-                    onLongClick = { if (overridden) onResetRow(path, node) }
+                    onLongClick = { if (overridden) onResetRow(path, node) },
+                    valueToText = { value ->
+                        if (path == "Video@@Frame limit") frameLimitUiText(value).title else value
+                    },
+                    item = { value, currentValue, onClick ->
+                        if (path == "Video@@Frame limit") {
+                            FrameLimitOptionRow(value, value == currentValue, onClick)
+                        } else {
+                            com.zenithblue.sambas3.ui.settings.components.preference.ListPreferenceItem<String> { it }(
+                                value,
+                                currentValue,
+                                onClick
+                            )
+                        }
+                    }
                 )
             } else {
                 UnrenderableNodeRow(label, sectionIcon, effectiveDisplay, overridden, onResetRow = {
@@ -453,6 +487,41 @@ private fun CuratedRow(
                     onResetRow(path, node)
                 })
             }
+        }
+    }
+}
+
+@Composable
+private fun FrameLimitOptionRow(value: String, selected: Boolean, onClick: () -> Unit) {
+    val copy = frameLimitUiText(value)
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .heightIn(min = 58.dp)
+            .selectable(
+                selected = selected,
+                enabled = true,
+                role = Role.RadioButton,
+                onClick = onClick
+            )
+            .background(if (selected) RPCSXColors.primary.copy(alpha = 0.10f) else Color.Transparent)
+            .padding(horizontal = 22.dp, vertical = 8.dp),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        RadioButton(selected = selected, onClick = null)
+        Spacer(Modifier.width(14.dp))
+        Column {
+            Text(
+                copy.title,
+                color = if (selected) RPCSXColors.primary else RPCSXColors.textPrimary,
+                style = MaterialTheme.typography.bodyLarge,
+                fontWeight = if (selected) FontWeight.SemiBold else FontWeight.Normal
+            )
+            Text(
+                copy.description,
+                color = RPCSXColors.textSecondary,
+                style = MaterialTheme.typography.bodySmall
+            )
         }
     }
 }

@@ -670,6 +670,55 @@ class InGameMenuCoordinatorTest {
         coordinator.dispatch(InGameMenuIntent.DismissSaveConfirm)
         assertNull(coordinator.state.value.saveConfirmSlot)
     }
+
+    @Test
+    fun request_load_on_empty_slot_shows_notice_without_closing() {
+        openSavestates(
+            SaveStateCapabilities(true, false, true, listOf(SaveSlot(2, false, "Slot 2")))
+        )
+        coordinator.dispatch(InGameMenuIntent.RequestLoad(2))
+
+        assertEquals(2, coordinator.state.value.loadUnavailableSlot)
+        assertTrue(coordinator.state.value.isOpen)
+        assertTrue(gateway.loadCalls.isEmpty())
+    }
+
+    @Test
+    fun request_load_on_existing_slot_loads_and_closes() {
+        openSavestates(
+            SaveStateCapabilities(true, false, true, listOf(SaveSlot(1, true, "Slot 1", "/tmp/slot1.SAVESTAT")))
+        )
+        coordinator.dispatch(InGameMenuIntent.RequestLoad(1))
+
+        awaitCondition { coordinator.state.value.session is MenuSessionState.Closed }
+        assertEquals(listOf(1), gateway.loadCalls)
+        assertEquals(listOf(false), gateway.endResumes)
+    }
+
+    @Test
+    fun missing_save_notice_owns_controller_commands_and_back() {
+        openSavestates(
+            SaveStateCapabilities(true, false, true, listOf(SaveSlot(0, false, "Slot 0")))
+        )
+        coordinator.dispatch(InGameMenuIntent.RequestLoad(0))
+        assertTrue(coordinator.handleLoadUnavailableCommand(MenuCommand.Next))
+        assertEquals(0, coordinator.state.value.loadUnavailableSlot)
+        assertTrue(coordinator.handleLoadUnavailableCommand(MenuCommand.Back))
+        assertNull(coordinator.state.value.loadUnavailableSlot)
+        assertEquals(InGamePage.SaveStates, coordinator.state.value.currentPage)
+    }
+
+    @Test
+    fun back_intent_dismisses_missing_save_notice_before_popping_page() {
+        openSavestates(
+            SaveStateCapabilities(true, false, true, listOf(SaveSlot(0, false, "Slot 0")))
+        )
+        coordinator.dispatch(InGameMenuIntent.RequestLoad(0))
+        coordinator.dispatch(InGameMenuIntent.Back)
+
+        assertNull(coordinator.state.value.loadUnavailableSlot)
+        assertEquals(InGamePage.SaveStates, coordinator.state.value.currentPage)
+    }
 }
 
 class ClosePolicyTest {

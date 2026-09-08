@@ -19,18 +19,17 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.safeDrawingPadding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.itemsIndexed
 import androidx.compose.foundation.lazy.grid.rememberLazyGridState
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.remember
@@ -45,10 +44,13 @@ import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.window.Dialog
+import androidx.compose.ui.window.DialogProperties
 import coil3.compose.AsyncImage
 import coil3.request.ImageRequest
 import com.zenithblue.sambas3.R
 import com.zenithblue.sambas3.RPCSXColors
+import com.zenithblue.sambas3.ui.components.DialogBackgroundBlur
 import java.io.File
 import java.text.DateFormat
 import java.util.Date
@@ -58,13 +60,15 @@ fun InGameSaveStatePage(
     capabilities: SaveStateCapabilities?,
     selectedIndex: Int,
     confirmSlot: Int?,
+    loadUnavailableSlot: Int?,
     onBack: () -> Unit,
     onReportCount: (Int) -> Unit,
     onSelect: (Int) -> Unit,
     onRequestSave: (Int) -> Unit,
     onSave: (Int) -> Unit,
     onLoad: (Int) -> Unit,
-    onDismissConfirm: () -> Unit
+    onDismissConfirm: () -> Unit,
+    onDismissLoadUnavailable: () -> Unit
 ) {
     val slots = capabilities?.slots ?: emptyList()
     val suspendMode = capabilities?.suspendMode == true
@@ -180,29 +184,146 @@ fun InGameSaveStatePage(
         SaveStateHintFooter(
             suspendMode = suspendMode,
             canSave = canSave,
-            canLoad = !suspendMode && slots.any { it.exists }
+            canLoad = !suspendMode
         )
     }
 
     if (confirmSlot != null) {
-        AlertDialog(
-            onDismissRequest = onDismissConfirm,
-            title = { Text("Save State?") },
-            text = {
-                Text(
-                    if (suspendMode) {
-                        "Save and exit the game?"
-                    } else {
-                        "Save current emulation state to slot " + confirmSlot +
-                            "? The game will briefly pause while the state is saved."
-                    }
-                )
+        val replacingExisting = slots.firstOrNull { it.slot == confirmSlot }?.exists == true
+        SaveStateNoticeDialog(
+            title = if (suspendMode) "SAVE & EXIT" else "SAVE TO SLOT $confirmSlot",
+            message = if (suspendMode) {
+                "Capture the current state and close this game session?"
+            } else {
+                if (replacingExisting) {
+                    "Replace the state currently stored in slot $confirmSlot? The game stays paused while the snapshot is written."
+                } else {
+                    "Capture the current game in slot $confirmSlot? The game stays paused while the snapshot is written."
+                }
             },
-            confirmButton = {
-                TextButton(onClick = { onSave(confirmSlot) }) { Text("Save") }
-            },
-            dismissButton = { TextButton(onClick = onDismissConfirm) { Text("Cancel") } }
+            iconRes = R.drawable.ic_save,
+            actionText = "SAVE",
+            onAction = { onSave(confirmSlot) },
+            onDismiss = onDismissConfirm
         )
+    }
+
+    if (loadUnavailableSlot != null) {
+        SaveStateNoticeDialog(
+            title = "NO SAVE IN SLOT $loadUnavailableSlot",
+            message = "This slot is empty. Save the game to this slot before trying to load it.",
+            iconRes = R.drawable.ic_info,
+            actionText = "OK",
+            onAction = onDismissLoadUnavailable,
+            onDismiss = onDismissLoadUnavailable,
+            showCancel = false
+        )
+    }
+}
+
+@Composable
+private fun SaveStateNoticeDialog(
+    title: String,
+    message: String,
+    iconRes: Int,
+    actionText: String,
+    onAction: () -> Unit,
+    onDismiss: () -> Unit,
+    showCancel: Boolean = true
+) {
+    Dialog(
+        onDismissRequest = onDismiss,
+        properties = DialogProperties(usePlatformDefaultWidth = false)
+    ) {
+        DialogBackgroundBlur(36)
+        Surface(
+            shape = RoundedCornerShape(18.dp),
+            color = Color(0xF20D0A12),
+            border = BorderStroke(1.dp, RPCSXColors.primary.copy(alpha = 0.42f)),
+            shadowElevation = 24.dp,
+            modifier = Modifier.widthIn(max = 430.dp).fillMaxWidth(0.88f)
+        ) {
+            Column(
+                modifier = Modifier.padding(22.dp),
+                verticalArrangement = Arrangement.spacedBy(16.dp)
+            ) {
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(12.dp)
+                ) {
+                    Surface(
+                        shape = RoundedCornerShape(10.dp),
+                        color = RPCSXColors.primary.copy(alpha = 0.14f),
+                        border = BorderStroke(1.dp, RPCSXColors.primary.copy(alpha = 0.35f)),
+                        modifier = Modifier.size(42.dp)
+                    ) {
+                        Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                            Icon(
+                                painter = painterResource(iconRes),
+                                contentDescription = null,
+                                tint = RPCSXColors.primary,
+                                modifier = Modifier.size(21.dp)
+                            )
+                        }
+                    }
+                    Column(verticalArrangement = Arrangement.spacedBy(2.dp)) {
+                        Text(
+                            "save states",
+                            color = RPCSXColors.primary,
+                            fontSize = 12.sp
+                        )
+                        Text(
+                            title,
+                            color = RPCSXColors.textPrimary,
+                            style = MaterialTheme.typography.titleMedium,
+                            fontWeight = FontWeight.Bold,
+                            letterSpacing = 0.7.sp
+                        )
+                    }
+                }
+                HorizontalDivider(color = Color(0x20FFFFFF))
+                Text(
+                    message,
+                    color = RPCSXColors.textSecondary,
+                    style = MaterialTheme.typography.bodyMedium
+                )
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.End,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    if (showCancel) {
+                        Surface(
+                            onClick = onDismiss,
+                            shape = RoundedCornerShape(8.dp),
+                            color = Color.Transparent
+                        ) {
+                            Text(
+                                "CANCEL",
+                                color = RPCSXColors.textSecondary,
+                                style = MaterialTheme.typography.labelMedium,
+                                fontWeight = FontWeight.Bold,
+                                modifier = Modifier.padding(horizontal = 16.dp, vertical = 10.dp)
+                            )
+                        }
+                    }
+                    Surface(
+                        onClick = onAction,
+                        shape = RoundedCornerShape(8.dp),
+                        color = RPCSXColors.primary,
+                        border = BorderStroke(1.dp, RPCSXColors.focusRing)
+                    ) {
+                        Text(
+                            actionText,
+                            color = Color(0xFF0A0D1A),
+                            style = MaterialTheme.typography.labelMedium,
+                            fontWeight = FontWeight.Black,
+                            modifier = Modifier.padding(horizontal = 18.dp, vertical = 10.dp)
+                        )
+                    }
+                }
+            }
+        }
     }
 }
 
@@ -317,7 +438,6 @@ private fun SaveSlotCard(
                     }
                     Surface(
                         onClick = onLoad,
-                        enabled = slot.exists,
                         shape = RoundedCornerShape(6.dp),
                         color = if (slot.exists) Color(0x25FFFFFF) else Color(0x10FFFFFF),
                         border = BorderStroke(0.5.dp, if (slot.exists) Color(0x35FFFFFF) else Color.Transparent)

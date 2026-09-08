@@ -35,8 +35,10 @@ sealed interface InGameMenuIntent {
 
     data class SaveState(val slot: Int) : InGameMenuIntent
     data class LoadState(val slot: Int) : InGameMenuIntent
+    data class RequestLoad(val slot: Int) : InGameMenuIntent
     data class RequestSaveConfirm(val slot: Int) : InGameMenuIntent
     data object DismissSaveConfirm : InGameMenuIntent
+    data object DismissLoadUnavailable : InGameMenuIntent
 
     // Settings transaction
     data object SettingsSave : InGameMenuIntent
@@ -119,7 +121,8 @@ data class InGameMenuUiState(
     val settingsLoading: Boolean = false,
     val showDirtyDialog: Boolean = false,
     val settingsWriteError: String? = null,
-    val saveConfirmSlot: Int? = null
+    val saveConfirmSlot: Int? = null,
+    val loadUnavailableSlot: Int? = null
 ) {
     val isOpen: Boolean get() = session is MenuSessionState.Opening || session is MenuSessionState.Open
     val currentPage: InGamePage? get() = (session as? MenuSessionState.Open)?.pageStack?.lastOrNull()
@@ -240,6 +243,17 @@ class InGameMenuCoordinator(
             is InGameMenuIntent.LoadState -> closeAndRun(CloseReason.LoadState, intent.slot) { requestId ->
                 core.loadState(intent.slot, checkNotNull(requestId))
             }
+            is InGameMenuIntent.RequestLoad -> {
+                val current = _state.value
+                val slot = current.capabilities.savestate?.slots?.firstOrNull { it.slot == intent.slot }
+                if (current.currentPage == InGamePage.SaveStates &&
+                    slot?.exists == true && !slot.path.isNullOrBlank()
+                ) {
+                    dispatch(InGameMenuIntent.LoadState(intent.slot))
+                } else if (current.currentPage == InGamePage.SaveStates) {
+                    _state.update { it.copy(loadUnavailableSlot = intent.slot) }
+                }
+            }
 
             is InGameMenuIntent.RequestSaveConfirm -> _state.update {
                 val open = it.session as? MenuSessionState.Open ?: return@update it
@@ -251,6 +265,7 @@ class InGameMenuCoordinator(
             }
 
             is InGameMenuIntent.DismissSaveConfirm -> _state.update { it.copy(saveConfirmSlot = null) }
+            is InGameMenuIntent.DismissLoadUnavailable -> _state.update { it.copy(loadUnavailableSlot = null) }
 
             is InGameMenuIntent.SettingsSave -> scope.launch { settingsSave() }
             is InGameMenuIntent.SettingsDiscard -> scope.launch { settingsDiscard() }
@@ -428,7 +443,8 @@ class InGameMenuCoordinator(
                 session = open.copy(pageStack = stack + page),
                 pageSelections = updatedSelections,
                 selectedIndex = updatedSelections[page] ?: 0,
-                saveConfirmSlot = null
+                saveConfirmSlot = null,
+                loadUnavailableSlot = null
             )
         }
         if (page == InGamePage.Settings) scope.launch { enterSettings() }
@@ -439,6 +455,10 @@ class InGameMenuCoordinator(
         val open = s.session as? MenuSessionState.Open ?: return
         if (s.saveConfirmSlot != null) {
             _state.update { it.copy(saveConfirmSlot = null) }
+            return
+        }
+        if (s.loadUnavailableSlot != null) {
+            _state.update { it.copy(loadUnavailableSlot = null) }
             return
         }
         when (open.pageStack.lastOrNull()) {
@@ -481,7 +501,8 @@ class InGameMenuCoordinator(
                 session = open.copy(pageStack = newStack),
                 pageSelections = updatedSelections,
                 selectedIndex = restoredIndex,
-                saveConfirmSlot = null
+                saveConfirmSlot = null,
+                loadUnavailableSlot = null
             )
         }
     }
@@ -580,6 +601,17 @@ class InGameMenuCoordinator(
             }
 
             is MenuCommand.Back -> _state.update { it.copy(saveConfirmSlot = null) }
+            else -> Unit
+        }
+        return true
+    }
+
+    /** A missing-save notice is modal for both touch and controller input. */
+    fun handleLoadUnavailableCommand(command: MenuCommand): Boolean {
+        if (_state.value.loadUnavailableSlot == null) return false
+        when (command) {
+            is MenuCommand.Activate,
+            is MenuCommand.Back -> _state.update { it.copy(loadUnavailableSlot = null) }
             else -> Unit
         }
         return true
