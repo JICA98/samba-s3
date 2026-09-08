@@ -1074,20 +1074,6 @@ index 8308a4798..f1e6d9299 100644
  extern "C" std::string _rpcsx_getFriends()
  {
      nlohmann::json j;
-diff --git a/android/src/samba-build-id.cpp b/android/src/samba-build-id.cpp
-index 8aca7dc59..0b93578d9 100644
---- a/android/src/samba-build-id.cpp
-+++ b/android/src/samba-build-id.cpp
-@@ -1,8 +1,6 @@
- #include <string>
--
- static std::string g_samba_build_id =
--    "rpcsx=27441815c12cca1a4dcb3daec82b513b1a35eed7 samba=62a70942d8c121a7e58c74b6a4e2700cf369c0ae patch_sha256=6468572dbc6dec3ea7d0ad996adeb57dffd96a090d10482ea04d7013abecd5f0 build_type=Debug";
--
-+    "rpcsx=657b26a0d197c29d42cdcf3b3f6e8ad5c6765bbc samba=d658f7773b054f3640aa2f93767d8b7bc4c34364 patch_sha256=c82a4148d359441eec7e78f0432a793ab9d82f2f9c00747898e439a05179803c build_type=Debug";
- extern "C" const char* _rpcsx_sambaBuildId() {
-     return g_samba_build_id.c_str();
- }
 diff --git a/rpcs3/Emu/Cell/PPUThread.cpp b/rpcs3/Emu/Cell/PPUThread.cpp
 index d2768d8b0..caaef4c15 100644
 --- a/rpcs3/Emu/Cell/PPUThread.cpp

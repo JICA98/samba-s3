@@ -56,17 +56,8 @@ fi
 # Reverse-check: if the patch is already applied, skip. Forward-apply otherwise.
 # Fail the build if neither direction is clean so a stale patch cannot silently
 # produce an old core where supportsCompileProgressEvents() is false.
-# samba-build-id.cpp is generated and stamped; normalize to placeholder before check.
-if [ -f "$RPCSX_DIR/android/src/samba-build-id.cpp" ]; then
-    cat >"$RPCSX_DIR/android/src/samba-build-id.cpp" <<'EOF_PLACEHOLDER'
-#include <string>
-static std::string g_samba_build_id =
-    "rpcsx=657b26a0d197c29d42cdcf3b3f6e8ad5c6765bbc samba=4033d8335239844b03bce62d346d405859582f48 patch_sha256=0cd4cc1866223f575ed1c00551f4f9820c9190539fbaf60b8bca4752f3117d40 build_type=Debug";
-extern "C" const char* _rpcsx_sambaBuildId() {
-    return g_samba_build_id.c_str();
-}
-EOF_PLACEHOLDER
-fi
+# samba-build-id.cpp is generated and stamped below, so it must not be part of
+# the persistent submodule patch.
 PATCH_FILE="$SCRIPT_DIR/patches/rpcsx-submodule-changes.patch"
 if [ -f "$PATCH_FILE" ] && [ ! -s "$PATCH_FILE" ]; then
     # Empty patch: local engine edits are already pinned inside the submodule
