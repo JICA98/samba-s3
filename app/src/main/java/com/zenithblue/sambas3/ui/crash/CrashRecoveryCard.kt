@@ -2,7 +2,6 @@ package com.zenithblue.sambas3.ui.crash
 
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
-import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -14,7 +13,6 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.widthIn
-import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
@@ -105,7 +103,7 @@ fun CrashRecoveryCard(
     val message = when (state) {
         is HomeRecoveryState.ConfirmedCrash -> "The emulator reported a fatal error. Likely cause: ${state.report.cause}."
         is HomeRecoveryState.Interrupted -> state.message
-        is HomeRecoveryState.LoadFailure -> "Saved slot could not be restored: ${state.reason}"
+        is HomeRecoveryState.LoadFailure -> loadFailureMessage(state.reason)
         is HomeRecoveryState.ActionFailed -> state.message
         is HomeRecoveryState.ActionRunning -> "Preparing emulator..."
         HomeRecoveryState.None -> ""
@@ -120,7 +118,7 @@ fun CrashRecoveryCard(
 
     Surface(
         shape = RoundedCornerShape(14.dp),
-        color = Color.Transparent,
+        color = Color(0xFF0B0E17),
         border = BorderStroke(
             1.dp,
             if (confirmed || isLoadFailure) RPCSXColors.errorColor.copy(alpha = 0.65f)
@@ -128,9 +126,9 @@ fun CrashRecoveryCard(
         ),
         shadowElevation = 12.dp,
         modifier = Modifier
-            .widthIn(max = 680.dp)
-            .fillMaxWidth(0.85f)
-            .padding(horizontal = 8.dp, vertical = 2.dp)
+            .padding(horizontal = 16.dp, vertical = 2.dp)
+            .widthIn(max = 760.dp)
+            .fillMaxWidth()
     ) {
         Box(Modifier.fillMaxWidth()) {
             if (coilModel != null) {
@@ -169,14 +167,15 @@ fun CrashRecoveryCard(
             )
 
             Column(
-                modifier = Modifier.padding(horizontal = 14.dp, vertical = 9.dp),
-                verticalArrangement = Arrangement.spacedBy(6.dp),
+                modifier = Modifier.padding(horizontal = 16.dp, vertical = 12.dp),
+                verticalArrangement = Arrangement.spacedBy(8.dp),
             ) {
-                // Row 1: Icon + Title info + Status badge + Close button
+                // Header: keep status and title on separate lines so neither is
+                // squeezed behind the close action on compact landscape screens.
                 Row(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.SpaceBetween,
-                    verticalAlignment = Alignment.CenterVertically,
+                    verticalAlignment = Alignment.Top,
                 ) {
                     Row(
                         modifier = Modifier.weight(1f),
@@ -185,8 +184,8 @@ fun CrashRecoveryCard(
                     ) {
                         Box(
                             Modifier
-                                .size(36.dp)
-                                .clip(RoundedCornerShape(6.dp))
+                                .size(42.dp)
+                                .clip(RoundedCornerShape(8.dp))
                                 .background(RPCSXColors.surfaceOverlay),
                             contentAlignment = Alignment.Center,
                         ) {
@@ -202,34 +201,16 @@ fun CrashRecoveryCard(
                             }
                         }
                         Column(Modifier.weight(1f)) {
-                            Row(
-                                verticalAlignment = Alignment.CenterVertically,
-                                horizontalArrangement = Arrangement.spacedBy(6.dp),
-                            ) {
-                                Text(
-                                    if (isLoadFailure) "LOAD FAILED" else if (confirmed) "CRASHED" else "STOPPED UNEXPECTEDLY",
-                                    color = if (confirmed || isLoadFailure) RPCSXColors.errorColor else RPCSXColors.primary,
-                                    style = MaterialTheme.typography.labelSmall,
-                                    fontWeight = FontWeight.Bold,
-                                )
-                                Text(
-                                    "·",
-                                    color = RPCSXColors.textSecondary,
-                                    style = MaterialTheme.typography.labelSmall,
-                                )
-                                Text(
-                                    displayTitle.uppercase() + if (showId) " ($titleId)" else "",
-                                    color = RPCSXColors.textPrimary,
-                                    style = MaterialTheme.typography.labelSmall,
-                                    fontWeight = FontWeight.Bold,
-                                    maxLines = 1,
-                                    overflow = TextOverflow.Ellipsis,
-                                )
-                            }
                             Text(
-                                "$message  ·  $logHint",
-                                color = RPCSXColors.textSecondary,
-                                style = MaterialTheme.typography.bodySmall.copy(fontSize = 11.sp),
+                                if (isLoadFailure) "LOAD FAILED" else if (confirmed) "CRASHED" else "STOPPED UNEXPECTEDLY",
+                                color = if (confirmed || isLoadFailure) RPCSXColors.errorColor else RPCSXColors.primary,
+                                style = MaterialTheme.typography.labelSmall,
+                                fontWeight = FontWeight.Bold,
+                            )
+                            Text(
+                                displayTitle.uppercase() + if (showId) " ($titleId)" else "",
+                                color = RPCSXColors.textPrimary,
+                                style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.Bold),
                                 maxLines = 1,
                                 overflow = TextOverflow.Ellipsis,
                             )
@@ -248,14 +229,28 @@ fun CrashRecoveryCard(
                     }
                 }
 
-                // Row 2: Action buttons
+                Text(
+                    message,
+                    color = RPCSXColors.textSecondary,
+                    style = MaterialTheme.typography.bodySmall.copy(fontSize = 12.sp),
+                    maxLines = 2,
+                    overflow = TextOverflow.Ellipsis,
+                )
+                Text(
+                    logHint,
+                    color = RPCSXColors.textSecondary.copy(alpha = 0.72f),
+                    style = MaterialTheme.typography.labelSmall.copy(fontSize = 10.sp),
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis,
+                )
+
                 if (isRunning) {
                     Text("Working...", color = RPCSXColors.textSecondary, style = MaterialTheme.typography.bodySmall)
                 } else {
+                    // Primary recovery choices remain visible without horizontal
+                    // scrolling; diagnostics live on their own row below.
                     Row(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .horizontalScroll(rememberScrollState()),
+                        modifier = Modifier.fillMaxWidth(),
                         horizontalArrangement = Arrangement.spacedBy(6.dp),
                         verticalAlignment = Alignment.CenterVertically,
                     ) {
@@ -298,6 +293,12 @@ fun CrashRecoveryCard(
                                 colors = ButtonDefaults.outlinedButtonColors(contentColor = Color.White),
                             ) { Text("RETRY", style = MaterialTheme.typography.labelSmall) }
                         }
+                    }
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.spacedBy(6.dp),
+                        verticalAlignment = Alignment.CenterVertically,
+                    ) {
                         OutlinedButton(
                             onClick = onDetails,
                             contentPadding = PaddingValues(horizontal = 10.dp, vertical = 2.dp),
@@ -329,4 +330,14 @@ fun CrashRecoveryCard(
             }
         }
     }
+}
+
+internal fun loadFailureMessage(reason: String): String = when {
+    reason.contains("InvalidFileOrFolder", ignoreCase = true) ->
+        "The game disc could not be reconnected for this save. Reconnect the ISO and retry."
+    reason.contains("invalid-savestate-file", ignoreCase = true) ->
+        "This save file is missing or empty. Choose another save or start the game fresh."
+    reason.contains("retry-limit", ignoreCase = true) ->
+        "This save failed repeatedly. Start fresh or open Details to review the failure."
+    else -> "SambaS3 couldn't restore this save. Retry it, or start the game fresh."
 }

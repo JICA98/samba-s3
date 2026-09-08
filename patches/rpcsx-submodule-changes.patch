@@ -1,5 +1,5 @@
 diff --git a/android/src/rpcsx-android.cpp b/android/src/rpcsx-android.cpp
-index 8308a4798..f1e6d9299 100644
+index 8308a4798..687be6ff4 100644
 --- a/android/src/rpcsx-android.cpp
 +++ b/android/src/rpcsx-android.cpp
 @@ -55,6 +55,8 @@
@@ -8,7 +8,7 @@ index 8308a4798..f1e6d9299 100644
  #include <utility>
 +#include <fstream>
 +#include <sstream>
- 
+
  #define STB_IMAGE_WRITE_IMPLEMENTATION
  #define STBI_ONLY_PNG
 @@ -155,6 +157,7 @@ static constexpr int FRONTEND_EVENT_EMULATOR_ACTION_ERROR = 4;
@@ -16,13 +16,13 @@ index 8308a4798..f1e6d9299 100644
  static constexpr int FRONTEND_EVENT_SAVESTATE_FAILED = 6;
  static constexpr int FRONTEND_EVENT_RENDERER_ERROR = 7;
 +static constexpr int FRONTEND_EVENT_SAVESTATE_LOAD_TERMINAL = 9;
- 
+
  static atomic_t<bool> g_frontend_menu_active{false};
  static atomic_t<bool> g_frontend_menu_paused_emu{false};
 @@ -914,6 +917,20 @@ static void collectGamePaths(std::vector<std::string> &paths,
    }
  }
- 
+
 +static void collect_fs_directories(const std::string& root, std::vector<std::string>& out) {
 +  std::string normalized = root;
 +  if (!normalized.empty() && normalized.back() != '/') {
@@ -43,19 +43,19 @@ index 8308a4798..f1e6d9299 100644
 @@ -1123,6 +1140,11 @@ public:
      return owner_tid.load(std::memory_order_acquire) == ::gettid();
    }
- 
+
 +  bool isReady() const {
 +    return started.load(std::memory_order_acquire) &&
 +        owner_tid.load(std::memory_order_acquire) != static_cast<pid_t>(-1);
 +  }
 +
    JNIEnv* ownerEnv() const { return owner_env; }
- 
+
    u32 queueDepth() {
 @@ -1310,6 +1332,8 @@ static void emit_frontend_event(int type, const std::string* payload)
      });
  }
- 
+
 +static void finish_pending_savestate_load_if_running();
 +
  // Vulkan's unrecoverable Android surface errors are surfaced to Kotlin so a
@@ -69,7 +69,7 @@ index 8308a4798..f1e6d9299 100644
 +extern void ppu_finalize(const ppu_module<lv2_obj> &,
 +                         bool force_mem_release = false);
  extern bool ppu_load_rel_exec(const ppu_rel_object &);
- 
+
  class CompilationQueue {
 @@ -1765,8 +1790,15 @@ private:
      // captures this context when its thread starts; setting it later around
@@ -124,7 +124,7 @@ index 8308a4798..f1e6d9299 100644
 @@ -2280,6 +2327,10 @@ extern "C" bool _rpcsx_startMainThreadProcessor(JNIEnv *env) {
    return true;
  }
- 
+
 +extern "C" bool _rpcsx_isMainThreadProcessorReady() {
 +  return g_mainThreadProcessor.isReady();
 +}
@@ -132,7 +132,34 @@ index 8308a4798..f1e6d9299 100644
  extern "C" bool _rpcsx_collectGameInfo(JNIEnv *env, std::string_view rootDir,
                                         long progressId) {
    std::unique_lock lifecycleLock(g_emulator_lifecycle_mutex);
-@@ -2829,10 +2880,7 @@ static bool installPkg(JNIEnv *env, fs::file &&file, jlong progressId) {
+@@ -2320,9 +2371,23 @@ extern "C" int _rpcsx_bootSavestate(std::string_view savestate_path_,
+
+   const std::string original_game_path(original_game_path_);
+   if (!original_game_path.empty()) {
+-    const auto registration = Emu.AddGame(original_game_path);
+-    rpcsx_android.notice("S3SAVE recovery-register-game path='%s' result=%d",
+-                         original_game_path.c_str(), static_cast<int>(registration));
++    // SAF-backed direct ISOs arrive as /proc/self/fd/<n>. AddGame() expects a
++    // mounted disc directory, so passing the descriptor path directly cannot
++    // discover PARAM.SFO or register the title in games.yml. Mount the ISO
++    // first and keep that virtual disc alive for the savestate boot below.
++    std::string registration_path = original_game_path;
++    if (fs::is_file(original_game_path)) {
++      if (std::string mounted_path = Emu.ResolvePpuCompileRoot(original_game_path);
++          !mounted_path.empty()) {
++        registration_path = std::move(mounted_path);
++      }
++    }
++
++    const auto registration = Emu.AddGame(registration_path);
++    rpcsx_android.notice(
++        "S3SAVE recovery-register-game source='%s' mounted='%s' result=%d",
++        original_game_path.c_str(), registration_path.c_str(),
++        static_cast<int>(registration));
+   }
+
+   Emu.SetContinuousMode(true);
+@@ -2829,10 +2894,7 @@ static bool installPkg(JNIEnv *env, fs::file &&file, jlong progressId) {
    if (worker()) {
      auto paths = std::vector(bootable_paths.begin(), bootable_paths.end());
      collectGameInfo(env, progress.getProgressId(), paths);
@@ -142,19 +169,19 @@ index 8308a4798..f1e6d9299 100644
 -    }
 +    progress.report(100, 100, "Files installed");
    }
- 
+
    return true;
-@@ -2943,7 +2991,7 @@ static bool installRap(JNIEnv *env, fs::file &&file, jlong progressId,
+@@ -2943,7 +3005,7 @@ static bool installRap(JNIEnv *env, fs::file &&file, jlong progressId,
    }
- 
+
    collectGameInfo(env, progress.getProgressId(), {std::string(rootPath)});
 -  g_compilationQueue.push(progress, std::move(ebootPath));
 +  progress.report(100, 100, "Files installed");
    return true;
  }
- 
-@@ -3042,8 +3090,7 @@ static bool installIso(JNIEnv *env, fs::file &&file, jlong progressId) {
- 
+
+@@ -3042,8 +3104,7 @@ static bool installIso(JNIEnv *env, fs::file &&file, jlong progressId) {
+
    progress.report(0, 0, "Publishing installed game");
    collectGameInfo(env, progress.getProgressId(), {finalPath});
 -  progress.report(0, 0, "Preparing PPU compilation");
@@ -162,11 +189,11 @@ index 8308a4798..f1e6d9299 100644
 +  progress.report(100, 100, "Files installed");
    return true;
  }
- 
-@@ -3363,6 +3410,391 @@ extern "C" int _rpcsx_extractIsoPreview(int fd, const char* destPath) {
+
+@@ -3363,6 +3424,391 @@ extern "C" int _rpcsx_extractIsoPreview(int fd, const char* destPath) {
    return 0;
  }
- 
+
 +static std::string g_compile_batch_result_json;
 +static std::atomic<bool> g_install_batch_canceled{false};
 +
@@ -555,18 +582,18 @@ index 8308a4798..f1e6d9299 100644
  extern "C" int _rpcsx_prepareRuntimePpu(const char* path, u64 sessionId)
  {
      if (!path || !*path)
-@@ -3607,7 +4039,7 @@ extern "C" std::string _rpcsx_settingsGet(std::string_view path) {
+@@ -3607,7 +4053,7 @@ extern "C" std::string _rpcsx_settingsGet(std::string_view path) {
    auto root = find_cfg_node(&g_cfg, path);
- 
+
    if (root == nullptr) {
 -    return nullptr;
 +    return "{}";
    }
- 
+
    return root->to_json().dump(4);
-@@ -3955,9 +4387,8 @@ extern "C" bool _rpcsx_gracefulShutdown()
+@@ -3955,9 +4401,8 @@ extern "C" bool _rpcsx_gracefulShutdown()
  }
- 
+
  // Multi-slot savestate support.
 -// The core always writes the newest state to get_savestate_file(..., 0, 0)
 -// (id 0). Higher slots are produced by renaming that file after the save
@@ -575,8 +602,8 @@ index 8308a4798..f1e6d9299 100644
 +// files follow the core naming scheme:
  //   <config>/savestates/<TITLE>/<TITLE>_1_<slot>.SAVESTAT.zst
  static constexpr int kSaveStateSlotCount = 5;
- 
-@@ -4074,20 +4505,9 @@ extern "C" bool _rpcsx_saveState(int slot)
+
+@@ -4074,20 +4519,9 @@ extern "C" bool _rpcsx_saveState(int slot)
          Emu.after_kill_callback = [slot, suspendMode, id]()
          {
              const destructive_guard clear_busy;
@@ -599,10 +626,10 @@ index 8308a4798..f1e6d9299 100644
              if (boot_path.empty())
              {
                  rpcsx_android.error("S3SAVE id=%llu phase=failed slot=%d reason=missing_slot_file",
-@@ -4111,6 +4531,10 @@ extern "C" bool _rpcsx_saveState(int slot)
+@@ -4111,6 +4545,10 @@ extern "C" bool _rpcsx_saveState(int slot)
                  return;
              }
- 
+
 +            // New saves are always zstd. Once the exact new file is valid,
 +            // discard an obsolete gzip version so the slot has one authority.
 +            fs::remove_file(slot_path + ".gz");
@@ -610,7 +637,7 @@ index 8308a4798..f1e6d9299 100644
              sstate_log(id, "save", "core_stopped");
              rpcsx_android.notice("S3SAVE id=%llu phase=file-committed slot=%d path='%s' size=%llu",
                                   (u64)id, slot, boot_path, (u64)info.size);
-@@ -4144,13 +4568,71 @@ extern "C" bool _rpcsx_saveState(int slot)
+@@ -4144,13 +4582,71 @@ extern "C" bool _rpcsx_saveState(int slot)
          {
              Emu.SetContinuousMode(true);
          }
@@ -620,7 +647,7 @@ index 8308a4798..f1e6d9299 100644
      });
      return true;
  }
- 
+
 -extern "C" bool _rpcsx_loadSaveState(int slot)
 +struct pending_savestate_load
 +{
@@ -684,7 +711,7 @@ index 8308a4798..f1e6d9299 100644
  {
      if (slot < 0 || slot >= kSaveStateSlotCount)
          slot = 0;
-@@ -4172,172 +4654,246 @@ extern "C" bool _rpcsx_loadSaveState(int slot)
+@@ -4172,172 +4668,246 @@ extern "C" bool _rpcsx_loadSaveState(int slot)
      sstate_log(id, "load", "file_resolved", fmt::format(" path='{}'", path).c_str());
      g_frontend_menu_active = false;
      g_frontend_menu_paused_emu = false;
@@ -754,7 +781,7 @@ index 8308a4798..f1e6d9299 100644
      });
      return true;
  }
- 
+
 -extern "C" std::string _rpcsx_getCurrentTrophies()
 +extern "C" bool _rpcsx_loadSaveState(int slot)
  {
@@ -1008,7 +1035,7 @@ index 8308a4798..f1e6d9299 100644
 +                         static_cast<long long>(j.value("queryDurationMs", 0LL)));
      return j.dump();
  }
- 
+
 +extern "C" std::string _rpcsx_getCurrentTrophies()
 +{
 +    std::string trophy_set;
@@ -1106,7 +1133,7 @@ index d2768d8b0..caaef4c15 100644
 +#endif
 +		return effective;
  	}
- 
+
  	static jit_codegen_level ppu_jit_codegen_level()
 @@ -329,12 +343,28 @@ extern "C" const char* _rpcsx_getPpuManifestKey()
  extern "C" const char* _rpcsx_getPpuManifestKeyForTitle(const char* titleId)
@@ -1136,7 +1163,7 @@ index d2768d8b0..caaef4c15 100644
 +	g_cfg.from_string(config_backup);
  	return lastForTitle.c_str();
  }
- 
+
 @@ -4841,8 +4871,45 @@ extern void ppu_precompile(std::vector<std::string>& dir_queue, std::vector<ppu_
  					{
  						obj.clear(), src.close(); // Clear decrypted file and elf object memory
@@ -1183,11 +1210,11 @@ index d2768d8b0..caaef4c15 100644
 +#endif
  						continue;
  					}
- 
+
 @@ -4887,7 +4954,35 @@ extern void ppu_precompile(std::vector<std::string>& dir_queue, std::vector<ppu_
  							break;
  						}
- 
+
 -						ppu_initialize(*ovlm, false, file_size, memory_limit);
 +						for (;;)
 +						{
@@ -1222,7 +1249,7 @@ index d2768d8b0..caaef4c15 100644
  						break;
  					}
 @@ -5021,7 +5116,35 @@ extern void ppu_precompile(std::vector<std::string>& dir_queue, std::vector<ppu_
- 
+
  						_main.name = ' '; // Make ppu_finalize work
  						Emu.ConfigurePPUCache();
 -						ppu_initialize(_main, false, file_size, memory_limit);
@@ -1259,9 +1286,9 @@ index d2768d8b0..caaef4c15 100644
  						ppu_finalize(_main, true);
  						_main = {};
 @@ -5336,6 +5459,15 @@ bool ppu_initialize(const ppu_module<lv2_obj>& info, bool check_only, u64 file_s
- 
+
  	bool has_mfvscr = false;
- 
+
 +#if defined(__ANDROID__)
 +	// INSTALL Gate C progress: full module count (cached + uncached) so UI shows
 +	// real "module X of TOTAL", not the per-step batch size.
@@ -1275,9 +1302,9 @@ index d2768d8b0..caaef4c15 100644
  	const ppu_compile_policy compile_policy = is_being_used_in_emulation
  		? ppu_compile_policy::background
 @@ -5895,6 +6027,17 @@ bool ppu_initialize(const ppu_module<lv2_obj>& info, bool check_only, u64 file_s
- 
+
  		module_counter++;
- 
+
 +#if defined(__ANDROID__)
 +		{
 +			const auto ctx = get_system_progress_context();
@@ -1312,7 +1339,7 @@ index d2768d8b0..caaef4c15 100644
 @@ -5917,6 +6070,26 @@ bool ppu_initialize(const ppu_module<lv2_obj>& info, bool check_only, u64 file_s
  			return true;
  		}
- 
+
 +#if defined(__ANDROID__)
 +		// INSTALL Gate C: count every uncached module for real progress totals, but
 +		// only enqueue up to install_step_max_new into this step's workload.
@@ -1335,9 +1362,9 @@ index d2768d8b0..caaef4c15 100644
 +
  		// Remember, used in ppu_initialize(void)
  		compiled_new = true;
- 
+
 @@ -5925,6 +6098,16 @@ bool ppu_initialize(const ppu_module<lv2_obj>& info, bool check_only, u64 file_s
- 
+
  		// Fill workload list for compilation
  		workload.emplace_back(std::move(obj_name), std::move(part));
 +#if defined(__ANDROID__)
@@ -1351,12 +1378,12 @@ index d2768d8b0..caaef4c15 100644
 +		}
 +#endif
  	}
- 
+
  	if (check_only)
 @@ -5932,6 +6115,20 @@ bool ppu_initialize(const ppu_module<lv2_obj>& info, bool check_only, u64 file_s
  		return false;
  	}
- 
+
 +#if defined(__ANDROID__)
 +	{
 +		const auto ctx = get_system_progress_context();
@@ -1376,7 +1403,7 @@ index d2768d8b0..caaef4c15 100644
  		g_progr_fknown_bits += file_size;
 @@ -5945,7 +6142,42 @@ bool ppu_initialize(const ppu_module<lv2_obj>& info, bool check_only, u64 file_s
  		atomic_t<u64> work_done = 0;
- 
+
  		// Update progress dialog
 +#if defined(__ANDROID__)
 +		{
@@ -1414,23 +1441,23 @@ index d2768d8b0..caaef4c15 100644
 +#else
  		g_progr_ptotal += ::size32(workload);
 +#endif
- 
+
  		*progress_dialog = get_localized_string(localized_string_id::PROGRESS_DIALOG_COMPILING_PPU_MODULES);
- 
+
 @@ -6034,6 +6266,9 @@ bool ppu_initialize(const ppu_module<lv2_obj>& info, bool check_only, u64 file_s
  					}
- 
+
  					ppu_log.success("LLVM: Compiled module %s", obj_name);
 +#if defined(__ANDROID__)
 +					ppu_batch_note_committed();
 +#endif
  				}
- 
+
  				core_lock.unlock();
 @@ -6098,6 +6333,13 @@ bool ppu_initialize(const ppu_module<lv2_obj>& info, bool check_only, u64 file_s
- 
+
  		threads.join();
- 
+
 +#if defined(__ANDROID__)
 +		// Worker threads only advance the atomic commit counter. Publish the
 +		// aggregate receipt once after every compiler has joined; concurrent
@@ -1497,7 +1524,7 @@ index 6df7e3334..56e23fd85 100644
 +		const auto gpu_name = dev.gpu().get_name();
 +		const auto driver_name = dev.gpu().get_driver_name();
 +		const bool is_turnip = gpu_name.find("Turnip") != umax || driver_name.find("Turnip") != umax;
- 
+
  		if (domain == sync_domain::host &&
 -			vk::get_driver_vendor() == vk::driver_vendor::AMD &&
 -			vk::get_chip_family() < vk::chip_class::AMD_navi1x)
@@ -1515,7 +1542,7 @@ index 6df7e3334..56e23fd85 100644
 +			// explicit host-read barrier in gpu_label::signal keeps the mapped
 +			// value coherent for the CPU polling loop.
  			m_backend = sync_backend::gpu_label;
- 
+
 +			// One-time runtime proof (low volume: first host event only).
 +			static bool s_s3vksync_logged = false;
 +			if (!s_s3vksync_logged)
@@ -1536,7 +1563,7 @@ index 6df7e3334..56e23fd85 100644
  		}
 @@ -456,6 +481,25 @@ namespace vk
  			::size32(image_memory_barriers), image_memory_barriers.data());
- 
+
  		VK_GET_SYMBOL(vkCmdFillBuffer)(cmd, m_buffer_handle, m_buffer_offset, 4, label_constants::set_);
 +
 +		// The label is read by the CPU through a mapped pointer.  The transfer
@@ -1558,7 +1585,7 @@ index 6df7e3334..56e23fd85 100644
 +			0, nullptr,
 +			0, nullptr);
  	}
- 
+
  	gpu_debug_marker::gpu_debug_marker(gpu_debug_marker_pool& pool, std::string message)
 diff --git a/rpcs3/Emu/System.cpp b/rpcs3/Emu/System.cpp
 index 21a47f932..969910fd7 100644
@@ -1576,7 +1603,7 @@ index 21a47f932..969910fd7 100644
 @@ -436,6 +436,41 @@ build_ppu_preflight_plan(
      return plan;
  }
- 
+
 +static std::string mount_iso_as_bdvd(const std::string& path)
 +{
 +	fs::file file(path);
@@ -1616,9 +1643,9 @@ index 21a47f932..969910fd7 100644
  	Emulator& emu,
  	std::vector<std::string> dir_queue,
 @@ -475,6 +510,17 @@ static bool run_ppu_precompile_stage(
- 
+
  		ppu_initialize(main);
- 
+
 +		// A Kotlin-managed batch deliberately stops after a bounded number of
 +		// new objects. Persist those objects, tear this worker down, and let the
 +		// next isolated process resume from cache instead of accumulating JIT
@@ -1651,12 +1678,12 @@ index 21a47f932..969910fd7 100644
 @@ -580,8 +629,8 @@ Emulator::PreparePpuOnly(
          old_app_version
      };
- 
+
 -    m_path = game_path;
 -    m_path_original = game_path;
 +    m_path = resolved_path;
 +    m_path_original = resolved_path;
- 
+
      m_title_id =
          title_hint;
 @@ -592,8 +641,8 @@ Emulator::PreparePpuOnly(
@@ -1671,7 +1698,7 @@ index 21a47f932..969910fd7 100644
          }
          if (!_psf.empty())
 @@ -1471,19 +1520,12 @@ game_boot_result Emulator::BootGame(std::string path, const std::string& title_i
- 
+
  	if (fs::is_file(path))
  	{
 -		fs::file file(path);
@@ -1687,21 +1714,21 @@ index 21a47f932..969910fd7 100644
 -			path = mount_path;
 +			path = std::move(mount_path);
  			direct = false;
- 
+
 -			for (auto& item : fs::dir(mount_path))
 +			for (auto& item : fs::dir(path))
  			{
  				sys_log.notice("%s", item.name);
  			}
 @@ -3140,10 +3182,15 @@ void Emulator::FinalizeRunRequest()
- 
+
  	lv2_obj::make_scheduler_ready();
- 
+
 -	m_state.compare_and_swap_test(system_state::starting, system_state::running);
 +	const bool became_running = m_state.compare_and_swap_test(system_state::starting, system_state::running);
- 
+
  	m_ar.reset();
- 
+
 +	if (became_running)
 +	{
 +		GetCallbacks().on_started();
@@ -1712,7 +1739,7 @@ index 21a47f932..969910fd7 100644
  		Pause();
 @@ -3534,6 +3581,11 @@ extern bool check_if_vdec_contexts_exist();
  extern bool try_lock_spu_threads_in_a_state_compatible_with_savestates(bool revert_lock = false, std::vector<std::pair<shared_ptr<named_thread<spu_thread>>, u32>>* out_list = nullptr);
- 
+
  void Emulator::Kill(bool allow_autoexit, bool savestate, savestate_stage* save_stage)
 +{
 +	Kill(allow_autoexit, savestate, save_stage, 0);
@@ -1725,7 +1752,7 @@ index 21a47f932..969910fd7 100644
 @@ -3580,7 +3632,7 @@ void Emulator::Kill(bool allow_autoexit, bool savestate, savestate_stage* save_s
  			std::shared_ptr<std::shared_ptr<void>> pause_thread = std::make_shared<std::shared_ptr<void>>();
  			sstate_trace("prepare-created");
- 
+
 -			*pause_thread = make_ptr(new named_thread("Savestate Prepare Thread"sv, [pause_thread, allow_autoexit, this, sstate_trace, post_core_lifecycle]() mutable
 +			*pause_thread = make_ptr(new named_thread("Savestate Prepare Thread"sv, [pause_thread, allow_autoexit, savestate_id, this, sstate_trace, post_core_lifecycle]() mutable
  				{
@@ -1733,7 +1760,7 @@ index 21a47f932..969910fd7 100644
  					struct scoped_success_guard
 @@ -3678,13 +3730,13 @@ void Emulator::Kill(bool allow_autoexit, bool savestate, savestate_stage* save_s
  					success_guard.save_state_success = true;
- 
+
  					sstate_trace("prepared-kill-dispatch-before");
 -					post_core_lifecycle([allow_autoexit, this, paused_spus, sstate_trace]()
 +					post_core_lifecycle([allow_autoexit, savestate_id, this, paused_spus, sstate_trace]()
@@ -1750,19 +1777,19 @@ index 21a47f932..969910fd7 100644
 @@ -3799,7 +3851,7 @@ void Emulator::Kill(bool allow_autoexit, bool savestate, savestate_stage* save_s
  	// There is no race condition because it is only accessed by the same thread
  	std::shared_ptr<std::shared_ptr<void>> join_thread = std::make_shared<std::shared_ptr<void>>();
- 
+
 -	*join_thread = make_ptr(new named_thread("Emulation Join Thread"sv, [join_thread, savestate, allow_autoexit, save_stage = save_stage ? *save_stage : savestate_stage{}, this]() mutable
 +	*join_thread = make_ptr(new named_thread("Emulation Join Thread"sv, [join_thread, savestate, allow_autoexit, savestate_id, save_stage = save_stage ? *save_stage : savestate_stage{}, this]() mutable
  		{
  			fs::pending_file file;
- 
+
 @@ -3912,7 +3964,7 @@ void Emulator::Kill(bool allow_autoexit, bool savestate, savestate_stage* save_s
  			{
  				set_progress_message("Creating File");
- 
+
 -				path = get_savestate_file(m_title_id, m_path, 0, 0);
 +				path = get_savestate_file(m_title_id, m_path, savestate_id, 0);
- 
+
  				// The function is meant for reading files, so if there is no ZST file it would not return compressed file path
  			    // So this is the only place where the result is edited if need to be
 diff --git a/rpcs3/Emu/System.h b/rpcs3/Emu/System.h
@@ -1881,7 +1908,7 @@ index dc7a56339..ff6272533 100644
 +{
 +    g_ppu_batch_new_committed.fetch_add(1, std::memory_order_acq_rel);
 +}
- 
+
  void set_system_progress_context(const SystemProgressContext& ctx)
  {
 @@ -76,6 +150,8 @@ void clear_system_progress_context()
@@ -1891,7 +1918,7 @@ index dc7a56339..ff6272533 100644
 +    g_ppu_install_step_more_work.store(false, std::memory_order_release);
 +    reset_ppu_install_batch_stats();
  }
- 
+
  // --- Snapshot builder ---
 diff --git a/rpcs3/Emu/compile_progress.hpp b/rpcs3/Emu/compile_progress.hpp
 index 9210b5d10..53b103fdf 100644
@@ -1904,11 +1931,11 @@ index 9210b5d10..53b103fdf 100644
 +    /** Kotlin-owned INSTALL/PRELAUNCH batch limit (0 = unlimited runtime work). */
 +    u32 install_step_max_new = 0;
  };
- 
+
  void set_system_progress_context(const SystemProgressContext& ctx);
  SystemProgressContext get_system_progress_context();
  void clear_system_progress_context();
- 
+
 +/** Set when a bounded ppu_initialize left uncached modules for a later process. */
 +void set_ppu_install_step_more_work(bool more);
 +bool get_ppu_install_step_more_work();
@@ -1947,7 +1974,7 @@ index b94dd35c4..23b9265c6 100644
 @@ -74,6 +74,18 @@ TROPUSRLoader::load_result TROPUSRLoader::Load(std::string_view filepath, std::s
  	return res;
  }
- 
+
 +bool TROPUSRLoader::LoadPhysical(std::string_view filepath)
 +{
 +	if (!m_file.open(std::string(filepath)))
@@ -1969,11 +1996,11 @@ index 2465b7dc6..3378ecbb9 100644
 +++ b/rpcs3/Loader/TROPUSR.h
 @@ -96,6 +96,9 @@ public:
  	};
- 
+
  	[[nodiscard]] load_result Load(std::string_view filepath, std::string_view configpath);
 +	// Read an existing physical TROPUSR.DAT without consulting emulator VFS and
 +	// without generating/replacing a missing or invalid user's trophy history.
 +	[[nodiscard]] bool LoadPhysical(std::string_view filepath);
  	[[nodiscard]] bool Save(std::string_view filepath);
- 
+
  	[[nodiscard]] u32 GetTrophiesCount() const;
