@@ -1,5 +1,5 @@
 diff --git a/android/src/rpcsx-android.cpp b/android/src/rpcsx-android.cpp
-index 8308a4798..1c1ed3ae7 100644
+index 8308a4798..28dbc828d 100644
 --- a/android/src/rpcsx-android.cpp
 +++ b/android/src/rpcsx-android.cpp
 @@ -55,6 +55,8 @@
@@ -618,7 +618,78 @@ index 8308a4798..1c1ed3ae7 100644
    }
 
    return root->to_json().dump(4);
-@@ -3828,7 +4278,7 @@ extern "C" std::string _rpcsx_inGameMenuCapabilities()
+@@ -3645,6 +4095,70 @@ extern "C" std::string _rpcsx_getVersion() {
+   return rx::getVersion().toString();
+ }
+
++extern "C" std::string _rpcsx_getFrameLimiterStateJson()
++{
++  const frame_limit_type requested = g_cfg.video.frame_limit.get();
++  const frame_limit_type effective = g_disable_frame_limit ? frame_limit_type::none : requested;
++  const auto mode_name = [](frame_limit_type mode) -> const char*
++  {
++    switch (mode)
++    {
++    case frame_limit_type::none: return "Off";
++    case frame_limit_type::_30: return "30";
++    case frame_limit_type::_50: return "50";
++    case frame_limit_type::_60: return "60";
++    case frame_limit_type::_120: return "120";
++    case frame_limit_type::display_rate: return "Display";
++    case frame_limit_type::_auto: return "Auto";
++    case frame_limit_type::_ps3: return "PS3 Native";
++    case frame_limit_type::infinite: return "Infinite";
++    }
++    return "Unknown";
++  };
++
++  double target_fps = 0.;
++  bool target_known = true;
++  switch (effective)
++  {
++  case frame_limit_type::none:
++    target_fps = g_cfg.core.max_cpu_preempt_count_per_frame ? static_cast<double>(g_cfg.video.vblank_rate) : 0.;
++    break;
++  case frame_limit_type::_30: target_fps = 30.; break;
++  case frame_limit_type::_50: target_fps = 50.; break;
++  case frame_limit_type::_60: target_fps = 60.; break;
++  case frame_limit_type::_120: target_fps = 120.; break;
++  case frame_limit_type::display_rate:
++    target_known = false;
++    break;
++  case frame_limit_type::_auto:
++    target_fps = static_cast<double>(g_cfg.video.vblank_rate);
++    break;
++  case frame_limit_type::_ps3:
++  case frame_limit_type::infinite:
++    target_fps = 0.;
++    break;
++  }
++
++  const double second_limit = g_cfg.video.second_frame_limit;
++  if (second_limit >= 0.1 && (!target_known || target_fps < 0.1 || second_limit < target_fps))
++  {
++    target_fps = second_limit;
++    target_known = true;
++  }
++
++  nlohmann::json state{
++    {"requestedMode", mode_name(requested)},
++    {"effectiveMode", mode_name(effective)},
++    {"runtimeMutable", true},
++    {"disabledByCore", static_cast<bool>(g_disable_frame_limit)},
++    {"secondLimitFps", second_limit},
++    {"uncapped", target_known && target_fps < 0.1}
++  };
++  if (target_known) state["targetFps"] = target_fps;
++  else state["targetFps"] = nullptr;
++  return state.dump();
++}
++
+ extern "C" void *_rpcsx_setCustomDriver(void *driverHandle) {
+   auto prevLoader = vk::instance::g_vk_loader;
+   if (prevLoader != nullptr) {
+@@ -3828,7 +4342,7 @@ extern "C" std::string _rpcsx_inGameMenuCapabilities()
      nlohmann::json j;
      j["apiVersion"] = 1;
      j["frontendOwnsHomeMenu"] = true;
@@ -627,7 +698,7 @@ index 8308a4798..1c1ed3ae7 100644
      j["screenshot"] = true;
      // recording — g_user_asked_for_recording has no consumer in this core's
      // render path and g_recording_mode is never started, so advertising
-@@ -3955,9 +4405,8 @@ extern "C" bool _rpcsx_gracefulShutdown()
+@@ -3955,9 +4469,8 @@ extern "C" bool _rpcsx_gracefulShutdown()
  }
 
  // Multi-slot savestate support.
@@ -639,7 +710,7 @@ index 8308a4798..1c1ed3ae7 100644
  //   <config>/savestates/<TITLE>/<TITLE>_1_<slot>.SAVESTAT.zst
  static constexpr int kSaveStateSlotCount = 5;
 
-@@ -4074,20 +4523,9 @@ extern "C" bool _rpcsx_saveState(int slot)
+@@ -4074,20 +4587,9 @@ extern "C" bool _rpcsx_saveState(int slot)
          Emu.after_kill_callback = [slot, suspendMode, id]()
          {
              const destructive_guard clear_busy;
@@ -662,7 +733,7 @@ index 8308a4798..1c1ed3ae7 100644
              if (boot_path.empty())
              {
                  rpcsx_android.error("S3SAVE id=%llu phase=failed slot=%d reason=missing_slot_file",
-@@ -4111,6 +4549,10 @@ extern "C" bool _rpcsx_saveState(int slot)
+@@ -4111,6 +4613,10 @@ extern "C" bool _rpcsx_saveState(int slot)
                  return;
              }
 
@@ -673,7 +744,7 @@ index 8308a4798..1c1ed3ae7 100644
              sstate_log(id, "save", "core_stopped");
              rpcsx_android.notice("S3SAVE id=%llu phase=file-committed slot=%d path='%s' size=%llu",
                                   (u64)id, slot, boot_path, (u64)info.size);
-@@ -4144,13 +4586,71 @@ extern "C" bool _rpcsx_saveState(int slot)
+@@ -4144,13 +4650,71 @@ extern "C" bool _rpcsx_saveState(int slot)
          {
              Emu.SetContinuousMode(true);
          }
@@ -747,7 +818,7 @@ index 8308a4798..1c1ed3ae7 100644
  {
      if (slot < 0 || slot >= kSaveStateSlotCount)
          slot = 0;
-@@ -4172,172 +4672,246 @@ extern "C" bool _rpcsx_loadSaveState(int slot)
+@@ -4172,172 +4736,269 @@ extern "C" bool _rpcsx_loadSaveState(int slot)
      sstate_log(id, "load", "file_resolved", fmt::format(" path='{}'", path).c_str());
      g_frontend_menu_active = false;
      g_frontend_menu_paused_emu = false;
@@ -1098,9 +1169,33 @@ index 8308a4798..1c1ed3ae7 100644
 +    try
 +    {
 +        const std::string root = rpcs3::utils::get_hdd0_dir() + "home/" + Emu.GetUsr() + "/trophy/";
++        std::string active_trophy_set;
++        if (Emu.GetTitleID() == title_id)
++        {
++            if (auto* current = g_fxo->try_get<current_trophy_name>())
++            {
++                std::lock_guard lock(current->mtx);
++                active_trophy_set = current->name;
++            }
++        }
 +        for (const auto& entry : fs::dir(root))
 +        {
 +            if (!entry.is_directory || entry.name == "." || entry.name == "..") continue;
++            bool matches = entry.name == active_trophy_set;
++            const std::string mapping_path = root + entry.name + "/SAMBAS3_TITLE_ID";
++            if (!matches)
++            {
++                fs::file mapping(mapping_path);
++                if (mapping)
++                {
++                    std::string mapped_title = mapping.to_string();
++                    while (!mapped_title.empty() && std::isspace(static_cast<unsigned char>(mapped_title.back())))
++                    {
++                        mapped_title.pop_back();
++                    }
++                    matches = mapped_title == title_id;
++                }
++            }
 +            const std::string config_path = root + entry.name + "/TROPCONF.SFM";
 +            fs::file config(config_path);
 +            if (!config) continue;
@@ -1108,8 +1203,7 @@ index 8308a4798..1c1ed3ae7 100644
 +            if (!document.Read(config.to_string())) continue;
 +            auto xml_root = document.GetRoot();
 +            if (!xml_root) continue;
-+            bool matches = false;
-+            for (std::shared_ptr<rXmlNode> node = xml_root->GetChildren(); node; node = node->GetNext())
++            for (std::shared_ptr<rXmlNode> node = xml_root->GetChildren(); !matches && node; node = node->GetNext())
 +            {
 +                if (node->GetName() == "title-id" && node->GetNodeContent() == title_id)
 +                {
@@ -1137,6 +1231,35 @@ index 8308a4798..1c1ed3ae7 100644
  extern "C" std::string _rpcsx_getFriends()
  {
      nlohmann::json j;
+diff --git a/ps3fw/sceNpTrophy.cpp b/ps3fw/sceNpTrophy.cpp
+index b6f295e4c..dbdaa58a4 100644
+--- a/ps3fw/sceNpTrophy.cpp
++++ b/ps3fw/sceNpTrophy.cpp
+@@ -756,6 +756,24 @@ sceNpTrophyRegisterContext(ppu_thread& ppu, u32 context, u32 handle,
+
+ 	ensure(tropusr->Load(trophyUsrPath, trophyConfPath).success);
+
++	// TROPCONF identifies the NP communication set but does not reliably carry
++	// the disc TITLE_ID. Persist the association at the point where both are
++	// authoritative so the Android launcher can query trophies while stopped.
++	// The sidecar is emulator metadata and is never exposed to the guest.
++	if (const std::string title_id = Emu.GetTitleID(); !title_id.empty())
++	{
++		const std::string mapping_path = vfs::get(trophyPath + "/SAMBAS3_TITLE_ID");
++		if (!fs::write_file(mapping_path, fs::rewrite, title_id))
++		{
++			sceNpTrophy.warning("Failed to persist trophy title association '%s' -> '%s' (%s)",
++				ctxt->trp_name, title_id, fs::g_tls_error);
++		}
++		else
++		{
++			sceNpTrophy.notice("S3TROPHY associated title=%s set=%s", title_id, ctxt->trp_name);
++		}
++	}
++
+ 	// This emulates vsh sending the events and ensures that not 2 events are
+ 	// processed at once
+ 	const std::pair<u32, s32> statuses[] = {
 diff --git a/rpcs3/Emu/Cell/PPUThread.cpp b/rpcs3/Emu/Cell/PPUThread.cpp
 index d2768d8b0..caaef4c15 100644
 --- a/rpcs3/Emu/Cell/PPUThread.cpp

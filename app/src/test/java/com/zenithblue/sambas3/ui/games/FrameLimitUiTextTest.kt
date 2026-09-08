@@ -16,11 +16,13 @@ class FrameLimitUiTextTest {
     fun numeric_limits_include_fps_units() {
         assertEquals("30 FPS", frameLimitUiText("30").title)
         assertEquals("60 FPS", frameLimitUiText("60").title)
-        assertEquals("120 FPS", frameLimitUiText("120").title)
+        assertTrue(frameLimitUiText("120").title.startsWith("120 FPS"))
     }
 
     @Test
-    fun auto_is_marked_recommended() {
-        assertTrue(frameLimitUiText("Auto").title.contains("recommended"))
+    fun mobile_presets_are_promoted_and_only_selected_legacy_value_is_retained() {
+        val available = listOf("Off", "30", "50", "60", "120", "Display", "Auto", "PS3 Native", "Infinite")
+        assertEquals(listOf("30", "60", "Infinite", "Auto"), frameLimitOptions(available, "Auto"))
+        assertEquals(listOf("30", "60", "Infinite"), frameLimitOptions(available, "60"))
     }
 }

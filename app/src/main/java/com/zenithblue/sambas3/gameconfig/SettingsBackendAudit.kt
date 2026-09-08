@@ -63,7 +63,7 @@ object SettingsBackendAudit {
         KnownSetting("Video@@Renderer", "enum"),
         KnownSetting("Video@@Resolution", "enum"),
         KnownSetting("Video@@Aspect ratio", "enum"),
-        KnownSetting("Video@@Frame limit", "enum"),
+        KnownSetting("Video@@Frame limit", "enum", SettingApplyPhase.LIVE),
         KnownSetting("Video@@MSAA", "enum"),
         KnownSetting("Video@@Shader Mode", "enum"),
         KnownSetting("Video@@Write Color Buffers", "bool"),

@@ -54,6 +54,7 @@ import coil3.compose.AsyncImage
 import coil3.request.ImageRequest
 import com.zenithblue.sambas3.R
 import com.zenithblue.sambas3.RPCSXColors
+import com.zenithblue.sambas3.ui.components.DialogBackgroundBlur
 import java.io.File
 
 enum class AchievementFilter { ALL, UNLOCKED, LOCKED, BRONZE, SILVER, GOLD, PLATINUM }
@@ -168,7 +169,10 @@ fun AchievementsContent(snapshot: TrophySnapshot?, loading: Boolean, onClose: ()
             if (maxWidth < 700.dp) uiState.snapshot.trophies.firstOrNull { it.id == selectedId }?.let { selected ->
                 AlertDialog(
                     onDismissRequest = { selectedId = null },
-                    title = { Text(selected.name) },
+                    title = {
+                        DialogBackgroundBlur(radius = 36)
+                        Text(selected.name)
+                    },
                     text = { TrophyDetail(selected, Modifier.fillMaxWidth()) },
                     confirmButton = { TextButton(onClick = { selectedId = null }) { Text("CLOSE") } }
                 )

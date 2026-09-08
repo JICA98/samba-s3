@@ -43,7 +43,7 @@ class SettingsBackendAuditTest {
     @Test
     fun lifecycle_hints_are_explicit_for_global_and_in_game_editors() {
         assertEquals(
-            "APPLIES AFTER NEXT GAME BOOT",
+            "APPLIES NOW",
             SettingsBackendAudit.applyHint("@@Video@@Frame limit", inGame = false, actualType = "enum")
         )
         assertEquals(

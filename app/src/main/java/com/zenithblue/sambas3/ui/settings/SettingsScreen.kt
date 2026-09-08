@@ -145,6 +145,10 @@ import com.zenithblue.sambas3.utils.InputBindingPrefs
 import com.zenithblue.sambas3.ui.monitoring.MonitoringSettingsScreen
 import com.zenithblue.sambas3.ui.controller.ControllerSettingsScreen
 import com.zenithblue.sambas3.gameconfig.SettingsBackendAudit
+import com.zenithblue.sambas3.ui.games.FRAME_LIMIT_PATH
+import com.zenithblue.sambas3.ui.games.FrameLimitOptionRow
+import com.zenithblue.sambas3.ui.games.frameLimitOptions
+import com.zenithblue.sambas3.ui.games.frameLimitUiText
 import org.json.JSONObject
 import java.io.File
 import kotlin.math.ceil
@@ -916,9 +920,15 @@ fun AdvancedSettingsScreen(
                             var itemValue by remember(itemObject) { mutableStateOf(itemObject.getString("value")) }
                             val def = itemObject.getString("default")
                             val variantsJson = itemObject.getJSONArray("variants")
-                            val variants = ArrayList<String>()
+                            val allVariants = ArrayList<String>()
                             for (i in 0..<variantsJson.length()) {
-                                variants.add(variantsJson.getString(i))
+                                allVariants.add(variantsJson.getString(i))
+                            }
+                            val isFrameLimit = SettingsBackendAudit.normalizePath(itemPath) == FRAME_LIMIT_PATH
+                            val variants = if (isFrameLimit) {
+                                frameLimitOptions(allVariants, itemValue)
+                            } else {
+                                allVariants
                             }
 
                             SingleSelectionDialog(
@@ -948,6 +958,20 @@ fun AdvancedSettingsScreen(
                                         itemObject.put("value", value)
                                         itemValue = value
                                         onValueCommitted?.invoke(itemPath, "\"" + value + "\"")
+                                    }
+                                },
+                                valueToText = { value ->
+                                    if (isFrameLimit) frameLimitUiText(value).title else value
+                                },
+                                item = { value, currentValue, onClick ->
+                                    if (isFrameLimit) {
+                                        FrameLimitOptionRow(value, value == currentValue, onClick)
+                                    } else {
+                                        com.zenithblue.sambas3.ui.settings.components.preference.ListPreferenceItem<String> { it }(
+                                            value,
+                                            currentValue,
+                                            onClick
+                                        )
                                     }
                                 },
                                 onLongClick = {

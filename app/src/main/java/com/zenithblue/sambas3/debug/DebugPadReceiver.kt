@@ -664,10 +664,16 @@ private object BenchmarkDebugController {
         fun value(name: String): String = if (json.has(name) && !json.isNull(name)) {
             json.opt(name)?.toString() ?: "null"
         } else "null"
+        val limiter = json.optJSONObject("frameLimiter")
+        fun limiterValue(name: String): String = if (limiter != null && limiter.has(name) && !limiter.isNull(name)) {
+            limiter.opt(name)?.toString() ?: "null"
+        } else "null"
         Log.i(
             "S3BENCH",
             "elapsed_ms=${SystemClock.elapsedRealtime()} state=ready " +
                 "fps=${value("fps")} frametime_ms=${value("frametimeMs")} " +
+                "limiter_mode=${limiterValue("requestedMode")} limiter_effective=${limiterValue("effectiveMode")} " +
+                "limiter_target_fps=${limiterValue("targetFps")} limiter_uncapped=${limiterValue("uncapped")} " +
                 "presented=${value("presentedFrameCount")} vblank_delta=${value("vblankDelta")} " +
                 "host_cpu=${value("hostCpu")} ppu_cpu=${value("ppuCpu")} " +
                 "spu_cpu=${value("spuCpu")} rsx_cpu=${value("rsxCpu")} rsx_load=${value("rsxLoad")}"

@@ -885,6 +885,7 @@ struct RPCSXApi {
   std::string (*settingsGetEffective)(std::string_view titleId, std::string_view path);
   std::string (*getVersion)();
   std::string (*getPerfMetricsJson)();
+  std::string (*getFrameLimiterStateJson)();
   bool (*setPerfMetricsEnabled)(bool enabled, int intervalMs);
   std::string (*patchEngineVersion)();
   std::string (*patchesList)();
@@ -995,6 +996,7 @@ struct RPCSXLibrary : RPCSXApi {
     result.settingsGetEffective = reinterpret_cast<decltype(settingsGetEffective)>(dlsym(handle, "_rpcsx_settingsGetEffective"));
     result.getVersion = reinterpret_cast<decltype(getVersion)>(dlsym(handle, "_rpcsx_getVersion"));
     result.getPerfMetricsJson = reinterpret_cast<decltype(getPerfMetricsJson)>(dlsym(handle, "_rpcsx_getPerfMetricsJson"));
+    result.getFrameLimiterStateJson = reinterpret_cast<decltype(getFrameLimiterStateJson)>(dlsym(handle, "_rpcsx_getFrameLimiterStateJson"));
     result.setPerfMetricsEnabled = reinterpret_cast<decltype(setPerfMetricsEnabled)>(dlsym(handle, "_rpcsx_setPerfMetricsEnabled"));
     result.patchEngineVersion = reinterpret_cast<decltype(patchEngineVersion)>(dlsym(handle, "_rpcsx_patchEngineVersion"));
     result.patchesList = reinterpret_cast<decltype(patchesList)>(dlsym(handle, "_rpcsx_patchesList"));
@@ -1594,15 +1596,25 @@ Java_com_zenithblue_sambas3_RPCSX_hasTrophyExports(JNIEnv *, jobject) {
   return rpcsxLib.getCurrentTrophies && rpcsxLib.getTrophiesForTitle ? JNI_TRUE : JNI_FALSE;
 }
 
+static std::string append_frame_limiter_state(std::string metrics) {
+  if (!rpcsxLib.getFrameLimiterStateJson || metrics.empty()) return metrics;
+  const std::string limiter = rpcsxLib.getFrameLimiterStateJson();
+  if (limiter.size() < 2 || limiter.front() != '{' || limiter.back() != '}') return metrics;
+  const size_t end = metrics.find_last_of('}');
+  if (end == std::string::npos) return metrics;
+  metrics.insert(end, ",\"frameLimiter\":" + limiter);
+  return metrics;
+}
+
 extern "C" JNIEXPORT jstring JNICALL
 Java_com_zenithblue_sambas3_RPCSX_getPerfMetricsJson(JNIEnv *env, jobject) {
   if (rpcsxLib.getPerfMetricsJson) {
     std::string str = rpcsxLib.getPerfMetricsJson();
     if (!str.empty()) {
-      return wrap(env, str);
+      return wrap(env, append_frame_limiter_state(std::move(str)));
     }
   }
-  return wrap(env, s3_perf::build_fallback_json());
+  return wrap(env, append_frame_limiter_state(s3_perf::build_fallback_json()));
 }
 
 extern "C" JNIEXPORT jstring JNICALL
@@ -1610,7 +1622,7 @@ Java_com_zenithblue_sambas3_RPCSX_getFallbackPerfJson(JNIEnv *env, jobject) {
   // Surface-measured frames (ANativeWindow queueBuffer hook). The core export
   // reports emu_flip counters; when it reports presented=0 while frames are
   // visibly presenting, the UI merges this fallback's fresh fps/samples.
-  return wrap(env, s3_perf::build_fallback_json());
+  return wrap(env, append_frame_limiter_state(s3_perf::build_fallback_json()));
 }
 
 extern "C" JNIEXPORT jboolean JNICALL
