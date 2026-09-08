@@ -27,6 +27,8 @@ object CompileProgressBridge {
         val fileTotal: Int = 0,
         val moduleDone: Int = 0,
         val moduleTotal: Int = 0,
+        /** Coarse remaining-time label from main-process rate; null until a real rate exists. */
+        val remainingLabel: String? = null,
         /** Survives active→false so terminal consumers can distinguish COMPLETED vs FAILED/CANCELED. */
         val outcome: CompileOutcome = CompileOutcome.NONE,
         val jobId: Long = 0L,
@@ -61,17 +63,20 @@ object CompileProgressBridge {
         percent: Int,
         message: String?,
         active: Boolean,
-        outcome: CompileOutcome = CompileOutcome.NONE
+        outcome: CompileOutcome = CompileOutcome.NONE,
+        remainingLabel: String? = null,
     ) {
         val cur = _installState.value
+        val floor = monotonicFloor(cur, titleId, moduleDone, moduleTotal, percent, message, active)
         _installState.value = cur.copy(
             ppuActive = active,
             titleId = titleId ?: cur.titleId,
-            ppuPercent = percent.coerceIn(0, 100),
-            ppuMax = 100,
-            ppuMsg = message ?: cur.ppuMsg,
-            moduleDone = moduleDone,
-            moduleTotal = moduleTotal,
+            ppuPercent = floor.percent,
+            ppuMax = if (floor.total > 0) 100 else 0,
+            ppuMsg = floor.message ?: cur.ppuMsg,
+            moduleDone = floor.done,
+            moduleTotal = floor.total,
+            remainingLabel = if (active) remainingLabel else null,
             outcome = outcome,
             jobId = jobId
         )
@@ -81,6 +86,56 @@ object CompileProgressBridge {
     private val _prelaunchState = MutableStateFlow(CompileState())
     val prelaunchState: StateFlow<CompileState> = _prelaunchState.asStateFlow()
     private var prelaunchPpuJobId: Long? = null
+
+    /** Mirrors PRELAUNCH progress produced in the isolated :ppu_compile process. */
+    fun updatePrelaunchStateForExternalWorker(
+        context: Context?,
+        titleId: String?,
+        jobId: Long,
+        moduleDone: Int,
+        moduleTotal: Int,
+        percent: Int,
+        message: String?,
+        active: Boolean,
+        outcome: CompileOutcome = CompileOutcome.NONE,
+        remainingLabel: String? = null,
+    ) {
+        val cur = _prelaunchState.value
+        val wasActive = cur.ppuActive
+        if (active) prelaunchPpuJobId = jobId else if (prelaunchPpuJobId == jobId) prelaunchPpuJobId = null
+        val floor = monotonicFloor(cur, titleId, moduleDone, moduleTotal, percent, message, active)
+        _prelaunchState.value = cur.copy(
+            ppuActive = active,
+            titleId = titleId ?: cur.titleId,
+            ppuPercent = floor.percent,
+            ppuMax = if (floor.total > 0) 100 else 0,
+            ppuMsg = floor.message ?: cur.ppuMsg,
+            moduleDone = floor.done,
+            moduleTotal = floor.total,
+            remainingLabel = if (active) remainingLabel else null,
+            outcome = outcome,
+            jobId = jobId,
+        )
+        if (active && !wasActive) {
+            requestMonitorStart(
+                context?.applicationContext,
+                NativeEvent(
+                    domain = RPCSX.COMPILE_DOMAIN_PPU,
+                    phase = RPCSX.COMPILE_PHASE_BEGIN,
+                    origin = RPCSX.COMPILE_ORIGIN_PRELAUNCH,
+                    jobId = jobId,
+                    value = percent.toLong(),
+                    max = 100,
+                    message = message,
+                    titleId = titleId,
+                    fileDone = 0,
+                    fileTotal = 0,
+                    moduleDone = moduleDone,
+                    moduleTotal = moduleTotal,
+                )
+            )
+        }
+    }
 
     // Keep latest runtime event for service cold start promotion
     @Volatile
@@ -106,13 +161,13 @@ object CompileProgressBridge {
                     jobMatches = ppuJobId == jobId,
                 )
                 if (!decision.shouldClearUiActive) return@Runnable
-                // UI-only: never persist Runtime ready / validatedByRealBootFrame from watchdog.
-                Log.w(TAG, decision.logMessage ?: "PPU watchdog clear UI only job=$jobId")
+                Log.w(TAG, decision.logMessage ?: "PPU watchdog finalizing job=$jobId")
                 Log.w(TAG, "PPU watchdog missing_terminal=1 establishes_validated_ready=0 job=$jobId")
-                ppuJobId = null
-                ppuDoneWatchdog = null
-                if (shaderJobIds.isEmpty()) latestRuntimeEvent = null
-                _state.value = CompileState(ppuActive = false, shaderActive = cur.shaderActive, shaderMsg = cur.shaderMsg, titleId = null)
+                _state.value = cur.copy(
+                    ppuMsg = "Verifying cache… waiting for compiler process",
+                    remainingLabel = null,
+                    ppuPercent = 99,
+                )
             }
         }
         ppuDoneWatchdog = r
@@ -235,16 +290,20 @@ object CompileProgressBridge {
             RPCSX.COMPILE_PHASE_PROGRESS -> {
                 if (installPpuJobId == null) installPpuJobId = ev.jobId
                 if (installPpuJobId != ev.jobId) return
+                val floor = monotonicFloor(
+                    cur, ev.titleId, ev.moduleDone, ev.moduleTotal,
+                    ev.value.toInt(), ev.message, active = true,
+                )
                 _installState.value = cur.copy(
                     ppuActive = true,
                     titleId = ev.titleId ?: cur.titleId,
-                    ppuPercent = ev.value.toInt().coerceIn(0, 100),
-                    ppuMax = if (ev.max > 0) ev.max.toInt() else 100,
-                    ppuMsg = ev.message ?: cur.ppuMsg,
+                    ppuPercent = floor.percent,
+                    ppuMax = if (floor.total > 0) 100 else 100,
+                    ppuMsg = floor.message ?: cur.ppuMsg,
                     fileDone = ev.fileDone,
                     fileTotal = ev.fileTotal,
-                    moduleDone = ev.moduleDone,
-                    moduleTotal = ev.moduleTotal,
+                    moduleDone = floor.done,
+                    moduleTotal = floor.total,
                     outcome = CompileOutcome.NONE,
                     jobId = ev.jobId,
                 )
@@ -302,16 +361,20 @@ object CompileProgressBridge {
                 if (prelaunchPpuJobId == null) prelaunchPpuJobId = ev.jobId
                 if (prelaunchPpuJobId != ev.jobId) return
                 val wasActive = cur.ppuActive
+                val floor = monotonicFloor(
+                    cur, ev.titleId, ev.moduleDone, ev.moduleTotal,
+                    ev.value.toInt(), ev.message, active = true,
+                )
                 _prelaunchState.value = cur.copy(
                     ppuActive = true,
                     titleId = ev.titleId ?: cur.titleId,
-                    ppuPercent = ev.value.toInt().coerceIn(0, 100),
-                    ppuMax = if (ev.max > 0) ev.max.toInt() else 100,
-                    ppuMsg = ev.message ?: cur.ppuMsg,
+                    ppuPercent = floor.percent,
+                    ppuMax = if (floor.total > 0) 100 else 100,
+                    ppuMsg = floor.message ?: cur.ppuMsg,
                     fileDone = ev.fileDone,
                     fileTotal = ev.fileTotal,
-                    moduleDone = ev.moduleDone,
-                    moduleTotal = ev.moduleTotal
+                    moduleDone = floor.done,
+                    moduleTotal = floor.total
                 )
                 if (!wasActive) requestMonitorStart(appCtx, ev)
             }
@@ -499,6 +562,44 @@ object CompileProgressBridge {
 
     fun isPrelaunchJobActive(jobId: Long): Boolean =
         jobId > 0L && prelaunchPpuJobId == jobId
+
+    private data class FlooredProgress(
+        val done: Int,
+        val total: Int,
+        val percent: Int,
+        val message: String?,
+    )
+
+    private fun monotonicFloor(
+        cur: CompileState,
+        titleId: String?,
+        moduleDone: Int,
+        moduleTotal: Int,
+        percent: Int,
+        message: String?,
+        active: Boolean,
+    ): FlooredProgress {
+        val sameTitle = cur.titleId.isNullOrBlank() || titleId.isNullOrBlank() ||
+            cur.titleId.equals(titleId, ignoreCase = true)
+        if (!active || !cur.ppuActive || !sameTitle) {
+            return FlooredProgress(moduleDone, moduleTotal, percent.coerceIn(0, 100), message)
+        }
+        val done = maxOf(cur.moduleDone, moduleDone)
+        val total = maxOf(cur.moduleTotal, moduleTotal, done)
+        val computed = if (total > 0) (done * 100 / total).coerceIn(0, 100) else 0
+        val incoming = percent.coerceIn(0, 100)
+        val pct = if (done > cur.moduleDone || total > cur.moduleTotal) {
+            maxOf(computed, incoming)
+        } else {
+            maxOf(cur.ppuPercent, computed, incoming)
+        }
+        val msg = if (done > cur.moduleDone || total > cur.moduleTotal) {
+            message
+        } else {
+            cur.ppuMsg ?: message
+        }
+        return FlooredProgress(done, total, pct, msg)
+    }
 
     fun clearForTest() {
         synchronized(this) {

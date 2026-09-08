@@ -1,0 +1,558 @@
+package com.zenithblue.sambas3.iso
+
+import android.content.Context
+import android.net.Uri
+import android.os.ParcelFileDescriptor
+import android.provider.OpenableColumns
+import android.system.Os
+import android.system.OsConstants
+import android.util.Log
+import com.zenithblue.sambas3.Game
+import com.zenithblue.sambas3.GameIdentity
+import com.zenithblue.sambas3.GameInfo
+import com.zenithblue.sambas3.GameRepository
+import com.zenithblue.sambas3.GameSourceMode
+import com.zenithblue.sambas3.PpuReadinessStore
+import com.zenithblue.sambas3.PreRuntimePpuState
+import com.zenithblue.sambas3.RPCSX
+import com.zenithblue.sambas3.RuntimePpuState
+import com.zenithblue.sambas3.toStore
+import com.zenithblue.sambas3.utils.GameFolderMatch
+import com.zenithblue.sambas3.utils.GameSourceKind
+import java.io.File
+import java.io.FileInputStream
+import java.nio.ByteBuffer
+import java.nio.ByteOrder
+import kotlin.math.min
+
+/**
+ * Direct ISO inspection, metadata extraction, and library registration for debug builds.
+ * Never copies the ISO into app-private storage.
+ */
+object DirectIsoManager {
+    private const val TAG = "S3ISO"
+    private const val SECTOR_SIZE = 2048
+
+    data class DirectIsoMetadata(
+        val titleId: String,
+        val titleName: String,
+        val iconPath: String?,
+        val fileSize: Long
+    )
+
+    enum class IsoImportStatus { IMPORTED, ALREADY_IMPORTED, FAILED }
+
+    data class IsoImportEntry(
+        val displayName: String,
+        val titleId: String?,
+        val uri: String,
+        val status: IsoImportStatus,
+        val message: String? = null,
+        val iconPath: String? = null,
+    )
+
+    data class IsoFolderImportResult(
+        val entries: List<IsoImportEntry>,
+        val skippedDirectories: Int = 0,
+    ) {
+        val importedCount: Int get() = entries.count { it.status == IsoImportStatus.IMPORTED }
+        val alreadyImportedCount: Int get() = entries.count { it.status == IsoImportStatus.ALREADY_IMPORTED }
+        val failedCount: Int get() = entries.count { it.status == IsoImportStatus.FAILED }
+    }
+
+    sealed class DirectIsoRegisterResult {
+        abstract val game: Game
+        data class Registered(override val game: Game) : DirectIsoRegisterResult()
+        data class AlreadyImported(override val game: Game) : DirectIsoRegisterResult()
+    }
+
+    fun matchExistingGame(
+        gamePath: String,
+        gameName: String?,
+        gameSourceUri: String?,
+        incomingUri: String,
+        incomingTitleId: String?,
+    ): Boolean {
+        if (!gameSourceUri.isNullOrBlank() && gameSourceUri == incomingUri) return true
+        if (gamePath == incomingUri) return true
+        val id = incomingTitleId?.uppercase()?.takeIf { it.isNotBlank() } ?: return false
+        if (gamePath.equals("direct_iso/$id", ignoreCase = true)) return true
+        if (gamePath.substringAfterLast('/').equals(id, ignoreCase = true)) return true
+        return GameIdentity.titleIdOrNull(gamePath, gameName)?.uppercase() == id
+    }
+
+    fun findExisting(uri: Uri, titleId: String?): Game? {
+        val incoming = uri.toString()
+        return GameRepository.list().firstOrNull { game ->
+            matchExistingGame(
+                gamePath = game.info.path,
+                gameName = game.info.name.value,
+                gameSourceUri = game.info.sourceUri.value,
+                incomingUri = incoming,
+                incomingTitleId = titleId,
+            )
+        }
+    }
+
+    fun importIsoMatches(context: Context, matches: List<GameFolderMatch>): IsoFolderImportResult {
+        check(com.zenithblue.sambas3.BuildConfig.DIRECT_ISO_LOADING) {
+            "Direct ISO loading is available only in debug/test builds"
+        }
+        val skippedDirectories = matches.count { it.sourceKind == GameSourceKind.DIRECTORY }
+        val entries = matches.mapNotNull { match ->
+            if (match.sourceKind != GameSourceKind.ISO) return@mapNotNull null
+            val uri = match.sourceUri ?: return@mapNotNull IsoImportEntry(
+                displayName = match.folderName,
+                titleId = match.titleId,
+                uri = "",
+                status = IsoImportStatus.FAILED,
+                message = "Missing ISO URI",
+            )
+            try {
+                when (val result = registerDirectIso(context, uri, match.titleId)) {
+                    is DirectIsoRegisterResult.AlreadyImported -> IsoImportEntry(
+                        displayName = result.game.info.name.value ?: match.folderName,
+                        titleId = match.titleId ?: GameIdentity.titleIdOrNull(result.game.info.path, result.game.info.name.value),
+                        uri = uri.toString(),
+                        status = IsoImportStatus.ALREADY_IMPORTED,
+                        iconPath = result.game.info.iconPath.value,
+                    )
+                    is DirectIsoRegisterResult.Registered -> IsoImportEntry(
+                        displayName = result.game.info.name.value ?: match.folderName,
+                        titleId = match.titleId ?: GameIdentity.titleIdOrNull(result.game.info.path, result.game.info.name.value),
+                        uri = uri.toString(),
+                        status = IsoImportStatus.IMPORTED,
+                        iconPath = result.game.info.iconPath.value,
+                    )
+                }
+            } catch (e: Exception) {
+                Log.e(TAG, "folder ISO import failed name=${match.folderName}: ${e.message}")
+                IsoImportEntry(
+                    displayName = match.folderName,
+                    titleId = match.titleId,
+                    uri = uri.toString(),
+                    status = IsoImportStatus.FAILED,
+                    message = e.message ?: "Unknown error",
+                )
+            }
+        }
+        return IsoFolderImportResult(entries = entries, skippedDirectories = skippedDirectories)
+    }
+
+    fun mergeFolderResults(
+        first: IsoFolderImportResult?,
+        second: IsoFolderImportResult,
+    ): IsoFolderImportResult {
+        if (first == null) return second
+        fun key(entry: IsoImportEntry): String =
+            entry.titleId?.uppercase() ?: entry.uri.ifBlank { entry.displayName.lowercase() }
+        fun rank(status: IsoImportStatus): Int = when (status) {
+            IsoImportStatus.IMPORTED -> 2
+            IsoImportStatus.ALREADY_IMPORTED -> 1
+            IsoImportStatus.FAILED -> 0
+        }
+        val merged = LinkedHashMap<String, IsoImportEntry>()
+        (first.entries + second.entries).forEach { entry ->
+            val existing = merged[key(entry)]
+            if (existing == null || rank(entry.status) >= rank(existing.status)) {
+                merged[key(entry)] = entry
+            }
+        }
+        return IsoFolderImportResult(
+            entries = merged.values.toList(),
+            skippedDirectories = first.skippedDirectories + second.skippedDirectories,
+        )
+    }
+
+    fun registerDirectIso(context: Context, uri: Uri, provisionalTitleId: String? = null): DirectIsoRegisterResult {
+        val nameHint = runCatching { queryDisplayName(context.applicationContext, uri) }.getOrNull()
+        val earlyId = provisionalTitleId ?: nameHint?.let { extractTitleIdFromText(it) }
+        findExisting(uri, earlyId)?.let { existing ->
+            Log.i(TAG, "already_imported titleId=${earlyId ?: existing.info.path} uri=$uri")
+            return DirectIsoRegisterResult.AlreadyImported(existing)
+        }
+        return registerOpenedIso(context, uri)
+    }
+
+    fun validateAndRegister(context: Context, uri: Uri): Game {
+        return registerDirectIso(context, uri).game
+    }
+
+    private fun registerOpenedIso(context: Context, uri: Uri): DirectIsoRegisterResult {
+        check(com.zenithblue.sambas3.BuildConfig.DIRECT_ISO_LOADING) {
+            "Direct ISO loading is available only in debug/test builds"
+        }
+        val appCtx = context.applicationContext
+        val effectiveUri = DirectIsoSession.resolveDocumentUri(context, uri) ?: uri
+        val pfd = try {
+            val directFile = if (effectiveUri.scheme == "file" || effectiveUri.path?.startsWith("/") == true || effectiveUri.toString().startsWith("/")) {
+                if (effectiveUri.scheme == "file") File(effectiveUri.path ?: "") else File(effectiveUri.toString())
+            } else null
+
+            if (directFile != null && directFile.exists() && directFile.canRead()) {
+                ParcelFileDescriptor.open(directFile, ParcelFileDescriptor.MODE_READ_ONLY)
+            } else {
+                appCtx.contentResolver.openFileDescriptor(effectiveUri, "r")
+            }
+        } catch (e: Exception) {
+            Log.e(TAG, "unavailable reason=${e.message}")
+            throw e
+        } ?: run {
+            val msg = "Could not open descriptor for $effectiveUri"
+            Log.e(TAG, "unavailable reason=$msg")
+            throw IllegalStateException(msg)
+        }
+
+        pfd.use { descriptor ->
+            val statSize = descriptor.statSize
+            if (statSize <= 0) {
+                val msg = "File is empty or not seekable (statSize=$statSize)"
+                Log.e(TAG, "unavailable reason=$msg")
+                throw IllegalArgumentException(msg)
+            }
+            // Stream-only providers cannot serve random disc reads. Reject here
+            // rather than falling back to copying the full ISO.
+            try {
+                Os.lseek(descriptor.fileDescriptor, 0L, OsConstants.SEEK_CUR)
+            } catch (e: Exception) {
+                val msg = "ISO source is not seekable/random-access (required for disc reads)"
+                Log.e(TAG, "unavailable reason=$msg cause=${e.message}")
+                throw IllegalArgumentException(msg, e)
+            }
+            Log.i(TAG, "fd_opened fd=${descriptor.fd} seekable=true size=$statSize")
+
+            val displayName = queryDisplayName(appCtx, uri)
+            val parsedMeta = parseIso9660Metadata(descriptor)
+            val titleId = parsedMeta?.first
+                ?: extractTitleIdFromText(displayName)
+                ?: "DISO${kotlin.math.abs(uri.toString().hashCode()).toString(16).uppercase().padStart(5, '0').takeLast(5)}"
+
+            val titleName = parsedMeta?.second
+                ?: displayName.removeSuffix(".iso").removeSuffix(".ISO")
+
+            findExisting(effectiveUri, titleId)?.let { existing ->
+                Log.i(TAG, "already_imported titleId=$titleId uri=$effectiveUri")
+                return DirectIsoRegisterResult.AlreadyImported(existing)
+            }
+
+            // Icon extraction via RPCSX.instance.extractIsoPreview
+            val iconsDir = File(appCtx.filesDir, "direct_iso_icons").apply { if (!exists()) mkdirs() }
+            val iconDest = File(iconsDir, "${titleId}.png")
+            val previewResult = runCatching {
+                RPCSX.instance.extractIsoPreview(descriptor.fd, iconDest.absolutePath)
+            }.getOrDefault(-1)
+
+            if (previewResult == -1 || previewResult == 1 || previewResult == 2) {
+                val msg = "Core rejected file: not a supported PS3 ISO"
+                Log.e(TAG, "unavailable reason=$msg")
+                throw IllegalArgumentException(msg)
+            }
+
+            val iconPath = if (previewResult == 0 && iconDest.exists() && iconDest.length() > 0) {
+                iconDest.absolutePath
+            } else {
+                null
+            }
+
+            val pic1Dest = File(iconsDir, "${titleId}_pic1.png")
+            runCatching {
+                extractIsoPic1(descriptor, pic1Dest)
+            }
+
+            val canonicalPath = "direct_iso/$titleId"
+            val gameInfo = GameInfo(
+                path = canonicalPath,
+                name = titleName,
+                iconPath = iconPath,
+                gameFlags = 0,
+                sourceUri = effectiveUri.toString(),
+                sourceMode = GameSourceMode.DIRECT_ISO
+            )
+
+            // Use the same key as Launch Center. This also keeps fallback DISO ids
+            // playable when an unusual image has no readable TITLE_ID metadata.
+            val readinessKey = GameIdentity.titleIdOrNull(canonicalPath, titleName)
+                ?: GameIdentity.key(canonicalPath, titleName)
+            // Direct ISO still needs isolated INSTALL + PRELAUNCH batches. Do not
+            // manufacture Ready — that hid compile-on-start from Home/Launch.
+            PpuReadinessStore.setPreRuntimeState(appCtx, readinessKey, PreRuntimePpuState.NOT_DONE)
+            PpuReadinessStore.setRuntimeState(appCtx, readinessKey, RuntimePpuState.NOT_STARTED)
+
+            GameRepository.add(arrayOf(gameInfo), progressId = -1)
+            Log.i(TAG, "registered titleId=$titleId mode=DIRECT_ISO path=$canonicalPath uri=$uri")
+
+            val registered = GameRepository.find(canonicalPath) ?: Game(toStore(gameInfo))
+            return DirectIsoRegisterResult.Registered(registered)
+        }
+    }
+
+    fun registerFromFilePath(context: Context, file: File): Game {
+        return validateAndRegister(context, Uri.fromFile(file))
+    }
+
+    fun shouldResetFakeReady(
+        pre: PreRuntimePpuState,
+        runtime: RuntimePpuState,
+        hasCacheObjects: Boolean,
+    ): Boolean {
+        if (hasCacheObjects) return false
+        return pre == PreRuntimePpuState.READY || runtime == RuntimePpuState.IDLE_AFTER_COMPILE
+    }
+
+    /** Clears manufactured Ready on Direct ISO titles that never compiled cache. */
+    fun reconcileLaunchReadiness(context: Context) {
+        if (!com.zenithblue.sambas3.BuildConfig.DIRECT_ISO_LOADING) return
+        GameRepository.list()
+            .filter { it.info.sourceMode.value == GameSourceMode.DIRECT_ISO }
+            .forEach { game ->
+                val key = GameIdentity.titleIdOrNull(game.info.path, game.info.name.value)
+                    ?: GameIdentity.key(game.info.path, game.info.name.value)
+                val pre = PpuReadinessStore.getPreRuntimeState(context, key)
+                val runtime = PpuReadinessStore.getRuntimeState(context, key)
+                val hasCache = com.zenithblue.sambas3.ppu.PpuCompilePathResolver.hasCompiledCache(key)
+                if (shouldResetFakeReady(pre, runtime, hasCache)) {
+                    PpuReadinessStore.setPreRuntimeState(context, key, PreRuntimePpuState.NOT_DONE)
+                    PpuReadinessStore.setRuntimeState(context, key, RuntimePpuState.NOT_STARTED)
+                }
+            }
+    }
+
+    private fun queryDisplayName(context: Context, uri: Uri): String {
+        if (uri.scheme == "file" || uri.path?.startsWith("/") == true || uri.toString().startsWith("/")) {
+            val f = if (uri.scheme == "file") File(uri.path ?: "") else File(uri.toString())
+            return f.name
+        }
+        return runCatching {
+            context.contentResolver.query(uri, arrayOf(OpenableColumns.DISPLAY_NAME), null, null, null)?.use { cursor ->
+                if (cursor.moveToFirst()) cursor.getString(0) else null
+            }
+        }.getOrNull() ?: uri.lastPathSegment ?: "PS3_GAME.iso"
+    }
+
+    private fun extractTitleIdFromText(text: String): String? {
+        val regex = Regex("(?<![A-Za-z0-9])([A-Za-z]{4}\\d{5})(?![A-Za-z0-9])")
+        return regex.find(text)?.groupValues?.getOrNull(1)?.uppercase()
+    }
+
+    /**
+     * Reads Sector 16 (Primary Volume Descriptor) and traverses root directory
+     * to find PS3_GAME/PARAM.SFO, then parses TITLE_ID and TITLE.
+     */
+    private fun parseIso9660Metadata(pfd: ParcelFileDescriptor): Pair<String, String>? {
+        return try {
+            val fis = FileInputStream(pfd.fileDescriptor)
+            val channel = fis.channel
+
+            // Read PVD at sector 16 (32768)
+            val pvdBuffer = ByteBuffer.allocate(SECTOR_SIZE).order(ByteOrder.LITTLE_ENDIAN)
+            channel.position(16L * SECTOR_SIZE)
+            if (!readFully(channel, pvdBuffer)) return null
+            pvdBuffer.flip()
+
+            val pvdBytes = pvdBuffer.array()
+            // Check magic CD001
+            if (pvdBytes[1] != 'C'.code.toByte() ||
+                pvdBytes[2] != 'D'.code.toByte() ||
+                pvdBytes[3] != '0'.code.toByte() ||
+                pvdBytes[4] != '0'.code.toByte() ||
+                pvdBytes[5] != '1'.code.toByte()
+            ) {
+                return null
+            }
+
+            // Root directory record is at offset 156 in PVD
+            val rootRecordOffset = 156
+            val rootLba = pvdBuffer.getInt(rootRecordOffset + 2)
+            val rootLength = pvdBuffer.getInt(rootRecordOffset + 10)
+            if (rootLba <= 0 || rootLength <= 0) return null
+
+            // Read root directory extent
+            val rootDirBytes = ByteArray(min(rootLength, 65536))
+            channel.position(rootLba.toLong() * SECTOR_SIZE)
+            if (!readFully(channel, ByteBuffer.wrap(rootDirBytes))) return null
+
+            val ps3GameEntry = findDirectoryRecord(rootDirBytes, "PS3_GAME") ?: return null
+            val ps3GameLba = ps3GameEntry.first
+            val ps3GameLength = ps3GameEntry.second
+
+            // Read PS3_GAME directory extent
+            val ps3GameBytes = ByteArray(min(ps3GameLength, 65536))
+            channel.position(ps3GameLba.toLong() * SECTOR_SIZE)
+            if (!readFully(channel, ByteBuffer.wrap(ps3GameBytes))) return null
+
+            val sfoEntry = findDirectoryRecord(ps3GameBytes, "PARAM.SFO") ?: return null
+            val sfoLba = sfoEntry.first
+            val sfoLength = sfoEntry.second
+
+            // Read PARAM.SFO
+            val sfoBytes = ByteArray(min(sfoLength, 65536))
+            channel.position(sfoLba.toLong() * SECTOR_SIZE)
+            if (!readFully(channel, ByteBuffer.wrap(sfoBytes))) return null
+
+            parseParamSfo(sfoBytes)
+        } catch (e: Exception) {
+            Log.w(TAG, "parseIso9660Metadata failed: ${e.message}")
+            null
+        }
+    }
+
+    fun extractIsoPic1(pfd: ParcelFileDescriptor, dest: File): Boolean {
+        if (dest.isFile && dest.length() > 0) return true
+        return try {
+            val fis = FileInputStream(pfd.fileDescriptor)
+            val channel = fis.channel
+
+            val pvdBuffer = ByteBuffer.allocate(SECTOR_SIZE).order(ByteOrder.LITTLE_ENDIAN)
+            channel.position(16L * SECTOR_SIZE)
+            if (!readFully(channel, pvdBuffer)) return false
+            pvdBuffer.flip()
+
+            val pvdBytes = pvdBuffer.array()
+            if (pvdBytes[1] != 'C'.code.toByte() ||
+                pvdBytes[2] != 'D'.code.toByte() ||
+                pvdBytes[3] != '0'.code.toByte() ||
+                pvdBytes[4] != '0'.code.toByte() ||
+                pvdBytes[5] != '1'.code.toByte()
+            ) {
+                return false
+            }
+
+            val rootRecordOffset = 156
+            val rootLba = pvdBuffer.getInt(rootRecordOffset + 2)
+            val rootLength = pvdBuffer.getInt(rootRecordOffset + 10)
+            if (rootLba <= 0 || rootLength <= 0) return false
+
+            val rootDirBytes = ByteArray(min(rootLength, 65536))
+            channel.position(rootLba.toLong() * SECTOR_SIZE)
+            if (!readFully(channel, ByteBuffer.wrap(rootDirBytes))) return false
+
+            val ps3GameEntry = findDirectoryRecord(rootDirBytes, "PS3_GAME") ?: return false
+            val ps3GameLba = ps3GameEntry.first
+            val ps3GameLength = ps3GameEntry.second
+
+            val ps3GameBytes = ByteArray(min(ps3GameLength, 65536))
+            channel.position(ps3GameLba.toLong() * SECTOR_SIZE)
+            if (!readFully(channel, ByteBuffer.wrap(ps3GameBytes))) return false
+
+            val pic1Entry = findDirectoryRecord(ps3GameBytes, "PIC1.PNG") ?: return false
+            val pic1Lba = pic1Entry.first
+            val pic1Length = pic1Entry.second
+            if (pic1Lba <= 0 || pic1Length <= 0 || pic1Length > 16 * 1024 * 1024) return false
+
+            val pic1Bytes = ByteArray(pic1Length)
+            channel.position(pic1Lba.toLong() * SECTOR_SIZE)
+            if (!readFully(channel, ByteBuffer.wrap(pic1Bytes))) return false
+
+            dest.parentFile?.mkdirs()
+            val tmp = File(dest.parentFile, "${dest.name}.tmp")
+            tmp.writeBytes(pic1Bytes)
+            if (!tmp.renameTo(dest)) {
+                dest.delete()
+                tmp.renameTo(dest)
+            }
+            Log.i(TAG, "extractIsoPic1 extracted $pic1Length bytes to ${dest.absolutePath}")
+            true
+        } catch (e: Exception) {
+            Log.w(TAG, "extractIsoPic1 failed: ${e.message}")
+            false
+        }
+    }
+
+    fun extractIsoPic1(context: Context, uri: Uri, dest: File): Boolean {
+        if (dest.isFile && dest.length() > 0) return true
+        return try {
+            val pfd = context.contentResolver.openFileDescriptor(uri, "r") ?: return false
+            pfd.use { extractIsoPic1(it, dest) }
+        } catch (e: Exception) {
+            Log.w(TAG, "extractIsoPic1 from uri failed: ${e.message}")
+            false
+        }
+    }
+
+    private fun readFully(channel: java.nio.channels.FileChannel, buffer: ByteBuffer): Boolean {
+        while (buffer.hasRemaining()) {
+            val count = channel.read(buffer)
+            if (count <= 0) return false
+        }
+        return true
+    }
+
+    private fun findDirectoryRecord(data: ByteArray, targetName: String): Pair<Int, Int>? {
+        var offset = 0
+        while (offset < data.size) {
+            val recordLen = data[offset].toInt() and 0xFF
+            if (recordLen == 0) {
+                offset = (offset + SECTOR_SIZE) and (SECTOR_SIZE - 1).inv()
+                continue
+            }
+            if (offset + recordLen > data.size) break
+
+            val nameLen = data[offset + 32].toInt() and 0xFF
+            if (offset + 33 + nameLen <= data.size) {
+                val rawName = String(data, offset + 33, nameLen, Charsets.US_ASCII)
+                val cleanName = rawName.substringBefore(';')
+                if (cleanName.equals(targetName, ignoreCase = true)) {
+                    // ByteBuffer.wrap(array, offset, length) does not make absolute
+                    // getInt(2) relative to offset; it still indexes from array[0].
+                    // Directory records after the first entry therefore used bogus
+                    // extents and PARAM.SFO could never be reached.
+                    val bb = ByteBuffer.wrap(data).order(ByteOrder.LITTLE_ENDIAN)
+                    val lba = bb.getInt(offset + 2)
+                    val len = bb.getInt(offset + 10)
+                    return lba to len
+                }
+            }
+            offset += recordLen
+        }
+        return null
+    }
+
+    private fun parseParamSfo(data: ByteArray): Pair<String, String>? {
+        if (data.size < 20) return null
+        val bb = ByteBuffer.wrap(data).order(ByteOrder.LITTLE_ENDIAN)
+        // Magic \0PSF
+        if (data[0] != 0.toByte() || data[1] != 'P'.code.toByte() || data[2] != 'S'.code.toByte() || data[3] != 'F'.code.toByte()) {
+            return null
+        }
+        val keyTableStart = bb.getInt(8)
+        val dataTableStart = bb.getInt(12)
+        val entryCount = bb.getInt(16)
+
+        var titleId: String? = null
+        var titleName: String? = null
+
+        for (i in 0 until entryCount) {
+            val entryOff = 20 + i * 16
+            if (entryOff + 16 > data.size) break
+
+            val keyOffset = bb.getShort(entryOff).toInt() and 0xFFFF
+            val dataFormat = bb.getShort(entryOff + 2).toInt() and 0xFFFF
+            val dataLen = bb.getInt(entryOff + 4)
+            val dataOffset = bb.getInt(entryOff + 12)
+
+            val keyPos = keyTableStart + keyOffset
+            if (keyPos >= data.size) continue
+            val keyEnd = (keyPos until data.size).firstOrNull { data[it] == 0.toByte() } ?: data.size
+            val key = String(data, keyPos, keyEnd - keyPos, Charsets.US_ASCII)
+
+            val valPos = dataTableStart + dataOffset
+            if (valPos + dataLen <= data.size) {
+                // PS3 PARAM.SFO files in the wild use both 0x0204 and
+                // 0x0404 for UTF-8 string fields.
+                if (dataFormat == 0x0204 || dataFormat == 0x0404 || (dataFormat and 0x00FF) == 0x04) {
+                    val strVal = String(data, valPos, dataLen, Charsets.UTF_8).trimEnd('\u0000')
+                    if (key == "TITLE_ID") titleId = strVal
+                    else if (key == "TITLE") titleName = strVal
+                }
+            }
+        }
+
+        if (titleId != null && titleName != null) {
+            return titleId to titleName
+        }
+        if (titleId != null) {
+            return titleId to titleId
+        }
+        return null
+    }
+}

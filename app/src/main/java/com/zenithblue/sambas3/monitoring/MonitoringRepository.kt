@@ -67,7 +67,8 @@ class MonitoringRepository(
                         // Paused is deliberately not a valid fresh telemetry
                         // state. Keeping the old emulator snapshot visible
                         // while paused makes FPS look fabricated.
-                        val running = stateProvider() == EmulatorState.Running
+                        val state = stateProvider()
+                        val running = state == EmulatorState.Running || state == EmulatorState.Loading || state == EmulatorState.Starting
                         if (running && !wasRunning) generation++
                         if (!running && wasRunning) history.clear()
                         wasRunning = running
@@ -98,7 +99,6 @@ class MonitoringRepository(
                 } finally {
                     system.stop()
                     perf.setEnabled(false, intervalMs)
-                    history.clear()
                     wasRunning = false
                     androidAvailabilityLogged = false
                 }
@@ -111,6 +111,9 @@ class MonitoringRepository(
         job = null
         system.stop()
         perf.setEnabled(false, 300L)
+        history.clear()
+        wasRunning = false
+        generation = 0L
     }
 
     private fun hasEmulatorValue(metrics: EmulatorMetrics, metric: MonitoringMetric): Boolean = when (metric) {

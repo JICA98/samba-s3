@@ -91,17 +91,19 @@ object HomeRecoveryRepository {
         slot: Int?,
         reason: String,
         report: CrashReport? = null,
+        sessionId: String? = null,
     ) {
         val json = JSONObject().apply {
             put("gamePath", gamePath)
             put("savestatePath", savestatePath ?: "")
             put("slot", slot ?: -1)
             put("reason", reason)
+            put("sessionId", sessionId ?: "")
         }
         context.getSharedPreferences(PREFS, Context.MODE_PRIVATE)
             .edit().putString(LOAD_FAILURE, json.toString()).apply()
-        mutableState.value = HomeRecoveryState.LoadFailure(gamePath, savestatePath, slot, reason, report)
-        Log.e(TAG, "load failure persisted game=$gamePath slot=$slot reason=$reason")
+        mutableState.value = HomeRecoveryState.LoadFailure(gamePath, savestatePath, slot, reason, report, sessionId)
+        Log.e(TAG, "load failure persisted game=$gamePath slot=$slot reason=$reason session=$sessionId")
     }
 
     fun recordCrashFailure(context: Context, session: EmulationSessionRecord?, report: CrashReport?) {
@@ -154,6 +156,7 @@ object HomeRecoveryRepository {
             savestatePath = json.optString("savestatePath").ifBlank { null },
             slot = json.optInt("slot", -1).takeIf { it >= 0 },
             reason = json.optString("reason", "Unknown load failure"),
+            sessionId = json.optString("sessionId").ifBlank { null },
         )
     }.getOrNull()
 }
@@ -168,8 +171,8 @@ object HomeRecoveryDecision {
         sameProcess: Boolean,
         classification: CrashClassification?,
     ): RecoveryDecision = when {
-        state == EmulationSessionState.STOPPING && stopReason in setOf("InGameExit", "HomeStop") && sameProcess -> RecoveryDecision.NONE
         classification == CrashClassification.CONFIRMED_CRASH -> RecoveryDecision.CONFIRMED_CRASH
+        state == EmulationSessionState.STOPPING && stopReason in setOf("InGameExit", "HomeStop") && sameProcess -> RecoveryDecision.NONE
         else -> RecoveryDecision.INTERRUPTED
     }
 }

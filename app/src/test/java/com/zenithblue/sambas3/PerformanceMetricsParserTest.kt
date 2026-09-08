@@ -53,4 +53,24 @@ class PerformanceMetricsParserTest {
         assertEquals(listOf(16f, 52f), current.metrics.frameTimeTimedSamples.map { it.value })
         assertEquals(listOf(900L, 916L), current.metrics.frameTimeTimedSamples.map { it.timestampUs })
     }
+
+    @Test
+    fun vk_present_source_is_trusted_when_fresh() {
+        val parsed = PerformanceMetricsParser.parse(
+            "{\"version\":2,\"timestampUs\":1000,\"fpsSource\":\"vk_present\",\"frameSampleFresh\":true," +
+                "\"fps\":59.8,\"frametimeMs\":16.7}"
+        )!!
+        assertEquals(59.8f, parsed.metrics.fps)
+        assertEquals(16.7f, parsed.metrics.frameTimeMs)
+    }
+
+    @Test
+    fun zero_fps_is_treated_as_unavailable() {
+        val parsed = PerformanceMetricsParser.parse(
+            "{\"version\":2,\"timestampUs\":1000,\"fpsSource\":\"emu_flip\",\"frameSampleFresh\":true," +
+                "\"fps\":0,\"frametimeMs\":0}"
+        )!!
+        assertNull(parsed.metrics.fps)
+        assertNull(parsed.metrics.frameTimeMs)
+    }
 }

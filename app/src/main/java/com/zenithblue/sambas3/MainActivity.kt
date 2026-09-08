@@ -3,6 +3,7 @@ package com.zenithblue.sambas3
 import android.app.Notification
 import android.app.NotificationChannel
 import android.app.NotificationManager
+import android.os.Build
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -22,6 +23,12 @@ class MainActivity : ComponentActivity() {
     private var debugPadReceiver: DebugPadReceiver? = null
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
+        // Legacy filesystem imports need the runtime read grant on Android 10–12.
+        // Android 13+ ignores READ_EXTERNAL_STORAGE; SAF grants the selected URI.
+        if (Build.VERSION.SDK_INT <= Build.VERSION_CODES.S) {
+            Permission.ExternalStorageRead.requestPermission(this)
+        }
 
         GeneralSettings.init(this)
         WindowCompat.setDecorFitsSystemWindows(window, false)
@@ -53,9 +60,16 @@ class MainActivity : ComponentActivity() {
 
             // Restore persisted ISO candidates (folder scan) without creating fake Games.
             try { com.zenithblue.sambas3.utils.LibraryCandidatesRepository.load(this@MainActivity) } catch (_: Exception) {}
+            try { com.zenithblue.sambas3.utils.ScannedFoldersRepository.load(this@MainActivity) } catch (_: Exception) {}
 
             lifecycleScope.launch {
                 GameRepository.load()
+                // Direct ISO entries from older builds manufactured Ready.
+                // Reset those lies when no PPU cache objects exist so Home
+                // and Launch Center show PREPARE PPU instead of fake done.
+                com.zenithblue.sambas3.iso.DirectIsoManager.reconcileLaunchReadiness(
+                    this@MainActivity
+                )
             }
 
             FirmwareRepository.load()
@@ -63,6 +77,12 @@ class MainActivity : ComponentActivity() {
             val nativeLibraryDir =
                 packageManager.getApplicationInfo(packageName, 0).nativeLibraryDir
             RPCSX.nativeLibDirectory = nativeLibraryDir
+
+            try {
+                com.zenithblue.sambas3.logging.LogBroker.ensureStarted(this@MainActivity)
+            } catch (e: Exception) {
+                android.util.Log.w("Main", "LogBroker pre-init start failed: ${e.message}")
+            }
 
             RPCSX.openLibrary()
             // S3CORE build ID — must log after dlopen so stale cores are immediately visible in logcat
@@ -118,6 +138,18 @@ class MainActivity : ComponentActivity() {
             }
         }
 
+        try {
+            com.zenithblue.sambas3.ppu.ImportPpuPreparationCoordinator.reconcileInterruptedState(this)
+        } catch (e: Exception) {
+            android.util.Log.w("Main", "PPU interrupted-state recovery failed: ${e.message}")
+        }
+
+        lifecycleScope.launch(kotlinx.coroutines.Dispatchers.IO) {
+            try { com.zenithblue.sambas3.logging.LogBroker.ensureStarted(this@MainActivity) } catch (e: Exception) {
+                android.util.Log.w("Main", "LogBroker start failed: ${e.message}")
+            }
+        }
+
         // Never gate Home on diagnostics. Recovery analysis is deliberately
         // started after AppNavHost has entered composition.
         lifecycleScope.launch {
@@ -147,7 +179,7 @@ class MainActivity : ComponentActivity() {
         unregisterUsbEventListener()
         try { debugPadReceiver?.let { unregisterReceiver(it) } } catch (_: Exception) {}
         debugPadReceiver = null
-        LogMonitor.stop()
+        try { LogMonitor.flushWriters() } catch (_: Exception) {}
     }
 
     override fun dispatchKeyEvent(event: android.view.KeyEvent): Boolean {

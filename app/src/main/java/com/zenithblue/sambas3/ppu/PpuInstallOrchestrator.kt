@@ -14,13 +14,15 @@ import com.zenithblue.sambas3.PreRuntimePpuState
 import com.zenithblue.sambas3.ProgressRepository
 import com.zenithblue.sambas3.RPCSX
 import com.zenithblue.sambas3.UserRepository
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CompletableDeferred
-import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.NonCancellable
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import kotlinx.coroutines.withTimeoutOrNull
 import org.json.JSONObject
 
 object PpuInstallOrchestrator {
@@ -31,13 +33,34 @@ object PpuInstallOrchestrator {
     @Volatile
     private var activeSessionId: Long? = null
     @Volatile
+    private var activeLogicalJobId: Long? = null
+    @Volatile
+    private var activeConnection: PpuBatchWorkerConnection? = null
+    @Volatile
     private var isCanceled = false
 
     fun cancel(sessionId: Long) {
-        if (activeSessionId == sessionId) {
-            isCanceled = true
-            Log.i(TAG, "Cancellation requested for session=$sessionId")
+        val matches = sessionId == activeSessionId || sessionId == activeLogicalJobId
+        if ((activeSessionId != null || activeLogicalJobId != null) && !matches) {
+            Log.i(TAG, "Ignoring stale cancel session=$sessionId active=$activeSessionId job=$activeLogicalJobId")
+            PpuDiagnosticLog.emit("stale_stop_ignored", extras = mapOf("sessionId" to sessionId, "active" to activeSessionId))
+            return
         }
+        requestCancel()
+        Log.i(TAG, "Cancellation requested for session=$sessionId active=$activeSessionId")
+    }
+
+    fun prepareForNewJob() {
+        isCanceled = false
+    }
+
+    fun requestCancel(context: Context? = null) {
+        isCanceled = true
+        val sid = activeSessionId ?: activeLogicalJobId ?: 0L
+        val conn = activeConnection
+        Log.i(TAG, "requestCancel session=$sid pid=${conn?.workerPid}")
+        PpuDiagnosticLog.emit("cancel_request", extras = mapOf("sessionId" to sid, "pid" to conn?.workerPid))
+        conn?.requestCancel(sid)
     }
 
     suspend fun execute(
@@ -60,38 +83,47 @@ object PpuInstallOrchestrator {
         }
 
         try {
-            isCanceled = false
+            if (isCanceled) {
+                Log.i(TAG, "execute aborted — already canceled title=$safeTitle")
+                markCanceled(appContext, safeTitle, logicalJobId)
+                return@withContext false
+            }
+            activeLogicalJobId = logicalJobId
             val currentManifestKey = runCatching { RPCSX.instance.getPpuManifestKey(safeTitle) }.getOrNull() ?: ""
             var sessionLoaded = PpuInstallSessionStore.load(appContext)
 
-            if (sessionLoaded != null && (sessionLoaded.titleId != safeTitle || sessionLoaded.manifestKey != currentManifestKey)) {
+            if (sessionLoaded != null && (sessionLoaded.titleId != safeTitle || sessionLoaded.gamePath != gamePath || sessionLoaded.manifestKey != currentManifestKey)) {
                 Log.w(TAG, "Manifest or title mismatch (old=${sessionLoaded.titleId} new=$safeTitle) — resetting session")
                 PpuInstallSessionStore.clear(appContext)
                 sessionLoaded = null
             }
 
-            val sessionId = sessionLoaded?.sessionId ?: System.currentTimeMillis()
+            // Every retry is a fresh attempt. Native revalidates the retained cache;
+            // persisted UI counters must never be accepted as completion evidence.
+            val resumedBatchSize = sessionLoaded?.batchSize ?: PpuBatchPolicy.DEFAULT_BATCH_SIZE
+            val sessionId = logicalJobId
             activeSessionId = sessionId
 
-            var session: PpuInstallSession = sessionLoaded ?: run {
-                val s = PpuInstallSession(
-                    sessionId = sessionId,
-                    jobId = logicalJobId,
-                    titleId = safeTitle,
-                    gamePath = gamePath,
-                    manifestKey = currentManifestKey,
-                    batchSize = PpuBatchPolicy.DEFAULT_BATCH_SIZE,
-                    phase = PpuSessionPhase.CREATED
-                )
-                PpuInstallSessionStore.save(appContext, s)
-                s
-            }
+            var session = PpuInstallSession(
+                sessionId = sessionId,
+                jobId = logicalJobId,
+                titleId = safeTitle,
+                gamePath = gamePath,
+                manifestKey = currentManifestKey,
+                batchSize = resumedBatchSize,
+                phase = PpuSessionPhase.CREATED,
+                attemptId = logicalJobId.toString(),
+                logicalSessionId = logicalJobId.toString(),
+            )
+            PpuInstallSessionStore.save(appContext, session)
 
             var totalModules = session.totalModules
             var completedModules = session.completedModules
             var batchIndex = session.batchIndex
             var currentBatchSize = session.batchSize
             var consecutiveMinFailures = 0
+            var bindFailures = 0
+            val noProgress = NoProgressGuard(PpuWorkerControlPolicy.ZERO_PROGRESS_BATCH_LIMIT)
 
             Log.i(
                 "S3PPUSESSION",
@@ -106,7 +138,7 @@ object PpuInstallOrchestrator {
 
                 var conn: PpuBatchWorkerConnection? = null
                 conn = PpuBatchWorkerConnection(appContext) { deathReason ->
-                    if (deathReason is WorkerDeathReason.Unexpected) {
+                    if (deathReason !is WorkerDeathReason.ExpectedAfterResult) {
                         batchFinishedDeferred.complete(
                             JSONObject().put("status", "unexpected_death").put("message", "worker_died")
                         )
@@ -117,18 +149,77 @@ object PpuInstallOrchestrator {
                 val bound = conn.bind()
                 if (!bound) {
                     Log.e(TAG, "Failed to bind to PpuBatchWorkerService for batch=$batchIndex")
-                    conn.unbind()
+                    conn.releaseBindingAfterExit()
+                    bindFailures++
+                    if (bindFailures >= PpuWorkerControlPolicy.BIND_RETRY_LIMIT) {
+                        markFailed(appContext, safeTitle, logicalJobId, "Could not start PPU worker")
+                        return@withContext false
+                    }
                     delay(1000)
                     continue
                 }
+                activeConnection = conn
 
                 val worker = try {
-                    conn.connectionReady.await()
+                    val ready = withTimeoutOrNull(PpuWorkerControlPolicy.STARTUP_TIMEOUT_MS) {
+                        conn.connectionReady.await()
+                    }
+                    if (ready == null) {
+                        Log.e(TAG, "Worker startup timeout batch=$batchIndex")
+                        awaitVerifiedExitOrQuarantine(
+                            conn, appContext, safeTitle, logicalJobId,
+                            signalImmediately = true,
+                            reason = "Worker startup timeout",
+                        )
+                        conn.releaseBindingAfterExit()
+                        if (activeConnection === conn) activeConnection = null
+                        bindFailures++
+                        if (bindFailures >= PpuWorkerControlPolicy.BIND_RETRY_LIMIT) {
+                            markFailed(appContext, safeTitle, logicalJobId, "Worker startup timeout")
+                            return@withContext false
+                        }
+                        delay(1000)
+                        continue
+                    }
+                    ready
+                } catch (e: CancellationException) {
+                    isCanceled = true
+                    withContext(NonCancellable) {
+                        awaitVerifiedExitOrQuarantine(
+                            conn, appContext, safeTitle, logicalJobId,
+                            signalImmediately = false,
+                            reason = "Worker exit was not observed after cancellation",
+                        )
+                        conn.releaseBindingAfterExit()
+                        markCanceled(appContext, safeTitle, logicalJobId)
+                    }
+                    throw e
                 } catch (e: Exception) {
                     Log.e(TAG, "Worker connection await failed: ${e.message}")
-                    conn.unbind()
+                    conn.releaseBindingAfterExit()
+                    bindFailures++
+                    if (bindFailures >= PpuWorkerControlPolicy.BIND_RETRY_LIMIT) {
+                        markFailed(appContext, safeTitle, logicalJobId, e.message ?: "Worker connection failed")
+                        return@withContext false
+                    }
                     delay(1000)
                     continue
+                }
+                bindFailures = 0
+                runCatching {
+                    val pid = worker.workerPid
+                    if (pid > 0) conn.workerPid = pid
+                }
+                if (isCanceled) {
+                    conn.requestCancel(sessionId)
+                    awaitVerifiedExitOrQuarantine(
+                        conn, appContext, safeTitle, logicalJobId,
+                        signalImmediately = false,
+                        reason = "Worker exit was not observed after cancellation",
+                    )
+                    conn.releaseBindingAfterExit()
+                    markCanceled(appContext, safeTitle, logicalJobId)
+                    return@withContext false
                 }
 
                 val callback = object : IPpuBatchCallback.Stub() {
@@ -138,6 +229,12 @@ object PpuInstallOrchestrator {
                         workerInstanceId: String?,
                         cbBatchIndex: Int
                     ) {
+                        if (cbSessionId != sessionId || cbBatchIndex != batchIndex) {
+                            PpuDiagnosticLog.emit("stale_callback_ignored", titleId = safeTitle, extras = mapOf("type" to "started"))
+                            return
+                        }
+                        if (workerPid > 0) conn.workerPid = workerPid
+                        conn.workerInstanceId = workerInstanceId
                         Log.i(
                             "S3PPUBATCH",
                             "batch=$cbBatchIndex pid=$workerPid worker=$workerInstanceId state=STARTED"
@@ -151,15 +248,19 @@ object PpuInstallOrchestrator {
                         cbCompleted: Int,
                         message: String?
                     ) {
-                        if (cbTotal > 0 && totalModules == 0) totalModules = cbTotal
-                        val reduced = PpuOverallProgressReducer.reduceLiveProgress(
-                            titleTotal = totalModules,
-                            lastKnownCompleted = completedModules,
-                            workerTotal = cbTotal,
-                            cachedBefore = completedModules,
-                            currentBatchCompiled = cbCompleted
+                        if (isCanceled || cbSessionId != sessionId || cbJobId != logicalJobId) {
+                            PpuDiagnosticLog.emit("stale_callback_ignored", titleId = safeTitle, extras = mapOf("type" to "progress"))
+                            return
+                        }
+                        // Native callback counters can reset between ELF/PRX scopes.
+                        // Keep the last audited batch receipt as numeric authority.
+                        updateProgressUi(
+                            appContext,
+                            safeTitle,
+                            logicalJobId,
+                            OverallProgress(totalModules, completedModules, if (totalModules > 0) completedModules * 100 / totalModules else 0),
+                            message ?: "Compiling PPU objects… $completedModules validated",
                         )
-                        updateProgressUi(appContext, safeTitle, logicalJobId, reduced)
                     }
 
                     override fun onBatchFinished(
@@ -168,7 +269,11 @@ object PpuInstallOrchestrator {
                         cbBatchIndex: Int,
                         resultJson: String?
                     ) {
-                        conn?.let { it.isResultReceived = true }
+                        if (cbSessionId != sessionId || cbJobId != logicalJobId || cbBatchIndex != batchIndex) {
+                            PpuDiagnosticLog.emit("stale_callback_ignored", titleId = safeTitle, extras = mapOf("type" to "finished"))
+                            return
+                        }
+                        conn.isResultReceived = true
                         val json = try {
                             JSONObject(resultJson ?: "{}")
                         } catch (e: Exception) {
@@ -195,6 +300,7 @@ object PpuInstallOrchestrator {
                         user,
                         batchIndex,
                         currentBatchSize,
+                        RPCSX.COMPILE_ORIGIN_INSTALL,
                         currentManifestKey,
                         callback
                     )
@@ -205,48 +311,70 @@ object PpuInstallOrchestrator {
                     )
                 }
 
-                // Live ticker to update UI per module as objects are written to disk
-                val liveTicker = CoroutineScope(Dispatchers.IO).launch {
-                    while (isActive && !batchFinishedDeferred.isCompleted) {
+                val liveTicker = launch {
+                    while (isActive && !batchFinishedDeferred.isCompleted && !isCanceled) {
                         delay(1000)
                         val onDisk = countCacheObjects(appContext, safeTitle)
-                        if (onDisk > completedModules) {
-                            val reduced = PpuOverallProgressReducer.reduceLiveProgress(
-                                titleTotal = totalModules,
-                                lastKnownCompleted = completedModules,
-                                workerTotal = totalModules,
-                                cachedBefore = completedModules,
-                                currentBatchCompiled = onDisk - completedModules
-                            )
-                            updateProgressUi(appContext, safeTitle, logicalJobId, reduced)
-                        }
+                        PpuDiagnosticLog.emit(
+                            "cache_scan",
+                            titleId = safeTitle,
+                            extras = mapOf("onDisk" to onDisk, "completed" to completedModules),
+                        )
                     }
                 }
 
-                // Await batch finished or unexpected termination
                 val resultObj = try {
                     batchFinishedDeferred.await()
+                } catch (e: CancellationException) {
+                    isCanceled = true
+                    liveTicker.cancel()
+                    withContext(NonCancellable) {
+                        conn.requestCancel(sessionId)
+                        awaitVerifiedExitOrQuarantine(
+                            conn, appContext, safeTitle, logicalJobId,
+                            signalImmediately = false,
+                            reason = "Worker exit was not observed after cancellation",
+                        )
+                        conn.releaseBindingAfterExit()
+                        markCanceled(appContext, safeTitle, logicalJobId)
+                    }
+                    throw e
                 } catch (e: Exception) {
                     JSONObject().put("status", "failed").put("message", e.message)
                 } finally {
                     liveTicker.cancel()
                 }
 
-                // Await process exit
-                val deathReason = processExitDeferred.await()
-                conn.unbind()
+                val deathReason = withTimeoutOrNull(PpuWorkerControlPolicy.EXIT_GRACE_MS) {
+                    processExitDeferred.await()
+                } ?: awaitVerifiedExitOrQuarantine(
+                    conn, appContext, safeTitle, logicalJobId,
+                    signalImmediately = true,
+                    reason = "Worker exit was not observed after result",
+                )
+                conn.releaseBindingAfterExit()
+                if (activeConnection === conn) activeConnection = null
 
                 val oldWorkerDead = when (deathReason) {
                     is WorkerDeathReason.ExpectedAfterResult -> 1
-                    is WorkerDeathReason.Unexpected -> 1
+                    is WorkerDeathReason.Unexpected,
+                    is WorkerDeathReason.NullBinding,
+                    is WorkerDeathReason.BindingDied -> 1
                 }
                 Log.i("S3PPUIPC", "old_worker_dead=$oldWorkerDead")
 
-                val status = resultObj.optString("status", "failed")
-                val workerTotal = resultObj.optInt("totalModules", 0)
-                val cachedAfter = resultObj.optInt("cachedAfter", 0)
+                val report = PpuNativeBatchReport.parse(resultObj.toString())
+                val status = report.status
+                if (status == "all_complete" && !report.provesCompletion) {
+                    markFailed(appContext, safeTitle, logicalJobId, "Native completion receipt was not auditable")
+                    return@withContext false
+                }
+                val workerTotal = report.totalModules
+                val cachedAfter = report.cachedAfter
+                val completedBefore = completedModules
+                val totalBefore = totalModules
 
-                if (workerTotal > 0) totalModules = workerTotal
+                if (workerTotal > totalModules) totalModules = workerTotal
                 if (cachedAfter > completedModules) completedModules = cachedAfter
 
                 val reduced = PpuOverallProgressReducer.reduceBatchFinished(
@@ -255,7 +383,8 @@ object PpuInstallOrchestrator {
                     workerTotal = workerTotal,
                     cachedAfter = cachedAfter
                 )
-                completedModules = reduced.completedModules
+                completedModules = maxOf(completedModules, reduced.completedModules)
+                totalModules = maxOf(totalModules, reduced.totalModules)
                 updateProgressUi(appContext, safeTitle, logicalJobId, reduced)
 
                 session = session.copy(
@@ -266,7 +395,13 @@ object PpuInstallOrchestrator {
                 )
                 PpuInstallSessionStore.save(appContext, session)
 
-                if (deathReason is WorkerDeathReason.Unexpected) {
+                if (isCanceled || status == "canceled") {
+                    Log.i("S3PPUSESSION", "state=CANCELED job=$logicalJobId")
+                    markCanceled(appContext, safeTitle, logicalJobId)
+                    return@withContext false
+                }
+
+                if (deathReason !is WorkerDeathReason.ExpectedAfterResult) {
                     val onDiskCount = countCacheObjects(appContext, safeTitle)
                     if (onDiskCount > completedModules) {
                         Log.i(TAG, "Cache advanced despite crash: $completedModules -> $onDiskCount")
@@ -279,7 +414,8 @@ object PpuInstallOrchestrator {
                         )
                         updateProgressUi(appContext, safeTitle, logicalJobId, reduced)
                     }
-                    Log.w(TAG, "Worker died unexpectedly pid=${deathReason.lastWorkerPid} inst=${deathReason.lastInstanceId}")
+                    val unexpected = deathReason as? WorkerDeathReason.Unexpected
+                    Log.w(TAG, "Worker died unexpectedly pid=${unexpected?.lastWorkerPid ?: conn.workerPid} inst=${unexpected?.lastInstanceId ?: conn.workerInstanceId}")
                     val oldSize = currentBatchSize
                     currentBatchSize = PpuBatchPolicy.nextBatchSizeOnFailure(currentBatchSize)
                     Log.i(TAG, "Batch fallback $oldSize -> $currentBatchSize")
@@ -306,8 +442,14 @@ object PpuInstallOrchestrator {
                         return@withContext true
                     }
                     "more_work" -> {
+                        val newly = (completedModules - completedBefore).coerceAtLeast(0)
+                        val discoveryAdvanced = totalModules > totalBefore || report.remainingUncached > 0 && newly > 0
+                        if (noProgress.completedBatch(newly.toLong(), discoveryAdvanced || newly > 0)) {
+                            markFailed(appContext, safeTitle, logicalJobId, "Repeated zero-progress batches")
+                            return@withContext false
+                        }
                         batchIndex++
-                        delay(200) // Small pause between processes
+                        delay(200)
                     }
                     "canceled" -> {
                         Log.i("S3PPUSESSION", "state=CANCELED job=$logicalJobId")
@@ -328,21 +470,44 @@ object PpuInstallOrchestrator {
             }
 
             true
+        } catch (e: CancellationException) {
+            isCanceled = true
+            markCanceled(appContext, safeTitle, logicalJobId)
+            throw e
         } finally {
             activeSessionId = null
+            activeLogicalJobId = null
+            activeConnection = null
             fileLock.close()
         }
     }
 
-    private fun updateProgressUi(context: Context, titleId: String, jobId: Long, progress: OverallProgress) {
-        val total = progress.totalModules
-        val done = progress.completedModules
-        val msg = if (total > 0) "module $done of $total" else "module $done"
+    private fun updateProgressUi(
+        context: Context,
+        titleId: String,
+        jobId: Long,
+        progress: OverallProgress,
+        message: String? = null,
+    ) {
+        val cur = CompileProgressBridge.installState.value
+        val previous = if (cur.ppuActive &&
+            (cur.titleId.isNullOrBlank() || cur.titleId.equals(titleId, ignoreCase = true))
+        ) {
+            OverallProgress(cur.moduleTotal, cur.moduleDone, cur.ppuPercent)
+        } else {
+            null
+        }
+        val merged = PpuOverallProgressReducer.mergeMonotonic(previous, progress)
+        val total = merged.totalModules
+        val done = merged.completedModules
+        val msg = message ?: if (total > 0) "module $done of $total" else "module $done"
+        val remaining = PpuRemainingTimeTracker.observeInstall(titleId, done, total, active = true)
+        val notifMsg = PpuRemainingTime.progressLine(msg, remaining)
 
-        Log.i("S3PPUPROG", "done=$done total=$total")
+        Log.i("S3PPUPROG", "done=$done total=$total remaining=${remaining ?: "-"}")
 
         // 1. Update notification 3000
-        ProgressRepository.onProgressEvent(NOTIF_INSTALL, done.toLong(), total.toLong(), msg)
+        ProgressRepository.onProgressEvent(NOTIF_INSTALL, done.toLong(), total.toLong(), notifMsg)
 
         // 2. Update CompileProgressBridge.installState
         CompileProgressBridge.updateInstallStateForExternalWorker(
@@ -350,9 +515,10 @@ object PpuInstallOrchestrator {
             jobId = jobId,
             moduleDone = done,
             moduleTotal = total,
-            percent = progress.percent,
+            percent = merged.percent,
             message = msg,
-            active = true
+            active = true,
+            remainingLabel = remaining,
         )
 
         // 3. Update ImportSessionStore
@@ -360,6 +526,7 @@ object PpuInstallOrchestrator {
     }
 
     private fun markCompleted(context: Context, titleId: String, jobId: Long, total: Int) {
+        PpuRemainingTimeTracker.resetInstall()
         PpuInstallSessionStore.clear(context)
 
         // Terminal logic decision
@@ -387,13 +554,15 @@ object PpuInstallOrchestrator {
         )
 
         if (decision.markPreRuntimeReady) {
+            PpuReadinessStore.setPreRuntimeState(context, titleId, PreRuntimePpuState.READY)
+            PpuReadinessStore.setRuntimeState(context, titleId, com.zenithblue.sambas3.RuntimePpuState.NOT_STARTED)
             ImportSessionStore.updatePhase(NOTIF_INSTALL, ImportPhase.READY, resolvedTitleId = titleId)
             mainHandler.postDelayed({ ImportSessionStore.remove(NOTIF_INSTALL) }, 1200)
-            ImportPpuPreparationCoordinator.onInstallPpuSuccess(context, titleId)
         }
     }
 
     private fun markFailed(context: Context, titleId: String, jobId: Long, reason: String) {
+        PpuRemainingTimeTracker.resetInstall()
         CompileProgressBridge.updateInstallStateForExternalWorker(
             titleId = titleId,
             jobId = jobId,
@@ -409,16 +578,18 @@ object PpuInstallOrchestrator {
     }
 
     private fun markCanceled(context: Context, titleId: String, jobId: Long) {
+        PpuRemainingTimeTracker.resetInstall()
         CompileProgressBridge.updateInstallStateForExternalWorker(
             titleId = titleId,
             jobId = jobId,
             moduleDone = 0,
             moduleTotal = 0,
             percent = 0,
-            message = "PPU compilation canceled",
+            message = "Install PPU stopped — retry to resume",
             active = false,
             outcome = CompileOutcome.CANCELED
         )
+        PpuReadinessStore.setPreRuntimeState(context, titleId, PreRuntimePpuState.FAILED)
         ImportSessionStore.remove(NOTIF_INSTALL)
     }
 
@@ -434,7 +605,9 @@ object PpuInstallOrchestrator {
             var total = 0
             dir.listFiles()?.forEach { sub ->
                 if (sub.isDirectory) {
-                    total += (sub.list()?.size ?: 0)
+                    total += sub.list()?.count { name ->
+                        name.endsWith(".obj") || name.endsWith(".obj.gz")
+                    } ?: 0
                 } else if (sub.name.endsWith(".obj") || sub.name.endsWith(".obj.gz")) {
                     total++
                 }
@@ -443,5 +616,31 @@ object PpuInstallOrchestrator {
         } catch (_: Exception) {
             0
         }
+    }
+
+    private suspend fun awaitVerifiedExitOrQuarantine(
+        connection: PpuBatchWorkerConnection,
+        context: Context,
+        titleId: String,
+        jobId: Long,
+        signalImmediately: Boolean,
+        reason: String,
+    ): WorkerDeathReason {
+        if (!signalImmediately) {
+            withTimeoutOrNull(PpuWorkerControlPolicy.CANCEL_GRACE_MS) {
+                connection.awaitVerifiedExit()
+            }?.let { return it }
+        }
+        connection.signalVerifiedInstance()
+        withTimeoutOrNull(PpuWorkerControlPolicy.EXIT_GRACE_MS) {
+            connection.awaitVerifiedExit()
+        }?.let { return it }
+
+        PpuDiagnosticLog.emit("stop_failed_keep_lease", titleId = titleId, pid = connection.workerPid)
+        markFailed(context, titleId, jobId, reason)
+        ImportPpuPreparationCoordinator.onWorkerExitUnverified(titleId, jobId)
+        // Deliberately unbounded: ownership and the process lock remain held until
+        // Binder supplies actual death evidence. Retry must not overlap this worker.
+        return connection.awaitVerifiedExit()
     }
 }

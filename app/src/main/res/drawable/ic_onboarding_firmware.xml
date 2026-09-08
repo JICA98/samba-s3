@@ -1,0 +1,44 @@
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="120dp"
+    android:height="120dp"
+    android:viewportWidth="96"
+    android:viewportHeight="96">
+  <!-- Outer ambient circle glow -->
+  <path
+      android:fillColor="#1AE5A93C"
+      android:pathData="M48,6 A42,42 0 1,1 47.99,6 Z"/>
+
+  <!-- Disc Outer Ring -->
+  <path
+      android:fillColor="#161B22"
+      android:strokeColor="#FFFFFF"
+      android:strokeWidth="1.5"
+      android:pathData="M48,16 A32,32 0 1,1 47.99,16 Z"/>
+
+  <!-- Disc Track Highlights -->
+  <path
+      android:strokeColor="#30E5A93C"
+      android:strokeWidth="1.2"
+      android:pathData="M48,24 A24,24 0 1,1 47.99,24 Z"/>
+
+  <!-- Disc Inner Spindle -->
+  <path
+      android:fillColor="#0D1117"
+      android:strokeColor="#E5A93C"
+      android:strokeWidth="1.5"
+      android:pathData="M48,38 A10,10 0 1,1 47.99,38 Z"/>
+  <path
+      android:fillColor="#161B22"
+      android:pathData="M48,44 A4,4 0 1,1 47.99,44 Z"/>
+
+  <!-- System Software Badge / Flash Arrow -->
+  <path
+      android:fillColor="#E5A93C"
+      android:pathData="M66,56 A11,11 0 1,1 65.99,56 Z"/>
+  <path
+      android:strokeColor="#0D1117"
+      android:strokeWidth="2"
+      android:strokeLineCap="round"
+      android:strokeLineJoin="round"
+      android:pathData="M66,50 L66,60 M62,56 L66,60 L70,56 M62,63 L70,63"/>
+</vector>

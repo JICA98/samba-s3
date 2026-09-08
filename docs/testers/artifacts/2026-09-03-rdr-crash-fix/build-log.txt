@@ -1,0 +1,5 @@
+0219dd1 fix(rdr): stabilize BLUS30758 gameplay on Adreno
+5a60569 fix(settings): preserve global and per-game configuration scope
+bdf3a75 fix(ppu): remove broad storage permission dependency
+7382968 fix(games): resolve Demon's Souls and Red Dead Redemption black screen and crashes
+92b3b73 feat(ppu): implement process-recycled INSTALL PPU batch worker

@@ -16,6 +16,7 @@ import com.zenithblue.sambas3.ppu.GameRunEligibilityHelper
 import com.zenithblue.sambas3.ppu.ImportPpuPreparationCoordinator
 import com.zenithblue.sambas3.utils.GeneralSettings
 
+
 object GameLaunchRepository {
     fun snapshot(
         context: Context,
@@ -41,6 +42,8 @@ object GameLaunchRepository {
             validatedByRealBootFrame = titleId?.let {
                 runCatching { PpuReadinessStore.isRuntimeValidated(context, it) }.getOrDefault(false)
             } ?: false,
+            activeCompileTitleId = ImportPpuPreparationCoordinator.activeTitleId,
+            stoppingCompile = ImportPpuPreparationCoordinator.stopping,
         )
         val overrides = titleId?.let { GameSettingsOverrides.gameOverrides(context, it) }.orEmpty()
         fun globalValue(path: String, fallback: String): String {
@@ -106,12 +109,17 @@ object GameLaunchRepository {
                 setting("PPU", "Core@@PPU Decoder", "LLVM"),
                 setting("SPU", "Core@@SPU Decoder", "LLVM")
             ),
-            ppuStatus = when (availability) {
-                GameLaunchAvailability.Ready -> "Ready"
-                GameLaunchAvailability.NeedsPreparation -> "Needs preparation"
-                is GameLaunchAvailability.PreparingPpu -> "Preparing PPU"
-                is GameLaunchAvailability.Failed -> "Failed"
-                else -> if (sameRunning) "Running" else "Unavailable"
+            ppuStatus = when (ppuUi.prepareAction) {
+                PrepareAction.Locked -> "Waiting"
+                PrepareAction.Stop -> "Preparing PPU"
+                PrepareAction.Stopping -> "Stopping"
+                else -> when (availability) {
+                    GameLaunchAvailability.Ready -> "Ready"
+                    GameLaunchAvailability.NeedsPreparation -> "Needs preparation"
+                    is GameLaunchAvailability.PreparingPpu -> "Preparing PPU"
+                    is GameLaunchAvailability.Failed -> "Failed"
+                    else -> if (sameRunning) "Running" else "Unavailable"
+                }
             },
             ppuUi = ppuUi,
             saveSlots = slots,

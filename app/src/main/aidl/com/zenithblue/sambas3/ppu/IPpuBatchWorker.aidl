@@ -11,6 +11,7 @@ interface IPpuBatchWorker {
         String userId,
         int batchIndex,
         int maxNewObjects,
+        int compileOrigin,
         String manifestKey,
         IPpuBatchCallback callback
     );

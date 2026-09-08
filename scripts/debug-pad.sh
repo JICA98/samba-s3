@@ -1,98 +1,42 @@
 #!/usr/bin/env bash
-# debug-pad.sh — agent ADB pad bridge for SambaS3 (no coordinate math)
-# Requires app with DebugPadReceiver (MainActivity/RPCSXActivity register).
-# Canonical: ./scripts/debug-pad.sh SERIAL BUTTON  (e.g. ./scripts/debug-pad.sh 7d6afed8 START)
-# Shorthand (single device only): ./scripts/debug-pad.sh START
-# Raw: ./scripts/debug-pad.sh SERIAL --raw --ei d2 64 --ei lx 100
+# Deterministic debug pad bridge. Requires request-id acknowledgements in the APK.
 set -euo pipefail
-
-ALL_BTNS="CROSS|SQUARE|CIRCLE|TRIANGLE|L1|R1|L2|R2|START|SELECT|PS|UP|DOWN|LEFT|RIGHT|L3|R3"
-
-is_button() {
-  case "$1" in
-    CROSS|SQUARE|CIRCLE|TRIANGLE|L1|R1|L2|R2|START|SELECT|PS|UP|DOWN|LEFT|RIGHT|L3|R3) return 0 ;;
-    *) return 1 ;;
-  esac
-}
-
-device_count() {
-  adb devices | awk 'NR>1 && $2=="device"{c++} END{print c+0}'
-}
-
-if [[ "${1:-}" == "-h" || "${1:-}" == "--help" ]]; then
+SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
+source "$SCRIPT_DIR/lib/debug-bridge.sh"
+BUTTONS='CROSS SQUARE CIRCLE TRIANGLE L1 R1 L2 R2 START SELECT PS UP DOWN LEFT RIGHT L3 R3'
+usage() {
   echo "Usage: $0 [SERIAL] BUTTON"
-  echo "  BUTTON: $ALL_BTNS"
-  echo "  e.g.: $0 7d6afed8 START | $0 START (single device only)"
-  echo "  raw: $0 SERIAL --raw --ei d2 64 ..."
-  exit 0
-fi
-
-first_device() {
-  adb devices | awk 'NR>1 && $2=="device"{print $1; exit}'
+  echo "Buttons: $BUTTONS"
+  echo "Raw: $0 [SERIAL] --raw --ei d1 0 --ei d2 0 --ei lx 127 --ei ly 127 --ei rx 127 --ei ry 127"
+  echo 'Raw holds must be released/centered; delivery failures return nonzero.'
 }
-
-# --raw passthrough: ./scripts/debug-pad.sh [SERIAL] --raw <am broadcast extras>
-if [[ "${1:-}" == "--raw" ]] || [[ "${2:-}" == "--raw" ]]; then
-  if [[ "${1:-}" == "--raw" ]]; then
-    shift
-    n=$(device_count)
-    if [[ "$n" -eq 0 ]]; then echo "No device"; exit 1; fi
-    if [[ "$n" -gt 1 ]]; then echo "Ambiguous: $n devices connected, pass SERIAL explicitly"; adb devices; exit 1; fi
-    SERIAL="$(first_device)"
-  else
-    SERIAL="$1"; shift
-    shift # drop --raw
-  fi
-  if [[ -z "${SERIAL:-}" ]]; then echo "No device"; exit 1; fi
-  adb -s "$SERIAL" shell "am broadcast -a com.zenithblue.sambas3.DEBUG_PAD $*" 2>&1 | tail -1
-  exit 0
-fi
-
-# Parse [SERIAL] BUTTON
+is_button() { [[ " $BUTTONS " == *" $1 "* ]]; }
+if [[ "${1:-}" == --help || "${1:-}" == -h ]]; then usage; exit 0; fi
 SERIAL=""
-BTN=""
-if [[ $# -eq 1 ]]; then
-  if is_button "$1"; then
-    BTN="$1"
-    n=$(device_count)
-    if [[ "$n" -eq 0 ]]; then echo "No device"; exit 1; fi
-    if [[ "$n" -gt 1 ]]; then echo "Ambiguous: $n devices connected, pass SERIAL explicitly"; adb devices; exit 1; fi
-    SERIAL="$(first_device)"
-  else
-    echo "Unknown button '$1' — use $ALL_BTNS or --raw"
-    exit 1
-  fi
-elif [[ $# -eq 2 ]]; then
-  # Allow either order, but BUTTON must be a known button.
-  if is_button "$1" && ! is_button "$2"; then
-    BTN="$1"; SERIAL="$2"
-  elif is_button "$2"; then
-    SERIAL="$1"; BTN="$2"
-  else
-    echo "Unknown button '$2' — use $ALL_BTNS or --raw"
-    exit 1
-  fi
+if [[ $# -gt 1 ]] && ! is_button "$1" && [[ "$1" != --raw ]]; then SERIAL="$1"; shift; fi
+if [[ $# == 2 ]] && is_button "$1"; then SERIAL="$2"; set -- "$1"; fi
+[[ $# -gt 0 ]] || { usage; exit 1; }
+mode="$1"; shift
+raw_args=()
+if [[ "$mode" == --raw ]]; then
+  while (( $# )); do
+    [[ $# -ge 3 && "$1" == --ei ]] || { usage; exit 1; }
+    case "$2" in d1|d2|lx|ly|rx|ry) ;; *) echo "Unknown raw field: $2" >&2; exit 1;; esac
+    [[ "$3" =~ ^[0-9]{1,3}$ ]] || { echo "Invalid integer: $3" >&2; exit 1; }
+    value=$((10#$3)); limit=255
+    [[ "$2" != d1 ]] || limit=511
+    (( value <= limit )) || { echo "Out of range: $2=$value" >&2; exit 1; }
+    raw_args+=(--ei "$2" "$value"); shift 3
+  done
+  action="$PKG.DEBUG_PAD"; expected='PAD d1='
 else
-  echo "Usage: $0 [SERIAL] BUTTON"
-  echo "  BUTTON: $ALL_BTNS"
-  echo "  e.g.: $0 7d6afed8 START | $0 START (single device only)"
-  exit 1
+  is_button "$mode" && [[ $# == 0 ]] || { usage; exit 1; }
+  action="$PKG.DEBUG_PAD_$mode"; expected="BUTTON $mode release"
 fi
-
-if [[ -z "$SERIAL" ]]; then echo "No device"; exit 1; fi
-if ! is_button "$BTN"; then echo "Unknown $BTN — use $ALL_BTNS or --raw"; exit 1; fi
-
-OUT="$(adb -s "$SERIAL" shell "am broadcast -a com.zenithblue.sambas3.DEBUG_PAD_$BTN" 2>&1 | tail -1)"
-echo "$OUT"
-# Verify actual delivery via DebugPad log instead of trusting "Broadcast completed".
-sleep 1
-if adb -s "$SERIAL" shell "logcat -d -b main -t 200 2>/dev/null | grep -q 'DebugPad.*$BTN'" 2>/dev/null; then
-  echo "[$SERIAL] sent $BTN (verified: DebugPad log shows $BTN)"
-else
-  # Fall back to any recent DebugPad activity so silent failure is visible.
-  if adb -s "$SERIAL" shell "logcat -d -b main -t 200 2>/dev/null | grep -q DebugPad" 2>/dev/null; then
-    echo "[$SERIAL] sent $BTN (warning: DebugPad active but no $BTN line in last 200 — receiver may be unregistered/foregrounded elsewhere)"
-  else
-    echo "[$SERIAL] sent $BTN (WARNING: no DebugPad log — receiver not registered? Ensure MainActivity/RPCSXActivity is foregrounded with debug APK)"
-  fi
-fi
+bridge_device
+bridge_capture DebugPad
+trap bridge_cleanup EXIT
+bridge_send "$action" "${raw_args[@]}"
+# A button pulse succeeds only after release is acknowledged, not just press.
+bridge_wait "$expected" 10
+echo "[OK] $mode delivered to $SERIAL"

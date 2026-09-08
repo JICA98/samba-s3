@@ -11,17 +11,18 @@ object PpuInstallSessionStore {
     private const val FILE_NAME = "session.json"
     private val json = Json { ignoreUnknownKeys = true; prettyPrint = false }
 
-    private fun sessionFile(context: Context): File {
-        val dir = File(context.filesDir, DIR_NAME).apply { if (!exists()) mkdirs() }
+    private fun sessionFile(context: Context, kind: PpuBatchKind): File {
+        val suffix = if (kind == PpuBatchKind.INSTALL) DIR_NAME else "ppu-runtime"
+        val dir = File(context.filesDir, suffix).apply { if (!exists()) mkdirs() }
         return File(dir, FILE_NAME)
     }
 
     @Synchronized
-    fun load(context: Context): PpuInstallSession? {
+    fun load(context: Context, kind: PpuBatchKind = PpuBatchKind.INSTALL): PpuInstallSession? {
         return try {
-            val f = sessionFile(context)
+            val f = sessionFile(context, kind)
             if (!f.exists()) return null
-            json.decodeFromString<PpuInstallSession>(f.readText())
+            json.decodeFromString<PpuInstallSession>(f.readText()).takeIf { it.kind == kind }
         } catch (e: Exception) {
             Log.w(TAG, "Failed to load session: ${e.message}")
             null
@@ -31,13 +32,10 @@ object PpuInstallSessionStore {
     @Synchronized
     fun save(context: Context, session: PpuInstallSession) {
         try {
-            val target = sessionFile(context)
-            val temp = File(target.parentFile, "session.json.tmp")
+            val target = sessionFile(context, session.kind)
             val text = json.encodeToString(session)
-            temp.writeText(text)
-            if (!temp.renameTo(target)) {
-                target.delete()
-                temp.renameTo(target)
+            if (!PpuAtomicFiles.writeUtf8(target, text)) {
+                Log.e(TAG, "Failed to persist session for ${session.titleId}")
             }
         } catch (e: Exception) {
             Log.e(TAG, "Failed to save session: ${e.message}", e)
@@ -45,10 +43,16 @@ object PpuInstallSessionStore {
     }
 
     @Synchronized
-    fun clear(context: Context) {
+    fun clear(context: Context, kind: PpuBatchKind = PpuBatchKind.INSTALL) {
         try {
-            val f = sessionFile(context)
+            val f = sessionFile(context, kind)
             if (f.exists()) f.delete()
         } catch (_: Exception) {}
+    }
+
+    @Synchronized
+    fun clearIfTitle(context: Context, titleId: String, kind: PpuBatchKind) {
+        val session = load(context, kind) ?: return
+        if (session.titleId.equals(titleId, ignoreCase = true)) clear(context, kind)
     }
 }

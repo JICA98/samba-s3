@@ -11,8 +11,8 @@
 | **Language** | Kotlin (UI), C++ (native JNI bridge), C (emulator core loaded at runtime) |
 | **UI framework** | Jetpack Compose (Material3) |
 | **Min SDK** | 29 (Android 10) |
-| **Target SDK** | 35 |
-| **Compile SDK** | 36 |
+| **Target SDK** | 37 |
+| **Compile SDK** | 37 |
 | **NDK** | 30.0.14904198 |
 | **ABIs** | `arm64-v8a`, `x86_64` |
 
@@ -92,7 +92,7 @@ adb logcat -c && adb logcat | grep -E "sambas3|RPCSX|Main"
 
 ## AGP / Toolchain Versions
 
-- AGP: 8.13.2
+- AGP: 9.3.2
 - Kotlin: 2.3.21
 - Compose Compiler Extension: 1.5.15
 

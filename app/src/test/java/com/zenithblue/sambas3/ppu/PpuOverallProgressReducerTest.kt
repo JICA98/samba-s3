@@ -84,4 +84,110 @@ class PpuOverallProgressReducerTest {
         assertEquals(16, restarted.completedModules)
         assertTrue(restarted.completedModules >= 16)
     }
+
+    @Test
+    fun nativeWindow_elfReset_accumulatesInsteadOfRewinding() {
+        val window = PpuNativeProgressWindow()
+        val first = window.absorb(27, 34)
+        assertEquals(27, first.first)
+        assertEquals(34, first.second)
+
+        val afterReset = window.absorb(5, 34)
+        assertEquals(32, afterReset.first)
+        assertEquals(61, afterReset.second)
+    }
+
+    @Test
+    fun nativeWindow_smallJitter_doesNotCountAsReset() {
+        val window = PpuNativeProgressWindow()
+        window.absorb(27, 34)
+        val jitter = window.absorb(26, 34)
+        // Drop of 1 is not an ELF reset, and high-water must not rewind.
+        assertEquals(27, jitter.first)
+        assertEquals(34, jitter.second)
+    }
+
+    @Test
+    fun nativeWindow_resetKeepsHighWaterForNewWorker() {
+        val window = PpuNativeProgressWindow()
+        window.absorb(27, 34)
+        window.absorb(5, 34)
+        window.reset()
+        val fresh = window.absorb(5, 34)
+        assertEquals(32, fresh.first)
+        assertEquals(61, fresh.second)
+    }
+
+    @Test
+    fun nativeWindow_newBatchDoesNotRewindPastTitleHighWater() {
+        val window = PpuNativeProgressWindow()
+        window.absorb(52, 52)
+        window.reset()
+        val recycled = window.absorb(23, 33)
+        assertEquals(52, recycled.first)
+        assertEquals(52, recycled.second)
+    }
+
+    @Test
+    fun nativeWindow_largeElfFunctionCountIsNotRewound() {
+        val window = PpuNativeProgressWindow()
+        window.absorb(52, 52)
+        window.reset()
+        val eboot = window.absorb(81, 35557)
+        assertEquals(81, eboot.first)
+        assertEquals(35557, eboot.second)
+    }
+
+    @Test
+    fun liveDisplay_doesNotSitAtFullWhileStillCompiling() {
+        val full = OverallProgress(totalModules = 52, completedModules = 52, percent = 100)
+        val shown = PpuOverallProgressReducer.liveDisplay(full)
+        assertEquals(52, shown.completedModules)
+        assertEquals(52, shown.totalModules)
+        assertEquals(99, shown.percent)
+    }
+
+    @Test
+    fun liveDisplay_photographedNearFinishDoesNotInventOneMoreObject() {
+        val mgs = PpuOverallProgressReducer.liveDisplay(OverallProgress(192, 192, 100))
+        assertEquals(192, mgs.totalModules)
+        assertEquals(192, mgs.completedModules)
+        val later = PpuOverallProgressReducer.liveDisplay(OverallProgress(208, 208, 100))
+        assertEquals(208, later.totalModules)
+        assertEquals(99, later.percent)
+    }
+
+    @Test
+    fun liveDisplay_unknownTotalHasNoFabricatedDenominator() {
+        val shown = PpuOverallProgressReducer.liveDisplay(
+            OverallProgress(0, 192, 0),
+            discoveryComplete = false,
+        )
+        assertEquals(0, shown.totalModules)
+        assertEquals(192, shown.completedModules)
+        assertEquals(0, shown.percent)
+    }
+
+    @Test
+    fun mergeMonotonic_doesNotRegressLiveUi() {
+        val high = OverallProgress(totalModules = 34, completedModules = 27, percent = 79)
+        val rewind = OverallProgress(totalModules = 34, completedModules = 5, percent = 14)
+        val merged = PpuOverallProgressReducer.mergeMonotonic(high, rewind)
+        assertEquals(27, merged.completedModules)
+        assertEquals(34, merged.totalModules)
+        assertTrue(merged.completedModules >= 27)
+    }
+
+    @Test
+    fun reduceLiveProgress_growsTotalInsteadOfClampingCompleted() {
+        val grown = PpuOverallProgressReducer.reduceLiveProgress(
+            titleTotal = 34,
+            lastKnownCompleted = 27,
+            workerTotal = 68,
+            cachedBefore = 27,
+            currentBatchCompiled = 5,
+        )
+        assertEquals(32, grown.completedModules)
+        assertEquals(68, grown.totalModules)
+    }
 }

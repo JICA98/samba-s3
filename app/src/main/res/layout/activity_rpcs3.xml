@@ -29,6 +29,16 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent" />
 
+    <!-- Live logs sit above pad, below utility buttons and the in-game menu.
+         Locked mode is touch-through so gameplay still reaches PadOverlay. -->
+    <com.zenithblue.sambas3.ui.InteractivePassThroughComposeView
+        android:id="@+id/liveLogsOverlay"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:importantForAccessibility="no"
+        android:clickable="false"
+        android:focusable="false" />
+
     <androidx.compose.ui.platform.ComposeView
         android:id="@+id/ingameOverlay"
         android:layout_width="match_parent"

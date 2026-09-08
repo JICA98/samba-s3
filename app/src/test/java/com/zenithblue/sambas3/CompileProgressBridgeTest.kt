@@ -147,14 +147,41 @@ class CompileProgressBridgeTest {
         assertTrue(install.ppuActive)
         assertEquals("Progress: file 1 of 10, module 1 of 5 (2m remaining)", install.ppuMsg)
         // Simulate progress update in Kotlin install UI
-        CompileProgressBridge.injectForTest(ppuEvent(RPCSX.COMPILE_PHASE_PROGRESS, 80, 50, origin = RPCSX.COMPILE_ORIGIN_INSTALL, msg = "Progress: file 5 of 10, module 3 of 5 (1m remaining)"))
-        assertEquals(50, CompileProgressBridge.installState.value.ppuPercent)
+        CompileProgressBridge.injectForTest(ppuEvent(RPCSX.COMPILE_PHASE_PROGRESS, 80, 50, origin = RPCSX.COMPILE_ORIGIN_INSTALL, moduleDone = 3, moduleTotal = 5, msg = "Progress: file 5 of 10, module 3 of 5 (1m remaining)"))
+        assertEquals(60, CompileProgressBridge.installState.value.ppuPercent)
         assertTrue(CompileProgressBridge.installState.value.ppuActive)
         // Runtime also can be active concurrently via separate FGS (2000 vs 3000)
         CompileProgressBridge.injectForTest(ppuEvent(RPCSX.COMPILE_PHASE_BEGIN, 81, 0))
         assertTrue(CompileProgressBridge.state.value.ppuActive)
         assertTrue(CompileProgressBridge.installState.value.ppuActive)
         assertEquals(2, CompileProgressBridge.state.value.activeDomainCount + (if (CompileProgressBridge.installState.value.ppuActive) 1 else 0))
+    }
+
+    @Test
+    fun installProgressDoesNotRewindWhenNativeElfWindowResets() {
+        CompileProgressBridge.updateInstallStateForExternalWorker(
+            titleId = "BLUS30109",
+            jobId = 9L,
+            moduleDone = 27,
+            moduleTotal = 34,
+            percent = 79,
+            message = "module 27 of 34",
+            active = true,
+        )
+        CompileProgressBridge.updateInstallStateForExternalWorker(
+            titleId = "BLUS30109",
+            jobId = 9L,
+            moduleDone = 5,
+            moduleTotal = 34,
+            percent = 14,
+            message = "module 5 of 34",
+            active = true,
+        )
+        val install = CompileProgressBridge.installState.value
+        assertEquals(27, install.moduleDone)
+        assertEquals(34, install.moduleTotal)
+        assertEquals("module 27 of 34", install.ppuMsg)
+        assertTrue(install.ppuPercent >= 79)
     }
 
     @Test

@@ -1,6 +1,6 @@
 # Per-Game Fix Registry — SambaS3
 
-This directory tracks **per-title** compatibility, configs and loop results on the MediaTek reference device `Y5WWBMJVOZSK4HU8` (2311DRK48I/duchamp, Dimensity 8300 Ultra, Mali-G615 MC6, Valhall generation 4). It is the **single source of truth** for agents iterating toward correctly rendered, controllable gameplay.
+This directory tracks **per-title** compatibility, configs and loop results by title ID, GPU vendor/architecture, and exact GPU. It is the **single source of truth** for agents iterating toward correctly rendered, controllable gameplay.
 
 ## Structure
 
@@ -9,9 +9,11 @@ This directory tracks **per-title** compatibility, configs and loop results on t
 | `_template.md` | Copy for new titles. |
 | `BLUS31584-GTA-San-Andreas.md` | GTA SA — **in-game pass** after replacing the truncated `PS3DataMain.obb`; shader/steady-state FPS optimization remains open. |
 | `BLUS30443-Demons-Souls.md` | Demon's Souls — **in-game pass** after Write Color Buffers fix, JNI fallback bridge, and pre-boot curated defaults. |
-| `BLUS30758-Red-Dead-Redemption.md` | Red Dead Redemption — **3D rendering pass** on Turnip 26.3, WCB/RCB enabled, RSX tiling disabled, and Max SPURS Threads 4. |
+| `BLUS30758-Red-Dead-Redemption.md` | Red Dead Redemption — intro rendering only; post-intro black screen still reproduced on Adreno 750 / Turnip 26.2.99 with gpu_label active. See [current validation](../findings/2026-09-04-rdr-adreno750-gpulabel-validation.md). |
+| `BCUS98174/qualcomm-adreno/adreno-750/README.md` | The Last of Us — **fail** on OnePlus 13R / Adreno 750 / Turnip 26.2.99. Update 1.11 still ends in an SPU null DMA access and RSX-thread segfault; no stable 30 FPS gameplay pass. |
 | `GPU-COMPATIBILITY.md` | Global SambaS3 GPU-family forecast and verification matrix for Adreno, Mali/Immortalis, Xclipse/AMD and PowerVR. |
-| `<TITLEID>-<slug>.md` | Other titles as they are triaged. |
+| `<TITLEID>/<vendor-architecture>/<gpu-name>/README.md` | Preferred hierarchy for new device-specific game reports. |
+| `<TITLEID>-<slug>.md` | Legacy flat reports. |
 
 ## Workflow (use with skills `sambas3-game-launch` + `sambas3-logs`)
 

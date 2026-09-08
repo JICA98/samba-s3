@@ -354,6 +354,26 @@ class InGameMenuCoordinatorTest {
     }
 
     @Test
+    fun page_navigation_preserves_and_restores_selected_position() {
+        openMain()
+        coordinator.dispatch(InGameMenuIntent.ReportItemCount(InGamePage.Main, 8))
+        // Move to index 3 on Main
+        coordinator.moveSelection(3)
+        assertEquals(3, coordinator.state.value.selectedIndex)
+
+        // Navigate to Monitoring
+        coordinator.dispatch(InGameMenuIntent.OpenMonitoring)
+        awaitCondition { coordinator.state.value.currentPage == InGamePage.Monitoring }
+        assertEquals(0, coordinator.state.value.selectedIndex)
+
+        // Navigate back to Main
+        coordinator.dispatch(InGameMenuIntent.Back)
+        awaitCondition { coordinator.state.value.currentPage == InGamePage.Main }
+        // Restored back to index 3!
+        assertEquals(3, coordinator.state.value.selectedIndex)
+    }
+
+    @Test
     fun selection_wraps_within_exact_item_count() {
         openMain()
         coordinator.dispatch(InGameMenuIntent.ReportItemCount(InGamePage.Main, 5))
@@ -362,6 +382,38 @@ class InGameMenuCoordinatorTest {
         assertEquals(0, coordinator.state.value.selectedIndex)
         assertTrue(coordinator.moveSelection(-1))
         assertEquals(4, coordinator.state.value.selectedIndex)
+    }
+
+    @Test
+    fun selection_2d_navigates_grid_columns_and_rows() {
+        openMain()
+        coordinator.dispatch(InGameMenuIntent.ReportItemCount(InGamePage.Main, 10))
+        // Starts at index 0 (row 0, col 0)
+        assertEquals(0, coordinator.state.value.selectedIndex)
+
+        // Move right -> (row 0, col 1) = index 1
+        assertTrue(coordinator.moveSelection2D(dx = 1, dy = 0, columns = 2))
+        assertEquals(1, coordinator.state.value.selectedIndex)
+
+        // Move right again -> clamped at col 1
+        assertTrue(coordinator.moveSelection2D(dx = 1, dy = 0, columns = 2))
+        assertEquals(1, coordinator.state.value.selectedIndex)
+
+        // Move down -> (row 1, col 1) = index 3
+        assertTrue(coordinator.moveSelection2D(dx = 0, dy = 1, columns = 2))
+        assertEquals(3, coordinator.state.value.selectedIndex)
+
+        // Move left -> (row 1, col 0) = index 2
+        assertTrue(coordinator.moveSelection2D(dx = -1, dy = 0, columns = 2))
+        assertEquals(2, coordinator.state.value.selectedIndex)
+
+        // Move up -> (row 0, col 0) = index 0
+        assertTrue(coordinator.moveSelection2D(dx = 0, dy = -1, columns = 2))
+        assertEquals(0, coordinator.state.value.selectedIndex)
+
+        // Move up from top row wraps to bottom row -> (row 4, col 0) = index 8
+        assertTrue(coordinator.moveSelection2D(dx = 0, dy = -1, columns = 2))
+        assertEquals(8, coordinator.state.value.selectedIndex)
     }
 
     @Test
@@ -458,6 +510,17 @@ class InGameMenuCoordinatorTest {
     fun core_home_menu_row_never_appears() {
         val rows = mainRowDescriptors(InGameMenuCapabilities.EMPTY)
         assertTrue(rows.none { it.intent.toString().contains("Core", ignoreCase = true) })
+    }
+
+    @Test
+    fun live_logs_row_is_present_and_navigable() {
+        val rows = mainRowDescriptors(InGameMenuCapabilities.EMPTY)
+        assertTrue(rows.any { it.labelRes == com.zenithblue.sambas3.R.string.ingame_live_logs })
+        openMain()
+        coordinator.dispatch(InGameMenuIntent.OpenLiveLogs)
+        assertEquals(InGamePage.LiveLogs, coordinator.state.value.currentPage)
+        coordinator.dispatch(InGameMenuIntent.Back)
+        assertEquals(InGamePage.Main, coordinator.state.value.currentPage)
     }
 
     @Test

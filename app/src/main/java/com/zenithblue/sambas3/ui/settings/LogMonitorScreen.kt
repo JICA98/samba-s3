@@ -1,10 +1,7 @@
 package com.zenithblue.sambas3.ui.settings
 
-import android.content.ActivityNotFoundException
-import android.content.ClipData
 import android.content.Context
-import android.content.Intent
-import android.net.Uri
+import android.view.KeyEvent
 import android.widget.Toast
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.expandVertically
@@ -39,6 +36,7 @@ import androidx.compose.material3.FilterChipDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
@@ -64,13 +62,17 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.core.content.FileProvider
 import com.zenithblue.sambas3.LogEntry
 import com.zenithblue.sambas3.LogLevel
 import com.zenithblue.sambas3.LogMonitor
 import com.zenithblue.sambas3.LogSource
 import com.zenithblue.sambas3.R
 import com.zenithblue.sambas3.RPCSXColors
+import com.zenithblue.sambas3.logging.SessionExport
+import com.zenithblue.sambas3.logging.statusLabel
+import com.zenithblue.sambas3.ui.common.SambaScreenScaffold
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 
 // ---------------------------------------------------------------------------
 // Level / source color helpers
@@ -110,6 +112,8 @@ fun LogMonitorScreen(
     modifier: Modifier = Modifier,
     navigateBack: () -> Unit,
     isInSplitPane: Boolean = false,
+    onOpenCrashLogs: (() -> Unit)? = null,
+    selectedSessionId: String? = null,
 ) {
     var selectedLevel by remember { mutableStateOf<LogLevel?>(null) }
     var selectedSource by remember { mutableStateOf<LogSource?>(null) }
@@ -117,15 +121,34 @@ fun LogMonitorScreen(
     var filtersExpanded by remember { mutableStateOf(false) }
 
     val context = LocalContext.current
+    var historicalEntries by remember { mutableStateOf<List<com.zenithblue.sambas3.logging.UnifiedLogEntry>>(emptyList()) }
     DisposableEffect(context) {
-        // Log capture is an explicit diagnostic surface. Keeping logcat
-        // parsing and three disk writers alive during every game session
-        // adds avoidable CPU, I/O, and battery pressure.
-        LogMonitor.start(context)
-        onDispose { LogMonitor.stop() }
+        com.zenithblue.sambas3.logging.LogBroker.ensureStarted(context)
+        com.zenithblue.sambas3.logging.LogBroker.retainStream()
+        onDispose {
+            com.zenithblue.sambas3.logging.LogBroker.releaseStream()
+        }
     }
+    val liveSnapshot by com.zenithblue.sambas3.logging.LogBroker.snapshot.collectAsState()
+    val requestedId = selectedSessionId
+        ?: com.zenithblue.sambas3.logging.LogBroker.currentSessionId
+        ?: com.zenithblue.sambas3.logging.LogSessionStore.latest(context)?.sessionId
+    val logSession = remember(requestedId) {
+        requestedId?.let { com.zenithblue.sambas3.logging.LogSessionStore.read(context, it) }
+            ?: com.zenithblue.sambas3.logging.LogBroker.currentManifest
+    }
+    val viewingHistory = logSession != null && logSession.sessionId != com.zenithblue.sambas3.logging.LogBroker.currentSessionId
+    LaunchedEffect(requestedId, viewingHistory) {
+        historicalEntries = if (viewingHistory && requestedId != null) {
+            withContext(kotlinx.coroutines.Dispatchers.IO) {
+                com.zenithblue.sambas3.logging.LogBroker.hydrateSession(context, requestedId)
+            }
+        } else emptyList()
+    }
+    val sourceStatus by com.zenithblue.sambas3.logging.LogBroker.status.collectAsState()
 
-    val allLogs by LogMonitor.logs.collectAsState()
+    val unified = if (viewingHistory) historicalEntries else liveSnapshot.filter { requestedId == null || it.sessionId == requestedId || it.sessionId == null }
+    val allLogs = remember(unified) { unified.map { com.zenithblue.sambas3.logging.LogBroker.toLogEntry(it) } }
     val filtered by remember(allLogs, selectedLevel, selectedSource) {
         derivedStateOf {
             allLogs.filter { e ->
@@ -137,7 +160,8 @@ fun LogMonitorScreen(
 
     val listState = rememberLazyListState()
 
-    LaunchedEffect(filtered.size, autoScroll) {
+    val lastEventId = filtered.lastOrNull()?.id
+    LaunchedEffect(lastEventId, autoScroll) {
         if (autoScroll && filtered.isNotEmpty()) {
             listState.animateScrollToItem(filtered.size - 1)
         }
@@ -155,8 +179,39 @@ fun LogMonitorScreen(
         Column(
             modifier = modifier
                 .fillMaxSize()
-                .background(RPCSXColors.background)
+                .background(Color.Transparent)
         ) {
+            if (logSession != null) {
+                Column(Modifier.padding(horizontal = 12.dp, vertical = 8.dp), verticalArrangement = Arrangement.spacedBy(2.dp)) {
+                    Text(
+                        logSession.gameTitleSnapshot,
+                        color = RPCSXColors.primary,
+                        fontFamily = FontFamily.Monospace,
+                        fontWeight = FontWeight.Bold,
+                        fontSize = 13.sp,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis,
+                    )
+                    val meta = listOfNotNull(
+                        logSession.titleId,
+                        logSession.terminalState.name,
+                        logSession.driverLabel,
+                    ).joinToString(" · ")
+                    Text(meta, color = RPCSXColors.textSecondary, fontFamily = FontFamily.Monospace, fontSize = 10.sp)
+                    val statusLine = sourceStatus.entries.joinToString("  ") { (kind, status) ->
+                        "${kind.label}: ${kind.statusLabel(status)}"
+                    }.ifBlank { "Sources warming up" }
+                    Text(statusLine, color = RPCSXColors.textSecondary, fontFamily = FontFamily.Monospace, fontSize = 10.sp, maxLines = 2, overflow = TextOverflow.Ellipsis)
+                }
+            } else if (allLogs.isEmpty()) {
+                Text(
+                    "No log session yet. Launch a game to capture App / RPCSX logs. Existing files are listed below if present.",
+                    color = RPCSXColors.textSecondary,
+                    modifier = Modifier.padding(horizontal = 12.dp, vertical = 8.dp),
+                    fontFamily = FontFamily.Monospace,
+                    fontSize = 11.sp,
+                )
+            }
             // Filters header: summary + expand/collapse
             Row(
                 modifier = Modifier
@@ -308,61 +363,50 @@ fun LogMonitorScreen(
         }
     }
 
-    @Composable
-    fun TopBar() {
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(56.dp)
-                .background(RPCSXColors.background)
-                .drawBehind {
-                    drawLine(
-                        color = RPCSXColors.outlineVariant,
-                        start = Offset(0f, size.height),
-                        end = Offset(size.width, size.height),
-                        strokeWidth = 1.dp.toPx()
-                    )
+    // Full-screen scaffold: unified top bar (below notch), ambient blur behind,
+    // controller hints above the gesture nav bar. B/BACK handled by scaffold.
+    SambaScreenScaffold(
+        title = stringResource(R.string.log_monitor),
+        iconRes = R.drawable.ic_terminal,
+        onBack = navigateBack,
+        compact = isInSplitPane,
+        showHints = !isInSplitPane,
+        hints = listOf(
+            R.drawable.cross to "Select",
+            R.drawable.circle to "Back"
+        ),
+        onGamepadKey = { keyCode ->
+            when (keyCode) {
+                KeyEvent.KEYCODE_BUTTON_Y -> {
+                    autoScroll = !autoScroll
+                    true
                 }
-                .padding(horizontal = 8.dp),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            IconButton(onClick = navigateBack) {
-                Icon(
-                    painter = painterResource(R.drawable.ic_keyboard_arrow_left),
-                    contentDescription = null,
-                    tint = RPCSXColors.primary
-                )
+                else -> false
             }
-            Icon(
-                painter = painterResource(R.drawable.ic_terminal),
-                contentDescription = null,
-                tint = RPCSXColors.primary,
-                modifier = Modifier.size(20.dp)
-            )
-            Spacer(Modifier.width(8.dp))
-            Text(
-                text = stringResource(R.string.log_monitor).uppercase(),
-                color = RPCSXColors.primary,
-                fontFamily = FontFamily.Monospace,
-                fontWeight = FontWeight.Bold,
-                fontSize = 18.sp,
-                letterSpacing = 2.sp
+        },
+        actions = {
+            if (onOpenCrashLogs != null) {
+                OutlinedButton(
+                    onClick = onOpenCrashLogs,
+                    modifier = Modifier.height(32.dp),
+                    shape = RoundedCornerShape(6.dp),
+                    contentPadding = PaddingValues(horizontal = 10.dp, vertical = 2.dp),
+                ) {
+                    Text("CRASH HISTORY", style = MaterialTheme.typography.labelSmall)
+                }
+            }
+        },
+    ) {
+        Column(modifier = Modifier.fillMaxSize()) {
+            LogContent(modifier = Modifier.weight(1f))
+            LogBottomBar(
+                autoScroll = autoScroll,
+                onAutoScrollToggle = { autoScroll = !autoScroll },
+                onClear = { LogMonitor.clearLogs() },
+                showBackHint = false,
+                sessionId = logSession?.sessionId,
             )
         }
-    }
-
-    // Pin action bar under content so Clear / Auto-scroll / Share never get clipped
-    Column(modifier = modifier.fillMaxSize()) {
-        if (!isInSplitPane) {
-            TopBar()
-        }
-        LogContent(modifier = Modifier.weight(1f))
-        LogBottomBar(
-            autoScroll = autoScroll,
-            onAutoScrollToggle = { autoScroll = !autoScroll },
-            onClear = { LogMonitor.clearLogs() },
-            showBackHint = !isInSplitPane
-        )
     }
 }
 
@@ -475,6 +519,7 @@ private fun LogBottomBar(
     onAutoScrollToggle: () -> Unit,
     onClear: () -> Unit,
     showBackHint: Boolean,
+    sessionId: String? = null,
 ) {
     val context = LocalContext.current
     Column(
@@ -554,7 +599,7 @@ private fun LogBottomBar(
 
             IconButton(
                 onClick = {
-                    shareLogFiles(context)
+                    shareLogFiles(context, sessionId)
                 },
                 modifier = Modifier.size(36.dp)
             ) {
@@ -577,59 +622,12 @@ private fun LogBottomBar(
  * Share on-disk log files via system chooser.
  * Requires FileProvider authority `${packageName}.provider` + external-files logs path.
  */
-private fun shareLogFiles(context: Context) {
-    LogMonitor.flushWriters()
-    val files = LogMonitor.getAllLogFiles()
-    if (files.isEmpty()) {
+private fun shareLogFiles(context: Context, sessionId: String?) {
+    val id = sessionId ?: com.zenithblue.sambas3.logging.LogBroker.currentSessionId
+        ?: com.zenithblue.sambas3.logging.LogSessionStore.latest(context)?.sessionId
+    if (id == null) {
         Toast.makeText(context, context.getString(R.string.log_not_found), Toast.LENGTH_SHORT).show()
         return
     }
-
-    val authority = "${context.packageName}.provider"
-    val uris = ArrayList<Uri>(files.size)
-    for (file in files) {
-        try {
-            uris.add(FileProvider.getUriForFile(context, authority, file))
-        } catch (e: IllegalArgumentException) {
-            Toast.makeText(
-                context,
-                "Cannot share ${file.name}: ${e.message}",
-                Toast.LENGTH_LONG
-            ).show()
-            return
-        }
-    }
-    if (uris.isEmpty()) {
-        Toast.makeText(context, context.getString(R.string.log_not_found), Toast.LENGTH_SHORT).show()
-        return
-    }
-
-    val intent = if (uris.size == 1) {
-        Intent(Intent.ACTION_SEND).apply {
-            type = "text/plain"
-            putExtra(Intent.EXTRA_STREAM, uris[0])
-            clipData = ClipData.newUri(context.contentResolver, "log", uris[0])
-            addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
-        }
-    } else {
-        Intent(Intent.ACTION_SEND_MULTIPLE).apply {
-            type = "text/plain"
-            putParcelableArrayListExtra(Intent.EXTRA_STREAM, uris)
-            // ClipData needed so FLAG_GRANT_READ_URI_PERMISSION applies to all URIs
-            clipData = ClipData.newUri(context.contentResolver, "log", uris[0]).also { clip ->
-                for (i in 1 until uris.size) {
-                    clip.addItem(ClipData.Item(uris[i]))
-                }
-            }
-            addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
-        }
-    }
-
-    try {
-        context.startActivity(
-            Intent.createChooser(intent, context.getString(R.string.log_share_all))
-        )
-    } catch (_: ActivityNotFoundException) {
-        Toast.makeText(context, context.getString(R.string.no_activity_to_handle_action), Toast.LENGTH_SHORT).show()
-    }
+    SessionExport.shareSession(context, id)
 }

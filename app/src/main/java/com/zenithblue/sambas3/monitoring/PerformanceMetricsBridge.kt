@@ -21,15 +21,26 @@ object PerformanceMetricsBridge : MonitoringPerfSource {
     override fun read(): EmulatorMetrics? {
         val raw = runCatching { RPCSX.instance.getPerfMetricsJson() }.getOrNull()?.takeIf { it.isNotBlank() } ?: return null
         return PerformanceMetricsParser.parse(raw)?.let { parsed ->
-            parsed.metrics.also { metrics ->
+            val fallbackMetrics = runCatching { RPCSX.instance.getFallbackPerfJson() }
+                .getOrNull()?.takeIf { it.isNotBlank() }
+                ?.let { PerformanceMetricsParser.parse(it)?.metrics }
+            val merged = if (fallbackMetrics != null) {
+                PerformanceMetricsMerger.merge(parsed.metrics, fallbackMetrics)
+            } else {
+                PerformanceMetricsMerger.MergedMetrics(parsed.metrics, false)
+            }
+            merged.metrics.also { metrics ->
                 if (!runtimeGateLogged) {
                     runtimeGateLogged = true
                     android.util.Log.i(
                         "S3PERF",
-                        "export=1 payload_length=${raw.length} version=${parsed.version} " +
+                            "export=1 payload_length=${raw.length} version=${parsed.version} " +
                             "source=${metrics.fpsSource ?: "unknown"} presented=${metrics.presentedFrameCount ?: "null"} " +
+                            "vblank=${parsed.metrics.vblankCount ?: "null"}/${parsed.metrics.vblankDelta ?: "null"} " +
                             "fps=${metrics.fps ?: "null"} frametime_ms=${metrics.frameTimeMs ?: "null"} " +
                             "fps_samples=${metrics.fpsSamples.size} frametime_samples=${metrics.frameTimeSamples.size} " +
+                            "merged_fallback=${if (merged.frameSourceFallback) 1 else 0} " +
+                            "fallback_presented=${fallbackMetrics?.presentedFrameCount ?: "null"} " +
                             "ppu=${metrics.ppuCpuPercent ?: "null"} spu=${metrics.spuCpuPercent ?: "null"} " +
                             "rsx=${metrics.rsxCpuPercent ?: "null"} rsx_load=${metrics.rsxLoadPercent ?: "null"}"
                     )

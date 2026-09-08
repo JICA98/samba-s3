@@ -22,8 +22,8 @@ class PpuProcessFileLock private constructor(
         fun tryAcquire(context: Context, titleId: String): PpuProcessFileLock? {
             return try {
                 val locksDir = File(context.filesDir, "locks").apply { if (!exists()) mkdirs() }
-                val safeTitle = titleId.ifBlank { "unknown" }
-                val lockFile = File(locksDir, "ppu-install-$safeTitle.lock")
+                // RPCSX owns process-global VM/JIT state. Serialize all PPU phases and titles.
+                val lockFile = File(locksDir, "ppu-compile-global.lock")
                 val raf = RandomAccessFile(lockFile, "rw")
                 val channel = raf.channel
                 val lock = channel.tryLock() ?: run {

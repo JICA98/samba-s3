@@ -118,6 +118,9 @@ class GameLaunchSnapshotLiveInputsTest {
         val snap = GameLaunchRepository.snapshot(ctx, game(), inputs)
         assertTrue(snap.ppuUi.runtimePpu.progress == null || snap.ppuUi.runtimePpu.progress != 99)
         assertEquals(PpuPhaseState.Waiting, snap.ppuUi.runtimePpu.state)
+        assertEquals(PrepareAction.Locked, snap.ppuUi.prepareAction)
+        assertFalse(snap.canPlayFresh)
+        assertEquals("Waiting", snap.ppuStatus)
     }
 
     @Test
@@ -142,7 +145,7 @@ class GameLaunchSnapshotLiveInputsTest {
     }
 
     @Test
-    fun installReadyWithoutValidation_willPrepareOnStart() {
+    fun installReadyRuntimeNotStarted_requiresKotlinPreparation() {
         PpuReadinessStore.setPreRuntimeState(ctx, title, PreRuntimePpuState.READY)
         PpuReadinessStore.setRuntimeState(ctx, title, RuntimePpuState.NOT_STARTED)
         val inputs = LaunchRuntimeInputs(
@@ -156,9 +159,9 @@ class GameLaunchSnapshotLiveInputsTest {
             validatedByRealBootFrame = false,
         )
         val snap = GameLaunchRepository.snapshot(ctx, game(), inputs)
-        assertTrue(snap.ppuUi.startEnabled)
-        assertEquals("Will prepare on start", snap.ppuUi.runtimePpu.detail)
-        assertEquals(PrimaryStartLabel.StartAndPrepare, snap.ppuUi.primaryStartLabel)
+        assertFalse(snap.ppuUi.startEnabled)
+        assertEquals("Needs preparation", snap.ppuUi.runtimePpu.detail)
+        assertEquals(PrepareAction.Prepare, snap.ppuUi.prepareAction)
     }
 
     @Test

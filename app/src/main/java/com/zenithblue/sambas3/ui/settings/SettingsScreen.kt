@@ -5,15 +5,44 @@ import android.net.Uri
 import android.provider.DocumentsContract
 import android.util.Log
 import android.view.KeyEvent
+import android.view.InputDevice
+import android.view.MotionEvent
+import android.view.View
 import android.widget.Toast
 import androidx.activity.compose.BackHandler
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.WindowInsetsSides
+import androidx.compose.foundation.layout.offset
+import androidx.compose.foundation.layout.only
+import androidx.compose.foundation.layout.safeDrawing
+import androidx.compose.foundation.layout.statusBars
+import androidx.compose.foundation.layout.windowInsetsPadding
+import androidx.compose.foundation.lazy.grid.GridCells
+import androidx.compose.foundation.lazy.grid.GridItemSpan
+import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
+import androidx.compose.foundation.lazy.grid.items
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.Surface
+import androidx.compose.ui.draw.blur
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.focus.focusProperties
+import androidx.compose.ui.focus.onFocusChanged
+import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalConfiguration
+import androidx.compose.ui.text.font.FontFamily
+import androidx.compose.ui.text.style.TextOverflow
+import com.zenithblue.sambas3.ui.settings.components.safeCombinedClickable
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.runtime.mutableStateListOf
 import com.zenithblue.sambas3.ui.user.UsersScreen
 import com.zenithblue.sambas3.ui.drivers.GpuDriversScreen
 import com.zenithblue.sambas3.ui.settings.LogMonitorScreen
+import com.zenithblue.sambas3.ui.crash.CrashLogsHistoryScreen
 import androidx.compose.animation.animateContentSize
 import androidx.compose.animation.core.RepeatMode
 import androidx.compose.animation.core.animateFloat
@@ -47,6 +76,11 @@ import androidx.compose.material3.SearchBar
 import androidx.compose.material3.SearchBarDefaults
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarDefaults
+import androidx.compose.foundation.lazy.grid.rememberLazyGridState
+import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.ui.platform.LocalView
+import kotlin.math.abs
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
@@ -64,6 +98,7 @@ import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.input.key.KeyEventType
 import androidx.compose.ui.input.key.onKeyEvent
+import androidx.compose.ui.input.key.onPreviewKeyEvent
 import androidx.compose.ui.input.key.type
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.platform.LocalContext
@@ -142,45 +177,113 @@ fun ControllerHintStrip(
     Row(
         modifier = modifier
             .fillMaxWidth()
-            .height(36.dp)
-            .background(com.zenithblue.sambas3.RPCSXColors.surfaceContainerHigh)
+            .height(34.dp)
+            .background(Color(0xEE090C16))
             .drawBehind {
                 drawLine(
-                    color = com.zenithblue.sambas3.RPCSXColors.outlineVariant,
+                    color = Color(0x20C9A84C),
                     start = androidx.compose.ui.geometry.Offset(0f, 0f),
                     end = androidx.compose.ui.geometry.Offset(size.width, 0f),
                     strokeWidth = 1.dp.toPx()
                 )
             }
+            .windowInsetsPadding(WindowInsets.safeDrawing.only(WindowInsetsSides.Horizontal + WindowInsetsSides.Bottom))
             .padding(horizontal = 16.dp),
         horizontalArrangement = Arrangement.End,
         verticalAlignment = Alignment.CenterVertically
     ) {
         hints.forEachIndexed { index, (drawableId, label) ->
             if (index > 0) {
-                Spacer(modifier = Modifier.width(16.dp))
+                Spacer(modifier = Modifier.width(14.dp))
                 Box(
                     modifier = Modifier
                         .width(1.dp)
-                        .fillMaxHeight(0.5f)
-                        .background(com.zenithblue.sambas3.RPCSXColors.textDisabled)
+                        .fillMaxHeight(0.45f)
+                        .background(Color(0x30FFFFFF))
                 )
-                Spacer(modifier = Modifier.width(16.dp))
+                Spacer(modifier = Modifier.width(14.dp))
             }
             Row(
                 verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.spacedBy(8.dp)
+                horizontalArrangement = Arrangement.spacedBy(6.dp)
             ) {
                 Image(
                     painter = painterResource(id = drawableId),
                     contentDescription = null,
-                    modifier = Modifier.size(18.dp)
+                    modifier = Modifier.size(16.dp)
                 )
                 Text(
                     text = label.uppercase(),
                     color = if (drawableId == R.drawable.cross) com.zenithblue.sambas3.RPCSXColors.primary else com.zenithblue.sambas3.RPCSXColors.textSecondary,
                     style = MaterialTheme.typography.labelSmall,
-                    fontWeight = FontWeight.Bold
+                    fontWeight = FontWeight.Bold,
+                    fontFamily = FontFamily.Monospace
+                )
+            }
+        }
+    }
+}
+
+@Composable
+private fun AmbientSettingsBackground() {
+    com.zenithblue.sambas3.ui.common.SambaAmbientBackground()
+}
+
+private data class SettingDetailInfo(
+    val title: String,
+    val category: String,
+    val description: String,
+    val iconRes: Int,
+    val status: String,
+    val backend: String,
+    val subsystem: String,
+    val target: String,
+    val actionLabel: String,
+    val actionIconRes: Int = R.drawable.ic_keyboard_arrow_right
+)
+
+@Composable
+private fun DetailMetricCard(
+    modifier: Modifier = Modifier,
+    label: String,
+    value: String,
+    valueColor: Color = com.zenithblue.sambas3.RPCSXColors.textPrimary
+) {
+    Surface(
+        modifier = modifier,
+        shape = RoundedCornerShape(8.dp),
+        color = Color(0x350F1526),
+        border = BorderStroke(1.dp, Color(0x18FFFFFF))
+    ) {
+        Row(
+            modifier = Modifier.padding(horizontal = 7.dp, vertical = 6.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Box(
+                modifier = Modifier
+                    .width(2.dp)
+                    .height(18.dp)
+                    .background(com.zenithblue.sambas3.RPCSXColors.primary, RoundedCornerShape(1.dp))
+            )
+            Spacer(modifier = Modifier.width(6.dp))
+            Column {
+                Text(
+                    text = label,
+                    color = com.zenithblue.sambas3.RPCSXColors.textSecondary,
+                    fontSize = 8.sp,
+                    fontFamily = FontFamily.Monospace,
+                    fontWeight = FontWeight.Bold,
+                    letterSpacing = 0.5.sp
+                )
+                Text(
+                    text = value,
+                    color = valueColor,
+                    fontSize = 10.sp,
+                    fontFamily = FontFamily.SansSerif,
+                    fontWeight = FontWeight.Bold,
+                    maxLines = 2,
+                    lineHeight = 12.sp,
+                    overflow = TextOverflow.Ellipsis
                 )
             }
         }
@@ -190,187 +293,372 @@ fun ControllerHintStrip(
 @Composable
 fun SettingsDetailPane(
     focusedKey: String,
-    activeUser: String
+    activeUser: String,
+    isUltraWide: Boolean = true,
+    onAction: () -> Unit = {}
 ) {
-    val title: String
-    val description: String
-    val status: String
-    val backend: String
-
-    when (focusedKey) {
-        "internal_directory" -> {
-            title = "Storage Directory"
-            description = "Access the emulator's internal storage directory. Here you can manage cache, config files, shaders, and installed packages directly."
-            status = "ACTIVE"
-            backend = "LOCAL STORAGE"
-        }
+    val detail = when (focusedKey) {
+        "internal_directory" -> SettingDetailInfo(
+            title = "Storage Directory",
+            category = "FILE SYSTEM & CACHE",
+            description = "Access the emulator's internal storage directory. Manage cache, config files, shaders, firmware, and installed game packages directly on disk.",
+            iconRes = R.drawable.ic_folder,
+            status = "ACTIVE",
+            backend = "LOCAL STORAGE",
+            subsystem = "APP DATA VFS",
+            target = "FILES & SHADERS",
+            actionLabel = "OPEN FILE MANAGER",
+            actionIconRes = R.drawable.ic_folder
+        )
         "users" -> {
-            title = "User Profiles"
-            val username = com.zenithblue.sambas3.UserRepository.getUsername(activeUser)
-            description = "Manage local user accounts, game saves, and save data directories. Current active user is $username."
-            status = "ACTIVE"
-            backend = "PROFILE SYSTEM"
+            val username = UserRepository.getUsername(activeUser) ?: ""
+            SettingDetailInfo(
+                title = "User Profiles",
+                category = "ACCOUNT & SAVES",
+                description = "Manage local console profiles, save data folders, and user accounts. Active profile is currently set to '$username'.",
+                iconRes = R.drawable.ic_person,
+                status = "ACTIVE",
+                backend = "PROFILE SYSTEM",
+                subsystem = "DEV_HDD0/HOME",
+                target = username.uppercase(),
+                actionLabel = "MANAGE PROFILES",
+                actionIconRes = R.drawable.ic_person
+            )
         }
-        "advanced_settings" -> {
-            title = "Advanced Config"
-            description = "Configure core emulation parameters, CPU instruction set compilers, system variables, and file system path mappings."
-            status = "CONFIGURED"
-            backend = "RPCSX SYSTEM"
-        }
-        "custom_driver" -> {
-            title = "GPU Drivers"
+        "onboarding" -> SettingDetailInfo(
+            title = stringResource(R.string.onboarding_replay_title),
+            category = "SETUP WIZARD",
+            description = stringResource(R.string.onboarding_replay_description),
+            iconRes = R.drawable.ic_refresh,
+            status = stringResource(R.string.onboarding_ready),
+            backend = stringResource(R.string.onboarding_setup_guide),
+            subsystem = "FIRST LAUNCH",
+            target = "LIBRARIES & FW",
+            actionLabel = "RUN SETUP WIZARD",
+            actionIconRes = R.drawable.ic_refresh
+        )
+        "advanced_settings" -> SettingDetailInfo(
+            title = "Advanced Config",
+            category = "RPCSX CORE ENGINE",
+            description = "Configure core emulation parameters, CPU instruction set compilers (PPU/SPU LLVM), system variables, audio buffers, and file system path mappings.",
+            iconRes = R.drawable.tune,
+            status = "CONFIGURED",
+            backend = "RPCSX SYSTEM",
+            subsystem = "YAML CONFIG",
+            target = "CORE / GPU / AUDIO",
+            actionLabel = "OPEN ADVANCED SETTINGS",
+            actionIconRes = R.drawable.tune
+        )
+        "custom_driver" -> SettingDetailInfo(
+            title = "GPU Drivers",
+            category = "GRAPHICS ACCELERATION",
             description = if (BuildConfig.INCLUDE_BUNDLED_TURNIP_DRIVERS) {
                 "Select the Android system driver or offline Turnip packages included with Samba S3."
             } else {
                 "Load custom graphics drivers (like Turnip or custom Vulkan/Adreno drivers) to optimize rendering performance, fix graphical glitches, and improve stability."
-            }
-            status = if (com.zenithblue.sambas3.RPCSX.instance.supportsCustomDriverLoading()) "SUPPORTED" else "UNSUPPORTED"
-            backend = "VULKAN 1.3"
-        }
-        "onboarding" -> {
-            title = stringResource(R.string.onboarding_replay_title)
-            description = stringResource(R.string.onboarding_replay_description)
-            status = stringResource(R.string.onboarding_ready)
-            backend = stringResource(R.string.onboarding_setup_guide)
-        }
-        "controls" -> {
-            title = "Controller Bindings"
-            description = "Configure physical gamepad mappings, D-pad sensitivity, touch-screen overlays, haptic feedback, and input profiles."
-            status = "CONNECTED"
-            backend = "INPUT INTERFACE"
-        }
-        "share_logs" -> {
-            title = "System Logs"
-            description = "Export and share the emulator execution logs. Helpful for debugging crashes, verifying compatibility, and reporting bugs to the developers."
-            status = "READY"
-            backend = "TEXT/PLAIN"
-        }
-        "logs" -> {
-            title = "Log Monitor"
-            description = "Live streaming log viewer capturing RPCSX backend, kernel syscalls, Cell modules, Vulkan, GPU driver, and Android app logs in real-time. Logs are saved to separate files per category."
-            status = "LIVE"
-            backend = "LOGCAT"
-        }
-        "monitoring" -> {
-            title = "Performance Monitor"
-            description = "Configure the in-game FPS, frametime, RPCSX CPU, Android system, memory, thermal and battery overlay. Values unavailable on this device remain hidden."
-            status = "OPTIONAL"
-            backend = "COMPOSE / RPCSX"
-        }
-        "debug_controller" -> {
-            title = "Debug Controller"
-            description = "Agent ADB bridge for pad injection (DEBUG_PAD broadcasts) + coordinate 1632,873 calibration for Y5WWBMJVOZSK4HU8. Test controller without EULA timing, verify overlayPadData, and copy adb loops for per-game fixes."
-            status = "READY"
-            backend = "ADB/BROADCAST"
-        }
-        else -> {
-            title = "SambaS3 Core"
-            description = "Configure the heartbeat of your gaming experience. Adjust core frequency, cycle accuracy, and bios paths to optimize performance for seventh-generation console emulation."
-            status = "OPTIMIZED"
-            backend = "VULKAN 1.3"
-        }
+            },
+            iconRes = R.drawable.memory,
+            status = if (RPCSX.instance.supportsCustomDriverLoading()) "SUPPORTED" else "UNSUPPORTED",
+            backend = "VULKAN 1.3",
+            subsystem = "DRIVER LOADER",
+            target = "ADRENO / TURNIP",
+            actionLabel = "MANAGE GPU DRIVERS",
+            actionIconRes = R.drawable.memory
+        )
+        "controls" -> SettingDetailInfo(
+            title = "Controller Bindings",
+            category = "INPUT INTERFACE",
+            description = "Configure physical gamepad mappings, D-pad sensitivity, touch-screen overlays, haptic feedback, and input profiles.",
+            iconRes = R.drawable.gamepad,
+            status = "CONNECTED",
+            backend = "INPUT INTERFACE",
+            subsystem = "PAD SUBSYSTEM",
+            target = "KEYBOARD & PAD",
+            actionLabel = "CONFIGURE CONTROLLER",
+            actionIconRes = R.drawable.gamepad
+        )
+        "share_logs" -> SettingDetailInfo(
+            title = "System Logs",
+            category = "DIAGNOSTICS & SHARING",
+            description = "Export and share the emulator execution logs. Helpful for debugging crashes, verifying compatibility, and reporting bugs to the developers.",
+            iconRes = R.drawable.ic_share,
+            status = "READY",
+            backend = "TEXT/PLAIN",
+            subsystem = "LOG EXPORTER",
+            target = "SYSTEM SHARE",
+            actionLabel = "EXPORT LOG FILE",
+            actionIconRes = R.drawable.ic_share
+        )
+        "logs" -> SettingDetailInfo(
+            title = "Log Monitor",
+            category = "REAL-TIME TELEMETRY",
+            description = "Live streaming log viewer capturing RPCSX backend, kernel syscalls, Cell modules, Vulkan, GPU driver, and Android app logs in real-time.",
+            iconRes = R.drawable.ic_terminal,
+            status = "LIVE",
+            backend = "LOGCAT STREAM",
+            subsystem = "ASYNC LOG BUFFER",
+            target = "KERNEL & ENGINE",
+            actionLabel = "OPEN LOG MONITOR",
+            actionIconRes = R.drawable.ic_terminal
+        )
+        "crash_logs" -> SettingDetailInfo(
+            title = "Crash Logs History",
+            category = "CRASH DIAGNOSTICS",
+            description = "View diagnostics, backtraces, and logs for all crashed game sessions to investigate crashes and verify stability.",
+            iconRes = R.drawable.ic_restore,
+            status = "RECORDING",
+            backend = "CRASH RECOVERY",
+            subsystem = "SESSION JOURNAL",
+            target = "TOMBSTONES & TRACES",
+            actionLabel = "VIEW CRASH LOGS",
+            actionIconRes = R.drawable.ic_restore
+        )
+        "monitoring" -> SettingDetailInfo(
+            title = "Performance Monitor",
+            category = "IN-GAME OVERLAY",
+            description = "Configure the in-game FPS, frametime, RPCSX CPU, Android system, memory, thermal and battery telemetry overlay.",
+            iconRes = R.drawable.ic_video,
+            status = "ACTIVE",
+            backend = "COMPOSE / RPCSX",
+            subsystem = "HARDWARE SENSORS",
+            target = "HEADS-UP DISPLAY",
+            actionLabel = "CONFIGURE OVERLAY",
+            actionIconRes = R.drawable.ic_video
+        )
+        "patches" -> SettingDetailInfo(
+            title = stringResource(R.string.patch_manager),
+            category = "COMMUNITY ENHANCEMENTS",
+            description = stringResource(R.string.patch_manager_description),
+            iconRes = R.drawable.tune,
+            status = "AVAILABLE",
+            backend = "PATCH REPOSITORY",
+            subsystem = "RUNTIME PATCHES",
+            target = "TITLE ID DATABASE",
+            actionLabel = "OPEN PATCH MANAGER",
+            actionIconRes = R.drawable.tune
+        )
+        else -> SettingDetailInfo(
+            title = "SambaS3 Core",
+            category = "EMULATION ENGINE",
+            description = "Configure the heartbeat of your gaming experience. Adjust core frequency, cycle accuracy, and bios paths to optimize performance.",
+            iconRes = R.drawable.tune,
+            status = "OPTIMIZED",
+            backend = "VULKAN 1.3",
+            subsystem = "CORE SYSTEM",
+            target = "RPCSX ENGINE",
+            actionLabel = "OPEN SETTINGS",
+            actionIconRes = R.drawable.tune
+        )
     }
 
-    Box(
+    Column(
         modifier = Modifier
             .fillMaxSize()
-            .background(com.zenithblue.sambas3.RPCSXColors.surfaceOverlay.copy(alpha = 0.2f))
-            .drawBehind {
-                drawRect(
-                    color = com.zenithblue.sambas3.RPCSXColors.surfaceOverlay,
-                    topLeft = androidx.compose.ui.geometry.Offset(0f, 0f),
-                    size = size,
-                    style = androidx.compose.ui.graphics.drawscope.Stroke(width = 1.dp.toPx())
-                )
-            }
-            .padding(24.dp)
+            .padding(14.dp),
+        verticalArrangement = Arrangement.SpaceBetween
     ) {
         Column(
-            modifier = Modifier
-                .align(Alignment.BottomStart)
-                .fillMaxWidth(),
-            verticalArrangement = Arrangement.spacedBy(16.dp)
+            modifier = Modifier.fillMaxWidth(),
+            verticalArrangement = Arrangement.spacedBy(10.dp)
         ) {
-            Text(
-                text = title,
-                color = com.zenithblue.sambas3.RPCSXColors.primary,
-                fontFamily = androidx.compose.ui.text.font.FontFamily.Monospace,
-                fontWeight = FontWeight.Bold,
-                fontSize = 20.sp,
-                letterSpacing = 1.sp
-            )
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(12.dp)
+            ) {
+                Box(
+                    modifier = Modifier
+                        .size(46.dp)
+                        .background(
+                            Brush.radialGradient(
+                                colors = listOf(
+                                    com.zenithblue.sambas3.RPCSXColors.primary.copy(alpha = 0.25f),
+                                    Color(0x20141C30)
+                                )
+                            ),
+                            shape = RoundedCornerShape(12.dp)
+                        )
+                        .drawBehind {
+                            drawRoundRect(
+                                color = com.zenithblue.sambas3.RPCSXColors.primary.copy(alpha = 0.5f),
+                                cornerRadius = androidx.compose.ui.geometry.CornerRadius(12.dp.toPx()),
+                                style = Stroke(width = 1.dp.toPx())
+                            )
+                        },
+                    contentAlignment = Alignment.Center
+                ) {
+                    Icon(
+                        painter = painterResource(id = detail.iconRes),
+                        contentDescription = null,
+                        tint = com.zenithblue.sambas3.RPCSXColors.primary,
+                        modifier = Modifier.size(24.dp)
+                    )
+                }
 
-            Text(
-                text = description,
-                color = com.zenithblue.sambas3.RPCSXColors.textPrimary,
-                fontFamily = androidx.compose.ui.text.font.FontFamily.SansSerif,
-                fontSize = 14.sp,
-                lineHeight = 20.sp
-            )
+                Column(modifier = Modifier.weight(1f)) {
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(6.dp)
+                    ) {
+                        Box(
+                            modifier = Modifier
+                                .size(6.dp)
+                                .background(com.zenithblue.sambas3.RPCSXColors.primary, CircleShape)
+                        )
+                        Text(
+                            text = detail.category,
+                            color = com.zenithblue.sambas3.RPCSXColors.primaryDim,
+                            fontFamily = FontFamily.Monospace,
+                            fontSize = 10.sp,
+                            fontWeight = FontWeight.Bold,
+                            letterSpacing = 1.5.sp
+                        )
+                    }
+                    Text(
+                        text = detail.title,
+                        color = com.zenithblue.sambas3.RPCSXColors.textPrimary,
+                        fontSize = 18.sp,
+                        fontWeight = FontWeight.Bold,
+                        fontFamily = FontFamily.SansSerif,
+                        letterSpacing = 0.5.sp
+                    )
+                }
+
+                Surface(
+                    shape = RoundedCornerShape(20.dp),
+                    color = com.zenithblue.sambas3.RPCSXColors.primary.copy(alpha = 0.15f),
+                    border = BorderStroke(1.dp, com.zenithblue.sambas3.RPCSXColors.primary.copy(alpha = 0.4f))
+                ) {
+                    Row(
+                        modifier = Modifier.padding(horizontal = 9.dp, vertical = 4.dp),
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(5.dp)
+                    ) {
+                        Box(
+                            modifier = Modifier
+                                .size(5.dp)
+                                .background(com.zenithblue.sambas3.RPCSXColors.primary, CircleShape)
+                        )
+                        Text(
+                            text = detail.status,
+                            color = com.zenithblue.sambas3.RPCSXColors.primary,
+                            fontSize = 10.sp,
+                            fontWeight = FontWeight.Bold,
+                            fontFamily = FontFamily.Monospace
+                        )
+                    }
+                }
+            }
+
+            Surface(
+                modifier = Modifier.fillMaxWidth(),
+                shape = RoundedCornerShape(10.dp),
+                color = Color(0x600A0E18),
+                border = BorderStroke(1.dp, Color(0x18FFFFFF))
+            ) {
+                Text(
+                    text = detail.description,
+                    color = com.zenithblue.sambas3.RPCSXColors.textSecondary,
+                    fontSize = 12.sp,
+                    lineHeight = 17.sp,
+                    modifier = Modifier.padding(horizontal = 12.dp, vertical = 10.dp)
+                )
+            }
 
             Row(
-                horizontalArrangement = Arrangement.spacedBy(16.dp),
-                verticalAlignment = Alignment.CenterVertically
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(6.dp)
+            ) {
+                DetailMetricCard(
+                    modifier = Modifier.weight(1f),
+                    label = "STATUS",
+                    value = detail.status,
+                    valueColor = com.zenithblue.sambas3.RPCSXColors.primary
+                )
+                DetailMetricCard(
+                    modifier = Modifier.weight(1f),
+                    label = "BACKEND",
+                    value = detail.backend,
+                    valueColor = com.zenithblue.sambas3.RPCSXColors.textPrimary
+                )
+                DetailMetricCard(
+                    modifier = Modifier.weight(1f),
+                    label = "SUBSYSTEM",
+                    value = detail.subsystem,
+                    valueColor = com.zenithblue.sambas3.RPCSXColors.textPrimary
+                )
+                DetailMetricCard(
+                    modifier = Modifier.weight(1f),
+                    label = "TARGET",
+                    value = detail.target,
+                    valueColor = com.zenithblue.sambas3.RPCSXColors.textPrimary
+                )
+            }
+        }
+
+        Column(
+            modifier = Modifier.fillMaxWidth(),
+            verticalArrangement = Arrangement.spacedBy(8.dp)
+        ) {
+            Surface(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(38.dp)
+                    .clickable(onClick = onAction),
+                shape = RoundedCornerShape(8.dp),
+                color = com.zenithblue.sambas3.RPCSXColors.primary,
+                shadowElevation = 2.dp
             ) {
                 Row(
-                    modifier = Modifier
-                        .background(com.zenithblue.sambas3.RPCSXColors.surface)
-                        .drawBehind {
-                            drawLine(
-                                color = com.zenithblue.sambas3.RPCSXColors.primary,
-                                start = androidx.compose.ui.geometry.Offset(0f, 0f),
-                                end = androidx.compose.ui.geometry.Offset(0f, size.height),
-                                strokeWidth = 2.dp.toPx()
-                            )
-                        }
-                        .padding(horizontal = 12.dp, vertical = 8.dp),
+                    modifier = Modifier.fillMaxSize(),
+                    horizontalArrangement = Arrangement.Center,
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    Column {
-                        Text(
-                            text = "STATUS",
-                            color = com.zenithblue.sambas3.RPCSXColors.textSecondary,
-                            style = MaterialTheme.typography.labelSmall,
-                            fontWeight = FontWeight.Bold
-                        )
-                        Text(
-                            text = status,
-                            color = com.zenithblue.sambas3.RPCSXColors.primary,
-                            style = MaterialTheme.typography.bodyMedium,
-                            fontWeight = FontWeight.Bold
-                        )
-                    }
+                    Icon(
+                        painter = painterResource(id = detail.actionIconRes),
+                        contentDescription = null,
+                        tint = com.zenithblue.sambas3.RPCSXColors.onPrimary,
+                        modifier = Modifier.size(16.dp)
+                    )
+                    Spacer(Modifier.width(8.dp))
+                    Text(
+                        text = detail.actionLabel,
+                        color = com.zenithblue.sambas3.RPCSXColors.onPrimary,
+                        fontSize = 11.sp,
+                        fontWeight = FontWeight.Bold,
+                        fontFamily = FontFamily.Monospace,
+                        letterSpacing = 1.sp
+                    )
                 }
+            }
 
-                Row(
-                    modifier = Modifier
-                        .background(com.zenithblue.sambas3.RPCSXColors.surface)
-                        .drawBehind {
-                            drawLine(
-                                color = com.zenithblue.sambas3.RPCSXColors.primaryDim,
-                                start = androidx.compose.ui.geometry.Offset(0f, 0f),
-                                end = androidx.compose.ui.geometry.Offset(0f, size.height),
-                                strokeWidth = 2.dp.toPx()
-                            )
-                        }
-                        .padding(horizontal = 12.dp, vertical = 8.dp),
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Column {
-                        Text(
-                            text = "BACKEND",
-                            color = com.zenithblue.sambas3.RPCSXColors.textSecondary,
-                            style = MaterialTheme.typography.labelSmall,
-                            fontWeight = FontWeight.Bold
-                        )
-                        Text(
-                            text = backend,
-                            color = com.zenithblue.sambas3.RPCSXColors.textPrimary,
-                            style = MaterialTheme.typography.bodyMedium,
-                            fontWeight = FontWeight.Bold
-                        )
-                    }
-                }
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .background(Color(0x400A0E18), RoundedCornerShape(6.dp))
+                    .padding(horizontal = 10.dp, vertical = 5.dp),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.SpaceBetween
+            ) {
+                Text(
+                    text = "DEVICE: ${android.os.Build.MANUFACTURER.uppercase()} ${android.os.Build.MODEL.uppercase()}",
+                    color = com.zenithblue.sambas3.RPCSXColors.textSecondary.copy(alpha = 0.7f),
+                    fontSize = 9.sp,
+                    fontFamily = FontFamily.Monospace
+                )
+                Text(
+                    text = "ARCH: ${android.os.Build.SUPPORTED_ABIS.firstOrNull()?.uppercase() ?: "ARM64"}",
+                    color = com.zenithblue.sambas3.RPCSXColors.textSecondary.copy(alpha = 0.7f),
+                    fontSize = 9.sp,
+                    fontFamily = FontFamily.Monospace
+                )
+                Text(
+                    text = if (isUltraWide) "DISPLAY: 21:9 WIDESCREEN" else "DISPLAY: WIDESCREEN",
+                    color = com.zenithblue.sambas3.RPCSXColors.primaryDim,
+                    fontSize = 9.sp,
+                    fontFamily = FontFamily.Monospace,
+                    fontWeight = FontWeight.Bold
+                )
             }
         }
     }
@@ -863,115 +1151,113 @@ fun AdvancedSettingsScreen(
 
     @Composable
     fun AdvancedTopBar(compact: Boolean = false) {
+        if (!isSearching) {
+            com.zenithblue.sambas3.ui.common.SambaTopBar(
+                title = displayTitle,
+                iconRes = R.drawable.tune,
+                onBack = navigateBack,
+                compact = compact,
+                actions = {
+                    IconButton(onClick = { isSearching = true }) {
+                        Icon(
+                            painter = painterResource(id = R.drawable.ic_search),
+                            contentDescription = "Search",
+                            tint = com.zenithblue.sambas3.RPCSXColors.primary
+                        )
+                    }
+                }
+            )
+            return
+        }
+        // Search mode: same unified container, back exits search.
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .height(if (compact) 48.dp else 56.dp)
-                .background(com.zenithblue.sambas3.RPCSXColors.background)
+                .height(if (compact) 48.dp else 52.dp)
+                .background(Color(0xEE090C16))
+                .drawBehind {
+                    drawLine(
+                        color = Color(0x20C9A84C),
+                        start = androidx.compose.ui.geometry.Offset(0f, size.height),
+                        end = androidx.compose.ui.geometry.Offset(size.width, size.height),
+                        strokeWidth = 1.dp.toPx()
+                    )
+                }
+                .windowInsetsPadding(WindowInsets.statusBars)
+                .windowInsetsPadding(WindowInsets.safeDrawing.only(WindowInsetsSides.Horizontal))
                 .padding(horizontal = if (compact) 8.dp else 16.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            IconButton(
-                onClick = {
-                    if (isSearching) {
+            Surface(
+                shape = CircleShape,
+                color = Color(0x20C9A84C),
+                border = BorderStroke(1.dp, Color(0x35C9A84C)),
+                modifier = Modifier.size(if (compact) 30.dp else 34.dp)
+            ) {
+                IconButton(
+                    onClick = {
                         isSearching = false
                         searchQuery = ""
-                    } else {
-                        navigateBack()
-                    }
-                },
-                modifier = if (!compact) Modifier.padding(end = 8.dp) else Modifier
-            ) {
-                Icon(
-                    painter = painterResource(id = R.drawable.ic_keyboard_arrow_left),
-                    contentDescription = null,
-                    tint = com.zenithblue.sambas3.RPCSXColors.primary
-                )
+                    },
+                    modifier = Modifier.fillMaxSize()
+                ) {
+                    Icon(
+                        painter = painterResource(id = R.drawable.ic_keyboard_arrow_left),
+                        contentDescription = "Back",
+                        tint = com.zenithblue.sambas3.RPCSXColors.primary,
+                        modifier = Modifier.size(if (compact) 18.dp else 20.dp)
+                    )
+                }
             }
 
-            if (isSearching) {
-                var expanded by remember { mutableStateOf(false) }
-                CompositionLocalProvider(
-                    LocalTextStyle provides MaterialTheme.typography.bodyLarge.copy(fontSize = 16.sp)
-                ) {
-                    SearchBar(
-                        expanded = expanded,
-                        onExpandedChange = {},
-                        modifier = Modifier
-                            .weight(1f)
-                            .animateContentSize(),
-                        windowInsets = WindowInsets(0, 0, 0, 0),
-                        inputField = {
-                            SearchBarDefaults.InputField(
-                                query = searchQuery,
-                                onQueryChange = { searchQuery = it },
-                                onSearch = { expanded = false },
-                                placeholder = { Text(stringResource(R.string.search)) },
-                                leadingIcon = {
-                                    Icon(painter = painterResource(id = R.drawable.ic_search), null)
-                                },
-                                trailingIcon = {
-                                    IconButton(onClick = {
-                                        if (searchQuery.isNotEmpty()) {
-                                            searchQuery = ""
-                                        } else {
-                                            isSearching = false
-                                        }
-                                    }) {
-                                        Icon(painter = painterResource(id = R.drawable.ic_close), null)
+            Spacer(modifier = Modifier.width(8.dp))
+            var expanded by remember { mutableStateOf(false) }
+            CompositionLocalProvider(
+                LocalTextStyle provides MaterialTheme.typography.bodyLarge.copy(fontSize = 16.sp)
+            ) {
+                SearchBar(
+                    expanded = expanded,
+                    onExpandedChange = {},
+                    modifier = Modifier
+                        .weight(1f)
+                        .animateContentSize(),
+                    windowInsets = WindowInsets(0, 0, 0, 0),
+                    inputField = {
+                        SearchBarDefaults.InputField(
+                            query = searchQuery,
+                            onQueryChange = { searchQuery = it },
+                            onSearch = { expanded = false },
+                            placeholder = { Text(stringResource(R.string.search)) },
+                            leadingIcon = {
+                                Icon(painter = painterResource(id = R.drawable.ic_search), null)
+                            },
+                            trailingIcon = {
+                                IconButton(onClick = {
+                                    if (searchQuery.isNotEmpty()) {
+                                        searchQuery = ""
+                                    } else {
+                                        isSearching = false
                                     }
-                                },
-                                expanded = expanded,
-                                onExpandedChange = {}
-                            )
-                        }
-                    ) {}
-                }
-            } else {
-                if (!compact) {
-                    Icon(
-                        painter = painterResource(id = R.drawable.tune),
-                        contentDescription = null,
-                        tint = com.zenithblue.sambas3.RPCSXColors.primary,
-                        modifier = Modifier.size(24.dp)
-                    )
-                    Spacer(modifier = Modifier.width(12.dp))
-                } else {
-                    Spacer(modifier = Modifier.width(8.dp))
-                }
-                Text(
-                    text = displayTitle.uppercase(),
-                    color = com.zenithblue.sambas3.RPCSXColors.primary,
-                    fontFamily = androidx.compose.ui.text.font.FontFamily.Monospace,
-                    fontWeight = FontWeight.Bold,
-                    fontSize = if (compact) 16.sp else 18.sp,
-                    letterSpacing = 2.sp,
-                    maxLines = 1,
-                    modifier = Modifier.weight(1f)
-                )
-                IconButton(onClick = { isSearching = true }) {
-                    Icon(
-                        painter = painterResource(id = R.drawable.ic_search),
-                        contentDescription = "Search",
-                        tint = com.zenithblue.sambas3.RPCSXColors.primary
-                    )
-                }
+                                }) {
+                                    Icon(painter = painterResource(id = R.drawable.ic_close), null)
+                                }
+                            },
+                            expanded = expanded,
+                            onExpandedChange = {}
+                        )
+                    }
+                ) {}
             }
         }
     }
 
     @Composable
     fun WideAdvancedBody(contentPadding: PaddingValues) {
-        // Only folder nodes on the left. Leaf settings (have "type") are NOT categories —
-        // selecting them previously left an empty right pane ("dummy screen").
         val categories = remember(settings) {
             settings.keys().asSequence().filter { key ->
                 isSettingsFolder(settings.optJSONObject(key))
             }.toList()
         }
-        // Keep the user's category across canonical-tree refreshes after a
-        // successful write. Only recover to the first category if the backend
-        // no longer exposes the selected one.
         var selectedCategoryKey by remember(path) { mutableStateOf("") }
         LaunchedEffect(settings, categories) {
             if (selectedCategoryKey !in categories) {
@@ -986,47 +1272,64 @@ fun AdvancedSettingsScreen(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(contentPadding)
-                .background(com.zenithblue.sambas3.RPCSXColors.background),
-            horizontalArrangement = Arrangement.spacedBy(16.dp)
+                .windowInsetsPadding(WindowInsets.safeDrawing.only(WindowInsetsSides.Horizontal))
+                .padding(horizontal = 14.dp, vertical = 10.dp),
+            horizontalArrangement = Arrangement.spacedBy(14.dp)
         ) {
-            LazyColumn(
+            Surface(
                 modifier = Modifier
                     .weight(1f)
                     .fillMaxHeight(),
-            ) {
-                item {
-                    Spacer(modifier = Modifier.height(16.dp))
-                }
-                items(categories) { category ->
-                    HomePreference(
-                        title = category,
-                        icon = {
-                            Icon(
-                                painter = painterResource(id = advancedSettingIconRes(category)),
-                                contentDescription = null
-                            )
-                        },
-                        description = "",
-                        onClick = { selectedCategoryKey = category },
-                        onFocusChanged = { if (it) selectedCategoryKey = category }
+                shape = RoundedCornerShape(16.dp),
+                color = Color(0xCC0E1424),
+                border = BorderStroke(
+                    1.dp,
+                    Brush.verticalGradient(
+                        listOf(
+                            Color(0x33C9A84C),
+                            Color(0x15FFFFFF),
+                            Color(0x06FFFFFF)
+                        )
                     )
+                )
+            ) {
+                LazyColumn(
+                    modifier = Modifier.fillMaxSize(),
+                    contentPadding = PaddingValues(horizontal = 8.dp, vertical = 8.dp),
+                    verticalArrangement = Arrangement.spacedBy(4.dp)
+                ) {
+                    item {
+                        SettingsCategoryHeader("CORE CATEGORIES")
+                    }
+                    items(categories) { category ->
+                        SettingsNavCard(
+                            title = category,
+                            subtitle = "",
+                            iconRes = advancedSettingIconRes(category),
+                            isSelected = selectedCategoryKey == category,
+                            onClick = { selectedCategoryKey = category },
+                            onFocusChanged = { if (it) selectedCategoryKey = category }
+                        )
+                    }
                 }
             }
 
-            Box(
+            Surface(
                 modifier = Modifier
                     .weight(2f)
-                    .fillMaxHeight()
-                    .padding(end = 16.dp, top = 16.dp, bottom = 16.dp)
-                    .background(com.zenithblue.sambas3.RPCSXColors.surfaceOverlay.copy(alpha = 0.2f))
-                    .drawBehind {
-                        drawRect(
-                            color = com.zenithblue.sambas3.RPCSXColors.surfaceOverlay,
-                            topLeft = androidx.compose.ui.geometry.Offset(0f, 0f),
-                            size = size,
-                            style = androidx.compose.ui.graphics.drawscope.Stroke(width = 1.dp.toPx())
+                    .fillMaxHeight(),
+                shape = RoundedCornerShape(16.dp),
+                color = Color(0xD90E1424),
+                border = BorderStroke(
+                    1.dp,
+                    Brush.verticalGradient(
+                        listOf(
+                            Color(0x40C9A84C),
+                            Color(0x18FFFFFF),
+                            Color(0x08FFFFFF)
                         )
-                    }
+                    )
+                )
             ) {
                 val categoryPath =
                     if (path.isEmpty()) "@@$selectedCategoryKey" else "$path@@$selectedCategoryKey"
@@ -1039,30 +1342,75 @@ fun AdvancedSettingsScreen(
 
                 AdvancedSettingsContent(
                     keys = filteredKeysForCategory,
-                    modifier = Modifier.fillMaxSize()
+                    modifier = Modifier.fillMaxSize(),
+                    contentPadding = PaddingValues(horizontal = 8.dp, vertical = 8.dp)
                 )
             }
         }
     }
 
+    // Controller: Circle/BACK exits search or goes back.
+    // Focus is requested so D-pad/stick traversal works immediately.
+    val advancedFocus = remember { FocusRequester() }
+    val advancedView = LocalView.current
+    fun handleAdvancedKey(keyCode: Int): Boolean {
+        return when (keyCode) {
+            KeyEvent.KEYCODE_BUTTON_B, KeyEvent.KEYCODE_BACK -> {
+                if (isSearching) {
+                    isSearching = false
+                    searchQuery = ""
+                } else {
+                    navigateBack()
+                }
+                true
+            }
+            else -> false
+        }
+    }
+    DisposableEffect(advancedView) {
+        val listener = View.OnKeyListener { _, keyCode, event ->
+            if (event.action != KeyEvent.ACTION_DOWN) return@OnKeyListener false
+            handleAdvancedKey(keyCode)
+        }
+        advancedView.setOnKeyListener(listener)
+        onDispose { advancedView.setOnKeyListener(null) }
+    }
+    LaunchedEffect(Unit) {
+        try { advancedFocus.requestFocus() } catch (_: Exception) {}
+    }
+    val advancedKeyModifier = Modifier
+        .fillMaxSize()
+        .focusRequester(advancedFocus)
+        .focusable()
+        .onPreviewKeyEvent { keyEvent ->
+            if (keyEvent.type != KeyEventType.KeyDown) return@onPreviewKeyEvent false
+            handleAdvancedKey(keyEvent.nativeKeyEvent.keyCode)
+        }
+
     if (isInSplitPane) {
-        Column(modifier = Modifier.fillMaxSize()) {
-            AdvancedTopBar(compact = true)
-            AdvancedSettingsContent(keys = filteredKeys, contentPadding = PaddingValues(0.dp))
+        Box(modifier = advancedKeyModifier) {
+            AmbientSettingsBackground()
+            Column(modifier = Modifier.fillMaxSize()) {
+                AdvancedTopBar(compact = true)
+                AdvancedSettingsContent(keys = filteredKeys, contentPadding = PaddingValues(0.dp))
+            }
         }
     } else {
-        Scaffold(
-            modifier = modifier,
-            topBar = { AdvancedTopBar() },
-            bottomBar = {
-                ControllerHintStrip(
-                    hints = listOf(
-                        R.drawable.cross to "Select",
-                        R.drawable.circle to "Back"
+        Box(modifier = advancedKeyModifier) {
+            AmbientSettingsBackground()
+            Scaffold(
+                modifier = modifier.windowInsetsPadding(WindowInsets.safeDrawing),
+                containerColor = Color.Transparent,
+                topBar = { AdvancedTopBar() },
+                bottomBar = {
+                    ControllerHintStrip(
+                        hints = listOf(
+                            R.drawable.cross to "Select",
+                            R.drawable.circle to "Back"
+                        )
                     )
-                )
-            }
-        ) { contentPadding ->
+                }
+            ) { contentPadding ->
             val folderCount = remember(settings) {
                 settings.keys().asSequence().count { key ->
                     isSettingsFolder(settings.optJSONObject(key))
@@ -1073,6 +1421,187 @@ fun AdvancedSettingsScreen(
                 WideAdvancedBody(contentPadding = contentPadding)
             } else {
                 AdvancedSettingsContent(keys = filteredKeys, contentPadding = contentPadding)
+            }
+            }
+        }
+    }
+}
+
+@Composable
+private fun SettingsCategoryHeader(text: String) {
+    Text(
+        text = text,
+        color = com.zenithblue.sambas3.RPCSXColors.primaryDim,
+        fontSize = 10.sp,
+        fontWeight = FontWeight.Bold,
+        fontFamily = FontFamily.Monospace,
+        letterSpacing = 1.5.sp,
+        modifier = Modifier.padding(start = 8.dp, top = 8.dp, bottom = 4.dp)
+    )
+}
+
+@Composable
+private fun ControllerHintBadge(
+    modifier: Modifier = Modifier,
+    glyph: String,
+    label: String,
+    isPrimary: Boolean = false,
+    isAccent: Boolean = false
+) {
+    Row(
+        modifier = modifier,
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(5.dp)
+    ) {
+        Surface(
+            shape = RoundedCornerShape(3.dp),
+            color = when {
+                isPrimary -> com.zenithblue.sambas3.RPCSXColors.primary.copy(alpha = 0.22f)
+                isAccent -> Color(0x354CC9A8)
+                else -> com.zenithblue.sambas3.RPCSXColors.textSecondary.copy(alpha = 0.15f)
+            },
+            border = BorderStroke(
+                1.dp,
+                when {
+                    isPrimary -> com.zenithblue.sambas3.RPCSXColors.primary
+                    isAccent -> Color(0x804CC9A8)
+                    else -> com.zenithblue.sambas3.RPCSXColors.textSecondary.copy(alpha = 0.6f)
+                }
+            )
+        ) {
+            Text(
+                text = glyph,
+                modifier = Modifier.padding(horizontal = 4.dp, vertical = 1.dp),
+                style = MaterialTheme.typography.labelSmall.copy(
+                    fontSize = 10.sp,
+                    fontWeight = FontWeight.Bold
+                ),
+                color = when {
+                    isPrimary -> com.zenithblue.sambas3.RPCSXColors.primary
+                    isAccent -> Color(0xFF4CC9A8)
+                    else -> com.zenithblue.sambas3.RPCSXColors.textSecondary
+                }
+            )
+        }
+        Text(
+            text = label,
+            style = MaterialTheme.typography.labelSmall.copy(
+                fontSize = 11.sp,
+                fontWeight = FontWeight.SemiBold
+            ),
+            color = if (isPrimary) com.zenithblue.sambas3.RPCSXColors.primary else com.zenithblue.sambas3.RPCSXColors.textSecondary
+        )
+    }
+}
+
+@Composable
+private fun SettingsBottomBar(
+    onYamlClick: () -> Unit = {}
+) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .height(36.dp)
+            .background(Color(0xEE090C16))
+            .drawBehind {
+                drawLine(
+                    color = Color(0x20C9A84C),
+                    start = androidx.compose.ui.geometry.Offset(0f, 0f),
+                    end = androidx.compose.ui.geometry.Offset(size.width, 0f),
+                    strokeWidth = 1.dp.toPx()
+                )
+            }
+            .padding(horizontal = 16.dp),
+        horizontalArrangement = Arrangement.End,
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Row(
+            horizontalArrangement = Arrangement.spacedBy(14.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            ControllerHintBadge(glyph = "D-PAD", label = "NAVIGATE")
+            ControllerHintBadge(glyph = "✕", label = "SELECT", isPrimary = true)
+            ControllerHintBadge(glyph = "○", label = "BACK")
+            ControllerHintBadge(
+                glyph = "▲",
+                label = "YAML CONFIG",
+                isAccent = true,
+                modifier = Modifier.clickable(onClick = onYamlClick)
+            )
+        }
+    }
+}
+
+@Composable
+private fun SettingsNavCard(
+    title: String,
+    subtitle: String,
+    iconRes: Int,
+    isSelected: Boolean,
+    onClick: () -> Unit,
+    onLongClick: () -> Unit = {},
+    onFocusChanged: (Boolean) -> Unit = {},
+    extraBadge: (@Composable () -> Unit)? = null
+) {
+    Surface(
+        modifier = Modifier
+            .fillMaxWidth()
+            .focusProperties { canFocus = false }
+            .safeCombinedClickable(
+                onClick = onClick,
+                onLongClick = onLongClick
+            ),
+        shape = RoundedCornerShape(12.dp),
+        color = if (isSelected) Color(0x35C9A84C) else Color(0x1D141D2E),
+        border = BorderStroke(
+            width = if (isSelected) 1.5.dp else 1.dp,
+            color = if (isSelected) com.zenithblue.sambas3.RPCSXColors.primary else Color(0x18FFFFFF)
+        )
+    ) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 12.dp, vertical = 9.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Surface(
+                shape = CircleShape,
+                color = if (isSelected) com.zenithblue.sambas3.RPCSXColors.primary.copy(alpha = 0.25f) else Color(0x20FFFFFF),
+                border = BorderStroke(1.dp, if (isSelected) com.zenithblue.sambas3.RPCSXColors.primary.copy(alpha = 0.6f) else Color(0x10FFFFFF)),
+                modifier = Modifier.size(34.dp)
+            ) {
+                Box(contentAlignment = Alignment.Center) {
+                    Icon(
+                        painter = painterResource(id = iconRes),
+                        contentDescription = null,
+                        tint = if (isSelected) com.zenithblue.sambas3.RPCSXColors.primary else com.zenithblue.sambas3.RPCSXColors.textSecondary,
+                        modifier = Modifier.size(18.dp)
+                    )
+                }
+            }
+            Spacer(modifier = Modifier.width(10.dp))
+            Column(modifier = Modifier.weight(1f)) {
+                Text(
+                    text = title,
+                    color = if (isSelected) com.zenithblue.sambas3.RPCSXColors.primary else com.zenithblue.sambas3.RPCSXColors.textPrimary,
+                    fontSize = 13.sp,
+                    fontWeight = FontWeight.Bold,
+                    fontFamily = FontFamily.SansSerif,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis
+                )
+                Text(
+                    text = subtitle,
+                    color = com.zenithblue.sambas3.RPCSXColors.textSecondary,
+                    fontSize = 11.sp,
+                    fontFamily = FontFamily.SansSerif,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis
+                )
+            }
+            if (extraBadge != null) {
+                Spacer(modifier = Modifier.width(6.dp))
+                extraBadge()
             }
         }
     }
@@ -1091,53 +1620,453 @@ fun SettingsScreen(
     onFocusedKeyChanged: (String) -> Unit,
     onActiveSettingKeyChanged: (String?) -> Unit,
 ) {
-    val topBarScrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior()
     val activeUser by remember { UserRepository.activeUser }
-    val advancedSettingsPathStack = remember { mutableStateListOf("") }
-    val configuration = androidx.compose.ui.platform.LocalConfiguration.current
-    val isWideScreen = configuration.screenWidthDp > 600
+    val context = LocalContext.current
+    val focusRequester = remember { FocusRequester() }
 
-    BackHandler(enabled = activeSettingKey != null) {
-        onActiveSettingKeyChanged(null)
+    val configPicker = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.OpenDocument(),
+        onResult = { uri: Uri? ->
+            uri?.let {
+                if (FileUtil.importConfig(context, it))
+                    onRefresh()
+            }
+        }
+    )
+
+    val configExporter = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.CreateDocument("application/x-yaml"),
+        onResult = { uri: Uri? ->
+            uri?.let { FileUtil.exportConfig(context, it) }
+        }
+    )
+
+    fun openYamlManager() {
+        AlertDialogQueue.showDialog(
+            title = context.getString(R.string.manage_settings),
+            confirmText = context.getString(R.string.export),
+            dismissText = context.getString(R.string.import_),
+            onDismiss = { configPicker.launch(arrayOf("*/*")) },
+            onConfirm = { configExporter.launch("config.yml") }
+        )
     }
 
-    Scaffold(
-        modifier = modifier,
-        topBar = {
+    fun executeAction(key: String) {
+        when (key) {
+            "internal_directory" -> {
+                if (!FileUtil.launchInternalDir(context)) {
+                    AlertDialogQueue.showDialog(
+                        context.getString(R.string.failed_to_view_internal_dir),
+                        context.getString(R.string.no_activity_to_handle_action)
+                    )
+                }
+            }
+            "users" -> navigateTo("users")
+            "onboarding" -> navigateTo(ONBOARDING_ROUTE)
+            "advanced_settings" -> navigateTo("settings@@$")
+            "custom_driver" -> {
+                if (RPCSX.instance.supportsCustomDriverLoading()) {
+                    navigateTo("drivers")
+                } else {
+                    AlertDialogQueue.showDialog(
+                        title = context.getString(R.string.custom_driver_not_supported),
+                        message = context.getString(R.string.custom_driver_not_supported_description),
+                        confirmText = context.getString(R.string.close),
+                        dismissText = ""
+                    )
+                }
+            }
+            "controls" -> navigateTo("controls")
+            "monitoring" -> navigateTo("monitoring")
+            "logs" -> navigateTo("logs")
+            "crash_logs" -> navigateTo("crash_logs")
+            "share_logs" -> {
+                val sessionId = com.zenithblue.sambas3.logging.LogBroker.currentSessionId
+                    ?: com.zenithblue.sambas3.logging.LogSessionStore.latest(context)?.sessionId
+                if (sessionId == null || !com.zenithblue.sambas3.logging.SessionExport.shareSession(context, sessionId)) {
+                    Toast.makeText(context, context.getString(R.string.log_not_found), Toast.LENGTH_SHORT).show()
+                }
+            }
+            "patches" -> navigateTo("patches")
+        }
+    }
+
+    val settingKeys = remember {
+        listOfNotNull(
+            "internal_directory",
+            "users",
+            "advanced_settings",
+            "onboarding",
+            "custom_driver",
+            "controls",
+            "monitoring",
+            "logs",
+            "crash_logs",
+            "share_logs",
+            if (!BuildConfig.IS_PLAYSTORE_BUILD) "patches" else null
+        )
+    }
+
+    val totalItems = settingKeys.size
+    val configuration = LocalConfiguration.current
+    val numColumns = if (configuration.screenWidthDp >= 800) 3 else if (configuration.screenWidthDp >= 500) 2 else 1
+    val gridState = rememberLazyGridState()
+    val rootFocusRequester = remember { FocusRequester() }
+
+    var focusedIndex by remember {
+        mutableIntStateOf(settingKeys.indexOf(focusedKey).coerceAtLeast(0))
+    }
+
+    LaunchedEffect(Unit) {
+        try { rootFocusRequester.requestFocus() } catch (_: Exception) {}
+    }
+
+    fun navigateGrid(deltaX: Int, deltaY: Int) {
+        val current = focusedIndex
+        val target = when {
+            deltaX > 0 -> {
+                when (current) {
+                    0 -> 1
+                    1 -> 2
+                    2 -> 2
+                    3 -> 3
+                    4 -> 5
+                    5 -> 6
+                    6 -> 6
+                    7 -> 8
+                    8 -> 9
+                    9 -> 9
+                    10 -> 10
+                    else -> current
+                }
+            }
+            deltaX < 0 -> {
+                when (current) {
+                    0 -> 0
+                    1 -> 0
+                    2 -> 1
+                    3 -> 3
+                    4 -> 4
+                    5 -> 4
+                    6 -> 5
+                    7 -> 7
+                    8 -> 7
+                    9 -> 8
+                    10 -> 10
+                    else -> current
+                }
+            }
+            deltaY > 0 -> {
+                when (current) {
+                    0 -> 3
+                    1 -> 5
+                    2 -> 6
+                    3 -> 4
+                    4 -> 7
+                    5 -> 8
+                    6 -> 9
+                    7 -> 10
+                    8 -> 10
+                    9 -> 10
+                    10 -> 10
+                    else -> current
+                }
+            }
+            deltaY < 0 -> {
+                when (current) {
+                    0 -> 0
+                    1 -> 1
+                    2 -> 2
+                    3 -> 0
+                    4 -> 3
+                    5 -> 1
+                    6 -> 2
+                    7 -> 4
+                    8 -> 5
+                    9 -> 6
+                    10 -> 7
+                    else -> current
+                }
+            }
+            else -> current
+        }
+
+        if (target != focusedIndex && target in 0 until totalItems) {
+            focusedIndex = target
+            onFocusedKeyChanged(settingKeys[target])
+        }
+    }
+
+    LaunchedEffect(focusedIndex) {
+        val scrollTarget = when {
+            focusedIndex < 4 -> 0
+            focusedIndex < 7 -> 4
+            else -> 8
+        }
+        gridState.animateScrollToItem(scrollTarget)
+    }
+
+    var stickArmedX by remember { mutableStateOf(true) }
+    var stickArmedY by remember { mutableStateOf(true) }
+    var stickHoldStartTimeX by remember { mutableLongStateOf(0L) }
+    var stickHoldStartTimeY by remember { mutableLongStateOf(0L) }
+    var lastStickStepTimeX by remember { mutableLongStateOf(0L) }
+    var lastStickStepTimeY by remember { mutableLongStateOf(0L) }
+    var lastKeyRepeatTime by remember { mutableLongStateOf(0L) }
+
+    val currentView = LocalView.current
+    DisposableEffect(currentView) {
+        val motionListener = View.OnGenericMotionListener { _, event ->
+            val source = event.source
+            val isGamepadOrJoystick = (source and InputDevice.SOURCE_GAMEPAD != 0) ||
+                (source and InputDevice.SOURCE_JOYSTICK != 0)
+            if (!isGamepadOrJoystick) return@OnGenericMotionListener false
+
+            val rawX = event.getAxisValue(MotionEvent.AXIS_X)
+            val rawY = event.getAxisValue(MotionEvent.AXIS_Y)
+            val hatX = event.getAxisValue(MotionEvent.AXIS_HAT_X)
+            val hatY = event.getAxisValue(MotionEvent.AXIS_HAT_Y)
+            val now = android.os.SystemClock.uptimeMillis()
+
+            val effectiveX = if (abs(rawX) > 0.45f) rawX else hatX
+            val effectiveY = if (abs(rawY) > 0.45f) rawY else hatY
+
+            if (effectiveX < -0.55f) {
+                if (stickArmedX) {
+                    stickArmedX = false
+                    stickHoldStartTimeX = now
+                    lastStickStepTimeX = now
+                    navigateGrid(deltaX = -1, deltaY = 0)
+                } else if (now - stickHoldStartTimeX > 350L && now - lastStickStepTimeX > 180L) {
+                    lastStickStepTimeX = now
+                    navigateGrid(deltaX = -1, deltaY = 0)
+                }
+            } else if (effectiveX > 0.55f) {
+                if (stickArmedX) {
+                    stickArmedX = false
+                    stickHoldStartTimeX = now
+                    lastStickStepTimeX = now
+                    navigateGrid(deltaX = 1, deltaY = 0)
+                } else if (now - stickHoldStartTimeX > 350L && now - lastStickStepTimeX > 180L) {
+                    lastStickStepTimeX = now
+                    navigateGrid(deltaX = 1, deltaY = 0)
+                }
+            } else if (abs(effectiveX) < 0.20f) {
+                stickArmedX = true
+            }
+
+            if (effectiveY < -0.55f) {
+                if (stickArmedY) {
+                    stickArmedY = false
+                    stickHoldStartTimeY = now
+                    lastStickStepTimeY = now
+                    navigateGrid(deltaX = 0, deltaY = -1)
+                } else if (now - stickHoldStartTimeY > 350L && now - lastStickStepTimeY > 180L) {
+                    lastStickStepTimeY = now
+                    navigateGrid(deltaX = 0, deltaY = -1)
+                }
+            } else if (effectiveY > 0.55f) {
+                if (stickArmedY) {
+                    stickArmedY = false
+                    stickHoldStartTimeY = now
+                    lastStickStepTimeY = now
+                    navigateGrid(deltaX = 0, deltaY = 1)
+                } else if (now - stickHoldStartTimeY > 350L && now - lastStickStepTimeY > 180L) {
+                    lastStickStepTimeY = now
+                    navigateGrid(deltaX = 0, deltaY = 1)
+                }
+            } else if (abs(effectiveY) < 0.20f) {
+                stickArmedY = true
+            }
+
+            true
+        }
+
+        val keyListener = View.OnKeyListener { _, keyCode, event ->
+            if (event.action != KeyEvent.ACTION_DOWN) return@OnKeyListener false
+            if (event.repeatCount > 0) {
+                val now = android.os.SystemClock.uptimeMillis()
+                if (now - lastKeyRepeatTime < 180L) return@OnKeyListener true
+                lastKeyRepeatTime = now
+            }
+            when (keyCode) {
+                KeyEvent.KEYCODE_DPAD_LEFT, KeyEvent.KEYCODE_BUTTON_L1 -> {
+                    navigateGrid(deltaX = -1, deltaY = 0)
+                    true
+                }
+                KeyEvent.KEYCODE_DPAD_RIGHT, KeyEvent.KEYCODE_BUTTON_R1 -> {
+                    navigateGrid(deltaX = 1, deltaY = 0)
+                    true
+                }
+                KeyEvent.KEYCODE_DPAD_UP -> {
+                    navigateGrid(deltaX = 0, deltaY = -1)
+                    true
+                }
+                KeyEvent.KEYCODE_DPAD_DOWN -> {
+                    navigateGrid(deltaX = 0, deltaY = 1)
+                    true
+                }
+                KeyEvent.KEYCODE_BUTTON_A, KeyEvent.KEYCODE_DPAD_CENTER, KeyEvent.KEYCODE_ENTER -> {
+                    val key = settingKeys.getOrNull(focusedIndex) ?: settingKeys[0]
+                    executeAction(key)
+                    true
+                }
+                KeyEvent.KEYCODE_BUTTON_B, KeyEvent.KEYCODE_BACK -> {
+                    navigateBack()
+                    true
+                }
+                KeyEvent.KEYCODE_BUTTON_Y -> {
+                    openYamlManager()
+                    true
+                }
+                else -> false
+            }
+        }
+
+        currentView.setOnGenericMotionListener(motionListener)
+        currentView.setOnKeyListener(keyListener)
+        onDispose {
+            currentView.setOnGenericMotionListener(null)
+            currentView.setOnKeyListener(null)
+        }
+    }
+
+    Box(
+        modifier = modifier
+            .fillMaxSize()
+            .focusRequester(rootFocusRequester)
+            .focusable()
+            .onPreviewKeyEvent { keyEvent ->
+                if (keyEvent.type != KeyEventType.KeyDown) return@onPreviewKeyEvent false
+                val code = keyEvent.nativeKeyEvent.keyCode
+                if (keyEvent.nativeKeyEvent.repeatCount > 0) {
+                    val now = android.os.SystemClock.uptimeMillis()
+                    if (now - lastKeyRepeatTime < 180L) return@onPreviewKeyEvent true
+                    lastKeyRepeatTime = now
+                }
+                when (code) {
+                    KeyEvent.KEYCODE_DPAD_LEFT, KeyEvent.KEYCODE_BUTTON_L1 -> {
+                        navigateGrid(deltaX = -1, deltaY = 0)
+                        true
+                    }
+                    KeyEvent.KEYCODE_DPAD_RIGHT, KeyEvent.KEYCODE_BUTTON_R1 -> {
+                        navigateGrid(deltaX = 1, deltaY = 0)
+                        true
+                    }
+                    KeyEvent.KEYCODE_DPAD_UP -> {
+                        navigateGrid(deltaX = 0, deltaY = -1)
+                        true
+                    }
+                    KeyEvent.KEYCODE_DPAD_DOWN -> {
+                        navigateGrid(deltaX = 0, deltaY = 1)
+                        true
+                    }
+                    KeyEvent.KEYCODE_BUTTON_A, KeyEvent.KEYCODE_DPAD_CENTER, KeyEvent.KEYCODE_ENTER -> {
+                        val key = settingKeys.getOrNull(focusedIndex) ?: settingKeys[0]
+                        executeAction(key)
+                        true
+                    }
+                    KeyEvent.KEYCODE_BUTTON_B, KeyEvent.KEYCODE_BACK -> {
+                        navigateBack()
+                        true
+                    }
+                    KeyEvent.KEYCODE_BUTTON_Y -> {
+                        openYamlManager()
+                        true
+                    }
+                    else -> false
+                }
+            }
+    ) {
+        AmbientSettingsBackground()
+
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .windowInsetsPadding(WindowInsets.safeDrawing)
+        ) {
+            // Top Bar
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .height(56.dp)
-                    .background(com.zenithblue.sambas3.RPCSXColors.background)
+                    .height(52.dp)
+                    .background(Color(0xEE090C16))
+                    .drawBehind {
+                        drawLine(
+                            color = Color(0x20C9A84C),
+                            start = androidx.compose.ui.geometry.Offset(0f, size.height),
+                            end = androidx.compose.ui.geometry.Offset(size.width, size.height),
+                            strokeWidth = 1.dp.toPx()
+                        )
+                    }
                     .padding(horizontal = 16.dp),
-                verticalAlignment = Alignment.CenterVertically
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.SpaceBetween
             ) {
-                IconButton(
-                    onClick = navigateBack,
-                    modifier = Modifier.padding(end = 8.dp)
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
+                    Surface(
+                        shape = CircleShape,
+                        color = Color(0x20C9A84C),
+                        border = BorderStroke(1.dp, Color(0x35C9A84C)),
+                        modifier = Modifier
+                            .size(34.dp)
+                            .focusProperties { canFocus = false }
+                    ) {
+                        IconButton(
+                            onClick = navigateBack,
+                            modifier = Modifier
+                                .fillMaxSize()
+                                .focusProperties { canFocus = false }
+                        ) {
+                            Icon(
+                                painter = painterResource(id = R.drawable.ic_keyboard_arrow_left),
+                                contentDescription = "Back",
+                                tint = com.zenithblue.sambas3.RPCSXColors.primary,
+                                modifier = Modifier.size(20.dp)
+                            )
+                        }
+                    }
+
+                    // Small controller hint badge for Back: [ ○ ]
+                    Surface(
+                        shape = RoundedCornerShape(3.dp),
+                        color = com.zenithblue.sambas3.RPCSXColors.textSecondary.copy(alpha = 0.15f),
+                        border = BorderStroke(1.dp, com.zenithblue.sambas3.RPCSXColors.textSecondary.copy(alpha = 0.6f)),
+                        modifier = Modifier.focusProperties { canFocus = false }
+                    ) {
+                        Text(
+                            text = "○",
+                            modifier = Modifier.padding(horizontal = 4.dp, vertical = 1.dp),
+                            style = MaterialTheme.typography.labelSmall.copy(
+                                fontSize = 10.sp,
+                                fontWeight = FontWeight.Bold
+                            ),
+                            color = com.zenithblue.sambas3.RPCSXColors.textSecondary
+                        )
+                    }
+
+                    Spacer(modifier = Modifier.width(4.dp))
+
                     Icon(
-                        painter = painterResource(id = R.drawable.ic_keyboard_arrow_left),
+                        painter = painterResource(id = R.drawable.gamepad),
                         contentDescription = null,
-                        tint = com.zenithblue.sambas3.RPCSXColors.primary
+                        tint = com.zenithblue.sambas3.RPCSXColors.primary,
+                        modifier = Modifier.size(22.dp)
+                    )
+
+                    Text(
+                        text = stringResource(R.string.settings).uppercase(),
+                        color = com.zenithblue.sambas3.RPCSXColors.primary,
+                        fontFamily = FontFamily.Monospace,
+                        fontWeight = FontWeight.Bold,
+                        fontSize = 17.sp,
+                        letterSpacing = 2.sp
                     )
                 }
-                Icon(
-                    painter = painterResource(id = R.drawable.gamepad),
-                    contentDescription = null,
-                    tint = com.zenithblue.sambas3.RPCSXColors.primary,
-                    modifier = Modifier.size(24.dp)
-                )
-                Spacer(modifier = Modifier.width(12.dp))
-                Text(
-                    text = stringResource(R.string.settings).uppercase(),
-                    color = com.zenithblue.sambas3.RPCSXColors.primary,
-                    fontFamily = androidx.compose.ui.text.font.FontFamily.Monospace,
-                    fontWeight = FontWeight.Bold,
-                    fontSize = 18.sp,
-                    letterSpacing = 2.sp
-                )
-                Spacer(modifier = Modifier.weight(1f))
+
                 Row(
                     verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.spacedBy(8.dp)
@@ -1145,349 +2074,209 @@ fun SettingsScreen(
                     Text(
                         text = "v" + com.zenithblue.sambas3.BuildConfig.VERSION_NAME,
                         color = com.zenithblue.sambas3.RPCSXColors.textSecondary,
-                        fontFamily = androidx.compose.ui.text.font.FontFamily.Monospace,
+                        fontFamily = FontFamily.Monospace,
                         fontSize = 12.sp
                     )
                     PulsingDot()
                 }
             }
-        },
-        bottomBar = {
-            ControllerHintStrip(
-                hints = listOf(
-                    R.drawable.cross to "Select",
-                    R.drawable.circle to "Back"
-                )
-            )
-        }
-    ) { contentPadding ->
-        val context = LocalContext.current
-        val configPicker = rememberLauncherForActivityResult(
-            contract = ActivityResultContracts.OpenDocument(),
-            onResult = { uri: Uri? ->
-                uri?.let {
-                    if (FileUtil.importConfig(context, it))
-                        onRefresh()
-                }
-            }
-        )
 
-        val configExporter = rememberLauncherForActivityResult(
-            contract = ActivityResultContracts.CreateDocument("application/x-yaml"),
-            onResult = { uri: Uri? ->
-                uri?.let { FileUtil.exportConfig(context, it) }
-            }
-        )
-
-        Row(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(contentPadding)
-                .background(com.zenithblue.sambas3.RPCSXColors.background),
-            horizontalArrangement = Arrangement.spacedBy(16.dp)
-        ) {
-            LazyColumn(
+            // Grid of Settings Cards
+            LazyVerticalGrid(
+                state = gridState,
+                columns = GridCells.Fixed(numColumns),
                 modifier = Modifier
-                    .weight(if (isWideScreen) 1f else 3f)
-                    .fillMaxHeight(),
+                    .weight(1f)
+                    .fillMaxWidth()
+                    .padding(horizontal = 16.dp),
+                contentPadding = PaddingValues(top = 8.dp, bottom = 10.dp),
+                horizontalArrangement = Arrangement.spacedBy(10.dp),
+                verticalArrangement = Arrangement.spacedBy(8.dp)
             ) {
-                item {
-                    Spacer(modifier = Modifier.height(16.dp))
+                // Category 1: SYSTEM & STORAGE
+                item(span = { GridItemSpan(maxLineSpan) }) {
+                    SettingsCategoryHeader("SYSTEM & STORAGE")
                 }
-
-                item(
-                    key = "internal_directory"
-                ) {
-                    HomePreference(
+                item(key = "internal_directory") {
+                    SettingsNavCard(
                         title = stringResource(R.string.view_internal_dir),
-                        icon = { PreferenceIcon(icon = painterResource(R.drawable.ic_folder)) },
-                        description = stringResource(R.string.view_internal_dir_description),
+                        subtitle = stringResource(R.string.view_internal_dir_description),
+                        iconRes = R.drawable.ic_folder,
+                        isSelected = focusedIndex == 0,
                         onClick = {
-                            if (!FileUtil.launchInternalDir(context)) {
-                                AlertDialogQueue.showDialog(
-                                    context.getString(R.string.failed_to_view_internal_dir),
-                                    context.getString(R.string.no_activity_to_handle_action)
-                                )
-                            }
-                        },
-                        onFocusChanged = { if (it) onFocusedKeyChanged("internal_directory") }
+                            focusedIndex = 0
+                            onFocusedKeyChanged("internal_directory")
+                            executeAction("internal_directory")
+                        }
                     )
                 }
-
-                item(
-                    key = "users"
-                ) {
-                    HomePreference(
+                item(key = "users") {
+                    SettingsNavCard(
                         title = stringResource(R.string.users),
-                        description = "${stringResource(R.string.active_user)}: ${UserRepository.getUsername(activeUser)}",
-                        icon = {
-                            PreferenceIcon(icon = painterResource(id = R.drawable.ic_person))
-                        },
+                        subtitle = "${stringResource(R.string.active_user)}: ${UserRepository.getUsername(activeUser)}",
+                        iconRes = R.drawable.ic_person,
+                        isSelected = focusedIndex == 1,
                         onClick = {
-                            if (isWideScreen) onActiveSettingKeyChanged("users")
-                            else navigateTo("users")
-                        },
-                        onFocusChanged = { if (it) onFocusedKeyChanged("users") }
+                            focusedIndex = 1
+                            onFocusedKeyChanged("users")
+                            executeAction("users")
+                        }
                     )
                 }
-
-                item(key = "onboarding") {
-                    HomePreference(
-                        title = stringResource(R.string.onboarding_replay_title),
-                        description = stringResource(R.string.onboarding_replay_description),
-                        icon = { Icon(painterResource(R.drawable.ic_refresh), contentDescription = null) },
-                        onClick = { navigateTo(ONBOARDING_ROUTE) },
-                        onFocusChanged = { if (it) onFocusedKeyChanged("onboarding") },
-                    )
-                }
-
                 item(key = "advanced_settings") {
-                    HomePreference(
+                    SettingsNavCard(
                         title = stringResource(R.string.advanced_settings),
-                        icon = { Icon(painterResource(R.drawable.tune), null) },
-                        description = stringResource(R.string.advanced_settings_description),
+                        subtitle = stringResource(R.string.advanced_settings_description),
+                        iconRes = R.drawable.tune,
+                        isSelected = focusedIndex == 2,
                         onClick = {
-                            navigateTo("settings@@$")
+                            focusedIndex = 2
+                            onFocusedKeyChanged("advanced_settings")
+                            executeAction("advanced_settings")
                         },
-                        onLongClick = {
-                            AlertDialogQueue.showDialog(
-                                title = context.getString(R.string.manage_settings),
-                                confirmText = context.getString(R.string.export),
-                                dismissText = context.getString(R.string.import_),
-                                onDismiss = {
-                                    configPicker.launch(arrayOf("*/*"))
-                                },
-                                onConfirm = {
-                                    configExporter.launch("config.yml")
-                                }
-                            )
-                        },
-                        onFocusChanged = { if (it) onFocusedKeyChanged("advanced_settings") }
+                        onLongClick = { openYamlManager() },
+                        extraBadge = {
+                            Surface(
+                                shape = RoundedCornerShape(3.dp),
+                                color = Color(0x304CC9A8),
+                                border = BorderStroke(1.dp, Color(0x804CC9A8))
+                            ) {
+                                Text(
+                                    text = "▲ YAML",
+                                    modifier = Modifier.padding(horizontal = 4.dp, vertical = 1.dp),
+                                    style = MaterialTheme.typography.labelSmall.copy(
+                                        fontSize = 8.sp,
+                                        fontWeight = FontWeight.Bold,
+                                        fontFamily = FontFamily.Monospace
+                                    ),
+                                    color = Color(0xFF4CC9A8)
+                                )
+                            }
+                        }
+                    )
+                }
+                item(key = "onboarding") {
+                    SettingsNavCard(
+                        title = stringResource(R.string.onboarding_replay_title),
+                        subtitle = stringResource(R.string.onboarding_replay_description),
+                        iconRes = R.drawable.ic_refresh,
+                        isSelected = focusedIndex == 3,
+                        onClick = {
+                            focusedIndex = 3
+                            onFocusedKeyChanged("onboarding")
+                            executeAction("onboarding")
+                        }
                     )
                 }
 
-                item(
-                    key = "custom_driver"
-                ) {
-                    HomePreference(
+                // Category 2: GRAPHICS & INPUT
+                item(span = { GridItemSpan(maxLineSpan) }) {
+                    Spacer(Modifier.height(4.dp))
+                    SettingsCategoryHeader("GRAPHICS & INPUT")
+                }
+                item(key = "custom_driver") {
+                    SettingsNavCard(
                         title = stringResource(R.string.custom_driver),
-                        icon = { Icon(painterResource(R.drawable.memory), contentDescription = null) },
-                        description = stringResource(R.string.custom_driver_description),
+                        subtitle = stringResource(R.string.custom_driver_description),
+                        iconRes = R.drawable.memory,
+                        isSelected = focusedIndex == 4,
                         onClick = {
-                            if (RPCSX.instance.supportsCustomDriverLoading()) {
-                                if (isWideScreen) onActiveSettingKeyChanged("custom_driver")
-                                else navigateTo("drivers")
-                            } else {
-                                AlertDialogQueue.showDialog(
-                                    title = context.getString(R.string.custom_driver_not_supported),
-                                    message = context.getString(R.string.custom_driver_not_supported_description),
-                                    confirmText = context.getString(R.string.close),
-                                    dismissText = ""
-                                )
-                            }
-                        },
-                        onFocusChanged = { if (it) onFocusedKeyChanged("custom_driver") }
+                            focusedIndex = 4
+                            onFocusedKeyChanged("custom_driver")
+                            executeAction("custom_driver")
+                        }
                     )
                 }
-
                 item(key = "controls") {
-                    HomePreference(
+                    SettingsNavCard(
                         title = stringResource(R.string.controls),
-                        icon = { Icon(painterResource(R.drawable.gamepad), null) },
-                        description = stringResource(R.string.controls_description),
+                        subtitle = stringResource(R.string.controls_description),
+                        iconRes = R.drawable.gamepad,
+                        isSelected = focusedIndex == 5,
                         onClick = {
-                            if (isWideScreen) onActiveSettingKeyChanged("controls")
-                            else navigateTo("controls")
-                        },
-                        onFocusChanged = { if (it) onFocusedKeyChanged("controls") }
+                            focusedIndex = 5
+                            onFocusedKeyChanged("controls")
+                            executeAction("controls")
+                        }
                     )
                 }
-
-                item(key = "share_logs") {
-                    HomePreference(
-                        title = stringResource(R.string.share_log),
-                        icon = { Icon(painter = painterResource(id = R.drawable.ic_share), contentDescription = null) },
-                        description = stringResource(R.string.share_log_description),
-                        onClick = {
-                            val file = DocumentFile.fromSingleUri(
-                                context, DocumentsContract.buildDocumentUri(
-                                    AppDataDocumentProvider.AUTHORITY,
-                                    "${AppDataDocumentProvider.ROOT_ID}/cache/RPCSX${if (RPCSX.lastPlayedGame.isNotEmpty()) "" else ".old"}.log"
-                                )
-                            )
-
-                            if (file != null && file.exists() && file.length() != 0L) {
-                                val intent = Intent(Intent.ACTION_SEND).apply {
-                                    setDataAndType(file.uri, "text/plain")
-                                    addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
-                                    putExtra(Intent.EXTRA_STREAM, file.uri)
-                                }
-                                context.startActivity(Intent.createChooser(intent, context.getString(R.string.share_log)))
-                            } else {
-                                Toast.makeText(context, context.getString(R.string.log_not_found), Toast.LENGTH_SHORT).show()
-                            }
-                        },
-                        onFocusChanged = { if (it) onFocusedKeyChanged("share_logs") }
-                    )
-                }
-
-                item(key = "logs") {
-                    HomePreference(
-                        title = stringResource(R.string.log_monitor),
-                        icon = { Icon(painterResource(R.drawable.ic_terminal), null) },
-                        description = stringResource(R.string.log_monitor_description),
-                        onClick = {
-                            if (isWideScreen) onActiveSettingKeyChanged("logs")
-                            else navigateTo("logs")
-                        },
-                        onFocusChanged = { if (it) onFocusedKeyChanged("logs") }
-                    )
-                }
-
                 item(key = "monitoring") {
-                    HomePreference(
+                    SettingsNavCard(
                         title = "Performance Monitor",
-                        icon = { Icon(painterResource(R.drawable.ic_video), null) },
-                        description = "In-game FPS, CPU/GPU, RAM, thermal and power telemetry.",
+                        subtitle = "In-game FPS, telemetry & battery overlay",
+                        iconRes = R.drawable.ic_video,
+                        isSelected = focusedIndex == 6,
                         onClick = {
-                            if (isWideScreen) onActiveSettingKeyChanged("monitoring") else navigateTo("monitoring")
-                        },
-                        onFocusChanged = { if (it) onFocusedKeyChanged("monitoring") }
+                            focusedIndex = 6
+                            onFocusedKeyChanged("monitoring")
+                            executeAction("monitoring")
+                        }
                     )
                 }
 
-                item(key = "debug_controller") {
-                    HomePreference(
-                        title = "Debug — Controller",
-                        icon = { Icon(painterResource(R.drawable.gamepad), null) },
-                        description = "Agent ADB bridge (DEBUG_PAD broadcasts) + tap calibration 1632,873. Test X/UP/Sticks without restarting game.",
+                // Category 3: DIAGNOSTICS & TOOLS
+                item(span = { GridItemSpan(maxLineSpan) }) {
+                    Spacer(Modifier.height(4.dp))
+                    SettingsCategoryHeader("DIAGNOSTICS & TOOLS")
+                }
+                item(key = "logs") {
+                    SettingsNavCard(
+                        title = stringResource(R.string.log_monitor),
+                        subtitle = stringResource(R.string.log_monitor_description),
+                        iconRes = R.drawable.ic_terminal,
+                        isSelected = focusedIndex == 7,
                         onClick = {
-                            if (isWideScreen) onActiveSettingKeyChanged("debug_controller")
-                            else navigateTo("debug_controller")
-                        },
-                        onFocusChanged = { if (it) onFocusedKeyChanged("debug_controller") }
+                            focusedIndex = 7
+                            onFocusedKeyChanged("logs")
+                            executeAction("logs")
+                        }
                     )
                 }
-
+                item(key = "crash_logs") {
+                    SettingsNavCard(
+                        title = "Crash Logs History",
+                        subtitle = "Diagnostics, backtraces & session logs",
+                        iconRes = R.drawable.ic_restore,
+                        isSelected = focusedIndex == 8,
+                        onClick = {
+                            focusedIndex = 8
+                            onFocusedKeyChanged("crash_logs")
+                            executeAction("crash_logs")
+                        }
+                    )
+                }
+                item(key = "share_logs") {
+                    SettingsNavCard(
+                        title = stringResource(R.string.share_log),
+                        subtitle = stringResource(R.string.share_log_description),
+                        iconRes = R.drawable.ic_share,
+                        isSelected = focusedIndex == 9,
+                        onClick = {
+                            focusedIndex = 9
+                            onFocusedKeyChanged("share_logs")
+                            executeAction("share_logs")
+                        }
+                    )
+                }
                 if (!BuildConfig.IS_PLAYSTORE_BUILD) {
                     item(key = "patches") {
-                        HomePreference(
+                        SettingsNavCard(
                             title = stringResource(R.string.patch_manager),
-                            icon = { Icon(painterResource(R.drawable.tune), null) },
-                            description = stringResource(R.string.patch_manager_description),
+                            subtitle = stringResource(R.string.patch_manager_description),
+                            iconRes = R.drawable.ic_build,
+                            isSelected = focusedIndex == 10,
                             onClick = {
-                                if (isWideScreen) onActiveSettingKeyChanged("patches")
-                                else navigateTo("patches")
-                            },
-                            onFocusChanged = { if (it) onFocusedKeyChanged("patches") }
+                                focusedIndex = 10
+                                onFocusedKeyChanged("patches")
+                                executeAction("patches")
+                            }
                         )
                     }
                 }
             }
 
-            if (isWideScreen) {
-                Box(
-                    modifier = Modifier
-                        .weight(2f)
-                        .fillMaxHeight()
-                        .padding(end = 16.dp, top = 16.dp, bottom = 16.dp)
-                        .background(com.zenithblue.sambas3.RPCSXColors.surfaceOverlay.copy(alpha = 0.2f))
-                        .drawBehind {
-                            drawRect(
-                                color = com.zenithblue.sambas3.RPCSXColors.surfaceOverlay,
-                                topLeft = androidx.compose.ui.geometry.Offset(0f, 0f),
-                                size = size,
-                                style = androidx.compose.ui.graphics.drawscope.Stroke(width = 1.dp.toPx())
-                            )
-                        }
-                ) {
-                    when (activeSettingKey) {
-                        "users" -> {
-                            UsersScreen(
-                                navigateBack = { onActiveSettingKeyChanged(null) },
-                                isInSplitPane = true
-                            )
-                        }
-                        "advanced_settings" -> {
-                            val currentPath = advancedSettingsPathStack.lastOrNull() ?: ""
-                            val currentObj = getNestedSettings(settings, currentPath)
-                            AdvancedSettingsScreen(
-                                navigateBack = {
-                                    if (advancedSettingsPathStack.size > 1) {
-                                        advancedSettingsPathStack.removeAt(advancedSettingsPathStack.lastIndex)
-                                    } else {
-                                        onActiveSettingKeyChanged(null)
-                                    }
-                                },
-                                navigateTo = { route ->
-                                    if (isAdvancedSettingsRoute(route)) {
-                                        advancedSettingsPathStack.add(
-                                            normalizeAdvancedSettingsPath(route)
-                                        )
-                                    } else {
-                                        navigateTo(route)
-                                    }
-                                },
-                                settings = currentObj,
-                                path = currentPath,
-                                isInSplitPane = true,
-                                onValueCommitted = { _, _ -> onRefresh() },
-                                settingsSetter = RPCSX.instance::settingsSetGlobalAndVerify
-                            )
-                        }
-                        "custom_driver" -> {
-                            GpuDriversScreen(
-                                navigateBack = { onActiveSettingKeyChanged(null) },
-                                isInSplitPane = true
-                            )
-                        }
-                        "controls" -> {
-                            ControllerSettingsScreen(
-                                navigateBack = { onActiveSettingKeyChanged(null) },
-                                isInSplitPane = true,
-                                onOpenTest = { device ->
-                                    // The test route is pushed above Settings. Restore the
-                                    // controller pane when it pops instead of falling back to
-                                    // the default Storage Directory detail pane.
-                                    onFocusedKeyChanged("controls")
-                                    onActiveSettingKeyChanged("controls")
-                                    navigateTo("controller_test/${android.net.Uri.encode(device.deviceKey)}")
-                                },
-                            )
-                        }
-                        "logs" -> {
-                            LogMonitorScreen(
-                                navigateBack = { onActiveSettingKeyChanged(null) },
-                                isInSplitPane = true
-                            )
-                        }
-                        "monitoring" -> {
-                            MonitoringSettingsScreen(
-                                navigateBack = { onActiveSettingKeyChanged(null) },
-                                isInSplitPane = true
-                            )
-                        }
-                        "debug_controller" -> {
-                            com.zenithblue.sambas3.ui.debug.DebugControllerScreen(
-                                navigateBack = { onActiveSettingKeyChanged(null) }
-                            )
-                        }
-                        "patches" -> {
-                            if (!BuildConfig.IS_PLAYSTORE_BUILD) {
-                                PatchManagerScreen(
-                                    navigateBack = { onActiveSettingKeyChanged(null) },
-                                    isInSplitPane = true
-                                )
-                            } else {
-                                SettingsDetailPane(focusedKey = focusedKey, activeUser = activeUser)
-                            }
-                        }
-                        else -> {
-                            SettingsDetailPane(focusedKey = focusedKey, activeUser = activeUser)
-                        }
-                    }
-                }
-            }
+            // Bottom Controller Hint Bar (matching Home Screen style)
+            SettingsBottomBar(onYamlClick = { openYamlManager() })
         }
     }
 }

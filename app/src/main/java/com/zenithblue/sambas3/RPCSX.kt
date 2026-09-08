@@ -88,6 +88,7 @@ class RPCSX {
     external fun usbDeviceEvent(fd: Int, vendorId: Int, productId: Int, event: Int): Boolean
     external fun processCompilationQueue(): Boolean
     external fun startMainThreadProcessor(): Boolean
+    external fun isMainThreadProcessorReady(): Boolean
     external fun overlayPadData(digital1: Int, digital2: Int, leftStickX: Int, leftStickY: Int, rightStickX: Int, rightStickY: Int): Boolean
     external fun collectGameInfo(rootDir: String, progressId: Long): Boolean
     external fun systemInfo(): String
@@ -128,6 +129,8 @@ class RPCSX {
     external fun hasTrophyExports(): Boolean
     /** Optional structured performance snapshot from newer runtime cores. */
     external fun getPerfMetricsJson(): String?
+    /** Surface-measured fallback (ANativeWindow presents) used when the core export has no frame data. */
+    external fun getFallbackPerfJson(): String?
     /** Enables the core-side metrics snapshot producer only while the UI monitor is active. */
     external fun setPerfMetricsEnabled(enabled: Boolean, intervalMs: Int): Boolean
     // ISO preview probe — extracts only PS3_GAME/ICON0.PNG to cache, size capped 16 MiB, no install/PPU.
@@ -136,6 +139,7 @@ class RPCSX {
     external fun prepareRuntimePpu(path: String, sessionId: Long): Int
     external fun cancelRuntimePpuPreparation(sessionId: Long): Boolean
     external fun compileInstallPpuBatch(titleId: String, gamePath: String, logicalJobId: Long, maxNewObjects: Int): String
+    external fun compileRuntimePpuBatch(titleId: String, gamePath: String, logicalJobId: Long, maxNewObjects: Int): String
     external fun cancelInstallPpuBatch()
 
     /** Global writes are accepted only after the native config read-back matches. */

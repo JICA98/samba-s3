@@ -1,0 +1,202 @@
+package com.zenithblue.sambas3.monitoring
+
+import java.util.Locale
+
+data class MonitoringDisplayEntry(
+    val metric: MonitoringMetric,
+    val label: String,
+    val value: String?
+) {
+    val displayValue: String get() = value ?: "—"
+}
+
+data class OverlayLayoutMetrics(
+    val panelWidthDp: Float,
+    val padHDp: Float,
+    val padVDp: Float,
+    val rowGapDp: Float,
+    val colGapDp: Float,
+    val graphHeightDp: Float,
+    val labelSp: Float,
+    val valueSp: Float,
+    val columns: Int,
+    val strokeDp: Float,
+)
+
+data class MonitoringGraphEntry(
+    val metric: MonitoringMetric,
+    val label: String,
+    val currentValue: String?,
+    val isPlaceholder: Boolean,
+    val samples: List<TimedSample>,
+    val isFrameTime: Boolean
+)
+
+object MonitoringOverlayPresentation {
+
+    /**
+     * Sizes the in-game overlay from screen width (dp) so Compact/Grid/Detailed
+     * stay proportional on every density. High-DPI phones no longer get a huge
+     * Material-sp panel; system font scale is clamped so it cannot blow up HUD text.
+     */
+    fun overlayLayout(
+        layout: MonitoringLayout,
+        screenWidthDp: Float,
+        density: Float,
+        fontScale: Float,
+        textScale: Float,
+    ): OverlayLayoutMetrics {
+        val widthFrac = when (layout) {
+            MonitoringLayout.Compact -> 0.20f
+            MonitoringLayout.Grid -> 0.26f
+            MonitoringLayout.Detailed -> 0.32f
+        }
+        val minW = when (layout) {
+            MonitoringLayout.Compact -> 132f
+            MonitoringLayout.Grid -> 156f
+            MonitoringLayout.Detailed -> 188f
+        }
+        val maxW = when (layout) {
+            MonitoringLayout.Compact -> 188f
+            MonitoringLayout.Grid -> 220f
+            MonitoringLayout.Detailed -> 252f
+        }
+        val densityAdj = (1.5f / density.coerceIn(1.0f, 4.0f)).coerceIn(0.55f, 1.15f)
+        val panel = (screenWidthDp * widthFrac * densityAdj).coerceIn(minW, maxW)
+        val userScale = textScale.coerceIn(0.50f, 1.25f)
+        val fontAdj = userScale / fontScale.coerceIn(1.0f, 1.35f)
+        val detailed = layout == MonitoringLayout.Detailed
+        return OverlayLayoutMetrics(
+            panelWidthDp = panel,
+            padHDp = (4.5f * userScale).coerceIn(3f, 7f),
+            padVDp = (3.5f * userScale).coerceIn(2.5f, 6f),
+            rowGapDp = (2.0f * userScale).coerceIn(1.5f, 4f),
+            colGapDp = (5.0f * userScale).coerceIn(3.5f, 8f),
+            graphHeightDp = (26f * userScale).coerceIn(20f, 36f),
+            labelSp = 7.0f * fontAdj,
+            valueSp = (if (detailed) 9.0f else 8.0f) * fontAdj,
+            columns = when (layout) {
+                MonitoringLayout.Compact -> 4
+                MonitoringLayout.Grid, MonitoringLayout.Detailed -> 2
+            },
+            strokeDp = 1.1f,
+        )
+    }
+
+    fun buildDisplayEntries(
+        enabledMetrics: Set<MonitoringMetric>,
+        emulator: EmulatorMetrics,
+        android: AndroidSystemMetrics
+    ): List<MonitoringDisplayEntry> {
+        return MonitoringMetricDescriptors.all
+            .filter { it.metric in enabledMetrics }
+            .map { desc ->
+                val value = formatMetricValue(desc.metric, emulator, android)
+                MonitoringDisplayEntry(
+                    metric = desc.metric,
+                    label = desc.shortLabel,
+                    value = value
+                )
+            }
+    }
+
+    fun buildGraphEntries(
+        graphMetrics: Set<MonitoringMetric>,
+        emulator: EmulatorMetrics,
+        fpsHistory: List<TimedSample>,
+        frameTimeHistory: List<TimedSample>
+    ): List<MonitoringGraphEntry> = buildList {
+        if (MonitoringMetric.Fps in graphMetrics) {
+            val samples = validGraphSamples(fpsHistory)
+            val current = finiteNonNegative(emulator.fps)?.let { String.format(Locale.US, "%.1f", it) }
+            add(
+                MonitoringGraphEntry(
+                    metric = MonitoringMetric.Fps,
+                    label = "FPS",
+                    currentValue = current,
+                    isPlaceholder = samples.size < 2,
+                    samples = samples,
+                    isFrameTime = false
+                )
+            )
+        }
+        if (MonitoringMetric.FrameTime in graphMetrics) {
+            val samples = validGraphSamples(frameTimeHistory)
+            val current = finiteNonNegative(emulator.frameTimeMs)?.let { String.format(Locale.US, "%.1f ms", it) }
+            add(
+                MonitoringGraphEntry(
+                    metric = MonitoringMetric.FrameTime,
+                    label = "FRAME",
+                    currentValue = current,
+                    isPlaceholder = samples.size < 2,
+                    samples = samples,
+                    isFrameTime = true
+                )
+            )
+        }
+    }
+
+    fun formatMetricValue(
+        metric: MonitoringMetric,
+        e: EmulatorMetrics,
+        a: AndroidSystemMetrics
+    ): String? = when (metric) {
+        MonitoringMetric.Fps -> finiteNonNegative(e.fps)?.let { String.format(Locale.US, "%.1f", it) }
+        MonitoringMetric.FrameTime -> finiteNonNegative(e.frameTimeMs)?.let { String.format(Locale.US, "%.1f ms", it) }
+        MonitoringMetric.RpcsxHostCpu -> pct(e.hostCpuPercent)
+        MonitoringMetric.PpuCpu -> pct(e.ppuCpuPercent)
+        MonitoringMetric.SpuCpu -> pct(e.spuCpuPercent)
+        MonitoringMetric.RsxCpu -> pct(e.rsxCpuPercent)
+        MonitoringMetric.RsxLoad -> pct(e.rsxLoadPercent?.toFloat())
+        MonitoringMetric.PpuThreads -> e.ppuThreads?.toString()
+        MonitoringMetric.SpuThreads -> e.spuThreads?.toString()
+        MonitoringMetric.HostThreads -> e.hostThreads?.toString()
+        MonitoringMetric.AndroidSystemCpu -> pct(a.systemCpuPercent)
+        MonitoringMetric.AndroidProcessCpu -> pct(a.processCpuPercent)
+        MonitoringMetric.GpuHardwareLoad -> pct(a.gpu?.loadPercent?.toFloat())
+        MonitoringMetric.GpuFrequency -> a.gpu?.frequencyHz?.let { "${it / 1_000_000} MHz" }
+        MonitoringMetric.CpuFrequency -> a.cpuFrequenciesHz.maxOrNull()?.takeIf { it > 0 }?.let { "${it / 1_000_000} MHz" }
+        MonitoringMetric.RamUsed -> bytes(a.ramUsedBytes)
+        MonitoringMetric.RamAvailable -> bytes(a.ramAvailableBytes)
+        MonitoringMetric.RamTotal -> bytes(a.ramTotalBytes)
+        MonitoringMetric.AppRss -> bytes(a.processRssBytes)
+        MonitoringMetric.AppPss -> bytes(a.processPssBytes)
+        MonitoringMetric.SwapUsed -> bytes(a.swapUsedBytes)
+        MonitoringMetric.SwapTotal -> bytes(a.swapTotalBytes)
+        MonitoringMetric.ZramUsed -> bytes(a.zramUsedBytes)
+        MonitoringMetric.BatteryPercent -> a.batteryPercent?.let { "$it%" }
+        MonitoringMetric.BatteryTemperature -> finite(a.batteryTemperatureC)?.let { String.format(Locale.US, "%.1f°C", it) }
+        MonitoringMetric.BatteryPower -> finiteNonNegative(a.batteryPowerW)?.let {
+            val arrow = if (a.charging == true) "↑" else if (a.charging == false) "↓" else ""
+            if (arrow.isNotEmpty()) String.format(Locale.US, "%.1fW %s", it, arrow)
+            else String.format(Locale.US, "%.1fW", it)
+        }
+        MonitoringMetric.ThermalStatus -> a.thermalStatus?.let(::thermalLabel)
+        MonitoringMetric.ThermalHeadroom -> finite(a.thermalHeadroom)?.let { String.format(Locale.US, "%.1f", it) }
+    }
+
+    private fun pct(value: Float?): String? = finiteNonNegative(value)?.let { String.format(Locale.US, "%.0f%%", it) }
+
+    private fun finite(value: Float?): Float? = value?.takeIf { it.isFinite() }
+
+    private fun finiteNonNegative(value: Float?): Float? = value?.takeIf { it.isFinite() && it >= 0f }
+
+    private fun validGraphSamples(samples: List<TimedSample>): List<TimedSample> = samples.filter {
+        it.timestampUs >= 0L && it.value.isFinite() && it.value >= 0f
+    }
+
+    private fun bytes(value: Long?): String? = value?.let {
+        if (it >= 1_000_000_000L) String.format(Locale.US, "%.1fG", it / 1_000_000_000f)
+        else String.format(Locale.US, "%.0fM", it / 1_000_000f)
+    }
+
+    fun thermalLabel(status: Int): String = when (status) {
+        0 -> "NONE"
+        1 -> "LIGHT"
+        2 -> "MODERATE"
+        3 -> "SEVERE"
+        4 -> "CRITICAL"
+        5 -> "EMERGENCY"
+        else -> "UNKNOWN"
+    }
+}

@@ -1,0 +1,46 @@
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="120dp"
+    android:height="120dp"
+    android:viewportWidth="96"
+    android:viewportHeight="96">
+  <!-- Outer ambient circle glow -->
+  <path
+      android:fillColor="#1AE5A93C"
+      android:pathData="M48,6 A42,42 0 1,1 47.99,6 Z"/>
+
+  <!-- Back Game Case -->
+  <path
+      android:fillColor="#161B22"
+      android:strokeColor="#40E5A93C"
+      android:strokeWidth="1.2"
+      android:pathData="M24,24 H56 V72 H24 Z"/>
+
+  <!-- Front Game Case (Tilted / Offset) -->
+  <path
+      android:fillColor="#1F2937"
+      android:strokeColor="#FFFFFF"
+      android:strokeWidth="1.5"
+      android:pathData="M34,18 H68 V66 H34 Z"/>
+
+  <!-- PS3 Header Banner on Case -->
+  <path
+      android:fillColor="#0D1117"
+      android:pathData="M34,18 H68 V28 H34 Z"/>
+  <path
+      android:strokeColor="#E5A93C"
+      android:strokeWidth="1.5"
+      android:strokeLineCap="round"
+      android:pathData="M38,23 H52"/>
+
+  <!-- Disc Sliding Out -->
+  <path
+      android:fillColor="#161B22"
+      android:strokeColor="#E5A93C"
+      android:strokeWidth="1.5"
+      android:pathData="M66,42 A18,18 0 1,1 65.99,42 Z"/>
+  <path
+      android:fillColor="#0D1117"
+      android:strokeColor="#388BFD"
+      android:strokeWidth="1.2"
+      android:pathData="M66,42 A6,6 0 1,1 65.99,42 Z"/>
+</vector>

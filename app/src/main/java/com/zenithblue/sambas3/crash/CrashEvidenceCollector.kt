@@ -1,130 +1,113 @@
 package com.zenithblue.sambas3.crash
 
 import android.content.Context
-import com.zenithblue.sambas3.LogMonitor
+import com.zenithblue.sambas3.logging.CaptureState
+import com.zenithblue.sambas3.logging.LogBroker
+import com.zenithblue.sambas3.logging.LogSessionManifest
+import com.zenithblue.sambas3.logging.LogSessionStore
+import com.zenithblue.sambas3.logging.SessionDiagnostics
+import com.zenithblue.sambas3.logging.SessionDiagnosticsView
 import com.zenithblue.sambas3.session.EmulationSessionRecord
-import org.json.JSONObject
 import java.io.File
-import java.text.SimpleDateFormat
-import java.util.Calendar
-import java.util.Locale
-import java.util.TimeZone
 
 data class CrashReport(
     val directory: File,
     val classification: CrashClassification,
     val summary: String,
     val cause: String,
-    val sources: Map<String, File>
+    val sources: Map<String, File>,
+    val gameTitle: String? = null,
+    val titleId: String? = null,
+    val gameIconPath: String? = null,
+    val sessionId: String? = null,
+    val revision: Long = 0L,
+    val rawStopReason: String? = null,
+    val captureState: CaptureState? = null,
+    val diagnostics: SessionDiagnosticsView? = null,
 )
 
 object CrashEvidenceCollector {
-    /** Fast startup path: bounded tails only, no report directory or large copies. */
     fun collectSummary(context: Context, session: EmulationSessionRecord?, evidenceHint: String = ""): CrashReport {
-        LogMonitor.flushWriters()
-        val sourceFiles = LogMonitor.getAllLogFiles().associateBy { it.name }
-        val endMs = session?.let { maxOf(it.lastHeartbeatMs, it.failureAtMs ?: 0L, it.stoppedAtMs ?: 0L) + 2_000L }
-        val evidence = buildString {
-            if (evidenceHint.isNotBlank()) append(evidenceHint).append('\n')
-            sourceFiles.values.forEach { file -> if (file.isFile) append(file.readEvidence(session?.startedAtMs, endMs)).append('\n') }
+        val logSession = session?.sessionId?.let { LogSessionStore.read(context, it) }
+        val view = logSession?.let {
+            SessionDiagnostics.project(
+                it,
+                fatalEventId = session.fatalEventId,
+                evidenceHint = evidenceHint,
+            )
         }
-        val classification = CrashClassifier.classify(evidence, session != null)
-        val id = session?.sessionId ?: "report-${System.currentTimeMillis()}"
-        val dir = File(context.filesDir, "crash_reports/$id")
+        val classification = view?.classification ?: CrashClassifier.classify(
+            evidenceHint,
+            session != null,
+            cleanStop = false,
+            fatalEventId = session?.fatalEventId,
+            frontendReason = session?.stopReason ?: logSession?.stopReason,
+        )
+        val sources = sessionOwnedSources(context, logSession)
+        val dir = File(context.filesDir, "crash_reports/${session?.sessionId ?: "report"}")
         return CrashReport(
             directory = dir,
             classification = classification,
-            summary = classification.name.replace('_', ' '),
-            cause = CrashClassifier.likelyCause(evidence),
-            sources = sourceFiles
+            summary = view?.outcome?.name?.replace('_', ' ') ?: classification.name.replace('_', ' '),
+            cause = view?.diagnosticCause?.name?.replace('_', ' ') ?: CrashClassifier.likelyCause(evidenceHint),
+            sources = sources,
+            gameTitle = logSession?.gameTitleSnapshot ?: session?.gameName,
+            titleId = logSession?.titleId ?: session?.titleId,
+            gameIconPath = logSession?.gameIconSnapshotPath,
+            sessionId = session?.sessionId ?: logSession?.sessionId,
+            revision = logSession?.revision ?: 0L,
+            rawStopReason = logSession?.stopReason ?: session?.stopReason,
+            captureState = logSession?.captureState,
+            diagnostics = view,
         )
     }
 
-    /** Explicit user export path. It is intentionally never called during startup rendering. */
     fun collect(context: Context, session: EmulationSessionRecord?, evidenceHint: String = ""): CrashReport {
-        LogMonitor.flushWriters()
-        val sourceFiles = LogMonitor.getAllLogFiles().associateBy { it.name }
-        val endMs = session?.let { maxOf(it.lastHeartbeatMs, it.failureAtMs ?: 0L, it.stoppedAtMs ?: 0L) + 2_000L }
-        val evidence = buildString {
-            append(evidenceHint).append('\n')
-            sourceFiles.values.forEach { file -> if (file.isFile) append(file.readEvidence(session?.startedAtMs, endMs)).append('\n') }
-        }
-        val classification = CrashClassifier.classify(evidence, session != null)
-        val id = session?.sessionId ?: "report-${System.currentTimeMillis()}"
-        val dir = File(context.filesDir, "crash_reports/$id").apply { mkdirs() }
-        val copied = mutableMapOf<String, File>()
-        sourceFiles.forEach { (name, source) ->
-            val destination = File(dir, name)
-            runCatching { destination.writeText(source.readEvidence(session?.startedAtMs, endMs)); copied[name] = destination }
-        }
-        val metadata = File(dir, "metadata.json").apply { writeText(JSONObject().apply {
-            put("classification", classification.name)
-            put("cause", CrashClassifier.likelyCause(evidence))
-            put("sessionId", session?.sessionId ?: "")
-            put("gamePath", session?.gamePath ?: "")
-            put("titleId", session?.titleId ?: "")
-            put("startedAtMs", session?.startedAtMs ?: 0L)
-            put("lastHeartbeatMs", session?.lastHeartbeatMs ?: 0L)
-            put("failureAtMs", session?.failureAtMs ?: 0L)
-            put("stoppedAtMs", session?.stoppedAtMs ?: 0L)
-        }.toString(2)) }
-        File(dir, "summary.txt").writeText("${classification.name}\nLikely cause: ${CrashClassifier.likelyCause(evidence)}\n${evidence.take(4000)}")
-        copied["metadata.json"] = metadata
-        copied["summary.txt"] = File(dir, "summary.txt")
-        return CrashReport(dir, classification, classification.name.replace('_', ' '), CrashClassifier.likelyCause(evidence), copied)
+        return collectSummary(context, session, evidenceHint)
     }
 
-    private fun File.readEvidence(startedAtMs: Long?, endAtMs: Long? = null, maxBytes: Int = 512 * 1024): String {
-        if (startedAtMs == null) return readPrefix(maxBytes)
-        val start = startedAtMs
-        val now = System.currentTimeMillis()
-        val lines = StringBuilder()
-        var parsedLine = false
-        // Recovery runs during Home startup. Read only the newest bounded tail;
-        // scanning a rotated 25 MB log before drawing the card makes recovery
-        // appear hung and can delay the first frame for many seconds.
-        val fileLength = length()
-        val tailStart = maxOf(0L, fileLength - maxBytes.toLong())
-        java.io.RandomAccessFile(this, "r").use { file ->
-            file.seek(tailStart)
-            if (tailStart > 0L) file.readLine()
-            while (file.filePointer < fileLength) {
-                val line = file.readLine() ?: break
-                val lineTime = line.logTimestampMs(now)
-                if (lineTime != null) {
-                    parsedLine = true
-                    if (lineTime >= start && (endAtMs == null || lineTime <= endAtMs) && lines.length < maxBytes) lines.append(line).append('\n')
-                } else if (!parsedLine && lastModified() >= start && (endAtMs == null || lastModified() <= endAtMs) && lines.length < maxBytes) {
-                    lines.append(line).append('\n')
-                }
-                if (lines.length >= maxBytes) break
-            }
-        }
-        return lines.toString().take(maxBytes)
+    fun reportForManifest(context: Context, manifest: LogSessionManifest): CrashReport {
+        val view = SessionDiagnostics.project(manifest)
+        val sources = sessionOwnedSources(context, manifest)
+        val dir = LogSessionStore.sessionDir(context, manifest.sessionId)
+        return CrashReport(
+            directory = dir,
+            classification = view.classification,
+            summary = view.outcome.name.replace('_', ' '),
+            cause = view.diagnosticCause?.name?.replace('_', ' ') ?: (manifest.stopReason ?: view.outcome.name),
+            sources = sources,
+            gameTitle = manifest.gameTitleSnapshot,
+            titleId = manifest.titleId,
+            gameIconPath = manifest.gameIconSnapshotPath,
+            sessionId = manifest.sessionId,
+            revision = manifest.revision,
+            rawStopReason = manifest.stopReason,
+            captureState = manifest.captureState,
+            diagnostics = view,
+        )
     }
 
-    private fun File.readPrefix(maxBytes: Int): String = inputStream().use { stream ->
-        val bytes = ByteArray(maxBytes)
-        val count = stream.read(bytes)
-        if (count <= 0) "" else String(bytes, 0, count)
+    fun collectSourceFiles(context: Context, session: EmulationSessionRecord?): Map<String, File> {
+        val manifest = session?.sessionId?.let { LogSessionStore.read(context, it) }
+        return sessionOwnedSources(context, manifest)
     }
 
-    private fun String.logTimestampMs(nowMs: Long): Long? {
-        val match = Regex("^\\[?(\\d{2}-\\d{2} \\d{2}:\\d{2}:\\d{2}\\.\\d{3})").find(this) ?: return null
-        val formatter = SimpleDateFormat("MM-dd HH:mm:ss.SSS", Locale.US).apply {
-            timeZone = TimeZone.getDefault()
-            isLenient = false
+    private fun sessionOwnedSources(context: Context, manifest: LogSessionManifest?): Map<String, File> {
+        if (manifest == null) return emptyMap()
+        val files = LinkedHashMap<String, File>()
+        val dir = LogSessionStore.sessionDir(context, manifest.sessionId)
+        fun add(key: String, file: File) {
+            if (file.isFile && file.length() > 0 && !files.containsKey(key)) files[key] = file
         }
-        val parsed = runCatching { formatter.parse(match.groupValues[1]) ?: return null }.getOrNull() ?: return null
-        val calendar = Calendar.getInstance().apply {
-            time = parsed
-            set(Calendar.YEAR, Calendar.getInstance().get(Calendar.YEAR))
+        File(dir, "manifest.json").let { add("manifest.json", it) }
+        manifest.gameIconSnapshotPath?.let { add("game_icon.bin", File(it)) }
+        for (artifact in manifest.artifacts) {
+            val file = LogBroker.artifactFile(context, manifest.sessionId, artifact) ?: continue
+            val key = artifact.id.ifBlank { artifact.originalFilename.ifBlank { file.name } }
+            add(key, file)
         }
-        var timestamp = calendar.timeInMillis
-        if (timestamp > nowMs + 24 * 60 * 60 * 1000L) {
-            calendar.add(Calendar.YEAR, -1)
-            timestamp = calendar.timeInMillis
-        }
-        return timestamp
+        File(dir, "lifecycle.jsonl").takeIf { it.isFile }?.let { add("lifecycle.jsonl", it) }
+        File(dir, "capture-health.json").takeIf { it.isFile }?.let { add("capture-health.json", it) }
+        return files
     }
 }

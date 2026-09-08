@@ -59,7 +59,7 @@ class LaunchPpuPresentationTest {
         assertEquals(68, ui.installPpu.progress)
         assertEquals(PpuPhaseState.Waiting, ui.runtimePpu.state)
         assertFalse(ui.startEnabled)
-        assertEquals(PrepareAction.PreparingInstall, ui.prepareAction)
+        assertEquals(PrepareAction.Stop, ui.prepareAction)
     }
 
     @Test
@@ -84,7 +84,7 @@ class LaunchPpuPresentationTest {
         assertEquals(PpuPhaseState.Compiling, ui.runtimePpu.state)
         assertEquals(31, ui.runtimePpu.progress)
         assertFalse(ui.startEnabled)
-        assertEquals(PrepareAction.PreparingRuntime, ui.prepareAction)
+        assertEquals(PrepareAction.Stop, ui.prepareAction)
     }
 
     @Test
@@ -105,8 +105,10 @@ class LaunchPpuPresentationTest {
         )
         assertEquals(PpuPhaseState.Waiting, ui.runtimePpu.state)
         assertNull(ui.runtimePpu.progress)
-        assertTrue(ui.runtimePpu.detail?.contains("Waiting") == true || ui.runtimePpu.detail == "Waiting")
+        assertTrue(ui.runtimePpu.detail?.contains("Waiting") == true)
         assertFalse(ui.startEnabled)
+        assertEquals(PrepareAction.Locked, ui.prepareAction)
+        assertEquals("Another game is compiling PPU", ui.statusLine)
     }
 
     @Test
@@ -130,25 +132,24 @@ class LaunchPpuPresentationTest {
     }
 
     @Test
-    fun installReadyRuntimeNotStarted_willPrepareOnStart() {
+    fun installReadyRuntimeNotStarted_requiresPreparation() {
         val inputs = idleInputs(
             pre = PreRuntimePpuState.READY,
             rt = RuntimePpuState.NOT_STARTED,
         )
         val ui = LaunchPpuPresentation.build(
             "BLUS30443",
-            GameLaunchAvailability.Ready,
+            GameLaunchAvailability.NeedsPreparation,
             inputs,
         )
         assertEquals(PpuPhaseState.Ready, ui.installPpu.state)
-        assertEquals("Will prepare on start", ui.runtimePpu.detail)
-        assertTrue(ui.startEnabled)
-        assertEquals(PrimaryStartLabel.StartAndPrepare, ui.primaryStartLabel)
-        assertNull(ui.prepareAction)
+        assertEquals("Needs preparation", ui.runtimePpu.detail)
+        assertFalse(ui.startEnabled)
+        assertEquals(PrepareAction.Prepare, ui.prepareAction)
     }
 
     @Test
-    fun legacyIdleWithoutValidation_willPrepareOnStart() {
+    fun kotlinPreparedIdleWithoutValidation_isReadyToStart() {
         val inputs = idleInputs(
             pre = PreRuntimePpuState.READY,
             rt = RuntimePpuState.IDLE_AFTER_COMPILE,
@@ -159,42 +160,41 @@ class LaunchPpuPresentationTest {
             GameLaunchAvailability.Ready,
             inputs,
         )
-        assertEquals("Will prepare on start", ui.runtimePpu.detail)
-        assertEquals(PrimaryStartLabel.StartAndPrepare, ui.primaryStartLabel)
+        assertEquals("Ready", ui.runtimePpu.detail)
+        assertEquals(PrimaryStartLabel.Start, ui.primaryStartLabel)
     }
 
     @Test
-    fun needsPreparation_showsReimportAction() {
+    fun needsPreparation_showsPrepareAction() {
         val inputs = idleInputs()
         val ui = LaunchPpuPresentation.build(
             "BLUS30443",
             GameLaunchAvailability.NeedsPreparation,
             inputs,
         )
-        assertEquals(PrepareAction.ReimportOrRebuild, ui.prepareAction)
+        assertEquals(PrepareAction.Prepare, ui.prepareAction)
         assertFalse(ui.startEnabled)
-        assertEquals("Re-import required", ui.statusLine)
+        assertEquals("PPU preparation required", ui.statusLine)
     }
 
     @Test
-    fun installFailed_showsReimport_runtimeFailedWithInstallReady_retryOnStart() {
+    fun failedPhases_showRetryPreparation() {
         val installFailed = LaunchPpuPresentation.build(
             "BLUS30443",
-            GameLaunchAvailability.Failed(true, "Install PPU failed — re-import required"),
+            GameLaunchAvailability.Failed(true, "Install PPU failed — retry preparation"),
             idleInputs(pre = PreRuntimePpuState.FAILED, rt = RuntimePpuState.NOT_STARTED),
         )
-        assertEquals(PrepareAction.ReimportOrRebuild, installFailed.prepareAction)
+        assertEquals(PrepareAction.Retry, installFailed.prepareAction)
         assertFalse(installFailed.startEnabled)
 
         val runtimeFailed = LaunchPpuPresentation.build(
             "BLUS30443",
-            GameLaunchAvailability.Ready,
+            GameLaunchAvailability.Failed(true, "Runtime PPU failed — retry preparation"),
             idleInputs(pre = PreRuntimePpuState.READY, rt = RuntimePpuState.FAILED),
         )
-        assertEquals("Retry on start", runtimeFailed.runtimePpu.detail)
-        assertTrue(runtimeFailed.startEnabled)
-        assertEquals(PrimaryStartLabel.RetryOnStart, runtimeFailed.primaryStartLabel)
-        assertNull(runtimeFailed.prepareAction)
+        assertEquals("Preparation failed", runtimeFailed.runtimePpu.detail)
+        assertFalse(runtimeFailed.startEnabled)
+        assertEquals(PrepareAction.Retry, runtimeFailed.prepareAction)
     }
 
     @Test
@@ -204,7 +204,7 @@ class LaunchPpuPresentationTest {
             rt = RuntimePpuState.COMPILING,
             waiting = true,
             deferred = true,
-        )
+        ).copy(activeCompileTitleId = "BLUS30443")
         val ui = LaunchPpuPresentation.build(
             "BLUS30443",
             GameLaunchAvailability.PreparingPpu(null),
@@ -266,6 +266,131 @@ class LaunchPpuPresentationTest {
     }
 
     @Test
+    fun homeOverlay_includesInstallPpuWithoutImportRow() {
+        assertTrue(
+            LaunchPpuPresentation.homeCardShowsCompileOverlay(
+                isImporting = false,
+                isRuntimeGameCompile = false,
+                usingPrelaunchPpu = false,
+                usingInstallPpu = true,
+            )
+        )
+        assertFalse(
+            LaunchPpuPresentation.homeCardShowsCompileOverlay(
+                isImporting = false,
+                isRuntimeGameCompile = false,
+                usingPrelaunchPpu = false,
+                usingInstallPpu = false,
+            )
+        )
+    }
+
+    @Test
+    fun phaseStatusText_compilingPrefersModuleDetailOverZeroPercent() {
+        val compiling = PpuPhaseUi("Install PPU", PpuPhaseState.Compiling, 0, "module 7")
+        assertEquals("module 7", LaunchPpuPresentation.phaseStatusText(compiling))
+        val withPct = PpuPhaseUi("Install PPU", PpuPhaseState.Compiling, 42, "module 12 of 80")
+        assertEquals("module 12 of 80", LaunchPpuPresentation.phaseStatusText(withPct))
+        val ready = PpuPhaseUi("Runtime PPU", PpuPhaseState.Ready, null, "Ready")
+        assertEquals("Ready", LaunchPpuPresentation.phaseStatusText(ready))
+    }
+
+    @Test
+    fun compilingInstall_carriesRemainingLabelWithoutReplacingModuleDetail() {
+        val inputs = idleInputs(
+            install = CompileProgressBridge.CompileState(
+                ppuActive = true,
+                titleId = "BLUS31584",
+                ppuPercent = 35,
+                ppuMsg = "module 25 of 71",
+                moduleDone = 25,
+                moduleTotal = 71,
+                remainingLabel = "~8 min remaining",
+            ),
+            pre = PreRuntimePpuState.IN_PROGRESS,
+        )
+        val ui = LaunchPpuPresentation.build(
+            "BLUS31584",
+            GameLaunchAvailability.PreparingPpu(null),
+            inputs,
+        )
+        assertEquals(PpuPhaseState.Compiling, ui.installPpu.state)
+        assertEquals("module 25 of 71", ui.installPpu.detail)
+        assertEquals("~8 min remaining", ui.installPpu.remainingLabel)
+        assertEquals("module 25 of 71", LaunchPpuPresentation.phaseStatusText(ui.installPpu))
+        assertEquals(
+            "module 25 of 71 · ~8 min remaining",
+            LaunchPpuPresentation.phaseStatusLine(ui.installPpu),
+        )
+        assertEquals(
+            "module 25 of 71 · ~8 min remaining",
+            LaunchPpuPresentation.compileProgressLine(inputs.installPpu),
+        )
+    }
+
+    @Test
+    fun compileProgressLine_omitsRemainingWhenUnknown() {
+        val state = CompileProgressBridge.CompileState(
+            ppuActive = true,
+            ppuMsg = "module 7 of 80",
+            moduleDone = 7,
+            moduleTotal = 80,
+        )
+        assertEquals("module 7 of 80", LaunchPpuPresentation.compileProgressLine(state))
+    }
+
+    @Test
+    fun compileProgressPercent_usesModuleCounts() {
+        val state = CompileProgressBridge.CompileState(
+            ppuActive = true,
+            ppuPercent = 0,
+            moduleDone = 7,
+            moduleTotal = 80,
+            ppuMsg = "module 7 of 80",
+        )
+        assertEquals(8, LaunchPpuPresentation.compileProgressPercent(state))
+        assertEquals("module 7 of 80", LaunchPpuPresentation.compileProgressDetail(state))
+        val unknown = CompileProgressBridge.CompileState(
+            ppuActive = true,
+            ppuPercent = 0,
+            moduleDone = 7,
+            moduleTotal = 0,
+            ppuMsg = "module 7",
+        )
+        assertEquals(null, LaunchPpuPresentation.compileProgressPercent(unknown))
+        assertEquals("module 7", LaunchPpuPresentation.compileProgressDetail(unknown))
+    }
+
+    @Test
+    fun orphanedInstallInProgress_showsRetryNotPreparing() {
+        val ui = LaunchPpuPresentation.build(
+            "BCUS98125",
+            GameLaunchAvailability.Failed(true, "Install PPU interrupted — retry to resume"),
+            idleInputs(pre = PreRuntimePpuState.IN_PROGRESS, rt = RuntimePpuState.NOT_STARTED),
+        )
+        assertEquals(PpuPhaseState.Failed, ui.installPpu.state)
+        assertEquals("Interrupted — retry to resume", ui.installPpu.detail)
+        assertEquals(PpuPhaseState.Waiting, ui.runtimePpu.state)
+        assertEquals(PrepareAction.Retry, ui.prepareAction)
+        assertFalse(ui.startEnabled)
+        assertEquals("Install PPU interrupted — retry to resume", ui.statusLine)
+    }
+
+    @Test
+    fun orphanedRuntimeCompiling_showsRetryNotFinalizing() {
+        val ui = LaunchPpuPresentation.build(
+            "BLUS30443",
+            GameLaunchAvailability.Failed(true, "Runtime PPU interrupted — retry to resume"),
+            idleInputs(pre = PreRuntimePpuState.READY, rt = RuntimePpuState.COMPILING),
+        )
+        assertEquals(PpuPhaseState.Failed, ui.runtimePpu.state)
+        assertEquals("Interrupted — retry to resume", ui.runtimePpu.detail)
+        assertEquals(PrepareAction.Retry, ui.prepareAction)
+        assertFalse(ui.startEnabled)
+        assertEquals("Runtime PPU interrupted — retry to resume", ui.statusLine)
+    }
+
+    @Test
     fun invalidated_mapsInstallNotReady_notPreparing() {
         val inputs = idleInputs(pre = PreRuntimePpuState.INVALIDATED, rt = RuntimePpuState.NOT_STARTED)
         val ui = LaunchPpuPresentation.build(
@@ -275,5 +400,89 @@ class LaunchPpuPresentationTest {
         )
         assertEquals(PpuPhaseState.NotReady, ui.installPpu.state)
         assertEquals("Needs preparation", ui.installPpu.detail)
+    }
+
+    @Test
+    fun foreignInstall_locksPrepareAndDisablesStart() {
+        val inputs = idleInputs(
+            install = CompileProgressBridge.CompileState(
+                ppuActive = true,
+                titleId = "BLUS99999",
+                ppuPercent = 40,
+                ppuMsg = "module 10 of 40",
+            ),
+            pre = PreRuntimePpuState.NOT_DONE,
+        ).copy(activeCompileTitleId = "BLUS99999")
+        val ui = LaunchPpuPresentation.build(
+            "BLUS30443",
+            GameLaunchAvailability.NeedsPreparation,
+            inputs,
+        )
+        assertEquals(PrepareAction.Locked, ui.prepareAction)
+        assertEquals(PpuPhaseState.Waiting, ui.installPpu.state)
+        assertEquals("Waiting — another game is compiling", ui.installPpu.detail)
+        assertEquals("Another game is compiling PPU", ui.statusLine)
+        assertFalse(ui.startEnabled)
+    }
+
+    @Test
+    fun thisTitleCompiling_showsStopNotPrepare() {
+        val inputs = idleInputs(
+            install = CompileProgressBridge.CompileState(
+                ppuActive = true,
+                titleId = "BLUS30443",
+                ppuPercent = 40,
+            ),
+            pre = PreRuntimePpuState.IN_PROGRESS,
+        ).copy(activeCompileTitleId = "BLUS30443")
+        val ui = LaunchPpuPresentation.build(
+            "BLUS30443",
+            GameLaunchAvailability.PreparingPpu(null),
+            inputs,
+        )
+        assertEquals(PrepareAction.Stop, ui.prepareAction)
+        assertEquals(PpuPhaseState.Compiling, ui.installPpu.state)
+        assertFalse(ui.startEnabled)
+    }
+
+    @Test
+    fun stoppingThisTitle_showsStopping() {
+        val inputs = idleInputs(
+            install = CompileProgressBridge.CompileState(
+                ppuActive = true,
+                titleId = "BLUS30443",
+            ),
+            pre = PreRuntimePpuState.IN_PROGRESS,
+        ).copy(activeCompileTitleId = "BLUS30443", stoppingCompile = true)
+        val ui = LaunchPpuPresentation.build(
+            "BLUS30443",
+            GameLaunchAvailability.PreparingPpu(null),
+            inputs,
+        )
+        assertEquals(PrepareAction.Stopping, ui.prepareAction)
+        assertEquals("Stopping PPU compilation", ui.statusLine)
+        assertFalse(ui.startEnabled)
+    }
+
+    @Test
+    fun readyTitle_lockedWhileOtherCompiles() {
+        val inputs = idleInputs(
+            pre = PreRuntimePpuState.READY,
+            rt = RuntimePpuState.IDLE_AFTER_COMPILE,
+            validated = true,
+            install = CompileProgressBridge.CompileState(
+                ppuActive = true,
+                titleId = "BLES00001",
+            ),
+        ).copy(activeCompileTitleId = "BLES00001")
+        val ui = LaunchPpuPresentation.build(
+            "BLUS30443",
+            GameLaunchAvailability.Ready,
+            inputs,
+        )
+        assertEquals(PrepareAction.Locked, ui.prepareAction)
+        assertFalse(ui.startEnabled)
+        assertEquals("Another game is compiling PPU", ui.statusLine)
+        assertEquals(PpuPhaseState.Ready, ui.installPpu.state)
     }
 }

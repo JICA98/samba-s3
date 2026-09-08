@@ -11,6 +11,7 @@ import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
 import kotlinx.coroutines.test.StandardTestDispatcher
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
 import org.junit.Test
 
@@ -83,6 +84,100 @@ class MonitoringRepositoryTest {
         assertEquals(false, perf.enabledValues.last())
     }
 
+    @Test
+    fun updateIntervalChangeReconfiguresSampling() = runTest {
+        val settings = MutableStateFlow(MonitoringSettings(enabled = true, updateMs = 300L))
+        val system = FakeSystemSource()
+        val perf = FakePerfSource()
+        val repository = MonitoringRepository(context, system, perf, { EmulatorState.Running }, StandardTestDispatcher(testScheduler))
+
+        repository.start(this, settings)
+        runCurrent()
+        advanceTimeBy(300L)
+        runCurrent()
+
+        assertEquals(300L, perf.intervalValues.last())
+
+        // Update interval to 600ms
+        settings.value = settings.value.copy(updateMs = 600L)
+        runCurrent()
+        advanceTimeBy(600L)
+        runCurrent()
+
+        assertEquals(600L, perf.intervalValues.last())
+        assertEquals(1, system.maxActiveCount)
+        repository.stop()
+    }
+
+    @Test
+    fun graphMetricChangeUpdatesHistoryCollection() = runTest {
+        val settings = MutableStateFlow(
+            MonitoringSettings(
+                enabled = true,
+                updateMs = 300L,
+                graphMetrics = emptySet()
+            )
+        )
+        val system = FakeSystemSource()
+        val perf = FakePerfSource()
+        val repository = MonitoringRepository(context, system, perf, { EmulatorState.Running }, StandardTestDispatcher(testScheduler))
+
+        repository.start(this, settings)
+        runCurrent()
+        advanceTimeBy(600L)
+        runCurrent()
+
+        // With no graph metrics enabled, history is empty
+        assertTrue(repository.snapshot.value.fpsHistory.isEmpty())
+
+        // Enable FPS graph metric
+        settings.value = settings.value.copy(graphMetrics = setOf(MonitoringMetric.Fps))
+        runCurrent()
+        advanceTimeBy(600L)
+        runCurrent()
+
+        // History now captures samples
+        assertTrue(repository.snapshot.value.fpsHistory.isNotEmpty())
+        repository.stop()
+    }
+
+    @Test
+    fun runningToPausedToRunningLifecycleClearsHistoryAndDoesNotLeak() = runTest {
+        var state = EmulatorState.Running
+        val settings = MutableStateFlow(
+            MonitoringSettings(
+                enabled = true,
+                updateMs = 300L,
+                graphMetrics = setOf(MonitoringMetric.Fps)
+            )
+        )
+        val system = FakeSystemSource()
+        val perf = FakePerfSource()
+        val repository = MonitoringRepository(context, system, perf, { state }, StandardTestDispatcher(testScheduler))
+
+        repository.start(this, settings)
+        runCurrent()
+        advanceTimeBy(600L)
+        runCurrent()
+
+        // Running: samples collected
+        assertTrue(repository.snapshot.value.fpsHistory.isNotEmpty())
+
+        // Pause emulator: history clears
+        state = EmulatorState.Paused
+        advanceTimeBy(300L)
+        runCurrent()
+        assertTrue(repository.snapshot.value.fpsHistory.isEmpty())
+
+        // Resume emulator: history resumes fresh
+        state = EmulatorState.Running
+        advanceTimeBy(600L)
+        runCurrent()
+        assertTrue(repository.snapshot.value.fpsHistory.isNotEmpty())
+
+        repository.stop()
+    }
+
     private class FakeSystemSource : MonitoringSystemSource {
         var startCount = 0
         var stopCount = 0
@@ -110,15 +205,23 @@ class MonitoringRepositoryTest {
 
     private class FakePerfSource : MonitoringPerfSource {
         val enabledValues = mutableListOf<Boolean>()
+        val intervalValues = mutableListOf<Long>()
         var readCount = 0
+        private var timeNs = 1_000_000_000L
 
         override fun setEnabled(enabled: Boolean, intervalMs: Long) {
             enabledValues += enabled
+            intervalValues += intervalMs
         }
 
         override fun read(): EmulatorMetrics? {
             readCount++
-            return EmulatorMetrics(fps = 60f, frameTimeMs = 16.7f)
+            timeNs += 16_666_666L
+            return EmulatorMetrics(
+                timestampNs = timeNs,
+                fps = 60f,
+                frameTimeMs = 16.7f
+            )
         }
 
         override fun logUiSnapshot(metrics: EmulatorMetrics) = Unit

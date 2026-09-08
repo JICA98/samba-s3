@@ -29,6 +29,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.zenithblue.sambas3.databinding.ActivityRpcs3Binding
 import com.zenithblue.sambas3.dialogs.AlertDialogQueue
 import com.zenithblue.sambas3.gameconfig.GameSettingsOverrides
+import com.zenithblue.sambas3.utils.GpuDriverSelection
 import com.zenithblue.sambas3.overlay.State
 import com.zenithblue.sambas3.ppu.FreshBootFramePhase
 import com.zenithblue.sambas3.ppu.FreshBootFrameValidator
@@ -124,6 +125,9 @@ class RPCSXActivity : ComponentActivity(), EmulationHost {
     private var isRecoveryRecreate = false
     private var finishReason = EmulatorActivityFinishReason.None
     private var externalStopReason: EmulatorStopReason? = null
+    // True when this boot applied a title/device-scoped compatibility driver
+    // override (boot-only Turnip). Restored to the stored selection on exit.
+    private var compatDriverApplied = false
     private val interactionLock = InteractionLock()
     private var operationUiState: SavestateOperationUiState = SavestateOperationUiState.Hidden
     override val activityInstanceId = NEXT_ACTIVITY_ID.incrementAndGet()
@@ -157,6 +161,7 @@ class RPCSXActivity : ComponentActivity(), EmulationHost {
         }
         if (!RPCSX.initialized) {
             try {
+                com.zenithblue.sambas3.logging.LogBroker.ensureStarted(this)
                 RPCSX.nativeLibDirectory = packageManager.getApplicationInfo(packageName, 0).nativeLibraryDir
                 if (RPCSX.openLibrary()) {
                     RPCSX.instance.initialize(RPCSX.rootDirectory, UserRepository.getUserFromSettings())
@@ -193,6 +198,7 @@ class RPCSXActivity : ComponentActivity(), EmulationHost {
         binding.surfaceHost.translationZ = 0f
         binding.monitoringOverlay.translationZ = 1f
         binding.padOverlay.translationZ = 2f
+        binding.liveLogsOverlay.translationZ = 2.5f
         binding.menuToggle.translationZ = 3f
         binding.oscToggle.translationZ = 3f
         binding.transitionOverlay.translationZ = 100f
@@ -228,6 +234,24 @@ class RPCSXActivity : ComponentActivity(), EmulationHost {
             }
         }
 
+        binding.liveLogsOverlay.visibility = View.GONE
+        binding.liveLogsOverlay.isClickable = false
+        binding.liveLogsOverlay.isFocusable = false
+        binding.liveLogsOverlay.setViewCompositionStrategy(
+            ViewCompositionStrategy.DisposeOnViewTreeLifecycleDestroyed
+        )
+        binding.liveLogsOverlay.setContent {
+            RPCSXTheme {
+                val liveSettings by com.zenithblue.sambas3.logging.LiveLogOverlaySettings.state(this@RPCSXActivity).collectAsStateWithLifecycle()
+                val menuState by coordinator.state.collectAsStateWithLifecycle()
+                LaunchedEffect(liveSettings.enabled, liveSettings.editMode, liveSettings.locked) {
+                    binding.liveLogsOverlay.visibility = if (liveSettings.enabled) View.VISIBLE else View.GONE
+                    binding.liveLogsOverlay.interceptTouches = liveSettings.enabled && liveSettings.editMode && !liveSettings.locked
+                }
+                com.zenithblue.sambas3.ui.logging.LiveLogOverlayHost(menuState.isOpen)
+            }
+        }
+
         unregisterUsbEventListener = listenUsbEvents(this)
         enableFullScreenImmersive()
 
@@ -240,7 +264,10 @@ class RPCSXActivity : ComponentActivity(), EmulationHost {
                 val uiState by coordinator.state.collectAsStateWithLifecycle()
                 InGameMenuHost(
                     uiState = uiState,
-                    gamePath = intent.getStringExtra("path"),
+                    gamePath = intent.getStringExtra("path")
+                        ?: (if (::originalGamePath.isInitialized) originalGamePath else null)
+                        ?: intent.getStringExtra(RPCSXActivity.EXTRA_ORIGINAL_GAME_PATH)
+                        ?: RPCSX.activeGame.value,
                     core = coreGateway,
                     onIntent = coordinator::dispatch
                 )
@@ -397,21 +424,35 @@ class RPCSXActivity : ComponentActivity(), EmulationHost {
         }
         val gamePath = originalGamePath
         val gameInfo = GameRepository.find(gamePath)?.info
+        val gameTitle = GameIdentity.displayName(originalGamePath, gameInfo?.name?.value)
+        val titleId = GameIdentity.titleIdOrNull(originalGamePath, gameInfo?.name?.value)
         GameSessionService.start(
             this,
             gamePath,
-            gameInfo?.name?.value,
+            gameTitle,
             gameInfo?.iconPath?.value
         )
         RPCSX.lastPlayedGame = gamePath
-        EmulationSessionJournal.begin(
+        val session = EmulationSessionJournal.begin(
             this,
             originalGamePath,
-            GameIdentity.titleIdOrNull(originalGamePath, null),
-            originalGamePath.substringAfterLast('/'),
+            titleId,
+            gameTitle,
             activityInstanceId,
             surfaceLeaseManager.currentGeneration
         )
+        try {
+            com.zenithblue.sambas3.logging.LogBroker.beginGameSession(
+                this,
+                session.sessionId,
+                originalGamePath,
+                gameTitle,
+                gameInfo?.iconPath?.value,
+                bootMode.name,
+            )
+        } catch (e: Exception) {
+            Log.w("S3LOG", "log session begin failed: ${e.message}")
+        }
         logSessionSnapshot("activity-created")
         if (bootMode != EmulatorBootMode.FreshGame) {
             pendingRecovery?.let {
@@ -529,17 +570,77 @@ class RPCSXActivity : ComponentActivity(), EmulationHost {
             val gameTitleId = GameSettingsOverrides.resolveTitleId(gamePath, this@RPCSXActivity)
                 ?: GameSettingsOverrides.resolveTitleId(bootPath, this@RPCSXActivity)
             if (!gameTitleId.isNullOrBlank()) {
-                Log.i("S3BOOT", "applying per-game overrides and curated defaults for $gameTitleId")
-                GameSettingsOverrides.applyForGame(this@RPCSXActivity, gameTitleId)
+                // Scoped settings lease: a crashed session's globals are
+                // restored first, then the resolved title profile is applied
+                // over a snapshot. Exact originals return on clean exit.
+                GameSettingsOverrides.beginScopedLeaseForBoot(this@RPCSXActivity, gameTitleId)
             }
+            if (!intent.getBooleanExtra(EXTRA_SAFE_RETRY, false)) {
+                // Title/device-scoped compatibility driver: RDR on a known-bad
+                // Adreno system driver boots a validated bundled Turnip for
+                // THIS boot only. The stored global driver preference is never
+                // mutated; it is re-applied on exit (see restoreCompatDriver).
+                compatDriverApplied = runCatching {
+                    val override = GpuDriverSelection.resolveCompatBootDriverForBoot(
+                        this@RPCSXActivity, gameTitleId
+                    )
+                    if (override != null) {
+                        GpuDriverSelection.applyCompatBootDriver(override, applicationInfo.nativeLibraryDir)
+                    } else false
+                }.getOrDefault(false)
+            }
+            val effectiveBootPath: String
+            val effectiveOriginalGamePath: String
+            // Direct-ISO applies to every boot mode: a savestate boot still needs the
+            // disc mounted, and the core resolves the game through the original path.
+            // The entire direct-source branch is debug/test-only. Release builds
+            // must retain the legacy installed-path behavior, even if app data
+            // came from an earlier debug build.
+            val isDirectIso = com.zenithblue.sambas3.BuildConfig.DIRECT_ISO_LOADING &&
+                (gameInfo?.sourceMode?.value == GameSourceMode.DIRECT_ISO ||
+                    ((gamePath.endsWith(".iso", ignoreCase = true) ||
+                        bootPath.endsWith(".iso", ignoreCase = true)) &&
+                        gameInfo?.sourceUri?.value != null))
+            if (isDirectIso) {
+                val uriStr = gameInfo?.sourceUri?.value ?: gamePath
+                val uri = if (uriStr.startsWith("content://") || uriStr.startsWith("file://")) {
+                    android.net.Uri.parse(uriStr)
+                } else {
+                    android.net.Uri.fromFile(java.io.File(uriStr))
+                }
+                Log.i("S3ISO", "boot_source=DIRECT_ISO uri=$uri mode=$bootMode")
+                val session = runCatching {
+                    com.zenithblue.sambas3.iso.DirectIsoSession.acquire(this@RPCSXActivity, uri)
+                }.getOrElse { err ->
+                    Log.e("S3ISO", "unavailable reason=${err.message}")
+                    runOnUiThread {
+                        android.widget.Toast.makeText(
+                            this@RPCSXActivity,
+                            "ISO unavailable. Reconnect storage or select the ISO again.",
+                            android.widget.Toast.LENGTH_LONG
+                        ).show()
+                        failBootAndReturnHome("direct-iso-unavailable")
+                    }
+                    return@thread
+                }
+                effectiveBootPath = session.procFdPath
+                effectiveOriginalGamePath = session.procFdPath
+            } else {
+                effectiveBootPath = bootPath
+                effectiveOriginalGamePath = gamePath
+            }
+
             val bootResult = BootResult.fromInt(
                 if (bootMode != EmulatorBootMode.FreshGame) {
-                    bootSavestateSerialized(bootPath, gamePath)
+                    bootSavestateSerialized(bootPath, effectiveOriginalGamePath)
                 } else {
-                    bootSerialized(bootPath)
+                    bootSerialized(effectiveBootPath)
                 }
             )
             if (bootResult != BootResult.NoErrors) {
+                if (isDirectIso) {
+                    com.zenithblue.sambas3.iso.DirectIsoSession.release("boot-failed")
+                }
                 Log.w("S3HOMELOAD", "direct-boot-return result=$bootResult source=$bootPath")
                 if (bootMode != EmulatorBootMode.FreshGame) {
                     Log.w("S3HOMELOAD", "boot-savestate-return result=$bootResult")
@@ -808,6 +909,7 @@ class RPCSXActivity : ComponentActivity(), EmulationHost {
     /** Boot/load failures return to Home; RPCSXActivity never owns recovery presentation. */
     private fun failBootAndReturnHome(reason: String) {
         if (!terminalFailure.compareAndSet(false, true)) return
+        com.zenithblue.sambas3.iso.DirectIsoSession.release("fail-boot-$reason")
         interactionLock.lock(EmulatorInteractionLock.CrashView)
         val failureEventId = "boot-failure-${System.currentTimeMillis()}-${activityInstanceId}"
         EmulationSessionJournal.markFailure(this, failureEventId)
@@ -819,6 +921,8 @@ class RPCSXActivity : ComponentActivity(), EmulationHost {
                 bootRequest.savestatePath,
                 bootRequest.slot,
                 reason,
+                sessionId = EmulationSessionJournal.read(this@RPCSXActivity)?.sessionId
+                    ?: com.zenithblue.sambas3.logging.LogBroker.currentSessionId,
             )
             stopAndFinishAfterFailure(EmulatorStopReason.BootFailureCleanup)
         }
@@ -830,9 +934,17 @@ class RPCSXActivity : ComponentActivity(), EmulationHost {
         }
         Log.i("S3RECOVERY", "failure return stop=$stopped")
         if (!stopped) {
-            runOnUiThread {
-                Log.e("S3RECOVERY", "failure return retained Activity because native Stopped was not proven")
-            }
+            // A wedged RSX thread can prevent the native state machine from
+            // reaching Stopped (for example after a display-driver timeout).
+            // Keeping this fullscreen Activity alive leaves the tablet on a
+            // black, non-interactive surface forever.  This path is only used
+            // after a fatal/boot failure, so terminate the process once the
+            // coordinator has exhausted its bounded stop attempts.  Kill from
+            // this IO coroutine rather than only from runOnUiThread: the main
+            // thread may itself be blocked in the failed presentation path.
+            Log.e("S3RECOVERY", "native stop unproven; terminating failed emulator process")
+            runCatching { runOnUiThread { finishAndRemoveTask() } }
+            android.os.Process.killProcess(android.os.Process.myPid())
         }
     }
 
@@ -939,6 +1051,8 @@ class RPCSXActivity : ComponentActivity(), EmulationHost {
             EmulatorActivityFinishReason.ExplicitExit
         }
         GameSessionService.stop(this)
+        try { GameSettingsOverrides.endScopedLeaseAfterBoot(this) } catch (_: Exception) {}
+        restoreCompatDriver()
         Log.i("S3HOST", "finish-external-stop activity=$activityInstanceId requestId=$requestId")
         finish()
     }
@@ -1299,11 +1413,27 @@ class RPCSXActivity : ComponentActivity(), EmulationHost {
             RPCSX.instance.bootSavestate(savestatePath, originalGamePath)
         }
 
+    /**
+     * Re-apply the stored GPU driver selection after a compat-override boot
+     * exits. No-op unless this activity applied a boot-only override.
+     */
+    private fun restoreCompatDriver() {
+        if (!compatDriverApplied) return
+        compatDriverApplied = false
+        try {
+            GpuDriverSelection.restoreStoredSelection(this, applicationInfo.nativeLibraryDir)
+        } catch (e: Exception) {
+            Log.w("S3GPU", "compat-restore failed: ${e.message}")
+        }
+    }
+
     /** Map a semantic menu command to coordinator intents. Returns true if consumed. */
     private fun handleMenuCommand(command: MenuCommand): Boolean {
         return when (command) {
             is MenuCommand.Previous -> coordinator.moveSelection(-1)
             is MenuCommand.Next -> coordinator.moveSelection(1)
+            is MenuCommand.Left -> false
+            is MenuCommand.Right -> false
             is MenuCommand.PageUp -> coordinator.jumpSelection(-10)
             is MenuCommand.PageDown -> coordinator.jumpSelection(10)
             is MenuCommand.Activate -> {
@@ -1344,9 +1474,6 @@ class RPCSXActivity : ComponentActivity(), EmulationHost {
                     false
                 }
             }
-
-            is MenuCommand.Left -> false
-            is MenuCommand.Right -> false
         }
     }
 
@@ -1408,6 +1535,8 @@ class RPCSXActivity : ComponentActivity(), EmulationHost {
             val nativeState = RPCSX.getState()
             RPCSX.state.value = nativeState
             if (nativeState == EmulatorState.Stopped && !isRecoveryRecreate) {
+                try { GameSettingsOverrides.endScopedLeaseAfterBoot(this) } catch (_: Exception) {}
+                restoreCompatDriver()
                 val myPath = try { intent.getStringExtra("path") } catch (_: Exception) { null }
                 if (myPath != null && RPCSX.activeGame.value == myPath) {
                     Log.i("S3LIFE", "onDestroy Stopped clearing stale activeGame=$myPath")
@@ -1439,6 +1568,14 @@ class RPCSXActivity : ComponentActivity(), EmulationHost {
         bootThread?.interrupt()
         try { bootThread?.join(2000) } catch (_: Exception) {}
         try { if (bootThread?.isAlive == true) Log.w("S3LIFE", "bootThread still alive after onDestroy join timeout") } catch (_: Exception) {}
+        // Release the direct-ISO FD only after the core no longer needs the disc.
+        // Releasing before kill/stop completes would break in-flight disc reads.
+        val nativeStopped = runCatching { RPCSX.getState() }.getOrDefault(EmulatorState.Stopped) == EmulatorState.Stopped
+        if (nativeStopped) {
+            com.zenithblue.sambas3.iso.DirectIsoSession.release("activity-destroyed-stopped")
+        } else {
+            Log.w("S3ISO", "fd_session_retained reason=core-still-alive fd=${com.zenithblue.sambas3.iso.DirectIsoSession.current()?.fd}")
+        }
     }
 
     private fun isMenuOpen(): Boolean = coordinator.state.value.isOpen

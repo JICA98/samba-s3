@@ -271,8 +271,24 @@ object EmulatorStopCoordinator {
             // Home is allowed to classify recovery.
             Log.i("S3EXIT", "event=trophy-flush-complete sessionId=${session?.sessionId ?: "none"} stopRequestId=$requestId boundary=native-stop journal=${session?.state ?: "none"}")
             EmulationSessionJournal.markCleanStop(context, requestId, reason.name, stopFinishReason(reason))
+            runCatching {
+                com.zenithblue.sambas3.logging.LogBroker.finalizeGameSession(
+                    context,
+                    session?.sessionId,
+                    com.zenithblue.sambas3.logging.LogSessionTerminal.CLEAN_STOP,
+                    reason.name,
+                )
+            }
         } else {
             EmulationSessionJournal.markFailedStop(context, requestId, reason.name, session?.fatalEventId)
+            runCatching {
+                com.zenithblue.sambas3.logging.LogBroker.finalizeGameSession(
+                    context,
+                    session?.sessionId,
+                    com.zenithblue.sambas3.logging.LogSessionTerminal.FAILED,
+                    reason.name,
+                )
+            }
         }
         logExitTrace(context, host, requestId, reason, terminalEvent, EmulatorState.Stopped.name)
         withContext(Dispatchers.Main.immediate) {

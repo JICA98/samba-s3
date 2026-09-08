@@ -1,0 +1,69 @@
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="120dp"
+    android:height="120dp"
+    android:viewportWidth="96"
+    android:viewportHeight="96">
+  <!-- Outer ambient circle glow -->
+  <path
+      android:fillColor="#1AE5A93C"
+      android:pathData="M48,6 A42,42 0 1,1 47.99,6 Z"/>
+  <path
+      android:strokeColor="#40E5A93C"
+      android:strokeWidth="1.5"
+      android:pathData="M48,10 A38,38 0 1,1 47.99,10 Z"/>
+
+  <!-- PS3 Slim Console Silhouette -->
+  <path
+      android:fillColor="#1F2937"
+      android:strokeColor="#E5A93C"
+      android:strokeWidth="1.5"
+      android:pathData="M22,38 C22,34 26,30 32,30 L64,30 C70,30 74,34 74,38 L74,54 C74,56 72,58 70,58 L26,58 C24,58 22,56 22,54 Z"/>
+
+  <!-- Console Slot / Power Line -->
+  <path
+      android:strokeColor="#E5A93C"
+      android:strokeWidth="1.2"
+      android:strokeLineCap="round"
+      android:pathData="M30,42 L58,42"/>
+  <path
+      android:fillColor="#E5A93C"
+      android:pathData="M64,42 A1.5,1.5 0 1,1 63.99,42 Z"/>
+
+  <!-- DualShock Controller in Foreground -->
+  <path
+      android:fillColor="#111827"
+      android:strokeColor="#FFFFFF"
+      android:strokeWidth="1.5"
+      android:pathData="M30,52 C26,52 24,56 25,62 L27,72 C28,76 33,78 37,74 L42,68 L54,68 L59,74 C63,78 68,76 69,72 L71,62 C72,56 70,52 66,52 C60,52 57,56 53,56 L43,56 C39,56 36,52 30,52 Z"/>
+
+  <!-- D-Pad on Controller -->
+  <path
+      android:fillColor="#E5A93C"
+      android:pathData="M33,59 L35,59 L35,57 L37,57 L37,59 L39,59 L39,61 L37,61 L37,63 L35,63 L35,61 L33,61 Z"/>
+
+  <!-- Face Buttons (Cross, Circle, Triangle, Square dots) -->
+  <path
+      android:fillColor="#388BFD"
+      android:pathData="M61,57 A1,1 0 1,1 60.99,57 Z"/>
+  <path
+      android:fillColor="#E5A93C"
+      android:pathData="M59,59 A1,1 0 1,1 58.99,59 Z"/>
+  <path
+      android:fillColor="#F85149"
+      android:pathData="M63,59 A1,1 0 1,1 62.99,59 Z"/>
+  <path
+      android:fillColor="#56D364"
+      android:pathData="M61,61 A1,1 0 1,1 60.99,61 Z"/>
+
+  <!-- Thumbsticks -->
+  <path
+      android:fillColor="#242B38"
+      android:strokeColor="#E5A93C"
+      android:strokeWidth="1"
+      android:pathData="M41,64 A3,3 0 1,1 40.99,64 Z"/>
+  <path
+      android:fillColor="#242B38"
+      android:strokeColor="#E5A93C"
+      android:strokeWidth="1"
+      android:pathData="M55,64 A3,3 0 1,1 54.99,64 Z"/>
+</vector>

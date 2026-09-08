@@ -48,6 +48,13 @@ CMD="${1:-}"; shift || true
 
 pad() { "$SCRIPT_DIR/debug-pad.sh" "$SERIAL" "$@"; }
 pad_raw() { "$SCRIPT_DIR/debug-pad.sh" "$SERIAL" --raw "$@"; }
+release_pad() { pad_raw --ei d1 0 --ei d2 0 --ei lx 127 --ei ly 127 --ei rx 127 --ei ry 127; }
+arm_release() {
+  trap 'release_pad || true' EXIT
+  trap 'exit 130' INT
+  trap 'exit 143' TERM
+}
+finish_release() { release_pad; trap - EXIT INT TERM; }
 
 cmd_list() {
   echo "[*] Physical input devices on $SERIAL:"
@@ -70,7 +77,7 @@ cmd_press() {
   for ((i=1; i<=TIMES; i++)); do
     echo "[*] $BTN ($i/$TIMES)"
     pad "$BTN" | tail -1
-    [[ "$i" -lt "$TIMES" ]] && sleep "$GAP"
+    if [[ "$i" -lt "$TIMES" ]]; then sleep "$GAP"; fi
   done
 }
 
@@ -84,11 +91,12 @@ cmd_hold() { # hold BTN seconds — raw press, sleep, release (centered sticks)
     UP) D="--ei d1 16";; DOWN) D="--ei d1 64";; LEFT) D="--ei d1 128";; RIGHT) D="--ei d1 32";;
     L3) D="--ei d1 2";; R3) D="--ei d1 4";;
   esac
+  arm_release
   # shellcheck disable=SC2086
   pad_raw $D --ei lx 127 --ei ly 127 --ei rx 127 --ei ry 127 | tail -1
   echo "[*] holding $BTN for ${SECS}s..."
   sleep "$SECS"
-  pad_raw --ei d1 0 --ei d2 0 --ei lx 127 --ei ly 127 --ei rx 127 --ei ry 127 | tail -1
+  finish_release
   echo "[*] released $BTN"
 }
 
@@ -110,10 +118,11 @@ cmd_stick() { # stick LEFT|RIGHT|UP|DOWN [seconds]
     LEFT) LX=0; LY=127;; RIGHT) LX=255; LY=127;; UP) LX=127; LY=0;; DOWN) LX=127; LY=255;;
     *) echo "stick direction must be LEFT|RIGHT|UP|DOWN"; exit 1;;
   esac
+  arm_release
   pad_raw --ei d1 0 --ei d2 0 --ei lx "$LX" --ei ly "$LY" --ei rx 127 --ei ry 127 | tail -1
   echo "[*] left stick $DIR for ${SECS}s..."
   sleep "$SECS"
-  pad_raw --ei d1 0 --ei d2 0 --ei lx 127 --ei ly 127 --ei rx 127 --ei ry 127 | tail -1
+  finish_release
   echo "[*] stick centered"
 }
 
@@ -122,7 +131,7 @@ cmd_eula() { # eula [rounds=3] [gap=4] — GTA-style EULA accept loop
   for ((i=1; i<=ROUNDS; i++)); do
     echo "[*] EULA accept CROSS ($i/$ROUNDS)"
     pad CROSS | tail -1
-    [[ "$i" -lt "$ROUNDS" ]] && sleep "$GAP"
+    if [[ "$i" -lt "$ROUNDS" ]]; then sleep "$GAP"; fi
   done
 }
 

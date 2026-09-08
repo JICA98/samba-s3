@@ -1,0 +1,40 @@
+===== S3GPU (driver resolver) =====
+09-03 10:27:13.190  6389  6828 I GpuDriverSelection: S3GPU compat title=BLUS30758 verdict=stored reason=explicit-user-driver
+===== S3GAMECFG (lease boot) =====
+09-03 10:27:12.957  6389  6828 I GameConfig: S3GAMECFG boot title=BLUS30758 compat={Video@@Write Color Buffers=true, Video@@Read Color Buffers=true, Video@@Handle RSX Memory Tiling=false, Video@@Driver Wake-Up Delay=200, Core@@SPU loop detection=true, Video@@Relaxed ZCULL Sync=true, Core@@Max SPURS Threads=4} user={} resolved={Video@@Write Color Buffers=true, Video@@Read Color Buffers=true, Video@@Handle RSX Memory Tiling=false, Video@@Driver Wake-Up Delay=200, Core@@SPU loop detection=true, Video@@Relaxed ZCULL Sync=true, Core@@Max SPURS Threads=4}
+09-03 10:27:13.187  6389  6828 I GameConfig: S3GAMECFG boot title=BLUS30758 lease=1788411432957 keys=[Video@@Write Color Buffers, Video@@Read Color Buffers, Video@@Handle RSX Memory Tiling, Video@@Driver Wake-Up Delay, Core@@SPU loop detection, Video@@Relaxed ZCULL Sync, Core@@Max SPURS Threads] applied=7/7 globalBefore={Video@@Write Color Buffers=true, Video@@Read Color Buffers=true, Video@@Handle RSX Memory Tiling=false, Video@@Driver Wake-Up Delay=200, Core@@SPU loop detection=true, Video@@Relaxed ZCULL Sync=true, Core@@Max SPURS Threads=4}
+===== Vulkan driver proof =====
+09-03 10:24:42.531  6389  6389 I RPCSX-UI: Loading custom driver /data/data/com.zenithblue.sambas3/files/gpu_drivers/turnip-26.3
+09-03 10:27:14.256  6389  6828 I hook_impl: hook_android_dlopen_ext: loading custom driver: /data/data/com.zenithblue.sambas3/files/gpu_drivers/turnip-26.3/libvulkan_freedreno.so
+09-03 10:27:14.259  6389  6828 I RPCS3   : Found Vulkan-compatible GPU: 'Turnip Adreno (TM) 750' running on driver 26.2.99
+09-03 10:27:14.263  6389  6828 D RPCS3   : Vulkan: Renderer initialized on device 'Turnip Adreno (TM) 750'
+09-03 10:27:22.373  6389  6913 I RPCS3   : Found Vulkan-compatible GPU: 'Turnip Adreno (TM) 750' running on driver 26.2.99
+09-03 10:27:22.375  6389  6913 D RPCS3   : Vulkan: Renderer initialized on device 'Turnip Adreno (TM) 750'
+===== boot/first-frame =====
+09-03 10:27:14.452  6389  6828 I S3BOOTFRAME: event=boot_return title=BLUS30758 result=NoErrors state=Starting surface_gen=1
+09-03 10:27:14.453  6389  6883 I S3BOOTFRAME: event=boot_return title=BLUS30758 result=NoErrors state=Starting surface_gen=1 runtime_ppu_active=0
+09-03 10:27:14.453  6389  6883 I S3BOOTFRAME: event=frame_probe attempt=1 copied=0 state=Starting surface_gen=1
+09-03 10:27:14.604  6389  6883 I S3BOOTFRAME: event=runtime_ppu_begin title=BLUS30758 late=1
+09-03 10:27:14.804  6389  6883 I S3BOOTFRAME: event=frame_probe attempt=2 copied=0 state=Starting surface_gen=1
+09-03 10:27:14.954  6389  6883 I S3BOOTFRAME: event=runtime_ppu_begin title=BLUS30758 late=1
+09-03 10:27:20.369  6389  6883 I S3BOOTFRAME: event=frame_probe attempt=3 copied=0 state=Stopping surface_gen=1
+09-03 10:27:20.520  6389  6883 I S3BOOTFRAME: event=frame_probe attempt=4 copied=0 state=Stopping surface_gen=1
+===== milestones (Bink/Press Start/shaders) =====
+09-03 10:29:30.395  6389  7166 D RPCS3   : r4 : 0x1560738  -> "[BINK] Using 2 speakers."
+09-03 10:29:30.395  6389  7166 D RPCS3   : r9 : 0x1560738  -> "[BINK] Using 2 speakers."
+09-03 10:29:30.395  6389  7166 D RPCS3   : sys_tty_write(): “[BINK] Using 2 speakers.“ << endl
+09-03 10:29:37.824  6389  6966 D RPCS3   : r4 : 0x1560738  -> "[STARTUP] Time to Press Start: 2"
+09-03 10:29:37.824  6389  6966 D RPCS3   : r9 : 0x1560738  -> "[STARTUP] Time to Press Start: 2"
+09-03 10:29:37.824  6389  6966 D RPCS3   : sys_tty_write(): “[STARTUP] Time to Press Start: 22.714 seconds.“ << endl
+09-03 10:29:40.802  6389  6958 I RPCS3   : Program compiled successfully
+===== fence/device errors (all) =====
+09-03 10:29:40.354  6389  7147 E RPCS3   : [vulkan] vk::wait_for_event has timed out!
+===== recovery/journal =====
+09-03 10:24:42.800  6389  6389 I S3RECOVERY: refresh session=1788406400044-9336ea33 state=RUNNING terminal=1788402109134-531457c0/true process=add7493d-97d7-4f05-9824-2047a70503e1/d973321d-faa6-4753-ad0c-0494c3550d2c
+09-03 10:24:42.800  6389  6389 I S3RECOVERY: ignoring stale CLEAN_STOP session=1788402109134-531457c0 activeSession=1788406400044-9336ea33
+09-03 10:24:42.809  6389  6389 I S3RECOVERY: refresh session=1788406400044-9336ea33 state=RUNNING terminal=1788402109134-531457c0/true process=add7493d-97d7-4f05-9824-2047a70503e1/d973321d-faa6-4753-ad0c-0494c3550d2c
+09-03 10:24:42.809  6389  6389 I S3RECOVERY: ignoring stale CLEAN_STOP session=1788402109134-531457c0 activeSession=1788406400044-9336ea33
+09-03 10:24:42.811  6389  6389 I S3RECOVERY: decision=INTERRUPTED session=1788406400044-9336ea33 report=UNEXPECTED_TERMINATION cause=Emulator or application
+09-03 10:24:42.812  6389  6389 I S3RECOVERY: decision=INTERRUPTED session=1788406400044-9336ea33 report=UNEXPECTED_TERMINATION cause=Emulator or application
+09-03 10:27:12.912  6389  6389 I S3HOST  : register activity=1 surface=1
+09-03 10:27:12.934  6389  6828 I S3RECOVERY: preflight state=Stopped activeGame=null recovery=false

@@ -2,6 +2,7 @@ package com.zenithblue.sambas3.ui.drivers
 
 import android.net.Uri
 import android.util.Log
+import android.view.KeyEvent
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.clickable
@@ -26,6 +27,7 @@ import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.HorizontalDivider
@@ -34,14 +36,12 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
-import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Tab
 import androidx.compose.material3.TabRow
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
-import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -61,6 +61,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.zenithblue.sambas3.R
 import com.zenithblue.sambas3.RPCSX
+import com.zenithblue.sambas3.RPCSXColors
 import com.zenithblue.sambas3.dialogs.AlertDialogQueue
 import com.zenithblue.sambas3.drivers.catalog.DriverCatalogSnapshot
 import com.zenithblue.sambas3.drivers.catalog.DriverGpuFilter
@@ -68,6 +69,7 @@ import com.zenithblue.sambas3.drivers.catalog.DriverSourceId
 import com.zenithblue.sambas3.drivers.catalog.DriverVariantFilter
 import com.zenithblue.sambas3.drivers.download.DriverDownloadRegistry
 import com.zenithblue.sambas3.drivers.download.DriverDownloadState
+import com.zenithblue.sambas3.ui.common.SambaScreenScaffold
 import com.zenithblue.sambas3.utils.GeneralSettings
 import com.zenithblue.sambas3.utils.GeneralSettings.string
 import com.zenithblue.sambas3.utils.GpuDriverHelper
@@ -93,6 +95,7 @@ fun GpuDriversScreen(
     var selectedDriver by remember { mutableStateOf(GeneralSettings["selected_gpu_driver"].string("Default")) }
     var selectedTab by remember { mutableStateOf(DriverTab.Installed) }
     var isInstalling by remember { mutableStateOf(false) }
+    var pendingDelete by remember { mutableStateOf<Pair<java.io.File, com.zenithblue.sambas3.utils.GpuDriverMetadata>?>(null) }
 
     var snapshot by remember { mutableStateOf<DriverCatalogSnapshot?>(null) }
     var isLoadingCatalog by remember { mutableStateOf(false) }
@@ -302,18 +305,7 @@ fun GpuDriversScreen(
                         if (canDelete) {
                             Row(modifier = Modifier.fillMaxWidth().padding(top = 6.dp), horizontalArrangement = Arrangement.End) {
                                 TextButton(
-                                    onClick = {
-                                        scope.launch(Dispatchers.IO) {
-                                            if (GpuDriverHelper.deleteDriver(context, file, metadata)) {
-                                                val updated = GpuDriverHelper.getInstalledDrivers(context)
-                                                val sel = GeneralSettings["selected_gpu_driver"].string("Default")
-                                                withContext(Dispatchers.Main) {
-                                                    drivers = updated
-                                                    selectedDriver = sel
-                                                }
-                                            }
-                                        }
-                                    }
+                                    onClick = { pendingDelete = file to metadata }
                                 ) { Text("DELETE", color = MaterialTheme.colorScheme.error) }
                             }
                         }
@@ -490,25 +482,42 @@ fun GpuDriversScreen(
         }
     }
 
-    Scaffold(
-        snackbarHost = { SnackbarHost(hostState = snackbarHostState) },
-        topBar = {
-            TopAppBar(
-                title = { Text(stringResource(R.string.custom_driver), fontWeight = FontWeight.Medium) },
-                navigationIcon = {
-                    IconButton(onClick = navigateBack) {
-                        Icon(painter = painterResource(id = R.drawable.ic_keyboard_arrow_left), contentDescription = null)
-                    }
-                },
-                actions = {
-                    IconButton(onClick = { driverPickerLauncher.launch("application/zip") }) {
-                        Icon(painter = painterResource(id = R.drawable.ic_add), contentDescription = "Import Driver")
-                    }
+    SambaScreenScaffold(
+        title = stringResource(R.string.custom_driver),
+        iconRes = R.drawable.memory,
+        onBack = navigateBack,
+        compact = isInSplitPane,
+        showHints = !isInSplitPane,
+        hints = listOf(
+            R.drawable.cross to "Select",
+            R.drawable.l1 to "Tabs",
+            R.drawable.circle to "Back"
+        ),
+        onGamepadKey = { keyCode ->
+            when (keyCode) {
+                KeyEvent.KEYCODE_BUTTON_L1 -> {
+                    selectedTab = DriverTab.Installed
+                    true
                 }
-            )
-        }
-    ) { paddingValues ->
-        Column(modifier = Modifier.fillMaxSize().padding(paddingValues).padding(horizontal = 16.dp)) {
+                KeyEvent.KEYCODE_BUTTON_R1 -> {
+                    selectedTab = DriverTab.Browse
+                    true
+                }
+                else -> false
+            }
+        },
+        actions = {
+            IconButton(onClick = { driverPickerLauncher.launch("application/zip") }) {
+                Icon(
+                    painter = painterResource(id = R.drawable.ic_add),
+                    contentDescription = "Import Driver",
+                    tint = RPCSXColors.primary,
+                )
+            }
+        },
+    ) {
+        Column(modifier = Modifier.fillMaxSize().padding(horizontal = 16.dp)) {
+            SnackbarHost(hostState = snackbarHostState)
             TabRow(selectedTabIndex = selectedTab.ordinal) {
                 Tab(selected = selectedTab == DriverTab.Installed, onClick = { selectedTab = DriverTab.Installed }, text = { Text("Installed") })
                 Tab(selected = selectedTab == DriverTab.Browse, onClick = { selectedTab = DriverTab.Browse }, text = { Text("Browse Drivers") })
@@ -521,6 +530,39 @@ fun GpuDriversScreen(
                 }
             }
         }
+    }
+
+    pendingDelete?.let { (file, metadata) ->
+        AlertDialog(
+            onDismissRequest = { pendingDelete = null },
+            title = { Text("Uninstall GPU driver?") },
+            text = {
+                Text(
+                    if (metadata.label == selectedDriver) {
+                        "${metadata.uiTitle} is selected. Samba S3 will switch to the system driver before uninstalling it."
+                    } else {
+                        "Remove ${metadata.uiTitle} from Samba S3's private driver storage?"
+                    }
+                )
+            },
+            confirmButton = {
+                TextButton(onClick = {
+                    pendingDelete = null
+                    scope.launch(Dispatchers.IO) {
+                        if (metadata.label == selectedDriver) GpuDriverHelper.resetToSystemDriver(context)
+                        val deleted = GpuDriverHelper.deleteDriver(context, file, metadata)
+                        val updated = GpuDriverHelper.getInstalledDrivers(context)
+                        val sel = GeneralSettings["selected_gpu_driver"].string("Default")
+                        withContext(Dispatchers.Main) {
+                            drivers = updated
+                            selectedDriver = sel
+                            snackbarHostState.showSnackbar(if (deleted) "GPU driver uninstalled" else "GPU driver could not be uninstalled")
+                        }
+                    }
+                }) { Text("UNINSTALL") }
+            },
+            dismissButton = { TextButton(onClick = { pendingDelete = null }) { Text("CANCEL") } },
+        )
     }
 }
 

@@ -3,7 +3,10 @@ package com.zenithblue.sambas3.ui.games.preview
 import android.content.Context
 import android.net.Uri
 import android.util.Log
+import com.zenithblue.sambas3.Game
+import com.zenithblue.sambas3.GameSourceMode
 import com.zenithblue.sambas3.RPCSX
+import com.zenithblue.sambas3.iso.DirectIsoManager
 import com.zenithblue.sambas3.utils.FileUtil
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
@@ -49,6 +52,85 @@ object GamePreviewRepository {
             Log.w(TAG, "resolveInstalledPreview failed for $iconPath: ${e.message}")
             GamePreviewModel.None
         }
+    }
+
+    fun resolveInstalledBackground(iconPath: String?): GamePreviewModel {
+        if (iconPath.isNullOrBlank()) return GamePreviewModel.None
+        return try {
+            val iconFile = File(iconPath)
+            val parent = iconFile.parentFile ?: return GamePreviewModel.None
+
+            // Check <name>_pic1.png (Direct ISO icon pattern: BLUS31584.png -> BLUS31584_pic1.png)
+            val directIsoPic1 = File(parent, "${iconFile.nameWithoutExtension}_pic1.png")
+            if (directIsoPic1.isFile && directIsoPic1.length() > 0) {
+                return GamePreviewModel.LocalFile(directIsoPic1)
+            }
+
+            // Check PIC1.PNG / PIC1.png in same directory
+            val pic1Upper = File(parent, "PIC1.PNG")
+            if (pic1Upper.isFile && pic1Upper.length() > 0) {
+                return GamePreviewModel.LocalFile(pic1Upper)
+            }
+            val pic1Lower = File(parent, "PIC1.png")
+            if (pic1Lower.isFile && pic1Lower.length() > 0) {
+                return GamePreviewModel.LocalFile(pic1Lower)
+            }
+
+            // Check parent directory if icon was in PS3_GAME/ICON0.PNG
+            val grandParent = parent.parentFile
+            if (grandParent != null) {
+                val gpPic1 = File(grandParent, "PIC1.PNG")
+                if (gpPic1.isFile && gpPic1.length() > 0) {
+                    return GamePreviewModel.LocalFile(gpPic1)
+                }
+            }
+
+            GamePreviewModel.None
+        } catch (e: Exception) {
+            Log.w(TAG, "resolveInstalledBackground failed for $iconPath: ${e.message}")
+            GamePreviewModel.None
+        }
+    }
+
+    suspend fun resolveBackground(context: Context, game: Game): GamePreviewModel = withContext(Dispatchers.IO) {
+        val rawIconPath = game.info.iconPath.value
+        val installedBg = resolveInstalledBackground(rawIconPath)
+        if (installedBg !is GamePreviewModel.None) {
+            return@withContext installedBg
+        }
+
+        // Try resolving from sourceUri (DIRECT_ISO or folder)
+        val sourceUriStr = game.info.sourceUri.value
+        if (!sourceUriStr.isNullOrBlank()) {
+            val uri = runCatching { Uri.parse(sourceUriStr) }.getOrNull()
+            if (uri != null) {
+                val isIso = game.info.sourceMode.value == GameSourceMode.DIRECT_ISO ||
+                    sourceUriStr.endsWith(".iso", ignoreCase = true)
+
+                if (isIso) {
+                    val titleId = game.info.path.substringAfterLast('/')
+                    val iconsDir = File(context.filesDir, "direct_iso_icons").apply { if (!exists()) mkdirs() }
+                    val dest = File(iconsDir, "${titleId}_pic1.png")
+                    if (dest.isFile && dest.length() > 0) {
+                        return@withContext GamePreviewModel.LocalFile(dest)
+                    }
+                    if (DirectIsoManager.extractIsoPic1(context, uri, dest)) {
+                        return@withContext GamePreviewModel.LocalFile(dest)
+                    }
+                } else {
+                    // Directory game via SAF
+                    val candidates = listOf("PS3_GAME/PIC1.PNG", "PIC1.PNG", "PS3_GAME/PIC1.png", "PIC1.png")
+                    for (path in candidates) {
+                        val doc = FileUtil.uriChild(context, uri, path)
+                        if (doc != null && !doc.isDirectory) {
+                            return@withContext GamePreviewModel.ContentUri(doc.uri)
+                        }
+                    }
+                }
+            }
+        }
+
+        GamePreviewModel.None
     }
 
     suspend fun resolveDirectoryPreview(context: Context, sourceUri: Uri): GamePreviewModel = withContext(Dispatchers.IO) {

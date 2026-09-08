@@ -4,6 +4,8 @@ import android.content.Context
 import android.util.Log
 import com.zenithblue.sambas3.RPCSX
 import com.zenithblue.sambas3.UserRepository
+import java.util.concurrent.CountDownLatch
+import java.util.concurrent.TimeUnit
 
 object PpuWorkerNativeBootstrap {
     private const val TAG = "PpuWorkerBootstrap"
@@ -21,6 +23,7 @@ object PpuWorkerNativeBootstrap {
             val nativeLibDir = appContext.packageManager.getApplicationInfo(appContext.packageName, 0).nativeLibraryDir
             RPCSX.nativeLibDirectory = nativeLibDir
 
+            runCatching { com.zenithblue.sambas3.logging.LogBroker.ensureStarted(appContext) }
             if (!RPCSX.openLibrary()) {
                 Log.e(TAG, "Failed to open librpcsx-android.so in worker process")
                 return false
@@ -38,7 +41,40 @@ object PpuWorkerNativeBootstrap {
             }
 
             RPCSX.initialized = true
-            Log.i(TAG, "Worker native bootstrap succeeded. root=${RPCSX.rootDirectory} user=$user")
+            val pumpEntered = CountDownLatch(1)
+            kotlin.concurrent.thread(name = "rpcsx-mtp-worker", isDaemon = true) {
+                try {
+                    pumpEntered.countDown()
+                    RPCSX.instance.startMainThreadProcessor()
+                } catch (e: Exception) {
+                    Log.e(TAG, "Worker main-thread processor failed: ${e.message}", e)
+                    pumpEntered.countDown()
+                }
+            }
+            if (!pumpEntered.await(PpuWorkerControlPolicy.STARTUP_TIMEOUT_MS, TimeUnit.MILLISECONDS)) {
+                Log.e(TAG, "Main-thread processor thread did not start")
+                return false
+            }
+            val readyDeadline = System.nanoTime() + TimeUnit.SECONDS.toNanos(2)
+            var pumpReady = false
+            while (System.nanoTime() < readyDeadline) {
+                pumpReady = runCatching { RPCSX.instance.isMainThreadProcessorReady() }.getOrDefault(false)
+                if (pumpReady) break
+                Thread.sleep(20)
+            }
+            PpuDiagnosticLog.emit(
+                "bootstrap_ready",
+                extras = mapOf(
+                    "pumpReady" to pumpReady,
+                    "coreId" to runCatching { RPCSX.instance.getCoreBuildId() }.getOrNull(),
+                    "user" to user,
+                ),
+            )
+            if (!pumpReady) {
+                Log.e(TAG, "Worker native bootstrap failed: main-thread processor not ready")
+                return false
+            }
+            Log.i(TAG, "Worker native bootstrap succeeded. pumpReady=$pumpReady root=${RPCSX.rootDirectory} user=$user")
             true
         } catch (e: Exception) {
             Log.e(TAG, "Worker native bootstrap threw: ${e.message}", e)

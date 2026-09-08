@@ -80,6 +80,7 @@ import com.zenithblue.sambas3.ui.games.GamesScreen
 import com.zenithblue.sambas3.ui.settings.ADVANCED_SETTINGS_ROUTE
 import com.zenithblue.sambas3.ui.settings.AdvancedSettingsScreen
 import com.zenithblue.sambas3.ui.settings.LogMonitorScreen
+import com.zenithblue.sambas3.ui.crash.CrashLogsHistoryScreen
 import com.zenithblue.sambas3.ui.settings.PatchManagerScreen
 import com.zenithblue.sambas3.ui.settings.ControllerSettings
 import com.zenithblue.sambas3.ui.settings.SettingsScreen
@@ -97,7 +98,6 @@ import com.zenithblue.sambas3.ui.onboarding.ONBOARDING_ROUTE
 import com.zenithblue.sambas3.ui.onboarding.OnboardingDestination
 import com.zenithblue.sambas3.ui.onboarding.OnboardingEntry
 import com.zenithblue.sambas3.ui.onboarding.OnboardingPrefs
-import com.zenithblue.sambas3.utils.FileUtil
 import androidx.navigation.NavType
 import androidx.navigation.navArgument
 import org.json.JSONObject
@@ -154,8 +154,9 @@ fun AppNavHost(initialRoute: String? = null) {
             navigateToSettings = { },
             navigateToDrivers = { },
             navigateToPatches = { },
-            navigateToLogs = { },
-            drawerState
+            navigateToLogs = { _ -> },
+            navigateToCrashLogs = { _ -> },
+            drawerState = drawerState
         )
 
         return
@@ -185,7 +186,12 @@ fun AppNavHost(initialRoute: String? = null) {
                 navigateToSettings = { navigateTo("settings") },
                 navigateToDrivers = { navigateTo("drivers") },
                 navigateToPatches = { navigateTo("patches") },
-                navigateToLogs = { navigateTo("logs") },
+                navigateToLogs = { sessionId ->
+                    navigateTo(if (sessionId.isNullOrBlank()) "logs" else "logs/${Uri.encode(sessionId)}")
+                },
+                navigateToCrashLogs = { sessionId ->
+                    navigateTo(if (sessionId.isNullOrBlank()) "crash_logs" else "crash_logs/${Uri.encode(sessionId)}")
+                },
                 drawerState
             )
         }
@@ -279,11 +285,33 @@ fun AppNavHost(initialRoute: String? = null) {
             )
         }
 
-        composable(
-            route = "logs"
-        ) {
+        composable(route = "logs") {
             LogMonitorScreen(
-                navigateBack = navController::navigateUp
+                navigateBack = navController::navigateUp,
+                onOpenCrashLogs = { navigateTo("crash_logs") },
+            )
+        }
+        composable(
+            route = "logs/{sessionId}",
+            arguments = listOf(navArgument("sessionId") { type = NavType.StringType }),
+        ) { entry ->
+            LogMonitorScreen(
+                navigateBack = navController::navigateUp,
+                onOpenCrashLogs = { navigateTo("crash_logs/${entry.arguments?.getString("sessionId").orEmpty()}") },
+                selectedSessionId = Uri.decode(entry.arguments?.getString("sessionId").orEmpty()).ifBlank { null },
+            )
+        }
+
+        composable(route = "crash_logs") {
+            CrashLogsHistoryScreen(navigateBack = navController::navigateUp)
+        }
+        composable(
+            route = "crash_logs/{sessionId}",
+            arguments = listOf(navArgument("sessionId") { type = NavType.StringType }),
+        ) { entry ->
+            CrashLogsHistoryScreen(
+                navigateBack = navController::navigateUp,
+                initialSessionId = Uri.decode(entry.arguments?.getString("sessionId").orEmpty()).ifBlank { null },
             )
         }
 
@@ -312,7 +340,8 @@ fun GamesDestination(
     navigateToSettings: () -> Unit,
     navigateToDrivers: () -> Unit,
     navigateToPatches: () -> Unit,
-    navigateToLogs: () -> Unit,
+    navigateToLogs: (String?) -> Unit,
+    navigateToCrashLogs: (String?) -> Unit = {},
     drawerState: androidx.compose.material3.DrawerState
 ) {
     val context = LocalContext.current
@@ -355,10 +384,12 @@ fun GamesDestination(
         contract = ActivityResultContracts.OpenDocumentTree(),
         onResult = { uri: Uri? ->
             uri?.let {
-                // TODO: FileUtil.saveGameFolderUri(prefs, it)
                 val takeFlags = Intent.FLAG_GRANT_READ_URI_PERMISSION
-                context.contentResolver.takePersistableUriPermission(it, takeFlags)
-                FileUtil.installPackages(context, it)
+                try {
+                    context.contentResolver.takePersistableUriPermission(it, takeFlags)
+                } catch (_: SecurityException) {
+                }
+                // Folder ISO import is handled in GamesScreen via Direct ISO (no copy).
             }
         }
     )
@@ -371,6 +402,7 @@ fun GamesDestination(
         navigateToDrivers = navigateToDrivers,
         navigateToPatches = navigateToPatches,
         navigateToLogs = navigateToLogs,
+        navigateToCrashLogs = navigateToCrashLogs,
         emulatorState = RPCSX.state,
         emulatorActiveGame = RPCSX.activeGame
     )

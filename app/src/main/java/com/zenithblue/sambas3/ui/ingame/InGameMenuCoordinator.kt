@@ -20,6 +20,7 @@ sealed interface InGameMenuIntent {
 
     data object OpenSettings : InGameMenuIntent
     data object OpenMonitoring : InGameMenuIntent
+    data object OpenLiveLogs : InGameMenuIntent
     data object OpenController : InGameMenuIntent
     data object OpenConfigureGame : InGameMenuIntent
     data object OpenTrophies : InGameMenuIntent
@@ -44,6 +45,7 @@ sealed interface InGameMenuIntent {
     data class SettingsTransientSet(val path: String, val value: String) : InGameMenuIntent
     data object RequestDirtyCheck : InGameMenuIntent
     data class ReportItemCount(val page: InGamePage, val count: Int) : InGameMenuIntent
+    data class SelectIndex(val index: Int) : InGameMenuIntent
 }
 
 sealed interface InGameMenuHostEffect {
@@ -103,6 +105,7 @@ data class InGameMenuUiState(
     val settingsActive: Boolean = false,
     val settingsDirty: Boolean = false,
     val selectedIndex: Int = 0,
+    val pageSelections: Map<InGamePage, Int> = emptyMap(),
     val itemCounts: Map<InGamePage, Int> = emptyMap(),
     val settingsTreeJson: String? = null,
     val settingsLoading: Boolean = false,
@@ -154,6 +157,7 @@ fun mainRowDescriptors(cap: InGameMenuCapabilities): List<MainRowDescriptor> = b
     add(MainRowDescriptor(com.zenithblue.sambas3.R.string.configure_game, com.zenithblue.sambas3.R.drawable.tune, true, true, InGameMenuIntent.OpenConfigureGame))
     add(MainRowDescriptor(com.zenithblue.sambas3.R.string.ingame_settings, com.zenithblue.sambas3.R.drawable.ic_settings, true, true, InGameMenuIntent.OpenSettings))
     add(MainRowDescriptor(com.zenithblue.sambas3.R.string.ingame_monitoring, com.zenithblue.sambas3.R.drawable.ic_video, true, true, InGameMenuIntent.OpenMonitoring))
+    add(MainRowDescriptor(com.zenithblue.sambas3.R.string.ingame_live_logs, com.zenithblue.sambas3.R.drawable.ic_terminal, true, true, InGameMenuIntent.OpenLiveLogs))
     add(MainRowDescriptor(com.zenithblue.sambas3.R.string.ingame_controller, com.zenithblue.sambas3.R.drawable.tune, true, true, InGameMenuIntent.OpenController))
     if (cap.friendsAvailable) {
         add(MainRowDescriptor(com.zenithblue.sambas3.R.string.ingame_friends, com.zenithblue.sambas3.R.drawable.ic_settings, true, true, InGameMenuIntent.OpenFriends))
@@ -209,6 +213,7 @@ class InGameMenuCoordinator(
             is InGameMenuIntent.Back -> handleBackInternal()
             is InGameMenuIntent.OpenSettings -> pushPage(InGamePage.Settings)
             is InGameMenuIntent.OpenMonitoring -> pushPage(InGamePage.Monitoring)
+            is InGameMenuIntent.OpenLiveLogs -> pushPage(InGamePage.LiveLogs)
             is InGameMenuIntent.OpenController -> pushPage(InGamePage.Controller)
             is InGameMenuIntent.OpenConfigureGame -> pushPage(InGamePage.ConfigureGame)
             is InGameMenuIntent.OpenTrophies -> pushPage(InGamePage.Trophies)
@@ -243,6 +248,14 @@ class InGameMenuCoordinator(
 
             is InGameMenuIntent.ReportItemCount -> _state.update {
                 it.copy(itemCounts = it.itemCounts + (intent.page to intent.count))
+            }
+
+            is InGameMenuIntent.SelectIndex -> _state.update {
+                val curPage = (it.session as? MenuSessionState.Open)?.pageStack?.lastOrNull()
+                it.copy(
+                    selectedIndex = intent.index,
+                    pageSelections = if (curPage != null) it.pageSelections + (curPage to intent.index) else it.pageSelections
+                )
             }
         }
     }
@@ -365,12 +378,19 @@ class InGameMenuCoordinator(
     private fun pushPage(page: InGamePage) {
         val s = _state.value
         val open = s.session as? MenuSessionState.Open ?: return
-        if (open.pageStack.lastOrNull() == page) return
+        val curPage = open.pageStack.lastOrNull()
+        if (curPage == page) return
         _state.update { st ->
             val stack = (st.session as? MenuSessionState.Open)?.pageStack ?: return@update st
+            val updatedSelections = if (curPage != null) {
+                st.pageSelections + (curPage to st.selectedIndex)
+            } else {
+                st.pageSelections
+            }
             st.copy(
                 session = open.copy(pageStack = stack + page),
-                selectedIndex = 0
+                pageSelections = updatedSelections,
+                selectedIndex = updatedSelections[page] ?: 0
             )
         }
         if (page == InGamePage.Settings) scope.launch { enterSettings() }
@@ -404,9 +424,21 @@ class InGameMenuCoordinator(
         _state.update { st ->
             val open = st.session as? MenuSessionState.Open ?: return@update st
             if (open.pageStack.size <= 1) return@update st
+            val curPage = open.pageStack.lastOrNull()
+            val newStack = open.pageStack.dropLast(1)
+            val returnPage = newStack.lastOrNull()
+            val updatedSelections = if (curPage != null) {
+                st.pageSelections + (curPage to st.selectedIndex)
+            } else {
+                st.pageSelections
+            }
+            val restoredIndex = if (returnPage != null) {
+                updatedSelections[returnPage] ?: 0
+            } else 0
             st.copy(
-                session = open.copy(pageStack = open.pageStack.dropLast(1)),
-                selectedIndex = 0
+                session = open.copy(pageStack = newStack),
+                pageSelections = updatedSelections,
+                selectedIndex = restoredIndex
             )
         }
     }
@@ -418,7 +450,46 @@ class InGameMenuCoordinator(
         val count = s.itemCounts[page] ?: return false
         if (count <= 0) return false
         val next = ((s.selectedIndex + delta) % count + count) % count
-        _state.update { it.copy(selectedIndex = next) }
+        _state.update {
+            it.copy(
+                selectedIndex = next,
+                pageSelections = it.pageSelections + (page to next)
+            )
+        }
+        return true
+    }
+
+    /** 2D grid selection move for multi-column menus (e.g. 2-column Main panel). */
+    fun moveSelection2D(dx: Int, dy: Int, columns: Int = 2): Boolean {
+        val s = _state.value
+        val page = s.currentPage ?: return false
+        val count = s.itemCounts[page] ?: return false
+        if (count <= 0) return false
+        val cur = s.selectedIndex.coerceIn(0, count - 1)
+        val curRow = cur / columns
+        val curCol = cur % columns
+        val totalRows = (count + columns - 1) / columns
+
+        var nextCol = curCol + dx
+        var nextRow = curRow + dy
+
+        if (dx != 0) {
+            nextCol = nextCol.coerceIn(0, columns - 1)
+        }
+        if (dy != 0) {
+            nextRow = ((nextRow % totalRows) + totalRows) % totalRows
+        }
+
+        var next = nextRow * columns + nextCol
+        if (next >= count) {
+            next = if (dx > 0) cur else count - 1
+        }
+        _state.update {
+            it.copy(
+                selectedIndex = next,
+                pageSelections = it.pageSelections + (page to next)
+            )
+        }
         return true
     }
 

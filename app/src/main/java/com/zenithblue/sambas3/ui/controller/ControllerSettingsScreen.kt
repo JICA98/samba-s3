@@ -2,8 +2,10 @@ package com.zenithblue.sambas3.ui.controller
 
 import android.util.Log
 import android.view.KeyEvent
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
@@ -17,11 +19,16 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
+import com.zenithblue.sambas3.R
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.sp
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.FilterChip
@@ -53,6 +60,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.zenithblue.sambas3.RPCSXColors
+import com.zenithblue.sambas3.ui.common.SambaScreenScaffold
 import com.zenithblue.sambas3.input.ConnectedInputDevice
 import com.zenithblue.sambas3.input.ControllerDeviceRepository
 import com.zenithblue.sambas3.input.ControllerFamily
@@ -220,7 +228,13 @@ fun ControllerSettingsScreen(
                 },
             verticalArrangement = Arrangement.spacedBy(10.dp),
         ) {
-            Text("CONTROLS", color = RPCSXColors.primary, style = MaterialTheme.typography.headlineSmall)
+            // Sub-tabs (top bar is provided by the scaffold)
+            Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+                listOf("Mapping", "Profiles", "Advanced").forEach { value ->
+                    FilterChip(selected = tab == value, onClick = { tab = value }, label = { Text(value) })
+                }
+            }
+
             DeviceStrip(
                 devices = devices,
                 selectedKey = selectedDevice?.deviceKey,
@@ -230,22 +244,6 @@ fun ControllerSettingsScreen(
                     selectedDeviceKey = it.deviceKey
                 },
             )
-            selectedDevice?.let { device ->
-                Text(
-                    "${device.name} · ${device.family.name.replace('_', ' ')} · ${profile.name}",
-                    color = RPCSXColors.textSecondary,
-                    style = MaterialTheme.typography.bodySmall,
-                )
-            } ?: Text("No gamepad or keyboard connected", color = RPCSXColors.textSecondary)
-
-            Row(horizontalArrangement = Arrangement.spacedBy(8.dp), verticalAlignment = Alignment.CenterVertically) {
-                listOf("Mapping", "Profiles", "Advanced").forEach { value ->
-                    FilterChip(selected = tab == value, onClick = { tab = value }, label = { Text(value) })
-                }
-                selectedDevice?.let { device ->
-                    Button(onClick = { onOpenTest(device) }) { Text("OPEN TEST") }
-                }
-            }
 
             when (tab) {
                 "Profiles" -> ProfilesPane(profile, ::save)
@@ -253,40 +251,61 @@ fun ControllerSettingsScreen(
                 else -> {
                     if (family == ControllerFamily.KEYBOARD) {
                         Row(
-                            Modifier.fillMaxWidth().background(RPCSXColors.surface).padding(10.dp),
+                            Modifier
+                                .fillMaxWidth()
+                                .clip(RoundedCornerShape(8.dp))
+                                .background(Color(0x22FFFFFF))
+                                .padding(horizontal = 10.dp, vertical = 6.dp),
                             horizontalArrangement = Arrangement.SpaceBetween,
                             verticalAlignment = Alignment.CenterVertically,
                         ) {
-                            Column(Modifier.weight(1f)) {
-                                Text("Keyboard detected", color = Color.White)
-                                Text("PC Gamepad: WASD movement, arrows camera", color = RPCSXColors.textSecondary)
+                            Text(
+                                "Keyboard · WASD movement · Arrows camera",
+                                color = RPCSXColors.textSecondary,
+                                fontSize = 11.sp,
+                                modifier = Modifier.weight(1f)
+                            )
+                            Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+                                Surface(
+                                    onClick = {
+                                        selectedDevice?.let { device ->
+                                            save(ControllerProfileSelection.buildDefault(
+                                                deviceKey = device.deviceKey,
+                                                family = ControllerFamily.KEYBOARD,
+                                                descriptor = device.descriptor,
+                                                vendorId = device.vendorId,
+                                                productId = device.productId,
+                                            ))
+                                        }
+                                    },
+                                    shape = RoundedCornerShape(6.dp),
+                                    color = Color(0x20FFFFFF),
+                                    border = BorderStroke(1.dp, Color(0x35FFFFFF))
+                                ) {
+                                    Text("PC GAMEPAD", color = Color.White, fontSize = 10.sp, fontWeight = FontWeight.Bold, modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp))
+                                }
+                                Surface(
+                                    onClick = {
+                                        selectedDevice?.let { device ->
+                                            save(ControllerProfile(
+                                                deviceKey = device.deviceKey,
+                                                family = ControllerFamily.KEYBOARD,
+                                                name = "D-Pad Classic",
+                                                deviceDescriptor = device.descriptor,
+                                                vendorId = device.vendorId,
+                                                productId = device.productId,
+                                                digitalBindings = com.zenithblue.sambas3.input.FamilyDefaultMappings.keyboardDpadDefaults(),
+                                                keyboardAnalog = null,
+                                            ))
+                                        }
+                                    },
+                                    shape = RoundedCornerShape(6.dp),
+                                    color = Color(0x20FFFFFF),
+                                    border = BorderStroke(1.dp, Color(0x35FFFFFF))
+                                ) {
+                                    Text("D-PAD CLASSIC", color = Color.White, fontSize = 10.sp, fontWeight = FontWeight.Bold, modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp))
+                                }
                             }
-                            OutlinedButton(onClick = {
-                                selectedDevice?.let { device ->
-                                    save(ControllerProfileSelection.buildDefault(
-                                        deviceKey = device.deviceKey,
-                                        family = ControllerFamily.KEYBOARD,
-                                        descriptor = device.descriptor,
-                                        vendorId = device.vendorId,
-                                        productId = device.productId,
-                                    ))
-                                }
-                            }) { Text("APPLY PC GAMEPAD") }
-                            OutlinedButton(onClick = {
-                                selectedDevice?.let { device ->
-                                    save(ControllerProfileSelection.buildDefault(
-                                        deviceKey = device.deviceKey,
-                                        family = ControllerFamily.KEYBOARD,
-                                        descriptor = device.descriptor,
-                                        vendorId = device.vendorId,
-                                        productId = device.productId,
-                                    ).copy(
-                                        name = "D-pad Classic",
-                                        digitalBindings = com.zenithblue.sambas3.input.FamilyDefaultMappings.keyboardDpadDefaults(),
-                                        keyboardAnalog = null,
-                                    ))
-                                }
-                            }) { Text("D-PAD CLASSIC") }
                         }
                     }
                     BoxWithConstraints(Modifier.fillMaxWidth().weight(1f, fill = true)) {
@@ -360,17 +379,47 @@ fun ControllerSettingsScreen(
         }
     }
 
-    if (isInSplitPane) {
-        Surface(color = RPCSXColors.surfaceElevated, modifier = Modifier.fillMaxSize().padding(18.dp)) { content() }
-    } else {
-        Scaffold(
-            topBar = {
-                LargeTopAppBar(
-                    title = { Text("Controls") },
-                    navigationIcon = { TextButton(onClick = navigateBack) { Text("BACK") } },
-                )
-            },
-        ) { padding -> Box(Modifier.padding(padding)) { content() } }
+    fun cycleTab(delta: Int) {
+        val tabs = listOf("Mapping", "Profiles", "Advanced")
+        val next = (tabs.indexOf(tab).coerceAtLeast(0) + delta).mod(tabs.size)
+        tab = tabs[next]
+    }
+
+    SambaScreenScaffold(
+        title = "CONTROLS",
+        iconRes = R.drawable.gamepad,
+        onBack = navigateBack,
+        compact = isInSplitPane,
+        showHints = !isInSplitPane,
+        hints = listOf(
+            R.drawable.cross to "Select",
+            R.drawable.l1 to "Tabs",
+            R.drawable.circle to "Back"
+        ),
+        isBackAllowed = { captureTarget == null },
+        onGamepadKey = { keyCode ->
+            when {
+                captureTarget != null -> false
+                keyCode == KeyEvent.KEYCODE_BUTTON_L1 -> {
+                    cycleTab(-1)
+                    true
+                }
+                keyCode == KeyEvent.KEYCODE_BUTTON_R1 -> {
+                    cycleTab(1)
+                    true
+                }
+                else -> false
+            }
+        },
+    ) {
+        Surface(
+            color = Color.Transparent,
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(horizontal = 16.dp, vertical = 8.dp)
+        ) {
+            content()
+        }
     }
 
     val captured = candidate
@@ -492,49 +541,43 @@ private fun MappingList(
     listFillsHeight: Boolean = false,
 ) {
     Column(modifier) {
-        if (family == ControllerFamily.KEYBOARD) {
-            Text("KEYBOARD · ${profile.name}", color = RPCSXColors.primary)
-            Text("PC Gamepad · WASD left stick · Arrow keys right stick", color = RPCSXColors.textSecondary)
-            profile.keyboardAnalog?.let { analog ->
-                Text(
-                    "MOVEMENT  ${keyPair(analog.leftX)} horizontal · ${keyPair(analog.leftY)} vertical",
-                    color = Color.White,
-                    style = MaterialTheme.typography.bodySmall,
-                )
-                Text(
-                    "CAMERA  ${keyPair(analog.rightX)} horizontal · ${keyPair(analog.rightY)} vertical",
-                    color = Color.White,
-                    style = MaterialTheme.typography.bodySmall,
-                )
-            }
-        }
         Text(
-            if (captureTarget == null) "Tap to inspect · hold to remap" else "Press a physical input for ${captureTarget.label}",
-            color = RPCSXColors.textSecondary,
+            text = if (captureTarget == null) "TAP TO INSPECT · HOLD TO REMAP" else "PRESS PHYSICAL INPUT FOR ${captureTarget.label}",
+            color = if (captureTarget == null) RPCSXColors.textSecondary else RPCSXColors.focusRing,
+            fontWeight = FontWeight.Bold,
+            fontSize = 11.sp,
+            modifier = Modifier.padding(bottom = 4.dp)
         )
         val listModifier = if (listFillsHeight) Modifier.weight(1f).fillMaxHeight() else Modifier.height(360.dp)
-        LazyColumn(listModifier, verticalArrangement = Arrangement.spacedBy(5.dp)) {
+        LazyColumn(listModifier, verticalArrangement = Arrangement.spacedBy(4.dp)) {
             items(LogicalControl.entries, key = { it.name }) { logical ->
                 val highlighted = selected == logical || state.isPressed(logical)
-                Row(
-                    Modifier
+                Surface(
+                    shape = RoundedCornerShape(8.dp),
+                    color = if (highlighted) RPCSXColors.primary.copy(alpha = 0.22f) else Color(0x28FFFFFF),
+                    border = BorderStroke(1.dp, if (highlighted) RPCSXColors.focusRing else Color(0x20FFFFFF)),
+                    modifier = Modifier
                         .fillMaxWidth()
-                        .clip(MaterialTheme.shapes.small)
-                        .background(if (highlighted) Color(0x553AD69B) else RPCSXColors.surface)
                         .combinedClickable(onClick = { onSelect(logical) }, onLongClick = { onRemap(logical) })
-                        .padding(horizontal = 10.dp, vertical = 8.dp),
-                    horizontalArrangement = Arrangement.SpaceBetween,
-                    verticalAlignment = Alignment.CenterVertically,
                 ) {
-                    Column(Modifier.weight(1f)) {
-                        Text(logical.label, color = Color.White)
-                        Text(
-                            if (logical == LogicalControl.PS_HOME_FRONTEND) "Esc · Emulator Menu"
-                            else com.zenithblue.sambas3.input.PhysicalInputLabelFormatter.key(profile.digitalBindings[logical]),
-                            color = RPCSXColors.textSecondary,
-                        )
+                    Row(
+                        Modifier.padding(horizontal = 10.dp, vertical = 6.dp),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Column(Modifier.weight(1f)) {
+                            Text(logical.label, color = Color.White, fontWeight = FontWeight.Bold, fontSize = 12.sp)
+                            Text(
+                                if (logical == LogicalControl.PS_HOME_FRONTEND) "Esc · Emulator Menu"
+                                else com.zenithblue.sambas3.input.PhysicalInputLabelFormatter.key(profile.digitalBindings[logical]),
+                                color = RPCSXColors.textSecondary,
+                                fontSize = 10.sp
+                            )
+                        }
+                        if (logical == LogicalControl.PS_HOME_FRONTEND) {
+                            Text("RESERVED", color = RPCSXColors.primary, fontSize = 10.sp, fontWeight = FontWeight.Bold)
+                        }
                     }
-                    if (logical == LogicalControl.PS_HOME_FRONTEND) Text("RESERVED", color = RPCSXColors.primary)
                 }
             }
         }

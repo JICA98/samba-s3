@@ -2,6 +2,7 @@ package com.zenithblue.sambas3
 
 import android.content.Context
 import android.util.Log
+import com.zenithblue.sambas3.logging.toLegacySource
 import kotlinx.coroutines.*
 import kotlinx.coroutines.currentCoroutineContext
 import kotlinx.coroutines.channels.Channel
@@ -174,6 +175,8 @@ object LogMonitor {
     private const val MAX_UI_ENTRIES = 1000
     private const val CHANNEL_CAPACITY = 8192
     private const val BATCH_SIZE = 20
+    private const val FLUSH_BYTES = 32 * 1024L
+    private const val FLUSH_INTERVAL_MS = 2_000L
 
     private val _logs = MutableStateFlow<List<LogEntry>>(emptyList())
     val logs: StateFlow<List<LogEntry>> = _logs.asStateFlow()
@@ -194,6 +197,7 @@ object LogMonitor {
 
     private val writers = mutableMapOf<LogFileCategory, BufferedWriter>()
     private val writeSizes = mutableMapOf<LogFileCategory, Long>()
+    private val lastFlushAtMs = mutableMapOf<LogFileCategory, Long>()
     private var entryIdCounter = 0L
 
     // ------------------------------------------------------------------
@@ -201,30 +205,25 @@ object LogMonitor {
     // ------------------------------------------------------------------
 
     fun start(context: Context) {
-        if (running.getAndSet(true)) return
-
-        logDir = context.getExternalFilesDir("logs")?.also { it.mkdirs() }
-        openWriters()
-
-        scope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
-        val channel = Channel<LogEntry>(CHANNEL_CAPACITY)
-
-        scope!!.launch { runLogcatReader(channel) }
-        scope!!.launch { runConsumer(channel) }
-
-        Log.i(TAG, "LogMonitor started — log dir: ${logDir?.absolutePath}")
+        com.zenithblue.sambas3.logging.LogBroker.ensureStarted(context)
     }
 
+    fun attachBroker(context: Context, engine: com.zenithblue.sambas3.logging.LogBrokerEngine) {
+        logDir = context.getExternalFilesDir("logs")?.also { it.mkdirs() }
+        if (writers.isEmpty()) openWriters()
+        if (running.compareAndSet(false, true)) {
+            hydrateUiFromFiles()
+            engine.addSink { ingest(it) }
+            Log.i(TAG, "LogMonitor attached to broker — log dir: ${logDir?.absolutePath}")
+        }
+    }
+
+    /**
+     * Collection is process-lifetime. Stop only flushes so Settings/Logs
+     * leaving the composition cannot empty the next crash report.
+     */
     fun stop() {
-        if (!running.getAndSet(false)) return
-        scope?.cancel()
-        scope = null
-        logcatProcess?.destroy()
-        logcatProcess = null
-        writers.values.forEach { runCatching { it.close() } }
-        writers.clear()
-        writeSizes.clear()
-        Log.i(TAG, "LogMonitor stopped")
+        flushWriters()
     }
 
     fun clearLogs() {
@@ -232,6 +231,7 @@ object LogMonitor {
         _backendLogs.value = emptyList()
         _vulkanLogs.value = emptyList()
         _appLogs.value = emptyList()
+        com.zenithblue.sambas3.logging.LogBroker.clearView()
     }
 
     fun getLogFile(category: LogFileCategory = LogFileCategory.APP): File? =
@@ -247,6 +247,82 @@ object LogMonitor {
     /** Flush open writers so share/export sees latest lines. */
     fun flushWriters() {
         writers.values.forEach { runCatching { it.flush() } }
+    }
+
+    private fun ingest(entry: com.zenithblue.sambas3.logging.UnifiedLogEntry) {
+        val mapped = LogEntry(
+            id = entry.sequence,
+            timestamp = entry.timestampText ?: "",
+            level = entry.level,
+            tag = entry.tag ?: entry.source.name,
+            message = entry.message,
+            source = entry.source.toLegacySource(),
+        )
+        val cat = mapped.source.fileCategory()
+        rotateIfNeeded(cat)
+        writers[cat]?.let { w ->
+            val line = "[${mapped.timestamp}] ${mapped.level.letter}/${mapped.tag}: ${mapped.message}\n"
+            runCatching {
+                w.write(line)
+                val added = line.toByteArray(Charsets.UTF_8).size.toLong()
+                val next = (writeSizes[cat] ?: 0L) + added
+                writeSizes[cat] = next
+                val now = System.currentTimeMillis()
+                val last = lastFlushAtMs[cat] ?: 0L
+                if (added >= FLUSH_BYTES || now - last >= FLUSH_INTERVAL_MS) {
+                    w.flush()
+                    lastFlushAtMs[cat] = now
+                }
+            }
+        }
+        val all = _logs.value
+        val nextAll = if (all.size >= MAX_UI_ENTRIES) all.drop(all.size - MAX_UI_ENTRIES + 1) + mapped else all + mapped
+        _logs.value = nextAll
+        when (cat) {
+            LogFileCategory.BACKEND -> {
+                val cur = _backendLogs.value
+                _backendLogs.value = if (cur.size >= MAX_UI_ENTRIES) cur.drop(1) + mapped else cur + mapped
+            }
+            LogFileCategory.VULKAN -> {
+                val cur = _vulkanLogs.value
+                _vulkanLogs.value = if (cur.size >= MAX_UI_ENTRIES) cur.drop(1) + mapped else cur + mapped
+            }
+            LogFileCategory.APP -> {
+                val cur = _appLogs.value
+                _appLogs.value = if (cur.size >= MAX_UI_ENTRIES) cur.drop(1) + mapped else cur + mapped
+            }
+        }
+    }
+
+    private fun hydrateUiFromFiles() {
+        if (_logs.value.isNotEmpty()) return
+        val hydrated = ArrayList<LogEntry>(400)
+        getAllLogFiles().forEach { file ->
+            if (!file.isFile || file.length() == 0L) return@forEach
+            val len = file.length()
+            val startOffset = (len - 64 * 1024L).coerceAtLeast(0L)
+            val tailer = com.zenithblue.sambas3.logging.LogFileTailer(file, initialOffset = startOffset)
+            tailer.drain().takeLast(200).forEach { line ->
+                hydrated += LogEntry(
+                    id = ++entryIdCounter,
+                    timestamp = "",
+                    level = LogLevel.INFO,
+                    tag = file.name,
+                    message = line,
+                    source = when {
+                        file.name.contains("backend") -> LogSource.RPCSX
+                        file.name.contains("vulkan") -> LogSource.VULKAN
+                        else -> LogSource.APP
+                    },
+                )
+            }
+        }
+        if (hydrated.isNotEmpty()) {
+            _logs.value = hydrated.takeLast(MAX_UI_ENTRIES)
+            _backendLogs.value = hydrated.filter { it.source.fileCategory() == LogFileCategory.BACKEND }.takeLast(MAX_UI_ENTRIES)
+            _vulkanLogs.value = hydrated.filter { it.source.fileCategory() == LogFileCategory.VULKAN }.takeLast(MAX_UI_ENTRIES)
+            _appLogs.value = hydrated.filter { it.source.fileCategory() == LogFileCategory.APP }.takeLast(MAX_UI_ENTRIES)
+        }
     }
 
     // ------------------------------------------------------------------

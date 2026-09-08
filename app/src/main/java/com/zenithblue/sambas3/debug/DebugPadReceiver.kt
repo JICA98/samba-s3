@@ -4,23 +4,39 @@ import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
+import android.net.Uri
 import android.os.Handler
 import android.os.Looper
 import android.os.SystemClock
 import android.util.Log
 import android.util.Base64
+import android.provider.OpenableColumns
+import androidx.lifecycle.LifecycleOwner
+import androidx.lifecycle.lifecycleScope
+import kotlinx.coroutines.launch
 import com.zenithblue.sambas3.BuildConfig
 import com.zenithblue.sambas3.Digital2Flags
+import com.zenithblue.sambas3.EmulatorBootMode
+import com.zenithblue.sambas3.EmulatorState
+import com.zenithblue.sambas3.GameIdentity
 import com.zenithblue.sambas3.GameRepository
+import com.zenithblue.sambas3.GameSourceMode
 import com.zenithblue.sambas3.LogMonitor
-import com.zenithblue.sambas3.PpuReadinessStore
-import com.zenithblue.sambas3.PreRuntimePpuState
 import com.zenithblue.sambas3.PrecompilerService
 import com.zenithblue.sambas3.PrecompilerServiceAction
 import com.zenithblue.sambas3.RPCSX
+import com.zenithblue.sambas3.RPCSXActivity
 import com.zenithblue.sambas3.gameconfig.SettingsBackendAudit
+import com.zenithblue.sambas3.monitoring.FpsGraphScale
+import com.zenithblue.sambas3.monitoring.MonitoringLayout
+import com.zenithblue.sambas3.monitoring.MonitoringMetric
+import com.zenithblue.sambas3.monitoring.MonitoringOverlaySettings
+import com.zenithblue.sambas3.monitoring.MonitoringPosition
+import com.zenithblue.sambas3.monitoring.MonitoringPreset
+import com.zenithblue.sambas3.monitoring.MonitoringPresets
 import com.zenithblue.sambas3.utils.FileUtil
 import org.json.JSONObject
+import java.io.File
 
 /**
  * Agent ADB bridge for controller injection — no coordinate taps.
@@ -29,6 +45,9 @@ import org.json.JSONObject
  *  - com.zenithblue.sambas3.DEBUG_PAD  with extras d1,d2,lx,ly,rx,ry (ints)
  *  - com.zenithblue.sambas3.DEBUG_PAD_CROSS (+ CIRCLE/SQUARE/TRIANGLE/START/SELECT/PS/L1/R1/L2/R2/UP/DOWN/LEFT/RIGHT/L3/R3)
  *    → press 120ms then release (deterministic for loop scripts).
+ *  - com.zenithblue.sambas3.DEBUG_BOOT_GAME with extras path/originalGamePath
+ *    → in-process boot (same extras as GamesScreen.bootGame); shell am start
+ *    of RPCSXActivity is blocked by exported=false.
  *
  * Example:
  *  adb shell am broadcast -a com.zenithblue.sambas3.DEBUG_PAD_CROSS
@@ -38,6 +57,49 @@ import org.json.JSONObject
 class DebugPadReceiver(private val onDebugFatal: (() -> Unit)? = null) : BroadcastReceiver() {
     override fun onReceive(context: Context?, intent: Intent?) {
         val action = intent?.action ?: return
+        val requestId = intent.getStringExtra("request_id").orEmpty()
+        if (!BuildConfig.DEBUG) return
+        if (action == ACTION_STOP_GAME) {
+            val owner = context as? LifecycleOwner ?: return
+            owner.lifecycleScope.launch {
+                val stopped = com.zenithblue.sambas3.session.EmulatorStopCoordinator.stop(
+                    context, com.zenithblue.sambas3.session.EmulatorStopReason.HomeStop
+                )
+                Log.w("S3BOOT", "stop completed ok=$stopped request_id=$requestId")
+            }
+            return
+        }
+        if (action == ACTION_DRIVER_SYSMEM) {
+            if (context == null || RPCSX.getState() != EmulatorState.Stopped) {
+                Log.w("S3BOOT", "sysmem blocked: core must be stopped request_id=$requestId")
+                return
+            }
+            val enabled = intent.getBooleanExtra("enabled", false)
+            com.zenithblue.sambas3.utils.GeneralSettings["gpu_driver_force_sysmem"] = enabled
+            val applied = com.zenithblue.sambas3.utils.GpuDriverSelection.applyStoredSelection(
+                context, context.applicationInfo.nativeLibraryDir
+            )
+            Log.w("S3BOOT", "sysmem enabled=$enabled applied=$applied request_id=$requestId")
+            return
+        }
+        if (action == ACTION_DRIVER_TU_DEBUG) {
+            if (RPCSX.getState() != EmulatorState.Stopped) {
+                Log.w("S3BOOT", "tu_debug blocked: core must be stopped request_id=$requestId")
+                return
+            }
+            val value = intent.getStringExtra("value").orEmpty()
+            val result = com.zenithblue.sambas3.utils.GpuDriverSelection.setDebugTurnipOptions(value)
+            result.onSuccess { applied ->
+                Log.w("S3BOOT", "tu_debug value=${applied.ifEmpty { "<clear>" }} applied=true request_id=$requestId")
+            }.onFailure { error ->
+                Log.w("S3BOOT", "tu_debug value=$value applied=false error=${error.message} request_id=$requestId")
+            }
+            return
+        }
+        if (action == ACTION_MONITOR_SET) {
+            handleMonitorSet(context, intent)
+            return
+        }
         if (action == ACTION_FATAL) {
             if (BuildConfig.DEBUG) onDebugFatal?.invoke()
             else Log.w("DebugPad", "DEBUG_FATAL ignored in non-debug build")
@@ -63,11 +125,15 @@ class DebugPadReceiver(private val onDebugFatal: (() -> Unit)? = null) : Broadca
             return
         }
         if (action.startsWith(ACTION_SETTINGS_PREFIX)) {
-            handleSettingsProbe(intent)
+            handleSettingsProbe(context, intent)
             return
         }
-        if (action == ACTION_REMOVE_GAME || action == ACTION_INSTALL_FILE || action == ACTION_CLEAR_PPU_CACHE || action == ACTION_BOOT_GAME) {
+        if (action == ACTION_REMOVE_GAME || action == ACTION_INSTALL_FILE) {
             handleLibraryProbe(context, intent)
+            return
+        }
+        if (action == ACTION_BOOT_GAME) {
+            handleBootGame(context, intent)
             return
         }
         when {
@@ -78,8 +144,8 @@ class DebugPadReceiver(private val onDebugFatal: (() -> Unit)? = null) : Broadca
                 val ly = intent.getIntExtra("ly", 127)
                 val rx = intent.getIntExtra("rx", 127)
                 val ry = intent.getIntExtra("ry", 127)
-                Log.w("DebugPad", "PAD d1=$d1 d2=$d2 lx=$lx ly=$ly rx=$rx ry=$ry")
                 RPCSX.instance.overlayPadData(d1, d2, lx, ly, rx, ry)
+                Log.w("DebugPad", "PAD d1=$d1 d2=$d2 lx=$lx ly=$ly rx=$rx ry=$ry request_id=$requestId")
             }
             action.startsWith(PREFIX) -> {
                 val suffix = action.removePrefix(PREFIX)
@@ -87,11 +153,11 @@ class DebugPadReceiver(private val onDebugFatal: (() -> Unit)? = null) : Broadca
                     Log.w("DebugPad", "unknown button $suffix")
                     return
                 }
-                Log.w("DebugPad", "BUTTON $suffix d1=$d1 d2=$d2 press 120ms")
                 RPCSX.instance.overlayPadData(d1, d2, 127, 127, 127, 127)
+                Log.w("DebugPad", "BUTTON $suffix d1=$d1 d2=$d2 press 120ms request_id=$requestId")
                 Handler(Looper.getMainLooper()).postDelayed({
                     RPCSX.instance.overlayPadData(0, 0, 127, 127, 127, 127)
-                    Log.w("DebugPad", "BUTTON $suffix release")
+                    Log.w("DebugPad", "BUTTON $suffix release request_id=$requestId")
                 }, 120)
             }
         }
@@ -131,8 +197,8 @@ class DebugPadReceiver(private val onDebugFatal: (() -> Unit)? = null) : Broadca
                     uriExtra.isNotEmpty() -> android.net.Uri.parse(uriExtra)
                     path.isNotEmpty() -> {
                         val file = java.io.File(path)
-                        if (!file.exists()) {
-                            Log.w("S3LIB_HARNESS", "install path=$path not_found")
+                        if (!file.isFile) {
+                            Log.w("S3LIB_HARNESS", "install path=$path not_file")
                             return
                         }
                         android.net.Uri.fromFile(file)
@@ -145,53 +211,207 @@ class DebugPadReceiver(private val onDebugFatal: (() -> Unit)? = null) : Broadca
                 PrecompilerService.start(ctx, PrecompilerServiceAction.Install, uri)
                 Log.i("S3LIB_HARNESS", "install started uri=$uri")
             }
-            ACTION_CLEAR_PPU_CACHE -> {
-                val title = intent.getStringExtra("title")?.trim().orEmpty()
-                if (title.isEmpty()) {
-                    Log.w("S3LIB_HARNESS", "clear_cache missing title=")
-                    return
-                }
-                var r = RPCSX.rootDirectory
-                if (r.isEmpty()) {
-                    r = ctx.getExternalFilesDir(null)?.toString() ?: ""
-                }
-                if (r.isNotEmpty() && !r.endsWith("/")) r += "/"
-                val cacheDir = java.io.File(r, "cache/cache/$title")
-                val manifestFile = java.io.File(r, "cache/cache/ppu_manifest/$title.json")
-                val sessionFile = java.io.File(ctx.filesDir, "ppu-install/session.json")
-                val cOk = cacheDir.deleteRecursively()
-                val mOk = manifestFile.delete()
-                val sOk = sessionFile.delete()
-                PpuReadinessStore.setPreRuntimeState(ctx, title, PreRuntimePpuState.NOT_DONE)
-                Log.i("S3LIB_HARNESS", "clear_cache title=$title cacheDeleted=$cOk manifestDeleted=$mOk sessionDeleted=$sOk")
-            }
-            ACTION_BOOT_GAME -> {
-                val title = intent.getStringExtra("title")?.trim().orEmpty()
-                val path = intent.getStringExtra("path")?.trim().orEmpty()
-                val game = GameRepository.list().firstOrNull { g ->
-                    (title.isNotEmpty() && g.info.path.contains(title, ignoreCase = true)) ||
-                    (path.isNotEmpty() && g.info.path.equals(path, ignoreCase = true))
-                }
-                if (game != null) {
-                    com.zenithblue.sambas3.ui.games.bootGame(ctx, game)
-                    Log.i("S3LIB_HARNESS", "boot title=$title ok=true path=${game.info.path}")
-                } else if (path.isNotEmpty()) {
-                    val fallbackIntent = Intent(ctx, com.zenithblue.sambas3.RPCSXActivity::class.java).apply {
-                        putExtra("path", path)
-                        putExtra(com.zenithblue.sambas3.RPCSXActivity.EXTRA_ORIGINAL_GAME_PATH, path)
-                        putExtra(com.zenithblue.sambas3.RPCSXActivity.EXTRA_BOOT_MODE, com.zenithblue.sambas3.EmulatorBootMode.FreshGame.name)
-                        addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-                    }
-                    ctx.startActivity(fallbackIntent)
-                    Log.i("S3LIB_HARNESS", "boot direct path ok=true path=$path")
-                } else {
-                    Log.w("S3LIB_HARNESS", "boot title=$title not_found")
-                }
-            }
         }
     }
 
-    private fun handleSettingsProbe(intent: Intent) {
+    private fun handleMonitorSet(context: Context?, intent: Intent) {
+        val requestId = intent.getStringExtra("request_id").orEmpty()
+        if (context == null) return
+        var current = MonitoringOverlaySettings.read(context)
+        if (intent.hasExtra("enabled")) {
+            current = current.copy(enabled = intent.getBooleanExtra("enabled", false))
+        }
+        if (intent.hasExtra("preset")) {
+            val presetName = intent.getStringExtra("preset").orEmpty()
+            val preset = runCatching { MonitoringPreset.valueOf(presetName) }.getOrNull()
+            if (preset != null && preset != MonitoringPreset.Custom) {
+                current = current.copy(
+                    enabledMetrics = MonitoringPresets.forPreset(preset),
+                    graphMetrics = current.graphMetrics.filterTo(mutableSetOf()) { it in MonitoringPresets.forPreset(preset) }
+                )
+            }
+        }
+        if (intent.hasExtra("metrics")) {
+            val raw = intent.getStringExtra("metrics").orEmpty()
+            val metrics = if (raw.equals("all", ignoreCase = true)) {
+                MonitoringMetric.entries.toSet()
+            } else if (raw.equals("none", ignoreCase = true)) {
+                emptySet()
+            } else {
+                raw.split(',').map { it.trim() }.filter { it.isNotEmpty() }
+                    .mapNotNull { name -> runCatching { MonitoringMetric.valueOf(name) }.getOrNull() }
+                    .toSet()
+            }
+            current = current.copy(enabledMetrics = metrics)
+        }
+        if (intent.hasExtra("graphs")) {
+            val raw = intent.getStringExtra("graphs").orEmpty()
+            val graphs = if (raw.equals("all", ignoreCase = true)) {
+                setOf(MonitoringMetric.Fps, MonitoringMetric.FrameTime)
+            } else if (raw.equals("none", ignoreCase = true)) {
+                emptySet()
+            } else {
+                raw.split(',').map { it.trim() }.filter { it.isNotEmpty() }
+                    .mapNotNull { name -> runCatching { MonitoringMetric.valueOf(name) }.getOrNull() }
+                    .toSet()
+            }
+            current = current.copy(graphMetrics = graphs)
+        }
+        if (intent.hasExtra("position")) {
+            val posName = intent.getStringExtra("position").orEmpty()
+            runCatching { MonitoringPosition.valueOf(posName) }.getOrNull()?.let {
+                current = current.copy(position = it)
+            }
+        }
+        if (intent.hasExtra("layout")) {
+            val layoutName = intent.getStringExtra("layout").orEmpty()
+            runCatching { MonitoringLayout.valueOf(layoutName) }.getOrNull()?.let {
+                current = current.copy(layout = it)
+            }
+        }
+        if (intent.hasExtra("update_ms")) {
+            val ms = intent.getLongExtra("update_ms", current.updateMs).coerceIn(250L, 1000L)
+            current = current.copy(updateMs = ms)
+        }
+        if (intent.hasExtra("opacity")) {
+            val op = intent.getFloatExtra("opacity", current.opacity).coerceIn(0.05f, 1.0f)
+            current = current.copy(opacity = op)
+        }
+        if (intent.hasExtra("text_scale")) {
+            val ts = intent.getFloatExtra("text_scale", current.textScale).coerceIn(0.50f, 1.25f)
+            current = current.copy(textScale = ts)
+        }
+        if (intent.hasExtra("history")) {
+            val h = intent.getIntExtra("history", current.graphHistorySeconds).coerceIn(5, 30)
+            current = current.copy(graphHistorySeconds = h)
+        }
+        if (intent.hasExtra("fps_scale")) {
+            val scName = intent.getStringExtra("fps_scale").orEmpty()
+            runCatching { FpsGraphScale.valueOf(scName) }.getOrNull()?.let {
+                current = current.copy(fpsScaleMode = it)
+            }
+        }
+        if (intent.hasExtra("hide_with_menu")) {
+            current = current.copy(hideWithMenu = intent.getBooleanExtra("hide_with_menu", true))
+        }
+        MonitoringOverlaySettings.write(context, current)
+        Log.w("S3MONITOR_DEBUG", "applied enabled=${current.enabled} preset=${current.preset} pos=${current.position} layout=${current.layout} request_id=$requestId")
+    }
+
+    /**
+     * Debug-only: boot a game in-process with the same extras as
+     * GamesScreen.bootGame. Shell `am start` of RPCSXActivity is blocked by
+     * exported=false on recent Android, so automation must go through this
+     * in-process path (probed by scripts/debug-launch-game.sh).
+     */
+    private fun handleBootGame(context: Context?, intent: Intent) {
+        val requestId = intent.getStringExtra("request_id").orEmpty()
+        if (!BuildConfig.DEBUG) {
+            Log.w("S3BOOT", "boot ignored in non-debug build")
+            return
+        }
+        val app = context?.applicationContext ?: return
+        val path = intent.getStringExtra("originalGamePath")?.trim().orEmpty()
+            .ifEmpty { intent.getStringExtra("path")?.trim().orEmpty() }
+        if (path.isEmpty()) {
+            Log.w("S3BOOT", "boot missing path=")
+            return
+        }
+        val nativeState = runCatching { RPCSX.getState() }.getOrNull()
+        if (nativeState != EmulatorState.Stopped) {
+            Log.w("S3BOOT", "boot blocked nativeState=${nativeState ?: "Unknown"} path=$path request_id=$requestId")
+            return
+        }
+        var bootPath = path
+        val resolution = runCatching {
+            if (path.endsWith(".iso", ignoreCase = true)) {
+                val existing = GameRepository.list().firstOrNull { it.info.path == path || it.info.sourceUri.value == path }
+                    ?: findRegisteredDirectIso(app, File(path).name)
+                if (existing != null) {
+                    // Re-parse legacy/fallback registrations before boot. This lets
+                    // debug-launch-game.sh validate the real import path and migrates
+                    // old DISO ids after parser fixes instead of silently reusing them.
+                    val resolved = if (
+                        existing.info.sourceMode.value == GameSourceMode.DIRECT_ISO &&
+                        GameIdentity.titleIdOrNull(existing.info.path, existing.info.name.value) == null
+                    ) {
+                        val sourceUri = existing.info.sourceUri.value
+                            ?: error("Direct ISO registration has no persisted source URI")
+                        com.zenithblue.sambas3.iso.DirectIsoManager.validateAndRegister(
+                            app,
+                            Uri.parse(sourceUri),
+                        )
+                    } else {
+                        existing
+                    }
+                    GameRepository.onBoot(resolved)
+                    bootPath = resolved.info.path
+                } else {
+                    val registered = runCatching {
+                        val fileUri = Uri.fromFile(File(path))
+                        val documentUri = com.zenithblue.sambas3.iso.DirectIsoSession.resolveDocumentUri(app, fileUri)
+                        if (documentUri != null && documentUri != fileUri) {
+                            com.zenithblue.sambas3.iso.DirectIsoManager.validateAndRegister(app, documentUri)
+                        } else {
+                            com.zenithblue.sambas3.iso.DirectIsoManager.registerFromFilePath(app, File(path))
+                        }
+                    }.getOrNull()
+                    val resolved = registered?.let { reg ->
+                        GameRepository.list().firstOrNull { g ->
+                            g.info.path == reg.info.path || g.info.sourceUri.value == reg.info.sourceUri.value
+                        } ?: reg
+                    }
+                    if (resolved != null) {
+                        GameRepository.onBoot(resolved)
+                        // Boot the canonical library entry so RPCSXActivity resolves
+                        // the DIRECT_ISO sourceUri/session instead of the raw path.
+                        bootPath = resolved.info.path
+                    }
+                }
+            } else {
+                GameRepository.list().firstOrNull { it.info.path == path }?.let { GameRepository.onBoot(it) }
+            }
+        }
+        if (resolution.isFailure) {
+            Log.e(
+                "S3BOOT",
+                "boot ISO registration failed path=$path request_id=$requestId",
+                resolution.exceptionOrNull(),
+            )
+            return
+        }
+        val boot = Intent(app, RPCSXActivity::class.java).apply {
+            addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+            putExtra("path", bootPath)
+            putExtra(RPCSXActivity.EXTRA_ORIGINAL_GAME_PATH, bootPath)
+            putExtra(RPCSXActivity.EXTRA_BOOT_MODE, EmulatorBootMode.FreshGame.name)
+        }
+        app.startActivity(boot)
+        Log.w("S3BOOT", "boot started path=$bootPath request_id=$requestId")
+    }
+
+    /** Resolve a raw debug path back to the persisted SAF-backed direct ISO entry. */
+    private fun findRegisteredDirectIso(context: Context, displayName: String): com.zenithblue.sambas3.Game? {
+        if (displayName.isBlank()) return null
+        return GameRepository.list().firstOrNull { game ->
+            game.info.sourceMode.value == com.zenithblue.sambas3.GameSourceMode.DIRECT_ISO &&
+                game.info.sourceUri.value?.let { source ->
+                    runCatching {
+                        context.contentResolver.query(
+                            Uri.parse(source),
+                            arrayOf(OpenableColumns.DISPLAY_NAME),
+                            null,
+                            null,
+                            null
+                        )?.use { cursor ->
+                            cursor.moveToFirst() && cursor.getString(0).equals(displayName, ignoreCase = true)
+                        } == true
+                    }.getOrDefault(false)
+                } == true
+        }
+    }
+
+    private fun handleSettingsProbe(context: Context?, intent: Intent) {
         if (!BuildConfig.DEBUG) {
             Log.w("S3CFG_HARNESS", "ignored in non-debug build")
             return
@@ -248,22 +468,43 @@ class DebugPadReceiver(private val onDebugFatal: (() -> Unit)? = null) : Broadca
             ACTION_SETTINGS_WRITE_GAME -> {
                 val rawValue = intent.getStringExtra("value") ?: return
                 val value = encodeProbeValue(path, rawValue)
-                val ok = RPCSX.instance.gameSettingsOverrideSet(title, path, value)
+                // Single owner: GameSettingsOverrides.recordGame performs the
+                // best-effort native write + app-tier persist (no separate native call).
+                val stored = context?.let {
+                    com.zenithblue.sambas3.gameconfig.GameSettingsOverrides.recordGame(it, title, path, value, null)
+                } ?: false
                 Log.i(
                     "S3CFG_HARNESS",
-                    "write scope=game title=$title path=$path requested=$value ok=$ok overrides=${RPCSX.instance.gameSettingsOverridesGet(title)}"
+                    "write scope=game title=$title path=$path requested=$value stored=$stored overrides=${RPCSX.instance.gameSettingsOverridesGet(title)}"
                 )
             }
             ACTION_SETTINGS_CLEAR_GAME -> {
-                val ok = RPCSX.instance.gameSettingsOverrideClear(title, path)
+                // Single owner: clearGameSetting performs native clear + app-tier
+                // clear + live re-apply (no separate native call).
+                val cleared = context?.let {
+                    com.zenithblue.sambas3.gameconfig.GameSettingsOverrides.clearGameSetting(it, title, path, "")
+                } ?: false
                 Log.i(
                     "S3CFG_HARNESS",
-                    "clear scope=game title=$title path=$path ok=$ok overrides=${RPCSX.instance.gameSettingsOverridesGet(title)}"
+                    "clear scope=game title=$title path=$path cleared=$cleared overrides=${RPCSX.instance.gameSettingsOverridesGet(title)}"
                 )
             }
             ACTION_SETTINGS_CLEAR_ALL -> {
-                val ok = RPCSX.instance.gameSettingsOverridesClear(title)
-                Log.i("S3CFG_HARNESS", "clear-all scope=game title=$title ok=$ok")
+                // Must clear BOTH tiers: native title state AND persisted app tier
+                // (SharedPreferences game.<TITLE>). clearGame owns both.
+                val cleared = context?.let {
+                    val ok = com.zenithblue.sambas3.gameconfig.GameSettingsOverrides.clearGame(it, title)
+                    val explicit = com.zenithblue.sambas3.gameconfig.GameSettingsOverrides.explicitUserOverrides(it, title)
+                    Log.i(
+                        "S3CFG_HARNESS",
+                        "clear-all scope=game title=$title ok=$ok explicit=$explicit native=${RPCSX.instance.gameSettingsOverridesGet(title)}"
+                    )
+                    ok
+                } ?: run {
+                    val ok = RPCSX.instance.gameSettingsOverridesClear(title)
+                    Log.i("S3CFG_HARNESS", "clear-all scope=game title=$title ok=$ok (no context)")
+                    ok
+                }
             }
         }
     }
@@ -318,10 +559,12 @@ class DebugPadReceiver(private val onDebugFatal: (() -> Unit)? = null) : Broadca
         const val ACTION_REMOVE_GAME = "com.zenithblue.sambas3.DEBUG_REMOVE_GAME"
         /** Debug-only: start PrecompilerService Install for a filesystem ISO/folder path. */
         const val ACTION_INSTALL_FILE = "com.zenithblue.sambas3.DEBUG_INSTALL_FILE"
-        /** Debug-only: clear PPU cache and manifest for a given titleId. */
-        const val ACTION_CLEAR_PPU_CACHE = "com.zenithblue.sambas3.DEBUG_CLEAR_PPU_CACHE"
-        /** Debug-only: boot an imported title via bootGame. */
+        /** Debug-only: boot a game in-process (same extras as GamesScreen.bootGame). */
         const val ACTION_BOOT_GAME = "com.zenithblue.sambas3.DEBUG_BOOT_GAME"
+        const val ACTION_STOP_GAME = "com.zenithblue.sambas3.DEBUG_STOP_GAME"
+        const val ACTION_DRIVER_SYSMEM = "com.zenithblue.sambas3.DEBUG_DRIVER_SYSMEM"
+        const val ACTION_DRIVER_TU_DEBUG = "com.zenithblue.sambas3.DEBUG_DRIVER_TU_DEBUG"
+        const val ACTION_MONITOR_SET = "com.zenithblue.sambas3.DEBUG_MONITOR_SET"
 
         fun register(context: Context, onDebugFatal: (() -> Unit)? = null): DebugPadReceiver {
             val r = DebugPadReceiver(onDebugFatal)
@@ -343,8 +586,11 @@ class DebugPadReceiver(private val onDebugFatal: (() -> Unit)? = null) : Broadca
                 addAction(ACTION_SETTINGS_CLEAR_ALL)
                 addAction(ACTION_REMOVE_GAME)
                 addAction(ACTION_INSTALL_FILE)
-                addAction(ACTION_CLEAR_PPU_CACHE)
                 addAction(ACTION_BOOT_GAME)
+                addAction(ACTION_STOP_GAME)
+                addAction(ACTION_DRIVER_SYSMEM)
+                addAction(ACTION_DRIVER_TU_DEBUG)
+                addAction(ACTION_MONITOR_SET)
                 addAction(PREFIX + "CROSS")
                 addAction(PREFIX + "CIRCLE")
                 addAction(PREFIX + "SQUARE")
