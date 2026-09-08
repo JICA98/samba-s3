@@ -131,7 +131,6 @@ fun OnboardingScreen(
     Box(
         modifier = Modifier
             .fillMaxSize()
-            .windowInsetsPadding(WindowInsets.safeDrawing)
             .focusRequester(rootFocusRequester)
             .focusable()
             .onPreviewKeyEvent { event ->
@@ -190,6 +189,7 @@ fun OnboardingScreen(
         Column(
             modifier = Modifier
                 .fillMaxSize()
+                .windowInsetsPadding(WindowInsets.safeDrawing)
                 .padding(horizontal = 14.dp, vertical = 6.dp),
         ) {
             // Header Bar
