@@ -1,6 +1,5 @@
 package com.zenithblue.sambas3
 
-import android.app.ForegroundServiceStartNotAllowedException
 import android.content.Context
 import android.content.Intent
 import android.os.Build
@@ -522,18 +521,12 @@ object CompileProgressBridge {
             ContextCompat.startForegroundService(appCtx, intent)
             fgsStartDenied = false
             Log.i(TAG, "startForegroundService requested for domain=${ev.domain} phase=${ev.phase} job=${ev.jobId}")
-        } catch (e: ForegroundServiceStartNotAllowedException) {
-            Log.w(TAG, "FGS start denied (background): ${e.message}")
-            fgsStartDenied = true
-            // Keep StateFlow/UI coherent; do not crash or retry loop
         } catch (e: IllegalStateException) {
-            // Some OEMs throw IllegalStateException for background start
-            if (e.message?.contains("NotAllowed") == true || e is ForegroundServiceStartNotAllowedException) {
-                Log.w(TAG, "FGS start not allowed: ${e.message}")
-                fgsStartDenied = true
-            } else {
-                Log.e(TAG, "startForegroundService failed: ${e.message}", e)
-            }
+            // Android 12+ and some OEMs reject background FGS starts with an
+            // IllegalStateException subtype. Avoid referencing that API-31 class on API 29/30.
+            Log.w(TAG, "FGS start not allowed: ${e.message}")
+            fgsStartDenied = true
+            // Keep StateFlow/UI coherent; do not crash or retry loop.
         } catch (e: Exception) {
             Log.e(TAG, "startForegroundService failed: ${e.message}", e)
         }

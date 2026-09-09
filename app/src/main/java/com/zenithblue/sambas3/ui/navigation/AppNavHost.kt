@@ -84,6 +84,7 @@ import com.zenithblue.sambas3.ui.crash.CrashLogsHistoryScreen
 import com.zenithblue.sambas3.ui.settings.PatchManagerScreen
 import com.zenithblue.sambas3.ui.settings.ControllerSettings
 import com.zenithblue.sambas3.ui.settings.SettingsScreen
+import com.zenithblue.sambas3.ui.settings.PrivacyPolicyScreen
 import com.zenithblue.sambas3.ui.debug.DebugControllerScreen
 import com.zenithblue.sambas3.ui.monitoring.MonitoringSettingsScreen
 import com.zenithblue.sambas3.ui.controller.ControllerSettingsScreen
@@ -238,6 +239,10 @@ fun AppNavHost(initialRoute: String? = null) {
                 onFocusedKeyChanged = { settingsFocusedKey = it },
                 onActiveSettingKeyChanged = { settingsActiveSettingKey = it },
             )
+        }
+
+        composable(route = "privacy_policy") {
+            PrivacyPolicyScreen(navigateBack = navController::navigateUp)
         }
 
         composable(

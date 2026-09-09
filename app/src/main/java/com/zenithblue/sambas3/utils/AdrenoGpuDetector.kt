@@ -33,7 +33,7 @@ object AdrenoGpuDetector {
             ?: listOf(
                 Build.HARDWARE,
                 Build.BOARD,
-                Build.SOC_MODEL.takeIf { Build.VERSION.SDK_INT >= 31 },
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) Build.SOC_MODEL else null,
                 System.getProperty("ro.hardware.vulkan"),
                 System.getProperty("ro.chipname"),
             ).filterNotNull().joinToString(" ").ifBlank { null }

@@ -9,6 +9,11 @@
     <string name="import_">Import</string>
     <string name="none">None</string>
     <string name="reset">Reset</string>
+    <string name="failed_to_update_ui">Failed to update UI</string>
+    <string name="permission_required">Permission required</string>
+    <string name="permission_required_description">Grant permission to install from this source to update.</string>
+    <string name="enter_repo_url">Enter repository URL</string>
+    <string name="select_repo">Select repository</string>
 
     <!-- AppNavHost -->
     <string name="about">About</string>
@@ -17,6 +22,8 @@
     <string name="edit_overlay">Edit Overlay</string>
     <string name="firmware">Firmware</string>
     <string name="settings">Settings</string>
+    <string name="privacy_policy">Privacy Policy</string>
+    <string name="privacy_policy_description">Review what SambaS3 stores locally and when data can leave your device</string>
 
     <!-- FileUtil -->
     <string name="game_import_failed">Game import failed: %1$s</string>

@@ -92,6 +92,7 @@ class ProgressRepository {
          * will be hidden in shade but visible in Task Manager). Updates via [onProgressEvent] with the same id
          * will post through NotificationManagerCompat while the service stays foreground.
          */
+        @android.annotation.SuppressLint("MissingPermission") // All notify() calls are guarded by canPost().
         fun createForeground(
             service: Service,
             notificationId: Int,
@@ -157,7 +158,9 @@ class ProgressRepository {
                         .setPriority(NotificationCompat.PRIORITY_HIGH)
                         .setProgress(0, 0, false)
                         .setOngoing(false)
-                    try { notificationManager.notify(notificationId, builder.build()) } catch (_: Exception) {}
+                    if (NotificationChannels.canPost(service)) {
+                        try { notificationManager.notify(notificationId, builder.build()) } catch (_: Exception) {}
+                    }
                     AlertDialogQueue.showDialog(title, contentText)
                 } else {
                     // For PrecompilerService install PPU, switch title to PPU when message indicates file/module progress
@@ -174,7 +177,9 @@ class ProgressRepository {
                         // indeterminate
                         builder.setProgress(0, 0, true)
                     }
-                    try { notificationManager.notify(notificationId, builder.build()) } catch (_: Exception) {}
+                    if (NotificationChannels.canPost(service)) {
+                        try { notificationManager.notify(notificationId, builder.build()) } catch (_: Exception) {}
+                    }
                 }
 
                 handler(ProgressUpdateEntry(value, max, text))
@@ -198,6 +203,7 @@ class ProgressRepository {
          * Helper to post a one-shot notification update for secondary ongoing notifications (2001/2002)
          * without owning a foreground. Caller must have already ensured channel exists.
          */
+        @android.annotation.SuppressLint("MissingPermission") // Returns unless POST_NOTIFICATIONS is granted.
         fun notifySecondary(
             context: Context,
             notificationId: Int,
@@ -206,6 +212,7 @@ class ProgressRepository {
             value: Long,
             max: Long
         ) {
+            if (!NotificationChannels.canPost(context)) return
             val builder = NotificationCompat.Builder(context, NotificationChannels.RPCSX_PROGRESS).apply {
                 setContentTitle(title)
                 setSmallIcon(R.mipmap.ic_sambas3_foreground)

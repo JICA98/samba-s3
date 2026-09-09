@@ -31,6 +31,7 @@ object PpuRuntimeOrchestrator {
     private var activeLogicalJobId: Long? = null
 
     @Volatile
+    @android.annotation.SuppressLint("StaticFieldLeak") // Connection owns applicationContext and is cleared on terminal paths.
     private var activeConnection: PpuBatchWorkerConnection? = null
 
     @Volatile

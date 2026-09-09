@@ -1810,6 +1810,7 @@ class RPCSXActivity : ComponentActivity(), EmulationHost {
     }
 
     /** Intercept before child views can interpret Enter, arrows, Tab, Home, etc. */
+    @android.annotation.SuppressLint("RestrictedApi") // Activity override must delegate unhandled input.
     override fun dispatchKeyEvent(event: KeyEvent): Boolean {
         val routed = mapperRegistry.resolve(event)
         if (isExternalKeyboardEvent(event, routed)) {

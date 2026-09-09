@@ -182,6 +182,7 @@ class MainActivity : ComponentActivity() {
         try { LogMonitor.flushWriters() } catch (_: Exception) {}
     }
 
+    @android.annotation.SuppressLint("RestrictedApi") // Activity override must delegate unhandled input.
     override fun dispatchKeyEvent(event: android.view.KeyEvent): Boolean {
         val physicalSource = event.source and (
             android.view.InputDevice.SOURCE_KEYBOARD or

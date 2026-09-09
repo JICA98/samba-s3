@@ -149,6 +149,7 @@ class CompilationMonitorService : Service() {
         }
     }
 
+    @android.annotation.SuppressLint("MissingPermission") // Guarded by NotificationChannels.canPost().
     private fun onProjectionChanged(projection: CompilationMonitorLogic.MonitorProjection) {
         lastProjection = projection
         if (!isForeground) {
@@ -165,7 +166,9 @@ class CompilationMonitorService : Service() {
 
         val anchor = buildAnchorNotification(projection)
         try {
-            NotificationManagerCompat.from(this).notify(NOTIF_FGS, anchor)
+            if (NotificationChannels.canPost(this)) {
+                NotificationManagerCompat.from(this).notify(NOTIF_FGS, anchor)
+            }
             cancelSecondaryNotifications()
         } catch (e: Exception) {
             Log.e(TAG, "notify update failed: ${e.message}", e)

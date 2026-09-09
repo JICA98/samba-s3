@@ -28,7 +28,10 @@ android {
     }
 
     signingConfigs {
-        val keystorePropertiesFile = rootProject.file("local.properties")
+        val keystorePropertiesFile = System.getenv("KEYSTORE_PROPERTIES_PATH")
+            ?.takeIf { it.isNotBlank() }
+            ?.let(::file)
+            ?: rootProject.file("local.properties")
         val keystoreProperties = Properties()
         if (keystorePropertiesFile.exists()) {
             keystorePropertiesFile.inputStream().use { keystoreProperties.load(it) }
@@ -41,6 +44,8 @@ android {
         if (keystorePath.isNotEmpty()) {
             val keyFile = file(keystorePath)
             val resolvedFile = when {
+                keystorePropertiesFile.parentFile.resolve(keystorePath).exists() ->
+                    keystorePropertiesFile.parentFile.resolve(keystorePath)
                 keyFile.exists() -> keyFile
                 rootProject.file(keystorePath).exists() -> rootProject.file(keystorePath)
                 else -> keyFile
@@ -85,7 +90,9 @@ android {
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
             )
-            signingConfig = signingConfigs.findByName("custom-key") ?: signingConfigs.getByName("debug")
+            // Never publish a release artifact under the Android debug certificate.
+            // Without production credentials the explicit release-task guard below fails the build.
+            signingConfig = signingConfigs.findByName("custom-key")
         }
     }
 
@@ -134,12 +141,30 @@ android {
     }
 
     lint {
-        abortOnError = false
-        checkReleaseBuilds = false
+        abortOnError = true
+        checkReleaseBuilds = true
+        // The Chinese catalog is intentionally partial and Android correctly falls back
+        // to the complete default catalog. Compose 1.10's context-resource migration is
+        // tracked separately; neither condition is a release correctness failure.
+        warning += setOf("MissingTranslation", "LocalContextGetResourceValueCall")
     }
 }
 
 base.archivesName = "samba-s3"
+
+val customReleaseSigning = android.signingConfigs.findByName("custom-key")
+gradle.taskGraph.whenReady {
+    val createsReleaseArtifact = allTasks.any {
+        (it.name.startsWith("bundle") || it.name.startsWith("assemble")) &&
+            it.name.endsWith("Release")
+    }
+    if (createsReleaseArtifact && customReleaseSigning == null) {
+        throw GradleException(
+            "Production signing is required for release artifacts. Set KEYSTORE_PROPERTIES_PATH " +
+                "or KEYSTORE_PATH, KEYSTORE_ALIAS, and KEYSTORE_PASSWORD."
+        )
+    }
+}
 
 // --- Samba S3 deterministic RPCSX core build (BLOCKER A) ---
 // `app/src/main/jniLibs` is .gitignored on purpose. A clean checkout must build the

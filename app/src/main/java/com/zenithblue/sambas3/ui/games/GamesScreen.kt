@@ -1160,7 +1160,7 @@ fun GamesScreen(
                     )
 
                     Text(
-                        SimpleDateFormat("h:mm a", Locale.getDefault()).format(Date()),
+                        SimpleDateFormat("h:mm a", configuration.locales[0]).format(Date()),
                         style = AppTypography.labelMedium,
                         color = RPCSXColors.textSecondary
                     )
@@ -1931,9 +1931,9 @@ fun GamesScreen(
                     clearCacheTarget = game
                 },
                 canClearCache = !gameplayRunning &&
-                    !CompileProgressBridge.installState.value.ppuActive &&
-                    !CompileProgressBridge.prelaunchState.value.ppuActive &&
-                    !CompileProgressBridge.state.value.ppuActive &&
+                    !installPpu.ppuActive &&
+                    !prelaunchPpu.ppuActive &&
+                    !runtimePpu.ppuActive &&
                     !com.zenithblue.sambas3.ppu.ImportPpuPreparationCoordinator.stopping &&
                     !com.zenithblue.sambas3.ppu.ImportPpuPreparationCoordinator.hasActiveOwner(),
                 onPrepare = {
@@ -3489,7 +3489,7 @@ fun FirmwareCard(distance: Int, onClick: () -> Unit) {
         animationSpec = tween(200)
     )
 
-    BoxWithConstraints(
+    Box(
         modifier = Modifier
             .fillMaxSize()
             .scale(scale)
@@ -3599,7 +3599,7 @@ fun AddGameCard(distance: Int, onClick: () -> Unit, disabled: Boolean = false) {
         animationSpec = tween(200)
     )
 
-    BoxWithConstraints(
+    Box(
         modifier = Modifier
             .fillMaxSize()
             .scale(scale)
@@ -4394,7 +4394,7 @@ fun PendingImportCard(
     val progressMax = if (isPpu) installPpu.ppuMax.toLong() else progressEntry?.max?.longValue ?: 0L
     val msg = if (isPpu) installPpu.ppuMsg else progressEntry?.message?.value
     val title = if (isPpu) "COMPILING PPU" else "IMPORTING..."
-    BoxWithConstraints(
+    Box(
         modifier = Modifier.fillMaxSize().scale(scale).alpha(alpha).combinedClickable(onClick = onClick)
             .shadow(elevation = glowIntensity, spotColor = RPCSXColors.focusGlow, ambientColor = RPCSXColors.focusGlow, shape = RoundedCornerShape(8.dp))
             .border(width = if (isFocused) 2.dp else 1.dp, color = if (isFocused) RPCSXColors.focusRing else RPCSXColors.surfaceOverlay, shape = RoundedCornerShape(8.dp))

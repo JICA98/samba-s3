@@ -1,6 +1,5 @@
 package com.zenithblue.sambas3.ui.settings
 
-import android.content.Intent
 import android.net.Uri
 import android.provider.DocumentsContract
 import android.util.Log
@@ -428,6 +427,18 @@ fun SettingsDetailPane(
             target = "HEADS-UP DISPLAY",
             actionLabel = "CONFIGURE OVERLAY",
             actionIconRes = R.drawable.ic_video
+        )
+        "privacy" -> SettingDetailInfo(
+            title = stringResource(R.string.privacy_policy),
+            category = "PRIVACY & DISCLOSURE",
+            description = stringResource(R.string.privacy_policy_description),
+            iconRes = R.drawable.ic_lock,
+            status = "BUILT-IN",
+            backend = "IN-APP",
+            subsystem = "DATA DISCLOSURE",
+            target = "LOCAL PAGE",
+            actionLabel = "OPEN PRIVACY POLICY",
+            actionIconRes = R.drawable.ic_lock
         )
         "patches" -> SettingDetailInfo(
             title = stringResource(R.string.patch_manager),
@@ -1711,6 +1722,7 @@ fun SettingsScreen(
                     Toast.makeText(context, context.getString(R.string.log_not_found), Toast.LENGTH_SHORT).show()
                 }
             }
+            "privacy" -> navigateTo("privacy_policy")
             "patches" -> navigateTo("patches")
         }
     }
@@ -1727,6 +1739,7 @@ fun SettingsScreen(
             "logs",
             "crash_logs",
             "share_logs",
+            "privacy",
             if (!BuildConfig.IS_PLAYSTORE_BUILD) "patches" else null
         )
     }
@@ -1760,7 +1773,8 @@ fun SettingsScreen(
                     7 -> 8
                     8 -> 9
                     9 -> 9
-                    10 -> 10
+                    10 -> if (totalItems > 11) 11 else 10
+                    11 -> 11
                     else -> current
                 }
             }
@@ -1777,6 +1791,7 @@ fun SettingsScreen(
                     8 -> 7
                     9 -> 8
                     10 -> 10
+                    11 -> 10
                     else -> current
                 }
             }
@@ -1790,9 +1805,10 @@ fun SettingsScreen(
                     5 -> 8
                     6 -> 9
                     7 -> 10
-                    8 -> 10
-                    9 -> 10
+                    8 -> if (totalItems > 11) 11 else 10
+                    9 -> if (totalItems > 11) 11 else 10
                     10 -> 10
+                    11 -> 11
                     else -> current
                 }
             }
@@ -1809,6 +1825,7 @@ fun SettingsScreen(
                     8 -> 5
                     9 -> 6
                     10 -> 7
+                    11 -> 8
                     else -> current
                 }
             }
@@ -2282,15 +2299,28 @@ fun SettingsScreen(
                         }
                     )
                 }
+                item(key = "privacy") {
+                    SettingsNavCard(
+                        title = stringResource(R.string.privacy_policy),
+                        subtitle = stringResource(R.string.privacy_policy_description),
+                        iconRes = R.drawable.ic_lock,
+                        isSelected = focusedIndex == 10,
+                        onClick = {
+                            focusedIndex = 10
+                            onFocusedKeyChanged("privacy")
+                            executeAction("privacy")
+                        }
+                    )
+                }
                 if (!BuildConfig.IS_PLAYSTORE_BUILD) {
                     item(key = "patches") {
                         SettingsNavCard(
                             title = stringResource(R.string.patch_manager),
                             subtitle = stringResource(R.string.patch_manager_description),
                             iconRes = R.drawable.ic_build,
-                            isSelected = focusedIndex == 10,
+                            isSelected = focusedIndex == 11,
                             onClick = {
-                                focusedIndex = 10
+                                focusedIndex = 11
                                 onFocusedKeyChanged("patches")
                                 executeAction("patches")
                             }
