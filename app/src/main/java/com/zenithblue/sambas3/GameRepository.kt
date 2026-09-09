@@ -192,8 +192,7 @@ class GameRepository {
                     val loadedGames = Json.decodeFromString<Array<GameInfo>>(
                         File(RPCSX.rootDirectory + "games.json").readText()
                     ).filter { info ->
-                        // A release build must not activate direct-ISO metadata
-                        // left behind by a debug build sharing the same app data.
+                        // Keep SAF-backed direct-ISO entries active across process restarts.
                         BuildConfig.DIRECT_ISO_LOADING || info.sourceMode != GameSourceMode.DIRECT_ISO
                     }.map { info -> Game(toStore(info)) }
                     synchronized(instance) {

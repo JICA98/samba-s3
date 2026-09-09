@@ -96,7 +96,7 @@ object DirectIsoManager {
 
     fun importIsoMatches(context: Context, matches: List<GameFolderMatch>): IsoFolderImportResult {
         check(com.zenithblue.sambas3.BuildConfig.DIRECT_ISO_LOADING) {
-            "Direct ISO loading is available only in debug/test builds"
+            "Direct ISO loading is disabled in this build"
         }
         val skippedDirectories = matches.count { it.sourceKind == GameSourceKind.DIRECTORY }
         val entries = matches.mapNotNull { match ->
@@ -180,7 +180,7 @@ object DirectIsoManager {
 
     private fun registerOpenedIso(context: Context, uri: Uri): DirectIsoRegisterResult {
         check(com.zenithblue.sambas3.BuildConfig.DIRECT_ISO_LOADING) {
-            "Direct ISO loading is available only in debug/test builds"
+            "Direct ISO loading is disabled in this build"
         }
         val appCtx = context.applicationContext
         val effectiveUri = DirectIsoSession.resolveDocumentUri(context, uri) ?: uri

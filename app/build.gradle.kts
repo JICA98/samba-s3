@@ -83,7 +83,9 @@ android {
             buildConfigField("boolean", "DIRECT_ISO_LOADING", "true")
         }
         release {
-            buildConfigField("boolean", "DIRECT_ISO_LOADING", "false")
+            // SAF-selected ISO files are a supported production feature; keep the
+            // direct, no-copy path enabled in release builds as well as debug builds.
+            buildConfigField("boolean", "DIRECT_ISO_LOADING", "true")
             isMinifyEnabled = true
             isShrinkResources = true
             proguardFiles(
