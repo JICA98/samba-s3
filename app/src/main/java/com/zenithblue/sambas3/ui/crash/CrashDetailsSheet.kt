@@ -1,6 +1,7 @@
 package com.zenithblue.sambas3.ui.crash
 
 import android.util.Log
+import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.horizontalScroll
@@ -101,6 +102,7 @@ fun CrashDetailsSheet(
             .background(Color.Black.copy(alpha = .60f)),
         contentAlignment = Alignment.Center,
     ) {
+        BackHandler { onDismiss() }
         Box(
             modifier = Modifier
                 .size(380.dp)
@@ -251,7 +253,7 @@ fun CrashDetailsSheet(
                                         modifier = Modifier.size(13.dp),
                                     )
                                     Text(
-                                        "CLOSE",
+                                        "○ CLOSE",
                                         color = Color.White,
                                         fontSize = 11.sp,
                                         fontWeight = FontWeight.Bold,
@@ -333,8 +335,8 @@ fun CrashLogPane(report: CrashReport, initialTab: Int, modifier: Modifier = Modi
         // Left Sidebar: Categories (minimal footprint)
         Surface(
             shape = RoundedCornerShape(10.dp),
-            color = Color(0x18FFFFFF),
-            border = BorderStroke(1.dp, Color(0x1EFFFFFF)),
+            color = RPCSXColors.surfaceElevated,
+            border = BorderStroke(1.dp, RPCSXColors.outlineVariant),
             modifier = Modifier
                 .width(132.dp)
                 .fillMaxHeight(),
@@ -410,6 +412,7 @@ fun CrashLogPane(report: CrashReport, initialTab: Int, modifier: Modifier = Modi
                     value = query,
                     onValueChange = { query = it },
                     singleLine = true,
+                    textStyle = MaterialTheme.typography.bodySmall,
                     placeholder = {
                         Text(
                             "Search ${names.getOrElse(tab) { "" }}…",
@@ -418,6 +421,10 @@ fun CrashLogPane(report: CrashReport, initialTab: Int, modifier: Modifier = Modi
                     },
                     shape = RoundedCornerShape(8.dp),
                     colors = OutlinedTextFieldDefaults.colors(
+                        focusedTextColor = RPCSXColors.textPrimary,
+                        unfocusedTextColor = RPCSXColors.textPrimary,
+                        focusedPlaceholderColor = RPCSXColors.textSecondary,
+                        unfocusedPlaceholderColor = RPCSXColors.textSecondary,
                         focusedBorderColor = RPCSXColors.primary,
                         unfocusedBorderColor = Color(0x28FFFFFF),
                         focusedContainerColor = Color(0x18000000),
@@ -425,7 +432,7 @@ fun CrashLogPane(report: CrashReport, initialTab: Int, modifier: Modifier = Modi
                     ),
                     modifier = Modifier
                         .weight(1f)
-                        .height(38.dp),
+                        .height(56.dp),
                 )
                 Spacer(Modifier.width(8.dp))
                 OutlinedButton(
@@ -475,8 +482,8 @@ fun CrashLogPane(report: CrashReport, initialTab: Int, modifier: Modifier = Modi
 
             Surface(
                 shape = RoundedCornerShape(10.dp),
-                color = Color(0x35000000),
-                border = BorderStroke(1.dp, Color(0x18FFFFFF)),
+                color = RPCSXColors.surfaceElevated,
+                border = BorderStroke(1.dp, RPCSXColors.outlineVariant),
                 modifier = Modifier
                     .weight(1f)
                     .fillMaxWidth(),

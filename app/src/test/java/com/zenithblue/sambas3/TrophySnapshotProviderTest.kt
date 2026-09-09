@@ -18,14 +18,26 @@ class TrophySnapshotProviderTest {
     private class FixtureQuery : TrophyQuery {
         var currentSnapshot = trophySnapshot(unlocked = listOf(0), generation = "0:10", user = "user-a")
         var titleSnapshot = currentSnapshot
+        var isoSnapshot: TrophySnapshot? = null
+        var isoCalls = 0
         override fun current() = "current"
         override fun title(titleId: String) = "title"
+        override fun titleFromIso(titleId: String, isoFd: Int): String {
+            isoCalls++
+            return "iso"
+        }
     }
 
     @Test
     fun liveAndTitleUseTheSameFixtureCountsIdsAndGrades() = runBlocking {
         val query = FixtureQuery()
-        val provider = TrophySnapshotProvider(query) { value -> if (value == "current") query.currentSnapshot else query.titleSnapshot }
+        val provider = TrophySnapshotProvider(query) { value ->
+            when (value) {
+                "current" -> query.currentSnapshot
+                "iso" -> query.isoSnapshot
+                else -> query.titleSnapshot
+            }
+        }
         val live = provider.current(force = true)!!
         val title = provider.title("BLUS31584", force = true)!!
         assertEquals(33, live.total)
@@ -38,7 +50,13 @@ class TrophySnapshotProviderTest {
     @Test
     fun cacheIdentityIncludesUserAndGenerationAndInvalidationReloads() = runBlocking {
         val query = FixtureQuery()
-        val provider = TrophySnapshotProvider(query) { value -> if (value == "current") query.currentSnapshot else query.titleSnapshot }
+        val provider = TrophySnapshotProvider(query) { value ->
+            when (value) {
+                "current" -> query.currentSnapshot
+                "iso" -> query.isoSnapshot
+                else -> query.titleSnapshot
+            }
+        }
         val first = provider.title("BLUS31584")!!
         query.titleSnapshot = trophySnapshot(unlocked = listOf(0, 1), generation = "1:20", user = "user-a")
         val generationChanged = provider.title("BLUS31584")!!
@@ -63,6 +81,47 @@ class TrophySnapshotProviderTest {
         assertEquals(1, AchievementPresentation.filter(entries, AchievementFilter.UNLOCKED, true).size)
         assertEquals(listOf(0, 2, 1), AchievementPresentation.sort(entries, AchievementSort.RECENT).map { it.id })
         assertTrue(AchievementPresentation.filter(entries, AchievementFilter.GOLD, true).single().hidden)
+    }
+
+    @Test
+    fun isoFallbackReturnsReadySetWhenHddHasNone() = runBlocking {
+        val query = FixtureQuery()
+        query.titleSnapshot = TrophySnapshot(
+            state = TrophySnapshotState.NO_TROPHY_SET,
+            titleId = "BLUS30443",
+            trophySetId = null,
+            gameName = "",
+            trophies = emptyList(),
+            rpcS3UserId = "00000001",
+            tropusrPath = null,
+            tropusrExists = false,
+            tropusrSize = 0L,
+            tropusrMtime = 0L,
+            generation = null,
+            querySource = "title",
+            queryDurationMs = 1L,
+            status = "no_trophy_set",
+        )
+        query.isoSnapshot = trophySnapshot(unlocked = emptyList(), generation = "iso:1", user = "00000001").copy(
+            titleId = "BLUS30443",
+            trophySetId = "NPWR00000_00",
+            gameName = "Demon's Souls",
+            querySource = "iso",
+        )
+        val provider = TrophySnapshotProvider(query) { value ->
+            when (value) {
+                "current" -> query.currentSnapshot
+                "iso" -> query.isoSnapshot
+                else -> query.titleSnapshot
+            }
+        }
+        val hdd = provider.title("BLUS30443", force = true)!!
+        assertEquals(TrophySnapshotState.NO_TROPHY_SET, hdd.state)
+        val iso = provider.titleFromIso("BLUS30443", 7, force = true)!!
+        assertEquals(TrophySnapshotState.READY, iso.state)
+        assertEquals(33, iso.total)
+        assertEquals("iso", iso.querySource)
+        assertEquals(1, query.isoCalls)
     }
 
 }

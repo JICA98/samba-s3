@@ -1700,16 +1700,9 @@ fun SettingsScreen(
             "onboarding" -> navigateTo(ONBOARDING_ROUTE)
             "advanced_settings" -> navigateTo("settings@@$")
             "custom_driver" -> {
-                if (RPCSX.instance.supportsCustomDriverLoading()) {
-                    navigateTo("drivers")
-                } else {
-                    AlertDialogQueue.showDialog(
-                        title = context.getString(R.string.custom_driver_not_supported),
-                        message = context.getString(R.string.custom_driver_not_supported_description),
-                        confirmText = context.getString(R.string.close),
-                        dismissText = ""
-                    )
-                }
+                // Driver page is viewable on all devices (system driver + coming-soon);
+                // custom-driver selection itself stays guarded per card.
+                navigateTo("drivers")
             }
             "controls" -> navigateTo("controls")
             "monitoring" -> navigateTo("monitoring")

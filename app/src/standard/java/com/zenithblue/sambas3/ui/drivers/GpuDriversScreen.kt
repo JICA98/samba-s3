@@ -1,10 +1,8 @@
 package com.zenithblue.sambas3.ui.drivers
 
-import android.net.Uri
 import android.util.Log
 import android.view.KeyEvent
-import androidx.activity.compose.rememberLauncherForActivityResult
-import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -15,9 +13,14 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.lazy.grid.GridCells
+import androidx.compose.foundation.lazy.grid.GridItemSpan
+import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
+import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
@@ -32,14 +35,12 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
-import androidx.compose.material3.Tab
-import androidx.compose.material3.TabRow
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
@@ -52,8 +53,11 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.focusRequester
+import androidx.compose.ui.focus.onFocusChanged
+import androidx.compose.foundation.focusable
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
@@ -70,10 +74,17 @@ import com.zenithblue.sambas3.drivers.catalog.DriverVariantFilter
 import com.zenithblue.sambas3.drivers.download.DriverDownloadRegistry
 import com.zenithblue.sambas3.drivers.download.DriverDownloadState
 import com.zenithblue.sambas3.ui.common.SambaScreenScaffold
+import com.zenithblue.sambas3.ui.drivers.ComingSoonDriversSection
+import com.zenithblue.sambas3.ui.drivers.DriverBrandRow
+import com.zenithblue.sambas3.ui.drivers.DriverStickFocusNav
+import com.zenithblue.sambas3.ui.drivers.gamepadActivate
+import com.zenithblue.sambas3.ui.drivers.isMesaDriver
+import com.zenithblue.sambas3.ui.drivers.systemVendorChip
+import com.zenithblue.sambas3.ui.drivers.vendorLogoRes
+import com.zenithblue.sambas3.utils.AdrenoGpuDetector
 import com.zenithblue.sambas3.utils.GeneralSettings
 import com.zenithblue.sambas3.utils.GeneralSettings.string
 import com.zenithblue.sambas3.utils.GpuDriverHelper
-import com.zenithblue.sambas3.utils.GpuDriverInstallResult
 import com.zenithblue.sambas3.utils.GpuDriverSelection
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -93,8 +104,7 @@ fun GpuDriversScreen(
 
     var drivers by remember { mutableStateOf(GpuDriverHelper.getInstalledDrivers(context)) }
     var selectedDriver by remember { mutableStateOf(GeneralSettings["selected_gpu_driver"].string("Default")) }
-    var selectedTab by remember { mutableStateOf(DriverTab.Installed) }
-    var isInstalling by remember { mutableStateOf(false) }
+    var selectedTab by remember { mutableStateOf(DriverTab.Installed) } // ponytail: Browse kept in code; UI no longer exposes it
     var pendingDelete by remember { mutableStateOf<Pair<java.io.File, com.zenithblue.sambas3.utils.GpuDriverMetadata>?>(null) }
 
     var snapshot by remember { mutableStateOf<DriverCatalogSnapshot?>(null) }
@@ -176,72 +186,83 @@ fun GpuDriversScreen(
         }
     }
 
-    val driverPickerLauncher = rememberLauncherForActivityResult(
-        contract = ActivityResultContracts.GetContent()
-    ) { uri: Uri? ->
-        uri?.let {
-            isInstalling = true
-            scope.launch(Dispatchers.IO) {
-                try {
-                    context.contentResolver.openInputStream(it)?.use { stream ->
-                        val result = GpuDriverHelper.installDriver(context, stream)
-                        if (result == GpuDriverInstallResult.Success) {
-                            val updated = GpuDriverHelper.getInstalledDrivers(context)
-                            withContext(Dispatchers.Main) {
-                                drivers = updated
-                                selectedDriver = GeneralSettings["selected_gpu_driver"].string("Default")
-                            }
-                        }
-                        withContext(Dispatchers.Main) {
-                            isInstalling = false
-                            snackbarHostState.showSnackbar(
-                                message = GpuDriverHelper.resolveInstallResultToString(result)
-                            )
-                        }
-                    }
-                } catch (e: Exception) {
-                    Log.e("GpuDriver", "Error installing driver: ${e.message}")
-                    withContext(Dispatchers.Main) { isInstalling = false }
-                }
-            }
-        }
-    }
-
     @Composable
     fun InstalledTabContent() {
-        LazyColumn(modifier = Modifier.fillMaxSize()) {
+        var gpuInfo by remember { mutableStateOf<com.zenithblue.sambas3.utils.AdrenoGpuInfo?>(null) }
+        LaunchedEffect(Unit) {
+            gpuInfo = withContext(Dispatchers.IO) { AdrenoGpuDetector.detect() }
+        }
+        val vendorChip = remember(gpuInfo) {
+            gpuInfo?.let { systemVendorChip(it) } ?: "SYSTEM"
+        }
+        val vendorLogo = remember(gpuInfo) {
+            gpuInfo?.let { vendorLogoRes(it) } ?: R.drawable.hw_gpu_fallback
+        }
+        DriverStickFocusNav()
+        val firstCardKey = drivers.entries.firstOrNull()?.key?.path
+        LazyVerticalGrid(
+            columns = GridCells.Adaptive(360.dp),
+            modifier = Modifier.fillMaxSize(),
+            horizontalArrangement = Arrangement.spacedBy(12.dp),
+            verticalArrangement = Arrangement.spacedBy(8.dp),
+        ) {
             items(drivers.entries.toList(), key = { it.key.path }) { (file, metadata) ->
                 val isSystem = metadata.name == "Default"
                 val isSelected = metadata.label == selectedDriver || (isSystem && selectedDriver == "Default")
                 val canDelete = metadata.name != "Default" && !metadata.isBundled
+                val canSelect = isSystem || RPCSX.instance.supportsCustomDriverLoading()
+                val focusRequester = remember { FocusRequester() }
+                var cardFocused by remember { mutableStateOf(false) }
+                fun selectDriverAction(): Boolean {
+                    if (!canSelect) {
+                        AlertDialogQueue.showDialog(
+                            context.getString(R.string.custom_driver_not_supported),
+                            context.getString(R.string.custom_driver_not_supported_description)
+                        )
+                        return false
+                    }
+                    val ok = GpuDriverSelection.selectDriver(
+                        context = context,
+                        metadata = metadata,
+                        driverDir = if (isSystem) null else file,
+                        nativeLibraryDir = RPCSX.nativeLibDirectory,
+                        forceSysmem = false
+                    )
+                    if (!ok) {
+                        AlertDialogQueue.showDialog(
+                            context.getString(R.string.error),
+                            context.getString(R.string.failed_to_load_selected_driver)
+                        )
+                    } else {
+                        selectedDriver = if (isSystem) "Default" else metadata.label
+                    }
+                    return ok
+                }
+                if (file.path == firstCardKey) {
+                    LaunchedEffect(focusRequester) {
+                        kotlinx.coroutines.delay(300)
+                        runCatching { focusRequester.requestFocus() }
+                    }
+                }
                 Card(
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(vertical = 6.dp)
-                        .clickable {
-                            val ok = GpuDriverSelection.selectDriver(
-                                context = context,
-                                metadata = metadata,
-                                driverDir = if (isSystem) null else file,
-                                nativeLibraryDir = RPCSX.nativeLibDirectory,
-                                forceSysmem = false
-                            )
-                            if (!ok) {
-                                AlertDialogQueue.showDialog(
-                                    context.getString(R.string.error),
-                                    context.getString(R.string.failed_to_load_selected_driver)
-                                )
-                            } else {
-                                selectedDriver = if (isSystem) "Default" else metadata.label
-                            }
-                        },
+                        .onFocusChanged { cardFocused = it.isFocused }
+                        .focusRequester(focusRequester)
+                        .focusable()
+                        .clickable { selectDriverAction() }
+                        .gamepadActivate { selectDriverAction() },
+                    border = if (cardFocused) BorderStroke(2.dp, RPCSXColors.primary) else null,
                     colors = CardDefaults.cardColors(
                         containerColor = if (isSelected) MaterialTheme.colorScheme.primaryContainer else MaterialTheme.colorScheme.surfaceVariant
                     ),
                     shape = RoundedCornerShape(12.dp),
                     elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
                 ) {
-                    Column(modifier = Modifier.padding(14.dp)) {
+                    Column(modifier = Modifier.padding(14.dp).heightIn(min = 160.dp)) {
+                        DriverBrandRow(metadata = metadata, systemVendor = vendorChip, vendorLogo = vendorLogo)
+                        Spacer(modifier = Modifier.height(8.dp))
                         Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.fillMaxWidth()) {
                             Column(modifier = Modifier.weight(1f)) {
                                 Text(
@@ -269,37 +290,28 @@ fun GpuDriversScreen(
                                         color = MaterialTheme.colorScheme.primary
                                     )
                                 }
+                                if (isMesaDriver(metadata)) {
+                                    Text(
+                                        text = "Mesa open-source Vulkan driver",
+                                        style = MaterialTheme.typography.labelSmall,
+                                        color = MaterialTheme.colorScheme.secondary
+                                    )
+                                }
                             }
                             Spacer(modifier = Modifier.width(8.dp))
                             if (isSelected) {
-                                Button(
-                                    onClick = {},
-                                    enabled = false,
-                                    colors = ButtonDefaults.buttonColors(
-                                        disabledContainerColor = MaterialTheme.colorScheme.primary,
-                                        disabledContentColor = MaterialTheme.colorScheme.onPrimary
+                                Surface(
+                                    shape = RoundedCornerShape(10.dp),
+                                    color = MaterialTheme.colorScheme.primary,
+                                ) {
+                                    Text(
+                                        "SELECTED",
+                                        fontSize = 12.sp,
+                                        fontWeight = FontWeight.Bold,
+                                        color = MaterialTheme.colorScheme.onPrimary,
+                                        modifier = Modifier.padding(horizontal = 14.dp, vertical = 10.dp),
                                     )
-                                ) { Text("SELECTED", fontSize = 12.sp) }
-                            } else {
-                                Button(
-                                    onClick = {
-                                        val ok = GpuDriverSelection.selectDriver(
-                                            context = context,
-                                            metadata = metadata,
-                                            driverDir = if (isSystem) null else file,
-                                            nativeLibraryDir = RPCSX.nativeLibDirectory,
-                                            forceSysmem = false
-                                        )
-                                        if (!ok) {
-                                            AlertDialogQueue.showDialog(
-                                                context.getString(R.string.error),
-                                                context.getString(R.string.failed_to_load_selected_driver)
-                                            )
-                                        } else {
-                                            selectedDriver = if (isSystem) "Default" else metadata.label
-                                        }
-                                    }
-                                ) { Text("SELECT", fontSize = 12.sp) }
+                                }
                             }
                         }
                         if (canDelete) {
@@ -312,29 +324,12 @@ fun GpuDriversScreen(
                     }
                 }
             }
-            item {
-                Spacer(modifier = Modifier.height(12.dp))
-                Button(
-                    onClick = { driverPickerLauncher.launch("application/zip") },
-                    modifier = Modifier.fillMaxWidth().height(52.dp),
-                    enabled = !isInstalling
-                ) {
-                    if (isInstalling) {
-                        CircularProgressIndicator(modifier = Modifier.size(18.dp), strokeWidth = 2.dp)
-                        Spacer(modifier = Modifier.width(8.dp))
-                        Text(stringResource(R.string.installing))
-                    } else {
-                        Icon(painter = painterResource(id = R.drawable.ic_add), contentDescription = null)
-                        Spacer(modifier = Modifier.width(8.dp))
-                        Text("IMPORT DRIVER")
-                    }
+            item(span = { GridItemSpan(maxLineSpan) }) {
+                Column {
+                    Spacer(modifier = Modifier.height(16.dp))
+                    ComingSoonDriversSection()
+                    Spacer(modifier = Modifier.height(12.dp))
                 }
-                Spacer(modifier = Modifier.height(8.dp))
-                Text(
-                    "Import a Samba ZIP driver package from storage. Standard builds only.",
-                    style = MaterialTheme.typography.labelSmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                )
             }
         }
     }
@@ -490,44 +485,22 @@ fun GpuDriversScreen(
         showHints = !isInSplitPane,
         hints = listOf(
             R.drawable.cross to "Select",
-            R.drawable.l1 to "Tabs",
             R.drawable.circle to "Back"
         ),
-        onGamepadKey = { keyCode ->
-            when (keyCode) {
-                KeyEvent.KEYCODE_BUTTON_L1 -> {
-                    selectedTab = DriverTab.Installed
-                    true
-                }
-                KeyEvent.KEYCODE_BUTTON_R1 -> {
-                    selectedTab = DriverTab.Browse
-                    true
-                }
-                else -> false
-            }
-        },
-        actions = {
-            IconButton(onClick = { driverPickerLauncher.launch("application/zip") }) {
-                Icon(
-                    painter = painterResource(id = R.drawable.ic_add),
-                    contentDescription = "Import Driver",
-                    tint = RPCSXColors.primary,
-                )
+        onGamepadKey = { code ->
+            if (code == KeyEvent.KEYCODE_BUTTON_B) {
+                navigateBack()
+                true
+            } else {
+                false
             }
         },
     ) {
         Column(modifier = Modifier.fillMaxSize().padding(horizontal = 16.dp)) {
             SnackbarHost(hostState = snackbarHostState)
-            TabRow(selectedTabIndex = selectedTab.ordinal) {
-                Tab(selected = selectedTab == DriverTab.Installed, onClick = { selectedTab = DriverTab.Installed }, text = { Text("Installed") })
-                Tab(selected = selectedTab == DriverTab.Browse, onClick = { selectedTab = DriverTab.Browse }, text = { Text("Browse Drivers") })
-            }
             Spacer(modifier = Modifier.height(12.dp))
             Box(modifier = Modifier.weight(1f).fillMaxWidth()) {
-                when (selectedTab) {
-                    DriverTab.Installed -> InstalledTabContent()
-                    DriverTab.Browse -> BrowseTabContent()
-                }
+                InstalledTabContent()
             }
         }
     }

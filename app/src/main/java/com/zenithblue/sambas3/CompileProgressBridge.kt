@@ -22,6 +22,7 @@ object CompileProgressBridge {
         val titleId: String? = null,
         val shaderActive: Boolean = false,
         val shaderMsg: String? = null,
+        val shaderPercent: Int = 0,
         val fileDone: Int = 0,
         val fileTotal: Int = 0,
         val moduleDone: Int = 0,
@@ -199,12 +200,10 @@ object CompileProgressBridge {
         try {
             if (!RPCSX.instance.supportsCompileProgressEvents()) {
                 Log.w(TAG, "Old runtime core lacks compile progress events — degrading to HUD only")
-                registered = true
                 return
             }
         } catch (e: Exception) {
             Log.w(TAG, "supportsCompileProgressEvents check failed: ${e.message}")
-            registered = true
             return
         }
 
@@ -469,12 +468,18 @@ object CompileProgressBridge {
                 latestRuntimeEvent = ev
                 _state.value = cur.copy(
                     shaderActive = true,
-                    shaderMsg = ev.message ?: "Compiling shaders…"
+                    shaderMsg = ev.message ?: "Compiling shaders…",
+                    shaderPercent = ev.value.toInt().coerceIn(0, 100),
                 )
                 requestMonitorStart(appCtx, ev)
             }
             RPCSX.COMPILE_PHASE_PROGRESS -> {
-                // For now shader has no progress ETA — ignore, keep indeterminate
+                if (!shaderJobIds.contains(ev.jobId)) return
+                _state.value = cur.copy(
+                    shaderActive = true,
+                    shaderMsg = ev.message ?: cur.shaderMsg,
+                    shaderPercent = ev.value.toInt().coerceIn(0, 100),
+                )
             }
             RPCSX.COMPILE_PHASE_COMPLETED, RPCSX.COMPILE_PHASE_FAILED, RPCSX.COMPILE_PHASE_CANCELED -> {
                 // jobId 0 means cancel all (from ProgramStateCache.clear)
@@ -492,7 +497,8 @@ object CompileProgressBridge {
                 }
                 _state.value = cur.copy(
                     shaderActive = shaderJobIds.isNotEmpty(),
-                    shaderMsg = if (shaderJobIds.isNotEmpty()) cur.shaderMsg ?: "Compiling shaders…" else null
+                    shaderMsg = if (shaderJobIds.isNotEmpty()) cur.shaderMsg ?: "Compiling shaders…" else null,
+                    shaderPercent = if (shaderJobIds.isNotEmpty()) cur.shaderPercent else 0,
                 )
                 if (shaderJobIds.isEmpty() && ppuJobId == null) {
                     latestRuntimeEvent = null
@@ -587,9 +593,9 @@ object CompileProgressBridge {
             maxOf(cur.ppuPercent, computed, incoming)
         }
         val msg = if (done > cur.moduleDone || total > cur.moduleTotal) {
-            message
+            message?.takeIf { it.isNotBlank() } ?: cur.ppuMsg
         } else {
-            cur.ppuMsg ?: message
+            cur.ppuMsg ?: message?.takeIf { it.isNotBlank() }
         }
         return FlooredProgress(done, total, pct, msg)
     }

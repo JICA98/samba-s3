@@ -16,6 +16,7 @@ import kotlinx.coroutines.cancel
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
+import com.zenithblue.sambas3.ppu.PpuRemainingTime
 
 class CompilationMonitorService : Service() {
 
@@ -183,8 +184,9 @@ class CompilationMonitorService : Service() {
             compilingShaders = getString(R.string.compiling_shaders_title),
             preparingRuntimePpu = "Preparing Runtime PPU",
         )
+        val titled = state.titleId?.takeIf { it.isNotBlank() }?.let { "$title · $it" } ?: title
         val builder = NotificationCompat.Builder(this, NotificationChannels.RPCSX_PROGRESS)
-            .setContentTitle(title)
+            .setContentTitle(titled)
             .setSmallIcon(R.mipmap.ic_sambas3_foreground)
             .setCategory(NotificationCompat.CATEGORY_PROGRESS)
             .setOngoing(true)
@@ -200,7 +202,10 @@ class CompilationMonitorService : Service() {
             builder.setProgress(state.ppuMax, state.ppuPercent, false)
             builder.setContentText(ppuLine)
         } else if (state.ppuActive) {
-            val msg = state.ppuMsg ?: "Compiling PPU modules…"
+            val msg = PpuRemainingTime.progressLine(
+                state.ppuMsg ?: "Compiling PPU modules…",
+                state.remainingLabel,
+            )
             builder.setContentText(msg)
             builder.setStyle(NotificationCompat.BigTextStyle().bigText(msg))
             if (state.ppuMax > 0) builder.setProgress(state.ppuMax, state.ppuPercent, false)
@@ -208,7 +213,8 @@ class CompilationMonitorService : Service() {
         } else if (state.shaderActive) {
             val msg = state.shaderMsg ?: getString(R.string.compiling_shaders_desc)
             builder.setContentText(msg)
-            builder.setProgress(0, 0, true)
+            if (state.shaderPercent > 0) builder.setProgress(100, state.shaderPercent, false)
+            else builder.setProgress(0, 0, true)
         }
 
         return builder.build()

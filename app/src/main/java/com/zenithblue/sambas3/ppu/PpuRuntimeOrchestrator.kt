@@ -247,10 +247,10 @@ object PpuRuntimeOrchestrator {
                             appContext,
                             safeTitle,
                             logicalJobId,
-                            completedModules,
-                            totalModules,
-                            if (totalModules > 0) completedModules * 100 / totalModules else 0,
-                            message ?: "Compiling Runtime PPU… $completedModules validated",
+                            maxOf(completedModules, cbCompleted),
+                            maxOf(totalModules, cbTotal),
+                            if (maxOf(totalModules, cbTotal) > 0) maxOf(completedModules, cbCompleted) * 100 / maxOf(totalModules, cbTotal) else 0,
+                            message.takeIf { cbTotal <= 0 },
                             active = true,
                         )
                     }

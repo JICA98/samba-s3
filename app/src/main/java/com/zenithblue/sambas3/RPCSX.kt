@@ -117,6 +117,7 @@ class RPCSX {
     external fun patchEngineVersion(): String
     external fun patchesList(): String
     external fun patchSetEnabled(hash: String, description: String, enabled: Boolean): Boolean
+    external fun patchSetEnabledForTitle(hash: String, description: String, titleId: String, enabled: Boolean): Boolean
     // Per-title PPU manifest key (cache_abi+llvm_cpu+title_id+firmware+patches) for fingerprint.
     // Native now supports _rpcsx_getPpuManifestKeyForTitle(titleId) with global fallback.
     external fun getPpuManifestKey(titleId: String): String?
@@ -178,6 +179,8 @@ class RPCSX {
     external fun getCurrentTrophies(): String
     /** Reads the installed RPCS3 trophy set for a stopped title without booting it. */
     external fun getTrophiesForTitle(titleId: String): String
+    /** Installs TROPHY.TRP from a Direct ISO fd into the HDD trophy dir, then reads the set. */
+    external fun getTrophiesForTitleFromIso(titleId: String, isoFd: Int): String
     external fun getFriends(): String
     external fun friendAction(action: String, username: String): Boolean
     external fun beginInGameSettingsSession(): Boolean

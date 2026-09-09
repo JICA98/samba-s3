@@ -146,6 +146,7 @@ class RPCSXActivity : ComponentActivity(), EmulationHost {
     private lateinit var thumbnailStore: SavestateThumbnailStore
     private val bootMutex = Any()
     private val terminalFailure = java.util.concurrent.atomic.AtomicBoolean(false)
+    @Volatile private var freshBootFrameValidated = false
     private val mapperRegistry by lazy { DeviceInputMapperRegistry() }
 
     override val currentSurfaceGeneration: Long
@@ -344,7 +345,7 @@ class RPCSXActivity : ComponentActivity(), EmulationHost {
                             operationUiState = SavestateOperationUiState.Saving(effect.slot, "Capturing emulator state...")
                             thumbnailStore.begin(requestId, effect.slot, effect.savestatePath)
                             EmulationSessionJournal.update(this@RPCSXActivity, EmulationSessionState.SAVING)
-                            showTransitionOverlay("Saving Slot ${effect.slot}...")
+                            showTransitionOverlay("Saving Slot ${effect.slot}", "Capturing current frame", 10)
                             captureTransitionFrame(requestId, effect.slot)
                             neutralizeForwardedPad()
                             Log.i("S3SAVE", "transition begin requestId=$requestId slot=${effect.slot} original=$originalGamePath")
@@ -353,6 +354,7 @@ class RPCSXActivity : ComponentActivity(), EmulationHost {
 
                     is com.zenithblue.sambas3.ui.ingame.InGameMenuHostEffect.SavestateRequestAccepted -> {
                         val pending = PendingSavestateRecoveryStore.read(this@RPCSXActivity)
+                        updateTransitionProgress("Saving Slot ${effect.slot}", "Writing emulator state", 35)
                         Log.i(
                             "S3SAVE",
                             "native-accepted requestId=${pending?.requestId ?: 0L} slot=${effect.slot} " +
@@ -394,7 +396,7 @@ class RPCSXActivity : ComponentActivity(), EmulationHost {
                         EmulationSessionJournal.update(this@RPCSXActivity, EmulationSessionState.LOADING)
                         neutralizeForwardedPad()
                         binding.padOverlay.setMenuMode(true)
-                        showTransitionOverlay("Loading Slot ${effect.slot}...")
+                        showTransitionOverlay("Loading Slot ${effect.slot}", "Validating saved state", 15)
                         Log.i("S3SAVE", "manual-load transition begin requestId=${effect.requestId} slot=${effect.slot} path=${effect.savestatePath}")
                     }
 
@@ -410,6 +412,7 @@ class RPCSXActivity : ComponentActivity(), EmulationHost {
                             Log.e("S3SAVE", "manual-load marker missing requestId=${effect.requestId} slot=${effect.slot}")
                         } else {
                             operationUiState = SavestateOperationUiState.Loading(effect.slot, null, "Restoring saved state...")
+                            updateTransitionProgress("Loading Slot ${effect.slot}", "Restoring emulator state", 45)
                             if (runCatching { RPCSX.instance.hasLoadSaveStateTerminalExport() }.getOrDefault(false)) {
                                 Log.i("S3SAVE", "manual-load accepted requestId=${effect.requestId} slot=${effect.slot} awaiting=native-terminal")
                                 // The native terminal success is emitted only after the
@@ -518,17 +521,31 @@ class RPCSXActivity : ComponentActivity(), EmulationHost {
             Log.w("S3LOG", "log session begin failed: ${e.message}")
         }
         logSessionSnapshot("activity-created")
+        configureLoadingArtwork(gameInfo?.iconPath?.value)
+        CompileProgressBridge.registerOnce(this)
         if (bootMode == EmulatorBootMode.FreshGame) {
-            configureLoadingArtwork(gameInfo?.iconPath?.value)
             showTransitionOverlay("Preparing game…")
             interactionLock.lock(EmulatorInteractionLock.BootTransition)
             CompileProgressBridge.state.onEach { progress ->
-                if (binding.transitionOverlay.visibility == View.VISIBLE && !recoveryTransitionActive) {
-                    binding.transitionLabel.text = when {
-                        progress.ppuActive -> progress.ppuMsg ?: "Preparing PPU cache…"
-                        progress.shaderActive -> progress.shaderMsg ?: "Preparing shaders…"
-                        else -> "Preparing game…"
-                    }
+                if (recoveryTransitionActive) return@onEach
+                if (progress.ppuActive) {
+                    val messages = progress.ppuMsg.orEmpty().lines()
+                    if (binding.transitionOverlay.visibility != View.VISIBLE) showTransitionOverlay("Preparing game…")
+                    updateTransitionProgress(
+                        messages.firstOrNull()?.takeIf(String::isNotBlank) ?: "Preparing game",
+                        messages.drop(1).joinToString(" ").ifBlank { "Processing game modules" },
+                        progress.ppuPercent,
+                    )
+                } else if (progress.shaderActive) {
+                    if (binding.transitionOverlay.visibility != View.VISIBLE) showTransitionOverlay("Preparing shaders…")
+                    interactionLock.lock(EmulatorInteractionLock.BootTransition)
+                    binding.transitionLabel.text = progress.shaderMsg ?: "Preparing shaders…"
+                    binding.transitionProgress.isIndeterminate = progress.shaderPercent <= 0
+                    binding.transitionProgress.progress = progress.shaderPercent
+                } else if (freshBootFrameValidated && binding.transitionOverlay.visibility == View.VISIBLE) {
+                    binding.transitionOverlay.visibility = View.GONE
+                    interactionLock.unlock()
+                    inputGate.waitForNeutral()
                 }
             }.launchIn(lifecycleScope)
         }
@@ -537,9 +554,14 @@ class RPCSXActivity : ComponentActivity(), EmulationHost {
                 transitionController.beginRecoveryBoot(it.requestId, it.slot, it.savestatePath)
             }
             recoveryTransitionActive = true
-            showTransitionOverlay("Restoring...")
+            val loadingSlot = bootRequest.slot ?: pendingRecovery?.slot ?: 0
+            showTransitionOverlay("Loading Slot $loadingSlot", "Opening saved state", 15)
             interactionLock.lock(EmulatorInteractionLock.BootTransition)
-            operationUiState = SavestateOperationUiState.Loading(pendingRecovery?.slot ?: 0, null, "Restoring saved state...")
+            operationUiState = SavestateOperationUiState.Loading(
+                loadingSlot,
+                bootRequest.savestatePath?.let { SavestateThumbnailStore.previewPathForPath(it).path },
+                "Restoring saved state...",
+            )
         }
 
         // Frontend listener registered only after binding + content are ready (§16).
@@ -747,8 +769,8 @@ class RPCSXActivity : ComponentActivity(), EmulationHost {
 
     /**
      * Fresh-game boot must prove a real Surface producer frame before Runtime
-     * readiness is persisted. Runtime PPU (if any) must finish first; the
-     * first-frame window does not start while compile is still active.
+     * readiness is persisted. Shader/PPU work still owns the overlay; first-frame
+     * probes start only after that work is idle.
      */
     private fun confirmFreshBootFrameAndValidate() {
         bootThread?.interrupt()
@@ -757,9 +779,7 @@ class RPCSXActivity : ComponentActivity(), EmulationHost {
                 ?: originalGamePath.substringAfterLast('/')
             var state = FreshBootFrameValidator.bootRequested()
             val surfaceGen = surfaceLeaseManager.currentGeneration
-            val runtimeActiveAtBoot = runCatching {
-                CompileProgressBridge.state.value.hasBlockingCompileWork()
-            }.getOrDefault(false)
+            val runtimeActiveAtBoot = runCatching { CompileProgressBridge.state.value.isActive }.getOrDefault(false)
             Log.i(
                 "S3BOOTFRAME",
                 "event=boot_return title=$titleId result=NoErrors " +
@@ -772,16 +792,15 @@ class RPCSXActivity : ComponentActivity(), EmulationHost {
                 surfaceGeneration = surfaceGen,
                 runtimePpuActive = runtimeActiveAtBoot,
             )
-            // Wait for Runtime PPU terminal if compile is (or becomes) active.
+
             val runtimeWaitDeadline = System.currentTimeMillis() + RUNTIME_PPU_WAIT_TIMEOUT_MS
             while (
                 state.phase == FreshBootFramePhase.WaitingForRuntimePpu &&
                 System.currentTimeMillis() < runtimeWaitDeadline &&
                 !Thread.interrupted()
             ) {
-                val active = runCatching { CompileProgressBridge.state.value.hasBlockingCompileWork() }.getOrDefault(false)
+                val active = runCatching { CompileProgressBridge.state.value.isActive }.getOrDefault(false)
                 if (!active && state.runtimePpuSeen) {
-                    Log.i("S3BOOTFRAME", "event=runtime_ppu_terminal title=$titleId")
                     state = FreshBootFrameValidator.onRuntimePpuTerminal(
                         state,
                         surfaceLeaseManager.currentGeneration,
@@ -789,7 +808,6 @@ class RPCSXActivity : ComponentActivity(), EmulationHost {
                     break
                 }
                 if (active && !state.runtimePpuSeen) {
-                    Log.i("S3BOOTFRAME", "event=runtime_ppu_begin title=$titleId")
                     state = FreshBootFrameValidator.onRuntimePpuBegin(
                         state,
                         surfaceLeaseManager.currentGeneration,
@@ -801,20 +819,15 @@ class RPCSXActivity : ComponentActivity(), EmulationHost {
                     return@thread
                 }
             }
-            // If Runtime PPU never appeared, move to first-frame wait.
             if (state.phase == FreshBootFramePhase.WaitingForRuntimePpu) {
-                val stillActive = runCatching { CompileProgressBridge.state.value.hasBlockingCompileWork() }.getOrDefault(false)
+                val stillActive = runCatching { CompileProgressBridge.state.value.isActive }.getOrDefault(false)
                 if (!stillActive) {
                     state = FreshBootFrameValidator.onRuntimePpuTerminal(
                         state,
                         surfaceLeaseManager.currentGeneration,
                     )
-                } else {
-                    Log.e("S3BOOTFRAME", "event=runtime_ppu_wait_timeout title=$titleId")
-                    state = FreshBootFrameValidator.onTimeout(state.copy(phase = FreshBootFramePhase.WaitingForFirstFrame), "runtime-ppu-timeout")
                 }
             }
-            // Also transition from BootReturned if we skipped runtime wait.
             if (state.phase == FreshBootFramePhase.BootReturned) {
                 state = state.copy(phase = FreshBootFramePhase.WaitingForFirstFrame)
             }
@@ -826,22 +839,14 @@ class RPCSXActivity : ComponentActivity(), EmulationHost {
                 System.currentTimeMillis() < frameDeadline &&
                 !Thread.interrupted()
             ) {
-                // If Runtime PPU or SPU/Shader starts late, pause the frame window.
-                val runtimeActive = runCatching {
-                    val st = CompileProgressBridge.state.value
-                    st.hasBlockingCompileWork()
-                }.getOrDefault(false)
+                val runtimeActive = runCatching { CompileProgressBridge.state.value.isActive }.getOrDefault(false)
                 if (runtimeActive) {
-                    Log.i("S3BOOTFRAME", "event=runtime_ppu_begin title=$titleId late=1")
                     state = FreshBootFrameValidator.onRuntimePpuBegin(
                         state,
                         surfaceLeaseManager.currentGeneration,
                     )
                     while (
-                        runCatching {
-                            val st = CompileProgressBridge.state.value
-                            st.hasBlockingCompileWork()
-                        }.getOrDefault(false) &&
+                        runCatching { CompileProgressBridge.state.value.isActive }.getOrDefault(false) &&
                         System.currentTimeMillis() < runtimeWaitDeadline &&
                         !Thread.interrupted()
                     ) {
@@ -886,6 +891,7 @@ class RPCSXActivity : ComponentActivity(), EmulationHost {
             }
 
             if (state.isValidated) {
+                freshBootFrameValidated = true
                 Log.i(
                     "S3BOOTFRAME",
                     "event=frame_validated samples=${state.stableSamples} surface_gen=${state.surfaceGeneration} title=$titleId"
@@ -895,7 +901,7 @@ class RPCSXActivity : ComponentActivity(), EmulationHost {
                 }
                 EmulationSessionJournal.update(this@RPCSXActivity, EmulationSessionState.RUNNING)
                 runOnUiThread {
-                    if (!isFinishing && !recoveryTransitionActive) {
+                    if (!isFinishing && !recoveryTransitionActive && !CompileProgressBridge.state.value.isActive) {
                         binding.transitionOverlay.visibility = View.GONE
                         interactionLock.unlock()
                         inputGate.waitForNeutral()
@@ -1189,13 +1195,14 @@ class RPCSXActivity : ComponentActivity(), EmulationHost {
         }
         thumbnailStore.commit(record.requestId, record.slot, path)
         operationUiState = SavestateOperationUiState.Saving(record.slot, "Finalizing Slot ${record.slot}...")
+        updateTransitionProgress("Saving Slot ${record.slot}", "Save written; preparing restore", 65)
         EmulationSessionJournal.update(this, EmulationSessionState.LOADING)
         if (!transitionController.surfaceResetStarted()) {
             Log.w("S3SURFACE", "surface reset rejected requestId=${record.requestId}")
             return
         }
         operationUiState = SavestateOperationUiState.Loading(record.slot, SavestateThumbnailStore.previewPathForPath(path).path, "Restoring saved state...")
-        binding.transitionLabel.text = "Restoring Slot ${record.slot}..."
+        updateTransitionProgress("Loading Slot ${record.slot}", "Recreating game surface", 75)
         Log.i("S3RENDER", "old surface replacement requested requestId=${record.requestId} slot=${record.slot} path=$path")
         runCatching {
             surfaceLeaseManager.replace {
@@ -1225,6 +1232,7 @@ class RPCSXActivity : ComponentActivity(), EmulationHost {
             return
         }
         bootThread?.interrupt()
+        runOnUiThread { updateTransitionProgress("Loading Slot ${record.slot}", "Restoring emulator state", 85) }
         bootThread = thread(name = "S3 Saved-state Boot") {
             val restoreOriginalPath = activeRestoreOriginalGamePath()
             if (restoreOriginalPath == null) {
@@ -1265,6 +1273,10 @@ class RPCSXActivity : ComponentActivity(), EmulationHost {
 
     private fun confirmRecoveryFrameAndClear() {
         thread(name = "S3 Saved-state Frame Confirm") {
+            runOnUiThread {
+                val slot = PendingSavestateRecoveryStore.read(this@RPCSXActivity)?.slot ?: 0
+                updateTransitionProgress("Loading Slot $slot", "Verifying restored game frame", 95)
+            }
             var stable = 0
             val expectedGeneration = surfaceLeaseManager.currentGeneration
             val deadline = System.currentTimeMillis() + FIRST_FRAME_TIMEOUT_MS
@@ -1335,6 +1347,7 @@ class RPCSXActivity : ComponentActivity(), EmulationHost {
         allowFrameCompletion: Boolean,
     ) {
         bootThread?.interrupt()
+        runOnUiThread { updateTransitionProgress("Loading Slot ${record.slot}", "Verifying restored game frame", 95) }
         bootThread = thread(name = "S3 Manual Savestate Confirm") {
             val expectedGeneration = surfaceLeaseManager.currentGeneration
             // Large titles can legitimately spend close to a minute tearing
@@ -1431,12 +1444,26 @@ class RPCSXActivity : ComponentActivity(), EmulationHost {
 
     private fun showTransitionOverlay(label: String) {
         binding.transitionLabel.text = label
+        binding.transitionDetail.visibility = View.GONE
+        binding.transitionProgress.isIndeterminate = true
         binding.transitionOverlay.alpha = 1f
         binding.transitionOverlay.visibility = View.VISIBLE
     }
 
-    private fun CompileProgressBridge.CompileState.hasBlockingCompileWork(): Boolean =
-        shaderActive || (ppuActive && !(ppuPercent >= 100 && moduleTotal > 0 && moduleDone >= moduleTotal))
+    private fun showTransitionOverlay(label: String, detail: String, progress: Int) {
+        showTransitionOverlay(label)
+        updateTransitionProgress(label, detail, progress)
+    }
+
+    private fun updateTransitionProgress(label: String, detail: String, progress: Int) {
+        val percent = progress.coerceIn(0, 100)
+        binding.transitionLabel.text = "$label - $percent%"
+        binding.transitionDetail.text = detail
+        binding.transitionDetail.visibility = View.VISIBLE
+        binding.transitionProgress.isIndeterminate = false
+        binding.transitionProgress.max = 100
+        binding.transitionProgress.progress = percent
+    }
 
     private fun configureLoadingArtwork(iconPath: String?) {
         fun setPreview(view: android.widget.ImageView, preview: GamePreviewModel) {

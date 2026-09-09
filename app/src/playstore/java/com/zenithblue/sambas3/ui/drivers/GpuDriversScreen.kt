@@ -2,16 +2,21 @@ package com.zenithblue.sambas3.ui.drivers
 
 import android.content.Context
 import android.util.Log
+import android.view.KeyEvent
 import android.widget.Toast
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.grid.GridCells
+import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
+import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Card
@@ -30,14 +35,26 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.focusRequester
+import androidx.compose.ui.focus.onFocusChanged
+import androidx.compose.foundation.focusable
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.zenithblue.sambas3.R
 import com.zenithblue.sambas3.RPCSX
+import com.zenithblue.sambas3.RPCSXColors
 import com.zenithblue.sambas3.ui.common.SambaScreenScaffold
 import com.zenithblue.sambas3.dialogs.AlertDialogQueue
+import com.zenithblue.sambas3.ui.drivers.ComingSoonDriversSection
+import com.zenithblue.sambas3.ui.drivers.DriverBrandRow
+import com.zenithblue.sambas3.ui.drivers.DriverStickFocusNav
+import com.zenithblue.sambas3.ui.drivers.gamepadActivate
+import com.zenithblue.sambas3.ui.drivers.isMesaDriver
+import com.zenithblue.sambas3.ui.drivers.systemVendorChip
+import com.zenithblue.sambas3.ui.drivers.vendorLogoRes
 import com.zenithblue.sambas3.utils.AdrenoGpuDetector
 import com.zenithblue.sambas3.utils.BundledDriverSyncResult
 import com.zenithblue.sambas3.utils.BundledDriverVisibility
@@ -145,6 +162,18 @@ fun GpuDriversScreen(
 
     @Composable
     fun DriversContent(modifier: Modifier = Modifier) {
+        var gpuInfo by remember { mutableStateOf<com.zenithblue.sambas3.utils.AdrenoGpuInfo?>(null) }
+        LaunchedEffect(Unit) {
+            gpuInfo = withContext(Dispatchers.IO) { AdrenoGpuDetector.detect() }
+        }
+        val vendorChip = remember(gpuInfo) {
+            gpuInfo?.let { systemVendorChip(it) } ?: "SYSTEM"
+        }
+        val vendorLogo = remember(gpuInfo) {
+            gpuInfo?.let { vendorLogoRes(it) } ?: R.drawable.hw_gpu_fallback
+        }
+        DriverStickFocusNav()
+        val firstCardKey = drivers.entries.firstOrNull()?.key?.path
         Column(
             modifier = modifier
                 .fillMaxSize()
@@ -167,43 +196,75 @@ fun GpuDriversScreen(
                 modifier = Modifier.padding(bottom = 16.dp),
             )
 
-            LazyColumn(modifier = Modifier.fillMaxSize()) {
+            LazyVerticalGrid(
+                columns = GridCells.Adaptive(300.dp),
+                modifier = Modifier.weight(1f).fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(12.dp),
+                verticalArrangement = Arrangement.spacedBy(12.dp),
+            ) {
                 items(drivers.entries.toList(), key = { it.key.path }) { (file, metadata) ->
                     val isSystem = metadata.name == "Default"
+                    val selected = metadata.label == selectedDriver || (isSystem && selectedDriver == "Default")
+                    val focusRequester = remember { FocusRequester() }
+                    var cardFocused by remember { mutableStateOf(false) }
+                    fun selectDriverAction() {
+                        if (!RPCSX.instance.supportsCustomDriverLoading() && !isSystem) {
+                            AlertDialogQueue.showDialog(
+                                context.getString(R.string.custom_driver_not_supported),
+                                context.getString(R.string.custom_driver_not_supported_description),
+                            )
+                            return
+                        }
+                        if (metadata.experimental) {
+                            pendingExperimental = file to metadata
+                        } else {
+                            applySelection(context, file, metadata) { ok, label ->
+                                if (ok) selectedDriver = label
+                            }
+                        }
+                    }
+                    if (file.path == firstCardKey) {
+                        LaunchedEffect(focusRequester) {
+                            kotlinx.coroutines.delay(300)
+                            runCatching { focusRequester.requestFocus() }
+                        }
+                    }
                     Card(
                         modifier = Modifier
                             .fillMaxWidth()
                             .padding(vertical = 4.dp)
-                            .clickable {
-                                if (!RPCSX.instance.supportsCustomDriverLoading() && !isSystem) {
-                                    AlertDialogQueue.showDialog(
-                                        context.getString(R.string.custom_driver_not_supported),
-                                        context.getString(R.string.custom_driver_not_supported_description),
-                                    )
-                                    return@clickable
-                                }
-                                if (metadata.experimental) {
-                                    pendingExperimental = file to metadata
-                                } else {
-                                    applySelection(context, file, metadata) { ok, label ->
-                                        if (ok) selectedDriver = label
-                                    }
-                                }
+                            .onFocusChanged { cardFocused = it.isFocused }
+                            .focusRequester(focusRequester)
+                            .focusable()
+                            .clickable { selectDriverAction() }
+                            .gamepadActivate { selectDriverAction() },
+                        border = BorderStroke(
+                            if (selected || cardFocused) 2.dp else 1.dp,
+                            when {
+                                cardFocused -> RPCSXColors.primary
+                                selected -> RPCSXColors.primary
+                                else -> RPCSXColors.outlineVariant
                             },
+                        ),
                         colors = CardDefaults.cardColors(
-                            containerColor = if (
-                                metadata.label == selectedDriver ||
-                                (isSystem && selectedDriver == "Default")
-                            ) {
-                                MaterialTheme.colorScheme.primaryContainer
+                            containerColor = if (selected || cardFocused) {
+                                RPCSXColors.surfaceElevated
                             } else {
-                                MaterialTheme.colorScheme.surfaceVariant
-                            }
+                                RPCSXColors.surface
+                            },
+                            contentColor = RPCSXColors.textPrimary,
                         ),
                         shape = RoundedCornerShape(8.dp),
                         elevation = CardDefaults.elevatedCardElevation(defaultElevation = 4.dp),
                     ) {
-                        Column(modifier = Modifier.padding(16.dp)) {
+                        Column(modifier = Modifier.padding(16.dp).heightIn(min = 160.dp)) {
+                            DriverBrandRow(metadata = metadata, systemVendor = vendorChip, vendorLogo = vendorLogo)
+                            Spacer(modifier = Modifier.height(8.dp))
+                            Text(
+                                if (selected) "SELECTED" else "SELECT DRIVER",
+                                color = RPCSXColors.primary,
+                                style = MaterialTheme.typography.labelSmall,
+                            )
                             Text(
                                 text = metadata.uiTitle,
                                 style = MaterialTheme.typography.bodyLarge,
@@ -214,6 +275,13 @@ fun GpuDriversScreen(
                                     text = "Included with Samba S3",
                                     style = MaterialTheme.typography.labelMedium,
                                     color = MaterialTheme.colorScheme.primary,
+                                )
+                            }
+                            if (isMesaDriver(metadata)) {
+                                Text(
+                                    text = "Mesa open-source Vulkan driver",
+                                    style = MaterialTheme.typography.labelSmall,
+                                    color = MaterialTheme.colorScheme.secondary,
                                 )
                             }
                             if (metadata.role != null) {
@@ -238,6 +306,9 @@ fun GpuDriversScreen(
                     }
                 }
                 item { Spacer(modifier = Modifier.height(24.dp)) }
+                item(span = { androidx.compose.foundation.lazy.grid.GridItemSpan(maxLineSpan) }) {
+                    ComingSoonDriversSection()
+                }
             }
         }
     }
@@ -249,6 +320,14 @@ fun GpuDriversScreen(
             onBack = navigateBack,
             compact = true,
             showHints = false,
+            onGamepadKey = { code ->
+                if (code == KeyEvent.KEYCODE_BUTTON_B) {
+                    navigateBack()
+                    true
+                } else {
+                    false
+                }
+            },
         ) {
             DriversContent(modifier = Modifier.fillMaxSize())
         }
@@ -261,6 +340,14 @@ fun GpuDriversScreen(
                 R.drawable.cross to "Select",
                 R.drawable.circle to "Back"
             ),
+            onGamepadKey = { code ->
+                if (code == KeyEvent.KEYCODE_BUTTON_B) {
+                    navigateBack()
+                    true
+                } else {
+                    false
+                }
+            },
         ) {
             Column(modifier = Modifier.fillMaxSize()) {
                 SnackbarHost(hostState = snackbarHostState)

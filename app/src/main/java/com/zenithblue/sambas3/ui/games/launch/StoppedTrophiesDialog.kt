@@ -1,53 +1,54 @@
 package com.zenithblue.sambas3.ui.games.launch
 
+import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.BasicAlertDialog
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.window.DialogProperties
 import com.zenithblue.sambas3.RPCSXColors
 import com.zenithblue.sambas3.ui.achievements.AchievementsContent
-import com.zenithblue.sambas3.ui.components.DialogBackgroundBlur
 import com.zenithblue.sambas3.ui.ingame.TrophiesData
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun StoppedTrophiesDialog(data: TrophiesData?, loading: Boolean, onDismiss: () -> Unit) {
-    BasicAlertDialog(
-        onDismissRequest = onDismiss,
-        properties = DialogProperties(usePlatformDefaultWidth = false)
+fun StoppedTrophiesOverlay(data: TrophiesData?, loading: Boolean, onDismiss: () -> Unit) {
+    BackHandler(onBack = onDismiss)
+    Box(
+        Modifier
+            .fillMaxSize()
+            .background(Color.Black.copy(alpha = .36f))
+            .clickable(
+                interactionSource = remember { MutableInteractionSource() },
+                indication = null,
+                onClick = {},
+            ),
+        contentAlignment = Alignment.Center
     ) {
-        DialogBackgroundBlur(radius = 42)
-        Box(
-            Modifier.fillMaxSize().background(Color.Black.copy(alpha = .36f)),
-            contentAlignment = Alignment.Center
+        Surface(
+            shape = RoundedCornerShape(20.dp),
+            color = Color(0xED0D0A12),
+            border = BorderStroke(1.dp, RPCSXColors.primary.copy(alpha = .55f)),
+            shadowElevation = 24.dp,
+            modifier = Modifier.fillMaxWidth(.92f).fillMaxHeight(.86f)
         ) {
-            Surface(
-                shape = RoundedCornerShape(20.dp),
-                color = Color(0xED0D0A12),
-                border = BorderStroke(1.dp, RPCSXColors.primary.copy(alpha = .55f)),
-                shadowElevation = 24.dp,
-                modifier = Modifier.fillMaxWidth(.92f).fillMaxHeight(.86f)
-            ) {
-                AchievementsContent(
-                    data,
-                    loading,
-                    onDismiss,
-                    modifier = Modifier.padding(horizontal = 24.dp, vertical = 18.dp)
-                )
-            }
+            AchievementsContent(
+                data,
+                loading,
+                onDismiss,
+                modifier = Modifier.padding(horizontal = 24.dp, vertical = 18.dp)
+            )
         }
     }
 }

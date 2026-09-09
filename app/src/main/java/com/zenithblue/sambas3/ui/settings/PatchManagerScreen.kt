@@ -70,6 +70,7 @@ private data class GameGroup(
 fun PatchManagerScreen(
     navigateBack: () -> Unit,
     isInSplitPane: Boolean = false,
+    titleId: String? = null,
 ) {
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
@@ -82,11 +83,14 @@ fun PatchManagerScreen(
     fun refresh() {
         scope.launch {
             loading = true
-            val all = withContext(Dispatchers.IO) { PatchRepository.list() }
+            val all = withContext(Dispatchers.IO) {
+                val patches = PatchRepository.list()
+                if (titleId == null) patches else PatchRepository.forTitle(patches, titleId)
+            }
             val grouped = withContext(Dispatchers.IO) { PatchRepository.group(all) }
             val gameGroups = grouped
                 .flatMap { pg ->
-                    gameLabelsFor(pg.titles, pg.serials).map { label ->
+                    (titleId?.let { listOf(it) } ?: gameLabelsFor(pg.titles, pg.serials)).map { label ->
                         label to pg
                     }
                 }
@@ -325,7 +329,7 @@ fun PatchManagerScreen(
                                 onClick = { enabled ->
                                     scope.launch {
                                         withContext(Dispatchers.IO) {
-                                            PatchRepository.setEnabled(patch, enabled)
+                                            PatchRepository.setEnabled(patch, enabled, titleId)
                                         }
                                         refresh()
                                     }

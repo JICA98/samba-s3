@@ -104,7 +104,7 @@ import com.zenithblue.sambas3.ui.games.preview.GamePreviewRepository
 import com.zenithblue.sambas3.ui.games.launch.GameLaunchCenter
 import com.zenithblue.sambas3.ui.games.launch.GameLaunchRepository
 import com.zenithblue.sambas3.ui.games.launch.GameSavestateRepository
-import com.zenithblue.sambas3.ui.games.launch.StoppedTrophiesDialog
+import com.zenithblue.sambas3.iso.DirectIsoSession
 import com.zenithblue.sambas3.ui.ingame.TrophiesData
 import com.zenithblue.sambas3.ui.achievements.AchievementEvents
 import com.zenithblue.sambas3.ui.achievements.AchievementRepository
@@ -239,6 +239,7 @@ fun GamesScreen(
     var focusedIndex by remember { mutableStateOf(if (games.isNotEmpty()) 0 else -1) }
     var bootingGame by remember { mutableStateOf<Game?>(null) }
     var launchCenterGame by remember { mutableStateOf<Game?>(null) }
+    var patchTitleId by remember { mutableStateOf<String?>(null) }
     var stoppedTrophies by remember { mutableStateOf<TrophiesData?>(null) }
     var stoppedTrophiesLoading by remember { mutableStateOf(false) }
     LaunchedEffect(Unit) {
@@ -253,7 +254,23 @@ fun GamesScreen(
         val game = launchCenterGame
         if (!stoppedTrophiesLoading || game == null) return@LaunchedEffect
         val titleId = GameIdentity.titleIdOrNull(game.info.path, game.info.name.value)
-        stoppedTrophies = titleId?.let { AchievementRepository.title(it, force = true) }
+        val hdd = titleId?.let { AchievementRepository.title(it, force = true) }
+        stoppedTrophies = if (hdd != null && hdd.available) {
+            hdd
+        } else {
+            val sourceUri = game.info.sourceUri.value
+            val isoUri = sourceUri?.takeIf { it.isNotBlank() }?.let { runCatching { Uri.parse(it) }.getOrNull() }
+            val isDirectIso = game.info.sourceMode.value == GameSourceMode.DIRECT_ISO ||
+                sourceUri?.endsWith(".iso", ignoreCase = true) == true
+            if (titleId != null && isDirectIso && isoUri != null) {
+                runCatching {
+                    DirectIsoSession.withReadOnly(context, isoUri) { fd ->
+                        AchievementRepository.titleFromIsoNow(titleId, fd, force = true)
+                    }
+                }.onFailure { Log.w("S3TROPHY", "iso trophy fallback failed title=$titleId: ${it.message}") }
+                    .getOrNull() ?: hdd
+            } else hdd
+        }
         stoppedTrophiesLoading = false
     }
     val recoveryScope = rememberCoroutineScope()
@@ -843,6 +860,10 @@ fun GamesScreen(
                     } else if (isSearchExpanded) {
                         if (searchQuery.isNotEmpty()) searchQuery = "" else isSearchExpanded = false
                         true
+                    } else if (HomeRecoveryRepository.state.value !is HomeRecoveryState.None &&
+                        HomeRecoveryRepository.state.value !is HomeRecoveryState.ActionRunning) {
+                        HomeRecoveryRepository.dismiss(context)
+                        true
                     } else false
                 }
                 else -> false
@@ -951,6 +972,10 @@ fun GamesScreen(
                             true
                         } else if (isSearchExpanded) {
                             if (searchQuery.isNotEmpty()) searchQuery = "" else isSearchExpanded = false
+                            true
+                        } else if (recoveryState !is HomeRecoveryState.None &&
+                            recoveryState !is HomeRecoveryState.ActionRunning) {
+                            HomeRecoveryRepository.dismiss(context)
                             true
                         } else false
                     }
@@ -1862,6 +1887,13 @@ fun GamesScreen(
             }
         }
 
+        patchTitleId?.let { titleId ->
+            com.zenithblue.sambas3.ui.settings.PatchManagerScreen(
+                navigateBack = { patchTitleId = null },
+                titleId = titleId,
+            )
+        }
+
         launchCenterGame?.let { game ->
             val readinessRevision by PpuReadinessStore.revision.collectAsState()
             val coordinatorRevision by com.zenithblue.sambas3.ppu.ImportPpuPreparationCoordinator.coordinatorRevision.collectAsState()
@@ -1920,8 +1952,8 @@ fun GamesScreen(
                     (navigateToDrivers ?: navigateToSettings)?.invoke()
                 },
                 onPatches = {
+                    patchTitleId = GameIdentity.titleIdOrNull(game.info.path, game.info.name.value)
                     launchCenterGame = null
-                    (navigateToPatches ?: navigateToSettings)?.invoke()
                 },
                 onAchievements = {
                     stoppedTrophiesLoading = true
@@ -1941,6 +1973,13 @@ fun GamesScreen(
                 },
                 onStop = {
                     com.zenithblue.sambas3.ppu.ImportPpuPreparationCoordinator.requestStop(context)
+                },
+                showTrophies = stoppedTrophiesLoading || stoppedTrophies != null,
+                trophiesData = stoppedTrophies,
+                trophiesLoading = stoppedTrophiesLoading,
+                onDismissTrophies = {
+                    stoppedTrophiesLoading = false
+                    stoppedTrophies = null
                 },
             )
         }
@@ -1975,17 +2014,6 @@ fun GamesScreen(
                 },
                 onExportReport = { exportRecoveryReport(state) },
                 onDismiss = { detailsState = null },
-            )
-        }
-
-        if (stoppedTrophiesLoading || stoppedTrophies != null) {
-            StoppedTrophiesDialog(
-                data = stoppedTrophies,
-                loading = stoppedTrophiesLoading,
-                onDismiss = {
-                    stoppedTrophiesLoading = false
-                    stoppedTrophies = null
-                }
             )
         }
 
@@ -4030,6 +4058,7 @@ fun GameCard(
         usingInstallPpu && installPpu.moduleTotal > 0 -> installPpu.moduleDone.toLong()
         usingPrelaunchPpu && prelaunchPpu.moduleTotal > 0 -> prelaunchPpu.moduleDone.toLong()
         usingRuntimePpu -> runtimeCompile.ppuPercent.toLong()
+        usingRuntimeShader -> runtimeCompile.shaderPercent.toLong()
         usingInstallPpu -> installPpu.ppuPercent.toLong()
         usingPrelaunchPpu -> prelaunchPpu.ppuPercent.toLong()
         else -> progressEntry?.value?.longValue ?: 0
@@ -4039,6 +4068,7 @@ fun GameCard(
         usingInstallPpu && installPpu.moduleTotal > 0 -> installPpu.moduleTotal.toLong()
         usingPrelaunchPpu && prelaunchPpu.moduleTotal > 0 -> prelaunchPpu.moduleTotal.toLong()
         usingRuntimePpu -> runtimeCompile.ppuMax.toLong()
+        usingRuntimeShader -> 100L
         usingInstallPpu -> installPpu.ppuMax.toLong()
         usingPrelaunchPpu -> prelaunchPpu.ppuMax.toLong()
         else -> progressEntry?.max?.longValue ?: 0
@@ -4051,7 +4081,7 @@ fun GameCard(
         else -> progressEntry?.message?.value
     }
     val isIndeterminate = when {
-        usingRuntimeShader -> true
+        usingRuntimeShader -> runtimeCompile.shaderPercent <= 0
         usingRuntimePpu || usingInstallPpu || usingPrelaunchPpu -> progressMax <= 0L
         else -> progressMax == 0L
     }

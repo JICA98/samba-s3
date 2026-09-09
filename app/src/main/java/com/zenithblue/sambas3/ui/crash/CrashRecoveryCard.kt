@@ -216,16 +216,26 @@ fun CrashRecoveryCard(
                             )
                         }
                     }
-                    IconButton(
-                        onClick = onDismiss,
-                        modifier = Modifier.size(28.dp)
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(4.dp),
                     ) {
-                        Icon(
-                            painter = painterResource(R.drawable.ic_close),
-                            contentDescription = "Dismiss",
-                            tint = RPCSXColors.textSecondary,
-                            modifier = Modifier.size(16.dp)
+                        Text(
+                            "○",
+                            color = RPCSXColors.textSecondary,
+                            style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Bold),
                         )
+                        IconButton(
+                            onClick = onDismiss,
+                            modifier = Modifier.size(28.dp)
+                        ) {
+                            Icon(
+                                painter = painterResource(R.drawable.ic_close),
+                                contentDescription = "Dismiss (○)",
+                                tint = RPCSXColors.textSecondary,
+                                modifier = Modifier.size(16.dp)
+                            )
+                        }
                     }
                 }
 

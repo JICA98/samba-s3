@@ -358,7 +358,7 @@ private fun CrashSessionCard(
     val stateColor = when (manifest.terminalState) {
         LogSessionTerminal.CRASHED, LogSessionTerminal.FAILED -> RPCSXColors.errorColor
         LogSessionTerminal.INTERRUPTED -> RPCSXColors.primary
-        LogSessionTerminal.RUNNING -> RPCSXColors.primaryMuted
+        LogSessionTerminal.RUNNING -> RPCSXColors.primary
         else -> RPCSXColors.textSecondary
     }
 
@@ -421,7 +421,7 @@ private fun CrashSessionCard(
                 ) {
                     Text(
                         manifest.gameTitleSnapshot.uppercase(),
-                        color = if (isSelected) RPCSXColors.primary else RPCSXColors.textPrimary,
+                        color = RPCSXColors.textPrimary,
                         style = MaterialTheme.typography.bodySmall,
                         fontWeight = FontWeight.Bold,
                         maxLines = 1,

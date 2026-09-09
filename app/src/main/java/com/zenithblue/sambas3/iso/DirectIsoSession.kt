@@ -30,11 +30,7 @@ object DirectIsoSession {
     @Volatile
     private var activeSession: Session? = null
 
-    @Synchronized
-    fun acquire(context: Context, uri: Uri): Session {
-        release("new-session-request")
-        Log.i(TAG, "source_selected uri=$uri")
-
+    private fun openDescriptor(context: Context, uri: Uri): ParcelFileDescriptor {
         val pfd = try {
             val directFile = if (uri.scheme == "file" || uri.path?.startsWith("/") == true || uri.toString().startsWith("/")) {
                 if (uri.scheme == "file") File(uri.path ?: "") else File(uri.toString())
@@ -57,7 +53,6 @@ object DirectIsoSession {
             throw IllegalStateException(msg)
         }
 
-        val fd = pfd.fd
         val size = pfd.statSize
         if (size <= 0) {
             runCatching { pfd.close() }
@@ -73,19 +68,35 @@ object DirectIsoSession {
             Log.e(TAG, "unavailable reason=$msg cause=${e.message}")
             throw IllegalStateException(msg, e)
         }
-        val procFdPath = "/proc/self/fd/$fd"
-        Log.i(TAG, "fd_opened fd=$fd seekable=true size=$size")
+        Log.i(TAG, "fd_opened fd=${pfd.fd} seekable=true size=$size")
+        return pfd
+    }
 
+    @Synchronized
+    fun acquire(context: Context, uri: Uri): Session {
+        release("new-session-request")
+        Log.i(TAG, "source_selected uri=$uri")
+        val pfd = openDescriptor(context, uri)
+        val fd = pfd.fd
         val session = Session(
             uri = uri,
             pfd = pfd,
             fd = fd,
-            procFdPath = procFdPath,
-            statSize = size
+            procFdPath = "/proc/self/fd/$fd",
+            statSize = pfd.statSize
         )
         activeSession = session
-        Log.i(TAG, "fd_session_acquired uri=$uri fd=$fd procFd=$procFdPath")
+        Log.i(TAG, "fd_session_acquired uri=$uri fd=$fd procFd=${session.procFdPath}")
         return session
+    }
+
+    fun <T> withReadOnly(context: Context, uri: Uri, block: (Int) -> T): T {
+        val pfd = openDescriptor(context, uri)
+        try {
+            return block(pfd.fd)
+        } finally {
+            runCatching { pfd.close() }
+        }
     }
 
     @Synchronized

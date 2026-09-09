@@ -18,6 +18,7 @@ data class Patch(
     val serials: List<String> = emptyList(),
     val titles: List<String> = emptyList(),
     val enabled: Boolean = false,
+    val enabledSerials: List<String> = emptyList(),
 )
 
 data class PatchGroup(
@@ -73,12 +74,21 @@ object PatchRepository {
             RPCSX.instance.patchSetEnabled(hash, name, enabled)
         }.getOrDefault(false).also { invalidate() }
 
-    fun setEnabled(group: PatchGroup, enabled: Boolean): Boolean =
+    fun setEnabled(group: PatchGroup, enabled: Boolean, titleId: String? = null): Boolean =
         group.hashes.map { hash ->
             runCatching {
-                RPCSX.instance.patchSetEnabled(hash, group.name, enabled)
+                if (titleId == null) RPCSX.instance.patchSetEnabled(hash, group.name, enabled)
+                else RPCSX.instance.patchSetEnabledForTitle(hash, group.name, titleId, enabled)
             }.getOrDefault(false)
         }.all { it }.also { invalidate() }
+
+    fun forTitle(patches: List<Patch>, titleId: String): List<Patch> =
+        patches.filter { patch ->
+            patch.serials.any { it.equals(titleId, ignoreCase = true) } ||
+                patch.titles.any { it.equals(titleId, ignoreCase = true) }
+        }.map { patch ->
+            patch.copy(enabled = patch.enabledSerials.any { it.equals(titleId, ignoreCase = true) })
+        }
 
     fun group(patches: List<Patch>): List<PatchGroup> =
         patches.groupBy { listOf(it.name, it.author, it.version, it.notes) }

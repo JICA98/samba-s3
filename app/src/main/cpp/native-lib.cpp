@@ -890,6 +890,7 @@ struct RPCSXApi {
   std::string (*patchEngineVersion)();
   std::string (*patchesList)();
   bool (*patchSetEnabled)(std::string_view hash, std::string_view description, bool enabled);
+  bool (*patchSetEnabledForTitle)(std::string_view hash, std::string_view description, std::string_view titleId, bool enabled);
      const char* (*getPpuManifestKey)();
     const char* (*getPpuManifestKeyForTitle)(const char* titleId);
     const char* (*getSambaBuildId)();
@@ -916,6 +917,7 @@ struct RPCSXApi {
   bool (*loadSaveStateWithRequest)(int slot, unsigned long long requestId);
   std::string (*getCurrentTrophies)();
   std::string (*getTrophiesForTitle)(const char* titleId);
+  std::string (*getTrophiesForTitleFromIso)(const char* titleId, int isoFd);
   std::string (*getFriends)();
   bool (*friendAction)(std::string_view action, std::string_view username);
   bool (*beginInGameSettingsSession)();
@@ -1001,6 +1003,7 @@ struct RPCSXLibrary : RPCSXApi {
     result.patchEngineVersion = reinterpret_cast<decltype(patchEngineVersion)>(dlsym(handle, "_rpcsx_patchEngineVersion"));
     result.patchesList = reinterpret_cast<decltype(patchesList)>(dlsym(handle, "_rpcsx_patchesList"));
     result.patchSetEnabled = reinterpret_cast<decltype(patchSetEnabled)>(dlsym(handle, "_rpcsx_patchSetEnabled"));
+    result.patchSetEnabledForTitle = reinterpret_cast<decltype(patchSetEnabledForTitle)>(dlsym(handle, "_rpcsx_patchSetEnabledForTitle"));
     result.getPpuManifestKey = reinterpret_cast<decltype(getPpuManifestKey)>(dlsym(handle, "_rpcsx_getPpuManifestKey"));
     result.getPpuManifestKeyForTitle = reinterpret_cast<decltype(getPpuManifestKeyForTitle)>(dlsym(handle, "_rpcsx_getPpuManifestKeyForTitle"));
     result.getSambaBuildId = reinterpret_cast<decltype(getSambaBuildId)>(dlsym(handle, "_rpcsx_sambaBuildId"));
@@ -1028,6 +1031,7 @@ struct RPCSXLibrary : RPCSXApi {
     result.loadSaveStateWithRequest = reinterpret_cast<decltype(loadSaveStateWithRequest)>(dlsym(handle, "_rpcsx_loadSaveStateWithRequest"));
     result.getCurrentTrophies = reinterpret_cast<decltype(getCurrentTrophies)>(dlsym(handle, "_rpcsx_getCurrentTrophies"));
     result.getTrophiesForTitle = reinterpret_cast<decltype(getTrophiesForTitle)>(dlsym(handle, "_rpcsx_getTrophiesForTitle"));
+    result.getTrophiesForTitleFromIso = reinterpret_cast<decltype(getTrophiesForTitleFromIso)>(dlsym(handle, "_rpcsx_getTrophiesForTitleFromIso"));
     result.getFriends = reinterpret_cast<decltype(getFriends)>(dlsym(handle, "_rpcsx_getFriends"));
     result.friendAction = reinterpret_cast<decltype(friendAction)>(dlsym(handle, "_rpcsx_friendAction"));
     result.beginInGameSettingsSession = reinterpret_cast<decltype(beginInGameSettingsSession)>(dlsym(handle, "_rpcsx_beginInGameSettingsSession"));
@@ -1234,6 +1238,12 @@ Java_com_zenithblue_sambas3_RPCSX_getTrophiesForTitle(JNIEnv* env, jobject, jstr
   if (!rpcsxLib.getTrophiesForTitle) return wrap(env, std::string(R"({"available":false,"status":"unsupported"})"));
   const std::string title_id = unwrap(env, jtitle_id);
   return wrap(env, rpcsxLib.getTrophiesForTitle(title_id.c_str()));
+}
+extern "C" JNIEXPORT jstring JNICALL
+Java_com_zenithblue_sambas3_RPCSX_getTrophiesForTitleFromIso(JNIEnv* env, jobject, jstring jtitle_id, jint iso_fd) {
+  if (!rpcsxLib.getTrophiesForTitleFromIso) return wrap(env, std::string(R"({"available":false,"status":"no_trophy_set"})"));
+  const std::string title_id = unwrap(env, jtitle_id);
+  return wrap(env, rpcsxLib.getTrophiesForTitleFromIso(title_id.c_str(), iso_fd));
 }
 extern "C" JNIEXPORT jstring JNICALL
 Java_com_zenithblue_sambas3_RPCSX_getFriends(JNIEnv* env, jobject) {
@@ -1515,6 +1525,15 @@ Java_com_zenithblue_sambas3_RPCSX_patchSetEnabled(JNIEnv *env, jobject,
   if (!rpcsxLib.patchSetEnabled) return false;
   return rpcsxLib.patchSetEnabled(unwrap(env, jhash),
                                    unwrap(env, jdescription), jenabled);
+}
+
+extern "C" JNIEXPORT jboolean JNICALL
+Java_com_zenithblue_sambas3_RPCSX_patchSetEnabledForTitle(JNIEnv *env, jobject,
+    jstring jhash, jstring jdescription, jstring jtitle, jboolean enabled) {
+  if (!rpcsxLib.patchSetEnabledForTitle || !jtitle) return false;
+  const auto title = unwrap(env, jtitle);
+  if (title.empty()) return false;
+  return rpcsxLib.patchSetEnabledForTitle(unwrap(env, jhash), unwrap(env, jdescription), title, enabled);
 }
 
 extern "C" JNIEXPORT jboolean JNICALL

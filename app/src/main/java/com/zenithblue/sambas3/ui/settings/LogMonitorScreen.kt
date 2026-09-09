@@ -355,7 +355,7 @@ fun LogMonitorScreen(
                         .fillMaxWidth(),
                     contentPadding = PaddingValues(vertical = 4.dp),
                 ) {
-                    itemsIndexed(filtered, key = { _, e -> e.id }) { index, entry ->
+                    itemsIndexed(filtered, key = { index, e -> "${e.id}-$index-${e.timestamp}-${e.message.hashCode()}" }) { index, entry ->
                         LogEntryRow(entry = entry, index = index)
                     }
                 }

@@ -11,11 +11,13 @@ import org.json.JSONObject
 interface TrophyQuery {
     fun current(): String
     fun title(titleId: String): String
+    fun titleFromIso(titleId: String, isoFd: Int): String
 }
 
 private class RpcsxTrophyQuery(private val rpcsx: RPCSX) : TrophyQuery {
     override fun current(): String = rpcsx.getCurrentTrophies()
     override fun title(titleId: String): String = rpcsx.getTrophiesForTitle(titleId)
+    override fun titleFromIso(titleId: String, isoFd: Int): String = rpcsx.getTrophiesForTitleFromIso(titleId, isoFd)
 }
 
 private data class TrophyCacheKey(
@@ -39,6 +41,13 @@ class TrophySnapshotProvider(
     suspend fun title(titleId: String, force: Boolean = false): TrophySnapshot? = withContext(Dispatchers.IO) {
         load("title", force) { query.title(titleId) }
     }
+
+    suspend fun titleFromIso(titleId: String, isoFd: Int, force: Boolean = false): TrophySnapshot? = withContext(Dispatchers.IO) {
+        titleFromIsoNow(titleId, isoFd, force)
+    }
+
+    fun titleFromIsoNow(titleId: String, isoFd: Int, force: Boolean = false): TrophySnapshot? =
+        load("iso", force) { query.titleFromIso(titleId, isoFd) }
 
     @Synchronized
     fun invalidate(titleId: String? = null, trophySetId: String? = null) {
@@ -80,6 +89,10 @@ object AchievementRepository {
     private val provider = TrophySnapshotProvider(RpcsxTrophyQuery(RPCSX.instance))
     suspend fun current(force: Boolean = false): TrophySnapshot? = provider.current(force)
     suspend fun title(titleId: String, force: Boolean = false): TrophySnapshot? = provider.title(titleId, force)
+    suspend fun titleFromIso(titleId: String, isoFd: Int, force: Boolean = false): TrophySnapshot? =
+        provider.titleFromIso(titleId, isoFd, force)
+    fun titleFromIsoNow(titleId: String, isoFd: Int, force: Boolean = false): TrophySnapshot? =
+        provider.titleFromIsoNow(titleId, isoFd, force)
     fun invalidate(titleId: String? = null, trophySetId: String? = null) = provider.invalidate(titleId, trophySetId)
 }
 

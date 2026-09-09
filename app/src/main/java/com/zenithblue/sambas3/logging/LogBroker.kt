@@ -299,7 +299,7 @@ object LogBroker {
             val lines = tailer.drain().takeLast(800)
             for (line in lines) {
                 entries += UnifiedLogEntry(
-                    sequence = 0L,
+                    sequence = entries.size.toLong() + 1L,
                     sessionId = sessionId,
                     timestampMs = null,
                     timestampText = null,

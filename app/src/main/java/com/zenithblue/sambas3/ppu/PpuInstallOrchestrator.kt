@@ -253,14 +253,13 @@ object PpuInstallOrchestrator {
                             PpuDiagnosticLog.emit("stale_callback_ignored", titleId = safeTitle, extras = mapOf("type" to "progress"))
                             return
                         }
-                        // Native callback counters can reset between ELF/PRX scopes.
-                        // Keep the last audited batch receipt as numeric authority.
+                        // Worker counters are cache inventory + validated commits, not ELF windows.
                         updateProgressUi(
                             appContext,
                             safeTitle,
                             logicalJobId,
-                            OverallProgress(totalModules, completedModules, if (totalModules > 0) completedModules * 100 / totalModules else 0),
-                            message ?: "Compiling PPU objects… $completedModules validated",
+                            PpuOverallProgressReducer.reduceLiveProgress(totalModules, completedModules, cbTotal, cbCompleted, 0),
+                            message.takeIf { cbTotal <= 0 },
                         )
                     }
 
@@ -501,9 +500,9 @@ object PpuInstallOrchestrator {
         val merged = PpuOverallProgressReducer.mergeMonotonic(previous, progress)
         val total = merged.totalModules
         val done = merged.completedModules
-        val msg = message ?: if (total > 0) "module $done of $total" else "module $done"
+        val msg = message ?: if (total > 0) "module $done of $total" else "Discovering PPU modules…"
         val remaining = PpuRemainingTimeTracker.observeInstall(titleId, done, total, active = true)
-        val notifMsg = PpuRemainingTime.progressLine(msg, remaining)
+        val notifMsg = "$titleId · ${PpuRemainingTime.progressLine(msg, remaining)}"
 
         Log.i("S3PPUPROG", "done=$done total=$total remaining=${remaining ?: "-"}")
 

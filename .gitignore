@@ -41,3 +41,6 @@ app/src/playstore/assets/bundled_gpu_drivers/*.zip
 # Local approved Turnip downloads
 turnip-inputs/
 .tmp/
+
+# Kotlin local session cache
+.kotlin/

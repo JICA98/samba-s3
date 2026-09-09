@@ -84,7 +84,10 @@ import com.zenithblue.sambas3.RPCSXColors
 import com.zenithblue.sambas3.ui.games.preview.GamePreviewModel
 import com.zenithblue.sambas3.ui.games.preview.GamePreviewRepository
 import com.zenithblue.sambas3.ui.ingame.SaveSlot
+import com.zenithblue.sambas3.ui.ingame.TrophiesData
 import java.io.File
+import java.text.DateFormat
+import java.util.Date
 
 enum class LaunchFocusTarget {
     START,
@@ -94,6 +97,7 @@ enum class LaunchFocusTarget {
     PATCHES,
     TROPHIES,
     CLEAR_CACHE,
+    SAVES,
     CLOSE
 }
 
@@ -112,6 +116,10 @@ fun GameLaunchCenter(
     canClearCache: Boolean,
     onPrepare: (() -> Unit)? = null,
     onStop: (() -> Unit)? = null,
+    showTrophies: Boolean = false,
+    trophiesData: TrophiesData? = null,
+    trophiesLoading: Boolean = false,
+    onDismissTrophies: () -> Unit = {},
 ) {
     val context = LocalContext.current
     val rawIconPath = snapshot.game.info.iconPath.value
@@ -149,21 +157,34 @@ fun GameLaunchCenter(
     val previewBgModel: Any = bgPreview ?: R.drawable.default_wallpaper
 
     val ppuUi = snapshot.ppuUi
+    val enabledPatches by produceState(emptyList<String>(), titleId) {
+        value = kotlinx.coroutines.withContext(kotlinx.coroutines.Dispatchers.IO) {
+            com.zenithblue.sambas3.PatchRepository.forTitle(
+                com.zenithblue.sambas3.PatchRepository.list(), titleId,
+            ).filter { it.enabled }.map { it.name }.distinct()
+        }
+    }
     val existingSaves = snapshot.saveSlots.filter { it.exists }
     val hasContinue = snapshot.latestSave != null && existingSaves.isNotEmpty()
 
     var focusedTarget by remember { mutableStateOf(LaunchFocusTarget.START) }
+    var focusedSaveIndex by remember { mutableIntStateOf(0) }
     val focusRequester = remember { FocusRequester() }
 
     LaunchedEffect(Unit) {
         try { focusRequester.requestFocus() } catch (_: Exception) {}
     }
 
-    BackHandler {
+    BackHandler(enabled = !showTrophies) {
         onDismiss()
     }
 
+    fun dismissTrophiesOrLauncher() {
+        if (showTrophies) onDismissTrophies() else onDismiss()
+    }
+
     fun triggerAction() {
+        if (showTrophies) return
         when (focusedTarget) {
             LaunchFocusTarget.START -> {
                 if (ppuUi.prepareAction == PrepareAction.Prepare || ppuUi.prepareAction == PrepareAction.Retry) {
@@ -186,33 +207,39 @@ fun GameLaunchCenter(
             LaunchFocusTarget.PATCHES -> onPatches()
             LaunchFocusTarget.TROPHIES -> onAchievements()
             LaunchFocusTarget.CLEAR_CACHE -> if (canClearCache) onClearCache()
+            LaunchFocusTarget.SAVES -> existingSaves.getOrNull(focusedSaveIndex)?.let { if (snapshot.canLoadSave) onLoad(it) }
             LaunchFocusTarget.CLOSE -> onDismiss()
         }
     }
 
     fun onNavigateUp() {
+        if (showTrophies) return
         when (focusedTarget) {
             LaunchFocusTarget.START, LaunchFocusTarget.CONTINUE -> focusedTarget = LaunchFocusTarget.CLOSE
             LaunchFocusTarget.PATCHES -> focusedTarget = LaunchFocusTarget.CONFIG
             LaunchFocusTarget.TROPHIES -> focusedTarget = LaunchFocusTarget.DRIVER
             LaunchFocusTarget.CLEAR_CACHE -> focusedTarget = LaunchFocusTarget.PATCHES
+            LaunchFocusTarget.SAVES -> focusedTarget = LaunchFocusTarget.CLEAR_CACHE
             LaunchFocusTarget.DRIVER, LaunchFocusTarget.CONFIG -> focusedTarget = LaunchFocusTarget.CLOSE
             LaunchFocusTarget.CLOSE -> {}
         }
     }
 
     fun onNavigateDown() {
+        if (showTrophies) return
         when (focusedTarget) {
             LaunchFocusTarget.CLOSE -> focusedTarget = LaunchFocusTarget.START
             LaunchFocusTarget.CONFIG -> focusedTarget = LaunchFocusTarget.PATCHES
             LaunchFocusTarget.DRIVER -> focusedTarget = LaunchFocusTarget.TROPHIES
             LaunchFocusTarget.PATCHES, LaunchFocusTarget.TROPHIES -> focusedTarget = LaunchFocusTarget.CLEAR_CACHE
-            LaunchFocusTarget.CLEAR_CACHE -> focusedTarget = if (hasContinue) LaunchFocusTarget.CONTINUE else LaunchFocusTarget.START
+            LaunchFocusTarget.CLEAR_CACHE -> focusedTarget = if (existingSaves.isNotEmpty()) LaunchFocusTarget.SAVES else if (hasContinue) LaunchFocusTarget.CONTINUE else LaunchFocusTarget.START
+            LaunchFocusTarget.SAVES -> focusedTarget = if (hasContinue) LaunchFocusTarget.CONTINUE else LaunchFocusTarget.START
             LaunchFocusTarget.START, LaunchFocusTarget.CONTINUE -> {}
         }
     }
 
     fun onNavigateLeft() {
+        if (showTrophies) return
         when (focusedTarget) {
             LaunchFocusTarget.START -> focusedTarget = if (hasContinue) LaunchFocusTarget.CONTINUE else LaunchFocusTarget.TROPHIES
             LaunchFocusTarget.CONTINUE -> focusedTarget = LaunchFocusTarget.TROPHIES
@@ -220,11 +247,13 @@ fun GameLaunchCenter(
             LaunchFocusTarget.CLEAR_CACHE -> focusedTarget = LaunchFocusTarget.PATCHES
             LaunchFocusTarget.DRIVER -> focusedTarget = LaunchFocusTarget.CONFIG
             LaunchFocusTarget.CLOSE -> focusedTarget = LaunchFocusTarget.CONFIG
+            LaunchFocusTarget.SAVES -> focusedSaveIndex = (focusedSaveIndex - 1).coerceAtLeast(0)
             LaunchFocusTarget.CONFIG, LaunchFocusTarget.PATCHES -> {}
         }
     }
 
     fun onNavigateRight() {
+        if (showTrophies) return
         when (focusedTarget) {
             LaunchFocusTarget.CONFIG -> focusedTarget = LaunchFocusTarget.DRIVER
             LaunchFocusTarget.PATCHES -> focusedTarget = LaunchFocusTarget.TROPHIES
@@ -232,6 +261,7 @@ fun GameLaunchCenter(
             LaunchFocusTarget.TROPHIES -> focusedTarget = if (hasContinue) LaunchFocusTarget.CONTINUE else LaunchFocusTarget.START
             LaunchFocusTarget.CLEAR_CACHE -> focusedTarget = if (hasContinue) LaunchFocusTarget.CONTINUE else LaunchFocusTarget.START
             LaunchFocusTarget.CONTINUE -> focusedTarget = LaunchFocusTarget.START
+            LaunchFocusTarget.SAVES -> focusedSaveIndex = (focusedSaveIndex + 1).coerceAtMost(existingSaves.lastIndex)
             LaunchFocusTarget.START, LaunchFocusTarget.CLOSE -> {}
         }
     }
@@ -241,7 +271,7 @@ fun GameLaunchCenter(
     var stickStateY by remember { mutableIntStateOf(0) }
     var lastStickTime by remember { mutableLongStateOf(0L) }
 
-    DisposableEffect(currentView) {
+    DisposableEffect(currentView, showTrophies) {
         val motionListener = View.OnGenericMotionListener { _, event ->
             val source = event.source
             val isGamepadOrJoystick = (source and InputDevice.SOURCE_GAMEPAD != 0) ||
@@ -337,7 +367,7 @@ fun GameLaunchCenter(
                     true
                 }
                 KeyEvent.KEYCODE_BUTTON_B, KeyEvent.KEYCODE_BACK -> {
-                    onDismiss()
+                    dismissTrophiesOrLauncher()
                     true
                 }
                 else -> false
@@ -352,6 +382,7 @@ fun GameLaunchCenter(
         }
     }
 
+    Box(Modifier.fillMaxSize()) {
     Box(
         Modifier
             .fillMaxSize()
@@ -385,7 +416,7 @@ fun GameLaunchCenter(
                         }
                         keyEvent.key == Key.ButtonB || keyEvent.key == Key.Back ||
                         code == KeyEvent.KEYCODE_BUTTON_B || code == KeyEvent.KEYCODE_BACK -> {
-                            onDismiss()
+                            dismissTrophiesOrLauncher()
                             true
                         }
                         else -> false
@@ -610,7 +641,7 @@ fun GameLaunchCenter(
                                     contentColor = if (isPatchesFocused) RPCSXColors.primary else MaterialTheme.colorScheme.onSurface
                                 )
                             ) {
-                                Text("PATCHES", style = MaterialTheme.typography.labelSmall, maxLines = 1)
+                                Text("PATCHES (${enabledPatches.size})", style = MaterialTheme.typography.labelSmall, maxLines = 1)
                             }
 
                             val isTrophiesFocused = focusedTarget == LaunchFocusTarget.TROPHIES
@@ -747,6 +778,12 @@ fun GameLaunchCenter(
                         )
                         PpuPhaseRow(ppuUi.installPpu)
                         PpuPhaseRow(ppuUi.runtimePpu)
+                        if (enabledPatches.isNotEmpty()) {
+                            Text("ENABLED PATCHES", color = RPCSXColors.primary, style = MaterialTheme.typography.labelLarge)
+                            enabledPatches.forEach { name ->
+                                Text(name, color = RPCSXColors.textPrimary, style = MaterialTheme.typography.bodySmall)
+                            }
+                        }
 
                         // Saves
                         Spacer(Modifier.height(6.dp))
@@ -773,10 +810,11 @@ fun GameLaunchCenter(
                                     .horizontalScroll(rememberScrollState()),
                                 horizontalArrangement = Arrangement.spacedBy(8.dp),
                             ) {
-                                existingSaves.forEach { slot ->
+                                existingSaves.forEachIndexed { index, slot ->
                                     LaunchSaveCard(
                                         slot,
                                         enabled = snapshot.canLoadSave,
+                                        focused = focusedTarget == LaunchFocusTarget.SAVES && focusedSaveIndex == index,
                                         onClick = { onLoad(slot) },
                                     )
                                 }
@@ -803,6 +841,21 @@ fun GameLaunchCenter(
                             horizontalArrangement = Arrangement.spacedBy(10.dp)
                         ) {
                             // Controller Navigation Hints
+                            Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(4.dp)) {
+                                Surface(
+                                    shape = RoundedCornerShape(3.dp),
+                                    color = RPCSXColors.textSecondary.copy(alpha = 0.15f),
+                                    border = BorderStroke(1.dp, RPCSXColors.textSecondary)
+                                ) {
+                                    Text(
+                                        "D-PAD",
+                                        modifier = Modifier.padding(horizontal = 4.dp, vertical = 1.dp),
+                                        style = MaterialTheme.typography.labelSmall.copy(fontSize = 10.sp, fontWeight = FontWeight.Bold),
+                                        color = RPCSXColors.textSecondary
+                                    )
+                                }
+                                Text("NAVIGATE", style = MaterialTheme.typography.labelSmall, color = RPCSXColors.textSecondary)
+                            }
                             Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(4.dp)) {
                                 Surface(
                                     shape = RoundedCornerShape(3.dp),
@@ -861,7 +914,7 @@ fun GameLaunchCenter(
                                                 if (isStartFocused) 2.dp else 1.dp,
                                                 if (isStartFocused) RPCSXColors.focusRing else MaterialTheme.colorScheme.outlineVariant
                                             ),
-                                        ) { Text("PREPARE PPU", style = MaterialTheme.typography.labelMedium) }
+                                        ) { Text("✕ PREPARE PPU", style = MaterialTheme.typography.labelMedium) }
                                     }
                                 }
                                 PrepareAction.Retry -> {
@@ -877,7 +930,7 @@ fun GameLaunchCenter(
                                                 if (isStartFocused) 2.dp else 1.dp,
                                                 if (isStartFocused) RPCSXColors.focusRing else RPCSXColors.errorColor.copy(alpha = 0.7f)
                                             ),
-                                        ) { Text("RETRY PPU", style = MaterialTheme.typography.labelMedium) }
+                                        ) { Text("✕ RETRY PPU", style = MaterialTheme.typography.labelMedium) }
                                     }
                                 }
                                 PrepareAction.PreparingInstall -> {
@@ -946,27 +999,38 @@ fun GameLaunchCenter(
                                         contentPadding = PaddingValues(horizontal = 12.dp, vertical = 6.dp),
                                         shape = RoundedCornerShape(8.dp),
                                     ) {
-                                        Text("CONTINUE ${slot.slot}", style = MaterialTheme.typography.labelMedium)
+                                        Text("✕ CONTINUE ${slot.slot}", style = MaterialTheme.typography.labelMedium)
                                     }
                                 }
                             }
-                            Button(
-                                onClick = onFreshPlay,
-                                enabled = ppuUi.startEnabled && snapshot.canPlayFresh,
-                                colors = ButtonDefaults.buttonColors(
-                                    containerColor = if (isStartFocused) RPCSXColors.focusRing else RPCSXColors.primary,
-                                    contentColor = Color.Black,
-                                    disabledContainerColor = RPCSXColors.primary.copy(alpha = 0.35f),
-                                    disabledContentColor = Color.Black.copy(alpha = 0.35f),
-                                ),
-                                border = if (isStartFocused) BorderStroke(2.dp, RPCSXColors.focusRing) else null,
-                                contentPadding = PaddingValues(horizontal = 22.dp, vertical = 8.dp),
-                                shape = RoundedCornerShape(8.dp),
-                            ) {
-                                Text(
-                                    "START",
-                                    style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.Bold),
-                                )
+                            val showStart = ppuUi.prepareAction != PrepareAction.Prepare &&
+                                ppuUi.prepareAction != PrepareAction.Retry &&
+                                ppuUi.prepareAction != PrepareAction.Stop
+                            if (showStart) {
+                                Button(
+                                    onClick = onFreshPlay,
+                                    enabled = ppuUi.startEnabled && snapshot.canPlayFresh,
+                                    colors = ButtonDefaults.buttonColors(
+                                        containerColor = if (isStartFocused) RPCSXColors.focusRing else RPCSXColors.primary,
+                                        contentColor = Color.Black,
+                                        disabledContainerColor = RPCSXColors.primary.copy(alpha = 0.35f),
+                                        disabledContentColor = Color.Black.copy(alpha = 0.35f),
+                                    ),
+                                    border = if (isStartFocused) BorderStroke(2.dp, RPCSXColors.focusRing) else null,
+                                    contentPadding = PaddingValues(horizontal = 22.dp, vertical = 8.dp),
+                                    shape = RoundedCornerShape(8.dp),
+                                ) {
+                                    Text(
+                                        "START",
+                                        style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.Bold),
+                                    )
+                                    Spacer(Modifier.width(6.dp))
+                                    Icon(
+                                        painter = painterResource(R.drawable.gamepad),
+                                        contentDescription = null,
+                                        modifier = Modifier.size(18.dp),
+                                    )
+                                }
                             }
                         }
                     }
@@ -974,7 +1038,15 @@ fun GameLaunchCenter(
             }
         }
     }
-}
+    }
+    if (showTrophies) {
+        StoppedTrophiesOverlay(
+            data = trophiesData,
+            loading = trophiesLoading,
+            onDismiss = onDismissTrophies,
+        )
+    }
+    }
 }
 
 @Composable
@@ -1034,7 +1106,7 @@ private fun PpuPhaseRow(phase: PpuPhaseUi) {
             Text(phase.label, color = RPCSXColors.textSecondary, style = MaterialTheme.typography.bodySmall)
             Text(statusText, color = color, style = MaterialTheme.typography.bodySmall)
         }
-        if (phase.state == PpuPhaseState.Compiling && phase.progress != null && phase.progress > 0) {
+        if (phase.state == PpuPhaseState.Compiling) {
             val pct = phase.progress
             Row(
                 Modifier
@@ -1042,12 +1114,20 @@ private fun PpuPhaseRow(phase: PpuPhaseUi) {
                     .padding(top = 4.dp),
                 verticalAlignment = Alignment.CenterVertically,
             ) {
-                LinearProgressIndicator(
-                    progress = { (pct / 100f).coerceIn(0f, 1f) },
-                    modifier = Modifier.weight(1f),
-                    color = RPCSXColors.primary,
-                    trackColor = RPCSXColors.surfaceOverlay,
-                )
+                if (pct != null && pct > 0) {
+                    LinearProgressIndicator(
+                        progress = { (pct / 100f).coerceIn(0f, 1f) },
+                        modifier = Modifier.weight(1f),
+                        color = RPCSXColors.primary,
+                        trackColor = RPCSXColors.surfaceOverlay,
+                    )
+                } else {
+                    LinearProgressIndicator(
+                        modifier = Modifier.weight(1f),
+                        color = RPCSXColors.primary,
+                        trackColor = RPCSXColors.surfaceOverlay,
+                    )
+                }
                 if (!phase.remainingLabel.isNullOrBlank()) {
                     Spacer(Modifier.width(8.dp))
                     Text(
@@ -1059,27 +1139,18 @@ private fun PpuPhaseRow(phase: PpuPhaseUi) {
                     )
                 }
             }
-        } else if (phase.state == PpuPhaseState.Compiling && !phase.remainingLabel.isNullOrBlank()) {
-            Text(
-                phase.remainingLabel,
-                color = RPCSXColors.textSecondary,
-                style = MaterialTheme.typography.labelSmall.copy(fontSize = 10.sp),
-                maxLines = 1,
-                overflow = TextOverflow.Ellipsis,
-                modifier = Modifier.padding(top = 2.dp).align(Alignment.End),
-            )
         }
     }
 }
 
 @Composable
-private fun LaunchSaveCard(slot: SaveSlot, enabled: Boolean, onClick: () -> Unit) {
+private fun LaunchSaveCard(slot: SaveSlot, enabled: Boolean, focused: Boolean, onClick: () -> Unit) {
     val context = LocalContext.current
     Card(
         onClick = onClick,
         enabled = enabled,
         colors = CardDefaults.cardColors(containerColor = RPCSXColors.surface),
-        border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant),
+        border = BorderStroke(if (focused) 2.dp else 1.dp, if (focused) RPCSXColors.focusRing else MaterialTheme.colorScheme.outlineVariant),
     ) {
         Row(Modifier.padding(6.dp), verticalAlignment = Alignment.CenterVertically) {
             Box(
@@ -1109,7 +1180,20 @@ private fun LaunchSaveCard(slot: SaveSlot, enabled: Boolean, onClick: () -> Unit
                 }
             }
             Spacer(Modifier.width(6.dp))
-            Text("SLOT ${slot.slot}", color = RPCSXColors.textPrimary, style = MaterialTheme.typography.bodySmall)
+            Column {
+                Text("SLOT ${slot.slot}", color = RPCSXColors.textPrimary, style = MaterialTheme.typography.bodySmall)
+                Text(
+                    formatLaunchSlotTime(slot.mtimeMs),
+                    color = RPCSXColors.textSecondary,
+                    style = MaterialTheme.typography.labelSmall,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis,
+                )
+            }
         }
     }
 }
+
+private fun formatLaunchSlotTime(mtimeMs: Long): String =
+    if (mtimeMs <= 0L) "—"
+    else DateFormat.getDateTimeInstance(DateFormat.MEDIUM, DateFormat.SHORT).format(Date(mtimeMs))

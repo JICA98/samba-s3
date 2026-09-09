@@ -122,6 +122,16 @@
                 android:textSize="18sp"
                 android:textStyle="bold" />
 
+            <TextView
+                android:id="@+id/transitionDetail"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="6dp"
+                android:gravity="center"
+                android:textColor="#BFFFFFFF"
+                android:textSize="14sp"
+                android:visibility="gone" />
+
             <ProgressBar
                 android:id="@+id/transitionProgress"
                 style="?android:attr/progressBarStyleHorizontal"
