@@ -2,6 +2,10 @@ package com.zenithblue.sambas3
 
 import android.content.Intent
 import android.graphics.Bitmap
+import android.graphics.RenderEffect
+import android.graphics.Shader
+import android.net.Uri
+import android.os.Build
 import android.os.Handler
 import android.os.Looper
 import android.os.Bundle
@@ -67,6 +71,8 @@ import com.zenithblue.sambas3.crash.HomeRecoveryRepository
 import com.zenithblue.sambas3.monitoring.MonitoringOverlaySettings
 import com.zenithblue.sambas3.monitoring.MonitoringRepository
 import com.zenithblue.sambas3.ui.monitoring.MonitoringOverlay
+import com.zenithblue.sambas3.ui.games.preview.GamePreviewModel
+import com.zenithblue.sambas3.ui.games.preview.GamePreviewRepository
 import com.zenithblue.sambas3.input.ControllerDeviceRepository
 import com.zenithblue.sambas3.input.ControllerFamily
 import com.zenithblue.sambas3.input.DeviceInputMapperRegistry
@@ -512,6 +518,20 @@ class RPCSXActivity : ComponentActivity(), EmulationHost {
             Log.w("S3LOG", "log session begin failed: ${e.message}")
         }
         logSessionSnapshot("activity-created")
+        if (bootMode == EmulatorBootMode.FreshGame) {
+            configureLoadingArtwork(gameInfo?.iconPath?.value)
+            showTransitionOverlay("Preparing game…")
+            interactionLock.lock(EmulatorInteractionLock.BootTransition)
+            CompileProgressBridge.state.onEach { progress ->
+                if (binding.transitionOverlay.visibility == View.VISIBLE && !recoveryTransitionActive) {
+                    binding.transitionLabel.text = when {
+                        progress.ppuActive -> progress.ppuMsg ?: "Preparing PPU cache…"
+                        progress.shaderActive -> progress.shaderMsg ?: "Preparing shaders…"
+                        else -> "Preparing game…"
+                    }
+                }
+            }.launchIn(lifecycleScope)
+        }
         if (bootMode != EmulatorBootMode.FreshGame) {
             pendingRecovery?.let {
                 transitionController.beginRecoveryBoot(it.requestId, it.slot, it.savestatePath)
@@ -738,7 +758,7 @@ class RPCSXActivity : ComponentActivity(), EmulationHost {
             var state = FreshBootFrameValidator.bootRequested()
             val surfaceGen = surfaceLeaseManager.currentGeneration
             val runtimeActiveAtBoot = runCatching {
-                CompileProgressBridge.state.value.ppuActive
+                CompileProgressBridge.state.value.hasBlockingCompileWork()
             }.getOrDefault(false)
             Log.i(
                 "S3BOOTFRAME",
@@ -759,7 +779,7 @@ class RPCSXActivity : ComponentActivity(), EmulationHost {
                 System.currentTimeMillis() < runtimeWaitDeadline &&
                 !Thread.interrupted()
             ) {
-                val active = runCatching { CompileProgressBridge.state.value.ppuActive }.getOrDefault(false)
+                val active = runCatching { CompileProgressBridge.state.value.hasBlockingCompileWork() }.getOrDefault(false)
                 if (!active && state.runtimePpuSeen) {
                     Log.i("S3BOOTFRAME", "event=runtime_ppu_terminal title=$titleId")
                     state = FreshBootFrameValidator.onRuntimePpuTerminal(
@@ -783,7 +803,7 @@ class RPCSXActivity : ComponentActivity(), EmulationHost {
             }
             // If Runtime PPU never appeared, move to first-frame wait.
             if (state.phase == FreshBootFramePhase.WaitingForRuntimePpu) {
-                val stillActive = runCatching { CompileProgressBridge.state.value.ppuActive }.getOrDefault(false)
+                val stillActive = runCatching { CompileProgressBridge.state.value.hasBlockingCompileWork() }.getOrDefault(false)
                 if (!stillActive) {
                     state = FreshBootFrameValidator.onRuntimePpuTerminal(
                         state,
@@ -809,7 +829,7 @@ class RPCSXActivity : ComponentActivity(), EmulationHost {
                 // If Runtime PPU or SPU/Shader starts late, pause the frame window.
                 val runtimeActive = runCatching {
                     val st = CompileProgressBridge.state.value
-                    st.ppuActive || st.shaderActive
+                    st.hasBlockingCompileWork()
                 }.getOrDefault(false)
                 if (runtimeActive) {
                     Log.i("S3BOOTFRAME", "event=runtime_ppu_begin title=$titleId late=1")
@@ -820,7 +840,7 @@ class RPCSXActivity : ComponentActivity(), EmulationHost {
                     while (
                         runCatching {
                             val st = CompileProgressBridge.state.value
-                            st.ppuActive || st.shaderActive
+                            st.hasBlockingCompileWork()
                         }.getOrDefault(false) &&
                         System.currentTimeMillis() < runtimeWaitDeadline &&
                         !Thread.interrupted()
@@ -874,6 +894,13 @@ class RPCSXActivity : ComponentActivity(), EmulationHost {
                     PpuReadinessStore.markRuntimeValidatedByRealBoot(this@RPCSXActivity, titleId)
                 }
                 EmulationSessionJournal.update(this@RPCSXActivity, EmulationSessionState.RUNNING)
+                runOnUiThread {
+                    if (!isFinishing && !recoveryTransitionActive) {
+                        binding.transitionOverlay.visibility = View.GONE
+                        interactionLock.unlock()
+                        inputGate.waitForNeutral()
+                    }
+                }
                 return@thread
             }
 
@@ -1406,6 +1433,26 @@ class RPCSXActivity : ComponentActivity(), EmulationHost {
         binding.transitionLabel.text = label
         binding.transitionOverlay.alpha = 1f
         binding.transitionOverlay.visibility = View.VISIBLE
+    }
+
+    private fun CompileProgressBridge.CompileState.hasBlockingCompileWork(): Boolean =
+        shaderActive || (ppuActive && !(ppuPercent >= 100 && moduleTotal > 0 && moduleDone >= moduleTotal))
+
+    private fun configureLoadingArtwork(iconPath: String?) {
+        fun setPreview(view: android.widget.ImageView, preview: GamePreviewModel) {
+            when (preview) {
+                is GamePreviewModel.LocalFile -> view.setImageURI(Uri.fromFile(preview.file))
+                is GamePreviewModel.ContentUri -> view.setImageURI(preview.uri)
+                GamePreviewModel.None -> return
+            }
+            view.visibility = View.VISIBLE
+        }
+
+        setPreview(binding.transitionFrame, GamePreviewRepository.resolveInstalledBackground(iconPath))
+        setPreview(binding.transitionLogo, GamePreviewRepository.resolveInstalledPreview(iconPath))
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S && binding.transitionFrame.visibility == View.VISIBLE) {
+            binding.transitionFrame.setRenderEffect(RenderEffect.createBlurEffect(18f, 18f, Shader.TileMode.CLAMP))
+        }
     }
 
     /** Capture the currently displayed game frame before the old surface is released. */
