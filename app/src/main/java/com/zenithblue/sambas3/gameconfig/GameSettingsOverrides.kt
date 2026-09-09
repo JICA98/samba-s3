@@ -119,6 +119,13 @@ object GameSettingsOverrides {
                 "Video@@Relaxed ZCULL Sync" to "true",
                 "Core@@Max SPURS Threads" to "4"
             )
+            // inFamous 2 needs asynchronous texture streaming for complete
+            // rendering. Compatible savestates keep its busy SPU workload at
+            // safe points so a manual save can finish instead of being rejected.
+            "BCUS98125", "BCES01143", "BCES01144", "BCES01229", "NPEA00318", "NPUA80638" -> mapOf(
+                "Video@@Vulkan@@Asynchronous Texture Streaming 2" to "true",
+                "Savestate@@Compatible Savestate Mode" to "true"
+            )
             else -> emptyMap()
         }
     }

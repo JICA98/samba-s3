@@ -54,7 +54,10 @@ import java.io.File
  *  adb shell am broadcast -a com.zenithblue.sambas3.DEBUG_PAD --ei d2 64 --ei lx 127
  * Seen in LogMonitor as tag "DebugPad" → routed to BACKEND (via RPCSX-UI? actually uses Log.w).
  */
-class DebugPadReceiver(private val onDebugFatal: (() -> Unit)? = null) : BroadcastReceiver() {
+class DebugPadReceiver(
+    private val onDebugFatal: (() -> Unit)? = null,
+    private val onDebugButton: ((String) -> Boolean)? = null,
+) : BroadcastReceiver() {
     override fun onReceive(context: Context?, intent: Intent?) {
         val action = intent?.action ?: return
         val requestId = intent.getStringExtra("request_id").orEmpty()
@@ -149,6 +152,11 @@ class DebugPadReceiver(private val onDebugFatal: (() -> Unit)? = null) : Broadca
             }
             action.startsWith(PREFIX) -> {
                 val suffix = action.removePrefix(PREFIX)
+                if (onDebugButton?.invoke(suffix) == true) {
+                    Log.w("DebugPad", "BUTTON $suffix consumed-by-frontend request_id=$requestId")
+                    Log.w("DebugPad", "BUTTON $suffix release request_id=$requestId")
+                    return
+                }
                 val (d1, d2) = buttonToBits(suffix) ?: run {
                     Log.w("DebugPad", "unknown button $suffix")
                     return
@@ -566,8 +574,12 @@ class DebugPadReceiver(private val onDebugFatal: (() -> Unit)? = null) : Broadca
         const val ACTION_DRIVER_TU_DEBUG = "com.zenithblue.sambas3.DEBUG_DRIVER_TU_DEBUG"
         const val ACTION_MONITOR_SET = "com.zenithblue.sambas3.DEBUG_MONITOR_SET"
 
-        fun register(context: Context, onDebugFatal: (() -> Unit)? = null): DebugPadReceiver {
-            val r = DebugPadReceiver(onDebugFatal)
+        fun register(
+            context: Context,
+            onDebugFatal: (() -> Unit)? = null,
+            onDebugButton: ((String) -> Boolean)? = null,
+        ): DebugPadReceiver {
+            val r = DebugPadReceiver(onDebugFatal, onDebugButton)
             val f = IntentFilter().apply {
                 addAction(ACTION_PAD)
                 addAction(ACTION_FATAL)

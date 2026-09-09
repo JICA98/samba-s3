@@ -10,6 +10,9 @@ This directory tracks **per-title** compatibility, configs and loop results by t
 | `BLUS31584-GTA-San-Andreas.md` | GTA SA — **in-game pass** after replacing the truncated `PS3DataMain.obb`; shader/steady-state FPS optimization remains open. |
 | `BLUS30443-Demons-Souls.md` | Demon's Souls — **in-game pass** after Write Color Buffers fix, JNI fallback bridge, and pre-boot curated defaults. |
 | `BLUS30758-Red-Dead-Redemption.md` | Red Dead Redemption — intro rendering only; post-intro black screen still reproduced on Adreno 750 / Turnip 26.2.99 with gpu_label active. See [current validation](../findings/2026-09-04-rdr-adreno750-gpulabel-validation.md). |
+| `BCUS98125-Infamous-2.md` | inFamous 2 — OnePlus 13R reaches correctly rendered gameplay and now passes load-slot-0 → save-slot-1 → restore with both slot files preserved. Poco X6 Pro is deferred with a documented repeatable Mali 44.1.0 driver crash. |
+| `BCUS98111-God-of-War-III.md` | God of War III — user-verified in-game on OnePlus 13R at approximately 15 FPS; title-specific benchmarking remains pending. |
+| `BCUS98123-Uncharted-2.md` | Uncharted 2 — a second cached boot on OnePlus reaches the title screen, then freezes at the START prompt with corrupted rendering and RSX saturation; no fresh crash or OOM event is present. |
 | `BCUS98174/qualcomm-adreno/adreno-750/README.md` | The Last of Us — **fail** on OnePlus 13R / Adreno 750 / Turnip 26.2.99. Update 1.11 still ends in an SPU null DMA access and RSX-thread segfault; no stable 30 FPS gameplay pass. |
 | `GPU-COMPATIBILITY.md` | Global SambaS3 GPU-family forecast and verification matrix for Adreno, Mali/Immortalis, Xclipse/AMD and PowerVR. |
 | `<TITLEID>/<vendor-architecture>/<gpu-name>/README.md` | Preferred hierarchy for new device-specific game reports. |

@@ -433,11 +433,15 @@ class RPCSXActivity : ComponentActivity(), EmulationHost {
         }
         onBackPressedDispatcher.addCallback(this, backCallback)
 
-        debugPadReceiver = DebugPadReceiver.register(this) {
-            if (com.zenithblue.sambas3.BuildConfig.DEBUG) {
-                showInProcessFault("DEBUG_SIMULATED_FATAL VK_ERROR_DEVICE_LOST")
-            }
-        }
+        debugPadReceiver = DebugPadReceiver.register(
+            context = this,
+            onDebugFatal = {
+                if (com.zenithblue.sambas3.BuildConfig.DEBUG) {
+                    showInProcessFault("DEBUG_SIMULATED_FATAL VK_ERROR_DEVICE_LOST")
+                }
+            },
+            onDebugButton = { button -> handleDebugFrontendButton(button) },
+        )
 
         binding.oscToggle.setOnClickListener {
             toggleOnScreenControls()
@@ -1306,7 +1310,9 @@ class RPCSXActivity : ComponentActivity(), EmulationHost {
         bootThread?.interrupt()
         bootThread = thread(name = "S3 Manual Savestate Confirm") {
             val expectedGeneration = surfaceLeaseManager.currentGeneration
-            val deadline = System.currentTimeMillis() + 60_000L
+            // Large titles can legitimately spend close to a minute tearing
+            // down the old generation and restoring RSX state on Android.
+            val deadline = System.currentTimeMillis() + FIRST_FRAME_TIMEOUT_MS
             val notBefore = System.currentTimeMillis() + 3_000L
             var stable = 0
             while (System.currentTimeMillis() < deadline && !Thread.interrupted()) {
@@ -1333,7 +1339,9 @@ class RPCSXActivity : ComponentActivity(), EmulationHost {
                     return@thread
                 }
             }
-            if (!Thread.interrupted()) {
+            val stillPending = PendingSavestateRecoveryStore.read(this@RPCSXActivity)
+                ?.let { it.requestId == record.requestId && it.slot == record.slot } == true
+            if (!Thread.interrupted() && stillPending) {
                 val reason = "manual-load-timeout"
                 Log.e("S3SAVE", "$reason requestId=${record.requestId} slot=${record.slot}; exact slot kept for recovery")
                 PendingSavestateRecoveryStore.markFailure(this@RPCSXActivity, reason)
@@ -1358,6 +1366,10 @@ class RPCSXActivity : ComponentActivity(), EmulationHost {
             return
         }
         if (!success) {
+            bootThread?.takeIf { it.name == "S3 Manual Savestate Confirm" }?.let {
+                it.interrupt()
+                if (bootThread === it) bootThread = null
+            }
             PendingSavestateRecoveryStore.markFailure(this, reason)
             failTransition(reason)
             Log.e("S3SAVE", "manual-load terminal failure requestId=$requestId slot=$slot reason=$reason")
@@ -1370,6 +1382,10 @@ class RPCSXActivity : ComponentActivity(), EmulationHost {
         if (!transitionController.inGameLoadCompleted(record.requestId, record.slot)) {
             Log.w("S3SAVE", "manual-load completion ignored stale requestId=${record.requestId} slot=${record.slot} source=$source")
             return
+        }
+        bootThread?.takeIf { it.name == "S3 Manual Savestate Confirm" }?.let {
+            it.interrupt()
+            if (bootThread === it) bootThread = null
         }
         runCatching { RPCSX.instance.clearSavestateProgress() }
         PendingSavestateRecoveryStore.clear(this)
@@ -1566,6 +1582,25 @@ class RPCSXActivity : ComponentActivity(), EmulationHost {
     }
 
     /** Map a semantic menu command to coordinator intents. Returns true if consumed. */
+    private fun handleDebugFrontendButton(button: String): Boolean {
+        if (!isMenuOpen()) return false
+        val command = when (button.uppercase()) {
+            "UP" -> MenuCommand.Previous
+            "DOWN" -> MenuCommand.Next
+            "LEFT" -> MenuCommand.Left
+            "RIGHT" -> MenuCommand.Right
+            "CROSS" -> MenuCommand.Activate
+            "CIRCLE" -> MenuCommand.Back
+            "PS" -> MenuCommand.HomeToggle
+            "SQUARE" -> MenuCommand.PageAction1
+            "TRIANGLE" -> MenuCommand.PageAction2
+            "L1" -> MenuCommand.PageUp
+            "R1" -> MenuCommand.PageDown
+            else -> return false
+        }
+        return handleMenuCommand(command)
+    }
+
     private fun handleMenuCommand(command: MenuCommand): Boolean {
         if (coordinator.handleLoadUnavailableCommand(command)) return true
         if (coordinator.handleSaveConfirmCommand(command)) return true

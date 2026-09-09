@@ -42,8 +42,13 @@
         <service
             android:name=".ppu.PpuBatchWorkerService"
             android:process=":ppu_compile"
+            android:foregroundServiceType="specialUse"
             android:exported="false"
-            android:stopWithTask="false" />
+            android:stopWithTask="false">
+            <property
+                android:name="android.app.PROPERTY_SPECIAL_USE_FGS_SUBTYPE"
+                android:value="Runs one user-requested isolated PS3 PPU compilation batch while showing ongoing progress; the process exits after each batch to release compiler memory" />
+        </service>
         <service
             android:name=".CompilationMonitorService"
             android:foregroundServiceType="specialUse"

@@ -266,6 +266,21 @@ class GameSettingsOverridesTest {
         assertTrue(appliedCalls.contains("Core@@Max SPURS Threads" to "4"))
     }
 
+    @Test
+    fun curated_defaults_enable_rendering_and_safe_savestates_for_infamous_2() {
+        val titles = listOf("BCUS98125", "BCES01143", "BCES01144", "BCES01229", "NPEA00318", "NPUA80638")
+        for (title in titles) {
+            val defaults = GameSettingsOverrides.curatedDefaultsForTitle(title.lowercase())
+            assertEquals("true", defaults["Video@@Vulkan@@Asynchronous Texture Streaming 2"])
+            assertEquals("true", defaults["Savestate@@Compatible Savestate Mode"])
+        }
+
+        appliedCalls.clear()
+        GameSettingsOverrides.applyForGame(store, "BCUS98125", recordingSetter())
+        assertTrue(appliedCalls.contains("Video@@Vulkan@@Asynchronous Texture Streaming 2" to "true"))
+        assertTrue(appliedCalls.contains("Savestate@@Compatible Savestate Mode" to "true"))
+    }
+
     // ── resolveTitleId segment heuristic lives in TitleIdResolverTest ────────
 
     // ── Compatibility / explicit-user separation (§56) ─────────────────────

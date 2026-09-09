@@ -2,11 +2,16 @@ package com.zenithblue.sambas3.ppu
 
 import android.app.Service
 import android.content.Intent
+import android.content.pm.ServiceInfo
 import android.os.Handler
 import android.os.IBinder
 import android.os.Looper
 import android.os.Process
 import android.util.Log
+import androidx.core.app.NotificationCompat
+import androidx.core.app.ServiceCompat
+import com.zenithblue.sambas3.NotificationChannels
+import com.zenithblue.sambas3.R
 import com.zenithblue.sambas3.RPCSX
 import java.util.UUID
 import java.util.concurrent.atomic.AtomicBoolean
@@ -16,6 +21,7 @@ import kotlin.concurrent.thread
 class PpuBatchWorkerService : Service() {
     companion object {
         private const val TAG = "PpuBatchWorker"
+        const val NOTIF_PPU_WORKER = 2003
     }
 
     private val serviceInstanceId = UUID.randomUUID().toString()
@@ -23,6 +29,41 @@ class PpuBatchWorkerService : Service() {
     private val mainHandler = Handler(Looper.getMainLooper())
     private val batchAdmitted = AtomicBoolean(false)
     private val activeLogicalSessionId = AtomicLong(0L)
+    private var isForeground = false
+
+    override fun onCreate() {
+        super.onCreate()
+        NotificationChannels.ensureCreated(this)
+    }
+
+    override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
+        val notification = NotificationCompat.Builder(this, NotificationChannels.RPCSX_PROGRESS)
+            .setContentTitle(getString(R.string.compiling_ppu_title))
+            .setContentText(getString(R.string.compiling_ppu_worker_desc))
+            .setSmallIcon(R.mipmap.ic_sambas3_foreground)
+            .setCategory(NotificationCompat.CATEGORY_PROGRESS)
+            .setPriority(NotificationCompat.PRIORITY_LOW)
+            .setOngoing(true)
+            .setSilent(true)
+            .setShowWhen(false)
+            .setProgress(0, 0, true)
+            .build()
+        return try {
+            ServiceCompat.startForeground(
+                this,
+                NOTIF_PPU_WORKER,
+                notification,
+                ServiceInfo.FOREGROUND_SERVICE_TYPE_SPECIAL_USE,
+            )
+            isForeground = true
+            Log.i(TAG, "startForeground id=$NOTIF_PPU_WORKER startId=$startId")
+            START_NOT_STICKY
+        } catch (e: Exception) {
+            Log.e(TAG, "startForeground failed startId=$startId: ${e.message}", e)
+            stopSelf(startId)
+            START_NOT_STICKY
+        }
+    }
 
     private val binder = object : IPpuBatchWorker.Stub() {
         override fun startBatch(
@@ -240,6 +281,16 @@ class PpuBatchWorkerService : Service() {
                 Process.killProcess(pid)
             } catch (_: Exception) {}
         }, 150)
+    }
+
+    override fun onDestroy() {
+        if (isForeground) {
+            runCatching {
+                ServiceCompat.stopForeground(this, ServiceCompat.STOP_FOREGROUND_REMOVE)
+            }
+            isForeground = false
+        }
+        super.onDestroy()
     }
 
     override fun onBind(intent: Intent?): IBinder = binder

@@ -6,6 +6,7 @@ import android.content.Intent
 import android.content.ServiceConnection
 import android.os.IBinder
 import android.util.Log
+import androidx.core.content.ContextCompat
 import java.util.concurrent.atomic.AtomicBoolean
 import kotlinx.coroutines.CompletableDeferred
 
@@ -17,12 +18,14 @@ sealed class WorkerDeathReason {
 }
 
 class PpuBatchWorkerConnection(
-    private val context: Context,
+    context: Context,
     private val onDeath: (WorkerDeathReason) -> Unit,
 ) : ServiceConnection {
     companion object {
         private const val TAG = "PpuWorkerConn"
     }
+
+    private val context = context.applicationContext
 
     private var bound = false
     private var serviceBinder: IBinder? = null
@@ -51,8 +54,33 @@ class PpuBatchWorkerConnection(
 
     fun bind(): Boolean {
         val intent = Intent(context, PpuBatchWorkerService::class.java)
-        bound = context.bindService(intent, this, Context.BIND_AUTO_CREATE)
-        PpuDiagnosticLog.emit("worker_bind", extras = mapOf("bound" to bound))
+        val started = try {
+            ContextCompat.startForegroundService(context, intent)
+            true
+        } catch (e: Exception) {
+            Log.e(TAG, "startForegroundService failed: ${e.message}", e)
+            false
+        }
+        if (!started) {
+            PpuDiagnosticLog.emit(
+                "worker_bind",
+                extras = mapOf("foregroundStart" to false, "bound" to false),
+            )
+            return false
+        }
+        bound = try {
+            context.bindService(intent, this, Context.BIND_AUTO_CREATE)
+        } catch (e: Exception) {
+            Log.e(TAG, "bindService failed: ${e.message}", e)
+            false
+        }
+        if (!bound) {
+            runCatching { context.stopService(intent) }
+        }
+        PpuDiagnosticLog.emit(
+            "worker_bind",
+            extras = mapOf("foregroundStart" to started, "bound" to bound),
+        )
         return bound
     }
 
@@ -145,6 +173,13 @@ class PpuBatchWorkerConnection(
             try {
                 context.unbindService(this)
             } catch (_: Exception) {}
+        }
+        // The worker is both started (to obtain real foreground-service
+        // priority) and bound (for IPC). Always release the started lifetime
+        // alongside the binding so failed/abandoned handshakes cannot leave a
+        // notification or an idle isolated process behind.
+        runCatching {
+            context.stopService(Intent(context, PpuBatchWorkerService::class.java))
         }
     }
 

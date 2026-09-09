@@ -1,5 +1,5 @@
 diff --git a/android/src/rpcsx-android.cpp b/android/src/rpcsx-android.cpp
-index 8308a4798..28dbc828d 100644
+index 8308a4798..38bcb05ea 100644
 --- a/android/src/rpcsx-android.cpp
 +++ b/android/src/rpcsx-android.cpp
 @@ -55,6 +55,8 @@
@@ -710,9 +710,23 @@ index 8308a4798..28dbc828d 100644
  //   <config>/savestates/<TITLE>/<TITLE>_1_<slot>.SAVESTAT.zst
  static constexpr int kSaveStateSlotCount = 5;
 
-@@ -4074,20 +4587,9 @@ extern "C" bool _rpcsx_saveState(int slot)
+@@ -4071,30 +4584,30 @@ extern "C" bool _rpcsx_saveState(int slot)
+                    fmt::format(" emu_stopped=%d suspend=%d",
+                                (int)Emu.IsStopped(), (int)suspendMode)
+                        .c_str());
++        Emu.after_savestate_failure_callback = [slot, id](std::string reason)
++        {
++            const destructive_guard clear_busy;
++            rpcsx_android.error("S3SAVE id=%llu phase=failed slot=%d reason=%s",
++                                (u64)id, slot, reason.c_str());
++            const std::string failure = nlohmann::json{
++                {"requestId", id}, {"slot", slot}, {"reason", reason}
++            }.dump();
++            emit_frontend_event(FRONTEND_EVENT_SAVESTATE_FAILED, &failure);
++        };
          Emu.after_kill_callback = [slot, suspendMode, id]()
          {
++            Emu.after_savestate_failure_callback = nullptr;
              const destructive_guard clear_busy;
 -            const std::string fresh = slotSavestatePathCompressed(0);
 -            if (slot > 0 && !fresh.empty())
@@ -733,7 +747,28 @@ index 8308a4798..28dbc828d 100644
              if (boot_path.empty())
              {
                  rpcsx_android.error("S3SAVE id=%llu phase=failed slot=%d reason=missing_slot_file",
-@@ -4111,6 +4613,10 @@ extern "C" bool _rpcsx_saveState(int slot)
+                                     (u64)id, slot);
+-                const std::string failure = fmt::format(
+-                    R"({{"requestId":{},"slot":{},"reason":"missing_slot_file"}})",
+-                    id, slot);
++                const std::string failure = nlohmann::json{
++                    {"requestId", id}, {"slot", slot}, {"reason", "missing_slot_file"}
++                }.dump();
+                 emit_frontend_event(FRONTEND_EVENT_SAVESTATE_FAILED, &failure);
+                 return;
+             }
+@@ -4104,13 +4617,18 @@ extern "C" bool _rpcsx_saveState(int slot)
+             {
+                 rpcsx_android.error("S3SAVE id=%llu phase=failed slot=%d reason=invalid_final_file path='%s'",
+                                     (u64)id, slot, boot_path);
+-                const std::string failure = fmt::format(
+-                    R"({{"requestId":{},"slot":{},"path":"{}","reason":"invalid_final_file"}})",
+-                    id, slot, boot_path);
++                const std::string failure = nlohmann::json{
++                    {"requestId", id}, {"slot", slot}, {"path", boot_path},
++                    {"reason", "invalid_final_file"}
++                }.dump();
+                 emit_frontend_event(FRONTEND_EVENT_SAVESTATE_FAILED, &failure);
                  return;
              }
 
@@ -744,7 +779,21 @@ index 8308a4798..28dbc828d 100644
              sstate_log(id, "save", "core_stopped");
              rpcsx_android.notice("S3SAVE id=%llu phase=file-committed slot=%d path='%s' size=%llu",
                                   (u64)id, slot, boot_path, (u64)info.size);
-@@ -4144,13 +4650,71 @@ extern "C" bool _rpcsx_saveState(int slot)
+@@ -4139,18 +4657,85 @@ extern "C" bool _rpcsx_saveState(int slot)
+                                  (u64)id, slot, boot_path);
+             emit_frontend_event(FRONTEND_EVENT_SAVESTATE_COMMITTED, &committed);
+         };
++        // The frontend menu owns a regular emulation pause. RPCSX's savestate
++        // preparation must run briefly so it can place every SPU at its own
++        // savestate-safe boundary; asking it to prepare an already paused core
++        // makes the SPU lock routine reject immediately.
++        if (Emu.IsPaused())
++        {
++            sstate_log(id, "save", "resume_for_spu_prepare");
++            Emu.Resume();
++        }
+         sstate_log(id, "save", "kill_begin");
+         if (!suspendMode)
          {
              Emu.SetContinuousMode(true);
          }
@@ -818,7 +867,7 @@ index 8308a4798..28dbc828d 100644
  {
      if (slot < 0 || slot >= kSaveStateSlotCount)
          slot = 0;
-@@ -4172,172 +4736,269 @@ extern "C" bool _rpcsx_loadSaveState(int slot)
+@@ -4172,172 +4757,272 @@ extern "C" bool _rpcsx_loadSaveState(int slot)
      sstate_log(id, "load", "file_resolved", fmt::format(" path='{}'", path).c_str());
      g_frontend_menu_active = false;
      g_frontend_menu_paused_emu = false;
@@ -882,7 +931,10 @@ index 8308a4798..28dbc828d 100644
 +        {
 +            g_coreDispatch.push(std::move(boot));
 +        };
-+        Emu.GracefulShutdown(false, false, false, true);
++        // Do not synchronously wait on the lifecycle queue: Kill's final
++        // cleanup is posted back to this same queue. The after-kill callback
++        // above remains the ordering barrier before the restored slot boots.
++        Emu.GracefulShutdown(false, true, false, true);
 +        sstate_log(id, "load", "shutdown_queued",
 +                   fmt::format(" is_stopped=%d", (int)Emu.IsStopped()).c_str());
      });
@@ -1627,6 +1679,38 @@ index d2768d8b0..caaef4c15 100644
  		if (caller_is_named)
  		{
  			thread_ctrl::set_name(old_name);
+diff --git a/rpcs3/Emu/RSX/VK/VKDraw.cpp b/rpcs3/Emu/RSX/VK/VKDraw.cpp
+index fd2370c95..e7bc835a3 100644
+--- a/rpcs3/Emu/RSX/VK/VKDraw.cpp
++++ b/rpcs3/Emu/RSX/VK/VKDraw.cpp
+@@ -494,19 +494,18 @@ void VKGSRender::load_texture_env()
+ 		}
+ 	}
+
+-	if (g_cfg.video.vk.asynchronous_texture_streaming)
++	if (auto* async_task_scheduler = g_fxo->try_get<vk::AsyncTaskScheduler>();
++		async_task_scheduler && async_task_scheduler->is_recording() &&
++		!async_task_scheduler->is_host_mode())
+ 	{
+ 		// We have to do this here, because we have to assume the CB will be dumped
+-		auto& async_task_scheduler = g_fxo->get<vk::AsyncTaskScheduler>();
+-
+-		if (async_task_scheduler.is_recording() &&
+-			!async_task_scheduler.is_host_mode())
++		// The setting can be enabled while the active Vulkan device has no
++		// independent transfer queue. In that case no scheduler is created, so
++		// only access it after confirming the FXO instance exists.
++		if (auto ev = async_task_scheduler->get_primary_sync_label())
+ 		{
+ 			// Sync any async scheduler tasks
+-			if (auto ev = async_task_scheduler.get_primary_sync_label())
+-			{
+-				ev->gpu_wait(*m_current_command_buffer, m_async_compute_dependency_info);
+-			}
++			ev->gpu_wait(*m_current_command_buffer, m_async_compute_dependency_info);
+ 		}
+ 	}
+ }
 diff --git a/rpcs3/Emu/RSX/VK/VKTextureCache.cpp b/rpcs3/Emu/RSX/VK/VKTextureCache.cpp
 index 72b6bcf40..f58605836 100644
 --- a/rpcs3/Emu/RSX/VK/VKTextureCache.cpp
@@ -1747,7 +1831,7 @@ index 6df7e3334..56e23fd85 100644
 
  	gpu_debug_marker::gpu_debug_marker(gpu_debug_marker_pool& pool, std::string message)
 diff --git a/rpcs3/Emu/System.cpp b/rpcs3/Emu/System.cpp
-index 21a47f932..969910fd7 100644
+index 21a47f932..e4418a663 100644
 --- a/rpcs3/Emu/System.cpp
 +++ b/rpcs3/Emu/System.cpp
 @@ -90,7 +90,7 @@ extern void spu_load_exec(const spu_exec_object&);
@@ -1908,7 +1992,7 @@ index 21a47f932..969910fd7 100644
  {
  	static const auto make_ptr = [](auto ptr)
  	{
-@@ -3580,7 +3632,7 @@ void Emulator::Kill(bool allow_autoexit, bool savestate, savestate_stage* save_s
+@@ -3580,9 +3632,25 @@ void Emulator::Kill(bool allow_autoexit, bool savestate, savestate_stage* save_s
  			std::shared_ptr<std::shared_ptr<void>> pause_thread = std::make_shared<std::shared_ptr<void>>();
  			sstate_trace("prepare-created");
 
@@ -1916,8 +2000,52 @@ index 21a47f932..969910fd7 100644
 +			*pause_thread = make_ptr(new named_thread("Savestate Prepare Thread"sv, [pause_thread, allow_autoexit, savestate_id, this, sstate_trace, post_core_lifecycle]() mutable
  				{
  					sstate_trace("prepare-entry");
++					const auto finish_failed_prepare = [&post_core_lifecycle, &pause_thread](std::string reason)
++					{
++						auto failure_callback = std::move(Emu.after_savestate_failure_callback);
++						post_core_lifecycle([
++							pause = std::move(pause_thread),
++							failure_callback = std::move(failure_callback),
++							reason = std::move(reason)]() mutable
++							{
++								// Retain and then release the prepare thread on the lifecycle
++								// queue. Notify the platform exactly once after preparation ends.
++								if (failure_callback)
++								{
++									failure_callback(std::move(reason));
++								}
++							});
++					};
  					struct scoped_success_guard
-@@ -3678,13 +3730,13 @@ void Emulator::Kill(bool allow_autoexit, bool savestate, savestate_stage* save_s
+ 					{
+ 						bool save_state_success = false;
+@@ -3618,11 +3686,7 @@ void Emulator::Kill(bool allow_autoexit, bool savestate, savestate_stage* save_s
+ 						}
+
+ 						m_emu_state_close_pending = false;
+-
+-						post_core_lifecycle([pause = std::move(pause_thread)]()
+-							{
+-								// Join thread
+-							});
++						finish_failed_prepare("spu_lock_failed");
+
+ 						return;
+ 					}
+@@ -3665,11 +3729,7 @@ void Emulator::Kill(bool allow_autoexit, bool savestate, savestate_stage* save_s
+ 						}
+
+ 						m_emu_state_close_pending = false;
+-
+-						post_core_lifecycle([pause = std::move(pause_thread)]()
+-							{
+-								// Join thread
+-							});
++						finish_failed_prepare(vdec_error ? "vdec_active" : "savedata_active");
+
+ 						return;
+ 					}
+@@ -3678,13 +3738,13 @@ void Emulator::Kill(bool allow_autoexit, bool savestate, savestate_stage* save_s
  					success_guard.save_state_success = true;
 
  					sstate_trace("prepared-kill-dispatch-before");
@@ -1933,16 +2061,24 @@ index 21a47f932..969910fd7 100644
  							sstate_trace("prepared-kill-callback-exit");
  						});
  					sstate_trace("prepared-kill-dispatch-after");
-@@ -3799,7 +3851,7 @@ void Emulator::Kill(bool allow_autoexit, bool savestate, savestate_stage* save_s
+@@ -3748,6 +3808,7 @@ void Emulator::Kill(bool allow_autoexit, bool savestate, savestate_stage* save_s
+ 		hdd1.clear();
+ 		init_mem_containers = nullptr;
+ 		after_kill_callback = nullptr;
++		after_savestate_failure_callback = nullptr;
+ 		m_config_path.clear();
+ 		m_config_mode = cfg_mode::custom;
+ 		read_used_savestate_versions();
+@@ -3799,7 +3860,7 @@ void Emulator::Kill(bool allow_autoexit, bool savestate, savestate_stage* save_s
  	// There is no race condition because it is only accessed by the same thread
  	std::shared_ptr<std::shared_ptr<void>> join_thread = std::make_shared<std::shared_ptr<void>>();
 
 -	*join_thread = make_ptr(new named_thread("Emulation Join Thread"sv, [join_thread, savestate, allow_autoexit, save_stage = save_stage ? *save_stage : savestate_stage{}, this]() mutable
-+	*join_thread = make_ptr(new named_thread("Emulation Join Thread"sv, [join_thread, savestate, allow_autoexit, savestate_id, save_stage = save_stage ? *save_stage : savestate_stage{}, this]() mutable
++	*join_thread = make_ptr(new named_thread("Emulation Join Thread"sv, [join_thread, savestate, allow_autoexit, savestate_id, save_stage = save_stage ? *save_stage : savestate_stage{}, post_core_lifecycle, this]() mutable
  		{
  			fs::pending_file file;
 
-@@ -3912,7 +3964,7 @@ void Emulator::Kill(bool allow_autoexit, bool savestate, savestate_stage* save_s
+@@ -3912,7 +3973,7 @@ void Emulator::Kill(bool allow_autoexit, bool savestate, savestate_stage* save_s
  			{
  				set_progress_message("Creating File");
 
@@ -1951,8 +2087,20 @@ index 21a47f932..969910fd7 100644
 
  				// The function is meant for reading files, so if there is no ZST file it would not return compressed file path
  			    // So this is the only place where the result is edited if need to be
+@@ -4279,8 +4340,9 @@ void Emulator::Kill(bool allow_autoexit, bool savestate, savestate_stage* save_s
+
+ 			set_progress_message("Resetting Objects");
+
+-			// Final termination from main thread (move the last ownership of join thread in order to destroy it)
+-			CallFromMainThread([join_thread = std::move(join_thread), verbose_message, stop_watchdog, init_mtx, allow_autoexit, this]()
++			// Final termination on the serialized lifecycle queue. Move the last
++			// ownership there so this join thread never destroys or joins itself.
++			post_core_lifecycle([join_thread = std::move(join_thread), verbose_message, stop_watchdog, init_mtx, allow_autoexit, this]()
+ 				{
+ 					cpu_thread::cleanup();
+
 diff --git a/rpcs3/Emu/System.h b/rpcs3/Emu/System.h
-index 804981160..d35b3d49e 100644
+index 804981160..323d2daf6 100644
 --- a/rpcs3/Emu/System.h
 +++ b/rpcs3/Emu/System.h
 @@ -78,6 +78,9 @@ struct EmuCallbacks
@@ -1965,7 +2113,17 @@ index 804981160..d35b3d49e 100644
  	std::function<void()> on_missing_fw;
  	std::function<void(std::shared_ptr<atomic_t<bool>>, int)> on_emulation_stop_no_response;
  	std::function<void(std::shared_ptr<atomic_t<bool>>, stx::shared_ptr<utils::serial>, stx::atomic_ptr<std::string>*, std::shared_ptr<void>)> on_save_state_progress;
-@@ -452,6 +455,8 @@ public:
+@@ -270,6 +273,9 @@ public:
+ 	std::string hdd1;
+ 	std::function<void(u32)> init_mem_containers;
+ 	std::function<void()> after_kill_callback;
++	// Android save requests need a terminal callback when the asynchronous
++	// prepare stage rejects a savestate before Kill reaches after_kill_callback.
++	std::function<void(std::string)> after_savestate_failure_callback;
+
+ 	u32 m_boot_source_type = 0; // CELL_GAME_GAMETYPE_SYS
+
+@@ -452,6 +458,8 @@ public:
  	void Resume();
  	void GracefulShutdown(bool allow_autoexit = true, bool async_op = false, bool savestate = false, bool continuous_mode = false);
  	void Kill(bool allow_autoexit = true, bool savestate = false, savestate_stage* stage = nullptr);
@@ -1974,7 +2132,7 @@ index 804981160..d35b3d49e 100644
  	game_boot_result Restart(bool graceful = true);
  	bool Quit(bool force_quit);
  	static void CleanUp();
-@@ -525,6 +530,10 @@ public:
+@@ -525,6 +533,10 @@ public:
  		const std::string& game_path,
  		const std::string& title_hint,
  		const std::function<bool()>& canceled);
@@ -2163,3 +2321,16 @@ index 2465b7dc6..3378ecbb9 100644
  	[[nodiscard]] bool Save(std::string_view filepath);
 
  	[[nodiscard]] u32 GetTrophiesCount() const;
+diff --git a/rpcs3/util/Thread.cpp b/rpcs3/util/Thread.cpp
+index b9c909bbb..0e096444a 100644
+--- a/rpcs3/util/Thread.cpp
++++ b/rpcs3/util/Thread.cpp
+@@ -2057,7 +2057,7 @@ const bool s_exception_handler_set = []() -> bool
+ 		std::abort();
+ 	}
+
+-#ifdef __APPLE__
++#if defined(__APPLE__) || defined(__ANDROID__)
+ 	if (::sigaction(SIGBUS, &sa, NULL) == -1)
+ 	{
+ 		std::fprintf(stderr, "sigaction(SIGBUS) failed (%d).\n", errno);
