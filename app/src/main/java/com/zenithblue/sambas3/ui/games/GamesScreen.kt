@@ -1,9 +1,13 @@
 package com.zenithblue.sambas3.ui.games
 
 import android.content.ClipData
+import android.content.BroadcastReceiver
+import android.content.Context
 import android.content.Intent
+import android.content.IntentFilter
 import android.content.ActivityNotFoundException
 import android.net.Uri
+import android.os.BatteryManager
 import android.view.InputDevice
 import android.view.KeyEvent
 import android.view.MotionEvent
@@ -12,10 +16,12 @@ import androidx.activity.compose.BackHandler
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.core.content.ContextCompat
 import androidx.core.content.FileProvider
 import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
+import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.Image
@@ -58,13 +64,18 @@ import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.focus.onFocusChanged
+import androidx.compose.ui.geometry.CornerRadius
 import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.graphics.ColorMatrix
+import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.graphics.Shape
+import androidx.compose.ui.graphics.drawscope.Fill
+import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.input.key.Key
 import androidx.compose.ui.input.key.KeyEventType
@@ -1187,8 +1198,10 @@ fun GamesScreen(
                     Text(
                         SimpleDateFormat("h:mm a", configuration.locales[0]).format(Date()),
                         style = AppTypography.labelMedium,
-                        color = RPCSXColors.textSecondary
+                        color = Color.White.copy(alpha = 0.92f)
                     )
+
+                    AdaptiveBatteryIndicator()
 
                     FrostedGlassBox(
                         ambientModel = fullscreenAmbientModel,
@@ -1444,7 +1457,6 @@ fun GamesScreen(
                         modifier = Modifier
                             .matchParentSize()
                             .blur(radius = 16.dp)
-                            .alpha(0.95f)
                     )
                 }
 
@@ -1454,8 +1466,8 @@ fun GamesScreen(
                         .background(
                             Brush.verticalGradient(
                                 listOf(
-                                    Color(0xFF0C101D).copy(alpha = 0.65f),
-                                    Color(0xFF0C101D).copy(alpha = 0.85f)
+                                    Color(0xFF141009).copy(alpha = 0.65f),
+                                    Color(0xFF141009).copy(alpha = 0.85f)
                                 )
                             )
                         )
@@ -1665,13 +1677,9 @@ fun GamesScreen(
                     )
                     RefreshFoldersTopBarButton(
                         enabled = scannedFolders.isNotEmpty() && !scanningFolder,
-                        ambientModel = fullscreenAmbientModel,
                         onClick = triggerRefresh,
                     )
-                    FrostedGlassBox(
-                        ambientModel = fullscreenAmbientModel,
-                        shape = RoundedCornerShape(4.dp),
-                        border = null,
+                    Box(
                         modifier = Modifier.clickable {
                             isGridView = !isGridView
                             com.zenithblue.sambas3.utils.GeneralSettings.setValue("home_view_mode", if (isGridView) "grid" else "carousel")
@@ -2762,6 +2770,111 @@ fun InfoBadge(text: String, color: Color = RPCSXColors.textSecondary) {
     }
 }
 
+data class BatteryUiState(val pct: Int, val charging: Boolean, val low: Boolean)
+
+/**
+ * Event-driven battery state: reads the cached ACTION_BATTERY_CHANGED sticky
+ * broadcast once, then re-reads only when the system pushes a change.
+ * No polling, no wakeups.
+ */
+@Composable
+fun rememberAdaptiveBatteryState(): BatteryUiState {
+    val context = LocalContext.current
+    fun read(intent: Intent?): BatteryUiState {
+        if (intent == null) return BatteryUiState(100, false, false)
+        val level = intent.getIntExtra(BatteryManager.EXTRA_LEVEL, -1)
+        val scale = intent.getIntExtra(BatteryManager.EXTRA_SCALE, 100).coerceAtLeast(1)
+        val pct = if (level >= 0) level * 100 / scale else 100
+        val charging = intent.getIntExtra(BatteryManager.EXTRA_PLUGGED, 0) != 0
+        val low = intent.getIntExtra(BatteryManager.EXTRA_BATTERY_LOW, 0) != 0
+        return BatteryUiState(pct, charging, low)
+    }
+    var state by remember {
+        mutableStateOf(read(context.registerReceiver(null, IntentFilter(Intent.ACTION_BATTERY_CHANGED))))
+    }
+    DisposableEffect(context) {
+        val receiver = object : BroadcastReceiver() {
+            override fun onReceive(c: Context, i: Intent) { state = read(i) }
+        }
+        ContextCompat.registerReceiver(
+            context, receiver,
+            IntentFilter(Intent.ACTION_BATTERY_CHANGED),
+            ContextCompat.RECEIVER_NOT_EXPORTED
+        )
+        onDispose { runCatching { context.unregisterReceiver(receiver) } }
+    }
+    return state
+}
+
+@Composable
+fun AdaptiveBatteryIndicator(modifier: Modifier = Modifier) {
+    val state = rememberAdaptiveBatteryState()
+    val color = when {
+        state.charging -> RPCSXColors.focusRing
+        state.low || state.pct <= 15 -> RPCSXColors.errorColor
+        state.pct <= 30 -> RPCSXColors.primary
+        else -> RPCSXColors.textPrimary
+    }
+    Row(
+        modifier = modifier,
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(4.dp)
+    ) {
+        Canvas(modifier = Modifier.size(width = 16.dp, height = 9.dp)) {
+            val sw = 1.2.dp.toPx()
+            val capW = 1.6.dp.toPx()
+            val bodyW = size.width - capW - sw
+            val bodyH = size.height - sw
+            drawRoundRect(
+                color,
+                topLeft = Offset(sw / 2, sw / 2),
+                size = Size(bodyW, bodyH),
+                cornerRadius = CornerRadius(1.5.dp.toPx()),
+                style = Stroke(sw)
+            )
+            drawRoundRect(
+                color,
+                topLeft = Offset(bodyW + sw / 2 + 0.8.dp.toPx(), size.height * 0.28f),
+                size = Size(capW, size.height * 0.44f),
+                cornerRadius = CornerRadius(0.5.dp.toPx()),
+                style = Fill
+            )
+            val inner = sw * 1.2f
+            val fillW = (bodyW - inner * 2) * (state.pct.coerceIn(0, 100) / 100f)
+            if (fillW > 0f) {
+                drawRoundRect(
+                    color,
+                    topLeft = Offset(inner, inner),
+                    size = Size(fillW, bodyH - inner - sw * 0.4f),
+                    cornerRadius = CornerRadius(0.5.dp.toPx()),
+                    style = Fill
+                )
+            }
+            if (state.charging) {
+                val ix = inner
+                val iy = inner
+                val iw = bodyW - inner * 2
+                val ih = bodyH - inner * 2
+                val bolt = Path().apply {
+                    moveTo(ix + iw * 0.58f, iy + ih * 0.02f)
+                    lineTo(ix + iw * 0.28f, iy + ih * 0.56f)
+                    lineTo(ix + iw * 0.50f, iy + ih * 0.56f)
+                    lineTo(ix + iw * 0.42f, iy + ih * 0.98f)
+                    lineTo(ix + iw * 0.74f, iy + ih * 0.38f)
+                    lineTo(ix + iw * 0.52f, iy + ih * 0.38f)
+                    close()
+                }
+                drawPath(bolt, RPCSXColors.background, style = Fill)
+            }
+        }
+        Text(
+            text = "${state.pct}%",
+            style = AppTypography.labelMedium,
+            color = color
+        )
+    }
+}
+
 @Composable
 fun FrostedGlassBox(
     ambientModel: Any?,
@@ -2898,10 +3011,7 @@ private fun IsoFoldersTopBarButton(
     val density = LocalDensity.current
     val popupGapPx = with(density) { 8.dp.roundToPx() }
     Box(modifier = Modifier.onSizeChanged { buttonHeightPx = it.height }) {
-        FrostedGlassBox(
-            ambientModel = ambientModel,
-            shape = RoundedCornerShape(4.dp),
-            border = null,
+        Box(
             modifier = Modifier.clickable { onExpandedChange(!expanded) },
         ) {
             Row(
@@ -3111,13 +3221,9 @@ private fun IsoFoldersTopBarButton(
 @Composable
 private fun RefreshFoldersTopBarButton(
     enabled: Boolean,
-    ambientModel: Any? = null,
     onClick: () -> Unit,
 ) {
-    FrostedGlassBox(
-        ambientModel = ambientModel,
-        shape = RoundedCornerShape(4.dp),
-        border = null,
+    Box(
         modifier = Modifier.clickable(enabled = enabled, onClick = onClick),
     ) {
         Row(
@@ -3130,12 +3236,12 @@ private fun RefreshFoldersTopBarButton(
                 contentDescription = "R2",
                 modifier = Modifier
                     .size(15.dp)
-                    .alpha(if (enabled) 1f else 0.4f),
+                    .alpha(if (enabled) 1f else 0.55f),
             )
             Icon(
                 painter = painterResource(R.drawable.ic_refresh),
                 contentDescription = stringResource(R.string.iso_folders_refresh),
-                tint = if (enabled) RPCSXColors.primary else RPCSXColors.textDisabled,
+                tint = if (enabled) RPCSXColors.primary else RPCSXColors.textSecondary.copy(alpha = 0.7f),
                 modifier = Modifier.size(15.dp),
             )
         }
