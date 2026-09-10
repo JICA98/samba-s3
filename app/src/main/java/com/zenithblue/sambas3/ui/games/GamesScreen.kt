@@ -247,6 +247,11 @@ fun GamesScreen(
         return
     }
 
+    // Home content is now composed and loaded — release the boot splash.
+    LaunchedEffect(Unit) {
+        com.zenithblue.sambas3.ui.splash.SplashGate.homeReady()
+    }
+
     var focusedIndex by remember { mutableStateOf(if (games.isNotEmpty()) 0 else -1) }
     var bootingGame by remember { mutableStateOf<Game?>(null) }
     var launchCenterGame by remember { mutableStateOf<Game?>(null) }

@@ -59,9 +59,9 @@ Package approved drivers with `./scripts/package-bundled-turnip-drivers.sh` (inp
 ./gradlew assembleStandardDebug
 ./gradlew assemblePlaystoreDebug
 
-# Play Store release APK / AAB
-./gradlew assemblePlaystoreRelease
-./gradlew bundlePlaystoreRelease
+# Play Store release APK / AAB (standard ONLY — playstore variant is NOT required / never ship it)
+./gradlew assembleStandardRelease
+./gradlew bundleStandardRelease
 
 # Unit tests
 ./gradlew :app:testStandardDebugUnitTest :app:testPlaystoreDebugUnitTest
@@ -76,7 +76,8 @@ Package approved drivers with `./scripts/package-bundled-turnip-drivers.sh` (inp
 # Output APKs
 # app/build/outputs/apk/standard/release/samba-s3-standard-release.apk
 # app/build/outputs/apk/standard/debug/samba-s3-standard-debug.apk
-# app/build/outputs/apk/playstore/debug/samba-s3-playstore-debug.apk
+# app/build/outputs/bundle/standardRelease/samba-s3-standard-release.aab  ← Play Store upload
+# app/build/outputs/apk/standard/debug/samba-s3-standard-debug.apk
 # app/build/outputs/bundle/playstoreRelease/samba-s3-playstore-release.aab
 ```
 

@@ -1,6 +1,6 @@
 <resources xmlns:tools="http://schemas.android.com/tools">
     <!-- Base application theme. -->
     <style name="Theme.SambaS3" parent="Theme.Material3.DayNight.NoActionBar">
-        <!-- nothing -->
+        <item name="android:windowBackground">@color/samba_window_background</item>
     </style>
 </resources>

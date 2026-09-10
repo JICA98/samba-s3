@@ -139,6 +139,9 @@ fun AppNavHost(initialRoute: String? = null) {
     AlertDialogQueue.AlertDialog()
 
     if (needsFirstRunOnboarding) {
+        LaunchedEffect(Unit) {
+            com.zenithblue.sambas3.ui.splash.SplashGate.homeReady()
+        }
         OnboardingDestination(
             entry = OnboardingEntry.FirstRun,
             onFinished = {

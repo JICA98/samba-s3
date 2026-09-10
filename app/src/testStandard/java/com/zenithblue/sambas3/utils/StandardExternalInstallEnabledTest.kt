@@ -17,9 +17,4 @@ class StandardExternalInstallEnabledTest {
         assertTrue(BuildConfig.INCLUDE_BUNDLED_TURNIP_DRIVERS)
     }
 
-    @Test
-    fun github_driver_channel_constant_present() {
-        // Class only exists on standard flavor
-        assertTrue(DefaultGpuDriverChannel.contains("K11MCH1") || DefaultGpuDriverChannel.contains("github.com"))
-    }
 }

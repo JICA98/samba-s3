@@ -39,7 +39,6 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import com.zenithblue.sambas3.PatchDownloadResult
 import com.zenithblue.sambas3.PatchGroup
 import com.zenithblue.sambas3.PatchRepository
 import com.zenithblue.sambas3.R
@@ -78,7 +77,6 @@ fun PatchManagerScreen(
     var loading by remember { mutableStateOf(true) }
     var groups by remember { mutableStateOf<List<GameGroup>>(emptyList()) }
     var query by remember { mutableStateOf("") }
-    var downloadState by remember { mutableStateOf<PatchDownloadResult?>(null) }
 
     fun refresh() {
         scope.launch {
@@ -109,18 +107,6 @@ fun PatchManagerScreen(
     }
 
     LaunchedEffect(Unit) { refresh() }
-
-    fun downloadOfficial() {
-        scope.launch {
-            downloadState = null
-            downloadState = withContext(Dispatchers.IO) {
-                PatchRepository.downloadOfficial()
-            }
-            if (downloadState is PatchDownloadResult.Success) {
-                refresh()
-            }
-        }
-    }
 
     val filteredGroups = remember(groups, query) {
         if (query.isEmpty()) {
@@ -197,13 +183,6 @@ fun PatchManagerScreen(
             )
             // Actions stay next to search when top bar is hidden (split pane).
             if (isInSplitPane) {
-                IconButton(onClick = { downloadOfficial() }) {
-                    Icon(
-                        painter = painterResource(R.drawable.ic_cloud_download),
-                        contentDescription = "Download patches",
-                        tint = RPCSXColors.textSecondary,
-                    )
-                }
                 IconButton(onClick = { importLauncher.launch("*/*") }) {
                     Icon(
                         painter = painterResource(R.drawable.ic_add),
@@ -224,26 +203,6 @@ fun PatchManagerScreen(
         ) {
             PatchSearchBar()
 
-            when {
-                downloadState is PatchDownloadResult.Error -> {
-                    Text(
-                        (downloadState as PatchDownloadResult.Error).message,
-                        modifier = Modifier.padding(horizontal = 16.dp, vertical = 4.dp),
-                        color = RPCSXColors.errorColor,
-                        style = MaterialTheme.typography.bodySmall.copy(fontFamily = FontFamily.Monospace),
-                    )
-                }
-                downloadState is PatchDownloadResult.Success &&
-                    !(downloadState as PatchDownloadResult.Success).updated -> {
-                    Text(
-                        "Patches already up to date",
-                        modifier = Modifier.padding(horizontal = 16.dp, vertical = 4.dp),
-                        color = RPCSXColors.primaryDim,
-                        style = MaterialTheme.typography.bodySmall.copy(fontFamily = FontFamily.Monospace),
-                    )
-                }
-            }
-
             if (loading) {
                 Box(
                     modifier = Modifier.fillMaxSize(),
@@ -258,16 +217,16 @@ fun PatchManagerScreen(
                 ) {
                     Column(horizontalAlignment = Alignment.CenterHorizontally) {
                         Text(
-                            "No patches found",
+                            "No patches imported",
                             style = MaterialTheme.typography.bodyLarge.copy(
                                 fontFamily = FontFamily.Monospace,
                                 color = RPCSXColors.textSecondary,
                             )
                         )
                         Spacer(modifier = Modifier.height(12.dp))
-                        OutlinedButton(onClick = { downloadOfficial() }) {
+                        OutlinedButton(onClick = { importLauncher.launch("*/*") }) {
                             Text(
-                                "DOWNLOAD OFFICIAL PATCHES",
+                                "IMPORT PATCH.YML",
                                 fontFamily = FontFamily.Monospace,
                             )
                         }
@@ -354,13 +313,6 @@ fun PatchManagerScreen(
             compact = true,
             showHints = false,
             actions = {
-                IconButton(onClick = { downloadOfficial() }) {
-                    Icon(
-                        painter = painterResource(R.drawable.ic_cloud_download),
-                        contentDescription = "Download patches",
-                        tint = RPCSXColors.textSecondary,
-                    )
-                }
                 IconButton(onClick = { importLauncher.launch("*/*") }) {
                     Icon(
                         painter = painterResource(R.drawable.ic_add),
@@ -379,26 +331,19 @@ fun PatchManagerScreen(
             onBack = navigateBack,
             hints = listOf(
                 R.drawable.cross to "Toggle",
-                R.drawable.triangle to "Update",
+                R.drawable.triangle to "Import",
                 R.drawable.circle to "Back"
             ),
             onGamepadKey = { keyCode ->
                 when (keyCode) {
                     KeyEvent.KEYCODE_BUTTON_Y -> {
-                        downloadOfficial()
+                        importLauncher.launch("*/*")
                         true
                     }
                     else -> false
                 }
             },
             actions = {
-                IconButton(onClick = { downloadOfficial() }) {
-                    Icon(
-                        painter = painterResource(R.drawable.ic_cloud_download),
-                        contentDescription = "Download patches",
-                        tint = RPCSXColors.primary,
-                    )
-                }
                 IconButton(onClick = { importLauncher.launch("*/*") }) {
                     Icon(
                         painter = painterResource(R.drawable.ic_add),

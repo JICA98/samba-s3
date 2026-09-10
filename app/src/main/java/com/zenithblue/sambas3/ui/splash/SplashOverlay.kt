@@ -43,6 +43,15 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.zenithblue.sambas3.R
 import kotlinx.coroutines.delay
+import java.util.concurrent.atomic.AtomicBoolean
+
+/** Set once the home GamesScreen has loaded real content; releases the splash. */
+object SplashGate {
+    private val ready = java.util.concurrent.atomic.AtomicBoolean(false)
+    fun homeReady() { ready.set(true) }
+    internal fun isHomeReady(): Boolean = ready.get()
+}
+
 
 private val BgDark = Color(0xFF0A0D1A)
 private val Gold = Color(0xFFC9A84C)
@@ -74,7 +83,13 @@ fun SplashOverlay(
         label = "splashAlpha",
     )
     LaunchedEffect(Unit) {
+        // Hold until home screen content is loaded (or hard cap), so the
+        // fade reveals the real UI instead of an empty background.
+        val deadline = System.currentTimeMillis() + 6000
         delay(minDurationMs)
+        while (!SplashGate.isHomeReady() && System.currentTimeMillis() < deadline) {
+            delay(50)
+        }
         fading = true
         delay(fadeMs.toLong())
         visible = false
@@ -84,8 +99,8 @@ fun SplashOverlay(
         Box(
             modifier
                 .fillMaxSize()
-                .background(BgDark)
-                .alpha(alpha),
+                .alpha(alpha)
+                .background(BgDark),
         ) { SplashContent() }
     }
 }
