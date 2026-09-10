@@ -118,7 +118,11 @@ class CompileProgressBridgeTest {
 
         assertTrue(CompileProgressBridge.clearStuckPpuUiIfComplete(21))
         val state = CompileProgressBridge.state.value
-        assertFalse(state.ppuActive)
+        // Checkpoint behavior: keep ppuActive until native terminal event, so the
+        // launcher does not re-request preparation and start a duplicate compile.
+        assertTrue(state.ppuActive)
+        assertEquals(99, state.ppuPercent)
+        assertEquals("Verifying cache… waiting for compiler process", state.ppuMsg)
         assertEquals(CompileOutcome.NONE, state.outcome)
         assertTrue(CompileProgressBridge.isRuntimeJobActive(RPCSX.COMPILE_DOMAIN_PPU, 21))
 

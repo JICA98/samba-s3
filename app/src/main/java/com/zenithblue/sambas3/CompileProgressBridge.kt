@@ -171,8 +171,9 @@ object CompileProgressBridge {
         Log.w(TAG, decision.logMessage ?: "PPU watchdog finalizing job=$jobId")
         Log.w(TAG, "PPU watchdog missing_terminal=1 establishes_validated_ready=0 job=$jobId")
         _state.value = cur.copy(
-            ppuActive = false,
+            ppuMsg = "Verifying cache… waiting for compiler process",
             remainingLabel = null,
+            ppuPercent = 99,
         )
         return true
     }
