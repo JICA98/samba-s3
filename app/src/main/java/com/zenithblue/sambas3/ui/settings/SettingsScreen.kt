@@ -35,6 +35,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.style.TextOverflow
+import com.zenithblue.sambas3.ui.settings.components.gamepadActivate
 import com.zenithblue.sambas3.ui.settings.components.safeCombinedClickable
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.runtime.mutableStateListOf
@@ -59,8 +60,10 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.material3.Button
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
@@ -83,6 +86,7 @@ import kotlin.math.abs
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableDoubleStateOf
 import androidx.compose.runtime.mutableLongStateOf
@@ -840,13 +844,22 @@ fun AdvancedSettingsScreen(
     fun AdvancedSettingsContent(
         keys: List<Pair<String, JSONObject>>,
         modifier: Modifier = Modifier,
-        contentPadding: PaddingValues = PaddingValues(0.dp)
+        contentPadding: PaddingValues = PaddingValues(0.dp),
+        focusRequesters: MutableMap<String, FocusRequester>? = null,
+        listState: LazyListState? = null
     ) {
         LazyColumn(
             modifier = modifier.fillMaxSize().padding(contentPadding),
+            state = listState ?: androidx.compose.foundation.lazy.rememberLazyListState(),
         ) {
-            items(keys, key = { it.first }) { (itemPath, itemObject) ->
+            itemsIndexed(keys, key = { _, it -> it.first }) { index, (itemPath, itemObject) ->
                 val key = itemPath.substringAfterLast("@@")
+                val itemModifier = if (focusRequesters != null) {
+                    Modifier.focusRequester(
+                        focusRequesters.getOrPut(itemPath) { FocusRequester() }
+                    )
+                } else Modifier
+                Box(modifier = itemModifier) {
                 if (itemObject != null) {
                     when (val type =
                         if (itemObject.has("type")) itemObject.getString("type") else null) {
@@ -1171,12 +1184,65 @@ fun AdvancedSettingsScreen(
                         }
                     }
                 }
+                }
             }
 
             if (path.isEmpty()) {
             }
         }
-    
+
+    }
+
+    // Hoisted page navigation handler: content panes register a key handler
+    // here so the root key path (View.OnKeyListener) can route D-pad moves.
+    val wideNavHandler = remember(path) { java.util.concurrent.atomic.AtomicReference<((Int) -> Boolean)?>(null) }
+
+    @Composable
+    fun PlainAdvancedContent(keys: List<Pair<String, JSONObject>>, contentPadding: PaddingValues) {
+        val itemRequesters = remember(keys) { mutableMapOf<String, FocusRequester>() }
+        val scrollState = androidx.compose.foundation.lazy.rememberLazyListState()
+        val scope = rememberCoroutineScope()
+        var lastIndex by remember(keys) { mutableStateOf<String?>(null) }
+        LaunchedEffect(keys) {
+            repeat(8) {
+                kotlinx.coroutines.delay(250)
+                try { itemRequesters[keys.firstOrNull()?.first]?.requestFocus(); return@LaunchedEffect } catch (_: IllegalStateException) {}
+            }
+        }
+
+        fun move(delta: Int) {
+            if (keys.isEmpty()) return
+            val current = keys.indexOfFirst { it.first == lastIndex }.let { if (it < 0) 0 else it }
+            val next = (current + delta + keys.size) % keys.size
+            val path2 = keys[next].first
+            val requester = itemRequesters.getOrPut(path2) { FocusRequester() }
+            scope.launch {
+                runCatching { scrollState.scrollToItem(next) }
+                kotlinx.coroutines.delay(50)
+                try { requester.requestFocus(); lastIndex = path2 } catch (_: IllegalStateException) {}
+            }
+        }
+
+        DisposableEffect(keys) {
+            val handler: (Int) -> Boolean = { code ->
+                when (code) {
+                    KeyEvent.KEYCODE_DPAD_DOWN -> { move(1); true }
+                    KeyEvent.KEYCODE_DPAD_UP -> { move(-1); true }
+                    else -> false
+                }
+            }
+            wideNavHandler.set(handler)
+            onDispose { if (wideNavHandler.get() === handler) wideNavHandler.set(null) }
+        }
+
+        Box(modifier = Modifier.fillMaxSize()) {
+            AdvancedSettingsContent(
+                keys = keys,
+                contentPadding = contentPadding,
+                focusRequesters = itemRequesters,
+                listState = scrollState
+            )
+        }
     }
 
     val configuration = androidx.compose.ui.platform.LocalConfiguration.current
@@ -1302,6 +1368,122 @@ fun AdvancedSettingsScreen(
         val categoryObj = remember(settings, selectedCategoryKey) {
             settings.optJSONObject(selectedCategoryKey) ?: JSONObject()
         }
+        val railRequesters = remember(categories, path) {
+            val map = mutableMapOf<String, FocusRequester>()
+            categories.forEach { map[it] = FocusRequester() }
+            map
+        }
+        // Seed focus on the first rail card so the Row-level preview-key handler
+        // (D-pad navigation) receives all subsequent events.
+        LaunchedEffect(path, categories) {
+            repeat(8) {
+                kotlinx.coroutines.delay(250)
+                try { railRequesters[categories.firstOrNull()]?.requestFocus(); return@LaunchedEffect } catch (_: IllegalStateException) {}
+            }
+        }
+        val listScrollState = androidx.compose.foundation.lazy.rememberLazyListState()
+        val listKeyboardScope = rememberCoroutineScope()
+        var listPaneFocused by remember(path) { mutableStateOf(false) }
+        var lastFocusedListPath by remember(path) { mutableStateOf<String?>(null) }
+        val listFocusRequesters = remember(path, selectedCategoryKey) {
+            mutableMapOf<String, FocusRequester>()
+        }
+
+        fun listKeysForCategory(catKey: String): List<Pair<String, JSONObject>> {
+            val categoryPath = if (path.isEmpty()) "@@$catKey" else "$path@@$catKey"
+            if (catKey.isEmpty()) return emptyList()
+            return settings.optJSONObject(catKey)?.let { obj ->
+                obj.keys().asSequence().mapNotNull { key ->
+                    val o = obj[key] as? JSONObject
+                    if (o != null) "$categoryPath@@$key" to o else null
+                }.toList()
+            } ?: emptyList()
+        }
+
+        suspend fun requestFocusWithRetry(requester: FocusRequester?, label: String): Boolean {
+            if (requester == null) return false
+            repeat(12) {
+                try { requester.requestFocus(); lastFocusedListPath = label; return true } catch (_: IllegalStateException) {}
+                kotlinx.coroutines.delay(60)
+            }
+            return false
+        }
+
+        fun moveListFocus(delta: Int) {
+            val keys = listKeysForCategory(selectedCategoryKey)
+            if (keys.isEmpty()) return
+            val current = keys.indexOfFirst { it.first == lastFocusedListPath }
+            val next = (current + delta + keys.size) % keys.size
+            val path2 = keys[next].first
+            listKeyboardScope.launch {
+                runCatching { listScrollState.scrollToItem(next) }
+                repeat(6) {
+                    val requester = listFocusRequesters[path2]
+                    if (requester != null && requestFocusWithRetry(requester, path2)) return@launch
+                    kotlinx.coroutines.delay(60)
+                    runCatching { listScrollState.scrollToItem(next) }
+                }
+            }
+        }
+
+        fun focusCategory(delta: Int) {
+            if (categories.isEmpty()) return
+            val current = categories.indexOf(selectedCategoryKey).coerceAtLeast(0)
+            val next = (current + delta + categories.size) % categories.size
+            selectedCategoryKey = categories[next]
+            listPaneFocused = false
+            lastFocusedListPath = null
+            listKeyboardScope.launch {
+                repeat(10) {
+                    try { railRequesters[categories[next]]?.requestFocus(); return@launch } catch (_: IllegalStateException) {}
+                    kotlinx.coroutines.delay(50)
+                }
+            }
+        }
+
+        fun enterListPane(): Boolean {
+            val keys = listKeysForCategory(selectedCategoryKey)
+            if (keys.isEmpty()) return false
+            listPaneFocused = true
+            var first = listFocusRequesters[keys[0].first]
+            listKeyboardScope.launch {
+                runCatching { listScrollState.scrollToItem(0) }
+                repeat(6) {
+                    first = listFocusRequesters[keys[0].first]
+                    if (first != null && requestFocusWithRetry(first, keys[0].first)) return@launch
+                    kotlinx.coroutines.delay(60)
+                    runCatching { listScrollState.scrollToItem(0) }
+                }
+            }
+            return true
+        }
+
+        fun leaveListPane(): Boolean {
+            if (!listPaneFocused) return false
+            listPaneFocused = false
+            lastFocusedListPath = null
+            listKeyboardScope.launch {
+                repeat(10) {
+                    try { railRequesters[selectedCategoryKey]?.requestFocus(); return@launch } catch (_: IllegalStateException) {}
+                    kotlinx.coroutines.delay(50)
+                }
+            }
+            return true
+        }
+
+        DisposableEffect(path, selectedCategoryKey, categories) {
+            val handler: (Int) -> Boolean = { code ->
+                when (code) {
+                    KeyEvent.KEYCODE_DPAD_DOWN -> { if (listPaneFocused) moveListFocus(1) else focusCategory(1); true }
+                    KeyEvent.KEYCODE_DPAD_UP -> { if (listPaneFocused) moveListFocus(-1) else focusCategory(-1); true }
+                    KeyEvent.KEYCODE_DPAD_RIGHT -> if (!listPaneFocused) enterListPane() else true
+                    KeyEvent.KEYCODE_DPAD_LEFT -> leaveListPane()
+                    else -> false
+                }
+            }
+            wideNavHandler.set(handler)
+            onDispose { if (wideNavHandler.get() === handler) wideNavHandler.set(null) }
+        }
 
         Row(
             modifier = Modifier
@@ -1341,9 +1523,12 @@ fun AdvancedSettingsScreen(
                             title = category,
                             subtitle = "",
                             iconRes = advancedSettingIconRes(category),
+                            modifier = Modifier.focusRequester(
+                                railRequesters.getOrPut(category) { FocusRequester() }
+                            ),
                             isSelected = selectedCategoryKey == category,
                             onClick = { selectedCategoryKey = category },
-                            onFocusChanged = { if (it) selectedCategoryKey = category }
+                            onFocusChanged = { if (it) { selectedCategoryKey = category; listPaneFocused = false } }
                         )
                     }
                 }
@@ -1378,7 +1563,9 @@ fun AdvancedSettingsScreen(
                 AdvancedSettingsContent(
                     keys = filteredKeysForCategory,
                     modifier = Modifier.fillMaxSize(),
-                    contentPadding = PaddingValues(horizontal = 8.dp, vertical = 8.dp)
+                    contentPadding = PaddingValues(horizontal = 8.dp, vertical = 8.dp),
+                    focusRequesters = listFocusRequesters,
+                    listState = listScrollState
                 )
             }
         }
@@ -1389,7 +1576,7 @@ fun AdvancedSettingsScreen(
     val advancedFocus = remember { FocusRequester() }
     val advancedView = LocalView.current
     fun handleAdvancedKey(keyCode: Int): Boolean {
-        return when (keyCode) {
+        when (keyCode) {
             KeyEvent.KEYCODE_BUTTON_B, KeyEvent.KEYCODE_BACK -> {
                 if (isSearching) {
                     isSearching = false
@@ -1397,10 +1584,14 @@ fun AdvancedSettingsScreen(
                 } else {
                     navigateBack()
                 }
-                true
+                return true
             }
-            else -> false
+            KeyEvent.KEYCODE_BUTTON_Y -> {
+                if (!isSearching) isSearching = true
+                return true
+            }
         }
+        return wideNavHandler.get()?.invoke(keyCode) ?: false
     }
     DisposableEffect(advancedView) {
         val listener = View.OnKeyListener { _, keyCode, event ->
@@ -1427,7 +1618,7 @@ fun AdvancedSettingsScreen(
             AmbientSettingsBackground()
             Column(modifier = Modifier.fillMaxSize()) {
                 AdvancedTopBar(compact = true)
-                AdvancedSettingsContent(keys = filteredKeys, contentPadding = PaddingValues(0.dp))
+                PlainAdvancedContent(keys = filteredKeys, contentPadding = PaddingValues(0.dp))
             }
         }
     } else {
@@ -1455,7 +1646,7 @@ fun AdvancedSettingsScreen(
             if (isWideScreen && !isSearching && folderCount > 0) {
                 WideAdvancedBody(contentPadding = contentPadding)
             } else {
-                AdvancedSettingsContent(keys = filteredKeys, contentPadding = contentPadding)
+                PlainAdvancedContent(keys = filteredKeys, contentPadding = contentPadding)
             }
             }
         }
@@ -1573,15 +1764,16 @@ private fun SettingsNavCard(
     subtitle: String,
     iconRes: Int,
     isSelected: Boolean,
+    modifier: Modifier = Modifier,
     onClick: () -> Unit,
     onLongClick: () -> Unit = {},
     onFocusChanged: (Boolean) -> Unit = {},
     extraBadge: (@Composable () -> Unit)? = null
 ) {
     Surface(
-        modifier = Modifier
+        modifier = modifier
             .fillMaxWidth()
-            .focusProperties { canFocus = false }
+            .gamepadActivate(onClick)
             .safeCombinedClickable(
                 onClick = onClick,
                 onLongClick = onLongClick
@@ -1625,14 +1817,16 @@ private fun SettingsNavCard(
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis
                 )
-                Text(
-                    text = subtitle,
-                    color = com.zenithblue.sambas3.RPCSXColors.textSecondary,
-                    fontSize = 11.sp,
-                    fontFamily = FontFamily.SansSerif,
-                    maxLines = 1,
-                    overflow = TextOverflow.Ellipsis
-                )
+                if (subtitle.isNotEmpty()) {
+                    Text(
+                        text = subtitle,
+                        color = com.zenithblue.sambas3.RPCSXColors.textSecondary,
+                        fontSize = 11.sp,
+                        fontFamily = FontFamily.SansSerif,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis
+                    )
+                }
             }
             if (extraBadge != null) {
                 Spacer(modifier = Modifier.width(6.dp))

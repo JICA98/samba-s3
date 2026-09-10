@@ -12,6 +12,8 @@ import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ExperimentalLayoutApi
+import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -827,20 +829,18 @@ fun GameLaunchCenter(
                         Modifier.padding(vertical = 4.dp),
                         color = MaterialTheme.colorScheme.outlineVariant,
                     )
-                    Row(
+                    @OptIn(ExperimentalLayoutApi::class)
+                    Column(
                         Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.SpaceBetween,
-                        verticalAlignment = Alignment.CenterVertically,
+                        verticalArrangement = Arrangement.spacedBy(6.dp),
                     ) {
                         val footerStatus = snapshot.blockReason ?: ppuUi.statusLine
-                        Row(
-                            Modifier
-                                .weight(1f)
-                                .padding(end = 8.dp),
-                            verticalAlignment = Alignment.CenterVertically,
-                            horizontalArrangement = Arrangement.spacedBy(10.dp)
+                        // Controller Navigation Hints — wrap onto extra rows instead of crushing
+                        FlowRow(
+                            Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.spacedBy(10.dp),
+                            verticalArrangement = Arrangement.spacedBy(4.dp),
                         ) {
-                            // Controller Navigation Hints
                             Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(4.dp)) {
                                 Surface(
                                     shape = RoundedCornerShape(3.dp),
@@ -899,6 +899,7 @@ fun GameLaunchCenter(
                         }
 
                         Row(
+                            Modifier.fillMaxWidth(),
                             horizontalArrangement = Arrangement.spacedBy(8.dp, Alignment.End),
                             verticalAlignment = Alignment.CenterVertically,
                         ) {
