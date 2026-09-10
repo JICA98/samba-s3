@@ -7,6 +7,9 @@ import android.os.Build
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.ui.Modifier
 import androidx.core.view.WindowCompat
 import androidx.lifecycle.lifecycleScope
 import kotlinx.coroutines.launch
@@ -134,7 +137,10 @@ class MainActivity : ComponentActivity() {
 
         setContent {
             RPCSXTheme {
-                AppNavHost(initialRoute = intent.getStringExtra("route"))
+                Box(Modifier.fillMaxSize()) {
+                    AppNavHost(initialRoute = intent.getStringExtra("route"))
+                    com.zenithblue.sambas3.ui.splash.SplashOverlay(Modifier.fillMaxSize())
+                }
             }
         }
 

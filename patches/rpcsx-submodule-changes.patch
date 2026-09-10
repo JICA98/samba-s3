@@ -1679,6 +1679,26 @@ index d2768d8b0..caaef4c15 100644
  		if (caller_is_named)
  		{
  			thread_ctrl::set_name(old_name);
+diff --git a/rpcs3/Emu/RSX/Overlays/overlay_compile_notification.cpp b/rpcs3/Emu/RSX/Overlays/overlay_compile_notification.cpp
+index 75975964f..9f0a7f928 100644
+--- a/rpcs3/Emu/RSX/Overlays/overlay_compile_notification.cpp
++++ b/rpcs3/Emu/RSX/Overlays/overlay_compile_notification.cpp
+@@ -1,3 +1,4 @@
+ #include "stdafx.h"
+ #include "overlay_message.h"
+ #include "overlay_loading_icon.hpp"
++#include "Emu/compile_progress.hpp"
+@@ -13,3 +14,10 @@ namespace rsx
+ 		void show_shader_compile_notification()
+ 		{
++#ifdef __ANDROID__
++			if (get_compile_event_sink())
++			{
++				return;
++			}
++#endif
++
+ 			if (!s_shader_loading_icon24)
 diff --git a/rpcs3/Emu/RSX/VK/VKDraw.cpp b/rpcs3/Emu/RSX/VK/VKDraw.cpp
 index fd2370c95..e7bc835a3 100644
 --- a/rpcs3/Emu/RSX/VK/VKDraw.cpp

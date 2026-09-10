@@ -54,6 +54,7 @@ import com.zenithblue.sambas3.ui.ingame.RpcsxBridgeAdapter
 import com.zenithblue.sambas3.ui.ingame.TrophyEvents
 import com.zenithblue.sambas3.ui.emulation.EmulatorInteractionLock
 import com.zenithblue.sambas3.ui.emulation.InteractionLock
+import com.zenithblue.sambas3.ui.emulation.RuntimeShaderToast
 import com.zenithblue.sambas3.ui.emulation.SavestateOperationUiState
 import com.zenithblue.sambas3.debug.DebugPadReceiver
 import com.zenithblue.sambas3.session.EmulationSessionJournal
@@ -142,6 +143,9 @@ class RPCSXActivity : ComponentActivity(), EmulationHost {
     override val activityInstanceId = NEXT_ACTIVITY_ID.incrementAndGet()
     private var transitionBitmap: Bitmap? = null
     private var menuPreviewBitmap by mutableStateOf<Bitmap?>(null)
+    private var shaderToastVisible by mutableStateOf(false)
+    private var shaderToastShownForActivePeriod = false
+    private var shaderToastHideRunnable: Runnable? = null
     private val transitionController = SavestateTransitionController()
     private lateinit var thumbnailStore: SavestateThumbnailStore
     private val bootMutex = Any()
@@ -212,6 +216,7 @@ class RPCSXActivity : ComponentActivity(), EmulationHost {
         binding.liveLogsOverlay.translationZ = 2.5f
         binding.menuToggle.translationZ = 3f
         binding.oscToggle.translationZ = 3f
+        binding.shaderToastOverlay.translationZ = 4f
         binding.transitionOverlay.translationZ = 100f
         surfaceLeaseManager = SurfaceLeaseManager(binding.surfaceHost)
         surfaceLeaseManager.onFailure = { reason ->
@@ -260,6 +265,17 @@ class RPCSXActivity : ComponentActivity(), EmulationHost {
                     binding.liveLogsOverlay.interceptTouches = liveSettings.enabled && liveSettings.editMode && !liveSettings.locked
                 }
                 com.zenithblue.sambas3.ui.logging.LiveLogOverlayHost(menuState.isOpen)
+            }
+        }
+
+        binding.shaderToastOverlay.isClickable = false
+        binding.shaderToastOverlay.isFocusable = false
+        binding.shaderToastOverlay.setViewCompositionStrategy(
+            ViewCompositionStrategy.DisposeOnViewTreeLifecycleDestroyed
+        )
+        binding.shaderToastOverlay.setContent {
+            RPCSXTheme {
+                RuntimeShaderToast(visible = shaderToastVisible)
             }
         }
 
@@ -527,6 +543,7 @@ class RPCSXActivity : ComponentActivity(), EmulationHost {
             showTransitionOverlay("Preparing game…")
             interactionLock.lock(EmulatorInteractionLock.BootTransition)
             CompileProgressBridge.state.onEach { progress ->
+                if (!progress.shaderActive) shaderToastShownForActivePeriod = false
                 if (recoveryTransitionActive) return@onEach
                 if (progress.ppuActive) {
                     val messages = progress.ppuMsg.orEmpty().lines()
@@ -536,12 +553,13 @@ class RPCSXActivity : ComponentActivity(), EmulationHost {
                         messages.drop(1).joinToString(" ").ifBlank { "Processing game modules" },
                         progress.ppuPercent,
                     )
-                } else if (progress.shaderActive) {
-                    if (binding.transitionOverlay.visibility != View.VISIBLE) showTransitionOverlay("Preparing shaders…")
-                    interactionLock.lock(EmulatorInteractionLock.BootTransition)
-                    binding.transitionLabel.text = progress.shaderMsg ?: "Preparing shaders…"
-                    binding.transitionProgress.isIndeterminate = progress.shaderPercent <= 0
-                    binding.transitionProgress.progress = progress.shaderPercent
+                } else if (progress.shaderActive && freshBootFrameValidated) {
+                    if (binding.transitionOverlay.visibility == View.VISIBLE) {
+                        binding.transitionOverlay.visibility = View.GONE
+                        interactionLock.unlock()
+                        inputGate.waitForNeutral()
+                    }
+                    showRuntimeShaderToast()
                 } else if (freshBootFrameValidated && binding.transitionOverlay.visibility == View.VISIBLE) {
                     binding.transitionOverlay.visibility = View.GONE
                     interactionLock.unlock()
@@ -769,8 +787,8 @@ class RPCSXActivity : ComponentActivity(), EmulationHost {
 
     /**
      * Fresh-game boot must prove a real Surface producer frame before Runtime
-     * readiness is persisted. Shader/PPU work still owns the overlay; first-frame
-     * probes start only after that work is idle.
+     * readiness is persisted. Runtime PPU work still owns the blocking overlay;
+     * shader work is non-blocking and is presented as a gameplay toast.
      */
     private fun confirmFreshBootFrameAndValidate() {
         bootThread?.interrupt()
@@ -779,7 +797,9 @@ class RPCSXActivity : ComponentActivity(), EmulationHost {
                 ?: originalGamePath.substringAfterLast('/')
             var state = FreshBootFrameValidator.bootRequested()
             val surfaceGen = surfaceLeaseManager.currentGeneration
-            val runtimeActiveAtBoot = runCatching { CompileProgressBridge.state.value.isActive }.getOrDefault(false)
+            val runtimeActiveAtBoot = runCatching {
+                CompileProgressBridge.state.value.hasBlockingCompileWork()
+            }.getOrDefault(false)
             Log.i(
                 "S3BOOTFRAME",
                 "event=boot_return title=$titleId result=NoErrors " +
@@ -799,7 +819,9 @@ class RPCSXActivity : ComponentActivity(), EmulationHost {
                 System.currentTimeMillis() < runtimeWaitDeadline &&
                 !Thread.interrupted()
             ) {
-                val active = runCatching { CompileProgressBridge.state.value.isActive }.getOrDefault(false)
+                val active = runCatching {
+                    CompileProgressBridge.state.value.hasBlockingCompileWork()
+                }.getOrDefault(false)
                 if (!active && state.runtimePpuSeen) {
                     state = FreshBootFrameValidator.onRuntimePpuTerminal(
                         state,
@@ -820,7 +842,9 @@ class RPCSXActivity : ComponentActivity(), EmulationHost {
                 }
             }
             if (state.phase == FreshBootFramePhase.WaitingForRuntimePpu) {
-                val stillActive = runCatching { CompileProgressBridge.state.value.isActive }.getOrDefault(false)
+                val stillActive = runCatching {
+                    CompileProgressBridge.state.value.hasBlockingCompileWork()
+                }.getOrDefault(false)
                 if (!stillActive) {
                     state = FreshBootFrameValidator.onRuntimePpuTerminal(
                         state,
@@ -839,14 +863,18 @@ class RPCSXActivity : ComponentActivity(), EmulationHost {
                 System.currentTimeMillis() < frameDeadline &&
                 !Thread.interrupted()
             ) {
-                val runtimeActive = runCatching { CompileProgressBridge.state.value.isActive }.getOrDefault(false)
+                val runtimeActive = runCatching {
+                    CompileProgressBridge.state.value.hasBlockingCompileWork()
+                }.getOrDefault(false)
                 if (runtimeActive) {
                     state = FreshBootFrameValidator.onRuntimePpuBegin(
                         state,
                         surfaceLeaseManager.currentGeneration,
                     )
                     while (
-                        runCatching { CompileProgressBridge.state.value.isActive }.getOrDefault(false) &&
+                        runCatching {
+                            CompileProgressBridge.state.value.hasBlockingCompileWork()
+                        }.getOrDefault(false) &&
                         System.currentTimeMillis() < runtimeWaitDeadline &&
                         !Thread.interrupted()
                     ) {
@@ -901,10 +929,13 @@ class RPCSXActivity : ComponentActivity(), EmulationHost {
                 }
                 EmulationSessionJournal.update(this@RPCSXActivity, EmulationSessionState.RUNNING)
                 runOnUiThread {
-                    if (!isFinishing && !recoveryTransitionActive && !CompileProgressBridge.state.value.isActive) {
+                    if (!isFinishing && !recoveryTransitionActive &&
+                        !CompileProgressBridge.state.value.hasBlockingCompileWork()
+                    ) {
                         binding.transitionOverlay.visibility = View.GONE
                         interactionLock.unlock()
                         inputGate.waitForNeutral()
+                        if (CompileProgressBridge.state.value.shaderActive) showRuntimeShaderToast()
                     }
                 }
                 return@thread
@@ -1455,6 +1486,19 @@ class RPCSXActivity : ComponentActivity(), EmulationHost {
         updateTransitionProgress(label, detail, progress)
     }
 
+    private fun CompileProgressBridge.CompileState.hasBlockingCompileWork(): Boolean = ppuActive
+
+    private fun showRuntimeShaderToast() {
+        if (shaderToastShownForActivePeriod) return
+        shaderToastShownForActivePeriod = true
+        shaderToastHideRunnable?.let(binding.shaderToastOverlay::removeCallbacks)
+        shaderToastVisible = true
+        shaderToastHideRunnable = Runnable {
+            shaderToastVisible = false
+            shaderToastHideRunnable = null
+        }.also { binding.shaderToastOverlay.postDelayed(it, SHADER_TOAST_DURATION_MS) }
+    }
+
     private fun updateTransitionProgress(label: String, detail: String, progress: Int) {
         val percent = progress.coerceIn(0, 100)
         binding.transitionLabel.text = "$label - $percent%"
@@ -1779,6 +1823,8 @@ class RPCSXActivity : ComponentActivity(), EmulationHost {
     }
 
     override fun onDestroy() {
+        shaderToastHideRunnable?.let(binding.shaderToastOverlay::removeCallbacks)
+        shaderToastHideRunnable = null
         EmulationHostRegistry.unregister(this)
         if (finishReason == EmulatorActivityFinishReason.ExplicitExit || finishReason == EmulatorActivityFinishReason.HomeStop) {
             val session = EmulationSessionJournal.read(this)
@@ -2111,6 +2157,7 @@ class RPCSXActivity : ComponentActivity(), EmulationHost {
         private const val TITLE_ID_POLL_TIMEOUT_MS = 10_000L
         private const val FRAME_COPY_TIMEOUT_MS = 2_000L
         private const val FIRST_FRAME_TIMEOUT_MS = 120_000L
+        private const val SHADER_TOAST_DURATION_MS = 5_000L
         /** First-frame window after Runtime PPU is idle (fresh boot only). */
         private const val FRESH_BOOT_FIRST_FRAME_TIMEOUT_MS = 120_000L
         /** Upper bound waiting for in-Activity Runtime PPU before frame probes. */

@@ -37,6 +37,7 @@ import androidx.compose.ui.tooling.preview.PreviewLightDark
 import androidx.compose.ui.unit.dp
 import com.zenithblue.sambas3.R
 import com.zenithblue.sambas3.ui.settings.components.base.BaseDialogPreference
+import com.zenithblue.sambas3.ui.settings.components.gamepadActivate
 import com.zenithblue.sambas3.ui.settings.components.core.PreferenceIcon
 import com.zenithblue.sambas3.ui.settings.components.core.PreferenceTitle
 import com.zenithblue.sambas3.ui.settings.components.core.PreferenceValue
@@ -223,6 +224,7 @@ private fun <T> DialogPreferenceItem(
         modifier = Modifier
             .fillMaxWidth()
             .heightIn(min = 48.dp)
+            .gamepadActivate(onClick)
             .selectable(
                 selected = isSelected,
                 enabled = true,

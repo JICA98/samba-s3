@@ -1,5 +1,3 @@
-import java.util.Properties
-
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.compose.compiler)
@@ -28,24 +26,13 @@ android {
     }
 
     signingConfigs {
-        val keystorePropertiesFile = System.getenv("KEYSTORE_PROPERTIES_PATH")
-            ?.takeIf { it.isNotBlank() }
-            ?.let(::file)
-            ?: rootProject.file("local.properties")
-        val keystoreProperties = Properties()
-        if (keystorePropertiesFile.exists()) {
-            keystorePropertiesFile.inputStream().use { keystoreProperties.load(it) }
-        }
-
-        val keystoreAlias = keystoreProperties.getProperty("keystore.alias") ?: System.getenv("KEYSTORE_ALIAS") ?: ""
-        val keystorePassword = keystoreProperties.getProperty("keystore.password") ?: System.getenv("KEYSTORE_PASSWORD") ?: ""
-        val keystorePath = keystoreProperties.getProperty("keystore.path") ?: System.getenv("KEYSTORE_PATH") ?: ""
+        val keystoreAlias = "samba-s3"
+        val keystorePassword = "sambas3key2026"
+        val keystorePath = "/home/abhaybyte/Downloads/samba-s3-release.jks"
 
         if (keystorePath.isNotEmpty()) {
             val keyFile = file(keystorePath)
             val resolvedFile = when {
-                keystorePropertiesFile.parentFile.resolve(keystorePath).exists() ->
-                    keystorePropertiesFile.parentFile.resolve(keystorePath)
                 keyFile.exists() -> keyFile
                 rootProject.file(keystorePath).exists() -> rootProject.file(keystorePath)
                 else -> keyFile

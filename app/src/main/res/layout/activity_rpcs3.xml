@@ -39,6 +39,16 @@
         android:clickable="false"
         android:focusable="false" />
 
+    <!-- Runtime shader hints mirror the core's bottom-left toast, but remain
+         visual-only so controller and touch input keep reaching gameplay. -->
+    <com.zenithblue.sambas3.ui.TouchThroughComposeView
+        android:id="@+id/shaderToastOverlay"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:importantForAccessibility="no"
+        android:clickable="false"
+        android:focusable="false" />
+
     <androidx.compose.ui.platform.ComposeView
         android:id="@+id/ingameOverlay"
         android:layout_width="match_parent"

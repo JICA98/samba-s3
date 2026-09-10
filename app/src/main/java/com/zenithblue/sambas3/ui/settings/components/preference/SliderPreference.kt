@@ -1,5 +1,6 @@
 package com.zenithblue.sambas3.ui.settings.components.preference
 
+import android.view.KeyEvent
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.text.KeyboardOptions
@@ -18,12 +19,16 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.input.key.KeyEventType
+import androidx.compose.ui.input.key.onKeyEvent
+import androidx.compose.ui.input.key.type
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.tooling.preview.PreviewLightDark
 import androidx.compose.ui.unit.dp
 import com.zenithblue.sambas3.R
+import com.zenithblue.sambas3.ui.settings.components.gamepadActivate
 import com.zenithblue.sambas3.ui.settings.components.util.ComposePreview
 import com.zenithblue.sambas3.ui.settings.components.core.PreferenceSubtitle
 import com.zenithblue.sambas3.ui.settings.components.core.PreferenceTitle
@@ -55,7 +60,19 @@ fun SliderPreference(
     }
 
     RegularPreference(
-        modifier = modifier,
+        modifier = modifier
+            .onKeyEvent { event ->
+                if (event.type != KeyEventType.KeyDown || !enabled) return@onKeyEvent false
+                val code = event.nativeKeyEvent.keyCode
+                val onKey: Int =
+                    if (code == KeyEvent.KEYCODE_DPAD_RIGHT) 1
+                    else if (code == KeyEvent.KEYCODE_DPAD_LEFT) -1
+                    else 0
+                if (onKey != 0) {
+                    onValueChange((value + onKey * stepSize).coerceIn(valueRange.start, valueRange.endInclusive))
+                    true
+                } else false
+            },
         title = { PreferenceTitle(title = title) },
         leadingIcon = leadingIcon,
         subtitle = { subtitle?.let { PreferenceSubtitle(text = it) } },
@@ -112,6 +129,12 @@ fun SliderPreference(
             },
             confirmButton = {
                 TextButton(
+                    modifier = Modifier.gamepadActivate {
+                        if (!isError) {
+                            onValueChange(tempValue)
+                            showDialog = false
+                        }
+                    },
                     onClick = {
                         if (!isError) {
                             onValueChange(tempValue)
@@ -124,11 +147,23 @@ fun SliderPreference(
                 }
             },
             dismissButton = {
-                TextButton(onClick = { 
+                TextButton(onClick = {
                     showDialog = false
                     isError = false
                     tempValue = value
                     textValue = value.toInt().toString()
+                },
+                modifier = Modifier.onKeyEvent { event ->
+                    if (event.type == KeyEventType.KeyDown &&
+                        (event.nativeKeyEvent.keyCode == KeyEvent.KEYCODE_BUTTON_B ||
+                            event.nativeKeyEvent.keyCode == KeyEvent.KEYCODE_BACK)
+                    ) {
+                        showDialog = false
+                        isError = false
+                        tempValue = value
+                        textValue = value.toInt().toString()
+                        true
+                    } else false
                 }) {
                     Text(stringResource(android.R.string.cancel))
                 }

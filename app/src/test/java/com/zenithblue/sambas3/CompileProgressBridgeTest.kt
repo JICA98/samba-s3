@@ -103,6 +103,30 @@ class CompileProgressBridgeTest {
     }
 
     @Test
+    fun ppu100WithoutTerminal_watchdogClearsOnlyUiActive() {
+        CompileProgressBridge.injectForTest(ppuEvent(RPCSX.COMPILE_PHASE_BEGIN, 21, 0))
+        CompileProgressBridge.injectForTest(
+            ppuEvent(
+                RPCSX.COMPILE_PHASE_PROGRESS,
+                21,
+                100,
+                msg = "Progress: file 78 of 78, module 33 of 33 (done)",
+                moduleDone = 33,
+                moduleTotal = 33,
+            )
+        )
+
+        assertTrue(CompileProgressBridge.clearStuckPpuUiIfComplete(21))
+        val state = CompileProgressBridge.state.value
+        assertFalse(state.ppuActive)
+        assertEquals(CompileOutcome.NONE, state.outcome)
+        assertTrue(CompileProgressBridge.isRuntimeJobActive(RPCSX.COMPILE_DOMAIN_PPU, 21))
+
+        CompileProgressBridge.injectForTest(ppuEvent(RPCSX.COMPILE_PHASE_COMPLETED, 21))
+        assertFalse(CompileProgressBridge.isRuntimeJobActive(RPCSX.COMPILE_DOMAIN_PPU, 21))
+    }
+
+    @Test
     fun ppuCanceledWhileShaderRemains() {
         CompileProgressBridge.injectForTest(ppuEvent(RPCSX.COMPILE_PHASE_BEGIN, 30, 10))
         CompileProgressBridge.injectForTest(shaderEvent(RPCSX.COMPILE_PHASE_BEGIN, 31))

@@ -31,6 +31,7 @@ import androidx.compose.ui.unit.dp
 import com.zenithblue.sambas3.R
 import com.zenithblue.sambas3.ui.settings.components.util.ComposePreview
 import com.zenithblue.sambas3.ui.settings.components.LocalPreferenceState
+import com.zenithblue.sambas3.ui.settings.components.gamepadActivate
 import com.zenithblue.sambas3.ui.settings.components.core.PreferenceIcon
 import com.zenithblue.sambas3.ui.settings.components.core.PreferenceSubtitle
 import com.zenithblue.sambas3.ui.settings.components.core.PreferenceTitle
@@ -64,6 +65,7 @@ fun BasePreference(
         Surface(
             modifier = modifier
                 .onFocusChanged { isFocused = it.isFocused }
+                .gamepadActivate(preferenceOnClick)
                 .combinedClickable(
                     onClick = preferenceOnClick,
                     onLongClick = onLongClick

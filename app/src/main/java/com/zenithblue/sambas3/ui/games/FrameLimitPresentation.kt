@@ -1,5 +1,6 @@
 package com.zenithblue.sambas3.ui.games
 
+import android.view.KeyEvent
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -15,6 +16,9 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.input.key.KeyEventType
+import androidx.compose.ui.input.key.onKeyEvent
+import androidx.compose.ui.input.key.type
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.font.FontWeight
@@ -57,6 +61,16 @@ internal fun FrameLimitOptionRow(value: String, selected: Boolean, onClick: () -
         modifier = Modifier
             .fillMaxWidth()
             .heightIn(min = 62.dp)
+            .onKeyEvent { event ->
+                if (event.type == KeyEventType.KeyDown &&
+                    (event.nativeKeyEvent.keyCode == KeyEvent.KEYCODE_BUTTON_A ||
+                        event.nativeKeyEvent.keyCode == KeyEvent.KEYCODE_DPAD_CENTER ||
+                        event.nativeKeyEvent.keyCode == KeyEvent.KEYCODE_ENTER)
+                ) {
+                    onClick()
+                    true
+                } else false
+            }
             .selectable(
                 selected = selected,
                 enabled = true,

@@ -67,9 +67,14 @@ Package approved drivers with `./scripts/package-bundled-turnip-drivers.sh` (inp
 ./gradlew :app:testStandardDebugUnitTest :app:testPlaystoreDebugUnitTest
 
 # Build + install + launch (default FLAVOR=standard; override FLAVOR=playstore)
-./build_and_install.sh debug
+./build_and_install.sh
 
+# IMPORTANT: ALWAYS install the RELEASE APK on devices (Poco X6 Pro, OnePlus 13R).
+# After EVERY release build, update BOTH devices (Poco X6 Pro + OnePlus 13R). Never just one.
+# Never install debug builds. If replacing an existing install:
+# adb uninstall com.zenithblue.sambas3 && adb install app/build/outputs/apk/standard/release/samba-s3-standard-release.apk
 # Output APKs
+# app/build/outputs/apk/standard/release/samba-s3-standard-release.apk
 # app/build/outputs/apk/standard/debug/samba-s3-standard-debug.apk
 # app/build/outputs/apk/playstore/debug/samba-s3-playstore-debug.apk
 # app/build/outputs/bundle/playstoreRelease/samba-s3-playstore-release.aab

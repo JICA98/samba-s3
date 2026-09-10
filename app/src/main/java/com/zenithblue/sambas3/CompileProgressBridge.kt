@@ -151,28 +151,32 @@ object CompileProgressBridge {
     private fun schedulePpuDoneWatchdog(jobId: Long) {
         ppuDoneWatchdog?.let { mainHandler?.removeCallbacks(it) }
         val r = Runnable {
-            if (ppuJobId == jobId && _state.value.ppuActive && _state.value.ppuPercent == 100 && _state.value.moduleDone == _state.value.moduleTotal && _state.value.moduleTotal > 0) {
-                val cur = _state.value
-                val decision = CompileWatchdogLogic.evaluateStuckAtComplete(
-                    ppuActive = cur.ppuActive,
-                    ppuPercent = cur.ppuPercent,
-                    moduleDone = cur.moduleDone,
-                    moduleTotal = cur.moduleTotal,
-                    jobMatches = ppuJobId == jobId,
-                )
-                if (!decision.shouldClearUiActive) return@Runnable
-                Log.w(TAG, decision.logMessage ?: "PPU watchdog finalizing job=$jobId")
-                Log.w(TAG, "PPU watchdog missing_terminal=1 establishes_validated_ready=0 job=$jobId")
-                _state.value = cur.copy(
-                    ppuMsg = "Verifying cache… waiting for compiler process",
-                    remainingLabel = null,
-                    ppuPercent = 99,
-                )
-            }
+            clearStuckPpuUiIfComplete(jobId)
         }
         ppuDoneWatchdog = r
         mainHandler?.postDelayed(r, 30_000)
     }
+
+    @Synchronized
+    internal fun clearStuckPpuUiIfComplete(jobId: Long): Boolean {
+        val cur = _state.value
+        val decision = CompileWatchdogLogic.evaluateStuckAtComplete(
+            ppuActive = cur.ppuActive,
+            ppuPercent = cur.ppuPercent,
+            moduleDone = cur.moduleDone,
+            moduleTotal = cur.moduleTotal,
+            jobMatches = ppuJobId == jobId,
+        )
+        if (!decision.shouldClearUiActive) return false
+        Log.w(TAG, decision.logMessage ?: "PPU watchdog finalizing job=$jobId")
+        Log.w(TAG, "PPU watchdog missing_terminal=1 establishes_validated_ready=0 job=$jobId")
+        _state.value = cur.copy(
+            ppuActive = false,
+            remainingLabel = null,
+        )
+        return true
+    }
+
     private fun cancelPpuDoneWatchdog() {
         ppuDoneWatchdog?.let { mainHandler?.removeCallbacks(it) }
         ppuDoneWatchdog = null
