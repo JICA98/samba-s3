@@ -2027,6 +2027,112 @@ index 75975964f..5a3e7d3de 100644
  			if (!s_shader_loading_icon24)
  			{
  				// Creating the icon requires FS read, so it is important to cache it
+diff --git a/rpcs3/Emu/RSX/Program/ProgramStateCache.h b/rpcs3/Emu/RSX/Program/ProgramStateCache.h
+index 453c7c7ba..53a03a9ea 100644
+--- a/rpcs3/Emu/RSX/Program/ProgramStateCache.h
++++ b/rpcs3/Emu/RSX/Program/ProgramStateCache.h
+@@ -233,31 +233,31 @@ protected:
+ 			return std::forward_as_tuple(*cache_hint->get_vertex_program<vertex_program_type>(), true);
+ 		}
+ 
+-		bool recompile = false;
+-		vertex_program_type* new_shader;
+-		{
+-			reader_lock lock(m_vertex_mutex);
++		reader_lock lock(m_vertex_mutex);
+ 
+-			const auto& I = m_vertex_shader_cache.find(rsx_vp);
+-			if (I != m_vertex_shader_cache.end())
+-			{
+-				rsx::program_cache_hint_t::cache_vertex_program(cache_hint, rsx_vp, &(I->second));
+-				return std::forward_as_tuple(I->second, true);
+-			}
++		const auto& I = m_vertex_shader_cache.find(rsx_vp);
++		if (I != m_vertex_shader_cache.end())
++		{
++			rsx::program_cache_hint_t::cache_vertex_program(cache_hint, rsx_vp, &(I->second));
++			return std::forward_as_tuple(I->second, true);
++		}
+ 
+-			rsx_log.trace("VP not found in buffer!");
++		rsx_log.trace("VP not found in buffer!");
+ 
+-			lock.upgrade();
+-			auto [it, inserted] = m_vertex_shader_cache.try_emplace(rsx_vp);
+-			new_shader = &(it->second);
+-			recompile = inserted;
+-		}
++		lock.upgrade();
+ 
+-		if (recompile)
++		// Double-check if another thread inserted and compiled it while upgrading
++		const auto& I2 = m_vertex_shader_cache.find(rsx_vp);
++		if (I2 != m_vertex_shader_cache.end())
+ 		{
+-			backend_traits::recompile_vertex_program(rsx_vp, *new_shader, m_next_id++);
++			rsx::program_cache_hint_t::cache_vertex_program(cache_hint, rsx_vp, &(I2->second));
++			return std::forward_as_tuple(I2->second, true);
+ 		}
+ 
++		auto [it, inserted] = m_vertex_shader_cache.try_emplace(rsx_vp);
++		vertex_program_type* new_shader = &(it->second);
++		backend_traits::recompile_vertex_program(rsx_vp, *new_shader, m_next_id++);
++
+ 		rsx::program_cache_hint_t::cache_vertex_program(cache_hint, rsx_vp, new_shader);
+ 		return std::forward_as_tuple(*new_shader, false);
+ 	}
+@@ -271,32 +271,32 @@ protected:
+ 			return std::forward_as_tuple(*cache_hint->get_fragment_program<fragment_program_type>(), true);
+ 		}
+ 
+-		bool recompile = false;
+-		typename binary_to_fragment_program::iterator it;
+-		fragment_program_type* new_shader;
+-		{
+-			reader_lock lock(m_fragment_mutex);
++		reader_lock lock(m_fragment_mutex);
+ 
+-			const auto& I = m_fragment_shader_cache.find(rsx_fp);
+-			if (I != m_fragment_shader_cache.end())
+-			{
+-				rsx::program_cache_hint_t::cache_fragment_program(cache_hint, rsx_fp, &(I->second));
+-				return std::forward_as_tuple(I->second, true);
+-			}
++		const auto& I = m_fragment_shader_cache.find(rsx_fp);
++		if (I != m_fragment_shader_cache.end())
++		{
++			rsx::program_cache_hint_t::cache_fragment_program(cache_hint, rsx_fp, &(I->second));
++			return std::forward_as_tuple(I->second, true);
++		}
+ 
+-			rsx_log.trace("FP not found in buffer!");
++		rsx_log.trace("FP not found in buffer!");
+ 
+-			lock.upgrade();
+-			std::tie(it, recompile) = m_fragment_shader_cache.try_emplace(rsx_fp);
+-			new_shader = &(it->second);
+-		}
++		lock.upgrade();
+ 
+-		if (recompile)
++		// Double-check if another thread inserted and compiled it while upgrading
++		const auto& I2 = m_fragment_shader_cache.find(rsx_fp);
++		if (I2 != m_fragment_shader_cache.end())
+ 		{
+-			it->first.clone_data();
+-			backend_traits::recompile_fragment_program(rsx_fp, *new_shader, m_next_id++);
++			rsx::program_cache_hint_t::cache_fragment_program(cache_hint, rsx_fp, &(I2->second));
++			return std::forward_as_tuple(I2->second, true);
+ 		}
+ 
++		auto [it, inserted] = m_fragment_shader_cache.try_emplace(rsx_fp);
++		fragment_program_type* new_shader = &(it->second);
++		it->first.clone_data();
++		backend_traits::recompile_fragment_program(rsx_fp, *new_shader, m_next_id++);
++
+ 		rsx::program_cache_hint_t::cache_fragment_program(cache_hint, rsx_fp, new_shader);
+ 		return std::forward_as_tuple(*new_shader, false);
+ 	}
 diff --git a/rpcs3/Emu/RSX/VK/VKDraw.cpp b/rpcs3/Emu/RSX/VK/VKDraw.cpp
 index fd2370c95..e7bc835a3 100644
 --- a/rpcs3/Emu/RSX/VK/VKDraw.cpp
@@ -2059,6 +2165,24 @@ index fd2370c95..e7bc835a3 100644
  		}
  	}
  }
+diff --git a/rpcs3/Emu/RSX/VK/VKGSRender.cpp b/rpcs3/Emu/RSX/VK/VKGSRender.cpp
+index 32abde0c4..e931b6583 100644
+--- a/rpcs3/Emu/RSX/VK/VKGSRender.cpp
++++ b/rpcs3/Emu/RSX/VK/VKGSRender.cpp
+@@ -795,6 +795,13 @@ VKGSRender::~VKGSRender()
+ 	// Clear flush requests
+ 	m_flush_requests.clear_pending_flag();
+ 
++	// Drain and destroy shader storage cache before clearing m_prog_buffer
++	if (m_shaders_cache)
++	{
++		m_shaders_cache->wait_stores();
++		m_shaders_cache.reset();
++	}
++
+ 	// Shaders
+ 	vk::destroy_pipe_compiler();        // Ensure no pending shaders being compiled
+ 	spirv::finalize_compiler_context(); // Shut down the glslang compiler
 diff --git a/rpcs3/Emu/RSX/VK/VKTextureCache.cpp b/rpcs3/Emu/RSX/VK/VKTextureCache.cpp
 index 72b6bcf40..f58605836 100644
 --- a/rpcs3/Emu/RSX/VK/VKTextureCache.cpp
@@ -2104,6 +2228,28 @@ index b4b05be4a..c6579afbd 100644
  				case CELL_GCM_TEXTURE_DEPTH16:
  					rsx::convert_linear_swizzle<u16, false>(tmp_data.data(), data, width, height, rsx_pitch);
  					break;
+diff --git a/rpcs3/Emu/RSX/VK/vkutils/graphics_pipeline_state.hpp b/rpcs3/Emu/RSX/VK/vkutils/graphics_pipeline_state.hpp
+index 2973385e9..9b5ea2cf5 100644
+--- a/rpcs3/Emu/RSX/VK/vkutils/graphics_pipeline_state.hpp
++++ b/rpcs3/Emu/RSX/VK/vkutils/graphics_pipeline_state.hpp
+@@ -44,7 +44,7 @@ namespace vk
+ 			// NOTE: Vk** structs have padding bytes
+ 			memcpy(this, &other, sizeof(graphics_pipeline_state));
+ 
+-			if (other.cs.pAttachments == other.att_state)
++			if (other.cs.pAttachments != nullptr || other.cs.attachmentCount > 0)
+ 			{
+ 				// Rebase pointer
+ 				cs.pAttachments = att_state;
+@@ -60,7 +60,7 @@ namespace vk
+ 				// NOTE: Vk** structs have padding bytes
+ 				memcpy(this, &other, sizeof(graphics_pipeline_state));
+ 
+-				if (other.cs.pAttachments == other.att_state)
++				if (other.cs.pAttachments != nullptr || other.cs.attachmentCount > 0)
+ 				{
+ 					// Rebase pointer
+ 					cs.pAttachments = att_state;
 diff --git a/rpcs3/Emu/RSX/VK/vkutils/sync.cpp b/rpcs3/Emu/RSX/VK/vkutils/sync.cpp
 index 6df7e3334..56e23fd85 100644
 --- a/rpcs3/Emu/RSX/VK/vkutils/sync.cpp
@@ -2179,10 +2325,25 @@ index 6df7e3334..56e23fd85 100644
  
  	gpu_debug_marker::gpu_debug_marker(gpu_debug_marker_pool& pool, std::string message)
 diff --git a/rpcs3/Emu/RSX/rsx_cache.h b/rpcs3/Emu/RSX/rsx_cache.h
-index 27f300ce6..085668001 100644
+index 27f300ce6..98b244284 100644
 --- a/rpcs3/Emu/RSX/rsx_cache.h
 +++ b/rpcs3/Emu/RSX/rsx_cache.h
-@@ -80,25 +80,31 @@ namespace rsx
+@@ -32,7 +32,7 @@ namespace rsx
+ 			RSXFragmentProgram fp;
+ 		};
+ 
+-		using unpacked_type = lf_fifo<unpacked_shader, 500>;
++		using unpacked_type = std::vector<unpacked_shader>;
+ 
+ 		struct pipeline_data
+ 		{
+@@ -74,31 +74,36 @@ namespace rsx
+ 		std::string version_prefix;
+ 		std::string root_path;
+ 		std::string pipeline_class_name;
+-		lf_fifo<std::unique_ptr<u8[]>, 100> fragment_program_data;
+ 
+ 		backend_storage& m_storage;
  
  		std::atomic<bool> m_shader_storage_exit{false};
  		std::condition_variable m_shader_storage_cv;
@@ -2217,7 +2378,7 @@ index 27f300ce6..085668001 100644
  					}
  
  					pipeline_data data = pack(item.props, item.vp, item.fp);
-@@ -138,6 +144,15 @@ namespace rsx
+@@ -138,6 +143,15 @@ namespace rsx
  					const std::string pipeline_file_name = fmt::format("%llX+%llX+%llX+%llX.bin", data.vertex_program_hash, data.fragment_program_hash, data.pipeline_storage_hash, state_hash);
  					const std::string pipeline_path = root_path + "/pipelines/" + pipeline_class_name + "/" + version_prefix + "/" + pipeline_file_name;
  					fs::write_pending_file(pipeline_path, &data, sizeof(data));
@@ -2233,7 +2394,28 @@ index 27f300ce6..085668001 100644
  				}
  			});
  
-@@ -343,9 +358,9 @@ namespace rsx
+@@ -146,7 +160,7 @@ namespace rsx
+ 			return fmt::format("%s pipeline object %u of %u", index == 0 ? "Loading" : "Compiling", processed, entry_count);
+ 		}
+ 
+-		void load_shaders(uint nb_workers, unpacked_type& unpacked, std::string& directory_path, std::vector<fs::dir_entry>& entries, u32 entry_count,
++		void load_shaders(uint nb_workers, unpacked_type& unpacked, std::mutex& unpacked_mutex, std::string& directory_path, std::vector<fs::dir_entry>& entries, u32 entry_count,
+ 			shader_loading_dialog* dlg)
+ 		{
+ 			atomic_t<u32> processed(0);
+@@ -199,7 +213,10 @@ namespace rsx
+ 
+ 					m_storage.preload_programs(nullptr, entry.vp, entry.fp);
+ 
+-					unpacked[unpacked.push_begin()] = std::move(entry);
++					{
++						std::lock_guard lock(unpacked_mutex);
++						unpacked.push_back(std::move(entry));
++					}
+ 
+ 					if (thread_processed >= 10 && !update_stats())
+ 					{
+@@ -343,9 +360,9 @@ namespace rsx
  			{
  				std::lock_guard lock(m_shader_storage_mtx);
  				m_shader_storage_exit = true;
@@ -2244,7 +2426,24 @@ index 27f300ce6..085668001 100644
  			m_shader_storage_worker_thread.join();
  		}
  
-@@ -433,24 +448,21 @@ namespace rsx
+@@ -404,12 +421,14 @@ namespace rsx
+ 
+ 			// Preload everything needed to compile the shaders
+ 			unpacked_type unpacked;
++			unpacked.reserve(entry_count);
++			std::mutex unpacked_mutex;
+ 			uint nb_workers = g_cfg.video.renderer == video_renderer::vulkan ? utils::get_thread_count() * 2 : 1;
+ 
+-			load_shaders(nb_workers, unpacked, directory_path, entries, entry_count, dlg);
++			load_shaders(nb_workers, unpacked, unpacked_mutex, directory_path, entries, entry_count, dlg);
+ 
+ 			// Account for any invalid entries
+-			entry_count = unpacked.size();
++			entry_count = ::size32(unpacked);
+ 
+ 			compile_shaders(nb_workers, unpacked, entry_count, dlg, std::forward<Args>(args)...);
+ 
+@@ -433,24 +452,21 @@ namespace rsx
  			auto item = unpacked_shader{pipeline, vp, RSXFragmentProgram::clone(fp) /* ???? */};
  
  			std::lock_guard lock(m_shader_storage_mtx);
@@ -2277,6 +2476,28 @@ index 27f300ce6..085668001 100644
  		}
  
  		RSXVertexProgram load_vp_raw(u64 program_hash) const
+@@ -477,10 +493,9 @@ namespace rsx
+ 				return fp;
+ 			}
+ 
+-			auto buf = std::make_unique<u8[]>(size);
+-			fp.data = buf.get();
+-			f.read(buf.get(), size);
+-			fragment_program_data[fragment_program_data.push_begin()] = std::move(buf);
++			fp.data.local_storage.resize(size);
++			fp.data.data_ptr = fp.data.local_storage.data();
++			f.read(fp.data.data_ptr, size);
+ 			return fp;
+ 		}
+ 
+@@ -490,6 +505,7 @@ namespace rsx
+ 			result.vp = load_vp_raw(data.vertex_program_hash);
+ 			result.fp = load_fp_raw(data.fragment_program_hash);
+ 			result.props = data.pipeline_properties;
++			result.props.state.cs.pAttachments = result.props.state.att_state;
+ 
+ 			result.vp.ctrl = data.vp_ctrl0;
+ 			result.vp.output_mask = data.vp_ctrl1;
 diff --git a/rpcs3/Emu/System.cpp b/rpcs3/Emu/System.cpp
 index 21a47f932..e4418a663 100644
 --- a/rpcs3/Emu/System.cpp

@@ -286,11 +286,13 @@ class GameSettingsOverridesTest {
         val path = "Core@@Stub PPU Traps"
         assertEquals("1", GameSettingsOverrides.curatedDefaultsForTitle("BCUS98123")[path])
         assertEquals("1", GameSettingsOverrides.curatedDefaultsForTitle("bcus98123")[path])
+        assertEquals("Accurate", GameSettingsOverrides.curatedDefaultsForTitle("BCUS98123")["Core@@XFloat Accuracy"])
         assertTrue(GameSettingsOverrides.curatedDefaultsForTitle("BCES00509").isEmpty())
 
         appliedCalls.clear()
         GameSettingsOverrides.applyForGame(store, "BCUS98123", recordingSetter())
         assertTrue(appliedCalls.contains(path to "1"))
+        assertTrue(appliedCalls.contains("Core@@XFloat Accuracy" to "Accurate"))
     }
 
     // ── resolveTitleId segment heuristic lives in TitleIdResolverTest ────────

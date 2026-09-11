@@ -104,8 +104,11 @@ object GameSettingsOverrides {
             // The tested North American Uncharted 2 build reaches a recoverable
             // PPU trap in foreground.cpp during startup. RPCSX recommends 1 for
             // this exact trap; keep the workaround scoped to the evidenced ID.
+            // XFloat Accuracy: Accurate ensures double precision intermediate representation
+            // for SPU xfloat math, preventing visual lighting/artifact glitches in gameplay.
             "BCUS98123" -> mapOf(
-                "Core@@Stub PPU Traps" to "1"
+                "Core@@Stub PPU Traps" to "1",
+                "Core@@XFloat Accuracy" to "Accurate"
             )
             "BLUS30443", "BLES00932", "BCAS20071", "BCJS30022", "BCJS70013", "BCAS20096" -> mapOf(
                 "Video@@Write Color Buffers" to "true"

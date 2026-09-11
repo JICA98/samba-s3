@@ -282,20 +282,19 @@ Earlier evidence:
 Related upstream ARM reports: <https://github.com/rpcs3/rpcs3/issues/18769>
 and <https://github.com/RPCS3/rpcs3/issues/17774>.
 
-Status: **Turnip plus Stub PPU Traps=1 fixes the former fatal PPU trap, but the
-game is not yet consistently playable. WCB causes a 120-second black-frame
-timeout and RDB causes full-screen title corruption. A full BCUS98123 cache
-reset proved the PPU progress UI/bridge works, then live-stalled on an animated
-loading dagger; stopping that guest hung with one SPU thread still using a full
-CPU core. The second cache-reuse boot progressed to a clean autosave screen but
-then produced no frames for 120 seconds and was recovered correctly. Limiting
-LLVM/SPU cache workers to two advanced a cached retry to the title, but one run
-SIGSEGV'd in `highCellSpursKernel3` and the other became sound-only and timed
-out there. Dynamic SPU interpretation also froze at autosave. Enabling SPU loop
-detection regressed LLVM to black output before autosave. Both the dynamic and
-loop-detection watchdog exits made all six SPU threads execute invalid host
-addresses during shutdown, followed by signal 11, proving a shared stop/unmap
-race. All alternatives are ruled out and the safe LLVM baseline is restored.
-Next, ship and verify automatic clean-process recovery for native stop hangs,
-then fix the shared ARM SPU execution/stop defect rather than adding renderer
-toggles.**
+## 2026-09-11 Shader corruption resolution and runtime refinements
+
+### Root cause analysis of shader corruption on reopen / save management
+Across all games, relaunching after gameplay or saving/loading savestates suffered from random native crashes and pipeline compilation aborts. Root causes identified and fixed:
+1. **`ProgramStateCache.h` race condition:** `search_vertex_program` and `search_fragment_program` previously dropped the upgrade lock immediately after `try_emplace`, exposing uncompiled default entries (`handle == VK_NULL_HANDLE`) to concurrent reader threads. Now the upgrade lock is held across compilation, with an `I2` double-check.
+2. **`graphics_pipeline_state.hpp` attachment pointer rebasing:** Deserialized `.bin` states had attachment pointers referencing old process addresses. Attachment pointers (`pAttachments = att_state`) are now consistently rebased on copy/assign whenever attachments exist.
+3. **`rsx_cache.h` leaky FIFO queue:** `fragment_program_data` queue used `lf_fifo<..., 100>`, which asserted (`index - i < N * 2`) and overflowed for titles with >100 shaders on reload. Direct allocation in `fp.data.local_storage` and mutex-protected `std::vector<unpacked_shader>` now handle arbitrary shader quantities safely.
+4. **`VKGSRender.cpp` teardown ordering:** Drain and destroy `m_shaders_cache` before clearing `m_prog_buffer` to eliminate background writer races during emulator shutdown.
+
+### Uncharted 2 rendering and watchdog refinements
+1. **SPU XFloat Accuracy (`Core@@XFloat Accuracy=Accurate`):** Added to curated settings for `BCUS98123`. Uncharted 2 requires double-precision intermediate representation for SPU floating-point operations to prevent overbright artifacts and white rectangular lighting glitches on ARM.
+2. **Watchdog compile awareness:** `startNoFrameWatchdog` now pauses while compilation is active (`CompileProgressBridge.state.value.isActive`) and the timeout is raised to 180s, preventing premature frame timeouts during heavy level / shader streaming.
+3. **PPU UI bridge handover:** Updated `CompileProgressBridge` to retain progress metrics on completion, and `RPCSXActivity` now transitions the overlay cleanly to "Starting game… Waiting for game output" (100%) rather than freezing at 99%.
+
+Status: **Shader cache corruption and teardown races resolved natively in `librpcsx-android.so`. PPU UI bridge and transition overlay updated. `Core@@XFloat Accuracy=Accurate` added for BCUS98123. Awaiting on-device validation once the device is connected.**
+

@@ -450,12 +450,20 @@ object CompileProgressBridge {
                 }
                 ppuJobId = null
                 if (shaderJobIds.isEmpty()) latestRuntimeEvent = null
-                // Clear stale PPU state fully (A11)
-                _state.value = CompileState(
+                val finalOutcome = when (ev.phase) {
+                    RPCSX.COMPILE_PHASE_COMPLETED -> CompileOutcome.COMPLETED
+                    RPCSX.COMPILE_PHASE_FAILED -> CompileOutcome.FAILED
+                    RPCSX.COMPILE_PHASE_CANCELED -> CompileOutcome.CANCELED
+                    else -> CompileOutcome.NONE
+                }
+                _state.value = cur.copy(
                     ppuActive = false,
-                    shaderActive = cur.shaderActive,
-                    shaderMsg = cur.shaderMsg,
-                    titleId = null
+                    titleId = null,
+                    ppuPercent = if (finalOutcome == CompileOutcome.COMPLETED) 100 else 0,
+                    ppuMsg = if (finalOutcome == CompileOutcome.COMPLETED) "Compilation finished" else null,
+                    remainingLabel = null,
+                    outcome = finalOutcome,
+                    jobId = ev.jobId,
                 )
             }
         }

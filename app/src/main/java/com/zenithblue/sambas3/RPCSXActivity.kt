@@ -571,6 +571,14 @@ class RPCSXActivity : ComponentActivity(), EmulationHost {
                         messages.drop(1).joinToString(" ").ifBlank { "Processing game modules" },
                         progress.ppuPercent,
                     )
+                } else if (!freshBootFrameValidated && !freshBootOverlayReleased) {
+                    if (binding.transitionOverlay.visibility == View.VISIBLE) {
+                        updateTransitionProgress(
+                            "Starting game…",
+                            "Waiting for game output",
+                            100,
+                        )
+                    }
                 }
             }.launchIn(lifecycleScope)
         }
@@ -1052,11 +1060,13 @@ class RPCSXActivity : ComponentActivity(), EmulationHost {
             var watchdogState = NoFrameWatchdog.State()
             while (isActive) {
                 val emulatorState = runCatching { RPCSX.getState() }.getOrNull()
+                val compileActive = runCatching { CompileProgressBridge.state.value.isActive }.getOrDefault(false)
                 val shouldWatch = emulatorState == EmulatorState.Running &&
                     lifecycle.currentState.isAtLeast(Lifecycle.State.RESUMED) &&
                     !terminalFailure.get() &&
                     !isFinishing &&
-                    !isDestroyed
+                    !isDestroyed &&
+                    !compileActive
                 val presentedFrames = if (shouldWatch) readPresentedFrameCount() else null
                 val observation = NoFrameWatchdog.observe(
                     state = watchdogState,
@@ -2265,7 +2275,7 @@ class RPCSXActivity : ComponentActivity(), EmulationHost {
         private const val SHADER_TOAST_DURATION_MS = 5_000L
         /** First-frame window after Runtime PPU is idle (fresh boot only). */
         private const val FRESH_BOOT_FIRST_FRAME_TIMEOUT_MS = 120_000L
-        private const val NO_FRAME_TIMEOUT_MS = 120_000L
+        private const val NO_FRAME_TIMEOUT_MS = 180_000L
         private const val NO_FRAME_WATCHDOG_POLL_MS = 1_000L
         /** Sparse live-render probe during a long Runtime PPU apply (full-size frame copies). */
         private const val RENDER_HANDOVER_PROBE_INTERVAL_MS = 750L
