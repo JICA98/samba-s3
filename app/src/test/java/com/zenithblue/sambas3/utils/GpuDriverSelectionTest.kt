@@ -21,6 +21,7 @@ class GpuDriverSelectionTest {
         isAdreno = false,
         isArm64 = true,
     )
+    private val adreno740 = adreno750.copy(gpuId = "740", rawModel = "Adreno (TM) 740")
     private val system = GpuDriverSelection.CurrentDriverSelection("Default", "")
     private val custom = GpuDriverSelection.CurrentDriverSelection("turnip-26.3", "/data/user/0/x/files/gpu_drivers/turnip-26.3")
 
@@ -58,6 +59,26 @@ class GpuDriverSelectionTest {
         )
         assertNotNull(spec)
         assertEquals("turnip-26.3", spec!!.entryId)
+    }
+
+    @Test
+    fun uncharted2_adreno750_system_with_turnip_resolves_override() {
+        val spec = GpuDriverSelection.resolveCompatBootDriver(
+            "BCUS98123", adreno750, system,
+            listOf(turnipRecommended), setOf("turnip-26.3")
+        )
+        assertNotNull(spec)
+        assertEquals("turnip-26.3", spec!!.entryId)
+    }
+
+    @Test
+    fun uncharted2_other_adreno_is_not_auto_overridden_without_device_evidence() {
+        assertNull(
+            GpuDriverSelection.resolveCompatBootDriver(
+                "BCUS98123", adreno740, system,
+                listOf(turnipRecommended), setOf("turnip-26.3")
+            )
+        )
     }
 
     @Test

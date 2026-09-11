@@ -54,7 +54,7 @@ For sequences/holds/loops use the wrapper (same bridge, no coordinates):
 `am broadcast` printing `Broadcast completed: result=0` proves nothing about delivery. `debug-pad.sh` greps `logcat -b main` for `DebugPad.*<BTN>` after each send:
 
 - Verified line → delivered (`BUTTON <BTN> d1=.. d2=.. press 120ms` → `release`, `Log.w("DebugPad")` → BACKEND file via `LogMonitor`).
-- No `DebugPad` at all → receiver not registered: ensure debug APK (`DebugPadReceiver.kt`, registered in `MainActivity.kt:136` and `RPCSXActivity.kt:372`) and that `MainActivity`/`RPCSXActivity` is foregrounded (`dumpsys window mCurrentFocus`).
+- No `DebugPad` at all → receiver not registered: ensure the current APK is installed and `MainActivity`/`RPCSXActivity` is foregrounded (`dumpsys window mCurrentFocus`). Release builds accept only the DUMP-permission-protected boot/stop/pad subset from adb shell.
 - Game frozen (`Emulation has been frozen!`) → pad cannot unfreeze it; collect logs.
 
 ## Loop pattern (GTA EULA example)
@@ -70,7 +70,7 @@ for _ in 1 2 3; do ./scripts/debug-pad.sh "$SERIAL" CROSS; sleep 4; done
 |---|---|
 | `Unknown <BTN>` | Use the button list above or `--raw`. Shorthand-without-serial accepts every button. |
 | `Ambiguous: N devices` | Pass `SERIAL` explicitly. |
-| No `DebugPad` log | Reinstall debug APK, foreground `MainActivity`/`RPCSXActivity`, retry once. |
+| No `DebugPad` log | Reinstall the current APK, foreground `MainActivity`/`RPCSXActivity`, retry once. |
 | Stick no-move | Center is `127`, not `0`. |
 
 ## References

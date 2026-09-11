@@ -2178,6 +2178,105 @@ index 6df7e3334..56e23fd85 100644
  	}
  
  	gpu_debug_marker::gpu_debug_marker(gpu_debug_marker_pool& pool, std::string message)
+diff --git a/rpcs3/Emu/RSX/rsx_cache.h b/rpcs3/Emu/RSX/rsx_cache.h
+index 27f300ce6..085668001 100644
+--- a/rpcs3/Emu/RSX/rsx_cache.h
++++ b/rpcs3/Emu/RSX/rsx_cache.h
+@@ -80,25 +80,31 @@ namespace rsx
+ 
+ 		std::atomic<bool> m_shader_storage_exit{false};
+ 		std::condition_variable m_shader_storage_cv;
++		std::condition_variable m_shader_storage_drained_cv;
+ 		std::mutex m_shader_storage_mtx;
+ 		std::vector<unpacked_shader> m_shader_storage_worker_queue;
++		bool m_shader_storage_writing = false;
+ 
+ 		std::thread m_shader_storage_worker_thread = std::thread([this]
+ 			{
+-				while (!m_shader_storage_exit.load())
++				while (true)
+ 				{
+ 					unpacked_shader item;
+ 
+ 					{
+ 						std::unique_lock lock(m_shader_storage_mtx);
+-						m_shader_storage_cv.wait(lock);
++						m_shader_storage_cv.wait(lock, [this]
++							{
++								return m_shader_storage_exit.load() || !m_shader_storage_worker_queue.empty();
++							});
+ 						if (m_shader_storage_worker_queue.empty())
+ 						{
+-							continue;
++							break;
+ 						}
+ 
+ 						item = std::move(m_shader_storage_worker_queue.back());
+ 						m_shader_storage_worker_queue.pop_back();
++						m_shader_storage_writing = true;
+ 					}
+ 
+ 					pipeline_data data = pack(item.props, item.vp, item.fp);
+@@ -138,6 +144,15 @@ namespace rsx
+ 					const std::string pipeline_file_name = fmt::format("%llX+%llX+%llX+%llX.bin", data.vertex_program_hash, data.fragment_program_hash, data.pipeline_storage_hash, state_hash);
+ 					const std::string pipeline_path = root_path + "/pipelines/" + pipeline_class_name + "/" + version_prefix + "/" + pipeline_file_name;
+ 					fs::write_pending_file(pipeline_path, &data, sizeof(data));
++
++					{
++						std::lock_guard lock(m_shader_storage_mtx);
++						m_shader_storage_writing = false;
++						if (m_shader_storage_worker_queue.empty())
++						{
++							m_shader_storage_drained_cv.notify_all();
++						}
++					}
+ 				}
+ 			});
+ 
+@@ -343,9 +358,9 @@ namespace rsx
+ 			{
+ 				std::lock_guard lock(m_shader_storage_mtx);
+ 				m_shader_storage_exit = true;
+-				m_shader_storage_cv.notify_one();
+ 			}
+ 
++			m_shader_storage_cv.notify_one();
+ 			m_shader_storage_worker_thread.join();
+ 		}
+ 
+@@ -433,24 +448,21 @@ namespace rsx
+ 			auto item = unpacked_shader{pipeline, vp, RSXFragmentProgram::clone(fp) /* ???? */};
+ 
+ 			std::lock_guard lock(m_shader_storage_mtx);
++			if (m_shader_storage_exit.load())
++			{
++				return;
++			}
+ 			m_shader_storage_worker_queue.push_back(std::move(item));
+ 			m_shader_storage_cv.notify_one();
+ 		}
+ 
+ 		void wait_stores()
+ 		{
+-			while (true)
+-			{
++			std::unique_lock lock(m_shader_storage_mtx);
++			m_shader_storage_drained_cv.wait(lock, [this]
+ 				{
+-					std::lock_guard lock(m_shader_storage_mtx);
+-					if (m_shader_storage_worker_queue.empty())
+-					{
+-						return;
+-					}
+-				}
+-
+-				std::this_thread::sleep_for(std::chrono::milliseconds(50));
+-			}
++					return m_shader_storage_worker_queue.empty() && !m_shader_storage_writing;
++				});
+ 		}
+ 
+ 		RSXVertexProgram load_vp_raw(u64 program_hash) const
 diff --git a/rpcs3/Emu/System.cpp b/rpcs3/Emu/System.cpp
 index 21a47f932..e4418a663 100644
 --- a/rpcs3/Emu/System.cpp

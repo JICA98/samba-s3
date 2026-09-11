@@ -46,6 +46,7 @@ object SettingsBackendAudit {
     // matrix. Paths are normalized without the leading @@ used by JNI callers.
     val knownSettings: List<KnownSetting> = listOf(
         KnownSetting("Core@@PPU Decoder", "enum"),
+        KnownSetting("Core@@Stub PPU Traps", "int"),
         KnownSetting("Core@@PPU Threads", "int"),
         KnownSetting("Core@@PPU LLVM Codegen Mode", "enum"),
         KnownSetting("Core@@Max LLVM Compile Threads", "int"),

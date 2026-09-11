@@ -8,9 +8,9 @@ description: Deterministic SambaS3 game launch via MainActivity warm start. Use 
 ## Why this path
 
 - `RPCSXActivity` is `android:exported="false"` (`AndroidManifest.xml:64-69`); `MainActivity` is `android:exported="true"` (`:84-94`).
-- `MainActivity.onResume` registers `DebugPadReceiver` (`MainActivity.kt:134-137`) and `onCreate` runs `RPCSX.openLibrary()` + `initialize` + main-thread/compile-queue threads (`MainActivity.kt:45-108`).
+- `MainActivity.onResume` registers `DebugPadReceiver` and `onCreate` runs `RPCSX.openLibrary()` + `initialize` + main-thread/compile-queue threads. Release registration requires the privileged `android.permission.DUMP` sender permission, so adb shell can drive the bounded bridge but ordinary apps cannot.
 - `RPCSXActivity` has a cold-init fallback (`RPCSXActivity.kt:162-177`), but warm start through `MainActivity` first remains the safe ordering (avoids the historical `getState` null `SIGSEGV` after `force-stop`).
-- There is **no `DEBUG_BOOT_GAME` handler** in `debug/DebugPadReceiver.kt` (actions are `DEBUG_PAD*`, `DEBUG_FATAL`, `DEBUG_LOG_MONITOR_*`, `DEBUG_BENCH_*`, `DEBUG_SETTINGS_*`, `DEBUG_REMOVE_GAME`, `DEBUG_INSTALL_FILE`). `debug-launch-game.sh` probes for it but launches via the warm start below.
+- `DebugPadReceiver` handles the bounded `DEBUG_BOOT_GAME` action in release builds for adb-shell callers holding `android.permission.DUMP`. The launch script uses that bridge after warming `MainActivity`.
 
 ## Canonical
 
@@ -21,7 +21,7 @@ GAME='/storage/emulated/0/Android/data/com.zenithblue.sambas3/files/config/games
 ./scripts/debug-launch-game.sh "$SERIAL" "$GAME"
 ```
 
-What the script does: starts `MainActivity` → brief wait for `DebugPad registered` → warm `am start -n com.zenithblue.sambas3/.RPCSXActivity --es path "$GAME" --es originalGamePath "$GAME" --es bootMode FreshGame` → waits at most 20s for `mCurrentFocus ... RPCSXActivity`. Max 2 attempts, then stops.
+What the script does: starts `MainActivity` → briefly waits for `DebugPad registered` → sends the bounded `DEBUG_BOOT_GAME` bridge action with the exact game path → waits at most 20s for `mCurrentFocus ... RPCSXActivity`. Max 2 attempts, then stops.
 
 ## Resolve GAME (counts toward the ~10-command budget)
 

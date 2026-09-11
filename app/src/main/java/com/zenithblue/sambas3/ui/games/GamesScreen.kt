@@ -90,6 +90,7 @@ import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
 import androidx.compose.ui.window.Popup
 import androidx.compose.ui.window.PopupProperties
@@ -125,6 +126,8 @@ import com.zenithblue.sambas3.crash.RecoveryAction
 import com.zenithblue.sambas3.ui.crash.CrashDetailsSheet
 import com.zenithblue.sambas3.ui.crash.CrashRecoveryCard
 import com.zenithblue.sambas3.ui.crash.StopFailureCard
+import com.zenithblue.sambas3.ui.components.DialogBackgroundBlur
+import com.zenithblue.sambas3.ui.components.DialogImmersiveSystemBars
 import com.zenithblue.sambas3.session.EmulatorStopCoordinator
 import com.zenithblue.sambas3.iso.DirectIsoManager
 import com.zenithblue.sambas3.utils.FileUtil
@@ -295,7 +298,6 @@ fun GamesScreen(
     var scanningFolder by remember { mutableStateOf(false) }
     var isFoldersExpanded by remember { mutableStateOf(false) }
     var configureGameTarget by remember { mutableStateOf<Game?>(null) }
-    var configuringGame by remember { mutableStateOf(false) }
     var removeGameTarget by remember { mutableStateOf<Game?>(null) }
     var removingGame by remember { mutableStateOf(false) }
     var removeGameFailed by remember { mutableStateOf(false) }
@@ -1957,7 +1959,8 @@ fun GamesScreen(
                     bootGame(context, game, slot.path?.takeIf { slot.exists }, slot.slot)
                 },
                 onConfigure = {
-                    launchCenterGame = null
+                    // Keep the launcher composed underneath: the config page opens
+                    // in front of it and closing returns to the launcher.
                     configureGameTarget = game
                 },
                 onDriver = {
@@ -2031,71 +2034,26 @@ fun GamesScreen(
         }
 
         if (configureGameTarget != null) {
-            // Engine gate (review F7): reading/editing the config tree requires a
-            // live initialized engine that is NOT running a game.
-            val engineIdle = RPCSX.activeLibrary.value != null &&
-                runCatching { RPCSX.getState() == EmulatorState.Stopped }.getOrDefault(false)
-            ModalBottomSheet(
-                onDismissRequest = {
-                    configureGameTarget = null
-                    configuringGame = false
-                }
+            // Fullscreen config page over a platform-blurred library backdrop
+            // (blur is Android 12+; the page scrim keeps it readable below that).
+            Dialog(
+                onDismissRequest = { configureGameTarget = null },
+                properties = DialogProperties(
+                    usePlatformDefaultWidth = false,
+                    decorFitsSystemWindows = false
+                )
             ) {
-                if (!configuringGame) {
-                    Column(modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)) {
-                        Row(
-                            verticalAlignment = Alignment.CenterVertically,
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .combinedClickable(enabled = engineIdle) { configuringGame = true }
-                                .padding(vertical = 12.dp)
-                        ) {
-                            Icon(
-                                painter = painterResource(R.drawable.tune),
-                                contentDescription = null,
-                                tint = if (engineIdle) RPCSXColors.primary else RPCSXColors.textDisabled,
-                                modifier = Modifier.size(24.dp)
-                            )
-                            Spacer(modifier = Modifier.width(16.dp))
-                            Column {
-                                Text(
-                                    text = stringResource(R.string.configure_game),
-                                    style = AppTypography.bodyLarge,
-                                    color = if (engineIdle) RPCSXColors.textPrimary else RPCSXColors.textDisabled
-                                )
-                                if (!engineIdle) {
-                                    Text(
-                                        text = stringResource(R.string.configure_game_gate_description),
-                                        style = AppTypography.labelSmall,
-                                        color = RPCSXColors.textSecondary
-                                    )
-                                } else {
-                                    Text(
-                                        text = (configureGameTarget?.info?.name?.value
-                                            ?: configureGameTarget?.info?.path?.substringAfterLast('/')
-                                            ?: "").uppercase(),
-                                        style = AppTypography.labelSmall,
-                                        color = RPCSXColors.textSecondary
-                                    )
-                                }
-                            }
-                        }
-                    }
-                } else {
-                    GameConfigureScreen(
-                        gamePath = configureGameTarget?.info?.path,
-                        modifier = Modifier.heightIn(max = 640.dp),
-                        onClose = {
-                            configuringGame = false
-                            configureGameTarget = null
-                        },
-                        onRemove = {
-                            removeGameTarget = configureGameTarget
-                            configuringGame = false
-                            configureGameTarget = null
-                        },
-                    )
-                }
+                DialogBackgroundBlur(radius = 32)
+                DialogImmersiveSystemBars()
+                GameConfigureScreen(
+                    gamePath = configureGameTarget?.info?.path,
+                    modifier = Modifier.fillMaxSize(),
+                    onClose = { configureGameTarget = null },
+                    onRemove = {
+                        removeGameTarget = configureGameTarget
+                        configureGameTarget = null
+                    },
+                )
             }
         }
 

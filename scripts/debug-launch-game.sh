@@ -5,7 +5,7 @@ set -euo pipefail
 SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
 source "$SCRIPT_DIR/lib/debug-bridge.sh"
 
-usage() { echo "Usage: $0 [SERIAL] GAME_PATH (absolute on-device path or registered direct_iso/<TITLE_ID>; current debug APK required)"; }
+usage() { echo "Usage: $0 [SERIAL] GAME_PATH (absolute on-device path or registered direct_iso/<TITLE_ID>; current APK required)"; }
 if [[ "${1:-}" == --help || "${1:-}" == -h ]]; then usage; exit 0; fi
 if [[ $# == 1 ]]; then SERIAL=""; GAME="$1"
 elif [[ $# == 2 ]]; then SERIAL="$1"; GAME="$2"
@@ -52,5 +52,5 @@ for attempt in 1 2; do
     exit 1
   fi
 done
-echo "No boot acknowledgement. Install a current debug APK and collect logs with scripts/get-samba-logs.sh $SERIAL" >&2
+echo "No boot acknowledgement. Install a current APK with the adb-shell bridge and collect logs with scripts/get-samba-logs.sh $SERIAL" >&2
 exit 1

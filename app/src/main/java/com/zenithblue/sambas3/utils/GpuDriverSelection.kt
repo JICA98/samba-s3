@@ -12,7 +12,7 @@ private const val TAG = "GpuDriverSelection"
  * Applies the stored GPU driver selection to the native emulator.
  * Handles Adreno 830 SYSMEM hint for the experimental A8XX package when catalog requires it.
  *
- * RDR compatibility (Red Dead Redemption on known-bad Adreno system drivers):
+ * Per-title compatibility for games that hit known-bad Adreno system-driver paths:
  * [resolveCompatBootDriver] answers whether this boot should use a validated
  * bundled Turnip INSTEAD of the stored selection. It is boot-only: it never
  * writes GeneralSettings. [restoreStoredSelection] re-applies the stored
@@ -143,6 +143,14 @@ object GpuDriverSelection {
     /** Device-validated member of the RDR family. */
     const val RDR_VALIDATED_TITLE = "BLUS30758"
 
+    /**
+     * Exact title/GPU pair observed crashing in Qualcomm's graphics-pipeline
+     * linker before the title screen. Keep this narrow until other Uncharted 2
+     * regions or Adreno generations have matching device evidence.
+     */
+    private const val UNCHARTED_2_VALIDATED_TITLE = "BCUS98123"
+    private const val UNCHARTED_2_VALIDATED_GPU = "750"
+
     data class CurrentDriverSelection(val selectedLabel: String, val driverPath: String) {
         companion object {
             fun read(): CurrentDriverSelection = CurrentDriverSelection(
@@ -170,6 +178,11 @@ object GpuDriverSelection {
     fun isRdrCompatTitle(titleId: String?): Boolean =
         !titleId.isNullOrBlank() && RDR_COMPAT_FAMILY.contains(titleId.uppercase())
 
+    private fun isValidatedAdrenoSystemCrashTitle(titleId: String?, gpuInfo: AdrenoGpuInfo): Boolean =
+        isRdrCompatTitle(titleId) ||
+            (titleId.equals(UNCHARTED_2_VALIDATED_TITLE, ignoreCase = true) &&
+                gpuInfo.gpuId == UNCHARTED_2_VALIDATED_GPU)
+
     /**
      * Pure compatibility decision. Non-null only when ALL hold:
      * RDR-family title + Adreno GPU + user still on system/default + a
@@ -183,7 +196,7 @@ object GpuDriverSelection {
         compatibleEntries: List<BundledGpuDriverEntry>,
         installedBundledIds: Set<String>,
     ): CompatBootDriverSpec? {
-        if (!isRdrCompatTitle(titleId)) return null
+        if (!isValidatedAdrenoSystemCrashTitle(titleId, gpuInfo)) return null
         if (!gpuInfo.isAdreno) {
             Log.i(TAG, "S3GPU compat title=$titleId verdict=system reason=non-adreno")
             return null

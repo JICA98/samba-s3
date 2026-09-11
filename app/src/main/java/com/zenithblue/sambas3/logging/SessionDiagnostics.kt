@@ -21,6 +21,7 @@ enum class CaptureState {
 }
 
 enum class DiagnosticCause {
+    FRAME_TIMEOUT,
     NATIVE_CRASH,
     GPU_RENDERER,
     BOOT_LOAD_FAILURE,
@@ -83,6 +84,7 @@ object SessionDiagnostics {
             manifest.terminalState == LogSessionTerminal.CRASHED
         val gpuEvidence = containsGpuFatal(evidenceHint)
         val nativeEvidence = containsNativeFatal(evidenceHint)
+        val frameTimeoutEvidence = containsFrameTimeout(evidenceHint)
         val capture = manifest.captureState
         val outcome = when {
             typedFatal && (nativeEvidence || fatalEventId != null || manifest.terminalState == LogSessionTerminal.CRASHED) ->
@@ -100,6 +102,7 @@ object SessionDiagnostics {
         }
         val cause = when {
             outcome == SessionOutcome.CLEAN_STOP -> null
+            frameTimeoutEvidence -> DiagnosticCause.FRAME_TIMEOUT
             gpuEvidence -> DiagnosticCause.GPU_RENDERER
             outcome == SessionOutcome.CONFIRMED_CRASH && nativeEvidence -> DiagnosticCause.NATIVE_CRASH
             outcome == SessionOutcome.CONFIRMED_CRASH && osExitEvidence -> DiagnosticCause.OS_KILL
@@ -166,5 +169,9 @@ object SessionDiagnostics {
 
     private fun containsNativeFatal(evidence: String): Boolean =
         Regex("SIGSEGV|SIGABRT|Fatal signal|Scudo|FATAL EXCEPTION|assertion failed|Access violation", RegexOption.IGNORE_CASE)
+            .containsMatchIn(evidence)
+
+    private fun containsFrameTimeout(evidence: String): Boolean =
+        Regex("frame-timeout|no-produced-frame", RegexOption.IGNORE_CASE)
             .containsMatchIn(evidence)
 }

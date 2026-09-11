@@ -73,7 +73,7 @@ object EmulatorStopCoordinator {
 
     suspend fun stop(context: Context, reason: EmulatorStopReason): Boolean {
         val appContext = context.applicationContext
-        return request(
+        val stopped = request(
             reason = reason,
             context = appContext,
             readState = { RPCSX.getState() },
@@ -83,6 +83,12 @@ object EmulatorStopCoordinator {
             cancelRecovery = { PendingSavestateRecoveryStore.cancelAutomaticRecovery(appContext, reason.name) },
             finalize = { requestId, host -> finalizeStopped(appContext, requestId, host, reason) },
         )
+        if (!stopped) {
+            val failedRequestId = (mutableState.value as? EmulatorStopState.Failed)?.requestId
+                ?: nextRequestId.get()
+            FailedNativeStopRecovery.schedule(appContext, failedRequestId, reason)
+        }
+        return stopped
     }
 
     /** Shared strict native stop primitive for pre-boot cleanup paths. */

@@ -69,4 +69,16 @@ class SessionDiagnosticsTest {
         assertEquals(SessionOutcome.INTERRUPTED, view.outcome)
         assertEquals(DiagnosticCause.UNPROVEN_STOP, view.diagnosticCause)
     }
+
+    @Test
+    fun typedNoFrameTimeoutHasDedicatedCause() {
+        val view = SessionDiagnostics.project(
+            manifest(LogSessionTerminal.CRASHED, "CrashExit"),
+            fatalEventId = "fatal-timeout",
+            evidenceHint = "frame-timeout no-produced-frame-for=120269ms presented=1043",
+        )
+        assertEquals(SessionOutcome.CONFIRMED_CRASH, view.outcome)
+        assertEquals(DiagnosticCause.FRAME_TIMEOUT, view.diagnosticCause)
+        assertEquals(CrashClassification.CONFIRMED_CRASH, view.classification)
+    }
 }

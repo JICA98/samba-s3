@@ -281,6 +281,18 @@ class GameSettingsOverridesTest {
         assertTrue(appliedCalls.contains("Savestate@@Compatible Savestate Mode" to "true"))
     }
 
+    @Test
+    fun curated_defaults_stub_ppu_traps_only_for_tested_uncharted_2_title() {
+        val path = "Core@@Stub PPU Traps"
+        assertEquals("1", GameSettingsOverrides.curatedDefaultsForTitle("BCUS98123")[path])
+        assertEquals("1", GameSettingsOverrides.curatedDefaultsForTitle("bcus98123")[path])
+        assertTrue(GameSettingsOverrides.curatedDefaultsForTitle("BCES00509").isEmpty())
+
+        appliedCalls.clear()
+        GameSettingsOverrides.applyForGame(store, "BCUS98123", recordingSetter())
+        assertTrue(appliedCalls.contains(path to "1"))
+    }
+
     // ── resolveTitleId segment heuristic lives in TitleIdResolverTest ────────
 
     // ── Compatibility / explicit-user separation (§56) ─────────────────────

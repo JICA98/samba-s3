@@ -84,6 +84,22 @@ object HomeRecoveryRepository {
         }
     }
 
+    /**
+     * Cheap synchronous predicate for first-composition decisions (boot splash).
+     * True when Home must present an unfinished/failed session or load failure,
+     * i.e. this process is a recovery restart rather than a user cold start.
+     */
+    fun hasPendingRecovery(context: Context): Boolean = runCatching {
+        val appContext = context.applicationContext
+        if (readLoadFailure(appContext) != null) return@runCatching true
+        val session = EmulationSessionJournal.unfinished(appContext) ?: return@runCatching false
+        if (isAcknowledged(appContext, session)) return@runCatching false
+        val sameProcessLive = session.processInstanceId == ProcessInstance.id &&
+            runCatching { RPCSX.getState() }.getOrNull() in
+            setOf(EmulatorState.Running, EmulatorState.Paused)
+        !sameProcessLive
+    }.getOrDefault(false)
+
     fun recordLoadFailure(
         context: Context,
         gamePath: String,

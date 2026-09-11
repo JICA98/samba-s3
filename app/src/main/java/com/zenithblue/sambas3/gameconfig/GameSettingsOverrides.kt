@@ -101,6 +101,12 @@ object GameSettingsOverrides {
     fun curatedDefaultsForTitle(titleId: String?): Map<String, String> {
         if (titleId.isNullOrBlank()) return emptyMap()
         return when (titleId.uppercase()) {
+            // The tested North American Uncharted 2 build reaches a recoverable
+            // PPU trap in foreground.cpp during startup. RPCSX recommends 1 for
+            // this exact trap; keep the workaround scoped to the evidenced ID.
+            "BCUS98123" -> mapOf(
+                "Core@@Stub PPU Traps" to "1"
+            )
             "BLUS30443", "BLES00932", "BCAS20071", "BCJS30022", "BCJS70013", "BCAS20096" -> mapOf(
                 "Video@@Write Color Buffers" to "true"
             )

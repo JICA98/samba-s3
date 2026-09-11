@@ -135,11 +135,28 @@ class MainActivity : ComponentActivity() {
             try { CompileProgressBridge.registerOnce(this) } catch (_: Exception) {}
         }
 
+        val coldStart = savedInstanceState == null
+        // A process relaunched after an emulator/app crash restores this Activity
+        // with saved state and/or an unfinished session. Showing the boot splash
+        // there makes a recovery restart look like a fresh launch, so only true
+        // cold starts get it.
+        val pendingRecovery = runCatching {
+            com.zenithblue.sambas3.crash.HomeRecoveryRepository.hasPendingRecovery(this)
+        }.getOrDefault(false)
+        val showBootSplash = coldStart && !pendingRecovery
+        android.util.Log.i(
+            "S3SPLASH",
+            "coldStart=$coldStart restored=${savedInstanceState != null} " +
+                "pendingRecovery=$pendingRecovery show=$showBootSplash"
+        )
+
         setContent {
             RPCSXTheme {
                 Box(Modifier.fillMaxSize()) {
                     AppNavHost(initialRoute = intent.getStringExtra("route"))
-                    com.zenithblue.sambas3.ui.splash.SplashOverlay(Modifier.fillMaxSize())
+                    if (showBootSplash) {
+                        com.zenithblue.sambas3.ui.splash.SplashOverlay(Modifier.fillMaxSize())
+                    }
                 }
             }
         }

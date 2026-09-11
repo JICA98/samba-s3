@@ -31,6 +31,7 @@ import androidx.core.view.WindowInsetsControllerCompat
 import androidx.core.view.isInvisible
 import androidx.core.view.updateLayoutParams
 import androidx.lifecycle.lifecycleScope
+import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.zenithblue.sambas3.databinding.ActivityRpcs3Binding
 import com.zenithblue.sambas3.dialogs.AlertDialogQueue
@@ -38,6 +39,7 @@ import com.zenithblue.sambas3.gameconfig.GameSettingsOverrides
 import com.zenithblue.sambas3.utils.GpuDriverSelection
 import com.zenithblue.sambas3.overlay.State
 import com.zenithblue.sambas3.ppu.FreshBootFramePhase
+import com.zenithblue.sambas3.ppu.FreshBootFrameState
 import com.zenithblue.sambas3.ppu.FreshBootFrameValidator
 import com.zenithblue.sambas3.ui.ingame.CloseReason
 import com.zenithblue.sambas3.ui.ingame.GameplayInputGate
@@ -66,6 +68,7 @@ import com.zenithblue.sambas3.session.EmulationHost
 import com.zenithblue.sambas3.session.EmulationHostRegistry
 import com.zenithblue.sambas3.session.EmulatorStopCoordinator
 import com.zenithblue.sambas3.session.EmulatorStopReason
+import com.zenithblue.sambas3.session.FailedNativeStopRecovery
 import com.zenithblue.sambas3.session.StopResult
 import com.zenithblue.sambas3.crash.CrashEvidenceCollector
 import com.zenithblue.sambas3.crash.HomeRecoveryRepository
@@ -81,7 +84,10 @@ import com.zenithblue.sambas3.input.LogicalControl
 import com.zenithblue.sambas3.input.RoutedInputMapper
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
+import org.json.JSONObject
 import kotlin.concurrent.thread
 import kotlin.math.abs
 import java.util.concurrent.CountDownLatch
@@ -151,6 +157,10 @@ class RPCSXActivity : ComponentActivity(), EmulationHost {
     private val bootMutex = Any()
     private val terminalFailure = java.util.concurrent.atomic.AtomicBoolean(false)
     @Volatile private var freshBootFrameValidated = false
+    /** First-frame proof released the boot overlay while Runtime PPU still applies. */
+    @Volatile private var freshBootOverlayReleased = false
+    /** Boot-thread-only throttle for sparse background render probes. */
+    private var lastRenderHandoverProbeMs = 0L
     private val mapperRegistry by lazy { DeviceInputMapperRegistry() }
 
     override val currentSurfaceGeneration: Long
@@ -235,6 +245,7 @@ class RPCSXActivity : ComponentActivity(), EmulationHost {
         binding.monitoringOverlay.isFocusable = false
         binding.monitoringOverlay.setOnTouchListener { _, _ -> false }
         monitoringRepository.start(lifecycleScope)
+        startNoFrameWatchdog()
         binding.monitoringOverlay.setViewCompositionStrategy(
             ViewCompositionStrategy.DisposeOnViewTreeLifecycleDestroyed
         )
@@ -545,6 +556,13 @@ class RPCSXActivity : ComponentActivity(), EmulationHost {
             CompileProgressBridge.state.onEach { progress ->
                 if (!progress.shaderActive) shaderToastShownForActivePeriod = false
                 if (recoveryTransitionActive) return@onEach
+                if (freshBootFrameValidated || freshBootOverlayReleased) {
+                    // The game proved real rendering; Runtime PPU/shader work keeps
+                    // running in the background without re-covering the surface.
+                    releaseFreshBootTransitionOverlayIfVisible()
+                    if (progress.shaderActive) showRuntimeShaderToast()
+                    return@onEach
+                }
                 if (progress.ppuActive) {
                     val messages = progress.ppuMsg.orEmpty().lines()
                     if (binding.transitionOverlay.visibility != View.VISIBLE) showTransitionOverlay("Preparing game…")
@@ -553,17 +571,6 @@ class RPCSXActivity : ComponentActivity(), EmulationHost {
                         messages.drop(1).joinToString(" ").ifBlank { "Processing game modules" },
                         progress.ppuPercent,
                     )
-                } else if (progress.shaderActive && freshBootFrameValidated) {
-                    if (binding.transitionOverlay.visibility == View.VISIBLE) {
-                        binding.transitionOverlay.visibility = View.GONE
-                        interactionLock.unlock()
-                        inputGate.waitForNeutral()
-                    }
-                    showRuntimeShaderToast()
-                } else if (freshBootFrameValidated && binding.transitionOverlay.visibility == View.VISIBLE) {
-                    binding.transitionOverlay.visibility = View.GONE
-                    interactionLock.unlock()
-                    inputGate.waitForNeutral()
                 }
             }.launchIn(lifecycleScope)
         }
@@ -814,6 +821,10 @@ class RPCSXActivity : ComponentActivity(), EmulationHost {
             )
 
             val runtimeWaitDeadline = System.currentTimeMillis() + RUNTIME_PPU_WAIT_TIMEOUT_MS
+            var renderHandoverState = FreshBootFrameState(
+                phase = FreshBootFramePhase.WaitingForFirstFrame,
+                surfaceGeneration = surfaceLeaseManager.currentGeneration,
+            )
             while (
                 state.phase == FreshBootFramePhase.WaitingForRuntimePpu &&
                 System.currentTimeMillis() < runtimeWaitDeadline &&
@@ -835,6 +846,7 @@ class RPCSXActivity : ComponentActivity(), EmulationHost {
                         surfaceLeaseManager.currentGeneration,
                     )
                 }
+                renderHandoverState = probeFreshBootRenderHandover(renderHandoverState, titleId)
                 try {
                     Thread.sleep(200L)
                 } catch (_: InterruptedException) {
@@ -878,6 +890,7 @@ class RPCSXActivity : ComponentActivity(), EmulationHost {
                         System.currentTimeMillis() < runtimeWaitDeadline &&
                         !Thread.interrupted()
                     ) {
+                        renderHandoverState = probeFreshBootRenderHandover(renderHandoverState, titleId)
                         try {
                             Thread.sleep(200L)
                         } catch (_: InterruptedException) {
@@ -929,12 +942,8 @@ class RPCSXActivity : ComponentActivity(), EmulationHost {
                 }
                 EmulationSessionJournal.update(this@RPCSXActivity, EmulationSessionState.RUNNING)
                 runOnUiThread {
-                    if (!isFinishing && !recoveryTransitionActive &&
-                        !CompileProgressBridge.state.value.hasBlockingCompileWork()
-                    ) {
-                        binding.transitionOverlay.visibility = View.GONE
-                        interactionLock.unlock()
-                        inputGate.waitForNeutral()
+                    if (!isFinishing && !recoveryTransitionActive) {
+                        releaseFreshBootTransitionOverlayIfVisible()
                         if (CompileProgressBridge.state.value.shaderActive) showRuntimeShaderToast()
                     }
                 }
@@ -1024,9 +1033,56 @@ class RPCSXActivity : ComponentActivity(), EmulationHost {
                 CrashEvidenceCollector.collectSummary(this@RPCSXActivity, session, evidence)
             }.getOrNull()
             HomeRecoveryRepository.recordCrashFailure(this@RPCSXActivity, session, report)
+            if (evidence.startsWith("frame-timeout", ignoreCase = true)) {
+                Log.e("S3RECOVERY", "frame timeout persisted; bypassing unsafe native stop")
+                FailedNativeStopRecovery.scheduleAfterFrameTimeout(this@RPCSXActivity, evidence)
+                return@launch
+            }
             stopAndFinishAfterFailure(EmulatorStopReason.CrashExit)
         }
     }
+
+    /**
+     * A guest thread can terminate while RPCSX still reports Running, leaving a
+     * permanently stale SurfaceView. Treat 120 seconds without a native present
+     * as a typed crash so Home recovery is reachable instead of leaving black UI.
+     */
+    private fun startNoFrameWatchdog() {
+        lifecycleScope.launch(kotlinx.coroutines.Dispatchers.Default) {
+            var watchdogState = NoFrameWatchdog.State()
+            while (isActive) {
+                val emulatorState = runCatching { RPCSX.getState() }.getOrNull()
+                val shouldWatch = emulatorState == EmulatorState.Running &&
+                    lifecycle.currentState.isAtLeast(Lifecycle.State.RESUMED) &&
+                    !terminalFailure.get() &&
+                    !isFinishing &&
+                    !isDestroyed
+                val presentedFrames = if (shouldWatch) readPresentedFrameCount() else null
+                val observation = NoFrameWatchdog.observe(
+                    state = watchdogState,
+                    nowMs = android.os.SystemClock.elapsedRealtime(),
+                    shouldWatch = shouldWatch,
+                    presentedFrameCount = presentedFrames,
+                    timeoutMs = NO_FRAME_TIMEOUT_MS,
+                )
+                watchdogState = observation.state
+                if (observation.timedOut) {
+                    val evidence = "frame-timeout no-produced-frame-for=${observation.stalledForMs}ms " +
+                        "presented=$presentedFrames state=$emulatorState surface_gen=$currentSurfaceGeneration"
+                    Log.e("S3FRAMEWATCH", evidence)
+                    runOnUiThread { showInProcessFault(evidence) }
+                    return@launch
+                }
+                delay(NO_FRAME_WATCHDOG_POLL_MS)
+            }
+        }
+    }
+
+    private fun readPresentedFrameCount(): Long? = runCatching {
+        val raw = RPCSX.instance.getFallbackPerfJson()?.takeIf { it.isNotBlank() }
+            ?: return@runCatching null
+        JSONObject(raw).optLong("presentedFrameCount", -1L).takeIf { it >= 0L }
+    }.getOrNull()
 
     /** Boot/load failures return to Home; RPCSXActivity never owns recovery presentation. */
     private fun failBootAndReturnHome(reason: String) {
@@ -1487,6 +1543,55 @@ class RPCSXActivity : ComponentActivity(), EmulationHost {
     }
 
     private fun CompileProgressBridge.CompileState.hasBlockingCompileWork(): Boolean = ppuActive
+
+    /**
+     * Hand the surface to the game as soon as it proves real rendering. Runtime
+     * PPU/shader compilation continues in the background (FGS notification and
+     * shader toast only), so a long "Applying PPU Code" phase must not keep the
+     * blocking boot overlay on top of a live game.
+     */
+    private fun releaseFreshBootTransitionOverlayIfVisible() {
+        if (recoveryTransitionActive) return
+        if (binding.transitionOverlay.visibility != View.VISIBLE) return
+        binding.transitionOverlay.visibility = View.GONE
+        interactionLock.unlock()
+        inputGate.waitForNeutral()
+    }
+
+    /**
+     * While Runtime PPU is still applying, keep probing the live surface with the
+     * same stable-frame rule used for final validation. Readiness marking still
+     * waits for the PPU terminal; only the UI handover is accelerated.
+     */
+    private fun probeFreshBootRenderHandover(
+        probeState: FreshBootFrameState,
+        titleId: String,
+    ): FreshBootFrameState {
+        if (freshBootOverlayReleased) return probeState
+        // Frame copies are full-size bitmaps; keep the background probe sparse so
+        // a long PPU apply phase does not churn memory on top of the emulator.
+        val now = System.currentTimeMillis()
+        if (now - lastRenderHandoverProbeMs < RENDER_HANDOVER_PROBE_INTERVAL_MS) return probeState
+        lastRenderHandoverProbeMs = now
+        val running = runCatching { RPCSX.getState() == EmulatorState.Running }.getOrDefault(false)
+        val generation = surfaceLeaseManager.currentGeneration
+        val copied = running && probeCurrentFrame(generation)
+        val next = FreshBootFrameValidator.onFrameProbe(probeState, copied, running, generation)
+        if (next.isValidated) {
+            freshBootOverlayReleased = true
+            Log.i(
+                "S3BOOTFRAME",
+                "event=render_handover samples=${next.stableSamples} runtime_ppu_active=1 " +
+                    "title=$titleId surface_gen=$generation"
+            )
+            runOnUiThread {
+                if (!isFinishing && !recoveryTransitionActive) {
+                    releaseFreshBootTransitionOverlayIfVisible()
+                }
+            }
+        }
+        return next
+    }
 
     private fun showRuntimeShaderToast() {
         if (shaderToastShownForActivePeriod) return
@@ -2160,6 +2265,10 @@ class RPCSXActivity : ComponentActivity(), EmulationHost {
         private const val SHADER_TOAST_DURATION_MS = 5_000L
         /** First-frame window after Runtime PPU is idle (fresh boot only). */
         private const val FRESH_BOOT_FIRST_FRAME_TIMEOUT_MS = 120_000L
+        private const val NO_FRAME_TIMEOUT_MS = 120_000L
+        private const val NO_FRAME_WATCHDOG_POLL_MS = 1_000L
+        /** Sparse live-render probe during a long Runtime PPU apply (full-size frame copies). */
+        private const val RENDER_HANDOVER_PROBE_INTERVAL_MS = 750L
         /** Upper bound waiting for in-Activity Runtime PPU before frame probes. */
         private const val RUNTIME_PPU_WAIT_TIMEOUT_MS = 30 * 60_000L
         private val NEXT_ACTIVITY_ID = AtomicLong(0L)

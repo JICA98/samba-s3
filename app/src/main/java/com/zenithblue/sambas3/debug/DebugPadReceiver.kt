@@ -61,7 +61,15 @@ class DebugPadReceiver(
     override fun onReceive(context: Context?, intent: Intent?) {
         val action = intent?.action ?: return
         val requestId = intent.getStringExtra("request_id").orEmpty()
-        if (!BuildConfig.DEBUG) return
+        // Device validation must use the release APK. Keep only the minimal
+        // shell automation surface available there; registration is protected
+        // by android.permission.DUMP, which the adb shell owns and ordinary
+        // third-party apps cannot obtain. Destructive diagnostics, settings,
+        // imports, and fault injection remain debug-only below.
+        if (!BuildConfig.DEBUG && !isReleaseShellAction(action)) {
+            Log.w("DebugPad", "$action ignored in non-debug build")
+            return
+        }
         if (action == ACTION_STOP_GAME) {
             val owner = context as? LifecycleOwner ?: return
             owner.lifecycleScope.launch {
@@ -314,10 +322,6 @@ class DebugPadReceiver(
      */
     private fun handleBootGame(context: Context?, intent: Intent) {
         val requestId = intent.getStringExtra("request_id").orEmpty()
-        if (!BuildConfig.DEBUG) {
-            Log.w("S3BOOT", "boot ignored in non-debug build")
-            return
-        }
         val app = context?.applicationContext ?: return
         val path = intent.getStringExtra("originalGamePath")?.trim().orEmpty()
             .ifEmpty { intent.getStringExtra("path")?.trim().orEmpty() }
@@ -621,10 +625,26 @@ class DebugPadReceiver(
                 addAction(PREFIX + "L3")
                 addAction(PREFIX + "R3")
             }
-            context.registerReceiver(r, f, Context.RECEIVER_EXPORTED)
-            Log.i("DebugPad", "registered")
+            val senderPermission = if (BuildConfig.DEBUG) null else android.Manifest.permission.DUMP
+            context.registerReceiver(
+                r,
+                f,
+                senderPermission,
+                null,
+                Context.RECEIVER_EXPORTED,
+            )
+            Log.i(
+                "DebugPad",
+                "registered sender=${if (senderPermission == null) "any-debug" else "adb-shell"}",
+            )
             return r
         }
+
+        private fun isReleaseShellAction(action: String): Boolean =
+            action == ACTION_BOOT_GAME ||
+                action == ACTION_STOP_GAME ||
+                action == ACTION_PAD ||
+                action.startsWith(PREFIX)
     }
 }
 

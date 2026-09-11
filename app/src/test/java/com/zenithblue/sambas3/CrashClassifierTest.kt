@@ -40,6 +40,12 @@ class CrashClassifierTest {
     fun gpuCauseIsIdentified() = assertEquals("GPU / Vulkan / driver", CrashClassifier.likelyCause("VK_ERROR_DEVICE_LOST"))
 
     @Test
+    fun frameTimeoutCauseIsIdentified() = assertEquals(
+        "Frame timeout",
+        CrashClassifier.likelyCause("frame-timeout no-produced-frame-for=120001ms"),
+    )
+
+    @Test
     fun ordinaryVulkanStartupLineIsNotAConfirmedGpuCrash() = assertEquals(
         "Emulator or application",
         CrashClassifier.likelyCause("Vulkan renderer initialized with driver"),
