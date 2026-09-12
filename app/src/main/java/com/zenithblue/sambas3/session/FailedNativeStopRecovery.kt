@@ -10,6 +10,10 @@ import android.os.Process
 import android.os.SystemClock
 import android.util.Log
 import com.zenithblue.sambas3.MainActivity
+import com.zenithblue.sambas3.logging.CaptureState
+import com.zenithblue.sambas3.logging.LogBroker
+import com.zenithblue.sambas3.logging.LogSessionStore
+import com.zenithblue.sambas3.logging.LogSessionTerminal
 import java.util.concurrent.atomic.AtomicBoolean
 
 /**
@@ -60,6 +64,19 @@ object FailedNativeStopRecovery {
         if (!scheduled.compareAndSet(false, true)) return
 
         val appContext = context.applicationContext
+        EmulationSessionJournal.read(appContext)?.let { session ->
+            runCatching { LogBroker.snapshotNativeBeforeReopen(appContext) }
+                .onFailure { Log.w(TAG, "id=$requestId native log snapshot unavailable", it) }
+            runCatching {
+                // Native writers cannot be safely drained before this forced restart.
+                LogSessionStore.finalize(
+                    appContext, session.sessionId, LogSessionTerminal.FAILED, detail,
+                    captureState = CaptureState.RECOVERED_PARTIAL,
+                )
+            }.onFailure { error ->
+                Log.e(TAG, "id=$requestId failed to finalize crash logs", error)
+            }
+        }
         val restartIntent = Intent(appContext, MainActivity::class.java).apply {
             addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK)
             putExtra("native_stop_recovery", true)

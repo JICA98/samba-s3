@@ -175,9 +175,50 @@ class RPCSXActivity : ComponentActivity(), EmulationHost {
     private lateinit var monitoringRepository: MonitoringRepository
 
     private lateinit var backCallback: OnBackPressedCallback
+    private var ppuLaunchDeferred = false
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        // All entry points (including debug launches and save loads) must use
+        // Home's PPU gate before creating a surface or starting a native boot.
+        val requestedPath = EmulatorBootRequest.fromIntent(
+            intent, PendingSavestateRecoveryStore.validForLaunch(this),
+        ).originalGamePath
+        val registeredGame = GameRepository.find(requestedPath)
+        val requestedGame = registeredGame ?: Game(GameInfoStore(requestedPath))
+        val ppuOwnerActive = com.zenithblue.sambas3.ppu.ImportPpuPreparationCoordinator.hasActiveOwner()
+        if (RPCSX.initialized && RPCSX.state.value == EmulatorState.Stopped && !ppuOwnerActive) {
+            GameIdentity.titleIdOrNull(requestedPath, requestedGame.info.name.value)?.let { titleId ->
+                PpuReadinessStore.invalidateIfFingerprintChanged(this, titleId)
+            }
+        }
+        val availability = com.zenithblue.sambas3.ppu.GameRunEligibilityHelper.evaluateAvailability(
+            this, requestedGame,
+            installPpuActive = CompileProgressBridge.installState.value.ppuActive || ppuOwnerActive,
+            prelaunchState = CompileProgressBridge.prelaunchState.value,
+            runtimeState = CompileProgressBridge.state.value,
+            emulatorState = RPCSX.state.value,
+            activeGame = RPCSX.activeGame.value,
+        )
+        if (availability != com.zenithblue.sambas3.ppu.GameLaunchAvailability.Ready &&
+            availability != com.zenithblue.sambas3.ppu.GameLaunchAvailability.GameplayRunning
+        ) {
+            ppuLaunchDeferred = true
+            Log.i("S3BOOT", "boot deferred to Home path=$requestedPath reason=$availability")
+            startActivity(Intent(this, MainActivity::class.java).apply {
+                addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_NEW_TASK)
+            })
+            if (registeredGame != null &&
+                (availability == com.zenithblue.sambas3.ppu.GameLaunchAvailability.NeedsPreparation ||
+                    availability is com.zenithblue.sambas3.ppu.GameLaunchAvailability.Failed)
+            ) {
+                com.zenithblue.sambas3.ppu.ImportPpuPreparationCoordinator.requestPreparation(
+                    applicationContext, registeredGame,
+                )
+            }
+            finish()
+            return
+        }
         AlertDialogQueue.hostsSuppressed = true
         try { com.zenithblue.sambas3.utils.GeneralSettings.init(this) } catch (_: Exception) {}
         if (RPCSX.rootDirectory.isEmpty()) {
@@ -706,7 +747,17 @@ class RPCSXActivity : ComponentActivity(), EmulationHost {
                 // Scoped settings lease: a crashed session's globals are
                 // restored first, then the resolved title profile is applied
                 // over a snapshot. Exact originals return on clean exit.
-                GameSettingsOverrides.beginScopedLeaseForBoot(this@RPCSXActivity, gameTitleId)
+                val settingsLease =
+                    GameSettingsOverrides.beginScopedLeaseForBoot(this@RPCSXActivity, gameTitleId)
+                if (!settingsLease.allApplied) {
+                    Log.e(
+                        "S3GAMECFG",
+                        "boot refused title=$gameTitleId reason=profile-apply-failed " +
+                            "keys=${settingsLease.perKeyOk}",
+                    )
+                    runOnUiThread { failBootAndReturnHome("game-settings-apply-failed") }
+                    return@thread
+                }
             }
             if (!intent.getBooleanExtra(EXTRA_SAFE_RETRY, false)) {
                 // Title/device-scoped compatibility driver: RDR on a known-bad
@@ -1033,7 +1084,7 @@ class RPCSXActivity : ComponentActivity(), EmulationHost {
         if (!terminalFailure.compareAndSet(false, true)) return
         interactionLock.lock(EmulatorInteractionLock.CrashView)
         val fatalEventId = "fatal-${System.currentTimeMillis()}-${activityInstanceId}"
-        EmulationSessionJournal.markFailure(this, fatalEventId)
+        EmulationSessionJournal.markFailure(this, fatalEventId, reason = evidence)
         Log.e("S3CRASH", "in-process fault evidence=$evidence")
         lifecycleScope.launch(kotlinx.coroutines.Dispatchers.IO) {
             val session = EmulationSessionJournal.read(this@RPCSXActivity)
@@ -1060,13 +1111,11 @@ class RPCSXActivity : ComponentActivity(), EmulationHost {
             var watchdogState = NoFrameWatchdog.State()
             while (isActive) {
                 val emulatorState = runCatching { RPCSX.getState() }.getOrNull()
-                val compileActive = runCatching { CompileProgressBridge.state.value.isActive }.getOrDefault(false)
                 val shouldWatch = emulatorState == EmulatorState.Running &&
                     lifecycle.currentState.isAtLeast(Lifecycle.State.RESUMED) &&
                     !terminalFailure.get() &&
                     !isFinishing &&
-                    !isDestroyed &&
-                    !compileActive
+                    !isDestroyed
                 val presentedFrames = if (shouldWatch) readPresentedFrameCount() else null
                 val observation = NoFrameWatchdog.observe(
                     state = watchdogState,
@@ -1938,6 +1987,10 @@ class RPCSXActivity : ComponentActivity(), EmulationHost {
     }
 
     override fun onDestroy() {
+        if (ppuLaunchDeferred) {
+            super.onDestroy()
+            return
+        }
         shaderToastHideRunnable?.let(binding.shaderToastOverlay::removeCallbacks)
         shaderToastHideRunnable = null
         EmulationHostRegistry.unregister(this)
@@ -2275,7 +2328,7 @@ class RPCSXActivity : ComponentActivity(), EmulationHost {
         private const val SHADER_TOAST_DURATION_MS = 5_000L
         /** First-frame window after Runtime PPU is idle (fresh boot only). */
         private const val FRESH_BOOT_FIRST_FRAME_TIMEOUT_MS = 120_000L
-        private const val NO_FRAME_TIMEOUT_MS = 180_000L
+        private const val NO_FRAME_TIMEOUT_MS = 120_000L
         private const val NO_FRAME_WATCHDOG_POLL_MS = 1_000L
         /** Sparse live-render probe during a long Runtime PPU apply (full-size frame copies). */
         private const val RENDER_HANDOVER_PROBE_INTERVAL_MS = 750L

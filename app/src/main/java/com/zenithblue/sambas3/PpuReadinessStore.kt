@@ -205,7 +205,7 @@ object PpuReadinessStore {
     }
 
     @Synchronized
-    fun invalidateIfFingerprintChanged(context: Context, key: String, currentFingerprint: String?): Boolean {
+    fun invalidateIfFingerprintChanged(context: Context, key: String, currentFingerprint: String? = fingerprint(context, key)): Boolean {
         ensureLoaded(context)
         val entry = cache[key] ?: return false
         val stored = entry.fingerprint

@@ -98,17 +98,18 @@ object EmulationSessionJournal {
         Log.i("S3EXIT", "requested session=${current.sessionId} stopRequestId=$requestId stopReason=$reason finishReason=${finishReason ?: "unknown"} journal=STOPPING timestamp=$now")
     }
 
-    fun markFailure(context: Context, fatalEventId: String) {
+    fun markFailure(context: Context, fatalEventId: String, reason: String? = null) {
         val current = read(context) ?: return
         val now = System.currentTimeMillis()
         write(context, current.copy(
             state = EmulationSessionState.FAILED,
             lastHeartbeatMs = now,
             fatalEventId = fatalEventId,
+            stopReason = reason ?: current.stopReason,
             failureAtMs = now,
             cleanTermination = false,
         ))
-        Log.i("S3EXIT", "event=fatal sessionId=${current.sessionId} activityInstanceId=${current.activityInstanceId} fatalEventId=$fatalEventId timestamp=$now")
+        Log.i("S3EXIT", "event=fatal sessionId=${current.sessionId} activityInstanceId=${current.activityInstanceId} fatalEventId=$fatalEventId stopReason=${reason ?: "none"} timestamp=$now")
     }
 
     /**

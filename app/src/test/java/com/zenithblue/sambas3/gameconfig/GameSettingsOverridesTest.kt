@@ -286,13 +286,31 @@ class GameSettingsOverridesTest {
         val path = "Core@@Stub PPU Traps"
         assertEquals("1", GameSettingsOverrides.curatedDefaultsForTitle("BCUS98123")[path])
         assertEquals("1", GameSettingsOverrides.curatedDefaultsForTitle("bcus98123")[path])
-        assertEquals("Accurate", GameSettingsOverrides.curatedDefaultsForTitle("BCUS98123")["Core@@XFloat Accuracy"])
+        assertEquals("\"Accurate\"", GameSettingsOverrides.curatedDefaultsForTitle("BCUS98123")["Core@@XFloat Accuracy"])
+        assertEquals("\"Atomic\"", GameSettingsOverrides.curatedDefaultsForTitle("BCUS98123")["Core@@RSX FIFO Accuracy"])
+        assertEquals("200", GameSettingsOverrides.curatedDefaultsForTitle("BCUS98123")["Video@@Driver Wake-Up Delay"])
+        assertEquals("false", GameSettingsOverrides.curatedDefaultsForTitle("BCUS98123")["Video@@Write Color Buffers"])
+        assertEquals("false", GameSettingsOverrides.curatedDefaultsForTitle("BCUS98123")["Video@@Read Depth Buffer"])
+        assertEquals("false", GameSettingsOverrides.curatedDefaultsForTitle("BCUS98123")["Video@@Read Color Buffers"])
+        assertEquals("false", GameSettingsOverrides.curatedDefaultsForTitle("BCUS98123")["Video@@Write Depth Buffer"])
+        assertEquals("false", GameSettingsOverrides.curatedDefaultsForTitle("BCUS98123")["Video@@Vulkan@@Asynchronous Texture Streaming 2"])
+        assertEquals("\"Accurate\"", GameSettingsOverrides.curatedDefaultsForTitle("BCUS98174")["Core@@XFloat Accuracy"])
+        assertEquals("false", GameSettingsOverrides.curatedDefaultsForTitle("BCUS98174")["Core@@SPU loop detection"])
+        assertEquals("\"Atomic\"", GameSettingsOverrides.curatedDefaultsForTitle("BCUS98174")["Core@@RSX FIFO Accuracy"])
+        assertEquals("200", GameSettingsOverrides.curatedDefaultsForTitle("BCUS98174")["Video@@Driver Wake-Up Delay"])
         assertTrue(GameSettingsOverrides.curatedDefaultsForTitle("BCES00509").isEmpty())
 
         appliedCalls.clear()
         GameSettingsOverrides.applyForGame(store, "BCUS98123", recordingSetter())
         assertTrue(appliedCalls.contains(path to "1"))
-        assertTrue(appliedCalls.contains("Core@@XFloat Accuracy" to "Accurate"))
+        assertTrue(appliedCalls.contains("Core@@XFloat Accuracy" to "\"Accurate\""))
+        assertTrue(appliedCalls.contains("Core@@RSX FIFO Accuracy" to "\"Atomic\""))
+        assertTrue(appliedCalls.contains("Video@@Driver Wake-Up Delay" to "200"))
+        assertTrue(appliedCalls.contains("Video@@Write Color Buffers" to "false"))
+        assertTrue(appliedCalls.contains("Video@@Read Depth Buffer" to "false"))
+        assertTrue(appliedCalls.contains("Video@@Read Color Buffers" to "false"))
+        assertTrue(appliedCalls.contains("Video@@Write Depth Buffer" to "false"))
+        assertTrue(appliedCalls.contains("Video@@Vulkan@@Asynchronous Texture Streaming 2" to "false"))
     }
 
     // ── resolveTitleId segment heuristic lives in TitleIdResolverTest ────────

@@ -80,11 +80,12 @@ object SessionDiagnostics {
         osExitEvidence: Boolean = false,
         evidenceHint: String = "",
     ): SessionDiagnosticsView {
+        val effectiveHint = if (evidenceHint.isNotBlank()) evidenceHint else (manifest.stopReason ?: "")
         val typedFatal = !fatalEventId.isNullOrBlank() ||
             manifest.terminalState == LogSessionTerminal.CRASHED
-        val gpuEvidence = containsGpuFatal(evidenceHint)
-        val nativeEvidence = containsNativeFatal(evidenceHint)
-        val frameTimeoutEvidence = containsFrameTimeout(evidenceHint)
+        val gpuEvidence = containsGpuFatal(effectiveHint)
+        val nativeEvidence = containsNativeFatal(effectiveHint)
+        val frameTimeoutEvidence = containsFrameTimeout(effectiveHint)
         val capture = manifest.captureState
         val outcome = when {
             typedFatal && (nativeEvidence || fatalEventId != null || manifest.terminalState == LogSessionTerminal.CRASHED) ->

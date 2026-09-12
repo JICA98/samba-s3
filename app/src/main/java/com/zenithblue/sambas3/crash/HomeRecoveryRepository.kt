@@ -63,7 +63,7 @@ object HomeRecoveryRepository {
         }
 
         val report = withContext(Dispatchers.IO) {
-            runCatching { CrashEvidenceCollector.collectSummary(appContext, session) }.getOrNull()
+            runCatching { CrashEvidenceCollector.collectSummary(appContext, session, session.stopReason ?: "") }.getOrNull()
         }
         val decision = HomeRecoveryDecision.decide(
             session.state,

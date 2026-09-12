@@ -854,3 +854,19 @@ worse on this 8-core SoC, so the cap is ruled out and was reverted.
 Hypothesis for the next loop: SPU→RSX kick *data* delivery (SPU DMA /
 MFC accuracy) rather than thread count, since kicks are sent but never
 observed by RSX.
+
+### 2026-09-12 ARM64 LLVM instruction-cache publication experiment
+
+Ported the architecture-neutral part of
+`hamzaq2000/rpcs3@983c69d5ebccf45b239e68ed7433c42d94c2d6d4`:
+`MemoryManager1` and `MemoryManager2` now retain emitted code ranges and
+call `asmjit::VirtMem::flushInstructionCache` only after RuntimeDyld applies
+relocations. Apple-only VM and guest-CPU coordination changes were excluded.
+
+The arm64 `RelWithDebInfo` core built successfully. Both standard and
+Play Store debug unit-test tasks passed. The generated submodule patch passes
+reverse-apply validation.
+
+Device validation is pending: only the OnePlus 13R (`d30a1726`) is connected.
+Project policy requires every new release APK to be installed on both the
+OnePlus 13R and Poco X6 Pro, so no release APK was built or installed.

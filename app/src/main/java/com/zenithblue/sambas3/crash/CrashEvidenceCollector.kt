@@ -29,15 +29,16 @@ data class CrashReport(
 object CrashEvidenceCollector {
     fun collectSummary(context: Context, session: EmulationSessionRecord?, evidenceHint: String = ""): CrashReport {
         val logSession = session?.sessionId?.let { LogSessionStore.read(context, it) }
+        val effectiveHint = if (evidenceHint.isNotBlank()) evidenceHint else (session?.stopReason ?: logSession?.stopReason ?: "")
         val view = logSession?.let {
             SessionDiagnostics.project(
                 it,
-                fatalEventId = session.fatalEventId,
-                evidenceHint = evidenceHint,
+                fatalEventId = session?.fatalEventId,
+                evidenceHint = effectiveHint,
             )
         }
         val classification = view?.classification ?: CrashClassifier.classify(
-            evidenceHint,
+            effectiveHint,
             session != null,
             cleanStop = false,
             fatalEventId = session?.fatalEventId,
@@ -49,7 +50,7 @@ object CrashEvidenceCollector {
             directory = dir,
             classification = classification,
             summary = view?.outcome?.name?.replace('_', ' ') ?: classification.name.replace('_', ' '),
-            cause = view?.diagnosticCause?.name?.replace('_', ' ') ?: CrashClassifier.likelyCause(evidenceHint),
+            cause = view?.diagnosticCause?.name?.replace('_', ' ') ?: CrashClassifier.likelyCause(effectiveHint),
             sources = sources,
             gameTitle = logSession?.gameTitleSnapshot ?: session?.gameName,
             titleId = logSession?.titleId ?: session?.titleId,

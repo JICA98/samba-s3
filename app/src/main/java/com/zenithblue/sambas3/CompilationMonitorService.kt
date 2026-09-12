@@ -26,6 +26,18 @@ class CompilationMonitorService : Service() {
         const val NOTIF_SHADER = 2002
         const val TAG = "CompileMonitorService"
 
+        @Volatile
+        var isRunning: Boolean = false
+            private set
+
+        fun setStarting() {
+            isRunning = true
+        }
+
+        fun clearRunning() {
+            isRunning = false
+        }
+
         fun startForEvent(context: android.content.Context, event: CompileProgressBridge.NativeEvent) {
             val intent = Intent(context, CompilationMonitorService::class.java).apply {
                 putExtra("domain", event.domain)
@@ -48,9 +60,28 @@ class CompilationMonitorService : Service() {
     private var collectJob: Job? = null
     private var isForeground = false
     private var lastProjection: CompilationMonitorLogic.MonitorProjection? = null
+    private val stopHandler = android.os.Handler(android.os.Looper.getMainLooper())
+    private var stopRunnable: Runnable? = null
+
+    private fun scheduleStopForegroundAndSelf(delayMs: Long = 3000L) {
+        if (stopRunnable != null) return
+        stopRunnable = Runnable {
+            stopRunnable = null
+            if (isForeground && !currentProjection().isActive) {
+                Log.i(TAG, "Projection inactive after debounce delay — stopping foreground")
+                stopForegroundAndSelf()
+            }
+        }.also { stopHandler.postDelayed(it, delayMs) }
+    }
+
+    private fun cancelScheduledStop() {
+        stopRunnable?.let { stopHandler.removeCallbacks(it) }
+        stopRunnable = null
+    }
 
     override fun onCreate() {
         super.onCreate()
+        isRunning = true
         NotificationChannels.ensureCreated(this)
         // Observe runtime + prelaunch together so PRELAUNCH Runtime PPU owns FGS 2000
         // without collapsing origin/job ownership into a single boolean.
@@ -116,8 +147,10 @@ class CompilationMonitorService : Service() {
                 live.prelaunchActive,
             )
         ) {
-            Log.i(TAG, "No live compile jobs after promotion — stopping")
-            stopForegroundAndSelf()
+            Log.i(TAG, "No live compile jobs after promotion — scheduling stop")
+            scheduleStopForegroundAndSelf()
+        } else {
+            cancelScheduledStop()
         }
         return START_NOT_STICKY
     }
@@ -160,10 +193,11 @@ class CompilationMonitorService : Service() {
         }
 
         if (!projection.isActive) {
-            Log.i(TAG, "Projection inactive — stopping foreground")
-            stopForegroundAndSelf()
+            Log.i(TAG, "Projection inactive — scheduling stop")
+            scheduleStopForegroundAndSelf()
             return
         }
+        cancelScheduledStop()
 
         val anchor = buildAnchorNotification(projection)
         try {
@@ -228,6 +262,8 @@ class CompilationMonitorService : Service() {
     }
 
     private fun stopForegroundAndSelf() {
+        cancelScheduledStop()
+        isRunning = false
         try {
             ServiceCompat.stopForeground(this, ServiceCompat.STOP_FOREGROUND_REMOVE)
             NotificationManagerCompat.from(this).apply {
@@ -242,6 +278,8 @@ class CompilationMonitorService : Service() {
     }
 
     override fun onDestroy() {
+        cancelScheduledStop()
+        isRunning = false
         collectJob?.cancel()
         serviceScope.cancel()
         try {

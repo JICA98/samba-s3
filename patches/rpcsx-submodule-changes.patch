@@ -1516,7 +1516,7 @@ index b6f295e4c..dbdaa58a4 100644
  	// processed at once
  	const std::pair<u32, s32> statuses[] = {
 diff --git a/rpcs3/Emu/Cell/PPUThread.cpp b/rpcs3/Emu/Cell/PPUThread.cpp
-index d2768d8b0..caaef4c15 100644
+index d2768d8b0..9219e79c2 100644
 --- a/rpcs3/Emu/Cell/PPUThread.cpp
 +++ b/rpcs3/Emu/Cell/PPUThread.cpp
 @@ -16,6 +16,7 @@
@@ -1549,7 +1549,16 @@ index d2768d8b0..caaef4c15 100644
  	}
  
  	static jit_codegen_level ppu_jit_codegen_level()
-@@ -329,12 +343,28 @@ extern "C" const char* _rpcsx_getPpuManifestKey()
+@@ -302,6 +316,8 @@ namespace
+ 		key["llvm_cpu"] = llvm_cpu;
+ 		key["ppu_settings"] = nlohmann::json::object();
+ 		key["ppu_settings"]["accurate_dfma"] = g_cfg.core.use_accurate_dfma.get();
++		key["ppu_settings"]["accurate_cache_line_stores"] = g_cfg.core.accurate_cache_line_stores.get();
++		key["ppu_settings"]["fixup_vnan"] = g_cfg.core.ppu_fix_vnan.get();
+ 		key["ppu_settings"]["nj_fixup"] = g_cfg.core.ppu_llvm_nj_fixup.get();
+ 		key["ppu_settings"]["reservations_128"] = g_cfg.core.ppu_128_reservations_loop_max_length.get();
+ 		key["ppu_settings"]["greedy_mode"] = g_cfg.core.ppu_llvm_greedy_mode.get();
+@@ -329,12 +345,28 @@ extern "C" const char* _rpcsx_getPpuManifestKey()
  extern "C" const char* _rpcsx_getPpuManifestKeyForTitle(const char* titleId)
  {
  	static thread_local std::string lastForTitle;
@@ -1578,7 +1587,7 @@ index d2768d8b0..caaef4c15 100644
  	return lastForTitle.c_str();
  }
  
-@@ -4841,8 +4871,45 @@ extern void ppu_precompile(std::vector<std::string>& dir_queue, std::vector<ppu_
+@@ -4841,8 +4873,45 @@ extern void ppu_precompile(std::vector<std::string>& dir_queue, std::vector<ppu_
  					{
  						obj.clear(), src.close(); // Clear decrypted file and elf object memory
  						file_allocation = {};     // release used file memory
@@ -1625,7 +1634,7 @@ index d2768d8b0..caaef4c15 100644
  						continue;
  					}
  
-@@ -4887,7 +4954,35 @@ extern void ppu_precompile(std::vector<std::string>& dir_queue, std::vector<ppu_
+@@ -4887,7 +4956,35 @@ extern void ppu_precompile(std::vector<std::string>& dir_queue, std::vector<ppu_
  							break;
  						}
  
@@ -1662,7 +1671,7 @@ index d2768d8b0..caaef4c15 100644
  						ppu_finalize(*ovlm, true);
  						break;
  					}
-@@ -5021,7 +5116,35 @@ extern void ppu_precompile(std::vector<std::string>& dir_queue, std::vector<ppu_
+@@ -5021,7 +5118,35 @@ extern void ppu_precompile(std::vector<std::string>& dir_queue, std::vector<ppu_
  
  						_main.name = ' '; // Make ppu_finalize work
  						Emu.ConfigurePPUCache();
@@ -1699,7 +1708,7 @@ index d2768d8b0..caaef4c15 100644
  						spu_cache::initialize(false);
  						ppu_finalize(_main, true);
  						_main = {};
-@@ -5336,6 +5459,15 @@ bool ppu_initialize(const ppu_module<lv2_obj>& info, bool check_only, u64 file_s
+@@ -5336,6 +5461,15 @@ bool ppu_initialize(const ppu_module<lv2_obj>& info, bool check_only, u64 file_s
  
  	bool has_mfvscr = false;
  
@@ -1715,7 +1724,7 @@ index d2768d8b0..caaef4c15 100644
  	const bool is_being_used_in_emulation = vm::base(info.segs[0].addr) == info.segs[0].ptr;
  	const ppu_compile_policy compile_policy = is_being_used_in_emulation
  		? ppu_compile_policy::background
-@@ -5895,6 +6027,17 @@ bool ppu_initialize(const ppu_module<lv2_obj>& info, bool check_only, u64 file_s
+@@ -5895,6 +6029,17 @@ bool ppu_initialize(const ppu_module<lv2_obj>& info, bool check_only, u64 file_s
  
  		module_counter++;
  
@@ -1733,7 +1742,7 @@ index d2768d8b0..caaef4c15 100644
  		if (!check_only)
  		{
  			link_workload.emplace_back(obj_name, false);
-@@ -5903,6 +6046,16 @@ bool ppu_initialize(const ppu_module<lv2_obj>& info, bool check_only, u64 file_s
+@@ -5903,6 +6048,16 @@ bool ppu_initialize(const ppu_module<lv2_obj>& info, bool check_only, u64 file_s
  		// Check object file
  		if (jit_compiler::check(cache_path + obj_name))
  		{
@@ -1750,7 +1759,7 @@ index d2768d8b0..caaef4c15 100644
  			if (!is_being_used_in_emulation && !check_only)
  			{
  				ppu_log.success("LLVM: Module exists: %s", obj_name);
-@@ -5917,6 +6070,26 @@ bool ppu_initialize(const ppu_module<lv2_obj>& info, bool check_only, u64 file_s
+@@ -5917,6 +6072,26 @@ bool ppu_initialize(const ppu_module<lv2_obj>& info, bool check_only, u64 file_s
  			return true;
  		}
  
@@ -1777,7 +1786,7 @@ index d2768d8b0..caaef4c15 100644
  		// Remember, used in ppu_initialize(void)
  		compiled_new = true;
  
-@@ -5925,6 +6098,16 @@ bool ppu_initialize(const ppu_module<lv2_obj>& info, bool check_only, u64 file_s
+@@ -5925,6 +6100,16 @@ bool ppu_initialize(const ppu_module<lv2_obj>& info, bool check_only, u64 file_s
  
  		// Fill workload list for compilation
  		workload.emplace_back(std::move(obj_name), std::move(part));
@@ -1794,7 +1803,7 @@ index d2768d8b0..caaef4c15 100644
  	}
  
  	if (check_only)
-@@ -5932,6 +6115,20 @@ bool ppu_initialize(const ppu_module<lv2_obj>& info, bool check_only, u64 file_s
+@@ -5932,6 +6117,20 @@ bool ppu_initialize(const ppu_module<lv2_obj>& info, bool check_only, u64 file_s
  		return false;
  	}
  
@@ -1815,7 +1824,7 @@ index d2768d8b0..caaef4c15 100644
  	if (g_progr_ftotal_bits && file_size)
  	{
  		g_progr_fknown_bits += file_size;
-@@ -5945,7 +6142,42 @@ bool ppu_initialize(const ppu_module<lv2_obj>& info, bool check_only, u64 file_s
+@@ -5945,7 +6144,42 @@ bool ppu_initialize(const ppu_module<lv2_obj>& info, bool check_only, u64 file_s
  		atomic_t<u64> work_done = 0;
  
  		// Update progress dialog
@@ -1858,7 +1867,7 @@ index d2768d8b0..caaef4c15 100644
  
  		*progress_dialog = get_localized_string(localized_string_id::PROGRESS_DIALOG_COMPILING_PPU_MODULES);
  
-@@ -6034,6 +6266,9 @@ bool ppu_initialize(const ppu_module<lv2_obj>& info, bool check_only, u64 file_s
+@@ -6034,6 +6268,9 @@ bool ppu_initialize(const ppu_module<lv2_obj>& info, bool check_only, u64 file_s
  					}
  
  					ppu_log.success("LLVM: Compiled module %s", obj_name);
@@ -1868,7 +1877,7 @@ index d2768d8b0..caaef4c15 100644
  				}
  
  				core_lock.unlock();
-@@ -6098,6 +6333,13 @@ bool ppu_initialize(const ppu_module<lv2_obj>& info, bool check_only, u64 file_s
+@@ -6098,6 +6335,13 @@ bool ppu_initialize(const ppu_module<lv2_obj>& info, bool check_only, u64 file_s
  
  		threads.join();
  
@@ -1882,6 +1891,29 @@ index d2768d8b0..caaef4c15 100644
  		if (caller_is_named)
  		{
  			thread_ctrl::set_name(old_name);
+diff --git a/rpcs3/Emu/Cell/SPUThread.cpp b/rpcs3/Emu/Cell/SPUThread.cpp
+index f511b3c55..9c58fec78 100644
+--- a/rpcs3/Emu/Cell/SPUThread.cpp
++++ b/rpcs3/Emu/Cell/SPUThread.cpp
+@@ -2346,6 +2346,18 @@ void spu_thread::do_dma_transfer(spu_thread* _this, const spu_mfc_cmd& args, u8*
+ 	u32 eal = args.eal;
+ 	u32 lsa = args.lsa & 0x3ffff;
+ 
++	if (!args.size)
++	{
++		return;
++	}
++
++	if (eal < RAW_SPU_BASE_ADDR && !vm::check_addr(eal, is_get ? vm::page_readable : vm::page_writable, args.size))
++	{
++		spu_log.error("SPU DMA fault: %s unmapped address 0x%08x (size=%u, cmd=0x%x)",
++			is_get ? "reading" : "writing", eal, args.size, args.cmd);
++		return;
++	}
++
+ 	// Keep src point to const
+ 	u8* dst = nullptr;
+ 	const u8* src = nullptr;
 diff --git a/rpcs3/Emu/RSX/Overlays/Shaders/shader_loading_dialog_native.cpp b/rpcs3/Emu/RSX/Overlays/Shaders/shader_loading_dialog_native.cpp
 index a72a3ee7c..015f6a53b 100644
 --- a/rpcs3/Emu/RSX/Overlays/Shaders/shader_loading_dialog_native.cpp
@@ -2028,7 +2060,7 @@ index 75975964f..5a3e7d3de 100644
  			{
  				// Creating the icon requires FS read, so it is important to cache it
 diff --git a/rpcs3/Emu/RSX/Program/ProgramStateCache.h b/rpcs3/Emu/RSX/Program/ProgramStateCache.h
-index 453c7c7ba..53a03a9ea 100644
+index 453c7c7ba..8db722872 100644
 --- a/rpcs3/Emu/RSX/Program/ProgramStateCache.h
 +++ b/rpcs3/Emu/RSX/Program/ProgramStateCache.h
 @@ -233,31 +233,31 @@ protected:
@@ -2081,16 +2113,22 @@ index 453c7c7ba..53a03a9ea 100644
  		rsx::program_cache_hint_t::cache_vertex_program(cache_hint, rsx_vp, new_shader);
  		return std::forward_as_tuple(*new_shader, false);
  	}
-@@ -271,32 +271,32 @@ protected:
+@@ -271,31 +271,34 @@ protected:
  			return std::forward_as_tuple(*cache_hint->get_fragment_program<fragment_program_type>(), true);
  		}
  
 -		bool recompile = false;
 -		typename binary_to_fragment_program::iterator it;
 -		fragment_program_type* new_shader;
--		{
--			reader_lock lock(m_fragment_mutex);
 +		reader_lock lock(m_fragment_mutex);
++
++		const auto& I = m_fragment_shader_cache.find(rsx_fp);
++		if (I != m_fragment_shader_cache.end())
+ 		{
+-			reader_lock lock(m_fragment_mutex);
++			rsx::program_cache_hint_t::cache_fragment_program(cache_hint, rsx_fp, &(I->second));
++			return std::forward_as_tuple(I->second, true);
++		}
  
 -			const auto& I = m_fragment_shader_cache.find(rsx_fp);
 -			if (I != m_fragment_shader_cache.end())
@@ -2098,43 +2136,160 @@ index 453c7c7ba..53a03a9ea 100644
 -				rsx::program_cache_hint_t::cache_fragment_program(cache_hint, rsx_fp, &(I->second));
 -				return std::forward_as_tuple(I->second, true);
 -			}
-+		const auto& I = m_fragment_shader_cache.find(rsx_fp);
-+		if (I != m_fragment_shader_cache.end())
-+		{
-+			rsx::program_cache_hint_t::cache_fragment_program(cache_hint, rsx_fp, &(I->second));
-+			return std::forward_as_tuple(I->second, true);
-+		}
++		rsx_log.trace("FP not found in buffer!");
  
 -			rsx_log.trace("FP not found in buffer!");
-+		rsx_log.trace("FP not found in buffer!");
++		lock.upgrade();
  
 -			lock.upgrade();
 -			std::tie(it, recompile) = m_fragment_shader_cache.try_emplace(rsx_fp);
 -			new_shader = &(it->second);
--		}
-+		lock.upgrade();
- 
--		if (recompile)
 +		// Double-check if another thread inserted and compiled it while upgrading
 +		const auto& I2 = m_fragment_shader_cache.find(rsx_fp);
 +		if (I2 != m_fragment_shader_cache.end())
- 		{
--			it->first.clone_data();
--			backend_traits::recompile_fragment_program(rsx_fp, *new_shader, m_next_id++);
++		{
 +			rsx::program_cache_hint_t::cache_fragment_program(cache_hint, rsx_fp, &(I2->second));
 +			return std::forward_as_tuple(I2->second, true);
  		}
  
+-		if (recompile)
 +		auto [it, inserted] = m_fragment_shader_cache.try_emplace(rsx_fp);
 +		fragment_program_type* new_shader = &(it->second);
-+		it->first.clone_data();
++		if (rsx_fp.ucode_length && rsx_fp.get_data())
+ 		{
+ 			it->first.clone_data();
+-			backend_traits::recompile_fragment_program(rsx_fp, *new_shader, m_next_id++);
+ 		}
 +		backend_traits::recompile_fragment_program(rsx_fp, *new_shader, m_next_id++);
-+
+ 
  		rsx::program_cache_hint_t::cache_fragment_program(cache_hint, rsx_fp, new_shader);
  		return std::forward_as_tuple(*new_shader, false);
+@@ -435,7 +438,7 @@ public:
+ 		std::function<pipeline_type*(pipeline_storage_type&)> callback;
+ 		const bool notify = allow_notification;
+ 		std::optional<RSXFragmentProgram> fragment_clone;
+-		if (notify)
++		if (notify && fragment_shader.ucode_length && fragment_shader.get_data())
+ 		{
+ 			fragment_clone = RSXFragmentProgram::clone(fragment_shader);
+ 		}
+@@ -483,6 +486,11 @@ public:
+ 
+ 	void fill_fragment_constants_buffer(std::span<f32> dst_buffer, const fragment_program_type& fragment_program, const RSXFragmentProgram& rsx_prog, bool sanitize = false) const
+ 	{
++		if (&fragment_program == nullptr)
++		{
++			return;
++		}
++
+ 		if (dst_buffer.size_bytes() < (fragment_program.FragmentConstantOffsetCache.size() * 16))
+ 		{
+ 			// This can happen if CELL alters the shader after it has been loaded by RSX.
+diff --git a/rpcs3/Emu/RSX/Program/RSXFragmentProgram.h b/rpcs3/Emu/RSX/Program/RSXFragmentProgram.h
+index 36f50a7f5..691b4d41f 100644
+--- a/rpcs3/Emu/RSX/Program/RSXFragmentProgram.h
++++ b/rpcs3/Emu/RSX/Program/RSXFragmentProgram.h
+@@ -249,6 +249,10 @@ struct RSXFragmentProgram
+ 		data_storage_helper(data_storage_helper&& other) noexcept
+ 			: data_ptr(other.data_ptr), local_storage(std::move(other.local_storage))
+ 		{
++			if (!local_storage.empty())
++			{
++				data_ptr = local_storage.data();
++			}
+ 			other.data_ptr = nullptr;
+ 		}
+ 
+@@ -278,6 +282,10 @@ struct RSXFragmentProgram
+ 
+ 			data_ptr = other.data_ptr;
+ 			local_storage = std::move(other.local_storage);
++			if (!local_storage.empty())
++			{
++				data_ptr = local_storage.data();
++			}
+ 			other.data_ptr = nullptr;
+ 
+ 			return *this;
+diff --git a/rpcs3/Emu/RSX/RSXThread.cpp b/rpcs3/Emu/RSX/RSXThread.cpp
+index adbf67a19..d7605fa4c 100644
+--- a/rpcs3/Emu/RSX/RSXThread.cpp
++++ b/rpcs3/Emu/RSX/RSXThread.cpp
+@@ -2023,7 +2023,11 @@ namespace rsx
+ 				continue;
+ 
+ 			const auto& tex = rsx::method_registers.vertex_textures[i];
+-			if (tex.enabled() && (current_vp_metadata.referenced_textures_mask & (1 << i)))
++			// Sampler descriptors are populated by load_texture_env; a null entry
++			// means the texture upload was skipped (disabled/uncached). Treat as
++			// unbound instead of dereferencing null (SIGSEGV on Adreno/Turnip).
++			if (tex.enabled() && (current_vp_metadata.referenced_textures_mask & (1 << i)) &&
++				i < sampler_descriptors.size() && sampler_descriptors[i])
+ 			{
+ 				current_vp_texture_state.clear(i);
+ 				current_vp_texture_state.set_dimension(sampler_descriptors[i]->image_type, i);
+@@ -2079,7 +2083,9 @@ namespace rsx
+ 			auto& tex = rsx::method_registers.fragment_textures[i];
+ 			current_fp_texture_state.clear(i);
+ 
+-			if (tex.enabled() && sampler_descriptors[i]->format_class != RSX_FORMAT_CLASS_UNDEFINED)
++			// Null sampler means upload was skipped; treat as unbound texture.
++			if (tex.enabled() && i < sampler_descriptors.size() && sampler_descriptors[i] &&
++				sampler_descriptors[i]->format_class != RSX_FORMAT_CLASS_UNDEFINED)
+ 			{
+ 				std::memcpy(current_fragment_program.texture_params[i].scale, sampler_descriptors[i]->texcoord_xform.scale, 6 * sizeof(f32));
+ 				current_fragment_program.texture_params[i].remap = tex.remap();
+diff --git a/rpcs3/Emu/RSX/VK/VKCompute.cpp b/rpcs3/Emu/RSX/VK/VKCompute.cpp
+index 4e2558896..d8e27b833 100644
+--- a/rpcs3/Emu/RSX/VK/VKCompute.cpp
++++ b/rpcs3/Emu/RSX/VK/VKCompute.cpp
+@@ -68,6 +68,12 @@ namespace vk
+ 			switch (vk::get_driver_vendor())
+ 			{
+ 			case vk::driver_vendor::unknown:
++#if defined(__ANDROID__) || defined(ANDROID)
++				unroll_loops = true;
++				optimal_kernel_size = 1;
++				optimal_group_size = 64;
++				break;
++#endif
+ 			case vk::driver_vendor::INTEL:
+ 			case vk::driver_vendor::ANV:
+ 				// Intel hw has 8 threads, but LDS allocation behavior makes optimal group size between 64 and 256
+@@ -150,9 +156,20 @@ namespace vk
+ 
+ 			auto compiler = vk::get_pipe_compiler();
+ 			m_program = compiler->compile(info, m_pipeline_layout, vk::pipe_compiler::COMPILE_INLINE);
++			if (!m_program || m_program->pipeline == VK_NULL_HANDLE)
++			{
++				rsx_log.error("compute_task::load_program: Failed to compile compute pipeline (m_program=%p)", static_cast<void*>(m_program.get()));
++				m_program.reset();
++				return;
++			}
+ 			declare_inputs();
+ 		}
+ 
++		if (!m_program || m_program->pipeline == VK_NULL_HANDLE)
++		{
++			return;
++		}
++
+ 		ensure(m_used_descriptors < VK_MAX_COMPUTE_TASKS);
+ 
+ 		m_descriptor_set = m_descriptor_pool.allocate(m_descriptor_layout, VK_TRUE);
+@@ -172,6 +189,10 @@ namespace vk
+ 		}
+ 
+ 		load_program(cmd);
++		if (!m_program || m_program->pipeline == VK_NULL_HANDLE)
++		{
++			return;
++		}
+ 		VK_GET_SYMBOL(vkCmdDispatch)(cmd, invocations_x, invocations_y, invocations_z);
  	}
+ 
 diff --git a/rpcs3/Emu/RSX/VK/VKDraw.cpp b/rpcs3/Emu/RSX/VK/VKDraw.cpp
-index fd2370c95..e7bc835a3 100644
+index fd2370c95..bb1f28361 100644
 --- a/rpcs3/Emu/RSX/VK/VKDraw.cpp
 +++ b/rpcs3/Emu/RSX/VK/VKDraw.cpp
 @@ -494,19 +494,18 @@ void VKGSRender::load_texture_env()
@@ -2165,24 +2320,240 @@ index fd2370c95..e7bc835a3 100644
  		}
  	}
  }
+@@ -869,6 +868,12 @@ void VKGSRender::emit_geometry(u32 sub_index)
+ 	update_vertex_env(sub_index, upload_info);
+ 
+ 	ensure(m_vertex_layout_storage);
++	if (!m_program || m_program->pipeline == VK_NULL_HANDLE)
++	{
++		rsx_log.error("emit_geometry: Skipping draw due to null or uncompiled program (m_program=%p)", static_cast<void*>(m_program));
++		return;
++	}
++
+ 	if (update_descriptors)
+ 	{
+ 		m_program->bind_uniform(persistent_buffer, binding_table.vertex_buffers_first_bind_slot, m_current_frame->descriptor_set);
+@@ -899,6 +904,12 @@ void VKGSRender::emit_geometry(u32 sub_index)
+ 
+ 	if (reload_state)
+ 	{
++		if (!m_program || m_program->pipeline == VK_NULL_HANDLE)
++		{
++			rsx_log.error("emit_geometry: Skipping draw with null pipeline (m_program=%p)", static_cast<void*>(m_program));
++			return;
++		}
++
+ 		VK_GET_SYMBOL(vkCmdBindPipeline)(*m_current_command_buffer, VK_PIPELINE_BIND_POINT_GRAPHICS, m_program->pipeline);
+ 
+ 		update_draw_state();
 diff --git a/rpcs3/Emu/RSX/VK/VKGSRender.cpp b/rpcs3/Emu/RSX/VK/VKGSRender.cpp
-index 32abde0c4..e931b6583 100644
+index 32abde0c4..94a611b08 100644
 --- a/rpcs3/Emu/RSX/VK/VKGSRender.cpp
 +++ b/rpcs3/Emu/RSX/VK/VKGSRender.cpp
-@@ -795,6 +795,13 @@ VKGSRender::~VKGSRender()
- 	// Clear flush requests
- 	m_flush_requests.clear_pending_flag();
+@@ -580,7 +580,10 @@ VKGSRender::VKGSRender(utils::serial* ar) noexcept : GSRender(ar)
+ 		[this](const vk::pipeline_props& props, const RSXVertexProgram& vp, const RSXFragmentProgram& fp)
+ 		{
+ 			// Program was linked or queued for linking
+-			m_shaders_cache->store(props, vp, fp);
++			if (m_shaders_cache)
++			{
++				m_shaders_cache->store(props, vp, fp);
++			}
+ 		});
  
-+	// Drain and destroy shader storage cache before clearing m_prog_buffer
+ 	if (g_cfg.video.disable_vertex_cache)
+@@ -797,6 +800,11 @@ VKGSRender::~VKGSRender()
+ 
+ 	// Shaders
+ 	vk::destroy_pipe_compiler();        // Ensure no pending shaders being compiled
 +	if (m_shaders_cache)
 +	{
 +		m_shaders_cache->wait_stores();
 +		m_shaders_cache.reset();
 +	}
-+
- 	// Shaders
- 	vk::destroy_pipe_compiler();        // Ensure no pending shaders being compiled
  	spirv::finalize_compiler_context(); // Shut down the glslang compiler
+ 	m_prog_buffer->clear();             // Delete shader objects
+ 	m_shader_interpreter.destroy();
+@@ -2033,7 +2041,7 @@ bool VKGSRender::load_program()
+ 		}
+ 	}
+ 
+-	return m_program != nullptr;
++	return m_program != nullptr && m_program->pipeline != VK_NULL_HANDLE;
+ }
+ 
+ void VKGSRender::load_program_env()
+@@ -2125,13 +2133,13 @@ void VKGSRender::load_program_env()
+ 		check_heap_status(VK_HEAP_CHECK_FRAGMENT_CONSTANTS_STORAGE);
+ 
+ 		// Fragment constants
+-		if (fragment_constants_size)
++		if (m_fragment_prog && fragment_constants_size)
+ 		{
+ 			auto mem = m_fragment_constants_ring_info.alloc<256>(fragment_constants_size);
+ 			auto buf = m_fragment_constants_ring_info.map(mem, fragment_constants_size);
+ 
+ 			m_prog_buffer->fill_fragment_constants_buffer({reinterpret_cast<float*>(buf), fragment_constants_size},
+-				*ensure(m_fragment_prog), current_fragment_program, true);
++				*m_fragment_prog, current_fragment_program, true);
+ 
+ 			m_fragment_constants_ring_info.unmap();
+ 			m_fragment_constants_buffer_info = {m_fragment_constants_ring_info.heap->value, mem, fragment_constants_size};
+diff --git a/rpcs3/Emu/RSX/VK/VKHelpers.cpp b/rpcs3/Emu/RSX/VK/VKHelpers.cpp
+index c6fc74822..5d27c9ef9 100644
+--- a/rpcs3/Emu/RSX/VK/VKHelpers.cpp
++++ b/rpcs3/Emu/RSX/VK/VKHelpers.cpp
+@@ -90,6 +90,7 @@ namespace vk
+ 		g_drv_no_primitive_restart = false;
+ 		g_drv_sanitize_fp_values = false;
+ 		g_drv_disable_fence_reset = false;
++		g_drv_strict_query_scopes = !!g_cfg.video.strict_rendering_mode;
+ 		g_drv_emulate_cond_render = (g_cfg.video.relaxed_zcull_sync && !g_render_device->get_conditional_render_support());
+ 		g_num_processed_frames = 0;
+ 		g_num_total_frames = 0;
+diff --git a/rpcs3/Emu/RSX/VK/VKOverlays.cpp b/rpcs3/Emu/RSX/VK/VKOverlays.cpp
+index 32c4cf745..505d1f606 100644
+--- a/rpcs3/Emu/RSX/VK/VKOverlays.cpp
++++ b/rpcs3/Emu/RSX/VK/VKOverlays.cpp
+@@ -254,6 +254,12 @@ namespace vk
+ 			program->bind_uniform(info, "fs" + std::to_string(n), VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, m_descriptor_set);
+ 		}
+ 
++		if (!program || program->pipeline == VK_NULL_HANDLE)
++		{
++			rsx_log.error("overlay_pass::load_program: Skipping overlay with null pipeline (program=%p)", static_cast<void*>(program));
++			return;
++		}
++
+ 		VK_GET_SYMBOL(vkCmdBindPipeline)(cmd, VK_PIPELINE_BIND_POINT_GRAPHICS, program->pipeline);
+ 		m_descriptor_set.bind(cmd, VK_PIPELINE_BIND_POINT_GRAPHICS, m_pipeline_layout);
+ 
+diff --git a/rpcs3/Emu/RSX/VK/VKPipelineCompiler.cpp b/rpcs3/Emu/RSX/VK/VKPipelineCompiler.cpp
+index fbf7f3844..e7474a382 100644
+--- a/rpcs3/Emu/RSX/VK/VKPipelineCompiler.cpp
++++ b/rpcs3/Emu/RSX/VK/VKPipelineCompiler.cpp
+@@ -52,16 +52,26 @@ namespace vk
+ 
+ 	std::unique_ptr<glsl::program> pipe_compiler::int_compile_compute_pipe(const VkComputePipelineCreateInfo& create_info, VkPipelineLayout pipe_layout)
+ 	{
+-		VkPipeline pipeline;
+-		VK_GET_SYMBOL(vkCreateComputePipelines)(*g_render_device, nullptr, 1, &create_info, nullptr, &pipeline);
++		VkPipeline pipeline = VK_NULL_HANDLE;
++		const VkResult res = VK_GET_SYMBOL(vkCreateComputePipelines)(*g_render_device, nullptr, 1, &create_info, nullptr, &pipeline);
++		if (res != VK_SUCCESS || pipeline == VK_NULL_HANDLE)
++		{
++			rsx_log.error("Failed to create compute pipeline (res=%d, pipeline=%p)", static_cast<int>(res), static_cast<void*>(pipeline));
++			return nullptr;
++		}
+ 		return std::make_unique<vk::glsl::program>(*m_device, pipeline, pipe_layout);
+ 	}
+ 
+ 	std::unique_ptr<glsl::program> pipe_compiler::int_compile_graphics_pipe(const VkGraphicsPipelineCreateInfo& create_info, VkPipelineLayout pipe_layout,
+ 		const std::vector<glsl::program_input>& vs_inputs, const std::vector<glsl::program_input>& fs_inputs)
+ 	{
+-		VkPipeline pipeline;
+-		CHECK_RESULT(VK_GET_SYMBOL(vkCreateGraphicsPipelines)(*m_device, VK_NULL_HANDLE, 1, &create_info, nullptr, &pipeline));
++		VkPipeline pipeline = VK_NULL_HANDLE;
++		const VkResult res = VK_GET_SYMBOL(vkCreateGraphicsPipelines)(*m_device, VK_NULL_HANDLE, 1, &create_info, nullptr, &pipeline);
++		if (res != VK_SUCCESS || pipeline == VK_NULL_HANDLE)
++		{
++			rsx_log.error("Failed to create graphics pipeline (res=%d, pipeline=%p)", static_cast<int>(res), static_cast<void*>(pipeline));
++			return nullptr;
++		}
+ 		auto result = std::make_unique<vk::glsl::program>(*m_device, pipeline, pipe_layout, vs_inputs, fs_inputs);
+ 		result->link();
+ 		return result;
+@@ -70,6 +80,12 @@ namespace vk
+ 	std::unique_ptr<glsl::program> pipe_compiler::int_compile_graphics_pipe(const vk::pipeline_props& create_info, VkShaderModule modules[2], VkPipelineLayout pipe_layout,
+ 		const std::vector<glsl::program_input>& vs_inputs, const std::vector<glsl::program_input>& fs_inputs)
+ 	{
++		if (modules[0] == VK_NULL_HANDLE || modules[1] == VK_NULL_HANDLE)
++		{
++			rsx_log.error("int_compile_graphics_pipe: Null shader module! vs=%p, fs=%p",
++				static_cast<void*>(modules[0]), static_cast<void*>(modules[1]));
++			return nullptr;
++		}
+ 		VkPipelineShaderStageCreateInfo shader_stages[2] = {};
+ 		shader_stages[0].sType = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
+ 		shader_stages[0].stage = VK_SHADER_STAGE_VERTEX_BIT;
+diff --git a/rpcs3/Emu/RSX/VK/VKPipelineCompiler.h b/rpcs3/Emu/RSX/VK/VKPipelineCompiler.h
+index e240f210d..c6aaa237b 100644
+--- a/rpcs3/Emu/RSX/VK/VKPipelineCompiler.h
++++ b/rpcs3/Emu/RSX/VK/VKPipelineCompiler.h
+@@ -39,7 +39,11 @@ namespace vk
+ 
+ 			if (state.ms.rasterizationSamples != VK_SAMPLE_COUNT_1_BIT)
+ 			{
+-				if (memcmp(&state.ms, &other.state.ms, sizeof(VkPipelineMultisampleStateCreateInfo)))
++				if (state.ms.rasterizationSamples != other.state.ms.rasterizationSamples ||
++					state.ms.sampleShadingEnable != other.state.ms.sampleShadingEnable ||
++					state.ms.minSampleShading != other.state.ms.minSampleShading ||
++					state.ms.alphaToCoverageEnable != other.state.ms.alphaToCoverageEnable ||
++					state.ms.alphaToOneEnable != other.state.ms.alphaToOneEnable)
+ 					return false;
+ 
+ 				if (state.temp_storage.msaa_sample_mask != other.state.temp_storage.msaa_sample_mask)
+@@ -172,13 +176,18 @@ namespace rpcs3
+ 		seed ^= hash_struct(pipelineProperties.state.ia);
+ 		seed ^= hash_struct(pipelineProperties.state.ds);
+ 		seed ^= hash_struct(pipelineProperties.state.rs);
+-		seed ^= hash_struct(pipelineProperties.state.ms);
++
++		// Do not hash pointers to memory (pSampleMask / pAttachments)!
++		VkPipelineMultisampleStateCreateInfo ms_tmp;
++		memcpy(&ms_tmp, &pipelineProperties.state.ms, sizeof(VkPipelineMultisampleStateCreateInfo));
++		ms_tmp.pSampleMask = nullptr;
++		seed ^= hash_struct(ms_tmp);
+ 		seed ^= hash_base(pipelineProperties.state.temp_storage.msaa_sample_mask);
+ 
+-		// Do not compare pointers to memory!
+ 		VkPipelineColorBlendStateCreateInfo tmp;
+ 		memcpy(&tmp, &pipelineProperties.state.cs, sizeof(VkPipelineColorBlendStateCreateInfo));
+ 		tmp.pAttachments = nullptr;
++		seed ^= hash_struct(tmp);
+ 
+ 		for (usz i = 0; i < pipelineProperties.state.cs.attachmentCount; ++i)
+ 		{
+diff --git a/rpcs3/Emu/RSX/VK/VKProgramPipeline.cpp b/rpcs3/Emu/RSX/VK/VKProgramPipeline.cpp
+index 52ef4179c..11a1996e4 100644
+--- a/rpcs3/Emu/RSX/VK/VKProgramPipeline.cpp
++++ b/rpcs3/Emu/RSX/VK/VKProgramPipeline.cpp
+@@ -31,14 +31,19 @@ namespace vk
+ 				fmt::throw_exception("Failed to compile %s shader", shader_type);
+ 			}
+ 
+-			VkShaderModuleCreateInfo vs_info;
++			VkShaderModuleCreateInfo vs_info{};
+ 			vs_info.codeSize = m_compiled.size() * sizeof(u32);
+ 			vs_info.pNext = nullptr;
+ 			vs_info.sType = VK_STRUCTURE_TYPE_SHADER_MODULE_CREATE_INFO;
+ 			vs_info.pCode = m_compiled.data();
+ 			vs_info.flags = 0;
+ 
+-			VK_GET_SYMBOL(vkCreateShaderModule)(*g_render_device, &vs_info, nullptr, &m_handle);
++			const VkResult sm_res = VK_GET_SYMBOL(vkCreateShaderModule)(*g_render_device, &vs_info, nullptr, &m_handle);
++			if (sm_res != VK_SUCCESS || m_handle == VK_NULL_HANDLE)
++			{
++				rsx_log.error("vkCreateShaderModule failed with res=%d", static_cast<int>(sm_res));
++				m_handle = VK_NULL_HANDLE;
++			}
+ 
+ 			return m_handle;
+ 		}
+diff --git a/rpcs3/Emu/RSX/VK/VKRenderTargets.h b/rpcs3/Emu/RSX/VK/VKRenderTargets.h
+index 7b21574f4..14f6006e5 100644
+--- a/rpcs3/Emu/RSX/VK/VKRenderTargets.h
++++ b/rpcs3/Emu/RSX/VK/VKRenderTargets.h
+@@ -184,8 +184,7 @@ namespace vk
+ 				}
+ 				break;
+ 			default:
+-				rsx_log.error("Unknown driver vendor!");
+-				[[fallthrough]];
++			case driver_vendor::unknown:
+ 			case driver_vendor::NVIDIA:
+ 			case driver_vendor::INTEL:
+ 			case driver_vendor::MVK:
 diff --git a/rpcs3/Emu/RSX/VK/VKTextureCache.cpp b/rpcs3/Emu/RSX/VK/VKTextureCache.cpp
 index 72b6bcf40..f58605836 100644
 --- a/rpcs3/Emu/RSX/VK/VKTextureCache.cpp
@@ -2229,29 +2600,66 @@ index b4b05be4a..c6579afbd 100644
  					rsx::convert_linear_swizzle<u16, false>(tmp_data.data(), data, width, height, rsx_pitch);
  					break;
 diff --git a/rpcs3/Emu/RSX/VK/vkutils/graphics_pipeline_state.hpp b/rpcs3/Emu/RSX/VK/vkutils/graphics_pipeline_state.hpp
-index 2973385e9..9b5ea2cf5 100644
+index 2973385e9..aad217347 100644
 --- a/rpcs3/Emu/RSX/VK/vkutils/graphics_pipeline_state.hpp
 +++ b/rpcs3/Emu/RSX/VK/vkutils/graphics_pipeline_state.hpp
-@@ -44,7 +44,7 @@ namespace vk
+@@ -44,11 +44,27 @@ namespace vk
  			// NOTE: Vk** structs have padding bytes
  			memcpy(this, &other, sizeof(graphics_pipeline_state));
  
 -			if (other.cs.pAttachments == other.att_state)
-+			if (other.cs.pAttachments != nullptr || other.cs.attachmentCount > 0)
++			// Disk-loaded pipeline_data carries a stale pAttachments address from
++			// a previous run; always rebase to our own inline array when blending
++			// is in use, and normalize to nullptr when no attachments exist.
++			if (other.cs.attachmentCount > 0)
  			{
  				// Rebase pointer
  				cs.pAttachments = att_state;
-@@ -60,7 +60,7 @@ namespace vk
+ 			}
++			else
++			{
++				cs.pAttachments = nullptr;
++			}
++
++			if (other.ms.rasterizationSamples != VK_SAMPLE_COUNT_1_BIT && other.ms.pSampleMask)
++			{
++				ms.pSampleMask = &temp_storage.msaa_sample_mask;
++			}
++			else
++			{
++				ms.pSampleMask = nullptr;
++			}
+ 		}
+ 
+ 		~graphics_pipeline_state() = default;
+@@ -60,11 +76,24 @@ namespace vk
  				// NOTE: Vk** structs have padding bytes
  				memcpy(this, &other, sizeof(graphics_pipeline_state));
  
 -				if (other.cs.pAttachments == other.att_state)
-+				if (other.cs.pAttachments != nullptr || other.cs.attachmentCount > 0)
++				if (other.cs.attachmentCount > 0)
  				{
  					// Rebase pointer
  					cs.pAttachments = att_state;
+ 				}
++				else
++				{
++					cs.pAttachments = nullptr;
++				}
++
++				if (other.ms.rasterizationSamples != VK_SAMPLE_COUNT_1_BIT && other.ms.pSampleMask)
++				{
++					ms.pSampleMask = &temp_storage.msaa_sample_mask;
++				}
++				else
++				{
++					ms.pSampleMask = nullptr;
++				}
+ 			}
+ 
+ 			return *this;
 diff --git a/rpcs3/Emu/RSX/VK/vkutils/sync.cpp b/rpcs3/Emu/RSX/VK/vkutils/sync.cpp
-index 6df7e3334..56e23fd85 100644
+index 6df7e3334..d09c14986 100644
 --- a/rpcs3/Emu/RSX/VK/vkutils/sync.cpp
 +++ b/rpcs3/Emu/RSX/VK/vkutils/sync.cpp
 @@ -201,14 +201,39 @@ namespace vk
@@ -2270,7 +2678,7 @@ index 6df7e3334..56e23fd85 100644
 +			((vk::get_driver_vendor() == vk::driver_vendor::AMD &&
 +			  vk::get_chip_family() < vk::chip_class::AMD_navi1x)
 +#if defined(__ANDROID__) || defined(ANDROID)
-+			 || is_turnip
++			 || true
 +#endif
 +			))
 +		{
@@ -2325,7 +2733,7 @@ index 6df7e3334..56e23fd85 100644
  
  	gpu_debug_marker::gpu_debug_marker(gpu_debug_marker_pool& pool, std::string message)
 diff --git a/rpcs3/Emu/RSX/rsx_cache.h b/rpcs3/Emu/RSX/rsx_cache.h
-index 27f300ce6..98b244284 100644
+index 27f300ce6..f67b1be11 100644
 --- a/rpcs3/Emu/RSX/rsx_cache.h
 +++ b/rpcs3/Emu/RSX/rsx_cache.h
 @@ -32,7 +32,7 @@ namespace rsx
@@ -2403,7 +2811,16 @@ index 27f300ce6..98b244284 100644
  			shader_loading_dialog* dlg)
  		{
  			atomic_t<u32> processed(0);
-@@ -199,7 +213,10 @@ namespace rsx
+@@ -192,14 +206,18 @@ namespace rsx
+ 
+ 					auto entry = unpack(pdata);
+ 
+-					if (entry.vp.data.empty() || !entry.fp.ucode_length)
++					if (entry.vp.data.empty() || !entry.fp.ucode_length || !entry.fp.get_data())
+ 					{
++						fs::remove_file(filename);
+ 						continue;
+ 					}
  
  					m_storage.preload_programs(nullptr, entry.vp, entry.fp);
  
@@ -2415,7 +2832,16 @@ index 27f300ce6..98b244284 100644
  
  					if (thread_processed >= 10 && !update_stats())
  					{
-@@ -343,9 +360,9 @@ namespace rsx
+@@ -334,6 +352,8 @@ namespace rsx
+ 				if (std::string cache_path = rpcs3::cache::get_ppu_cache(); !cache_path.empty())
+ 				{
+ 					root_path = std::move(cache_path) + "shaders_cache/";
++					fs::create_path(root_path + "raw");
++					fs::create_path(root_path + "pipelines/" + pipeline_class_name + "/" + version_prefix);
+ 				}
+ 			}
+ 		}
+@@ -343,9 +363,9 @@ namespace rsx
  			{
  				std::lock_guard lock(m_shader_storage_mtx);
  				m_shader_storage_exit = true;
@@ -2426,13 +2852,17 @@ index 27f300ce6..98b244284 100644
  			m_shader_storage_worker_thread.join();
  		}
  
-@@ -404,12 +421,14 @@ namespace rsx
+@@ -404,12 +424,18 @@ namespace rsx
  
  			// Preload everything needed to compile the shaders
  			unpacked_type unpacked;
 +			unpacked.reserve(entry_count);
 +			std::mutex unpacked_mutex;
++#ifdef ANDROID
++			uint nb_workers = g_cfg.video.renderer == video_renderer::vulkan ? std::clamp(utils::get_thread_count() / 2, 1u, 4u) : 1;
++#else
  			uint nb_workers = g_cfg.video.renderer == video_renderer::vulkan ? utils::get_thread_count() * 2 : 1;
++#endif
  
 -			load_shaders(nb_workers, unpacked, directory_path, entries, entry_count, dlg);
 +			load_shaders(nb_workers, unpacked, unpacked_mutex, directory_path, entries, entry_count, dlg);
@@ -2443,7 +2873,23 @@ index 27f300ce6..98b244284 100644
  
  			compile_shaders(nb_workers, unpacked, entry_count, dlg, std::forward<Args>(args)...);
  
-@@ -433,24 +452,21 @@ namespace rsx
+@@ -424,6 +450,15 @@ namespace rsx
+ 				return;
+ 			}
+ 
++			// Never persist half-baked entries: a zero-length FP (ensure() would
++			// abort in clone) or empty VP data produces a corrupt .bin that
++			// crashes the next cold load during unpack/compile. Skip quietly;
++			// the pipeline will be recompiled inline and cached on success.
++			if (!fp.ucode_length || vp.data.empty() || !fp.get_data())
++			{
++				return;
++			}
++
+ 			if (vp.jump_table.size() > 32)
+ 			{
+ 				rsx_log.error("shaders_cache: vertex program has more than 32 jump addresses. Entry not saved to cache");
+@@ -433,24 +468,21 @@ namespace rsx
  			auto item = unpacked_shader{pipeline, vp, RSXFragmentProgram::clone(fp) /* ???? */};
  
  			std::lock_guard lock(m_shader_storage_mtx);
@@ -2476,7 +2922,7 @@ index 27f300ce6..98b244284 100644
  		}
  
  		RSXVertexProgram load_vp_raw(u64 program_hash) const
-@@ -477,10 +493,9 @@ namespace rsx
+@@ -477,10 +509,11 @@ namespace rsx
  				return fp;
  			}
  
@@ -2484,20 +2930,161 @@ index 27f300ce6..98b244284 100644
 -			fp.data = buf.get();
 -			f.read(buf.get(), size);
 -			fragment_program_data[fragment_program_data.push_begin()] = std::move(buf);
++			fp.total_length = size;
 +			fp.data.local_storage.resize(size);
 +			fp.data.data_ptr = fp.data.local_storage.data();
 +			f.read(fp.data.data_ptr, size);
++			fp.valid = true;
  			return fp;
  		}
  
-@@ -490,6 +505,7 @@ namespace rsx
+@@ -490,6 +523,25 @@ namespace rsx
  			result.vp = load_vp_raw(data.vertex_program_hash);
  			result.fp = load_fp_raw(data.fragment_program_hash);
  			result.props = data.pipeline_properties;
-+			result.props.state.cs.pAttachments = result.props.state.att_state;
++			// Copy-ctor already rebases, but enforce explicitly for stale disk
++			// pointers: null when no attachments, inline array otherwise.
++			if (result.props.state.cs.attachmentCount > 0)
++			{
++				result.props.state.cs.pAttachments = result.props.state.att_state;
++			}
++			else
++			{
++				result.props.state.cs.pAttachments = nullptr;
++			}
++
++			if (result.props.state.ms.rasterizationSamples != VK_SAMPLE_COUNT_1_BIT && result.props.state.ms.pSampleMask)
++			{
++				result.props.state.ms.pSampleMask = &result.props.state.temp_storage.msaa_sample_mask;
++			}
++			else
++			{
++				result.props.state.ms.pSampleMask = nullptr;
++			}
  
  			result.vp.ctrl = data.vp_ctrl0;
  			result.vp.output_mask = data.vp_ctrl1;
+@@ -528,6 +580,25 @@ namespace rsx
+ 		{
+ 			pipeline_data data_block = {};
+ 			data_block.pipeline_properties = pipeline;
++
++			if (data_block.pipeline_properties.state.cs.attachmentCount > 0)
++			{
++				data_block.pipeline_properties.state.cs.pAttachments = data_block.pipeline_properties.state.att_state;
++			}
++			else
++			{
++				data_block.pipeline_properties.state.cs.pAttachments = nullptr;
++			}
++
++			if (data_block.pipeline_properties.state.ms.rasterizationSamples != VK_SAMPLE_COUNT_1_BIT && data_block.pipeline_properties.state.ms.pSampleMask)
++			{
++				data_block.pipeline_properties.state.ms.pSampleMask = &data_block.pipeline_properties.state.temp_storage.msaa_sample_mask;
++			}
++			else
++			{
++				data_block.pipeline_properties.state.ms.pSampleMask = nullptr;
++			}
++
+ 			data_block.vertex_program_hash = m_storage.get_hash(vp);
+ 			data_block.fragment_program_hash = m_storage.get_hash(fp);
+ 			data_block.pipeline_storage_hash = m_storage.get_hash(pipeline);
+diff --git a/rpcs3/util/JITLLVM.cpp b/rpcs3/util/JITLLVM.cpp
+--- a/rpcs3/util/JITLLVM.cpp
++++ b/rpcs3/util/JITLLVM.cpp
+@@ -202,6 +202,11 @@ struct MemoryManager1 : llvm::RTDyldMemoryManager
+ 	// May be a memory container internally
+ 	std::function<u64(const std::string&)> m_symbols_cement;
+ 
++#ifdef ARCH_ARM64
++	// Code must not be published until RuntimeDyld has applied relocations.
++	std::vector<std::pair<u8*, uptr>> m_code_ranges;
++#endif
++
+ 	MemoryManager1(std::function<u64(const std::string&)> symbols_cement = {}) noexcept
+ 		: m_symbols_cement(std::move(symbols_cement))
+ 	{
+@@ -310,7 +315,16 @@ struct MemoryManager1 : llvm::RTDyldMemoryManager
+ 	u8* allocateCodeSection(uptr size, uint align, uint /*sec_id*/, llvm::StringRef /*sec_name*/) override
+ 	{
+-		return allocate(code_ptr, m_code_mems, size, align, utils::protection::wx);
++		u8* const result = allocate(code_ptr, m_code_mems, size, align, utils::protection::wx);
++
++#ifdef ARCH_ARM64
++		if (result && size)
++		{
++			m_code_ranges.emplace_back(result, size);
++		}
++#endif
++
++		return result;
+ 	}
+ 
+ 	u8* allocateDataSection(uptr size, uint align, uint /*sec_id*/, llvm::StringRef /*sec_name*/, bool is_ro) override
+ 	{
+@@ -326,6 +340,15 @@ struct MemoryManager1 : llvm::RTDyldMemoryManager
+ 	bool finalizeMemory(std::string* = nullptr) override
+ 	{
++#ifdef ARCH_ARM64
++		for (const auto& [ptr, size] : m_code_ranges)
++		{
++			asmjit::VirtMem::flushInstructionCache(ptr, size);
++		}
++
++		m_code_ranges.clear();
++#endif
++
+ 		return false;
+ 	}
+ 
+ 	void registerEHFrames(u8*, u64, usz) override
+@@ -345,6 +368,11 @@ struct MemoryManager2 : llvm::RTDyldMemoryManager
+ 	// May be a memory container internally
+ 	std::function<u64(const std::string&)> m_symbols_cement;
+ 
++#ifdef ARCH_ARM64
++	// Code must not be published until RuntimeDyld has applied relocations.
++	std::vector<std::pair<u8*, uptr>> m_code_ranges;
++#endif
++
+ 	MemoryManager2(std::function<u64(const std::string&)> symbols_cement = {}) noexcept
+ 		: m_symbols_cement(std::move(symbols_cement))
+ 	{
+@@ -378,7 +406,16 @@ struct MemoryManager2 : llvm::RTDyldMemoryManager
+ 	u8* allocateCodeSection(uptr size, uint align, uint /*sec_id*/, llvm::StringRef /*sec_name*/) override
+ 	{
+-		return jit_runtime::alloc(size, align, true);
++		u8* const result = jit_runtime::alloc(size, align, true);
++
++#ifdef ARCH_ARM64
++		if (result && size)
++		{
++			m_code_ranges.emplace_back(result, size);
++		}
++#endif
++
++		return result;
+ 	}
+ 
+ 	u8* allocateDataSection(uptr size, uint align, uint /*sec_id*/, llvm::StringRef /*sec_name*/, bool /*is_ro*/) override
+ 	{
+@@ -388,6 +425,15 @@ struct MemoryManager2 : llvm::RTDyldMemoryManager
+ 	bool finalizeMemory(std::string* = nullptr) override
+ 	{
++#ifdef ARCH_ARM64
++		for (const auto& [ptr, size] : m_code_ranges)
++		{
++			asmjit::VirtMem::flushInstructionCache(ptr, size);
++		}
++
++		m_code_ranges.clear();
++#endif
++
+ 		return false;
+ 	}
+ 
+ 	void registerEHFrames(u8*, u64, usz) override
 diff --git a/rpcs3/Emu/System.cpp b/rpcs3/Emu/System.cpp
 index 21a47f932..e4418a663 100644
 --- a/rpcs3/Emu/System.cpp
@@ -3087,10 +3674,36 @@ index 2465b7dc6..3378ecbb9 100644
  
  	[[nodiscard]] u32 GetTrophiesCount() const;
 diff --git a/rpcs3/util/Thread.cpp b/rpcs3/util/Thread.cpp
-index b9c909bbb..0e096444a 100644
+index b9c909bbb..be43f8b32 100644
 --- a/rpcs3/util/Thread.cpp
 +++ b/rpcs3/util/Thread.cpp
-@@ -2057,7 +2057,7 @@ const bool s_exception_handler_set = []() -> bool
+@@ -47,6 +47,7 @@ DYNAMIC_IMPORT_RENAME("Kernel32.dll", SetThreadDescriptionImport, "SetThreadDesc
+ #include <ucontext.h>
+ #endif
+ #include <pthread.h>
++#include <dlfcn.h>
+ #include <sys/time.h>
+ #include <sys/resource.h>
+ #include <time.h>
+@@ -1999,6 +2000,17 @@ static void signal_handler(int /*sig*/, siginfo_t* info, void* uct) noexcept
+ 
+ 	std::string msg = fmt::format("Segfault %s location %p at %p.\n", cause, info->si_addr, RIP(context));
+ 
++#if !defined(_WIN32)
++	Dl_info dlinfo{};
++	if (dladdr(reinterpret_cast<const void*>(RIP(context)), &dlinfo) && dlinfo.dli_fbase)
++	{
++		fmt::append(msg, "Module: %s (+0x%lx, symbol: %s)\n",
++			dlinfo.dli_fname ? dlinfo.dli_fname : "unknown",
++			(uintptr_t)RIP(context) - (uintptr_t)dlinfo.dli_fbase,
++			dlinfo.dli_sname ? dlinfo.dli_sname : "unknown");
++	}
++#endif
++
+ 	if (vm::try_get_addr(info->si_addr).second)
+ 	{
+ 		fmt::append(msg, "Sudo Addr: %p, VM Addr: %p\n", vm::g_sudo_addr, vm::g_base_addr);
+@@ -2057,7 +2069,7 @@ const bool s_exception_handler_set = []() -> bool
  		std::abort();
  	}
  

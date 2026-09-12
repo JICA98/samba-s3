@@ -170,10 +170,18 @@ object CompileProgressBridge {
         if (!decision.shouldClearUiActive) return false
         Log.w(TAG, decision.logMessage ?: "PPU watchdog finalizing job=$jobId")
         Log.w(TAG, "PPU watchdog missing_terminal=1 establishes_validated_ready=0 job=$jobId")
+        // Clear active so NoFrameWatchdog can observe stalled frames and recover.
+        // Preserve metrics/job for forensics; outcome stays NONE so readiness is
+        // never falsely validated. Late native terminals for this job are ignored.
+        ppuJobId = null
+        cancelPpuDoneWatchdog()
+        if (shaderJobIds.isEmpty()) latestRuntimeEvent = null
         _state.value = cur.copy(
-            ppuMsg = "Verifying cache… waiting for compiler process",
+            ppuActive = false,
+            ppuMsg = null,
             remainingLabel = null,
-            ppuPercent = 99,
+            outcome = CompileOutcome.NONE,
+            jobId = jobId,
         )
         return true
     }
@@ -522,8 +530,10 @@ object CompileProgressBridge {
 
     private fun requestMonitorStart(appCtx: Context?, ev: NativeEvent) {
         if (appCtx == null) return // unit test — no FGS start
+        if (CompilationMonitorService.isRunning) return // Already running, StateFlow observes
         // Install-origin already filtered; only runtime reaches here
         try {
+            CompilationMonitorService.setStarting()
             val intent = Intent(appCtx, CompilationMonitorService::class.java).apply {
                 putExtra("domain", ev.domain)
                 putExtra("phase", ev.phase)
@@ -541,12 +551,14 @@ object CompileProgressBridge {
             fgsStartDenied = false
             Log.i(TAG, "startForegroundService requested for domain=${ev.domain} phase=${ev.phase} job=${ev.jobId}")
         } catch (e: IllegalStateException) {
+            CompilationMonitorService.clearRunning()
             // Android 12+ and some OEMs reject background FGS starts with an
             // IllegalStateException subtype. Avoid referencing that API-31 class on API 29/30.
             Log.w(TAG, "FGS start not allowed: ${e.message}")
             fgsStartDenied = true
             // Keep StateFlow/UI coherent; do not crash or retry loop.
         } catch (e: Exception) {
+            CompilationMonitorService.clearRunning()
             Log.e(TAG, "startForegroundService failed: ${e.message}", e)
         }
     }

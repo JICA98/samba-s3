@@ -108,7 +108,27 @@ object GameSettingsOverrides {
             // for SPU xfloat math, preventing visual lighting/artifact glitches in gameplay.
             "BCUS98123" -> mapOf(
                 "Core@@Stub PPU Traps" to "1",
-                "Core@@XFloat Accuracy" to "Accurate"
+                // Engine setters accept JSON literals. Enum/string values must
+                // remain quoted through persistence and the scoped boot lease.
+                "Core@@XFloat Accuracy" to SettingsValueCodec.quoteCfgString("Accurate"),
+                "Core@@RSX FIFO Accuracy" to SettingsValueCodec.quoteCfgString("Atomic"),
+                "Video@@Driver Wake-Up Delay" to "200",
+                "Video@@Write Color Buffers" to "false",
+                "Video@@Read Depth Buffer" to "false",
+                "Video@@Read Color Buffers" to "false",
+                "Video@@Write Depth Buffer" to "false",
+                "Video@@Vulkan@@Asynchronous Texture Streaming 2" to "false"
+            )
+            "BCUS98174", "NPUA80960", "BCES01584", "BCES01585" -> mapOf(
+                "Core@@XFloat Accuracy" to SettingsValueCodec.quoteCfgString("Accurate"),
+                "Core@@SPU loop detection" to "false",
+                "Core@@RSX FIFO Accuracy" to SettingsValueCodec.quoteCfgString("Atomic"),
+                "Video@@Driver Wake-Up Delay" to "200",
+                "Video@@Write Color Buffers" to "true",
+                "Video@@Read Color Buffers" to "true",
+                "Video@@Write Depth Buffer" to "true",
+                "Video@@Read Depth Buffer" to "true",
+                "Video@@Vulkan@@Asynchronous Texture Streaming 2" to "false"
             )
             "BLUS30443", "BLES00932", "BCAS20071", "BCJS30022", "BCJS70013", "BCAS20096" -> mapOf(
                 "Video@@Write Color Buffers" to "true"
@@ -534,18 +554,30 @@ object GameSettingsOverrides {
      * Device boot entry: recover any stale lease, then snapshot + apply the
      * resolved [titleId] profile. Never mutates global driver preferences.
      */
-    fun beginScopedLeaseForBoot(context: Context, titleId: String): ScopedGameSettingsLease? {
+    fun beginScopedLeaseForBoot(context: Context, titleId: String): LeaseBeginResult {
         val store = leaseStoreOf(context)
-        recoverStaleLease(store, ::readGlobalEncoded, ::writeGlobalEncoded)
+        if (!recoverStaleLease(store, ::readGlobalEncoded, ::writeGlobalEncoded)) {
+            Log.e(TAG, "S3GAMECFG boot title=$titleId refused=stale-lease-restore-failed")
+            return LeaseBeginResult(null, false, emptyMap())
+        }
         val resolved = resolvedBootOverrides(context, titleId)
         if (resolved.isEmpty()) {
             Log.i(TAG, "S3GAMECFG boot title=$titleId lease=none resolved=empty")
-            return null
+            return LeaseBeginResult(null, true, emptyMap())
         }
         val compat = compatibilityDefaultsForTitle(titleId)
         val user = explicitUserOverrides(context, titleId)
         Log.i(TAG, "S3GAMECFG boot title=$titleId compat=$compat user=$user resolved=$resolved")
-        return beginScopedLease(store, titleId, resolved, ::readGlobalEncoded, ::writeGlobalEncoded).lease
+        val result = beginScopedLease(store, titleId, resolved, ::readGlobalEncoded, ::writeGlobalEncoded)
+        if (!result.allApplied) {
+            val rollback = endScopedLease(store, ::readGlobalEncoded, ::writeGlobalEncoded, reason = "apply-failed")
+            Log.e(
+                TAG,
+                "S3GAMECFG boot title=$titleId refused=profile-apply-failed " +
+                    "failed=${result.perKeyOk.filterValues { !it }} rollback=${rollback.allRestored}/${rollback.leaseCleared}",
+            )
+        }
+        return result
     }
 
     /** Device exit entry: restore snapshot globals, then clear the lease. */
