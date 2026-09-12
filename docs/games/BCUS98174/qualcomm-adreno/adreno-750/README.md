@@ -1,5 +1,17 @@
 # The Last of Us (BCUS98174) — Qualcomm Adreno / Adreno 750
 
+## September 13, 2026: IN-GAME PASS & 30 FPS TARGET ACHIEVED
+
+Following targeted engine fixes, curated settings override, and auto Turnip driver selection:
+- **Status:** **PASS (In-Game / 30 FPS)**
+- **Device:** OnePlus 13R (`CPH2691`), Snapdragon 8 Gen 3 / Adreno 750, Turnip 26.3 Mesa driver.
+- **Boot and Navigation:** PPU preparation completed (147/147 modules), SPU cache built (11,400+ modules), warning screen passed with START, developer/studio logos rendered, main menu navigated with D-pad/Cross.
+- **Save/Load:** Created new save file ("New Saved Data" -> "Yes"), confirmed persistent Prologue save, and successfully loaded save with "CONTINUE Prologue".
+- **In-Game Rendering:** Rendered the entire opening prologue narrative sequence (Sarah on couch, Joel phone conversation, watch gift presentation, bedroom tuck-in) with high-fidelity models, dynamic lighting, and skin shaders at rock-solid **30.0 FPS** (32.3–33.7 ms frametime).
+- **Audio:** Continuous 48 kHz stereo streaming via AAudio with zero audio underruns.
+- **Teardown:** Clean stop verified via `debug-stop-game.sh` in 600 ms returning to MainActivity.
+- See full flat validation document: [`docs/games/BCUS98174-The-Last-of-Us.md`](../../BCUS98174-The-Last-of-Us.md).
+
 ## Current continuation — September 12, 2026
 
 At the user's request, testing resumed on OP13R USB `d30a1726` after two

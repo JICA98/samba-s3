@@ -1486,6 +1486,20 @@ index 8308a4798..96b55a37d 100644
  extern "C" std::string _rpcsx_getFriends()
  {
      nlohmann::json j;
+diff --git a/android/src/samba-build-id.cpp b/android/src/samba-build-id.cpp
+index 8aca7dc59..c9ef428e9 100644
+--- a/android/src/samba-build-id.cpp
++++ b/android/src/samba-build-id.cpp
+@@ -1,8 +1,6 @@
+ #include <string>
+-
+ static std::string g_samba_build_id =
+-    "rpcsx=27441815c12cca1a4dcb3daec82b513b1a35eed7 samba=62a70942d8c121a7e58c74b6a4e2700cf369c0ae patch_sha256=6468572dbc6dec3ea7d0ad996adeb57dffd96a090d10482ea04d7013abecd5f0 build_type=Debug";
+-
++    "rpcsx=657b26a0d197c29d42cdcf3b3f6e8ad5c6765bbc samba=6c0212c1db2c4324ea082bf558a68386cd084bc5 patch_sha256=fe6f432cf5d69dea626467c0897285443e863152e3c8672abf2c4a84151018ae build_type=RelWithDebInfo";
+ extern "C" const char* _rpcsx_sambaBuildId() {
+     return g_samba_build_id.c_str();
+ }
 diff --git a/ps3fw/sceNpTrophy.cpp b/ps3fw/sceNpTrophy.cpp
 index b6f295e4c..dbdaa58a4 100644
 --- a/ps3fw/sceNpTrophy.cpp
@@ -2060,18 +2074,24 @@ index 75975964f..5a3e7d3de 100644
  			{
  				// Creating the icon requires FS read, so it is important to cache it
 diff --git a/rpcs3/Emu/RSX/Program/ProgramStateCache.h b/rpcs3/Emu/RSX/Program/ProgramStateCache.h
-index 453c7c7ba..8db722872 100644
+index 453c7c7ba..9532d1103 100644
 --- a/rpcs3/Emu/RSX/Program/ProgramStateCache.h
 +++ b/rpcs3/Emu/RSX/Program/ProgramStateCache.h
-@@ -233,31 +233,31 @@ protected:
+@@ -233,33 +233,36 @@ protected:
  			return std::forward_as_tuple(*cache_hint->get_vertex_program<vertex_program_type>(), true);
  		}
  
 -		bool recompile = false;
 -		vertex_program_type* new_shader;
--		{
--			reader_lock lock(m_vertex_mutex);
 +		reader_lock lock(m_vertex_mutex);
++
++		const auto& I = m_vertex_shader_cache.find(rsx_vp);
++		if (I != m_vertex_shader_cache.end())
+ 		{
+-			reader_lock lock(m_vertex_mutex);
++			rsx::program_cache_hint_t::cache_vertex_program(cache_hint, rsx_vp, &(I->second));
++			return std::forward_as_tuple(I->second, true);
++		}
  
 -			const auto& I = m_vertex_shader_cache.find(rsx_vp);
 -			if (I != m_vertex_shader_cache.end())
@@ -2079,41 +2099,38 @@ index 453c7c7ba..8db722872 100644
 -				rsx::program_cache_hint_t::cache_vertex_program(cache_hint, rsx_vp, &(I->second));
 -				return std::forward_as_tuple(I->second, true);
 -			}
-+		const auto& I = m_vertex_shader_cache.find(rsx_vp);
-+		if (I != m_vertex_shader_cache.end())
-+		{
-+			rsx::program_cache_hint_t::cache_vertex_program(cache_hint, rsx_vp, &(I->second));
-+			return std::forward_as_tuple(I->second, true);
-+		}
++		rsx_log.trace("VP not found in buffer!");
  
 -			rsx_log.trace("VP not found in buffer!");
-+		rsx_log.trace("VP not found in buffer!");
++		lock.upgrade();
  
 -			lock.upgrade();
 -			auto [it, inserted] = m_vertex_shader_cache.try_emplace(rsx_vp);
 -			new_shader = &(it->second);
 -			recompile = inserted;
--		}
-+		lock.upgrade();
- 
--		if (recompile)
 +		// Double-check if another thread inserted and compiled it while upgrading
 +		const auto& I2 = m_vertex_shader_cache.find(rsx_vp);
 +		if (I2 != m_vertex_shader_cache.end())
- 		{
--			backend_traits::recompile_vertex_program(rsx_vp, *new_shader, m_next_id++);
++		{
 +			rsx::program_cache_hint_t::cache_vertex_program(cache_hint, rsx_vp, &(I2->second));
 +			return std::forward_as_tuple(I2->second, true);
  		}
  
+-		if (recompile)
 +		auto [it, inserted] = m_vertex_shader_cache.try_emplace(rsx_vp);
 +		vertex_program_type* new_shader = &(it->second);
-+		backend_traits::recompile_vertex_program(rsx_vp, *new_shader, m_next_id++);
-+
++		if (inserted)
+ 		{
+ 			backend_traits::recompile_vertex_program(rsx_vp, *new_shader, m_next_id++);
+ 		}
+ 
  		rsx::program_cache_hint_t::cache_vertex_program(cache_hint, rsx_vp, new_shader);
- 		return std::forward_as_tuple(*new_shader, false);
+-		return std::forward_as_tuple(*new_shader, false);
++		return std::forward_as_tuple(*new_shader, !inserted);
  	}
-@@ -271,31 +271,34 @@ protected:
+ 
+ 	/// bool here to inform that the program was preexisting.
+@@ -271,34 +274,40 @@ protected:
  			return std::forward_as_tuple(*cache_hint->get_fragment_program<fragment_program_type>(), true);
  		}
  
@@ -2155,16 +2172,23 @@ index 453c7c7ba..8db722872 100644
 -		if (recompile)
 +		auto [it, inserted] = m_fragment_shader_cache.try_emplace(rsx_fp);
 +		fragment_program_type* new_shader = &(it->second);
-+		if (rsx_fp.ucode_length && rsx_fp.get_data())
++		if (inserted)
  		{
- 			it->first.clone_data();
--			backend_traits::recompile_fragment_program(rsx_fp, *new_shader, m_next_id++);
+-			it->first.clone_data();
++			if (rsx_fp.ucode_length && rsx_fp.get_data())
++			{
++				it->first.clone_data();
++			}
+ 			backend_traits::recompile_fragment_program(rsx_fp, *new_shader, m_next_id++);
  		}
-+		backend_traits::recompile_fragment_program(rsx_fp, *new_shader, m_next_id++);
  
  		rsx::program_cache_hint_t::cache_fragment_program(cache_hint, rsx_fp, new_shader);
- 		return std::forward_as_tuple(*new_shader, false);
-@@ -435,7 +438,7 @@ public:
+-		return std::forward_as_tuple(*new_shader, false);
++		return std::forward_as_tuple(*new_shader, !inserted);
+ 	}
+ 
+ public:
+@@ -435,7 +444,7 @@ public:
  		std::function<pipeline_type*(pipeline_storage_type&)> callback;
  		const bool notify = allow_notification;
  		std::optional<RSXFragmentProgram> fragment_clone;
@@ -2173,7 +2197,7 @@ index 453c7c7ba..8db722872 100644
  		{
  			fragment_clone = RSXFragmentProgram::clone(fragment_shader);
  		}
-@@ -483,6 +486,11 @@ public:
+@@ -483,6 +492,11 @@ public:
  
  	void fill_fragment_constants_buffer(std::span<f32> dst_buffer, const fragment_program_type& fragment_program, const RSXFragmentProgram& rsx_prog, bool sanitize = false) const
  	{
@@ -2515,10 +2539,32 @@ index e240f210d..c6aaa237b 100644
  		for (usz i = 0; i < pipelineProperties.state.cs.attachmentCount; ++i)
  		{
 diff --git a/rpcs3/Emu/RSX/VK/VKProgramPipeline.cpp b/rpcs3/Emu/RSX/VK/VKProgramPipeline.cpp
-index 52ef4179c..11a1996e4 100644
+index 52ef4179c..919a4bced 100644
 --- a/rpcs3/Emu/RSX/VK/VKProgramPipeline.cpp
 +++ b/rpcs3/Emu/RSX/VK/VKProgramPipeline.cpp
-@@ -31,14 +31,19 @@ namespace vk
+@@ -13,13 +13,20 @@ namespace vk
+ 
+ 		void shader::create(::glsl::program_domain domain, const std::string& source)
+ 		{
++			if (m_handle != VK_NULL_HANDLE)
++			{
++				destroy();
++			}
+ 			type = domain;
+ 			m_source = source;
+ 		}
+ 
+ 		VkShaderModule shader::compile()
+ 		{
+-			ensure(m_handle == VK_NULL_HANDLE);
++			if (m_handle != VK_NULL_HANDLE)
++			{
++				return m_handle;
++			}
+ 
+ 			if (!spirv::compile_glsl_to_spv(m_compiled, m_source, type, ::glsl::glsl_rules_vulkan))
+ 			{
+@@ -31,14 +38,19 @@ namespace vk
  				fmt::throw_exception("Failed to compile %s shader", shader_type);
  			}
  
@@ -2990,101 +3036,6 @@ index 27f300ce6..f67b1be11 100644
  			data_block.vertex_program_hash = m_storage.get_hash(vp);
  			data_block.fragment_program_hash = m_storage.get_hash(fp);
  			data_block.pipeline_storage_hash = m_storage.get_hash(pipeline);
-diff --git a/rpcs3/util/JITLLVM.cpp b/rpcs3/util/JITLLVM.cpp
---- a/rpcs3/util/JITLLVM.cpp
-+++ b/rpcs3/util/JITLLVM.cpp
-@@ -202,6 +202,11 @@ struct MemoryManager1 : llvm::RTDyldMemoryManager
- 	// May be a memory container internally
- 	std::function<u64(const std::string&)> m_symbols_cement;
- 
-+#ifdef ARCH_ARM64
-+	// Code must not be published until RuntimeDyld has applied relocations.
-+	std::vector<std::pair<u8*, uptr>> m_code_ranges;
-+#endif
-+
- 	MemoryManager1(std::function<u64(const std::string&)> symbols_cement = {}) noexcept
- 		: m_symbols_cement(std::move(symbols_cement))
- 	{
-@@ -310,7 +315,16 @@ struct MemoryManager1 : llvm::RTDyldMemoryManager
- 	u8* allocateCodeSection(uptr size, uint align, uint /*sec_id*/, llvm::StringRef /*sec_name*/) override
- 	{
--		return allocate(code_ptr, m_code_mems, size, align, utils::protection::wx);
-+		u8* const result = allocate(code_ptr, m_code_mems, size, align, utils::protection::wx);
-+
-+#ifdef ARCH_ARM64
-+		if (result && size)
-+		{
-+			m_code_ranges.emplace_back(result, size);
-+		}
-+#endif
-+
-+		return result;
- 	}
- 
- 	u8* allocateDataSection(uptr size, uint align, uint /*sec_id*/, llvm::StringRef /*sec_name*/, bool is_ro) override
- 	{
-@@ -326,6 +340,15 @@ struct MemoryManager1 : llvm::RTDyldMemoryManager
- 	bool finalizeMemory(std::string* = nullptr) override
- 	{
-+#ifdef ARCH_ARM64
-+		for (const auto& [ptr, size] : m_code_ranges)
-+		{
-+			asmjit::VirtMem::flushInstructionCache(ptr, size);
-+		}
-+
-+		m_code_ranges.clear();
-+#endif
-+
- 		return false;
- 	}
- 
- 	void registerEHFrames(u8*, u64, usz) override
-@@ -345,6 +368,11 @@ struct MemoryManager2 : llvm::RTDyldMemoryManager
- 	// May be a memory container internally
- 	std::function<u64(const std::string&)> m_symbols_cement;
- 
-+#ifdef ARCH_ARM64
-+	// Code must not be published until RuntimeDyld has applied relocations.
-+	std::vector<std::pair<u8*, uptr>> m_code_ranges;
-+#endif
-+
- 	MemoryManager2(std::function<u64(const std::string&)> symbols_cement = {}) noexcept
- 		: m_symbols_cement(std::move(symbols_cement))
- 	{
-@@ -378,7 +406,16 @@ struct MemoryManager2 : llvm::RTDyldMemoryManager
- 	u8* allocateCodeSection(uptr size, uint align, uint /*sec_id*/, llvm::StringRef /*sec_name*/) override
- 	{
--		return jit_runtime::alloc(size, align, true);
-+		u8* const result = jit_runtime::alloc(size, align, true);
-+
-+#ifdef ARCH_ARM64
-+		if (result && size)
-+		{
-+			m_code_ranges.emplace_back(result, size);
-+		}
-+#endif
-+
-+		return result;
- 	}
- 
- 	u8* allocateDataSection(uptr size, uint align, uint /*sec_id*/, llvm::StringRef /*sec_name*/, bool /*is_ro*/) override
- 	{
-@@ -388,6 +425,15 @@ struct MemoryManager2 : llvm::RTDyldMemoryManager
- 	bool finalizeMemory(std::string* = nullptr) override
- 	{
-+#ifdef ARCH_ARM64
-+		for (const auto& [ptr, size] : m_code_ranges)
-+		{
-+			asmjit::VirtMem::flushInstructionCache(ptr, size);
-+		}
-+
-+		m_code_ranges.clear();
-+#endif
-+
- 		return false;
- 	}
- 
- 	void registerEHFrames(u8*, u64, usz) override
 diff --git a/rpcs3/Emu/System.cpp b/rpcs3/Emu/System.cpp
 index 21a47f932..e4418a663 100644
 --- a/rpcs3/Emu/System.cpp
@@ -3673,6 +3624,102 @@ index 2465b7dc6..3378ecbb9 100644
  	[[nodiscard]] bool Save(std::string_view filepath);
  
  	[[nodiscard]] u32 GetTrophiesCount() const;
+diff --git a/rpcs3/util/JITLLVM.cpp b/rpcs3/util/JITLLVM.cpp
+index 80d6608de..b9afcbd49 100644
+--- a/rpcs3/util/JITLLVM.cpp
++++ b/rpcs3/util/JITLLVM.cpp
+@@ -202,6 +202,11 @@ struct MemoryManager1 : llvm::RTDyldMemoryManager
+ 	// May be a memory container internally
+ 	std::function<u64(const std::string&)> m_symbols_cement;
+ 
++#ifdef ARCH_ARM64
++	// Code must not be published until RuntimeDyld has applied relocations.
++	std::vector<std::pair<u8*, uptr>> m_code_ranges;
++#endif
++
+ 	MemoryManager1(std::function<u64(const std::string&)> symbols_cement = {}) noexcept
+ 		: m_symbols_cement(std::move(symbols_cement))
+ 	{
+@@ -310,7 +315,16 @@ struct MemoryManager1 : llvm::RTDyldMemoryManager
+ 
+ 	u8* allocateCodeSection(uptr size, uint align, uint /*sec_id*/, llvm::StringRef /*sec_name*/) override
+ 	{
+-		return allocate(code_ptr, m_code_mems, size, align, utils::protection::wx);
++		u8* const result = allocate(code_ptr, m_code_mems, size, align, utils::protection::wx);
++
++#ifdef ARCH_ARM64
++		if (result && size)
++		{
++			m_code_ranges.emplace_back(result, size);
++		}
++#endif
++
++		return result;
+ 	}
+ 
+ 	u8* allocateDataSection(uptr size, uint align, uint /*sec_id*/, llvm::StringRef /*sec_name*/, bool is_ro) override
+@@ -326,6 +340,15 @@ struct MemoryManager1 : llvm::RTDyldMemoryManager
+ 
+ 	bool finalizeMemory(std::string* = nullptr) override
+ 	{
++#ifdef ARCH_ARM64
++		for (const auto& [ptr, size] : m_code_ranges)
++		{
++			asmjit::VirtMem::flushInstructionCache(ptr, size);
++		}
++
++		m_code_ranges.clear();
++#endif
++
+ 		return false;
+ 	}
+ 
+@@ -345,6 +368,11 @@ struct MemoryManager2 : llvm::RTDyldMemoryManager
+ 	// May be a memory container internally
+ 	std::function<u64(const std::string&)> m_symbols_cement;
+ 
++#ifdef ARCH_ARM64
++	// Code must not be published until RuntimeDyld has applied relocations.
++	std::vector<std::pair<u8*, uptr>> m_code_ranges;
++#endif
++
+ 	MemoryManager2(std::function<u64(const std::string&)> symbols_cement = {}) noexcept
+ 		: m_symbols_cement(std::move(symbols_cement))
+ 	{
+@@ -378,7 +406,16 @@ struct MemoryManager2 : llvm::RTDyldMemoryManager
+ 
+ 	u8* allocateCodeSection(uptr size, uint align, uint /*sec_id*/, llvm::StringRef /*sec_name*/) override
+ 	{
+-		return jit_runtime::alloc(size, align, true);
++		u8* const result = jit_runtime::alloc(size, align, true);
++
++#ifdef ARCH_ARM64
++		if (result && size)
++		{
++			m_code_ranges.emplace_back(result, size);
++		}
++#endif
++
++		return result;
+ 	}
+ 
+ 	u8* allocateDataSection(uptr size, uint align, uint /*sec_id*/, llvm::StringRef /*sec_name*/, bool /*is_ro*/) override
+@@ -388,6 +425,15 @@ struct MemoryManager2 : llvm::RTDyldMemoryManager
+ 
+ 	bool finalizeMemory(std::string* = nullptr) override
+ 	{
++#ifdef ARCH_ARM64
++		for (const auto& [ptr, size] : m_code_ranges)
++		{
++			asmjit::VirtMem::flushInstructionCache(ptr, size);
++		}
++
++		m_code_ranges.clear();
++#endif
++
+ 		return false;
+ 	}
+ 
 diff --git a/rpcs3/util/Thread.cpp b/rpcs3/util/Thread.cpp
 index b9c909bbb..be43f8b32 100644
 --- a/rpcs3/util/Thread.cpp

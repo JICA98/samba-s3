@@ -151,6 +151,11 @@ object GpuDriverSelection {
     private const val UNCHARTED_2_VALIDATED_TITLE = "BCUS98123"
     private const val UNCHARTED_2_VALIDATED_GPU = "750"
 
+    val TLOU_COMPAT_FAMILY = setOf(
+        "BCUS98174", "NPUA80960", "BCES01584", "BCES01585"
+    )
+    private const val TLOU_VALIDATED_GPU = "750"
+
     data class CurrentDriverSelection(val selectedLabel: String, val driverPath: String) {
         companion object {
             fun read(): CurrentDriverSelection = CurrentDriverSelection(
@@ -178,10 +183,15 @@ object GpuDriverSelection {
     fun isRdrCompatTitle(titleId: String?): Boolean =
         !titleId.isNullOrBlank() && RDR_COMPAT_FAMILY.contains(titleId.uppercase())
 
+    fun isTlouCompatTitle(titleId: String?): Boolean =
+        !titleId.isNullOrBlank() && TLOU_COMPAT_FAMILY.contains(titleId.uppercase())
+
     private fun isValidatedAdrenoSystemCrashTitle(titleId: String?, gpuInfo: AdrenoGpuInfo): Boolean =
         isRdrCompatTitle(titleId) ||
             (titleId.equals(UNCHARTED_2_VALIDATED_TITLE, ignoreCase = true) &&
-                gpuInfo.gpuId == UNCHARTED_2_VALIDATED_GPU)
+                gpuInfo.gpuId == UNCHARTED_2_VALIDATED_GPU) ||
+            (isTlouCompatTitle(titleId) &&
+                gpuInfo.gpuId == TLOU_VALIDATED_GPU)
 
     /**
      * Pure compatibility decision. Non-null only when ALL hold:
@@ -210,7 +220,11 @@ object GpuDriverSelection {
             Log.w(TAG, "S3GPU compat title=$titleId verdict=system reason=turnip-missing")
             return null
         }
-        val reason = "rdr-adreno-system+turnip:${entry.id}"
+        val reason = when {
+            isTlouCompatTitle(titleId) -> "tlou-adreno-system+turnip:${entry.id}"
+            isRdrCompatTitle(titleId) -> "rdr-adreno-system+turnip:${entry.id}"
+            else -> "uncharted2-adreno-system+turnip:${entry.id}"
+        }
         Log.i(TAG, "S3GPU compat title=$titleId verdict=turnip entry=${entry.id} reason=$reason")
         return CompatBootDriverSpec(entry.id, entry.libraryName, entry.displayName, reason)
     }

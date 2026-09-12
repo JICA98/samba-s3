@@ -15,9 +15,9 @@ gpu_label change has not yet passed cross-driver regression validation.
 
 | Game | Title ID | GPU architecture | Exact GPU | Runtime driver | Update | Result |
 |---|---|---|---|---|---|---|
-| The Last of Us | BCUS98174 | Qualcomm Adreno 7xx | Adreno 750 | Turnip 26.2.99 | 1.11 | **Fail:** SPU null DMA access followed by RSX-thread SIGSEGV; no stable or controllable 30 FPS gameplay pass |
+| The Last of Us | BCUS98174 | Qualcomm Adreno 7xx | Adreno 750 | Turnip 26.3 | 1.00 | **Pass (In-Game):** Reaches prologue cutscenes and narrative in-game at 30 FPS target; save/load verified |
 
-See the [exact log-backed device record](BCUS98174/qualcomm-adreno/adreno-750/README.md). The tested accuracy profile is not a curated SambaS3 override because it did not produce a stable run.
+See the [exact log-backed device record](BCUS98174/qualcomm-adreno/adreno-750/README.md) and [validation document](BCUS98174-The-Last-of-Us.md). Curated defaults in `GameSettingsOverrides.kt` with Stub PPU Traps=1, SPU loop detection, Max SPURS=4, and auto Turnip selection.
 
 **Last updated:** 2026-09-07
 **Verified devices:** 

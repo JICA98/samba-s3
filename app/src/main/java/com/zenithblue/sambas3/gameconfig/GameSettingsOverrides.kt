@@ -120,14 +120,17 @@ object GameSettingsOverrides {
                 "Video@@Vulkan@@Asynchronous Texture Streaming 2" to "false"
             )
             "BCUS98174", "NPUA80960", "BCES01584", "BCES01585" -> mapOf(
+                "Core@@Stub PPU Traps" to "1",
                 "Core@@XFloat Accuracy" to SettingsValueCodec.quoteCfgString("Accurate"),
-                "Core@@SPU loop detection" to "false",
+                "Core@@SPU loop detection" to "true",
+                "Core@@Max SPURS Threads" to "4",
                 "Core@@RSX FIFO Accuracy" to SettingsValueCodec.quoteCfgString("Atomic"),
                 "Video@@Driver Wake-Up Delay" to "200",
-                "Video@@Write Color Buffers" to "true",
-                "Video@@Read Color Buffers" to "true",
-                "Video@@Write Depth Buffer" to "true",
-                "Video@@Read Depth Buffer" to "true",
+                "Video@@Write Color Buffers" to "false",
+                "Video@@Read Color Buffers" to "false",
+                "Video@@Write Depth Buffer" to "false",
+                "Video@@Read Depth Buffer" to "false",
+                "Video@@Relaxed ZCULL Sync" to "true",
                 "Video@@Vulkan@@Asynchronous Texture Streaming 2" to "false"
             )
             "BLUS30443", "BLES00932", "BCAS20071", "BCJS30022", "BCJS70013", "BCAS20096" -> mapOf(

@@ -72,6 +72,16 @@ class GpuDriverSelectionTest {
     }
 
     @Test
+    fun tlou_adreno750_system_with_turnip_resolves_override() {
+        val spec = GpuDriverSelection.resolveCompatBootDriver(
+            "BCUS98174", adreno750, system,
+            listOf(turnipRecommended), setOf("turnip-26.3")
+        )
+        assertNotNull(spec)
+        assertEquals("turnip-26.3", spec!!.entryId)
+    }
+
+    @Test
     fun uncharted2_other_adreno_is_not_auto_overridden_without_device_evidence() {
         assertNull(
             GpuDriverSelection.resolveCompatBootDriver(

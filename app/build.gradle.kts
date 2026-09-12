@@ -68,6 +68,7 @@ android {
     buildTypes {
         debug {
             buildConfigField("boolean", "DIRECT_ISO_LOADING", "true")
+            signingConfig = signingConfigs.findByName("custom-key")
         }
         release {
             // SAF-selected ISO files are a supported production feature; keep the
