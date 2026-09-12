@@ -1,5 +1,84 @@
 # Demon's Souls (BLUS30443) — Black Screen Fix & In-Game Validation Log
 
+## 2026-09-12 14:08–14:22 IST: OP13R stop/reopen checkpoint
+
+Two canonical launches of `direct_iso/BLUS30443` ran in the same main process,
+PID `5349`, on OP13R USB `d30a1726`. Existing caches and saves were retained.
+The first run rendered the autosave notice, title screen, and attract movie at
+about 30 FPS. START pulses and 1–2 second holds were acknowledged by the debug
+receiver, but controllable gameplay was not reached. These acknowledgments
+prove receiver execution, not guest consumption; the receiver currently ignores
+the native pad function's Boolean return. Input loss remains unclassified.
+
+Canonical stop returned `ok=true`. The second launch reused the process and
+caches, rendered the autosave notice at 30.1 FPS, and also stopped with
+`ok=true` before switching to The Last of Us at the user's request. This is a
+successful warm boot/stop checkpoint, not a gameplay or save/load pass. No
+cache or save was deleted. OP13R briefly disconnected and reconnected during
+the first run; the emulator process survived.
+
+- First launch: `/tmp/samba-bridge-fBlDa0/logcat.txt`
+- Title and attract screenshots: `/tmp/demons-title-20260912.png`,
+  `/tmp/demons-cross-title-20260912.png`
+- First evidence: `/tmp/demons-title-input-attempt1-20260912`
+- First stop: `/tmp/samba-bridge-ktEpQ7/logcat.txt`
+- Warm launch: `/tmp/samba-bridge-2ZOV1w/logcat.txt`
+- Warm autosave screenshot: `/tmp/demons-warm-reopen-20260912.png`
+- Warm evidence: `/tmp/demons-warm-reopen-attempt2-20260912`
+- Second stop: `/tmp/samba-bridge-pV23uZ/logcat.txt`
+
+## 2026-09-12 OP13R: Home-only PPU regression correction
+
+The older playable result below belongs to OnePlus Pad 2, not today's OP13R run.
+On OP13R USB `d30a1726`, direct ISO launch `direct_iso/BLUS30443` initially bypassed
+Home readiness and compiled PPU modules on the emulator loading screen (10/180).
+Evidence was collected before a clean stop; no shader-cache corruption was proven
+by this attempt.
+
+The shared `RPCSXActivity` entry now gates all boot modes before rendering/native
+boot, returning unprepared games to Home and starting the existing PPU worker there.
+Release `590978c8ee471051ed644c10202a99dcd48fc04cf35cf4794419f991fb20ea71`
+was installed without deleting data. The actual activity regression test covers
+fresh and save-load modes; 21 selected tests passed overall.
+
+At 11:37 IST, Home visibly showed **Compiling PPU Modules, 93/233**, with Stop PPU
+available. Main PID `11861` and `:ppu_compile` PID `13116` were live. Compilation
+is not complete yet, and current OP13R gameplay/stop-reopen/save-load remain unverified.
+
+- Before: `/tmp/demons-op13r-cold-20260912.png`
+- Regression bundle: `/tmp/demons-ppu-loading-regression-20260912`
+- Corrected gate log: `/tmp/samba-bridge-P1z6LO/logcat.txt`
+- Home verification: `/tmp/demons-ppu-home-gate-20260912.png`
+
+### 11:48–11:54 IST: completed preparation and fingerprint audit
+
+Home preparation completed normally at 11:48:38 IST. Runtime batch reported
+`all_complete`, `totalModules=233`, `cachedBefore=233`, `compiledThisBatch=0`,
+`remainingUncached=0`, `inventorySealed=true`, and `audited=true`. Both readiness
+labels became Ready; the independent worker exited. Evidence:
+`/tmp/demons-home-ppu-completed-20260912` and inspected screenshot
+`/tmp/demons-ppu-home-complete-20260912.png`.
+
+Follow-up source review found launch never called the existing compiler-fingerprint
+invalidation check. It now does so when the engine is initialized and idle with no
+PPU owner. Native fingerprints now also include Accurate Cache Line Stores and
+PPU vector-NaN fixups, both of which alter the compiled object key. A new activity
+regression test proves stale Ready metadata redirects to Home instead of compiling
+in the loading screen.
+
+Release APK `18657201d4e1611ab0b6ed63f22230ebc7933f02cce0b43931ffe21a779deea1`,
+native patch `c4a520ad5ebd3d621f191e3b64778d55ce8721803ac456306f4b267d70e96fd5`,
+was installed on OP13R after the worker finished. All 148 selected tests passed.
+The first launch correctly deferred to Home for the changed fingerprint; the
+existing cache was re-audited and Home returned to Ready with no worker remaining.
+
+- Fingerprint deferral: `/tmp/samba-bridge-B5kCXM/logcat.txt`
+- Home after audit: `/tmp/demons-ppu-fingerprint-audit-20260912.png`
+- Prepared launch: `/tmp/samba-bridge-DNqZT5/logcat.txt`, PID `20774`
+
+Prepared launch is now under device validation; gameplay and save/load are not
+yet claimed successful.
+
 **Goal:** Diagnose and eliminate in-game black screen, establish robust per-game configuration override pipeline, and validate cold launch → SPU cache build → Title Screen → Character Load → 3D Gameplay on Snapdragon 8 Gen 3 reference device `7d6afed8`.
 
 | Field | Value |

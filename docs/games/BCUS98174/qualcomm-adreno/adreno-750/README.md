@@ -1,5 +1,80 @@
 # The Last of Us (BCUS98174) — Qualcomm Adreno / Adreno 750
 
+## Current continuation — September 12, 2026
+
+At the user's request, testing resumed on OP13R USB `d30a1726` after two
+Demon's Souls boot/stop runs. Canonical launch requested `direct_iso/BCUS98174`
+at 14:22:41 IST. The activity readiness gate returned the game to Home for PPU
+preparation. An inspected screenshot at about 14:23 showed **Compiling PPU
+Modules, module 7 of 147**, with **Stop PPU** available. Main PID `5349` and
+worker PID `20121` were confirmed live. This is preparation, not a game boot
+or gameplay pass; the older failure results below remain historical evidence.
+
+- Launch acknowledgment: `/tmp/samba-bridge-EEaflE/logcat.txt`
+- Inspected Home preparation screenshot: `/tmp/tlou-entry-20260912.png`
+- No cache/save deletion or configuration experiment in this continuation.
+- Pending: preparation completion, runtime boot, input, gameplay, stop/reopen,
+  and save/load verification. Record each result here and commit/push milestones.
+
+## September 12 evening follow-up: preparation ready, runtime still fails
+
+On resumption, Home showed both PPU readiness labels **Ready**, no PPU worker
+remained, and a previous TLOU session had recovered as **FRAME TIMEOUT**.
+The intervening runs and package replacements were not continuously observed;
+their outcomes must not be inferred from the earlier preparation screenshot.
+Evidence was collected before another launch:
+`/tmp/tlou-preparation-resume-20260912`, with Home screenshot
+`/tmp/tlou-resumed-home-20260912.png`.
+
+A new canonical launch in PID `23852` was acknowledged in
+`/tmp/samba-bridge-iMID7n/logcat.txt`. The installed APK was independently hashed
+as `dfafa036f586e1984525d70c643141dc34c201760829c276c927e077d60e2ccf`, matching
+the existing local **debug** APK. This continuation did not install it; these
+observations are diagnostic and need release-build validation.
+
+The current core log proves **game v1.00**, **system Qualcomm Adreno 750 Vulkan
+driver**, LLVM SPU, Accurate XFloat, color-buffer reads/writes enabled,
+RSX memory tiling disabled, and driver wake-up delay 200. This differs from
+the historical v1.11/Turnip runs. No settings or save/cache files were changed
+by this continuation.
+
+The inspected runtime screenshot shows **Applying PPU Code — 0%**. Meanwhile,
+native PPU linking completed repeatedly with `failed=0`, guest threads ran,
+and the main thread repeatedly logged RSX SPU-kick timeouts. The native
+`S3VKSYNC` diagnostic selected `domain=host backend=gpu_label reason=android`.
+This does not prove shader-file corruption, nor does the retained evidence
+prove a continuously stopped presentation counter. The PPU overlay and actual
+runtime state need further correlation; gameplay remains unverified.
+
+- Runtime screenshot: `/tmp/tlou-runtime-attempt1-20260912-evening.png`
+- Current-run evidence: `/tmp/tlou-runtime-attempt1-evening-20260912`
+- Native stack attempt: Android rejected `run-as ... debuggerd -b 23852`
+  because it could not establish the target-SDK-37 SELinux context. No native
+  stack was obtained and no device security settings were changed.
+
+Subsequent terminal evidence resolves the presentation question: at
+21:03:07.994 IST, PID `23852` logged
+`frame-timeout no-produced-frame-for=120571ms presented=376 state=Running surface_gen=1`.
+Android recorded signal 9 at 21:03:08.559 during the deliberate clean-process
+recovery. New PID `24413` classified the session as `CONFIRMED_CRASH` /
+`FRAME TIMEOUT`. Thus the 120-second watchdog worked; the earlier PPU overlay
+did not exempt this run. The later stop acknowledgment
+`/tmp/samba-bridge-TDodoM/logcat.txt` came from the recovered launcher, not a
+successful native stop of the stalled game. Session: `1789227021372-ca407844`.
+
+### Milestone checks
+
+The standard and playstore unit-test XML reports each contain 658 tests with
+zero failures/errors. Their newest report timestamps are 11:22:45 UTC and
+08:56:30 UTC respectively. Source and native-patch changes continued after
+those reports; they do not validate all current changes. The documentation
+checkpoint has no whitespace errors. Current native/source changes require
+separate review and validation before a code milestone is committed. None
+of these unit-test results establishes emulator gameplay or shader/save-load
+correctness.
+
+## Historical September 6–7 result
+
 **Result:** FAIL — no stable or controllable gameplay was reached, so a sustained 30 FPS result is not established. Testing stopped after the real update-1.11 run ended in an SPU null DMA access followed by an RSX-thread segmentation fault.
 
 **Tested:** 2026-09-06 to 2026-09-07

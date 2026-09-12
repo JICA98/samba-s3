@@ -61,6 +61,94 @@ Thermal status reached 3 and CPU sensors approximately 78–82 °C in the first 
 - The official RPCS3 patch database entry for the tested PPU hash (`ad7bfe5eb63563703c893ab10930c35cf80e8d0e`) exposes `Disable Mesh Trimming`. It does not provide an official 60 FPS patch for this build, so SambaS3 does not invent one.
 - Official patch API: <https://rpcs3.net/compatibility?patch&api=v1&v=1.2>
 
+## 2026-09-11 OnePlus control rerun
+
+A fresh control run on the prior installed core exercised the Kotlin PPU bridge
+before the shader-cache release. The visible progress advanced monotonically
+from 12/71 (16%) to 33/71 (46%) and 57/71 (80%), then the native logs completed
+link/apply without error. The game produced a clean inFamous 2 logo frame at
+about 31.8 FPS. Before deterministic gameplay input or a requested stop,
+however, Android recorded process signal 11 at about 0.93 GB RSS. The captured
+logs contain no Vulkan error, backend fatal, crash-buffer record, or LMK/OOM
+event. This run validates PPU UI progress behavior, but it is not a stop/reopen
+shader-cache pass and weakens the earlier blanket playable claim until the
+current native patch is retested.
+
+- PPU samples: `/tmp/infamous2-reopen-control-attempt1-30s.png`,
+  `/tmp/infamous2-reopen-control-attempt1-75s.png`,
+  `/tmp/infamous2-reopen-control-attempt1-130s.png`
+- Live post-PPU frame: `/tmp/infamous2-reopen-control-attempt1-180s.png`
+- Unexpected-stop launcher frame:
+  `/tmp/infamous2-reopen-control-attempt1-210s.png`
+- Evidence bundle: `/tmp/infamous2-post-ppu-unexpected-stop-20260911`
+
+## 2026-09-11 patched-core stop/reopen validation
+
+The first launch attempted immediately after the Uncharted 2 stop was rejected
+as an invalid control when preflight exposed a leaked global `SPU Decoder:
+Interpreter (dynamic)`. Its canonical stop did not acknowledge and Android
+recorded signal 11 at about 1.0 GB RSS. Evidence was captured before the app was
+force-stopped, and the global baseline was repaired offline to LLVM, automatic
+compile threads, Safe block mode, loop detection off, Approximate XFloat, and
+zero Stub PPU Traps.
+
+With that repaired baseline, current patch `2dc094ae` linked the cached PPU
+objects and produced a clean inFamous 2 logo at about 28.3 FPS within 30
+seconds. By 65 seconds the surface had changed to black with no reported FPS.
+It remained black beyond the required 120-second no-frame threshold while CPU
+and RSX stayed busy. The evidence contains no backend fatal, Vulkan error,
+crash buffer, or LMK/OOM event, so this is classified as a frame timeout rather
+than a graphics-driver crash.
+
+The canonical stop then timed out in native shutdown. The frontend journaled
+`FAILED` with `HomeStop`, restored all leased settings, scheduled clean-process
+recovery, and intentionally sent signal 9 to its own stuck process. The signal
+9 is therefore controlled containment, not an unhandled emulator crash. This
+attempt did not reach gameplay or prove a clean shader-cache reopen; one final
+cache-reuse launch remains in the bounded validation.
+
+- Invalid dynamic-leak stop bundle:
+  `/tmp/infamous2-dynamic-leak-stop-failure-20260911`
+- Valid LLVM 30-second frame:
+  `/tmp/infamous2-current-core-valid-attempt1-30s.png`
+- Black 65-second frame:
+  `/tmp/infamous2-current-core-valid-attempt1-65s.png`
+- Timeout frame and pre-stop evidence:
+  `/tmp/infamous2-current-core-valid-attempt1-timeout.png`,
+  `/tmp/infamous2-current-core-valid-attempt1-timeout-20260911`
+- Stop bridge and post-stop evidence:
+  `/tmp/samba-bridge-95r4yy/logcat.txt`,
+  `/tmp/infamous2-current-core-valid-attempt1-stop-failure-20260911`
+
+The second and final cache-reuse launch validated copied surface samples, but
+never showed the clean logo seen on attempt 1. Screenshots at roughly 30, 60,
+and 165 seconds were black with no FPS and the same displayed frame count while
+CPU and RSX remained busy. Vulkan initialized at emulator time 01:38 and the
+game continued running until emulator time 04:49, so the long black interval
+was not merely pre-renderer PPU compilation. There was again no backend fatal,
+Vulkan error, crash buffer, or LMK/OOM evidence.
+
+Unlike attempt 1, final teardown was clean. A Home stop requested at 00:01:26
+reached native `Stopped` in 607 ms, completed shader/RSX cleanup and `Objects
+cleared`, restored the setting lease, recorded `CLEAN_STOP`, and returned to
+MainActivity without a process restart. This proves one clean stop after a
+cache-reuse launch, but the reopen itself still failed to render and never
+reached gameplay. The current shader-cache patch is therefore not yet
+validated as resolving the all-games stop/reopen defect.
+
+- Reopen launch bridge: `/tmp/samba-bridge-4B1vlc/logcat.txt`
+- Reopen black frames:
+  `/tmp/infamous2-current-core-valid-attempt2-30s.png`,
+  `/tmp/infamous2-current-core-valid-attempt2-60s.png`,
+  `/tmp/infamous2-current-core-valid-attempt2-timeout.png`
+- Final evidence and clean-stop trace:
+  `/tmp/infamous2-current-core-valid-attempt2-timeout-20260912`
+
+Current status: **not validated playable on the patched core. Both bounded
+LLVM launches stalled on black output; the first required controlled
+clean-process recovery after native stop timed out, while the second stopped
+cleanly in 607 ms.**
+
 ## Reproduction
 
 ```bash
