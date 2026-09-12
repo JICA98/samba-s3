@@ -8,6 +8,7 @@ Following targeted engine fixes, curated settings override, and auto Turnip driv
 - **Boot and Navigation:** PPU preparation completed (147/147 modules), SPU cache built (11,400+ modules), warning screen passed with START, developer/studio logos rendered, main menu navigated with D-pad/Cross.
 - **Save/Load:** Created new save file ("New Saved Data" -> "Yes"), confirmed persistent Prologue save, and successfully loaded save with "CONTINUE Prologue".
 - **In-Game Rendering:** Rendered the entire opening prologue narrative sequence (Sarah on couch, Joel phone conversation, watch gift presentation, bedroom tuck-in) with high-fidelity models, dynamic lighting, and skin shaders at rock-solid **30.0 FPS** (32.3–33.7 ms frametime).
+- **Interactive Cutscene Transitions:** Successfully navigated menus, selected New Game / Normal difficulty, created save game, and triggered real-time narrative gameplay. After bedroom bedtime sequence, cutscene finishes and transitions to player night sequence.
 - **Audio:** Continuous 48 kHz stereo streaming via AAudio with zero audio underruns.
 - **Teardown:** Clean stop verified via `debug-stop-game.sh` in 600 ms returning to MainActivity.
 - See full flat validation document: [`docs/games/BCUS98174-The-Last-of-Us.md`](../../BCUS98174-The-Last-of-Us.md).

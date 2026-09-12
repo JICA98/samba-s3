@@ -76,6 +76,8 @@ Known aliases: `BCUS98174`, `NPUA80960`, `BCES01584`, `BCES01585`.
 - **Joel wearing watch with Sarah:** `docs/games/BCUS98174/tlou-ingame-prologue-joel-sarah-watch.png`
 - **Joel carrying Sarah to bedroom:** `docs/games/BCUS98174/tlou-ingame-prologue-joel-carries-sarah.png`
 - **Sarah in bed with nightstand lamp:** `docs/games/BCUS98174/tlou-ingame-prologue-sarah-bed.png`
+- **Interactive main menu selection:** `docs/games/BCUS98174/tlou-main-menu-selection.png`
+- **In-game persistent save slot:** `docs/games/BCUS98174/tlou-ingame-save-menu.png`
 
 ## Reproduction
 
