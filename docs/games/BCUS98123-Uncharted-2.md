@@ -870,3 +870,11 @@ reverse-apply validation.
 Device validation is pending: only the OnePlus 13R (`d30a1726`) is connected.
 Project policy requires every new release APK to be installed on both the
 OnePlus 13R and Poco X6 Pro, so no release APK was built or installed.
+
+Static follow-up audited the Vulkan shader-cache shutdown and reload path.
+Normal teardown now stops pipeline producers, drains the atomic pending-file
+writer, destroys the cache, then clears program objects. Disk pipeline structs
+also rebase embedded Vulkan pointers before use, and zero-length shader entries
+are rejected on write and load. Existing evidence does not prove nonzero raw
+shader-file corruption, so no speculative checksum layer was added before the
+release stop/reopen test.
