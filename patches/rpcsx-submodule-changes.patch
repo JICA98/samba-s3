@@ -3240,7 +3240,7 @@ index 21a47f932..cd43d74d3 100644
 @@ -3245,6 +3292,15 @@ bool Emulator::Pause(bool freeze_emulation, bool show_resume_message)
  		{
  			const auto status = Emu.GetStatus(false);
-
+ 
 +#ifdef __ANDROID__
 +			// Android's on_pause callback requests process recovery for a frozen
 +			// core. Do not create a permanent banner or native UI refresh thread.
@@ -3788,7 +3788,7 @@ index 80d6608de..b9afcbd49 100644
  	}
  
 diff --git a/rpcs3/util/Thread.cpp b/rpcs3/util/Thread.cpp
-index b9c909bbb..3d7e34112 100644
+index b9c909bbb..c26cb33bf 100644
 --- a/rpcs3/util/Thread.cpp
 +++ b/rpcs3/util/Thread.cpp
 @@ -47,6 +47,7 @@ DYNAMIC_IMPORT_RENAME("Kernel32.dll", SetThreadDescriptionImport, "SetThreadDesc
@@ -3826,7 +3826,7 @@ index b9c909bbb..3d7e34112 100644
  	if (::sigaction(SIGBUS, &sa, NULL) == -1)
  	{
  		std::fprintf(stderr, "sigaction(SIGBUS) failed (%d).\n", errno);
-@@ -2915,6 +2927,23 @@ u64 thread_ctrl::get_affinity_mask(thread_class group)
+@@ -2915,6 +2927,39 @@ u64 thread_ctrl::get_affinity_mask(thread_class group)
  		mask |= 1ull << i;
  	}
  
@@ -3840,6 +3840,22 @@ index b9c909bbb..3d7e34112 100644
 +		{
 +			mask &= ~0x3ull;
 +		}
++
++		// Asymmetric core steering on 8-core Snapdragon (e.g. 8 Gen 3: 1x X4 prime + 5x A720 + 2x A520):
++		// Keep RSX render thread on Prime & Big cores (cores 5-7, 0xE0) to avoid Vulkan submission stalls.
++		// Keep PPU thread on cores 4-7 (0xF0) to prevent game logic preemption.
++		// SPU worker threads retain full access to performance cores 2-7 (0xFC).
++		if (affinities[6] == thread_class::general && affinities[7] == thread_class::general)
++		{
++			if (group == thread_class::rsx)
++			{
++				mask &= 0xE0ull;
++			}
++			else if (group == thread_class::ppu)
++			{
++				mask &= 0xF0ull;
++			}
++		}
 +	}
 +
 +	if (!mask)
@@ -3849,4 +3865,16 @@ index b9c909bbb..3d7e34112 100644
 +
  	return mask;
  #endif
+ 
+@@ -3155,6 +3200,11 @@ void thread_ctrl::set_native_priority(int priority)
+ 	{
+ 		sig_log.error("pthread_setschedparam() failed: %d", err);
+ 	}
++
++#if defined(__linux__) || defined(__ANDROID__)
++	const int nice_val = (priority > 0) ? -8 : ((priority < 0) ? 10 : 0);
++	setpriority(PRIO_PROCESS, 0, nice_val);
++#endif
+ #endif
+ }
  

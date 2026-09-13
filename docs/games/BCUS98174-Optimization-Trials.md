@@ -35,7 +35,8 @@ This document tracks every configuration, engine patch, threading change, compil
 | **16** | Secondary Cloth Simulation Decoupling | Rate-limit Sarah's cloth physics passes from 60 Hz to 30 Hz in SPU core | Cuts SPURS compute demand without breaking skeletal animation | **ARCHITECTURAL GOAL** |
 | **17** | `XFloat Accuracy: Approximate` | Relax SPU double-precision float emulation to single precision | Boot halts at black screen with SPU 2 stuck in an infinite loop at 100% CPU; must remain Accurate | **REJECTED (Must remain Accurate)** |
 | **18** | `SPU GETLLAR Busy Waiting: 0` | Force immediate yield on SPU reservation acquisition | Causes SPU 2 busy-wait freeze during game engine initialization; must remain default (100) | **REJECTED (Must remain 100)** |
-| **19** | Decoupled Core Affinity (RSX/PPU Prime, SPU Performance) | Dedicate Core 7 (Cortex-X4) to RSX and Core 6 to PPU, mapping 6 SPURS workers to Cores 0–5 | Eliminates CFS scheduler preemption between RSX rendering thread and SPURS workers | **UNDER EVALUATION** |
+| **19** | Asymmetric Core Steering & CFS Nice Prioritization | Steer RSX thread to Cores 5–7 (Cortex-A720 3.15 GHz & X4 3.3 GHz) and PPU to Cores 4–7; enforce `setpriority(PRIO_PROCESS, 0, -8)` on Android for `scoped_priority(+1)` | Eliminates RSX starvation by SPU worker threads; prevents Vulkan draw call latency spikes on Qualcomm Adreno 750 | **KEPT (Effective Architecture)** |
+| **20** | `Relaxed ZCULL Sync` & `Driver Wake-Up Delay: 1` | Bypass blocking ZCULL sync queries and minimize RSX submission delay | Prevents GPU pipeline synchronization bubbles during deferred lighting passes | **KEPT (Required)** |
 
 ---
 
