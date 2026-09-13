@@ -53,7 +53,9 @@ import androidx.compose.runtime.mutableLongStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.produceState
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
+import kotlinx.coroutines.launch
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
@@ -98,6 +100,7 @@ enum class LaunchFocusTarget {
     DRIVER,
     PATCHES,
     TROPHIES,
+    FAST_MODE,
     CLEAR_CACHE,
     SAVES,
     CLOSE
@@ -169,6 +172,21 @@ fun GameLaunchCenter(
     val existingSaves = snapshot.saveSlots.filter { it.exists }
     val hasContinue = snapshot.latestSave != null && existingSaves.isNotEmpty()
 
+    val scope = rememberCoroutineScope()
+    var fastModeRefreshTick by remember { mutableIntStateOf(0) }
+    var fastModeActive by remember(titleId) { mutableStateOf(false) }
+    LaunchedEffect(titleId, enabledPatches, fastModeRefreshTick) {
+        fastModeActive = com.zenithblue.sambas3.patch.PatchFastMode.isFastModeEnabled(titleId)
+    }
+    fun toggleFastMode() {
+        scope.launch {
+            val next = !fastModeActive
+            com.zenithblue.sambas3.patch.PatchFastMode.setFastModeEnabled(titleId, next, context)
+            fastModeActive = next
+            fastModeRefreshTick++
+        }
+    }
+
     var focusedTarget by remember { mutableStateOf(LaunchFocusTarget.START) }
     var focusedSaveIndex by remember { mutableIntStateOf(0) }
     val focusRequester = remember { FocusRequester() }
@@ -208,6 +226,7 @@ fun GameLaunchCenter(
             LaunchFocusTarget.DRIVER -> onDriver()
             LaunchFocusTarget.PATCHES -> onPatches()
             LaunchFocusTarget.TROPHIES -> onAchievements()
+            LaunchFocusTarget.FAST_MODE -> toggleFastMode()
             LaunchFocusTarget.CLEAR_CACHE -> if (canClearCache) onClearCache()
             LaunchFocusTarget.SAVES -> existingSaves.getOrNull(focusedSaveIndex)?.let { if (snapshot.canLoadSave) onLoad(it) }
             LaunchFocusTarget.CLOSE -> onDismiss()
@@ -220,7 +239,8 @@ fun GameLaunchCenter(
             LaunchFocusTarget.START, LaunchFocusTarget.CONTINUE -> focusedTarget = LaunchFocusTarget.CLOSE
             LaunchFocusTarget.PATCHES -> focusedTarget = LaunchFocusTarget.CONFIG
             LaunchFocusTarget.TROPHIES -> focusedTarget = LaunchFocusTarget.DRIVER
-            LaunchFocusTarget.CLEAR_CACHE -> focusedTarget = LaunchFocusTarget.PATCHES
+            LaunchFocusTarget.FAST_MODE -> focusedTarget = LaunchFocusTarget.PATCHES
+            LaunchFocusTarget.CLEAR_CACHE -> focusedTarget = LaunchFocusTarget.FAST_MODE
             LaunchFocusTarget.SAVES -> focusedTarget = LaunchFocusTarget.CLEAR_CACHE
             LaunchFocusTarget.DRIVER, LaunchFocusTarget.CONFIG -> focusedTarget = LaunchFocusTarget.CLOSE
             LaunchFocusTarget.CLOSE -> {}
@@ -233,7 +253,8 @@ fun GameLaunchCenter(
             LaunchFocusTarget.CLOSE -> focusedTarget = LaunchFocusTarget.START
             LaunchFocusTarget.CONFIG -> focusedTarget = LaunchFocusTarget.PATCHES
             LaunchFocusTarget.DRIVER -> focusedTarget = LaunchFocusTarget.TROPHIES
-            LaunchFocusTarget.PATCHES, LaunchFocusTarget.TROPHIES -> focusedTarget = LaunchFocusTarget.CLEAR_CACHE
+            LaunchFocusTarget.PATCHES, LaunchFocusTarget.TROPHIES -> focusedTarget = LaunchFocusTarget.FAST_MODE
+            LaunchFocusTarget.FAST_MODE -> focusedTarget = LaunchFocusTarget.CLEAR_CACHE
             LaunchFocusTarget.CLEAR_CACHE -> focusedTarget = if (existingSaves.isNotEmpty()) LaunchFocusTarget.SAVES else if (hasContinue) LaunchFocusTarget.CONTINUE else LaunchFocusTarget.START
             LaunchFocusTarget.SAVES -> focusedTarget = if (hasContinue) LaunchFocusTarget.CONTINUE else LaunchFocusTarget.START
             LaunchFocusTarget.START, LaunchFocusTarget.CONTINUE -> {}
@@ -246,7 +267,8 @@ fun GameLaunchCenter(
             LaunchFocusTarget.START -> focusedTarget = if (hasContinue) LaunchFocusTarget.CONTINUE else LaunchFocusTarget.TROPHIES
             LaunchFocusTarget.CONTINUE -> focusedTarget = LaunchFocusTarget.TROPHIES
             LaunchFocusTarget.TROPHIES -> focusedTarget = LaunchFocusTarget.PATCHES
-            LaunchFocusTarget.CLEAR_CACHE -> focusedTarget = LaunchFocusTarget.PATCHES
+            LaunchFocusTarget.FAST_MODE -> focusedTarget = LaunchFocusTarget.PATCHES
+            LaunchFocusTarget.CLEAR_CACHE -> focusedTarget = LaunchFocusTarget.FAST_MODE
             LaunchFocusTarget.DRIVER -> focusedTarget = LaunchFocusTarget.CONFIG
             LaunchFocusTarget.CLOSE -> focusedTarget = LaunchFocusTarget.CONFIG
             LaunchFocusTarget.SAVES -> focusedSaveIndex = (focusedSaveIndex - 1).coerceAtLeast(0)
@@ -259,6 +281,7 @@ fun GameLaunchCenter(
         when (focusedTarget) {
             LaunchFocusTarget.CONFIG -> focusedTarget = LaunchFocusTarget.DRIVER
             LaunchFocusTarget.PATCHES -> focusedTarget = LaunchFocusTarget.TROPHIES
+            LaunchFocusTarget.FAST_MODE -> focusedTarget = if (hasContinue) LaunchFocusTarget.CONTINUE else LaunchFocusTarget.START
             LaunchFocusTarget.DRIVER -> focusedTarget = if (hasContinue) LaunchFocusTarget.CONTINUE else LaunchFocusTarget.START
             LaunchFocusTarget.TROPHIES -> focusedTarget = if (hasContinue) LaunchFocusTarget.CONTINUE else LaunchFocusTarget.START
             LaunchFocusTarget.CLEAR_CACHE -> focusedTarget = if (hasContinue) LaunchFocusTarget.CONTINUE else LaunchFocusTarget.START
@@ -665,6 +688,37 @@ fun GameLaunchCenter(
                             ) {
                                 Text("TROPHIES", style = MaterialTheme.typography.labelSmall, maxLines = 1)
                             }
+                        }
+                        val isFastModeFocused = focusedTarget == LaunchFocusTarget.FAST_MODE
+                        OutlinedButton(
+                            onClick = { toggleFastMode() },
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .height(34.dp),
+                            contentPadding = PaddingValues(horizontal = 4.dp, vertical = 0.dp),
+                            shape = RoundedCornerShape(8.dp),
+                            border = BorderStroke(
+                                if (isFastModeFocused) 2.dp else 1.dp,
+                                if (fastModeActive) Color(0xFF00E676) else if (isFastModeFocused) RPCSXColors.focusRing else MaterialTheme.colorScheme.outlineVariant
+                            ),
+                            colors = ButtonDefaults.outlinedButtonColors(
+                                containerColor = if (fastModeActive) Color(0xFF00C853).copy(alpha = 0.18f) else if (isFastModeFocused) RPCSXColors.primaryMuted else Color.Transparent,
+                                contentColor = if (fastModeActive) Color(0xFF00E676) else if (isFastModeFocused) RPCSXColors.primary else MaterialTheme.colorScheme.onSurface,
+                            ),
+                        ) {
+                            Icon(
+                                painter = painterResource(if (fastModeActive) R.drawable.ic_check_circle else R.drawable.tune),
+                                contentDescription = null,
+                                modifier = Modifier.size(16.dp),
+                                tint = if (fastModeActive) Color(0xFF00E676) else RPCSXColors.textSecondary
+                            )
+                            Spacer(Modifier.width(6.dp))
+                            Text(
+                                if (fastModeActive) "FAST MODE: ON" else "FAST MODE: OFF",
+                                style = MaterialTheme.typography.labelSmall,
+                                fontWeight = FontWeight.Bold,
+                                maxLines = 1
+                            )
                         }
                         val isClearCacheFocused = focusedTarget == LaunchFocusTarget.CLEAR_CACHE
                         OutlinedButton(

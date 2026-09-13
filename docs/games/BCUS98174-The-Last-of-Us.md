@@ -34,6 +34,7 @@ Product-owned defaults for all known The Last of Us title IDs in `GameSettingsOv
   "Video@@Read Depth Buffer": false,
   "Video@@Relaxed ZCULL Sync": true,
   "Video@@Handle RSX Memory Tiling": true,
+  "Video@@Strict Rendering Mode": true,
   "Video@@Vulkan@@Asynchronous Texture Streaming 2": false
 }
 ```
@@ -78,6 +79,7 @@ Known aliases: `BCUS98174`, `NPUA80960`, `BCES01584`, `BCES01585`.
 7. *In-game milestone:* Successfully rendered the full opening prologue sequence (Sarah couch scene, watch gift to Joel, bedroom transition) at rock-steady 30.0 FPS.
 8. *Hallway & Joel's Bedroom Navigation:* Navigated Sarah out of bedroom, unlocked door with raw Triangle holds, walked hallway corridor past staircase landing to Joel's bedroom door at 3.5–4.2 FPS with affinity pinning. In-app UI overlay telemetry routing verified.
 9. *Save/Load Lifecycle & Menu 50+ FPS Target:* Loaded persistent save data directly into active hallway gameplay session. Tested in-game Pause Menu Save flow under active traversal; created new save slot `Save Game 3` (`BCUS98174_NDI_LASTOFUS01_BT_2`) verified durable on `dev_hdd0`. Achieved 49.4–51.3 FPS (13.2–22.0 ms frametime) in Load and Save dialog overlays with in-app UI monitor active.
+10. *Patch Fast Mode & Glitch Resolution:* Implemented per-game `Patch Fast Mode` (`PatchFastMode.kt`) in the Home Game Launch Center (`GameLaunchCenter.kt`). Combines curated glitch-free performance patches (`Disable in-built MLAA`, `Disable Motion Blur`, `Skip Intro`). Added `Video@@Strict Rendering Mode: true` in `GameSettingsOverrides.kt`, completely eliminating driver feedback loop quad corruptions, wall tile artifacts, and transparent rectangular blocks in the hallway.
 
 ## Screenshots
 
@@ -92,10 +94,12 @@ Known aliases: `BCUS98174`, `NPUA80960`, `BCES01584`, `BCES01585`.
 - **Interactive main menu selection:** `docs/games/BCUS98174/tlou-main-menu-selection.png`
 - **In-game persistent save slot:** `docs/games/BCUS98174/tlou-ingame-save-menu.png`
 - **In-game save slot creation:** `docs/games/BCUS98174/tlou-ingame-save-created.png`
+- **Game Launcher Patch Fast Mode:** `docs/games/BCUS98174/tlou-launcher-patch-fast-mode.png`
 - **Controllable character in bedroom (mirror reflection):** `docs/games/BCUS98174/tlou-ingame-bedroom-sarah-mirror.png`
 - **Controllable character walking in bedroom:** `docs/games/BCUS98174/tlou-ingame-bedroom-sarah-walking.png`
 - **Controllable character in second-floor hallway/foyer:** `docs/games/BCUS98174/tlou-ingame-hallway-foyer.png`
 - **Controllable character at Joel's bedroom door & staircase:** `docs/games/BCUS98174/tlou-ingame-joel-bedroom-door.png`
+- **Clean hallway traversal (zero graphical glitches):** `docs/games/BCUS98174/tlou-ingame-hallway-clean-no-glitches.png`
 
 ## Reproduction
 

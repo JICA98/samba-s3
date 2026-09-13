@@ -304,6 +304,7 @@ class GameSettingsOverridesTest {
         assertEquals("true", GameSettingsOverrides.curatedDefaultsForTitle("BCUS98174")["Video@@Read Color Buffers"])
         assertEquals("true", GameSettingsOverrides.curatedDefaultsForTitle("BCUS98174")["Video@@Handle RSX Memory Tiling"])
         assertEquals("true", GameSettingsOverrides.curatedDefaultsForTitle("BCUS98174")["Video@@Relaxed ZCULL Sync"])
+        assertEquals("true", GameSettingsOverrides.curatedDefaultsForTitle("BCUS98174")["Video@@Strict Rendering Mode"])
         assertTrue(GameSettingsOverrides.curatedDefaultsForTitle("BCES00509").isEmpty())
 
         appliedCalls.clear()

@@ -205,6 +205,20 @@ object PpuReadinessStore {
     }
 
     @Synchronized
+    fun syncFingerprint(context: Context, key: String, newFingerprint: String) {
+        ensureLoaded(context)
+        val entry = cache[key] ?: return
+        val newEntry = entry.copy(
+            fingerprint = newFingerprint,
+            updatedMs = System.currentTimeMillis()
+        )
+        cache[key] = newEntry
+        save(context)
+        bumpRevision()
+        Log.i("PpuReadinessStore", "fingerprint synchronized for title=$key")
+    }
+
+    @Synchronized
     fun invalidateIfFingerprintChanged(context: Context, key: String, currentFingerprint: String? = fingerprint(context, key)): Boolean {
         ensureLoaded(context)
         val entry = cache[key] ?: return false

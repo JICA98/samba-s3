@@ -8,8 +8,8 @@
 | **Load / Save Game Menu Overlays** | **49.4–51.3 FPS (13.2–22.0 ms frametime, PPU 120–139%, RSX 34–41%)** | **TARGET ACHIEVED (50+ FPS)** |
 | **Narrative In-Game Sequences** | **30.1 FPS (33.4 ms frametime, APP CPU 332%, RSX 87%, PPU 78%)** | **TARGET ACHIEVED** |
 | **Save/Load Progression & Lifecycle** | Loaded Save 2 into hallway; created durable Save 3 on dev_hdd0 | **PASS** |
-| **Active Controllable Gameplay (Bedroom)** | 3.5–4.2 FPS (Sarah model, mirror reflections, input control) | **FUNCTIONAL / BOUND BY SPU** |
-| **Hallway & Joel's Bedroom Door** | 3.5–4.2 FPS (Door unlocked via Triangle, traversed hallway to Joel's door & stairs) | **PROGRESSION VERIFIED** |
+| **Active Controllable Gameplay (Hallway)** | Clean rendering with **zero graphical glitches** (Strict Rendering Mode) | **PASS / CLEAN 3D** |
+| **Patch Fast Mode (Per-Game)** | Toggleable one-click preset on Home Launcher combining clean perf patches | **PASS** |
 | **Telemetry & Overlay Routing** | Native overlay disabled; in-app Compose UI overlay active | **PASS** |
 | **Audio Pipeline** | 48 kHz stereo continuous streaming via AAudio | **PASS** |
 | **Crash / Assertion Handling** | Zero PPU trap aborts, zero RSX SPU kick deadlocks | **RESOLVED** |

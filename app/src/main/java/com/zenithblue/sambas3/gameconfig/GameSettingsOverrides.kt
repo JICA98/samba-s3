@@ -133,6 +133,7 @@ object GameSettingsOverrides {
                 "Video@@Read Depth Buffer" to "false",
                 "Video@@Relaxed ZCULL Sync" to "true",
                 "Video@@Handle RSX Memory Tiling" to "true",
+                "Video@@Strict Rendering Mode" to "true",
                 "Video@@Vulkan@@Asynchronous Texture Streaming 2" to "false"
             )
             "BLUS30443", "BLES00932", "BCAS20071", "BCJS30022", "BCJS70013", "BCAS20096" -> mapOf(
