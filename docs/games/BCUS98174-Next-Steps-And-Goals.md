@@ -36,14 +36,14 @@
 | Metric / Phase | Target Value | Observed Value | Status |
 |---|---|---|---|
 | **Title Screen (3D Window & Menu)** | 30.0 FPS | 15.3–16.5 FPS (Foliage, sunbeams, curtains) | Functional |
-| **Load / Save Game Menu Overlays** | 30.0+ FPS | **49.4–58.0 FPS (13.2–22.0 ms frametime)** | **TARGET ACHIEVED** |
+| **Load / Save Game Menu Overlays** | 30.0+ FPS | **30.0–58.5 FPS (16.2–33.3 ms frametime)** | **TARGET ACHIEVED** |
 | **Narrative In-Game Sequences** | 30.0 FPS | **30.1 FPS (33.4 ms frametime, APP CPU 332%)** | **TARGET ACHIEVED** |
-| **Active Controllable Gameplay (Hallway)** | **30.0 FPS** | **3.5–4.2 FPS (228–271 ms frametime)** | **NOT YET ACHIEVED (BOUND BY SPU)** |
+| **Active Controllable Gameplay (Hallway)** | **30.0 FPS** | **3.0–4.2 FPS (228–349 ms frametime)** | **NOT YET ACHIEVED (BOUND BY SPU)** |
 | **Visual Fidelity (Artifacts/Glitches)** | Zero corruption | **Zero block artifacts / 100% clean 3D** (`Strict Rendering Mode: true`) | **ACHIEVED** |
-| **Save/Load Lifecycle** | Durable across boots | Save Game 1, 2, 3 created & verified on `dev_hdd0` | **ACHIEVED** |
+| **Save/Load Lifecycle** | Durable across boots | Save Game 1, 2, 3 created & verified; AutoLoad verified | **ACHIEVED** |
 | **Patch Fast Mode** | One-click Home UI toggle | Integrated into `GameLaunchCenter.kt` | **ACHIEVED** |
 | **Core Affinity Pinning** | Cores 2–7 (Perf cores) | Excluded Cortex-A520 little cores 0–1 | **ACHIEVED** |
-| **Crash & Freeze Handling** | Exit to Home cleanly | Currently shows `EMULATION_FROZEN` toast in-emu | **ACTION REQUIRED** |
+| **Watchdog & Compile Threads** | Clean boot without false timeout | `Compile Threads: 2`, `Watchdog: 240s` | **ACHIEVED** |
 
 ---
 

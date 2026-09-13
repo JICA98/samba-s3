@@ -41,11 +41,11 @@ Achieve **sustained 30.0 FPS playable performance with zero visual glitches** du
 | Emulation Phase | Target Performance | Current Verified Result | Status |
 |---|---|---|---|
 | **Title Screen 3D Window** | Sustained 30.0 FPS | 15.3–16.5 FPS (Foliage, dynamic lighting) | In Progress |
-| **Menu & Save/Load Screens** | Sustained 30.0+ FPS | **49.4–58.0 FPS (13.2–22.0 ms frametime)** | **TARGET ACHIEVED** |
+| **Menu & Save/Load Screens** | Sustained 30.0+ FPS | **30.0–58.5 FPS (16.2–33.3 ms frametime)** | **TARGET ACHIEVED** |
 | **Prologue In-Game Narrative** | Sustained 30.0 FPS | **30.1 FPS (33.4 ms frametime, APP CPU 332%)** | **TARGET ACHIEVED** |
-| **Active Controllable Traversal** | **Sustained 30.0 FPS (33.3 ms)** | **3.5–4.2 FPS (228–271 ms frametime, bound by SPU)** | **NOT YET ACHIEVED (PRIMARY FOCUS)** |
+| **Active Controllable Traversal** | **Sustained 30.0 FPS (33.3 ms)** | **3.0–4.2 FPS (228–349 ms frametime, bound by SPU)** | **NOT YET ACHIEVED (PRIMARY FOCUS)** |
 | **Visual Rendering Quality** | Zero quads, zero blocks, zero artifacts | **Verified 100% clean** via `Strict Rendering Mode: true` | **ACHIEVED** |
-| **Save/Load Progression** | Persistent save/load lifecycle | Save creation and restore validated across sessions | **ACHIEVED** |
+| **Save/Load Progression** | Persistent save/load lifecycle | Save creation and auto-load validated across sessions | **ACHIEVED** |
 | **Launcher Fast Mode** | One-click per-game patch preset | Integrated into Home `GameLaunchCenter.kt` | **ACHIEVED** |
 | **Crash Handling** | Exit to Home cleanly on freeze | In-emulator frozen toast currently informs user | **PENDING NATIVE EXIT FIX** |
 

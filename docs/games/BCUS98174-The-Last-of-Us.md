@@ -111,6 +111,7 @@ Known aliases: `BCUS98174`, `NPUA80960`, `BCES01584`, `BCES01585`.
 8. *Hallway & Joel's Bedroom Navigation:* Navigated Sarah out of bedroom, unlocked door with raw Triangle holds, walked hallway corridor past staircase landing to Joel's bedroom door at 3.5–4.2 FPS with affinity pinning. In-app UI overlay telemetry routing verified.
 9. *Save/Load Lifecycle & Menu 50+ FPS Target:* Loaded persistent save data directly into active hallway gameplay session. Tested in-game Pause Menu Save flow under active traversal; created new save slot `Save Game 3` (`BCUS98174_NDI_LASTOFUS01_BT_2`) verified durable on `dev_hdd0`. Achieved 49.4–51.3 FPS (13.2–22.0 ms frametime) in Load and Save dialog overlays with in-app UI monitor active.
 10. *Patch Fast Mode & Glitch Resolution:* Implemented per-game `Patch Fast Mode` (`PatchFastMode.kt`) in the Home Game Launch Center (`GameLaunchCenter.kt`). Combines curated glitch-free performance patches (`Disable in-built MLAA`, `Disable Motion Blur`, `Skip Intro`). Added `Video@@Strict Rendering Mode: true` in `GameSettingsOverrides.kt`, completely eliminating driver feedback loop quad corruptions, wall tile artifacts, and transparent rectangular blocks in the hallway.
+11. *SPU Compilation, Watchdog Calibration, & Menu 30+ FPS Verification:* Capped `Core@@Max LLVM Compile Threads: 2` in `GameSettingsOverrides.kt` to allow 2 SPU worker threads to compile cache modules in parallel. Extended `FIRST_FRAME_TIMEOUT_MS`, `FRESH_BOOT_FIRST_FRAME_TIMEOUT_MS`, and `NO_FRAME_TIMEOUT_MS` to 240_000 ms in `RPCSXActivity.kt` to prevent false frame-timeout terminations during initial 14,500+ SPU program compilation. Verified sustained **30.0–58.5 FPS (16.2–33.3 ms frametime)** in the live interactive main menu via `S3BENCH` telemetry (`tlou-main-menu-30fps-verified.png`). Verified save/load auto-load cycle via `cellSaveDataListAutoLoad` directly into active traversal gameplay (`tlou-ingame-loaded-save.png`).
 
 ## Screenshots
 
@@ -123,8 +124,10 @@ Known aliases: `BCUS98174`, `NPUA80960`, `BCES01584`, `BCES01585`.
 - **Sarah in bed with nightstand lamp:** `docs/games/BCUS98174/tlou-ingame-prologue-sarah-bed.png`
 - **3D Title Screen Window:** `docs/games/BCUS98174/tlou-title-screen-window-3d.png`
 - **Interactive main menu selection:** `docs/games/BCUS98174/tlou-main-menu-selection.png`
+- **Main menu sustained 30-58 FPS verified:** `docs/games/BCUS98174/tlou-main-menu-30fps-verified.png`
 - **In-game persistent save slot:** `docs/games/BCUS98174/tlou-ingame-save-menu.png`
 - **In-game save slot creation:** `docs/games/BCUS98174/tlou-ingame-save-created.png`
+- **In-game save slot auto-loaded:** `docs/games/BCUS98174/tlou-ingame-loaded-save.png`
 - **Game Launcher Patch Fast Mode:** `docs/games/BCUS98174/tlou-launcher-patch-fast-mode.png`
 - **Controllable character in bedroom (mirror reflection):** `docs/games/BCUS98174/tlou-ingame-bedroom-sarah-mirror.png`
 - **Controllable character walking in bedroom:** `docs/games/BCUS98174/tlou-ingame-bedroom-sarah-walking.png`

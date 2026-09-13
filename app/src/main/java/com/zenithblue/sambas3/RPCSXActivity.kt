@@ -2334,11 +2334,11 @@ class RPCSXActivity : ComponentActivity(), EmulationHost {
         private const val TITLE_ID_POLL_INTERVAL_MS = 250L
         private const val TITLE_ID_POLL_TIMEOUT_MS = 10_000L
         private const val FRAME_COPY_TIMEOUT_MS = 2_000L
-        private const val FIRST_FRAME_TIMEOUT_MS = 120_000L
+        private const val FIRST_FRAME_TIMEOUT_MS = 240_000L
         private const val SHADER_TOAST_DURATION_MS = 5_000L
         /** First-frame window after Runtime PPU is idle (fresh boot only). */
-        private const val FRESH_BOOT_FIRST_FRAME_TIMEOUT_MS = 120_000L
-        private const val NO_FRAME_TIMEOUT_MS = 120_000L
+        private const val FRESH_BOOT_FIRST_FRAME_TIMEOUT_MS = 240_000L
+        private const val NO_FRAME_TIMEOUT_MS = 240_000L
         private const val NO_FRAME_WATCHDOG_POLL_MS = 1_000L
         /** Sparse live-render probe during a long Runtime PPU apply (full-size frame copies). */
         private const val RENDER_HANDOVER_PROBE_INTERVAL_MS = 750L
