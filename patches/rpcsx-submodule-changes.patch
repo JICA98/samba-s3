@@ -3788,7 +3788,7 @@ index 80d6608de..b9afcbd49 100644
  	}
  
 diff --git a/rpcs3/util/Thread.cpp b/rpcs3/util/Thread.cpp
-index b9c909bbb..c26cb33bf 100644
+index b9c909bbb..365b1edcf 100644
 --- a/rpcs3/util/Thread.cpp
 +++ b/rpcs3/util/Thread.cpp
 @@ -47,6 +47,7 @@ DYNAMIC_IMPORT_RENAME("Kernel32.dll", SetThreadDescriptionImport, "SetThreadDesc
@@ -3826,35 +3826,20 @@ index b9c909bbb..c26cb33bf 100644
  	if (::sigaction(SIGBUS, &sa, NULL) == -1)
  	{
  		std::fprintf(stderr, "sigaction(SIGBUS) failed (%d).\n", errno);
-@@ -2915,6 +2927,39 @@ u64 thread_ctrl::get_affinity_mask(thread_class group)
+@@ -2915,6 +2927,24 @@ u64 thread_ctrl::get_affinity_mask(thread_class group)
  		mask |= 1ull << i;
  	}
  
 +	// On big.LITTLE ARM64 (e.g. 8-core Snapdragon), cores 0-1 are in-order Cortex-A520 little cores.
 +	// Running heavy SPU, PPU, or RSX threads on little cores causes severe barrier stalls.
-+	// Exclude cores 0-1 for core emulation threads unless explicitly pinned.
++	// Exclude cores 0-1 for core emulation threads unless explicitly pinned, directing all SPU,
++	// PPU, and RSX threads to the 6 Cortex-A720 and Cortex-X4 performance cores (cores 2-7, 0xFC).
 +	if (std::thread::hardware_concurrency() >= 8 &&
 +	    (group == thread_class::spu || group == thread_class::ppu || group == thread_class::rsx))
 +	{
 +		if (affinities[0] == thread_class::general && affinities[1] == thread_class::general)
 +		{
 +			mask &= ~0x3ull;
-+		}
-+
-+		// Asymmetric core steering on 8-core Snapdragon (e.g. 8 Gen 3: 1x X4 prime + 5x A720 + 2x A520):
-+		// Keep RSX render thread on Prime & Big cores (cores 5-7, 0xE0) to avoid Vulkan submission stalls.
-+		// Keep PPU thread on cores 4-7 (0xF0) to prevent game logic preemption.
-+		// SPU worker threads retain full access to performance cores 2-7 (0xFC).
-+		if (affinities[6] == thread_class::general && affinities[7] == thread_class::general)
-+		{
-+			if (group == thread_class::rsx)
-+			{
-+				mask &= 0xE0ull;
-+			}
-+			else if (group == thread_class::ppu)
-+			{
-+				mask &= 0xF0ull;
-+			}
 +		}
 +	}
 +
@@ -3866,7 +3851,7 @@ index b9c909bbb..c26cb33bf 100644
  	return mask;
  #endif
  
-@@ -3155,6 +3200,11 @@ void thread_ctrl::set_native_priority(int priority)
+@@ -3155,6 +3185,11 @@ void thread_ctrl::set_native_priority(int priority)
  	{
  		sig_log.error("pthread_setschedparam() failed: %d", err);
  	}
@@ -3878,3 +3863,29 @@ index b9c909bbb..c26cb33bf 100644
  #endif
  }
  
+diff --git a/rx/include/rx/asm.hpp b/rx/include/rx/asm.hpp
+index a5ef0173e..b1fabd6c2 100644
+--- a/rx/include/rx/asm.hpp
++++ b/rx/include/rx/asm.hpp
+@@ -281,10 +281,21 @@ inline void yield() { std::this_thread::yield(); }
+ 
+ // Synchronization helper (cache-friendly busy waiting)
+ inline void busy_wait(usz cycles = 3000) {
++#if defined(ARCH_ARM64)
++  // On ARM64 (e.g. Snapdragon), cntvct_el0 ticks at generic timer frequency (19.2 MHz)
++  // while x86 TSC ticks at ~3.5 GHz (182x faster). Scaling by 182 prevents busy_wait
++  // from delaying 182x longer than designed in SPU/RSX synchronization primitives.
++  const usz ticks = std::max<usz>(1, cycles / 182);
++  const u64 stop = get_tsc() + ticks;
++  do
++    pause();
++  while (get_tsc() < stop);
++#else
+   const u64 stop = get_tsc() + cycles;
+   do
+     pause();
+   while (get_tsc() < stop);
++#endif
+ }
+ 
+ // Align to power of 2
