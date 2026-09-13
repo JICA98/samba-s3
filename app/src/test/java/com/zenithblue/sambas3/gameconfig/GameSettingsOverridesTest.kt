@@ -297,6 +297,7 @@ class GameSettingsOverridesTest {
         assertEquals("1", GameSettingsOverrides.curatedDefaultsForTitle("BCUS98174")["Core@@Stub PPU Traps"])
         assertEquals("\"Accurate\"", GameSettingsOverrides.curatedDefaultsForTitle("BCUS98174")["Core@@XFloat Accuracy"])
         assertEquals("true", GameSettingsOverrides.curatedDefaultsForTitle("BCUS98174")["Core@@SPU loop detection"])
+        assertEquals("\"Mega\"", GameSettingsOverrides.curatedDefaultsForTitle("BCUS98174")["Core@@SPU Block Size"])
         assertEquals("6", GameSettingsOverrides.curatedDefaultsForTitle("BCUS98174")["Core@@Max SPURS Threads"])
         assertEquals("2", GameSettingsOverrides.curatedDefaultsForTitle("BCUS98174")["Core@@Max LLVM Compile Threads"])
         assertEquals("\"Atomic\"", GameSettingsOverrides.curatedDefaultsForTitle("BCUS98174")["Core@@RSX FIFO Accuracy"])

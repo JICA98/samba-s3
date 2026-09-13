@@ -123,6 +123,7 @@ object GameSettingsOverrides {
                 "Core@@Stub PPU Traps" to "1",
                 "Core@@XFloat Accuracy" to SettingsValueCodec.quoteCfgString("Accurate"),
                 "Core@@SPU loop detection" to "true",
+                "Core@@SPU Block Size" to SettingsValueCodec.quoteCfgString("Mega"),
                 "Core@@Max SPURS Threads" to "6",
                 "Core@@Max LLVM Compile Threads" to "2",
                 "Core@@RSX FIFO Accuracy" to SettingsValueCodec.quoteCfgString("Atomic"),
