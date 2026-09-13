@@ -41,12 +41,12 @@ object FailedNativeStopRecovery {
     }
 
     /**
-     * A no-frame timeout means the core has already failed. Calling its stop
+     * A no-frame timeout or frozen state means the core has already failed. Calling its stop
      * path can make every live ARM SPU thread jump into invalid host memory,
      * turning the typed timeout into a SIGSEGV before Home can present it.
      * The caller persists crash evidence before entering this method.
      */
-    fun scheduleAfterFrameTimeout(context: Context, evidence: String) {
+    fun scheduleAfterCoreFailure(context: Context, evidence: String) {
         scheduleCleanProcessRestart(
             context = context,
             requestId = System.currentTimeMillis(),

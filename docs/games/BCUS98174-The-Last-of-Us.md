@@ -1,5 +1,36 @@
 # The Last of Us (BCUS98174) — Android Validation
 
+## September 13 continuation: frozen core recovered, source fix pending device validation
+
+- The resumed launch was rejected with `nativeState=Frozen` in PID 7058 at
+  17:53:18 IST. This was an existing failed session, not a new gameplay sample.
+- Evidence collected before stopping: `/tmp/tlou-resume-20260913-existing-session`.
+  `cache-RPCSX.log` records main-thread read at unmapped `0x42` and Save/Load
+  Game Thread read at unmapped `0x3b906052`. These faults do not establish that
+  save data is corrupt; save creation and restore must be retested.
+- `debug-stop-game.sh` acknowledged `stop completed ok=true`; bridge evidence:
+  `/tmp/samba-bridge-VNX7Ir/logcat.txt`. The bounded wrapper ended after 110.5 s.
+  No new traversal FPS measurement was obtained.
+- Source change: Android `on_pause` emits frontend event 10 for frozen state;
+  `System.cpp` suppresses the permanent frozen overlay. Kotlin routes that event
+  and an older-core state-poll fallback to persisted crash evidence and clean
+  process recovery, bypassing unsafe native teardown.
+- Validation: incremental ARM64 `rpcsx-android` native target built successfully
+  (existing compiler warnings); focused standard unit tests passed, 5 tests,
+  including frozen-core and frame-timeout manifest finalization and Patch Fast
+  Mode. Logs: `/tmp/tlou-freeze-native-build.log`, `/tmp/tlou-freeze-tests.log`.
+  This is build/unit evidence, not proof of on-device recovery or 30 FPS.
+- Regenerated the persistent native patch, excluding the generated
+  `samba-build-id.cpp`; its stale stamp previously failed the reverse check.
+- No SPU job limiter was introduced. Per-thread CPU utilization cannot identify
+  cloth work or prove that dropping jobs preserves guest barriers and collision.
+  Identify guest job entry points and measure time in useful work versus waits
+  before attempting selective frequency changes. Keep six SPURS workers and
+  Atomic FIFO, given the documented failures with fewer workers and Fast FIFO.
+- Only OnePlus USB `d30a1726` was connected. Two-device release deployment and
+  on-device freeze, save/load, visual and traversal validation remain outstanding.
+
+
 | Field | Value |
 |---|---|
 | Title / update | The Last of Us™ (USA), `BCUS98174`, game reports v01.00 |

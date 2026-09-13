@@ -1058,6 +1058,10 @@ class RPCSXActivity : ComponentActivity(), EmulationHost {
 
                     RPCSX.FRONTEND_EVENT_TROPHY_UNLOCKED -> runOnUiThread { TrophyEvents.notifyUnlocked(payload) }
 
+                    RPCSX.FRONTEND_EVENT_EMULATION_FROZEN -> runOnUiThread {
+                        showInProcessFault("emulation-frozen")
+                    }
+
                     RPCSX.FRONTEND_EVENT_RENDERER_ERROR,
                     RPCSX.FRONTEND_EVENT_EMULATOR_ACTION_ERROR -> runOnUiThread {
                         if (recoveryTransitionActive && bootMode != EmulatorBootMode.FreshGame) {
@@ -1092,9 +1096,10 @@ class RPCSXActivity : ComponentActivity(), EmulationHost {
                 CrashEvidenceCollector.collectSummary(this@RPCSXActivity, session, evidence)
             }.getOrNull()
             HomeRecoveryRepository.recordCrashFailure(this@RPCSXActivity, session, report)
-            if (evidence.startsWith("frame-timeout", ignoreCase = true)) {
-                Log.e("S3RECOVERY", "frame timeout persisted; bypassing unsafe native stop")
-                FailedNativeStopRecovery.scheduleAfterFrameTimeout(this@RPCSXActivity, evidence)
+            if (evidence.startsWith("frame-timeout", ignoreCase = true) ||
+                evidence == "emulation-frozen") {
+                Log.e("S3RECOVERY", "core failure persisted; bypassing unsafe native stop")
+                FailedNativeStopRecovery.scheduleAfterCoreFailure(this@RPCSXActivity, evidence)
                 return@launch
             }
             stopAndFinishAfterFailure(EmulatorStopReason.CrashExit)
@@ -1111,6 +1116,11 @@ class RPCSXActivity : ComponentActivity(), EmulationHost {
             var watchdogState = NoFrameWatchdog.State()
             while (isActive) {
                 val emulatorState = runCatching { RPCSX.getState() }.getOrNull()
+                // Runtime-loaded older cores may not emit the frozen event.
+                if (emulatorState == EmulatorState.Frozen && !terminalFailure.get()) {
+                    runOnUiThread { showInProcessFault("emulation-frozen") }
+                    return@launch
+                }
                 val shouldWatch = emulatorState == EmulatorState.Running &&
                     lifecycle.currentState.isAtLeast(Lifecycle.State.RESUMED) &&
                     !terminalFailure.get() &&

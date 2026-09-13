@@ -1,9 +1,9 @@
 # The Last of Us (BCUS98174) — Qualcomm Adreno / Adreno 750
 
-## September 13, 2026: IN-GAME PASS & 30 FPS TARGET ACHIEVED
+## September 13, 2026: gameplay reached; sustained 30 FPS traversal not achieved
 
 Following targeted engine fixes, curated settings override, and auto Turnip driver selection:
-- **Status:** **PASS (In-Game / 30 FPS)**
+- **Status:** Gameplay reached. Narrative: about 30 FPS; active traversal: 3.5–4.2 FPS. The performance objective remains open.
 - **Device:** OnePlus 13R (`CPH2691`), Snapdragon 8 Gen 3 / Adreno 750, Turnip 26.3 Mesa driver.
 - **Boot and Navigation:** PPU preparation completed (147/147 modules), SPU cache built (11,400+ modules), warning screen passed with START, developer/studio logos rendered, main menu navigated with D-pad/Cross.
 - **Save/Load Lifecycle:** Loaded `Save Game 2` restoring character into active hallway gameplay session. Tested in-game Pause Menu Save flow under active traversal; created new save slot `Save Game 3` (`BCUS98174_NDI_LASTOFUS01_BT_2`) verified durable on `dev_hdd0`. Achieved **49.4–51.3 FPS** (13.2–22.0 ms frametime) in Load and Save dialog overlays with in-app UI monitor active.

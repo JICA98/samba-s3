@@ -232,6 +232,7 @@ class RPCSX {
         const val FRONTEND_EVENT_SAVESTATE_LOAD_TERMINAL = 9
         const val FRONTEND_EVENT_RENDERER_ERROR = 7
         const val FRONTEND_EVENT_TROPHY_UNLOCKED = 8
+        const val FRONTEND_EVENT_EMULATION_FROZEN = 10
 
         /**
          * JNI descriptor for [CompileProgressCallback.onEvent]. Must match
