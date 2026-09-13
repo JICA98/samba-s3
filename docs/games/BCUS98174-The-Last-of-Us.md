@@ -11,7 +11,7 @@
 
 ## Result
 
-- **In-Game Validation Achieved:** OnePlus 13R successfully boots The Last of Us, advances through SPU cache compilation (10,800+ modules), presents the warning/EULA screen, transitions through high-detail developer/studio logos (Naughty Dog, Sony), displays the interactive main menu, creates and loads persistent save data, and renders the opening prologue narrative in-game at a solid target 30.0 FPS (32–33 ms frametime).
+- **In-Game Validation Achieved:** OnePlus 13R successfully boots The Last of Us, advances through SPU cache compilation (10,800+ modules), presents the warning/EULA screen, transitions through high-detail developer/studio logos (Naughty Dog, Sony), displays the interactive 3D window main menu, creates and loads persistent save data, renders the opening prologue narrative in-game at 30.0 FPS (32–33 ms frametime), and transitions into active controllable character gameplay in Sarah's bedroom with full real-time 3D graphics (mirrors, dynamic lighting, furniture).
 - High-fidelity 3D character models (Sarah, Joel), dynamic interior lighting (nightstand lamp, hallway), skin/hair shaders, couch leather textures, and real-time animations render accurately with zero vertex explosions or color corruptions.
 - Audio playback through AAudio/Cubeb streams continuously at 48000 Hz in full sync without buffer underruns.
 - The clean stop lifecycle via `debug-stop-game.sh` is validated: reaches `stop completed ok=true`, unregisters host cleanly, and returns to `MainActivity`.
@@ -25,14 +25,15 @@ Product-owned defaults for all known The Last of Us title IDs in `GameSettingsOv
   "Core@@Stub PPU Traps": 1,
   "Core@@XFloat Accuracy": "Accurate",
   "Core@@SPU loop detection": true,
-  "Core@@Max SPURS Threads": 4,
+  "Core@@Max SPURS Threads": 6,
   "Core@@RSX FIFO Accuracy": "Atomic",
-  "Video@@Driver Wake-Up Delay": 200,
+  "Video@@Driver Wake-Up Delay": 1,
   "Video@@Write Color Buffers": false,
-  "Video@@Read Color Buffers": false,
+  "Video@@Read Color Buffers": true,
   "Video@@Write Depth Buffer": false,
   "Video@@Read Depth Buffer": false,
   "Video@@Relaxed ZCULL Sync": true,
+  "Video@@Handle RSX Memory Tiling": true,
   "Video@@Vulkan@@Asynchronous Texture Streaming 2": false
 }
 ```
@@ -50,10 +51,13 @@ Known aliases: `BCUS98174`, `NPUA80960`, `BCES01584`, `BCES01585`.
 3. **PPU Trap Abort During Cutscene/Gameplay Handover (`SIGTRAP` in `PPUThread.cpp:3507`)**:
    - *Problem:* Like Uncharted 2, Naughty Dog's engine issues a debug/assertion PPU trap instruction during state handover between scene loading and gameplay. With `Stub PPU Traps = 0`, RPCS3 aborted `PPU[0x1000000] main_thread` with fatal error `PPU Trap!`.
    - *Fix:* Added `"Core@@Stub PPU Traps": 1` to title overrides.
-4. **Scudo Allocator OOM / Virtual Map Exhaustion (`SIGABRT status 6`)**:
-   - *Problem:* Enabling CPU readback buffers (`Write/Read Color Buffers` and `Write/Read Depth Buffers`) alongside unconstrained 6-thread concurrent LLVM JIT compilation consumed over 4.3 GB RSS and exhausted Android Scudo map counts.
-   - *Fix:* Disabled WCB/RCB/WDB/RDB (unnecessary for Naughty Dog deferred pipeline) and constrained concurrent SPURS workers to `"Core@@Max SPURS Threads": 4`. RSS dropped to a stable ~3.0–3.4 GB.
-5. **Vulkan Compute Pipeline Failure on Adreno Proprietary Driver (`res=-13 VK_ERROR_UNKNOWN`)**:
+4. **SPU RSX Kick / Animation Stalls (`Max SPURS Threads: 4`)**:
+   - *Problem:* Limiting SPURS to 4 threads starved SPU 4 (responsible for kicking RSX command buffers) and SPU 5 (animation processing), causing `RsxKick: *** Timeout while waiting on RSX SPU kicks ***` (333 ms timeout loop = 3.0 FPS) and `ASSERTION: false && "Animation SPU jobs did not complete in time!"`.
+   - *Fix:* Restored `"Core@@Max SPURS Threads": 6` and reduced `"Video@@Driver Wake-Up Delay": 1`. SPU kick timeouts ceased completely.
+5. **Black 3D Viewport / Missing Lighting Post-Process (`Read Color Buffers: false`)**:
+   - *Problem:* The Last of Us deferred rendering engine requires CPU access to the rendered color buffer for lighting evaluation and post-processing; with `Read Color Buffers: false`, the 3D window title screen and bedroom environment output pitch black with only text visible.
+   - *Fix:* Enabled `"Video@@Read Color Buffers": true` and `"Video@@Handle RSX Memory Tiling": true`. The 3D title screen window, foliage, curtains, and bedroom interior with mirror reflections render completely.
+6. **Vulkan Compute Pipeline Failure on Adreno Proprietary Driver (`res=-13 VK_ERROR_UNKNOWN`)**:
    - *Problem:* Qualcomm's proprietary system Vulkan driver fails `vkCreateComputePipelines` with `VK_ERROR_UNKNOWN (-13)` during post-processing compute passes.
    - *Fix:* Added `BCUS98174` (and `TLOU_COMPAT_FAMILY`) to `GpuDriverSelection.kt` so the bundled open-source Turnip 26.3 Mesa driver is automatically selected on Adreno 750 / Snapdragon 8 Gen 3 devices.
 
@@ -76,8 +80,11 @@ Known aliases: `BCUS98174`, `NPUA80960`, `BCES01584`, `BCES01585`.
 - **Joel wearing watch with Sarah:** `docs/games/BCUS98174/tlou-ingame-prologue-joel-sarah-watch.png`
 - **Joel carrying Sarah to bedroom:** `docs/games/BCUS98174/tlou-ingame-prologue-joel-carries-sarah.png`
 - **Sarah in bed with nightstand lamp:** `docs/games/BCUS98174/tlou-ingame-prologue-sarah-bed.png`
+- **3D Title Screen Window:** `docs/games/BCUS98174/tlou-title-screen-window-3d.png`
 - **Interactive main menu selection:** `docs/games/BCUS98174/tlou-main-menu-selection.png`
 - **In-game persistent save slot:** `docs/games/BCUS98174/tlou-ingame-save-menu.png`
+- **Controllable character in bedroom (mirror reflection):** `docs/games/BCUS98174/tlou-ingame-bedroom-sarah-mirror.png`
+- **Controllable character walking in bedroom:** `docs/games/BCUS98174/tlou-ingame-bedroom-sarah-walking.png`
 
 ## Reproduction
 

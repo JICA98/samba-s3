@@ -297,9 +297,11 @@ class GameSettingsOverridesTest {
         assertEquals("1", GameSettingsOverrides.curatedDefaultsForTitle("BCUS98174")["Core@@Stub PPU Traps"])
         assertEquals("\"Accurate\"", GameSettingsOverrides.curatedDefaultsForTitle("BCUS98174")["Core@@XFloat Accuracy"])
         assertEquals("true", GameSettingsOverrides.curatedDefaultsForTitle("BCUS98174")["Core@@SPU loop detection"])
-        assertEquals("4", GameSettingsOverrides.curatedDefaultsForTitle("BCUS98174")["Core@@Max SPURS Threads"])
+        assertEquals("6", GameSettingsOverrides.curatedDefaultsForTitle("BCUS98174")["Core@@Max SPURS Threads"])
         assertEquals("\"Atomic\"", GameSettingsOverrides.curatedDefaultsForTitle("BCUS98174")["Core@@RSX FIFO Accuracy"])
-        assertEquals("200", GameSettingsOverrides.curatedDefaultsForTitle("BCUS98174")["Video@@Driver Wake-Up Delay"])
+        assertEquals("1", GameSettingsOverrides.curatedDefaultsForTitle("BCUS98174")["Video@@Driver Wake-Up Delay"])
+        assertEquals("true", GameSettingsOverrides.curatedDefaultsForTitle("BCUS98174")["Video@@Read Color Buffers"])
+        assertEquals("true", GameSettingsOverrides.curatedDefaultsForTitle("BCUS98174")["Video@@Handle RSX Memory Tiling"])
         assertEquals("true", GameSettingsOverrides.curatedDefaultsForTitle("BCUS98174")["Video@@Relaxed ZCULL Sync"])
         assertTrue(GameSettingsOverrides.curatedDefaultsForTitle("BCES00509").isEmpty())
 
