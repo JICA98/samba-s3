@@ -77,6 +77,7 @@ Known aliases: `BCUS98174`, `NPUA80960`, `BCES01584`, `BCES01585`.
 6. *PPU Trap stubbing:* Added `Stub PPU Traps: 1` preventing the fatal abort at cutscene transitions.
 7. *In-game milestone:* Successfully rendered the full opening prologue sequence (Sarah couch scene, watch gift to Joel, bedroom transition) at rock-steady 30.0 FPS.
 8. *Hallway & Joel's Bedroom Navigation:* Navigated Sarah out of bedroom, unlocked door with raw Triangle holds, walked hallway corridor past staircase landing to Joel's bedroom door at 3.5–4.2 FPS with affinity pinning. In-app UI overlay telemetry routing verified.
+9. *Save/Load Lifecycle & Menu 50+ FPS Target:* Loaded persistent save data directly into active hallway gameplay session. Tested in-game Pause Menu Save flow under active traversal; created new save slot `Save Game 3` (`BCUS98174_NDI_LASTOFUS01_BT_2`) verified durable on `dev_hdd0`. Achieved 49.4–51.3 FPS (13.2–22.0 ms frametime) in Load and Save dialog overlays with in-app UI monitor active.
 
 ## Screenshots
 
@@ -90,6 +91,7 @@ Known aliases: `BCUS98174`, `NPUA80960`, `BCES01584`, `BCES01585`.
 - **3D Title Screen Window:** `docs/games/BCUS98174/tlou-title-screen-window-3d.png`
 - **Interactive main menu selection:** `docs/games/BCUS98174/tlou-main-menu-selection.png`
 - **In-game persistent save slot:** `docs/games/BCUS98174/tlou-ingame-save-menu.png`
+- **In-game save slot creation:** `docs/games/BCUS98174/tlou-ingame-save-created.png`
 - **Controllable character in bedroom (mirror reflection):** `docs/games/BCUS98174/tlou-ingame-bedroom-sarah-mirror.png`
 - **Controllable character walking in bedroom:** `docs/games/BCUS98174/tlou-ingame-bedroom-sarah-walking.png`
 - **Controllable character in second-floor hallway/foyer:** `docs/games/BCUS98174/tlou-ingame-hallway-foyer.png`
