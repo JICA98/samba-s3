@@ -21,13 +21,14 @@ object PatchFastMode {
         // The Last of Us (BCUS98174 / NPUA80960 / BCES01584 / BCES01585):
         // "Disable in-built MLAA" eliminates heavy SPU post-processing.
         // "Disable Motion Blur" saves GPU RSX & SPU compute.
+        // "Disable SSAO" disables heavy SPU ambient occlusion passes cleanly.
         // "Skip Intro" bypasses intros straight to menu.
         // NOTE: "Disable Depth of Field", "Disable Bloom", and "Enable GPU Lighting"
         // are excluded because on v01.00 they introduce severe checkered/quad visual glitches.
-        "BCUS98174" to setOf("Disable in-built MLAA", "Disable Motion Blur", "Skip Intro"),
-        "NPUA80960" to setOf("Disable in-built MLAA", "Disable Motion Blur", "Skip Intro"),
-        "BCES01584" to setOf("Disable in-built MLAA", "Disable Motion Blur", "Skip Intro"),
-        "BCES01585" to setOf("Disable in-built MLAA", "Disable Motion Blur", "Skip Intro"),
+        "BCUS98174" to setOf("Disable in-built MLAA", "Disable Motion Blur", "Disable SSAO", "Skip Intro"),
+        "NPUA80960" to setOf("Disable in-built MLAA", "Disable Motion Blur", "Disable SSAO", "Skip Intro"),
+        "BCES01584" to setOf("Disable in-built MLAA", "Disable Motion Blur", "Disable SSAO", "Skip Intro"),
+        "BCES01585" to setOf("Disable in-built MLAA", "Disable Motion Blur", "Disable SSAO", "Skip Intro"),
 
         // Uncharted 2: Among Thieves
         "BCUS98123" to setOf("Disable in-built MLAA", "Disable Motion Blur", "Skip Intro"),

@@ -11,6 +11,7 @@ class PatchFastModeTest {
         val patches = PatchFastMode.fastPatchNamesForTitle("BCUS98174")
         assertTrue(patches.contains("Disable in-built MLAA"))
         assertTrue(patches.contains("Disable Motion Blur"))
+        assertTrue(patches.contains("Disable SSAO"))
         assertTrue(patches.contains("Skip Intro"))
         // Confirmed: glitch-causing patches must NOT be included in fast mode for TLOU
         assertTrue(!patches.contains("Disable Depth of Field"))
@@ -21,7 +22,7 @@ class PatchFastModeTest {
     @Test
     fun curatedFastPatchesCaseInsensitive() {
         val upper = PatchFastMode.fastPatchNamesForTitle("bcus98174")
-        val expected = setOf("Disable in-built MLAA", "Disable Motion Blur", "Skip Intro")
+        val expected = setOf("Disable in-built MLAA", "Disable Motion Blur", "Disable SSAO", "Skip Intro")
         assertEquals(expected, upper)
     }
 
