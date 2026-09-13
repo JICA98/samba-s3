@@ -1529,6 +1529,25 @@ index b6f295e4c..dbdaa58a4 100644
  	// This emulates vsh sending the events and ensures that not 2 events are
  	// processed at once
  	const std::pair<u32, s32> statuses[] = {
+diff --git a/rpcs3/Emu/CPU/CPUThread.cpp b/rpcs3/Emu/CPU/CPUThread.cpp
+index 141a700ad..f352986bc 100644
+--- a/rpcs3/Emu/CPU/CPUThread.cpp
++++ b/rpcs3/Emu/CPU/CPUThread.cpp
+@@ -635,10 +635,14 @@ void cpu_thread::operator()()
+ 
+ 	g_tls_this_thread = this;
+ 
++#ifdef ANDROID
++	thread_ctrl::set_thread_affinity_mask(thread_ctrl::get_affinity_mask(get_class()));
++#else
+ 	if (g_cfg.core.thread_scheduler != thread_scheduler_mode::os)
+ 	{
+ 		thread_ctrl::set_thread_affinity_mask(thread_ctrl::get_affinity_mask(get_class()));
+ 	}
++#endif
+ 
+ 	while (!g_fxo->is_init<cpu_profiler>())
+ 	{
 diff --git a/rpcs3/Emu/Cell/PPUThread.cpp b/rpcs3/Emu/Cell/PPUThread.cpp
 index d2768d8b0..9219e79c2 100644
 --- a/rpcs3/Emu/Cell/PPUThread.cpp
@@ -2235,11 +2254,45 @@ index 36f50a7f5..691b4d41f 100644
  			other.data_ptr = nullptr;
  
  			return *this;
+diff --git a/rpcs3/Emu/RSX/RSXOffload.cpp b/rpcs3/Emu/RSX/RSXOffload.cpp
+index a03e7e3d6..87e034fdb 100644
+--- a/rpcs3/Emu/RSX/RSXOffload.cpp
++++ b/rpcs3/Emu/RSX/RSXOffload.cpp
+@@ -33,10 +33,14 @@ namespace rsx
+ 			current_thread_ = thread_ctrl::get_current();
+ 			ensure(current_thread_);
+ 
++#ifdef ANDROID
++			thread_ctrl::set_thread_affinity_mask(thread_ctrl::get_affinity_mask(thread_class::rsx));
++#else
+ 			if (g_cfg.core.thread_scheduler != thread_scheduler_mode::os)
+ 			{
+ 				thread_ctrl::set_thread_affinity_mask(thread_ctrl::get_affinity_mask(thread_class::rsx));
+ 			}
++#endif
+ 
+ 			while (thread_ctrl::state() != thread_state::aborting)
+ 			{
 diff --git a/rpcs3/Emu/RSX/RSXThread.cpp b/rpcs3/Emu/RSX/RSXThread.cpp
-index adbf67a19..d7605fa4c 100644
+index adbf67a19..b991716b0 100644
 --- a/rpcs3/Emu/RSX/RSXThread.cpp
 +++ b/rpcs3/Emu/RSX/RSXThread.cpp
-@@ -2023,7 +2023,11 @@ namespace rsx
+@@ -1077,10 +1077,14 @@ namespace rsx
+ 		// Raise priority above other threads
+ 		thread_ctrl::scoped_priority high_prio(+1);
+ 
++#ifdef ANDROID
++		thread_ctrl::set_thread_affinity_mask(thread_ctrl::get_affinity_mask(thread_class::rsx));
++#else
+ 		if (g_cfg.core.thread_scheduler != thread_scheduler_mode::os)
+ 		{
+ 			thread_ctrl::set_thread_affinity_mask(thread_ctrl::get_affinity_mask(thread_class::rsx));
+ 		}
++#endif
+ 
+ 		while (!test_stopped())
+ 		{
+@@ -2023,7 +2027,11 @@ namespace rsx
  				continue;
  
  			const auto& tex = rsx::method_registers.vertex_textures[i];
@@ -2252,7 +2305,7 @@ index adbf67a19..d7605fa4c 100644
  			{
  				current_vp_texture_state.clear(i);
  				current_vp_texture_state.set_dimension(sampler_descriptors[i]->image_type, i);
-@@ -2079,7 +2083,9 @@ namespace rsx
+@@ -2079,7 +2087,9 @@ namespace rsx
  			auto& tex = rsx::method_registers.fragment_textures[i];
  			current_fp_texture_state.clear(i);
  
@@ -3721,7 +3774,7 @@ index 80d6608de..b9afcbd49 100644
  	}
  
 diff --git a/rpcs3/util/Thread.cpp b/rpcs3/util/Thread.cpp
-index b9c909bbb..be43f8b32 100644
+index b9c909bbb..3d7e34112 100644
 --- a/rpcs3/util/Thread.cpp
 +++ b/rpcs3/util/Thread.cpp
 @@ -47,6 +47,7 @@ DYNAMIC_IMPORT_RENAME("Kernel32.dll", SetThreadDescriptionImport, "SetThreadDesc
@@ -3759,3 +3812,27 @@ index b9c909bbb..be43f8b32 100644
  	if (::sigaction(SIGBUS, &sa, NULL) == -1)
  	{
  		std::fprintf(stderr, "sigaction(SIGBUS) failed (%d).\n", errno);
+@@ -2915,6 +2927,23 @@ u64 thread_ctrl::get_affinity_mask(thread_class group)
+ 		mask |= 1ull << i;
+ 	}
+ 
++	// On big.LITTLE ARM64 (e.g. 8-core Snapdragon), cores 0-1 are in-order Cortex-A520 little cores.
++	// Running heavy SPU, PPU, or RSX threads on little cores causes severe barrier stalls.
++	// Exclude cores 0-1 for core emulation threads unless explicitly pinned.
++	if (std::thread::hardware_concurrency() >= 8 &&
++	    (group == thread_class::spu || group == thread_class::ppu || group == thread_class::rsx))
++	{
++		if (affinities[0] == thread_class::general && affinities[1] == thread_class::general)
++		{
++			mask &= ~0x3ull;
++		}
++	}
++
++	if (!mask)
++	{
++		mask = 0xFC; // Fallback to cores 2-7
++	}
++
+ 	return mask;
+ #endif
+ 

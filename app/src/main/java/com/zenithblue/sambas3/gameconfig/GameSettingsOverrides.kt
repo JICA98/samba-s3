@@ -124,7 +124,7 @@ object GameSettingsOverrides {
                 "Core@@XFloat Accuracy" to SettingsValueCodec.quoteCfgString("Accurate"),
                 "Core@@SPU loop detection" to "true",
                 "Core@@Max SPURS Threads" to "6",
-                "Core@@Max LLVM Compile Threads" to "2",
+                "Core@@Max LLVM Compile Threads" to "1",
                 "Core@@RSX FIFO Accuracy" to SettingsValueCodec.quoteCfgString("Atomic"),
                 "Video@@Driver Wake-Up Delay" to "1",
                 "Video@@Write Color Buffers" to "false",

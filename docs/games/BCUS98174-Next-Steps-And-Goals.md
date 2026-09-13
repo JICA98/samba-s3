@@ -6,8 +6,9 @@
 |---|---|---|
 | **Title Screen (3D Window & Menu)** | 15.3–16.5 FPS (Foliage, sunbeams, curtains rendered) | **PASS** |
 | **Narrative In-Game Sequences** | **30.1 FPS (33.4 ms frametime, APP CPU 332%, RSX 87%, PPU 78%)** | **TARGET ACHIEVED** |
-| **Active Controllable Gameplay (Bedroom)** | 2.5–3.2 FPS (Sarah model, mirror reflections, input control) | **FUNCTIONAL / BOUND BY SPU** |
-| **Hallway & Foyer Exploration** | 2.5–3.2 FPS (Door unlocked via Triangle hold, 2nd floor hallway traversed) | **PROGRESSION VERIFIED** |
+| **Active Controllable Gameplay (Bedroom)** | 3.5–4.2 FPS (Sarah model, mirror reflections, input control) | **FUNCTIONAL / BOUND BY SPU** |
+| **Hallway & Joel's Bedroom Door** | 3.5–4.2 FPS (Door unlocked via Triangle, traversed hallway to Joel's door & stairs) | **PROGRESSION VERIFIED** |
+| **Telemetry & Overlay Routing** | Native overlay disabled; in-app Compose UI overlay active | **PASS** |
 | **Audio Pipeline** | 48 kHz stereo continuous streaming via AAudio | **PASS** |
 | **Crash / Assertion Handling** | Zero PPU trap aborts, zero RSX SPU kick deadlocks | **RESOLVED** |
 
@@ -47,28 +48,29 @@
 
 ---
 
-## 3. Highly Detailed Next Steps
+## 3. Execution Record & Next Steps
 
-### Step 1: Thread Affinity & Core Pinning Optimization
-1. **PPU & RSX Core Affinity:**
-   - Modify thread initialization in `PPUThread.cpp` and `RSXThread.cpp` to explicitly bind `PPU[0x1000000]` and `rsx::thread` to CPU core 7 (Cortex-X4) and core 6 (Cortex-A720).
-2. **SPURS Worker Affinity:**
-   - Bind SPU threads 0–4 to CPU cores 2–5 (Cortex-A720).
-   - Prevent the Linux kernel scheduler from scheduling guest worker threads onto the weak Cortex-A520 cores (CPU 0–1).
+### Step 1: Thread Affinity & Core Pinning Optimization (COMPLETED)
+1. **Core Affinity Exclusion:**
+   - Modified `thread_ctrl::get_affinity_mask()` in `rpcs3/util/Thread.cpp` on ARM64 Android to exclude CPU cores 0–1 (Cortex-A520 little cores) for `thread_class::spu`, `thread_class::ppu`, and `thread_class::rsx`.
+   - Updated `CPUThread.cpp`, `RSXThread.cpp`, and `RSXOffload.cpp` to enforce affinity mask application under Android regardless of scheduler mode.
+   - Verified via `ps -o TID,PSR,%CPU,COMM`: SPU workers, PPU main, and RSX threads are pinned strictly to Cortex-A720 and Cortex-X4 performance cores (Cores 2–7). Active traversal frametime improved from 348 ms down to 228–271 ms (framerate improved to 3.5–4.2 FPS).
+2. **Telemetry Routing:**
+   - Disabled native emulator HUD overlay (`Performance Overlay@@Enabled: false`).
+   - Enabled in-app Compose UI monitoring overlay (`DEBUG_MONITOR_SET --ez enabled true --es preset Performance`), routing live FPS, frame times, CPU, and battery metrics.
 3. **PPU Compiler Thread Throttling:**
-   - Restrict `Core@@Max LLVM Compile Threads` to 2 in `GameSettingsOverrides.kt` to prevent background shader/module recompilations from consuming memory and triggering Scudo out-of-memory aborts during boot.
+   - Restricted `Core@@Max LLVM Compile Threads` to 1 in `GameSettingsOverrides.kt` to prevent runtime memory exhaustion during background compilation.
 
-### Step 2: Traverse from Second-Floor Foyer to Downstairs Living Room
+### Step 2: Traverse from Second-Floor to Downstairs Living Room (IN PROGRESS)
 1. **Hallway Navigation:**
-   - Guide Sarah past the banister to the staircase landing.
-   - Walk down the stairs to trigger the ground-floor streaming zone.
-2. **Living Room Cutscene Trigger:**
-   - Enter the living room where Joel is on the phone.
-   - Measure framerate during the cinematic handover to verify that 30.0 FPS is sustained as observed in reference benchmarks.
-3. **Autosave Checkpoint:**
-   - Ensure the autosave checkpoint triggers at the base of the stairs, confirming save slot write integrity.
+   - Sarah navigated past bedroom doorway, down the upstairs hallway to Joel's bedroom door and the staircase landing (`docs/games/BCUS98174/tlou-ingame-joel-bedroom-door.png`).
+2. **Staircase & Ground-Floor Trigger:**
+   - Descend the staircase to trigger the living room streaming zone where Joel is on the phone.
+   - Confirm real-time narrative gameplay handoff sustaining 30.1 FPS as verified in reference benchmarks.
 
-### Step 3: Turnip Vulkan Zero-Copy Readback
+### Step 3: Turnip Vulkan Zero-Copy Readback & SPU Offload (NEXT ARCHITECTURAL STEP)
 1. **Evaluate Color Buffer Readback Overhead:**
    - On Snapdragon unified memory (UMA), physical memory is shared between CPU and GPU.
    - Implement host-visible coherent buffer mapping for `Read Color Buffers` in `VKRenderTargets.cpp` to avoid synchronous GPU stall fences during color buffer copyback.
+2. **SPU Job Batching / Throttling:**
+   - Profile the 6 SPURS worker threads during traversal to determine whether non-critical collision / cloth simulation jobs can be yielded or decoupled without animation desync.

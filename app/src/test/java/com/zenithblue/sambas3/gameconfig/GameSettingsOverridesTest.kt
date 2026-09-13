@@ -298,7 +298,7 @@ class GameSettingsOverridesTest {
         assertEquals("\"Accurate\"", GameSettingsOverrides.curatedDefaultsForTitle("BCUS98174")["Core@@XFloat Accuracy"])
         assertEquals("true", GameSettingsOverrides.curatedDefaultsForTitle("BCUS98174")["Core@@SPU loop detection"])
         assertEquals("6", GameSettingsOverrides.curatedDefaultsForTitle("BCUS98174")["Core@@Max SPURS Threads"])
-        assertEquals("2", GameSettingsOverrides.curatedDefaultsForTitle("BCUS98174")["Core@@Max LLVM Compile Threads"])
+        assertEquals("1", GameSettingsOverrides.curatedDefaultsForTitle("BCUS98174")["Core@@Max LLVM Compile Threads"])
         assertEquals("\"Atomic\"", GameSettingsOverrides.curatedDefaultsForTitle("BCUS98174")["Core@@RSX FIFO Accuracy"])
         assertEquals("1", GameSettingsOverrides.curatedDefaultsForTitle("BCUS98174")["Video@@Driver Wake-Up Delay"])
         assertEquals("true", GameSettingsOverrides.curatedDefaultsForTitle("BCUS98174")["Video@@Read Color Buffers"])

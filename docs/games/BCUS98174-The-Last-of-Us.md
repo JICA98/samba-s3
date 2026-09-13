@@ -60,6 +60,12 @@ Known aliases: `BCUS98174`, `NPUA80960`, `BCES01584`, `BCES01585`.
 6. **Vulkan Compute Pipeline Failure on Adreno Proprietary Driver (`res=-13 VK_ERROR_UNKNOWN`)**:
    - *Problem:* Qualcomm's proprietary system Vulkan driver fails `vkCreateComputePipelines` with `VK_ERROR_UNKNOWN (-13)` during post-processing compute passes.
    - *Fix:* Added `BCUS98174` (and `TLOU_COMPAT_FAMILY`) to `GpuDriverSelection.kt` so the bundled open-source Turnip 26.3 Mesa driver is automatically selected on Adreno 750 / Snapdragon 8 Gen 3 devices.
+7. **Cortex-A520 Efficiency Core Contention & SPU Barrier Stalls**:
+   - *Problem:* Android OS scheduled heavy SPU workers (`SPU[0x2000100]`, `SPU[0x3000100]`) onto weak in-order Cortex-A520 cores (CPU 0 and 1), slowing barrier synchronization to 2.5–3.2 FPS.
+   - *Fix:* Implemented ARM64 big.LITTLE core affinity exclusion in `rpcs3/util/Thread.cpp`, `CPUThread.cpp`, `RSXThread.cpp`, and `RSXOffload.cpp`. Core worker threads (SPU, PPU, RSX) are automatically restricted to performance cores 2–7 (Cortex-A720 and Cortex-X4), lifting active traversal framerates to 3.5–4.2 FPS (228–271 ms frametimes).
+8. **In-Emulator vs. In-App Telemetry Routing**:
+   - *Problem:* Native emulator HUD text draws directly to the render target and adds presentation overhead.
+   - *Fix:* Disabled native performance overlay (`Performance Overlay@@Enabled: false`); enabled in-app Compose UI overlay (`com.zenithblue.sambas3.DEBUG_MONITOR_SET --ez enabled true --es preset Performance`) routing real-time metrics directly.
 
 ## Device Iterations (OnePlus 13R / Adreno 750)
 
@@ -70,6 +76,7 @@ Known aliases: `BCUS98174`, `NPUA80960`, `BCES01584`, `BCES01585`.
 5. *Turnip auto-selection:* Resolved Qualcomm compute pipeline `-13` errors.
 6. *PPU Trap stubbing:* Added `Stub PPU Traps: 1` preventing the fatal abort at cutscene transitions.
 7. *In-game milestone:* Successfully rendered the full opening prologue sequence (Sarah couch scene, watch gift to Joel, bedroom transition) at rock-steady 30.0 FPS.
+8. *Hallway & Joel's Bedroom Navigation:* Navigated Sarah out of bedroom, unlocked door with raw Triangle holds, walked hallway corridor past staircase landing to Joel's bedroom door at 3.5–4.2 FPS with affinity pinning. In-app UI overlay telemetry routing verified.
 
 ## Screenshots
 
@@ -86,6 +93,7 @@ Known aliases: `BCUS98174`, `NPUA80960`, `BCES01584`, `BCES01585`.
 - **Controllable character in bedroom (mirror reflection):** `docs/games/BCUS98174/tlou-ingame-bedroom-sarah-mirror.png`
 - **Controllable character walking in bedroom:** `docs/games/BCUS98174/tlou-ingame-bedroom-sarah-walking.png`
 - **Controllable character in second-floor hallway/foyer:** `docs/games/BCUS98174/tlou-ingame-hallway-foyer.png`
+- **Controllable character at Joel's bedroom door & staircase:** `docs/games/BCUS98174/tlou-ingame-joel-bedroom-door.png`
 
 ## Reproduction
 
