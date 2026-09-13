@@ -85,6 +85,7 @@ Known aliases: `BCUS98174`, `NPUA80960`, `BCES01584`, `BCES01585`.
 - **In-game persistent save slot:** `docs/games/BCUS98174/tlou-ingame-save-menu.png`
 - **Controllable character in bedroom (mirror reflection):** `docs/games/BCUS98174/tlou-ingame-bedroom-sarah-mirror.png`
 - **Controllable character walking in bedroom:** `docs/games/BCUS98174/tlou-ingame-bedroom-sarah-walking.png`
+- **Controllable character in second-floor hallway/foyer:** `docs/games/BCUS98174/tlou-ingame-hallway-foyer.png`
 
 ## Reproduction
 
