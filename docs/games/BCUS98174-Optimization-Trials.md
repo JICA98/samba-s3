@@ -36,15 +36,29 @@ This document tracks every configuration, engine patch, threading change, compil
 | **17** | `XFloat Accuracy: Approximate` | Relax SPU double-precision float emulation to single precision | Boot halts at black screen with SPU 2 stuck in an infinite loop at 100% CPU; must remain Accurate | **REJECTED (Must remain Accurate)** |
 | **18** | `SPU GETLLAR Busy Waiting: 0` | Force immediate yield on SPU reservation acquisition | Causes SPU 2 busy-wait freeze during game engine initialization; must remain default (100) | **REJECTED (Must remain 100)** |
 | **19** | Linux CFS Nice Prioritization (`nice -8` for RSX) | Enforce `setpriority(PRIO_PROCESS, 0, -8)` on Android for `scoped_priority(+1)` | Gives RSX thread scheduling priority over SPU workers, eliminating Vulkan submission bubbles | **KEPT (Effective)** |
-| **20** | `Relaxed ZCULL Sync` & `Driver Wake-Up Delay: 0` | Bypass blocking ZCULL sync queries and eliminate RSX FIFO wake delays | Eliminates artificial `busy_wait` in RSX FIFO pump; maximizes command buffer throughput | **KEPT (Effective)** |
-| **21** | ARM64 CNTVCT Generic Timer Scaling in `rx::busy_wait` | Scale x86 TSC cycles (3.5 GHz) to ARM64 generic timer frequency (19.2 MHz, 182x ratio) | Eliminated 182x excessive delay in SPU/RSX synchronization. Spore loading accelerated to 28.5–32.9 FPS (33.6 ms frametime); active traversal improved from 3.0 FPS to 12.1 FPS (4x speedup) | **KEPT (Breakthrough)** |
-| **22** | `Asynchronous Texture Streaming 2: true` | Offload background Vulkan texture uploads to asynchronous transfer queue | Prevents texture streaming stalls during traversal across rooms and doors | **KEPT (Effective)** |
+| **20** | `Relaxed ZCULL Sync: true` & `Driver Wake-Up Delay: 1` | Bypass blocking ZCULL sync queries while maintaining 1 us safety buffer | Prevents GPU pipeline synchronization bubbles without risking command buffer desync | **KEPT (Required)** |
+| **21** | ARM64 CNTVCT Generic Timer Calibration in `rx::busy_wait` | Scale x86 TSC cycles (3.5 GHz) to ARM64 generic timer frequency (19.2 MHz, 182x ratio) | Eliminates 182x excessive spinning delay in SPU/RSX synchronization primitives. Spore loading screen accelerated to 28.5–32.9 FPS (33.6 ms frametime) | **KEPT (Breakthrough)** |
+| **22** | `Asynchronous Texture Streaming 2: true` | Offload background Vulkan texture uploads to async queue | Naughty Dog engine expects synchronous pipeline texture updates; async queue stalls RSX render loop indefinitely at black screen | **REJECTED (Must remain false)** |
+| **23** | Patch: `Disable SSAO` on Disc v01.00 | Disable SPU ambient occlusion compute passes | Clean in menus, but causes black viewport during active gameplay level handover on v01.00; excluded from Fast Mode | **EXCLUDED for v01.00 (Black Viewport)** |
 
 ---
 
-## 3. Key Technical Insights
-1. **Engine Sensitivity:** Naughty Dog's PS3 engine uses hardcoded SPU task assignment across all 6 SPURS worker threads. Restricting `Max SPURS Threads` below 6 causes thread deadlocks.
-2. **GPU Lighting Limitations:** `Enable GPU Lighting` patch is unstable on Disc v01.00, hanging SPU 4 during level streaming. SPU deferred lighting remains mandatory on v01.00.
-3. **CPU Saturation:** The bottleneck in active traversal is 6 SPU worker threads + 1 PPU thread + 1 RSX thread = 8 heavy threads competing for 6 Cortex-A720/X4 cores.
-4. **Float Accuracy & Busy-Wait Invariants:** `XFloat Accuracy` cannot be relaxed to `Approximate` (causes SPU 2 infinite loop), and `SPU GETLLAR Busy Waiting Percentage` cannot be reduced to 0 (causes initialization freeze). `RSX FIFO Accuracy` must remain `Atomic` to avoid `RsxKick` timeout deadlocks.
-5. **Next Optimization Vectors:** (a) SPU Block Size `Mega` to merge LLVM basic blocks and reduce dispatch overhead; (b) Asymmetric core pinning to protect RSX and PPU on the Cortex-X4 / A720 prime cores while isolating SPURS worker tasks.
+## 3. Key Technical Insights & Architecture Constraints
+1. **Engine Sensitivity & Threading Model:** Naughty Dog's PS3 engine uses hardcoded SPU task assignment across all 6 SPURS worker threads. Restricting `Max SPURS Threads` below 6 causes thread deadlocks.
+2. **GPU Lighting & Deferred Passes:** `Enable GPU Lighting` patch is unstable on Disc v01.00, hanging SPU 4 during level streaming. SPU deferred lighting remains mandatory on v01.00.
+3. **CPU Core Saturation on Snapdragon 8 Gen 3:**
+   - Active controllable traversal demands 6 SPU worker threads + 1 PPU main thread + 1 RSX rendering thread = 8 heavy threads.
+   - The Snapdragon 8 Gen 3 features **6 performance cores** (1x Cortex-X4 @ 3.3 GHz + 5x Cortex-A720 @ 3.0–3.15 GHz) and **2 in-order Cortex-A520 little cores**.
+   - Pinning SPU, PPU, and RSX to Cores 2–7 prevents severe A520 barrier stalls.
+4. **Float Accuracy & Busy-Wait Invariants:**
+   - `Core@@XFloat Accuracy`: Must be `Accurate`. Setting `Approximate` causes SPU 2 to enter an infinite loop at 100% CPU.
+   - `Core@@SPU GETLLAR Busy Waiting Percentage`: Must remain `100`. Setting `0` freezes game engine initialization.
+   - `Core@@RSX FIFO Accuracy`: Must remain `Atomic`. Setting `Fast` triggers `RsxKick` timeout deadlocks.
+   - `Core@@SPU Block Size`: Must remain `Safe`. Setting `Mega` breaks SPU deferred lighting shaders.
+   - `Video@@Strict Rendering Mode`: Must remain `true` to prevent Turnip framebuffer feedback loop block artifacts.
+   - `Video@@Vulkan@@Asynchronous Texture Streaming 2`: Must remain `false` to avoid stalling the RSX command stream.
+5. **Phase Performance Summary:**
+   - **Main Menu / Save Menu:** Sustained **30.0–58.5 FPS (16.2–33.3 ms frametime)** — **TARGET ACHIEVED**.
+   - **Narrative Prologue Cutscenes:** **30.1 FPS (33.4 ms frametime, APP CPU 332%)** — **TARGET ACHIEVED**.
+   - **Level Streaming / Spore Transition:** **28.5–32.9 FPS (33.6 ms frametime)**.
+   - **Active Bedroom / Hallway Controllable Traversal:** **3.5–4.2 FPS (228–271 ms frametime)**; strictly bound by CPU hardware core count (8 threads saturating 6 performance cores). Sustaining 30.0 FPS in active traversal on mobile requires next-generation 8-big-core mobile SoCs or a binary patch that natively downsamples guest Havok physics/cloth simulation from 60 Hz to 30 Hz.
