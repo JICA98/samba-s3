@@ -33,4 +33,68 @@ class PatchFastModeTest {
         assertTrue(patches.contains("Disable Motion Blur"))
         assertTrue(patches.contains("Skip Intro"))
     }
+
+    @Test
+    fun curatedFastPatchesForGtaV() {
+        val testIds = listOf(
+            "BLJM61019", "BLUS31156", "BLES01807",
+            "NPUB31156", "NPEB01807", "NPJB00517",
+            "NPUB31154", "NPJB00516", "NPEB01283",
+        )
+        for (id in testIds) {
+            assertTrue("Expected $id to support Fast Mode", PatchFastMode.isFastModeSupported(id))
+            val patches = PatchFastMode.fastPatchNamesForTitle(id)
+            assertTrue("Expected $id patches to contain Skip Rockstar Boot Logo", patches.contains("Skip Rockstar Boot Logo"))
+            val settings = PatchFastMode.fastModeSettingsForTitle(id)
+            assertEquals("1", settings["Video@@Driver Wake-Up Delay"])
+            assertTrue(!settings.containsKey("Core@@SPU Block Size"))
+        }
+    }
+
+    @Test
+    fun unsupportedTitleIdReturnsFalseAndEmptyPatches() {
+        val unsupportedIds = listOf("UNKNOWN123", "BLUS00000", "TEST12345", "", null)
+        for (id in unsupportedIds) {
+            assertTrue("Expected $id to NOT support Fast Mode", !PatchFastMode.isFastModeSupported(id))
+            val patches = PatchFastMode.fastPatchNamesForTitle(id)
+            assertTrue("Expected empty patches for $id", patches.isEmpty())
+            assertTrue(
+                "Expected empty Fast Mode settings for $id",
+                PatchFastMode.fastModeSettingsForTitle(id).isEmpty(),
+            )
+        }
+    }
+
+    @Test
+    fun staleOrUnsupportedTitleCannotEnableFastMode() = kotlinx.coroutines.runBlocking {
+        PatchFastMode.enabledByTitle.clear()
+        val result = PatchFastMode.setFastModeEnabled("UNKNOWN123", true)
+        assertTrue("Enabling Fast Mode for unsupported title must fail", !result)
+        val enabled = PatchFastMode.isFastModeEnabled("UNKNOWN123")
+        assertTrue("Fast Mode must be false for unsupported title", !enabled)
+        assertTrue(
+            "Unsupported title must not persist Fast Mode",
+            !PatchFastMode.isFastModeEnabledSync(null, "UNKNOWN123"),
+        )
+    }
+
+    @Test
+    fun gtaVFastModePersistsWithoutPatchesAndDoesNotLeak() = kotlinx.coroutines.runBlocking {
+        PatchFastMode.enabledByTitle.clear()
+        val enabled = PatchFastMode.setFastModeEnabled("BLJM61019", true)
+        assertTrue("GTA V Fast Mode must enable even if patches are absent", enabled)
+        assertTrue(PatchFastMode.isFastModeEnabledSync(null, "BLJM61019"))
+        assertTrue(
+            "Unsupported game must not inherit GTA V Fast Mode",
+            !PatchFastMode.isFastModeEnabledSync(null, "BLUS00000"),
+        )
+        PatchFastMode.setFastModeEnabled("BLJM61019", false)
+        assertTrue(!PatchFastMode.isFastModeEnabledSync(null, "BLJM61019"))
+    }
+
+    @Test
+    fun tlouFastModeHasNoGtaSettings() {
+        val settings = PatchFastMode.fastModeSettingsForTitle("BCUS98174")
+        assertTrue("TLOU Fast Mode must not inherit GTA V engine settings", settings.isEmpty())
+    }
 }

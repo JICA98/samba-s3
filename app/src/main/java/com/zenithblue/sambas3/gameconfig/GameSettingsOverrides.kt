@@ -154,6 +154,27 @@ object GameSettingsOverrides {
                 "Video@@Relaxed ZCULL Sync" to "true",
                 "Core@@Max SPURS Threads" to "4"
             )
+            // Grand Theft Auto V (tested: BLJM61019). Other regional IDs share the RAGE
+            // profile but are untested. Write Color Buffers: true is the RPCS3 wiki lighting fix.
+            // Handle RSX Memory Tiling: false is required on Turnip; a 0xCD5B2000 RSX cache-miss
+            // SIGSEGV still reproduced on 2026-09-14 when Write Depth Buffer was also enabled,
+            // so depth write stays off in Normal. Accurate RSX reservation is wiki-recommended
+            // for desktop freezes but was not kept after that same SIGSEGV (isolate from depth write).
+            // Driver Wake-Up Delay: 200 is the conservative Normal default; Fast Mode overlays 1.
+            // Max LLVM Compile Threads: 2 prevents SPU-cache compile from SIGSEGV at ~3.2GB RSS.
+            // Max SPURS Threads: 4 keeps 2 performance cores for PPU/RSX on SD 8 Gen 3.
+            "BLJM61019", "BLUS31156", "BLES01807", "NPUB31156", "NPUB31154", "NPEB01807", "NPEB01283", "NPJB00517", "NPJB00516" -> mapOf(
+                "Video@@Write Color Buffers" to "true",
+                "Video@@Read Color Buffers" to "true",
+                "Video@@Handle RSX Memory Tiling" to "false",
+                "Video@@Driver Wake-Up Delay" to "200",
+                "Core@@SPU loop detection" to "true",
+                "Video@@Relaxed ZCULL Sync" to "true",
+                "Core@@Max SPURS Threads" to "4",
+                "Core@@Max LLVM Compile Threads" to "2",
+                "Core@@Accurate RSX reservation access" to "false",
+                "Video@@Vulkan@@Asynchronous Texture Streaming 2" to "false"
+            )
             // inFamous 2 needs asynchronous texture streaming for complete
             // rendering. Compatible savestates keep its busy SPU workload at
             // safe points so a manual save can finish instead of being rejected.
@@ -566,14 +587,20 @@ object GameSettingsOverrides {
             Log.e(TAG, "S3GAMECFG boot title=$titleId refused=stale-lease-restore-failed")
             return LeaseBeginResult(null, false, emptyMap())
         }
-        val resolved = resolvedBootOverrides(context, titleId)
+        val fastModeOn = com.zenithblue.sambas3.patch.PatchFastMode.isFastModeEnabledSync(context, titleId)
+        val fastMode = if (fastModeOn) {
+            com.zenithblue.sambas3.patch.PatchFastMode.fastModeSettingsForTitle(titleId)
+        } else {
+            emptyMap()
+        }
+        val resolved = resolvedBootOverrides(context, titleId) + fastMode
         if (resolved.isEmpty()) {
             Log.i(TAG, "S3GAMECFG boot title=$titleId lease=none resolved=empty")
             return LeaseBeginResult(null, true, emptyMap())
         }
         val compat = compatibilityDefaultsForTitle(titleId)
         val user = explicitUserOverrides(context, titleId)
-        Log.i(TAG, "S3GAMECFG boot title=$titleId compat=$compat user=$user resolved=$resolved")
+        Log.i(TAG, "S3GAMECFG boot title=$titleId fastMode=$fastModeOn compat=$compat user=$user extra=$fastMode resolved=$resolved")
         val result = beginScopedLease(store, titleId, resolved, ::readGlobalEncoded, ::writeGlobalEncoded)
         if (!result.allApplied) {
             val rollback = endScopedLease(store, ::readGlobalEncoded, ::writeGlobalEncoded, reason = "apply-failed")

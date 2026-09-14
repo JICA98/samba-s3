@@ -252,6 +252,20 @@ class GameSettingsOverridesTest {
             assertEquals("true", defaults["Video@@Relaxed ZCULL Sync"])
             assertEquals("4", defaults["Core@@Max SPURS Threads"])
         }
+        val gtaTitles = listOf(
+            "BLJM61019", "BLUS31156", "BLES01807",
+            "NPUB31154", "NPEB01283", "NPJB00516",
+        )
+        for (title in gtaTitles) {
+            val defaults = GameSettingsOverrides.curatedDefaultsForTitle(title)
+            assertEquals("true", defaults["Video@@Write Color Buffers"])
+            assertEquals("2", defaults["Core@@Max LLVM Compile Threads"])
+            assertEquals("200", defaults["Video@@Driver Wake-Up Delay"])
+            assertEquals("false", defaults["Video@@Handle RSX Memory Tiling"])
+            assertTrue(!defaults.containsKey("Video@@Write Depth Buffer"))
+            assertEquals("false", defaults["Core@@Accurate RSX reservation access"])
+        }
+
         assertTrue(GameSettingsOverrides.curatedDefaultsForTitle("BLUS30441").isEmpty())
         assertTrue(GameSettingsOverrides.curatedDefaultsForTitle(null).isEmpty())
 
@@ -478,6 +492,33 @@ class GameSettingsOverridesTest {
         assertEquals("false", globals["Video@@Write Color Buffers"])
         assertEquals("false", globals["Video@@Read Color Buffers"])
         assertEquals("0", globals["Video@@Driver Wake-Up Delay"])
+
+        // GTA V (BLJM61019) Normal profile applies curated settings and restores cleanly
+        val gtaResolved = GameSettingsOverrides.resolvedBootOverrides(store, emptyMap(), "BLJM61019")
+        assertEquals("true", gtaResolved["Video@@Write Color Buffers"])
+        assertEquals("true", gtaResolved["Video@@Read Color Buffers"])
+        assertEquals("false", gtaResolved["Video@@Handle RSX Memory Tiling"])
+        assertEquals("200", gtaResolved["Video@@Driver Wake-Up Delay"])
+        assertEquals("4", gtaResolved["Core@@Max SPURS Threads"])
+        assertEquals("2", gtaResolved["Core@@Max LLVM Compile Threads"])
+        assertEquals("false", gtaResolved["Video@@Vulkan@@Asynchronous Texture Streaming 2"])
+        GameSettingsOverrides.beginScopedLease(leaseStore, "BLJM61019", gtaResolved, read, write, nowMs = 3L, sessionId = 3L)
+        assertEquals("true", globals["Video@@Write Color Buffers"])
+        assertEquals("200", globals["Video@@Driver Wake-Up Delay"])
+        GameSettingsOverrides.endScopedLease(leaseStore, read, write)
+        assertEquals("false", globals["Video@@Write Color Buffers"])
+        assertEquals("0", globals["Video@@Driver Wake-Up Delay"])
+
+        // Fast Mode overlays win over Normal compatibility defaults and restore
+        val gtaFast = gtaResolved + com.zenithblue.sambas3.patch.PatchFastMode.fastModeSettingsForTitle("BLJM61019")
+        assertEquals("1", gtaFast["Video@@Driver Wake-Up Delay"])
+        assertEquals("true", gtaFast["Video@@Write Color Buffers"])
+        assertTrue(!gtaFast.containsKey("Core@@SPU Block Size") || gtaFast["Core@@SPU Block Size"] != "\"Mega\"")
+        GameSettingsOverrides.beginScopedLease(leaseStore, "BLJM61019", gtaFast, read, write, nowMs = 4L, sessionId = 4L)
+        assertEquals("1", globals["Video@@Driver Wake-Up Delay"])
+        GameSettingsOverrides.endScopedLease(leaseStore, read, write)
+        assertEquals("0", globals["Video@@Driver Wake-Up Delay"])
+        assertTrue(com.zenithblue.sambas3.patch.PatchFastMode.fastModeSettingsForTitle("BLUS00000").isEmpty())
     }
 
     private companion object {

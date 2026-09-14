@@ -173,12 +173,20 @@ fun GameLaunchCenter(
     val hasContinue = snapshot.latestSave != null && existingSaves.isNotEmpty()
 
     val scope = rememberCoroutineScope()
+    val isFastModeSupported = remember(titleId) {
+        com.zenithblue.sambas3.patch.PatchFastMode.isFastModeSupported(titleId)
+    }
     var fastModeRefreshTick by remember { mutableIntStateOf(0) }
     var fastModeActive by remember(titleId) { mutableStateOf(false) }
-    LaunchedEffect(titleId, enabledPatches, fastModeRefreshTick) {
-        fastModeActive = com.zenithblue.sambas3.patch.PatchFastMode.isFastModeEnabled(titleId)
+    LaunchedEffect(titleId, enabledPatches, fastModeRefreshTick, isFastModeSupported) {
+        if (!isFastModeSupported) {
+            fastModeActive = false
+        } else {
+            fastModeActive = com.zenithblue.sambas3.patch.PatchFastMode.isFastModeEnabled(titleId, context)
+        }
     }
     fun toggleFastMode() {
+        if (!isFastModeSupported) return
         scope.launch {
             val next = !fastModeActive
             com.zenithblue.sambas3.patch.PatchFastMode.setFastModeEnabled(titleId, next, context)
@@ -226,7 +234,7 @@ fun GameLaunchCenter(
             LaunchFocusTarget.DRIVER -> onDriver()
             LaunchFocusTarget.PATCHES -> onPatches()
             LaunchFocusTarget.TROPHIES -> onAchievements()
-            LaunchFocusTarget.FAST_MODE -> toggleFastMode()
+            LaunchFocusTarget.FAST_MODE -> if (isFastModeSupported) toggleFastMode()
             LaunchFocusTarget.CLEAR_CACHE -> if (canClearCache) onClearCache()
             LaunchFocusTarget.SAVES -> existingSaves.getOrNull(focusedSaveIndex)?.let { if (snapshot.canLoadSave) onLoad(it) }
             LaunchFocusTarget.CLOSE -> onDismiss()
@@ -240,7 +248,7 @@ fun GameLaunchCenter(
             LaunchFocusTarget.PATCHES -> focusedTarget = LaunchFocusTarget.CONFIG
             LaunchFocusTarget.TROPHIES -> focusedTarget = LaunchFocusTarget.DRIVER
             LaunchFocusTarget.FAST_MODE -> focusedTarget = LaunchFocusTarget.PATCHES
-            LaunchFocusTarget.CLEAR_CACHE -> focusedTarget = LaunchFocusTarget.FAST_MODE
+            LaunchFocusTarget.CLEAR_CACHE -> focusedTarget = if (isFastModeSupported) LaunchFocusTarget.FAST_MODE else LaunchFocusTarget.PATCHES
             LaunchFocusTarget.SAVES -> focusedTarget = LaunchFocusTarget.CLEAR_CACHE
             LaunchFocusTarget.DRIVER, LaunchFocusTarget.CONFIG -> focusedTarget = LaunchFocusTarget.CLOSE
             LaunchFocusTarget.CLOSE -> {}
@@ -253,7 +261,7 @@ fun GameLaunchCenter(
             LaunchFocusTarget.CLOSE -> focusedTarget = LaunchFocusTarget.START
             LaunchFocusTarget.CONFIG -> focusedTarget = LaunchFocusTarget.PATCHES
             LaunchFocusTarget.DRIVER -> focusedTarget = LaunchFocusTarget.TROPHIES
-            LaunchFocusTarget.PATCHES, LaunchFocusTarget.TROPHIES -> focusedTarget = LaunchFocusTarget.FAST_MODE
+            LaunchFocusTarget.PATCHES, LaunchFocusTarget.TROPHIES -> focusedTarget = if (isFastModeSupported) LaunchFocusTarget.FAST_MODE else LaunchFocusTarget.CLEAR_CACHE
             LaunchFocusTarget.FAST_MODE -> focusedTarget = LaunchFocusTarget.CLEAR_CACHE
             LaunchFocusTarget.CLEAR_CACHE -> focusedTarget = if (existingSaves.isNotEmpty()) LaunchFocusTarget.SAVES else if (hasContinue) LaunchFocusTarget.CONTINUE else LaunchFocusTarget.START
             LaunchFocusTarget.SAVES -> focusedTarget = if (hasContinue) LaunchFocusTarget.CONTINUE else LaunchFocusTarget.START
@@ -268,7 +276,7 @@ fun GameLaunchCenter(
             LaunchFocusTarget.CONTINUE -> focusedTarget = LaunchFocusTarget.TROPHIES
             LaunchFocusTarget.TROPHIES -> focusedTarget = LaunchFocusTarget.PATCHES
             LaunchFocusTarget.FAST_MODE -> focusedTarget = LaunchFocusTarget.PATCHES
-            LaunchFocusTarget.CLEAR_CACHE -> focusedTarget = LaunchFocusTarget.FAST_MODE
+            LaunchFocusTarget.CLEAR_CACHE -> focusedTarget = if (isFastModeSupported) LaunchFocusTarget.FAST_MODE else LaunchFocusTarget.PATCHES
             LaunchFocusTarget.DRIVER -> focusedTarget = LaunchFocusTarget.CONFIG
             LaunchFocusTarget.CLOSE -> focusedTarget = LaunchFocusTarget.CONFIG
             LaunchFocusTarget.SAVES -> focusedSaveIndex = (focusedSaveIndex - 1).coerceAtLeast(0)
@@ -691,30 +699,50 @@ fun GameLaunchCenter(
                         }
                         val isFastModeFocused = focusedTarget == LaunchFocusTarget.FAST_MODE
                         OutlinedButton(
-                            onClick = { toggleFastMode() },
+                            onClick = { if (isFastModeSupported) toggleFastMode() },
+                            enabled = isFastModeSupported,
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .height(34.dp),
                             contentPadding = PaddingValues(horizontal = 4.dp, vertical = 0.dp),
                             shape = RoundedCornerShape(8.dp),
                             border = BorderStroke(
-                                if (isFastModeFocused) 2.dp else 1.dp,
-                                if (fastModeActive) Color(0xFF00E676) else if (isFastModeFocused) RPCSXColors.focusRing else MaterialTheme.colorScheme.outlineVariant
+                                if (isFastModeFocused && isFastModeSupported) 2.dp else 1.dp,
+                                if (!isFastModeSupported) MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.3f)
+                                else if (fastModeActive) Color(0xFF00E676)
+                                else if (isFastModeFocused) RPCSXColors.focusRing
+                                else MaterialTheme.colorScheme.outlineVariant
                             ),
                             colors = ButtonDefaults.outlinedButtonColors(
-                                containerColor = if (fastModeActive) Color(0xFF00C853).copy(alpha = 0.18f) else if (isFastModeFocused) RPCSXColors.primaryMuted else Color.Transparent,
-                                contentColor = if (fastModeActive) Color(0xFF00E676) else if (isFastModeFocused) RPCSXColors.primary else MaterialTheme.colorScheme.onSurface,
+                                containerColor = if (!isFastModeSupported) Color.Transparent
+                                else if (fastModeActive) Color(0xFF00C853).copy(alpha = 0.18f)
+                                else if (isFastModeFocused) RPCSXColors.primaryMuted
+                                else Color.Transparent,
+                                contentColor = if (!isFastModeSupported) RPCSXColors.textSecondary.copy(alpha = 0.38f)
+                                else if (fastModeActive) Color(0xFF00E676)
+                                else if (isFastModeFocused) RPCSXColors.primary
+                                else MaterialTheme.colorScheme.onSurface,
+                                disabledContainerColor = Color.Transparent,
+                                disabledContentColor = RPCSXColors.textSecondary.copy(alpha = 0.38f),
                             ),
                         ) {
                             Icon(
-                                painter = painterResource(if (fastModeActive) R.drawable.ic_check_circle else R.drawable.tune),
+                                painter = painterResource(
+                                    if (!isFastModeSupported) R.drawable.tune
+                                    else if (fastModeActive) R.drawable.ic_check_circle
+                                    else R.drawable.tune
+                                ),
                                 contentDescription = null,
                                 modifier = Modifier.size(16.dp),
-                                tint = if (fastModeActive) Color(0xFF00E676) else RPCSXColors.textSecondary
+                                tint = if (!isFastModeSupported) RPCSXColors.textSecondary.copy(alpha = 0.38f)
+                                else if (fastModeActive) Color(0xFF00E676)
+                                else RPCSXColors.textSecondary
                             )
                             Spacer(Modifier.width(6.dp))
                             Text(
-                                if (fastModeActive) "FAST MODE: ON" else "FAST MODE: OFF",
+                                if (!isFastModeSupported) "FAST MODE: NOT SUPPORTED"
+                                else if (fastModeActive) "FAST MODE: ON"
+                                else "FAST MODE: OFF",
                                 style = MaterialTheme.typography.labelSmall,
                                 fontWeight = FontWeight.Bold,
                                 maxLines = 1
