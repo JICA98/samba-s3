@@ -2,7 +2,7 @@
 
 ## Current status
 
-- **Latest commit:** `807fef5223277336a165f4b749946c9f87f7297c`
+- **Latest commit:** `4489f534f624cbc3c2574c033b1a33a124fa2048`
 - **Game/title ID:** `BLJM61019` (Japan disc, PARAM.SFO VERSION 01.00). Path: `direct_iso/BLJM61019`
 - **GPU:** Qualcomm Adreno 750 / OnePlus 13R `d30a1726`
 - **Driver:** Turnip 26.3 package

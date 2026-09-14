@@ -14,7 +14,7 @@
 | **GPU** | Qualcomm Adreno 750 |
 | **Android Version** | Android 16 (API 36) |
 | **GPU Driver** | Turnip Mesa Vulkan (`turnip-26.3` package; runtime identity `Turnip Adreno (TM) 750`) |
-| **Samba-S3 Host Commit** | `807fef5223277336a165f4b749946c9f87f7297c` |
+| **Samba-S3 Host Commit** | `4489f534f624cbc3c2574c033b1a33a124fa2048` |
 | **RPCSX Core Revision** | `657b26a0d197c29d42cdcf3b3f6e8ad5c6765bbc` |
 | **Build Variant** | `standard` **release** (`RelWithDebInfo` core), installed on OnePlus 13R and Poco X6 Pro |
 
