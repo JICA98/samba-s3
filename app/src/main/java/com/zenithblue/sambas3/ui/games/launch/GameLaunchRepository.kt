@@ -82,7 +82,9 @@ object GameLaunchRepository {
             (live.emulatorState == EmulatorState.Running || live.emulatorState == EmulatorState.Paused)
         val otherRunning = active != null && active != game.info.path &&
             (live.emulatorState == EmulatorState.Running || live.emulatorState == EmulatorState.Paused)
+        val hasFirmware = live.hasFirmware
         val blocked = when {
+            !hasFirmware -> "PlayStation 3 firmware required"
             otherRunning -> "Another game is already running"
             availability is GameLaunchAvailability.GameplayRunning && !sameRunning -> "An emulator session is already running"
             availability is GameLaunchAvailability.EngineBusy -> "Emulator busy (${availability.state})"
@@ -124,10 +126,11 @@ object GameLaunchRepository {
             ppuUi = ppuUi,
             saveSlots = slots,
             latestSave = latest,
-            canPlayFresh = ppuUi.startEnabled,
-            canLoadSave = ppuUi.startEnabled,
+            canPlayFresh = hasFirmware && ppuUi.startEnabled,
+            canLoadSave = hasFirmware && ppuUi.startEnabled,
             blockReason = blocked,
             compactEmptySaves = LaunchPpuPresentation.compactEmptySaves(hasSaves),
+            hasFirmware = hasFirmware,
         )
     }
 }

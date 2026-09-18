@@ -121,6 +121,7 @@ fun GameLaunchCenter(
     canClearCache: Boolean,
     onPrepare: (() -> Unit)? = null,
     onStop: (() -> Unit)? = null,
+    onInstallFirmware: (() -> Unit)? = null,
     showTrophies: Boolean = false,
     trophiesData: TrophiesData? = null,
     trophiesLoading: Boolean = false,
@@ -215,7 +216,9 @@ fun GameLaunchCenter(
         if (showTrophies) return
         when (focusedTarget) {
             LaunchFocusTarget.START -> {
-                if (ppuUi.prepareAction == PrepareAction.Prepare || ppuUi.prepareAction == PrepareAction.Retry) {
+                if (!snapshot.hasFirmware) {
+                    onInstallFirmware?.invoke()
+                } else if (ppuUi.prepareAction == PrepareAction.Prepare || ppuUi.prepareAction == PrepareAction.Retry) {
                     onPrepare?.invoke()
                 } else if (ppuUi.prepareAction == PrepareAction.Stop) {
                     onStop?.invoke()
@@ -986,7 +989,33 @@ fun GameLaunchCenter(
                             verticalAlignment = Alignment.CenterVertically,
                         ) {
                             val isStartFocused = focusedTarget == LaunchFocusTarget.START
-                            when (ppuUi.prepareAction) {
+                            if (!snapshot.hasFirmware) {
+                                Button(
+                                    onClick = { onInstallFirmware?.invoke() },
+                                    enabled = onInstallFirmware != null,
+                                    colors = ButtonDefaults.buttonColors(
+                                        containerColor = if (isStartFocused) RPCSXColors.focusRing else RPCSXColors.primary,
+                                        contentColor = Color.Black,
+                                        disabledContainerColor = RPCSXColors.primary.copy(alpha = 0.35f),
+                                        disabledContentColor = Color.Black.copy(alpha = 0.35f),
+                                    ),
+                                    border = if (isStartFocused) BorderStroke(2.dp, RPCSXColors.focusRing) else null,
+                                    contentPadding = PaddingValues(horizontal = 22.dp, vertical = 8.dp),
+                                    shape = RoundedCornerShape(8.dp),
+                                ) {
+                                    Text(
+                                        "INSTALL FIRMWARE",
+                                        style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.Bold),
+                                    )
+                                    Spacer(Modifier.width(6.dp))
+                                    Icon(
+                                        painter = painterResource(R.drawable.ic_cloud_download),
+                                        contentDescription = null,
+                                        modifier = Modifier.size(18.dp),
+                                    )
+                                }
+                            } else {
+                                when (ppuUi.prepareAction) {
                                 PrepareAction.Prepare -> {
                                     if (onPrepare != null) {
                                         OutlinedButton(
@@ -1114,6 +1143,7 @@ fun GameLaunchCenter(
                                         modifier = Modifier.size(18.dp),
                                     )
                                 }
+                            }
                             }
                         }
                     }

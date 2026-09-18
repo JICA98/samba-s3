@@ -509,7 +509,26 @@ object PpuInstallOrchestrator {
         // 1. Update notification 3000
         ProgressRepository.onProgressEvent(NOTIF_INSTALL, done.toLong(), total.toLong(), notifMsg)
 
-        // 2. Update CompileProgressBridge.installState
+        // 2. Update FGS notification with exact module progress, real progress bar, and time remaining
+        PpuBatchWorkerService.updateProgressNotification(
+            context = context,
+            titleId = titleId,
+            done = done,
+            total = total,
+            percent = merged.percent,
+            message = msg,
+            remainingLabel = remaining,
+        )
+        PpuBatchWorkerConnection.updateKnownProgress(
+            titleId = titleId,
+            done = done,
+            total = total,
+            percent = merged.percent,
+            message = msg,
+            remaining = remaining,
+        )
+
+        // 3. Update CompileProgressBridge.installState
         CompileProgressBridge.updateInstallStateForExternalWorker(
             titleId = titleId,
             jobId = jobId,
@@ -519,14 +538,17 @@ object PpuInstallOrchestrator {
             message = msg,
             active = true,
             remainingLabel = remaining,
+            context = context,
         )
 
-        // 3. Update ImportSessionStore
+        // 4. Update ImportSessionStore
         ImportSessionStore.updatePhase(NOTIF_INSTALL, ImportPhase.COMPILING_PPU, resolvedTitleId = titleId)
     }
 
     private fun markCompleted(context: Context, titleId: String, jobId: Long, total: Int) {
         PpuRemainingTimeTracker.resetInstall()
+        PpuBatchWorkerService.cancelNotification(context)
+        PpuBatchWorkerConnection.clearKnownProgress()
         PpuInstallSessionStore.clear(context)
 
         // Terminal logic decision
@@ -550,7 +572,8 @@ object PpuInstallOrchestrator {
             percent = 100,
             message = "PPU compilation complete",
             active = false,
-            outcome = CompileOutcome.COMPLETED
+            outcome = CompileOutcome.COMPLETED,
+            context = context,
         )
 
         if (decision.markPreRuntimeReady) {
@@ -563,6 +586,8 @@ object PpuInstallOrchestrator {
 
     private fun markFailed(context: Context, titleId: String, jobId: Long, reason: String) {
         PpuRemainingTimeTracker.resetInstall()
+        PpuBatchWorkerService.cancelNotification(context)
+        PpuBatchWorkerConnection.clearKnownProgress()
         CompileProgressBridge.updateInstallStateForExternalWorker(
             titleId = titleId,
             jobId = jobId,
@@ -571,7 +596,8 @@ object PpuInstallOrchestrator {
             percent = 0,
             message = "PPU compilation failed: $reason",
             active = false,
-            outcome = CompileOutcome.FAILED
+            outcome = CompileOutcome.FAILED,
+            context = context,
         )
         PpuReadinessStore.setPreRuntimeState(context, titleId, PreRuntimePpuState.FAILED)
         ImportSessionStore.remove(NOTIF_INSTALL)
@@ -579,6 +605,8 @@ object PpuInstallOrchestrator {
 
     private fun markCanceled(context: Context, titleId: String, jobId: Long) {
         PpuRemainingTimeTracker.resetInstall()
+        PpuBatchWorkerService.cancelNotification(context)
+        PpuBatchWorkerConnection.clearKnownProgress()
         CompileProgressBridge.updateInstallStateForExternalWorker(
             titleId = titleId,
             jobId = jobId,
@@ -587,7 +615,8 @@ object PpuInstallOrchestrator {
             percent = 0,
             message = "Install PPU stopped — retry to resume",
             active = false,
-            outcome = CompileOutcome.CANCELED
+            outcome = CompileOutcome.CANCELED,
+            context = context,
         )
         PpuReadinessStore.setPreRuntimeState(context, titleId, PreRuntimePpuState.FAILED)
         ImportSessionStore.remove(NOTIF_INSTALL)

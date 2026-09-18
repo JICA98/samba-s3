@@ -1498,6 +1498,60 @@ index 8308a4798..b2a4ea1d8 100644
  extern "C" std::string _rpcsx_getFriends()
  {
      nlohmann::json j;
+diff --git a/android/src/samba-build-id.cpp b/android/src/samba-build-id.cpp
+index 8aca7dc59..4a78f837c 100644
+--- a/android/src/samba-build-id.cpp
++++ b/android/src/samba-build-id.cpp
+@@ -1,8 +1,6 @@
+ #include <string>
+-
+ static std::string g_samba_build_id =
+-    "rpcsx=27441815c12cca1a4dcb3daec82b513b1a35eed7 samba=62a70942d8c121a7e58c74b6a4e2700cf369c0ae patch_sha256=6468572dbc6dec3ea7d0ad996adeb57dffd96a090d10482ea04d7013abecd5f0 build_type=Debug";
+-
++    "rpcsx=657b26a0d197c29d42cdcf3b3f6e8ad5c6765bbc samba=f21050415f5721b54eccc504b3db0b6fbde9de06 patch_sha256=85f9de35012b1c85f822d1c60ad987efcfcfb2a6e6334cea38d5bc9ff071d0d0 build_type=RelWithDebInfo";
+ extern "C" const char* _rpcsx_sambaBuildId() {
+     return g_samba_build_id.c_str();
+ }
+diff --git a/ps3fw/cellNetCtl.cpp b/ps3fw/cellNetCtl.cpp
+index 64bb9b535..e56168798 100644
+--- a/ps3fw/cellNetCtl.cpp
++++ b/ps3fw/cellNetCtl.cpp
+@@ -176,6 +176,8 @@ error_code cellNetCtlAddHandler(vm::ptr<cellNetCtlHandler> handler,
+ 		return CELL_NET_CTL_ERROR_INVALID_ADDR;
+ 	}
+ 
++	*hid = 1;
++
+ 	return CELL_OK;
+ }
+ 
+@@ -221,6 +223,26 @@ error_code cellNetCtlGetInfo(s32 code, vm::ptr<CellNetCtlInfo> info)
+ 		return CELL_OK;
+ 	}
+ 
++	if (code == CELL_NET_CTL_INFO_DEVICE)
++	{
++		info->device = CELL_NET_CTL_DEVICE_WIRED;
++		return CELL_OK;
++	}
++
++	if (code == CELL_NET_CTL_INFO_LINK)
++	{
++		info->link = (nph.get_net_status() == CELL_NET_CTL_STATE_Disconnected)
++			? CELL_NET_CTL_LINK_DISCONNECTED
++			: CELL_NET_CTL_LINK_CONNECTED;
++		return CELL_OK;
++	}
++
++	if (code == CELL_NET_CTL_INFO_LINK_TYPE)
++	{
++		info->link_type = CELL_NET_CTL_LINK_TYPE_100BASE_FULL;
++		return CELL_OK;
++	}
++
+ 	if (nph.get_net_status() == CELL_NET_CTL_STATE_Disconnected)
+ 	{
+ 		return CELL_NET_CTL_ERROR_NOT_CONNECTED;
 diff --git a/ps3fw/sceNpTrophy.cpp b/ps3fw/sceNpTrophy.cpp
 index b6f295e4c..dbdaa58a4 100644
 --- a/ps3fw/sceNpTrophy.cpp
@@ -2363,6 +2417,369 @@ index 4e2558896..d8e27b833 100644
  		VK_GET_SYMBOL(vkCmdDispatch)(cmd, invocations_x, invocations_y, invocations_z);
  	}
  
+diff --git a/rpcs3/Emu/RSX/VK/VKDMA.cpp b/rpcs3/Emu/RSX/VK/VKDMA.cpp
+index 403cb4f7d..cc1dadbe1 100644
+--- a/rpcs3/Emu/RSX/VK/VKDMA.cpp
++++ b/rpcs3/Emu/RSX/VK/VKDMA.cpp
+@@ -36,15 +36,32 @@ namespace vk
+ 			return inheritance_info.parent->map_range(range);
+ 		}
+ 
++		if (!allocated_memory)
++		{
++			return nullptr;
++		}
++
+ 		if (memory_mapping == nullptr)
+ 		{
+ 			memory_mapping = static_cast<u8*>(allocated_memory->map(0, VK_WHOLE_SIZE));
+-			ensure(memory_mapping);
++			if (!memory_mapping)
++			{
++				rsx_log.error("dma_block::map_range: failed to map allocated_memory");
++				return nullptr;
++			}
++		}
++
++		if (range.start < base_address)
++		{
++			return nullptr;
++		}
++
++		const u32 start = range.start - base_address;
++		if (start >= allocated_memory->size() || start + range.length() > allocated_memory->size())
++		{
++			return nullptr;
+ 		}
+ 
+-		ensure(range.start >= base_address);
+-		u32 start = range.start;
+-		start -= base_address;
+ 		return memory_mapping + start;
+ 	}
+ 
+@@ -76,10 +93,29 @@ namespace vk
+ 		// Pre-loading the contents helps to avoid leakage when mixed types of allocations are in use (NVIDIA)
+ 		// TODO: Fix memory lost when old object goes out of use with in-flight data.
+ 		auto dst = static_cast<u8*>(allocated_memory->map(0, size));
++		if (!dst)
++		{
++			rsx_log.error("dma_block::allocate: failed to map allocated_memory for address 0x%x (size=0x%zx)", base_address, size);
++			return;
++		}
++
+ 		auto src = vm::get_super_ptr<u8>(base_address);
+ 
+-		if (rsx::get_location(base_address) == CELL_GCM_LOCATION_LOCAL ||
+-			vm::check_addr(base_address, 0, static_cast<u32>(size))) [[likely]]
++		if (rsx::get_location(base_address) == CELL_GCM_LOCATION_LOCAL)
++		{
++			const u32 offset = base_address - rsx::constants::local_mem_base;
++			const u32 local_size = rsx::get_current_renderer() ? rsx::get_current_renderer()->local_mem_size : 0;
++			const u32 avail = (offset < local_size) ? std::min<u32>(static_cast<u32>(size), local_size - offset) : 0;
++			if (avail > 0)
++			{
++				std::memcpy(dst, src, avail);
++			}
++			if (size > avail)
++			{
++				std::memset(dst + avail, 0, size - avail);
++			}
++		}
++		else if (vm::check_addr(base_address, 0, static_cast<u32>(size))) [[likely]]
+ 		{
+ 			// Linear virtual memory space. Copy all at once.
+ 			std::memcpy(dst, src, size);
+@@ -110,14 +146,13 @@ namespace vk
+ 			// Do some accounting before the allocation info is no more
+ 			s_allocated_dma_pool_size -= allocated_memory->size();
+ 
+-			// If you have both a memory allocation AND a parent block at the same time, you're in trouble
+-			ensure(head() == this);
++			inheritance_info.parent = nullptr;
+ 
+ 			if (memory_mapping)
+ 			{
+ 				// vma allocator does not allow us to destroy mapped memory on windows
+ 				unmap();
+-				ensure(!memory_mapping);
++				memory_mapping = nullptr;
+ 			}
+ 
+ 			// Move allocation to gc
+@@ -128,20 +163,20 @@ namespace vk
+ 
+ 	void dma_block::init(const render_device& dev, u32 addr, usz size)
+ 	{
+-		ensure((size > 0) && !((size | addr) & ~s_dma_block_mask));
++		if (size == 0) return;
+ 		base_address = addr;
+ 
+ 		allocate(dev, size);
+-		ensure(!inheritance_info.parent);
++		inheritance_info.parent = nullptr;
+ 	}
+ 
+ 	void dma_block::init(dma_block* parent, u32 addr, usz size)
+ 	{
+-		ensure((size > 0) && !((size | addr) & ~s_dma_block_mask));
++		if (size == 0) return;
+ 
+ 		base_address = addr;
+ 		inheritance_info.parent = parent;
+-		inheritance_info.block_offset = (addr - parent->base_address);
++		inheritance_info.block_offset = (parent && addr >= parent->base_address) ? (addr - parent->base_address) : 0;
+ 	}
+ 
+ 	void dma_block::flush(const utils::address_range& range)
+@@ -154,10 +189,28 @@ namespace vk
+ 		}
+ 
+ 		auto src = map_range(range);
+-		auto dst = vm::get_super_ptr(range.start);
+-		std::memcpy(dst, src, range.length());
++		if (!src)
++		{
++			return;
++		}
+ 
+-		// NOTE: Do not unmap. This can be extremely slow on some platforms.
++		if (rsx::get_location(range.start) == CELL_GCM_LOCATION_LOCAL)
++		{
++			const u32 offset = range.start - rsx::constants::local_mem_base;
++			const u32 local_size = rsx::get_current_renderer() ? rsx::get_current_renderer()->local_mem_size : 0;
++			if (offset >= local_size)
++			{
++				return;
++			}
++			const u32 avail = std::min<u32>(range.length(), local_size - offset);
++			auto dst = vm::get_super_ptr(range.start);
++			std::memcpy(dst, src, avail);
++		}
++		else if (vm::check_addr(range.start, 0, range.length()))
++		{
++			auto dst = vm::get_super_ptr(range.start);
++			std::memcpy(dst, src, range.length());
++		}
+ 	}
+ 
+ 	void dma_block::load(const utils::address_range& range)
+@@ -169,11 +222,36 @@ namespace vk
+ 			return;
+ 		}
+ 
+-		auto src = vm::get_super_ptr(range.start);
+ 		auto dst = map_range(range);
+-		std::memcpy(dst, src, range.length());
++		if (!dst)
++		{
++			return;
++		}
+ 
+-		// NOTE: Do not unmap. This can be extremely slow on some platforms.
++		if (rsx::get_location(range.start) == CELL_GCM_LOCATION_LOCAL)
++		{
++			const u32 offset = range.start - rsx::constants::local_mem_base;
++			const u32 local_size = rsx::get_current_renderer() ? rsx::get_current_renderer()->local_mem_size : 0;
++			const u32 avail = (offset < local_size) ? std::min<u32>(range.length(), local_size - offset) : 0;
++			if (avail > 0)
++			{
++				auto src = vm::get_super_ptr(range.start);
++				std::memcpy(dst, src, avail);
++			}
++			if (range.length() > avail)
++			{
++				std::memset(static_cast<u8*>(dst) + avail, 0, range.length() - avail);
++			}
++		}
++		else if (vm::check_addr(range.start, 0, range.length()))
++		{
++			auto src = vm::get_super_ptr(range.start);
++			std::memcpy(dst, src, range.length());
++		}
++		else
++		{
++			std::memset(dst, 0, range.length());
++		}
+ 	}
+ 
+ 	dma_mapping_handle dma_block::get(const utils::address_range& range)
+@@ -183,8 +261,10 @@ namespace vk
+ 			return inheritance_info.parent->get(range);
+ 		}
+ 
+-		ensure(range.start >= base_address);
+-		ensure(range.end <= end());
++		if (range.start < base_address || range.end > end() || !allocated_memory)
++		{
++			return {0, nullptr};
++		}
+ 
+ 		// mark_dirty(range);
+ 		return {(range.start - base_address), allocated_memory.get()};
+@@ -208,8 +288,10 @@ namespace vk
+ 
+ 	void dma_block::set_parent(dma_block* parent)
+ 	{
+-		ensure(parent);
+-		ensure(parent->base_address < base_address);
++		if (!parent || parent == this || parent->base_address >= base_address)
++		{
++			return;
++		}
+ 		if (inheritance_info.parent == parent)
+ 		{
+ 			// Nothing to do
+@@ -229,8 +311,7 @@ namespace vk
+ 
+ 	void dma_block::extend(const render_device& dev, usz new_size)
+ 	{
+-		ensure(allocated_memory);
+-		if (new_size <= allocated_memory->size())
++		if (!allocated_memory || new_size <= allocated_memory->size())
+ 			return;
+ 
+ 		allocate(dev, new_size);
+@@ -244,6 +325,10 @@ namespace vk
+ 	u32 dma_block::end() const
+ 	{
+ 		auto source = head();
++		if (!source || !source->allocated_memory)
++		{
++			return base_address;
++		}
+ 		return (source->base_address + source->allocated_memory->size() - 1);
+ 	}
+ 
+@@ -335,6 +420,11 @@ namespace vk
+ 
+ 	dma_mapping_handle map_dma(u32 local_address, u32 length)
+ 	{
++		if (length == 0)
++		{
++			return {0, nullptr};
++		}
++
+ 		// Not much contention expected here, avoid searching twice
+ 		std::lock_guard lock(g_dma_mutex);
+ 
+@@ -343,7 +433,7 @@ namespace vk
+ 
+ 		if (auto found = g_dma_pool.find(first_block); found != g_dma_pool.end())
+ 		{
+-			if (found->second->end() >= map_range.end)
++			if (found->second && found->second->end() >= map_range.end)
+ 			{
+ 				return found->second->get(map_range);
+ 			}
+@@ -353,10 +443,12 @@ namespace vk
+ 		if (first_block == last_block) [[likely]]
+ 		{
+ 			auto& block_info = g_dma_pool[first_block];
+-			ensure(!block_info);
++			if (!block_info || block_info->end() < map_range.end)
++			{
++				create_dma_block(block_info, first_block, s_dma_block_length);
++			}
+ 
+-			create_dma_block(block_info, first_block, s_dma_block_length);
+-			return block_info->get(map_range);
++			return block_info ? block_info->get(map_range) : dma_mapping_handle{0, nullptr};
+ 		}
+ 
+ 		// Scan range for overlapping sections and update 'chains' accordingly
+@@ -380,20 +472,19 @@ namespace vk
+ 			{
+ 				if (entry)
+ 				{
+-					// Then the references to this object do not go to the end of the list as will be done with this new allocation.
+-					// A dumb release is therefore safe...
+-					ensure(entry->end() < map_range.end);
+ 					stale_references.push_back(std::move(entry));
+ 				}
+ 
+ 				auto required_size = (last_block - first_block + s_dma_block_length);
+ 				create_dma_block(entry, block, required_size);
+-				block_head = entry->head();
++				block_head = entry ? entry->head() : nullptr;
+ 			}
+ 			else if (entry)
+ 			{
+-				ensure((entry->end() & s_dma_block_mask) <= last_block);
+-				entry->set_parent(block_head);
++				if (block_head)
++				{
++					entry->set_parent(block_head);
++				}
+ 			}
+ 			else
+ 			{
+@@ -402,11 +493,13 @@ namespace vk
+ 			}
+ 		}
+ 
+-		// Check that all the math adds up...
+ 		stale_references.clear();
+-		ensure(s_allocated_dma_pool_size == g_dma_pool.size() * s_dma_block_length);
+ 
+-		ensure(block_head);
++		if (!block_head)
++		{
++			return {0, nullptr};
++		}
++
+ 		return block_head->get(map_range);
+ 	}
+ 
+@@ -440,13 +533,16 @@ namespace vk
+ 
+ 			block += s_dma_block_length;
+ 		}
+-
+-		ensure(s_allocated_dma_pool_size == g_dma_pool.size() * s_dma_block_length);
+ 	}
+ 
+ 	template <bool load>
+ 	void sync_dma_impl(u32 local_address, u32 length)
+ 	{
++		if (length == 0)
++		{
++			return;
++		}
++
+ 		reader_lock lock(g_dma_mutex);
+ 
+ 		const auto limit = local_address + length - 1;
+@@ -455,7 +551,12 @@ namespace vk
+ 			u32 block = (local_address & s_dma_block_mask);
+ 			if (auto found = g_dma_pool.find(block); found != g_dma_pool.end())
+ 			{
+-				const auto sync_end = std::min(limit, found->second->end());
++				const auto block_end = found->second ? found->second->end() : 0;
++				if (local_address > block_end)
++				{
++					break;
++				}
++				const auto sync_end = std::min(limit, block_end);
+ 				const auto range = utils::address_range::start_end(local_address, sync_end);
+ 
+ 				if constexpr (load)
+@@ -469,11 +570,12 @@ namespace vk
+ 
+ 				if (sync_end < limit) [[unlikely]]
+ 				{
+-					// Technically legal but assuming a map->flush usage, this shouldnot happen
+-					// Optimizations could in theory batch together multiple transfers though
+-					rsx_log.error("Sink request spans multiple allocated blocks!");
+ 					const auto write_end = (sync_end + 1u);
+ 					const auto written = (write_end - local_address);
++					if (written >= length)
++					{
++						break;
++					}
+ 					length -= written;
+ 					local_address = write_end;
+ 					continue;
 diff --git a/rpcs3/Emu/RSX/VK/VKDraw.cpp b/rpcs3/Emu/RSX/VK/VKDraw.cpp
 index fd2370c95..bb1f28361 100644
 --- a/rpcs3/Emu/RSX/VK/VKDraw.cpp
@@ -2652,10 +3069,84 @@ index 7b21574f4..14f6006e5 100644
  			case driver_vendor::INTEL:
  			case driver_vendor::MVK:
 diff --git a/rpcs3/Emu/RSX/VK/VKTextureCache.cpp b/rpcs3/Emu/RSX/VK/VKTextureCache.cpp
-index 72b6bcf40..f58605836 100644
+index 72b6bcf40..2904fa88a 100644
 --- a/rpcs3/Emu/RSX/VK/VKTextureCache.cpp
 +++ b/rpcs3/Emu/RSX/VK/VKTextureCache.cpp
-@@ -1246,10 +1246,23 @@ namespace vk
+@@ -207,7 +207,12 @@ namespace vk
+ 					// Visualizing "hot" pixels when doing a partial copy is very revealing, there's lots of data from the padding areas to be filled in.
+ 
+ 					dma_sync(true);
+-					ensure(dma_mapping.second);
++					if (!dma_mapping.second)
++					{
++						rsx_log.error("dma_transfer: failed to map DMA for address 0x%X (len=0x%X)", dma_sync_region.start, dma_sync_region.length());
++						src->pop_layout(cmd);
++						return;
++					}
+ 
+ 					// Upload memory to the working buffer
+ 					const auto dst_offset = task_length; // Append to the end of the input
+@@ -291,6 +296,13 @@ namespace vk
+ 			{
+ 				dma_sync(false);
+ 
++				if (!dma_mapping.second)
++				{
++					rsx_log.error("dma_transfer: failed to map DMA for address 0x%X (len=0x%X)", dma_sync_region.start, dma_sync_region.length());
++					src->pop_layout(cmd);
++					return;
++				}
++
+ 				VkBufferCopy copy = {};
+ 				copy.srcOffset = result_offset;
+ 				copy.dstOffset = dma_mapping.first;
+@@ -301,6 +313,13 @@ namespace vk
+ 			{
+ 				dma_sync(true);
+ 
++				if (!dma_mapping.second)
++				{
++					rsx_log.error("dma_transfer: failed to map DMA for address 0x%X (len=0x%X)", dma_sync_region.start, dma_sync_region.length());
++					src->pop_layout(cmd);
++					return;
++				}
++
+ 				std::vector<VkBufferCopy> copy;
+ 				copy.reserve(transfer_height);
+ 
+@@ -321,8 +340,18 @@ namespace vk
+ 		{
+ 			dma_sync(false);
+ 
++			if (!dma_mapping.second)
++			{
++				rsx_log.error("dma_transfer: failed to map DMA for address 0x%X (len=0x%X)", dma_sync_region.start, dma_sync_region.length());
++				src->pop_layout(cmd);
++				return;
++			}
++
+ 			VkBufferImageCopy region = {};
+-			region.bufferRowLength = (rsx_pitch / internal_bpp);
++			if (internal_bpp > 0)
++			{
++				region.bufferRowLength = (rsx_pitch / internal_bpp);
++			}
+ 			region.imageSubresource = {src->aspect(), 0, 0, 1};
+ 			region.imageOffset = {src_area.x1, src_area.y1, 0};
+ 			region.imageExtent = {transfer_width, transfer_height, 1};
+@@ -333,6 +362,11 @@ namespace vk
+ 
+ 		src->pop_layout(cmd);
+ 
++		if (!dma_mapping.second)
++		{
++			return;
++		}
++
+ 		VkBufferMemoryBarrier2KHR mem_barrier =
+ 			{
+ 				.sType = VK_STRUCTURE_TYPE_BUFFER_MEMORY_BARRIER_2_KHR,
+@@ -1246,10 +1280,23 @@ namespace vk
  			return false;
  #ifndef __APPLE__
  		case CELL_GCM_TEXTURE_R5G6B5:
@@ -2681,21 +3172,177 @@ index 72b6bcf40..f58605836 100644
  #endif
  		case CELL_GCM_TEXTURE_W16_Z16_Y16_X16_FLOAT:
 diff --git a/rpcs3/Emu/RSX/VK/VKTextureCache.h b/rpcs3/Emu/RSX/VK/VKTextureCache.h
-index b4b05be4a..c6579afbd 100644
+index b4b05be4a..fa0e8744c 100644
 --- a/rpcs3/Emu/RSX/VK/VKTextureCache.h
 +++ b/rpcs3/Emu/RSX/VK/VKTextureCache.h
-@@ -336,6 +336,11 @@ namespace vk
- 					rsx::convert_linear_swizzle<u32, false>(tmp_data.data(), data, width, height, rsx_pitch);
- 					break;
- 				case CELL_GCM_TEXTURE_R5G6B5:
-+				case CELL_GCM_TEXTURE_R6G5B5:
-+				case CELL_GCM_TEXTURE_A1R5G5B5:
-+				case CELL_GCM_TEXTURE_D1R5G5B5:
-+				case CELL_GCM_TEXTURE_R5G5B5A1:
-+				case CELL_GCM_TEXTURE_A4R4G4B4:
- 				case CELL_GCM_TEXTURE_DEPTH16:
- 					rsx::convert_linear_swizzle<u16, false>(tmp_data.data(), data, width, height, rsx_pitch);
- 					break;
+@@ -217,12 +217,23 @@ namespace vk
+ 			if (context == rsx::texture_upload_context::framebuffer_storage)
+ 			{
+ 				auto surface = vk::as_rtt(vram_texture);
++				if (!surface)
++				{
++					rsx_log.error("copy_texture: failed to resolve surface for section 0x%X", get_section_base());
++					return;
++				}
+ 				surface->memory_barrier(cmd, rsx::surface_access::transfer_read);
+ 				locked_resource = surface->get_surface(rsx::surface_access::transfer_read);
+ 				transfer_width *= surface->samples_x;
+ 				transfer_height *= surface->samples_y;
+ 			}
+ 
++			if (!locked_resource)
++			{
++				rsx_log.error("copy_texture: locked_resource is null for section 0x%X", get_section_base());
++				return;
++			}
++
+ 			vk::image* target = locked_resource;
+ 			if (transfer_width != locked_resource->width() || transfer_height != locked_resource->height())
+ 			{
+@@ -246,26 +257,33 @@ namespace vk
+ 
+ 			if (const auto section_range = get_section_range(); section_range != valid_range)
+ 			{
+-				if (const auto offset = (valid_range.start - get_section_base()))
++				if (valid_range.start > get_section_base())
+ 				{
+-					transfer_y = offset / rsx_pitch;
+-					transfer_x = (offset % rsx_pitch) / internal_bpp;
+-
+-					ensure(transfer_width >= transfer_x);
+-					ensure(transfer_height >= transfer_y);
+-					transfer_width -= transfer_x;
+-					transfer_height -= transfer_y;
++					const auto offset = valid_range.start - get_section_base();
++					if (rsx_pitch > 0 && internal_bpp > 0)
++					{
++						transfer_y = offset / rsx_pitch;
++						transfer_x = (offset % rsx_pitch) / internal_bpp;
++
++						transfer_width = (transfer_width >= transfer_x) ? (transfer_width - transfer_x) : 0;
++						transfer_height = (transfer_height >= transfer_y) ? (transfer_height - transfer_y) : 0;
++					}
+ 				}
+ 
+-				if (const auto tail = (section_range.end - valid_range.end))
++				if (section_range.end > valid_range.end && rsx_pitch > 0)
+ 				{
++					const auto tail = (section_range.end - valid_range.end);
+ 					const auto row_count = tail / rsx_pitch;
+ 
+-					ensure(transfer_height >= row_count);
+-					transfer_height -= row_count;
++					transfer_height = (transfer_height >= row_count) ? (transfer_height - row_count) : 0;
+ 				}
+ 			}
+ 
++			if (transfer_width == 0 || transfer_height == 0)
++			{
++				return;
++			}
++
+ 			areai src_area;
+ 			src_area.x1 = static_cast<s32>(transfer_x);
+ 			src_area.y1 = static_cast<s32>(transfer_y);
+@@ -282,21 +300,30 @@ namespace vk
+ 			AUDIT(synchronized);
+ 
+ 			// Synchronize, reset dma_fence after waiting
+-			vk::wait_for_event(dma_fence.get(), GENERAL_WAIT_TIMEOUT);
++			if (dma_fence)
++			{
++				vk::wait_for_event(dma_fence.get(), GENERAL_WAIT_TIMEOUT);
++			}
+ 
+ 			// Calculate smallest range to flush - for framebuffers, the raster region is enough
+ 			const auto range = (context == rsx::texture_upload_context::framebuffer_storage) ? get_section_range() : get_confirmed_range();
+ 			auto flush_length = range.length();
+ 
+ 			const auto tiled_region = rsx::get_current_renderer()->get_tiled_memory_region(range);
+-			if (tiled_region)
++			if (tiled_region && tiled_region.tile)
+ 			{
+-				const auto available_tile_size = tiled_region.tile->size - (range.start - tiled_region.base_address);
+-				const auto max_content_size = tiled_region.tile->pitch * rx::alignUp(height, 64);
+-				flush_length = std::min(max_content_size, available_tile_size);
++				if (range.start >= tiled_region.base_address && range.start < tiled_region.base_address + tiled_region.tile->size)
++				{
++					const auto available_tile_size = tiled_region.tile->size - (range.start - tiled_region.base_address);
++					const auto max_content_size = tiled_region.tile->pitch * rx::alignUp(height, 64);
++					flush_length = std::min(max_content_size, available_tile_size);
++				}
+ 			}
+ 
+-			vk::flush_dma(range.start, flush_length);
++			if (flush_length > 0)
++			{
++				vk::flush_dma(range.start, flush_length);
++			}
+ 
+ #if DEBUG_DMA_TILING
+ 			// Are we a tiled region?
+@@ -325,22 +352,46 @@ namespace vk
+ 				rsx_log.trace("[Performance warning] CPU readback of swizzled data");
+ 
+ 				// Read-modify-write to avoid corrupting already resident memory outside texture region
+-				void* data = get_ptr(range.start);
+-				std::vector<u8> tmp_data(rsx_pitch * height);
+-				std::memcpy(tmp_data.data(), data, tmp_data.size());
+-
+-				switch (gcm_format)
++				if (rsx_pitch > 0 && height > 0)
+ 				{
+-				case CELL_GCM_TEXTURE_A8R8G8B8:
+-				case CELL_GCM_TEXTURE_DEPTH24_D8:
+-					rsx::convert_linear_swizzle<u32, false>(tmp_data.data(), data, width, height, rsx_pitch);
+-					break;
+-				case CELL_GCM_TEXTURE_R5G6B5:
+-				case CELL_GCM_TEXTURE_DEPTH16:
+-					rsx::convert_linear_swizzle<u16, false>(tmp_data.data(), data, width, height, rsx_pitch);
+-					break;
+-				default:
+-					rsx_log.error("Unexpected swizzled texture format 0x%x", gcm_format);
++					const u32 swiz_size = rsx_pitch * height;
++					bool addr_ok = false;
++					if (rsx::get_location(range.start) == CELL_GCM_LOCATION_LOCAL)
++					{
++						const u32 offset = range.start - rsx::constants::local_mem_base;
++						const u32 local_size = rsx::get_current_renderer() ? rsx::get_current_renderer()->local_mem_size : 0;
++						addr_ok = (offset < local_size) && (swiz_size <= local_size - offset);
++					}
++					else
++					{
++						addr_ok = vm::check_addr(range.start, 0, swiz_size);
++					}
++
++					if (addr_ok)
++					{
++						void* data = get_ptr(range.start);
++						std::vector<u8> tmp_data(swiz_size);
++						std::memcpy(tmp_data.data(), data, tmp_data.size());
++
++						switch (gcm_format)
++						{
++						case CELL_GCM_TEXTURE_A8R8G8B8:
++						case CELL_GCM_TEXTURE_DEPTH24_D8:
++							rsx::convert_linear_swizzle<u32, false>(tmp_data.data(), data, width, height, rsx_pitch);
++							break;
++						case CELL_GCM_TEXTURE_R5G6B5:
++						case CELL_GCM_TEXTURE_R6G5B5:
++						case CELL_GCM_TEXTURE_A1R5G5B5:
++						case CELL_GCM_TEXTURE_D1R5G5B5:
++						case CELL_GCM_TEXTURE_R5G5B5A1:
++						case CELL_GCM_TEXTURE_A4R4G4B4:
++						case CELL_GCM_TEXTURE_DEPTH16:
++							rsx::convert_linear_swizzle<u16, false>(tmp_data.data(), data, width, height, rsx_pitch);
++							break;
++						default:
++							rsx_log.error("Unexpected swizzled texture format 0x%x", gcm_format);
++						}
++					}
+ 				}
+ 			}
+ 		}
 diff --git a/rpcs3/Emu/RSX/VK/vkutils/graphics_pipeline_state.hpp b/rpcs3/Emu/RSX/VK/vkutils/graphics_pipeline_state.hpp
 index 2973385e9..aad217347 100644
 --- a/rpcs3/Emu/RSX/VK/vkutils/graphics_pipeline_state.hpp
@@ -2756,7 +3403,7 @@ index 2973385e9..aad217347 100644
  
  			return *this;
 diff --git a/rpcs3/Emu/RSX/VK/vkutils/sync.cpp b/rpcs3/Emu/RSX/VK/vkutils/sync.cpp
-index 6df7e3334..d09c14986 100644
+index 6df7e3334..a78814c34 100644
 --- a/rpcs3/Emu/RSX/VK/vkutils/sync.cpp
 +++ b/rpcs3/Emu/RSX/VK/vkutils/sync.cpp
 @@ -201,14 +201,39 @@ namespace vk
@@ -2829,6 +3476,18 @@ index 6df7e3334..d09c14986 100644
  	}
  
  	gpu_debug_marker::gpu_debug_marker(gpu_debug_marker_pool& pool, std::string message)
+@@ -567,6 +611,11 @@ namespace vk
+ 
+ 	VkResult wait_for_event(event* pEvent, u64 timeout)
+ 	{
++		if (!pEvent)
++		{
++			return VK_SUCCESS;
++		}
++
+ 		// Convert timeout to TSC cycles. Timeout accuracy isn't super-important, only fast response when event is signaled (within 10us if possible)
+ 		const u64 freq = utils::get_tsc_freq();
+ 
 diff --git a/rpcs3/Emu/RSX/rsx_cache.h b/rpcs3/Emu/RSX/rsx_cache.h
 index 27f300ce6..f67b1be11 100644
 --- a/rpcs3/Emu/RSX/rsx_cache.h

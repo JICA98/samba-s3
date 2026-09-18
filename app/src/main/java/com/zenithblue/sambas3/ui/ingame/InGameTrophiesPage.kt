@@ -23,7 +23,27 @@ fun InGameTrophiesPage(core: InGameMenuCoreGateway, onBack: () -> Unit) {
     LaunchedEffect(Unit) { TrophyEvents.refreshes.collect { refreshTick++ } }
     LaunchedEffect(refreshTick) {
         loading = true
-        snapshot = core.trophies().getOrNull() ?: AchievementRepository.current(force = true)
+        // TROPHY REGRESSION BARRIER — DO NOT SIMPLIFY (2026-09-17). The
+        // gateway already falls back from live `current()` to explicit
+        // titleId, but the page keeps its own fallback as well: if the
+        // gateway result is unavailable (old core, empty live context),
+        // retry live then explicit titleId directly. This mirrors the
+        // launcher (GamesScreen stopped-title + ISO fallback) so in-game
+        // can never show 0/0 while the launcher shows 0/52 for the same
+        // installed set. See RpcsxInGameMenuCoreGateway.trophies().
+        val gatewayResult = core.trophies().getOrNull()
+        snapshot = if (gatewayResult != null && gatewayResult.available) {
+            gatewayResult
+        } else {
+            val live = AchievementRepository.current(force = true)
+            if (live != null && live.available) live else {
+                val titleId = runCatching { com.zenithblue.sambas3.RPCSX.instance.getTitleId() }
+                    .getOrNull()?.trim().orEmpty()
+                if (titleId.isNotEmpty()) {
+                    AchievementRepository.title(titleId, force = true)?.takeIf { it.available } ?: live
+                } else live
+            }
+        }
         loading = false
     }
     Box(

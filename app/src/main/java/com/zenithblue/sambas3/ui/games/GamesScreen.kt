@@ -1812,22 +1812,30 @@ fun GamesScreen(
                                 is com.zenithblue.sambas3.ppu.GameLaunchAvailability.EngineBusy -> {
                                     HintButton(text = "PREPARING", icon = "X", color = RPCSXColors.textDisabled, onClick = { })
                                 }
-                                is com.zenithblue.sambas3.ppu.GameLaunchAvailability.Ready -> {
-                                    HintButton(text = "PLAY", icon = "X", color = RPCSXColors.primary, onClick = { launchCenterGame = hintGame })
-                                }
-                                else -> {
-                                    val isPlayable = hintAvailability == null || hintAvailability is com.zenithblue.sambas3.ppu.GameLaunchAvailability.Ready
-                                    HintButton(
-                                        text = "PLAY",
-                                        icon = "X",
-                                        color = if (isPlayable || hintGame == null) RPCSXColors.primary else RPCSXColors.textDisabled,
-                                        onClick = {
-                                            if (hintGame != null && hintAvailability is com.zenithblue.sambas3.ppu.GameLaunchAvailability.Ready) {
-                                                launchCenterGame = hintGame
-                                            }
-                                        }
-                                    )
-                                }
+                                 is com.zenithblue.sambas3.ppu.GameLaunchAvailability.Ready -> {
+                                     if (!hasFw) {
+                                         HintButton(text = "INSTALL FIRMWARE", icon = "X", color = RPCSXColors.primary, onClick = { installFwLauncher?.launch("*/*") })
+                                     } else {
+                                         HintButton(text = "PLAY", icon = "X", color = RPCSXColors.primary, onClick = { launchCenterGame = hintGame })
+                                     }
+                                 }
+                                 else -> {
+                                     if (!hasFw) {
+                                         HintButton(text = "INSTALL FIRMWARE", icon = "X", color = RPCSXColors.primary, onClick = { installFwLauncher?.launch("*/*") })
+                                     } else {
+                                         val isPlayable = hintAvailability == null || hintAvailability is com.zenithblue.sambas3.ppu.GameLaunchAvailability.Ready
+                                         HintButton(
+                                             text = "PLAY",
+                                             icon = "X",
+                                             color = if (isPlayable || hintGame == null) RPCSXColors.primary else RPCSXColors.textDisabled,
+                                             onClick = {
+                                                 if (hintGame != null && hintAvailability is com.zenithblue.sambas3.ppu.GameLaunchAvailability.Ready) {
+                                                     launchCenterGame = hintGame
+                                                 }
+                                             }
+                                         )
+                                     }
+                                 }
                             }
                         }
                     }
@@ -1938,10 +1946,15 @@ fun GamesScreen(
                 } ?: false,
                 activeCompileTitleId = com.zenithblue.sambas3.ppu.ImportPpuPreparationCoordinator.activeTitleId,
                 stoppingCompile = com.zenithblue.sambas3.ppu.ImportPpuPreparationCoordinator.stopping,
+                hasFirmware = hasFw,
             )
             GameLaunchCenter(
                 snapshot = GameLaunchRepository.snapshot(context, game, launchInputs),
                 onDismiss = { launchCenterGame = null },
+                onInstallFirmware = {
+                    launchCenterGame = null
+                    installFwLauncher?.launch("*/*")
+                },
                 onFreshPlay = {
                     val action = com.zenithblue.sambas3.ppu.ImportPpuPreparationCoordinator
                         .requestPreparation(context, game)

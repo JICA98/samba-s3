@@ -111,7 +111,10 @@ fun AchievementsContent(snapshot: TrophySnapshot?, loading: Boolean, onClose: ()
         ) {
             Column(Modifier.weight(1f)) {
                 Text(
-                    text = snapshot?.gameName?.ifBlank { "ACHIEVEMENTS" }?.uppercase() ?: "ACHIEVEMENTS",
+                    // TROPHY REGRESSION BARRIER: user-facing name is TROPHIES (not
+                    // Achievements). Keep this fallback in sync with the Trophies
+                    // menu entry (R.string.ingame_trophies / ingame_achievements).
+                    text = snapshot?.gameName?.ifBlank { "TROPHIES" }?.uppercase() ?: "TROPHIES",
                     color = RPCSXColors.primary,
                     style = MaterialTheme.typography.titleLarge,
                     fontWeight = FontWeight.Bold,

@@ -15,7 +15,7 @@ This directory tracks **per-title** compatibility, configs and loop results by t
 | `BCUS98123-Uncharted-2.md` | Uncharted 2 — Turnip + exact-title Stub PPU Traps=1 reaches opening gameplay, but the first scene has white/overbright targets. WCB/RDB, two-worker LLVM, dynamic interpretation, and SPU loop detection are ruled out. Both dynamic and LLVM loop-detection exits fault all six SPU threads during watchdog shutdown; source now bypasses unsafe native teardown after a typed frame timeout, pending two-device release validation. |
 | `BCUS98174-The-Last-of-Us.md` | The Last of Us — gameplay reached on OnePlus 13R; narrative about 30 FPS, active traversal 3.5–4.2 FPS. Sustained 30 FPS traversal remains open; a subsequent frozen session requires save/load revalidation. |
 | `BCUS98174/qualcomm-adreno/adreno-750/README.md` | The Last of Us device record — phase-specific performance and failure evidence. |
-| `BLJM61019/qualcomm-adreno/adreno-750/README.md` | GTA V — Pass 2/4 on Adreno 750 / Turnip 26.3. Best Fast Mode 27.7 FPS at Loading Story Mode; SIGSEGV `0xCD5B2000` before 3D gameplay. **30 FPS TARGET: FAIL**. |
+| `BLJM61019/qualcomm-adreno/adreno-750/README.md` | GTA V — Pass 3/4 on Adreno 750 / Turnip 26.3. 0xCD5B2000 SIGSEGV eliminated via native VKDMA/VKTextureCache guards. Best Fast Mode 28.9 FPS Loading Story Mode. **30 FPS TARGET: FAIL** (gameplay unmeasured). |
 | `GPU-COMPATIBILITY.md` | Global SambaS3 GPU-family forecast and verification matrix for Adreno, Mali/Immortalis, Xclipse/AMD and PowerVR. |
 | `<TITLEID>/<vendor-architecture>/<gpu-name>/README.md` | Preferred hierarchy for new device-specific game reports. |
 | `<TITLEID>-<slug>.md` | Legacy flat reports. |

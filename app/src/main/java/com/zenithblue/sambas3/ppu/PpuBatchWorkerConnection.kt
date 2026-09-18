@@ -23,6 +23,38 @@ class PpuBatchWorkerConnection(
 ) : ServiceConnection {
     companion object {
         private const val TAG = "PpuWorkerConn"
+
+        @Volatile var lastTitleId: String? = null
+        @Volatile var lastDone: Int = 0
+        @Volatile var lastTotal: Int = 0
+        @Volatile var lastPercent: Int = 0
+        @Volatile var lastMsg: String? = null
+        @Volatile var lastRemaining: String? = null
+
+        fun updateKnownProgress(
+            titleId: String?,
+            done: Int,
+            total: Int,
+            percent: Int,
+            message: String?,
+            remaining: String?,
+        ) {
+            lastTitleId = titleId
+            lastDone = done
+            lastTotal = total
+            lastPercent = percent
+            lastMsg = message
+            lastRemaining = remaining
+        }
+
+        fun clearKnownProgress() {
+            lastTitleId = null
+            lastDone = 0
+            lastTotal = 0
+            lastPercent = 0
+            lastMsg = null
+            lastRemaining = null
+        }
     }
 
     private val context = context.applicationContext
@@ -53,7 +85,14 @@ class PpuBatchWorkerConnection(
     }
 
     fun bind(): Boolean {
-        val intent = Intent(context, PpuBatchWorkerService::class.java)
+        val intent = Intent(context, PpuBatchWorkerService::class.java).apply {
+            lastTitleId?.let { putExtra("titleId", it) }
+            putExtra("done", lastDone)
+            putExtra("total", lastTotal)
+            putExtra("percent", lastPercent)
+            lastMsg?.let { putExtra("message", it) }
+            lastRemaining?.let { putExtra("remainingLabel", it) }
+        }
         val started = try {
             ContextCompat.startForegroundService(context, intent)
             true
@@ -75,7 +114,7 @@ class PpuBatchWorkerConnection(
             false
         }
         if (!bound) {
-            runCatching { context.stopService(intent) }
+            runCatching { context.stopService(Intent(context, PpuBatchWorkerService::class.java)) }
         }
         PpuDiagnosticLog.emit(
             "worker_bind",

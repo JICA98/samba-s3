@@ -65,8 +65,11 @@ object CompileProgressBridge {
         active: Boolean,
         outcome: CompileOutcome = CompileOutcome.NONE,
         remainingLabel: String? = null,
+        context: Context? = null,
     ) {
         val cur = _installState.value
+        val wasActive = cur.ppuActive
+        if (active) installPpuJobId = jobId else if (installPpuJobId == jobId) installPpuJobId = null
         val floor = monotonicFloor(cur, titleId, moduleDone, moduleTotal, percent, message, active)
         _installState.value = cur.copy(
             ppuActive = active,
@@ -80,6 +83,25 @@ object CompileProgressBridge {
             outcome = outcome,
             jobId = jobId
         )
+        if (active && !wasActive && context != null) {
+            requestMonitorStart(
+                context.applicationContext,
+                NativeEvent(
+                    domain = RPCSX.COMPILE_DOMAIN_PPU,
+                    phase = RPCSX.COMPILE_PHASE_BEGIN,
+                    origin = RPCSX.COMPILE_ORIGIN_INSTALL,
+                    jobId = jobId,
+                    value = percent.toLong(),
+                    max = 100,
+                    message = message,
+                    titleId = titleId,
+                    fileDone = 0,
+                    fileTotal = 0,
+                    moduleDone = moduleDone,
+                    moduleTotal = moduleTotal,
+                )
+            )
+        }
     }
 
     // Prelaunch-origin PPU state — headless preparation on Home, no RPCSXActivity
@@ -170,18 +192,31 @@ object CompileProgressBridge {
         if (!decision.shouldClearUiActive) return false
         Log.w(TAG, decision.logMessage ?: "PPU watchdog finalizing job=$jobId")
         Log.w(TAG, "PPU watchdog missing_terminal=1 establishes_validated_ready=0 job=$jobId")
-        // Clear active so NoFrameWatchdog can observe stalled frames and recover.
-        // Preserve metrics/job for forensics; outcome stays NONE so readiness is
-        // never falsely validated. Late native terminals for this job are ignored.
-        ppuJobId = null
-        cancelPpuDoneWatchdog()
-        if (shaderJobIds.isEmpty()) latestRuntimeEvent = null
+        // =========================================================================================
+        // CRITICAL REGRESSION BARRIER — CHECKPOINT 97a1909 / COMMIT 3415585 CONTRACT:
+        // DO NOT CLEAR ppuActive TO FALSE HERE!
+        //
+        // HISTORICAL REGRESSION CONTEXT:
+        // This watchdog fires when PPU compilation reaches 100% (moduleDone == moduleTotal) but the
+        // native COMPLETED terminal event has not yet been processed by the main thread.
+        // If ppuActive is prematurely set to false here (or ppuJobId cleared to null), the upcoming
+        // native COMPLETED event is dropped as an "unknown job" (ppuJobId != ev.jobId). As a result:
+        //   1. outcome remains NONE instead of COMPLETED.
+        //   2. PpuReadinessStore never transitions from COMPILING to IDLE_AFTER_COMPILE or READY.
+        //   3. The launcher / home card sees that preparation is incomplete (NeedsPreparation/Failed)
+        //      and either re-requests compilation or triggers duplicate PPU compilation in the
+        //      game loading page upon boot.
+        //
+        // Checkpoint 97a1909 and commit 3415585 established the invariant:
+        // The watchdog marks 'Verifying cache… waiting for compiler process' at 99% but KEEPS
+        // ppuActive = true and preserves ppuJobId so the authentic native COMPLETED event can
+        // cleanly establish the final terminal outcome and allow readiness persistence.
+        // DO NOT MODIFY OR REVERT THIS TO ppuActive = false.
+        // =========================================================================================
         _state.value = cur.copy(
-            ppuActive = false,
-            ppuMsg = null,
+            ppuMsg = "Verifying cache… waiting for compiler process",
             remainingLabel = null,
-            outcome = CompileOutcome.NONE,
-            jobId = jobId,
+            ppuPercent = 99,
         )
         return true
     }
@@ -623,6 +658,16 @@ object CompileProgressBridge {
             cur.ppuMsg ?: message?.takeIf { it.isNotBlank() }
         }
         return FlooredProgress(done, total, pct, msg)
+    }
+
+    fun resetRuntimeForBoot() {
+        synchronized(this) {
+            cancelPpuDoneWatchdog()
+            ppuJobId = null
+            shaderJobIds.clear()
+            latestRuntimeEvent = null
+            _state.value = CompileState()
+        }
     }
 
     fun clearForTest() {

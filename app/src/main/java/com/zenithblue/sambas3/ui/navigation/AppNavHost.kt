@@ -111,6 +111,9 @@ fun AppNavHost(initialRoute: String? = null) {
     val navController = rememberNavController()
     val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
     val scope = rememberCoroutineScope()
+    var needsPrivacyPolicy by remember {
+        mutableStateOf(!OnboardingPrefs.isPrivacyPolicyAccepted())
+    }
     var needsFirstRunOnboarding by remember {
         mutableStateOf(!OnboardingPrefs.isCompleted())
     }
@@ -137,6 +140,20 @@ fun AppNavHost(initialRoute: String? = null) {
     }
 
     AlertDialogQueue.AlertDialog()
+
+    if (needsPrivacyPolicy) {
+        LaunchedEffect(Unit) {
+            com.zenithblue.sambas3.ui.splash.SplashGate.homeReady()
+        }
+        PrivacyPolicyScreen(
+            navigateBack = null,
+            onAccept = {
+                OnboardingPrefs.markPrivacyPolicyAccepted()
+                needsPrivacyPolicy = false
+            }
+        )
+        return
+    }
 
     if (needsFirstRunOnboarding) {
         LaunchedEffect(Unit) {

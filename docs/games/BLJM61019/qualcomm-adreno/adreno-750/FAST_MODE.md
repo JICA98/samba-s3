@@ -47,4 +47,4 @@ Normal Mode remains the compatibility path. Fast Mode is not a global default.
 - **Boot:** `beginScopedLeaseForBoot` appends `fastModeSettingsForTitle` when the flag is on. Fast Mode knobs win over compatibility defaults.
 - **Do not enable** the RPCS3 GTA V `60 FPS` patch.
 
-Runtime Fast vs Normal on **gameplay** is still blocked by the `0xCD5B2000` SIGSEGV.
+Runtime Fast vs Normal on **gameplay**: The `0xCD5B2000` SIGSEGV is fixed in Pass 3. Fast Mode achieved **28.9 FPS** on Loading Story Mode (vs 26.2 FPS Normal). Transitioning into active 3D gameplay is pending resolution of the initial story load `cellNetCtlGetInfo` polling loop.

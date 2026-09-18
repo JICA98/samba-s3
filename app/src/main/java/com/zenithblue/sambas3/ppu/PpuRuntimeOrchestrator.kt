@@ -463,6 +463,25 @@ object PpuRuntimeOrchestrator {
             PpuRemainingTimeTracker.resetRuntime()
             null
         }
+        if (active) {
+            PpuBatchWorkerService.updateProgressNotification(
+                context = context,
+                titleId = titleId,
+                done = merged.completedModules,
+                total = merged.totalModules,
+                percent = merged.percent,
+                message = moduleMsg,
+                remainingLabel = remaining,
+            )
+            PpuBatchWorkerConnection.updateKnownProgress(
+                titleId = titleId,
+                done = merged.completedModules,
+                total = merged.totalModules,
+                percent = merged.percent,
+                message = moduleMsg,
+                remaining = remaining,
+            )
+        }
         CompileProgressBridge.updatePrelaunchStateForExternalWorker(
             context = context,
             titleId = titleId,
@@ -478,6 +497,8 @@ object PpuRuntimeOrchestrator {
     }
 
     private fun markCompleted(context: Context, titleId: String, jobId: Long, total: Int) {
+        PpuBatchWorkerService.cancelNotification(context)
+        PpuBatchWorkerConnection.clearKnownProgress()
         updateProgress(
             context, titleId, jobId, total, total, 100,
             "Runtime PPU preparation complete", false, CompileOutcome.COMPLETED,
@@ -487,6 +508,8 @@ object PpuRuntimeOrchestrator {
     }
 
     private fun markFailed(context: Context, titleId: String, jobId: Long, reason: String) {
+        PpuBatchWorkerService.cancelNotification(context)
+        PpuBatchWorkerConnection.clearKnownProgress()
         updateProgress(
             context, titleId, jobId, 0, 0, 0,
             "Runtime PPU failed: $reason", false, CompileOutcome.FAILED,
@@ -495,6 +518,8 @@ object PpuRuntimeOrchestrator {
     }
 
     private fun markCanceled(context: Context, titleId: String, jobId: Long) {
+        PpuBatchWorkerService.cancelNotification(context)
+        PpuBatchWorkerConnection.clearKnownProgress()
         updateProgress(
             context, titleId, jobId, 0, 0, 0,
             "Runtime PPU stopped — retry to resume", false, CompileOutcome.CANCELED,

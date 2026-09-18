@@ -22,6 +22,7 @@ data class LaunchRuntimeInputs(
     val validatedByRealBootFrame: Boolean = false,
     val activeCompileTitleId: String? = null,
     val stoppingCompile: Boolean = false,
+    val hasFirmware: Boolean = true,
 )
 
 enum class PpuPhaseState {

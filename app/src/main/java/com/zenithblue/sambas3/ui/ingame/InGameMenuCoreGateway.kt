@@ -60,6 +60,8 @@ interface RpcsxBridge {
     fun loadSaveState(slot: Int): Boolean
     fun loadSaveStateWithRequest(slot: Int, requestId: Long): Boolean
     fun getCurrentTrophies(): String
+    fun getTrophiesForTitle(titleId: String): String
+    fun getTitleId(): String
     fun getFriends(): String
     fun friendAction(action: String, username: String): Boolean
     fun beginInGameSettingsSession(): Boolean
@@ -86,6 +88,8 @@ class RpcsxBridgeAdapter(private val rpcsx: RPCSX = RPCSX.instance) : RpcsxBridg
     override fun loadSaveStateWithRequest(slot: Int, requestId: Long): Boolean =
         rpcsx.loadSaveStateWithRequest(slot, requestId)
     override fun getCurrentTrophies(): String = rpcsx.getCurrentTrophies()
+    override fun getTrophiesForTitle(titleId: String): String = rpcsx.getTrophiesForTitle(titleId)
+    override fun getTitleId(): String = runCatching { rpcsx.getTitleId() }.getOrDefault("")
     override fun getFriends(): String = rpcsx.getFriends()
     override fun friendAction(action: String, username: String): Boolean = rpcsx.friendAction(action, username)
     override fun beginInGameSettingsSession(): Boolean = rpcsx.beginInGameSettingsSession()
@@ -128,7 +132,28 @@ class RpcsxInGameMenuCoreGateway(private val bridge: RpcsxBridge) : InGameMenuCo
     }
 
     override suspend fun trophies(): Result<TrophiesData?> = runCatching {
-        AchievementRepository.current(force = true)
+        // ═══════════════════════════════════════════════════════════════════
+        // TROPHY REGRESSION BARRIER — DO NOT SIMPLIFY (2026-09-17, inFamous 2
+        // BCUS98125: launcher showed 0/52 while in-game showed 0/0).
+        // Live `current()` depends on native Emu.GetTitleID() +
+        // current_trophy_name, which can be empty when the menu opens before
+        // the game registers its trophy context (savestate boot, early menu,
+        // Direct ISO). The launcher never had this problem because it queries
+        // by explicit titleId from the game library. So the in-game path MUST
+        // keep this fallback: live first, then explicit titleId via
+        // getTitleId() + getTrophiesForTitle(). Removing the fallback
+        // reintroduces the 0/0 "No installed trophy set" regression even
+        // though the HDD set is installed. TROPUSR remains the unlock owner;
+        // this only changes which query supplies the snapshot.
+        // ═══════════════════════════════════════════════════════════════════
+        val live = AchievementRepository.current(force = true)
+        if (live != null && live.available) return@runCatching live
+        val titleId = runCatching { bridge.getTitleId() }.getOrNull()?.trim().orEmpty()
+        if (titleId.isNotEmpty()) {
+            val byTitle = AchievementRepository.title(titleId, force = true)
+            if (byTitle != null && byTitle.available) return@runCatching byTitle
+        }
+        live
     }
 
     override suspend fun friends(): Result<FriendsData?> = io {

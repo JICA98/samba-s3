@@ -22,6 +22,68 @@ class PpuBatchWorkerService : Service() {
     companion object {
         private const val TAG = "PpuBatchWorker"
         const val NOTIF_PPU_WORKER = 2003
+
+        fun buildNotification(
+            context: android.content.Context,
+            titleId: String? = null,
+            done: Int = 0,
+            total: Int = 0,
+            percent: Int = 0,
+            message: String? = null,
+            remainingLabel: String? = null,
+        ): android.app.Notification {
+            val title = if (!titleId.isNullOrBlank()) {
+                "${context.getString(R.string.compiling_ppu_title)} · $titleId"
+            } else {
+                context.getString(R.string.compiling_ppu_title)
+            }
+            val baseMsg = message ?: if (total > 0) "module $done of $total" else context.getString(R.string.compiling_ppu_worker_desc)
+            val fullText = PpuRemainingTime.progressLine(baseMsg, remainingLabel)
+            val builder = NotificationCompat.Builder(context, NotificationChannels.RPCSX_PROGRESS)
+                .setContentTitle(title)
+                .setContentText(fullText)
+                .setSmallIcon(R.mipmap.ic_sambas3_foreground)
+                .setCategory(NotificationCompat.CATEGORY_PROGRESS)
+                .setPriority(NotificationCompat.PRIORITY_LOW)
+                .setOngoing(true)
+                .setSilent(true)
+                .setShowWhen(false)
+                .setStyle(NotificationCompat.BigTextStyle().bigText(fullText))
+
+            if (total > 0) {
+                builder.setProgress(100, percent.coerceIn(0, 100), false)
+            } else {
+                builder.setProgress(0, 0, true)
+            }
+            return builder.build()
+        }
+
+        fun updateProgressNotification(
+            context: android.content.Context,
+            titleId: String? = null,
+            done: Int = 0,
+            total: Int = 0,
+            percent: Int = 0,
+            message: String? = null,
+            remainingLabel: String? = null,
+        ) {
+            try {
+                if (NotificationChannels.canPost(context)) {
+                    val notif = buildNotification(context, titleId, done, total, percent, message, remainingLabel)
+                    androidx.core.app.NotificationManagerCompat.from(context).notify(NOTIF_PPU_WORKER, notif)
+                }
+            } catch (e: Exception) {
+                Log.w(TAG, "updateProgressNotification failed: ${e.message}")
+            }
+        }
+
+        fun cancelNotification(context: android.content.Context) {
+            try {
+                androidx.core.app.NotificationManagerCompat.from(context).cancel(NOTIF_PPU_WORKER)
+            } catch (e: Exception) {
+                Log.w(TAG, "cancelNotification failed: ${e.message}")
+            }
+        }
     }
 
     private val serviceInstanceId = UUID.randomUUID().toString()
@@ -37,17 +99,13 @@ class PpuBatchWorkerService : Service() {
     }
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
-        val notification = NotificationCompat.Builder(this, NotificationChannels.RPCSX_PROGRESS)
-            .setContentTitle(getString(R.string.compiling_ppu_title))
-            .setContentText(getString(R.string.compiling_ppu_worker_desc))
-            .setSmallIcon(R.mipmap.ic_sambas3_foreground)
-            .setCategory(NotificationCompat.CATEGORY_PROGRESS)
-            .setPriority(NotificationCompat.PRIORITY_LOW)
-            .setOngoing(true)
-            .setSilent(true)
-            .setShowWhen(false)
-            .setProgress(0, 0, true)
-            .build()
+        val titleId = intent?.getStringExtra("titleId")
+        val done = intent?.getIntExtra("done", 0) ?: 0
+        val total = intent?.getIntExtra("total", 0) ?: 0
+        val percent = intent?.getIntExtra("percent", 0) ?: 0
+        val msg = intent?.getStringExtra("message")
+        val remaining = intent?.getStringExtra("remainingLabel")
+        val notification = buildNotification(this, titleId, done, total, percent, msg, remaining)
         return try {
             ServiceCompat.startForeground(
                 this,
@@ -185,6 +243,16 @@ class PpuBatchWorkerService : Service() {
                                 (evtTitleId.isNullOrBlank() || !evtTitleId.equals(safeTitle, ignoreCase = true))) return@setCompileProgressListener
                             if (phase == RPCSX.COMPILE_PHASE_PROGRESS || phase == RPCSX.COMPILE_PHASE_BEGIN) {
                                 val total = if (moduleTotal > 0) moduleTotal else 0
+                                val pct = if (total > 0) (moduleDone * 100 / total).coerceIn(0, 100) else 0
+                                updateProgressNotification(
+                                    this@PpuBatchWorkerService,
+                                    titleId = safeTitle,
+                                    done = moduleDone,
+                                    total = total,
+                                    percent = pct,
+                                    message = message ?: "module $moduleDone of $total",
+                                    remainingLabel = null,
+                                )
                                 callback?.onProgress(
                                     logicalSessionId,
                                     logicalJobId,

@@ -594,6 +594,36 @@ class RPCSXActivity : ComponentActivity(), EmulationHost {
         if (bootMode == EmulatorBootMode.FreshGame) {
             showTransitionOverlay("Preparing game…")
             interactionLock.lock(EmulatorInteractionLock.BootTransition)
+            // =========================================================================================
+            // CRITICAL REGRESSION BARRIER FOR AGENTS — DO NOT ALTER THIS LOADING SCREEN FLOW:
+            //
+            // HISTORICAL REGRESSION 1 (Blind Loading Screen / Clobbered Text Routes):
+            // In commit 2de3bd1, an unconditional `else if (!freshBootFrameValidated)` branch was added
+            // to display "Starting game… - 100% / Waiting for game output". Because the initial
+            // StateFlow emission has `progress.ppuActive == false`, this immediately clobbered the
+            // initial "Preparing game…" overlay on frame 0, permanently displaying "Starting game… - 100%"
+            // before the emulator even initialized or loaded any modules.
+            //
+            // HISTORICAL REGRESSION 2 (Suppressed PPU Progress on Boot):
+            // An attempt to suppress duplicate compilation checked `isTitlePrecompiled` and skipped
+            // `updateTransitionProgress` if `isPrecompiled` was true. However, on fresh installs or when
+            // firmware SPRX modules (e.g. libfont, libfreetype, libhttp) need cold compilation on first
+            // boot, native RPCSX DOES legitimately compile dozens of modules (taking up to 5 minutes).
+            // Checking `!isPrecompiled` caused the loading screen to remain completely frozen at
+            // "Starting game… - 100% / Waiting for game output" while PPU was actively compiling in the
+            // background (visible only in the Android notification shade), blinding the user.
+            //
+            // THE CONTRACT:
+            // 1. `progress.ppuActive` MUST ALWAYS update the loading screen progress overlay whenever
+            //    active (`hadPpuWork = true`). Never filter this out with `!isPrecompiled` flags.
+            // 2. `hadPpuWork` tracks whether PPU work actually occurred in this session. The transition
+            //    to "Starting game… - 100% / Waiting for game output" must ONLY execute if PPU work
+            //    was active and has now completed (`hadPpuWork && !progress.ppuActive`). It must NEVER
+            //    fire on initial boot when `ppuActive` is simply false.
+            // 3. When `freshBootFrameValidated` arrives (first stable rendered frame), the transition
+            //    overlay is cleanly dismissed via `releaseFreshBootTransitionOverlayIfVisible()`.
+            // =========================================================================================
+            var hadPpuWork = false
             CompileProgressBridge.state.onEach { progress ->
                 if (!progress.shaderActive) shaderToastShownForActivePeriod = false
                 if (recoveryTransitionActive) return@onEach
@@ -605,6 +635,7 @@ class RPCSXActivity : ComponentActivity(), EmulationHost {
                     return@onEach
                 }
                 if (progress.ppuActive) {
+                    hadPpuWork = true
                     val messages = progress.ppuMsg.orEmpty().lines()
                     if (binding.transitionOverlay.visibility != View.VISIBLE) showTransitionOverlay("Preparing game…")
                     updateTransitionProgress(
@@ -612,7 +643,7 @@ class RPCSXActivity : ComponentActivity(), EmulationHost {
                         messages.drop(1).joinToString(" ").ifBlank { "Processing game modules" },
                         progress.ppuPercent,
                     )
-                } else if (!freshBootFrameValidated && !freshBootOverlayReleased) {
+                } else if (hadPpuWork && !freshBootFrameValidated && !freshBootOverlayReleased) {
                     if (binding.transitionOverlay.visibility == View.VISIBLE) {
                         updateTransitionProgress(
                             "Starting game…",
@@ -1056,7 +1087,24 @@ class RPCSXActivity : ComponentActivity(), EmulationHost {
                         handleManualLoadTerminal(payload)
                     }
 
-                    RPCSX.FRONTEND_EVENT_TROPHY_UNLOCKED -> runOnUiThread { TrophyEvents.notifyUnlocked(payload) }
+                    // TROPHY REALTIME ALERT BARRIER — DO NOT REMOVE (2026-09-17).
+                    // Native RSX overlay (OverlayTrophyNotification in
+                    // rpcsx-android.cpp) shows the rich popup; this Kotlin
+                    // toast is the fallback so an unlock is ALWAYS visible
+                    // on-screen during gameplay even if the RSX overlay is
+                    // suppressed. notifyUnlocked() invalidates the trophy
+                    // cache so open Trophies pages refresh to the new state.
+                    RPCSX.FRONTEND_EVENT_TROPHY_UNLOCKED -> runOnUiThread {
+                        TrophyEvents.notifyUnlocked(payload)
+                        runCatching {
+                            android.widget.Toast.makeText(
+                                this,
+                                "Trophy unlocked",
+                                android.widget.Toast.LENGTH_LONG
+                            ).show()
+                        }
+                        Log.i("S3TROPHY", "realtime unlock alert shown payload=${payload?.take(128)}")
+                    }
 
                     RPCSX.FRONTEND_EVENT_EMULATION_FROZEN -> runOnUiThread {
                         showInProcessFault("emulation-frozen")

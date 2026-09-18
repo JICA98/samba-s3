@@ -19,4 +19,5 @@ data class GameLaunchSnapshot(
     val canLoadSave: Boolean,
     val blockReason: String? = null,
     val compactEmptySaves: Boolean = false,
+    val hasFirmware: Boolean = true,
 )

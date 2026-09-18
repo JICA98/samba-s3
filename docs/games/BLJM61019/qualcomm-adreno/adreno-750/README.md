@@ -28,8 +28,8 @@ Overlay FPS is the in-app Performance monitor (`emu_flip`), not display interpol
 |---|---|---|---|---|
 | **SPU cache compile** | Completes with `Max LLVM Compile Threads: 2` | Completes (same cap) | n/a | KEEP |
 | **Boot fade / legal** | 26.6 FPS, 31.0 ms, PPU 85%, RSX 85% | not separately snapshotted | 30 FPS | PARTIAL |
-| **Loading Story Mode** | Prior-session 25.2–26.7 FPS (Michael) | **27.7 FPS**, 51.2 ms, PPU 67%, RSX 82% (Trevor) | 30 FPS | PARTIAL |
-| **Prologue title card** (`Ludendorff, North Yankton, nine years ago.`) | **26.2 FPS**, 58.8 ms spike, PPU 77%, RSX 88% | crashed before / during next 3D load | 30 FPS | PARTIAL |
+| **Loading Story Mode** | Prior-session 25.2–26.7 FPS (Michael) | **28.9 FPS**, 33.2 ms, PPU 46%, RSX 89% (Michael, Pass 3) | 30 FPS | PARTIAL |
+| **Prologue title card** (`Ludendorff, North Yankton, nine years ago.`) | **26.2 FPS**, 58.8 ms spike, PPU 77%, RSX 88% | reached prior session | 30 FPS | PARTIAL |
 | **Main menu / pause** | Not reached | Not reached | 30 FPS | FAIL |
 | **On-foot / driving / heavy** | Not reached | Not reached | 30 FPS | FAIL |
 
@@ -38,7 +38,7 @@ Overlay FPS is the in-app Performance monitor (`emu_flip`), not display interpol
 30 FPS TARGET: FAIL
 ```
 
-27.7 FPS on a 2D loading card is **not** a locked 30 FPS result. No on-foot or driving gameplay was measured. Both Normal and Fast Mode still SIGSEGV (`status=11`) while transitioning into the prologue 3D scene.
+28.9 FPS on the 2D loading card is **not** a locked 30 FPS result. 3D gameplay remains unmeasured. The RSX cache-miss `0xCD5B2000` SIGSEGV is eliminated in Pass 3 via bounds clamping and null guards in `VKDMA.cpp`, `VKTextureCache.h/cpp`, and `sync.cpp` (process ran 15+ minutes without crash). Initial story mode loading loop (`cellNetCtlGetInfo` network check) remains active before entering 3D gameplay.
 
 ---
 
@@ -94,12 +94,12 @@ Not reached: pause menu, Franklin on-foot, driving, heavy traffic.
 ---
 
 ## Known Issues
-- Recurring SIGSEGV during RSX texture-cache miss `0xCD5B2000` on Turnip. Tiling is already false; depth write made it fire earlier. Fast Mode wake-up 1 did not prevent it (crash RSS 1.3 GB vs 2.4–2.5 GB Normal).
-- Backend logs often do not flush across SIGSEGV; grep `0xCD5B2000` in `logcat-sambas3.txt`.
-- No story save (`BLJM61019PROFILE` only).
+- RSX texture-cache miss `0xCD5B2000` Turnip SIGSEGV: **FIXED** in Pass 3 via `VKDMA.cpp` local memory clamping, `VKTextureCache.h/cpp` null/bounds guards, and `sync.cpp` `wait_for_event` null check. Process survived 15+ minutes continuously without crashing.
+- Extended story mode loading: GTA V loops on `cellNetCtlGetInfo` polling during initial story mode boot before 3D cutscene triggers.
+- No story save (`BLJM61019PROFILE` only; prologue start).
 
 ---
 
 ## Progress Tracking
-- **Latest Completed Pass:** PASS 2 of 4 (session stopped here on request)
-- **Next Pass:** survive `0xCD5B2000` into North Yankton 3D, then re-measure Fast vs Normal on the same scene
+- **Latest Completed Pass:** PASS 3 of 4
+- **Next Pass:** Pass 4 — resolve `cellNetCtl` / network stall or provide prologue save to measure 3D gameplay scene (on-foot, driving)

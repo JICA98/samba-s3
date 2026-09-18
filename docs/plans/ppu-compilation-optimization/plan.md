@@ -91,6 +91,12 @@ Produce a compact table with:
 - current LLVM thread count
 - whether first START after preparation hits cache instead of opening another long PPU compile wall
 
+> **REGRESSION PREVENTION CONTRACT (Checkpoint 97a1909 / Commit 3415585 & Loading Screen Restoration):**
+> 1. In `CompileProgressBridge.kt`, watchdog must NEVER clear `ppuActive = false` before native terminal event. It must keep `ppuActive = true` at 99% with `"Verifying cache… waiting for compiler process"`. Clearing early drops late terminals, prevents `outcome = COMPLETED`, prevents `PpuReadinessStore` from persisting `IDLE_AFTER_COMPILE`, and causes duplicate PPU compilation in the game loading page upon START.
+> 2. In `RPCSXActivity.kt`, `progress.ppuActive` MUST ALWAYS update the loading screen progress overlay whenever active. Do NOT suppress this with `!isPrecompiled` flags; firmware SPRX modules (e.g. `libfont`, `libfreetype`, `libhttp`) require legitimate compilation on first boot.
+> 3. In `RPCSXActivity.kt`, never clobber initial loading screen text routes with `"Starting game… - 100% / Waiting for game output"`. Use `hadPpuWork` so that `"Waiting for game output"` is ONLY displayed after active PPU work has legitimately taken place and completed (`hadPpuWork && !progress.ppuActive`).
+> 4. In `PpuBatchWorkerService.kt` and `CompilationMonitorService.kt`, FGS notifications must always reflect the actual progress bar (`setProgress(100, percent, false)`), module counts (`module done of total`), and estimated time remaining via `PpuRemainingTime.progressLine()`.
+
 Also derive these stage timings from existing timestamps or minimal instrumentation:
 
 - parent bind/start -> worker ready

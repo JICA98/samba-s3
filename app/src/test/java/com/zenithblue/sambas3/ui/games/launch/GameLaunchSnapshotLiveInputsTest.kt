@@ -177,4 +177,26 @@ class GameLaunchSnapshotLiveInputsTest {
         assertTrue(snap.compactEmptySaves)
         assertTrue(snap.saveSlots.none { it.exists })
     }
+
+    @Test
+    fun noFirmware_disablesPlayAndReportsBlockReason() {
+        PpuReadinessStore.setPreRuntimeState(ctx, title, PreRuntimePpuState.READY)
+        PpuReadinessStore.markRuntimeValidatedByRealBoot(ctx, title)
+        val inputs = LaunchRuntimeInputs(
+            installPpu = CompileProgressBridge.CompileState(),
+            prelaunchPpu = CompileProgressBridge.CompileState(),
+            runtimePpu = CompileProgressBridge.CompileState(),
+            emulatorState = EmulatorState.Stopped,
+            activeGame = null,
+            preRuntimeState = PreRuntimePpuState.READY,
+            runtimeReadyState = RuntimePpuState.IDLE_AFTER_COMPILE,
+            validatedByRealBootFrame = true,
+            hasFirmware = false,
+        )
+        val snap = GameLaunchRepository.snapshot(ctx, game(), inputs)
+        assertFalse(snap.hasFirmware)
+        assertFalse(snap.canPlayFresh)
+        assertFalse(snap.canLoadSave)
+        assertEquals("PlayStation 3 firmware required", snap.blockReason)
+    }
 }

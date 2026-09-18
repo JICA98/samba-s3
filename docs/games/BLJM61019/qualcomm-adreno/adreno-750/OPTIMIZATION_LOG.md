@@ -17,6 +17,7 @@ This file is a permanent, immutable record of all optimization experiments condu
 | P2-E1 | Pass 2 | Fast Mode | Wake-up 1 only (Mega dropped) | Loading Story Mode 27.7 FPS, then SIGSEGV 1.3 GB | KEEP overlay; crash open |
 | P2-E2 | Pass 2 | RSX | Explicit `Accurate RSX reservation access: false` | Leftover `true` cleared; did not stop SIGSEGV | KEEP false |
 | P2-E3 | Pass 2 | Fast Mode UI | GTA V Fast Mode ON; Demon's Souls NOT SUPPORTED | On-device screenshots | PASS |
+| P3-E1 | Pass 3 | RSX / VKDMA | Turnip VKTextureCache/VKDMA null/bounds guard at 0xCD5B2000 | 0xCD5B2000 SIGSEGV ELIMINATED; 15+ min runtime; 28.9 FPS peak | PASS (stability) / KEEP |
 
 ---
 
@@ -226,4 +227,27 @@ Result: GTA V FAST MODE: OFF then ON (green). Demon's Souls FAST MODE: NOT SUPPO
 PASS/PARTIAL/FAIL: PASS
 KEEP/REVERT: KEEP
 Reason: Required gating. Stale ON on GTA V does not appear on Demon's Souls (per-title flag + unsupported disable).
+```
+
+### P3-E1 — RSX texture-cache miss and VKDMA bounds / null dereference fixes (0xCD5B2000 SIGSEGV elimination)
+
+```text
+Pass: 3
+Technique: Guard dma_fence and wait_for_event null checks, add local memory bounds clamping and vm::check_addr in dma_block::flush and load, guard map_range and get against out-of-bounds, remove fragile ensure in map_dma and dma_transfer
+Subsystem: RSX / Vulkan backend (librpcsx-android.so)
+Hypothesis: 0xCD5B2000 SIGSEGV was caused by unmapped memory access in dma_block flush/load beyond local_size, null dma_fence dereference in imp_flush/wait_for_event, and unguarded bufferRowLength division by zero.
+Files/settings changed:
+  - app/src/main/cpp/rpcsx/rpcs3/Emu/RSX/VK/vkutils/sync.cpp (null check in wait_for_event)
+  - app/src/main/cpp/rpcsx/rpcs3/Emu/RSX/VK/VKTextureCache.h (dma_fence guard in imp_flush, swizzled readback local_size / check_addr guards)
+  - app/src/main/cpp/rpcsx/rpcs3/Emu/RSX/VK/VKDMA.cpp (local_mem_base clamping and check_addr in flush/load; map_range, end, and get safety guards; remove ensure in map_dma)
+  - app/src/main/cpp/rpcsx/rpcs3/Emu/RSX/VK/VKTextureCache.cpp (guarded dma_mapping.second check and internal_bpp > 0 for bufferRowLength)
+  - patches/rpcsx-submodule-changes.patch (synced)
+Test scene: GTA V BLJM61019 boot through Loading Story Mode
+Result: 0xCD5B2000 SIGSEGV completely resolved. Process ran continuously for 15+ minutes with zero crashes.
+FPS: 28.9 FPS peak (33.2 ms frametime) on Loading Story Mode (Michael)
+Power/thermal: 5.4–6.4W, battery 35–37°C, RAM 10.5 GB
+Stability: PASS (15+ min continuous without SIGSEGV)
+PASS/PARTIAL/FAIL: PASS (blocker fixed; gameplay entry pending story mode load resolution)
+KEEP/REVERT: KEEP
+Reason: Primary blocker for 3D measurement resolved.
 ```

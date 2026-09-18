@@ -64,7 +64,7 @@ import com.zenithblue.sambas3.ui.settings.ControllerHintStrip
 @Composable
 fun SambaTopBar(
     title: String,
-    onBack: () -> Unit,
+    onBack: (() -> Unit)? = null,
     modifier: Modifier = Modifier,
     iconRes: Int? = null,
     compact: Boolean = false,
@@ -88,50 +88,52 @@ fun SambaTopBar(
             .padding(horizontal = if (compact) 8.dp else 16.dp),
         verticalAlignment = Alignment.CenterVertically,
     ) {
-        Surface(
-            shape = CircleShape,
-            color = Color(0x20C9A84C),
-            border = BorderStroke(1.dp, Color(0x35C9A84C)),
-            modifier = Modifier
-                .size(if (compact) 30.dp else 34.dp)
-                .focusProperties { canFocus = false }
-        ) {
-            IconButton(
-                onClick = onBack,
+        if (onBack != null) {
+            Surface(
+                shape = CircleShape,
+                color = Color(0x20C9A84C),
+                border = BorderStroke(1.dp, Color(0x35C9A84C)),
                 modifier = Modifier
-                    .fillMaxSize()
+                    .size(if (compact) 30.dp else 34.dp)
                     .focusProperties { canFocus = false }
             ) {
-                Icon(
-                    painter = painterResource(id = R.drawable.ic_keyboard_arrow_left),
-                    contentDescription = "Back",
-                    tint = RPCSXColors.primary,
-                    modifier = Modifier.size(if (compact) 18.dp else 20.dp)
+                IconButton(
+                    onClick = onBack,
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .focusProperties { canFocus = false }
+                ) {
+                    Icon(
+                        painter = painterResource(id = R.drawable.ic_keyboard_arrow_left),
+                        contentDescription = "Back",
+                        tint = RPCSXColors.primary,
+                        modifier = Modifier.size(if (compact) 18.dp else 20.dp)
+                    )
+                }
+            }
+
+            // Controller glyph badge for Back: [ O ]
+            Surface(
+                shape = RoundedCornerShape(3.dp),
+                color = RPCSXColors.textSecondary.copy(alpha = 0.15f),
+                border = BorderStroke(1.dp, RPCSXColors.textSecondary.copy(alpha = 0.6f)),
+                modifier = Modifier
+                    .padding(start = 6.dp)
+                    .focusProperties { canFocus = false }
+            ) {
+                Text(
+                    text = "○",
+                    modifier = Modifier.padding(horizontal = 4.dp, vertical = 1.dp),
+                    style = MaterialTheme.typography.labelSmall.copy(
+                        fontSize = 10.sp,
+                        fontWeight = FontWeight.Bold
+                    ),
+                    color = RPCSXColors.textSecondary
                 )
             }
-        }
 
-        // Controller glyph badge for Back: [ O ]
-        Surface(
-            shape = RoundedCornerShape(3.dp),
-            color = RPCSXColors.textSecondary.copy(alpha = 0.15f),
-            border = BorderStroke(1.dp, RPCSXColors.textSecondary.copy(alpha = 0.6f)),
-            modifier = Modifier
-                .padding(start = 6.dp)
-                .focusProperties { canFocus = false }
-        ) {
-            Text(
-                text = "○",
-                modifier = Modifier.padding(horizontal = 4.dp, vertical = 1.dp),
-                style = MaterialTheme.typography.labelSmall.copy(
-                    fontSize = 10.sp,
-                    fontWeight = FontWeight.Bold
-                ),
-                color = RPCSXColors.textSecondary
-            )
+            Spacer(modifier = Modifier.width(if (compact) 8.dp else 12.dp))
         }
-
-        Spacer(modifier = Modifier.width(if (compact) 8.dp else 12.dp))
 
         if (iconRes != null) {
             Icon(
@@ -170,7 +172,7 @@ fun SambaTopBar(
 @Composable
 fun SambaScreenScaffold(
     title: String,
-    onBack: () -> Unit,
+    onBack: (() -> Unit)? = null,
     modifier: Modifier = Modifier,
     iconRes: Int? = null,
     actions: @Composable RowScope.() -> Unit = {},
@@ -196,7 +198,7 @@ fun SambaScreenScaffold(
             if (onGamepadKey?.invoke(keyCode) == true) return@OnKeyListener true
             when (keyCode) {
                 KeyEvent.KEYCODE_BUTTON_B, KeyEvent.KEYCODE_BACK -> {
-                    if (!isBackAllowed()) return@OnKeyListener false
+                    if (!isBackAllowed() || onBack == null) return@OnKeyListener false
                     onBack()
                     true
                 }
@@ -224,7 +226,7 @@ fun SambaScreenScaffold(
                 if (onGamepadKey?.invoke(code) == true) return@onPreviewKeyEvent true
                 when (code) {
                     KeyEvent.KEYCODE_BUTTON_B, KeyEvent.KEYCODE_BACK -> {
-                        if (!isBackAllowed()) return@onPreviewKeyEvent false
+                        if (!isBackAllowed() || onBack == null) return@onPreviewKeyEvent false
                         onBack()
                         true
                     }

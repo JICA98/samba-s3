@@ -36,4 +36,17 @@ class PpuBatchWorkerForegroundServiceTest {
         assertTrue(declaration.contains("android:foregroundServiceType=\"specialUse\""))
         assertTrue(declaration.contains("android.app.PROPERTY_SPECIAL_USE_FGS_SUBTYPE"))
     }
+
+    @Test
+    fun worker_notification_updates_with_progress_and_remaining_time() {
+        val service = source("app/src/main/java/com/zenithblue/sambas3/ppu/PpuBatchWorkerService.kt")
+        assertTrue(service.contains("fun updateProgressNotification("))
+        assertTrue(service.contains("fun buildNotification("))
+        assertTrue(service.contains("fun cancelNotification("))
+        assertTrue(service.contains("PpuRemainingTime.progressLine("))
+
+        val connection = source("app/src/main/java/com/zenithblue/sambas3/ppu/PpuBatchWorkerConnection.kt")
+        assertTrue(connection.contains("fun updateKnownProgress("))
+        assertTrue(connection.contains("fun clearKnownProgress("))
+    }
 }

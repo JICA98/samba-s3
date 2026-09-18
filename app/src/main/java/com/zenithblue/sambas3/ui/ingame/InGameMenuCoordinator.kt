@@ -174,7 +174,7 @@ fun mainRowDescriptors(cap: InGameMenuCapabilities): List<MainRowDescriptor> = b
     if (cap.friendsAvailable) {
         add(MainRowDescriptor(com.zenithblue.sambas3.R.string.ingame_friends, com.zenithblue.sambas3.R.drawable.ic_settings, true, true, InGameMenuIntent.OpenFriends))
     }
-    // Keep Achievements visible even when the current core/game has no trophy
+    // Keep Trophies visible even when the current core/game has no trophy
     // data. The page reports that state explicitly; hiding the entry made the
     // feature appear to be missing from the in-game settings menu.
     add(MainRowDescriptor(com.zenithblue.sambas3.R.string.ingame_achievements, com.zenithblue.sambas3.R.drawable.ic_star, true, true, InGameMenuIntent.OpenTrophies))

@@ -162,3 +162,36 @@ from Home/Launch/post-install. Validate Runtime only after real boot
 first-frame. Document Demon's Souls install Scudo OOM as native
 multistep handoff.
 ```
+
+---
+
+## 9. Critical Invariant: Checkpoint 97a1909 / 3415585 Watchdog Contract & Game Loading Page Duplicate Compile Prevention
+
+### The Regression Pattern (Do Not Repeat!)
+A recurring regression occurred across multiple iterations where:
+1. PPU compilation and Runtime PPU preparation completed successfully in the Launcher Card / Home (`PpuInstallOrchestrator` -> `PreRuntime=READY`, `PpuRuntimeOrchestrator` -> `Runtime=IDLE_AFTER_COMPILE`).
+2. When starting the game via START, the game loading page (`RPCSXActivity` transition overlay) still displayed PPU compilation ("Preparing game… Processing game modules") and blocked the user, recompiling or waiting in `WaitingForRuntimePpu`.
+
+### Root Cause 1: Premature Watchdog Clearing of `ppuActive` (Checkpoint 97a1909 / Commit 3415585)
+In `CompileProgressBridge.kt`, `clearStuckPpuUiIfComplete` was erroneously modified to set `_state.value = cur.copy(ppuActive = false, outcome = CompileOutcome.NONE, jobId = jobId)` and clear `ppuJobId = null`.
+- When the watchdog cleared `ppuActive` before the authentic native `COMPLETED` terminal event was handled by the main thread, the subsequent `COMPLETED` event was dropped as an unknown job (`ppuJobId != ev.jobId`).
+- `outcome` remained `NONE`, preventing `PpuReadinessStore` from persisting `IDLE_AFTER_COMPILE` or `READY`.
+- The launcher card or boot coordinator then detected incomplete readiness and re-requested compilation, triggering duplicate PPU compilation in the loading page upon game launch.
+- **Invariant:** `clearStuckPpuUiIfComplete` MUST keep `ppuActive = true` at 99% with `"Verifying cache… waiting for compiler process"` and PRESERVE `ppuJobId` until the native `COMPLETED` event arrives to transition `outcome` to `COMPLETED`.
+
+### Root Cause 2: RPCSXActivity Transition Overlay Regressions & Clobbered Text Routes
+1. **The Clobbered Loading Screen ("Waiting for game output"):**
+   In commit `2de3bd1`, an `else if (!freshBootFrameValidated)` branch was added to show `"Starting game… - 100% / Waiting for game output"`. Because StateFlow emits an initial state where `progress.ppuActive == false`, this immediately clobbered `"Preparing game…"` on frame 0, permanently displaying "Starting game… - 100% Waiting for game output" before the emulator even initialized or loaded modules.
+2. **The `isTitlePrecompiled` Blindness Hazard:**
+   An attempt was made to suppress PPU loading overlays when `isTitlePrecompiled(titleId) == true`. However, on a fresh install or when firmware SPRX modules (e.g. `libfont.sprx`, `libfreetype.sprx`, `libhttp.sprx`, `libpngenc.sprx`) have not yet been compiled, native RPCSX during game boot DOES compile 70+ firmware modules (taking up to 5 minutes). Suppressing the UI when `isTitlePrecompiled == true` blinded the user: the loading screen remained frozen at "Starting game… - 100% Waiting for game output" while the notification bar showed 78 files being compiled in the background.
+3. **The Definitive Contract for Loading Screen Handover:**
+   - Whenever `progress.ppuActive` is true, the transition overlay MUST display the live module compilation progress (`updateTransitionProgress(messages..., progress.ppuPercent)`).
+   - Use `hadPpuWork`: `"Starting game… - 100% / Waiting for game output"` must ONLY be set after PPU work has actually taken place and completed (`hadPpuWork && !progress.ppuActive`). It must NEVER execute on initial boot before work has even begun.
+   - When `freshBootFrameValidated` arrives (stable first frame confirmed), the transition overlay is cleanly dismissed via `releaseFreshBootTransitionOverlayIfVisible()`.
+   - `hasBlockingCompileWork()` in `FreshBootFrameValidator` must accurately check `ppuActive` to allow PPU compilation to complete before frame validation begins.
+
+### Root Cause 3: FGS Notification Panel Missing Progress & Time Remaining
+Foreground services (`PpuBatchWorkerService` FGS 2003 and `CompilationMonitorService` FGS 2000) previously showed static indeterminate notifications ("Compiling PPU", `setProgress(0, 0, true)`):
+- `PpuBatchWorkerService` now builds and updates notifications dynamically with module counts (`done/total`), actual progress percentage (`setProgress(100, percent, false)`), and smoothed time remaining from `PpuRemainingTime.progressLine(msg, remaining)`.
+- `PpuBatchWorkerConnection` persists and forwards the latest progress across isolated process recycling so batch transitions do not flicker back to indeterminate progress.
+- `CompilationMonitorService` now observes `installState` alongside `prelaunchState` and `state`, ensuring continuous live notification reporting across all PPU preparation phases.

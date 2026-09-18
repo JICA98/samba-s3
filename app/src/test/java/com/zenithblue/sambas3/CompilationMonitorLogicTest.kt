@@ -166,4 +166,43 @@ class CompilationMonitorLogicTest {
         )
         assertEquals("Preparing Runtime PPU", title)
     }
+
+    @Test
+    fun installStateActive_keepsMonitorActive() {
+        val projection = CompilationMonitorLogic.project(
+            runtime = CompileProgressBridge.CompileState(),
+            prelaunch = CompileProgressBridge.CompileState(),
+            install = CompileProgressBridge.CompileState(
+                ppuActive = true,
+                titleId = "BLUS30443",
+                moduleDone = 24,
+                moduleTotal = 100,
+                ppuPercent = 24,
+                ppuMsg = "module 24 of 100",
+                remainingLabel = "5m remaining",
+            ),
+        )
+        assertTrue(projection.isActive)
+        assertTrue(projection.installActive)
+        assertFalse(
+            CompilationMonitorLogic.shouldStopAfterPromotion(
+                runtimeActiveDomainCount = projection.runtime.activeDomainCount,
+                prelaunchActive = projection.prelaunchActive,
+                installActive = projection.installActive,
+            )
+        )
+        val content = CompilationMonitorLogic.contentState(projection)
+        assertEquals(24, content.ppuPercent)
+        assertEquals("module 24 of 100", content.ppuMsg)
+        assertEquals("5m remaining", content.remainingLabel)
+        assertEquals(
+            "Compiling PPU",
+            CompilationMonitorLogic.notificationTitle(
+                projection,
+                compilingPpu = "Compiling PPU",
+                compilingShaders = "Compiling shaders",
+                preparingRuntimePpu = "Preparing Runtime PPU",
+            )
+        )
+    }
 }

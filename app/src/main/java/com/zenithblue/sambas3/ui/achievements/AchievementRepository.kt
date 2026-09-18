@@ -27,7 +27,18 @@ private data class TrophyCacheKey(
     val generation: String?,
 )
 
-/** Shared live/Home provider. RPCSX/TROPUSR remains the only unlock-state owner. */
+/** Shared live/Home provider. RPCSX/TROPUSR remains the only unlock-state owner.
+ *
+ * TROPHY REGRESSION BARRIER — DO NOT SIMPLIFY (2026-09-17, BCUS98125):
+ * `current()` (live: Emu.GetTitleID + current_trophy_name) and
+ * `title(titleId)` (stopped: HDD scan by explicit titleId) are DIFFERENT native
+ * queries with different failure modes. The launcher uses `title()` (+ ISO
+ * fallback) and the in-game menu prefers `current()` with a `title()` fallback
+ * (see RpcsxInGameMenuCoreGateway.trophies + InGameTrophiesPage). Never collapse
+ * the in-game path to `current()` alone: when the live context is empty the
+ * native layer returns no_trophy_set (0/0) even though the set is installed and
+ * the launcher shows it (0/52). Trophies UI label (not "Achievements").
+ */
 class TrophySnapshotProvider(
     private val query: TrophyQuery,
     private val parse: (String?) -> TrophySnapshot? = { TrophySnapshot.fromJson(it) },

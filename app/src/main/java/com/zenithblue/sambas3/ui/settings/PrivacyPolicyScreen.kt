@@ -1,24 +1,35 @@
 package com.zenithblue.sambas3.ui.settings
 
+import android.view.KeyEvent
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
@@ -27,11 +38,15 @@ import androidx.compose.ui.unit.sp
 import com.zenithblue.sambas3.R
 import com.zenithblue.sambas3.RPCSXColors
 import com.zenithblue.sambas3.ui.common.SambaScreenScaffold
+import com.zenithblue.sambas3.ui.onboarding.gamepadClickable
 
 private data class PrivacySection(val title: String, val body: String)
 
 @Composable
-fun PrivacyPolicyScreen(navigateBack: () -> Unit) {
+fun PrivacyPolicyScreen(
+    navigateBack: (() -> Unit)? = null,
+    onAccept: (() -> Unit)? = null,
+) {
     val sections = listOf(
         PrivacySection(
             "INFORMATION STORED ON THIS DEVICE",
@@ -63,76 +78,151 @@ fun PrivacyPolicyScreen(navigateBack: () -> Unit) {
         title = stringResource(R.string.privacy_policy),
         iconRes = R.drawable.ic_lock,
         onBack = navigateBack,
-        hints = listOf(R.drawable.circle to "Back")
+        isBackAllowed = { navigateBack != null },
+        hints = if (onAccept != null) {
+            if (navigateBack != null) listOf(R.drawable.cross to "Agree & Continue", R.drawable.circle to "Back")
+            else listOf(R.drawable.cross to "Agree & Continue")
+        } else {
+            listOf(R.drawable.circle to "Back")
+        },
+        onGamepadKey = if (onAccept != null) {
+            { keyCode ->
+                if (keyCode == KeyEvent.KEYCODE_BUTTON_A ||
+                    keyCode == KeyEvent.KEYCODE_DPAD_CENTER ||
+                    keyCode == KeyEvent.KEYCODE_ENTER
+                ) {
+                    onAccept()
+                    true
+                } else false
+            }
+        } else null
     ) {
-        Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.TopCenter) {
-            LazyColumn(
+        Column(
+            modifier = Modifier.fillMaxSize(),
+            horizontalAlignment = Alignment.CenterHorizontally,
+        ) {
+            Box(
                 modifier = Modifier
-                    .widthIn(max = 920.dp)
-                    .fillMaxWidth()
-                    .fillMaxHeight()
-                    .padding(horizontal = 20.dp),
-                contentPadding = androidx.compose.foundation.layout.PaddingValues(vertical = 16.dp),
-                verticalArrangement = Arrangement.spacedBy(12.dp)
+                    .weight(1f)
+                    .fillMaxWidth(),
+                contentAlignment = Alignment.TopCenter
             ) {
-                item {
-                    Surface(
-                        shape = RoundedCornerShape(14.dp),
-                        color = Color(0xA6121724),
-                        border = BorderStroke(1.dp, RPCSXColors.primary.copy(alpha = 0.42f)),
-                        modifier = Modifier.fillMaxWidth()
-                    ) {
-                        Column(
-                            modifier = Modifier.padding(18.dp),
-                            verticalArrangement = Arrangement.spacedBy(7.dp)
+                LazyColumn(
+                    modifier = Modifier
+                        .widthIn(max = 920.dp)
+                        .fillMaxWidth()
+                        .fillMaxHeight()
+                        .padding(horizontal = 20.dp),
+                    contentPadding = androidx.compose.foundation.layout.PaddingValues(vertical = 16.dp),
+                    verticalArrangement = Arrangement.spacedBy(12.dp)
+                ) {
+                    item {
+                        Surface(
+                            shape = RoundedCornerShape(14.dp),
+                            color = Color(0xA6121724),
+                            border = BorderStroke(1.dp, RPCSXColors.primary.copy(alpha = 0.42f)),
+                            modifier = Modifier.fillMaxWidth()
                         ) {
-                            Text(
-                                "EFFECTIVE SEPTEMBER 9, 2026",
-                                color = RPCSXColors.primary,
-                                fontFamily = FontFamily.Monospace,
-                                fontWeight = FontWeight.Bold,
-                                fontSize = 11.sp,
-                                letterSpacing = 1.2.sp
-                            )
-                            Text(
-                                "Privacy by default",
-                                color = RPCSXColors.textPrimary,
-                                style = MaterialTheme.typography.headlineSmall,
-                                fontWeight = FontWeight.Bold
-                            )
-                            Text(
-                                "SambaS3 requires no online account. It contains no ads or analytics SDKs, does not sell personal information, and does not automatically send games, save states, screenshots, profile names, logs, or performance captures to the developer.",
-                                color = RPCSXColors.textSecondary,
-                                style = MaterialTheme.typography.bodyMedium
-                            )
+                            Column(
+                                modifier = Modifier.padding(18.dp),
+                                verticalArrangement = Arrangement.spacedBy(7.dp)
+                            ) {
+                                Text(
+                                    "EFFECTIVE SEPTEMBER 9, 2026",
+                                    color = RPCSXColors.primary,
+                                    fontFamily = FontFamily.Monospace,
+                                    fontWeight = FontWeight.Bold,
+                                    fontSize = 11.sp,
+                                    letterSpacing = 1.2.sp
+                                )
+                                Text(
+                                    "Privacy by default",
+                                    color = RPCSXColors.textPrimary,
+                                    style = MaterialTheme.typography.headlineSmall,
+                                    fontWeight = FontWeight.Bold
+                                )
+                                Text(
+                                    "SambaS3 requires no online account. It contains no ads or analytics SDKs, does not sell personal information, and does not automatically send games, save states, screenshots, profile names, logs, or performance captures to the developer.",
+                                    color = RPCSXColors.textSecondary,
+                                    style = MaterialTheme.typography.bodyMedium
+                                )
+                            }
+                        }
+                    }
+
+                    items(sections) { section ->
+                        Surface(
+                            shape = RoundedCornerShape(12.dp),
+                            color = Color(0x8F111722),
+                            border = BorderStroke(1.dp, Color(0x28FFFFFF)),
+                            modifier = Modifier.fillMaxWidth()
+                        ) {
+                            Column(
+                                modifier = Modifier.padding(horizontal = 18.dp, vertical = 14.dp),
+                                verticalArrangement = Arrangement.spacedBy(6.dp)
+                            ) {
+                                Text(
+                                    section.title,
+                                    color = RPCSXColors.primaryDim,
+                                    fontFamily = FontFamily.Monospace,
+                                    fontWeight = FontWeight.Bold,
+                                    fontSize = 11.sp,
+                                    letterSpacing = 1.sp
+                                )
+                                Text(
+                                    section.body,
+                                    color = RPCSXColors.textPrimary,
+                                    style = MaterialTheme.typography.bodyMedium
+                                )
+                            }
                         }
                     }
                 }
+            }
 
-                items(sections) { section ->
-                    Surface(
-                        shape = RoundedCornerShape(12.dp),
-                        color = Color(0x8F111722),
-                        border = BorderStroke(1.dp, Color(0x28FFFFFF)),
-                        modifier = Modifier.fillMaxWidth()
+            if (onAccept != null) {
+                Surface(
+                    modifier = Modifier.fillMaxWidth(),
+                    color = Color(0xEE090C16),
+                    border = BorderStroke(1.dp, Color(0x20C9A84C)),
+                ) {
+                    Row(
+                        modifier = Modifier
+                            .widthIn(max = 920.dp)
+                            .fillMaxWidth()
+                            .padding(horizontal = 20.dp, vertical = 8.dp),
+                        horizontalArrangement = Arrangement.End,
+                        verticalAlignment = Alignment.CenterVertically
                     ) {
-                        Column(
-                            modifier = Modifier.padding(horizontal = 18.dp, vertical = 14.dp),
-                            verticalArrangement = Arrangement.spacedBy(6.dp)
+                        var isContinueFocused by remember { mutableStateOf(false) }
+                        Surface(
+                            onClick = onAccept,
+                            shape = RoundedCornerShape(8.dp),
+                            color = if (isContinueFocused) Color(0xFFFFCC00) else Color(0xFFFFB800),
+                            border = if (isContinueFocused) BorderStroke(2.dp, Color.White) else BorderStroke(1.dp, Color(0x60FFFFFF)),
+                            modifier = Modifier
+                                .height(38.dp)
+                                .onFocusChanged { isContinueFocused = it.isFocused }
+                                .gamepadClickable(onAccept)
                         ) {
-                            Text(
-                                section.title,
-                                color = RPCSXColors.primaryDim,
-                                fontFamily = FontFamily.Monospace,
-                                fontWeight = FontWeight.Bold,
-                                fontSize = 11.sp,
-                                letterSpacing = 1.sp
-                            )
-                            Text(
-                                section.body,
-                                color = RPCSXColors.textPrimary,
-                                style = MaterialTheme.typography.bodyMedium
-                            )
+                            Row(
+                                modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
+                                verticalAlignment = Alignment.CenterVertically,
+                                horizontalArrangement = Arrangement.spacedBy(6.dp),
+                            ) {
+                                Icon(
+                                    painter = painterResource(R.drawable.cross),
+                                    contentDescription = null,
+                                    tint = Color(0xFF0D1117),
+                                    modifier = Modifier.size(14.dp),
+                                )
+                                Text(
+                                    text = stringResource(R.string.privacy_policy_agree),
+                                    fontWeight = FontWeight.ExtraBold,
+                                    fontSize = 13.sp,
+                                    color = Color(0xFF0D1117),
+                                )
+                            }
                         }
                     }
                 }

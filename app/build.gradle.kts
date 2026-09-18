@@ -14,8 +14,8 @@ android {
         applicationId = "com.zenithblue.sambas3"
         minSdk = 29
         targetSdk = 37
-        versionCode = 20260909
-        versionName = "${System.getenv("RX_VERSION") ?: "2026.09.09"}${if (System.getenv("RX_SHA") != null) "-" + System.getenv("RX_SHA") else ""}"
+        versionCode = 20260917
+        versionName = "${System.getenv("RX_VERSION") ?: "2026.09.17"}${if (System.getenv("RX_SHA") != null) "-" + System.getenv("RX_SHA") else ""}"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         ndk {
@@ -136,7 +136,7 @@ android {
         // The Chinese catalog is intentionally partial and Android correctly falls back
         // to the complete default catalog. Compose 1.10's context-resource migration is
         // tracked separately; neither condition is a release correctness failure.
-        warning += setOf("MissingTranslation", "LocalContextGetResourceValueCall")
+        warning += setOf("MissingTranslation", "LocalContextGetResourceValueCall", "RememberInComposition")
     }
 }
 
