@@ -1,0 +1,158 @@
+{
+  "review_date": "2026-09-24",
+  "frontend_revision": "270d72a56a926375f16f6c9a22474acdda99cd8c",
+  "backend_revision": "ed8ba6c12c218249524a441b79f48d6bae842394",
+  "scope": "Selected source and evidence review; no builds or device runs performed by this reviewer.",
+  "sources": [
+    {
+      "id": "S01",
+      "title": "Published frontend gitlink",
+      "url": "https://api.github.com/repos/JICA98/samba-s3/contents/app/src/main/cpp/rpcsx?ref=270d72a56a926375f16f6c9a22474acdda99cd8c",
+      "review_note": "Gitlink matches reviewed core revision."
+    },
+    {
+      "id": "S02",
+      "title": "Revised GOW benchmark",
+      "url": "https://github.com/JICA98/samba-s3/blob/270d72a56a926375f16f6c9a22474acdda99cd8c/docs/benchmarks/2026-09-24-oneplus-13r-revised-gow3.md",
+      "review_note": "Project report; statistics not independently regenerated from full raw frame stream."
+    },
+    {
+      "id": "S03",
+      "title": "Raw thread snapshot",
+      "url": "https://github.com/JICA98/samba-s3/blob/270d72a56a926375f16f6c9a22474acdda99cd8c/docs/benchmarks/evidence-revised-20260924-2215/threads-top.txt",
+      "review_note": "Reviewed thread rows and global top header."
+    },
+    {
+      "id": "S04",
+      "title": "Archived exit history",
+      "url": "https://github.com/JICA98/samba-s3/blob/270d72a56a926375f16f6c9a22474acdda99cd8c/docs/benchmarks/evidence-revised-20260924-2215/exit-info.txt",
+      "review_note": "Historical exits are not all crashes or from one run."
+    },
+    {
+      "id": "S05",
+      "title": "Gradle native build/verification",
+      "url": "https://github.com/JICA98/samba-s3/blob/270d72a56a926375f16f6c9a22474acdda99cd8c/app/build.gradle.kts",
+      "review_note": "Reviewed task wiring, not executed."
+    },
+    {
+      "id": "S06",
+      "title": "MonitoringRepository",
+      "url": "https://github.com/JICA98/samba-s3/blob/270d72a56a926375f16f6c9a22474acdda99cd8c/app/src/main/java/com/zenithblue/sambas3/monitoring/MonitoringRepository.kt",
+      "review_note": ""
+    },
+    {
+      "id": "S07",
+      "title": "AndroidSystemMetricsCollector",
+      "url": "https://github.com/JICA98/samba-s3/blob/270d72a56a926375f16f6c9a22474acdda99cd8c/app/src/main/java/com/zenithblue/sambas3/monitoring/AndroidSystemMetricsCollector.kt",
+      "review_note": ""
+    },
+    {
+      "id": "S08",
+      "title": "LogMonitor consumer and reader",
+      "url": "https://github.com/JICA98/samba-s3/blob/270d72a56a926375f16f6c9a22474acdda99cd8c/app/src/main/java/com/zenithblue/sambas3/LogMonitor.kt",
+      "review_note": "Runtime use and cost must be verified before attributing the benchmark hot worker."
+    },
+    {
+      "id": "S09",
+      "title": "GOW Fast Mode",
+      "url": "https://github.com/JICA98/samba-s3/blob/270d72a56a926375f16f6c9a22474acdda99cd8c/app/src/main/java/com/zenithblue/sambas3/patch/PatchFastMode.kt",
+      "review_note": ""
+    },
+    {
+      "id": "S10",
+      "title": "Thread scheduler policy",
+      "url": "https://github.com/abhay-byte/samba-s3-core/blob/ed8ba6c12c218249524a441b79f48d6bae842394/rpcs3/util/Thread.cpp",
+      "review_note": "Reviewed calculate_affinity_mask and topology paths."
+    },
+    {
+      "id": "S11",
+      "title": "SPU decoder routing",
+      "url": "https://github.com/abhay-byte/samba-s3-core/blob/ed8ba6c12c218249524a441b79f48d6bae842394/rpcs3/Emu/Cell/SPUThread.cpp",
+      "review_note": "Reviewed normal and save-state constructors."
+    },
+    {
+      "id": "S12",
+      "title": "Vulkan texture readback",
+      "url": "https://github.com/abhay-byte/samba-s3-core/blob/ed8ba6c12c218249524a441b79f48d6bae842394/rpcs3/Emu/RSX/VK/VKTextureCache.h",
+      "review_note": "Reviewed imp_flush including wait and swizzle path."
+    },
+    {
+      "id": "S13",
+      "title": "SPU LLVM compilation/publication",
+      "url": "https://github.com/abhay-byte/samba-s3-core/blob/ed8ba6c12c218249524a441b79f48d6bae842394/rpcs3/Emu/Cell/SPULLVMRecompiler.cpp",
+      "review_note": "Reviewed optimization/finalization/publication segment."
+    },
+    {
+      "id": "S14",
+      "title": "AArch64 CPU descriptors",
+      "url": "https://github.com/abhay-byte/samba-s3-core/blob/ed8ba6c12c218249524a441b79f48d6bae842394/rpcs3/Emu/CPU/Backends/AArch64/AArch64Common.cpp",
+      "review_note": "Partial source inspection; full feature dispatch needs executable validation."
+    },
+    {
+      "id": "S15",
+      "title": "Counter-based waiting",
+      "url": "https://github.com/abhay-byte/samba-s3-core/blob/ed8ba6c12c218249524a441b79f48d6bae842394/rx/include/rx/asm.hpp",
+      "review_note": "Reviewed calibrated duration and elapsed comparison in earlier fetch during this review."
+    },
+    {
+      "id": "S16",
+      "title": "RPCS3 upstream release change history",
+      "url": "https://github.com/RPCS3/rpcs3/releases",
+      "review_note": "Candidates for a presence/absence port ledger, not evidence that this fork lacks every listed change."
+    },
+    {
+      "id": "S17",
+      "title": "Android profileable manifest",
+      "url": "https://developer.android.com/guide/topics/manifest/profileable-element",
+      "review_note": ""
+    },
+    {
+      "id": "S18",
+      "title": "Current AOSP Simpleperf documentation",
+      "url": "https://android.googlesource.com/platform/system/extras/+/main/simpleperf/doc/",
+      "review_note": ""
+    },
+    {
+      "id": "S19",
+      "title": "Android Thermal API",
+      "url": "https://developer.android.com/games/optimize/adpf/thermal",
+      "review_note": ""
+    },
+    {
+      "id": "S20",
+      "title": "Android ApplicationExitInfo",
+      "url": "https://developer.android.com/reference/android/app/ApplicationExitInfo",
+      "review_note": ""
+    },
+    {
+      "id": "S21",
+      "title": "Mesa u_trace",
+      "url": "https://docs.mesa3d.org/u_trace.html",
+      "review_note": ""
+    },
+    {
+      "id": "S22",
+      "title": "Mesa Perfetto",
+      "url": "https://docs.mesa3d.org/perfetto.html",
+      "review_note": ""
+    },
+    {
+      "id": "S23",
+      "title": "Freedreno/Turnip architecture and diagnostics",
+      "url": "https://docs.mesa3d.org/drivers/freedreno.html",
+      "review_note": "Generic architecture/diagnostics; do not infer current chip support solely from the introductory prose."
+    },
+    {
+      "id": "S24",
+      "title": "Existing plan and Section 13 handoff",
+      "url": "https://github.com/JICA98/samba-s3/blob/270d72a56a926375f16f6c9a22474acdda99cd8c/docs/plans/rpcsx-arm-backend-optimization-plan.md",
+      "review_note": "Handoff claims are not independent native test execution."
+    },
+    {
+      "id": "S25",
+      "title": "KGSL busy-time accounting primary reference",
+      "url": "https://android.googlesource.com/kernel/msm/+/86e532604d9465e4b0fcf69a150a11185f606ff1/drivers/gpu/msm/kgsl_pwrctrl.c",
+      "review_note": "Reference implementation; validate the actual phone kernel node and reset/window semantics."
+    }
+  ]
+}

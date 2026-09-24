@@ -1,0 +1,118 @@
+4189 : ithblue.sambas3
+4191 : Signal Catcher
+4192 : perfetto_hprof_
+4193 : Jit thread pool
+4194 : HeapTaskDaemon
+4196 : ReferenceQueueD
+4197 : FinalizerDaemon
+4198 : FinalizerWatchd
+4199 : binder:4189_1
+4200 : binder:4189_2
+4201 : binder:4189_3
+4210 : Profile Saver
+4216 : RenderThread
+4226 : DefaultDispatch
+4227 : DefaultDispatch
+4230 : DefaultDispatch
+4237 : Log Writer
+4238 : ithblue.sambas3
+4240 : Thread-5
+4247 : Thread-6
+4248 : DefaultDispatch
+4250 : TracingMuxer
+4251 : pool-4-thread-1
+4252 : hwuiTask0
+4253 : hwuiTask1
+4257 : DefaultDispatch
+4258 : DefaultDispatch
+4259 : DefaultDispatch
+4260 : DefaultDispatch
+4261 : GrallocUploadTh
+4272 : SurfaceSyncGrou
+4281 : DefaultExecutor
+4285 : binder:4189_1
+4286 : binder:4189_4
+4293 : InteractionJank
+4333 : queued-work-loo
+4367 : Progress Dialog
+4368 : Performance Sen
+4369 : PS Move Worker 
+4370 : PS Move Worker 
+4371 : PS Move Worker 
+4372 : PS Move Worker 
+4373 : Gem Thread
+4374 : Camera Thread
+4375 : Usb Manager Thr
+4379 : cellAudio Threa
+4382 : cellAudio Threa
+4385 : cellAudio Threa
+4386 : MediaList Threa
+4387 : cellAudio Threa
+4388 : Network P2P Thr
+4389 : GDB Server
+4390 : CPU Profiler
+4391 : VUART AV Thread
+4392 : Timer Thread
+4395 : RsxAudioData Th
+4396 : Tcp Over Udp Ti
+4404 : Network Thread
+4405 : LV2 Watchdog Th
+4406 : PPU Syscall Usa
+4408 : Signaling Manag
+4409 : NetStart Hack
+4414 : MsgDialog Close
+4418 : Microphone Thre
+4421 : Overlay Input T
+4423 : com.ze:traceq0
+4431 : RSX.W1
+4432 : RSX.W2
+4433 : Thread-15
+4434 : rsx::thread
+4435 : Pad Thread
+4436 : PPU[0x1000000] 
+4475 : AAudio_1
+4647 : binder:4189_5
+4687 : binder:4189_6
+4773 : SPU[0x0000100] 
+4781 : SPU[0x1000100] 
+4782 : SPU[0x2000100] 
+4785 : SPU[0x3000100] 
+4787 : SPU[0x4000100] 
+4789 : PPU[0x1000001] 
+4790 : PPU[0x1000002] 
+4791 : SPU[0x0000200] 
+4792 : PPU[0x1000003] 
+4793 : PPU[0x1000004] 
+4794 : PPU[0x1000005] 
+4795 : PPU[0x1000006] 
+4799 : PPU[0x1000007] 
+4801 : PPU[0x1000008] 
+4802 : PPU[0x1000009] 
+4803 : PPU[0x100000a] 
+4804 : PPU[0x100000b] 
+4807 : VBlank Thread
+4808 : PPU[0x100000e] 
+4815 : PPU[0x100000f] 
+4816 : PPU[0x1000010] 
+4817 : PPU[0x1000011] 
+4818 : PPU[0x1000012] 
+4819 : PPU[0x1000013] 
+4820 : PPU[0x1000014] 
+4821 : PPU[0x1000015] 
+4822 : PPU[0x1000016] 
+4823 : PPU[0x1000017] 
+4826 : PPU[0x1000018] 
+4827 : PPU[0x1000019] 
+4828 : PPU[0x100001a] 
+4829 : PPU[0x100001b] 
+4830 : PPU[0x100001c] 
+4831 : PPU[0x100001d] 
+4833 : PPU[0x100001e] 
+4834 : PPU[0x100001f] 
+4835 : PPU[0x1000020] 
+4836 : PPU[0x1000021] 
+4837 : PPU[0x1000022] 
+4838 : PPU[0x1000023] 
+4839 : PPU[0x1000024] 
+4841 : PPU[0x1000025] 
+4857 : PPU[0x1000026] 

@@ -1,0 +1,189 @@
+09-25 00:25:12.092  4189  4189 I S3TOUCH : root action=down x=716 y=963
+09-25 00:25:12.092  4189  4189 I S3TOUCH : monitor action=down consumed=false
+09-25 00:25:12.092  4189  4189 I S3TOUCH : pad action=down menu=false
+09-25 00:25:12.189  4189  4189 I S3TOUCH : monitor action=down consumed=false
+09-25 00:25:12.243  4189  4436 D RPCS3   : sys_tty_write(ch=0, buf=*0x58bf20, len=63, pwritelen=*0xd000fde0)
+09-25 00:25:12.243  4189  4436 D RPCS3   : sys_tty_write(): “BATCHJOB: AddJob: waiting for room in job list 3 for job 56...“ << endl
+09-25 00:25:12.391  4189  4189 I S3TOUCH : monitor action=down consumed=false
+09-25 00:25:12.505  4189  4436 D RPCS3   : sys_tty_write(ch=0, buf=*0x58bf20, len=63, pwritelen=*0xd000fde0)
+09-25 00:25:12.505  4189  4436 D RPCS3   : sys_tty_write(): “BATCHJOB: AddJob: waiting for room in job list 3 for job 56...“ << endl
+09-25 00:25:12.609  4189  4189 I S3TOUCH : monitor action=down consumed=false
+09-25 00:25:12.753  4189  4189 I S3TOUCH : root action=down x=733 y=971
+09-25 00:25:12.754  4189  4189 I S3TOUCH : monitor action=down consumed=false
+09-25 00:25:12.754  4189  4189 I S3TOUCH : pad action=down menu=false
+09-25 00:25:12.768  4189  4436 D RPCS3   : sys_tty_write(ch=0, buf=*0x58bf20, len=63, pwritelen=*0xd000fde0)
+09-25 00:25:12.768  4189  4436 D RPCS3   : sys_tty_write(): “BATCHJOB: AddJob: waiting for room in job list 3 for job 56...“ << endl
+09-25 00:25:12.771  4189  4257 D S3PERF  : crosscheck ui_snapshot_fps=9.40723 ui_snapshot_frametime_ms=118.137
+09-25 00:25:12.785  4189  4189 I S3TOUCH : monitor action=down consumed=false
+09-25 00:25:12.950  4189  4436 D RPCS3   : sys_tty_write(ch=0, buf=*0x58bf20, len=63, pwritelen=*0xd000fde0)
+09-25 00:25:12.950  4189  4436 D RPCS3   : sys_tty_write(): “BATCHJOB: AddJob: waiting for room in job list 3 for job 56...“ << endl
+09-25 00:25:13.012  4189  4189 I S3TOUCH : monitor action=down consumed=false
+09-25 00:25:13.075  4189  4257 D S3PERF  : crosscheck source=surface presented=1563 json_fps=8.13062 json_frametime_ms=127.52
+09-25 00:25:13.234  4189  4189 I S3TOUCH : monitor action=down consumed=false
+09-25 00:25:13.331  4189  4436 D RPCS3   : sys_tty_write(ch=0, buf=*0x58bf20, len=63, pwritelen=*0xd000fde0)
+09-25 00:25:13.331  4189  4436 D RPCS3   : sys_tty_write(): “BATCHJOB: AddJob: waiting for room in job list 3 for job 56...“ << endl
+09-25 00:25:13.438  4189  4189 I S3TOUCH : monitor action=down consumed=false
+09-25 00:25:13.572  4189  4436 D RPCS3   : sys_tty_write(ch=0, buf=*0x58bf20, len=63, pwritelen=*0xd000fde0)
+09-25 00:25:13.572  4189  4436 D RPCS3   : sys_tty_write(): “BATCHJOB: AddJob: waiting for room in job list 3 for job 56...“ << endl
+09-25 00:25:13.649  4189  4189 I S3TOUCH : monitor action=down consumed=false
+09-25 00:25:13.858  4189  4189 I S3TOUCH : root action=down x=2173 y=915
+09-25 00:25:13.858  4189  4189 I S3TOUCH : monitor action=down consumed=false
+09-25 00:25:13.858  4189  4189 I S3TOUCH : pad action=down menu=false
+09-25 00:25:14.051  4189  4257 D S3PERF  : crosscheck ui_snapshot_fps=9.82744 ui_snapshot_frametime_ms=67.62
+09-25 00:25:14.075  4189  4189 I S3TOUCH : root action=down x=2169 y=917
+09-25 00:25:14.076  4189  4189 I S3TOUCH : monitor action=down consumed=false
+09-25 00:25:14.076  4189  4189 I S3TOUCH : pad action=down menu=false
+09-25 00:25:14.292  4189  4189 I S3TOUCH : root action=down x=2166 y=918
+09-25 00:25:14.293  4189  4189 I S3TOUCH : monitor action=down consumed=false
+09-25 00:25:14.293  4189  4189 I S3TOUCH : pad action=down menu=false
+09-25 00:25:14.356  4189  4257 D S3PERF  : crosscheck source=surface presented=1576 json_fps=11.5657 json_frametime_ms=96.045
+09-25 00:25:14.502  4189  4189 I S3TOUCH : root action=down x=2175 y=913
+09-25 00:25:14.502  4189  4189 I S3TOUCH : monitor action=down consumed=false
+09-25 00:25:14.502  4189  4189 I S3TOUCH : pad action=down menu=false
+09-25 00:25:14.703  4189  4189 I S3TOUCH : root action=down x=2179 y=914
+09-25 00:25:14.703  4189  4189 I S3TOUCH : monitor action=down consumed=false
+09-25 00:25:14.703  4189  4189 I S3TOUCH : pad action=down menu=false
+09-25 00:25:14.709  4189  4368 D RPCS3   : CPU Usage: Total: 69.0%, Cores: 0.0%, 0.0%, 0.0%, 0.0%, 0.0%, 0.0%, 0.0%, 0.0%
+09-25 00:25:14.714  4189  4189 W DebugPad: BUTTON SQUARE d1=0 d2=128 press 120ms request_id=s3-1790276114665801486-1089570-21071
+09-25 00:25:14.814  4189  5292 E RPCS3   : Video au decode has been waiting for a consumer for 5 seconds. (handle=0xf0000300, seq_id=1, cmd_id=63, queue_size=61)
+09-25 00:25:14.834  4189  4189 W DebugPad: BUTTON SQUARE release request_id=s3-1790276114665801486-1089570-21071
+09-25 00:25:14.850  4189  4406 D RPCS3   : PPU Syscall Usage Stats:
+09-25 00:25:14.850  4189  4406 D RPCS3   : 	⁂ _sys_lwcond_queue_wait [182086]
+09-25 00:25:14.850  4189  4406 D RPCS3   : 	⁂ sys_timer_usleep [181270]
+09-25 00:25:14.850  4189  4406 D RPCS3   : 	⁂ _sys_lwmutex_lock [179922]
+09-25 00:25:14.850  4189  4406 D RPCS3   : 	⁂ _sys_lwmutex_unlock [174818]
+09-25 00:25:14.850  4189  4406 D RPCS3   : 	⁂ _sys_lwcond_signal [112620]
+09-25 00:25:14.850  4189  4406 D RPCS3   : 	⁂ _sys_lwcond_signal_all [72334]
+09-25 00:25:14.850  4189  4406 D RPCS3   : 	⁂ sys_time_get_current_time [53723]
+09-25 00:25:14.850  4189  4406 D RPCS3   : 	⁂ sys_event_queue_receive [29765]
+09-25 00:25:14.850  4189  4406 D RPCS3   : 	⁂ sys_fs_read [29055]
+09-25 00:25:14.850  4189  4406 D RPCS3   : 	⁂ sys_event_port_send [8087]
+09-25 00:25:14.850  4189  4406 D RPCS3   : 	⁂ sys_fs_lseek [3250]
+09-25 00:25:14.850  4189  4406 D RPCS3   : 	⁂ sys_event_flag_wait [1915]
+09-25 00:25:14.850  4189  4406 D RPCS3   : 	⁂ sys_event_flag_clear [1915]
+09-25 00:25:14.850  4189  4406 D RPCS3   : 	⁂ _sys_lwmutex_trylock [339]
+09-25 00:25:14.850  4189  4406 D RPCS3   : 	⁂ sys_tty_write [183]
+09-25 00:25:15.460  4189  4189 I S3TOUCH : root action=down x=658 y=981
+09-25 00:25:15.461  4189  4189 I S3TOUCH : monitor action=down consumed=false
+09-25 00:25:15.461  4189  4189 I S3TOUCH : pad action=down menu=false
+09-25 00:25:15.690  4189  4189 I S3TOUCH : monitor action=down consumed=false
+09-25 00:25:15.847  4189  4257 D S3PERF  : crosscheck ui_snapshot_fps=9.3936 ui_snapshot_frametime_ms=112.017
+09-25 00:25:15.897  4189  4189 I S3TOUCH : monitor action=down consumed=false
+09-25 00:25:16.106  4189  4189 I S3TOUCH : monitor action=down consumed=false
+09-25 00:25:16.148  4189  4257 D S3PERF  : crosscheck source=surface presented=1595 json_fps=11.6048 json_frametime_ms=61.107
+09-25 00:25:16.285  4189  4189 I S3TOUCH : monitor action=down consumed=false
+09-25 00:25:16.866  4189  4189 I S3TOUCH : monitor action=down consumed=false
+09-25 00:25:17.106  4189  4257 D S3PERF  : crosscheck ui_snapshot_fps=13.4714 ui_snapshot_frametime_ms=52.444
+09-25 00:25:17.113  4189  4189 I S3TOUCH : monitor action=down consumed=false
+09-25 00:25:17.303  4189  4189 I S3TOUCH : monitor action=down consumed=false
+09-25 00:25:17.420  4189  4257 D S3PERF  : crosscheck source=surface presented=1611 json_fps=12.1367 json_frametime_ms=114.953
+09-25 00:25:18.722  4189  4257 D S3PERF  : crosscheck ui_snapshot_fps=19.8102 ui_snapshot_frametime_ms=16.71
+09-25 00:25:19.025  4189  4257 D S3PERF  : crosscheck source=surface presented=1671 json_fps=52.3427 json_frametime_ms=16.135
+09-25 00:25:19.793  4189  4189 I S3TOUCH : root action=down x=2398 y=1023
+09-25 00:25:19.793  4189  4189 I S3TOUCH : monitor action=down consumed=false
+09-25 00:25:19.793  4189  4189 I S3TOUCH : pad action=down menu=false
+09-25 00:25:19.822  4189  4436 W RPCS3   : cellVdecClose(handle=0xf0000300)
+09-25 00:25:19.822  4189  4436 W RPCS3   : _sys_interrupt_thread_disestablish(ih=0x100002a, r13=*0xd0010840)
+09-25 00:25:19.822  4189  4801 W RPCS3   : sys_fs_close(fd=21): Regular file, '/dev_bdvd/PS3_GAME/USRDIR/CINEMATICS/PSDNINT.M2V', Mode: 0x0, Flags: 0x0, Pos/Size: 12.625MB/109.444MB (0xca0000/0x6d71922)
+09-25 00:25:19.822  4189  5292 W RPCS3   : AU decoding: aborted (handle=0xf0000300, seq_id=1, cmd_id=114, abort_decode=1)
+09-25 00:25:19.822  4189  5292 W RPCS3   : 'vdecEntry' aborted (0.010925s)
+09-25 00:25:19.822  4189  5292 D RPCS3   : PPU thread perf stats are not available.
+09-25 00:25:19.918  4189  4434 W RPCS3   : Cached object for address 0x30A80000 was found, but it does not match stored parameters (width=1280 vs 1280; height=720 vs 720; depth=1 vs 0; mipmaps=1 vs 0)
+09-25 00:25:19.945  4189  4257 D S3PERF  : crosscheck ui_snapshot_fps=58.2141 ui_snapshot_frametime_ms=46.324
+09-25 00:25:20.025  4189  4434 W RPCS3   : Cached object for address 0x30A80000 was found, but it does not match stored parameters (width=1280 vs 1280; height=720 vs 720; depth=1 vs 0; mipmaps=1 vs 0)
+09-25 00:25:20.047  4189  4189 I S3TOUCH : root action=down x=2388 y=1015
+09-25 00:25:20.047  4189  4189 I S3TOUCH : monitor action=down consumed=false
+09-25 00:25:20.047  4189  4189 I S3TOUCH : pad action=down menu=false
+09-25 00:25:20.272  4189  4257 D S3PERF  : crosscheck source=surface presented=1726 json_fps=45.3023 json_frametime_ms=61.27
+09-25 00:25:20.296  4189  4436 W RPCS3   : sys_rsx_context_iounmap(context_id=0x55555555, io=0xb700000, size=0xd00000)
+09-25 00:25:20.296  4189  4436 W RPCS3   : sys_rsx_context_iounmap(): RSX is not idle while unmapping io
+09-25 00:25:20.296  4189  4436 W RPCS3   : sys_mmapper_unmap_shared_memory(addr=0x3b700000, mem_id=*0xd0010760)
+09-25 00:25:20.296  4189  4436 W RPCS3   : sys_mmapper_unmap_shared_memory(addr=0x3b800000, mem_id=*0xd0010760)
+09-25 00:25:20.296  4189  4436 W RPCS3   : sys_mmapper_unmap_shared_memory(addr=0x3b900000, mem_id=*0xd0010760)
+09-25 00:25:20.296  4189  4436 W RPCS3   : sys_mmapper_unmap_shared_memory(addr=0x3ba00000, mem_id=*0xd0010760)
+09-25 00:25:20.296  4189  4436 W RPCS3   : sys_mmapper_unmap_shared_memory(addr=0x3bb00000, mem_id=*0xd0010760)
+09-25 00:25:20.296  4189  4436 W RPCS3   : sys_mmapper_unmap_shared_memory(addr=0x3bc00000, mem_id=*0xd0010760)
+09-25 00:25:20.296  4189  4436 W RPCS3   : sys_mmapper_unmap_shared_memory(addr=0x3bd00000, mem_id=*0xd0010760)
+09-25 00:25:20.296  4189  4436 W RPCS3   : sys_mmapper_unmap_shared_memory(addr=0x3be00000, mem_id=*0xd0010760)
+09-25 00:25:20.296  4189  4436 W RPCS3   : sys_mmapper_unmap_shared_memory(addr=0x3bf00000, mem_id=*0xd0010760)
+09-25 00:25:20.296  4189  4436 W RPCS3   : sys_mmapper_unmap_shared_memory(addr=0x3c000000, mem_id=*0xd0010760)
+09-25 00:25:20.296  4189  4436 W RPCS3   : sys_mmapper_unmap_shared_memory(addr=0x3c100000, mem_id=*0xd0010760)
+09-25 00:25:20.297  4189  4436 W RPCS3   : sys_mmapper_unmap_shared_memory(addr=0x3c200000, mem_id=*0xd0010760)
+09-25 00:25:20.297  4189  4436 W RPCS3   : sys_mmapper_unmap_shared_memory(addr=0x3c300000, mem_id=*0xd0010760)
+09-25 00:25:20.332  4189  4434 W RPCS3   : Cached object for address 0x30A80000 was found, but it does not match stored parameters (width=1280 vs 1280; height=720 vs 720; depth=1 vs 0; mipmaps=1 vs 0)
+09-25 00:25:20.657  4189  4189 I S3TOUCH : root action=down x=2376 y=1027
+09-25 00:25:20.658  4189  4189 I S3TOUCH : monitor action=down consumed=false
+09-25 00:25:20.658  4189  4189 I S3TOUCH : pad action=down menu=false
+09-25 00:25:20.882  4189  4189 I S3TOUCH : root action=down x=2376 y=1027
+09-25 00:25:20.882  4189  4189 I S3TOUCH : monitor action=down consumed=false
+09-25 00:25:20.882  4189  4189 I S3TOUCH : pad action=down menu=false
+09-25 00:25:21.235  4189  4257 D S3PERF  : crosscheck ui_snapshot_fps=10.1096 ui_snapshot_frametime_ms=99.286
+09-25 00:25:21.559  4189  4257 D S3PERF  : crosscheck source=surface presented=1739 json_fps=10.1754 json_frametime_ms=91.928
+09-25 00:25:22.353  4189  4257 D S3PERF  : crosscheck ui_snapshot_fps=10.1754 ui_snapshot_frametime_ms=91.928
+09-25 00:25:22.659  4189  4257 D S3PERF  : crosscheck source=surface presented=1750 json_fps=10.188 json_frametime_ms=81.468
+09-25 00:25:23.620  4189  4257 D S3PERF  : crosscheck ui_snapshot_fps=10.2045 ui_snapshot_frametime_ms=116.017
+09-25 00:25:23.927  4189  4257 D S3PERF  : crosscheck source=surface presented=1763 json_fps=9.32047 json_frametime_ms=157.432
+09-25 00:25:24.710  4189  4368 D RPCS3   : CPU Usage: Total: 70.0%, Cores: 0.0%, 0.0%, 0.0%, 0.0%, 0.0%, 0.0%, 0.0%, 0.0%
+09-25 00:25:24.850  4189  4406 D RPCS3   : PPU Syscall Usage Stats:
+09-25 00:25:24.850  4189  4406 D RPCS3   : 	⁂ sys_timer_usleep [203274]
+09-25 00:25:24.850  4189  4406 D RPCS3   : 	⁂ _sys_lwcond_queue_wait [187738]
+09-25 00:25:24.850  4189  4406 D RPCS3   : 	⁂ _sys_lwmutex_lock [184524]
+09-25 00:25:24.850  4189  4406 D RPCS3   : 	⁂ _sys_lwmutex_unlock [178997]
+09-25 00:25:24.850  4189  4406 D RPCS3   : 	⁂ _sys_lwcond_signal [115228]
+09-25 00:25:24.850  4189  4406 D RPCS3   : 	⁂ _sys_lwcond_signal_all [75061]
+09-25 00:25:24.850  4189  4406 D RPCS3   : 	⁂ sys_time_get_current_time [55884]
+09-25 00:25:24.850  4189  4406 D RPCS3   : 	⁂ sys_event_queue_receive [32986]
+09-25 00:25:24.850  4189  4406 D RPCS3   : 	⁂ sys_fs_read [29616]
+09-25 00:25:24.850  4189  4406 D RPCS3   : 	⁂ sys_event_port_send [9027]
+09-25 00:25:24.850  4189  4406 D RPCS3   : 	⁂ sys_fs_lseek [3372]
+09-25 00:25:24.850  4189  4406 D RPCS3   : 	⁂ sys_event_flag_wait [2249]
+09-25 00:25:24.850  4189  4406 D RPCS3   : 	⁂ sys_event_flag_clear [2248]
+09-25 00:25:24.850  4189  4406 D RPCS3   : 	⁂ _sys_lwmutex_trylock [369]
+09-25 00:25:24.850  4189  4406 D RPCS3   : 	⁂ sys_mmapper_unmap_shared_memory [268]
+09-25 00:25:24.850  4189  4406 D RPCS3   : 	⁂ sys_mutex_lock [53]
+09-25 00:25:24.850  4189  4406 D RPCS3   : 	⁂ sys_mutex_unlock [53]
+09-25 00:25:24.850  4189  4406 D RPCS3   : 	⁂ sys_fs_close [21]
+09-25 00:25:24.850  4189  4406 D RPCS3   : 	⁂ sys_rsx_context_iounmap [8]
+09-25 00:25:24.850  4189  4406 D RPCS3   : 	⁂ _sys_interrupt_thread_disestablish [4]
+09-25 00:25:25.188  4189  4257 D S3PERF  : crosscheck ui_snapshot_fps=9.27709 ui_snapshot_frametime_ms=177.281
+09-25 00:25:25.493  4189  4257 D S3PERF  : crosscheck source=surface presented=1779 json_fps=10.7032 json_frametime_ms=96.078
+09-25 00:25:26.444  4189  4257 D S3PERF  : crosscheck ui_snapshot_fps=10.283 ui_snapshot_frametime_ms=84.333
+09-25 00:25:26.749  4189  4257 D S3PERF  : crosscheck source=surface presented=1792 json_fps=10.7412 json_frametime_ms=87.011
+09-25 00:25:27.274  4189  4189 I S3TOUCH : root action=down x=2385 y=1074
+09-25 00:25:27.274  4189  4189 I S3TOUCH : monitor action=down consumed=false
+09-25 00:25:27.274  4189  4189 I S3TOUCH : pad action=down menu=false
+09-25 00:25:28.333  4189  4189 I S3TOUCH : root action=down x=2384 y=1017
+09-25 00:25:28.334  4189  4189 I S3TOUCH : monitor action=down consumed=false
+09-25 00:25:28.334  4189  4189 I S3TOUCH : pad action=down menu=false
+09-25 00:25:28.334  4189  4257 D S3PERF  : crosscheck ui_snapshot_fps=10.0302 ui_snapshot_frametime_ms=126.924
+09-25 00:25:28.641  4189  4257 D S3PERF  : crosscheck source=surface presented=1809 json_fps=8.67489 json_frametime_ms=84.428
+09-25 00:25:29.594  4189  4257 D S3PERF  : crosscheck ui_snapshot_fps=10.3347 ui_snapshot_frametime_ms=70.894
+09-25 00:25:29.899  4189  4257 D S3PERF  : crosscheck source=surface presented=1821 json_fps=9.52096 json_frametime_ms=110.942
+09-25 00:25:31.742  4189  4227 D S3PERF  : crosscheck ui_snapshot_fps=7.40017 ui_snapshot_frametime_ms=139.144
+09-25 00:25:32.052  4189  4227 D S3PERF  : crosscheck source=surface presented=1836 json_fps=5.75937 json_frametime_ms=80.629
+09-25 00:25:32.469  4189  4434 E RPCS3   : FIFO error: possible desync event (last cmd = 0xbf647f5b)
+09-25 00:25:32.985  4189  4227 D S3PERF  : crosscheck ui_snapshot_fps=8.02401 ui_snapshot_frametime_ms=190.063
+09-25 00:25:33.294  4189  4227 D S3PERF  : crosscheck source=surface presented=1845 json_fps=7.60677 json_frametime_ms=128.988
+09-25 00:25:34.709  4189  4368 D RPCS3   : CPU Usage: Total: 57.0%, Cores: 0.0%, 0.0%, 0.0%, 0.0%, 0.0%, 0.0%, 0.0%, 0.0%
+09-25 00:25:34.818  4189  4227 D S3PERF  : crosscheck ui_snapshot_fps=7.22361 ui_snapshot_frametime_ms=105.928
+09-25 00:25:34.850  4189  4406 D RPCS3   : PPU Syscall Usage Stats:
+09-25 00:25:34.850  4189  4406 D RPCS3   : 	⁂ sys_timer_usleep [218515]
+09-25 00:25:34.850  4189  4406 D RPCS3   : 	⁂ _sys_lwcond_queue_wait [190319]
+09-25 00:25:34.850  4189  4406 D RPCS3   : 	⁂ _sys_lwmutex_lock [186760]
+09-25 00:25:34.850  4189  4406 D RPCS3   : 	⁂ _sys_lwmutex_unlock [180867]
+09-25 00:25:34.850  4189  4406 D RPCS3   : 	⁂ _sys_lwcond_signal [116392]
+09-25 00:25:34.850  4189  4406 D RPCS3   : 	⁂ _sys_lwcond_signal_all [76256]
+09-25 00:25:34.850  4189  4406 D RPCS3   : 	⁂ sys_time_get_current_time [56744]
+09-25 00:25:34.850  4189  4406 D RPCS3   : 	⁂ sys_event_queue_receive [35493]
+09-25 00:25:34.850  4189  4406 D RPCS3   : 	⁂ sys_fs_read [29852]
+09-25 00:25:34.850  4189  4406 D RPCS3   : 	⁂ sys_event_port_send [9758]
+09-25 00:25:34.850  4189  4406 D RPCS3   : 	⁂ sys_fs_lseek [3445]
+09-25 00:25:34.850  4189  4406 D RPCS3   : 	⁂ sys_event_flag_wait [2412]
+09-25 00:25:34.850  4189  4406 D RPCS3   : 	⁂ sys_event_flag_clear [2412]
+09-25 00:25:34.850  4189  4406 D RPCS3   : 	⁂ _sys_lwmutex_trylock [394]
+09-25 00:25:35.124  4189  4227 D S3PERF  : crosscheck source=surface presented=1856 json_fps=6.43701 json_frametime_ms=133.053
+09-25 00:25:36.049  4189  4189 I S3TOUCH : root action=down x=2406 y=987
+09-25 00:25:36.049  4189  4189 I S3TOUCH : monitor action=down consumed=false
+09-25 00:25:36.049  4189  4189 I S3TOUCH : pad action=down menu=false
+09-25 00:25:36.091  4189  4227 D S3PERF  : crosscheck ui_snapshot_fps=6.33181 ui_snapshot_frametime_ms=108.853
+09-25 00:25:36.396  4189  4227 D S3PERF  : crosscheck source=surface presented=1865 json_fps=7.08611 json_frametime_ms=149.198
