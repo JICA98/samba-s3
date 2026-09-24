@@ -2,6 +2,8 @@ package com.zenithblue.sambas3.ui.drivers
 
 import android.util.Log
 import android.view.KeyEvent
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -79,6 +81,7 @@ import com.zenithblue.sambas3.utils.AdrenoGpuDetector
 import com.zenithblue.sambas3.utils.GeneralSettings
 import com.zenithblue.sambas3.utils.GeneralSettings.string
 import com.zenithblue.sambas3.utils.GpuDriverHelper
+import com.zenithblue.sambas3.utils.GpuDriverInstallResult
 import com.zenithblue.sambas3.utils.GpuDriverSelection
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -111,6 +114,20 @@ fun GpuDriversScreen(
             withContext(Dispatchers.Main) {
                 drivers = updated
                 selectedDriver = sel
+            }
+        }
+    }
+
+    val importDriver = rememberLauncherForActivityResult(ActivityResultContracts.OpenDocument()) { uri ->
+        if (uri == null) return@rememberLauncherForActivityResult
+        scope.launch(Dispatchers.IO) {
+            val result = runCatching {
+                context.contentResolver.openInputStream(uri)?.use { GpuDriverHelper.installDriver(context, it) }
+                    ?: GpuDriverInstallResult.InvalidArchive
+            }.getOrDefault(GpuDriverInstallResult.InvalidArchive)
+            withContext(Dispatchers.Main) {
+                refreshInstalled()
+                snackbarHostState.showSnackbar(GpuDriverHelper.resolveInstallResultToString(result))
             }
         }
     }
@@ -287,6 +304,9 @@ fun GpuDriversScreen(
     ) {
         Column(modifier = Modifier.fillMaxSize().padding(horizontal = 16.dp)) {
             SnackbarHost(hostState = snackbarHostState)
+            Button(onClick = { importDriver.launch(arrayOf("application/zip", "application/octet-stream")) }) {
+                Text("IMPORT ADPKG")
+            }
             Spacer(modifier = Modifier.height(12.dp))
             Box(modifier = Modifier.weight(1f).fillMaxWidth()) {
                 InstalledTabContent()
@@ -327,4 +347,3 @@ fun GpuDriversScreen(
         )
     }
 }
-

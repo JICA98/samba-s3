@@ -1,0 +1,45 @@
+{
+  "schema_version": 1,
+  "task_id": "W00-TESTER-002",
+  "phase": "PASSIVE_LIVE_GAME_OBSERVATION",
+  "role": "tester",
+  "requested_model_label": "GPT-6 Luna High",
+  "role_prompt_sha256": "4fc7609d0512ed0c85199bc175677e54ec0df43e8c06ca7b81e20a89991cd740",
+  "base_candidate_id": "INSTALLED_RELEASE_UNATTRIBUTED",
+  "base_commit": "8c95cb5b27a54d72328b993cd27fd8d5947c794d",
+  "core_head": "657b26a0d197c29d42cdcf3b3f6e8ad5c6765bbc",
+  "core_source_manifest_sha256": "f34eef4eef0e1926012bfd7be922d8d10bf9a9630a841b392a7efa51eba62145",
+  "input_manifest_sha256": "4f5eed78ba7c80c09b8243603966926c5a5a4004fd3578765fa3d3d1ecf32a59",
+  "acceptance_contract_sha256": "7a58413ce32c82557d12272b7e4bd5d4df686667d1df08856042e0217e91c5b2",
+  "prior_backup_result_sha256": "d57d156a1b74949f867e7ff1c754c3443dec55b680ced48f544ae4dd2e2a910a",
+  "collector_prep_result_sha256": "fffb2d217ce3970c69f4a996676b55e3e87681f4e2a51741e740b48a5d8ac3ba",
+  "hypothesis": "Once the outside ADB actor is terminal or explicitly coordinated away, the already-running user GOW3 session can be attributed by current PID/session/title and diagnosed without launch, input, save/load, or disturbance of game state.",
+  "dispatch_gate": "DO NOT DISPATCH until foreground orchestrator documents exclusive shared-phone/ADB coordination or verified terminal state for the Scrapstorm actor.",
+  "scope": [
+    "Reuse the existing Luna High tester handle and prior W00-TESTER-001 private evidence. This is a new run ID, not a continuation of the invalidated prelaunch run.",
+    "No device command before explicit dispatch after the external actor gate. Then acquire a fresh persistent OS-held flock for the verified OnePlus 13R and shared ADB server; all commands stay under it. Revalidate stable USB identity, current serial, foreground game process/session/title, current battery temperature and thermal state, and durable backup integrity. Do not assume the user-reported live session still exists.",
+    "Preserve the existing process. Do not call debug-launch-game.sh, am start/force-stop, agent-device open, debug-pad.sh, input, install, settings/driver commands, save/load, or logcat -c. A failed identity or thermal gate ends the task without probing through mutation.",
+    "At a coordinated low-impact observation boundary, record host UTC/monotonic time, device monotonic time if available, app PID/start identity, foreground activity and a bounded PID-scoped logcat slice. Keep raw output and command exit codes private. Attribute GOW3 only if a fresh app session/manifest or current log identifies BCUS98111; otherwise mark game identity UNKNOWN.",
+    "Do not run full get-samba-logs.sh or broad system diagnostics inside a timing window. At the user's natural safe pause, hand the verified live session ID, serial mapping, lease schedule and capture boundary to the distinct log collector for one canonical log bundle. If no safe pause occurs, report diagnostic partial evidence and defer the heavy bundle; do not stop gameplay to force it.",
+    "Never score FPS or energy from overlay/present-only counters. Mark the current session diagnostic/unscored until W01 frame provenance and independent evaluator review exist. Preserve all interference and denied/unavailable-field evidence."
+  ],
+  "allowed_write_paths": ["private run output: .git/gow3-13r-private/jobs/W00-TESTER-002"],
+  "read_only_evidence": [
+    ".git/gow3-13r-private/jobs/W00-TESTER-001/result.json",
+    ".git/gow3-13r-private/jobs/W00-TESTER-001/handoff.md",
+    ".git/gow3-13r-private/jobs/W00-COLLECT-PREP-001/handoff.md",
+    "docs/gow3-13r/acceptance.json",
+    "docs/gow3-13r/W00_READINESS.md"
+  ],
+  "required_tests": [
+    "External actor terminal/coordination verified before any device command.",
+    "Fresh OS lock, USB identity, app PID/session/title, backup and thermal state recorded; unavailable fields explicit.",
+    "No launch, input, install, settings, save/load, forced pause/stop, or full collector during gameplay."
+  ],
+  "deliverables": ["private lease/command ledger", "bounded live-session identity and diagnostic evidence", "private result.json and handoff to collector"],
+  "timeout_seconds": 1800,
+  "authorized_budget": "One 30-minute passive diagnostic window only after explicit coordination. No gameplay mutation or scored benchmark.",
+  "device_lease_required": true,
+  "device_commands_allowed": "read-only bounded commands only after explicit dispatch gate",
+  "output_directory": "/home/abhaybyte/repos/samba-s3/.git/gow3-13r-private/jobs/W00-TESTER-002"
+}

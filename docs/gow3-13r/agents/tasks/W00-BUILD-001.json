@@ -1,0 +1,52 @@
+{
+  "schema_version": 1,
+  "task_id": "W00-BUILD-001",
+  "status": "READY_NOT_DISPATCHED",
+  "role": "build_metrics_worker",
+  "requested_model_label": "GPT-6 Luna High",
+  "role_prompt_sha256": "1f8d27388db60c1662c9d94831b71bbecc487af66136fd5857b74bcb4d5ea8df",
+  "base_candidate_id": "SOURCE_BASELINE_DIRTY_UNBUILT",
+  "base_commit": "8c95cb5b27a54d72328b993cd27fd8d5947c794d",
+  "core_head": "657b26a0d197c29d42cdcf3b3f6e8ad5c6765bbc",
+  "application_whole_diff_sha256": "0d92e24372b090fa9c0ace8b5b7811ff33f669969ee6424df8cbbfa25f97f14c",
+  "core_diff_sha256": "ff3ecb0cc8d050a6935f6b499d72ff742d64b084affe5f4a677dce478f26ddda",
+  "core_source_manifest_sha256": "f34eef4eef0e1926012bfd7be922d8d10bf9a9630a841b392a7efa51eba62145",
+  "input_manifest_sha256": "4f5eed78ba7c80c09b8243603966926c5a5a4004fd3578765fa3d3d1ecf32a59",
+  "acceptance_contract_sha256": "7a58413ce32c82557d12272b7e4bd5d4df686667d1df08856042e0217e91c5b2",
+  "hypothesis": "The patch guard mistakes a generated build-ID difference for unapplied engine patches. A narrow guard adjustment can validate every persistent patch hunk and allow the unchanged dirty core to reach the build stamp step.",
+  "scope": [
+    "Read the canonical WORKER.md, SUBAGENTS.md, role prompt 07 and repository AGENTS.md.",
+    "Create an isolated task worktree with the exact dirty application/core source reconstructed and checked against the input hashes; preserve the user's original trees.",
+    "Repair only the build_rpcsx.sh patch guard for generated android/src/samba-build-id.cpp while retaining failure on other stale/missing patch hunks.",
+    "Produce a reproducible source bundle or patch manifest for the exact dirty baseline and prove that it reconstitutes the expected source hashes.",
+    "Do not build or install an APK in this task. Report whether a later source-built release is ready for reviewer authorization."
+  ],
+  "allowed_write_paths": [
+    "isolated task worktree: build_rpcsx.sh",
+    "isolated task worktree: narrow host patch-guard test if needed",
+    "private job output: .git/gow3-13r-private/jobs/W00-BUILD-001"
+  ],
+  "read_only_evidence": [
+    "docs/gow3-13r/source-input-manifest.json",
+    "docs/gow3-13r/candidate-baseline.json",
+    "docs/gow3-13r/acceptance.json",
+    "patches/rpcsx-submodule-changes.patch",
+    "current dirty app and core source"
+  ],
+  "required_tests": [
+    "bash syntax check of changed script",
+    "current dirty core passes patch-applied detection without modifying its generated build-ID file",
+    "a non-generated patch mismatch still makes the guard fail in a disposable copy or isolated fixture",
+    "source reconstruction checks exact app/core diff hashes"
+  ],
+  "deliverables": [
+    "reviewable diff/patch and isolated worktree path",
+    "source bundle/manifest with hashes and reconstruction commands",
+    "host command log with exit codes",
+    "private result.json and brief Markdown handoff"
+  ],
+  "timeout_seconds": 1800,
+  "authorized_budget": "One focused 30-minute host-only W00 task; no device commands, network downloads, APK build, or unrelated code changes.",
+  "device_lease_required": false,
+  "output_directory": "/home/abhaybyte/repos/samba-s3/.git/gow3-13r-private/jobs/W00-BUILD-001"
+}

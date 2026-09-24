@@ -1,0 +1,15 @@
+{
+  "schema_version": 1,
+  "runner": "Codex CLI 0.156.1",
+  "trusted_verification": "Read-only join of thread_spawn_edges.child_thread_id to threads.id in local Codex state database, filtered by the coordinating parent thread; full handles retained privately.",
+  "bindings": [
+    {"role": "orchestrator", "requested_label": "GPT-6 Sol Max", "provider": "openai", "model": "gpt-6-sol", "reasoning_effort": "xhigh", "verified": true, "runtime_ref": "private:foreground_root", "deviation": "User-directed foreground takeover; session effort is fixed mid-run."},
+    {"role": "former_orchestrator_adviser", "requested_label": "GPT-6 Sol Max", "provider": "openai", "model": "gpt-6-sol", "reasoning_effort": "max", "verified": true, "runtime_ref": "private:orchestrator", "status": "completed; no current dispatch authority"},
+    {"role": "reviewer", "requested_label": "GPT-6 Sol Max", "provider": "openai", "model": "gpt-6-sol", "reasoning_effort": "max", "verified": true, "runtime_ref": "private:reviewer"},
+    {"role": "performance_analyst", "requested_label": "GPT-6 Luna High", "provider": "openai", "model": "gpt-6-luna", "reasoning_effort": "high", "verified": true, "runtime_ref": "private:metrics_analyst", "scope": "read-only metric source audit"},
+    {"role": "auxiliary_provenance_probe", "requested_label": "GPT-6 Luna High", "provider": "openai", "model": "gpt-6-luna", "reasoning_effort": "high", "verified": true, "runtime_ref": "private:provenance", "scope": "read-only source and artifact inventory"},
+    {"role": "build_metrics_worker", "requested_label": "GPT-6 Luna High", "provider": "openai", "model": "gpt-6-luna", "reasoning_effort": "high", "verified": true, "runtime_ref": "private:build_metrics_worker", "scope": "W00-BUILD-001 host-only patch guard and source bundle"},
+    {"role": "tester", "requested_label": "GPT-6 Luna High", "provider": "openai", "model": "gpt-6-luna", "reasoning_effort": "high", "verified": true, "runtime_ref": "private:tester", "scope": "W00-TESTER-001 lease-gated device inventory, backup, bounded observational launch and logs"}
+  ],
+  "unspawned_role_rule": "Do not infer a runtime binding from a role prompt or planned registry entry. Verify the selected model and effort in trusted runner metadata for each new child."
+}

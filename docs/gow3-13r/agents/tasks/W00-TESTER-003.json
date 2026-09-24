@@ -1,0 +1,42 @@
+{
+  "schema_version": 1,
+  "task_id": "W00-TESTER-003",
+  "phase": "BOUNDED_GOW3_SCRIPTED_RETRY",
+  "role": "tester",
+  "requested_model_label": "GPT-6 Luna High",
+  "role_prompt_sha256": "4fc7609d0512ed0c85199bc175677e54ec0df43e8c06ca7b81e20a89991cd740",
+  "base_candidate_id": "INSTALLED_RELEASE_UNATTRIBUTED",
+  "base_commit": "8c95cb5b27a54d72328b993cd27fd8d5947c794d",
+  "core_source_manifest_sha256": "f34eef4eef0e1926012bfd7be922d8d10bf9a9630a841b392a7efa51eba62145",
+  "input_manifest_sha256": "4f5eed78ba7c80c09b8243603966926c5a5a4004fd3578765fa3d3d1ecf32a59",
+  "acceptance_contract_sha256": "7a58413ce32c82557d12272b7e4bd5d4df686667d1df08856042e0217e91c5b2",
+  "prior_tester_result_sha256": "82cea831ae93640e7482d5da2144f050d9a42ecac50bd1f978feb167f0ee067e",
+  "prior_terminal_session_id": "1790169119700-c35beb3b",
+  "prior_session_native_log_sha256": "113a861d1419f98ca1856a291328f332a1e74c268b822fa32c57c1e179b127bd",
+  "prior_canonical_capture": ".git/gow3-13r-private/jobs/W00-COLLECT-001/canonical-1790169119700-c35beb3b",
+  "hypothesis": "One fresh, script-controlled retry on the unchanged installed release can confirm GOW3 boot, first-frame/gameplay progress and bounded controller-bridge delivery, while recording whether the prior SPU/FIFO failure recurs; it is not a scored FPS or save/load run.",
+  "scope": [
+    "Reuse the existing verified Luna High tester and prior durable 1,188-file backup. Start only after W00-COLLECT-001 canonical failure bundle has completed exactly once with exit 0 and its read-only lock is released. The prior user-run GOW3 session ended FAILED at 13:29:16Z; its exact native log is already preserved and contains SPU access violation/FIFO desync. This task is one controlled retry, not permission for repeated unbounded boots.",
+    "Acquire a fresh run-scoped persistent OS flock on the shared phone/ADB lock. Revalidate the OnePlus 13R USB identity/serial, installed package and registered direct_iso/BCUS98111 path, current app focus/no live GOW3 session, backup hashes and fresh battery/HAL/thermal status. Stop before launch if Android thermal status is SEVERE or battery temperature is at/above 43 °C, OEM warning appears, exact installation/game identity changes, or another ADB actor resumes. No unattended soak.",
+    "If no GOW3 session is live and current MainActivity is foreground, invoke scripts/debug-launch-game.sh once with explicit verified serial and exact registered direct_iso/BCUS98111 path. Never start RPCSXActivity directly, force-stop, reinstall, change driver/settings, clear caches/logcat or reset existing saves. If the script fails or focus times out, preserve fresh failure evidence before any new attempt; do not auto-retry in this packet.",
+    "Separate boot ACK/focus from first native frame and visible gameplay. Observe boundedly for first-frame/current session markers and optionally one non-disruptive agent-device milestone screenshot only if the installed CLI can attach without relaunching/foregrounding a different activity; otherwise mark visual evidence unavailable and ask the user. Do not infer real FPS from present counts or overlay.",
+    "After current game state is understood, use only scripts/debug-pad.sh with named pulses: at most one START, one CROSS and one SQUARE in that order or a safer subset justified by the visible state. Verify each DebugPad press-and-release ACK and any user-visible transition separately; do not spam a frozen game. No raw hold unless explicitly approved later. Do not press save/load/settings/exit controls or overwrite any user data.",
+    "Keep the active control observation short (up to 3 minutes after first frame) and check fresh thermal/battery again at a safe boundary; stop input immediately on thermal ceiling, freeze or failure. Do not automatically stop a surviving user game. Coordinate one fresh canonical log bundle with the distinct collector after terminal failure or a natural game pause; never duplicate the previous session bundle. If no safe pause, preserve a bounded current-session log slice and report deferred full capture.",
+    "Record exact times, PID/session/title/boot/focus/first-frame/input ACKs, thermal readings, command exits and any failure. Return private result.json and handoff. Mark real FPS, energy, save/load and full campaign gates INCONCLUSIVE/UNTESTED."
+  ],
+  "allowed_write_paths": ["private output: .git/gow3-13r-private/jobs/W00-TESTER-003"],
+  "read_only_evidence": [
+    ".git/gow3-13r-private/jobs/W00-TESTER-002/result.json",
+    ".git/gow3-13r-private/jobs/W00-COLLECT-001/canonical-1790169119700-c35beb3b/session/1790169119700-c35beb3b/manifest.json",
+    ".git/gow3-13r-private/jobs/W00-COLLECT-001/canonical-1790169119700-c35beb3b/session/1790169119700-c35beb3b/raw/native/1790170156574/RPCSX.log",
+    "scripts/debug-launch-game.sh",
+    "scripts/debug-pad.sh",
+    "docs/gow3-13r/acceptance.json"
+  ],
+  "required_tests": ["fresh device/registry/backup/thermal/lock gates", "at most one canonical launch attempt in this task", "each permitted pad pulse verified by DebugPad press/release ACK", "failure/terminal evidence collected once before any later retry"],
+  "deliverables": ["private lease/command and current-session evidence", "bounded launch/controller result", "thermal safety and log handoff", "private result.json"],
+  "timeout_seconds": 1800,
+  "authorized_budget": "One 30-minute lease-gated controlled retry with max one launch attempt and at most three named pad pulses. No install/settings/save-load/stress or third unchanged-hypothesis boot.",
+  "device_lease_required": true,
+  "output_directory": "/home/abhaybyte/repos/samba-s3/.git/gow3-13r-private/jobs/W00-TESTER-003"
+}

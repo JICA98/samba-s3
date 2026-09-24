@@ -1,0 +1,19 @@
+{
+  "schema_version": 1,
+  "active_implementation_worktrees": ["W01-BUILD-001 offline isolated evaluator worktree, now owned by W01-BUILD-002 review correction"],
+  "active_build_owner": "build_metrics_worker W01-BUILD-002 (evaluator correction only; no build authorized)",
+  "active_device_lease": "read-only collector shared ADB lock W00-COLLECT-001 pending/acquiring; no tester mutation lease",
+  "active_host_tester_preparation": null,
+  "device_scope": "verified OnePlus 13R CPH2691 only; physical identity and serial private",
+  "shared_adb_server_exclusion": "INVALIDATED: another live workspace issued ADB input outside the tester flock; tester lease released, fresh coordination required",
+  "global_status_owner": "foreground /root orchestrator (verified Sol xhigh; user-directed deviation)",
+  "build_integration_owner": "build_metrics_worker once spawned and scoped",
+  "device_mutation_owner": "tester only after lease",
+  "collector_policy": "scheduled allowlisted read-only commands only",
+  "completed_build_path_domain": {
+    "task_id": "W00-BUILD-001",
+    "role": "build_metrics_worker",
+    "paths": ["build_rpcsx.sh", "assigned host verification tests and private source manifest output"],
+    "status": "W00-BUILD-001 rejected; W00-BUILD-002 correction completed for W00-REVIEW-003; no source build authorized"
+  }
+}

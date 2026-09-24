@@ -1,0 +1,46 @@
+{
+  "schema_version": 1,
+  "task_id": "W01-BUILD-002",
+  "phase": "REVIEW_CORRECTION",
+  "role": "build_metrics_worker",
+  "requested_model_label": "GPT-6 Luna High",
+  "role_prompt_sha256": "1f8d27388db60c1662c9d94831b71bbecc487af66136fd5857b74bcb4d5ea8df",
+  "base_candidate_id": "SOURCE_BASELINE_DIRTY_UNBUILT",
+  "base_commit": "8c95cb5b27a54d72328b993cd27fd8d5947c794d",
+  "core_source_manifest_sha256": "f34eef4eef0e1926012bfd7be922d8d10bf9a9630a841b392a7efa51eba62145",
+  "input_manifest_sha256": "4f5eed78ba7c80c09b8243603966926c5a5a4004fd3578765fa3d3d1ecf32a59",
+  "acceptance_contract_sha256": "7a58413ce32c82557d12272b7e4bd5d4df686667d1df08856042e0217e91c5b2",
+  "prior_task_id": "W01-BUILD-001",
+  "prior_patch_sha256": "918f8d63bbd3a0b7ef398de34045c458bd0708faaf7ea590510f2bad68633438",
+  "prior_result_sha256": "90e847f4a9bec369d56e5a952897eae120952aafa6a385191b2ed8cd96c6ec0b",
+  "review_id": "W01-REVIEW-001",
+  "review_decision": "REJECT_METHOD_INTEGRATION",
+  "review_sha256": "2f626791cd359b91b078c69288b106058a8ea23c67c4fac413f39c1cd0d36e42",
+  "hypothesis": "Closing the four independent adversarial false-PASS paths and repairing the manifest will leave an evaluator that is safely INCONCLUSIVE without a verified native producer and complete identity/timeline evidence.",
+  "scope": [
+    "Reuse the existing isolated W01-BUILD-001 worktree and complete reviewer evidence. Do not edit original dirty app/core source, change acceptance.json, build, use network or touch a device.",
+    "Enforce a positive trusted-producer/provenance gate independent of run self-report. Because no reviewed native guest/render/present producer exists yet, every current CLI and direct API path must remain INCONCLUSIVE on frame scoring even if in-memory acceptance revision/executable are filled. Do not fake an attestation or make a syntactically valid run self-approve.",
+    "Bind run game revision and executable digest to the exact reviewed contract, and require independent installed artifact/title/settings identity corroboration before future PASS. Unsupported or unavailable corroboration is INCONCLUSIVE, not a permissive placeholder.",
+    "Make phase segments ordered, non-overlapping and exhaustive for the full raw session; explicitly classify every non-gameplay boundary and prohibit unscored active gameplay. Account for cross-segment intervals or mark the run INCONCLUSIVE/FAIL rather than silently skipping a stall. Derive guest/real-time speed from verified raw clock/progress records, not a self-reported ratio.",
+    "Require all mandatory 5-second scored gameplay windows to be evaluated and non-null. A run split into 180 one-second gameplay segments must not pass. Check window endpoint arithmetic and raw coverage. Preserve exact registered definitions for 1% low and p99.",
+    "Add adversarial host tests reproducing the review's four probes plus unscored gameplay, re-polled/dropped-tail records, overflow and invalid energy sensor. Fix SHA256SUMS and independently run sha256sum -c. Record any requirement that cannot be implemented without the native producer as an explicit gate, not a speculative PASS.",
+    "Return a new exact patch, test/command log with exit codes, content hashes, result.json and handoff. Independent Sol Max re-review required; no candidate or device score may be promoted."
+  ],
+  "allowed_write_paths": [
+    "existing isolated W01-BUILD-001 worktree: scripts/perf/evaluate_run.py, summarize-run.py and focused scripts/perf tests",
+    "private output: .git/gow3-13r-private/jobs/W01-BUILD-002"
+  ],
+  "read_only_evidence": [
+    "docs/gow3-13r/agents/reviews/W01-REVIEW-001.md",
+    ".git/gow3-13r-private/jobs/W01-REVIEW-001",
+    ".git/gow3-13r-private/jobs/W01-BUILD-001",
+    "docs/gow3-13r/acceptance.json",
+    "docs/gow3-13r/SOURCE_MAP.md"
+  ],
+  "required_tests": ["all focused tests including reviewer adversarial probes pass", "no-argument CLI remains non-success without demo data", "sha256sum -c new manifest exits 0", "original dirty app/core diff hashes unchanged"],
+  "deliverables": ["new content-addressed source patch and SHA256SUMS", "host tests and command log", "producer/identity gap note", "private result.json and handoff"],
+  "timeout_seconds": 2700,
+  "authorized_budget": "One 45-minute host-only review correction. No network/core/APK build/device/source-tree mutation outside isolated worktree.",
+  "device_lease_required": false,
+  "output_directory": "/home/abhaybyte/repos/samba-s3/.git/gow3-13r-private/jobs/W01-BUILD-002"
+}

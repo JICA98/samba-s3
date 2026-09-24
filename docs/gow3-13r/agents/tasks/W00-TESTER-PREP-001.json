@@ -1,0 +1,48 @@
+{
+  "schema_version": 1,
+  "task_id": "W00-TESTER-PREP-001",
+  "phase": "HOST_PREPARATION",
+  "role": "tester",
+  "requested_model_label": "GPT-6 Luna High",
+  "role_prompt_sha256": "4fc7609d0512ed0c85199bc175677e54ec0df43e8c06ca7b81e20a89991cd740",
+  "base_candidate_id": "PREEXISTING_RELEASE_UNATTRIBUTED",
+  "base_commit": "8c95cb5b27a54d72328b993cd27fd8d5947c794d",
+  "core_head": "657b26a0d197c29d42cdcf3b3f6e8ad5c6765bbc",
+  "core_source_manifest_sha256": "f34eef4eef0e1926012bfd7be922d8d10bf9a9630a841b392a7efa51eba62145",
+  "input_manifest_sha256": "4f5eed78ba7c80c09b8243603966926c5a5a4004fd3578765fa3d3d1ecf32a59",
+  "acceptance_contract_sha256": "7a58413ce32c82557d12272b7e4bd5d4df686667d1df08856042e0217e91c5b2",
+  "hypothesis": "A source-grounded inventory can make the first data-preserving backup and observational launch procedure concrete before a device lease is issued, while identifying paths and permissions that require target verification.",
+  "scope": [
+    "Read the canonical WORKER.md, SUBAGENTS.md, role prompt 08, repository AGENTS.md and relevant device-test, launch, controller, logs and agent-device skills; inspect installed agent-device workflow help.",
+    "Host-only inspect source and existing scripts for game registry, persistent PS3 saves, emulator save states, thumbnails, settings, driver selection, firmware and export/provider access paths.",
+    "Write a bounded backup-first procedure with source locations, proposed exact read/copy/restore-on-copy checks, permission and unknown-identity branches, thermal units check, and later lease-dependent observational launch stages.",
+    "Identify any command that would mutate device state and mark it unavailable until a separate enforced lease; include canonical launch/input/log rules for the later run.",
+    "Do not run adb, agent-device open/snapshot, launch, input, log collection, install, backup or any device command in this preparatory task."
+  ],
+  "allowed_write_paths": [
+    "private job output: .git/gow3-13r-private/jobs/W00-TESTER-PREP-001"
+  ],
+  "read_only_evidence": [
+    "docs/gow3-13r/W00_READINESS.md",
+    "docs/gow3-13r/acceptance.json",
+    "docs/gow3-13r/candidate-baseline.json",
+    "application save/registry/settings/driver source and existing device scripts"
+  ],
+  "required_checks": [
+    "Distinguish host-visible backup sources from app-private or SAF-only data that may need an in-app export/provider path.",
+    "Preserve existing slots and native persistent saves; no overwrite until validated backup.",
+    "Mark parent-reported device/game/thermal values provisional because raw command output was not archived.",
+    "Do not treat focus/boot ACK as first frame or presentation FPS as real FPS.",
+    "Record no device command execution and no actual backup in result.json."
+  ],
+  "deliverables": [
+    "private backup-readiness.md with source-linked path and permission matrix",
+    "private later-device-run sequence with enforced lease prerequisites and abort rules",
+    "private result.json and concise handoff; all actual device fields remain null/unverified"
+  ],
+  "timeout_seconds": 900,
+  "authorized_budget": "One 15-minute host-only tester preparation; no ADB/device command, source edit, install, network download, or benchmark.",
+  "device_lease_required": false,
+  "device_commands_allowed": false,
+  "output_directory": "/home/abhaybyte/repos/samba-s3/.git/gow3-13r-private/jobs/W00-TESTER-PREP-001"
+}

@@ -1456,7 +1456,7 @@ Java_com_zenithblue_sambas3_RPCSX_settingsGetEffective(
 extern "C" JNIEXPORT jboolean JNICALL
 Java_com_zenithblue_sambas3_RPCSX_supportsCustomDriverLoading(JNIEnv *env,
                                                  jobject instance) {
-  return access("/dev/kgsl-3d0", F_OK) == 0;
+  return access("/dev/kgsl-3d0", F_OK) == 0 || access("/dev/mali0", F_OK) == 0;
 }
 
 extern "C" JNIEXPORT jstring JNICALL

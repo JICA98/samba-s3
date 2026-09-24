@@ -1,0 +1,51 @@
+{
+  "schema_version": 1,
+  "task_id": "W00-REVIEW-003",
+  "role": "reviewer",
+  "requested_model_label": "GPT-6 Sol Max",
+  "base_candidate_id": "SOURCE_BASELINE_DIRTY_UNBUILT",
+  "base_commit": "8c95cb5b27a54d72328b993cd27fd8d5947c794d",
+  "core_head": "657b26a0d197c29d42cdcf3b3f6e8ad5c6765bbc",
+  "input_manifest_sha256": "4f5eed78ba7c80c09b8243603966926c5a5a4004fd3578765fa3d3d1ecf32a59",
+  "core_source_manifest_sha256": "f34eef4eef0e1926012bfd7be922d8d10bf9a9630a841b392a7efa51eba62145",
+  "acceptance_contract_sha256": "7a58413ce32c82557d12272b7e4bd5d4df686667d1df08856042e0217e91c5b2",
+  "subject_task_id": "W00-BUILD-002",
+  "subject_task_packet_sha256": "7d6b7563c95a5f9d77fc127058a2df2e8ae870978569e72b4bef5e0add4de75c",
+  "subject_result_sha256": "398ec924e06ceefd51f09eecc860031befcd08280a327388d5b4c93a7f0981de",
+  "subject_guard_patch_sha256": "e39d810bdd121633b42baf11e58c63e59e9207b1ae54a007e6537da7ad93f628",
+  "subject_guard_test_sha256": "1b0d070b16e1e6efa1a9f68184d1abd10b76d519d2ac78c44f92cbc12ece0a4f",
+  "subject_core_bundle_sha256": "e32cd30f249ecc25296a4027af0c6e7656a3ec53c458ffeb9a3bc2eda5315691",
+  "subject_bundle_manifest_sha256": "4395e04870f33f08581e5a7d7c11fbaed13240d32fa91b6aaf054ad627fee64d",
+  "subject_command_log_sha256": "318bbf6d7dfbf71ce3b82ad04316e3137995a54cb21e8ca39700ead955716b8e",
+  "hypothesis": "The W00-BUILD-002 correction closes every W00-BUILD-001 rejection finding without changing the original dirty source or making an unapproved release candidate.",
+  "scope": [
+    "Independently verify each subject artifact hash and review the actual revised isolated build script, test code, patch and command log, not just the worker's result assertions.",
+    "Revisit every prior REJECT finding: release invocation cannot false-succeed with legacy guard-only environment variable; explicit check-only is genuinely non-mutating; nonempty generated-only patch is rejected; all persistent hunks are validated; focused tests cover positive and negative cases.",
+    "Verify the pinned core commit is actually present in the bundle without relying on the original object database or alternates, and that the dirty core patch reproduces the expected diff hash in a scratch checkout. Check bundle provenance and manifest field meanings; upstream reachability may remain UNKNOWN if not needed for local authorized reconstruction.",
+    "Verify original application's whole diff 0d92e24372b090fa9c0ace8b5b7811ff33f669969ee6424df8cbbfa25f97f14c, core diff ff3ecb0cc8d050a6935f6b499d72ff742d64b084affe5f4a677dce478f26ddda, and initialized submodule registration remain intact. Keep the historical wrong-revision clone exit code UNKNOWN; do not erase it.",
+    "Return APPROVE, REJECT or NEEDS_EVIDENCE only for guard/source-bundle readiness for a separate host source build. Explicitly do not approve an APK, device installation, GOW3 FPS, save/load or campaign success; none were tested in W00-BUILD-002."
+  ],
+  "allowed_write_paths": [
+    "docs/gow3-13r/agents/reviews/W00-REVIEW-003.md",
+    "private reviewer output under .git/gow3-13r-private/jobs/W00-REVIEW-003"
+  ],
+  "read_only_evidence": [
+    "docs/gow3-13r/agents/tasks/W00-BUILD-002.json",
+    ".git/gow3-13r-private/jobs/W00-BUILD-002",
+    ".git/gow3-13r-private/jobs/W00-BUILD-001 and prior REJECT findings",
+    "original app/core source and local Git metadata"
+  ],
+  "required_tests": [
+    "Recompute decisive hashes; inspect changed code and fixture assertions.",
+    "Independent local check of bundle object and dirty patch reconstruction, or state precisely why evidence is insufficient.",
+    "Scoped verdict cites exact accepted/rejected hashes, residual risks and next gate."
+  ],
+  "deliverables": [
+    "independent review Markdown with findings and scoped verdict",
+    "private reviewer result.json or command log with checked evidence"
+  ],
+  "timeout_seconds": 1200,
+  "authorized_budget": "One 20-minute read-only independent review; no source edits, build, network, device commands or publication of private contents.",
+  "device_lease_required": false,
+  "output_directory": "/home/abhaybyte/repos/samba-s3/.git/gow3-13r-private/jobs/W00-REVIEW-003"
+}

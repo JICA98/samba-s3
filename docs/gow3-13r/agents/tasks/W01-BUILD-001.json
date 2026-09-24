@@ -1,0 +1,49 @@
+{
+  "schema_version": 1,
+  "task_id": "W01-BUILD-001",
+  "phase": "MEASUREMENT_EVALUATOR",
+  "role": "build_metrics_worker",
+  "requested_model_label": "GPT-6 Luna High",
+  "role_prompt_sha256": "1f8d27388db60c1662c9d94831b71bbecc487af66136fd5857b74bcb4d5ea8df",
+  "base_candidate_id": "SOURCE_BASELINE_DIRTY_UNBUILT",
+  "base_commit": "8c95cb5b27a54d72328b993cd27fd8d5947c794d",
+  "core_head": "657b26a0d197c29d42cdcf3b3f6e8ad5c6765bbc",
+  "core_source_manifest_sha256": "f34eef4eef0e1926012bfd7be922d8d10bf9a9630a841b392a7efa51eba62145",
+  "input_manifest_sha256": "4f5eed78ba7c80c09b8243603966926c5a5a4004fd3578765fa3d3d1ecf32a59",
+  "acceptance_contract_sha256": "7a58413ce32c82557d12272b7e4bd5d4df686667d1df08856042e0217e91c5b2",
+  "hypothesis": "A strict host evaluator can reject empty, demo, stale, repeated, and presentation-only frame streams before native frame-provenance instrumentation is available; no one-second FPS snapshot can be promoted to a real-60 score.",
+  "scope": [
+    "Read WORKER.md W01 and SUBAGENTS.md, the approved role prompt, SOURCE_MAP.md, current scripts/perf/summarize-run.py and relevant tests. Do not assume the existing CLI shape is a production scoring contract.",
+    "Create a new offline isolated Git worktree from the pinned application commit under the private W01-BUILD-001 output directory. Do not edit the original dirty worktree or initialize/update nested submodules; core source is read-only for this task.",
+    "Implement only a strict host-side evaluator and focused tests in scripts/perf. Accept versioned raw frame records with explicit process/session/surface/guest/render/present provenance, identity, phase, and timing. Missing or unsupported required evidence must yield INCONCLUSIVE or FAIL, never PASS. Preserve existing diagnostic median/min/max behavior only if clearly separated from production scoring; remove the no-argument demo fallback from any real-run path.",
+    "Test at least empty input, synthetic/demo records, presentation/vblank-only 60 Hz, 30 distinct game frames with 60 host presentations, duplicate polling, nonmonotonic or stale timestamps, session/surface reset, missing identity, gameplay exclusion, hidden long stall, and a valid synthetic fixture explicitly labeled as a test-only fixture. Do not claim a synthetic PASS is a device result.",
+    "Do not invent native IDs, actual FPS, energy, or device observations. Report fields not yet emitted by the exact core as unsupported; identify a minimal producer contract for a later task. No APK/core build, network, device command, installation, settings, save/load, or user data mutation.",
+    "Return a content-addressed patch, test/command log with exit codes, result.json and brief handoff. Independent Sol Max review is required before integration or use for scoring."
+  ],
+  "allowed_write_paths": [
+    "new isolated private W01-BUILD-001 worktree: scripts/perf/summarize-run.py and focused scripts/perf tests/new evaluator only",
+    "private output: .git/gow3-13r-private/jobs/W01-BUILD-001"
+  ],
+  "read_only_evidence": [
+    "docs/gow3-13r/SOURCE_MAP.md",
+    "docs/gow3-13r/acceptance.json",
+    "docs/gow3-13r/source-input-manifest.json",
+    "original dirty application and core checkout",
+    "WORKER.md and SUBAGENTS.md"
+  ],
+  "required_tests": [
+    "focused evaluator unit tests and existing relevant scripts/perf tests with recorded exit codes",
+    "strict no-input run returns non-success and contains no demo samples",
+    "original dirty application/core diff hashes remain unchanged"
+  ],
+  "deliverables": [
+    "isolated source patch with SHA-256",
+    "focused test and command log",
+    "schema/producer-gap note",
+    "private result.json and handoff"
+  ],
+  "timeout_seconds": 1800,
+  "authorized_budget": "One 30-minute host-only evaluator task, no network/build/device work.",
+  "device_lease_required": false,
+  "output_directory": "/home/abhaybyte/repos/samba-s3/.git/gow3-13r-private/jobs/W01-BUILD-001"
+}

@@ -1,0 +1,63 @@
+{
+  "schema_version": 1,
+  "recorded_at_utc": "2026-09-23T07:11:12Z",
+  "model_verification_source": "Trusted local Codex threads/spawn_edges; agent acknowledgment is not model proof.",
+  "acceptance_contract_sha256": "7a58413ce32c82557d12272b7e4bd5d4df686667d1df08856042e0217e91c5b2",
+  "acknowledgments": [
+    {
+      "role": "orchestrator",
+      "status": "ACKNOWLEDGED",
+      "source": "current orchestrator task execution",
+      "input": "verified WORKER/SUBAGENTS pack and exact acceptance hash",
+      "allowed_writes": "docs/gow3-13r administrative status only",
+      "device_mutation": false,
+      "output": "docs/gow3-13r and private runner map"
+    },
+    {
+      "role": "reviewer",
+      "task_id": "W00-REVIEW-002",
+      "status": "ACKNOWLEDGED",
+      "source": "reviewer followup message",
+      "input": "acceptance SHA-256 7a58413ce32c82557d12272b7e4bd5d4df686667d1df08856042e0217e91c5b2 and revised W00 setup",
+      "allowed_writes": "review findings only",
+      "device_mutation": false,
+      "output": "scoped reviewer verdict to orchestrator"
+    },
+    {
+      "role": "build_metrics_worker",
+      "task_id": "W00-BUILD-001",
+      "status": "ACKNOWLEDGED",
+      "source": "worker message during active task",
+      "input_packet_sha256": "da723c634693270d926c7d9901524df1f973198dec375cb10eb3df04c31afbf4",
+      "input_acceptance_sha256": "7a58413ce32c82557d12272b7e4bd5d4df686667d1df08856042e0217e91c5b2",
+      "allowed_writes": "isolated worktree build_rpcsx.sh and narrow test; private W00-BUILD-001 output",
+      "device_mutation": false,
+      "output": "private:.git/gow3-13r-private/jobs/W00-BUILD-001"
+    },
+    {
+      "role": "performance_analyst",
+      "task_id": "W00-METRIC-001",
+      "status": "PARTIAL_RETROSPECTIVE_ACKNOWLEDGED",
+      "source": "retrospective analyst message relayed by parent coordinator after job completion",
+      "prompt_sha256_reported": "5a14f8e3059459b261d7a3ed3cebaaf0a2c69a40d148d6da663c3a1edb8a43b7",
+      "pack_hashes_acknowledged": ["6b23db9427f1e59d398c316f602d36223e41004fe031d32e6a62a8890eebf7c7", "8a24098e5bea5391d4443f618826b91b6ca938e2d6a00c097013e151378d7fa3"],
+      "allowed_writes": "none; read-only repository/source audit",
+      "device_mutation": false,
+      "output": "message-only analyst result",
+      "limitation": "No formal pre-dispatch input packet or output directory was supplied; this acknowledgment is retrospective and does not satisfy that part of setup."
+    },
+    {
+      "role": "auxiliary_provenance_probe",
+      "task_id": "W00-PROV-001",
+      "status": "PARTIAL_AUXILIARY_PROBE",
+      "source": "completed read-only source inventory; not counted as full build/metrics implementation role"
+    },
+    {
+      "role": "tester",
+      "task_id": "W00-TESTER-PREP-001",
+      "status": "PENDING_ACKNOWLEDGMENT",
+      "source": "host-only task dispatched with explicit packet and no-device boundary"
+    }
+  ],
+  "unspawned_roles": ["cpu_worker", "gpu_driver_worker", "fastmode_worker", "savestate_worker", "log_collector"]
+}

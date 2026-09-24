@@ -1,0 +1,36 @@
+{
+  "schema_version": 1,
+  "task_id": "W00-COLLECT-001",
+  "phase": "TERMINAL_GOW3_SESSION_LOG_CAPTURE",
+  "role": "log_collector",
+  "requested_model_label": "GPT-6 Luna High",
+  "role_prompt_sha256": "8a2dca69b3b604111bfddb89c7da180ebb4b5259f82a6829d369c15d2af8b420",
+  "base_candidate_id": "INSTALLED_RELEASE_UNATTRIBUTED",
+  "base_commit": "8c95cb5b27a54d72328b993cd27fd8d5947c794d",
+  "core_source_manifest_sha256": "f34eef4eef0e1926012bfd7be922d8d10bf9a9630a841b392a7efa51eba62145",
+  "input_manifest_sha256": "4f5eed78ba7c80c09b8243603966926c5a5a4004fd3578765fa3d3d1ecf32a59",
+  "acceptance_contract_sha256": "7a58413ce32c82557d12272b7e4bd5d4df686667d1df08856042e0217e91c5b2",
+  "prior_tester_result_sha256": "82cea831ae93640e7482d5da2144f050d9a42ecac50bd1f978feb167f0ee067e",
+  "hypothesis": "One canonical post-failure log bundle can preserve the user-reported GOW3 session that ended in a no-produced-frame timeout, before the approved launch/controller retry, without mutating the device or confusing earlier rotated logs with this session.",
+  "scope": [
+    "Reuse the existing Luna High log_collector handle. Read W00-TESTER-002 result/handoff and exact terminal GOW3 manifest under its private evidence. Verify the current OnePlus USB serial mapping and that no tester lease is active. The prior tester lease ended at 13:43:03Z.",
+    "Acquire the shared phone/ADB OS flock for the entire capture, with a new private lease/read-only schedule record. Abort if the lock is unavailable or an outside ADB actor appears. The user's reported GOW3 process is terminal and MainActivity was foreground at the prior check; do not start/stop/foreground an app to reconfirm.",
+    "Run scripts/get-samba-logs.sh exactly once, with explicit verified serial, the exact terminal GOW3 session ID from W00-TESTER-002 manifest and a fresh private output directory under this task. This fulfills the sambas3-logs evidence-before-retry rule. Record script stdout/stderr, overall exit code and command start/end times. No second full collector call on partial output.",
+    "Only the audited read-only script is authorized. Do not clear logcat, launch/stop, send input, change settings/driver, install, save/load, take gameplay screenshots, or modify source. Heavy collection is safe now because the session is terminal, not a scored timing window.",
+    "Hash raw files, identify exact manifest/session/PID/time-correlated GOW3 findings, distinguish historical or uncorrelated rotations, and report command denials/hidden per-command status as unavailable. Do not convert 14,505 host presentations into a real FPS claim. Preserve raw private logs and redact shareable summary. Release the lock and hand the phone back to the tester only after capture completes safely."
+  ],
+  "allowed_write_paths": ["private output: .git/gow3-13r-private/jobs/W00-COLLECT-001"],
+  "read_only_evidence": [
+    ".git/gow3-13r-private/jobs/W00-TESTER-002/result.json",
+    ".git/gow3-13r-private/jobs/W00-TESTER-002/handoff.md",
+    ".git/gow3-13r-private/jobs/W00-TESTER-002/candidate-session-manifest.raw",
+    ".git/gow3-13r-private/jobs/W00-COLLECT-PREP-001/handoff.md",
+    "scripts/get-samba-logs.sh"
+  ],
+  "required_tests": ["one script invocation with exact session and fresh output path", "raw file hashes and source/time attribution", "no device mutation or concurrent tester lease"],
+  "deliverables": ["private canonical log bundle and SHA-256 manifest", "capture status/triage handoff", "private result.json"],
+  "timeout_seconds": 1200,
+  "authorized_budget": "One 20-minute read-only terminal-session collection, no network/build/device mutation.",
+  "device_lease_required": "read-only shared ADB OS lock; no mutation lease",
+  "output_directory": "/home/abhaybyte/repos/samba-s3/.git/gow3-13r-private/jobs/W00-COLLECT-001"
+}

@@ -1,0 +1,41 @@
+{
+  "schema_version": 1,
+  "task_id": "W01-REVIEW-001",
+  "phase": "INDEPENDENT_EVALUATOR_REVIEW",
+  "role": "reviewer",
+  "requested_model_label": "GPT-6 Sol Max",
+  "role_prompt_sha256": "145a16d95f268704795e9162a4a0d264b2a236b9d2f161249b779bba559d8d48",
+  "subject_task_id": "W01-BUILD-001",
+  "base_candidate_id": "SOURCE_BASELINE_DIRTY_UNBUILT",
+  "base_commit": "8c95cb5b27a54d72328b993cd27fd8d5947c794d",
+  "core_source_manifest_sha256": "f34eef4eef0e1926012bfd7be922d8d10bf9a9630a841b392a7efa51eba62145",
+  "input_manifest_sha256": "4f5eed78ba7c80c09b8243603966926c5a5a4004fd3578765fa3d3d1ecf32a59",
+  "acceptance_contract_sha256": "7a58413ce32c82557d12272b7e4bd5d4df686667d1df08856042e0217e91c5b2",
+  "subject_patch_sha256": "918f8d63bbd3a0b7ef398de34045c458bd0708faaf7ea590510f2bad68633438",
+  "subject_result_sha256": "90e847f4a9bec369d56e5a952897eae120952aafa6a385191b2ed8cd96c6ec0b",
+  "hypothesis": "The W01 host evaluator rejects unsupported or manufactured real-60 evidence and reports truthful gate status under the frozen acceptance contract, without hiding invalid intervals or treating synthetic fixtures as device results.",
+  "scope": [
+    "Independently inspect the exact W01-BUILD-001 patch and worktree implementation, full focused tests, command log, SHA256SUMS, handoff and producer-gap note. Do not rely on the worker's summary as proof; reconstruct decisive failures by running the tests and at least one adversarial host fixture of your own.",
+    "Check semantics of distinct guest/render/present IDs, complete export, dropped/duplicate/stale records, phase/coverage selection, frame interval and p99/1%-low/5-second window calculations, long stalls, guest speed, identity/provenance, power availability and synthetic/live separation against WORKER.md and acceptance.json.",
+    "Pay special attention to false PASS from self-reported IDs or test fixtures, missing acceptance title/executable identity, re-polled histories, surface/session resets, frames outside scored windows, very short runs, counter overflow and missing raw data. Verify no-argument summarizer returns a non-success without demonstration numbers.",
+    "Review method-only scope. There is no native per-frame producer, APK/core build, device capture, measured FPS or candidate. An approval may authorize integration/continued instrumentation only; it cannot be a GOW3 performance or device-test approval.",
+    "Do not edit implementation or worker raw evidence. Write an independent review with source-located findings, separate method/correctness/performance/save/efficiency verdicts, exact hashes and one scoped decision."
+  ],
+  "allowed_write_paths": ["docs/gow3-13r/agents/reviews/W01-REVIEW-001.md", "private output: .git/gow3-13r-private/jobs/W01-REVIEW-001"],
+  "read_only_evidence": [
+    ".git/gow3-13r-private/jobs/W01-BUILD-001/source.patch",
+    ".git/gow3-13r-private/jobs/W01-BUILD-001/result.json",
+    ".git/gow3-13r-private/jobs/W01-BUILD-001/HANDOFF.md",
+    ".git/gow3-13r-private/jobs/W01-BUILD-001/producer-gap.md",
+    ".git/gow3-13r-private/jobs/W01-BUILD-001/command-log.md",
+    ".git/gow3-13r-private/jobs/W01-BUILD-001/SHA256SUMS",
+    ".git/gow3-13r-private/jobs/W01-BUILD-001/worktree/scripts/perf",
+    "docs/gow3-13r/acceptance.json"
+  ],
+  "required_tests": ["re-run focused host tests with exit codes", "independent adversarial false-pass probe", "verify worker patch/result hashes and original dirty source unchanged"],
+  "deliverables": ["independent review Markdown with scoped decision", "private result.json and host test/evidence log"],
+  "timeout_seconds": 2700,
+  "authorized_budget": "One 45-minute read-only host review; no device/network/build/source edit.",
+  "device_lease_required": false,
+  "output_directory": "/home/abhaybyte/repos/samba-s3/.git/gow3-13r-private/jobs/W01-REVIEW-001"
+}

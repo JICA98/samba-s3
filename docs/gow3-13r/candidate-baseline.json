@@ -1,0 +1,50 @@
+{
+  "schema_version": 1,
+  "captured_at_utc": "2026-09-23T06:54:45Z",
+  "current_best_accepted_candidate": null,
+  "source_snapshot": {
+    "id": "SOURCE_BASELINE_DIRTY_UNBUILT",
+    "status": "IDENTIFIED_NOT_IMMUTABLY_BUNDLED",
+    "application_branch": "master",
+    "application_commit": "8c95cb5b27a54d72328b993cd27fd8d5947c794d",
+    "application_whole_diff_sha256": "0d92e24372b090fa9c0ace8b5b7811ff33f669969ee6424df8cbbfa25f97f14c",
+    "application_source_only_diff_sha256": "e6bcb160ee0d02d2c9ebf33f38ab497a67d81559d63ea72dd401a341aa18476e",
+    "modified_application_source_count": 2,
+    "core_gitlink": "657b26a0d197c29d42cdcf3b3f6e8ad5c6765bbc",
+    "local_core_head": "657b26a0d197c29d42cdcf3b3f6e8ad5c6765bbc",
+    "core_commit_object_available_locally": true,
+    "core_diff_sha256": "ff3ecb0cc8d050a6935f6b499d72ff742d64b084affe5f4a677dce478f26ddda",
+    "modified_core_file_count": 40,
+    "core_origin_declared": "https://github.com/RPCSX/rpcsx.git",
+    "core_remote_object_reachability": "UNVERIFIED",
+    "reproducible_source_bundle_sha256": null,
+    "build_status": "NOT_RUN_PATCH_GUARD_BLOCKED",
+    "apk_sha256": null,
+    "packaged_core_sha256": null
+  },
+  "preexisting_host_release": {
+    "id": "PREEXISTING_RELEASE_UNATTRIBUTED",
+    "relative_apk_path": "app/build/outputs/apk/standard/release/samba-s3-standard-release.apk",
+    "apk_size_bytes": 92401079,
+    "apk_sha256": "3bafe890309a92c023b588eaeba2f71817bda3c5d9b439eb37f6d867bc69b19f",
+    "embedded_arm64_core_path": "lib/arm64-v8a/librpcsx-android.so",
+    "embedded_arm64_core_sha256": "e6cfc98f35faad3172d46d5342cab80139666d2f4d71af38ccb2baa78b65f5eb",
+    "attributable_to_source_snapshot": false,
+    "installed_apk_verified_equal": null,
+    "loaded_core_verified_equal": null,
+    "loaded_gpu_driver_sha256": null,
+    "permitted_use": "Observational untouched baseline only after tester lease, data backup and runtime identity checks; not a scored real-FPS candidate."
+  },
+  "installed_app": {
+    "package_present": true,
+    "apk_sha256": null,
+    "signing_identity": null,
+    "loaded_core_sha256": null,
+    "loaded_driver_sha256": null,
+    "effective_settings_sha256": null,
+    "patch_manifest_sha256": null,
+    "game_revision": null,
+    "executable_hash": null,
+    "candidate_id": null
+  }
+}

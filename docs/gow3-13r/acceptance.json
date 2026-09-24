@@ -1,0 +1,109 @@
+{
+  "schema_version": 1,
+  "contract_id": "gow3-oneplus13r-real60-v1",
+  "status": "PRE_REGISTERED_PENDING_INDEPENDENT_REVIEW",
+  "source_plan": {
+    "worker_sha256": "6b23db9427f1e59d398c316f602d36223e41004fe031d32e6a62a8890eebf7c7",
+    "subagents_sha256": "8a24098e5bea5391d4443f618826b91b6ca938e2d6a00c097013e151378d7fa3"
+  },
+  "scope": {
+    "device": "verified OnePlus 13R, model CPH2691",
+    "title_id": "BCUS98111",
+    "game": "God of War III",
+    "game_revision": null,
+    "executable_hash": null,
+    "unknown_identity_policy": "No scored run or patch applicability claim until resolved."
+  },
+  "frame_truth": {
+    "required": "Distinct newly produced useful guest game frames correlated to completed renders and successful presentation, with verified source and session identities.",
+    "reject_as_game_fps": [
+      "display refresh or vblank alone",
+      "repeated presentation of one emulated frame",
+      "surface or Vulkan present counters without guest/render correlation",
+      "interpolated frames",
+      "frame skipping or altered game speed",
+      "coarse FPS polls converted into individual frame times",
+      "synthetic, fixture, stale, missing, or incomplete timing data"
+    ],
+    "speed_ratio_min": 0.98,
+    "speed_ratio_max": 1.02,
+    "speed_ratio_definition": "Verified guest progress divided by elapsed real time in a declared timing test."
+  },
+  "scenes": {
+    "minimum_distinct_gameplay_workloads": 4,
+    "required_categories": ["combat", "traversal_or_streaming", "visually_expensive", "boss_qte_or_equivalent_stress"],
+    "checkpoint_and_route_required": true,
+    "active_gameplay_required": true,
+    "native_loading_and_capped_video_predeclared_before_scoring": true,
+    "full_session_timeline_required": true,
+    "retroactive_exclusion_forbidden": ["slow combat", "shader stalls", "boss spawn", "thermal throttling"]
+  },
+  "scored_gameplay": {
+    "mean_fps_min": 59.5,
+    "mean_fps_max": 60.5,
+    "mean_fps_definition": "Verified distinct useful game frames divided by scored real elapsed seconds, with declared segment boundaries.",
+    "one_percent_low_fps_min": 55.0,
+    "one_percent_low_definition": "For N valid individual game-frame intervals, sort descending, take ceil(0.01*N) slowest intervals, then compute 1000 divided by their mean interval in milliseconds.",
+    "p99_game_frame_interval_ms_max": 20.0,
+    "fraction_intervals_over_33_33_ms_max": 0.001,
+    "gameplay_interval_ms_max": 100.0,
+    "rolling_window_seconds": 5,
+    "rolling_window_real_fps_min": 58.0,
+    "applies_to": "Every scored repeat and scored soak; the rolling gate applies to every scored gameplay window."
+  },
+  "repetition": {
+    "screening_seconds": 120,
+    "scored_repeats_per_promising_scene": 3,
+    "scored_repeat_seconds": 180,
+    "sustained_runs": 2,
+    "warmup_seconds_before_each_soak": 600,
+    "scored_seconds_per_soak": 1800,
+    "soak_gameplay": "Representative active gameplay, not an idle camera."
+  },
+  "thermal_abort": {
+    "android_status": "SEVERE or above",
+    "battery_celsius_at_or_above": 43.0,
+    "oem_warning_or_stricter_documented_limit": "abort",
+    "sensor_units_must_be_verified": true,
+    "unattended_soak_when_safety_data_unavailable": false
+  },
+  "correctness": {
+    "required": [
+      "responsive input and normal audio",
+      "correct guest progression, physics, and QTE timing",
+      "visible characters, geometry, gameplay UI, essential effects, lighting, and combat cues",
+      "declared visual quality and real internal render dimensions",
+      "no incompatible cache or save-state reuse"
+    ],
+    "quality_tiers": {
+      "reference": "Normal game resolution and correctness settings; measure actual dimensions.",
+      "fast": "Investigate 960x540-equivalent internal targets, then 1280x720-equivalent if affordable; verify expensive targets change.",
+      "aggressive": "Approximately 480-line internal rendering and disclosed cosmetic reductions; evaluate separately."
+    }
+  },
+  "save_load": {
+    "required_ui_matrix_ids": ["S01", "S02", "S03", "S04", "S05", "S06", "S07", "S08", "S09", "S10", "S11", "S12", "S13", "S14", "S15", "S16", "S17", "S18", "S19", "S20"],
+    "slots": [0, 1, 2, 3, 4],
+    "repeated_save_change_load_continue_cycles": 20,
+    "cold_process_restore_required": true,
+    "a_to_b_to_a_world_state_proof_required": true,
+    "fresh_frames_input_and_audio_after_load_required": true,
+    "user_data_integrity_required": true,
+    "final_candidate_normal_ui_path_required": true
+  },
+  "reproducibility": {
+    "required_identity": ["installed APK", "loaded core binary", "loaded GPU driver", "title and revision", "executable and patch hashes", "requested and effective settings", "quality and cache lineage", "raw frame and system data", "commands and exit codes", "independent review"],
+    "evidence_immutable_after_finalization": true,
+    "missing_or_unattributed_artifact_policy": "INCONCLUSIVE"
+  },
+  "efficiency": {
+    "only_after_real_60_qualification": true,
+    "same_quality_tier_comparison_required": true,
+    "minimum_paired_comparisons": 3,
+    "selected_candidate": "Lowest repeatably measured energy per verified real game frame among eligible tested candidates in the declared quality tier.",
+    "required_measures": ["energy per real frame with calibrated provenance", "average power and scope", "process CPU time per real frame", "GPU active time when available", "memory and allocation growth", "thermal conditions"],
+    "unavailable_calibrated_power_result": "EFFICIENCY_UNVERIFIED, not full PASS",
+    "ten_percent_reduction": "Stretch objective, not mandatory threshold."
+  },
+  "pass_policy": "All mandatory scene, FPS, pacing, soak, speed, correctness, save/load, identity, efficiency, and independent Sol Max final review gates must pass for the exact final candidate and evidence hashes. No retroactive threshold weakening may promote a failed run."
+}

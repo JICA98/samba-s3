@@ -1,0 +1,56 @@
+{
+  "schema_version": 1,
+  "task_id": "W00-BUILD-002",
+  "phase": "REVIEW_CORRECTION",
+  "role": "build_metrics_worker",
+  "requested_model_label": "GPT-6 Luna High",
+  "role_prompt_sha256": "1f8d27388db60c1662c9d94831b71bbecc487af66136fd5857b74bcb4d5ea8df",
+  "base_candidate_id": "SOURCE_BASELINE_DIRTY_UNBUILT",
+  "base_commit": "8c95cb5b27a54d72328b993cd27fd8d5947c794d",
+  "core_head": "657b26a0d197c29d42cdcf3b3f6e8ad5c6765bbc",
+  "application_whole_diff_sha256": "0d92e24372b090fa9c0ace8b5b7811ff33f669969ee6424df8cbbfa25f97f14c",
+  "core_diff_sha256": "ff3ecb0cc8d050a6935f6b499d72ff742d64b084affe5f4a677dce478f26ddda",
+  "core_source_manifest_sha256": "f34eef4eef0e1926012bfd7be922d8d10bf9a9630a841b392a7efa51eba62145",
+  "input_manifest_sha256": "4f5eed78ba7c80c09b8243603966926c5a5a4004fd3578765fa3d3d1ecf32a59",
+  "acceptance_contract_sha256": "7a58413ce32c82557d12272b7e4bd5d4df686667d1df08856042e0217e91c5b2",
+  "prior_task_id": "W00-BUILD-001",
+  "prior_guard_patch_sha256": "1a34714d4265ae7cf5d1185dcabf6ae1c249538ef1abd6783226e4546b5a1e01",
+  "prior_review_decision": "REJECT",
+  "hypothesis": "A revised patch guard can ignore only generated build-ID differences, retain rejection of stale persistent hunks, expose an explicitly non-building check-only mode without a false successful release result, and produce a portable offline core-base bundle.",
+  "scope": [
+    "Reuse the verified W00-BUILD-001 isolated application/core worktree and evidence; do not recreate it through network or mutate the original dirty checkout. The foreground orchestrator already restored the original submodule registration and verified unchanged app/core diff hashes.",
+    "Correct build_rpcsx.sh so a release invocation cannot return successful without building merely because RPCSX_PATCH_GUARD_ONLY=1. Any check-only entry must be explicit, clearly named and non-mutating; reject a nonempty patch containing only generated build-ID hunks. Preserve normal empty-patch behavior and strict validation of every persistent hunk.",
+    "Add focused host tests for applied persistent patch, unapplied/forward-apply path, stale non-generated mismatch, generated-only patch rejection, check-only no-write behavior, and release invocation under the former guard-only environment variable. Do not actually compile in this task; use bounded fixtures or command shims to prove control flow safely.",
+    "Make the exact pinned core base object portable offline: create an authorized local Git bundle containing commit 657b26a0d197c29d42cdcf3b3f6e8ad5c6765bbc and verify it in a fresh scratch repository, then apply the captured dirty core patch and compare exact source hashes. Do not fetch, clone a remote, run git submodule update/deinit, reset, or delete user data. If bundle generation is infeasible, report exact failure; do not claim portability.",
+    "Reconcile manifest field names and hashes: input_manifest_sha256 denotes docs/gow3-13r/candidate-baseline.json at 4f5eed78ba7c80c09b8243603966926c5a5a4004fd3578765fa3d3d1ecf32a59; core_source_manifest_sha256 denotes docs/gow3-13r/source-input-manifest.json at f34eef4eef0e1926012bfd7be922d8d10bf9a9630a841b392a7efa51eba62145. Keep the original wrong-revision clone attempt's exit code UNKNOWN in the historical log; do not erase or reinterpret it.",
+    "Write new content-addressed patch/test/bundle/manifest, command log with exit codes, result.json and handoff under W00-BUILD-002. Do not build or install an APK, touch the device or promote a candidate. Independent Sol Max re-review is required."
+  ],
+  "allowed_write_paths": [
+    "existing isolated W00-BUILD-001 worktree: build_rpcsx.sh and scripts/tests/test-build-rpcsx-patch-guard.sh",
+    "private output: .git/gow3-13r-private/jobs/W00-BUILD-002"
+  ],
+  "read_only_evidence": [
+    "reviewer W00-BUILD-001 REJECT verdict",
+    ".git/gow3-13r-private/jobs/W00-BUILD-001",
+    "docs/gow3-13r/source-input-manifest.json",
+    "docs/gow3-13r/acceptance.json",
+    "original dirty application and core source"
+  ],
+  "required_tests": [
+    "bash syntax and all focused guard fixtures pass with logged exit codes",
+    "check-only does not change application/core generated or persistent source hashes",
+    "release under RPCSX_PATCH_GUARD_ONLY=1 cannot falsely succeed without compilation",
+    "portable core commit object and exact dirty-core reconstruction verified offline in fresh scratch repository",
+    "original dirty app/core hashes and original initialized submodule registration remain unchanged"
+  ],
+  "deliverables": [
+    "new guard patch and focused test with SHA-256",
+    "portable core-base Git bundle and verification log with SHA-256",
+    "corrected source bundle manifest and command log",
+    "private result.json and concise handoff"
+  ],
+  "timeout_seconds": 1800,
+  "authorized_budget": "One focused 30-minute host-only review correction. No network, APK/core build, original source edit, or device command.",
+  "device_lease_required": false,
+  "output_directory": "/home/abhaybyte/repos/samba-s3/.git/gow3-13r-private/jobs/W00-BUILD-002"
+}

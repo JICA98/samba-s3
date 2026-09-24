@@ -1,0 +1,35 @@
+{
+  "schema_version": 1,
+  "task_id": "W00-COLLECT-PREP-001",
+  "phase": "LIVE_SESSION_EVIDENCE_PREPARATION",
+  "role": "log_collector",
+  "requested_model_label": "GPT-6 Luna High",
+  "role_prompt_sha256": "8a2dca69b3b604111bfddb89c7da180ebb4b5259f82a6829d369c15d2af8b420",
+  "base_candidate_id": "INSTALLED_RELEASE_UNATTRIBUTED",
+  "base_commit": "8c95cb5b27a54d72328b993cd27fd8d5947c794d",
+  "core_source_manifest_sha256": "f34eef4eef0e1926012bfd7be922d8d10bf9a9630a841b392a7efa51eba62145",
+  "input_manifest_sha256": "4f5eed78ba7c80c09b8243603966926c5a5a4004fd3578765fa3d3d1ecf32a59",
+  "acceptance_contract_sha256": "7a58413ce32c82557d12272b7e4bd5d4df686667d1df08856042e0217e91c5b2",
+  "hypothesis": "A host-only capture checklist can preserve and correlate the user-reported running GOW3 session without relaunching, input, clearing logs, or confusing it with prior failed sessions, once exclusive phone access is confirmed.",
+  "scope": [
+    "Read WORKER.md evidence/device rules, SUBAGENTS.md, the log-collector role prompt and sambas3-logs/agent-device skills. Inspect the installed get-samba-logs.sh source and existing private W00 tester handoff/evidence; keep private material private.",
+    "Do not issue any ADB, agent-device, phone, install, launch, input, stop, or network command in this prep task. The separate Scrapstorm agy process previously sent Back input outside our lock and was still live at dispatch. The user's report that GOW3 is playing is not yet a verified capture.",
+    "Propose a minimal read-only, low-disturbance capture schedule for the already-running session, including exact session/PID/time correlation, safe thermal observation, one canonical post-run log collection, and how to flag interference and unavailable identities. Do not invent gameplay FPS or promise a clean score.",
+    "Record any get-samba-logs.sh commands that could perturb a live game, and whether it is safer to capture after the user reaches a safe pause. Do not modify the script or original dirty source.",
+    "Produce a private brief handoff and result.json; wait for a separately authorized device-capture task and a coordinated phone window."
+  ],
+  "allowed_write_paths": ["private output: .git/gow3-13r-private/jobs/W00-COLLECT-PREP-001"],
+  "read_only_evidence": [
+    "docs/gow3-13r/STATUS.md",
+    "docs/gow3-13r/BLOCKERS.md",
+    ".git/gow3-13r-private/jobs/W00-TESTER-001/handoff.md",
+    "scripts/get-samba-logs.sh",
+    "WORKER.md and SUBAGENTS.md"
+  ],
+  "required_tests": ["host-only source inspection and capture-plan review; no device command or source edit"],
+  "deliverables": ["private result.json and concise handoff with safe capture sequence and remaining access gate"],
+  "timeout_seconds": 900,
+  "authorized_budget": "One 15-minute host-only preparation task, no phone/network/source mutation.",
+  "device_lease_required": false,
+  "output_directory": "/home/abhaybyte/repos/samba-s3/.git/gow3-13r-private/jobs/W00-COLLECT-PREP-001"
+}

@@ -1,0 +1,21 @@
+{
+  "schema_version": 1,
+  "captured_at_utc": "2026-09-23T07:01:36Z",
+  "source_state": "DIRTY_PRESERVED_UNBUNDLED",
+  "application_commit": "8c95cb5b27a54d72328b993cd27fd8d5947c794d",
+  "application_branch": "master",
+  "application_whole_diff_sha256": "0d92e24372b090fa9c0ace8b5b7811ff33f669969ee6424df8cbbfa25f97f14c",
+  "application_source_only_diff_sha256": "e6bcb160ee0d02d2c9ebf33f38ab497a67d81559d63ea72dd401a341aa18476e",
+  "modified_application_source_paths": [
+    "app/src/main/cpp/native-lib.cpp",
+    "app/src/standard/java/com/zenithblue/sambas3/ui/drivers/GpuDriversScreen.kt"
+  ],
+  "core_gitlink_and_local_head": "657b26a0d197c29d42cdcf3b3f6e8ad5c6765bbc",
+  "core_object_available_locally": true,
+  "core_diff_sha256": "ff3ecb0cc8d050a6935f6b499d72ff742d64b084affe5f4a677dce478f26ddda",
+  "modified_core_tracked_file_count": 40,
+  "core_untracked_file_count": 0,
+  "patch_file_sha256": "d8bcc159bc4fed6e7a5187a42dfff44ddeac3a003dd39e280f6a3fe85a638c31",
+  "build_script_sha256": "0648289118741f0aa11c017dee9dc294228b9a8aaad83860a10cac89c5aa3edd",
+  "reconstruction_rule": "Use the exact app/core base objects plus the binary diffs matching the recorded hashes; preserve both dirty trees. A worker must create and verify a durable source bundle before a source-build claim."
+}

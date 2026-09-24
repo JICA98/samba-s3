@@ -1,0 +1,55 @@
+{
+  "schema_version": 1,
+  "task_id": "W00-TESTER-001",
+  "phase": "FIRST_DEVICE_OBSERVATION",
+  "role": "tester",
+  "requested_model_label": "GPT-6 Luna High",
+  "role_prompt_sha256": "4fc7609d0512ed0c85199bc175677e54ec0df43e8c06ca7b81e20a89991cd740",
+  "base_candidate_id": "PREEXISTING_RELEASE_UNATTRIBUTED",
+  "base_commit": "8c95cb5b27a54d72328b993cd27fd8d5947c794d",
+  "core_head": "657b26a0d197c29d42cdcf3b3f6e8ad5c6765bbc",
+  "core_source_manifest_sha256": "f34eef4eef0e1926012bfd7be922d8d10bf9a9630a841b392a7efa51eba62145",
+  "input_manifest_sha256": "4f5eed78ba7c80c09b8243603966926c5a5a4004fd3578765fa3d3d1ecf32a59",
+  "acceptance_contract_sha256": "7a58413ce32c82557d12272b7e4bd5d4df686667d1df08856042e0217e91c5b2",
+  "hypothesis": "The currently installed SambaS3 release can be inventoried and existing user data safely backed up before one bounded observational GOW3 launch, after which raw logs can establish boot behavior without an FPS claim.",
+  "scope": [
+    "Re-use the verified tester agent and its W00-TESTER-PREP-001 handoff. Only the tester touches the OnePlus 13R or shared ADB server during this run; the foreground orchestrator owns task decisions.",
+    "Acquire one OS-held exclusive flock on .git/gow3-13r-private/device-and-adb.lock in a persistent exec session before the first ADB command. Run every ADB, agent-device, launch, controller and log command through that same locked session. Record lock holder/session, UTC time, stable private physical identity, current serial and shared ADB server identity in private run metadata. If lock acquisition fails or session is lost, stop device commands and report; do not launch.",
+    "Inside the lease, collect and archive raw read-only identity, installed package/signature, registered GOW3 game/title/revision/path, user, save/state/settings/firmware/driver access, battery and thermal outputs. Never assume the remembered wireless serial or parent-reported facts.",
+    "Create a new private backup directory outside the repository; copy and hash all accessible existing PS3 home/saves, all savestate variants/previews, config/registry/firmware and driver metadata before launch. Verify file lists and hashes against a second host copy. Treat inaccessible app-private preferences or driver binary as a named gap; do not overwrite, install, import, change driver, save/load, or run performance stress if rollback is incomplete.",
+    "Proceed to at most one untouched observational GOW3 launch only if exact device/game/installed runtime identities, safety state and required rollback data are verified. Use scripts/debug-launch-game.sh with the exact live registry path, never direct RPCSXActivity. The script's second attempt is allowed only after once-per-failure logs and a reviewed unchanged-hypothesis retry decision; stop at two attempts maximum.",
+    "After the run or any failure, call scripts/get-samba-logs.sh exactly once before any relaunch. Do not clear logcat. If a milestone screenshot is necessary, use agent-device only after version-matched workflow help; no coordinate input. Record boot/focus/log evidence separately from real guest FPS.",
+    "If backup, lease, identity, thermal, installation, or permissions fail a gate, stop before launch, preserve raw evidence, and report the exact gate and next safe action. Do not uninstall or install an APK, force-stop the app, alter user saves/settings, or claim FPS/save-load correctness."
+  ],
+  "allowed_write_paths": [
+    "private run output: .git/gow3-13r-private/jobs/W00-TESTER-001",
+    "private host backup outside the repository created for this run"
+  ],
+  "read_only_evidence": [
+    "docs/gow3-13r/acceptance.json",
+    "docs/gow3-13r/candidate-baseline.json",
+    "docs/gow3-13r/W00_READINESS.md",
+    ".git/gow3-13r-private/jobs/W00-TESTER-PREP-001/backup-readiness.md",
+    ".git/gow3-13r-private/jobs/W00-TESTER-PREP-001/later-device-run.md",
+    "scripts/debug-launch-game.sh",
+    "scripts/get-samba-logs.sh"
+  ],
+  "required_tests": [
+    "Verify current physical OnePlus 13R identity, package and GOW3 registry/title before a launch.",
+    "Verify copy manifest and a distinct host restore-check copy without modifying device originals.",
+    "Record raw thermal/battery data and abort at SEVERE thermal or battery >=43 C or an OEM warning.",
+    "On any launch attempt, preserve exact command/exit/time, focus, backend/Vulkan/exit-info and logcat evidence; no inferred FPS."
+  ],
+  "deliverables": [
+    "private lease and command log with sensitive identifiers redacted from shareable output",
+    "private backup manifest and host-copy verification or explicit access blocker",
+    "one bounded observational launch result if all gates pass",
+    "one canonical log evidence directory after a run/failure",
+    "private result.json and concise handoff"
+  ],
+  "timeout_seconds": 3600,
+  "authorized_budget": "One 60-minute lease-gated first-device inventory, backup, and at most one first observational launch; maximum two script attempts only after the required failure evidence. No install, settings change, save/load, benchmark, or destructive action.",
+  "device_lease_required": true,
+  "device_commands_allowed": true,
+  "output_directory": "/home/abhaybyte/repos/samba-s3/.git/gow3-13r-private/jobs/W00-TESTER-001"
+}

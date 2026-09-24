@@ -1,6 +1,6 @@
 [submodule "app/src/main/cpp/rpcsx"]
 	path = app/src/main/cpp/rpcsx
-	url = https://github.com/RPCSX/rpcsx.git
+	url = https://github.com/abhay-byte/samba-s3-core.git
 [submodule "app/src/main/cpp/libadrenotools"]
 	path = app/src/main/cpp/libadrenotools
 	url = ../../bylaws/libadrenotools.git
