@@ -55,4 +55,16 @@ class SettingsBackendAuditTest {
             SettingsBackendAudit.applyHint("@@Audio@@Master Volume", inGame = true, actualType = "int")
         )
     }
+
+    @Test
+    fun thread_scheduler_mode_is_recognized_and_audited() {
+        val descriptor = SettingsBackendAudit.descriptorFor("Core@@Thread Scheduler Mode")
+        assertTrue(descriptor != null)
+        assertEquals("enum", descriptor?.expectedType)
+        assertEquals(SettingApplyPhase.NEXT_EMULATION_BOOT, descriptor?.phase)
+        assertEquals(
+            "APPLIES AFTER THIS GAME RESTART",
+            SettingsBackendAudit.applyHint("@@Core@@Thread Scheduler Mode", inGame = true, actualType = "enum")
+        )
+    }
 }

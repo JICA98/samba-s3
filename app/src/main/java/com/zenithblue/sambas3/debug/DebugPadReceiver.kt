@@ -644,6 +644,8 @@ class DebugPadReceiver(
             action == ACTION_BOOT_GAME ||
                 action == ACTION_STOP_GAME ||
                 action == ACTION_PAD ||
+                action == ACTION_MONITOR_SET ||
+                action.startsWith(ACTION_SETTINGS_PREFIX) ||
                 action.startsWith(PREFIX)
     }
 }

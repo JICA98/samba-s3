@@ -170,6 +170,64 @@ class CpuTopologyTestCase(unittest.TestCase):
         self.assertEqual(topo["performance_mask"], 0xFC)
         self.assertEqual(topo["efficiency_mask"], 0x03)
 
+    def test_snapdragon_8_gen_3_realistic_eas_capacities(self):
+        # OnePlus 13R / SM8650 actual Energy Aware Scheduling capacities
+        # CPUs 0-1: Cortex-A520 (240), CPUs 2-3: Cortex-A720 (780), CPUs 4-6: Cortex-A720 (840), CPU 7: Cortex-X4 (1024)
+        caps = [(0, 240), (1, 240), (2, 780), (3, 780), (4, 840), (5, 840), (6, 840), (7, 1024)]
+        topo = parse_cpu_topology(0xFF, capacities=caps)
+        self.assertTrue(topo["is_heterogeneous"])
+        self.assertEqual(topo["performance_mask"], 0xFC)
+        self.assertEqual(topo["efficiency_mask"], 0x03)
+        self.assertEqual(topo["performance_mask"] & ~topo["allowed_mask"], 0)
+
+    def test_snapdragon_8_gen_3_cluster_frequencies(self):
+        # OnePlus 13R / SM8650 max frequencies across 3 clusters
+        # CPUs 0-1: 2265600 kHz, CPUs 2-3: 2956800 kHz, CPUs 4-6: 3148800 kHz, CPU 7: 3300000 kHz
+        freqs = [(0, 2265600), (1, 2265600), (2, 2956800), (3, 2956800), (4, 3148800), (5, 3148800), (6, 3148800), (7, 3300000)]
+        topo = parse_cpu_topology(0xFF, max_freqs=freqs)
+        self.assertTrue(topo["is_heterogeneous"])
+        self.assertEqual(topo["performance_mask"], 0xFC)
+        self.assertEqual(topo["efficiency_mask"], 0x03)
+        self.assertEqual(topo["performance_mask"] & ~topo["allowed_mask"], 0)
+
+    def test_snapdragon_8_gen_3_arm_midrs(self):
+        # OnePlus 13R / SM8650 MIDR_EL1 part numbers
+        # 0xd80 = Cortex-A520 (cores 0-1), 0xd81 = Cortex-A720 (cores 2-6), 0xd82 = Cortex-X4 (core 7)
+        midrs = [
+            (0, 0x410FD800), (1, 0x410FD800),
+            (2, 0x410FD810), (3, 0x410FD810), (4, 0x410FD810), (5, 0x410FD810), (6, 0x410FD810),
+            (7, 0x410FD820)
+        ]
+        topo = parse_cpu_topology(0xFF, midrs=midrs)
+        self.assertTrue(topo["is_heterogeneous"])
+        self.assertEqual(topo["performance_mask"], 0xFC)
+        self.assertEqual(topo["efficiency_mask"], 0x03)
+        self.assertEqual(topo["performance_mask"] & ~topo["allowed_mask"], 0)
+
+    def test_snapdragon_8_gen_3_scheduler_modes_and_affinity(self):
+        topo = {
+            "allowed_mask": 0xFF,
+            "performance_mask": 0xFC,
+            "efficiency_mask": 0x03,
+            "is_heterogeneous": True,
+        }
+        # In OS mode, all thread groups (SPU, PPU, RSX, General) receive full allowed_mask (0xFF)
+        for group in (ThreadClass.GENERAL, ThreadClass.SPU, ThreadClass.PPU, ThreadClass.RSX):
+            self.assertEqual(calculate_affinity_mask(group, ThreadSchedulerMode.OS, topo, 0xFF), 0xFF)
+
+        # In RPCS3 mode, SPU, PPU, RSX are pinned to performance mask (0xFC)
+        self.assertEqual(calculate_affinity_mask(ThreadClass.SPU, ThreadSchedulerMode.RPCS3, topo, 0xFF), 0xFC)
+        self.assertEqual(calculate_affinity_mask(ThreadClass.PPU, ThreadSchedulerMode.RPCS3, topo, 0xFF), 0xFC)
+        self.assertEqual(calculate_affinity_mask(ThreadClass.RSX, ThreadSchedulerMode.RPCS3, topo, 0xFF), 0xFC)
+        self.assertEqual(calculate_affinity_mask(ThreadClass.GENERAL, ThreadSchedulerMode.RPCS3, topo, 0xFF), 0xFF)
+
+        # Offline Prime core 7 (allowed_mask = 0x7F) -> SPU, PPU, RSX receive 0x7C (cores 2-6 only)
+        self.assertEqual(calculate_affinity_mask(ThreadClass.SPU, ThreadSchedulerMode.RPCS3, topo, 0x7F), 0x7C)
+        self.assertEqual(calculate_affinity_mask(ThreadClass.PPU, ThreadSchedulerMode.RPCS3, topo, 0x7F), 0x7C)
+
+        # Restricted cpuset to efficiency cores (allowed_mask = 0x03) -> clean fallback to 0x03
+        self.assertEqual(calculate_affinity_mask(ThreadClass.SPU, ThreadSchedulerMode.RPCS3, topo, 0x03), 0x03)
+
     def test_google_tensor_g3_9_cores(self):
         # 4x A510 (350) + 5x big/prime (850-1024) across 9 cores
         caps = [(0, 350), (1, 350), (2, 350), (3, 350), (4, 850), (5, 850), (6, 850), (7, 850), (8, 1024)]
@@ -386,7 +444,7 @@ class CpuTopologyTestCase(unittest.TestCase):
         if cpp_src.exists():
             subprocess.run(["g++", "-O2", "-std=c++20", str(cpp_src), "-o", str(bin_path)], check=True)
             res = subprocess.run([str(bin_path)], capture_output=True, text=True, check=True)
-            self.assertIn("ALL 21 CPU TOPOLOGY AND SCHEDULER TESTS PASSED!", res.stdout)
+            self.assertIn("ALL 24 CPU TOPOLOGY AND SCHEDULER TESTS PASSED!", res.stdout)
             if bin_path.exists():
                 bin_path.unlink()
 

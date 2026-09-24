@@ -308,6 +308,66 @@ int main()
 			topo.performance_mask, topo.efficiency_mask);
 	}
 
+	// Test 3b: Snapdragon 8 Gen 3 Cluster Frequencies (2x A520, 2x A720 lower, 3x A720 higher, 1x X4 prime)
+	{
+		std::vector<std::pair<u32, u64>> freqs = {
+			{0, 2265600}, {1, 2265600},
+			{2, 2956800}, {3, 2956800},
+			{4, 3148800}, {5, 3148800}, {6, 3148800},
+			{7, 3300000}
+		};
+		auto topo = parse_cpu_topology(0xFF, {}, freqs, {});
+		assert(topo.is_heterogeneous);
+		assert(topo.performance_mask == 0xFC);
+		assert(topo.efficiency_mask == 0x03);
+		printf("Test 3b (SD8Gen3 Frequencies): PASS (perf=0x%llx, eff=0x%llx)\n",
+			topo.performance_mask, topo.efficiency_mask);
+	}
+
+	// Test 3c: Snapdragon 8 Gen 3 MIDRs (0xd80 A520, 0xd81 A720, 0xd82 X4)
+	{
+		std::vector<std::pair<u32, u64>> midrs = {
+			{0, 0x410FD800}, {1, 0x410FD800},
+			{2, 0x410FD810}, {3, 0x410FD810}, {4, 0x410FD810}, {5, 0x410FD810}, {6, 0x410FD810},
+			{7, 0x410FD820}
+		};
+		auto topo = parse_cpu_topology(0xFF, {}, {}, midrs);
+		assert(topo.is_heterogeneous);
+		assert(topo.performance_mask == 0xFC);
+		assert(topo.efficiency_mask == 0x03);
+		printf("Test 3c (SD8Gen3 MIDRs): PASS (perf=0x%llx, eff=0x%llx)\n",
+			topo.performance_mask, topo.efficiency_mask);
+	}
+
+	// Test 3d: Snapdragon 8 Gen 3 Scheduler Modes (OS mode vs RPCS3 mode vs offline core)
+	{
+		cpu_topology_info topo;
+		topo.allowed_mask = 0xFF;
+		topo.performance_mask = 0xFC;
+		topo.efficiency_mask = 0x03;
+		topo.is_heterogeneous = true;
+
+		// OS mode: all thread groups receive unconstrained 0xFF
+		assert(calculate_affinity_mask(thread_class::general, thread_scheduler_mode::os, topo, 0xFF) == 0xFF);
+		assert(calculate_affinity_mask(thread_class::spu, thread_scheduler_mode::os, topo, 0xFF) == 0xFF);
+		assert(calculate_affinity_mask(thread_class::ppu, thread_scheduler_mode::os, topo, 0xFF) == 0xFF);
+		assert(calculate_affinity_mask(thread_class::rsx, thread_scheduler_mode::os, topo, 0xFF) == 0xFF);
+
+		// RPCS3 mode: SPU/PPU/RSX pinned to 0xFC, general is 0xFF
+		assert(calculate_affinity_mask(thread_class::spu, thread_scheduler_mode::old, topo, 0xFF) == 0xFC);
+		assert(calculate_affinity_mask(thread_class::ppu, thread_scheduler_mode::old, topo, 0xFF) == 0xFC);
+		assert(calculate_affinity_mask(thread_class::rsx, thread_scheduler_mode::old, topo, 0xFF) == 0xFC);
+		assert(calculate_affinity_mask(thread_class::general, thread_scheduler_mode::old, topo, 0xFF) == 0xFF);
+
+		// Offline core 7: allowed_mask = 0x7F -> SPU/PPU/RSX pinned to 0x7C
+		assert(calculate_affinity_mask(thread_class::spu, thread_scheduler_mode::old, topo, 0x7F) == 0x7C);
+
+		// Restricted to little cores 0-1: allowed_mask = 0x03 -> fallback to 0x03
+		assert(calculate_affinity_mask(thread_class::spu, thread_scheduler_mode::old, topo, 0x03) == 0x03);
+
+		printf("Test 3d (SD8Gen3 Scheduler Modes): PASS\n");
+	}
+
 	// Test 4: Google Tensor G3 (9 cores: 4x A510 [350] at 0-3, 5x big/prime [850-1024] at 4-8)
 	{
 		std::vector<std::pair<u32, u64>> caps = {
@@ -636,6 +696,6 @@ int main()
 		printf("Test 21 (Non-empty subset guarantee): PASS\n");
 	}
 
-	printf("\nALL 21 CPU TOPOLOGY AND SCHEDULER TESTS PASSED!\n");
+	printf("\nALL 24 CPU TOPOLOGY AND SCHEDULER TESTS PASSED!\n");
 	return 0;
 }

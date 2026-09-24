@@ -137,7 +137,8 @@ private val CURATED_SECTIONS = listOf(
             "Core@@PPU Decoder",
             "Core@@SPU Decoder",
             "Core@@SPU Block Size",
-            "Core@@SPU Threads"
+            "Core@@SPU Threads",
+            "Core@@Thread Scheduler Mode"
         )
     ),
     CuratedSection(

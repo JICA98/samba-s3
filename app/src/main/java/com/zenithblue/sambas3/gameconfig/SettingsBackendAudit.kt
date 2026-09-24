@@ -58,6 +58,7 @@ object SettingsBackendAudit {
         KnownSetting("Core@@SPU loop detection", "bool"),
         KnownSetting("Core@@Max SPURS Threads", "int"),
         KnownSetting("Core@@XFloat Accuracy", "enum"),
+        KnownSetting("Core@@Thread Scheduler Mode", "enum"),
         KnownSetting("VFS@@Enable /host_root/", "bool"),
         KnownSetting("VFS@@Initialize Directories", "bool"),
         KnownSetting("VFS@@Limit disk cache size", "bool"),
