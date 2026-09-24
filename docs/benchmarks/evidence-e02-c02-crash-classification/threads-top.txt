@@ -1,0 +1,123 @@
+Threads: 118 total,  10 running, 108 sleeping,   0 stopped,   0 zombie
+  Mem:    11222M total,    10719M used,      503M free,        1M buffers
+ Swap:     6143M total,     2355M used,     3788M free,     5870M cached
+800%cpu 422%user   4%nice 163%sys 178%idle   0%iow  30%irq   4%sirq   0%host
+  TID USER         PR  NI VIRT  RES  SHR S[%CPU] %MEM     TIME+ THREAD          PROCESS
+25338 u0_a463      12  -8  79G 2.1G 1.2G R 85.1  19.5   0:54.81 rsx::thread     com.zenithblue.sambas3
+25414 u0_a463      20   0  79G 2.1G 1.2G R 66.6  19.5   0:49.64 SPU[0x2000100]  com.zenithblue.sambas3
+25412 u0_a463      20   0  79G 2.1G 1.2G R 66.6  19.5   0:49.49 SPU[0x0000100]  com.zenithblue.sambas3
+25413 u0_a463      20   0  79G 2.1G 1.2G R 62.9  19.5   0:49.35 SPU[0x1000100]  com.zenithblue.sambas3
+25419 u0_a463      20   0  79G 2.1G 1.2G R 59.2  19.5   0:48.08 SPU[0x0000200]  com.zenithblue.sambas3
+25340 u0_a463      20   0  79G 2.1G 1.2G R 48.1  19.5   0:42.27 PPU[0x1000000]  com.zenithblue.sambas3
+25415 u0_a463      20   0  79G 2.1G 1.2G R 44.4  19.5   0:29.34 SPU[0x3000100]  com.zenithblue.sambas3
+25416 u0_a463      20   0  79G 2.1G 1.2G R 37.0  19.5   0:28.94 SPU[0x4000100]  com.zenithblue.sambas3
+25434 u0_a463      20   0  79G 2.1G 1.2G R 22.2  19.5   0:13.07 PPU[0x1000010]  com.zenithblue.sambas3
+25454 u0_a463      20   0  79G 2.1G 1.2G S  3.7  19.5   0:00.03 PPU[0x1000024]  com.zenithblue.sambas3
+25436 u0_a463      20   0  79G 2.1G 1.2G S  3.7  19.5   0:01.34 PPU[0x1000012]  com.zenithblue.sambas3
+25364 u0_a463      -3   0  79G 2.1G 1.2G S  3.7  19.5   0:04.97 AAudio_1        com.zenithblue.sambas3
+25219 u0_a463      20   0  79G 2.1G 1.2G S  3.7  19.5   0:03.41 DefaultDispatch com.zenithblue.sambas3
+25456 u0_a463      20   0  79G 2.1G 1.2G S  0.0  19.5   0:00.01 PPU[0x1000026]  com.zenithblue.sambas3
+25455 u0_a463      20   0  79G 2.1G 1.2G S  0.0  19.5   0:00.03 PPU[0x1000025]  com.zenithblue.sambas3
+25444 u0_a463      20   0  79G 2.1G 1.2G S  0.0  19.5   0:00.03 PPU[0x100001a]  com.zenithblue.sambas3
+25452 u0_a463      20   0  79G 2.1G 1.2G S  0.0  19.5   0:00.06 PPU[0x1000022]  com.zenithblue.sambas3
+25437 u0_a463      20   0  79G 2.1G 1.2G R  0.0  19.5   0:01.45 PPU[0x1000013]  com.zenithblue.sambas3
+25438 u0_a463      20   0  79G 2.1G 1.2G S  0.0  19.5   0:01.39 PPU[0x1000014]  com.zenithblue.sambas3
+25439 u0_a463      20   0  79G 2.1G 1.2G S  0.0  19.5   0:00.08 PPU[0x1000015]  com.zenithblue.sambas3
+25440 u0_a463      20   0  79G 2.1G 1.2G S  0.0  19.5   0:00.06 PPU[0x1000016]  com.zenithblue.sambas3
+25441 u0_a463      20   0  79G 2.1G 1.2G S  0.0  19.5   0:00.03 PPU[0x1000017]  com.zenithblue.sambas3
+25442 u0_a463      20   0  79G 2.1G 1.2G S  0.0  19.5   0:00.02 PPU[0x1000018]  com.zenithblue.sambas3
+25453 u0_a463      20   0  79G 2.1G 1.2G S  0.0  19.5   0:00.03 PPU[0x1000023]  com.zenithblue.sambas3
+25445 u0_a463      20   0  79G 2.1G 1.2G S  0.0  19.5   0:00.05 PPU[0x100001b]  com.zenithblue.sambas3
+25446 u0_a463      20   0  79G 2.1G 1.2G S  0.0  19.5   0:00.02 PPU[0x100001c]  com.zenithblue.sambas3
+25447 u0_a463      20   0  79G 2.1G 1.2G S  0.0  19.5   0:00.05 PPU[0x100001d]  com.zenithblue.sambas3
+25448 u0_a463      20   0  79G 2.1G 1.2G S  0.0  19.5   0:00.03 PPU[0x100001e]  com.zenithblue.sambas3
+25449 u0_a463      20   0  79G 2.1G 1.2G S  0.0  19.5   0:00.04 PPU[0x100001f]  com.zenithblue.sambas3
+25450 u0_a463      20   0  79G 2.1G 1.2G S  0.0  19.5   0:00.05 PPU[0x1000020]  com.zenithblue.sambas3
+25451 u0_a463      20   0  79G 2.1G 1.2G S  0.0  19.5   0:00.11 PPU[0x1000021]  com.zenithblue.sambas3
+25443 u0_a463      20   0  79G 2.1G 1.2G S  0.0  19.5   0:00.02 PPU[0x1000019]  com.zenithblue.sambas3
+25435 u0_a463      20   0  79G 2.1G 1.2G S  0.0  19.5   0:02.99 PPU[0x1000011]  com.zenithblue.sambas3
+25433 u0_a463      20   0  79G 2.1G 1.2G S  0.0  19.5   0:00.00 PPU[0x100000f]  com.zenithblue.sambas3
+25431 u0_a463      20   0  79G 2.1G 1.2G S  0.0  19.5   0:00.24 VBlank Thread   com.zenithblue.sambas3
+25432 u0_a463      20   0  79G 2.1G 1.2G S  0.0  19.5   0:05.09 PPU[0x100000e]  com.zenithblue.sambas3
+25425 u0_a463      20   0  79G 2.1G 1.2G S  0.0  19.5   0:05.42 PPU[0x1000008]  com.zenithblue.sambas3
+25427 u0_a463      20   0  79G 2.1G 1.2G S  0.0  19.5   0:01.18 PPU[0x100000a]  com.zenithblue.sambas3
+25426 u0_a463      20   0  79G 2.1G 1.2G S  0.0  19.5   0:00.41 PPU[0x1000009]  com.zenithblue.sambas3
+25428 u0_a463      20   0  79G 2.1G 1.2G S  0.0  19.5   0:00.87 PPU[0x100000b]  com.zenithblue.sambas3
+25422 u0_a463      20   0  79G 2.1G 1.2G S  0.0  19.5   0:04.13 PPU[0x1000005]  com.zenithblue.sambas3
+25423 u0_a463      20   0  79G 2.1G 1.2G S  0.0  19.5   0:02.30 PPU[0x1000006]  com.zenithblue.sambas3
+25424 u0_a463      20   0  79G 2.1G 1.2G S  0.0  19.5   0:03.96 PPU[0x1000007]  com.zenithblue.sambas3
+25420 u0_a463      20   0  79G 2.1G 1.2G S  0.0  19.5   0:00.00 PPU[0x1000003]  com.zenithblue.sambas3
+25417 u0_a463      20   0  79G 2.1G 1.2G S  0.0  19.5   0:00.00 PPU[0x1000001]  com.zenithblue.sambas3
+25421 u0_a463      20   0  79G 2.1G 1.2G S  0.0  19.5   0:00.00 PPU[0x1000004]  com.zenithblue.sambas3
+25418 u0_a463      20   0  79G 2.1G 1.2G S  0.0  19.5   0:00.00 PPU[0x1000002]  com.zenithblue.sambas3
+25406 u0_a463      20   0  79G 2.1G 1.2G S  0.0  19.5   0:01.40 binder:25144_6  com.zenithblue.sambas3
+25336 u0_a463      20   0  79G 2.1G 1.2G S  0.0  19.5   0:00.00 RSX.W2          com.zenithblue.sambas3
+25337 u0_a463      20   0  79G 2.1G 1.2G S  0.0  19.5   0:00.00 Thread-16       com.zenithblue.sambas3
+25335 u0_a463      20   0  79G 2.1G 1.2G S  0.0  19.5   0:00.00 RSX.W1          com.zenithblue.sambas3
+25339 u0_a463      20   0  79G 2.1G 1.2G S  0.0  19.5   0:02.54 Pad Thread      com.zenithblue.sambas3
+25329 u0_a463      20   0  79G 2.1G 1.2G S  0.0  19.5   0:00.95 binder:25144_5  com.zenithblue.sambas3
+25326 u0_a463      39  19  79G 2.1G 1.2G S  0.0  19.5   0:00.00 com.ze:traceq0  com.zenithblue.sambas3
+25319 u0_a463      20   0  79G 2.1G 1.2G S  0.0  19.5   0:00.00 Signaling Manag com.zenithblue.sambas3
+25311 u0_a463      12  -8  79G 2.1G 1.2G S  0.0  19.5   0:00.00 RsxAudioData Th com.zenithblue.sambas3
+25314 u0_a463      20   0  79G 2.1G 1.2G S  0.0  19.5   0:00.00 cellAudio Threa com.zenithblue.sambas3
+25315 u0_a463      20   0  79G 2.1G 1.2G S  0.0  19.5   0:00.00 Network Thread  com.zenithblue.sambas3
+25316 u0_a463      20   0  79G 2.1G 1.2G S  0.0  19.5   0:00.25 cellAudio Threa com.zenithblue.sambas3
+25317 u0_a463      20   0  79G 2.1G 1.2G S  0.0  19.5   0:00.08 LV2 Watchdog Th com.zenithblue.sambas3
+25318 u0_a463      20   0  79G 2.1G 1.2G S  0.0  19.5   0:00.00 PPU Syscall Usa com.zenithblue.sambas3
+25320 u0_a463      20   0  79G 2.1G 1.2G S  0.0  19.5   0:00.00 NetStart Hack   com.zenithblue.sambas3
+25321 u0_a463      20   0  79G 2.1G 1.2G S  0.0  19.5   0:00.00 MsgDialog Close com.zenithblue.sambas3
+25312 u0_a463      20   0  79G 2.1G 1.2G S  0.0  19.5   0:00.00 cellAudio Threa com.zenithblue.sambas3
+25324 u0_a463      20   0  79G 2.1G 1.2G S  0.0  19.5   0:00.00 Overlay Input T com.zenithblue.sambas3
+25313 u0_a463      20   0  79G 2.1G 1.2G S  0.0  19.5   0:00.00 Tcp Over Udp Ti com.zenithblue.sambas3
+25299 u0_a463      20   0  79G 2.1G 1.2G S  0.0  19.5   0:00.00 Gem Thread      com.zenithblue.sambas3
+25300 u0_a463      20   0  79G 2.1G 1.2G S  0.0  19.5   0:02.17 Camera Thread   com.zenithblue.sambas3
+25301 u0_a463      20   0  79G 2.1G 1.2G S  0.0  19.5   0:00.00 Usb Manager Thr com.zenithblue.sambas3
+25302 u0_a463      12  -8  79G 2.1G 1.2G S  0.0  19.5   0:01.03 cellAudio Threa com.zenithblue.sambas3
+25305 u0_a463      20   0  79G 2.1G 1.2G S  0.0  19.5   0:00.00 MediaList Threa com.zenithblue.sambas3
+25306 u0_a463      20   0  79G 2.1G 1.2G S  0.0  19.5   0:00.00 Network P2P Thr com.zenithblue.sambas3
+25307 u0_a463      20   0  79G 2.1G 1.2G S  0.0  19.5   0:01.60 GDB Server      com.zenithblue.sambas3
+25308 u0_a463      20   0  79G 2.1G 1.2G S  0.0  19.5   0:00.00 CPU Profiler    com.zenithblue.sambas3
+25309 u0_a463      20   0  79G 2.1G 1.2G S  0.0  19.5   0:00.13 VUART AV Thread com.zenithblue.sambas3
+25310 u0_a463      20   0  79G 2.1G 1.2G S  0.0  19.5   0:01.20 Timer Thread    com.zenithblue.sambas3
+25323 u0_a463      20   0  79G 2.1G 1.2G S  0.0  19.5   0:00.00 Microphone Thre com.zenithblue.sambas3
+25297 u0_a463      20   0  79G 2.1G 1.2G S  0.0  19.5   0:00.00 PS Move Worker  com.zenithblue.sambas3
+25295 u0_a463      20   0  79G 2.1G 1.2G S  0.0  19.5   0:00.00 PS Move Worker  com.zenithblue.sambas3
+25298 u0_a463      20   0  79G 2.1G 1.2G S  0.0  19.5   0:00.00 PS Move Worker  com.zenithblue.sambas3
+25296 u0_a463      20   0  79G 2.1G 1.2G S  0.0  19.5   0:00.00 PS Move Worker  com.zenithblue.sambas3
+25293 u0_a463      20   0  79G 2.1G 1.2G S  0.0  19.5   0:00.71 Progress Dialog com.zenithblue.sambas3
+25294 u0_a463      20   0  79G 2.1G 1.2G S  0.0  19.5   0:00.01 Performance Sen com.zenithblue.sambas3
+25287 u0_a463      18  -2  79G 2.1G 1.2G S  0.0  19.5   0:00.00 queued-work-loo com.zenithblue.sambas3
+25270 u0_a463      20   0  79G 2.1G 1.2G S  0.0  19.5   0:00.00 InteractionJank com.zenithblue.sambas3
+25261 u0_a463      20   0  79G 2.1G 1.2G S  0.0  19.5   0:00.20 binder:25144_4  com.zenithblue.sambas3
+25260 u0_a463      20   0  79G 2.1G 1.2G S  0.0  19.5   0:00.26 binder:25144_1  com.zenithblue.sambas3
+25258 u0_a463      20   0  79G 2.1G 1.2G S  0.0  19.5   0:00.16 DefaultExecutor com.zenithblue.sambas3
+25254 u0_a463      20   0  79G 2.1G 1.2G S  0.0  19.5   0:00.00 SurfaceSyncGrou com.zenithblue.sambas3
+25241 u0_a463      20   0  79G 2.1G 1.2G S  0.0  19.5   0:00.01 GrallocUploadTh com.zenithblue.sambas3
+25237 u0_a463      20   0  79G 2.1G 1.2G S  0.0  19.5   0:00.06 DefaultDispatch com.zenithblue.sambas3
+25232 u0_a463      20   0  79G 2.1G 1.2G S  0.0  19.5   0:02.03 DefaultDispatch com.zenithblue.sambas3
+25235 u0_a463      20   0  79G 2.1G 1.2G S  0.0  19.5   0:00.04 DefaultDispatch com.zenithblue.sambas3
+25238 u0_a463      20   0  79G 2.1G 1.2G S  0.0  19.5   0:00.00 DefaultDispatch com.zenithblue.sambas3
+25233 u0_a463      20   0  79G 2.1G 1.2G S  0.0  19.5   0:00.00 DefaultDispatch com.zenithblue.sambas3
+25231 u0_a463      20   0  79G 2.1G 1.2G S  0.0  19.5   0:00.00 DefaultDispatch com.zenithblue.sambas3
+25221 u0_a463      20   0  79G 2.1G 1.2G S  0.0  19.5   0:00.00 pool-4-thread-1 com.zenithblue.sambas3
+25220 u0_a463      10 -10  79G 2.1G 1.2G S  0.0  19.5   0:00.00 TracingMuxer    com.zenithblue.sambas3
+25223 u0_a463      18  -2  79G 2.1G 1.2G S  0.0  19.5   0:00.00 hwuiTask1       com.zenithblue.sambas3
+25222 u0_a463      18  -2  79G 2.1G 1.2G S  0.0  19.5   0:00.00 hwuiTask0       com.zenithblue.sambas3
+25217 u0_a463      20   0  79G 2.1G 1.2G S  0.0  19.5   0:00.12 Thread-5        com.zenithblue.sambas3
+25218 u0_a463      20   0  79G 2.1G 1.2G S  0.0  19.5   0:00.00 Thread-6        com.zenithblue.sambas3
+25216 u0_a463      10 -10  79G 2.1G 1.2G S  0.0  19.5   0:00.00 ithblue.sambas3 com.zenithblue.sambas3
+25215 u0_a463      30  10  79G 2.1G 1.2G S  0.0  19.5   0:00.65 Log Writer      com.zenithblue.sambas3
+25186 u0_a463      20   0  79G 2.1G 1.2G S  0.0  19.5   0:00.09 DefaultDispatch com.zenithblue.sambas3
+25167 u0_a463      10 -10  79G 2.1G 1.2G S  0.0  19.5   0:05.91 RenderThread    com.zenithblue.sambas3
+25159 u0_a463      29   9  79G 2.1G 1.2G S  0.0  19.5   0:00.04 Profile Saver   com.zenithblue.sambas3
+25157 u0_a463      20   0  79G 2.1G 1.2G S  0.0  19.5   0:00.00 binder:25144_2  com.zenithblue.sambas3
+25156 u0_a463      20   0  79G 2.1G 1.2G S  0.0  19.5   0:00.12 binder:25144_1  com.zenithblue.sambas3
+25158 u0_a463      20   0  79G 2.1G 1.2G S  0.0  19.5   0:00.28 binder:25144_3  com.zenithblue.sambas3
+25154 u0_a463      24   4  79G 2.1G 1.2G S  0.0  19.5   0:00.00 FinalizerDaemon com.zenithblue.sambas3
+25151 u0_a463      29   9  79G 2.1G 1.2G S  0.0  19.5   0:01.12 Jit thread pool com.zenithblue.sambas3
+25153 u0_a463      24   4  79G 2.1G 1.2G S  0.0  19.5   0:00.21 ReferenceQueueD com.zenithblue.sambas3
+25155 u0_a463      24   4  79G 2.1G 1.2G S  0.0  19.5   0:00.00 FinalizerWatchd com.zenithblue.sambas3
+25148 u0_a463       0 -20  79G 2.1G 1.2G S  0.0  19.5   0:00.00 Signal Catcher  com.zenithblue.sambas3
+25150 u0_a463       0 -20  79G 2.1G 1.2G S  0.0  19.5   0:00.00 perfetto_hprof_ com.zenithblue.sambas3
+25152 u0_a463      24   4  79G 2.1G 1.2G S  0.0  19.5   0:00.48 HeapTaskDaemon  com.zenithblue.sambas3
+25144 u0_a463      10 -10  79G 2.1G 1.2G S  0.0  19.5   0:13.92 ithblue.sambas3 com.zenithblue.sambas3

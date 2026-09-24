@@ -38,7 +38,7 @@ DEFAULT_DEVICE = "d30a1726"
 
 # Pinned commit and release hashes for verification
 EXPECTED_CORE_HASH = "ed8ba6c12c218249524a441b79f48d6bae842394"
-EXPECTED_APK_SHA256 = "7c697bdf95a79d6e40dc812f7799d3b9993b31712760b5486cd93bba695d83d9"
+EXPECTED_APK_SHA256 = "ff7679f9caa32bafe3620ef0f39324be3de8fed9bc46b9616d3ef913b4f5ca1a"
 EXPECTED_SO_SHA256 = "571426c33f8677ebec0f5fcc26c1c32d5e6ac6e9bdd2422bc0b1f0edb6afab09"
 
 
@@ -360,10 +360,22 @@ def main() -> int:
 
     # 9. Deterministic clean stop
     print("[*] Initiating clean game stop via debug-stop-game.sh...")
-    run_cmd([str(SCRIPTS_DIR / "debug-stop-game.sh"), args.serial], timeout=45)
+    r_stop = run_cmd([str(SCRIPTS_DIR / "debug-stop-game.sh"), args.serial], timeout=45)
 
     # Refresh post-stop exit info in evidence directory
-    adb_shell(args.serial, f"dumpsys activity exit-info {PKG_NAME} > {outdir}/exit-info.txt 2>&1 || true")
+    r_exit = adb_shell(args.serial, f"dumpsys activity exit-info {PKG_NAME}")
+    if r_exit.returncode == 0 and r_exit.stdout.strip():
+        (outdir / "exit-info.txt").write_text(r_exit.stdout, encoding="utf-8")
+
+    manifest_path = outdir / "run-manifest.json"
+    if manifest_path.exists():
+        try:
+            m_data = json.loads(manifest_path.read_text(encoding="utf-8"))
+            m_data["clean_stop"] = (r_stop.returncode == 0)
+            m_data["stop_reason"] = "DEBUG_STOP_GAME"
+            manifest_path.write_text(json.dumps(m_data, indent=2), encoding="utf-8")
+        except Exception:
+            pass
 
     # 10. Run frame events analyzer
     analysis_json_path = outdir / "frame-analysis.json"

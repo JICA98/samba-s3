@@ -24,33 +24,77 @@ data class CrashReport(
     val rawStopReason: String? = null,
     val captureState: CaptureState? = null,
     val diagnostics: SessionDiagnosticsView? = null,
+    val exitDiagnosis: ProcessExitDiagnosis? = null,
 )
 
 object CrashEvidenceCollector {
-    fun collectSummary(context: Context, session: EmulationSessionRecord?, evidenceHint: String = ""): CrashReport {
+    fun collectSummary(
+        context: Context,
+        session: EmulationSessionRecord?,
+        evidenceHint: String = "",
+        injectedExitRecords: List<ProcessExitRecord>? = null,
+    ): CrashReport {
         val logSession = session?.sessionId?.let { LogSessionStore.read(context, it) }
         val effectiveHint = if (evidenceHint.isNotBlank()) evidenceHint else (session?.stopReason ?: logSession?.stopReason ?: "")
+
+        val exitRecords = injectedExitRecords ?: ProcessExitInfoCollector.getExitRecords(context)
+        val matchedExit = ProcessExitMatcher.matchSession(session, exitRecords, context.packageName)
+        val exitDiagnosis = if (matchedExit != null || session != null) {
+            ProcessExitClassifier.classify(
+                exitRecord = matchedExit,
+                session = session,
+                evidenceHint = effectiveHint,
+            )
+        } else null
+
         val view = logSession?.let {
             SessionDiagnostics.project(
                 it,
-                fatalEventId = session?.fatalEventId,
+                fatalEventId = session.fatalEventId,
                 evidenceHint = effectiveHint,
             )
         }
-        val classification = view?.classification ?: CrashClassifier.classify(
-            effectiveHint,
-            session != null,
-            cleanStop = false,
-            fatalEventId = session?.fatalEventId,
-            frontendReason = session?.stopReason ?: logSession?.stopReason,
-        )
-        val sources = sessionOwnedSources(context, logSession)
+        val classification = when {
+            exitDiagnosis != null && exitDiagnosis.classification != ExitClassification.UNKNOWN ->
+                exitDiagnosis.classification.legacyClassification
+            view != null -> view.classification
+            else -> CrashClassifier.classify(
+                effectiveHint,
+                session != null,
+                cleanStop = false,
+                fatalEventId = session?.fatalEventId,
+                frontendReason = session?.stopReason ?: logSession?.stopReason,
+            )
+        }
+        val sources = sessionOwnedSources(context, logSession).toMutableMap()
         val dir = File(context.filesDir, "crash_reports/${session?.sessionId ?: "report"}")
+
+        if (exitDiagnosis?.rawTrace != null) {
+            runCatching {
+                dir.mkdirs()
+                val traceFile = File(dir, "tombstone.txt")
+                traceFile.writeText(exitDiagnosis.rawTrace)
+                sources["tombstone.txt"] = traceFile
+            }
+        }
+
+        val summary = exitDiagnosis?.summary?.ifBlank { null }
+            ?: view?.outcome?.name?.replace('_', ' ')
+            ?: classification.name.replace('_', ' ')
+
+        val cause = when {
+            exitDiagnosis != null && exitDiagnosis.classification != ExitClassification.UNKNOWN ->
+                exitDiagnosis.summary
+            view?.diagnosticCause != null ->
+                view.diagnosticCause.name.replace('_', ' ')
+            else -> CrashClassifier.likelyCause(effectiveHint)
+        }
+
         return CrashReport(
             directory = dir,
             classification = classification,
-            summary = view?.outcome?.name?.replace('_', ' ') ?: classification.name.replace('_', ' '),
-            cause = view?.diagnosticCause?.name?.replace('_', ' ') ?: CrashClassifier.likelyCause(effectiveHint),
+            summary = summary,
+            cause = cause,
             sources = sources,
             gameTitle = logSession?.gameTitleSnapshot ?: session?.gameName,
             titleId = logSession?.titleId ?: session?.titleId,
@@ -60,22 +104,65 @@ object CrashEvidenceCollector {
             rawStopReason = logSession?.stopReason ?: session?.stopReason,
             captureState = logSession?.captureState,
             diagnostics = view,
+            exitDiagnosis = exitDiagnosis,
         )
     }
 
-    fun collect(context: Context, session: EmulationSessionRecord?, evidenceHint: String = ""): CrashReport {
-        return collectSummary(context, session, evidenceHint)
+    fun collect(
+        context: Context,
+        session: EmulationSessionRecord?,
+        evidenceHint: String = "",
+        injectedExitRecords: List<ProcessExitRecord>? = null,
+    ): CrashReport {
+        return collectSummary(context, session, evidenceHint, injectedExitRecords)
     }
 
-    fun reportForManifest(context: Context, manifest: LogSessionManifest): CrashReport {
+    fun reportForManifest(
+        context: Context,
+        manifest: LogSessionManifest,
+        injectedExitRecords: List<ProcessExitRecord>? = null,
+    ): CrashReport {
+        val exitRecords = injectedExitRecords ?: ProcessExitInfoCollector.getExitRecords(context)
+        val matchedExit = ProcessExitMatcher.matchManifest(manifest, exitRecords, context.packageName)
+        val exitDiagnosis = if (matchedExit != null) {
+            ProcessExitClassifier.classify(
+                exitRecord = matchedExit,
+                evidenceHint = manifest.stopReason ?: "",
+            )
+        } else null
+
         val view = SessionDiagnostics.project(manifest)
-        val sources = sessionOwnedSources(context, manifest)
+        val sources = sessionOwnedSources(context, manifest).toMutableMap()
         val dir = LogSessionStore.sessionDir(context, manifest.sessionId)
+
+        if (exitDiagnosis?.rawTrace != null) {
+            runCatching {
+                dir.mkdirs()
+                val traceFile = File(dir, "tombstone.txt")
+                traceFile.writeText(exitDiagnosis.rawTrace)
+                sources["tombstone.txt"] = traceFile
+            }
+        }
+
+        val classification = when {
+            exitDiagnosis != null && exitDiagnosis.classification != ExitClassification.UNKNOWN ->
+                exitDiagnosis.classification.legacyClassification
+            else -> view.classification
+        }
+
+        val summary = exitDiagnosis?.summary?.ifBlank { null } ?: view.outcome.name.replace('_', ' ')
+        val cause = when {
+            exitDiagnosis != null && exitDiagnosis.classification != ExitClassification.UNKNOWN ->
+                exitDiagnosis.summary
+            view.diagnosticCause != null -> view.diagnosticCause.name.replace('_', ' ')
+            else -> manifest.stopReason ?: view.outcome.name
+        }
+
         return CrashReport(
             directory = dir,
-            classification = view.classification,
-            summary = view.outcome.name.replace('_', ' '),
-            cause = view.diagnosticCause?.name?.replace('_', ' ') ?: (manifest.stopReason ?: view.outcome.name),
+            classification = classification,
+            summary = summary,
+            cause = cause,
             sources = sources,
             gameTitle = manifest.gameTitleSnapshot,
             titleId = manifest.titleId,
@@ -85,6 +172,7 @@ object CrashEvidenceCollector {
             rawStopReason = manifest.stopReason,
             captureState = manifest.captureState,
             diagnostics = view,
+            exitDiagnosis = exitDiagnosis,
         )
     }
 

@@ -1,0 +1,7 @@
+total 564
+-rw-rw-r-- 1 tombstoned system 279361 1970-07-13 08:34 tombstone_00
+-rw-rw-r-- 1 tombstoned system 163606 1970-07-13 08:34 tombstone_00.pb
+-rw-rw-r-- 1 tombstoned system  82294 2026-09-20 16:00 tombstone_01
+-rw-rw-r-- 1 tombstoned system  41122 2026-09-20 16:00 tombstone_01.pb
+---
+total 0

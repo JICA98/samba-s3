@@ -1,0 +1,280 @@
+09-25 03:15:09.803 25144 25232 D S3PERF  : crosscheck source=surface presented=2783 json_fps=60.0012 json_frametime_ms=16.605
+09-25 03:15:10.110 25144 25232 D S3PERF  : crosscheck ui_snapshot_fps=59.9998 ui_snapshot_frametime_ms=16.677
+09-25 03:15:10.420 25144 25232 D S3PERF  : GPU load [/sys/class/kgsl/kgsl-3d0/gpubusy]: raw='412873 1003227' -> load=41.154494446421396%
+09-25 03:15:11.030 25144 25232 D S3PERF  : crosscheck source=surface presented=2857 json_fps=60.007 json_frametime_ms=16.696
+09-25 03:15:11.336 25144 25232 D S3PERF  : crosscheck ui_snapshot_fps=60.0037 ui_snapshot_frametime_ms=16.597
+09-25 03:15:12.254 25144 25232 D S3PERF  : crosscheck source=surface presented=2930 json_fps=59.9845 json_frametime_ms=16.838
+09-25 03:15:12.557 25144 25232 D S3PERF  : crosscheck ui_snapshot_fps=60.0053 ui_snapshot_frametime_ms=16.626
+09-25 03:15:12.638 25144 25294 D RPCS3   : CPU Usage: Total: 25.9%, Cores: 0.0%, 0.0%, 0.0%, 0.0%, 0.0%, 0.0%, 0.0%, 0.0%
+09-25 03:15:12.713 25144 25318 D RPCS3   : PPU Syscall Usage Stats:
+09-25 03:15:12.713 25144 25318 D RPCS3   : 	⁂ sys_timer_usleep [375373]
+09-25 03:15:12.713 25144 25318 D RPCS3   : 	⁂ sys_event_queue_receive [23092]
+09-25 03:15:12.713 25144 25318 D RPCS3   : 	⁂ _sys_lwcond_queue_wait [21518]
+09-25 03:15:12.713 25144 25318 D RPCS3   : 	⁂ _sys_lwmutex_lock [19795]
+09-25 03:15:12.713 25144 25318 D RPCS3   : 	⁂ _sys_lwmutex_unlock [16212]
+09-25 03:15:12.713 25144 25318 D RPCS3   : 	⁂ _sys_lwcond_signal [9400]
+09-25 03:15:12.713 25144 25318 D RPCS3   : 	⁂ sys_event_port_send [9329]
+09-25 03:15:12.713 25144 25318 D RPCS3   : 	⁂ _sys_lwcond_signal_all [6121]
+09-25 03:15:12.713 25144 25318 D RPCS3   : 	⁂ sys_event_flag_wait [4151]
+09-25 03:15:12.713 25144 25318 D RPCS3   : 	⁂ sys_event_flag_clear [4151]
+09-25 03:15:12.713 25144 25318 D RPCS3   : 	⁂ sys_time_get_current_time [3917]
+09-25 03:15:12.713 25144 25318 D RPCS3   : 	⁂ sys_fs_read [3283]
+09-25 03:15:13.475 25144 25232 D S3PERF  : crosscheck source=surface presented=3003 json_fps=60.0048 json_frametime_ms=16.637
+09-25 03:15:13.783 25144 25232 D S3PERF  : crosscheck ui_snapshot_fps=60.0038 ui_snapshot_frametime_ms=16.685
+09-25 03:15:14.700 25144 25232 D S3PERF  : crosscheck source=surface presented=3077 json_fps=60.001 json_frametime_ms=16.624
+09-25 03:15:15.007 25144 25232 D S3PERF  : crosscheck ui_snapshot_fps=60.0055 ui_snapshot_frametime_ms=16.585
+09-25 03:15:15.221 25144 25144 W DebugPad: BUTTON CROSS d1=0 d2=64 press 120ms request_id=s3-1790286315181088391-1387396-12749
+09-25 03:15:15.265 25144 25340 W RPCS3   : cellVdecClose(handle=0xf0000100)
+09-25 03:15:15.265 25144 25340 W RPCS3   : _sys_interrupt_thread_disestablish(ih=0x1000028, r13=*0xd0010840)
+09-25 03:15:15.265 25144 25425 W RPCS3   : sys_fs_close(fd=21): Regular file, '/dev_bdvd/PS3_GAME/USRDIR/CINEMATICS/OPENINGCREDITS.M2V', Mode: 0x0, Flags: 0x0, Pos/Size: 40.8125MB/374.731MB (0x28d0000/0x176bb07e)
+09-25 03:15:15.265 25144 25468 W RPCS3   : AU decoding: aborted (handle=0xf0000100, seq_id=1, cmd_id=1270, abort_decode=1)
+09-25 03:15:15.265 25144 25468 W RPCS3   : 'vdecEntry' aborted (0.023731s)
+09-25 03:15:15.265 25144 25468 D RPCS3   : PPU thread perf stats are not available.
+09-25 03:15:15.341 25144 25144 W DebugPad: BUTTON CROSS release request_id=s3-1790286315181088391-1387396-12749
+09-25 03:15:15.425 25144 25340 W RPCS3   : sys_rsx_context_iounmap(context_id=0x55555555, io=0x4c00000, size=0xd00000)
+09-25 03:15:15.425 25144 25340 W RPCS3   : sys_rsx_context_iounmap(): RSX is not idle while unmapping io
+09-25 03:15:15.425 25144 25340 W RPCS3   : sys_mmapper_unmap_shared_memory(addr=0x34c00000, mem_id=*0xd0010760)
+09-25 03:15:15.425 25144 25340 W RPCS3   : sys_mmapper_unmap_shared_memory(addr=0x34d00000, mem_id=*0xd0010760)
+09-25 03:15:15.434 25144 25340 W RPCS3   : sys_mmapper_unmap_shared_memory(addr=0x34e00000, mem_id=*0xd0010760)
+09-25 03:15:15.435 25144 25340 W RPCS3   : sys_mmapper_unmap_shared_memory(addr=0x34f00000, mem_id=*0xd0010760)
+09-25 03:15:15.435 25144 25340 W RPCS3   : sys_mmapper_unmap_shared_memory(addr=0x35000000, mem_id=*0xd0010760)
+09-25 03:15:15.435 25144 25340 W RPCS3   : sys_mmapper_unmap_shared_memory(addr=0x35100000, mem_id=*0xd0010760)
+09-25 03:15:15.435 25144 25340 W RPCS3   : sys_mmapper_unmap_shared_memory(addr=0x35200000, mem_id=*0xd0010760)
+09-25 03:15:15.435 25144 25340 W RPCS3   : sys_mmapper_unmap_shared_memory(addr=0x35300000, mem_id=*0xd0010760)
+09-25 03:15:15.435 25144 25340 W RPCS3   : sys_mmapper_unmap_shared_memory(addr=0x35400000, mem_id=*0xd0010760)
+09-25 03:15:15.435 25144 25340 W RPCS3   : sys_mmapper_unmap_shared_memory(addr=0x35500000, mem_id=*0xd0010760)
+09-25 03:15:15.435 25144 25340 W RPCS3   : sys_mmapper_unmap_shared_memory(addr=0x35600000, mem_id=*0xd0010760)
+09-25 03:15:15.435 25144 25340 W RPCS3   : sys_mmapper_unmap_shared_memory(addr=0x35700000, mem_id=*0xd0010760)
+09-25 03:15:15.435 25144 25340 W RPCS3   : sys_mmapper_unmap_shared_memory(addr=0x35800000, mem_id=*0xd0010760)
+09-25 03:15:15.640 25144 25425 D RPCS3   : sys_fs_fcntl(0xc0000006): /dev_bdvd
+09-25 03:15:15.640 25144 25425 W RPCS3   : sys_fs_stat(path=“/dev_bdvd/PS3_GAME/USRDIR/POS.PSARC”, sb=*0xd005f488)
+09-25 03:15:15.950 25144 25232 D S3PERF  : crosscheck source=surface presented=3137 json_fps=45.152 json_frametime_ms=24.202
+09-25 03:15:16.266 25144 25232 D S3PERF  : crosscheck ui_snapshot_fps=34.4794 ui_snapshot_frametime_ms=26.438
+09-25 03:15:17.189 25144 25232 D S3PERF  : crosscheck source=surface presented=3177 json_fps=35.4616 json_frametime_ms=61.196
+09-25 03:15:17.491 25144 25232 D S3PERF  : crosscheck ui_snapshot_fps=36.6202 ui_snapshot_frametime_ms=21.995
+09-25 03:15:18.412 25144 25232 D S3PERF  : crosscheck source=surface presented=3215 json_fps=31.974 json_frametime_ms=46.691
+09-25 03:15:18.723 25144 25232 D S3PERF  : crosscheck ui_snapshot_fps=33.3329 ui_snapshot_frametime_ms=48.041
+09-25 03:15:19.684 25144 25232 D S3PERF  : crosscheck source=surface presented=3257 json_fps=33.2451 json_frametime_ms=22.494
+09-25 03:15:20.005 25144 25232 D S3PERF  : crosscheck ui_snapshot_fps=31.4179 ui_snapshot_frametime_ms=88.496
+09-25 03:15:20.942 25144 25232 D S3PERF  : crosscheck source=surface presented=3292 json_fps=28.9652 json_frametime_ms=48.037
+09-25 03:15:21.247 25144 25232 D S3PERF  : crosscheck ui_snapshot_fps=29.0324 ui_snapshot_frametime_ms=16.844
+09-25 03:15:21.560 25144 25232 D S3PERF  : GPU load [/sys/class/kgsl/kgsl-3d0/gpubusy]: raw='582846 1007547' -> load=57.84802098562152%
+09-25 03:15:22.173 25144 25232 D S3PERF  : crosscheck source=surface presented=3333 json_fps=33.5821 json_frametime_ms=46.647
+09-25 03:15:22.480 25144 25232 D S3PERF  : crosscheck ui_snapshot_fps=34.5395 ui_snapshot_frametime_ms=22.958
+09-25 03:15:22.638 25144 25294 D RPCS3   : CPU Usage: Total: 67.8%, Cores: 0.0%, 0.0%, 0.0%, 0.0%, 0.0%, 0.0%, 0.0%, 0.0%
+09-25 03:15:22.713 25144 25318 D RPCS3   : PPU Syscall Usage Stats:
+09-25 03:15:22.713 25144 25318 D RPCS3   : 	⁂ sys_timer_usleep [403391]
+09-25 03:15:22.713 25144 25318 D RPCS3   : 	⁂ _sys_lwcond_queue_wait [47531]
+09-25 03:15:22.713 25144 25318 D RPCS3   : 	⁂ _sys_lwmutex_lock [45657]
+09-25 03:15:22.713 25144 25318 D RPCS3   : 	⁂ _sys_lwmutex_unlock [41410]
+09-25 03:15:22.713 25144 25318 D RPCS3   : 	⁂ sys_event_queue_receive [27462]
+09-25 03:15:22.713 25144 25318 D RPCS3   : 	⁂ _sys_lwcond_signal [26021]
+09-25 03:15:22.713 25144 25318 D RPCS3   : 	⁂ _sys_lwcond_signal_all [17077]
+09-25 03:15:22.713 25144 25318 D RPCS3   : 	⁂ sys_event_port_send [10767]
+09-25 03:15:22.713 25144 25318 D RPCS3   : 	⁂ sys_fs_read [7521]
+09-25 03:15:22.713 25144 25318 D RPCS3   : 	⁂ sys_time_get_current_time [6851]
+09-25 03:15:22.713 25144 25318 D RPCS3   : 	⁂ sys_fs_write [6196]
+09-25 03:15:22.713 25144 25318 D RPCS3   : 	⁂ sys_event_flag_wait [4797]
+09-25 03:15:22.713 25144 25318 D RPCS3   : 	⁂ sys_event_flag_clear [4797]
+09-25 03:15:22.713 25144 25318 D RPCS3   : 	⁂ sys_fs_fsync [1033]
+09-25 03:15:22.713 25144 25318 D RPCS3   : 	⁂ sys_fs_lseek [604]
+09-25 03:15:22.713 25144 25318 D RPCS3   : 	⁂ sys_mmapper_unmap_shared_memory [233]
+09-25 03:15:22.713 25144 25318 D RPCS3   : 	⁂ sys_time_get_timezone [142]
+09-25 03:15:22.713 25144 25318 D RPCS3   : 	⁂ sys_fs_fcntl [65]
+09-25 03:15:22.713 25144 25318 D RPCS3   : 	⁂ sys_mutex_lock [45]
+09-25 03:15:22.713 25144 25318 D RPCS3   : 	⁂ sys_mutex_unlock [45]
+09-25 03:15:22.713 25144 25318 D RPCS3   : 	⁂ sys_fs_stat [27]
+09-25 03:15:22.713 25144 25318 D RPCS3   : 	⁂ _sys_lwmutex_trylock [21]
+09-25 03:15:22.713 25144 25318 D RPCS3   : 	⁂ sys_fs_close [19]
+09-25 03:15:22.713 25144 25318 D RPCS3   : 	⁂ sys_rsx_context_iounmap [5]
+09-25 03:15:22.713 25144 25318 D RPCS3   : 	⁂ _sys_interrupt_thread_disestablish [2]
+09-25 03:15:23.414 25144 25232 D S3PERF  : crosscheck source=surface presented=3370 json_fps=28.4149 json_frametime_ms=33.944
+09-25 03:15:23.849 25144 25232 D S3PERF  : crosscheck ui_snapshot_fps=28.4149 ui_snapshot_frametime_ms=33.944
+09-25 03:15:24.464 25144 25232 D S3PERF  : crosscheck source=surface presented=3400 json_fps=29.0329 json_frametime_ms=44.77
+09-25 03:15:25.092 25144 25232 D S3PERF  : crosscheck ui_snapshot_fps=32.2404 ui_snapshot_frametime_ms=26.551
+09-25 03:15:25.728 25144 25232 D S3PERF  : crosscheck source=surface presented=3440 json_fps=31.1283 json_frametime_ms=28.709
+09-25 03:15:26.364 25144 25232 D S3PERF  : crosscheck ui_snapshot_fps=30.5855 ui_snapshot_frametime_ms=30.201
+09-25 03:15:26.874 25144 25144 W DebugPad: BUTTON SQUARE d1=0 d2=128 press 120ms request_id=s3-1790286326854105374-1387727-26505
+09-25 03:15:26.994 25144 25144 W DebugPad: BUTTON SQUARE release request_id=s3-1790286326854105374-1387727-26505
+09-25 03:15:27.009 25144 25232 D S3PERF  : crosscheck source=surface presented=3479 json_fps=28.8111 json_frametime_ms=47.687
+09-25 03:15:27.626 25144 25232 D S3PERF  : crosscheck ui_snapshot_fps=29.5106 ui_snapshot_frametime_ms=28.736
+09-25 03:15:28.255 25144 25232 D S3PERF  : crosscheck source=surface presented=3512 json_fps=25.0271 json_frametime_ms=65.219
+09-25 03:15:28.900 25144 25232 D S3PERF  : crosscheck ui_snapshot_fps=27.0174 ui_snapshot_frametime_ms=46.387
+09-25 03:15:29.520 25144 25232 D S3PERF  : crosscheck source=surface presented=3547 json_fps=27.5863 json_frametime_ms=24.901
+09-25 03:15:30.144 25144 25232 D S3PERF  : crosscheck ui_snapshot_fps=30.4248 ui_snapshot_frametime_ms=39.803
+09-25 03:15:30.781 25144 25232 D S3PERF  : crosscheck source=surface presented=3588 json_fps=32.3959 json_frametime_ms=28.297
+09-25 03:15:31.389 25144 25232 D S3PERF  : crosscheck ui_snapshot_fps=25.0502 ui_snapshot_frametime_ms=37.278
+09-25 03:15:31.723 25144 25232 D S3PERF  : GPU load [/sys/class/kgsl/kgsl-3d0/gpubusy]: raw='490499 1008492' -> load=48.63687565196353%
+09-25 03:15:32.038 25144 25232 D S3PERF  : crosscheck source=surface presented=3619 json_fps=26.3502 json_frametime_ms=25.044
+09-25 03:15:32.638 25144 25294 D RPCS3   : CPU Usage: Total: 63.7%, Cores: 0.0%, 0.0%, 0.0%, 0.0%, 0.0%, 0.0%, 0.0%, 0.0%
+09-25 03:15:32.648 25144 25232 D S3PERF  : crosscheck ui_snapshot_fps=30.7565 ui_snapshot_frametime_ms=16.513
+09-25 03:15:32.713 25144 25318 D RPCS3   : PPU Syscall Usage Stats:
+09-25 03:15:32.713 25144 25318 D RPCS3   : 	⁂ sys_timer_usleep [410754]
+09-25 03:15:32.713 25144 25318 D RPCS3   : 	⁂ _sys_lwcond_queue_wait [89630]
+09-25 03:15:32.713 25144 25318 D RPCS3   : 	⁂ _sys_lwmutex_lock [87590]
+09-25 03:15:32.713 25144 25318 D RPCS3   : 	⁂ _sys_lwmutex_unlock [82665]
+09-25 03:15:32.713 25144 25318 D RPCS3   : 	⁂ _sys_lwcond_signal [53573]
+09-25 03:15:32.713 25144 25318 D RPCS3   : 	⁂ _sys_lwcond_signal_all [33378]
+09-25 03:15:32.713 25144 25318 D RPCS3   : 	⁂ sys_event_queue_receive [31055]
+09-25 03:15:32.713 25144 25318 D RPCS3   : 	⁂ sys_time_get_current_time [28987]
+09-25 03:15:32.713 25144 25318 D RPCS3   : 	⁂ sys_fs_read [14601]
+09-25 03:15:32.713 25144 25318 D RPCS3   : 	⁂ sys_fs_write [14110]
+09-25 03:15:32.713 25144 25318 D RPCS3   : 	⁂ sys_event_port_send [12001]
+09-25 03:15:32.713 25144 25318 D RPCS3   : 	⁂ sys_event_flag_wait [5249]
+09-25 03:15:32.713 25144 25318 D RPCS3   : 	⁂ sys_event_flag_clear [5249]
+09-25 03:15:32.713 25144 25318 D RPCS3   : 	⁂ sys_fs_fsync [2352]
+09-25 03:15:32.713 25144 25318 D RPCS3   : 	⁂ sys_fs_lseek [1144]
+09-25 03:15:32.713 25144 25318 D RPCS3   : 	⁂ _sys_lwmutex_trylock [40]
+09-25 03:15:33.264 25144 25232 D S3PERF  : crosscheck source=surface presented=3658 json_fps=34.0809 json_frametime_ms=34.331
+09-25 03:15:33.873 25144 25232 D S3PERF  : crosscheck ui_snapshot_fps=29.0852 ui_snapshot_frametime_ms=72.831
+09-25 03:15:34.518 25144 25232 D S3PERF  : crosscheck source=surface presented=3697 json_fps=30.0478 json_frametime_ms=24.398
+09-25 03:15:35.158 25144 25232 D S3PERF  : crosscheck ui_snapshot_fps=33.7591 ui_snapshot_frametime_ms=23.783
+09-25 03:15:35.773 25144 25232 D S3PERF  : crosscheck source=surface presented=3737 json_fps=29.9227 json_frametime_ms=65.815
+09-25 03:15:35.994 25144 25144 W DebugPad: BUTTON SQUARE d1=0 d2=128 press 120ms request_id=s3-1790286335986351873-1388002-5937
+09-25 03:15:36.114 25144 25144 W DebugPad: BUTTON SQUARE release request_id=s3-1790286335986351873-1388002-5937
+09-25 03:15:36.381 25144 25232 D S3PERF  : crosscheck ui_snapshot_fps=30.326 ui_snapshot_frametime_ms=19.073
+09-25 03:15:37.007 25144 25232 D S3PERF  : crosscheck source=surface presented=3779 json_fps=35.365 json_frametime_ms=24.444
+09-25 03:15:37.625 25144 25232 D S3PERF  : crosscheck ui_snapshot_fps=30.9291 ui_snapshot_frametime_ms=27.249
+09-25 03:15:38.242 25144 25232 D S3PERF  : crosscheck source=surface presented=3814 json_fps=29.3228 json_frametime_ms=26.435
+09-25 03:15:38.864 25144 25219 D S3PERF  : crosscheck ui_snapshot_fps=32.3487 ui_snapshot_frametime_ms=25.36
+09-25 03:15:39.488 25144 25219 D S3PERF  : crosscheck source=surface presented=3854 json_fps=31.4351 json_frametime_ms=22.728
+09-25 03:15:40.096 25144 25219 D S3PERF  : crosscheck ui_snapshot_fps=31.0427 ui_snapshot_frametime_ms=28.931
+09-25 03:15:40.710 25144 25219 D S3PERF  : crosscheck source=surface presented=3889 json_fps=29.84 json_frametime_ms=24.031
+09-25 03:15:41.326 25144 25219 D S3PERF  : crosscheck ui_snapshot_fps=26.1399 ui_snapshot_frametime_ms=46.696
+09-25 03:15:41.952 25144 25219 D S3PERF  : crosscheck source=surface presented=3926 json_fps=30.1919 json_frametime_ms=30.371
+09-25 03:15:42.571 25144 25232 D S3PERF  : crosscheck ui_snapshot_fps=33.8832 ui_snapshot_frametime_ms=29.291
+09-25 03:15:42.638 25144 25294 D RPCS3   : CPU Usage: Total: 68.1%, Cores: 0.0%, 0.0%, 0.0%, 0.0%, 0.0%, 0.0%, 0.0%, 0.0%
+09-25 03:15:42.713 25144 25318 D RPCS3   : PPU Syscall Usage Stats:
+09-25 03:15:42.713 25144 25318 D RPCS3   : 	⁂ sys_timer_usleep [417141]
+09-25 03:15:42.713 25144 25318 D RPCS3   : 	⁂ _sys_lwcond_queue_wait [131279]
+09-25 03:15:42.713 25144 25318 D RPCS3   : 	⁂ _sys_lwmutex_lock [128779]
+09-25 03:15:42.713 25144 25318 D RPCS3   : 	⁂ _sys_lwmutex_unlock [123188]
+09-25 03:15:42.713 25144 25318 D RPCS3   : 	⁂ _sys_lwcond_signal [80879]
+09-25 03:15:42.713 25144 25318 D RPCS3   : 	⁂ _sys_lwcond_signal_all [49554]
+09-25 03:15:42.713 25144 25318 D RPCS3   : 	⁂ sys_time_get_current_time [42093]
+09-25 03:15:42.713 25144 25318 D RPCS3   : 	⁂ sys_event_queue_receive [34767]
+09-25 03:15:42.713 25144 25318 D RPCS3   : 	⁂ sys_fs_write [21934]
+09-25 03:15:42.713 25144 25318 D RPCS3   : 	⁂ sys_fs_read [21601]
+09-25 03:15:42.713 25144 25318 D RPCS3   : 	⁂ sys_event_port_send [13318]
+09-25 03:15:42.713 25144 25318 D RPCS3   : 	⁂ sys_event_flag_wait [5697]
+09-25 03:15:42.713 25144 25318 D RPCS3   : 	⁂ sys_event_flag_clear [5697]
+09-25 03:15:42.713 25144 25318 D RPCS3   : 	⁂ sys_fs_fsync [3655]
+09-25 03:15:42.713 25144 25318 D RPCS3   : 	⁂ sys_fs_lseek [1668]
+09-25 03:15:42.713 25144 25318 D RPCS3   : 	⁂ _sys_lwmutex_trylock [57]
+09-25 03:15:42.880 25144 25219 D S3PERF  : GPU load [/sys/class/kgsl/kgsl-3d0/gpubusy]: raw='629514 1008926' -> load=62.394466987668075%
+09-25 03:15:43.184 25144 25219 D S3PERF  : crosscheck source=surface presented=3967 json_fps=32.5124 json_frametime_ms=20.86
+09-25 03:15:43.884 25144 25219 D S3PERF  : crosscheck ui_snapshot_fps=33.9244 ui_snapshot_frametime_ms=44.907
+09-25 03:15:44.080 25144 25425 W RPCS3   : sys_fs_fstat(fd=10, sb=*0xd005f624)
+09-25 03:15:44.188 25144 25219 D S3PERF  : crosscheck source=surface presented=3994 json_fps=26.3791 json_frametime_ms=27.502
+09-25 03:15:45.137 25144 25219 D S3PERF  : crosscheck ui_snapshot_fps=29.9538 ui_snapshot_frametime_ms=25.743
+09-25 03:15:45.167 25144 25144 W DebugPad: BUTTON SQUARE d1=0 d2=128 press 120ms request_id=s3-1790286345139301542-1388262-9752
+09-25 03:15:45.288 25144 25144 W DebugPad: BUTTON SQUARE release request_id=s3-1790286345139301542-1388262-9752
+09-25 03:15:45.449 25144 25219 D S3PERF  : crosscheck source=surface presented=4033 json_fps=35.1826 json_frametime_ms=28.368
+09-25 03:15:46.372 25144 25219 D S3PERF  : crosscheck ui_snapshot_fps=42.6303 ui_snapshot_frametime_ms=18.138
+09-25 03:15:46.682 25144 25219 D S3PERF  : crosscheck source=surface presented=4085 json_fps=45.3857 json_frametime_ms=15.923
+09-25 03:15:47.608 25144 25219 D S3PERF  : crosscheck ui_snapshot_fps=43.3895 ui_snapshot_frametime_ms=17.412
+09-25 03:15:47.912 25144 25219 D S3PERF  : crosscheck source=surface presented=4138 json_fps=41.5631 json_frametime_ms=26.382
+09-25 03:15:48.832 25144 25219 D S3PERF  : crosscheck ui_snapshot_fps=40.6318 ui_snapshot_frametime_ms=46.87
+09-25 03:15:49.137 25144 25219 D S3PERF  : crosscheck source=surface presented=4186 json_fps=41.3079 json_frametime_ms=18.913
+09-25 03:15:50.062 25144 25219 D S3PERF  : crosscheck ui_snapshot_fps=43.529 ui_snapshot_frametime_ms=35.116
+09-25 03:15:50.367 25144 25219 D S3PERF  : crosscheck source=surface presented=4242 json_fps=43.851 json_frametime_ms=17.311
+09-25 03:15:51.285 25144 25219 D S3PERF  : crosscheck ui_snapshot_fps=47.503 ui_snapshot_frametime_ms=16.955
+09-25 03:15:51.589 25144 25219 D S3PERF  : crosscheck source=surface presented=4300 json_fps=50.3287 json_frametime_ms=16.98
+09-25 03:15:52.523 25144 25219 D S3PERF  : crosscheck ui_snapshot_fps=44.1147 ui_snapshot_frametime_ms=20.821
+09-25 03:15:52.638 25144 25294 D RPCS3   : CPU Usage: Total: 63.9%, Cores: 0.0%, 0.0%, 0.0%, 0.0%, 0.0%, 0.0%, 0.0%, 0.0%
+09-25 03:15:52.714 25144 25318 D RPCS3   : PPU Syscall Usage Stats:
+09-25 03:15:52.714 25144 25318 D RPCS3   : 	⁂ sys_timer_usleep [427661]
+09-25 03:15:52.714 25144 25318 D RPCS3   : 	⁂ _sys_lwcond_queue_wait [141644]
+09-25 03:15:52.714 25144 25318 D RPCS3   : 	⁂ _sys_lwmutex_lock [138989]
+09-25 03:15:52.714 25144 25318 D RPCS3   : 	⁂ _sys_lwmutex_unlock [132732]
+09-25 03:15:52.714 25144 25318 D RPCS3   : 	⁂ _sys_lwcond_signal [87311]
+09-25 03:15:52.714 25144 25318 D RPCS3   : 	⁂ _sys_lwcond_signal_all [53432]
+09-25 03:15:52.714 25144 25318 D RPCS3   : 	⁂ sys_time_get_current_time [46349]
+09-25 03:15:52.714 25144 25318 D RPCS3   : 	⁂ sys_event_queue_receive [38469]
+09-25 03:15:52.714 25144 25318 D RPCS3   : 	⁂ sys_fs_write [23699]
+09-25 03:15:52.714 25144 25318 D RPCS3   : 	⁂ sys_fs_read [23214]
+09-25 03:15:52.714 25144 25318 D RPCS3   : 	⁂ sys_event_port_send [14624]
+09-25 03:15:52.714 25144 25318 D RPCS3   : 	⁂ sys_event_flag_wait [6395]
+09-25 03:15:52.714 25144 25318 D RPCS3   : 	⁂ sys_event_flag_clear [6395]
+09-25 03:15:52.714 25144 25318 D RPCS3   : 	⁂ sys_fs_fsync [3951]
+09-25 03:15:52.714 25144 25318 D RPCS3   : 	⁂ sys_fs_lseek [1804]
+09-25 03:15:52.714 25144 25318 D RPCS3   : 	⁂ _sys_lwmutex_trylock [64]
+09-25 03:15:52.714 25144 25318 D RPCS3   : 	⁂ sys_fs_fstat [41]
+09-25 03:15:52.828 25144 25219 D S3PERF  : crosscheck source=surface presented=4354 json_fps=44.8924 json_frametime_ms=19.178
+09-25 03:15:53.773 25144 25219 D S3PERF  : crosscheck ui_snapshot_fps=44.1461 ui_snapshot_frametime_ms=19.663
+09-25 03:15:54.078 25144 25219 D S3PERF  : crosscheck source=surface presented=4406 json_fps=40.8401 json_frametime_ms=33.639
+09-25 03:15:54.084 25144 25219 D S3PERF  : GPU load [/sys/class/kgsl/kgsl-3d0/gpubusy]: raw='652844 1004761' -> load=64.97505376900577%
+09-25 03:15:54.333 25144 25144 W DebugPad: BUTTON SQUARE d1=0 d2=128 press 120ms request_id=s3-1790286354306677967-1388559-6405
+09-25 03:15:54.453 25144 25144 W DebugPad: BUTTON SQUARE release request_id=s3-1790286354306677967-1388559-6405
+09-25 03:15:55.009 25144 25219 D S3PERF  : crosscheck ui_snapshot_fps=40.9817 ui_snapshot_frametime_ms=18.08
+09-25 03:15:55.322 25144 25219 D S3PERF  : crosscheck source=surface presented=4454 json_fps=39.6439 json_frametime_ms=19.498
+09-25 03:15:56.248 25144 25219 D S3PERF  : crosscheck ui_snapshot_fps=37.2767 ui_snapshot_frametime_ms=18.908
+09-25 03:15:56.552 25144 25219 D S3PERF  : crosscheck source=surface presented=4506 json_fps=40.3572 json_frametime_ms=25.431
+09-25 03:15:57.472 25144 25219 D S3PERF  : crosscheck ui_snapshot_fps=42.1813 ui_snapshot_frametime_ms=38.357
+09-25 03:15:57.776 25144 25219 D S3PERF  : crosscheck source=surface presented=4558 json_fps=43.5615 json_frametime_ms=27.686
+09-25 03:15:58.701 25144 25219 D S3PERF  : crosscheck ui_snapshot_fps=44.7185 ui_snapshot_frametime_ms=26.429
+09-25 03:15:59.005 25144 25219 D S3PERF  : crosscheck source=surface presented=4616 json_fps=48.1885 json_frametime_ms=17.116
+09-25 03:15:59.928 25144 25219 D S3PERF  : crosscheck ui_snapshot_fps=40.5471 ui_snapshot_frametime_ms=30.777
+09-25 03:16:00.232 25144 25219 D S3PERF  : crosscheck source=surface presented=4664 json_fps=40.6136 json_frametime_ms=21.755
+09-25 03:16:01.151 25144 25219 D S3PERF  : crosscheck ui_snapshot_fps=46.3842 ui_snapshot_frametime_ms=18.156
+09-25 03:16:01.470 25144 25219 D S3PERF  : crosscheck source=surface presented=4722 json_fps=47.9346 json_frametime_ms=16.795
+09-25 03:16:02.425 25144 25219 D S3PERF  : crosscheck ui_snapshot_fps=39.5087 ui_snapshot_frametime_ms=16.745
+09-25 03:16:02.638 25144 25294 D RPCS3   : CPU Usage: Total: 62.0%, Cores: 0.0%, 0.0%, 0.0%, 0.0%, 0.0%, 0.0%, 0.0%, 0.0%
+09-25 03:16:02.714 25144 25318 D RPCS3   : PPU Syscall Usage Stats:
+09-25 03:16:02.714 25144 25318 D RPCS3   : 	⁂ sys_timer_usleep [439737]
+09-25 03:16:02.714 25144 25318 D RPCS3   : 	⁂ _sys_lwcond_queue_wait [142846]
+09-25 03:16:02.714 25144 25318 D RPCS3   : 	⁂ _sys_lwmutex_lock [140079]
+09-25 03:16:02.714 25144 25318 D RPCS3   : 	⁂ _sys_lwmutex_unlock [133146]
+09-25 03:16:02.714 25144 25318 D RPCS3   : 	⁂ _sys_lwcond_signal [87559]
+09-25 03:16:02.714 25144 25318 D RPCS3   : 	⁂ _sys_lwcond_signal_all [53693]
+09-25 03:16:02.714 25144 25318 D RPCS3   : 	⁂ sys_time_get_current_time [46473]
+09-25 03:16:02.714 25144 25318 D RPCS3   : 	⁂ sys_event_queue_receive [42225]
+09-25 03:16:02.714 25144 25318 D RPCS3   : 	⁂ sys_fs_read [23260]
+09-25 03:16:02.714 25144 25318 D RPCS3   : 	⁂ sys_event_port_send [15979]
+09-25 03:16:02.714 25144 25318 D RPCS3   : 	⁂ sys_event_flag_wait [7164]
+09-25 03:16:02.714 25144 25318 D RPCS3   : 	⁂ sys_event_flag_clear [7164]
+09-25 03:16:02.714 25144 25318 D RPCS3   : 	⁂ sys_fs_lseek [1824]
+09-25 03:16:02.714 25144 25318 D RPCS3   : 	⁂ _sys_lwmutex_trylock [75]
+09-25 03:16:02.728 25144 25219 D S3PERF  : crosscheck source=surface presented=4767 json_fps=31.7769 json_frametime_ms=29.812
+09-25 03:16:03.536 25144 25144 W DebugPad: BUTTON SQUARE d1=0 d2=128 press 120ms request_id=s3-1790286363495644940-1389007-7624
+09-25 03:16:03.656 25144 25144 W DebugPad: BUTTON SQUARE release request_id=s3-1790286363495644940-1389007-7624
+09-25 03:16:04.094 25144 25219 D S3PERF  : crosscheck ui_snapshot_fps=43.5555 ui_snapshot_frametime_ms=18.918
+09-25 03:16:04.408 25144 25219 D S3PERF  : crosscheck source=surface presented=4833 json_fps=37.1602 json_frametime_ms=23.894
+09-25 03:16:04.414 25144 25219 D S3PERF  : GPU load [/sys/class/kgsl/kgsl-3d0/gpubusy]: raw='709858 1020354' -> load=69.56977676375062%
+09-25 03:16:05.326 25144 25219 D S3PERF  : crosscheck ui_snapshot_fps=41.042 ui_snapshot_frametime_ms=17.305
+09-25 03:16:05.631 25144 25219 D S3PERF  : crosscheck source=surface presented=4885 json_fps=42.7042 json_frametime_ms=16.339
+09-25 03:16:06.587 25144 25219 D S3PERF  : crosscheck ui_snapshot_fps=52.5955 ui_snapshot_frametime_ms=17.494
+09-25 03:16:06.907 25144 25219 D S3PERF  : crosscheck source=surface presented=4951 json_fps=51.8016 json_frametime_ms=20.819
+09-25 03:16:07.844 25144 25219 D S3PERF  : crosscheck ui_snapshot_fps=42.6691 ui_snapshot_frametime_ms=22.287
+09-25 03:16:08.156 25144 25219 D S3PERF  : crosscheck source=surface presented=5001 json_fps=38.7521 json_frametime_ms=17.835
+09-25 03:16:09.093 25144 25219 D S3PERF  : crosscheck ui_snapshot_fps=37.1891 ui_snapshot_frametime_ms=15.962
+09-25 03:16:09.400 25144 25219 D S3PERF  : crosscheck source=surface presented=5049 json_fps=38.7156 json_frametime_ms=25.412
+09-25 03:16:10.323 25144 25219 D S3PERF  : crosscheck ui_snapshot_fps=44.4919 ui_snapshot_frametime_ms=21.14
+09-25 03:16:10.627 25144 25219 D S3PERF  : crosscheck source=surface presented=5105 json_fps=46.335 json_frametime_ms=17.902
+09-25 03:16:11.559 25144 25219 D S3PERF  : crosscheck ui_snapshot_fps=35.6383 ui_snapshot_frametime_ms=17.363
+09-25 03:16:11.862 25144 25219 D S3PERF  : crosscheck source=surface presented=5146 json_fps=31.9657 json_frametime_ms=32.216
+09-25 03:16:12.638 25144 25294 D RPCS3   : CPU Usage: Total: 58.0%, Cores: 0.0%, 0.0%, 0.0%, 0.0%, 0.0%, 0.0%, 0.0%, 0.0%
+09-25 03:16:12.713 25144 25318 D RPCS3   : PPU Syscall Usage Stats:
+09-25 03:16:12.713 25144 25318 D RPCS3   : 	⁂ sys_timer_usleep [449953]
+09-25 03:16:12.713 25144 25318 D RPCS3   : 	⁂ _sys_lwcond_queue_wait [144034]
+09-25 03:16:12.713 25144 25318 D RPCS3   : 	⁂ _sys_lwmutex_lock [141175]
+09-25 03:16:12.713 25144 25318 D RPCS3   : 	⁂ _sys_lwmutex_unlock [133579]
+09-25 03:16:12.713 25144 25318 D RPCS3   : 	⁂ _sys_lwcond_signal [87822]
+09-25 03:16:12.713 25144 25318 D RPCS3   : 	⁂ _sys_lwcond_signal_all [53956]
+09-25 03:16:12.713 25144 25318 D RPCS3   : 	⁂ sys_time_get_current_time [46597]
+09-25 03:16:12.713 25144 25318 D RPCS3   : 	⁂ sys_event_queue_receive [45885]
+09-25 03:16:12.713 25144 25318 D RPCS3   : 	⁂ sys_fs_read [23308]
+09-25 03:16:12.713 25144 25318 D RPCS3   : 	⁂ sys_event_port_send [17249]
+09-25 03:16:12.713 25144 25318 D RPCS3   : 	⁂ sys_event_flag_wait [7891]
+09-25 03:16:12.713 25144 25318 D RPCS3   : 	⁂ sys_event_flag_clear [7891]
+09-25 03:16:12.713 25144 25318 D RPCS3   : 	⁂ sys_fs_lseek [1847]
+09-25 03:16:12.713 25144 25318 D RPCS3   : 	⁂ _sys_lwmutex_trylock [87]
+09-25 03:16:12.784 25144 25219 D S3PERF  : crosscheck ui_snapshot_fps=33.1189 ui_snapshot_frametime_ms=56.02
+09-25 03:16:13.094 25144 25219 D S3PERF  : crosscheck source=surface presented=5186 json_fps=33.038 json_frametime_ms=44.059
+09-25 03:16:14.036 25144 25219 D S3PERF  : crosscheck ui_snapshot_fps=31.5769 ui_snapshot_frametime_ms=21.841
+09-25 03:16:14.347 25144 25219 D S3PERF  : crosscheck source=surface presented=5226 json_fps=31.3321 json_frametime_ms=22.233
+09-25 03:16:15.290 25144 25219 D S3PERF  : crosscheck ui_snapshot_fps=32.1858 ui_snapshot_frametime_ms=26.702
+09-25 03:16:15.595 25144 25219 D S3PERF  : crosscheck source=surface presented=5264 json_fps=29.2022 json_frametime_ms=24.145
+09-25 03:16:15.601 25144 25219 D S3PERF  : GPU load [/sys/class/kgsl/kgsl-3d0/gpubusy]: raw='555616 1067862' -> load=52.03069310453972%
+09-25 03:16:16.523 25144 25219 D S3PERF  : crosscheck ui_snapshot_fps=46.0405 ui_snapshot_frametime_ms=17.208
+09-25 03:16:16.829 25144 25219 D S3PERF  : crosscheck source=surface presented=5320 json_fps=46.4107 json_frametime_ms=19.843

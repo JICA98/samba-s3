@@ -10,6 +10,7 @@ import com.zenithblue.sambas3.session.EmulationSessionRecord
 import com.zenithblue.sambas3.session.EmulationSessionState
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
+import org.junit.Assert.assertNotNull
 import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
@@ -75,4 +76,49 @@ class CrashEvidenceCollectorTest {
         assertFalse(SessionDiagnostics.isCrashSession(finalized))
         assertEquals(manifest.sessionId, finalized.sessionId)
     }
+
+    @Test
+    fun collectCorrelatesExitRecordAndExtractsTombstone() {
+        val session = EmulationSessionRecord(
+            sessionId = "crash-session-1",
+            gamePath = "/g",
+            titleId = "BCUS98123",
+            gameName = "GOW3",
+            startedAtMs = 1000L,
+            lastHeartbeatMs = 2000L,
+            state = EmulationSessionState.FAILED,
+            activityInstanceId = 1L,
+            surfaceGeneration = 1L,
+            driverLabel = null,
+            cleanTermination = false,
+            pidAtSessionStart = 4475,
+        )
+
+        val tombstone = "*** *** *** ***\npid: 4475\nsignal 11 (SIGSEGV)\nbacktrace:\n#00 pc 00001234 /lib.so"
+        val exitRecord = ProcessExitRecord(
+            pid = 4475,
+            processName = "com.zenithblue.sambas3",
+            reason = ProcessExitRecord.REASON_CRASH_NATIVE,
+            reasonName = "CRASH_NATIVE",
+            status = 11,
+            timestamp = 1500L,
+            trace = tombstone,
+        )
+
+        val report = CrashEvidenceCollector.collect(
+            context = context,
+            session = session,
+            evidenceHint = "CrashExit",
+            injectedExitRecords = listOf(exitRecord),
+        )
+
+        assertNotNull(report.exitDiagnosis)
+        assertEquals(ExitClassification.NATIVE_CRASH, report.exitDiagnosis?.classification)
+        assertEquals("SIGSEGV", report.exitDiagnosis?.signalName)
+        assertEquals(CrashClassification.CONFIRMED_CRASH, report.classification)
+        assertTrue(report.sources.containsKey("tombstone.txt"))
+        val savedTombstone = report.sources["tombstone.txt"]!!.readText()
+        assertTrue(savedTombstone.contains("signal 11 (SIGSEGV)"))
+    }
 }
+
