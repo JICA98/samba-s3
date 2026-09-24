@@ -38,7 +38,7 @@ DEFAULT_DEVICE = "d30a1726"
 
 # Pinned commit and release hashes for verification
 EXPECTED_CORE_HASH = "ed8ba6c12c218249524a441b79f48d6bae842394"
-EXPECTED_APK_SHA256 = "749d0a165041884ca90d93176b04c9805b64c131def29ab86e11bce63230138a"
+EXPECTED_APK_SHA256 = "7c697bdf95a79d6e40dc812f7799d3b9993b31712760b5486cd93bba695d83d9"
 EXPECTED_SO_SHA256 = "571426c33f8677ebec0f5fcc26c1c32d5e6ac6e9bdd2422bc0b1f0edb6afab09"
 
 
@@ -195,7 +195,7 @@ def main() -> int:
     parser.add_argument("--duration", type=int, default=60, help="Gameplay duration in seconds (default: 60s)")
     parser.add_argument("--monitor-preset", default="Performance", help="Monitor preset: Off, Minimal, Performance, Detailed (default: Performance)")
     parser.add_argument("--expected-core", default=EXPECTED_CORE_HASH, help=f"Expected backend core commit (default: {EXPECTED_CORE_HASH})")
-    parser.add_argument("--expected-apk-sha", default=EXPECTED_APK_SHA256, help=f"Expected APK SHA-256 (default: {EXPECTED_APK_SHA256})")
+    parser.add_argument("--expected-apk-sha", "--expected-apk-sha256", dest="expected_apk_sha", default=EXPECTED_APK_SHA256, help=f"Expected APK SHA-256 (default: {EXPECTED_APK_SHA256})")
     parser.add_argument("--expected-so-sha", default=EXPECTED_SO_SHA256, help=f"Expected librpcsx-android.so SHA-256 (default: {EXPECTED_SO_SHA256})")
     parser.add_argument("--dry-run", action="store_true", help="Validate provenance and device status without launching game")
     parser.add_argument("--no-strict-hashes", action="store_true", help="Warn instead of rejecting mismatched APK/core hashes")

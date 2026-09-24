@@ -85,7 +85,10 @@ class MonitoringRepository(
                                 .forEach { put(it.metric, MetricDebugInfo(nowMs, "RPCSX emu_flip/perf collector")) }
                             MonitoringMetricDescriptors.all
                                 .filter { it.source != MonitoringMetricSource.Emulator && hasAndroidValue(android, it.metric) }
-                                .forEach { put(it.metric, MetricDebugInfo(nowMs, "Android system collector")) }
+                                .forEach {
+                                    val timestamp = android.timestampsMs[it.metric] ?: nowMs
+                                    put(it.metric, MetricDebugInfo(timestamp, "Android system collector"))
+                                }
                         }
                         val snapshot = MonitoringSnapshot(emulator ?: EmulatorMetrics(), android, metricDebug = metricDebug)
                         if (!androidAvailabilityLogged && (android.ramTotalBytes != null || android.batteryTemperatureC != null || android.gpu != null)) {

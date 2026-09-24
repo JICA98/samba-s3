@@ -24,7 +24,11 @@ data class EmulatorMetrics(
 
 data class MetricDebugInfo(val lastUpdatedAtMs: Long, val source: String)
 
-data class GpuHardwareMetrics(val loadPercent: Int? = null, val frequencyHz: Long? = null)
+data class GpuHardwareMetrics(
+    val loadPercent: Int? = null,
+    val frequencyHz: Long? = null,
+    val loadPercentPrecise: Double? = null
+)
 
 data class AndroidSystemMetrics(
     val systemCpuPercent: Float? = null,
@@ -44,7 +48,8 @@ data class AndroidSystemMetrics(
     val batteryPercent: Int? = null,
     val charging: Boolean? = null,
     val cpuFrequenciesHz: List<Long> = emptyList(),
-    val gpu: GpuHardwareMetrics? = null
+    val gpu: GpuHardwareMetrics? = null,
+    val timestampsMs: Map<MonitoringMetric, Long> = emptyMap()
 )
 
 data class MonitoringSnapshot(

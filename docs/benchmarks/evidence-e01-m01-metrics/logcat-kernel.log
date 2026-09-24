@@ -1,0 +1,501 @@
+--------- beginning of kernel
+09-25 02:44:46.774  1097  1097 I         : [ADFR][0][INFO][oplus_adfr_status_reset:1851]sa status reset: auto_mode:0,fakeframe:1,sa_min_fps:120
+09-25 02:44:46.782   950   950 I logd    : logdr: UID=2000 GID=2000 PID=24166 n tail=0 logMask=99 pid=22188 start=0ns deadline=0ns
+09-25 02:44:46.793  1097  1097 I [   info] ts_panel_notifier_callback: Notification type:4, early_trigger:0
+09-25 02:44:46.793  1097  1097 I [   info] ts_panel_notifier_callback: shashank:Received fps change old fps:60 new fps:120
+09-25 02:44:46.954  1097  1097 I [   info] ts_panel_notifier_callback: Notification type:4, early_trigger:1
+09-25 02:44:46.954  1097  1097 I [   info] ts_panel_notifier_callback: shashank:Received fps change old fps:120 new fps:60
+09-25 02:44:46.955  1097  1097 E         : [LCD][0][ERR][oplus_panel_switch_vid_mode:475] oplus_panel_switch_vid_mode not support
+09-25 02:44:46.955  1097  1097 I [drm:dsi_display_set_mode [msm_drm]] [msm-dsi-info]: mdp_transfer_time=6290, hactive=1264, vactive=2780, fps=60, h_skew=1, clk_rate=1012000000, h_sync_width=2,				h_front_porch26, h_back_porch=26, v_back_porch=42, v_sync_width=2, v_front_porch=58
+09-25 02:44:46.955  1097  1097 I [ADFR][0][INFO][oplus_adfr_fakeframe_status_update:2140]h_active: 1264,refresh_rate:60,h_skew:1,sw_fps:0,fakeframe:0
+09-25 02:44:46.961  1097  1097 I         : [LCD][0][INFO][oplus_panel_cmd_print:120] [A0020] dsi_cmd: qcom,mdss-dsi-timing-switch-command, count=8
+09-25 02:44:46.962  1097  1097 I [ADFR][0][INFO][oplus_adfr_fakeframe_status_update:2140]h_active: 1264,refresh_rate:60,h_skew:1,sw_fps:0,fakeframe:0
+09-25 02:44:46.962  1097  1097 I         : [ADFR][0][INFO][oplus_adfr_status_reset:1851]sa status reset: auto_mode:0,fakeframe:0,sa_min_fps:60
+09-25 02:44:46.978  1097  1097 I [   info] ts_panel_notifier_callback: Notification type:4, early_trigger:0
+09-25 02:44:46.978  1097  1097 I [   info] ts_panel_notifier_callback: shashank:Received fps change old fps:120 new fps:60
+09-25 02:44:46.989  1097  1097 I [   info] ts_panel_notifier_callback: Notification type:4, early_trigger:1
+09-25 02:44:46.989  1097  1097 I [   info] ts_panel_notifier_callback: shashank:Received fps change old fps:60 new fps:120
+09-25 02:44:47.003  1097  1097 E         : [LCD][0][ERR][oplus_panel_switch_vid_mode:475] oplus_panel_switch_vid_mode not support
+09-25 02:44:47.003  1097  1097 I [drm:dsi_display_set_mode [msm_drm]] [msm-dsi-info]: mdp_transfer_time=6290, hactive=1264, vactive=2780, fps=120, h_skew=0, clk_rate=1012000000, h_sync_width=2,				h_front_porch26, h_back_porch=26, v_back_porch=42, v_sync_width=2, v_front_porch=58
+09-25 02:44:47.004  1097  1097 I [ADFR][0][INFO][oplus_adfr_fakeframe_status_update:2140]h_active: 1264,refresh_rate:120,h_skew:0,sw_fps:0,fakeframe:0
+09-25 02:44:47.007  1097  1097 I         : [LCD][0][INFO][oplus_panel_cmd_print:120] [A0020] dsi_cmd: qcom,mdss-dsi-timing-switch-command, count=8
+09-25 02:44:47.007  1097  1097 I [ADFR][0][INFO][oplus_adfr_fakeframe_status_update:2140]h_active: 1264,refresh_rate:120,h_skew:0,sw_fps:0,fakeframe:1
+09-25 02:44:47.007  1097  1097 I         : [ADFR][0][INFO][oplus_adfr_status_reset:1851]sa status reset: auto_mode:0,fakeframe:1,sa_min_fps:120
+09-25 02:44:47.026  1097  1097 I [   info] ts_panel_notifier_callback: Notification type:4, early_trigger:0
+09-25 02:44:47.026  1097  1097 I [   info] ts_panel_notifier_callback: shashank:Received fps change old fps:60 new fps:120
+09-25 02:44:47.060     0     0 W [    C0] gen7_err_callback: 228 callbacks suppressed
+09-25 02:44:47.060     0     0 F         : [    C0] kgsl kgsl-3d0: CP: AHB bus error, CP_RL_ERROR_DETAILS_0:0x10008e07 CP_RL_ERROR_DETAILS_1:0x12144
+09-25 02:44:47.060     0     0 F         : [    C0] kgsl kgsl-3d0: CP: AHB bus error, CP_RL_ERROR_DETAILS_0:0x10008e07 CP_RL_ERROR_DETAILS_1:0x12144
+09-25 02:44:47.077     0     0 F         : [    C0] kgsl kgsl-3d0: CP: AHB bus error, CP_RL_ERROR_DETAILS_0:0x10008e07 CP_RL_ERROR_DETAILS_1:0x12144
+09-25 02:44:47.099     0     0 F         : [    C0] kgsl kgsl-3d0: CP: AHB bus error, CP_RL_ERROR_DETAILS_0:0x10008e07 CP_RL_ERROR_DETAILS_1:0x12144
+09-25 02:44:47.123     0     0 F         : [    C0] kgsl kgsl-3d0: CP: AHB bus error, CP_RL_ERROR_DETAILS_0:0x10008e07 CP_RL_ERROR_DETAILS_1:0x12144
+09-25 02:44:47.126     0     0 F         : [    C0] kgsl kgsl-3d0: CP: AHB bus error, CP_RL_ERROR_DETAILS_0:0x10008e07 CP_RL_ERROR_DETAILS_1:0x12144
+09-25 02:44:47.134     0     0 F         : [    C0] kgsl kgsl-3d0: CP: AHB bus error, CP_RL_ERROR_DETAILS_0:0x10008e07 CP_RL_ERROR_DETAILS_1:0x12144
+09-25 02:44:47.206     0     0 F         : [    C0] kgsl kgsl-3d0: CP: AHB bus error, CP_RL_ERROR_DETAILS_0:0x10008e07 CP_RL_ERROR_DETAILS_1:0x12144
+09-25 02:44:47.238     0     0 F         : [    C0] kgsl kgsl-3d0: CP: AHB bus error, CP_RL_ERROR_DETAILS_0:0x10008e07 CP_RL_ERROR_DETAILS_1:0x12144
+09-25 02:44:47.239     0     0 F         : [    C0] kgsl kgsl-3d0: CP: AHB bus error, CP_RL_ERROR_DETAILS_0:0x10008e07 CP_RL_ERROR_DETAILS_1:0x12144
+09-25 02:44:47.378 14629 14629 I [kworke][0xfa61847c5e6][21:15:00.196214] wlan: [14629:I:PMO] pmo_core_psoc_send_host_wakeup_ind_to_fw: Host wakeup indication sent to fw
+09-25 02:44:47.388     0     0 I [    C0] [soft_i][0xfa6184aa333][21: 15:00.205991] wlan: [0:I:WMA] WLAN triggered wakeup: BPF_ALLOW (39), vdev: 0 (STA)
+09-25 02:44:47.388     0     0 I [    C0] [soft_i][0xfa6184aaba9][21: 15:00.206104] wlan: [0:I:WMA] wma_wake_event_packet: Wake event packet:
+09-25 02:44:47.397  1633  1633 E qcom-hv-haptics c42d000.qcom,spmi: qcom,pm8550b@7:qcom,hv-haptics@f000: custom data 2 length 208 with play-rate 24000 Hz,magnitude=0x5fff
+09-25 02:44:47.397  1633  1633 E qcom-hv-haptics c42d000.qcom,spmi: qcom,pm8550b@7:qcom,hv-haptics@f000: LRA nominal impedance is 9 ohm
+09-25 02:44:47.397  1633  1633 E qcom-hv-haptics c42d000.qcom,spmi: qcom,pm8550b@7:qcom,hv-haptics@f000: update VMAX_HDRM to 1000 mv
+09-25 02:44:47.397  1633  1633 E qcom-hv-haptics c42d000.qcom,spmi: qcom,pm8550b@7:qcom,hv-haptics@f000: Set Vmax to 5774 mV
+09-25 02:44:47.398  1633  1633 E qcom-hv-haptics c42d000.qcom,spmi: qcom,pm8550b@7:qcom,hv-haptics@f000: playback val = 1
+09-25 02:44:47.407  1028  1028 E qcom-hv-haptics c42d000.qcom,spmi: qcom,pm8550b@7:qcom,hv-haptics@f000: wait 5793 us for brake pattern to complete
+09-25 02:44:47.410  1028  1028 E qcom-hv-haptics c42d000.qcom,spmi: qcom,pm8550b@7:qcom,hv-haptics@f000: polling HPWR_INTF timeout 3, value = 3
+09-25 02:44:47.412  1633  1633 E qcom-hv-haptics c42d000.qcom,spmi: qcom,pm8550b@7:qcom,hv-haptics@f000: playback val = 0
+09-25 02:44:47.412  1633  1633 E qcom-hv-haptics c42d000.qcom,spmi: qcom,pm8550b@7:qcom,hv-haptics@f000: erase effect, really stop play
+09-25 02:44:47.413  1028  1028 E qcom-hv-haptics c42d000.qcom,spmi: qcom,pm8550b@7:qcom,hv-haptics@f000: stopped play completely
+09-25 02:44:47.413  1028  1028 E qcom-hv-haptics c42d000.qcom,spmi: qcom,pm8550b@7:qcom,hv-haptics@f000: FIFO playing is done
+09-25 02:44:47.414  1633  1633 E qcom-hv-haptics c42d000.qcom,spmi: qcom,pm8550b@7:qcom,hv-haptics@f000: wait 5793 us for brake pattern to complete
+09-25 02:44:47.417  1633  1633 E qcom-hv-haptics c42d000.qcom,spmi: qcom,pm8550b@7:qcom,hv-haptics@f000: stopped play completely
+09-25 02:44:47.420  1633  1633 E qcom-hv-haptics c42d000.qcom,spmi: qcom,pm8550b@7:qcom,hv-haptics@f000: custom data 2 length 208 with play-rate 24000 Hz,magnitude=0x5fff
+09-25 02:44:47.420  1633  1633 E qcom-hv-haptics c42d000.qcom,spmi: qcom,pm8550b@7:qcom,hv-haptics@f000: LRA nominal impedance is 9 ohm
+09-25 02:44:47.420  1633  1633 E qcom-hv-haptics c42d000.qcom,spmi: qcom,pm8550b@7:qcom,hv-haptics@f000: update VMAX_HDRM to 1000 mv
+09-25 02:44:47.420  1633  1633 E qcom-hv-haptics c42d000.qcom,spmi: qcom,pm8550b@7:qcom,hv-haptics@f000: Set Vmax to 5774 mV
+09-25 02:44:47.422  1633  1633 E qcom-hv-haptics c42d000.qcom,spmi: qcom,pm8550b@7:qcom,hv-haptics@f000: playback val = 1
+09-25 02:44:47.431  1028  1028 E qcom-hv-haptics c42d000.qcom,spmi: qcom,pm8550b@7:qcom,hv-haptics@f000: wait 5793 us for brake pattern to complete
+09-25 02:44:47.434  1028  1028 E qcom-hv-haptics c42d000.qcom,spmi: qcom,pm8550b@7:qcom,hv-haptics@f000: polling HPWR_INTF timeout 3, value = 3
+09-25 02:44:47.435  1633  1633 E qcom-hv-haptics c42d000.qcom,spmi: qcom,pm8550b@7:qcom,hv-haptics@f000: playback val = 0
+09-25 02:44:47.435  1633  1633 E qcom-hv-haptics c42d000.qcom,spmi: qcom,pm8550b@7:qcom,hv-haptics@f000: erase effect, really stop play
+09-25 02:44:47.437  1028  1028 E qcom-hv-haptics c42d000.qcom,spmi: qcom,pm8550b@7:qcom,hv-haptics@f000: stopped play completely
+09-25 02:44:47.437  1028  1028 E qcom-hv-haptics c42d000.qcom,spmi: qcom,pm8550b@7:qcom,hv-haptics@f000: FIFO playing is done
+09-25 02:44:47.437  1633  1633 E qcom-hv-haptics c42d000.qcom,spmi: qcom,pm8550b@7:qcom,hv-haptics@f000: wait 5793 us for brake pattern to complete
+09-25 02:44:47.441  1633  1633 E qcom-hv-haptics c42d000.qcom,spmi: qcom,pm8550b@7:qcom,hv-haptics@f000: stopped play completely
+09-25 02:44:47.447  1633  1633 E qcom-hv-haptics c42d000.qcom,spmi: qcom,pm8550b@7:qcom,hv-haptics@f000: custom data 2 length 208 with play-rate 24000 Hz,magnitude=0x5fff
+09-25 02:44:47.447  1633  1633 E qcom-hv-haptics c42d000.qcom,spmi: qcom,pm8550b@7:qcom,hv-haptics@f000: LRA nominal impedance is 9 ohm
+09-25 02:44:47.447  1633  1633 E qcom-hv-haptics c42d000.qcom,spmi: qcom,pm8550b@7:qcom,hv-haptics@f000: update VMAX_HDRM to 1000 mv
+09-25 02:44:47.447  1633  1633 E qcom-hv-haptics c42d000.qcom,spmi: qcom,pm8550b@7:qcom,hv-haptics@f000: Set Vmax to 5774 mV
+09-25 02:44:47.448  1633  1633 E qcom-hv-haptics c42d000.qcom,spmi: qcom,pm8550b@7:qcom,hv-haptics@f000: playback val = 1
+09-25 02:44:47.457  1028  1028 E qcom-hv-haptics c42d000.qcom,spmi: qcom,pm8550b@7:qcom,hv-haptics@f000: wait 5793 us for brake pattern to complete
+09-25 02:44:47.460  1028  1028 E qcom-hv-haptics c42d000.qcom,spmi: qcom,pm8550b@7:qcom,hv-haptics@f000: polling HPWR_INTF timeout 3, value = 3
+09-25 02:44:47.463  1633  1633 E qcom-hv-haptics c42d000.qcom,spmi: qcom,pm8550b@7:qcom,hv-haptics@f000: playback val = 0
+09-25 02:44:47.463  1633  1633 E qcom-hv-haptics c42d000.qcom,spmi: qcom,pm8550b@7:qcom,hv-haptics@f000: erase effect, really stop play
+09-25 02:44:47.463  1028  1028 E qcom-hv-haptics c42d000.qcom,spmi: qcom,pm8550b@7:qcom,hv-haptics@f000: stopped play completely
+09-25 02:44:47.463  1028  1028 E qcom-hv-haptics c42d000.qcom,spmi: qcom,pm8550b@7:qcom,hv-haptics@f000: FIFO playing is done
+09-25 02:44:47.463  1633  1633 E qcom-hv-haptics c42d000.qcom,spmi: qcom,pm8550b@7:qcom,hv-haptics@f000: wait 5793 us for brake pattern to complete
+09-25 02:44:47.466  1633  1633 E qcom-hv-haptics c42d000.qcom,spmi: qcom,pm8550b@7:qcom,hv-haptics@f000: stopped play completely
+09-25 02:44:47.470  1633  1633 E qcom-hv-haptics c42d000.qcom,spmi: qcom,pm8550b@7:qcom,hv-haptics@f000: custom data 2 length 208 with play-rate 24000 Hz,magnitude=0x5fff
+09-25 02:44:47.470  1633  1633 E qcom-hv-haptics c42d000.qcom,spmi: qcom,pm8550b@7:qcom,hv-haptics@f000: LRA nominal impedance is 9 ohm
+09-25 02:44:47.470  1633  1633 E qcom-hv-haptics c42d000.qcom,spmi: qcom,pm8550b@7:qcom,hv-haptics@f000: update VMAX_HDRM to 1000 mv
+09-25 02:44:47.470  1633  1633 E qcom-hv-haptics c42d000.qcom,spmi: qcom,pm8550b@7:qcom,hv-haptics@f000: Set Vmax to 5774 mV
+09-25 02:44:47.471  1633  1633 E qcom-hv-haptics c42d000.qcom,spmi: qcom,pm8550b@7:qcom,hv-haptics@f000: playback val = 1
+09-25 02:44:47.480  1028  1028 E qcom-hv-haptics c42d000.qcom,spmi: qcom,pm8550b@7:qcom,hv-haptics@f000: wait 5793 us for brake pattern to complete
+09-25 02:44:47.482  1633  1633 E qcom-hv-haptics c42d000.qcom,spmi: qcom,pm8550b@7:qcom,hv-haptics@f000: playback val = 0
+09-25 02:44:47.482  1633  1633 E qcom-hv-haptics c42d000.qcom,spmi: qcom,pm8550b@7:qcom,hv-haptics@f000: erase effect, really stop play
+09-25 02:44:47.483  1028  1028 E qcom-hv-haptics c42d000.qcom,spmi: qcom,pm8550b@7:qcom,hv-haptics@f000: polling HPWR_INTF timeout 3, value = 3
+09-25 02:44:47.486  1028  1028 E qcom-hv-haptics c42d000.qcom,spmi: qcom,pm8550b@7:qcom,hv-haptics@f000: stopped play completely
+09-25 02:44:47.486  1028  1028 E qcom-hv-haptics c42d000.qcom,spmi: qcom,pm8550b@7:qcom,hv-haptics@f000: FIFO playing is done
+09-25 02:44:47.486  1633  1633 E qcom-hv-haptics c42d000.qcom,spmi: qcom,pm8550b@7:qcom,hv-haptics@f000: wait 5793 us for brake pattern to complete
+09-25 02:44:47.489  1633  1633 E qcom-hv-haptics c42d000.qcom,spmi: qcom,pm8550b@7:qcom,hv-haptics@f000: stopped play completely
+09-25 02:44:47.490  1633  1633 E qcom-hv-haptics c42d000.qcom,spmi: qcom,pm8550b@7:qcom,hv-haptics@f000: custom data 2 length 208 with play-rate 24000 Hz,magnitude=0x5fff
+09-25 02:44:47.490  1633  1633 E qcom-hv-haptics c42d000.qcom,spmi: qcom,pm8550b@7:qcom,hv-haptics@f000: LRA nominal impedance is 9 ohm
+09-25 02:44:47.490  1633  1633 E qcom-hv-haptics c42d000.qcom,spmi: qcom,pm8550b@7:qcom,hv-haptics@f000: update VMAX_HDRM to 1000 mv
+09-25 02:44:47.490  1633  1633 E qcom-hv-haptics c42d000.qcom,spmi: qcom,pm8550b@7:qcom,hv-haptics@f000: Set Vmax to 5774 mV
+09-25 02:44:47.491  1633  1633 E qcom-hv-haptics c42d000.qcom,spmi: qcom,pm8550b@7:qcom,hv-haptics@f000: playback val = 1
+09-25 02:44:47.500  1028  1028 E qcom-hv-haptics c42d000.qcom,spmi: qcom,pm8550b@7:qcom,hv-haptics@f000: wait 5793 us for brake pattern to complete
+09-25 02:44:47.503  1028  1028 E qcom-hv-haptics c42d000.qcom,spmi: qcom,pm8550b@7:qcom,hv-haptics@f000: polling HPWR_INTF timeout 3, value = 3
+09-25 02:44:47.505  1633  1633 E qcom-hv-haptics c42d000.qcom,spmi: qcom,pm8550b@7:qcom,hv-haptics@f000: playback val = 0
+09-25 02:44:47.505  1633  1633 E qcom-hv-haptics c42d000.qcom,spmi: qcom,pm8550b@7:qcom,hv-haptics@f000: erase effect, really stop play
+09-25 02:44:47.506  1028  1028 E qcom-hv-haptics c42d000.qcom,spmi: qcom,pm8550b@7:qcom,hv-haptics@f000: stopped play completely
+09-25 02:44:47.506  1028  1028 E qcom-hv-haptics c42d000.qcom,spmi: qcom,pm8550b@7:qcom,hv-haptics@f000: FIFO playing is done
+09-25 02:44:47.506  1633  1633 E qcom-hv-haptics c42d000.qcom,spmi: qcom,pm8550b@7:qcom,hv-haptics@f000: wait 5793 us for brake pattern to complete
+09-25 02:44:47.509  1633  1633 E qcom-hv-haptics c42d000.qcom,spmi: qcom,pm8550b@7:qcom,hv-haptics@f000: stopped play completely
+09-25 02:44:47.580  1633  1633 E qcom-hv-haptics c42d000.qcom,spmi: qcom,pm8550b@7:qcom,hv-haptics@f000: custom data 2 length 208 with play-rate 24000 Hz,magnitude=0x5fff
+09-25 02:44:47.580  1633  1633 E qcom-hv-haptics c42d000.qcom,spmi: qcom,pm8550b@7:qcom,hv-haptics@f000: LRA nominal impedance is 9 ohm
+09-25 02:44:47.580  1633  1633 E qcom-hv-haptics c42d000.qcom,spmi: qcom,pm8550b@7:qcom,hv-haptics@f000: update VMAX_HDRM to 1000 mv
+09-25 02:44:47.580  1633  1633 E qcom-hv-haptics c42d000.qcom,spmi: qcom,pm8550b@7:qcom,hv-haptics@f000: Set Vmax to 5774 mV
+09-25 02:44:47.581  1633  1633 E qcom-hv-haptics c42d000.qcom,spmi: qcom,pm8550b@7:qcom,hv-haptics@f000: playback val = 1
+09-25 02:44:47.590  1028  1028 E qcom-hv-haptics c42d000.qcom,spmi: qcom,pm8550b@7:qcom,hv-haptics@f000: wait 5793 us for brake pattern to complete
+09-25 02:44:47.592  1633  1633 E qcom-hv-haptics c42d000.qcom,spmi: qcom,pm8550b@7:qcom,hv-haptics@f000: playback val = 0
+09-25 02:44:47.592  1633  1633 E qcom-hv-haptics c42d000.qcom,spmi: qcom,pm8550b@7:qcom,hv-haptics@f000: erase effect, really stop play
+09-25 02:44:47.593  1028  1028 E qcom-hv-haptics c42d000.qcom,spmi: qcom,pm8550b@7:qcom,hv-haptics@f000: polling HPWR_INTF timeout 3, value = 3
+09-25 02:44:47.596  1028  1028 E qcom-hv-haptics c42d000.qcom,spmi: qcom,pm8550b@7:qcom,hv-haptics@f000: stopped play completely
+09-25 02:44:47.596  1028  1028 E qcom-hv-haptics c42d000.qcom,spmi: qcom,pm8550b@7:qcom,hv-haptics@f000: FIFO playing is done
+09-25 02:44:47.597  1633  1633 E qcom-hv-haptics c42d000.qcom,spmi: qcom,pm8550b@7:qcom,hv-haptics@f000: wait 5793 us for brake pattern to complete
+09-25 02:44:47.600  1633  1633 E qcom-hv-haptics c42d000.qcom,spmi: qcom,pm8550b@7:qcom,hv-haptics@f000: stopped play completely
+09-25 02:44:47.606  1633  1633 E qcom-hv-haptics c42d000.qcom,spmi: qcom,pm8550b@7:qcom,hv-haptics@f000: custom data 2 length 208 with play-rate 24000 Hz,magnitude=0x5fff
+09-25 02:44:47.606  1633  1633 E qcom-hv-haptics c42d000.qcom,spmi: qcom,pm8550b@7:qcom,hv-haptics@f000: LRA nominal impedance is 9 ohm
+09-25 02:44:47.606  1633  1633 E qcom-hv-haptics c42d000.qcom,spmi: qcom,pm8550b@7:qcom,hv-haptics@f000: update VMAX_HDRM to 1000 mv
+09-25 02:44:47.606  1633  1633 E qcom-hv-haptics c42d000.qcom,spmi: qcom,pm8550b@7:qcom,hv-haptics@f000: Set Vmax to 5774 mV
+09-25 02:44:47.607  1633  1633 E qcom-hv-haptics c42d000.qcom,spmi: qcom,pm8550b@7:qcom,hv-haptics@f000: playback val = 1
+09-25 02:44:47.616  1028  1028 E qcom-hv-haptics c42d000.qcom,spmi: qcom,pm8550b@7:qcom,hv-haptics@f000: wait 5793 us for brake pattern to complete
+09-25 02:44:47.619  1028  1028 E qcom-hv-haptics c42d000.qcom,spmi: qcom,pm8550b@7:qcom,hv-haptics@f000: polling HPWR_INTF timeout 3, value = 3
+09-25 02:44:47.621  1633  1633 E qcom-hv-haptics c42d000.qcom,spmi: qcom,pm8550b@7:qcom,hv-haptics@f000: playback val = 0
+09-25 02:44:47.621  1633  1633 E qcom-hv-haptics c42d000.qcom,spmi: qcom,pm8550b@7:qcom,hv-haptics@f000: erase effect, really stop play
+09-25 02:44:47.622  1028  1028 E qcom-hv-haptics c42d000.qcom,spmi: qcom,pm8550b@7:qcom,hv-haptics@f000: stopped play completely
+09-25 02:44:47.622  1028  1028 E qcom-hv-haptics c42d000.qcom,spmi: qcom,pm8550b@7:qcom,hv-haptics@f000: FIFO playing is done
+09-25 02:44:47.622  1633  1633 E qcom-hv-haptics c42d000.qcom,spmi: qcom,pm8550b@7:qcom,hv-haptics@f000: wait 5793 us for brake pattern to complete
+09-25 02:44:47.627  1633  1633 E qcom-hv-haptics c42d000.qcom,spmi: qcom,pm8550b@7:qcom,hv-haptics@f000: stopped play completely
+09-25 02:44:47.628  1633  1633 E qcom-hv-haptics c42d000.qcom,spmi: qcom,pm8550b@7:qcom,hv-haptics@f000: custom data 2 length 208 with play-rate 24000 Hz,magnitude=0x5fff
+09-25 02:44:47.628  1633  1633 E qcom-hv-haptics c42d000.qcom,spmi: qcom,pm8550b@7:qcom,hv-haptics@f000: LRA nominal impedance is 9 ohm
+09-25 02:44:47.628  1633  1633 E qcom-hv-haptics c42d000.qcom,spmi: qcom,pm8550b@7:qcom,hv-haptics@f000: update VMAX_HDRM to 1000 mv
+09-25 02:44:47.628  1633  1633 E qcom-hv-haptics c42d000.qcom,spmi: qcom,pm8550b@7:qcom,hv-haptics@f000: Set Vmax to 5774 mV
+09-25 02:44:47.629  1633  1633 E qcom-hv-haptics c42d000.qcom,spmi: qcom,pm8550b@7:qcom,hv-haptics@f000: playback val = 1
+09-25 02:44:47.638  1028  1028 E qcom-hv-haptics c42d000.qcom,spmi: qcom,pm8550b@7:qcom,hv-haptics@f000: wait 5793 us for brake pattern to complete
+09-25 02:44:47.639  1633  1633 E qcom-hv-haptics c42d000.qcom,spmi: qcom,pm8550b@7:qcom,hv-haptics@f000: playback val = 0
+09-25 02:44:47.639  1633  1633 E qcom-hv-haptics c42d000.qcom,spmi: qcom,pm8550b@7:qcom,hv-haptics@f000: erase effect, really stop play
+09-25 02:44:47.642  1028  1028 E qcom-hv-haptics c42d000.qcom,spmi: qcom,pm8550b@7:qcom,hv-haptics@f000: polling HPWR_INTF timeout 3, value = 3
+09-25 02:44:47.644  1028  1028 E qcom-hv-haptics c42d000.qcom,spmi: qcom,pm8550b@7:qcom,hv-haptics@f000: stopped play completely
+09-25 02:44:47.645  1028  1028 E qcom-hv-haptics c42d000.qcom,spmi: qcom,pm8550b@7:qcom,hv-haptics@f000: FIFO playing is done
+09-25 02:44:47.645  1633  1633 E qcom-hv-haptics c42d000.qcom,spmi: qcom,pm8550b@7:qcom,hv-haptics@f000: wait 5793 us for brake pattern to complete
+09-25 02:44:47.648  1633  1633 E qcom-hv-haptics c42d000.qcom,spmi: qcom,pm8550b@7:qcom,hv-haptics@f000: stopped play completely
+09-25 02:44:47.650  1633  1633 E qcom-hv-haptics c42d000.qcom,spmi: qcom,pm8550b@7:qcom,hv-haptics@f000: custom data 2 length 208 with play-rate 24000 Hz,magnitude=0x5fff
+09-25 02:44:47.650  1633  1633 E qcom-hv-haptics c42d000.qcom,spmi: qcom,pm8550b@7:qcom,hv-haptics@f000: LRA nominal impedance is 9 ohm
+09-25 02:44:47.650  1633  1633 E qcom-hv-haptics c42d000.qcom,spmi: qcom,pm8550b@7:qcom,hv-haptics@f000: update VMAX_HDRM to 1000 mv
+09-25 02:44:47.650  1633  1633 E qcom-hv-haptics c42d000.qcom,spmi: qcom,pm8550b@7:qcom,hv-haptics@f000: Set Vmax to 5774 mV
+09-25 02:44:47.651  1633  1633 E qcom-hv-haptics c42d000.qcom,spmi: qcom,pm8550b@7:qcom,hv-haptics@f000: playback val = 1
+09-25 02:44:47.660  1028  1028 E qcom-hv-haptics c42d000.qcom,spmi: qcom,pm8550b@7:qcom,hv-haptics@f000: wait 5793 us for brake pattern to complete
+09-25 02:44:47.661 16104 16104 I         : [INFO]: OPLUS_CHG[CHG_COMM]([oplus_comm_smooth_to_soc][3416]): soc[0 2 48 48 49 50] avg[2 1 0 0 0] fifo[49 49 49 49]
+09-25 02:44:47.662  1633  1633 E qcom-hv-haptics c42d000.qcom,spmi: qcom,pm8550b@7:qcom,hv-haptics@f000: playback val = 0
+09-25 02:44:47.662  1633  1633 E qcom-hv-haptics c42d000.qcom,spmi: qcom,pm8550b@7:qcom,hv-haptics@f000: erase effect, really stop play
+09-25 02:44:47.663  1028  1028 E qcom-hv-haptics c42d000.qcom,spmi: qcom,pm8550b@7:qcom,hv-haptics@f000: polling HPWR_INTF timeout 3, value = 3
+09-25 02:44:47.666  1028  1028 E qcom-hv-haptics c42d000.qcom,spmi: qcom,pm8550b@7:qcom,hv-haptics@f000: stopped play completely
+09-25 02:44:47.666  1028  1028 E qcom-hv-haptics c42d000.qcom,spmi: qcom,pm8550b@7:qcom,hv-haptics@f000: FIFO playing is done
+09-25 02:44:47.666  1633  1633 E qcom-hv-haptics c42d000.qcom,spmi: qcom,pm8550b@7:qcom,hv-haptics@f000: wait 5793 us for brake pattern to complete
+09-25 02:44:47.669  1633  1633 E qcom-hv-haptics c42d000.qcom,spmi: qcom,pm8550b@7:qcom,hv-haptics@f000: stopped play completely
+09-25 02:44:47.671  1633  1633 E qcom-hv-haptics c42d000.qcom,spmi: qcom,pm8550b@7:qcom,hv-haptics@f000: custom data 2 length 208 with play-rate 24000 Hz,magnitude=0x5fff
+09-25 02:44:47.671  1633  1633 E qcom-hv-haptics c42d000.qcom,spmi: qcom,pm8550b@7:qcom,hv-haptics@f000: LRA nominal impedance is 9 ohm
+09-25 02:44:47.671  1633  1633 E qcom-hv-haptics c42d000.qcom,spmi: qcom,pm8550b@7:qcom,hv-haptics@f000: update VMAX_HDRM to 1000 mv
+09-25 02:44:47.671  1633  1633 E qcom-hv-haptics c42d000.qcom,spmi: qcom,pm8550b@7:qcom,hv-haptics@f000: Set Vmax to 5774 mV
+09-25 02:44:47.672  1633  1633 E qcom-hv-haptics c42d000.qcom,spmi: qcom,pm8550b@7:qcom,hv-haptics@f000: playback val = 1
+09-25 02:44:47.681  1028  1028 E qcom-hv-haptics c42d000.qcom,spmi: qcom,pm8550b@7:qcom,hv-haptics@f000: wait 5793 us for brake pattern to complete
+09-25 02:44:47.683  1633  1633 E qcom-hv-haptics c42d000.qcom,spmi: qcom,pm8550b@7:qcom,hv-haptics@f000: playback val = 0
+09-25 02:44:47.683  1633  1633 E qcom-hv-haptics c42d000.qcom,spmi: qcom,pm8550b@7:qcom,hv-haptics@f000: erase effect, really stop play
+09-25 02:44:47.684  1028  1028 E qcom-hv-haptics c42d000.qcom,spmi: qcom,pm8550b@7:qcom,hv-haptics@f000: polling HPWR_INTF timeout 3, value = 3
+09-25 02:44:47.686 18489 18489 I         : [INFO]: OPLUS_CHG[TRACK]([oplus_chg_track_cal_no_charging_stats_new][6797]): chg_no_charging_cnt=164s, no_chg_time=174s, delta_time=6s
+09-25 02:44:47.687  1028  1028 E qcom-hv-haptics c42d000.qcom,spmi: qcom,pm8550b@7:qcom,hv-haptics@f000: stopped play completely
+09-25 02:44:47.687  1028  1028 E qcom-hv-haptics c42d000.qcom,spmi: qcom,pm8550b@7:qcom,hv-haptics@f000: FIFO playing is done
+09-25 02:44:47.687  1633  1633 E qcom-hv-haptics c42d000.qcom,spmi: qcom,pm8550b@7:qcom,hv-haptics@f000: wait 5793 us for brake pattern to complete
+09-25 02:44:47.690  1633  1633 E qcom-hv-haptics c42d000.qcom,spmi: qcom,pm8550b@7:qcom,hv-haptics@f000: stopped play completely
+09-25 02:44:47.694 18489 18489 I OPLUS_CHG[oplus_charge_info]: BATTERY[357 355 3794 3794 1624 48 50 49 2549 5416 1 0x0 2879], CHARGE[4490 600 0 0], WIRED[1 453 4680 500 1 0x0 0 0 0 2 0], WIRELESS[0 0 0 0 0 0x0 0 0 0], VOOC[0 0 0 0 0x0], UFCS[0 0 0 0x0], COMMON[6 0 0 0x0 1 0 1 5416 100 0]
+09-25 02:44:47.694  1633  1633 E qcom-hv-haptics c42d000.qcom,spmi: qcom,pm8550b@7:qcom,hv-haptics@f000: custom data 2 length 208 with play-rate 24000 Hz,magnitude=0x5fff
+09-25 02:44:47.694  1633  1633 E qcom-hv-haptics c42d000.qcom,spmi: qcom,pm8550b@7:qcom,hv-haptics@f000: LRA nominal impedance is 9 ohm
+09-25 02:44:47.694  1633  1633 E qcom-hv-haptics c42d000.qcom,spmi: qcom,pm8550b@7:qcom,hv-haptics@f000: update VMAX_HDRM to 1000 mv
+09-25 02:44:47.694  1633  1633 E qcom-hv-haptics c42d000.qcom,spmi: qcom,pm8550b@7:qcom,hv-haptics@f000: Set Vmax to 5774 mV
+09-25 02:44:47.695  1633  1633 E qcom-hv-haptics c42d000.qcom,spmi: qcom,pm8550b@7:qcom,hv-haptics@f000: playback val = 1
+09-25 02:44:47.698 18489 18489 I         : [INFO]: OPLUS_CHG[ADSP]([oplus_chg_8350_reg_dump][7390]): sm8450_st_dump: [chg_en=1, suspend=0, pd_svooc=0], subtype=0x01],[oplus_UsbCommCapable=0, oplus_pd_svooc=0, typec_mode=0, cid_status=0x01, usb_in_status=1],[0x2606=0x83, 0x2607=0x19, 0x2608=0x0a, 0x2609=0x02], [0x260a=0x04, 0x260b=0x59, 0x260c=0x0a, 0x260d=0x18], [0x260e=0x0a, 0x260f=0x01, 0x2610=0x00, 0x2640=0x01], [0x2641=0x02, 0x2642=0x05, 0x2646=0x01, 0x2650=0x03], [0x2706=0x0a, 0x2707=0x0a, 0x2708=0x0a, 0x2709=0x0a], [0x270b=0xe2, 0x270c=0x48, 0x2710=0xc0, 0x280c=0x38], [0x2810=0x00, 0x2840=0x01, 0x287f=0x00, 0x2906=0x02], [0x2908=0x0f, 0x290a=0x11, 0x290b=0x01, 0x290c=0x01], [0x2910=0x11, 0x2944=0x80, 0x2950=0x02, 0x2951=0x01], [0x2952=0x0a, 0x2954=0x00, 0x2960=0xe0, 0x2b06=0x08], [0x2b07=0x00, 0x2b08=0x00, 0x2b09=0x63, 0x2b0a=0x19], [0x2b0b=0x29, 0x2b0c=0x00, 0x29a8=0x81, 0x29a9=0x83], [0x29aa=0x00, 0x2aa2=0x00, 0x2aa8=0x87, 0x2aa9=0x00], [0x2aaa=0x00],
+09-25 02:44:47.704  1028  1028 E qcom-hv-haptics c42d000.qcom,spmi: qcom,pm8550b@7:qcom,hv-haptics@f000: wait 5793 us for brake pattern to complete
+09-25 02:44:47.705  1633  1633 E qcom-hv-haptics c42d000.qcom,spmi: qcom,pm8550b@7:qcom,hv-haptics@f000: playback val = 0
+09-25 02:44:47.705  1633  1633 E qcom-hv-haptics c42d000.qcom,spmi: qcom,pm8550b@7:qcom,hv-haptics@f000: erase effect, really stop play
+09-25 02:44:47.707  1028  1028 E qcom-hv-haptics c42d000.qcom,spmi: qcom,pm8550b@7:qcom,hv-haptics@f000: polling HPWR_INTF timeout 3, value = 3
+09-25 02:44:47.710  1028  1028 E qcom-hv-haptics c42d000.qcom,spmi: qcom,pm8550b@7:qcom,hv-haptics@f000: stopped play completely
+09-25 02:44:47.710  1028  1028 E qcom-hv-haptics c42d000.qcom,spmi: qcom,pm8550b@7:qcom,hv-haptics@f000: FIFO playing is done
+09-25 02:44:47.711  1633  1633 E qcom-hv-haptics c42d000.qcom,spmi: qcom,pm8550b@7:qcom,hv-haptics@f000: wait 5793 us for brake pattern to complete
+09-25 02:44:47.714  1633  1633 E qcom-hv-haptics c42d000.qcom,spmi: qcom,pm8550b@7:qcom,hv-haptics@f000: stopped play completely
+09-25 02:44:47.782  1633  1633 E qcom-hv-haptics c42d000.qcom,spmi: qcom,pm8550b@7:qcom,hv-haptics@f000: custom data 2 length 208 with play-rate 24000 Hz,magnitude=0x5fff
+09-25 02:44:47.782  1633  1633 E qcom-hv-haptics c42d000.qcom,spmi: qcom,pm8550b@7:qcom,hv-haptics@f000: LRA nominal impedance is 9 ohm
+09-25 02:44:47.782  1633  1633 E qcom-hv-haptics c42d000.qcom,spmi: qcom,pm8550b@7:qcom,hv-haptics@f000: update VMAX_HDRM to 1000 mv
+09-25 02:44:47.782  1633  1633 E qcom-hv-haptics c42d000.qcom,spmi: qcom,pm8550b@7:qcom,hv-haptics@f000: Set Vmax to 5774 mV
+09-25 02:44:47.782  1633  1633 E qcom-hv-haptics c42d000.qcom,spmi: qcom,pm8550b@7:qcom,hv-haptics@f000: playback val = 1
+09-25 02:44:47.791  1028  1028 E qcom-hv-haptics c42d000.qcom,spmi: qcom,pm8550b@7:qcom,hv-haptics@f000: wait 5793 us for brake pattern to complete
+09-25 02:44:47.793  1633  1633 E qcom-hv-haptics c42d000.qcom,spmi: qcom,pm8550b@7:qcom,hv-haptics@f000: playback val = 0
+09-25 02:44:47.793  1633  1633 E qcom-hv-haptics c42d000.qcom,spmi: qcom,pm8550b@7:qcom,hv-haptics@f000: erase effect, really stop play
+09-25 02:44:47.794  1028  1028 E qcom-hv-haptics c42d000.qcom,spmi: qcom,pm8550b@7:qcom,hv-haptics@f000: polling HPWR_INTF timeout 3, value = 3
+09-25 02:44:47.797  1028  1028 E qcom-hv-haptics c42d000.qcom,spmi: qcom,pm8550b@7:qcom,hv-haptics@f000: stopped play completely
+09-25 02:44:47.797  1028  1028 E qcom-hv-haptics c42d000.qcom,spmi: qcom,pm8550b@7:qcom,hv-haptics@f000: FIFO playing is done
+09-25 02:44:47.798  1633  1633 E qcom-hv-haptics c42d000.qcom,spmi: qcom,pm8550b@7:qcom,hv-haptics@f000: wait 5793 us for brake pattern to complete
+09-25 02:44:47.801  1633  1633 E qcom-hv-haptics c42d000.qcom,spmi: qcom,pm8550b@7:qcom,hv-haptics@f000: stopped play completely
+09-25 02:44:47.804  1633  1633 E qcom-hv-haptics c42d000.qcom,spmi: qcom,pm8550b@7:qcom,hv-haptics@f000: custom data 2 length 208 with play-rate 24000 Hz,magnitude=0x5fff
+09-25 02:44:47.804  1633  1633 E qcom-hv-haptics c42d000.qcom,spmi: qcom,pm8550b@7:qcom,hv-haptics@f000: LRA nominal impedance is 9 ohm
+09-25 02:44:47.804  1633  1633 E qcom-hv-haptics c42d000.qcom,spmi: qcom,pm8550b@7:qcom,hv-haptics@f000: update VMAX_HDRM to 1000 mv
+09-25 02:44:47.804  1633  1633 E qcom-hv-haptics c42d000.qcom,spmi: qcom,pm8550b@7:qcom,hv-haptics@f000: Set Vmax to 5774 mV
+09-25 02:44:47.805  1633  1633 E qcom-hv-haptics c42d000.qcom,spmi: qcom,pm8550b@7:qcom,hv-haptics@f000: playback val = 1
+09-25 02:44:47.814  1028  1028 E qcom-hv-haptics c42d000.qcom,spmi: qcom,pm8550b@7:qcom,hv-haptics@f000: wait 5793 us for brake pattern to complete
+09-25 02:44:47.815  1633  1633 E qcom-hv-haptics c42d000.qcom,spmi: qcom,pm8550b@7:qcom,hv-haptics@f000: playback val = 0
+09-25 02:44:47.815  1633  1633 E qcom-hv-haptics c42d000.qcom,spmi: qcom,pm8550b@7:qcom,hv-haptics@f000: erase effect, really stop play
+09-25 02:44:47.817  1028  1028 E qcom-hv-haptics c42d000.qcom,spmi: qcom,pm8550b@7:qcom,hv-haptics@f000: polling HPWR_INTF timeout 3, value = 3
+09-25 02:44:47.820  1028  1028 E qcom-hv-haptics c42d000.qcom,spmi: qcom,pm8550b@7:qcom,hv-haptics@f000: stopped play completely
+09-25 02:44:47.820  1028  1028 E qcom-hv-haptics c42d000.qcom,spmi: qcom,pm8550b@7:qcom,hv-haptics@f000: FIFO playing is done
+09-25 02:44:47.821  1633  1633 E qcom-hv-haptics c42d000.qcom,spmi: qcom,pm8550b@7:qcom,hv-haptics@f000: wait 5793 us for brake pattern to complete
+09-25 02:44:47.824  1633  1633 E qcom-hv-haptics c42d000.qcom,spmi: qcom,pm8550b@7:qcom,hv-haptics@f000: stopped play completely
+09-25 02:44:47.830  1633  1633 E qcom-hv-haptics c42d000.qcom,spmi: qcom,pm8550b@7:qcom,hv-haptics@f000: custom data 2 length 208 with play-rate 24000 Hz,magnitude=0x5fff
+09-25 02:44:47.830  1633  1633 E qcom-hv-haptics c42d000.qcom,spmi: qcom,pm8550b@7:qcom,hv-haptics@f000: LRA nominal impedance is 9 ohm
+09-25 02:44:47.830  1633  1633 E qcom-hv-haptics c42d000.qcom,spmi: qcom,pm8550b@7:qcom,hv-haptics@f000: update VMAX_HDRM to 1000 mv
+09-25 02:44:47.830  1633  1633 E qcom-hv-haptics c42d000.qcom,spmi: qcom,pm8550b@7:qcom,hv-haptics@f000: Set Vmax to 5774 mV
+09-25 02:44:47.831  1633  1633 E qcom-hv-haptics c42d000.qcom,spmi: qcom,pm8550b@7:qcom,hv-haptics@f000: playback val = 1
+09-25 02:44:47.840  1028  1028 E qcom-hv-haptics c42d000.qcom,spmi: qcom,pm8550b@7:qcom,hv-haptics@f000: wait 5793 us for brake pattern to complete
+09-25 02:44:47.842  1633  1633 E qcom-hv-haptics c42d000.qcom,spmi: qcom,pm8550b@7:qcom,hv-haptics@f000: playback val = 0
+09-25 02:44:47.842  1633  1633 E qcom-hv-haptics c42d000.qcom,spmi: qcom,pm8550b@7:qcom,hv-haptics@f000: erase effect, really stop play
+09-25 02:44:47.843  1028  1028 E qcom-hv-haptics c42d000.qcom,spmi: qcom,pm8550b@7:qcom,hv-haptics@f000: polling HPWR_INTF timeout 3, value = 3
+09-25 02:44:47.846  1028  1028 E qcom-hv-haptics c42d000.qcom,spmi: qcom,pm8550b@7:qcom,hv-haptics@f000: stopped play completely
+09-25 02:44:47.846  1028  1028 E qcom-hv-haptics c42d000.qcom,spmi: qcom,pm8550b@7:qcom,hv-haptics@f000: FIFO playing is done
+09-25 02:44:47.846  1633  1633 E qcom-hv-haptics c42d000.qcom,spmi: qcom,pm8550b@7:qcom,hv-haptics@f000: wait 5793 us for brake pattern to complete
+09-25 02:44:47.849  1633  1633 E qcom-hv-haptics c42d000.qcom,spmi: qcom,pm8550b@7:qcom,hv-haptics@f000: stopped play completely
+09-25 02:44:47.855  1633  1633 E qcom-hv-haptics c42d000.qcom,spmi: qcom,pm8550b@7:qcom,hv-haptics@f000: custom data 2 length 208 with play-rate 24000 Hz,magnitude=0x5fff
+09-25 02:44:47.855  1633  1633 E qcom-hv-haptics c42d000.qcom,spmi: qcom,pm8550b@7:qcom,hv-haptics@f000: LRA nominal impedance is 9 ohm
+09-25 02:44:47.855  1633  1633 E qcom-hv-haptics c42d000.qcom,spmi: qcom,pm8550b@7:qcom,hv-haptics@f000: update VMAX_HDRM to 1000 mv
+09-25 02:44:47.855  1633  1633 E qcom-hv-haptics c42d000.qcom,spmi: qcom,pm8550b@7:qcom,hv-haptics@f000: Set Vmax to 5774 mV
+09-25 02:44:47.856  1633  1633 E qcom-hv-haptics c42d000.qcom,spmi: qcom,pm8550b@7:qcom,hv-haptics@f000: playback val = 1
+09-25 02:44:47.865  1028  1028 E qcom-hv-haptics c42d000.qcom,spmi: qcom,pm8550b@7:qcom,hv-haptics@f000: wait 5793 us for brake pattern to complete
+09-25 02:44:47.868  1633  1633 E qcom-hv-haptics c42d000.qcom,spmi: qcom,pm8550b@7:qcom,hv-haptics@f000: playback val = 0
+09-25 02:44:47.868  1633  1633 E qcom-hv-haptics c42d000.qcom,spmi: qcom,pm8550b@7:qcom,hv-haptics@f000: erase effect, really stop play
+09-25 02:44:47.868  1028  1028 E qcom-hv-haptics c42d000.qcom,spmi: qcom,pm8550b@7:qcom,hv-haptics@f000: polling HPWR_INTF timeout 3, value = 3
+09-25 02:44:47.871  1028  1028 E qcom-hv-haptics c42d000.qcom,spmi: qcom,pm8550b@7:qcom,hv-haptics@f000: stopped play completely
+09-25 02:44:47.871  1028  1028 E qcom-hv-haptics c42d000.qcom,spmi: qcom,pm8550b@7:qcom,hv-haptics@f000: FIFO playing is done
+09-25 02:44:47.871  1633  1633 E qcom-hv-haptics c42d000.qcom,spmi: qcom,pm8550b@7:qcom,hv-haptics@f000: wait 5793 us for brake pattern to complete
+09-25 02:44:47.874  1633  1633 E qcom-hv-haptics c42d000.qcom,spmi: qcom,pm8550b@7:qcom,hv-haptics@f000: stopped play completely
+09-25 02:44:47.880  1633  1633 E qcom-hv-haptics c42d000.qcom,spmi: qcom,pm8550b@7:qcom,hv-haptics@f000: custom data 2 length 208 with play-rate 24000 Hz,magnitude=0x5fff
+09-25 02:44:47.880  1633  1633 E qcom-hv-haptics c42d000.qcom,spmi: qcom,pm8550b@7:qcom,hv-haptics@f000: LRA nominal impedance is 9 ohm
+09-25 02:44:47.880  1633  1633 E qcom-hv-haptics c42d000.qcom,spmi: qcom,pm8550b@7:qcom,hv-haptics@f000: update VMAX_HDRM to 1000 mv
+09-25 02:44:47.880  1633  1633 E qcom-hv-haptics c42d000.qcom,spmi: qcom,pm8550b@7:qcom,hv-haptics@f000: Set Vmax to 5774 mV
+09-25 02:44:47.881  1633  1633 E qcom-hv-haptics c42d000.qcom,spmi: qcom,pm8550b@7:qcom,hv-haptics@f000: playback val = 1
+09-25 02:44:47.890  1028  1028 E qcom-hv-haptics c42d000.qcom,spmi: qcom,pm8550b@7:qcom,hv-haptics@f000: wait 5793 us for brake pattern to complete
+09-25 02:44:47.891  1633  1633 E qcom-hv-haptics c42d000.qcom,spmi: qcom,pm8550b@7:qcom,hv-haptics@f000: playback val = 0
+09-25 02:44:47.891  1633  1633 E qcom-hv-haptics c42d000.qcom,spmi: qcom,pm8550b@7:qcom,hv-haptics@f000: erase effect, really stop play
+09-25 02:44:47.893  1028  1028 E qcom-hv-haptics c42d000.qcom,spmi: qcom,pm8550b@7:qcom,hv-haptics@f000: polling HPWR_INTF timeout 3, value = 3
+09-25 02:44:47.896  1028  1028 E qcom-hv-haptics c42d000.qcom,spmi: qcom,pm8550b@7:qcom,hv-haptics@f000: stopped play completely
+09-25 02:44:47.896  1028  1028 E qcom-hv-haptics c42d000.qcom,spmi: qcom,pm8550b@7:qcom,hv-haptics@f000: FIFO playing is done
+09-25 02:44:47.896  1633  1633 E qcom-hv-haptics c42d000.qcom,spmi: qcom,pm8550b@7:qcom,hv-haptics@f000: wait 5793 us for brake pattern to complete
+09-25 02:44:47.899  1633  1633 E qcom-hv-haptics c42d000.qcom,spmi: qcom,pm8550b@7:qcom,hv-haptics@f000: stopped play completely
+09-25 02:44:47.900  1633  1633 E qcom-hv-haptics c42d000.qcom,spmi: qcom,pm8550b@7:qcom,hv-haptics@f000: custom data 2 length 208 with play-rate 24000 Hz,magnitude=0x5fff
+09-25 02:44:47.900  1633  1633 E qcom-hv-haptics c42d000.qcom,spmi: qcom,pm8550b@7:qcom,hv-haptics@f000: LRA nominal impedance is 9 ohm
+09-25 02:44:47.900  1633  1633 E qcom-hv-haptics c42d000.qcom,spmi: qcom,pm8550b@7:qcom,hv-haptics@f000: update VMAX_HDRM to 1000 mv
+09-25 02:44:47.900  1633  1633 E qcom-hv-haptics c42d000.qcom,spmi: qcom,pm8550b@7:qcom,hv-haptics@f000: Set Vmax to 5774 mV
+09-25 02:44:47.901  1633  1633 E qcom-hv-haptics c42d000.qcom,spmi: qcom,pm8550b@7:qcom,hv-haptics@f000: playback val = 1
+09-25 02:44:47.910  1028  1028 E qcom-hv-haptics c42d000.qcom,spmi: qcom,pm8550b@7:qcom,hv-haptics@f000: wait 5793 us for brake pattern to complete
+09-25 02:44:47.911  1633  1633 E qcom-hv-haptics c42d000.qcom,spmi: qcom,pm8550b@7:qcom,hv-haptics@f000: playback val = 0
+09-25 02:44:47.911  1633  1633 E qcom-hv-haptics c42d000.qcom,spmi: qcom,pm8550b@7:qcom,hv-haptics@f000: erase effect, really stop play
+09-25 02:44:47.913  1028  1028 E qcom-hv-haptics c42d000.qcom,spmi: qcom,pm8550b@7:qcom,hv-haptics@f000: polling HPWR_INTF timeout 3, value = 3
+09-25 02:44:47.916  1028  1028 E qcom-hv-haptics c42d000.qcom,spmi: qcom,pm8550b@7:qcom,hv-haptics@f000: stopped play completely
+09-25 02:44:47.916  1028  1028 E qcom-hv-haptics c42d000.qcom,spmi: qcom,pm8550b@7:qcom,hv-haptics@f000: FIFO playing is done
+09-25 02:44:47.916  1633  1633 E qcom-hv-haptics c42d000.qcom,spmi: qcom,pm8550b@7:qcom,hv-haptics@f000: wait 5793 us for brake pattern to complete
+09-25 02:44:47.920  1633  1633 E qcom-hv-haptics c42d000.qcom,spmi: qcom,pm8550b@7:qcom,hv-haptics@f000: stopped play completely
+09-25 02:44:47.982  1633  1633 E qcom-hv-haptics c42d000.qcom,spmi: qcom,pm8550b@7:qcom,hv-haptics@f000: custom data 2 length 208 with play-rate 24000 Hz,magnitude=0x5fff
+09-25 02:44:47.982  1633  1633 E qcom-hv-haptics c42d000.qcom,spmi: qcom,pm8550b@7:qcom,hv-haptics@f000: LRA nominal impedance is 9 ohm
+09-25 02:44:47.982  1633  1633 E qcom-hv-haptics c42d000.qcom,spmi: qcom,pm8550b@7:qcom,hv-haptics@f000: update VMAX_HDRM to 1000 mv
+09-25 02:44:47.982  1633  1633 E qcom-hv-haptics c42d000.qcom,spmi: qcom,pm8550b@7:qcom,hv-haptics@f000: Set Vmax to 5774 mV
+09-25 02:44:47.983  1633  1633 E qcom-hv-haptics c42d000.qcom,spmi: qcom,pm8550b@7:qcom,hv-haptics@f000: playback val = 1
+09-25 02:44:47.992  1028  1028 E qcom-hv-haptics c42d000.qcom,spmi: qcom,pm8550b@7:qcom,hv-haptics@f000: wait 5793 us for brake pattern to complete
+09-25 02:44:47.995  1028  1028 E qcom-hv-haptics c42d000.qcom,spmi: qcom,pm8550b@7:qcom,hv-haptics@f000: polling HPWR_INTF timeout 3, value = 3
+09-25 02:44:47.996  1633  1633 E qcom-hv-haptics c42d000.qcom,spmi: qcom,pm8550b@7:qcom,hv-haptics@f000: playback val = 0
+09-25 02:44:47.996  1633  1633 E qcom-hv-haptics c42d000.qcom,spmi: qcom,pm8550b@7:qcom,hv-haptics@f000: erase effect, really stop play
+09-25 02:44:47.998  1028  1028 E qcom-hv-haptics c42d000.qcom,spmi: qcom,pm8550b@7:qcom,hv-haptics@f000: stopped play completely
+09-25 02:44:47.998  1028  1028 E qcom-hv-haptics c42d000.qcom,spmi: qcom,pm8550b@7:qcom,hv-haptics@f000: FIFO playing is done
+09-25 02:44:47.998  1633  1633 E qcom-hv-haptics c42d000.qcom,spmi: qcom,pm8550b@7:qcom,hv-haptics@f000: wait 5793 us for brake pattern to complete
+09-25 02:44:48.001  1633  1633 E qcom-hv-haptics c42d000.qcom,spmi: qcom,pm8550b@7:qcom,hv-haptics@f000: stopped play completely
+09-25 02:44:48.002  1633  1633 E qcom-hv-haptics c42d000.qcom,spmi: qcom,pm8550b@7:qcom,hv-haptics@f000: custom data 2 length 208 with play-rate 24000 Hz,magnitude=0x5fff
+09-25 02:44:48.002  1633  1633 E qcom-hv-haptics c42d000.qcom,spmi: qcom,pm8550b@7:qcom,hv-haptics@f000: LRA nominal impedance is 9 ohm
+09-25 02:44:48.002  1633  1633 E qcom-hv-haptics c42d000.qcom,spmi: qcom,pm8550b@7:qcom,hv-haptics@f000: update VMAX_HDRM to 1000 mv
+09-25 02:44:48.002  1633  1633 E qcom-hv-haptics c42d000.qcom,spmi: qcom,pm8550b@7:qcom,hv-haptics@f000: Set Vmax to 5774 mV
+09-25 02:44:48.003  1633  1633 E qcom-hv-haptics c42d000.qcom,spmi: qcom,pm8550b@7:qcom,hv-haptics@f000: playback val = 1
+09-25 02:44:48.012  1028  1028 E qcom-hv-haptics c42d000.qcom,spmi: qcom,pm8550b@7:qcom,hv-haptics@f000: wait 5793 us for brake pattern to complete
+09-25 02:44:48.015  1028  1028 E qcom-hv-haptics c42d000.qcom,spmi: qcom,pm8550b@7:qcom,hv-haptics@f000: polling HPWR_INTF timeout 3, value = 3
+09-25 02:44:48.016  1633  1633 E qcom-hv-haptics c42d000.qcom,spmi: qcom,pm8550b@7:qcom,hv-haptics@f000: playback val = 0
+09-25 02:44:48.016  1633  1633 E qcom-hv-haptics c42d000.qcom,spmi: qcom,pm8550b@7:qcom,hv-haptics@f000: erase effect, really stop play
+09-25 02:44:48.018  1028  1028 E qcom-hv-haptics c42d000.qcom,spmi: qcom,pm8550b@7:qcom,hv-haptics@f000: stopped play completely
+09-25 02:44:48.018  1028  1028 E qcom-hv-haptics c42d000.qcom,spmi: qcom,pm8550b@7:qcom,hv-haptics@f000: FIFO playing is done
+09-25 02:44:48.021  1633  1633 E qcom-hv-haptics c42d000.qcom,spmi: qcom,pm8550b@7:qcom,hv-haptics@f000: wait 5793 us for brake pattern to complete
+09-25 02:44:48.025  1633  1633 E qcom-hv-haptics c42d000.qcom,spmi: qcom,pm8550b@7:qcom,hv-haptics@f000: stopped play completely
+09-25 02:44:48.029  1633  1633 E qcom-hv-haptics c42d000.qcom,spmi: qcom,pm8550b@7:qcom,hv-haptics@f000: custom data 2 length 208 with play-rate 24000 Hz,magnitude=0x5fff
+09-25 02:44:48.029  1633  1633 E qcom-hv-haptics c42d000.qcom,spmi: qcom,pm8550b@7:qcom,hv-haptics@f000: LRA nominal impedance is 9 ohm
+09-25 02:44:48.029  1633  1633 E qcom-hv-haptics c42d000.qcom,spmi: qcom,pm8550b@7:qcom,hv-haptics@f000: update VMAX_HDRM to 1000 mv
+09-25 02:44:48.029  1633  1633 E qcom-hv-haptics c42d000.qcom,spmi: qcom,pm8550b@7:qcom,hv-haptics@f000: Set Vmax to 5774 mV
+09-25 02:44:48.030  1633  1633 E qcom-hv-haptics c42d000.qcom,spmi: qcom,pm8550b@7:qcom,hv-haptics@f000: playback val = 1
+09-25 02:44:48.039  1028  1028 E qcom-hv-haptics c42d000.qcom,spmi: qcom,pm8550b@7:qcom,hv-haptics@f000: wait 5793 us for brake pattern to complete
+09-25 02:44:48.041  1633  1633 E qcom-hv-haptics c42d000.qcom,spmi: qcom,pm8550b@7:qcom,hv-haptics@f000: playback val = 0
+09-25 02:44:48.041  1633  1633 E qcom-hv-haptics c42d000.qcom,spmi: qcom,pm8550b@7:qcom,hv-haptics@f000: erase effect, really stop play
+09-25 02:44:48.042  1028  1028 E qcom-hv-haptics c42d000.qcom,spmi: qcom,pm8550b@7:qcom,hv-haptics@f000: polling HPWR_INTF timeout 3, value = 3
+09-25 02:44:48.045  1028  1028 E qcom-hv-haptics c42d000.qcom,spmi: qcom,pm8550b@7:qcom,hv-haptics@f000: stopped play completely
+09-25 02:44:48.045  1028  1028 E qcom-hv-haptics c42d000.qcom,spmi: qcom,pm8550b@7:qcom,hv-haptics@f000: FIFO playing is done
+09-25 02:44:48.045  1633  1633 E qcom-hv-haptics c42d000.qcom,spmi: qcom,pm8550b@7:qcom,hv-haptics@f000: wait 5793 us for brake pattern to complete
+09-25 02:44:48.048  1633  1633 E qcom-hv-haptics c42d000.qcom,spmi: qcom,pm8550b@7:qcom,hv-haptics@f000: stopped play completely
+09-25 02:44:48.054  1633  1633 E qcom-hv-haptics c42d000.qcom,spmi: qcom,pm8550b@7:qcom,hv-haptics@f000: custom data 2 length 208 with play-rate 24000 Hz,magnitude=0x5fff
+09-25 02:44:48.054  1633  1633 E qcom-hv-haptics c42d000.qcom,spmi: qcom,pm8550b@7:qcom,hv-haptics@f000: LRA nominal impedance is 9 ohm
+09-25 02:44:48.054  1633  1633 E qcom-hv-haptics c42d000.qcom,spmi: qcom,pm8550b@7:qcom,hv-haptics@f000: update VMAX_HDRM to 1000 mv
+09-25 02:44:48.054  1633  1633 E qcom-hv-haptics c42d000.qcom,spmi: qcom,pm8550b@7:qcom,hv-haptics@f000: Set Vmax to 5774 mV
+09-25 02:44:48.055  1633  1633 E qcom-hv-haptics c42d000.qcom,spmi: qcom,pm8550b@7:qcom,hv-haptics@f000: playback val = 1
+09-25 02:44:48.064  1028  1028 E qcom-hv-haptics c42d000.qcom,spmi: qcom,pm8550b@7:qcom,hv-haptics@f000: wait 5793 us for brake pattern to complete
+09-25 02:44:48.067  1633  1633 E qcom-hv-haptics c42d000.qcom,spmi: qcom,pm8550b@7:qcom,hv-haptics@f000: playback val = 0
+09-25 02:44:48.067  1633  1633 E qcom-hv-haptics c42d000.qcom,spmi: qcom,pm8550b@7:qcom,hv-haptics@f000: erase effect, really stop play
+09-25 02:44:48.067  1028  1028 E qcom-hv-haptics c42d000.qcom,spmi: qcom,pm8550b@7:qcom,hv-haptics@f000: polling HPWR_INTF timeout 3, value = 3
+09-25 02:44:48.070  1028  1028 E qcom-hv-haptics c42d000.qcom,spmi: qcom,pm8550b@7:qcom,hv-haptics@f000: stopped play completely
+09-25 02:44:48.070  1028  1028 E qcom-hv-haptics c42d000.qcom,spmi: qcom,pm8550b@7:qcom,hv-haptics@f000: FIFO playing is done
+09-25 02:44:48.071  1633  1633 E qcom-hv-haptics c42d000.qcom,spmi: qcom,pm8550b@7:qcom,hv-haptics@f000: wait 5793 us for brake pattern to complete
+09-25 02:44:48.074  1633  1633 E qcom-hv-haptics c42d000.qcom,spmi: qcom,pm8550b@7:qcom,hv-haptics@f000: stopped play completely
+09-25 02:44:48.079  1633  1633 E qcom-hv-haptics c42d000.qcom,spmi: qcom,pm8550b@7:qcom,hv-haptics@f000: custom data 2 length 208 with play-rate 24000 Hz,magnitude=0x5fff
+09-25 02:44:48.079  1633  1633 E qcom-hv-haptics c42d000.qcom,spmi: qcom,pm8550b@7:qcom,hv-haptics@f000: LRA nominal impedance is 9 ohm
+09-25 02:44:48.079  1633  1633 E qcom-hv-haptics c42d000.qcom,spmi: qcom,pm8550b@7:qcom,hv-haptics@f000: update VMAX_HDRM to 1000 mv
+09-25 02:44:48.079  1633  1633 E qcom-hv-haptics c42d000.qcom,spmi: qcom,pm8550b@7:qcom,hv-haptics@f000: Set Vmax to 5774 mV
+09-25 02:44:48.080  1633  1633 E qcom-hv-haptics c42d000.qcom,spmi: qcom,pm8550b@7:qcom,hv-haptics@f000: playback val = 1
+09-25 02:44:48.089  1028  1028 E qcom-hv-haptics c42d000.qcom,spmi: qcom,pm8550b@7:qcom,hv-haptics@f000: wait 5793 us for brake pattern to complete
+09-25 02:44:48.090  1633  1633 E qcom-hv-haptics c42d000.qcom,spmi: qcom,pm8550b@7:qcom,hv-haptics@f000: playback val = 0
+09-25 02:44:48.090  1633  1633 E qcom-hv-haptics c42d000.qcom,spmi: qcom,pm8550b@7:qcom,hv-haptics@f000: erase effect, really stop play
+09-25 02:44:48.092  1028  1028 E qcom-hv-haptics c42d000.qcom,spmi: qcom,pm8550b@7:qcom,hv-haptics@f000: polling HPWR_INTF timeout 3, value = 3
+09-25 02:44:48.095  1028  1028 E qcom-hv-haptics c42d000.qcom,spmi: qcom,pm8550b@7:qcom,hv-haptics@f000: stopped play completely
+09-25 02:44:48.095  1028  1028 E qcom-hv-haptics c42d000.qcom,spmi: qcom,pm8550b@7:qcom,hv-haptics@f000: FIFO playing is done
+09-25 02:44:48.096  1633  1633 E qcom-hv-haptics c42d000.qcom,spmi: qcom,pm8550b@7:qcom,hv-haptics@f000: wait 5793 us for brake pattern to complete
+09-25 02:44:48.099  1633  1633 E qcom-hv-haptics c42d000.qcom,spmi: qcom,pm8550b@7:qcom,hv-haptics@f000: stopped play completely
+09-25 02:44:48.101  1633  1633 E qcom-hv-haptics c42d000.qcom,spmi: qcom,pm8550b@7:qcom,hv-haptics@f000: custom data 2 length 208 with play-rate 24000 Hz,magnitude=0x5fff
+09-25 02:44:48.102  1633  1633 E qcom-hv-haptics c42d000.qcom,spmi: qcom,pm8550b@7:qcom,hv-haptics@f000: LRA nominal impedance is 9 ohm
+09-25 02:44:48.102  1633  1633 E qcom-hv-haptics c42d000.qcom,spmi: qcom,pm8550b@7:qcom,hv-haptics@f000: update VMAX_HDRM to 1000 mv
+09-25 02:44:48.102  1633  1633 E qcom-hv-haptics c42d000.qcom,spmi: qcom,pm8550b@7:qcom,hv-haptics@f000: Set Vmax to 5774 mV
+09-25 02:44:48.105  1633  1633 E qcom-hv-haptics c42d000.qcom,spmi: qcom,pm8550b@7:qcom,hv-haptics@f000: playback val = 1
+09-25 02:44:48.113  1028  1028 E qcom-hv-haptics c42d000.qcom,spmi: qcom,pm8550b@7:qcom,hv-haptics@f000: wait 5793 us for brake pattern to complete
+09-25 02:44:48.114  1633  1633 E qcom-hv-haptics c42d000.qcom,spmi: qcom,pm8550b@7:qcom,hv-haptics@f000: playback val = 0
+09-25 02:44:48.114  1633  1633 E qcom-hv-haptics c42d000.qcom,spmi: qcom,pm8550b@7:qcom,hv-haptics@f000: erase effect, really stop play
+09-25 02:44:48.116  1028  1028 E qcom-hv-haptics c42d000.qcom,spmi: qcom,pm8550b@7:qcom,hv-haptics@f000: polling HPWR_INTF timeout 3, value = 3
+09-25 02:44:48.119  1028  1028 E qcom-hv-haptics c42d000.qcom,spmi: qcom,pm8550b@7:qcom,hv-haptics@f000: stopped play completely
+09-25 02:44:48.119  1028  1028 E qcom-hv-haptics c42d000.qcom,spmi: qcom,pm8550b@7:qcom,hv-haptics@f000: FIFO playing is done
+09-25 02:44:48.120  1633  1633 E qcom-hv-haptics c42d000.qcom,spmi: qcom,pm8550b@7:qcom,hv-haptics@f000: wait 5793 us for brake pattern to complete
+09-25 02:44:48.123  1633  1633 E qcom-hv-haptics c42d000.qcom,spmi: qcom,pm8550b@7:qcom,hv-haptics@f000: stopped play completely
+09-25 02:44:48.191  1633  1633 E qcom-hv-haptics c42d000.qcom,spmi: qcom,pm8550b@7:qcom,hv-haptics@f000: custom data 2 length 208 with play-rate 24000 Hz,magnitude=0x5fff
+09-25 02:44:48.191  1633  1633 E qcom-hv-haptics c42d000.qcom,spmi: qcom,pm8550b@7:qcom,hv-haptics@f000: LRA nominal impedance is 9 ohm
+09-25 02:44:48.191  1633  1633 E qcom-hv-haptics c42d000.qcom,spmi: qcom,pm8550b@7:qcom,hv-haptics@f000: update VMAX_HDRM to 1000 mv
+09-25 02:44:48.191  1633  1633 E qcom-hv-haptics c42d000.qcom,spmi: qcom,pm8550b@7:qcom,hv-haptics@f000: Set Vmax to 5774 mV
+09-25 02:44:48.192  1633  1633 E qcom-hv-haptics c42d000.qcom,spmi: qcom,pm8550b@7:qcom,hv-haptics@f000: playback val = 1
+09-25 02:44:48.201  1028  1028 E qcom-hv-haptics c42d000.qcom,spmi: qcom,pm8550b@7:qcom,hv-haptics@f000: wait 5793 us for brake pattern to complete
+09-25 02:44:48.203  1633  1633 E qcom-hv-haptics c42d000.qcom,spmi: qcom,pm8550b@7:qcom,hv-haptics@f000: playback val = 0
+09-25 02:44:48.203  1633  1633 E qcom-hv-haptics c42d000.qcom,spmi: qcom,pm8550b@7:qcom,hv-haptics@f000: erase effect, really stop play
+09-25 02:44:48.204  1028  1028 E qcom-hv-haptics c42d000.qcom,spmi: qcom,pm8550b@7:qcom,hv-haptics@f000: polling HPWR_INTF timeout 3, value = 3
+09-25 02:44:48.207  1028  1028 E qcom-hv-haptics c42d000.qcom,spmi: qcom,pm8550b@7:qcom,hv-haptics@f000: stopped play completely
+09-25 02:44:48.207  1028  1028 E qcom-hv-haptics c42d000.qcom,spmi: qcom,pm8550b@7:qcom,hv-haptics@f000: FIFO playing is done
+09-25 02:44:48.207  1633  1633 E qcom-hv-haptics c42d000.qcom,spmi: qcom,pm8550b@7:qcom,hv-haptics@f000: wait 5793 us for brake pattern to complete
+09-25 02:44:48.211  1633  1633 E qcom-hv-haptics c42d000.qcom,spmi: qcom,pm8550b@7:qcom,hv-haptics@f000: stopped play completely
+09-25 02:44:48.213  1633  1633 E qcom-hv-haptics c42d000.qcom,spmi: qcom,pm8550b@7:qcom,hv-haptics@f000: custom data 2 length 208 with play-rate 24000 Hz,magnitude=0x5fff
+09-25 02:44:48.213  1633  1633 E qcom-hv-haptics c42d000.qcom,spmi: qcom,pm8550b@7:qcom,hv-haptics@f000: LRA nominal impedance is 9 ohm
+09-25 02:44:48.213  1633  1633 E qcom-hv-haptics c42d000.qcom,spmi: qcom,pm8550b@7:qcom,hv-haptics@f000: update VMAX_HDRM to 1000 mv
+09-25 02:44:48.213  1633  1633 E qcom-hv-haptics c42d000.qcom,spmi: qcom,pm8550b@7:qcom,hv-haptics@f000: Set Vmax to 5774 mV
+09-25 02:44:48.214  1633  1633 E qcom-hv-haptics c42d000.qcom,spmi: qcom,pm8550b@7:qcom,hv-haptics@f000: playback val = 1
+09-25 02:44:48.223  1028  1028 E qcom-hv-haptics c42d000.qcom,spmi: qcom,pm8550b@7:qcom,hv-haptics@f000: wait 5793 us for brake pattern to complete
+09-25 02:44:48.224  1633  1633 E qcom-hv-haptics c42d000.qcom,spmi: qcom,pm8550b@7:qcom,hv-haptics@f000: playback val = 0
+09-25 02:44:48.224  1633  1633 E qcom-hv-haptics c42d000.qcom,spmi: qcom,pm8550b@7:qcom,hv-haptics@f000: erase effect, really stop play
+09-25 02:44:48.226  1028  1028 E qcom-hv-haptics c42d000.qcom,spmi: qcom,pm8550b@7:qcom,hv-haptics@f000: polling HPWR_INTF timeout 3, value = 3
+09-25 02:44:48.229  1028  1028 E qcom-hv-haptics c42d000.qcom,spmi: qcom,pm8550b@7:qcom,hv-haptics@f000: stopped play completely
+09-25 02:44:48.229  1028  1028 E qcom-hv-haptics c42d000.qcom,spmi: qcom,pm8550b@7:qcom,hv-haptics@f000: FIFO playing is done
+09-25 02:44:48.229  1633  1633 E qcom-hv-haptics c42d000.qcom,spmi: qcom,pm8550b@7:qcom,hv-haptics@f000: wait 5793 us for brake pattern to complete
+09-25 02:44:48.232  1633  1633 E qcom-hv-haptics c42d000.qcom,spmi: qcom,pm8550b@7:qcom,hv-haptics@f000: stopped play completely
+09-25 02:44:48.279  1633  1633 E qcom-hv-haptics c42d000.qcom,spmi: qcom,pm8550b@7:qcom,hv-haptics@f000: custom data 2 length 208 with play-rate 24000 Hz,magnitude=0x5fff
+09-25 02:44:48.279  1633  1633 E qcom-hv-haptics c42d000.qcom,spmi: qcom,pm8550b@7:qcom,hv-haptics@f000: LRA nominal impedance is 9 ohm
+09-25 02:44:48.280  1633  1633 E qcom-hv-haptics c42d000.qcom,spmi: qcom,pm8550b@7:qcom,hv-haptics@f000: update VMAX_HDRM to 1000 mv
+09-25 02:44:48.280  1633  1633 E qcom-hv-haptics c42d000.qcom,spmi: qcom,pm8550b@7:qcom,hv-haptics@f000: Set Vmax to 5774 mV
+09-25 02:44:48.281  1633  1633 E qcom-hv-haptics c42d000.qcom,spmi: qcom,pm8550b@7:qcom,hv-haptics@f000: playback val = 1
+09-25 02:44:48.289  1028  1028 E qcom-hv-haptics c42d000.qcom,spmi: qcom,pm8550b@7:qcom,hv-haptics@f000: wait 5793 us for brake pattern to complete
+09-25 02:44:48.291  1633  1633 E qcom-hv-haptics c42d000.qcom,spmi: qcom,pm8550b@7:qcom,hv-haptics@f000: playback val = 0
+09-25 02:44:48.291  1633  1633 E qcom-hv-haptics c42d000.qcom,spmi: qcom,pm8550b@7:qcom,hv-haptics@f000: erase effect, really stop play
+09-25 02:44:48.292  1028  1028 E qcom-hv-haptics c42d000.qcom,spmi: qcom,pm8550b@7:qcom,hv-haptics@f000: polling HPWR_INTF timeout 3, value = 3
+09-25 02:44:48.295  1028  1028 E qcom-hv-haptics c42d000.qcom,spmi: qcom,pm8550b@7:qcom,hv-haptics@f000: stopped play completely
+09-25 02:44:48.295  1028  1028 E qcom-hv-haptics c42d000.qcom,spmi: qcom,pm8550b@7:qcom,hv-haptics@f000: FIFO playing is done
+09-25 02:44:48.296  1633  1633 E qcom-hv-haptics c42d000.qcom,spmi: qcom,pm8550b@7:qcom,hv-haptics@f000: wait 5793 us for brake pattern to complete
+09-25 02:44:48.299  1633  1633 E qcom-hv-haptics c42d000.qcom,spmi: qcom,pm8550b@7:qcom,hv-haptics@f000: stopped play completely
+09-25 02:44:48.300  1633  1633 E qcom-hv-haptics c42d000.qcom,spmi: qcom,pm8550b@7:qcom,hv-haptics@f000: custom data 2 length 208 with play-rate 24000 Hz,magnitude=0x5fff
+09-25 02:44:48.300  1633  1633 E qcom-hv-haptics c42d000.qcom,spmi: qcom,pm8550b@7:qcom,hv-haptics@f000: LRA nominal impedance is 9 ohm
+09-25 02:44:48.300  1633  1633 E qcom-hv-haptics c42d000.qcom,spmi: qcom,pm8550b@7:qcom,hv-haptics@f000: update VMAX_HDRM to 1000 mv
+09-25 02:44:48.300  1633  1633 E qcom-hv-haptics c42d000.qcom,spmi: qcom,pm8550b@7:qcom,hv-haptics@f000: Set Vmax to 5774 mV
+09-25 02:44:48.301  1633  1633 E qcom-hv-haptics c42d000.qcom,spmi: qcom,pm8550b@7:qcom,hv-haptics@f000: playback val = 1
+09-25 02:44:48.310  1028  1028 E qcom-hv-haptics c42d000.qcom,spmi: qcom,pm8550b@7:qcom,hv-haptics@f000: wait 5793 us for brake pattern to complete
+09-25 02:44:48.312  1633  1633 E qcom-hv-haptics c42d000.qcom,spmi: qcom,pm8550b@7:qcom,hv-haptics@f000: playback val = 0
+09-25 02:44:48.312  1633  1633 E qcom-hv-haptics c42d000.qcom,spmi: qcom,pm8550b@7:qcom,hv-haptics@f000: erase effect, really stop play
+09-25 02:44:48.313  1028  1028 E qcom-hv-haptics c42d000.qcom,spmi: qcom,pm8550b@7:qcom,hv-haptics@f000: polling HPWR_INTF timeout 3, value = 3
+09-25 02:44:48.316  1028  1028 E qcom-hv-haptics c42d000.qcom,spmi: qcom,pm8550b@7:qcom,hv-haptics@f000: stopped play completely
+09-25 02:44:48.316  1028  1028 E qcom-hv-haptics c42d000.qcom,spmi: qcom,pm8550b@7:qcom,hv-haptics@f000: FIFO playing is done
+09-25 02:44:48.316  1633  1633 E qcom-hv-haptics c42d000.qcom,spmi: qcom,pm8550b@7:qcom,hv-haptics@f000: wait 5793 us for brake pattern to complete
+09-25 02:44:48.319  1633  1633 E qcom-hv-haptics c42d000.qcom,spmi: qcom,pm8550b@7:qcom,hv-haptics@f000: stopped play completely
+09-25 02:44:48.405  1633  1633 E qcom-hv-haptics c42d000.qcom,spmi: qcom,pm8550b@7:qcom,hv-haptics@f000: custom data 2 length 208 with play-rate 24000 Hz,magnitude=0x5fff
+09-25 02:44:48.405  1633  1633 E qcom-hv-haptics c42d000.qcom,spmi: qcom,pm8550b@7:qcom,hv-haptics@f000: LRA nominal impedance is 9 ohm
+09-25 02:44:48.405  1633  1633 E qcom-hv-haptics c42d000.qcom,spmi: qcom,pm8550b@7:qcom,hv-haptics@f000: update VMAX_HDRM to 1000 mv
+09-25 02:44:48.405  1633  1633 E qcom-hv-haptics c42d000.qcom,spmi: qcom,pm8550b@7:qcom,hv-haptics@f000: Set Vmax to 5774 mV
+09-25 02:44:48.406  1633  1633 E qcom-hv-haptics c42d000.qcom,spmi: qcom,pm8550b@7:qcom,hv-haptics@f000: playback val = 1
+09-25 02:44:48.415  1028  1028 E qcom-hv-haptics c42d000.qcom,spmi: qcom,pm8550b@7:qcom,hv-haptics@f000: wait 5793 us for brake pattern to complete
+09-25 02:44:48.418  1028  1028 E qcom-hv-haptics c42d000.qcom,spmi: qcom,pm8550b@7:qcom,hv-haptics@f000: polling HPWR_INTF timeout 3, value = 3
+09-25 02:44:48.419  1633  1633 E qcom-hv-haptics c42d000.qcom,spmi: qcom,pm8550b@7:qcom,hv-haptics@f000: playback val = 0
+09-25 02:44:48.419  1633  1633 E qcom-hv-haptics c42d000.qcom,spmi: qcom,pm8550b@7:qcom,hv-haptics@f000: erase effect, really stop play
+09-25 02:44:48.421  1028  1028 E qcom-hv-haptics c42d000.qcom,spmi: qcom,pm8550b@7:qcom,hv-haptics@f000: stopped play completely
+09-25 02:44:48.421  1028  1028 E qcom-hv-haptics c42d000.qcom,spmi: qcom,pm8550b@7:qcom,hv-haptics@f000: FIFO playing is done
+09-25 02:44:48.421  1633  1633 E qcom-hv-haptics c42d000.qcom,spmi: qcom,pm8550b@7:qcom,hv-haptics@f000: wait 5793 us for brake pattern to complete
+09-25 02:44:48.424  1633  1633 E qcom-hv-haptics c42d000.qcom,spmi: qcom,pm8550b@7:qcom,hv-haptics@f000: stopped play completely
+09-25 02:44:48.428  1633  1633 E qcom-hv-haptics c42d000.qcom,spmi: qcom,pm8550b@7:qcom,hv-haptics@f000: custom data 2 length 208 with play-rate 24000 Hz,magnitude=0x5fff
+09-25 02:44:48.428  1633  1633 E qcom-hv-haptics c42d000.qcom,spmi: qcom,pm8550b@7:qcom,hv-haptics@f000: LRA nominal impedance is 9 ohm
+09-25 02:44:48.429  1633  1633 E qcom-hv-haptics c42d000.qcom,spmi: qcom,pm8550b@7:qcom,hv-haptics@f000: update VMAX_HDRM to 1000 mv
+09-25 02:44:48.429  1633  1633 E qcom-hv-haptics c42d000.qcom,spmi: qcom,pm8550b@7:qcom,hv-haptics@f000: Set Vmax to 5774 mV
+09-25 02:44:48.430  1633  1633 E qcom-hv-haptics c42d000.qcom,spmi: qcom,pm8550b@7:qcom,hv-haptics@f000: playback val = 1
+09-25 02:44:48.439  1028  1028 E qcom-hv-haptics c42d000.qcom,spmi: qcom,pm8550b@7:qcom,hv-haptics@f000: wait 5793 us for brake pattern to complete
+09-25 02:44:48.442  1028  1028 E qcom-hv-haptics c42d000.qcom,spmi: qcom,pm8550b@7:qcom,hv-haptics@f000: polling HPWR_INTF timeout 3, value = 3
+09-25 02:44:48.445  1028  1028 E qcom-hv-haptics c42d000.qcom,spmi: qcom,pm8550b@7:qcom,hv-haptics@f000: stopped play completely
+09-25 02:44:48.445  1028  1028 E qcom-hv-haptics c42d000.qcom,spmi: qcom,pm8550b@7:qcom,hv-haptics@f000: FIFO playing is done
+09-25 02:44:48.445  1633  1633 E qcom-hv-haptics c42d000.qcom,spmi: qcom,pm8550b@7:qcom,hv-haptics@f000: playback val = 0
+09-25 02:44:48.445  1633  1633 E qcom-hv-haptics c42d000.qcom,spmi: qcom,pm8550b@7:qcom,hv-haptics@f000: erase effect, really stop play
+09-25 02:44:48.445  1633  1633 E qcom-hv-haptics c42d000.qcom,spmi: qcom,pm8550b@7:qcom,hv-haptics@f000: wait 5793 us for brake pattern to complete
+09-25 02:44:48.448  1633  1633 E qcom-hv-haptics c42d000.qcom,spmi: qcom,pm8550b@7:qcom,hv-haptics@f000: stopped play completely
+09-25 02:44:48.485  1633  1633 E qcom-hv-haptics c42d000.qcom,spmi: qcom,pm8550b@7:qcom,hv-haptics@f000: custom data 2 length 208 with play-rate 24000 Hz,magnitude=0x5fff
+09-25 02:44:48.485  1633  1633 E qcom-hv-haptics c42d000.qcom,spmi: qcom,pm8550b@7:qcom,hv-haptics@f000: LRA nominal impedance is 9 ohm
+09-25 02:44:48.485  1633  1633 E qcom-hv-haptics c42d000.qcom,spmi: qcom,pm8550b@7:qcom,hv-haptics@f000: update VMAX_HDRM to 1000 mv
+09-25 02:44:48.485  1633  1633 E qcom-hv-haptics c42d000.qcom,spmi: qcom,pm8550b@7:qcom,hv-haptics@f000: Set Vmax to 5774 mV
+09-25 02:44:48.486  1633  1633 E qcom-hv-haptics c42d000.qcom,spmi: qcom,pm8550b@7:qcom,hv-haptics@f000: playback val = 1
+09-25 02:44:48.495  1028  1028 E qcom-hv-haptics c42d000.qcom,spmi: qcom,pm8550b@7:qcom,hv-haptics@f000: wait 5793 us for brake pattern to complete
+09-25 02:44:48.496  1633  1633 E qcom-hv-haptics c42d000.qcom,spmi: qcom,pm8550b@7:qcom,hv-haptics@f000: playback val = 0
+09-25 02:44:48.496  1633  1633 E qcom-hv-haptics c42d000.qcom,spmi: qcom,pm8550b@7:qcom,hv-haptics@f000: erase effect, really stop play
+09-25 02:44:48.498  1028  1028 E qcom-hv-haptics c42d000.qcom,spmi: qcom,pm8550b@7:qcom,hv-haptics@f000: polling HPWR_INTF timeout 3, value = 3
+09-25 02:44:48.501  1028  1028 E qcom-hv-haptics c42d000.qcom,spmi: qcom,pm8550b@7:qcom,hv-haptics@f000: stopped play completely
+09-25 02:44:48.501  1028  1028 E qcom-hv-haptics c42d000.qcom,spmi: qcom,pm8550b@7:qcom,hv-haptics@f000: FIFO playing is done
+09-25 02:44:48.502  1633  1633 E qcom-hv-haptics c42d000.qcom,spmi: qcom,pm8550b@7:qcom,hv-haptics@f000: wait 5793 us for brake pattern to complete
+09-25 02:44:48.505  1633  1633 E qcom-hv-haptics c42d000.qcom,spmi: qcom,pm8550b@7:qcom,hv-haptics@f000: stopped play completely
+09-25 02:44:48.506  1633  1633 E qcom-hv-haptics c42d000.qcom,spmi: qcom,pm8550b@7:qcom,hv-haptics@f000: custom data 2 length 208 with play-rate 24000 Hz,magnitude=0x5fff
+09-25 02:44:48.506  1633  1633 E qcom-hv-haptics c42d000.qcom,spmi: qcom,pm8550b@7:qcom,hv-haptics@f000: LRA nominal impedance is 9 ohm
+09-25 02:44:48.506  1633  1633 E qcom-hv-haptics c42d000.qcom,spmi: qcom,pm8550b@7:qcom,hv-haptics@f000: update VMAX_HDRM to 1000 mv
+09-25 02:44:48.506  1633  1633 E qcom-hv-haptics c42d000.qcom,spmi: qcom,pm8550b@7:qcom,hv-haptics@f000: Set Vmax to 5774 mV
+09-25 02:44:48.507  1633  1633 E qcom-hv-haptics c42d000.qcom,spmi: qcom,pm8550b@7:qcom,hv-haptics@f000: playback val = 1
+09-25 02:44:48.516  1028  1028 E qcom-hv-haptics c42d000.qcom,spmi: qcom,pm8550b@7:qcom,hv-haptics@f000: wait 5793 us for brake pattern to complete
+09-25 02:44:48.519  1028  1028 E qcom-hv-haptics c42d000.qcom,spmi: qcom,pm8550b@7:qcom,hv-haptics@f000: polling HPWR_INTF timeout 3, value = 3
+09-25 02:44:48.519  1633  1633 E qcom-hv-haptics c42d000.qcom,spmi: qcom,pm8550b@7:qcom,hv-haptics@f000: playback val = 0
+09-25 02:44:48.519  1633  1633 E qcom-hv-haptics c42d000.qcom,spmi: qcom,pm8550b@7:qcom,hv-haptics@f000: erase effect, really stop play
+09-25 02:44:48.522   950   950 I logd    : logdr: UID=2000 GID=2000 PID=24241 n tail=0 logMask=10 pid=0 start=0ns deadline=0ns
+09-25 02:44:48.522  1028  1028 E qcom-hv-haptics c42d000.qcom,spmi: qcom,pm8550b@7:qcom,hv-haptics@f000: stopped play completely
+09-25 02:44:48.522  1028  1028 E qcom-hv-haptics c42d000.qcom,spmi: qcom,pm8550b@7:qcom,hv-haptics@f000: FIFO playing is done
+09-25 02:44:48.522  1633  1633 E qcom-hv-haptics c42d000.qcom,spmi: qcom,pm8550b@7:qcom,hv-haptics@f000: wait 5793 us for brake pattern to complete
+09-25 02:44:48.525  1633  1633 E qcom-hv-haptics c42d000.qcom,spmi: qcom,pm8550b@7:qcom,hv-haptics@f000: stopped play completely
+09-25 02:44:48.573   950   950 I logd    : logdr: UID=2000 GID=2000 PID=24246 n tail=5000 logMask=9 pid=0 start=0ns deadline=0ns
+09-25 02:44:48.612  1633  1633 E qcom-hv-haptics c42d000.qcom,spmi: qcom,pm8550b@7:qcom,hv-haptics@f000: custom data 2 length 208 with play-rate 24000 Hz,magnitude=0x5fff
+09-25 02:44:48.612  1633  1633 E qcom-hv-haptics c42d000.qcom,spmi: qcom,pm8550b@7:qcom,hv-haptics@f000: LRA nominal impedance is 9 ohm
+09-25 02:44:48.612  1633  1633 E qcom-hv-haptics c42d000.qcom,spmi: qcom,pm8550b@7:qcom,hv-haptics@f000: update VMAX_HDRM to 1000 mv
+09-25 02:44:48.612  1633  1633 E qcom-hv-haptics c42d000.qcom,spmi: qcom,pm8550b@7:qcom,hv-haptics@f000: Set Vmax to 5774 mV
+09-25 02:44:48.613  1633  1633 E qcom-hv-haptics c42d000.qcom,spmi: qcom,pm8550b@7:qcom,hv-haptics@f000: playback val = 1
+09-25 02:44:48.622  1028  1028 E qcom-hv-haptics c42d000.qcom,spmi: qcom,pm8550b@7:qcom,hv-haptics@f000: wait 5793 us for brake pattern to complete
+09-25 02:44:48.623  1633  1633 E qcom-hv-haptics c42d000.qcom,spmi: qcom,pm8550b@7:qcom,hv-haptics@f000: playback val = 0
+09-25 02:44:48.623  1633  1633 E qcom-hv-haptics c42d000.qcom,spmi: qcom,pm8550b@7:qcom,hv-haptics@f000: erase effect, really stop play
+09-25 02:44:48.625  1028  1028 E qcom-hv-haptics c42d000.qcom,spmi: qcom,pm8550b@7:qcom,hv-haptics@f000: polling HPWR_INTF timeout 3, value = 3
+09-25 02:44:48.628  1028  1028 E qcom-hv-haptics c42d000.qcom,spmi: qcom,pm8550b@7:qcom,hv-haptics@f000: stopped play completely
+09-25 02:44:48.628  1028  1028 E qcom-hv-haptics c42d000.qcom,spmi: qcom,pm8550b@7:qcom,hv-haptics@f000: FIFO playing is done
+09-25 02:44:48.628  1633  1633 E qcom-hv-haptics c42d000.qcom,spmi: qcom,pm8550b@7:qcom,hv-haptics@f000: wait 5793 us for brake pattern to complete
+09-25 02:44:48.631  1633  1633 E qcom-hv-haptics c42d000.qcom,spmi: qcom,pm8550b@7:qcom,hv-haptics@f000: stopped play completely
+09-25 02:44:48.635  1633  1633 E qcom-hv-haptics c42d000.qcom,spmi: qcom,pm8550b@7:qcom,hv-haptics@f000: custom data 2 length 208 with play-rate 24000 Hz,magnitude=0x5fff
+09-25 02:44:48.635  1633  1633 E qcom-hv-haptics c42d000.qcom,spmi: qcom,pm8550b@7:qcom,hv-haptics@f000: LRA nominal impedance is 9 ohm
+09-25 02:44:48.635  1633  1633 E qcom-hv-haptics c42d000.qcom,spmi: qcom,pm8550b@7:qcom,hv-haptics@f000: update VMAX_HDRM to 1000 mv
+09-25 02:44:48.635  1633  1633 E qcom-hv-haptics c42d000.qcom,spmi: qcom,pm8550b@7:qcom,hv-haptics@f000: Set Vmax to 5774 mV
+09-25 02:44:48.636  1633  1633 E qcom-hv-haptics c42d000.qcom,spmi: qcom,pm8550b@7:qcom,hv-haptics@f000: playback val = 1
+09-25 02:44:48.645  1028  1028 E qcom-hv-haptics c42d000.qcom,spmi: qcom,pm8550b@7:qcom,hv-haptics@f000: wait 5793 us for brake pattern to complete
+09-25 02:44:48.647  1633  1633 E qcom-hv-haptics c42d000.qcom,spmi: qcom,pm8550b@7:qcom,hv-haptics@f000: playback val = 0
+09-25 02:44:48.647  1633  1633 E qcom-hv-haptics c42d000.qcom,spmi: qcom,pm8550b@7:qcom,hv-haptics@f000: erase effect, really stop play
+09-25 02:44:48.648  1028  1028 E qcom-hv-haptics c42d000.qcom,spmi: qcom,pm8550b@7:qcom,hv-haptics@f000: polling HPWR_INTF timeout 3, value = 3
+09-25 02:44:48.651  1028  1028 E qcom-hv-haptics c42d000.qcom,spmi: qcom,pm8550b@7:qcom,hv-haptics@f000: stopped play completely
+09-25 02:44:48.651  1028  1028 E qcom-hv-haptics c42d000.qcom,spmi: qcom,pm8550b@7:qcom,hv-haptics@f000: FIFO playing is done
+09-25 02:44:48.651  1633  1633 E qcom-hv-haptics c42d000.qcom,spmi: qcom,pm8550b@7:qcom,hv-haptics@f000: wait 5793 us for brake pattern to complete
+09-25 02:44:48.654  1633  1633 E qcom-hv-haptics c42d000.qcom,spmi: qcom,pm8550b@7:qcom,hv-haptics@f000: stopped play completely
+09-25 02:44:48.678  1633  1633 E qcom-hv-haptics c42d000.qcom,spmi: qcom,pm8550b@7:qcom,hv-haptics@f000: custom data 2 length 208 with play-rate 24000 Hz,magnitude=0x5fff
+09-25 02:44:48.678  1633  1633 E qcom-hv-haptics c42d000.qcom,spmi: qcom,pm8550b@7:qcom,hv-haptics@f000: LRA nominal impedance is 9 ohm
+09-25 02:44:48.678  1633  1633 E qcom-hv-haptics c42d000.qcom,spmi: qcom,pm8550b@7:qcom,hv-haptics@f000: update VMAX_HDRM to 1000 mv
+09-25 02:44:48.678  1633  1633 E qcom-hv-haptics c42d000.qcom,spmi: qcom,pm8550b@7:qcom,hv-haptics@f000: Set Vmax to 5774 mV
+09-25 02:44:48.679  1633  1633 E qcom-hv-haptics c42d000.qcom,spmi: qcom,pm8550b@7:qcom,hv-haptics@f000: playback val = 1
+09-25 02:44:48.688  1028  1028 E qcom-hv-haptics c42d000.qcom,spmi: qcom,pm8550b@7:qcom,hv-haptics@f000: wait 5793 us for brake pattern to complete
+09-25 02:44:48.690  1633  1633 E qcom-hv-haptics c42d000.qcom,spmi: qcom,pm8550b@7:qcom,hv-haptics@f000: playback val = 0
+09-25 02:44:48.690  1633  1633 E qcom-hv-haptics c42d000.qcom,spmi: qcom,pm8550b@7:qcom,hv-haptics@f000: erase effect, really stop play
+09-25 02:44:48.691  1028  1028 E qcom-hv-haptics c42d000.qcom,spmi: qcom,pm8550b@7:qcom,hv-haptics@f000: polling HPWR_INTF timeout 3, value = 3
+09-25 02:44:48.694  1028  1028 E qcom-hv-haptics c42d000.qcom,spmi: qcom,pm8550b@7:qcom,hv-haptics@f000: stopped play completely
+09-25 02:44:48.694  1028  1028 E qcom-hv-haptics c42d000.qcom,spmi: qcom,pm8550b@7:qcom,hv-haptics@f000: FIFO playing is done
+09-25 02:44:48.694  1633  1633 E qcom-hv-haptics c42d000.qcom,spmi: qcom,pm8550b@7:qcom,hv-haptics@f000: wait 5793 us for brake pattern to complete
+09-25 02:44:48.697  1633  1633 E qcom-hv-haptics c42d000.qcom,spmi: qcom,pm8550b@7:qcom,hv-haptics@f000: stopped play completely
+09-25 02:44:48.701  1633  1633 E qcom-hv-haptics c42d000.qcom,spmi: qcom,pm8550b@7:qcom,hv-haptics@f000: custom data 2 length 208 with play-rate 24000 Hz,magnitude=0x5fff
+09-25 02:44:48.701  1633  1633 E qcom-hv-haptics c42d000.qcom,spmi: qcom,pm8550b@7:qcom,hv-haptics@f000: LRA nominal impedance is 9 ohm
+09-25 02:44:48.701  1633  1633 E qcom-hv-haptics c42d000.qcom,spmi: qcom,pm8550b@7:qcom,hv-haptics@f000: update VMAX_HDRM to 1000 mv
+09-25 02:44:48.701  1633  1633 E qcom-hv-haptics c42d000.qcom,spmi: qcom,pm8550b@7:qcom,hv-haptics@f000: Set Vmax to 5774 mV
+09-25 02:44:48.702  1633  1633 E qcom-hv-haptics c42d000.qcom,spmi: qcom,pm8550b@7:qcom,hv-haptics@f000: playback val = 1
+09-25 02:44:48.707   950   950 I logd    : logdr: UID=2000 GID=2000 PID=24251 n tail=2000 logMask=4 pid=0 start=0ns deadline=0ns
+09-25 02:44:48.711  1028  1028 E qcom-hv-haptics c42d000.qcom,spmi: qcom,pm8550b@7:qcom,hv-haptics@f000: wait 5793 us for brake pattern to complete
+09-25 02:44:48.712  1633  1633 E qcom-hv-haptics c42d000.qcom,spmi: qcom,pm8550b@7:qcom,hv-haptics@f000: playback val = 0
+09-25 02:44:48.712  1633  1633 E qcom-hv-haptics c42d000.qcom,spmi: qcom,pm8550b@7:qcom,hv-haptics@f000: erase effect, really stop play
+09-25 02:44:48.714  1028  1028 E qcom-hv-haptics c42d000.qcom,spmi: qcom,pm8550b@7:qcom,hv-haptics@f000: polling HPWR_INTF timeout 3, value = 3
+09-25 02:44:48.717  1028  1028 E qcom-hv-haptics c42d000.qcom,spmi: qcom,pm8550b@7:qcom,hv-haptics@f000: stopped play completely
+09-25 02:44:48.717  1028  1028 E qcom-hv-haptics c42d000.qcom,spmi: qcom,pm8550b@7:qcom,hv-haptics@f000: FIFO playing is done
+09-25 02:44:48.717  1633  1633 E qcom-hv-haptics c42d000.qcom,spmi: qcom,pm8550b@7:qcom,hv-haptics@f000: wait 5793 us for brake pattern to complete
+09-25 02:44:48.720  1633  1633 E qcom-hv-haptics c42d000.qcom,spmi: qcom,pm8550b@7:qcom,hv-haptics@f000: stopped play completely

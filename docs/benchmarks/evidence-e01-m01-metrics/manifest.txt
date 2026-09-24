@@ -1,0 +1,9 @@
+serial=d30a1726
+date=2026-09-24T21:15:00Z
+pkg=com.zenithblue.sambas3
+pid=22188
+fingerprint=OnePlus/CPH2691IN/OP5D3BL1:16/UKQ1.231108.001/V.R4T3.37e288c-13a765a-13fa038:user/release-keys
+soc=SM8650
+android=16
+    versionCode=20260917 minSdk=29 targetSdk=37
+    versionName=2026.09.17

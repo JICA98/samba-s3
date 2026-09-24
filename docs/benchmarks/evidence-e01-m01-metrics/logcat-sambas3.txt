@@ -1,0 +1,300 @@
+09-25 02:44:43.750 22188 22188 I S3TOUCH : root action=down x=2387 y=775
+09-25 02:44:43.750 22188 22188 I S3TOUCH : monitor action=down consumed=false
+09-25 02:44:43.750 22188 22188 I S3TOUCH : pad action=down menu=false
+09-25 02:44:43.985 22188 22188 I S3TOUCH : root action=down x=2250 y=897
+09-25 02:44:43.985 22188 22188 I S3TOUCH : monitor action=down consumed=false
+09-25 02:44:43.985 22188 22188 I S3TOUCH : pad action=down menu=false
+09-25 02:44:44.180 22188 22188 I S3TOUCH : root action=down x=2248 y=909
+09-25 02:44:44.181 22188 22188 I S3TOUCH : monitor action=down consumed=false
+09-25 02:44:44.181 22188 22188 I S3TOUCH : pad action=down menu=false
+09-25 02:44:44.335 22188 22312 D RPCS3   : sys_tty_write(ch=0, buf=*0x58bf20, len=63, pwritelen=*0xd000fde0)
+09-25 02:44:44.336 22188 22312 D RPCS3   : sys_tty_write(): “BATCHJOB: AddJob: waiting for room in job list 3 for job 56...“ << endl
+09-25 02:44:44.347 22188 22490 E RPCS3   : Video au decode has been waiting for a consumer for 5 seconds. (handle=0xf0000300, seq_id=1, cmd_id=63, queue_size=61)
+09-25 02:44:44.373 22188 22188 I S3TOUCH : root action=down x=2242 y=914
+09-25 02:44:44.374 22188 22188 I S3TOUCH : monitor action=down consumed=false
+09-25 02:44:44.374 22188 22188 I S3TOUCH : pad action=down menu=false
+09-25 02:44:44.566 22188 22188 I S3TOUCH : root action=down x=2237 y=922
+09-25 02:44:44.567 22188 22188 I S3TOUCH : monitor action=down consumed=false
+09-25 02:44:44.567 22188 22188 I S3TOUCH : pad action=down menu=false
+09-25 02:44:44.711 22188 22231 D S3PERF  : crosscheck ui_snapshot_fps=8.28218 ui_snapshot_frametime_ms=100.559
+09-25 02:44:44.758 22188 22188 I S3TOUCH : root action=down x=2232 y=924
+09-25 02:44:44.758 22188 22188 I S3TOUCH : monitor action=down consumed=false
+09-25 02:44:44.758 22188 22188 I S3TOUCH : pad action=down menu=false
+09-25 02:44:44.959 22188 22188 I S3TOUCH : root action=down x=2239 y=921
+09-25 02:44:44.959 22188 22188 I S3TOUCH : monitor action=down consumed=false
+09-25 02:44:44.959 22188 22188 I S3TOUCH : pad action=down menu=false
+09-25 02:44:45.017 22188 22231 D S3PERF  : crosscheck source=surface presented=1872 json_fps=7.2157 json_frametime_ms=99.818
+09-25 02:44:45.153 22188 22188 I S3TOUCH : root action=down x=2245 y=915
+09-25 02:44:45.155 22188 22188 I S3TOUCH : monitor action=down consumed=false
+09-25 02:44:45.155 22188 22188 I S3TOUCH : pad action=down menu=false
+09-25 02:44:45.407 22188 22188 I S3TOUCH : root action=down x=2443 y=736
+09-25 02:44:45.410 22188 22188 I S3TOUCH : monitor action=down consumed=false
+09-25 02:44:45.410 22188 22188 I S3TOUCH : pad action=down menu=false
+09-25 02:44:45.598 22188 22188 I S3TOUCH : root action=down x=2407 y=766
+09-25 02:44:45.599 22188 22188 I S3TOUCH : monitor action=down consumed=false
+09-25 02:44:45.599 22188 22188 I S3TOUCH : pad action=down menu=false
+09-25 02:44:45.805 22188 22188 I S3TOUCH : root action=down x=2308 y=840
+09-25 02:44:45.805 22188 22188 I S3TOUCH : monitor action=down consumed=false
+09-25 02:44:45.805 22188 22188 I S3TOUCH : pad action=down menu=false
+09-25 02:44:45.988 22188 22231 D S3PERF  : crosscheck ui_snapshot_fps=8.55788 ui_snapshot_frametime_ms=90.608
+09-25 02:44:46.006 22188 22188 I S3TOUCH : root action=down x=2240 y=909
+09-25 02:44:46.007 22188 22188 I S3TOUCH : monitor action=down consumed=false
+09-25 02:44:46.007 22188 22188 I S3TOUCH : pad action=down menu=false
+09-25 02:44:46.202 22188 22188 I S3TOUCH : root action=down x=2237 y=920
+09-25 02:44:46.204 22188 22188 I S3TOUCH : monitor action=down consumed=false
+09-25 02:44:46.204 22188 22188 I S3TOUCH : pad action=down menu=false
+09-25 02:44:46.292 22188 22231 D S3PERF  : crosscheck source=surface presented=1880 json_fps=5.15433 json_frametime_ms=451.955
+09-25 02:44:46.434 22188 22188 I S3TOUCH : root action=down x=2239 y=929
+09-25 02:44:46.434 22188 22188 I S3TOUCH : monitor action=down consumed=false
+09-25 02:44:46.434 22188 22188 I S3TOUCH : pad action=down menu=false
+09-25 02:44:46.563 22188 22188 I S3TOUCH : root action=down x=2234 y=936
+09-25 02:44:46.563 22188 22188 I S3TOUCH : monitor action=down consumed=false
+09-25 02:44:46.563 22188 22188 I S3TOUCH : pad action=down menu=false
+09-25 02:44:46.595 22188 22312 D RPCS3   : sys_tty_write(ch=0, buf=*0x58bf20, len=63, pwritelen=*0xd000fde0)
+09-25 02:44:46.596 22188 22312 D RPCS3   : sys_tty_write(): “BATCHJOB: AddJob: waiting for room in job list 3 for job 56...“ << endl
+09-25 02:44:46.789 22188 22188 I S3TOUCH : root action=down x=2234 y=937
+09-25 02:44:46.789 22188 22188 I S3TOUCH : monitor action=down consumed=false
+09-25 02:44:46.789 22188 22188 I S3TOUCH : pad action=down menu=false
+09-25 02:44:46.998 22188 22188 I S3TOUCH : root action=down x=2235 y=937
+09-25 02:44:46.998 22188 22188 I S3TOUCH : monitor action=down consumed=false
+09-25 02:44:46.998 22188 22188 I S3TOUCH : pad action=down menu=false
+09-25 02:44:47.102 22188 22312 D RPCS3   : sys_tty_write(ch=0, buf=*0x58bf20, len=63, pwritelen=*0xd000fde0)
+09-25 02:44:47.102 22188 22312 D RPCS3   : sys_tty_write(): “BATCHJOB: AddJob: waiting for room in job list 3 for job 56...“ << endl
+09-25 02:44:47.224 22188 22188 I S3TOUCH : root action=down x=2236 y=931
+09-25 02:44:47.225 22188 22188 I S3TOUCH : monitor action=down consumed=false
+09-25 02:44:47.225 22188 22188 I S3TOUCH : pad action=down menu=false
+09-25 02:44:47.276 22188 22231 D S3PERF  : crosscheck ui_snapshot_fps=6.20688 ui_snapshot_frametime_ms=97.8
+09-25 02:44:47.355 22188 22312 D RPCS3   : sys_tty_write(ch=0, buf=*0x58bf20, len=63, pwritelen=*0xd000fde0)
+09-25 02:44:47.355 22188 22312 D RPCS3   : sys_tty_write(): “BATCHJOB: AddJob: waiting for room in job list 3 for job 56...“ << endl
+09-25 02:44:47.441 22188 22188 I S3TOUCH : root action=down x=2237 y=935
+09-25 02:44:47.442 22188 22188 I S3TOUCH : monitor action=down consumed=false
+09-25 02:44:47.442 22188 22188 I S3TOUCH : pad action=down menu=false
+09-25 02:44:47.599 22188 22231 D S3PERF  : crosscheck source=surface presented=1889 json_fps=7.04139 json_frametime_ms=129.042
+09-25 02:44:47.634 22188 22188 I S3TOUCH : root action=down x=2235 y=939
+09-25 02:44:47.634 22188 22188 I S3TOUCH : monitor action=down consumed=false
+09-25 02:44:47.634 22188 22188 I S3TOUCH : pad action=down menu=false
+09-25 02:44:47.853 22188 22188 I S3TOUCH : root action=down x=2236 y=940
+09-25 02:44:47.853 22188 22188 I S3TOUCH : monitor action=down consumed=false
+09-25 02:44:47.854 22188 22188 I S3TOUCH : pad action=down menu=false
+09-25 02:44:48.063 22188 22188 I S3TOUCH : root action=down x=2237 y=939
+09-25 02:44:48.063 22188 22188 I S3TOUCH : monitor action=down consumed=false
+09-25 02:44:48.063 22188 22188 I S3TOUCH : pad action=down menu=false
+09-25 02:44:48.272 22188 22188 I S3TOUCH : root action=down x=2239 y=937
+09-25 02:44:48.272 22188 22188 I S3TOUCH : monitor action=down consumed=false
+09-25 02:44:48.272 22188 22188 I S3TOUCH : pad action=down menu=false
+09-25 02:44:48.482 22188 22188 I S3TOUCH : root action=down x=2239 y=936
+09-25 02:44:48.482 22188 22188 I S3TOUCH : monitor action=down consumed=false
+09-25 02:44:48.482 22188 22188 I S3TOUCH : pad action=down menu=false
+09-25 02:44:48.557 22188 22231 D S3PERF  : crosscheck ui_snapshot_fps=8.01902 ui_snapshot_frametime_ms=114.985
+09-25 02:44:48.676 22188 22188 I S3TOUCH : root action=down x=2239 y=939
+09-25 02:44:48.676 22188 22188 I S3TOUCH : monitor action=down consumed=false
+09-25 02:44:48.676 22188 22188 I S3TOUCH : pad action=down menu=false
+09-25 02:44:48.862 22188 22231 D S3PERF  : crosscheck source=surface presented=1898 json_fps=7.71163 json_frametime_ms=185.973
+09-25 02:44:48.876 22188 22188 I S3TOUCH : root action=down x=2238 y=934
+09-25 02:44:48.876 22188 22188 I S3TOUCH : monitor action=down consumed=false
+09-25 02:44:48.876 22188 22188 I S3TOUCH : pad action=down menu=false
+09-25 02:44:48.897 22188 22312 D RPCS3   : sys_tty_write(ch=0, buf=*0x58bf20, len=63, pwritelen=*0xd000fde0)
+09-25 02:44:48.897 22188 22312 D RPCS3   : sys_tty_write(): “BATCHJOB: AddJob: waiting for room in job list 3 for job 56...“ << endl
+09-25 02:44:49.079 22188 22188 I S3TOUCH : root action=down x=2240 y=938
+09-25 02:44:49.080 22188 22188 I S3TOUCH : monitor action=down consumed=false
+09-25 02:44:49.080 22188 22188 I S3TOUCH : pad action=down menu=false
+09-25 02:44:49.117 22188 22312 D RPCS3   : sys_tty_write(ch=0, buf=*0x58bf20, len=63, pwritelen=*0xd000fde0)
+09-25 02:44:49.117 22188 22312 D RPCS3   : sys_tty_write(): “BATCHJOB: AddJob: waiting for room in job list 3 for job 56...“ << endl
+09-25 02:44:49.305 22188 22188 I S3TOUCH : root action=down x=2239 y=938
+09-25 02:44:49.305 22188 22188 I S3TOUCH : monitor action=down consumed=false
+09-25 02:44:49.305 22188 22188 I S3TOUCH : pad action=down menu=false
+09-25 02:44:49.384 22188 22312 D RPCS3   : sys_tty_write(ch=0, buf=*0x58bf20, len=63, pwritelen=*0xd000fde0)
+09-25 02:44:49.384 22188 22312 D RPCS3   : sys_tty_write(): “BATCHJOB: AddJob: waiting for room in job list 3 for job 56...“ << endl
+09-25 02:44:49.437 22188 22490 E RPCS3   : Video au decode has been waiting for a consumer for 5 seconds. (handle=0xf0000300, seq_id=1, cmd_id=63, queue_size=61)
+09-25 02:44:49.475 22188 22312 D RPCS3   : sys_tty_write(ch=0, buf=*0x58bf20, len=63, pwritelen=*0xd000fde0)
+09-25 02:44:49.475 22188 22312 D RPCS3   : sys_tty_write(): “BATCHJOB: AddJob: waiting for room in job list 3 for job 56...“ << endl
+09-25 02:44:49.524 22188 22188 I S3TOUCH : root action=down x=2237 y=936
+09-25 02:44:49.524 22188 22188 I S3TOUCH : monitor action=down consumed=false
+09-25 02:44:49.525 22188 22188 I S3TOUCH : pad action=down menu=false
+09-25 02:44:49.628 22188 22312 D RPCS3   : sys_tty_write(ch=0, buf=*0x58bf20, len=63, pwritelen=*0xd000fde0)
+09-25 02:44:49.628 22188 22312 D RPCS3   : sys_tty_write(): “BATCHJOB: AddJob: waiting for room in job list 3 for job 56...“ << endl
+09-25 02:44:49.715 22188 22188 I S3TOUCH : root action=down x=2235 y=950
+09-25 02:44:49.715 22188 22188 I S3TOUCH : monitor action=down consumed=false
+09-25 02:44:49.715 22188 22188 I S3TOUCH : pad action=down menu=false
+09-25 02:44:49.825 22188 22231 D S3PERF  : crosscheck ui_snapshot_fps=6.49131 ui_snapshot_frametime_ms=161.131
+09-25 02:44:49.916 22188 22188 I S3TOUCH : root action=down x=2245 y=938
+09-25 02:44:49.916 22188 22188 I S3TOUCH : monitor action=down consumed=false
+09-25 02:44:49.917 22188 22188 I S3TOUCH : pad action=down menu=false
+09-25 02:44:50.138 22188 22231 D S3PERF  : crosscheck source=surface presented=1907 json_fps=7.0494 json_frametime_ms=122.948
+09-25 02:44:50.159 22188 22188 I S3TOUCH : root action=down x=2441 y=768
+09-25 02:44:50.160 22188 22188 I S3TOUCH : monitor action=down consumed=false
+09-25 02:44:50.160 22188 22188 I S3TOUCH : pad action=down menu=false
+09-25 02:44:50.312 22188 22188 I S3TOUCH : root action=down x=2402 y=778
+09-25 02:44:50.312 22188 22188 I S3TOUCH : monitor action=down consumed=false
+09-25 02:44:50.312 22188 22188 I S3TOUCH : pad action=down menu=false
+09-25 02:44:50.430 22188 22312 D RPCS3   : sys_tty_write(ch=0, buf=*0x58bf20, len=63, pwritelen=*0xd000fde0)
+09-25 02:44:50.430 22188 22312 D RPCS3   : sys_tty_write(): “BATCHJOB: AddJob: waiting for room in job list 3 for job 56...“ << endl
+09-25 02:44:50.520 22188 22188 I S3TOUCH : root action=down x=2396 y=788
+09-25 02:44:50.520 22188 22188 I S3TOUCH : monitor action=down consumed=false
+09-25 02:44:50.520 22188 22188 I S3TOUCH : pad action=down menu=false
+09-25 02:44:50.706 22188 22188 I S3TOUCH : root action=down x=2398 y=791
+09-25 02:44:50.706 22188 22188 I S3TOUCH : monitor action=down consumed=false
+09-25 02:44:50.706 22188 22188 I S3TOUCH : pad action=down menu=false
+09-25 02:44:50.907 22188 22188 I S3TOUCH : root action=down x=2397 y=793
+09-25 02:44:50.907 22188 22188 I S3TOUCH : monitor action=down consumed=false
+09-25 02:44:50.908 22188 22188 I S3TOUCH : pad action=down menu=false
+09-25 02:44:51.075 22188 22231 D S3PERF  : crosscheck ui_snapshot_fps=6.72689 ui_snapshot_frametime_ms=100.749
+09-25 02:44:51.110 22188 22188 I S3TOUCH : root action=down x=2397 y=796
+09-25 02:44:51.110 22188 22188 I S3TOUCH : monitor action=down consumed=false
+09-25 02:44:51.110 22188 22188 I S3TOUCH : pad action=down menu=false
+09-25 02:44:51.311 22188 22188 I S3TOUCH : root action=down x=2391 y=795
+09-25 02:44:51.311 22188 22188 I S3TOUCH : monitor action=down consumed=false
+09-25 02:44:51.311 22188 22188 I S3TOUCH : pad action=down menu=false
+09-25 02:44:51.397 22188 22231 D S3PERF  : crosscheck source=surface presented=1916 json_fps=7.87117 json_frametime_ms=125.797
+09-25 02:44:51.412 22188 22231 D S3PERF  : GPU load [/sys/class/kgsl/kgsl-3d0/gpubusy]: raw='506924 1002660' -> load=50.557915943590054%
+09-25 02:44:51.512 22188 22188 I S3TOUCH : root action=down x=2389 y=802
+09-25 02:44:51.512 22188 22188 I S3TOUCH : monitor action=down consumed=false
+09-25 02:44:51.512 22188 22188 I S3TOUCH : pad action=down menu=false
+09-25 02:44:51.707 22188 22188 I S3TOUCH : root action=down x=2389 y=799
+09-25 02:44:51.707 22188 22188 I S3TOUCH : monitor action=down consumed=false
+09-25 02:44:51.707 22188 22188 I S3TOUCH : pad action=down menu=false
+09-25 02:44:51.907 22188 22188 I S3TOUCH : root action=down x=2381 y=804
+09-25 02:44:51.907 22188 22188 I S3TOUCH : monitor action=down consumed=false
+09-25 02:44:51.907 22188 22188 I S3TOUCH : pad action=down menu=false
+09-25 02:44:52.100 22188 22188 I S3TOUCH : root action=down x=2378 y=809
+09-25 02:44:52.101 22188 22188 I S3TOUCH : monitor action=down consumed=false
+09-25 02:44:52.101 22188 22188 I S3TOUCH : pad action=down menu=false
+09-25 02:44:52.294 22188 22188 I S3TOUCH : root action=down x=2376 y=812
+09-25 02:44:52.294 22188 22188 I S3TOUCH : monitor action=down consumed=false
+09-25 02:44:52.294 22188 22188 I S3TOUCH : pad action=down menu=false
+09-25 02:44:52.353 22188 22231 D S3PERF  : crosscheck ui_snapshot_fps=10.2306 ui_snapshot_frametime_ms=122.163
+09-25 02:44:52.379 22188 22312 D RPCS3   : sys_tty_write(ch=0, buf=*0x58bf20, len=63, pwritelen=*0xd000fde0)
+09-25 02:44:52.379 22188 22312 D RPCS3   : sys_tty_write(): “BATCHJOB: AddJob: waiting for room in job list 3 for job 56...“ << endl
+09-25 02:44:52.522 22188 22312 D RPCS3   : sys_tty_write(ch=0, buf=*0x58bf20, len=63, pwritelen=*0xd000fde0)
+09-25 02:44:52.522 22188 22312 D RPCS3   : sys_tty_write(): “BATCHJOB: AddJob: waiting for room in job list 3 for job 56...“ << endl
+09-25 02:44:52.575 22188 22188 I S3TOUCH : root action=down x=2210 y=950
+09-25 02:44:52.575 22188 22188 I S3TOUCH : monitor action=down consumed=false
+09-25 02:44:52.575 22188 22188 I S3TOUCH : pad action=down menu=false
+09-25 02:44:52.637 22188 22312 D RPCS3   : sys_tty_write(ch=0, buf=*0x58bf20, len=63, pwritelen=*0xd000fde0)
+09-25 02:44:52.637 22188 22312 D RPCS3   : sys_tty_write(): “BATCHJOB: AddJob: waiting for room in job list 3 for job 56...“ << endl
+09-25 02:44:52.657 22188 22231 D S3PERF  : crosscheck source=surface presented=1929 json_fps=10.0576 json_frametime_ms=73.844
+09-25 02:44:52.749 22188 22312 D RPCS3   : sys_tty_write(ch=0, buf=*0x58bf20, len=63, pwritelen=*0xd000fde0)
+09-25 02:44:52.749 22188 22312 D RPCS3   : sys_tty_write(): “BATCHJOB: AddJob: waiting for room in job list 3 for job 56...“ << endl
+09-25 02:44:52.770 22188 22188 I S3TOUCH : root action=down x=2226 y=933
+09-25 02:44:52.770 22188 22188 I S3TOUCH : monitor action=down consumed=false
+09-25 02:44:52.770 22188 22188 I S3TOUCH : pad action=down menu=false
+09-25 02:44:52.944 21205 21205 I AndroidRuntime: VM exiting with result code 0, cleanup skipped.
+09-25 02:44:52.944 21722 21722 I AndroidRuntime: VM exiting with result code 0, cleanup skipped.
+09-25 02:44:52.953 22497 22497 I AndroidRuntime: VM exiting with result code 0, cleanup skipped.
+09-25 02:44:52.957 21540 21540 I AndroidRuntime: VM exiting with result code 0, cleanup skipped.
+09-25 02:44:52.965 22188 22266 D RPCS3   : CPU Usage: Total: 60.4%, Cores: 0.0%, 0.0%, 0.0%, 0.0%, 0.0%, 0.0%, 0.0%, 0.0%
+09-25 02:44:52.970 22188 22188 I S3TOUCH : root action=down x=2226 y=937
+09-25 02:44:52.970 22188 22188 I S3TOUCH : monitor action=down consumed=false
+09-25 02:44:52.970 22188 22188 I S3TOUCH : pad action=down menu=false
+09-25 02:44:52.980 22188 22312 D RPCS3   : sys_tty_write(ch=0, buf=*0x58bf20, len=63, pwritelen=*0xd000fde0)
+09-25 02:44:52.980 22188 22312 D RPCS3   : sys_tty_write(): “BATCHJOB: AddJob: waiting for room in job list 3 for job 56...“ << endl
+09-25 02:44:53.043 22188 22290 D RPCS3   : PPU Syscall Usage Stats:
+09-25 02:44:53.043 22188 22290 D RPCS3   : 	⁂ sys_timer_usleep [213282]
+09-25 02:44:53.043 22188 22290 D RPCS3   : 	⁂ _sys_lwcond_queue_wait [179045]
+09-25 02:44:53.043 22188 22290 D RPCS3   : 	⁂ _sys_lwmutex_lock [177949]
+09-25 02:44:53.043 22188 22290 D RPCS3   : 	⁂ _sys_lwmutex_unlock [172647]
+09-25 02:44:53.043 22188 22290 D RPCS3   : 	⁂ _sys_lwcond_signal [114474]
+09-25 02:44:53.043 22188 22290 D RPCS3   : 	⁂ _sys_lwcond_signal_all [71716]
+09-25 02:44:53.043 22188 22290 D RPCS3   : 	⁂ sys_time_get_current_time [52560]
+09-25 02:44:53.043 22188 22290 D RPCS3   : 	⁂ sys_event_queue_receive [29659]
+09-25 02:44:53.043 22188 22290 D RPCS3   : 	⁂ sys_fs_read [28935]
+09-25 02:44:53.043 22188 22290 D RPCS3   : 	⁂ sys_event_port_send [8315]
+09-25 02:44:53.043 22188 22290 D RPCS3   : 	⁂ sys_fs_lseek [3157]
+09-25 02:44:53.043 22188 22290 D RPCS3   : 	⁂ sys_event_flag_wait [1927]
+09-25 02:44:53.043 22188 22290 D RPCS3   : 	⁂ sys_event_flag_clear [1927]
+09-25 02:44:53.043 22188 22290 D RPCS3   : 	⁂ _sys_lwmutex_trylock [326]
+09-25 02:44:53.043 22188 22290 D RPCS3   : 	⁂ sys_tty_write [151]
+09-25 02:44:53.181 22188 22188 I S3TOUCH : root action=down x=2235 y=933
+09-25 02:44:53.181 22188 22188 I S3TOUCH : monitor action=down consumed=false
+09-25 02:44:53.182 22188 22188 I S3TOUCH : pad action=down menu=false
+09-25 02:44:53.400 22188 22188 I S3TOUCH : root action=down x=2241 y=927
+09-25 02:44:53.400 22188 22188 I S3TOUCH : monitor action=down consumed=false
+09-25 02:44:53.400 22188 22188 I S3TOUCH : pad action=down menu=false
+09-25 02:44:53.571 22188 22312 D RPCS3   : sys_tty_write(ch=0, buf=*0x58bf20, len=63, pwritelen=*0xd000fde0)
+09-25 02:44:53.571 22188 22312 D RPCS3   : sys_tty_write(): “BATCHJOB: AddJob: waiting for room in job list 3 for job 56...“ << endl
+09-25 02:44:53.599 22188 22188 I S3TOUCH : root action=down x=2244 y=925
+09-25 02:44:53.600 22188 22188 I S3TOUCH : monitor action=down consumed=false
+09-25 02:44:53.600 22188 22188 I S3TOUCH : pad action=down menu=false
+09-25 02:44:53.634 22188 22231 D S3PERF  : crosscheck ui_snapshot_fps=5.0442 ui_snapshot_frametime_ms=148.893
+09-25 02:44:53.651 22188 22312 D RPCS3   : sys_tty_write(ch=0, buf=*0x58bf20, len=63, pwritelen=*0xd000fde0)
+09-25 02:44:53.652 22188 22312 D RPCS3   : sys_tty_write(): “BATCHJOB: AddJob: waiting for room in job list 3 for job 56...“ << endl
+09-25 02:44:53.801 22188 22188 I S3TOUCH : root action=down x=2246 y=931
+09-25 02:44:53.801 22188 22188 I S3TOUCH : monitor action=down consumed=false
+09-25 02:44:53.801 22188 22188 I S3TOUCH : pad action=down menu=false
+09-25 02:44:53.939 22188 22231 D S3PERF  : crosscheck source=surface presented=1937 json_fps=6.14872 json_frametime_ms=155.271
+09-25 02:44:54.013 22188 22188 I S3TOUCH : root action=down x=2240 y=936
+09-25 02:44:54.014 22188 22188 I S3TOUCH : monitor action=down consumed=false
+09-25 02:44:54.014 22188 22188 I S3TOUCH : pad action=down menu=false
+09-25 02:44:54.086 22188 22312 D RPCS3   : sys_tty_write(ch=0, buf=*0x58bf20, len=63, pwritelen=*0xd000fde0)
+09-25 02:44:54.086 22188 22312 D RPCS3   : sys_tty_write(): “BATCHJOB: AddJob: waiting for room in job list 3 for job 56...“ << endl
+09-25 02:44:54.228 22188 22188 I S3TOUCH : root action=down x=2248 y=930
+09-25 02:44:54.228 22188 22188 I S3TOUCH : monitor action=down consumed=false
+09-25 02:44:54.228 22188 22188 I S3TOUCH : pad action=down menu=false
+09-25 02:44:54.439 22188 22188 I S3TOUCH : root action=down x=2243 y=934
+09-25 02:44:54.439 22188 22188 I S3TOUCH : monitor action=down consumed=false
+09-25 02:44:54.439 22188 22188 I S3TOUCH : pad action=down menu=false
+09-25 02:44:54.552 22188 22490 E RPCS3   : Video au decode has been waiting for a consumer for 5 seconds. (handle=0xf0000300, seq_id=1, cmd_id=63, queue_size=61)
+09-25 02:44:54.648 22188 22188 I S3TOUCH : root action=down x=2247 y=932
+09-25 02:44:54.648 22188 22188 I S3TOUCH : monitor action=down consumed=false
+09-25 02:44:54.648 22188 22188 I S3TOUCH : pad action=down menu=false
+09-25 02:44:54.849 22188 22188 I S3TOUCH : root action=down x=2241 y=933
+09-25 02:44:54.849 22188 22188 I S3TOUCH : monitor action=down consumed=false
+09-25 02:44:54.849 22188 22188 I S3TOUCH : pad action=down menu=false
+09-25 02:44:54.871 22188 22231 D S3PERF  : crosscheck ui_snapshot_fps=6.26336 ui_snapshot_frametime_ms=128.159
+09-25 02:44:55.051 22188 22188 I S3TOUCH : root action=down x=2236 y=933
+09-25 02:44:55.051 22188 22188 I S3TOUCH : monitor action=down consumed=false
+09-25 02:44:55.052 22188 22188 I S3TOUCH : pad action=down menu=false
+09-25 02:44:55.181 22188 22231 D S3PERF  : crosscheck source=surface presented=1945 json_fps=6.5934 json_frametime_ms=91.07
+09-25 02:44:55.276 22188 22188 I S3TOUCH : root action=down x=2235 y=926
+09-25 02:44:55.277 22188 22188 I S3TOUCH : monitor action=down consumed=false
+09-25 02:44:55.277 22188 22188 I S3TOUCH : pad action=down menu=false
+09-25 02:44:55.496 22188 22188 I S3TOUCH : root action=down x=2238 y=923
+09-25 02:44:55.498 22188 22188 I S3TOUCH : monitor action=down consumed=false
+09-25 02:44:55.498 22188 22188 I S3TOUCH : pad action=down menu=false
+09-25 02:44:55.704 22188 22188 I S3TOUCH : root action=down x=2237 y=924
+09-25 02:44:55.704 22188 22188 I S3TOUCH : monitor action=down consumed=false
+09-25 02:44:55.704 22188 22188 I S3TOUCH : pad action=down menu=false
+09-25 02:44:55.908 22188 22188 I S3TOUCH : root action=down x=2236 y=924
+09-25 02:44:55.908 22188 22188 I S3TOUCH : monitor action=down consumed=false
+09-25 02:44:55.908 22188 22188 I S3TOUCH : pad action=down menu=false
+09-25 02:44:56.106 22188 22188 I S3TOUCH : root action=down x=2237 y=925
+09-25 02:44:56.107 22188 22188 I S3TOUCH : monitor action=down consumed=false
+09-25 02:44:56.107 22188 22188 I S3TOUCH : pad action=down menu=false
+09-25 02:44:56.156 22188 22231 D S3PERF  : crosscheck ui_snapshot_fps=7.0961 ui_snapshot_frametime_ms=133.052
+09-25 02:44:56.310 22188 22188 I S3TOUCH : root action=down x=2239 y=925
+09-25 02:44:56.310 22188 22188 I S3TOUCH : monitor action=down consumed=false
+09-25 02:44:56.310 22188 22188 I S3TOUCH : pad action=down menu=false
+09-25 02:44:56.480 22188 22231 D S3PERF  : crosscheck source=surface presented=1954 json_fps=6.60958 json_frametime_ms=219.818
+09-25 02:44:56.726 22188 22188 I S3TOUCH : root action=down x=551 y=1076
+09-25 02:44:56.727 22188 22188 I S3TOUCH : monitor action=down consumed=false
+09-25 02:44:56.727 22188 22188 I S3TOUCH : pad action=down menu=false
+09-25 02:44:57.468 22188 22231 D S3PERF  : crosscheck ui_snapshot_fps=6.96741 ui_snapshot_frametime_ms=172.037
+09-25 02:44:57.488 22188 22188 I S3TOUCH : root action=down x=665 y=982
+09-25 02:44:57.488 22188 22188 I S3TOUCH : monitor action=down consumed=false
+09-25 02:44:57.488 22188 22188 I S3TOUCH : pad action=down menu=false
+09-25 02:44:57.794 22188 22231 D S3PERF  : crosscheck source=surface presented=1962 json_fps=7.04309 json_frametime_ms=103.194
+09-25 02:44:58.075 22188 22188 I S3TOUCH : monitor action=down consumed=false
+09-25 02:44:58.275 22188 22188 I S3TOUCH : monitor action=down consumed=false
+09-25 02:44:58.491 22188 22188 I S3TOUCH : monitor action=down consumed=false
+09-25 02:44:58.700 22188 22188 I S3TOUCH : monitor action=down consumed=false
+09-25 02:44:58.775 22188 22231 D S3PERF  : crosscheck ui_snapshot_fps=6.19008 ui_snapshot_frametime_ms=132.86
+09-25 02:44:59.096 22188 22231 D S3PERF  : crosscheck source=surface presented=1971 json_fps=6.9418 json_frametime_ms=111.55
+09-25 02:44:59.698 22188 22490 E RPCS3   : Video au decode has been waiting for a consumer for 5 seconds. (handle=0xf0000300, seq_id=1, cmd_id=63, queue_size=61)
+09-25 02:44:59.786 22188 22188 I S3TOUCH : root action=down x=645 y=826
+09-25 02:44:59.787 22188 22188 I S3TOUCH : monitor action=down consumed=false
+09-25 02:44:59.787 22188 22188 I S3TOUCH : pad action=down menu=false
+09-25 02:45:00.047 22188 22231 D S3PERF  : crosscheck ui_snapshot_fps=9.00729 ui_snapshot_frametime_ms=107.17
+09-25 02:45:00.212 22188 22188 I S3TOUCH : monitor action=down consumed=false
+09-25 02:45:00.350 22188 22231 D S3PERF  : crosscheck source=surface presented=1983 json_fps=10.0712 json_frametime_ms=126.09
+09-25 02:45:00.395 22188 22188 I S3TOUCH : monitor action=down consumed=false
+09-25 02:45:00.597 22188 22188 I S3TOUCH : monitor action=down consumed=false
+09-25 02:45:00.798 22188 22188 I S3TOUCH : root action=down x=2238 y=949
+09-25 02:45:00.798 22188 22188 I S3TOUCH : monitor action=down consumed=false
+09-25 02:45:00.798 22188 22188 I S3TOUCH : pad action=down menu=false
+09-25 02:45:01.008 22188 22188 I S3TOUCH : root action=down x=2238 y=951
+09-25 02:45:01.008 22188 22188 I S3TOUCH : monitor action=down consumed=false
+09-25 02:45:01.008 22188 22188 I S3TOUCH : pad action=down menu=false
+09-25 02:45:01.218 22188 22188 I S3TOUCH : root action=down x=2243 y=947
+09-25 02:45:01.218 22188 22188 I S3TOUCH : monitor action=down consumed=false
+09-25 02:45:01.219 22188 22188 I S3TOUCH : pad action=down menu=false
+09-25 02:45:01.302 22188 22231 D S3PERF  : crosscheck ui_snapshot_fps=9.38573 ui_snapshot_frametime_ms=94.287
