@@ -294,8 +294,10 @@ class RPCSXActivity : ComponentActivity(), EmulationHost {
             RPCSXTheme {
                 val monitorSettings by MonitoringOverlaySettings.state(this@RPCSXActivity).collectAsStateWithLifecycle()
                 val menuState by coordinator.state.collectAsStateWithLifecycle()
-                LaunchedEffect(monitorSettings.enabled) {
-                    binding.monitoringOverlay.visibility = if (monitorSettings.enabled) View.VISIBLE else View.GONE
+                LaunchedEffect(monitorSettings.enabled, menuState.isOpen, monitorSettings.graphMetrics) {
+                    val isVisible = monitorSettings.enabled && !(monitorSettings.hideWithMenu && menuState.isOpen)
+                    binding.monitoringOverlay.visibility = if (isVisible) View.VISIBLE else View.GONE
+                    monitoringRepository.isHistoryObserved = isVisible && monitorSettings.showGraphs
                     Log.i("S3PERF", "monitor enabled=${monitorSettings.enabled} intervalMs=${monitorSettings.updateMs}")
                 }
                 MonitoringOverlay(monitoringRepository, monitorSettings, menuState.isOpen)

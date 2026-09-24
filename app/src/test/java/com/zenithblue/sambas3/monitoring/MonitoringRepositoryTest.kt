@@ -13,6 +13,7 @@ import kotlinx.coroutines.test.StandardTestDispatcher
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
+import org.junit.Assert.assertSame
 import org.junit.Test
 
 @OptIn(ExperimentalCoroutinesApi::class)
@@ -176,6 +177,73 @@ class MonitoringRepositoryTest {
         assertTrue(repository.snapshot.value.fpsHistory.isNotEmpty())
 
         repository.stop()
+    }
+
+    @Test
+    fun historyCollectionSkippedWhenNotObserved() = runTest {
+        val settings = MutableStateFlow(
+            MonitoringSettings(
+                enabled = true,
+                updateMs = 300L,
+                graphMetrics = setOf(MonitoringMetric.Fps)
+            )
+        )
+        val system = FakeSystemSource()
+        val perf = FakePerfSource()
+        val repository = MonitoringRepository(context, system, perf, { EmulatorState.Running }, StandardTestDispatcher(testScheduler))
+
+        repository.start(this, settings)
+        runCurrent()
+        advanceTimeBy(600L)
+        runCurrent()
+        assertTrue(repository.snapshot.value.fpsHistory.isNotEmpty())
+
+        // Set isHistoryObserved = false (e.g. menu is open, overlay is hidden)
+        repository.isHistoryObserved = false
+        advanceTimeBy(300L)
+        runCurrent()
+
+        // History collection is skipped and returns emptyList
+        assertTrue(repository.snapshot.value.fpsHistory.isEmpty())
+
+        // Set isHistoryObserved = true again
+        repository.isHistoryObserved = true
+        advanceTimeBy(600L)
+        runCurrent()
+        assertTrue(repository.snapshot.value.fpsHistory.isNotEmpty())
+
+        repository.stop()
+    }
+
+    @Test
+    fun immutableLaunchDataIsCached() {
+        val system = FakeSystemSource()
+        val perf = FakePerfSource()
+        val repository = MonitoringRepository(context, system, perf, { EmulatorState.Running })
+
+        val first = repository.getLaunchData()
+        val second = repository.getLaunchData()
+
+        assertSame(first, second)
+        assertTrue(first.cpuCoreCount > 0)
+    }
+
+    @Test
+    fun historyIsBoundedUnderExtremeSampleVolume() {
+        val history = MonitoringHistory()
+        val manySamples = (1..5000).map { i ->
+            TimedSample(1_000_000_000L + i * 1_000L, 60f)
+        }
+        val metrics = EmulatorMetrics(
+            timestampNs = 1_000_000_000_000L + 5000 * 1_000_000L,
+            fpsTimedSamples = manySamples,
+        )
+
+        history.append(metrics, historySeconds = 30, enabled = setOf(MonitoringMetric.Fps))
+
+        val captured = history.fps()
+        assertTrue(captured.size <= MonitoringHistory.MAX_HISTORY_SAMPLES)
+        assertEquals(MonitoringHistory.MAX_HISTORY_SAMPLES, captured.size)
     }
 
     private class FakeSystemSource : MonitoringSystemSource {

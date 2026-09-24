@@ -29,6 +29,13 @@ interface MonitoringPerfSource {
     fun logUiSnapshot(metrics: EmulatorMetrics)
 }
 
+data class ImmutableLaunchData(
+    val coreBuildId: String? = null,
+    val totalRamBytes: Long? = null,
+    val totalSwapBytes: Long? = null,
+    val cpuCoreCount: Int = Runtime.getRuntime().availableProcessors(),
+)
+
 class MonitoringRepository(
     context: Context,
     private val system: MonitoringSystemSource = AndroidSystemMetricsCollector(context.applicationContext),
@@ -46,6 +53,30 @@ class MonitoringRepository(
     private var generation = 0L
     private var wasRunning = false
     private var androidAvailabilityLogged = false
+
+    @Volatile
+    var isHistoryObserved: Boolean = true
+
+    private var cachedLaunchData: ImmutableLaunchData? = null
+
+    fun getLaunchData(): ImmutableLaunchData {
+        cachedLaunchData?.let { return it }
+        val coreId = runCatching { RPCSX.instance.getCoreBuildId() }.getOrNull()
+        val memInfoLines = runCatching { java.io.File("/proc/meminfo").takeIf { it.isFile }?.readLines() }.getOrNull()
+        val ramTotal = memInfoLines?.firstOrNull { it.startsWith("MemTotal:") }
+            ?.substringAfter("MemTotal:")?.trim()?.split(Regex("\\s+"))?.firstOrNull()?.toLongOrNull()?.times(1024L)
+        val swapTotal = memInfoLines?.firstOrNull { it.startsWith("SwapTotal:") }
+            ?.substringAfter("SwapTotal:")?.trim()?.split(Regex("\\s+"))?.firstOrNull()?.toLongOrNull()?.times(1024L)
+
+        val data = ImmutableLaunchData(
+            coreBuildId = coreId,
+            totalRamBytes = ramTotal,
+            totalSwapBytes = swapTotal,
+            cpuCoreCount = Runtime.getRuntime().availableProcessors(),
+        )
+        cachedLaunchData = data
+        return data
+    }
 
     fun start(scope: CoroutineScope, settingsFlow: StateFlow<MonitoringSettings> = MonitoringOverlaySettings.state(appContext)) {
         if (job?.isActive == true) return
@@ -72,30 +103,47 @@ class MonitoringRepository(
                         if (running && !wasRunning) generation++
                         if (!running && wasRunning) history.clear()
                         wasRunning = running
+                        val shouldCollectHistory = isHistoryObserved && settings.graphMetrics.isNotEmpty()
                         val emulator = running.takeIf { it }?.let { perf.read() }
-                        if (emulator != null && settings.graphMetrics.isNotEmpty()) history.append(emulator, settings.graphHistorySeconds, settings.graphMetrics, generation)
+                        if (emulator != null && shouldCollectHistory) {
+                            history.append(emulator, settings.graphHistorySeconds, settings.graphMetrics, generation)
+                        }
                         val android = runCatching { system.read() }.getOrElse {
                             Log.w("S3PERF", "android telemetry read failed", it)
                             AndroidSystemMetrics()
                         }
-                        val metricDebug = buildMap {
+                        val metricDebug = if (_snapshot.subscriptionCount.value > 0) {
                             val nowMs = SystemClock.elapsedRealtime()
-                            if (emulator != null) MonitoringMetricDescriptors.all
-                                .filter { it.source == MonitoringMetricSource.Emulator && hasEmulatorValue(emulator, it.metric) }
-                                .forEach { put(it.metric, MetricDebugInfo(nowMs, "RPCSX emu_flip/perf collector")) }
-                            MonitoringMetricDescriptors.all
-                                .filter { it.source != MonitoringMetricSource.Emulator && hasAndroidValue(android, it.metric) }
-                                .forEach {
-                                    val timestamp = android.timestampsMs[it.metric] ?: nowMs
-                                    put(it.metric, MetricDebugInfo(timestamp, "Android system collector"))
+                            val map = HashMap<MonitoringMetric, MetricDebugInfo>(MonitoringMetricDescriptors.all.size)
+                            for (descriptor in MonitoringMetricDescriptors.all) {
+                                if (descriptor.source == MonitoringMetricSource.Emulator) {
+                                    if (emulator != null && hasEmulatorValue(emulator, descriptor.metric)) {
+                                        map[descriptor.metric] = MetricDebugInfo(nowMs, "RPCSX emu_flip/perf collector")
+                                    }
+                                } else {
+                                    if (hasAndroidValue(android, descriptor.metric)) {
+                                        val timestamp = android.timestampsMs[descriptor.metric] ?: nowMs
+                                        map[descriptor.metric] = MetricDebugInfo(timestamp, "Android system collector")
+                                    }
                                 }
+                            }
+                            map
+                        } else {
+                            emptyMap()
                         }
-                        val snapshot = MonitoringSnapshot(emulator ?: EmulatorMetrics(), android, metricDebug = metricDebug)
-                        if (!androidAvailabilityLogged && (android.ramTotalBytes != null || android.batteryTemperatureC != null || android.gpu != null)) {
+                        val effectiveAndroid = if (android.ramTotalBytes == null && getLaunchData().totalRamBytes != null) {
+                            android.copy(ramTotalBytes = getLaunchData().totalRamBytes)
+                        } else {
+                            android
+                        }
+                        val snapshot = MonitoringSnapshot(emulator ?: EmulatorMetrics(), effectiveAndroid, metricDebug = metricDebug)
+                        if (!androidAvailabilityLogged && (effectiveAndroid.ramTotalBytes != null || effectiveAndroid.batteryTemperatureC != null || effectiveAndroid.gpu != null)) {
                             androidAvailabilityLogged = true
-                            Log.d("S3PERF", "android telemetry available ram=${android.ramUsedBytes != null} gpu=${android.gpu != null} temp=${android.batteryTemperatureC != null} power=${android.batteryPowerW != null}")
+                            Log.d("S3PERF", "android telemetry available ram=${effectiveAndroid.ramUsedBytes != null} gpu=${effectiveAndroid.gpu != null} temp=${effectiveAndroid.batteryTemperatureC != null} power=${effectiveAndroid.batteryPowerW != null}")
                         }
-                        _snapshot.value = snapshot.copy(fpsHistory = history.fps(), frameTimeHistory = history.frameTime())
+                        val fpsHist = if (shouldCollectHistory) history.fps() else emptyList()
+                        val frameTimeHist = if (shouldCollectHistory) history.frameTime() else emptyList()
+                        _snapshot.value = snapshot.copy(fpsHistory = fpsHist, frameTimeHistory = frameTimeHist)
                         perf.logUiSnapshot(snapshot.emulator)
                         delay(intervalMs.coerceIn(250L, 1000L))
                     }

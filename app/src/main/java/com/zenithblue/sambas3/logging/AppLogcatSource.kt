@@ -99,6 +99,8 @@ object AppLogcatSource {
                     )
                     lastStatus = "exited-$exit"
                     delay(DEFAULT_IDLE_DELAY_MS)
+                } else if (coroutineContext.isActive) {
+                    delay(1_000L)
                 }
             } catch (e: Exception) {
                 val denied = e.message?.contains("Permission", true) == true

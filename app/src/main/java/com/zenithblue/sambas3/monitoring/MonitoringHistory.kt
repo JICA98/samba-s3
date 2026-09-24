@@ -29,6 +29,10 @@ class MonitoringHistory {
         }
     }
 
+    companion object {
+        const val MAX_HISTORY_SAMPLES = 3600 // 120 FPS * 30 seconds upper bound
+    }
+
     fun fps(): List<TimedSample> = fps.toList()
     fun frameTime(): List<TimedSample> = frameTime.toList()
     fun clear() { fps.clear(); frameTime.clear(); generation = null }
@@ -41,5 +45,6 @@ class MonitoringHistory {
             .sortedBy { it.timestampUs }
             .forEach { target.addLast(it) }
         while (target.firstOrNull()?.timestampUs?.let { it < windowStart } == true) target.removeFirst()
+        while (target.size > MAX_HISTORY_SAMPLES) target.removeFirst()
     }
 }

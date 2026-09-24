@@ -2,15 +2,16 @@ package com.zenithblue.sambas3
 
 import android.content.Context
 import android.util.Log
+import androidx.annotation.VisibleForTesting
 import com.zenithblue.sambas3.logging.toLegacySource
 import kotlinx.coroutines.*
-import kotlinx.coroutines.currentCoroutineContext
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import java.io.*
 import java.util.concurrent.atomic.AtomicBoolean
+import java.util.concurrent.atomic.AtomicLong
 
 // ---------------------------------------------------------------------------
 // Data model
@@ -172,11 +173,13 @@ fun LogSource.fileCategory(): LogFileCategory = when (this) {
 // ---------------------------------------------------------------------------
 object LogMonitor {
     private const val TAG = "LogMonitor"
-    private const val MAX_UI_ENTRIES = 1000
-    private const val CHANNEL_CAPACITY = 8192
-    private const val BATCH_SIZE = 20
-    private const val FLUSH_BYTES = 32 * 1024L
-    private const val FLUSH_INTERVAL_MS = 2_000L
+    const val MAX_UI_ENTRIES = 1000
+    const val CHANNEL_CAPACITY = 4096
+    const val BATCH_SIZE = 32
+    const val FLUSH_INTERVAL_MS = 2_000L
+    const val DISPLAY_CADENCE_MS = 300L
+    const val NORMAL_EOF_BACKOFF_MS = 1_000L
+    const val ERROR_BACKOFF_MS = 2_000L
 
     private val _logs = MutableStateFlow<List<LogEntry>>(emptyList())
     val logs: StateFlow<List<LogEntry>> = _logs.asStateFlow()
@@ -190,7 +193,17 @@ object LogMonitor {
     private val _appLogs = MutableStateFlow<List<LogEntry>>(emptyList())
     val appLogs: StateFlow<List<LogEntry>> = _appLogs.asStateFlow()
 
+    private val bufferLock = Any()
+    private val allBuf = ArrayDeque<LogEntry>(MAX_UI_ENTRIES + 1)
+    private val backBuf = ArrayDeque<LogEntry>(MAX_UI_ENTRIES + 1)
+    private val vulkBuf = ArrayDeque<LogEntry>(MAX_UI_ENTRIES + 1)
+    private val appBuf = ArrayDeque<LogEntry>(MAX_UI_ENTRIES + 1)
+
+    private val droppedDebugCount = AtomicLong(0L)
+    fun droppedCount(): Long = droppedDebugCount.get()
+
     private var scope: CoroutineScope? = null
+    private var channel: Channel<LogEntry>? = null
     private var logcatProcess: Process? = null
     private val running = AtomicBoolean(false)
     private var logDir: File? = null
@@ -199,6 +212,22 @@ object LogMonitor {
     private val writeSizes = mutableMapOf<LogFileCategory, Long>()
     private val lastFlushAtMs = mutableMapOf<LogFileCategory, Long>()
     private var entryIdCounter = 0L
+    @Volatile private var uiDirty = false
+
+    private fun <T> ArrayDeque<T>.addCapped(item: T) {
+        addLast(item)
+        if (size > MAX_UI_ENTRIES) removeFirst()
+    }
+
+    internal fun isFatalOrCrash(entry: LogEntry): Boolean {
+        if (entry.level == LogLevel.FATAL || entry.level == LogLevel.ERROR) return true
+        val tagLower = entry.tag.lowercase()
+        val msgLower = entry.message.lowercase()
+        return tagLower.contains("crash") || msgLower.contains("crash") ||
+            tagLower.contains("fatal") || msgLower.contains("fatal") ||
+            msgLower.contains("sigsegv") || msgLower.contains("sigbus") ||
+            msgLower.contains("abort") || tagLower.contains("sys_crashdump")
+    }
 
     // ------------------------------------------------------------------
     // Public API
@@ -213,20 +242,43 @@ object LogMonitor {
         if (writers.isEmpty()) openWriters()
         if (running.compareAndSet(false, true)) {
             hydrateUiFromFiles()
+            startConsumer()
             engine.addSink { ingest(it) }
             Log.i(TAG, "LogMonitor attached to broker — log dir: ${logDir?.absolutePath}")
         }
     }
 
+    private fun startConsumer() {
+        val ch = Channel<LogEntry>(CHANNEL_CAPACITY)
+        channel = ch
+        val s = CoroutineScope(SupervisorJob() + Dispatchers.IO)
+        scope = s
+        s.launch { runConsumer(ch) }
+    }
+
     /**
-     * Collection is process-lifetime. Stop only flushes so Settings/Logs
-     * leaving the composition cannot empty the next crash report.
+     * Stop flushes writers and publishes final UI updates, then cancels background consumer.
      */
     fun stop() {
+        running.set(false)
+        scope?.cancel()
+        scope = null
+        channel?.close()
+        channel = null
+        logcatProcess?.destroy()
+        logcatProcess = null
         flushWriters()
+        publishUi(force = true)
     }
 
     fun clearLogs() {
+        synchronized(bufferLock) {
+            allBuf.clear()
+            backBuf.clear()
+            vulkBuf.clear()
+            appBuf.clear()
+            uiDirty = false
+        }
         _logs.value = emptyList()
         _backendLogs.value = emptyList()
         _vulkanLogs.value = emptyList()
@@ -244,12 +296,80 @@ object LogMonitor {
                 .filter(File::exists)
         }
 
-    /** Flush open writers so share/export sees latest lines. */
-    fun flushWriters() {
-        writers.values.forEach { runCatching { it.flush() } }
+    /** Periodic buffered file flush. If force is true, flushes all writers immediately. */
+    fun flushPendingWriters(force: Boolean = false) {
+        val now = System.currentTimeMillis()
+        writers.forEach { (cat, w) ->
+            val last = lastFlushAtMs[cat] ?: 0L
+            if (force || now - last >= FLUSH_INTERVAL_MS) {
+                runCatching { w.flush() }
+                lastFlushAtMs[cat] = now
+            }
+        }
     }
 
-    private fun ingest(entry: com.zenithblue.sambas3.logging.UnifiedLogEntry) {
+    /** Flush open writers so share/export sees latest lines. */
+    fun flushWriters() {
+        flushPendingWriters(force = true)
+    }
+
+    fun publishUi(force: Boolean = true) {
+        synchronized(bufferLock) {
+            publishUiIfNeeded(force)
+        }
+    }
+
+    private fun publishUiIfNeeded(force: Boolean = false) {
+        if (!uiDirty && !force) return
+        val logsSubscribers = _logs.subscriptionCount.value > 0
+        val backendSubscribers = _backendLogs.subscriptionCount.value > 0
+        val vulkanSubscribers = _vulkanLogs.subscriptionCount.value > 0
+        val appSubscribers = _appLogs.subscriptionCount.value > 0
+        val anySubscribers = logsSubscribers || backendSubscribers || vulkanSubscribers || appSubscribers
+
+        if (force || anySubscribers) {
+            if (force || logsSubscribers) _logs.value = allBuf.toList()
+            if (force || backendSubscribers) _backendLogs.value = backBuf.toList()
+            if (force || vulkanSubscribers) _vulkanLogs.value = vulkBuf.toList()
+            if (force || appSubscribers) _appLogs.value = appBuf.toList()
+            uiDirty = false
+        } else {
+            // Update _logs so direct .value readers see state, but avoid copying 3 category lists
+            _logs.value = allBuf.toList()
+            uiDirty = false
+        }
+    }
+
+    internal fun enqueue(entry: LogEntry) {
+        val ch = channel
+        val isCritical = isFatalOrCrash(entry)
+        if (ch != null) {
+            val result = ch.trySend(entry)
+            if (result.isSuccess) {
+                return
+            }
+            if (isCritical) {
+                // Guaranteed delivery for FATAL/ERROR/crash under extreme pressure
+                synchronized(bufferLock) {
+                    processEntry(entry)
+                    publishUiIfNeeded(force = true)
+                }
+            } else if (!result.isClosed) {
+                // Drop low-priority debug under extreme pressure and count
+                droppedDebugCount.incrementAndGet()
+            }
+        } else {
+            // Direct/fallback processing when consumer channel is not running
+            synchronized(bufferLock) {
+                processEntry(entry)
+                if (isCritical) {
+                    publishUiIfNeeded(force = true)
+                }
+            }
+        }
+    }
+
+    fun ingest(entry: com.zenithblue.sambas3.logging.UnifiedLogEntry) {
         val mapped = LogEntry(
             id = entry.sequence,
             timestamp = entry.timestampText ?: "",
@@ -258,38 +378,38 @@ object LogMonitor {
             message = entry.message,
             source = entry.source.toLegacySource(),
         )
-        val cat = mapped.source.fileCategory()
+        enqueue(mapped)
+    }
+
+    private fun processEntry(entry: LogEntry) {
+        allBuf.addCapped(entry)
+        when (entry.source.fileCategory()) {
+            LogFileCategory.BACKEND -> backBuf.addCapped(entry)
+            LogFileCategory.VULKAN -> vulkBuf.addCapped(entry)
+            LogFileCategory.APP -> appBuf.addCapped(entry)
+        }
+        uiDirty = true
+        writeEntryToFile(entry)
+    }
+
+    internal fun writeEntryToFile(entry: LogEntry) {
+        val cat = entry.source.fileCategory()
         rotateIfNeeded(cat)
-        writers[cat]?.let { w ->
-            val line = "[${mapped.timestamp}] ${mapped.level.letter}/${mapped.tag}: ${mapped.message}\n"
-            runCatching {
-                w.write(line)
-                val added = line.toByteArray(Charsets.UTF_8).size.toLong()
-                val next = (writeSizes[cat] ?: 0L) + added
-                writeSizes[cat] = next
-                val now = System.currentTimeMillis()
+        val w = writers[cat] ?: return
+        val line = "[${entry.timestamp}] ${entry.level.letter}/${entry.tag}: ${entry.message}\n"
+        runCatching {
+            w.write(line)
+            writeSizes[cat] = (writeSizes[cat] ?: 0L) + line.length
+            val now = System.currentTimeMillis()
+            if (isFatalOrCrash(entry)) {
+                w.flush()
+                lastFlushAtMs[cat] = now
+            } else {
                 val last = lastFlushAtMs[cat] ?: 0L
-                if (added >= FLUSH_BYTES || now - last >= FLUSH_INTERVAL_MS) {
+                if (now - last >= FLUSH_INTERVAL_MS) {
                     w.flush()
                     lastFlushAtMs[cat] = now
                 }
-            }
-        }
-        val all = _logs.value
-        val nextAll = if (all.size >= MAX_UI_ENTRIES) all.drop(all.size - MAX_UI_ENTRIES + 1) + mapped else all + mapped
-        _logs.value = nextAll
-        when (cat) {
-            LogFileCategory.BACKEND -> {
-                val cur = _backendLogs.value
-                _backendLogs.value = if (cur.size >= MAX_UI_ENTRIES) cur.drop(1) + mapped else cur + mapped
-            }
-            LogFileCategory.VULKAN -> {
-                val cur = _vulkanLogs.value
-                _vulkanLogs.value = if (cur.size >= MAX_UI_ENTRIES) cur.drop(1) + mapped else cur + mapped
-            }
-            LogFileCategory.APP -> {
-                val cur = _appLogs.value
-                _appLogs.value = if (cur.size >= MAX_UI_ENTRIES) cur.drop(1) + mapped else cur + mapped
             }
         }
     }
@@ -318,10 +438,14 @@ object LogMonitor {
             }
         }
         if (hydrated.isNotEmpty()) {
-            _logs.value = hydrated.takeLast(MAX_UI_ENTRIES)
-            _backendLogs.value = hydrated.filter { it.source.fileCategory() == LogFileCategory.BACKEND }.takeLast(MAX_UI_ENTRIES)
-            _vulkanLogs.value = hydrated.filter { it.source.fileCategory() == LogFileCategory.VULKAN }.takeLast(MAX_UI_ENTRIES)
-            _appLogs.value = hydrated.filter { it.source.fileCategory() == LogFileCategory.APP }.takeLast(MAX_UI_ENTRIES)
+            synchronized(bufferLock) {
+                hydrated.takeLast(MAX_UI_ENTRIES).forEach { allBuf.addCapped(it) }
+                hydrated.filter { it.source.fileCategory() == LogFileCategory.BACKEND }.takeLast(MAX_UI_ENTRIES).forEach { backBuf.addCapped(it) }
+                hydrated.filter { it.source.fileCategory() == LogFileCategory.VULKAN }.takeLast(MAX_UI_ENTRIES).forEach { vulkBuf.addCapped(it) }
+                hydrated.filter { it.source.fileCategory() == LogFileCategory.APP }.takeLast(MAX_UI_ENTRIES).forEach { appBuf.addCapped(it) }
+                uiDirty = true
+                publishUiIfNeeded(force = true)
+            }
         }
     }
 
@@ -366,88 +490,149 @@ object LogMonitor {
     // Coroutines
     // ------------------------------------------------------------------
 
-    private suspend fun runLogcatReader(channel: Channel<LogEntry>) {
-        // threadtime format: MM-DD HH:MM:SS.mmm  PID  TID  LEVEL TAG : MSG
+    internal suspend fun runLogcatReader(
+        channel: Channel<LogEntry>,
+        processProvider: (suspend () -> Process)? = null,
+        eofBackoffMs: Long = NORMAL_EOF_BACKOFF_MS,
+        errorBackoffMs: Long = ERROR_BACKOFF_MS,
+    ) {
         val linePattern = Regex(
             """^(\d{2}-\d{2} \d{2}:\d{2}:\d{2}\.\d{3})\s+\d+\s+\d+\s+([VDIWEF])\s+(.+?)\s*:\s*(.*)$"""
         )
 
-        while (running.get() && currentCoroutineContext().isActive) {
-            try {
-                val proc = ProcessBuilder(
-                    "logcat", "-v", "threadtime", "-b", "main,crash,system"
-                ).redirectErrorStream(true).start()
-                logcatProcess = proc
+        try {
+            while (running.get() && currentCoroutineContext().isActive) {
+                var proc: Process? = null
+                try {
+                    proc = processProvider?.invoke() ?: ProcessBuilder(
+                        "logcat", "-v", "threadtime", "-b", "main,crash,system"
+                    ).redirectErrorStream(true).start()
+                    logcatProcess = proc
 
-                proc.inputStream.bufferedReader().use { reader ->
-                    var line: String?
-                    while (reader.readLine().also { line = it } != null && running.get() && currentCoroutineContext().isActive) {
-                        val l = line ?: continue
-                        val match = linePattern.matchEntire(l) ?: continue
-                        val (ts, lvl, tag, msg) = match.destructured
-                        val entry = LogEntry(
-                            id = ++entryIdCounter,
-                            timestamp = ts,
-                            level = LogLevel.fromChar(lvl[0]),
-                            tag = tag.trim(),
-                            message = msg,
-                            source = classifyTag(tag.trim()),
-                        )
-                        channel.trySend(entry)
+                    proc.inputStream.bufferedReader().use { reader ->
+                        var line: String?
+                        while (currentCoroutineContext().isActive && running.get()) {
+                            line = reader.readLine()
+                            if (line == null) break // Normal EOF
+                            val match = linePattern.matchEntire(line) ?: continue
+                            val (ts, lvl, tag, msg) = match.destructured
+                            val entry = LogEntry(
+                                id = ++entryIdCounter,
+                                timestamp = ts,
+                                level = LogLevel.fromChar(lvl[0]),
+                                tag = tag.trim(),
+                                message = msg,
+                                source = classifyTag(tag.trim()),
+                            )
+                            enqueue(entry)
+                        }
                     }
-                }
-                proc.destroy()
-            } catch (e: Exception) {
-                if (currentCoroutineContext().isActive && running.get()) {
-                    Log.w(TAG, "logcat reader restarting: ${e.message}")
-                    delay(2000)
+                    proc.destroy()
+                    if (logcatProcess == proc) logcatProcess = null
+
+                    // Normal EOF bounded backoff to prevent tight spin loops
+                    if (currentCoroutineContext().isActive && running.get()) {
+                        delay(eofBackoffMs)
+                    }
+                } catch (e: CancellationException) {
+                    throw e
+                } catch (e: Exception) {
+                    if (currentCoroutineContext().isActive && running.get()) {
+                        Log.w(TAG, "logcat reader error; waiting ${errorBackoffMs}ms: ${e.message}")
+                        delay(errorBackoffMs)
+                    }
+                } finally {
+                    proc?.destroy()
+                    if (logcatProcess == proc) logcatProcess = null
                 }
             }
+        } finally {
+            logcatProcess?.destroy()
+            logcatProcess = null
+            channel.close()
         }
-        channel.close()
     }
 
-    private suspend fun runConsumer(channel: Channel<LogEntry>) {
-        val allBuf = ArrayDeque<LogEntry>(MAX_UI_ENTRIES + 1)
-        val backBuf = ArrayDeque<LogEntry>(MAX_UI_ENTRIES + 1)
-        val vulkBuf = ArrayDeque<LogEntry>(MAX_UI_ENTRIES + 1)
-        val appBuf = ArrayDeque<LogEntry>(MAX_UI_ENTRIES + 1)
-
-        fun <T> ArrayDeque<T>.addCapped(item: T) {
-            addLast(item)
-            if (size > MAX_UI_ENTRIES) removeAt(0)
-        }
-
-        var batchCount = 0
-
-        for (entry in channel) {
-            allBuf.addCapped(entry)
-            when (entry.source.fileCategory()) {
-                LogFileCategory.BACKEND -> backBuf.addCapped(entry)
-                LogFileCategory.VULKAN -> vulkBuf.addCapped(entry)
-                LogFileCategory.APP -> appBuf.addCapped(entry)
-            }
-
-            val cat = entry.source.fileCategory()
-            rotateIfNeeded(cat)
-            writers[cat]?.let { w ->
-                val line = "[${entry.timestamp}] ${entry.level.letter}/${entry.tag}: ${entry.message}\n"
-                runCatching {
-                    w.write(line)
-                    writeSizes[cat] = (writeSizes[cat] ?: 0L) + line.length
+    internal suspend fun runConsumer(
+        channel: Channel<LogEntry>,
+        displayCadenceMs: Long = DISPLAY_CADENCE_MS,
+        flushIntervalMs: Long = FLUSH_INTERVAL_MS,
+    ) = coroutineScope {
+        val uiTicker = launch {
+            while (isActive) {
+                delay(displayCadenceMs)
+                synchronized(bufferLock) {
+                    publishUiIfNeeded(force = false)
                 }
             }
+        }
 
-            batchCount++
-            if (batchCount >= BATCH_SIZE || channel.isEmpty) {
-                writers.values.forEach { runCatching { it.flush() } }
-                _logs.value = allBuf.toList()
-                _backendLogs.value = backBuf.toList()
-                _vulkanLogs.value = vulkBuf.toList()
-                _appLogs.value = appBuf.toList()
-                batchCount = 0
-                yield()
+        val flushTicker = launch {
+            while (isActive) {
+                delay(flushIntervalMs)
+                flushPendingWriters(force = false)
             }
         }
+
+        try {
+            for (entry in channel) {
+                synchronized(bufferLock) {
+                    processEntry(entry)
+                    var drained = 0
+                    while (drained < BATCH_SIZE) {
+                        val next = channel.tryReceive().getOrNull() ?: break
+                        processEntry(next)
+                        drained++
+                    }
+                }
+                if (!running.get()) break
+            }
+        } catch (_: CancellationException) {
+            // normal cancellation
+        } finally {
+            uiTicker.cancel()
+            flushTicker.cancel()
+            synchronized(bufferLock) {
+                while (true) {
+                    val next = channel.tryReceive().getOrNull() ?: break
+                    processEntry(next)
+                }
+                publishUiIfNeeded(force = true)
+            }
+            flushWriters()
+        }
+    }
+
+    @VisibleForTesting
+    fun resetForTest(testLogDir: File? = null) {
+        stop()
+        synchronized(bufferLock) {
+            allBuf.clear()
+            backBuf.clear()
+            vulkBuf.clear()
+            appBuf.clear()
+            uiDirty = false
+        }
+        _logs.value = emptyList()
+        _backendLogs.value = emptyList()
+        _vulkanLogs.value = emptyList()
+        _appLogs.value = emptyList()
+        writers.values.forEach { runCatching { it.close() } }
+        writers.clear()
+        writeSizes.clear()
+        lastFlushAtMs.clear()
+        droppedDebugCount.set(0L)
+        entryIdCounter = 0L
+        logDir = testLogDir
+        if (testLogDir != null) {
+            openWriters()
+        }
+        running.set(true)
+    }
+
+    @VisibleForTesting
+    fun setConsumerChannelForTest(ch: Channel<LogEntry>) {
+        channel = ch
+        running.set(true)
     }
 }
