@@ -64,6 +64,14 @@ object PatchFastMode {
         "BLUS30758" to setOf("Disable in-built MLAA", "Disable Motion Blur"),
         "BLES00680" to setOf("Disable in-built MLAA", "Disable Motion Blur"),
         "BLES01294" to setOf("Disable in-built MLAA", "Disable Motion Blur"),
+
+        // God of War III
+        "BCUS98111" to setOf("Disable MLAA", "Disable Motion Blur", "Skip intro"),
+        "BCES00510" to setOf("Disable MLAA", "Disable Motion Blur", "Skip intro"),
+        "BCES00799" to setOf("Disable MLAA", "Disable Motion Blur", "Skip intro"),
+        "BCJS37001" to setOf("Disable MLAA", "Disable Motion Blur", "Skip intro"),
+        "BCAS25003" to setOf("Disable MLAA", "Disable Motion Blur", "Skip intro"),
+        "BCKS15003" to setOf("Disable MLAA", "Disable Motion Blur", "Skip intro"),
     )
 
     /**
@@ -147,11 +155,11 @@ object PatchFastMode {
         val targets = fastPatchNamesForTitle(upper)
         if (targets.isEmpty()) return false
         val titlePatches = runCatching {
-            PatchRepository.forTitle(PatchRepository.list(), upper)
+            PatchRepository.forTitle(PatchRepository.list(context), upper)
         }.getOrDefault(emptyList())
         if (titlePatches.isEmpty()) return false
         val enabledNames = titlePatches.filter { it.enabled }.map { it.name }.toSet()
-        return targets.all { it in enabledNames }
+        return targets.all { target -> enabledNames.any { it.equals(target, ignoreCase = true) } }
     }
 
     suspend fun isFastModeEnabled(titleId: String?, context: Context? = null): Boolean =
@@ -169,11 +177,14 @@ object PatchFastMode {
         val targets = fastPatchNamesForTitle(upper)
         if (targets.isNotEmpty()) {
             runCatching {
-                val patches = PatchRepository.list()
+                if (context != null) {
+                    PatchRepository.ensureBundledPatches(context)
+                }
+                val patches = PatchRepository.list(context)
                 val forGame = PatchRepository.forTitle(patches, upper)
                 val grouped = PatchRepository.group(forGame)
                 for (group in grouped) {
-                    if (group.name in targets) {
+                    if (targets.any { it.equals(group.name, ignoreCase = true) }) {
                         PatchRepository.setEnabled(group, enabled, upper)
                     }
                 }

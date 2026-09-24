@@ -1,0 +1,300 @@
+09-24 17:52:50.560  8578  8696 D RPCS3   : 	⁂ sys_mmapper_unmap_shared_memory [124]
+09-24 17:52:50.560  8578  8696 D RPCS3   : 	⁂ sys_time_get_timezone [100]
+09-24 17:52:50.560  8578  8696 D RPCS3   : 	⁂ sys_fs_lseek [58]
+09-24 17:52:50.560  8578  8696 D RPCS3   : 	⁂ _sys_lwcond_create [50]
+09-24 17:52:50.560  8578  8696 D RPCS3   : 	⁂ sys_time_get_timebase_frequency [44]
+09-24 17:52:50.560  8578  8696 D RPCS3   : 	⁂ sys_rsx_context_attribute [43]
+09-24 17:52:50.560  8578  8696 D RPCS3   : 	⁂ sys_mutex_lock [42]
+09-24 17:52:50.560  8578  8696 D RPCS3   : 	⁂ sys_mutex_unlock [42]
+09-24 17:52:50.560  8578  8696 D RPCS3   : 	⁂ _sys_ppu_thread_create [39]
+09-24 17:52:50.560  8578  8696 D RPCS3   : 	⁂ sys_ppu_thread_start [39]
+09-24 17:52:50.560  8578  8696 D RPCS3   : 	⁂ sys_fs_fcntl [36]
+09-24 17:52:50.560  8578  8696 D RPCS3   : 	⁂ sys_semaphore_create [34]
+09-24 17:52:50.560  8578  8696 D RPCS3   : 	⁂ _sys_prx_start_module [26]
+09-24 17:52:50.560  8578  8696 D RPCS3   : 	⁂ sys_fs_open [19]
+09-24 17:52:50.560  8578  8696 D RPCS3   : 	⁂ sys_fs_fstat [19]
+09-24 17:52:50.560  8578  8696 D RPCS3   : 	⁂ sys_fs_stat [17]
+09-24 17:52:50.560  8578  8696 D RPCS3   : 	⁂ _sys_prx_load_module [13]
+09-24 17:52:50.560  8578  8696 D RPCS3   : 	⁂ sys_event_queue_create [8]
+09-24 17:52:50.560  8578  8696 D RPCS3   : 	⁂ sys_rsx_context_iomap [8]
+09-24 17:52:50.560  8578  8696 D RPCS3   : 	⁂ sys_event_flag_create [6]
+09-24 17:52:50.560  8578  8696 D RPCS3   : 	⁂ sys_event_port_create [6]
+09-24 17:52:50.560  8578  8696 D RPCS3   : 	⁂ sys_event_port_connect_local [6]
+09-24 17:52:50.560  8578  8696 D RPCS3   : 	⁂ sys_spu_thread_initialize [6]
+09-24 17:52:50.560  8578  8696 D RPCS3   : 	⁂ sys_process_getpid [5]
+09-24 17:52:50.560  8578  8696 D RPCS3   : 	⁂ sys_mutex_create [5]
+09-24 17:52:50.560  8578  8696 D RPCS3   : 	⁂ sys_spu_thread_group_connect_event_all_threads [5]
+09-24 17:52:50.560  8578  8696 D RPCS3   : 	⁂ sys_process_get_sdk_version [4]
+09-24 17:52:50.560  8578  8696 D RPCS3   : 	⁂ sys_memory_get_user_memory_size [4]
+09-24 17:52:50.560  8578  8696 D RPCS3   : 	⁂ sys_memory_allocate [3]
+09-24 17:52:50.560  8578  8696 D RPCS3   : 	⁂ sys_process_is_spu_lock_line_reservation_address [2]
+09-24 17:52:50.560  8578  8696 D RPCS3   : 	⁂ _sys_ppu_thread_exit [2]
+09-24 17:52:50.560  8578  8696 D RPCS3   : 	⁂ sys_cond_create [2]
+09-24 17:52:50.560  8578  8696 D RPCS3   : 	⁂ sys_spu_thread_group_create [2]
+09-24 17:52:50.560  8578  8696 D RPCS3   : 	⁂ sys_spu_thread_group_start [2]
+09-24 17:52:50.560  8578  8696 D RPCS3   : 	⁂ sys_spu_thread_group_join [2]
+09-24 17:52:50.560  8578  8696 D RPCS3   : 	⁂ sys_spu_thread_group_connect_event [2]
+09-24 17:52:50.560  8578  8696 D RPCS3   : 	⁂ _sys_prx_register_module [2]
+09-24 17:52:50.560  8578  8696 D RPCS3   : 	⁂ _sys_prx_get_module_id_by_name [2]
+09-24 17:52:50.560  8578  8696 D RPCS3   : 	⁂ sys_rsx_attribute [2]
+09-24 17:52:50.560  8578  8696 D RPCS3   : 	⁂ sys_ss_access_control_engine [2]
+09-24 17:52:50.560  8578  8696 D RPCS3   : 	⁂ _sys_process_get_paramsfo [1]
+09-24 17:52:50.560  8578  8696 D RPCS3   : 	⁂ sys_ppu_thread_get_priority [1]
+09-24 17:52:50.560  8578  8696 D RPCS3   : 	⁂ sys_timer_create [1]
+09-24 17:52:50.560  8578  8696 D RPCS3   : 	⁂ _sys_timer_start [1]
+09-24 17:52:50.560  8578  8696 D RPCS3   : 	⁂ sys_timer_connect_event_queue [1]
+09-24 17:52:50.560  8578  8696 D RPCS3   : 	⁂ _sys_lwmutex_trylock [1]
+09-24 17:52:50.560  8578  8696 D RPCS3   : 	⁂ sys_spu_initialize [1]
+09-24 17:52:50.560  8578  8696 D RPCS3   : 	⁂ sys_mmapper_allocate_address [1]
+09-24 17:52:50.560  8578  8696 D RPCS3   : 	⁂ syscall_462 [1]
+09-24 17:52:50.560  8578  8696 D RPCS3   : 	⁂ sys_rsx_memory_allocate [1]
+09-24 17:52:50.560  8578  8696 D RPCS3   : 	⁂ sys_rsx_context_allocate [1]
+09-24 17:52:50.560  8578  8696 D RPCS3   : 	⁂ sys_rsx_context_iounmap [1]
+09-24 17:52:50.560  8578  8696 D RPCS3   : 	⁂ sys_rsx_device_map [1]
+09-24 17:52:50.560  8578  8696 D RPCS3   : 	⁂ sys_fs_close [1]
+09-24 17:52:50.560  8578  8696 D RPCS3   : 	⁂ sys_fs_opendir [1]
+09-24 17:52:50.833  8578  8620 D S3PERF  : crosscheck ui_snapshot_fps=60.0034 ui_snapshot_frametime_ms=16.346
+09-24 17:52:51.674  8578  8620 D S3PERF  : crosscheck source=surface presented=278 json_fps=60.0154 json_frametime_ms=16.751
+09-24 17:52:51.983  8578  8620 D S3PERF  : crosscheck ui_snapshot_fps=59.9948 ui_snapshot_frametime_ms=16.856
+09-24 17:52:52.918  8578  8620 D S3PERF  : crosscheck source=surface presented=352 json_fps=60.0081 json_frametime_ms=16.587
+09-24 17:52:53.227  8578  8620 D S3PERF  : crosscheck ui_snapshot_fps=60.0172 ui_snapshot_frametime_ms=16.695
+09-24 17:52:54.158  8578  8620 D S3PERF  : crosscheck source=surface presented=427 json_fps=60.0123 json_frametime_ms=16.629
+09-24 17:52:54.218  8578  8578 I S3TOUCH : root action=down x=2416 y=1082
+09-24 17:52:54.218  8578  8578 I S3TOUCH : monitor action=down consumed=false
+09-24 17:52:54.218  8578  8578 I S3TOUCH : pad action=down menu=false
+09-24 17:52:54.398  8578  8620 D S3PERF  : crosscheck ui_snapshot_fps=60.0123 ui_snapshot_frametime_ms=16.629
+09-24 17:52:55.043  8578  8578 I S3TOUCH : root action=down x=2408 y=1058
+09-24 17:52:55.043  8578  8578 I S3TOUCH : monitor action=down consumed=false
+09-24 17:52:55.043  8578  8578 I S3TOUCH : pad action=down menu=false
+09-24 17:52:55.328  8578  8620 D S3PERF  : crosscheck source=surface presented=497 json_fps=60.0052 json_frametime_ms=16.636
+09-24 17:52:55.637  8578  8620 D S3PERF  : crosscheck ui_snapshot_fps=60.0117 ui_snapshot_frametime_ms=16.584
+09-24 17:52:55.766  8578  8578 I S3TOUCH : root action=down x=2423 y=1047
+09-24 17:52:55.767  8578  8578 I S3TOUCH : monitor action=down consumed=false
+09-24 17:52:55.767  8578  8578 I S3TOUCH : pad action=down menu=false
+09-24 17:52:56.151  8578  8578 I S3TOUCH : root action=down x=2426 y=1049
+09-24 17:52:56.151  8578  8578 I S3TOUCH : monitor action=down consumed=false
+09-24 17:52:56.151  8578  8578 I S3TOUCH : pad action=down menu=false
+09-24 17:52:56.562  8578  8620 D S3PERF  : crosscheck source=surface presented=571 json_fps=60.0263 json_frametime_ms=16.204
+09-24 17:52:56.586  8578  8578 I S3TOUCH : root action=down x=2419 y=1054
+09-24 17:52:56.586  8578  8578 I S3TOUCH : monitor action=down consumed=false
+09-24 17:52:56.586  8578  8578 I S3TOUCH : pad action=down menu=false
+09-24 17:52:56.871  8578  8620 D S3PERF  : crosscheck ui_snapshot_fps=60.0345 ui_snapshot_frametime_ms=16.326
+09-24 17:52:56.883  8578  8578 I S3TOUCH : root action=down x=2425 y=1060
+09-24 17:52:56.883  8578  8578 I S3TOUCH : monitor action=down consumed=false
+09-24 17:52:56.883  8578  8578 I S3TOUCH : pad action=down menu=false
+09-24 17:52:57.261  8578  8578 I S3TOUCH : root action=down x=2431 y=1055
+09-24 17:52:57.261  8578  8578 I S3TOUCH : monitor action=down consumed=false
+09-24 17:52:57.261  8578  8578 I S3TOUCH : pad action=down menu=false
+09-24 17:52:57.568  8578  8578 I S3TOUCH : root action=down x=2435 y=1054
+09-24 17:52:57.568  8578  8578 I S3TOUCH : monitor action=down consumed=false
+09-24 17:52:57.568  8578  8578 I S3TOUCH : pad action=down menu=false
+09-24 17:52:57.724  8578  8620 D S3PERF  : crosscheck source=surface presented=641 json_fps=59.8987 json_frametime_ms=18.243
+09-24 17:52:57.865  8578  8578 I S3TOUCH : root action=down x=2434 y=1050
+09-24 17:52:57.865  8578  8578 I S3TOUCH : monitor action=down consumed=false
+09-24 17:52:57.865  8578  8578 I S3TOUCH : pad action=down menu=false
+09-24 17:52:58.032  8578  8620 D S3PERF  : crosscheck ui_snapshot_fps=60.0319 ui_snapshot_frametime_ms=15.604
+09-24 17:52:58.146  8578  8578 I S3TOUCH : root action=down x=2428 y=1054
+09-24 17:52:58.146  8578  8578 I S3TOUCH : monitor action=down consumed=false
+09-24 17:52:58.147  8578  8578 I S3TOUCH : pad action=down menu=false
+09-24 17:52:58.405  8578  8578 I S3TOUCH : root action=down x=2424 y=1051
+09-24 17:52:58.405  8578  8578 I S3TOUCH : monitor action=down consumed=false
+09-24 17:52:58.405  8578  8578 I S3TOUCH : pad action=down menu=false
+09-24 17:52:58.710  8578  8578 I S3TOUCH : root action=down x=2424 y=1052
+09-24 17:52:58.710  8578  8578 I S3TOUCH : monitor action=down consumed=false
+09-24 17:52:58.710  8578  8578 I S3TOUCH : pad action=down menu=false
+09-24 17:52:58.963  8578  8620 D S3PERF  : crosscheck source=surface presented=715 json_fps=59.9993 json_frametime_ms=16.293
+09-24 17:52:59.097  8578  8578 I S3TOUCH : root action=down x=2425 y=1050
+09-24 17:52:59.097  8578  8578 I S3TOUCH : monitor action=down consumed=false
+09-24 17:52:59.097  8578  8578 I S3TOUCH : pad action=down menu=false
+09-24 17:52:59.271  8578  8620 D S3PERF  : crosscheck ui_snapshot_fps=60.0097 ui_snapshot_frametime_ms=16.545
+09-24 17:52:59.484  8578  8578 I S3TOUCH : root action=down x=2414 y=1054
+09-24 17:52:59.484  8578  8578 I S3TOUCH : monitor action=down consumed=false
+09-24 17:52:59.484  8578  8578 I S3TOUCH : pad action=down menu=false
+09-24 17:52:59.782  8578  8578 I S3TOUCH : root action=down x=2424 y=1048
+09-24 17:52:59.782  8578  8578 I S3TOUCH : monitor action=down consumed=false
+09-24 17:52:59.782  8578  8578 I S3TOUCH : pad action=down menu=false
+09-24 17:52:59.903  8578  9057 D RPCS3   : HLE/LV2 history: 
+09-24 17:52:59.903  8578  9057 D RPCS3   : (0) 0x008b21fc: sys_mutex_unlock, 0x0, r3=0x0, r4=0x0, r5=0x0, r6=0x0
+09-24 17:52:59.904  8578  9057 W RPCS3   : '_sys_ppu_thread_exit' aborted (0.000332s)
+09-24 17:52:59.904  8578  9057 D RPCS3   : PPU thread perf stats are not available.
+09-24 17:52:59.904  8578  9057 D RPCS3   : PPU thread perf stats are not available.
+09-24 17:52:59.904  8578  8724 W RPCS3   : sys_rsx_context_iounmap(context_id=0x55555555, io=0x4c00000, size=0x4000000)
+09-24 17:52:59.904  8578  8724 W RPCS3   : sys_mmapper_unmap_shared_memory(addr=0x34c00000, mem_id=*0xd0010780)
+09-24 17:52:59.905  8578  8724 W RPCS3   : sys_mmapper_unmap_shared_memory(addr=0x34d00000, mem_id=*0xd0010780)
+09-24 17:52:59.906  8578  8724 W RPCS3   : sys_mmapper_unmap_shared_memory(addr=0x34e00000, mem_id=*0xd0010780)
+09-24 17:52:59.907  8578  8724 W RPCS3   : sys_mmapper_unmap_shared_memory(addr=0x34f00000, mem_id=*0xd0010780)
+09-24 17:52:59.907  8578  8724 W RPCS3   : sys_mmapper_unmap_shared_memory(addr=0x35000000, mem_id=*0xd0010780)
+09-24 17:52:59.907  8578  8724 W RPCS3   : sys_mmapper_unmap_shared_memory(addr=0x35100000, mem_id=*0xd0010780)
+09-24 17:52:59.907  8578  8724 W RPCS3   : sys_mmapper_unmap_shared_memory(addr=0x35200000, mem_id=*0xd0010780)
+09-24 17:52:59.907  8578  8724 W RPCS3   : sys_mmapper_unmap_shared_memory(addr=0x35300000, mem_id=*0xd0010780)
+09-24 17:52:59.908  8578  8724 W RPCS3   : sys_mmapper_unmap_shared_memory(addr=0x35400000, mem_id=*0xd0010780)
+09-24 17:52:59.908  8578  8724 W RPCS3   : sys_mmapper_unmap_shared_memory(addr=0x35500000, mem_id=*0xd0010780)
+09-24 17:52:59.908  8578  8724 W RPCS3   : sys_mmapper_unmap_shared_memory(addr=0x35600000, mem_id=*0xd0010780)
+09-24 17:52:59.908  8578  8724 W RPCS3   : sys_mmapper_unmap_shared_memory(addr=0x35700000, mem_id=*0xd0010780)
+09-24 17:52:59.908  8578  8724 W RPCS3   : sys_mmapper_unmap_shared_memory(addr=0x35800000, mem_id=*0xd0010780)
+09-24 17:52:59.908  8578  8724 W RPCS3   : sys_mmapper_unmap_shared_memory(addr=0x35900000, mem_id=*0xd0010780)
+09-24 17:52:59.908  8578  8724 W RPCS3   : sys_mmapper_unmap_shared_memory(addr=0x35a00000, mem_id=*0xd0010780)
+09-24 17:52:59.908  8578  8724 W RPCS3   : sys_mmapper_unmap_shared_memory(addr=0x35b00000, mem_id=*0xd0010780)
+09-24 17:52:59.909  8578  8724 W RPCS3   : sys_mmapper_unmap_shared_memory(addr=0x35c00000, mem_id=*0xd0010780)
+09-24 17:52:59.909  8578  8724 W RPCS3   : sys_mmapper_unmap_shared_memory(addr=0x35d00000, mem_id=*0xd0010780)
+09-24 17:52:59.909  8578  8724 W RPCS3   : sys_mmapper_unmap_shared_memory(addr=0x35e00000, mem_id=*0xd0010780)
+09-24 17:52:59.909  8578  8724 W RPCS3   : sys_mmapper_unmap_shared_memory(addr=0x35f00000, mem_id=*0xd0010780)
+09-24 17:52:59.909  8578  8724 W RPCS3   : sys_mmapper_unmap_shared_memory(addr=0x36000000, mem_id=*0xd0010780)
+09-24 17:52:59.910  8578  8724 W RPCS3   : sys_mmapper_unmap_shared_memory(addr=0x36100000, mem_id=*0xd0010780)
+09-24 17:52:59.910  8578  8724 W RPCS3   : sys_mmapper_unmap_shared_memory(addr=0x36200000, mem_id=*0xd0010780)
+09-24 17:52:59.910  8578  8724 W RPCS3   : sys_mmapper_unmap_shared_memory(addr=0x36300000, mem_id=*0xd0010780)
+09-24 17:52:59.910  8578  8724 W RPCS3   : sys_mmapper_unmap_shared_memory(addr=0x36400000, mem_id=*0xd0010780)
+09-24 17:52:59.910  8578  8724 W RPCS3   : sys_mmapper_unmap_shared_memory(addr=0x36500000, mem_id=*0xd0010780)
+09-24 17:52:59.910  8578  8724 W RPCS3   : sys_mmapper_unmap_shared_memory(addr=0x36600000, mem_id=*0xd0010780)
+09-24 17:52:59.910  8578  8724 W RPCS3   : sys_mmapper_unmap_shared_memory(addr=0x36700000, mem_id=*0xd0010780)
+09-24 17:52:59.910  8578  8724 W RPCS3   : sys_mmapper_unmap_shared_memory(addr=0x36800000, mem_id=*0xd0010780)
+09-24 17:52:59.910  8578  8724 W RPCS3   : sys_mmapper_unmap_shared_memory(addr=0x36900000, mem_id=*0xd0010780)
+09-24 17:52:59.910  8578  8724 W RPCS3   : sys_mmapper_unmap_shared_memory(addr=0x36a00000, mem_id=*0xd0010780)
+09-24 17:52:59.910  8578  8724 W RPCS3   : sys_mmapper_unmap_shared_memory(addr=0x36b00000, mem_id=*0xd0010780)
+09-24 17:52:59.911  8578  8724 W RPCS3   : sys_mmapper_unmap_shared_memory(addr=0x36c00000, mem_id=*0xd0010780)
+09-24 17:52:59.911  8578  8724 W RPCS3   : sys_mmapper_unmap_shared_memory(addr=0x36d00000, mem_id=*0xd0010780)
+09-24 17:52:59.911  8578  8724 W RPCS3   : sys_mmapper_unmap_shared_memory(addr=0x36e00000, mem_id=*0xd0010780)
+09-24 17:52:59.911  8578  8724 W RPCS3   : sys_mmapper_unmap_shared_memory(addr=0x36f00000, mem_id=*0xd0010780)
+09-24 17:52:59.911  8578  8724 W RPCS3   : sys_mmapper_unmap_shared_memory(addr=0x37000000, mem_id=*0xd0010780)
+09-24 17:52:59.911  8578  8724 W RPCS3   : sys_mmapper_unmap_shared_memory(addr=0x37100000, mem_id=*0xd0010780)
+09-24 17:52:59.911  8578  8724 W RPCS3   : sys_mmapper_unmap_shared_memory(addr=0x37200000, mem_id=*0xd0010780)
+09-24 17:52:59.911  8578  8724 W RPCS3   : sys_mmapper_unmap_shared_memory(addr=0x37300000, mem_id=*0xd0010780)
+09-24 17:52:59.912  8578  8724 W RPCS3   : sys_mmapper_unmap_shared_memory(addr=0x37400000, mem_id=*0xd0010780)
+09-24 17:52:59.912  8578  8724 W RPCS3   : sys_mmapper_unmap_shared_memory(addr=0x37500000, mem_id=*0xd0010780)
+09-24 17:52:59.912  8578  8724 W RPCS3   : sys_mmapper_unmap_shared_memory(addr=0x37600000, mem_id=*0xd0010780)
+09-24 17:52:59.912  8578  8724 W RPCS3   : sys_mmapper_unmap_shared_memory(addr=0x37700000, mem_id=*0xd0010780)
+09-24 17:52:59.912  8578  8724 W RPCS3   : sys_mmapper_unmap_shared_memory(addr=0x37800000, mem_id=*0xd0010780)
+09-24 17:52:59.912  8578  8724 W RPCS3   : sys_mmapper_unmap_shared_memory(addr=0x37900000, mem_id=*0xd0010780)
+09-24 17:52:59.912  8578  8724 W RPCS3   : sys_mmapper_unmap_shared_memory(addr=0x37a00000, mem_id=*0xd0010780)
+09-24 17:52:59.912  8578  8724 W RPCS3   : sys_mmapper_unmap_shared_memory(addr=0x37b00000, mem_id=*0xd0010780)
+09-24 17:52:59.912  8578  8724 W RPCS3   : sys_mmapper_unmap_shared_memory(addr=0x37c00000, mem_id=*0xd0010780)
+09-24 17:52:59.913  8578  8724 W RPCS3   : sys_mmapper_unmap_shared_memory(addr=0x37d00000, mem_id=*0xd0010780)
+09-24 17:52:59.913  8578  8724 W RPCS3   : sys_mmapper_unmap_shared_memory(addr=0x37e00000, mem_id=*0xd0010780)
+09-24 17:52:59.913  8578  8724 W RPCS3   : sys_mmapper_unmap_shared_memory(addr=0x37f00000, mem_id=*0xd0010780)
+09-24 17:52:59.913  8578  8724 W RPCS3   : sys_mmapper_unmap_shared_memory(addr=0x38000000, mem_id=*0xd0010780)
+09-24 17:52:59.913  8578  8724 W RPCS3   : sys_mmapper_unmap_shared_memory(addr=0x38100000, mem_id=*0xd0010780)
+09-24 17:52:59.913  8578  8724 W RPCS3   : sys_mmapper_unmap_shared_memory(addr=0x38200000, mem_id=*0xd0010780)
+09-24 17:52:59.913  8578  8724 W RPCS3   : sys_mmapper_unmap_shared_memory(addr=0x38300000, mem_id=*0xd0010780)
+09-24 17:52:59.913  8578  8724 W RPCS3   : sys_mmapper_unmap_shared_memory(addr=0x38400000, mem_id=*0xd0010780)
+09-24 17:52:59.913  8578  8724 W RPCS3   : sys_mmapper_unmap_shared_memory(addr=0x38500000, mem_id=*0xd0010780)
+09-24 17:52:59.914  8578  8724 W RPCS3   : sys_mmapper_unmap_shared_memory(addr=0x38600000, mem_id=*0xd0010780)
+09-24 17:52:59.914  8578  8724 W RPCS3   : sys_mmapper_unmap_shared_memory(addr=0x38700000, mem_id=*0xd0010780)
+09-24 17:52:59.914  8578  8724 W RPCS3   : sys_mmapper_unmap_shared_memory(addr=0x38800000, mem_id=*0xd0010780)
+09-24 17:52:59.914  8578  8724 W RPCS3   : sys_mmapper_unmap_shared_memory(addr=0x38900000, mem_id=*0xd0010780)
+09-24 17:52:59.914  8578  8724 W RPCS3   : sys_mmapper_unmap_shared_memory(addr=0x38a00000, mem_id=*0xd0010780)
+09-24 17:52:59.914  8578  8724 W RPCS3   : sys_mmapper_unmap_shared_memory(addr=0x38b00000, mem_id=*0xd0010780)
+09-24 17:52:59.914  8578  8724 W RPCS3   : cellSysutilRegisterCallback(slot=0, func=*0x51da28, userdata=*0x0)
+09-24 17:52:59.914  8578  8724 W RPCS3   : sys_rsx_attribute(packageId=0x202, a2=0x1, a3=0x1, a4=0x0, a5=0x0)
+09-24 17:52:59.914  8578  8724 W RPCS3   : sys_rsx_attribute(packageId=0x2, a2=0x1, a3=0x0, a4=0x0, a5=0x0)
+09-24 17:52:59.915  8578  8724 W RPCS3   : sys_rsx_context_attribute(context_id=0x55555555, package_id=0x101, a3=0x1, a4=0x2, a5=0x0, a6=0x0)
+09-24 17:52:59.915  8578  9029 W RPCS3   : [0x22d8] At 0x22dc: indirect branch to 0x22e0 (D)
+09-24 17:52:59.915  8578  9029 D RPCS3   : SPU block is a loop at [0x022f0 -> 0x022f0]
+09-24 17:52:59.915  8578  9029 D RPCS3   : Building function 0x22d8... (size 14, __spu-0x022d8-WaQSPvq1Lq5PoYECsUdjuAiMyYgd)
+09-24 17:52:59.922  8578  8724 W RPCS3   : cellSysutilGetSystemParamInt(id=0x112(ID_ENTER_BUTTON_ASSIGN), value=*0xd0010750)
+09-24 17:52:59.934  8578  9029 I RPCS3   : New SPU block compiled successfully (size=14)
+09-24 17:52:59.951  8578  8722 D RPCS3   : S3VKSYNC domain=host backend=gpu_label reason=android gpu=Turnip Adreno (TM) 750 driver=turnip Mesa driver driver_vendor=0
+09-24 17:52:59.964  8578  8722 W RPCS3   : Cached object for address 0x30A80000 was found, but it does not match stored parameters (width=1280 vs 1280; height=720 vs 720; depth=1 vs 0; mipmaps=1 vs 0)
+09-24 17:52:59.964  8578  8722 E RPCS3   : Format incompatibility detected, reporting failure to force data copy (VK_FORMAT=0x2C, GCM_FORMAT=0x9F)
+09-24 17:52:59.967  8578  8722 W RPCS3   : [descriptor_manager::register] Now monitoring 4 descriptor sets
+09-24 17:53:00.045  8578  8724 W RPCS3   : cellVdecQueryAttrEx(type=*0xd00108b0, attr=*0xd00108bc)
+09-24 17:53:00.045  8578  8724 W RPCS3   : cellVdecQueryAttr: MPEG2 (profile=3)
+09-24 17:53:00.062  8578  8578 I S3TOUCH : root action=down x=2423 y=1047
+09-24 17:53:00.062  8578  8578 I S3TOUCH : monitor action=down consumed=false
+09-24 17:53:00.062  8578  8578 I S3TOUCH : pad action=down menu=false
+09-24 17:53:00.069  8578  8724 W RPCS3   : cellVdecQueryAttrEx(type=*0xd0010750, attr=*0xd001075c)
+09-24 17:53:00.069  8578  8724 W RPCS3   : cellVdecQueryAttr: MPEG2 (profile=3)
+09-24 17:53:00.070  8578  8724 W RPCS3   : sys_mmapper_map_shared_memory(addr=0x34c00000, mem_id=0x8008500, flags=0x40000)
+09-24 17:53:00.070  8578  8724 E RPCS3   : Failed to lock sudo memory (addr=0x34c00000, size=0x100000). Consider increasing your system limits.
+09-24 17:53:00.070  8578  8724 W RPCS3   : sys_mmapper_map_shared_memory(addr=0x34d00000, mem_id=0x8008600, flags=0x40000)
+09-24 17:53:00.070  8578  8724 E RPCS3   : Failed to lock sudo memory (addr=0x34d00000, size=0x100000). Consider increasing your system limits.
+09-24 17:53:00.070  8578  8724 W RPCS3   : sys_mmapper_map_shared_memory(addr=0x34e00000, mem_id=0x8008700, flags=0x40000)
+09-24 17:53:00.070  8578  8724 E RPCS3   : Failed to lock sudo memory (addr=0x34e00000, size=0x100000). Consider increasing your system limits.
+09-24 17:53:00.070  8578  8724 W RPCS3   : sys_mmapper_map_shared_memory(addr=0x34f00000, mem_id=0x8008800, flags=0x40000)
+09-24 17:53:00.070  8578  8724 E RPCS3   : Failed to lock sudo memory (addr=0x34f00000, size=0x100000). Consider increasing your system limits.
+09-24 17:53:00.070  8578  8724 W RPCS3   : sys_mmapper_map_shared_memory(addr=0x35000000, mem_id=0x8008900, flags=0x40000)
+09-24 17:53:00.070  8578  8724 E RPCS3   : Failed to lock sudo memory (addr=0x35000000, size=0x100000). Consider increasing your system limits.
+09-24 17:53:00.072  8578  8724 W RPCS3   : sys_mmapper_map_shared_memory(addr=0x35100000, mem_id=0x8008a00, flags=0x40000)
+09-24 17:53:00.072  8578  8724 E RPCS3   : Failed to lock sudo memory (addr=0x35100000, size=0x100000). Consider increasing your system limits.
+09-24 17:53:00.072  8578  8724 W RPCS3   : sys_mmapper_map_shared_memory(addr=0x35200000, mem_id=0x8008b00, flags=0x40000)
+09-24 17:53:00.072  8578  8724 E RPCS3   : Failed to lock sudo memory (addr=0x35200000, size=0x100000). Consider increasing your system limits.
+09-24 17:53:00.072  8578  8724 W RPCS3   : sys_mmapper_map_shared_memory(addr=0x35300000, mem_id=0x8008c00, flags=0x40000)
+09-24 17:53:00.072  8578  8724 E RPCS3   : Failed to lock sudo memory (addr=0x35300000, size=0x100000). Consider increasing your system limits.
+09-24 17:53:00.072  8578  8724 W RPCS3   : sys_mmapper_map_shared_memory(addr=0x35400000, mem_id=0x8008d00, flags=0x40000)
+09-24 17:53:00.072  8578  8724 E RPCS3   : Failed to lock sudo memory (addr=0x35400000, size=0x100000). Consider increasing your system limits.
+09-24 17:53:00.072  8578  8724 W RPCS3   : sys_mmapper_map_shared_memory(addr=0x35500000, mem_id=0x8008e00, flags=0x40000)
+09-24 17:53:00.072  8578  8724 E RPCS3   : Failed to lock sudo memory (addr=0x35500000, size=0x100000). Consider increasing your system limits.
+09-24 17:53:00.072  8578  8724 W RPCS3   : sys_mmapper_map_shared_memory(addr=0x35600000, mem_id=0x8008f00, flags=0x40000)
+09-24 17:53:00.072  8578  8724 E RPCS3   : Failed to lock sudo memory (addr=0x35600000, size=0x100000). Consider increasing your system limits.
+09-24 17:53:00.072  8578  8724 W RPCS3   : sys_mmapper_map_shared_memory(addr=0x35700000, mem_id=0x8009000, flags=0x40000)
+09-24 17:53:00.072  8578  8724 E RPCS3   : Failed to lock sudo memory (addr=0x35700000, size=0x100000). Consider increasing your system limits.
+09-24 17:53:00.072  8578  8724 W RPCS3   : sys_mmapper_map_shared_memory(addr=0x35800000, mem_id=0x8009100, flags=0x40000)
+09-24 17:53:00.072  8578  8724 E RPCS3   : Failed to lock sudo memory (addr=0x35800000, size=0x100000). Consider increasing your system limits.
+09-24 17:53:00.072  8578  8724 W RPCS3   : sys_rsx_context_iomap(context_id=0x55555555, io=0x4c00000, ea=0x34c00000, size=0xd00000, flags=0xe000000000000800)
+09-24 17:53:00.073  8578  8724 W RPCS3   : sys_rsx_context_iomap(): RSX is not idle while mapping io
+09-24 17:53:00.095  8578  8724 W RPCS3   : cellVdecQueryAttrEx(type=*0xd0010954, attr=*0xd0010960)
+09-24 17:53:00.095  8578  8724 W RPCS3   : cellVdecQueryAttr: MPEG2 (profile=3)
+09-24 17:53:00.095  8578  8724 W RPCS3   : cellVdecOpenEx(type=*0xd0010954, res=*0xd0010980, cb=*0xd001094c, handle=*0x641b7c)
+09-24 17:53:00.095  8578  8724 W RPCS3   : cellVdecQueryAttr: MPEG2 (profile=3)
+09-24 17:53:00.095  8578  8724 W RPCS3   : _sys_ppu_thread_create(thread_id=*0xd00108c8, param=*0xd00107f0, arg=0xf0000000, unk=0x0, prio=1000, stacksize=0x2000, flags=0x2, threadname=*0xd00108b6)
+09-24 17:53:00.096  8578  8724 W RPCS3   : _sys_ppu_thread_create(): Thread "HLE Video Decoder" created (id=0x1000028, func=*0x7f454c46, rtoc=0x2020166, user-tls=0x100084b0)
+09-24 17:53:00.096  8578  8724 W RPCS3   : cellVdecStartSeq(handle=0xf0000000)
+09-24 17:53:00.163  8578  8722 W RPCS3   : [descriptor_manager::register] Now monitoring 5 descriptor sets
+09-24 17:53:00.172  8578  9027 W RPCS3   : Reports area at location CELL_GCM_LOCATION_MAIN was accessed. ZCULL optimizations will be disabled.
+09-24 17:53:00.198  8578  8620 D S3PERF  : crosscheck source=surface presented=782 json_fps=53.3653 json_frametime_ms=32.875
+09-24 17:53:00.345  8578  9095 W RPCS3   : cellSaveDataListAutoLoad(version=0, errDialog=0, setList=*0xd008e6d8, setBuf=*0xd008e6e8, funcFixed=*0x51c5d0, funcStat=*0x51c568, funcFile=*0x51c570, container=0xffffffff, userdata=*0xd008e6d4)
+09-24 17:53:00.345  8578  9095 D RPCS3   : savedata_op(): setList = { .sortType=0, .sortOrder=0, .dirNamePrefix='“BCUS98111-”' }
+09-24 17:53:00.345  8578  9095 D RPCS3   : savedata_op(): setBuf  = { .dirListMax=34, .fileListMax=2, .bufSize=1632 }
+09-24 17:53:00.353  8578  9095 W RPCS3   : savedata_op(): funcFixed returned result=1.
+09-24 17:53:00.354  8578  9095 W RPCS3   : cellSaveDataListAutoLoad(version=0, errDialog=0, setList=*0xd008e6d8, setBuf=*0xd008e6e8, funcFixed=*0x51c5b8, funcStat=*0x51c568, funcFile=*0x51c570, container=0xffffffff, userdata=*0xd008e6d0)
+09-24 17:53:00.354  8578  9095 D RPCS3   : savedata_op(): setList = { .sortType=0, .sortOrder=0, .dirNamePrefix='“BCUS98111-”' }
+09-24 17:53:00.354  8578  9095 D RPCS3   : savedata_op(): setBuf  = { .dirListMax=34, .fileListMax=2, .bufSize=1632 }
+09-24 17:53:00.368  8578  8578 I S3TOUCH : root action=down x=2422 y=1046
+09-24 17:53:00.368  8578  8578 I S3TOUCH : monitor action=down consumed=false
+09-24 17:53:00.368  8578  8578 I S3TOUCH : pad action=down menu=false
+09-24 17:53:00.387  8578  9095 W RPCS3   : savedata_op(): funcStat returned result=1.
+09-24 17:53:00.387  8578  9095 W RPCS3   : sceNpTrophyGetRequiredDiskSpace(context=0x1, handle=0x1, reqspace=*0x6407d0, options=0x0)
+09-24 17:53:00.388  8578  9095 W RPCS3   : sceNpTrophyGetRequiredDiskSpace(): Trophy config is already installed (trp_name=NPWR00801_00)
+09-24 17:53:00.388  8578  9095 W RPCS3   : sceNpTrophyGetRequiredDiskSpace(): reqspace is 0x0
+09-24 17:53:00.398  8578  9095 W RPCS3   : sceNpTrophyRegisterContext(context=0x1, handle=0x1, statusCb=*0x51e038, arg=*0x0, options=0x1)
+09-24 17:53:00.399  8578  9095 D RPCS3   : sceNpTrophyRegisterContext(): Callback is being called (trp_status=3)
+09-24 17:53:00.443  8578  9095 D RPCS3   : S3TROPHY associated title=BCUS98111 set=NPWR00801_00
+09-24 17:53:00.450  8578  8620 D S3PERF  : crosscheck ui_snapshot_fps=53.3653 ui_snapshot_frametime_ms=32.875
+09-24 17:53:00.495  8578  8668 D RPCS3   : CPU Usage: Total: 33.2%, Cores: 0.0%, 0.0%, 0.0%, 0.0%, 0.0%, 0.0%, 0.0%, 0.0%
+09-24 17:53:00.562  8578  8696 D RPCS3   : PPU Syscall Usage Stats:
+09-24 17:53:00.562  8578  8696 D RPCS3   : 	⁂ sys_timer_usleep [137093]
+09-24 17:53:00.562  8578  8696 D RPCS3   : 	⁂ sys_event_queue_receive [5938]
+09-24 17:53:00.562  8578  8696 D RPCS3   : 	⁂ _sys_lwmutex_lock [5193]
+09-24 17:53:00.562  8578  8696 D RPCS3   : 	⁂ _sys_lwcond_queue_wait [4978]
+09-24 17:53:00.562  8578  8696 D RPCS3   : 	⁂ _sys_lwmutex_unlock [4160]
+09-24 17:53:00.562  8578  8696 D RPCS3   : 	⁂ sys_time_get_current_time [2912]
+09-24 17:53:00.562  8578  8696 D RPCS3   : 	⁂ _sys_lwcond_signal [2482]
+09-24 17:53:00.562  8578  8696 D RPCS3   : 	⁂ sys_event_port_send [2417]
+09-24 17:53:00.562  8578  8696 D RPCS3   : 	⁂ _sys_lwcond_signal_all [1228]
+09-24 17:53:00.562  8578  8696 D RPCS3   : 	⁂ sys_fs_read [1054]
+09-24 17:53:00.562  8578  8696 D RPCS3   : 	⁂ sys_mmapper_map_shared_memory [329]
+09-24 17:53:00.562  8578  8696 D RPCS3   : 	⁂ sys_mmapper_unmap_shared_memory [188]
+09-24 17:53:00.562  8578  8696 D RPCS3   : 	⁂ sys_fs_lseek [59]
+09-24 17:53:00.562  8578  8696 D RPCS3   : 	⁂ sys_time_get_timebase_frequency [45]
+09-24 17:53:00.562  8578  8696 D RPCS3   : 	⁂ sys_mutex_lock [44]
+09-24 17:53:00.562  8578  8696 D RPCS3   : 	⁂ sys_mutex_unlock [44]
+09-24 17:53:00.562  8578  8696 D RPCS3   : 	⁂ sys_rsx_context_attribute [44]
+09-24 17:53:00.562  8578  8696 D RPCS3   : 	⁂ _sys_ppu_thread_create [40]
+09-24 17:53:00.562  8578  8696 D RPCS3   : 	⁂ sys_event_flag_wait [14]
+09-24 17:53:00.562  8578  8696 D RPCS3   : 	⁂ sys_event_flag_clear [14]
+09-24 17:53:00.562  8578  8696 D RPCS3   : 	⁂ sys_rsx_context_iomap [9]
+09-24 17:53:00.562  8578  8696 D RPCS3   : 	⁂ sys_rsx_attribute [4]
+09-24 17:53:00.562  8578  8696 D RPCS3   : 	⁂ _sys_ppu_thread_exit [3]
+09-24 17:53:00.562  8578  8696 D RPCS3   : 	⁂ _sys_lwmutex_trylock [3]
+09-24 17:53:00.562  8578  8696 D RPCS3   : 	⁂ sys_rsx_context_iounmap [2]
+09-24 17:53:00.697  8578  8578 I S3TOUCH : root action=down x=2421 y=1049
+09-24 17:53:00.698  8578  8578 I S3TOUCH : monitor action=down consumed=false
+09-24 17:53:00.698  8578  8578 I S3TOUCH : pad action=down menu=false
+09-24 17:53:01.101  8578  8578 I S3TOUCH : root action=down x=2424 y=1049
+09-24 17:53:01.101  8578  8578 I S3TOUCH : monitor action=down consumed=false
+09-24 17:53:01.101  8578  8578 I S3TOUCH : pad action=down menu=false
+09-24 17:53:01.370  8578  8620 D S3PERF  : crosscheck source=surface presented=809 json_fps=26.1405 json_frametime_ms=46.798
+09-24 17:53:01.643  8578  9095 W RPCS3   : sceNpTrophyGetTrophyUnlockState(context=0x1, handle=0x1, flags=*0x6407b0, count=*0x6407ac)
+09-24 17:53:01.677  8578  8620 D S3PERF  : crosscheck ui_snapshot_fps=32.1624 ui_snapshot_frametime_ms=23.441
+09-24 17:53:02.055  8578  8578 I S3TOUCH : root action=down x=2416 y=1043
+09-24 17:53:02.055  8578  8578 I S3TOUCH : monitor action=down consumed=false
+09-24 17:53:02.055  8578  8578 I S3TOUCH : pad action=down menu=false

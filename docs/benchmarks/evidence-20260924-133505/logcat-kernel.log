@@ -1,0 +1,501 @@
+--------- beginning of kernel
+09-24 13:34:27.223  1028  1028 E qcom-hv-haptics c42d000.qcom,spmi: qcom,pm8550b@7:qcom,hv-haptics@f000: polling HPWR_INTF timeout 3, value = 3
+09-24 13:34:27.226  1028  1028 E qcom-hv-haptics c42d000.qcom,spmi: qcom,pm8550b@7:qcom,hv-haptics@f000: stopped play completely
+09-24 13:34:27.226  1028  1028 E qcom-hv-haptics c42d000.qcom,spmi: qcom,pm8550b@7:qcom,hv-haptics@f000: FIFO playing is done
+09-24 13:34:27.226  1633  1633 E qcom-hv-haptics c42d000.qcom,spmi: qcom,pm8550b@7:qcom,hv-haptics@f000: wait 5793 us for brake pattern to complete
+09-24 13:34:27.229  1633  1633 E qcom-hv-haptics c42d000.qcom,spmi: qcom,pm8550b@7:qcom,hv-haptics@f000: stopped play completely
+09-24 13:34:27.231  1633  1633 E qcom-hv-haptics c42d000.qcom,spmi: qcom,pm8550b@7:qcom,hv-haptics@f000: custom data 2 length 208 with play-rate 24000 Hz,magnitude=0x5fff
+09-24 13:34:27.231  1633  1633 E qcom-hv-haptics c42d000.qcom,spmi: qcom,pm8550b@7:qcom,hv-haptics@f000: LRA nominal impedance is 9 ohm
+09-24 13:34:27.231  1633  1633 E qcom-hv-haptics c42d000.qcom,spmi: qcom,pm8550b@7:qcom,hv-haptics@f000: update VMAX_HDRM to 1000 mv
+09-24 13:34:27.231  1633  1633 E qcom-hv-haptics c42d000.qcom,spmi: qcom,pm8550b@7:qcom,hv-haptics@f000: Set Vmax to 5774 mV
+09-24 13:34:27.232  1633  1633 E qcom-hv-haptics c42d000.qcom,spmi: qcom,pm8550b@7:qcom,hv-haptics@f000: playback val = 1
+09-24 13:34:27.241  1028  1028 E qcom-hv-haptics c42d000.qcom,spmi: qcom,pm8550b@7:qcom,hv-haptics@f000: wait 5793 us for brake pattern to complete
+09-24 13:34:27.243  1633  1633 E qcom-hv-haptics c42d000.qcom,spmi: qcom,pm8550b@7:qcom,hv-haptics@f000: playback val = 0
+09-24 13:34:27.243  1633  1633 E qcom-hv-haptics c42d000.qcom,spmi: qcom,pm8550b@7:qcom,hv-haptics@f000: erase effect, really stop play
+09-24 13:34:27.244  1028  1028 E qcom-hv-haptics c42d000.qcom,spmi: qcom,pm8550b@7:qcom,hv-haptics@f000: polling HPWR_INTF timeout 3, value = 3
+09-24 13:34:27.247  1028  1028 E qcom-hv-haptics c42d000.qcom,spmi: qcom,pm8550b@7:qcom,hv-haptics@f000: stopped play completely
+09-24 13:34:27.247  1028  1028 E qcom-hv-haptics c42d000.qcom,spmi: qcom,pm8550b@7:qcom,hv-haptics@f000: FIFO playing is done
+09-24 13:34:27.247  1633  1633 E qcom-hv-haptics c42d000.qcom,spmi: qcom,pm8550b@7:qcom,hv-haptics@f000: wait 5793 us for brake pattern to complete
+09-24 13:34:27.250  1633  1633 E qcom-hv-haptics c42d000.qcom,spmi: qcom,pm8550b@7:qcom,hv-haptics@f000: stopped play completely
+09-24 13:34:27.379 21241 21241 I         : [INFO]: OPLUS_CHG[CHG_COMM]([oplus_comm_smooth_to_soc][3416]): soc[0 2 75 75 77 78] avg[0 1 0 0 0] fifo[77 78 78 77]
+09-24 13:34:27.396  2577  2577 I         : [INFO]: OPLUS_CHG[TRACK]([oplus_chg_track_cal_no_charging_stats_new][6797]): chg_no_charging_cnt=307s, no_chg_time=319s, delta_time=5s
+09-24 13:34:27.405  2577  2577 I OPLUS_CHG[oplus_charge_info]: BATTERY[410 409 4062 4062 1388 75 78 77 4058 5416 1 0x0 4302], CHARGE[4470 600 0 0], WIRED[1 450 4914 500 1 0x0 0 0 0 2 0], WIRELESS[0 0 0 0 0 0x0 0 0 0], VOOC[0 0 0 0 0x0], UFCS[0 0 0 0x0], COMMON[7 0 0 0x0 1 0 1 5416 100 0]
+09-24 13:34:27.413  2577  2577 I         : [INFO]: OPLUS_CHG[ADSP]([oplus_chg_8350_reg_dump][7390]): sm8450_st_dump: [chg_en=1, suspend=0, pd_svooc=0], subtype=0x01],[oplus_UsbCommCapable=0, oplus_pd_svooc=0, typec_mode=0, cid_status=0x01, usb_in_status=1],[0x2606=0x83, 0x2607=0x19, 0x2608=0x0a, 0x2609=0x02], [0x260a=0x04, 0x260b=0x57, 0x260c=0x0a, 0x260d=0x18], [0x260e=0x0a, 0x260f=0x01, 0x2610=0x00, 0x2640=0x01], [0x2641=0x02, 0x2642=0x05, 0x2646=0x01, 0x2650=0x03], [0x2706=0x0a, 0x2707=0x0a, 0x2708=0x0a, 0x2709=0x0a], [0x270b=0xe2, 0x270c=0x48, 0x2710=0xc0, 0x280c=0x38], [0x2810=0x00, 0x2840=0x01, 0x287f=0x00, 0x2906=0x02], [0x2908=0x0f, 0x290a=0x11, 0x290b=0x01, 0x290c=0x01], [0x2910=0x11, 0x2944=0x80, 0x2950=0x02, 0x2951=0x01], [0x2952=0x0a, 0x2954=0x00, 0x2960=0xe0, 0x2b06=0x08], [0x2b07=0x00, 0x2b08=0x00, 0x2b09=0x63, 0x2b0a=0x39], [0x2b0b=0x29, 0x2b0c=0x00, 0x29a8=0x81, 0x29a9=0x83], [0x29aa=0x00, 0x2aa2=0x00, 0x2aa8=0x87, 0x2aa9=0x00], [0x2aaa=0x00],
+09-24 13:34:27.776  1633  1633 E qcom-hv-haptics c42d000.qcom,spmi: qcom,pm8550b@7:qcom,hv-haptics@f000: custom data 2 length 208 with play-rate 24000 Hz,magnitude=0x5fff
+09-24 13:34:27.776  1633  1633 E qcom-hv-haptics c42d000.qcom,spmi: qcom,pm8550b@7:qcom,hv-haptics@f000: LRA nominal impedance is 9 ohm
+09-24 13:34:27.776  1633  1633 E qcom-hv-haptics c42d000.qcom,spmi: qcom,pm8550b@7:qcom,hv-haptics@f000: update VMAX_HDRM to 1000 mv
+09-24 13:34:27.776  1633  1633 E qcom-hv-haptics c42d000.qcom,spmi: qcom,pm8550b@7:qcom,hv-haptics@f000: Set Vmax to 5774 mV
+09-24 13:34:27.777  1633  1633 E qcom-hv-haptics c42d000.qcom,spmi: qcom,pm8550b@7:qcom,hv-haptics@f000: playback val = 1
+09-24 13:34:27.786  1028  1028 E qcom-hv-haptics c42d000.qcom,spmi: qcom,pm8550b@7:qcom,hv-haptics@f000: wait 5793 us for brake pattern to complete
+09-24 13:34:27.789  1028  1028 E qcom-hv-haptics c42d000.qcom,spmi: qcom,pm8550b@7:qcom,hv-haptics@f000: polling HPWR_INTF timeout 3, value = 3
+09-24 13:34:27.791  1633  1633 E qcom-hv-haptics c42d000.qcom,spmi: qcom,pm8550b@7:qcom,hv-haptics@f000: playback val = 0
+09-24 13:34:27.792  1633  1633 E qcom-hv-haptics c42d000.qcom,spmi: qcom,pm8550b@7:qcom,hv-haptics@f000: erase effect, really stop play
+09-24 13:34:27.792  1028  1028 E qcom-hv-haptics c42d000.qcom,spmi: qcom,pm8550b@7:qcom,hv-haptics@f000: stopped play completely
+09-24 13:34:27.792  1028  1028 E qcom-hv-haptics c42d000.qcom,spmi: qcom,pm8550b@7:qcom,hv-haptics@f000: FIFO playing is done
+09-24 13:34:27.792  1633  1633 E qcom-hv-haptics c42d000.qcom,spmi: qcom,pm8550b@7:qcom,hv-haptics@f000: wait 5793 us for brake pattern to complete
+09-24 13:34:27.797  1633  1633 E qcom-hv-haptics c42d000.qcom,spmi: qcom,pm8550b@7:qcom,hv-haptics@f000: stopped play completely
+09-24 13:34:27.800  1633  1633 E qcom-hv-haptics c42d000.qcom,spmi: qcom,pm8550b@7:qcom,hv-haptics@f000: custom data 2 length 208 with play-rate 24000 Hz,magnitude=0x5fff
+09-24 13:34:27.800  1633  1633 E qcom-hv-haptics c42d000.qcom,spmi: qcom,pm8550b@7:qcom,hv-haptics@f000: LRA nominal impedance is 9 ohm
+09-24 13:34:27.800  1633  1633 E qcom-hv-haptics c42d000.qcom,spmi: qcom,pm8550b@7:qcom,hv-haptics@f000: update VMAX_HDRM to 1000 mv
+09-24 13:34:27.800  1633  1633 E qcom-hv-haptics c42d000.qcom,spmi: qcom,pm8550b@7:qcom,hv-haptics@f000: Set Vmax to 5774 mV
+09-24 13:34:27.800 27327 27327 W binder_debug: 2 callbacks suppressed
+09-24 13:34:27.800 27327 27327 I binder  : undelivered transaction 344980661, process died.
+09-24 13:34:27.800 27327 27327 I binder  : undelivered transaction 344965315, process died.
+09-24 13:34:27.801  1633  1633 E qcom-hv-haptics c42d000.qcom,spmi: qcom,pm8550b@7:qcom,hv-haptics@f000: playback val = 1
+09-24 13:34:27.810  1028  1028 E qcom-hv-haptics c42d000.qcom,spmi: qcom,pm8550b@7:qcom,hv-haptics@f000: wait 5793 us for brake pattern to complete
+09-24 13:34:27.813  1028  1028 E qcom-hv-haptics c42d000.qcom,spmi: qcom,pm8550b@7:qcom,hv-haptics@f000: polling HPWR_INTF timeout 3, value = 3
+09-24 13:34:27.815  1633  1633 E qcom-hv-haptics c42d000.qcom,spmi: qcom,pm8550b@7:qcom,hv-haptics@f000: playback val = 0
+09-24 13:34:27.815  1633  1633 E qcom-hv-haptics c42d000.qcom,spmi: qcom,pm8550b@7:qcom,hv-haptics@f000: erase effect, really stop play
+09-24 13:34:27.816  1028  1028 E qcom-hv-haptics c42d000.qcom,spmi: qcom,pm8550b@7:qcom,hv-haptics@f000: stopped play completely
+09-24 13:34:27.816  1028  1028 E qcom-hv-haptics c42d000.qcom,spmi: qcom,pm8550b@7:qcom,hv-haptics@f000: FIFO playing is done
+09-24 13:34:27.816  1633  1633 E qcom-hv-haptics c42d000.qcom,spmi: qcom,pm8550b@7:qcom,hv-haptics@f000: wait 5793 us for brake pattern to complete
+09-24 13:34:27.819  1633  1633 E qcom-hv-haptics c42d000.qcom,spmi: qcom,pm8550b@7:qcom,hv-haptics@f000: stopped play completely
+09-24 13:34:27.848 15309 15309 I binder  : undelivered transaction 345244611, process died.
+09-24 13:34:27.848 15309 15309 I binder  : undelivered transaction 345244612, process died.
+09-24 13:34:27.848 15309 15309 I binder  : undelivered transaction 345244615, process died.
+09-24 13:34:27.848 15309 15309 I binder  : undelivered transaction 345244610, process died.
+09-24 13:34:27.885 18751 18751 I binder  : undelivered transaction 344980683, process died.
+09-24 13:34:27.885 18751 18751 I binder  : undelivered transaction 344910259, process died.
+09-24 13:34:27.885 18751 18751 I binder  : undelivered transaction 344965327, process died.
+09-24 13:34:27.919  1633  1633 E qcom-hv-haptics c42d000.qcom,spmi: qcom,pm8550b@7:qcom,hv-haptics@f000: custom data 2 length 208 with play-rate 24000 Hz,magnitude=0x5fff
+09-24 13:34:27.919  1633  1633 E qcom-hv-haptics c42d000.qcom,spmi: qcom,pm8550b@7:qcom,hv-haptics@f000: LRA nominal impedance is 9 ohm
+09-24 13:34:27.920  1633  1633 E qcom-hv-haptics c42d000.qcom,spmi: qcom,pm8550b@7:qcom,hv-haptics@f000: update VMAX_HDRM to 1000 mv
+09-24 13:34:27.920  1633  1633 E qcom-hv-haptics c42d000.qcom,spmi: qcom,pm8550b@7:qcom,hv-haptics@f000: Set Vmax to 5774 mV
+09-24 13:34:27.921  1633  1633 E qcom-hv-haptics c42d000.qcom,spmi: qcom,pm8550b@7:qcom,hv-haptics@f000: playback val = 1
+09-24 13:34:27.930  1028  1028 E qcom-hv-haptics c42d000.qcom,spmi: qcom,pm8550b@7:qcom,hv-haptics@f000: wait 5793 us for brake pattern to complete
+09-24 13:34:27.931  1633  1633 E qcom-hv-haptics c42d000.qcom,spmi: qcom,pm8550b@7:qcom,hv-haptics@f000: playback val = 0
+09-24 13:34:27.931  1633  1633 E qcom-hv-haptics c42d000.qcom,spmi: qcom,pm8550b@7:qcom,hv-haptics@f000: erase effect, really stop play
+09-24 13:34:27.933  1028  1028 E qcom-hv-haptics c42d000.qcom,spmi: qcom,pm8550b@7:qcom,hv-haptics@f000: polling HPWR_INTF timeout 3, value = 3
+09-24 13:34:27.936  1028  1028 E qcom-hv-haptics c42d000.qcom,spmi: qcom,pm8550b@7:qcom,hv-haptics@f000: stopped play completely
+09-24 13:34:27.936  1028  1028 E qcom-hv-haptics c42d000.qcom,spmi: qcom,pm8550b@7:qcom,hv-haptics@f000: FIFO playing is done
+09-24 13:34:27.936  1633  1633 E qcom-hv-haptics c42d000.qcom,spmi: qcom,pm8550b@7:qcom,hv-haptics@f000: wait 5793 us for brake pattern to complete
+09-24 13:34:27.939  1633  1633 E qcom-hv-haptics c42d000.qcom,spmi: qcom,pm8550b@7:qcom,hv-haptics@f000: stopped play completely
+09-24 13:34:27.943  1633  1633 E qcom-hv-haptics c42d000.qcom,spmi: qcom,pm8550b@7:qcom,hv-haptics@f000: custom data 2 length 208 with play-rate 24000 Hz,magnitude=0x5fff
+09-24 13:34:27.943  1633  1633 E qcom-hv-haptics c42d000.qcom,spmi: qcom,pm8550b@7:qcom,hv-haptics@f000: LRA nominal impedance is 9 ohm
+09-24 13:34:27.943  1633  1633 E qcom-hv-haptics c42d000.qcom,spmi: qcom,pm8550b@7:qcom,hv-haptics@f000: update VMAX_HDRM to 1000 mv
+09-24 13:34:27.943  1633  1633 E qcom-hv-haptics c42d000.qcom,spmi: qcom,pm8550b@7:qcom,hv-haptics@f000: Set Vmax to 5774 mV
+09-24 13:34:27.944  1633  1633 E qcom-hv-haptics c42d000.qcom,spmi: qcom,pm8550b@7:qcom,hv-haptics@f000: playback val = 1
+09-24 13:34:27.953  1028  1028 E qcom-hv-haptics c42d000.qcom,spmi: qcom,pm8550b@7:qcom,hv-haptics@f000: wait 5793 us for brake pattern to complete
+09-24 13:34:27.954  1633  1633 E qcom-hv-haptics c42d000.qcom,spmi: qcom,pm8550b@7:qcom,hv-haptics@f000: playback val = 0
+09-24 13:34:27.955  1633  1633 E qcom-hv-haptics c42d000.qcom,spmi: qcom,pm8550b@7:qcom,hv-haptics@f000: erase effect, really stop play
+09-24 13:34:27.955  1028  1028 E qcom-hv-haptics c42d000.qcom,spmi: qcom,pm8550b@7:qcom,hv-haptics@f000: polling HPWR_INTF timeout 3, value = 3
+09-24 13:34:27.958  1028  1028 E qcom-hv-haptics c42d000.qcom,spmi: qcom,pm8550b@7:qcom,hv-haptics@f000: stopped play completely
+09-24 13:34:27.959  1028  1028 E qcom-hv-haptics c42d000.qcom,spmi: qcom,pm8550b@7:qcom,hv-haptics@f000: FIFO playing is done
+09-24 13:34:27.959  1633  1633 E qcom-hv-haptics c42d000.qcom,spmi: qcom,pm8550b@7:qcom,hv-haptics@f000: wait 5793 us for brake pattern to complete
+09-24 13:34:27.962  1633  1633 E qcom-hv-haptics c42d000.qcom,spmi: qcom,pm8550b@7:qcom,hv-haptics@f000: stopped play completely
+09-24 13:34:27.963  1633  1633 E qcom-hv-haptics c42d000.qcom,spmi: qcom,pm8550b@7:qcom,hv-haptics@f000: custom data 2 length 208 with play-rate 24000 Hz,magnitude=0x5fff
+09-24 13:34:27.963  1633  1633 E qcom-hv-haptics c42d000.qcom,spmi: qcom,pm8550b@7:qcom,hv-haptics@f000: LRA nominal impedance is 9 ohm
+09-24 13:34:27.963  1633  1633 E qcom-hv-haptics c42d000.qcom,spmi: qcom,pm8550b@7:qcom,hv-haptics@f000: update VMAX_HDRM to 1000 mv
+09-24 13:34:27.963  1633  1633 E qcom-hv-haptics c42d000.qcom,spmi: qcom,pm8550b@7:qcom,hv-haptics@f000: Set Vmax to 5774 mV
+09-24 13:34:27.964  1633  1633 E qcom-hv-haptics c42d000.qcom,spmi: qcom,pm8550b@7:qcom,hv-haptics@f000: playback val = 1
+09-24 13:34:27.973  1028  1028 E qcom-hv-haptics c42d000.qcom,spmi: qcom,pm8550b@7:qcom,hv-haptics@f000: wait 5793 us for brake pattern to complete
+09-24 13:34:27.973  1633  1633 E qcom-hv-haptics c42d000.qcom,spmi: qcom,pm8550b@7:qcom,hv-haptics@f000: playback val = 0
+09-24 13:34:27.974  1633  1633 E qcom-hv-haptics c42d000.qcom,spmi: qcom,pm8550b@7:qcom,hv-haptics@f000: erase effect, really stop play
+09-24 13:34:27.976  1028  1028 E qcom-hv-haptics c42d000.qcom,spmi: qcom,pm8550b@7:qcom,hv-haptics@f000: polling HPWR_INTF timeout 3, value = 3
+09-24 13:34:27.978  1028  1028 E qcom-hv-haptics c42d000.qcom,spmi: qcom,pm8550b@7:qcom,hv-haptics@f000: stopped play completely
+09-24 13:34:27.979  1028  1028 E qcom-hv-haptics c42d000.qcom,spmi: qcom,pm8550b@7:qcom,hv-haptics@f000: FIFO playing is done
+09-24 13:34:27.979  1633  1633 E qcom-hv-haptics c42d000.qcom,spmi: qcom,pm8550b@7:qcom,hv-haptics@f000: wait 5793 us for brake pattern to complete
+09-24 13:34:27.982  1633  1633 E qcom-hv-haptics c42d000.qcom,spmi: qcom,pm8550b@7:qcom,hv-haptics@f000: stopped play completely
+09-24 13:34:27.991  1633  1633 E qcom-hv-haptics c42d000.qcom,spmi: qcom,pm8550b@7:qcom,hv-haptics@f000: custom data 2 length 208 with play-rate 24000 Hz,magnitude=0x5fff
+09-24 13:34:27.991  1633  1633 E qcom-hv-haptics c42d000.qcom,spmi: qcom,pm8550b@7:qcom,hv-haptics@f000: LRA nominal impedance is 9 ohm
+09-24 13:34:27.991  1633  1633 E qcom-hv-haptics c42d000.qcom,spmi: qcom,pm8550b@7:qcom,hv-haptics@f000: update VMAX_HDRM to 1000 mv
+09-24 13:34:27.991  1633  1633 E qcom-hv-haptics c42d000.qcom,spmi: qcom,pm8550b@7:qcom,hv-haptics@f000: Set Vmax to 5774 mV
+09-24 13:34:27.996  1633  1633 E qcom-hv-haptics c42d000.qcom,spmi: qcom,pm8550b@7:qcom,hv-haptics@f000: playback val = 1
+09-24 13:34:28.005  1028  1028 E qcom-hv-haptics c42d000.qcom,spmi: qcom,pm8550b@7:qcom,hv-haptics@f000: wait 5793 us for brake pattern to complete
+09-24 13:34:28.008  1633  1633 E qcom-hv-haptics c42d000.qcom,spmi: qcom,pm8550b@7:qcom,hv-haptics@f000: playback val = 0
+09-24 13:34:28.008  1633  1633 E qcom-hv-haptics c42d000.qcom,spmi: qcom,pm8550b@7:qcom,hv-haptics@f000: erase effect, really stop play
+09-24 13:34:28.008  1028  1028 E qcom-hv-haptics c42d000.qcom,spmi: qcom,pm8550b@7:qcom,hv-haptics@f000: polling HPWR_INTF timeout 3, value = 3
+09-24 13:34:28.011  1028  1028 E qcom-hv-haptics c42d000.qcom,spmi: qcom,pm8550b@7:qcom,hv-haptics@f000: stopped play completely
+09-24 13:34:28.011  1028  1028 E qcom-hv-haptics c42d000.qcom,spmi: qcom,pm8550b@7:qcom,hv-haptics@f000: FIFO playing is done
+09-24 13:34:28.011  1633  1633 E qcom-hv-haptics c42d000.qcom,spmi: qcom,pm8550b@7:qcom,hv-haptics@f000: wait 5793 us for brake pattern to complete
+09-24 13:34:28.014  1633  1633 E qcom-hv-haptics c42d000.qcom,spmi: qcom,pm8550b@7:qcom,hv-haptics@f000: stopped play completely
+09-24 13:34:28.016  1633  1633 E qcom-hv-haptics c42d000.qcom,spmi: qcom,pm8550b@7:qcom,hv-haptics@f000: custom data 2 length 208 with play-rate 24000 Hz,magnitude=0x5fff
+09-24 13:34:28.016  1633  1633 E qcom-hv-haptics c42d000.qcom,spmi: qcom,pm8550b@7:qcom,hv-haptics@f000: LRA nominal impedance is 9 ohm
+09-24 13:34:28.016  1633  1633 E qcom-hv-haptics c42d000.qcom,spmi: qcom,pm8550b@7:qcom,hv-haptics@f000: update VMAX_HDRM to 1000 mv
+09-24 13:34:28.016  1633  1633 E qcom-hv-haptics c42d000.qcom,spmi: qcom,pm8550b@7:qcom,hv-haptics@f000: Set Vmax to 5774 mV
+09-24 13:34:28.017  1633  1633 E qcom-hv-haptics c42d000.qcom,spmi: qcom,pm8550b@7:qcom,hv-haptics@f000: playback val = 1
+09-24 13:34:28.026  1028  1028 E qcom-hv-haptics c42d000.qcom,spmi: qcom,pm8550b@7:qcom,hv-haptics@f000: wait 5793 us for brake pattern to complete
+09-24 13:34:28.027  1633  1633 E qcom-hv-haptics c42d000.qcom,spmi: qcom,pm8550b@7:qcom,hv-haptics@f000: playback val = 0
+09-24 13:34:28.027  1633  1633 E qcom-hv-haptics c42d000.qcom,spmi: qcom,pm8550b@7:qcom,hv-haptics@f000: erase effect, really stop play
+09-24 13:34:28.029  1028  1028 E qcom-hv-haptics c42d000.qcom,spmi: qcom,pm8550b@7:qcom,hv-haptics@f000: polling HPWR_INTF timeout 3, value = 3
+09-24 13:34:28.031  1028  1028 E qcom-hv-haptics c42d000.qcom,spmi: qcom,pm8550b@7:qcom,hv-haptics@f000: stopped play completely
+09-24 13:34:28.032  1028  1028 E qcom-hv-haptics c42d000.qcom,spmi: qcom,pm8550b@7:qcom,hv-haptics@f000: FIFO playing is done
+09-24 13:34:28.032  1633  1633 E qcom-hv-haptics c42d000.qcom,spmi: qcom,pm8550b@7:qcom,hv-haptics@f000: wait 5793 us for brake pattern to complete
+09-24 13:34:28.035  1633  1633 E qcom-hv-haptics c42d000.qcom,spmi: qcom,pm8550b@7:qcom,hv-haptics@f000: stopped play completely
+09-24 13:34:28.636 20688 20688 E gsi soc : qcom,msm_gsi: gsi_stop_channel:3688 chan=1 busy try again
+09-24 13:34:28.638 20688 20688 E gsi soc : qcom,msm_gsi: gsi_stop_channel:3688 chan=14 busy try again
+09-24 13:34:28.826     0     0 E [    C0] [soft_i][0xed21dfaa012][08: 04:41.578555] wlan: [0:E:REGULATORY] reg_process_ch_avoid_event: skipping LTE Coex unsafe channel change
+09-24 13:34:28.826     0     0 E [    C0] [soft_i][0xed21dfaa1b9][08: 04:41.578577] wlan: [0:E:TIF] tgt_reg_ch_avoid_event_handler: Failed to process CH avoid event
+09-24 13:34:28.839 29560 29560 W audit   : audit_lost=5302983 audit_rate_limit=5 audit_backlog_limit=64
+09-24 13:34:28.839 29560 29560 E audit   : rate limit exceeded
+09-24 13:34:29.297  1633  1633 E qcom-hv-haptics c42d000.qcom,spmi: qcom,pm8550b@7:qcom,hv-haptics@f000: custom data 2 length 208 with play-rate 24000 Hz,magnitude=0x5fff
+09-24 13:34:29.297  1633  1633 E qcom-hv-haptics c42d000.qcom,spmi: qcom,pm8550b@7:qcom,hv-haptics@f000: LRA nominal impedance is 9 ohm
+09-24 13:34:29.297  1633  1633 E qcom-hv-haptics c42d000.qcom,spmi: qcom,pm8550b@7:qcom,hv-haptics@f000: update VMAX_HDRM to 1000 mv
+09-24 13:34:29.297  1633  1633 E qcom-hv-haptics c42d000.qcom,spmi: qcom,pm8550b@7:qcom,hv-haptics@f000: Set Vmax to 5774 mV
+09-24 13:34:29.297  1633  1633 E qcom-hv-haptics c42d000.qcom,spmi: qcom,pm8550b@7:qcom,hv-haptics@f000: playback val = 1
+09-24 13:34:29.306  1028  1028 E qcom-hv-haptics c42d000.qcom,spmi: qcom,pm8550b@7:qcom,hv-haptics@f000: wait 5793 us for brake pattern to complete
+09-24 13:34:29.309  1633  1633 E qcom-hv-haptics c42d000.qcom,spmi: qcom,pm8550b@7:qcom,hv-haptics@f000: playback val = 0
+09-24 13:34:29.309  1633  1633 E qcom-hv-haptics c42d000.qcom,spmi: qcom,pm8550b@7:qcom,hv-haptics@f000: erase effect, really stop play
+09-24 13:34:29.309  1028  1028 E qcom-hv-haptics c42d000.qcom,spmi: qcom,pm8550b@7:qcom,hv-haptics@f000: polling HPWR_INTF timeout 3, value = 3
+09-24 13:34:29.312  1028  1028 E qcom-hv-haptics c42d000.qcom,spmi: qcom,pm8550b@7:qcom,hv-haptics@f000: stopped play completely
+09-24 13:34:29.312  1028  1028 E qcom-hv-haptics c42d000.qcom,spmi: qcom,pm8550b@7:qcom,hv-haptics@f000: FIFO playing is done
+09-24 13:34:29.313  1633  1633 E qcom-hv-haptics c42d000.qcom,spmi: qcom,pm8550b@7:qcom,hv-haptics@f000: wait 5793 us for brake pattern to complete
+09-24 13:34:29.316  1633  1633 E qcom-hv-haptics c42d000.qcom,spmi: qcom,pm8550b@7:qcom,hv-haptics@f000: stopped play completely
+09-24 13:34:29.317  1633  1633 E qcom-hv-haptics c42d000.qcom,spmi: qcom,pm8550b@7:qcom,hv-haptics@f000: custom data 2 length 208 with play-rate 24000 Hz,magnitude=0x5fff
+09-24 13:34:29.317  1633  1633 E qcom-hv-haptics c42d000.qcom,spmi: qcom,pm8550b@7:qcom,hv-haptics@f000: LRA nominal impedance is 9 ohm
+09-24 13:34:29.317  1633  1633 E qcom-hv-haptics c42d000.qcom,spmi: qcom,pm8550b@7:qcom,hv-haptics@f000: update VMAX_HDRM to 1000 mv
+09-24 13:34:29.317  1633  1633 E qcom-hv-haptics c42d000.qcom,spmi: qcom,pm8550b@7:qcom,hv-haptics@f000: Set Vmax to 5774 mV
+09-24 13:34:29.318  1633  1633 E qcom-hv-haptics c42d000.qcom,spmi: qcom,pm8550b@7:qcom,hv-haptics@f000: playback val = 1
+09-24 13:34:29.327  1028  1028 E qcom-hv-haptics c42d000.qcom,spmi: qcom,pm8550b@7:qcom,hv-haptics@f000: wait 5793 us for brake pattern to complete
+09-24 13:34:29.329  1028  1028 E qcom-hv-haptics c42d000.qcom,spmi: qcom,pm8550b@7:qcom,hv-haptics@f000: polling HPWR_INTF timeout 3, value = 3
+09-24 13:34:29.330  1633  1633 E qcom-hv-haptics c42d000.qcom,spmi: qcom,pm8550b@7:qcom,hv-haptics@f000: playback val = 0
+09-24 13:34:29.330  1633  1633 E qcom-hv-haptics c42d000.qcom,spmi: qcom,pm8550b@7:qcom,hv-haptics@f000: erase effect, really stop play
+09-24 13:34:29.332  1028  1028 E qcom-hv-haptics c42d000.qcom,spmi: qcom,pm8550b@7:qcom,hv-haptics@f000: stopped play completely
+09-24 13:34:29.333  1028  1028 E qcom-hv-haptics c42d000.qcom,spmi: qcom,pm8550b@7:qcom,hv-haptics@f000: FIFO playing is done
+09-24 13:34:29.333  1633  1633 E qcom-hv-haptics c42d000.qcom,spmi: qcom,pm8550b@7:qcom,hv-haptics@f000: wait 5793 us for brake pattern to complete
+09-24 13:34:29.336  1633  1633 E qcom-hv-haptics c42d000.qcom,spmi: qcom,pm8550b@7:qcom,hv-haptics@f000: stopped play completely
+09-24 13:34:29.348  1633  1633 E qcom-hv-haptics c42d000.qcom,spmi: qcom,pm8550b@7:qcom,hv-haptics@f000: custom data 2 length 208 with play-rate 24000 Hz,magnitude=0x5fff
+09-24 13:34:29.348  1633  1633 E qcom-hv-haptics c42d000.qcom,spmi: qcom,pm8550b@7:qcom,hv-haptics@f000: LRA nominal impedance is 9 ohm
+09-24 13:34:29.348  1633  1633 E qcom-hv-haptics c42d000.qcom,spmi: qcom,pm8550b@7:qcom,hv-haptics@f000: update VMAX_HDRM to 1000 mv
+09-24 13:34:29.348  1633  1633 E qcom-hv-haptics c42d000.qcom,spmi: qcom,pm8550b@7:qcom,hv-haptics@f000: Set Vmax to 5774 mV
+09-24 13:34:29.349  1633  1633 E qcom-hv-haptics c42d000.qcom,spmi: qcom,pm8550b@7:qcom,hv-haptics@f000: playback val = 1
+09-24 13:34:29.358  1028  1028 E qcom-hv-haptics c42d000.qcom,spmi: qcom,pm8550b@7:qcom,hv-haptics@f000: wait 5793 us for brake pattern to complete
+09-24 13:34:29.360  1028  1028 E qcom-hv-haptics c42d000.qcom,spmi: qcom,pm8550b@7:qcom,hv-haptics@f000: polling HPWR_INTF timeout 3, value = 3
+09-24 13:34:29.362  1633  1633 E qcom-hv-haptics c42d000.qcom,spmi: qcom,pm8550b@7:qcom,hv-haptics@f000: playback val = 0
+09-24 13:34:29.362  1633  1633 E qcom-hv-haptics c42d000.qcom,spmi: qcom,pm8550b@7:qcom,hv-haptics@f000: erase effect, really stop play
+09-24 13:34:29.363  1028  1028 E qcom-hv-haptics c42d000.qcom,spmi: qcom,pm8550b@7:qcom,hv-haptics@f000: stopped play completely
+09-24 13:34:29.364  1028  1028 E qcom-hv-haptics c42d000.qcom,spmi: qcom,pm8550b@7:qcom,hv-haptics@f000: FIFO playing is done
+09-24 13:34:29.364  1633  1633 E qcom-hv-haptics c42d000.qcom,spmi: qcom,pm8550b@7:qcom,hv-haptics@f000: wait 5793 us for brake pattern to complete
+09-24 13:34:29.367  1633  1633 E qcom-hv-haptics c42d000.qcom,spmi: qcom,pm8550b@7:qcom,hv-haptics@f000: stopped play completely
+09-24 13:34:29.368  1633  1633 E qcom-hv-haptics c42d000.qcom,spmi: qcom,pm8550b@7:qcom,hv-haptics@f000: custom data 2 length 208 with play-rate 24000 Hz,magnitude=0x5fff
+09-24 13:34:29.368  1633  1633 E qcom-hv-haptics c42d000.qcom,spmi: qcom,pm8550b@7:qcom,hv-haptics@f000: LRA nominal impedance is 9 ohm
+09-24 13:34:29.368  1633  1633 E qcom-hv-haptics c42d000.qcom,spmi: qcom,pm8550b@7:qcom,hv-haptics@f000: update VMAX_HDRM to 1000 mv
+09-24 13:34:29.368  1633  1633 E qcom-hv-haptics c42d000.qcom,spmi: qcom,pm8550b@7:qcom,hv-haptics@f000: Set Vmax to 5774 mV
+09-24 13:34:29.369  1633  1633 E qcom-hv-haptics c42d000.qcom,spmi: qcom,pm8550b@7:qcom,hv-haptics@f000: playback val = 1
+09-24 13:34:29.378  1028  1028 E qcom-hv-haptics c42d000.qcom,spmi: qcom,pm8550b@7:qcom,hv-haptics@f000: wait 5793 us for brake pattern to complete
+09-24 13:34:29.381  1028  1028 E qcom-hv-haptics c42d000.qcom,spmi: qcom,pm8550b@7:qcom,hv-haptics@f000: polling HPWR_INTF timeout 3, value = 3
+09-24 13:34:29.382  1633  1633 E qcom-hv-haptics c42d000.qcom,spmi: qcom,pm8550b@7:qcom,hv-haptics@f000: playback val = 0
+09-24 13:34:29.382  1633  1633 E qcom-hv-haptics c42d000.qcom,spmi: qcom,pm8550b@7:qcom,hv-haptics@f000: erase effect, really stop play
+09-24 13:34:29.384  1028  1028 E qcom-hv-haptics c42d000.qcom,spmi: qcom,pm8550b@7:qcom,hv-haptics@f000: stopped play completely
+09-24 13:34:29.384  1028  1028 E qcom-hv-haptics c42d000.qcom,spmi: qcom,pm8550b@7:qcom,hv-haptics@f000: FIFO playing is done
+09-24 13:34:29.384  1633  1633 E qcom-hv-haptics c42d000.qcom,spmi: qcom,pm8550b@7:qcom,hv-haptics@f000: wait 5793 us for brake pattern to complete
+09-24 13:34:29.387  1633  1633 E qcom-hv-haptics c42d000.qcom,spmi: qcom,pm8550b@7:qcom,hv-haptics@f000: stopped play completely
+09-24 13:34:29.390  1633  1633 E qcom-hv-haptics c42d000.qcom,spmi: qcom,pm8550b@7:qcom,hv-haptics@f000: custom data 2 length 208 with play-rate 24000 Hz,magnitude=0x5fff
+09-24 13:34:29.390  1633  1633 E qcom-hv-haptics c42d000.qcom,spmi: qcom,pm8550b@7:qcom,hv-haptics@f000: LRA nominal impedance is 9 ohm
+09-24 13:34:29.390  1633  1633 E qcom-hv-haptics c42d000.qcom,spmi: qcom,pm8550b@7:qcom,hv-haptics@f000: update VMAX_HDRM to 1000 mv
+09-24 13:34:29.390  1633  1633 E qcom-hv-haptics c42d000.qcom,spmi: qcom,pm8550b@7:qcom,hv-haptics@f000: Set Vmax to 5774 mV
+09-24 13:34:29.391  1633  1633 E qcom-hv-haptics c42d000.qcom,spmi: qcom,pm8550b@7:qcom,hv-haptics@f000: playback val = 1
+09-24 13:34:29.400  1028  1028 E qcom-hv-haptics c42d000.qcom,spmi: qcom,pm8550b@7:qcom,hv-haptics@f000: wait 5793 us for brake pattern to complete
+09-24 13:34:29.401  1633  1633 E qcom-hv-haptics c42d000.qcom,spmi: qcom,pm8550b@7:qcom,hv-haptics@f000: playback val = 0
+09-24 13:34:29.401  1633  1633 E qcom-hv-haptics c42d000.qcom,spmi: qcom,pm8550b@7:qcom,hv-haptics@f000: erase effect, really stop play
+09-24 13:34:29.403  1028  1028 E qcom-hv-haptics c42d000.qcom,spmi: qcom,pm8550b@7:qcom,hv-haptics@f000: polling HPWR_INTF timeout 3, value = 3
+09-24 13:34:29.406  1028  1028 E qcom-hv-haptics c42d000.qcom,spmi: qcom,pm8550b@7:qcom,hv-haptics@f000: stopped play completely
+09-24 13:34:29.406  1028  1028 E qcom-hv-haptics c42d000.qcom,spmi: qcom,pm8550b@7:qcom,hv-haptics@f000: FIFO playing is done
+09-24 13:34:29.406  1633  1633 E qcom-hv-haptics c42d000.qcom,spmi: qcom,pm8550b@7:qcom,hv-haptics@f000: wait 5793 us for brake pattern to complete
+09-24 13:34:29.409  1633  1633 E qcom-hv-haptics c42d000.qcom,spmi: qcom,pm8550b@7:qcom,hv-haptics@f000: stopped play completely
+09-24 13:34:29.616     1     1 I init    : Untracked process (pid: 3466 name: (adb) ppid: 1 pgrp: 3466 state: Z) received SIGKILL
+09-24 13:34:29.616     1     1 I init    : Untracked process (pid: 3466 name: (adb) ppid: 1 pgrp: 3466 state: Z) did not have an associated service entry and will not be reaped
+09-24 13:34:29.617     1     1 I init    : Untracked process (pid: 1952 name: (linker64) ppid: 1 pgrp: 1952 state: Z) received SIGKILL
+09-24 13:34:29.617     1     1 I init    : Untracked process (pid: 1952 name: (linker64) ppid: 1 pgrp: 1952 state: Z) did not have an associated service entry and will not be reaped
+09-24 13:34:29.617     1     1 I init    : Untracked process (pid: 31896 name: (linker64) ppid: 1 pgrp: 1472 state: Z) received SIGKILL
+09-24 13:34:29.617     1     1 I init    : Untracked process (pid: 31896 name: (linker64) ppid: 1 pgrp: 1472 state: Z) did not have an associated service entry and will not be reaped
+09-24 13:34:29.617     1     1 I init    : Untracked process (pid: 1957 name: (bash) ppid: 1 pgrp: 1957 state: Z) received SIGKILL
+09-24 13:34:29.617     1     1 I init    : Untracked process (pid: 1957 name: (bash) ppid: 1 pgrp: 1957 state: Z) did not have an associated service entry and will not be reaped
+09-24 13:34:29.617     1     1 I init    : Untracked process (pid: 4223 name: (zsh) ppid: 1 pgrp: 4223 state: Z) received SIGKILL
+09-24 13:34:29.617     1     1 I init    : Untracked process (pid: 4223 name: (zsh) ppid: 1 pgrp: 4223 state: Z) did not have an associated service entry and will not be reaped
+09-24 13:34:29.672     0     0 W [    C1] gen7_err_callback: 176 callbacks suppressed
+09-24 13:34:29.672     0     0 F         : [    C1] kgsl kgsl-3d0: CP: AHB bus error, CP_RL_ERROR_DETAILS_0:0x10008e07 CP_RL_ERROR_DETAILS_1:0x12144
+09-24 13:34:30.008 21163 21163 E gsi soc : qcom,msm_gsi: gsi_stop_channel:3688 chan=1 busy try again
+09-24 13:34:30.010 21163 21163 E gsi soc : qcom,msm_gsi: gsi_stop_channel:3688 chan=14 busy try again
+09-24 13:34:30.420 15309 15309 I         : [OFP][0][INFO][oplus_get_doze_disable_time:3679]oplus_get_doze_disable_time=0
+09-24 13:34:30.420 15309 15309 W [drm] [msm-dsi-warn]: dsi_display_check_status,time_gap=-1454197687
+09-24 13:34:30.719 29574 29574 I binder  : undelivered transaction 345246846, process died.
+09-24 13:34:30.756 22325 22325 I adsp_sleepmon: Audio: num_sessions=0,num_lpi_sessions=0,timer_pending=1
+09-24 13:34:30.780 22325 22325 D [debug][sipa_91xx] sia91xx_mute: dai:sia91xx-aif-4-6c,sia91xx-aif-4-6c mute = 1 stream = 0
+09-24 13:34:30.780 22325 22325 I [ info][sia91xx_check_status_reg] sipa-spk.0: read reg[0x8]=0x0
+09-24 13:34:30.781 22325 22325 I [ info][sipa_regmap] sipa_regmap_proc_1_reg: addr:0x8, val:0x0
+09-24 13:34:30.784 22325 22325 D [debug][sipa_91xx] sia91xx_mute: dai:sia91xx-aif-4-6d,sia91xx-aif-4-6d mute = 1 stream = 0
+09-24 13:34:30.784 22325 22325 I [ info][sia91xx_check_status_reg] sipa-spk.1: read reg[0x8]=0x0
+09-24 13:34:30.784 22325 22325 I [ info][sipa_regmap] sipa_regmap_proc_1_reg: addr:0x8, val:0x0
+09-24 13:34:30.792 22325 22325 I sia91xx_get_check_feedback: chk_err = 0, channel_num = 1
+09-24 13:34:30.792 22325 22325 I sia91xx_set_check_feedback: chk_err = 0, channel_num = 1
+09-24 13:34:30.792 22325 22325 I sia91xx_get_check_feedback: chk_err = 0, channel_num = 0
+09-24 13:34:30.792 22325 22325 I sia91xx_set_check_feedback: chk_err = 0, channel_num = 0
+09-24 13:34:30.792 22325 22325 D [debug][sipa_driver] sipa_mute_set: ucontrol = 1, channel_num = 0
+09-24 13:34:30.792 22325 22325 D [debug][sipa_driver] sipa_mute_set: ucontrol = 1, channel_num = 1
+09-24 13:34:30.850   867   867 I servicemanager: Caller(pid=29577,uid=10463,sid=u:r:untrusted_app:s0:c207,c257,c512,c768) Found vendor.qti.qspmhal.IQspmhal/default in device VINTF manifest.
+09-24 13:34:31.024   867   867 I servicemanager: Caller(pid=29577,uid=10463,sid=u:r:untrusted_app:s0:c207,c257,c512,c768) Found android.hardware.graphics.allocator.IAllocator/default in device VINTF manifest.
+09-24 13:34:31.028   867   867 I servicemanager: Caller(pid=29577,uid=10463,sid=u:r:untrusted_app:s0:c207,c257,c512,c768) Found android.hardware.graphics.allocator.IAllocator/default in device VINTF manifest.
+09-24 13:34:31.053 29616 29616 W audit   : audit_lost=5302994 audit_rate_limit=5 audit_backlog_limit=64
+09-24 13:34:31.053 29616 29616 E audit   : rate limit exceeded
+09-24 13:34:31.100   867   867 I servicemanager: Caller(pid=29577,uid=10463,sid=u:r:untrusted_app:s0:c207,c257,c512,c768) Found vendor.qti.qspmhal.IQspmhal/default in device VINTF manifest.
+09-24 13:34:31.236 27850 27850 E gsi soc : qcom,msm_gsi: gsi_stop_channel:3688 chan=1 busy try again
+09-24 13:34:31.239 27850 27850 E gsi soc : qcom,msm_gsi: gsi_stop_channel:3688 chan=14 busy try again
+09-24 13:34:32.497 29430 29430 I         : [INFO]: OPLUS_CHG[CHG_COMM]([oplus_comm_smooth_to_soc][3416]): soc[0 2 75 75 77 78] avg[1 1 0 0 0] fifo[77 77 78 77]
+09-24 13:34:32.506 27688 27688 I         : [INFO]: OPLUS_CHG[TRACK]([oplus_chg_track_cal_no_charging_stats_new][6797]): chg_no_charging_cnt=312s, no_chg_time=324s, delta_time=5s
+09-24 13:34:32.515 27688 27688 I OPLUS_CHG[oplus_charge_info]: BATTERY[410 410 4096 4096 345 75 78 77 4057 5416 1 0x0 4301], CHARGE[4470 600 0 0], WIRED[1 450 4879 500 1 0x0 0 0 0 2 0], WIRELESS[0 0 0 0 0 0x0 0 0 0], VOOC[0 0 0 0 0x0], UFCS[0 0 0 0x0], COMMON[7 0 0 0x0 1 0 1 5416 100 0]
+09-24 13:34:32.519 27688 27688 I         : [INFO]: OPLUS_CHG[ADSP]([oplus_chg_8350_reg_dump][7390]): sm8450_st_dump: [chg_en=1, suspend=0, pd_svooc=0], subtype=0x01],[oplus_UsbCommCapable=0, oplus_pd_svooc=0, typec_mode=0, cid_status=0x01, usb_in_status=1],[0x2606=0x83, 0x2607=0x19, 0x2608=0x0a, 0x2609=0x02], [0x260a=0x00, 0x260b=0x57, 0x260c=0x0a, 0x260d=0x18], [0x260e=0x0a, 0x260f=0x01, 0x2610=0x00, 0x2640=0x01], [0x2641=0x02, 0x2642=0x05, 0x2646=0x01, 0x2650=0x03], [0x2706=0x0a, 0x2707=0x0a, 0x2708=0x0a, 0x2709=0x0a], [0x270b=0xe2, 0x270c=0x48, 0x2710=0xc0, 0x280c=0x38], [0x2810=0x00, 0x2840=0x01, 0x287f=0x00, 0x2906=0x02], [0x2908=0x0f, 0x290a=0x11, 0x290b=0x01, 0x290c=0x01], [0x2910=0x11, 0x2944=0x80, 0x2950=0x02, 0x2951=0x01], [0x2952=0x0a, 0x2954=0x00, 0x2960=0xe0, 0x2b06=0x08], [0x2b07=0x00, 0x2b08=0x00, 0x2b09=0x63, 0x2b0a=0x39], [0x2b0b=0x29, 0x2b0c=0x00, 0x29a8=0x81, 0x29a9=0x83], [0x29aa=0x00, 0x2aa2=0x00, 0x2aa8=0x87, 0x2aa9=0x00], [0x2aaa=0x00],
+09-24 13:34:33.397 29646 29646 W audit   : audit_lost=5303007 audit_rate_limit=5 audit_backlog_limit=64
+09-24 13:34:33.397 29646 29646 E audit   : rate limit exceeded
+09-24 13:34:33.498 13667 13667 I         : [INFO]: OPLUS_CHG[ADSP]([smbchg_lcm_en][5786]): set lcm to 1
+09-24 13:34:33.498 13667 13667 I         : [INFO]: OPLUS_CHG[ADSP]([lcm_frequency_ctrl][5821]): lcm_en_flag:2
+09-24 13:34:35.539 15309 15309 I         : [OFP][0][INFO][oplus_get_doze_disable_time:3679]oplus_get_doze_disable_time=0
+09-24 13:34:35.539 15309 15309 W [drm] [msm-dsi-warn]: dsi_display_check_status,time_gap=-1449077761
+09-24 13:34:35.613 29764 29764 W audit   : audit_lost=5303018 audit_rate_limit=5 audit_backlog_limit=64
+09-24 13:34:35.613 29764 29764 E audit   : rate limit exceeded
+09-24 13:34:35.795   620   620 I adsp_sleepmon: timer_event = 1,suspend_event = 0
+09-24 13:34:35.940 21163 21163 E gsi soc : qcom,msm_gsi: gsi_stop_channel:3688 chan=1 busy try again
+09-24 13:34:35.942 21163 21163 E gsi soc : qcom,msm_gsi: gsi_stop_channel:3688 chan=14 busy try again
+09-24 13:34:36.820 19938 19938 E iostack : irqs = 14750794, self-block = 0
+09-24 13:34:37.621 29430 29430 I         : [INFO]: OPLUS_CHG[CHG_COMM]([oplus_comm_smooth_to_soc][3416]): soc[0 2 75 75 77 78] avg[2 1 0 0 0] fifo[77 77 77 77]
+09-24 13:34:37.639 22321 22321 I OPLUS_CHG[oplus_charge_info]: BATTERY[411 410 4113 4113 -147 75 78 77 4057 5416 1 0x0 4301], CHARGE[4470 600 0 0], WIRED[1 450 4898 500 1 0x0 0 0 0 2 0], WIRELESS[0 0 0 0 0 0x0 0 0 0], VOOC[0 0 0 0 0x0], UFCS[0 0 0 0x0], COMMON[7 0 0 0x0 1 0 1 5416 100 0]
+09-24 13:34:37.643 22321 22321 I         : [INFO]: OPLUS_CHG[ADSP]([oplus_chg_8350_reg_dump][7390]): sm8450_st_dump: [chg_en=1, suspend=0, pd_svooc=0], subtype=0x01],[oplus_UsbCommCapable=0, oplus_pd_svooc=0, typec_mode=0, cid_status=0x01, usb_in_status=1],[0x2606=0x83, 0x2607=0x19, 0x2608=0x0a, 0x2609=0x02], [0x260a=0x00, 0x260b=0x57, 0x260c=0x0a, 0x260d=0x18], [0x260e=0x0a, 0x260f=0x01, 0x2610=0x00, 0x2640=0x01], [0x2641=0x02, 0x2642=0x05, 0x2646=0x01, 0x2650=0x03], [0x2706=0x0a, 0x2707=0x0a, 0x2708=0x0a, 0x2709=0x0a], [0x270b=0xe2, 0x270c=0x48, 0x2710=0xc0, 0x280c=0x38], [0x2810=0x00, 0x2840=0x01, 0x287f=0x00, 0x2906=0x02], [0x2908=0x0f, 0x290a=0x11, 0x290b=0x01, 0x290c=0x01], [0x2910=0x11, 0x2944=0x80, 0x2950=0x02, 0x2951=0x01], [0x2952=0x0a, 0x2954=0x00, 0x2960=0xe0, 0x2b06=0x08], [0x2b07=0x00, 0x2b08=0x00, 0x2b09=0x63, 0x2b0a=0x39], [0x2b0b=0x29, 0x2b0c=0x00, 0x29a8=0x81, 0x29a9=0x83], [0x29aa=0x00, 0x2aa2=0x00, 0x2aa8=0x87, 0x2aa9=0x00], [0x2aaa=0x00],
+09-24 13:34:37.664 20688 20688 E gsi soc : qcom,msm_gsi: gsi_stop_channel:3688 chan=1 busy try again
+09-24 13:34:37.667 20688 20688 E gsi soc : qcom,msm_gsi: gsi_stop_channel:3688 chan=14 busy try again
+09-24 13:34:37.928 29783 29783 W audit   : audit_lost=5303034 audit_rate_limit=5 audit_backlog_limit=64
+09-24 13:34:37.928 29783 29783 E audit   : rate limit exceeded
+09-24 13:34:38.441  1097  1097 I [   info] ts_panel_notifier_callback: Notification type:4, early_trigger:1
+09-24 13:34:38.441  1097  1097 I [   info] ts_panel_notifier_callback: shashank:Received fps change old fps:60 new fps:120
+09-24 13:34:38.459  1097  1097 E         : [LCD][0][ERR][oplus_panel_switch_vid_mode:475] oplus_panel_switch_vid_mode not support
+09-24 13:34:38.459  1097  1097 I [drm:dsi_display_set_mode [msm_drm]] [msm-dsi-info]: mdp_transfer_time=6290, hactive=1264, vactive=2780, fps=120, h_skew=0, clk_rate=1012000000, h_sync_width=2,				h_front_porch26, h_back_porch=26, v_back_porch=42, v_sync_width=2, v_front_porch=58
+09-24 13:34:38.461  1097  1097 I [ADFR][0][INFO][oplus_adfr_fakeframe_status_update:2140]h_active: 1264,refresh_rate:120,h_skew:0,sw_fps:0,fakeframe:0
+09-24 13:34:38.462  1097  1097 I         : [LCD][0][INFO][oplus_panel_cmd_print:120] [A0020] dsi_cmd: qcom,mdss-dsi-timing-switch-command, count=8
+09-24 13:34:38.462  1097  1097 I [ADFR][0][INFO][oplus_adfr_fakeframe_status_update:2140]h_active: 1264,refresh_rate:120,h_skew:0,sw_fps:0,fakeframe:1
+09-24 13:34:38.462  1097  1097 I         : [ADFR][0][INFO][oplus_adfr_status_reset:1851]sa status reset: auto_mode:0,fakeframe:1,sa_min_fps:120
+09-24 13:34:38.480  1097  1097 I         : <A0020> dsi_display_set_backlight time:08:04:51.233,bl_lvl:1683
+09-24 13:34:38.481  1097  1097 I [   info] ts_panel_notifier_callback: Notification type:4, early_trigger:0
+09-24 13:34:38.481  1097  1097 I [   info] ts_panel_notifier_callback: shashank:Received fps change old fps:60 new fps:120
+09-24 13:34:38.586  1097  1097 I [   info] ts_panel_notifier_callback: Notification type:4, early_trigger:1
+09-24 13:34:38.586  1097  1097 I [   info] ts_panel_notifier_callback: shashank:Received fps change old fps:120 new fps:60
+09-24 13:34:38.592  1097  1097 E         : [LCD][0][ERR][oplus_panel_switch_vid_mode:475] oplus_panel_switch_vid_mode not support
+09-24 13:34:38.592  1097  1097 I [drm:dsi_display_set_mode [msm_drm]] [msm-dsi-info]: mdp_transfer_time=6290, hactive=1264, vactive=2780, fps=60, h_skew=1, clk_rate=1012000000, h_sync_width=2,				h_front_porch26, h_back_porch=26, v_back_porch=42, v_sync_width=2, v_front_porch=58
+09-24 13:34:38.594  1097  1097 I [ADFR][0][INFO][oplus_adfr_fakeframe_status_update:2140]h_active: 1264,refresh_rate:60,h_skew:1,sw_fps:0,fakeframe:0
+09-24 13:34:38.599  1097  1097 I         : [LCD][0][INFO][oplus_panel_cmd_print:120] [A0020] dsi_cmd: qcom,mdss-dsi-timing-switch-command, count=8
+09-24 13:34:38.600  1097  1097 I [ADFR][0][INFO][oplus_adfr_fakeframe_status_update:2140]h_active: 1264,refresh_rate:60,h_skew:1,sw_fps:0,fakeframe:0
+09-24 13:34:38.600  1097  1097 I         : [ADFR][0][INFO][oplus_adfr_status_reset:1851]sa status reset: auto_mode:0,fakeframe:0,sa_min_fps:60
+09-24 13:34:38.616  1097  1097 I [   info] ts_panel_notifier_callback: Notification type:4, early_trigger:0
+09-24 13:34:38.616  1097  1097 I [   info] ts_panel_notifier_callback: shashank:Received fps change old fps:120 new fps:60
+09-24 13:34:39.816   867   867 I servicemanager: Caller(pid=29792,uid=2000,sid=u:r:shell:s0) Found android.hardware.graphics.allocator.IAllocator/default in device VINTF manifest.
+09-24 13:34:39.873   867   867 I servicemanager: Caller(pid=29792,uid=2000,sid=u:r:shell:s0) Found android.hardware.graphics.allocator.IAllocator/default in device VINTF manifest.
+09-24 13:34:40.188 29800 29800 W audit   : audit_lost=5303050 audit_rate_limit=5 audit_backlog_limit=64
+09-24 13:34:40.188 29800 29800 E audit   : rate limit exceeded
+09-24 13:34:40.251  1097  1097 I [   info] ts_panel_notifier_callback: Notification type:4, early_trigger:1
+09-24 13:34:40.251  1097  1097 I [   info] ts_panel_notifier_callback: shashank:Received fps change old fps:60 new fps:120
+09-24 13:34:40.255  1097  1097 E         : [LCD][0][ERR][oplus_panel_switch_vid_mode:475] oplus_panel_switch_vid_mode not support
+09-24 13:34:40.255  1097  1097 I [drm:dsi_display_set_mode [msm_drm]] [msm-dsi-info]: mdp_transfer_time=6290, hactive=1264, vactive=2780, fps=120, h_skew=0, clk_rate=1012000000, h_sync_width=2,				h_front_porch26, h_back_porch=26, v_back_porch=42, v_sync_width=2, v_front_porch=58
+09-24 13:34:40.256  1097  1097 I [ADFR][0][INFO][oplus_adfr_fakeframe_status_update:2140]h_active: 1264,refresh_rate:120,h_skew:0,sw_fps:0,fakeframe:0
+09-24 13:34:40.259  1097  1097 I         : [LCD][0][INFO][oplus_panel_cmd_print:120] [A0020] dsi_cmd: qcom,mdss-dsi-timing-switch-command, count=8
+09-24 13:34:40.259  1097  1097 I [ADFR][0][INFO][oplus_adfr_fakeframe_status_update:2140]h_active: 1264,refresh_rate:120,h_skew:0,sw_fps:0,fakeframe:1
+09-24 13:34:40.259  1097  1097 I         : [ADFR][0][INFO][oplus_adfr_status_reset:1851]sa status reset: auto_mode:0,fakeframe:1,sa_min_fps:120
+09-24 13:34:40.278  1097  1097 I [   info] ts_panel_notifier_callback: Notification type:4, early_trigger:0
+09-24 13:34:40.278  1097  1097 I [   info] ts_panel_notifier_callback: shashank:Received fps change old fps:60 new fps:120
+09-24 13:34:40.659 15309 15309 I         : [OFP][0][INFO][oplus_get_doze_disable_time:3679]oplus_get_doze_disable_time=0
+09-24 13:34:40.659 15309 15309 W [drm] [msm-dsi-warn]: dsi_display_check_status,time_gap=-1443957858
+09-24 13:34:40.758  1097  1097 I [   info] ts_panel_notifier_callback: Notification type:4, early_trigger:1
+09-24 13:34:40.758  1097  1097 I [   info] ts_panel_notifier_callback: shashank:Received fps change old fps:120 new fps:60
+09-24 13:34:40.763  1097  1097 E         : [LCD][0][ERR][oplus_panel_switch_vid_mode:475] oplus_panel_switch_vid_mode not support
+09-24 13:34:40.763  1097  1097 I [drm:dsi_display_set_mode [msm_drm]] [msm-dsi-info]: mdp_transfer_time=6290, hactive=1264, vactive=2780, fps=60, h_skew=1, clk_rate=1012000000, h_sync_width=2,				h_front_porch26, h_back_porch=26, v_back_porch=42, v_sync_width=2, v_front_porch=58
+09-24 13:34:40.765  1097  1097 I [ADFR][0][INFO][oplus_adfr_fakeframe_status_update:2140]h_active: 1264,refresh_rate:60,h_skew:1,sw_fps:0,fakeframe:0
+09-24 13:34:40.770  1097  1097 I         : [LCD][0][INFO][oplus_panel_cmd_print:120] [A0020] dsi_cmd: qcom,mdss-dsi-timing-switch-command, count=8
+09-24 13:34:40.771  1097  1097 I [ADFR][0][INFO][oplus_adfr_fakeframe_status_update:2140]h_active: 1264,refresh_rate:60,h_skew:1,sw_fps:0,fakeframe:0
+09-24 13:34:40.771  1097  1097 I         : [ADFR][0][INFO][oplus_adfr_status_reset:1851]sa status reset: auto_mode:0,fakeframe:0,sa_min_fps:60
+09-24 13:34:40.804  1097  1097 I [   info] ts_panel_notifier_callback: Notification type:4, early_trigger:0
+09-24 13:34:40.804  1097  1097 I [   info] ts_panel_notifier_callback: shashank:Received fps change old fps:120 new fps:60
+09-24 13:34:42.368 28498 28498 W audit   : audit_lost=5303066 audit_rate_limit=5 audit_backlog_limit=64
+09-24 13:34:42.368 28498 28498 E audit   : rate limit exceeded
+09-24 13:34:42.513  1097  1097 I [   info] ts_panel_notifier_callback: Notification type:4, early_trigger:1
+09-24 13:34:42.513  1097  1097 I [   info] ts_panel_notifier_callback: shashank:Received fps change old fps:60 new fps:120
+09-24 13:34:42.518  1097  1097 E         : [LCD][0][ERR][oplus_panel_switch_vid_mode:475] oplus_panel_switch_vid_mode not support
+09-24 13:34:42.518  1097  1097 I [drm:dsi_display_set_mode [msm_drm]] [msm-dsi-info]: mdp_transfer_time=6290, hactive=1264, vactive=2780, fps=120, h_skew=0, clk_rate=1012000000, h_sync_width=2,				h_front_porch26, h_back_porch=26, v_back_porch=42, v_sync_width=2, v_front_porch=58
+09-24 13:34:42.521  1097  1097 I [ADFR][0][INFO][oplus_adfr_fakeframe_status_update:2140]h_active: 1264,refresh_rate:120,h_skew:0,sw_fps:0,fakeframe:0
+09-24 13:34:42.522  1097  1097 I         : [LCD][0][INFO][oplus_panel_cmd_print:120] [A0020] dsi_cmd: qcom,mdss-dsi-timing-switch-command, count=8
+09-24 13:34:42.522  1097  1097 I [ADFR][0][INFO][oplus_adfr_fakeframe_status_update:2140]h_active: 1264,refresh_rate:120,h_skew:0,sw_fps:0,fakeframe:1
+09-24 13:34:42.522  1097  1097 I         : [ADFR][0][INFO][oplus_adfr_status_reset:1851]sa status reset: auto_mode:0,fakeframe:1,sa_min_fps:120
+09-24 13:34:42.532  1097  1097 I [   info] ts_panel_notifier_callback: Notification type:4, early_trigger:0
+09-24 13:34:42.532  1097  1097 I [   info] ts_panel_notifier_callback: shashank:Received fps change old fps:60 new fps:120
+09-24 13:34:42.595  1097  1097 I [   info] ts_panel_notifier_callback: Notification type:4, early_trigger:1
+09-24 13:34:42.595  1097  1097 I [   info] ts_panel_notifier_callback: shashank:Received fps change old fps:120 new fps:60
+09-24 13:34:42.598  1097  1097 E         : [LCD][0][ERR][oplus_panel_switch_vid_mode:475] oplus_panel_switch_vid_mode not support
+09-24 13:34:42.598  1097  1097 I [drm:dsi_display_set_mode [msm_drm]] [msm-dsi-info]: mdp_transfer_time=6290, hactive=1264, vactive=2780, fps=60, h_skew=1, clk_rate=1012000000, h_sync_width=2,				h_front_porch26, h_back_porch=26, v_back_porch=42, v_sync_width=2, v_front_porch=58
+09-24 13:34:42.600  1097  1097 I [ADFR][0][INFO][oplus_adfr_fakeframe_status_update:2140]h_active: 1264,refresh_rate:60,h_skew:1,sw_fps:0,fakeframe:0
+09-24 13:34:42.609  1097  1097 I         : [LCD][0][INFO][oplus_panel_cmd_print:120] [A0020] dsi_cmd: qcom,mdss-dsi-timing-switch-command, count=8
+09-24 13:34:42.609  1097  1097 I [ADFR][0][INFO][oplus_adfr_fakeframe_status_update:2140]h_active: 1264,refresh_rate:60,h_skew:1,sw_fps:0,fakeframe:0
+09-24 13:34:42.609  1097  1097 I         : [ADFR][0][INFO][oplus_adfr_status_reset:1851]sa status reset: auto_mode:0,fakeframe:0,sa_min_fps:60
+09-24 13:34:42.626  1097  1097 I [   info] ts_panel_notifier_callback: Notification type:4, early_trigger:0
+09-24 13:34:42.626  1097  1097 I [   info] ts_panel_notifier_callback: shashank:Received fps change old fps:120 new fps:60
+09-24 13:34:42.737 29430 29430 I         : [INFO]: OPLUS_CHG[CHG_COMM]([oplus_comm_smooth_to_soc][3416]): soc[0 2 75 75 77 78] avg[3 1 0 0 0] fifo[77 77 77 77]
+09-24 13:34:42.755 12958 12958 I OPLUS_CHG[oplus_charge_info]: BATTERY[412 411 4119 4119 -239 75 78 77 4057 5416 1 0x0 4301], CHARGE[4470 600 0 0], WIRED[1 453 4925 500 1 0x0 0 0 0 2 0], WIRELESS[0 0 0 0 0 0x0 0 0 0], VOOC[0 0 0 0 0x0], UFCS[0 0 0 0x0], COMMON[7 0 0 0x0 1 0 1 5416 100 0]
+09-24 13:34:42.757 12958 12958 I         : [INFO]: OPLUS_CHG[ADSP]([oplus_chg_8350_reg_dump][7390]): sm8450_st_dump: [chg_en=1, suspend=0, pd_svooc=0], subtype=0x01],[oplus_UsbCommCapable=0, oplus_pd_svooc=0, typec_mode=0, cid_status=0x01, usb_in_status=1],[0x2606=0x83, 0x2607=0x19, 0x2608=0x0a, 0x2609=0x02], [0x260a=0x00, 0x260b=0x57, 0x260c=0x0a, 0x260d=0x18], [0x260e=0x0a, 0x260f=0x01, 0x2610=0x00, 0x2640=0x01], [0x2641=0x02, 0x2642=0x05, 0x2646=0x01, 0x2650=0x03], [0x2706=0x0a, 0x2707=0x0a, 0x2708=0x0a, 0x2709=0x0a], [0x270b=0xe2, 0x270c=0x48, 0x2710=0xc0, 0x280c=0x38], [0x2810=0x00, 0x2840=0x01, 0x287f=0x00, 0x2906=0x02], [0x2908=0x0f, 0x290a=0x11, 0x290b=0x01, 0x290c=0x01], [0x2910=0x11, 0x2944=0x80, 0x2950=0x02, 0x2951=0x01], [0x2952=0x0a, 0x2954=0x00, 0x2960=0xe0, 0x2b06=0x08], [0x2b07=0x00, 0x2b08=0x00, 0x2b09=0x63, 0x2b0a=0x39], [0x2b0b=0x29, 0x2b0c=0x00, 0x29a8=0x81, 0x29a9=0x83], [0x29aa=0x00, 0x2aa2=0x00, 0x2aa8=0x87, 0x2aa9=0x00], [0x2aaa=0x00],
+09-24 13:34:44.032 27850 27850 E gsi soc : qcom,msm_gsi: gsi_stop_channel:3688 chan=1 busy try again
+09-24 13:34:44.033 27850 27850 E gsi soc : qcom,msm_gsi: gsi_stop_channel:3688 chan=14 busy try again
+09-24 13:34:44.745 29829 29829 W audit   : audit_lost=5303082 audit_rate_limit=5 audit_backlog_limit=64
+09-24 13:34:44.745 29829 29829 E audit   : rate limit exceeded
+09-24 13:34:44.792  1097  1097 I [   info] ts_panel_notifier_callback: Notification type:4, early_trigger:1
+09-24 13:34:44.792  1097  1097 I [   info] ts_panel_notifier_callback: shashank:Received fps change old fps:60 new fps:120
+09-24 13:34:44.797  1097  1097 E         : [LCD][0][ERR][oplus_panel_switch_vid_mode:475] oplus_panel_switch_vid_mode not support
+09-24 13:34:44.798  1097  1097 I [drm:dsi_display_set_mode [msm_drm]] [msm-dsi-info]: mdp_transfer_time=6290, hactive=1264, vactive=2780, fps=120, h_skew=0, clk_rate=1012000000, h_sync_width=2,				h_front_porch26, h_back_porch=26, v_back_porch=42, v_sync_width=2, v_front_porch=58
+09-24 13:34:44.799  1097  1097 I [ADFR][0][INFO][oplus_adfr_fakeframe_status_update:2140]h_active: 1264,refresh_rate:120,h_skew:0,sw_fps:0,fakeframe:0
+09-24 13:34:44.801  1097  1097 I         : [LCD][0][INFO][oplus_panel_cmd_print:120] [A0020] dsi_cmd: qcom,mdss-dsi-timing-switch-command, count=8
+09-24 13:34:44.801  1097  1097 I [ADFR][0][INFO][oplus_adfr_fakeframe_status_update:2140]h_active: 1264,refresh_rate:120,h_skew:0,sw_fps:0,fakeframe:1
+09-24 13:34:44.801  1097  1097 I         : [ADFR][0][INFO][oplus_adfr_status_reset:1851]sa status reset: auto_mode:0,fakeframe:1,sa_min_fps:120
+09-24 13:34:44.820  1097  1097 I [   info] ts_panel_notifier_callback: Notification type:4, early_trigger:0
+09-24 13:34:44.820  1097  1097 I [   info] ts_panel_notifier_callback: shashank:Received fps change old fps:60 new fps:120
+09-24 13:34:45.310  1097  1097 I [   info] ts_panel_notifier_callback: Notification type:4, early_trigger:1
+09-24 13:34:45.310  1097  1097 I [   info] ts_panel_notifier_callback: shashank:Received fps change old fps:120 new fps:60
+09-24 13:34:45.315  1097  1097 E         : [LCD][0][ERR][oplus_panel_switch_vid_mode:475] oplus_panel_switch_vid_mode not support
+09-24 13:34:45.315  1097  1097 I [drm:dsi_display_set_mode [msm_drm]] [msm-dsi-info]: mdp_transfer_time=6290, hactive=1264, vactive=2780, fps=60, h_skew=1, clk_rate=1012000000, h_sync_width=2,				h_front_porch26, h_back_porch=26, v_back_porch=42, v_sync_width=2, v_front_porch=58
+09-24 13:34:45.316  1097  1097 I [ADFR][0][INFO][oplus_adfr_fakeframe_status_update:2140]h_active: 1264,refresh_rate:60,h_skew:1,sw_fps:0,fakeframe:0
+09-24 13:34:45.321  1097  1097 I         : [LCD][0][INFO][oplus_panel_cmd_print:120] [A0020] dsi_cmd: qcom,mdss-dsi-timing-switch-command, count=8
+09-24 13:34:45.322  1097  1097 I [ADFR][0][INFO][oplus_adfr_fakeframe_status_update:2140]h_active: 1264,refresh_rate:60,h_skew:1,sw_fps:0,fakeframe:0
+09-24 13:34:45.322  1097  1097 I         : [ADFR][0][INFO][oplus_adfr_status_reset:1851]sa status reset: auto_mode:0,fakeframe:0,sa_min_fps:60
+09-24 13:34:45.338  1097  1097 I [   info] ts_panel_notifier_callback: Notification type:4, early_trigger:0
+09-24 13:34:45.338  1097  1097 I [   info] ts_panel_notifier_callback: shashank:Received fps change old fps:120 new fps:60
+09-24 13:34:45.779 15309 15309 I         : [OFP][0][INFO][oplus_get_doze_disable_time:3679]oplus_get_doze_disable_time=0
+09-24 13:34:45.779 15309 15309 W [drm] [msm-dsi-warn]: dsi_display_check_status,time_gap=-1438837857
+09-24 13:34:45.910  1097  1097 I [   info] ts_panel_notifier_callback: Notification type:4, early_trigger:1
+09-24 13:34:45.910  1097  1097 I [   info] ts_panel_notifier_callback: shashank:Received fps change old fps:60 new fps:120
+09-24 13:34:45.916  1097  1097 E         : [LCD][0][ERR][oplus_panel_switch_vid_mode:475] oplus_panel_switch_vid_mode not support
+09-24 13:34:45.916  1097  1097 I [drm:dsi_display_set_mode [msm_drm]] [msm-dsi-info]: mdp_transfer_time=6290, hactive=1264, vactive=2780, fps=120, h_skew=0, clk_rate=1012000000, h_sync_width=2,				h_front_porch26, h_back_porch=26, v_back_porch=42, v_sync_width=2, v_front_porch=58
+09-24 13:34:45.918  1097  1097 I [ADFR][0][INFO][oplus_adfr_fakeframe_status_update:2140]h_active: 1264,refresh_rate:120,h_skew:0,sw_fps:0,fakeframe:0
+09-24 13:34:45.925  1097  1097 I         : [LCD][0][INFO][oplus_panel_cmd_print:120] [A0020] dsi_cmd: qcom,mdss-dsi-timing-switch-command, count=8
+09-24 13:34:45.925  1097  1097 I [ADFR][0][INFO][oplus_adfr_fakeframe_status_update:2140]h_active: 1264,refresh_rate:120,h_skew:0,sw_fps:0,fakeframe:1
+09-24 13:34:45.925  1097  1097 I         : [ADFR][0][INFO][oplus_adfr_status_reset:1851]sa status reset: auto_mode:0,fakeframe:1,sa_min_fps:120
+09-24 13:34:45.928 27850 27850 E gsi soc : qcom,msm_gsi: gsi_stop_channel:3688 chan=1 busy try again
+09-24 13:34:45.931 27850 27850 E gsi soc : qcom,msm_gsi: gsi_stop_channel:3688 chan=14 busy try again
+09-24 13:34:45.935  1097  1097 I [   info] ts_panel_notifier_callback: Notification type:4, early_trigger:0
+09-24 13:34:45.935  1097  1097 I [   info] ts_panel_notifier_callback: shashank:Received fps change old fps:60 new fps:120
+09-24 13:34:45.998  1097  1097 I [   info] ts_panel_notifier_callback: Notification type:4, early_trigger:1
+09-24 13:34:45.998  1097  1097 I [   info] ts_panel_notifier_callback: shashank:Received fps change old fps:120 new fps:60
+09-24 13:34:46.000  1097  1097 E         : [LCD][0][ERR][oplus_panel_switch_vid_mode:475] oplus_panel_switch_vid_mode not support
+09-24 13:34:46.000  1097  1097 I [drm:dsi_display_set_mode [msm_drm]] [msm-dsi-info]: mdp_transfer_time=6290, hactive=1264, vactive=2780, fps=60, h_skew=1, clk_rate=1012000000, h_sync_width=2,				h_front_porch26, h_back_porch=26, v_back_porch=42, v_sync_width=2, v_front_porch=58
+09-24 13:34:46.002  1097  1097 I [ADFR][0][INFO][oplus_adfr_fakeframe_status_update:2140]h_active: 1264,refresh_rate:60,h_skew:1,sw_fps:0,fakeframe:0
+09-24 13:34:46.004  1097  1097 I         : [LCD][0][INFO][oplus_panel_cmd_print:120] [A0020] dsi_cmd: qcom,mdss-dsi-timing-switch-command, count=8
+09-24 13:34:46.004  1097  1097 I [ADFR][0][INFO][oplus_adfr_fakeframe_status_update:2140]h_active: 1264,refresh_rate:60,h_skew:1,sw_fps:0,fakeframe:0
+09-24 13:34:46.004  1097  1097 I         : [ADFR][0][INFO][oplus_adfr_status_reset:1851]sa status reset: auto_mode:0,fakeframe:0,sa_min_fps:60
+09-24 13:34:46.021  1097  1097 I [   info] ts_panel_notifier_callback: Notification type:4, early_trigger:0
+09-24 13:34:46.021  1097  1097 I [   info] ts_panel_notifier_callback: shashank:Received fps change old fps:120 new fps:60
+09-24 13:34:46.658 20688 20688 E gsi soc : qcom,msm_gsi: gsi_stop_channel:3688 chan=1 busy try again
+09-24 13:34:46.661 20688 20688 E gsi soc : qcom,msm_gsi: gsi_stop_channel:3688 chan=14 busy try again
+09-24 13:34:47.059 19938 19938 E iostack : irqs = 14751616, self-block = 0
+09-24 13:34:47.063 29843 29843 W audit   : audit_lost=5303098 audit_rate_limit=5 audit_backlog_limit=64
+09-24 13:34:47.063 29843 29843 E audit   : rate limit exceeded
+09-24 13:34:47.139  1097  1097 I [   info] ts_panel_notifier_callback: Notification type:4, early_trigger:1
+09-24 13:34:47.139  1097  1097 I [   info] ts_panel_notifier_callback: shashank:Received fps change old fps:60 new fps:120
+09-24 13:34:47.145  1097  1097 E         : [LCD][0][ERR][oplus_panel_switch_vid_mode:475] oplus_panel_switch_vid_mode not support
+09-24 13:34:47.145  1097  1097 I [drm:dsi_display_set_mode [msm_drm]] [msm-dsi-info]: mdp_transfer_time=6290, hactive=1264, vactive=2780, fps=120, h_skew=0, clk_rate=1012000000, h_sync_width=2,				h_front_porch26, h_back_porch=26, v_back_porch=42, v_sync_width=2, v_front_porch=58
+09-24 13:34:47.148  1097  1097 I [ADFR][0][INFO][oplus_adfr_fakeframe_status_update:2140]h_active: 1264,refresh_rate:120,h_skew:0,sw_fps:0,fakeframe:0
+09-24 13:34:47.148  1097  1097 I         : [LCD][0][INFO][oplus_panel_cmd_print:120] [A0020] dsi_cmd: qcom,mdss-dsi-timing-switch-command, count=8
+09-24 13:34:47.148  1097  1097 I [ADFR][0][INFO][oplus_adfr_fakeframe_status_update:2140]h_active: 1264,refresh_rate:120,h_skew:0,sw_fps:0,fakeframe:1
+09-24 13:34:47.148  1097  1097 I         : [ADFR][0][INFO][oplus_adfr_status_reset:1851]sa status reset: auto_mode:0,fakeframe:1,sa_min_fps:120
+09-24 13:34:47.167  1097  1097 I [   info] ts_panel_notifier_callback: Notification type:4, early_trigger:0
+09-24 13:34:47.167  1097  1097 I [   info] ts_panel_notifier_callback: shashank:Received fps change old fps:60 new fps:120
+09-24 13:34:47.665  1097  1097 I [   info] ts_panel_notifier_callback: Notification type:4, early_trigger:1
+09-24 13:34:47.665  1097  1097 I [   info] ts_panel_notifier_callback: shashank:Received fps change old fps:120 new fps:60
+09-24 13:34:47.670  1097  1097 E         : [LCD][0][ERR][oplus_panel_switch_vid_mode:475] oplus_panel_switch_vid_mode not support
+09-24 13:34:47.670  1097  1097 I [drm:dsi_display_set_mode [msm_drm]] [msm-dsi-info]: mdp_transfer_time=6290, hactive=1264, vactive=2780, fps=60, h_skew=1, clk_rate=1012000000, h_sync_width=2,				h_front_porch26, h_back_porch=26, v_back_porch=42, v_sync_width=2, v_front_porch=58
+09-24 13:34:47.673  1097  1097 I [ADFR][0][INFO][oplus_adfr_fakeframe_status_update:2140]h_active: 1264,refresh_rate:60,h_skew:1,sw_fps:0,fakeframe:0
+09-24 13:34:47.676  1097  1097 I         : [LCD][0][INFO][oplus_panel_cmd_print:120] [A0020] dsi_cmd: qcom,mdss-dsi-timing-switch-command, count=8
+09-24 13:34:47.676  1097  1097 I [ADFR][0][INFO][oplus_adfr_fakeframe_status_update:2140]h_active: 1264,refresh_rate:60,h_skew:1,sw_fps:0,fakeframe:0
+09-24 13:34:47.676  1097  1097 I         : [ADFR][0][INFO][oplus_adfr_status_reset:1851]sa status reset: auto_mode:0,fakeframe:0,sa_min_fps:60
+09-24 13:34:47.693  1097  1097 I [   info] ts_panel_notifier_callback: Notification type:4, early_trigger:0
+09-24 13:34:47.693  1097  1097 I [   info] ts_panel_notifier_callback: shashank:Received fps change old fps:120 new fps:60
+09-24 13:34:47.855 29430 29430 I         : [INFO]: OPLUS_CHG[CHG_COMM]([oplus_comm_smooth_to_soc][3416]): soc[0 2 75 75 77 78] avg[0 1 0 0 0] fifo[77 77 77 77]
+09-24 13:34:47.884 12958 12958 I OPLUS_CHG[oplus_charge_info]: BATTERY[412 412 4115 4115 -175 75 78 77 4057 5416 1 0x0 4301], CHARGE[4470 600 0 0], WIRED[1 453 4927 500 1 0x0 0 0 0 2 0], WIRELESS[0 0 0 0 0 0x0 0 0 0], VOOC[0 0 0 0 0x0], UFCS[0 0 0 0x0], COMMON[7 0 0 0x0 1 0 1 5416 100 0]
+09-24 13:34:47.888 12958 12958 I         : [INFO]: OPLUS_CHG[ADSP]([oplus_chg_8350_reg_dump][7390]): sm8450_st_dump: [chg_en=1, suspend=0, pd_svooc=0], subtype=0x01],[oplus_UsbCommCapable=0, oplus_pd_svooc=0, typec_mode=0, cid_status=0x01, usb_in_status=1],[0x2606=0x83, 0x2607=0x19, 0x2608=0x0a, 0x2609=0x02], [0x260a=0x00, 0x260b=0x57, 0x260c=0x0a, 0x260d=0x18], [0x260e=0x0a, 0x260f=0x01, 0x2610=0x00, 0x2640=0x01], [0x2641=0x02, 0x2642=0x05, 0x2646=0x01, 0x2650=0x03], [0x2706=0x0a, 0x2707=0x0a, 0x2708=0x0a, 0x2709=0x0a], [0x270b=0xe2, 0x270c=0x48, 0x2710=0xc0, 0x280c=0x38], [0x2810=0x00, 0x2840=0x01, 0x287f=0x00, 0x2906=0x02], [0x2908=0x0f, 0x290a=0x11, 0x290b=0x01, 0x290c=0x01], [0x2910=0x11, 0x2944=0x80, 0x2950=0x02, 0x2951=0x01], [0x2952=0x0a, 0x2954=0x00, 0x2960=0xe0, 0x2b06=0x08], [0x2b07=0x00, 0x2b08=0x00, 0x2b09=0x63, 0x2b0a=0x39], [0x2b0b=0x29, 0x2b0c=0x00, 0x29a8=0x81, 0x29a9=0x83], [0x29aa=0x00, 0x2aa2=0x00, 0x2aa8=0x87, 0x2aa9=0x00], [0x2aaa=0x00],
+09-24 13:34:47.915  1097  1097 I [   info] ts_panel_notifier_callback: Notification type:4, early_trigger:1
+09-24 13:34:47.915  1097  1097 I [   info] ts_panel_notifier_callback: shashank:Received fps change old fps:60 new fps:120
+09-24 13:34:47.920  1097  1097 E         : [LCD][0][ERR][oplus_panel_switch_vid_mode:475] oplus_panel_switch_vid_mode not support
+09-24 13:34:47.920  1097  1097 I [drm:dsi_display_set_mode [msm_drm]] [msm-dsi-info]: mdp_transfer_time=6290, hactive=1264, vactive=2780, fps=120, h_skew=0, clk_rate=1012000000, h_sync_width=2,				h_front_porch26, h_back_porch=26, v_back_porch=42, v_sync_width=2, v_front_porch=58
+09-24 13:34:47.922  1097  1097 I [ADFR][0][INFO][oplus_adfr_fakeframe_status_update:2140]h_active: 1264,refresh_rate:120,h_skew:0,sw_fps:0,fakeframe:0
+09-24 13:34:47.922  1097  1097 I         : [LCD][0][INFO][oplus_panel_cmd_print:120] [A0020] dsi_cmd: qcom,mdss-dsi-timing-switch-command, count=8
+09-24 13:34:47.922  1097  1097 I [ADFR][0][INFO][oplus_adfr_fakeframe_status_update:2140]h_active: 1264,refresh_rate:120,h_skew:0,sw_fps:0,fakeframe:1
+09-24 13:34:47.922  1097  1097 I         : [ADFR][0][INFO][oplus_adfr_status_reset:1851]sa status reset: auto_mode:0,fakeframe:1,sa_min_fps:120
+09-24 13:34:47.942  1097  1097 I [   info] ts_panel_notifier_callback: Notification type:4, early_trigger:0
+09-24 13:34:47.942  1097  1097 I [   info] ts_panel_notifier_callback: shashank:Received fps change old fps:60 new fps:120
+09-24 13:34:48.003  1097  1097 I [   info] ts_panel_notifier_callback: Notification type:4, early_trigger:1
+09-24 13:34:48.003  1097  1097 I [   info] ts_panel_notifier_callback: shashank:Received fps change old fps:120 new fps:60
+09-24 13:34:48.006  1097  1097 E         : [LCD][0][ERR][oplus_panel_switch_vid_mode:475] oplus_panel_switch_vid_mode not support
+09-24 13:34:48.006  1097  1097 I [drm:dsi_display_set_mode [msm_drm]] [msm-dsi-info]: mdp_transfer_time=6290, hactive=1264, vactive=2780, fps=60, h_skew=1, clk_rate=1012000000, h_sync_width=2,				h_front_porch26, h_back_porch=26, v_back_porch=42, v_sync_width=2, v_front_porch=58
+09-24 13:34:48.008  1097  1097 I [ADFR][0][INFO][oplus_adfr_fakeframe_status_update:2140]h_active: 1264,refresh_rate:60,h_skew:1,sw_fps:0,fakeframe:0
+09-24 13:34:48.009  1097  1097 I         : [LCD][0][INFO][oplus_panel_cmd_print:120] [A0020] dsi_cmd: qcom,mdss-dsi-timing-switch-command, count=8
+09-24 13:34:48.009  1097  1097 I [ADFR][0][INFO][oplus_adfr_fakeframe_status_update:2140]h_active: 1264,refresh_rate:60,h_skew:1,sw_fps:0,fakeframe:0
+09-24 13:34:48.009  1097  1097 I         : [ADFR][0][INFO][oplus_adfr_status_reset:1851]sa status reset: auto_mode:0,fakeframe:0,sa_min_fps:60
+09-24 13:34:48.026  1097  1097 I [   info] ts_panel_notifier_callback: Notification type:4, early_trigger:0
+09-24 13:34:48.026  1097  1097 I [   info] ts_panel_notifier_callback: shashank:Received fps change old fps:120 new fps:60
+09-24 13:34:49.387 29857 29857 W audit   : audit_lost=5303114 audit_rate_limit=5 audit_backlog_limit=64
+09-24 13:34:49.387 29857 29857 E audit   : rate limit exceeded
+09-24 13:34:49.454  1097  1097 I [   info] ts_panel_notifier_callback: Notification type:4, early_trigger:1
+09-24 13:34:49.454  1097  1097 I [   info] ts_panel_notifier_callback: shashank:Received fps change old fps:60 new fps:120
+09-24 13:34:49.459  1097  1097 E         : [LCD][0][ERR][oplus_panel_switch_vid_mode:475] oplus_panel_switch_vid_mode not support
+09-24 13:34:49.459  1097  1097 I [drm:dsi_display_set_mode [msm_drm]] [msm-dsi-info]: mdp_transfer_time=6290, hactive=1264, vactive=2780, fps=120, h_skew=0, clk_rate=1012000000, h_sync_width=2,				h_front_porch26, h_back_porch=26, v_back_porch=42, v_sync_width=2, v_front_porch=58
+09-24 13:34:49.460  1097  1097 I [ADFR][0][INFO][oplus_adfr_fakeframe_status_update:2140]h_active: 1264,refresh_rate:120,h_skew:0,sw_fps:0,fakeframe:0
+09-24 13:34:49.461  1097  1097 I         : [LCD][0][INFO][oplus_panel_cmd_print:120] [A0020] dsi_cmd: qcom,mdss-dsi-timing-switch-command, count=8
+09-24 13:34:49.461  1097  1097 I [ADFR][0][INFO][oplus_adfr_fakeframe_status_update:2140]h_active: 1264,refresh_rate:120,h_skew:0,sw_fps:0,fakeframe:1
+09-24 13:34:49.461  1097  1097 I         : [ADFR][0][INFO][oplus_adfr_status_reset:1851]sa status reset: auto_mode:0,fakeframe:1,sa_min_fps:120
+09-24 13:34:49.472  1097  1097 I [   info] ts_panel_notifier_callback: Notification type:4, early_trigger:0
+09-24 13:34:49.472  1097  1097 I [   info] ts_panel_notifier_callback: shashank:Received fps change old fps:60 new fps:120
+09-24 13:34:49.969  1097  1097 I [   info] ts_panel_notifier_callback: Notification type:4, early_trigger:1
+09-24 13:34:49.969  1097  1097 I [   info] ts_panel_notifier_callback: shashank:Received fps change old fps:120 new fps:60
+09-24 13:34:49.974  1097  1097 E         : [LCD][0][ERR][oplus_panel_switch_vid_mode:475] oplus_panel_switch_vid_mode not support
+09-24 13:34:49.974  1097  1097 I [drm:dsi_display_set_mode [msm_drm]] [msm-dsi-info]: mdp_transfer_time=6290, hactive=1264, vactive=2780, fps=60, h_skew=1, clk_rate=1012000000, h_sync_width=2,				h_front_porch26, h_back_porch=26, v_back_porch=42, v_sync_width=2, v_front_porch=58
+09-24 13:34:49.976  1097  1097 I [ADFR][0][INFO][oplus_adfr_fakeframe_status_update:2140]h_active: 1264,refresh_rate:60,h_skew:1,sw_fps:0,fakeframe:0
+09-24 13:34:49.981  1097  1097 I         : [LCD][0][INFO][oplus_panel_cmd_print:120] [A0020] dsi_cmd: qcom,mdss-dsi-timing-switch-command, count=8
+09-24 13:34:49.981  1097  1097 I [ADFR][0][INFO][oplus_adfr_fakeframe_status_update:2140]h_active: 1264,refresh_rate:60,h_skew:1,sw_fps:0,fakeframe:0
+09-24 13:34:49.981  1097  1097 I         : [ADFR][0][INFO][oplus_adfr_status_reset:1851]sa status reset: auto_mode:0,fakeframe:0,sa_min_fps:60
+09-24 13:34:49.998  1097  1097 I [   info] ts_panel_notifier_callback: Notification type:4, early_trigger:0
+09-24 13:34:49.998  1097  1097 I [   info] ts_panel_notifier_callback: shashank:Received fps change old fps:120 new fps:60
+09-24 13:34:50.901 15309 15309 I         : [OFP][0][INFO][oplus_get_doze_disable_time:3679]oplus_get_doze_disable_time=0
+09-24 13:34:50.901 15309 15309 W [drm] [msm-dsi-warn]: dsi_display_check_status,time_gap=-1433716488
+09-24 13:34:51.627 28498 28498 W audit   : audit_lost=5303130 audit_rate_limit=5 audit_backlog_limit=64
+09-24 13:34:51.627 28498 28498 E audit   : rate limit exceeded
+09-24 13:34:51.849  1097  1097 I [   info] ts_panel_notifier_callback: Notification type:4, early_trigger:1
+09-24 13:34:51.849  1097  1097 I [   info] ts_panel_notifier_callback: shashank:Received fps change old fps:60 new fps:120
+09-24 13:34:51.854  1097  1097 E         : [LCD][0][ERR][oplus_panel_switch_vid_mode:475] oplus_panel_switch_vid_mode not support
+09-24 13:34:51.854  1097  1097 I [drm:dsi_display_set_mode [msm_drm]] [msm-dsi-info]: mdp_transfer_time=6290, hactive=1264, vactive=2780, fps=120, h_skew=0, clk_rate=1012000000, h_sync_width=2,				h_front_porch26, h_back_porch=26, v_back_porch=42, v_sync_width=2, v_front_porch=58
+09-24 13:34:51.854  1097  1097 I [ADFR][0][INFO][oplus_adfr_fakeframe_status_update:2140]h_active: 1264,refresh_rate:120,h_skew:0,sw_fps:0,fakeframe:0
+09-24 13:34:51.857  1097  1097 I         : [LCD][0][INFO][oplus_panel_cmd_print:120] [A0020] dsi_cmd: qcom,mdss-dsi-timing-switch-command, count=8
+09-24 13:34:51.857  1097  1097 I [ADFR][0][INFO][oplus_adfr_fakeframe_status_update:2140]h_active: 1264,refresh_rate:120,h_skew:0,sw_fps:0,fakeframe:1
+09-24 13:34:51.857  1097  1097 I         : [ADFR][0][INFO][oplus_adfr_status_reset:1851]sa status reset: auto_mode:0,fakeframe:1,sa_min_fps:120
+09-24 13:34:51.876  1097  1097 I [   info] ts_panel_notifier_callback: Notification type:4, early_trigger:0
+09-24 13:34:51.876  1097  1097 I [   info] ts_panel_notifier_callback: shashank:Received fps change old fps:60 new fps:120
+09-24 13:34:52.372  1097  1097 I [   info] ts_panel_notifier_callback: Notification type:4, early_trigger:1
+09-24 13:34:52.372  1097  1097 I [   info] ts_panel_notifier_callback: shashank:Received fps change old fps:120 new fps:60
+09-24 13:34:52.378  1097  1097 E         : [LCD][0][ERR][oplus_panel_switch_vid_mode:475] oplus_panel_switch_vid_mode not support
+09-24 13:34:52.378  1097  1097 I [drm:dsi_display_set_mode [msm_drm]] [msm-dsi-info]: mdp_transfer_time=6290, hactive=1264, vactive=2780, fps=60, h_skew=1, clk_rate=1012000000, h_sync_width=2,				h_front_porch26, h_back_porch=26, v_back_porch=42, v_sync_width=2, v_front_porch=58
+09-24 13:34:52.380  1097  1097 I [ADFR][0][INFO][oplus_adfr_fakeframe_status_update:2140]h_active: 1264,refresh_rate:60,h_skew:1,sw_fps:0,fakeframe:0
+09-24 13:34:52.386  1097  1097 I         : [LCD][0][INFO][oplus_panel_cmd_print:120] [A0020] dsi_cmd: qcom,mdss-dsi-timing-switch-command, count=8
+09-24 13:34:52.386  1097  1097 I [ADFR][0][INFO][oplus_adfr_fakeframe_status_update:2140]h_active: 1264,refresh_rate:60,h_skew:1,sw_fps:0,fakeframe:0
+09-24 13:34:52.386  1097  1097 I         : [ADFR][0][INFO][oplus_adfr_status_reset:1851]sa status reset: auto_mode:0,fakeframe:0,sa_min_fps:60
+09-24 13:34:52.402  1097  1097 I [   info] ts_panel_notifier_callback: Notification type:4, early_trigger:0
+09-24 13:34:52.402  1097  1097 I [   info] ts_panel_notifier_callback: shashank:Received fps change old fps:120 new fps:60
+09-24 13:34:52.976 29430 29430 I         : [INFO]: OPLUS_CHG[CHG_COMM]([oplus_comm_smooth_to_soc][3416]): soc[0 2 75 75 77 78] avg[1 1 0 0 0] fifo[77 77 77 77]
+09-24 13:34:52.994 22321 22321 I OPLUS_CHG[oplus_charge_info]: BATTERY[412 412 4124 4124 -250 75 78 77 4057 5416 1 0x0 4301], CHARGE[4470 600 0 0], WIRED[1 453 4930 500 1 0x0 0 0 0 2 0], WIRELESS[0 0 0 0 0 0x0 0 0 0], VOOC[0 0 0 0 0x0], UFCS[0 0 0 0x0], COMMON[7 0 0 0x0 1 0 1 5416 100 0]
+09-24 13:34:52.998 22321 22321 I         : [INFO]: OPLUS_CHG[ADSP]([oplus_chg_8350_reg_dump][7390]): sm8450_st_dump: [chg_en=1, suspend=0, pd_svooc=0], subtype=0x01],[oplus_UsbCommCapable=0, oplus_pd_svooc=0, typec_mode=0, cid_status=0x01, usb_in_status=1],[0x2606=0x83, 0x2607=0x19, 0x2608=0x0a, 0x2609=0x02], [0x260a=0x00, 0x260b=0x57, 0x260c=0x0a, 0x260d=0x18], [0x260e=0x0a, 0x260f=0x01, 0x2610=0x00, 0x2640=0x01], [0x2641=0x02, 0x2642=0x05, 0x2646=0x01, 0x2650=0x03], [0x2706=0x0a, 0x2707=0x0a, 0x2708=0x0a, 0x2709=0x0a], [0x270b=0xe2, 0x270c=0x48, 0x2710=0xc0, 0x280c=0x38], [0x2810=0x00, 0x2840=0x01, 0x287f=0x00, 0x2906=0x02], [0x2908=0x0f, 0x290a=0x11, 0x290b=0x01, 0x290c=0x01], [0x2910=0x11, 0x2944=0x80, 0x2950=0x02, 0x2951=0x01], [0x2952=0x0a, 0x2954=0x00, 0x2960=0xe0, 0x2b06=0x08], [0x2b07=0x00, 0x2b08=0x00, 0x2b09=0x63, 0x2b0a=0x39], [0x2b0b=0x29, 0x2b0c=0x00, 0x29a8=0x81, 0x29a9=0x83], [0x29aa=0x00, 0x2aa2=0x00, 0x2aa8=0x87, 0x2aa9=0x00], [0x2aaa=0x00],
+09-24 13:34:53.913   867   867 I servicemanager: Caller(pid=2866,uid=1000,sid=u:r:system_server:s0) Since 'artd' could not be found trying to start it as a lazy AIDL service. (if it's not configured to be a lazy service, it may be stuck starting or still starting).
+09-24 13:34:53.916     1     1 I init    : starting service 'artd'...
+09-24 13:34:53.925     1     1 I init    : ... started service 'artd' has pid 29905
+09-24 13:34:53.925     1     1 I init    : Control message: Processed ctl.interface_start for 'aidl/artd' from pid: 867 (/system/bin/servicemanager)
+09-24 13:34:53.992   867   867 I servicemanager: Notifying artd they do (previously: don't) have clients when service is guaranteed to be in use
+09-24 13:34:54.066 29971 29971 W audit   : audit_lost=5303146 audit_rate_limit=5 audit_backlog_limit=64
+09-24 13:34:54.066 29971 29971 E audit   : rate limit exceeded
+09-24 13:34:54.158  1097  1097 I [   info] ts_panel_notifier_callback: Notification type:4, early_trigger:1
+09-24 13:34:54.158  1097  1097 I [   info] ts_panel_notifier_callback: shashank:Received fps change old fps:60 new fps:120
+09-24 13:34:54.163  1097  1097 E         : [LCD][0][ERR][oplus_panel_switch_vid_mode:475] oplus_panel_switch_vid_mode not support
+09-24 13:34:54.163  1097  1097 I [drm:dsi_display_set_mode [msm_drm]] [msm-dsi-info]: mdp_transfer_time=6290, hactive=1264, vactive=2780, fps=120, h_skew=0, clk_rate=1012000000, h_sync_width=2,				h_front_porch26, h_back_porch=26, v_back_porch=42, v_sync_width=2, v_front_porch=58
+09-24 13:34:54.164  1097  1097 I [ADFR][0][INFO][oplus_adfr_fakeframe_status_update:2140]h_active: 1264,refresh_rate:120,h_skew:0,sw_fps:0,fakeframe:0
+09-24 13:34:54.170  1097  1097 I         : [LCD][0][INFO][oplus_panel_cmd_print:120] [A0020] dsi_cmd: qcom,mdss-dsi-timing-switch-command, count=8
+09-24 13:34:54.171  1097  1097 I [ADFR][0][INFO][oplus_adfr_fakeframe_status_update:2140]h_active: 1264,refresh_rate:120,h_skew:0,sw_fps:0,fakeframe:1
+09-24 13:34:54.171  1097  1097 I         : [ADFR][0][INFO][oplus_adfr_status_reset:1851]sa status reset: auto_mode:0,fakeframe:1,sa_min_fps:120
+09-24 13:34:54.181  1097  1097 I [   info] ts_panel_notifier_callback: Notification type:4, early_trigger:0
+09-24 13:34:54.181  1097  1097 I [   info] ts_panel_notifier_callback: shashank:Received fps change old fps:60 new fps:120
+09-24 13:34:54.669  1097  1097 I [   info] ts_panel_notifier_callback: Notification type:4, early_trigger:1
+09-24 13:34:54.669  1097  1097 I [   info] ts_panel_notifier_callback: shashank:Received fps change old fps:120 new fps:60
+09-24 13:34:54.674  1097  1097 E         : [LCD][0][ERR][oplus_panel_switch_vid_mode:475] oplus_panel_switch_vid_mode not support
+09-24 13:34:54.674  1097  1097 I [drm:dsi_display_set_mode [msm_drm]] [msm-dsi-info]: mdp_transfer_time=6290, hactive=1264, vactive=2780, fps=60, h_skew=1, clk_rate=1012000000, h_sync_width=2,				h_front_porch26, h_back_porch=26, v_back_porch=42, v_sync_width=2, v_front_porch=58
+09-24 13:34:54.675  1097  1097 I [ADFR][0][INFO][oplus_adfr_fakeframe_status_update:2140]h_active: 1264,refresh_rate:60,h_skew:1,sw_fps:0,fakeframe:0
+09-24 13:34:54.682  1097  1097 I         : [LCD][0][INFO][oplus_panel_cmd_print:120] [A0020] dsi_cmd: qcom,mdss-dsi-timing-switch-command, count=8
+09-24 13:34:54.682  1097  1097 I [ADFR][0][INFO][oplus_adfr_fakeframe_status_update:2140]h_active: 1264,refresh_rate:60,h_skew:1,sw_fps:0,fakeframe:0
+09-24 13:34:54.682  1097  1097 I         : [ADFR][0][INFO][oplus_adfr_status_reset:1851]sa status reset: auto_mode:0,fakeframe:0,sa_min_fps:60
+09-24 13:34:54.697  1097  1097 I <A0020> len: 900 dsi_display_set_backlight 07:59:46.481:1683,07:59:46.589:1683,07:59:46.672:1683,07:59:46.780:1683,07:59:47.213:1683,07:59:47.687:1683,07:59:47.737:1683,08:00:23.554:1683,08:00:23.604:1683,08:00:23.987:1683,08:00:24.054:1683,08:00:40.852:1683,08:00:40.902:1683,08:00:41.509:1683,08:00:41.543:1683,08:00:42.500:1683,08:00:42.550:1683,08:00:46.743:1683,08:00:46.776:1683,08:01:37.821:1683,08:01:37.854:1683,08:01:54.126:1683,08:01:54.160:1683,08:03:06.890:1683,08:03:06.923:1683,08:03:08.488:1683,08:03:08.538:1683,08:03:29.017:1683,08:03:29.084:1683,08:03:33.087:1683,08:04:51.233:1683,08:04:51.366:1683,08:04:53.030:1683,08:04:53.554:1683,08:04:55.284:1683,08:04:55.376:1683,08:04:57.572:1683,08:04:58.088:1683,08:04:58.687:1683,08:04:58.770:1683,08:04:59.919:1683,08:05:00.443:1683,08:05:00.692:1683,08:05:00.776:1683,08:05:02.223:1683,08:05:02.748:1683,08:05:04.628:1683,08:05:05.152:1683,08:05:06.933:1683,08:05:07.449:1683,
+09-24 13:34:54.699  1097  1097 I [   info] ts_panel_notifier_callback: Notification type:4, early_trigger:0
+09-24 13:34:54.699  1097  1097 I [   info] ts_panel_notifier_callback: shashank:Received fps change old fps:120 new fps:60

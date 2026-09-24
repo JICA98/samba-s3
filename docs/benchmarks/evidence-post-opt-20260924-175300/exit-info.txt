@@ -1,0 +1,68 @@
+ACTIVITY MANAGER PROCESS EXIT INFO (dumpsys activity exit-info)
+Last Timestamp of Persistence Into Persistent Storage: 2026-09-24 16:53:50.256
+  package: com.zenithblue.sambas3
+    Historical Process Exit for uid=10463
+        ApplicationExitInfo #0:
+          timestamp=2026-09-24 17:51:36.843 pid=29577 realUid=10463 packageUid=10463 definingUid=10463 user=0
+          process=com.zenithblue.sambas3 reason=16 (PACKAGE UPDATED) subreason=0 (UNKNOWN) status=0
+          importance=400 pss=0.00 rss=161MB description=stop com.zenithblue.sambas3 due to installPackageLI state=empty trace=null
+        ApplicationExitInfo #1:
+          timestamp=2026-09-24 13:34:43.492 pid=25445 realUid=10463 packageUid=10463 definingUid=10463 user=0
+          process=com.zenithblue.sambas3 reason=2 (SIGNALED) subreason=0 (UNKNOWN) status=9
+          importance=100 pss=0.00 rss=3.1GB description=null state=empty trace=null
+        ApplicationExitInfo #2:
+          timestamp=2026-09-24 01:10:33.051 pid=18407 realUid=10463 packageUid=10463 definingUid=10463 user=0
+          process=com.zenithblue.sambas3 reason=3 (LOW_MEMORY) subreason=0 (UNKNOWN) status=0
+          importance=400 pss=0.00 rss=109MB description=null state=empty trace=null
+        ApplicationExitInfo #3:
+          timestamp=2026-09-23 18:59:17.166 pid=11411 realUid=10463 packageUid=10463 definingUid=10463 user=0
+          process=com.zenithblue.sambas3 reason=2 (SIGNALED) subreason=0 (UNKNOWN) status=9
+          importance=100 pss=0.00 rss=1.4GB description=null state=empty trace=null
+        ApplicationExitInfo #4:
+          timestamp=2026-09-23 18:04:58.413 pid=18090 realUid=10463 packageUid=10463 definingUid=10463 user=0
+          process=com.zenithblue.sambas3 reason=3 (LOW_MEMORY) subreason=0 (UNKNOWN) status=0
+          importance=400 pss=0.00 rss=92MB description=null state=empty trace=null
+        ApplicationExitInfo #5:
+          timestamp=2026-09-23 11:35:24.377 pid=11743 realUid=10463 packageUid=10463 definingUid=10463 user=0
+          process=com.zenithblue.sambas3 reason=2 (SIGNALED) subreason=0 (UNKNOWN) status=9
+          importance=100 pss=0.00 rss=2.3GB description=null state=empty trace=null
+        ApplicationExitInfo #6:
+          timestamp=2026-09-23 11:22:12.301 pid=12941 realUid=10463 packageUid=10463 definingUid=10463 user=0
+          process=com.zenithblue.sambas3:ppu_compile reason=2 (SIGNALED) subreason=0 (UNKNOWN) status=9
+          importance=100 pss=0.00 rss=0.00 description=null state=empty trace=null
+        ApplicationExitInfo #7:
+          timestamp=2026-09-23 11:22:01.898 pid=12719 realUid=10463 packageUid=10463 definingUid=10463 user=0
+          process=com.zenithblue.sambas3:ppu_compile reason=2 (SIGNALED) subreason=0 (UNKNOWN) status=9
+          importance=100 pss=0.00 rss=0.00 description=null state=empty trace=null
+        ApplicationExitInfo #8:
+          timestamp=2026-09-23 11:21:33.732 pid=12303 realUid=10463 packageUid=10463 definingUid=10463 user=0
+          process=com.zenithblue.sambas3:ppu_compile reason=2 (SIGNALED) subreason=0 (UNKNOWN) status=9
+          importance=100 pss=0.00 rss=396MB description=null state=empty trace=null
+        ApplicationExitInfo #9:
+          timestamp=2026-09-23 11:20:33.330 pid=11837 realUid=10463 packageUid=10463 definingUid=10463 user=0
+          process=com.zenithblue.sambas3:ppu_compile reason=2 (SIGNALED) subreason=0 (UNKNOWN) status=9
+          importance=100 pss=0.00 rss=344MB description=null state=empty trace=null
+        ApplicationExitInfo #10:
+          timestamp=2026-09-21 18:00:22.234 pid=29165 realUid=10463 packageUid=10463 definingUid=10463 user=0
+          process=com.zenithblue.sambas3 reason=13 (OTHER KILLS BY SYSTEM) subreason=6 (MEMORY PRESSURE) status=0
+          importance=400 pss=0.00 rss=276MB description=screen-on memory reclaim state=empty trace=null
+        ApplicationExitInfo #11:
+          timestamp=2026-09-19 11:23:52.434 pid=10089 realUid=10463 packageUid=10463 definingUid=10463 user=0
+          process=com.zenithblue.sambas3 reason=10 (USER REQUESTED) subreason=22 (REMOVE TASK) status=0
+          importance=400 pss=0.00 rss=442MB description=remove task state=empty trace=null
+        ApplicationExitInfo #12:
+          timestamp=2026-09-18 13:48:13.862 pid=11762 realUid=10463 packageUid=10463 definingUid=10463 user=0
+          process=com.zenithblue.sambas3 reason=13 (OTHER KILLS BY SYSTEM) subreason=6 (MEMORY PRESSURE) status=0
+          importance=400 pss=0.00 rss=141MB description=screen-on memory reclaim state=empty trace=null
+        ApplicationExitInfo #13:
+          timestamp=2026-09-17 21:23:40.986 pid=7884 realUid=10463 packageUid=10463 definingUid=10463 user=0
+          process=com.zenithblue.sambas3 reason=16 (PACKAGE UPDATED) subreason=0 (UNKNOWN) status=0
+          importance=100 pss=0.00 rss=1.2GB description=stop com.zenithblue.sambas3 due to installPackageLI state=empty trace=null
+        ApplicationExitInfo #14:
+          timestamp=2026-09-17 18:51:21.504 pid=3228 realUid=10463 packageUid=10463 definingUid=10463 user=0
+          process=com.zenithblue.sambas3 reason=16 (PACKAGE UPDATED) subreason=0 (UNKNOWN) status=0
+          importance=100 pss=0.00 rss=1.2GB description=stop com.zenithblue.sambas3 due to installPackageLI state=empty trace=null
+        ApplicationExitInfo #15:
+          timestamp=2026-09-17 18:45:06.809 pid=26029 realUid=10463 packageUid=10463 definingUid=10463 user=0
+          process=com.zenithblue.sambas3 reason=16 (PACKAGE UPDATED) subreason=0 (UNKNOWN) status=0
+          importance=100 pss=0.00 rss=368MB description=stop com.zenithblue.sambas3 due to installPackageLI state=empty trace=null

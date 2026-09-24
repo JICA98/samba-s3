@@ -1,0 +1,2 @@
+--------- beginning of crash
+09-24 01:10:34.639  2497  2539 F libc    : mprotect failed on atexit array: Out of memory

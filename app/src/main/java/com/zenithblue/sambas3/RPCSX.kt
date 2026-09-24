@@ -278,8 +278,9 @@ class RPCSX {
             }
 
             activeLibrary.value = path
+            logLoadedCore(path)
             runCatching {
-                android.util.Log.i(
+                Log.i(
                     "S3CAP",
                     "boot_savestate=${if (instance.hasBootSavestateExport()) 1 else 0} " +
                         "load_state=${if (instance.hasLoadSaveStateExport()) 1 else 0} " +
@@ -289,6 +290,35 @@ class RPCSX {
                 )
             }
             return true
+        }
+
+        private fun currentProcessName(): String {
+            return if (android.os.Build.VERSION.SDK_INT >= 33) {
+                android.os.Process.myProcessName()
+            } else {
+                android.app.Application.getProcessName()
+            }
+        }
+
+        private fun abiFromPath(path: String): String {
+            val parent = path.substringBeforeLast('/').substringAfterLast('/')
+            if (parent == "arm64-v8a" || parent == "x86_64" || parent == "armeabi-v7a" || parent == "x86") {
+                return parent
+            }
+            return android.os.Build.SUPPORTED_ABIS.firstOrNull() ?: "unknown"
+        }
+
+        private fun logLoadedCore(path: String) {
+            val rawId = runCatching { instance.getCoreBuildId() }.getOrNull()
+            val coreId = if (rawId.isNullOrBlank()) "unknown" else rawId
+            val processName = runCatching { currentProcessName() }.getOrDefault("unknown")
+            val abi = abiFromPath(path)
+            val message = "loaded path=$path process=$processName abi=$abi core_build_id=$coreId"
+            if (coreId == "unknown") {
+                Log.w("S3CORE", message)
+            } else {
+                Log.i("S3CORE", message)
+            }
         }
 
         init {

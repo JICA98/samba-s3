@@ -1,0 +1,501 @@
+--------- beginning of kernel
+09-24 22:14:38.125  1097  1097 I         : [LCD][0][INFO][oplus_panel_cmd_print:120] [A0020] dsi_cmd: qcom,mdss-dsi-timing-switch-command, count=8
+09-24 22:14:38.126  1097  1097 I [ADFR][0][INFO][oplus_adfr_fakeframe_status_update:2140]h_active: 1264,refresh_rate:120,h_skew:0,sw_fps:0,fakeframe:1
+09-24 22:14:38.126  1097  1097 I         : [ADFR][0][INFO][oplus_adfr_status_reset:1851]sa status reset: auto_mode:0,fakeframe:1,sa_min_fps:120
+09-24 22:14:38.144  1097  1097 I [   info] ts_panel_notifier_callback: Notification type:4, early_trigger:0
+09-24 22:14:38.144  1097  1097 I [   info] ts_panel_notifier_callback: shashank:Received fps change old fps:60 new fps:120
+09-24 22:14:38.180  1097  1097 I [   info] ts_panel_notifier_callback: Notification type:4, early_trigger:1
+09-24 22:14:38.180  1097  1097 I [   info] ts_panel_notifier_callback: shashank:Received fps change old fps:120 new fps:60
+09-24 22:14:38.181  1097  1097 E         : [LCD][0][ERR][oplus_panel_switch_vid_mode:475] oplus_panel_switch_vid_mode not support
+09-24 22:14:38.181  1097  1097 I [drm:dsi_display_set_mode [msm_drm]] [msm-dsi-info]: mdp_transfer_time=6290, hactive=1264, vactive=2780, fps=60, h_skew=1, clk_rate=1012000000, h_sync_width=2,				h_front_porch26, h_back_porch=26, v_back_porch=42, v_sync_width=2, v_front_porch=58
+09-24 22:14:38.182  1097  1097 I [ADFR][0][INFO][oplus_adfr_fakeframe_status_update:2140]h_active: 1264,refresh_rate:60,h_skew:1,sw_fps:0,fakeframe:0
+09-24 22:14:38.188  1097  1097 I         : [LCD][0][INFO][oplus_panel_cmd_print:120] [A0020] dsi_cmd: qcom,mdss-dsi-timing-switch-command, count=8
+09-24 22:14:38.188  1097  1097 I [ADFR][0][INFO][oplus_adfr_fakeframe_status_update:2140]h_active: 1264,refresh_rate:60,h_skew:1,sw_fps:0,fakeframe:0
+09-24 22:14:38.188  1097  1097 I         : [ADFR][0][INFO][oplus_adfr_status_reset:1851]sa status reset: auto_mode:0,fakeframe:0,sa_min_fps:60
+09-24 22:14:38.205  1097  1097 I [   info] ts_panel_notifier_callback: Notification type:4, early_trigger:0
+09-24 22:14:38.205  1097  1097 I [   info] ts_panel_notifier_callback: shashank:Received fps change old fps:120 new fps:60
+09-24 22:14:38.609  1097  1097 I [   info] ts_panel_notifier_callback: Notification type:4, early_trigger:1
+09-24 22:14:38.609  1097  1097 I [   info] ts_panel_notifier_callback: shashank:Received fps change old fps:60 new fps:120
+09-24 22:14:38.613  1097  1097 E         : [LCD][0][ERR][oplus_panel_switch_vid_mode:475] oplus_panel_switch_vid_mode not support
+09-24 22:14:38.613  1097  1097 I [drm:dsi_display_set_mode [msm_drm]] [msm-dsi-info]: mdp_transfer_time=6290, hactive=1264, vactive=2780, fps=120, h_skew=0, clk_rate=1012000000, h_sync_width=2,				h_front_porch26, h_back_porch=26, v_back_porch=42, v_sync_width=2, v_front_porch=58
+09-24 22:14:38.615  1097  1097 I [ADFR][0][INFO][oplus_adfr_fakeframe_status_update:2140]h_active: 1264,refresh_rate:120,h_skew:0,sw_fps:0,fakeframe:0
+09-24 22:14:38.616  1097  1097 I         : [LCD][0][INFO][oplus_panel_cmd_print:120] [A0020] dsi_cmd: qcom,mdss-dsi-timing-switch-command, count=8
+09-24 22:14:38.617  1097  1097 I [ADFR][0][INFO][oplus_adfr_fakeframe_status_update:2140]h_active: 1264,refresh_rate:120,h_skew:0,sw_fps:0,fakeframe:1
+09-24 22:14:38.617  1097  1097 I         : [ADFR][0][INFO][oplus_adfr_status_reset:1851]sa status reset: auto_mode:0,fakeframe:1,sa_min_fps:120
+09-24 22:14:38.635  1097  1097 I <A0020> len: 900 dsi_display_set_backlight 16:44:42.268:1683,16:44:42.401:1683,16:44:42.484:1683,16:44:42.534:1683,16:44:42.609:1683,16:44:42.709:1683,16:44:42.792:1683,16:44:42.892:1683,16:44:42.950:1683,16:44:43.050:1683,16:44:43.582:1683,16:44:43.682:1683,16:44:43.757:1683,16:44:43.840:1683,16:44:43.915:1683,16:44:43.948:1683,16:44:44.156:1683,16:44:44.206:1683,16:44:44.281:1683,16:44:44.331:1683,16:44:44.364:1683,16:44:44.481:1683,16:44:44.822:1683,16:44:44.872:1683,16:44:45.945:1683,16:44:45.979:1683,16:44:48.466:1683,16:44:48.516:1683,16:44:48.574:1683,16:44:48.674:1683,16:44:48.749:1683,16:44:48.799:1683,16:44:48.865:1683,16:44:48.915:1683,16:44:48.990:1683,16:44:49.040:1683,16:44:49.123:1683,16:44:49.207:1683,16:44:49.356:1683,16:44:49.539:1683,16:44:49.789:1683,16:44:49.839:1683,16:44:50.463:1683,16:44:50.513:1683,16:44:50.571:1683,16:44:50.621:1683,16:44:50.896:1683,16:44:50.946:1683,16:44:51.004:1683,16:44:51.437:1683,
+09-24 22:14:38.635  1097  1097 I [   info] ts_panel_notifier_callback: Notification type:4, early_trigger:0
+09-24 22:14:38.635  1097  1097 I [   info] ts_panel_notifier_callback: shashank:Received fps change old fps:60 new fps:120
+09-24 22:14:38.708  1097  1097 I [   info] ts_panel_notifier_callback: Notification type:4, early_trigger:1
+09-24 22:14:38.708  1097  1097 I [   info] ts_panel_notifier_callback: shashank:Received fps change old fps:120 new fps:60
+09-24 22:14:38.709  1097  1097 E         : [LCD][0][ERR][oplus_panel_switch_vid_mode:475] oplus_panel_switch_vid_mode not support
+09-24 22:14:38.709  1097  1097 I [drm:dsi_display_set_mode [msm_drm]] [msm-dsi-info]: mdp_transfer_time=6290, hactive=1264, vactive=2780, fps=60, h_skew=1, clk_rate=1012000000, h_sync_width=2,				h_front_porch26, h_back_porch=26, v_back_porch=42, v_sync_width=2, v_front_porch=58
+09-24 22:14:38.709  1097  1097 I [ADFR][0][INFO][oplus_adfr_fakeframe_status_update:2140]h_active: 1264,refresh_rate:60,h_skew:1,sw_fps:0,fakeframe:0
+09-24 22:14:38.712  1097  1097 I         : [LCD][0][INFO][oplus_panel_cmd_print:120] [A0020] dsi_cmd: qcom,mdss-dsi-timing-switch-command, count=8
+09-24 22:14:38.712  1097  1097 I [ADFR][0][INFO][oplus_adfr_fakeframe_status_update:2140]h_active: 1264,refresh_rate:60,h_skew:1,sw_fps:0,fakeframe:0
+09-24 22:14:38.712  1097  1097 I         : [ADFR][0][INFO][oplus_adfr_status_reset:1851]sa status reset: auto_mode:0,fakeframe:0,sa_min_fps:60
+09-24 22:14:38.729  1097  1097 I [   info] ts_panel_notifier_callback: Notification type:4, early_trigger:0
+09-24 22:14:38.729  1097  1097 I [   info] ts_panel_notifier_callback: shashank:Received fps change old fps:120 new fps:60
+09-24 22:14:38.729  1097  1097 I [   info] ts_panel_notifier_callback: Notification type:4, early_trigger:1
+09-24 22:14:38.729  1097  1097 I [   info] ts_panel_notifier_callback: shashank:Received fps change old fps:60 new fps:120
+09-24 22:14:38.737  1097  1097 E         : [LCD][0][ERR][oplus_panel_switch_vid_mode:475] oplus_panel_switch_vid_mode not support
+09-24 22:14:38.737  1097  1097 I [drm:dsi_display_set_mode [msm_drm]] [msm-dsi-info]: mdp_transfer_time=6290, hactive=1264, vactive=2780, fps=120, h_skew=0, clk_rate=1012000000, h_sync_width=2,				h_front_porch26, h_back_porch=26, v_back_porch=42, v_sync_width=2, v_front_porch=58
+09-24 22:14:38.738  1097  1097 I [ADFR][0][INFO][oplus_adfr_fakeframe_status_update:2140]h_active: 1264,refresh_rate:120,h_skew:0,sw_fps:0,fakeframe:0
+09-24 22:14:38.741  1097  1097 I         : [LCD][0][INFO][oplus_panel_cmd_print:120] [A0020] dsi_cmd: qcom,mdss-dsi-timing-switch-command, count=8
+09-24 22:14:38.741  1097  1097 I [ADFR][0][INFO][oplus_adfr_fakeframe_status_update:2140]h_active: 1264,refresh_rate:120,h_skew:0,sw_fps:0,fakeframe:1
+09-24 22:14:38.741  1097  1097 I         : [ADFR][0][INFO][oplus_adfr_status_reset:1851]sa status reset: auto_mode:0,fakeframe:1,sa_min_fps:120
+09-24 22:14:38.760  1097  1097 I [   info] ts_panel_notifier_callback: Notification type:4, early_trigger:0
+09-24 22:14:38.760  1097  1097 I [   info] ts_panel_notifier_callback: shashank:Received fps change old fps:60 new fps:120
+09-24 22:14:38.796  1097  1097 I [   info] ts_panel_notifier_callback: Notification type:4, early_trigger:1
+09-24 22:14:38.797  1097  1097 I [   info] ts_panel_notifier_callback: shashank:Received fps change old fps:120 new fps:60
+09-24 22:14:38.798  1097  1097 E         : [LCD][0][ERR][oplus_panel_switch_vid_mode:475] oplus_panel_switch_vid_mode not support
+09-24 22:14:38.798  1097  1097 I [drm:dsi_display_set_mode [msm_drm]] [msm-dsi-info]: mdp_transfer_time=6290, hactive=1264, vactive=2780, fps=60, h_skew=1, clk_rate=1012000000, h_sync_width=2,				h_front_porch26, h_back_porch=26, v_back_porch=42, v_sync_width=2, v_front_porch=58
+09-24 22:14:38.799  1097  1097 I [ADFR][0][INFO][oplus_adfr_fakeframe_status_update:2140]h_active: 1264,refresh_rate:60,h_skew:1,sw_fps:0,fakeframe:0
+09-24 22:14:38.804  1097  1097 I         : [LCD][0][INFO][oplus_panel_cmd_print:120] [A0020] dsi_cmd: qcom,mdss-dsi-timing-switch-command, count=8
+09-24 22:14:38.804  1097  1097 I [ADFR][0][INFO][oplus_adfr_fakeframe_status_update:2140]h_active: 1264,refresh_rate:60,h_skew:1,sw_fps:0,fakeframe:0
+09-24 22:14:38.804  1097  1097 I         : [ADFR][0][INFO][oplus_adfr_status_reset:1851]sa status reset: auto_mode:0,fakeframe:0,sa_min_fps:60
+09-24 22:14:38.820  1097  1097 I [   info] ts_panel_notifier_callback: Notification type:4, early_trigger:0
+09-24 22:14:38.820  1097  1097 I [   info] ts_panel_notifier_callback: shashank:Received fps change old fps:120 new fps:60
+09-24 22:14:38.905  1097  1097 I [   info] ts_panel_notifier_callback: Notification type:4, early_trigger:1
+09-24 22:14:38.905  1097  1097 I [   info] ts_panel_notifier_callback: shashank:Received fps change old fps:60 new fps:120
+09-24 22:14:38.909  1097  1097 E         : [LCD][0][ERR][oplus_panel_switch_vid_mode:475] oplus_panel_switch_vid_mode not support
+09-24 22:14:38.909  1097  1097 I [drm:dsi_display_set_mode [msm_drm]] [msm-dsi-info]: mdp_transfer_time=6290, hactive=1264, vactive=2780, fps=120, h_skew=0, clk_rate=1012000000, h_sync_width=2,				h_front_porch26, h_back_porch=26, v_back_porch=42, v_sync_width=2, v_front_porch=58
+09-24 22:14:38.910  1097  1097 I [ADFR][0][INFO][oplus_adfr_fakeframe_status_update:2140]h_active: 1264,refresh_rate:120,h_skew:0,sw_fps:0,fakeframe:0
+09-24 22:14:38.916  1097  1097 I         : [LCD][0][INFO][oplus_panel_cmd_print:120] [A0020] dsi_cmd: qcom,mdss-dsi-timing-switch-command, count=8
+09-24 22:14:38.916  1097  1097 I [ADFR][0][INFO][oplus_adfr_fakeframe_status_update:2140]h_active: 1264,refresh_rate:120,h_skew:0,sw_fps:0,fakeframe:1
+09-24 22:14:38.916  1097  1097 I         : [ADFR][0][INFO][oplus_adfr_status_reset:1851]sa status reset: auto_mode:0,fakeframe:1,sa_min_fps:120
+09-24 22:14:38.935  1097  1097 I [   info] ts_panel_notifier_callback: Notification type:4, early_trigger:0
+09-24 22:14:38.935  1097  1097 I [   info] ts_panel_notifier_callback: shashank:Received fps change old fps:60 new fps:120
+09-24 22:14:38.987  1097  1097 I [   info] ts_panel_notifier_callback: Notification type:4, early_trigger:1
+09-24 22:14:38.987  1097  1097 I [   info] ts_panel_notifier_callback: shashank:Received fps change old fps:120 new fps:60
+09-24 22:14:38.989  1097  1097 E         : [LCD][0][ERR][oplus_panel_switch_vid_mode:475] oplus_panel_switch_vid_mode not support
+09-24 22:14:38.989  1097  1097 I [drm:dsi_display_set_mode [msm_drm]] [msm-dsi-info]: mdp_transfer_time=6290, hactive=1264, vactive=2780, fps=60, h_skew=1, clk_rate=1012000000, h_sync_width=2,				h_front_porch26, h_back_porch=26, v_back_porch=42, v_sync_width=2, v_front_porch=58
+09-24 22:14:38.989  1097  1097 I [ADFR][0][INFO][oplus_adfr_fakeframe_status_update:2140]h_active: 1264,refresh_rate:60,h_skew:1,sw_fps:0,fakeframe:0
+09-24 22:14:38.995  1097  1097 I         : [LCD][0][INFO][oplus_panel_cmd_print:120] [A0020] dsi_cmd: qcom,mdss-dsi-timing-switch-command, count=8
+09-24 22:14:38.995  1097  1097 I [ADFR][0][INFO][oplus_adfr_fakeframe_status_update:2140]h_active: 1264,refresh_rate:60,h_skew:1,sw_fps:0,fakeframe:0
+09-24 22:14:38.995  1097  1097 I         : [ADFR][0][INFO][oplus_adfr_status_reset:1851]sa status reset: auto_mode:0,fakeframe:0,sa_min_fps:60
+09-24 22:14:39.012  1097  1097 I [   info] ts_panel_notifier_callback: Notification type:4, early_trigger:0
+09-24 22:14:39.012  1097  1097 I [   info] ts_panel_notifier_callback: shashank:Received fps change old fps:120 new fps:60
+09-24 22:14:39.047  1097  1097 I [   info] ts_panel_notifier_callback: Notification type:4, early_trigger:1
+09-24 22:14:39.047  1097  1097 I [   info] ts_panel_notifier_callback: shashank:Received fps change old fps:60 new fps:120
+09-24 22:14:39.054  1097  1097 E         : [LCD][0][ERR][oplus_panel_switch_vid_mode:475] oplus_panel_switch_vid_mode not support
+09-24 22:14:39.054  1097  1097 I [drm:dsi_display_set_mode [msm_drm]] [msm-dsi-info]: mdp_transfer_time=6290, hactive=1264, vactive=2780, fps=120, h_skew=0, clk_rate=1012000000, h_sync_width=2,				h_front_porch26, h_back_porch=26, v_back_porch=42, v_sync_width=2, v_front_porch=58
+09-24 22:14:39.054  1097  1097 I [ADFR][0][INFO][oplus_adfr_fakeframe_status_update:2140]h_active: 1264,refresh_rate:120,h_skew:0,sw_fps:0,fakeframe:0
+09-24 22:14:39.057  1097  1097 I         : [LCD][0][INFO][oplus_panel_cmd_print:120] [A0020] dsi_cmd: qcom,mdss-dsi-timing-switch-command, count=8
+09-24 22:14:39.057  1097  1097 I [ADFR][0][INFO][oplus_adfr_fakeframe_status_update:2140]h_active: 1264,refresh_rate:120,h_skew:0,sw_fps:0,fakeframe:1
+09-24 22:14:39.057  1097  1097 I         : [ADFR][0][INFO][oplus_adfr_status_reset:1851]sa status reset: auto_mode:0,fakeframe:1,sa_min_fps:120
+09-24 22:14:39.076  1097  1097 I [   info] ts_panel_notifier_callback: Notification type:4, early_trigger:0
+09-24 22:14:39.076  1097  1097 I [   info] ts_panel_notifier_callback: shashank:Received fps change old fps:60 new fps:120
+09-24 22:14:39.130  1097  1097 I [   info] ts_panel_notifier_callback: Notification type:4, early_trigger:1
+09-24 22:14:39.130  1097  1097 I [   info] ts_panel_notifier_callback: shashank:Received fps change old fps:120 new fps:60
+09-24 22:14:39.132  1097  1097 E         : [LCD][0][ERR][oplus_panel_switch_vid_mode:475] oplus_panel_switch_vid_mode not support
+09-24 22:14:39.132  1097  1097 I [drm:dsi_display_set_mode [msm_drm]] [msm-dsi-info]: mdp_transfer_time=6290, hactive=1264, vactive=2780, fps=60, h_skew=1, clk_rate=1012000000, h_sync_width=2,				h_front_porch26, h_back_porch=26, v_back_porch=42, v_sync_width=2, v_front_porch=58
+09-24 22:14:39.132  1097  1097 I [ADFR][0][INFO][oplus_adfr_fakeframe_status_update:2140]h_active: 1264,refresh_rate:60,h_skew:1,sw_fps:0,fakeframe:0
+09-24 22:14:39.136  1097  1097 I         : [LCD][0][INFO][oplus_panel_cmd_print:120] [A0020] dsi_cmd: qcom,mdss-dsi-timing-switch-command, count=8
+09-24 22:14:39.137  1097  1097 I [ADFR][0][INFO][oplus_adfr_fakeframe_status_update:2140]h_active: 1264,refresh_rate:60,h_skew:1,sw_fps:0,fakeframe:0
+09-24 22:14:39.137  1097  1097 I         : [ADFR][0][INFO][oplus_adfr_status_reset:1851]sa status reset: auto_mode:0,fakeframe:0,sa_min_fps:60
+09-24 22:14:39.153  1097  1097 I [   info] ts_panel_notifier_callback: Notification type:4, early_trigger:0
+09-24 22:14:39.153  1097  1097 I [   info] ts_panel_notifier_callback: shashank:Received fps change old fps:120 new fps:60
+09-24 22:14:39.221  1097  1097 I [   info] ts_panel_notifier_callback: Notification type:4, early_trigger:1
+09-24 22:14:39.221  1097  1097 I [   info] ts_panel_notifier_callback: shashank:Received fps change old fps:60 new fps:120
+09-24 22:14:39.228  1097  1097 E         : [LCD][0][ERR][oplus_panel_switch_vid_mode:475] oplus_panel_switch_vid_mode not support
+09-24 22:14:39.228  1097  1097 I [drm:dsi_display_set_mode [msm_drm]] [msm-dsi-info]: mdp_transfer_time=6290, hactive=1264, vactive=2780, fps=120, h_skew=0, clk_rate=1012000000, h_sync_width=2,				h_front_porch26, h_back_porch=26, v_back_porch=42, v_sync_width=2, v_front_porch=58
+09-24 22:14:39.228  1097  1097 I [ADFR][0][INFO][oplus_adfr_fakeframe_status_update:2140]h_active: 1264,refresh_rate:120,h_skew:0,sw_fps:0,fakeframe:0
+09-24 22:14:39.232  1097  1097 I         : [LCD][0][INFO][oplus_panel_cmd_print:120] [A0020] dsi_cmd: qcom,mdss-dsi-timing-switch-command, count=8
+09-24 22:14:39.232  1097  1097 I [ADFR][0][INFO][oplus_adfr_fakeframe_status_update:2140]h_active: 1264,refresh_rate:120,h_skew:0,sw_fps:0,fakeframe:1
+09-24 22:14:39.232  1097  1097 I         : [ADFR][0][INFO][oplus_adfr_status_reset:1851]sa status reset: auto_mode:0,fakeframe:1,sa_min_fps:120
+09-24 22:14:39.246 11559 11559 W audit   : audit_lost=5451954 audit_rate_limit=5 audit_backlog_limit=64
+09-24 22:14:39.246 11559 11559 E audit   : rate limit exceeded
+09-24 22:14:39.251  1097  1097 I [   info] ts_panel_notifier_callback: Notification type:4, early_trigger:0
+09-24 22:14:39.251  1097  1097 I [   info] ts_panel_notifier_callback: shashank:Received fps change old fps:60 new fps:120
+09-24 22:14:39.253  1097  1097 I [   info] ts_panel_notifier_callback: Notification type:4, early_trigger:1
+09-24 22:14:39.253  1097  1097 I [   info] ts_panel_notifier_callback: shashank:Received fps change old fps:120 new fps:60
+09-24 22:14:39.255  1097  1097 E         : [LCD][0][ERR][oplus_panel_switch_vid_mode:475] oplus_panel_switch_vid_mode not support
+09-24 22:14:39.255  1097  1097 I [drm:dsi_display_set_mode [msm_drm]] [msm-dsi-info]: mdp_transfer_time=6290, hactive=1264, vactive=2780, fps=60, h_skew=1, clk_rate=1012000000, h_sync_width=2,				h_front_porch26, h_back_porch=26, v_back_porch=42, v_sync_width=2, v_front_porch=58
+09-24 22:14:39.255  1097  1097 I [ADFR][0][INFO][oplus_adfr_fakeframe_status_update:2140]h_active: 1264,refresh_rate:60,h_skew:1,sw_fps:0,fakeframe:0
+09-24 22:14:39.261  1097  1097 I         : [LCD][0][INFO][oplus_panel_cmd_print:120] [A0020] dsi_cmd: qcom,mdss-dsi-timing-switch-command, count=8
+09-24 22:14:39.261  1097  1097 I [ADFR][0][INFO][oplus_adfr_fakeframe_status_update:2140]h_active: 1264,refresh_rate:60,h_skew:1,sw_fps:0,fakeframe:0
+09-24 22:14:39.261  1097  1097 I         : [ADFR][0][INFO][oplus_adfr_status_reset:1851]sa status reset: auto_mode:0,fakeframe:0,sa_min_fps:60
+09-24 22:14:39.278  1097  1097 I [   info] ts_panel_notifier_callback: Notification type:4, early_trigger:0
+09-24 22:14:39.278  1097  1097 I [   info] ts_panel_notifier_callback: shashank:Received fps change old fps:120 new fps:60
+09-24 22:14:39.345  1097  1097 I [   info] ts_panel_notifier_callback: Notification type:4, early_trigger:1
+09-24 22:14:39.345  1097  1097 I [   info] ts_panel_notifier_callback: shashank:Received fps change old fps:60 new fps:120
+09-24 22:14:39.353  1097  1097 E         : [LCD][0][ERR][oplus_panel_switch_vid_mode:475] oplus_panel_switch_vid_mode not support
+09-24 22:14:39.353  1097  1097 I [drm:dsi_display_set_mode [msm_drm]] [msm-dsi-info]: mdp_transfer_time=6290, hactive=1264, vactive=2780, fps=120, h_skew=0, clk_rate=1012000000, h_sync_width=2,				h_front_porch26, h_back_porch=26, v_back_porch=42, v_sync_width=2, v_front_porch=58
+09-24 22:14:39.354  1097  1097 I [ADFR][0][INFO][oplus_adfr_fakeframe_status_update:2140]h_active: 1264,refresh_rate:120,h_skew:0,sw_fps:0,fakeframe:0
+09-24 22:14:39.357  1097  1097 I         : [LCD][0][INFO][oplus_panel_cmd_print:120] [A0020] dsi_cmd: qcom,mdss-dsi-timing-switch-command, count=8
+09-24 22:14:39.357  1097  1097 I [ADFR][0][INFO][oplus_adfr_fakeframe_status_update:2140]h_active: 1264,refresh_rate:120,h_skew:0,sw_fps:0,fakeframe:1
+09-24 22:14:39.357  1097  1097 I         : [ADFR][0][INFO][oplus_adfr_status_reset:1851]sa status reset: auto_mode:0,fakeframe:1,sa_min_fps:120
+09-24 22:14:39.376  1097  1097 I [   info] ts_panel_notifier_callback: Notification type:4, early_trigger:0
+09-24 22:14:39.376  1097  1097 I [   info] ts_panel_notifier_callback: shashank:Received fps change old fps:60 new fps:120
+09-24 22:14:39.800  8500  8500 E iostack : irqs = 15510175, self-block = 0
+09-24 22:14:40.092     0     0 W [    C1] gen7_err_callback: 322 callbacks suppressed
+09-24 22:14:40.092     0     0 F         : [    C1] kgsl kgsl-3d0: CP: AHB bus error, CP_RL_ERROR_DETAILS_0:0x10008e07 CP_RL_ERROR_DETAILS_1:0x12144
+09-24 22:14:40.093     0     0 F         : [    C1] kgsl kgsl-3d0: CP: AHB bus error, CP_RL_ERROR_DETAILS_0:0x10008e07 CP_RL_ERROR_DETAILS_1:0x12144
+09-24 22:14:40.120     0     0 F         : [    C1] kgsl kgsl-3d0: CP: AHB bus error, CP_RL_ERROR_DETAILS_0:0x10008e07 CP_RL_ERROR_DETAILS_1:0x12144
+09-24 22:14:40.163     0     0 F         : [    C1] kgsl kgsl-3d0: CP: AHB bus error, CP_RL_ERROR_DETAILS_0:0x10008e07 CP_RL_ERROR_DETAILS_1:0x12144
+09-24 22:14:40.190     0     0 F         : [    C1] kgsl kgsl-3d0: CP: AHB bus error, CP_RL_ERROR_DETAILS_0:0x10008e07 CP_RL_ERROR_DETAILS_1:0x12144
+09-24 22:14:40.191     0     0 F         : [    C1] kgsl kgsl-3d0: CP: AHB bus error, CP_RL_ERROR_DETAILS_0:0x10008e07 CP_RL_ERROR_DETAILS_1:0x12144
+09-24 22:14:40.191     0     0 F         : [    C1] kgsl kgsl-3d0: CP: AHB bus error, CP_RL_ERROR_DETAILS_0:0x10008e07 CP_RL_ERROR_DETAILS_1:0x12144
+09-24 22:14:40.217     0     0 F         : [    C1] kgsl kgsl-3d0: CP: AHB bus error, CP_RL_ERROR_DETAILS_0:0x10008e07 CP_RL_ERROR_DETAILS_1:0x12144
+09-24 22:14:40.217     0     0 F         : [    C1] kgsl kgsl-3d0: CP: AHB bus error, CP_RL_ERROR_DETAILS_0:0x10008e07 CP_RL_ERROR_DETAILS_1:0x12144
+09-24 22:14:40.219     0     0 F         : [    C1] kgsl kgsl-3d0: CP: AHB bus error, CP_RL_ERROR_DETAILS_0:0x10008e07 CP_RL_ERROR_DETAILS_1:0x12144
+09-24 22:14:40.596 23258 23258 I         : [INFO]: OPLUS_CHG[VOOC]([oplus_vooc_fastchg_allow_or_enable_check][1335]): temp:384, temp_range:6
+09-24 22:14:40.596 22068 22068 I         : [INFO]: OPLUS_CHG[CHG_COMM]([oplus_comm_smooth_to_soc][3416]): soc[0 2 83 83 85 85] avg[1 1 0 0 0] fifo[85 85 85 85]
+09-24 22:14:40.612 13286 13286 I OPLUS_CHG[oplus_charge_info]: BATTERY[384 384 4146 4146 1530 83 85 85 4464 5416 1 0x0 4763], CHARGE[4470 500 1 1], WIRED[1 453 4919 500 1 0x0 0 0 0 2 0], WIRELESS[0 0 0 0 0 0x0 0 0 0], VOOC[0 0 0 0 0x0], UFCS[0 0 0 0x0], COMMON[7 0 0 0x0 1 0 1 5416 100 0]
+09-24 22:14:40.614 13286 13286 I         : [INFO]: OPLUS_CHG[ADSP]([oplus_chg_8350_reg_dump][7390]): sm8450_st_dump: [chg_en=0, suspend=0, pd_svooc=0], subtype=0x01],[oplus_UsbCommCapable=0, oplus_pd_svooc=0, typec_mode=0, cid_status=0x01, usb_in_status=1],[0x2606=0x87, 0x2607=0x00, 0x2608=0x0a, 0x2609=0x02], [0x260a=0x05, 0x260b=0x57, 0x260c=0x00, 0x260d=0x18], [0x260e=0x00, 0x260f=0x01, 0x2610=0x00, 0x2640=0x01], [0x2641=0x02, 0x2642=0x05, 0x2646=0x00, 0x2650=0x03], [0x2706=0x0a, 0x2707=0x0a, 0x2708=0x0a, 0x2709=0x0a], [0x270b=0xe2, 0x270c=0x48, 0x2710=0xc0, 0x280c=0x38], [0x2810=0x00, 0x2840=0x03, 0x287f=0x00, 0x2906=0x02], [0x2908=0x0f, 0x290a=0x11, 0x290b=0x01, 0x290c=0x01], [0x2910=0x11, 0x2944=0x80, 0x2950=0x02, 0x2951=0x01], [0x2952=0x0a, 0x2954=0x00, 0x2960=0xe0, 0x2b06=0x08], [0x2b07=0x00, 0x2b08=0x00, 0x2b09=0x63, 0x2b0a=0x39], [0x2b0b=0x29, 0x2b0c=0x00, 0x29a8=0x81, 0x29a9=0x83], [0x29aa=0x00, 0x2aa2=0x00, 0x2aa8=0x87, 0x2aa9=0x00], [0x2aaa=0x00],
+09-24 22:14:40.824  7199  7199 I         : [OFP][0][INFO][oplus_get_doze_disable_time:3679]oplus_get_doze_disable_time=0
+09-24 22:14:40.825  7199  7199 W [drm] [msm-dsi-warn]: dsi_display_check_status,time_gap=1977662436
+09-24 22:14:41.500 11579 11579 W audit   : audit_lost=5451967 audit_rate_limit=5 audit_backlog_limit=64
+09-24 22:14:41.500 11579 11579 E audit   : rate limit exceeded
+09-24 22:14:43.773 11601 11601 W audit   : audit_lost=5451978 audit_rate_limit=5 audit_backlog_limit=64
+09-24 22:14:43.773 11601 11601 E audit   : rate limit exceeded
+09-24 22:14:45.112     0     0 W [    C1] gen7_err_callback: 318 callbacks suppressed
+09-24 22:14:45.112     0     0 F         : [    C1] kgsl kgsl-3d0: CP: AHB bus error, CP_RL_ERROR_DETAILS_0:0x10008e07 CP_RL_ERROR_DETAILS_1:0x12144
+09-24 22:14:45.112     0     0 F         : [    C1] kgsl kgsl-3d0: CP: AHB bus error, CP_RL_ERROR_DETAILS_0:0x10008e07 CP_RL_ERROR_DETAILS_1:0x12144
+09-24 22:14:45.114     0     0 F         : [    C1] kgsl kgsl-3d0: CP: AHB bus error, CP_RL_ERROR_DETAILS_0:0x10008e07 CP_RL_ERROR_DETAILS_1:0x12144
+09-24 22:14:45.118     0     0 F         : [    C1] kgsl kgsl-3d0: CP: AHB bus error, CP_RL_ERROR_DETAILS_0:0x10008e07 CP_RL_ERROR_DETAILS_1:0x12144
+09-24 22:14:45.118     0     0 F         : [    C1] kgsl kgsl-3d0: CP: AHB bus error, CP_RL_ERROR_DETAILS_0:0x10008e07 CP_RL_ERROR_DETAILS_1:0x12144
+09-24 22:14:45.119     0     0 F         : [    C1] kgsl kgsl-3d0: CP: AHB bus error, CP_RL_ERROR_DETAILS_0:0x10008e07 CP_RL_ERROR_DETAILS_1:0x12144
+09-24 22:14:45.121     0     0 F         : [    C1] kgsl kgsl-3d0: CP: AHB bus error, CP_RL_ERROR_DETAILS_0:0x10008e07 CP_RL_ERROR_DETAILS_1:0x12144
+09-24 22:14:45.122     0     0 F         : [    C1] kgsl kgsl-3d0: CP: AHB bus error, CP_RL_ERROR_DETAILS_0:0x10008e07 CP_RL_ERROR_DETAILS_1:0x12144
+09-24 22:14:45.123     0     0 F         : [    C1] kgsl kgsl-3d0: CP: AHB bus error, CP_RL_ERROR_DETAILS_0:0x10008e07 CP_RL_ERROR_DETAILS_1:0x12144
+09-24 22:14:45.124     0     0 F         : [    C1] kgsl kgsl-3d0: CP: AHB bus error, CP_RL_ERROR_DETAILS_0:0x10008e07 CP_RL_ERROR_DETAILS_1:0x12144
+09-24 22:14:45.715 20220 20220 I         : [INFO]: OPLUS_CHG[VOOC]([oplus_vooc_fastchg_allow_or_enable_check][1335]): temp:384, temp_range:6
+09-24 22:14:45.715 10931 10931 I         : [INFO]: OPLUS_CHG[CHG_COMM]([oplus_comm_smooth_to_soc][3416]): soc[0 2 83 83 85 85] avg[2 1 0 0 0] fifo[85 85 85 85]
+09-24 22:14:45.730  4357  4357 I OPLUS_CHG[oplus_charge_info]: BATTERY[384 384 4149 4149 1466 83 85 85 4462 5416 1 0x0 4760], CHARGE[4470 500 1 1], WIRED[1 453 4878 500 1 0x0 0 0 0 2 0], WIRELESS[0 0 0 0 0 0x0 0 0 0], VOOC[0 0 0 0 0x0], UFCS[0 0 0 0x0], COMMON[7 0 0 0x0 1 0 1 5416 100 0]
+09-24 22:14:45.732  4357  4357 I         : [INFO]: OPLUS_CHG[ADSP]([oplus_chg_8350_reg_dump][7390]): sm8450_st_dump: [chg_en=0, suspend=0, pd_svooc=0], subtype=0x01],[oplus_UsbCommCapable=0, oplus_pd_svooc=0, typec_mode=0, cid_status=0x01, usb_in_status=1],[0x2606=0x87, 0x2607=0x00, 0x2608=0x0a, 0x2609=0x02], [0x260a=0x05, 0x260b=0x57, 0x260c=0x00, 0x260d=0x18], [0x260e=0x00, 0x260f=0x01, 0x2610=0x00, 0x2640=0x01], [0x2641=0x02, 0x2642=0x05, 0x2646=0x00, 0x2650=0x03], [0x2706=0x0a, 0x2707=0x0a, 0x2708=0x0a, 0x2709=0x0a], [0x270b=0xe2, 0x270c=0x48, 0x2710=0xc0, 0x280c=0x38], [0x2810=0x00, 0x2840=0x03, 0x287f=0x00, 0x2906=0x02], [0x2908=0x0f, 0x290a=0x11, 0x290b=0x01, 0x290c=0x01], [0x2910=0x11, 0x2944=0x80, 0x2950=0x02, 0x2951=0x01], [0x2952=0x0a, 0x2954=0x00, 0x2960=0xe0, 0x2b06=0x08], [0x2b07=0x00, 0x2b08=0x00, 0x2b09=0x63, 0x2b0a=0x39], [0x2b0b=0x29, 0x2b0c=0x00, 0x29a8=0x81, 0x29a9=0x83], [0x29aa=0x00, 0x2aa2=0x00, 0x2aa8=0x87, 0x2aa9=0x00], [0x2aaa=0x00],
+09-24 22:14:45.945  4357  4357 I         : [OFP][0][INFO][oplus_get_doze_disable_time:3679]oplus_get_doze_disable_time=0
+09-24 22:14:45.945  4357  4357 W [drm] [msm-dsi-warn]: dsi_display_check_status,time_gap=1982782531
+09-24 22:14:46.058 11620 11620 W audit   : audit_lost=5451989 audit_rate_limit=5 audit_backlog_limit=64
+09-24 22:14:46.058 11620 11620 E audit   : rate limit exceeded
+09-24 22:14:48.359 11638 11638 W audit   : audit_lost=5452000 audit_rate_limit=5 audit_backlog_limit=64
+09-24 22:14:48.359 11638 11638 E audit   : rate limit exceeded
+09-24 22:14:50.040  8500  8500 E iostack : irqs = 15510178, self-block = 0
+09-24 22:14:50.119     0     0 W [    C1] gen7_err_callback: 323 callbacks suppressed
+09-24 22:14:50.119     0     0 F         : [    C1] kgsl kgsl-3d0: CP: AHB bus error, CP_RL_ERROR_DETAILS_0:0x10008e07 CP_RL_ERROR_DETAILS_1:0x12144
+09-24 22:14:50.139     0     0 F         : [    C1] kgsl kgsl-3d0: CP: AHB bus error, CP_RL_ERROR_DETAILS_0:0x10008e07 CP_RL_ERROR_DETAILS_1:0x12144
+09-24 22:14:50.156     0     0 F         : [    C1] kgsl kgsl-3d0: CP: AHB bus error, CP_RL_ERROR_DETAILS_0:0x10008e07 CP_RL_ERROR_DETAILS_1:0x12144
+09-24 22:14:50.156     0     0 F         : [    C1] kgsl kgsl-3d0: CP: AHB bus error, CP_RL_ERROR_DETAILS_0:0x10008e07 CP_RL_ERROR_DETAILS_1:0x12144
+09-24 22:14:50.156     0     0 F         : [    C1] kgsl kgsl-3d0: CP: AHB bus error, CP_RL_ERROR_DETAILS_0:0x10008e07 CP_RL_ERROR_DETAILS_1:0x12144
+09-24 22:14:50.165     0     0 F         : [    C1] kgsl kgsl-3d0: CP: AHB bus error, CP_RL_ERROR_DETAILS_0:0x10008e07 CP_RL_ERROR_DETAILS_1:0x12144
+09-24 22:14:50.210     0     0 F         : [    C1] kgsl kgsl-3d0: CP: AHB bus error, CP_RL_ERROR_DETAILS_0:0x10008e07 CP_RL_ERROR_DETAILS_1:0x12144
+09-24 22:14:50.237     0     0 F         : [    C0] kgsl kgsl-3d0: CP: AHB bus error, CP_RL_ERROR_DETAILS_0:0x10008e07 CP_RL_ERROR_DETAILS_1:0x12144
+09-24 22:14:50.256     0     0 F         : [    C0] kgsl kgsl-3d0: CP: AHB bus error, CP_RL_ERROR_DETAILS_0:0x10008e07 CP_RL_ERROR_DETAILS_1:0x12144
+09-24 22:14:50.256     0     0 F         : [    C0] kgsl kgsl-3d0: CP: AHB bus error, CP_RL_ERROR_DETAILS_0:0x10008e07 CP_RL_ERROR_DETAILS_1:0x12144
+09-24 22:14:50.645 11656 11656 W audit   : audit_lost=5452013 audit_rate_limit=5 audit_backlog_limit=64
+09-24 22:14:50.645 11656 11656 E audit   : rate limit exceeded
+09-24 22:14:50.839 22220 22220 I         : [INFO]: OPLUS_CHG[VOOC]([oplus_vooc_fastchg_allow_or_enable_check][1335]): temp:384, temp_range:6
+09-24 22:14:50.839 22068 22068 I         : [INFO]: OPLUS_CHG[CHG_COMM]([oplus_comm_smooth_to_soc][3416]): soc[0 2 83 83 85 85] avg[3 1 0 0 0] fifo[85 85 85 85]
+09-24 22:14:50.855  2317  2317 I OPLUS_CHG[oplus_charge_info]: BATTERY[385 384 4149 4149 1402 83 85 85 4459 5416 1 0x0 4758], CHARGE[4470 500 1 1], WIRED[1 450 4938 500 1 0x0 0 0 0 2 0], WIRELESS[0 0 0 0 0 0x0 0 0 0], VOOC[0 0 0 0 0x0], UFCS[0 0 0 0x0], COMMON[7 0 0 0x0 1 0 1 5416 100 0]
+09-24 22:14:50.858  2317  2317 I         : [INFO]: OPLUS_CHG[ADSP]([oplus_chg_8350_reg_dump][7390]): sm8450_st_dump: [chg_en=0, suspend=0, pd_svooc=0], subtype=0x01],[oplus_UsbCommCapable=0, oplus_pd_svooc=0, typec_mode=0, cid_status=0x01, usb_in_status=1],[0x2606=0x87, 0x2607=0x00, 0x2608=0x0a, 0x2609=0x02], [0x260a=0x05, 0x260b=0x57, 0x260c=0x00, 0x260d=0x18], [0x260e=0x00, 0x260f=0x01, 0x2610=0x00, 0x2640=0x01], [0x2641=0x02, 0x2642=0x05, 0x2646=0x00, 0x2650=0x03], [0x2706=0x0a, 0x2707=0x0a, 0x2708=0x0a, 0x2709=0x0a], [0x270b=0xe2, 0x270c=0x48, 0x2710=0xc0, 0x280c=0x38], [0x2810=0x00, 0x2840=0x03, 0x287f=0x00, 0x2906=0x02], [0x2908=0x0f, 0x290a=0x11, 0x290b=0x01, 0x290c=0x01], [0x2910=0x11, 0x2944=0x80, 0x2950=0x02, 0x2951=0x01], [0x2952=0x0a, 0x2954=0x00, 0x2960=0xe0, 0x2b06=0x08], [0x2b07=0x00, 0x2b08=0x00, 0x2b09=0x63, 0x2b0a=0x39], [0x2b0b=0x29, 0x2b0c=0x00, 0x29a8=0x81, 0x29a9=0x83], [0x29aa=0x00, 0x2aa2=0x00, 0x2aa8=0x87, 0x2aa9=0x00], [0x2aaa=0x00],
+09-24 22:14:51.068  4357  4357 I         : [OFP][0][INFO][oplus_get_doze_disable_time:3679]oplus_get_doze_disable_time=0
+09-24 22:14:51.068  4357  4357 W [drm] [msm-dsi-warn]: dsi_display_check_status,time_gap=1987906438
+09-24 22:14:52.899 11674 11674 W audit   : audit_lost=5452024 audit_rate_limit=5 audit_backlog_limit=64
+09-24 22:14:52.899 11674 11674 E audit   : rate limit exceeded
+09-24 22:14:55.134     0     0 W [    C1] gen7_err_callback: 301 callbacks suppressed
+09-24 22:14:55.134     0     0 F         : [    C1] kgsl kgsl-3d0: CP: AHB bus error, CP_RL_ERROR_DETAILS_0:0x10008e07 CP_RL_ERROR_DETAILS_1:0x12144
+09-24 22:14:55.157     0     0 F         : [    C0] kgsl kgsl-3d0: CP: AHB bus error, CP_RL_ERROR_DETAILS_0:0x10008e07 CP_RL_ERROR_DETAILS_1:0x12144
+09-24 22:14:55.184     0     0 F         : [    C1] kgsl kgsl-3d0: CP: AHB bus error, CP_RL_ERROR_DETAILS_0:0x10008e07 CP_RL_ERROR_DETAILS_1:0x12144
+09-24 22:14:55.184     0     0 F         : [    C1] kgsl kgsl-3d0: CP: AHB bus error, CP_RL_ERROR_DETAILS_0:0x10008e07 CP_RL_ERROR_DETAILS_1:0x12144
+09-24 22:14:55.230 11693 11693 W audit   : audit_lost=5452035 audit_rate_limit=5 audit_backlog_limit=64
+09-24 22:14:55.230 11693 11693 E audit   : rate limit exceeded
+09-24 22:14:55.255     0     0 F         : [    C0] kgsl kgsl-3d0: CP: AHB bus error, CP_RL_ERROR_DETAILS_0:0x10008e07 CP_RL_ERROR_DETAILS_1:0x12144
+09-24 22:14:55.255     0     0 F         : [    C1] kgsl kgsl-3d0: CP: AHB bus error, CP_RL_ERROR_DETAILS_0:0x10008e07 CP_RL_ERROR_DETAILS_1:0x12144
+09-24 22:14:55.258     0     0 F         : [    C1] kgsl kgsl-3d0: CP: AHB bus error, CP_RL_ERROR_DETAILS_0:0x10008e07 CP_RL_ERROR_DETAILS_1:0x12144
+09-24 22:14:55.265     0     0 F         : [    C1] kgsl kgsl-3d0: CP: AHB bus error, CP_RL_ERROR_DETAILS_0:0x10008e07 CP_RL_ERROR_DETAILS_1:0x12144
+09-24 22:14:55.287     0     0 F         : [    C0] kgsl kgsl-3d0: CP: AHB bus error, CP_RL_ERROR_DETAILS_0:0x10008e07 CP_RL_ERROR_DETAILS_1:0x12144
+09-24 22:14:55.325     0     0 F         : [    C0] kgsl kgsl-3d0: CP: AHB bus error, CP_RL_ERROR_DETAILS_0:0x10008e07 CP_RL_ERROR_DETAILS_1:0x12144
+09-24 22:14:55.956 23258 23258 I         : [INFO]: OPLUS_CHG[VOOC]([oplus_vooc_fastchg_allow_or_enable_check][1335]): temp:385, temp_range:6
+09-24 22:14:55.956 22068 22068 I         : [INFO]: OPLUS_CHG[CHG_COMM]([oplus_comm_smooth_to_soc][3416]): soc[0 2 83 83 85 85] avg[0 1 0 0 0] fifo[85 85 85 85]
+09-24 22:14:55.972 13286 13286 I OPLUS_CHG[oplus_charge_info]: BATTERY[386 385 4148 4148 1494 83 85 85 4457 5416 1 0x0 4756], CHARGE[4470 500 1 1], WIRED[1 453 4949 500 1 0x0 0 0 0 2 0], WIRELESS[0 0 0 0 0 0x0 0 0 0], VOOC[0 0 0 0 0x0], UFCS[0 0 0 0x0], COMMON[7 0 0 0x0 1 0 1 5416 100 0]
+09-24 22:14:55.974 13286 13286 I         : [INFO]: OPLUS_CHG[ADSP]([oplus_chg_8350_reg_dump][7390]): sm8450_st_dump: [chg_en=0, suspend=0, pd_svooc=0], subtype=0x01],[oplus_UsbCommCapable=0, oplus_pd_svooc=0, typec_mode=0, cid_status=0x01, usb_in_status=1],[0x2606=0x87, 0x2607=0x00, 0x2608=0x0a, 0x2609=0x02], [0x260a=0x05, 0x260b=0x57, 0x260c=0x00, 0x260d=0x18], [0x260e=0x00, 0x260f=0x01, 0x2610=0x00, 0x2640=0x01], [0x2641=0x02, 0x2642=0x05, 0x2646=0x00, 0x2650=0x03], [0x2706=0x0a, 0x2707=0x0a, 0x2708=0x0a, 0x2709=0x0a], [0x270b=0xe2, 0x270c=0x48, 0x2710=0xc0, 0x280c=0x38], [0x2810=0x00, 0x2840=0x03, 0x287f=0x00, 0x2906=0x02], [0x2908=0x0f, 0x290a=0x11, 0x290b=0x01, 0x290c=0x01], [0x2910=0x11, 0x2944=0x80, 0x2950=0x02, 0x2951=0x01], [0x2952=0x0a, 0x2954=0x00, 0x2960=0xe0, 0x2b06=0x08], [0x2b07=0x00, 0x2b08=0x00, 0x2b09=0x63, 0x2b0a=0x39], [0x2b0b=0x29, 0x2b0c=0x00, 0x29a8=0x81, 0x29a9=0x83], [0x29aa=0x00, 0x2aa2=0x00, 0x2aa8=0x87, 0x2aa9=0x00], [0x2aaa=0x00],
+09-24 22:14:56.184  4357  4357 I         : [OFP][0][INFO][oplus_get_doze_disable_time:3679]oplus_get_doze_disable_time=0
+09-24 22:14:56.185  4357  4357 W [drm] [msm-dsi-warn]: dsi_display_check_status,time_gap=1993022444
+09-24 22:14:56.909 27574 27574 E gsi soc : qcom,msm_gsi: gsi_stop_channel:3688 chan=1 busy try again
+09-24 22:14:56.911 27574 27574 E gsi soc : qcom,msm_gsi: gsi_stop_channel:3688 chan=14 busy try again
+09-24 22:14:57.496 11711 11711 W audit   : audit_lost=5452046 audit_rate_limit=5 audit_backlog_limit=64
+09-24 22:14:57.496 11711 11711 E audit   : rate limit exceeded
+09-24 22:14:59.003  1097  1097 I [   info] ts_panel_notifier_callback: Notification type:4, early_trigger:1
+09-24 22:14:59.003  1097  1097 I [   info] ts_panel_notifier_callback: shashank:Received fps change old fps:120 new fps:60
+09-24 22:14:59.005  1097  1097 E         : [LCD][0][ERR][oplus_panel_switch_vid_mode:475] oplus_panel_switch_vid_mode not support
+09-24 22:14:59.005  1097  1097 I [drm:dsi_display_set_mode [msm_drm]] [msm-dsi-info]: mdp_transfer_time=6290, hactive=1264, vactive=2780, fps=60, h_skew=1, clk_rate=1012000000, h_sync_width=2,				h_front_porch26, h_back_porch=26, v_back_porch=42, v_sync_width=2, v_front_porch=58
+09-24 22:14:59.005  1097  1097 I [ADFR][0][INFO][oplus_adfr_fakeframe_status_update:2140]h_active: 1264,refresh_rate:60,h_skew:1,sw_fps:0,fakeframe:0
+09-24 22:14:59.014  1097  1097 I         : [LCD][0][INFO][oplus_panel_cmd_print:120] [A0020] dsi_cmd: qcom,mdss-dsi-timing-switch-command, count=8
+09-24 22:14:59.014  1097  1097 I [ADFR][0][INFO][oplus_adfr_fakeframe_status_update:2140]h_active: 1264,refresh_rate:60,h_skew:1,sw_fps:0,fakeframe:0
+09-24 22:14:59.014  1097  1097 I         : [ADFR][0][INFO][oplus_adfr_status_reset:1851]sa status reset: auto_mode:0,fakeframe:0,sa_min_fps:60
+09-24 22:14:59.031  1097  1097 I [   info] ts_panel_notifier_callback: Notification type:4, early_trigger:0
+09-24 22:14:59.031  1097  1097 I [   info] ts_panel_notifier_callback: shashank:Received fps change old fps:120 new fps:60
+09-24 22:14:59.167  1097  1097 I [   info] ts_panel_notifier_callback: Notification type:4, early_trigger:1
+09-24 22:14:59.167  1097  1097 I [   info] ts_panel_notifier_callback: shashank:Received fps change old fps:60 new fps:120
+09-24 22:14:59.173  1097  1097 E         : [LCD][0][ERR][oplus_panel_switch_vid_mode:475] oplus_panel_switch_vid_mode not support
+09-24 22:14:59.173  1097  1097 I [drm:dsi_display_set_mode [msm_drm]] [msm-dsi-info]: mdp_transfer_time=6290, hactive=1264, vactive=2780, fps=120, h_skew=0, clk_rate=1012000000, h_sync_width=2,				h_front_porch26, h_back_porch=26, v_back_porch=42, v_sync_width=2, v_front_porch=58
+09-24 22:14:59.174  1097  1097 I [ADFR][0][INFO][oplus_adfr_fakeframe_status_update:2140]h_active: 1264,refresh_rate:120,h_skew:0,sw_fps:0,fakeframe:0
+09-24 22:14:59.176  1097  1097 I         : [LCD][0][INFO][oplus_panel_cmd_print:120] [A0020] dsi_cmd: qcom,mdss-dsi-timing-switch-command, count=8
+09-24 22:14:59.176  1097  1097 I [ADFR][0][INFO][oplus_adfr_fakeframe_status_update:2140]h_active: 1264,refresh_rate:120,h_skew:0,sw_fps:0,fakeframe:1
+09-24 22:14:59.176  1097  1097 I         : [ADFR][0][INFO][oplus_adfr_status_reset:1851]sa status reset: auto_mode:0,fakeframe:1,sa_min_fps:120
+09-24 22:14:59.195  1097  1097 I [   info] ts_panel_notifier_callback: Notification type:4, early_trigger:0
+09-24 22:14:59.195  1097  1097 I [   info] ts_panel_notifier_callback: shashank:Received fps change old fps:60 new fps:120
+09-24 22:14:59.823 11733 11733 W audit   : audit_lost=5452059 audit_rate_limit=5 audit_backlog_limit=64
+09-24 22:14:59.823 11733 11733 E audit   : rate limit exceeded
+09-24 22:15:00.158     0     0 W [    C1] gen7_err_callback: 329 callbacks suppressed
+09-24 22:15:00.158     0     0 F         : [    C1] kgsl kgsl-3d0: CP: AHB bus error, CP_RL_ERROR_DETAILS_0:0x10008e07 CP_RL_ERROR_DETAILS_1:0x12144
+09-24 22:15:00.159     0     0 F         : [    C0] kgsl kgsl-3d0: CP: AHB bus error, CP_RL_ERROR_DETAILS_0:0x10008e07 CP_RL_ERROR_DETAILS_1:0x12144
+09-24 22:15:00.159     0     0 F         : [    C0] kgsl kgsl-3d0: CP: AHB bus error, CP_RL_ERROR_DETAILS_0:0x10008e07 CP_RL_ERROR_DETAILS_1:0x12144
+09-24 22:15:00.192     0     0 F         : [    C1] kgsl kgsl-3d0: CP: AHB bus error, CP_RL_ERROR_DETAILS_0:0x10008e07 CP_RL_ERROR_DETAILS_1:0x12144
+09-24 22:15:00.192     0     0 F         : [    C1] kgsl kgsl-3d0: CP: AHB bus error, CP_RL_ERROR_DETAILS_0:0x10008e07 CP_RL_ERROR_DETAILS_1:0x12144
+09-24 22:15:00.194     0     0 F         : [    C0] kgsl kgsl-3d0: CP: AHB bus error, CP_RL_ERROR_DETAILS_0:0x10008e07 CP_RL_ERROR_DETAILS_1:0x12144
+09-24 22:15:00.199     0     0 F         : [    C1] kgsl kgsl-3d0: CP: AHB bus error, CP_RL_ERROR_DETAILS_0:0x10008e07 CP_RL_ERROR_DETAILS_1:0x12144
+09-24 22:15:00.213     0     0 F         : [    C1] kgsl kgsl-3d0: CP: AHB bus error, CP_RL_ERROR_DETAILS_0:0x10008e07 CP_RL_ERROR_DETAILS_1:0x12144
+09-24 22:15:00.241     0     0 F         : [    C0] kgsl kgsl-3d0: CP: AHB bus error, CP_RL_ERROR_DETAILS_0:0x10008e07 CP_RL_ERROR_DETAILS_1:0x12144
+09-24 22:15:00.265     0     0 F         : [    C1] kgsl kgsl-3d0: CP: AHB bus error, CP_RL_ERROR_DETAILS_0:0x10008e07 CP_RL_ERROR_DETAILS_1:0x12144
+09-24 22:15:00.280  8500  8500 E iostack : irqs = 15510182, self-block = 0
+09-24 22:15:00.589  1097  1097 I [   info] ts_panel_notifier_callback: Notification type:4, early_trigger:1
+09-24 22:15:00.589  1097  1097 I [   info] ts_panel_notifier_callback: shashank:Received fps change old fps:120 new fps:60
+09-24 22:15:00.593  1097  1097 E         : [LCD][0][ERR][oplus_panel_switch_vid_mode:475] oplus_panel_switch_vid_mode not support
+09-24 22:15:00.593  1097  1097 I [drm:dsi_display_set_mode [msm_drm]] [msm-dsi-info]: mdp_transfer_time=6290, hactive=1264, vactive=2780, fps=60, h_skew=1, clk_rate=1012000000, h_sync_width=2,				h_front_porch26, h_back_porch=26, v_back_porch=42, v_sync_width=2, v_front_porch=58
+09-24 22:15:00.594  1097  1097 I [ADFR][0][INFO][oplus_adfr_fakeframe_status_update:2140]h_active: 1264,refresh_rate:60,h_skew:1,sw_fps:0,fakeframe:0
+09-24 22:15:00.595  1097  1097 I         : [LCD][0][INFO][oplus_panel_cmd_print:120] [A0020] dsi_cmd: qcom,mdss-dsi-timing-switch-command, count=8
+09-24 22:15:00.595  1097  1097 I [ADFR][0][INFO][oplus_adfr_fakeframe_status_update:2140]h_active: 1264,refresh_rate:60,h_skew:1,sw_fps:0,fakeframe:0
+09-24 22:15:00.595  1097  1097 I         : [ADFR][0][INFO][oplus_adfr_status_reset:1851]sa status reset: auto_mode:0,fakeframe:0,sa_min_fps:60
+09-24 22:15:00.612  1097  1097 I [   info] ts_panel_notifier_callback: Notification type:4, early_trigger:0
+09-24 22:15:00.612  1097  1097 I [   info] ts_panel_notifier_callback: shashank:Received fps change old fps:120 new fps:60
+09-24 22:15:00.612  1097  1097 I [   info] ts_panel_notifier_callback: Notification type:4, early_trigger:1
+09-24 22:15:00.612  1097  1097 I [   info] ts_panel_notifier_callback: shashank:Received fps change old fps:60 new fps:120
+09-24 22:15:00.620  1097  1097 E         : [LCD][0][ERR][oplus_panel_switch_vid_mode:475] oplus_panel_switch_vid_mode not support
+09-24 22:15:00.620  1097  1097 I [drm:dsi_display_set_mode [msm_drm]] [msm-dsi-info]: mdp_transfer_time=6290, hactive=1264, vactive=2780, fps=120, h_skew=0, clk_rate=1012000000, h_sync_width=2,				h_front_porch26, h_back_porch=26, v_back_porch=42, v_sync_width=2, v_front_porch=58
+09-24 22:15:00.621  1097  1097 I [ADFR][0][INFO][oplus_adfr_fakeframe_status_update:2140]h_active: 1264,refresh_rate:120,h_skew:0,sw_fps:0,fakeframe:0
+09-24 22:15:00.624  1097  1097 I         : [LCD][0][INFO][oplus_panel_cmd_print:120] [A0020] dsi_cmd: qcom,mdss-dsi-timing-switch-command, count=8
+09-24 22:15:00.624  1097  1097 I [ADFR][0][INFO][oplus_adfr_fakeframe_status_update:2140]h_active: 1264,refresh_rate:120,h_skew:0,sw_fps:0,fakeframe:1
+09-24 22:15:00.624  1097  1097 I         : [ADFR][0][INFO][oplus_adfr_status_reset:1851]sa status reset: auto_mode:0,fakeframe:1,sa_min_fps:120
+09-24 22:15:00.643  1097  1097 I [   info] ts_panel_notifier_callback: Notification type:4, early_trigger:0
+09-24 22:15:00.643  1097  1097 I [   info] ts_panel_notifier_callback: shashank:Received fps change old fps:60 new fps:120
+09-24 22:15:01.076  7199  7199 I         : [INFO]: OPLUS_CHG[VOOC]([oplus_vooc_fastchg_allow_or_enable_check][1335]): temp:386, temp_range:6
+09-24 22:15:01.076 10931 10931 I         : [INFO]: OPLUS_CHG[CHG_COMM]([oplus_comm_smooth_to_soc][3416]): soc[0 2 83 83 85 85] avg[1 1 0 0 0] fifo[85 85 85 85]
+09-24 22:15:01.090  3628  3628 I OPLUS_CHG[oplus_charge_info]: BATTERY[387 386 4146 4146 1453 83 85 85 4455 5416 1 0x0 4754], CHARGE[4470 500 1 1], WIRED[1 453 4928 500 1 0x0 0 0 0 2 0], WIRELESS[0 0 0 0 0 0x0 0 0 0], VOOC[0 0 0 0 0x0], UFCS[0 0 0 0x0], COMMON[7 0 0 0x0 1 0 1 5416 100 0]
+09-24 22:15:01.092  3628  3628 I         : [INFO]: OPLUS_CHG[ADSP]([oplus_chg_8350_reg_dump][7390]): sm8450_st_dump: [chg_en=0, suspend=0, pd_svooc=0], subtype=0x01],[oplus_UsbCommCapable=0, oplus_pd_svooc=0, typec_mode=0, cid_status=0x01, usb_in_status=1],[0x2606=0x87, 0x2607=0x00, 0x2608=0x0a, 0x2609=0x02], [0x260a=0x05, 0x260b=0x57, 0x260c=0x00, 0x260d=0x18], [0x260e=0x00, 0x260f=0x01, 0x2610=0x00, 0x2640=0x01], [0x2641=0x02, 0x2642=0x05, 0x2646=0x00, 0x2650=0x03], [0x2706=0x0a, 0x2707=0x0a, 0x2708=0x0a, 0x2709=0x0a], [0x270b=0xe2, 0x270c=0x48, 0x2710=0xc0, 0x280c=0x38], [0x2810=0x00, 0x2840=0x03, 0x287f=0x00, 0x2906=0x02], [0x2908=0x0f, 0x290a=0x11, 0x290b=0x01, 0x290c=0x01], [0x2910=0x11, 0x2944=0x80, 0x2950=0x02, 0x2951=0x01], [0x2952=0x0a, 0x2954=0x00, 0x2960=0xe0, 0x2b06=0x08], [0x2b07=0x00, 0x2b08=0x00, 0x2b09=0x63, 0x2b0a=0x39], [0x2b0b=0x29, 0x2b0c=0x00, 0x29a8=0x81, 0x29a9=0x83], [0x29aa=0x00, 0x2aa2=0x00, 0x2aa8=0x87, 0x2aa9=0x00], [0x2aaa=0x00],
+09-24 22:15:01.304  3628  3628 I         : [OFP][0][INFO][oplus_get_doze_disable_time:3679]oplus_get_doze_disable_time=0
+09-24 22:15:01.304  3628  3628 W [drm] [msm-dsi-warn]: dsi_display_check_status,time_gap=1998142355
+09-24 22:15:02.164 11750 11750 W audit   : audit_lost=5452070 audit_rate_limit=5 audit_backlog_limit=64
+09-24 22:15:02.164 11750 11750 E audit   : rate limit exceeded
+09-24 22:15:04.490 11769 11769 W audit   : audit_lost=5452081 audit_rate_limit=5 audit_backlog_limit=64
+09-24 22:15:04.490 11769 11769 E audit   : rate limit exceeded
+09-24 22:15:05.162     0     0 W [    C1] gen7_err_callback: 321 callbacks suppressed
+09-24 22:15:05.162     0     0 F         : [    C1] kgsl kgsl-3d0: CP: AHB bus error, CP_RL_ERROR_DETAILS_0:0x10008e07 CP_RL_ERROR_DETAILS_1:0x12144
+09-24 22:15:05.196     0     0 F         : [    C1] kgsl kgsl-3d0: CP: AHB bus error, CP_RL_ERROR_DETAILS_0:0x10008e07 CP_RL_ERROR_DETAILS_1:0x12144
+09-24 22:15:05.231     0     0 F         : [    C1] kgsl kgsl-3d0: CP: AHB bus error, CP_RL_ERROR_DETAILS_0:0x10008e07 CP_RL_ERROR_DETAILS_1:0x12144
+09-24 22:15:05.248     0     0 F         : [    C1] kgsl kgsl-3d0: CP: AHB bus error, CP_RL_ERROR_DETAILS_0:0x10008e07 CP_RL_ERROR_DETAILS_1:0x12144
+09-24 22:15:05.248     0     0 F         : [    C1] kgsl kgsl-3d0: CP: AHB bus error, CP_RL_ERROR_DETAILS_0:0x10008e07 CP_RL_ERROR_DETAILS_1:0x12144
+09-24 22:15:05.248     0     0 F         : [    C1] kgsl kgsl-3d0: CP: AHB bus error, CP_RL_ERROR_DETAILS_0:0x10008e07 CP_RL_ERROR_DETAILS_1:0x12144
+09-24 22:15:05.249     0     0 F         : [    C1] kgsl kgsl-3d0: CP: AHB bus error, CP_RL_ERROR_DETAILS_0:0x10008e07 CP_RL_ERROR_DETAILS_1:0x12144
+09-24 22:15:05.250     0     0 F         : [    C0] kgsl kgsl-3d0: CP: AHB bus error, CP_RL_ERROR_DETAILS_0:0x10008e07 CP_RL_ERROR_DETAILS_1:0x12144
+09-24 22:15:05.251     0     0 F         : [    C1] kgsl kgsl-3d0: CP: AHB bus error, CP_RL_ERROR_DETAILS_0:0x10008e07 CP_RL_ERROR_DETAILS_1:0x12144
+09-24 22:15:05.256     0     0 F         : [    C0] kgsl kgsl-3d0: CP: AHB bus error, CP_RL_ERROR_DETAILS_0:0x10008e07 CP_RL_ERROR_DETAILS_1:0x12144
+09-24 22:15:06.196  2317  2317 I         : [INFO]: OPLUS_CHG[VOOC]([oplus_vooc_fastchg_allow_or_enable_check][1335]): temp:387, temp_range:6
+09-24 22:15:06.196 22068 22068 I         : [INFO]: OPLUS_CHG[CHG_COMM]([oplus_comm_smooth_to_soc][3416]): soc[0 2 83 83 85 85] avg[2 1 0 0 0] fifo[85 85 85 85]
+09-24 22:15:06.213 22220 22220 I OPLUS_CHG[oplus_charge_info]: BATTERY[387 387 4143 4143 1586 83 85 85 4453 5416 1 0x0 4752], CHARGE[4470 500 1 1], WIRED[1 453 4912 500 1 0x0 0 0 0 2 0], WIRELESS[0 0 0 0 0 0x0 0 0 0], VOOC[0 0 0 0 0x0], UFCS[0 0 0 0x0], COMMON[7 0 0 0x0 1 0 1 5416 100 0]
+09-24 22:15:06.216 22220 22220 I         : [INFO]: OPLUS_CHG[ADSP]([oplus_chg_8350_reg_dump][7390]): sm8450_st_dump: [chg_en=0, suspend=0, pd_svooc=0], subtype=0x01],[oplus_UsbCommCapable=0, oplus_pd_svooc=0, typec_mode=0, cid_status=0x01, usb_in_status=1],[0x2606=0x87, 0x2607=0x00, 0x2608=0x0a, 0x2609=0x02], [0x260a=0x05, 0x260b=0x57, 0x260c=0x00, 0x260d=0x18], [0x260e=0x00, 0x260f=0x01, 0x2610=0x00, 0x2640=0x01], [0x2641=0x02, 0x2642=0x05, 0x2646=0x00, 0x2650=0x03], [0x2706=0x0a, 0x2707=0x0a, 0x2708=0x0a, 0x2709=0x0a], [0x270b=0xe2, 0x270c=0x48, 0x2710=0xc0, 0x280c=0x38], [0x2810=0x00, 0x2840=0x03, 0x287f=0x00, 0x2906=0x02], [0x2908=0x0f, 0x290a=0x11, 0x290b=0x01, 0x290c=0x01], [0x2910=0x11, 0x2944=0x80, 0x2950=0x02, 0x2951=0x01], [0x2952=0x0a, 0x2954=0x00, 0x2960=0xe0, 0x2b06=0x08], [0x2b07=0x00, 0x2b08=0x00, 0x2b09=0x63, 0x2b0a=0x39], [0x2b0b=0x29, 0x2b0c=0x00, 0x29a8=0x81, 0x29a9=0x83], [0x29aa=0x00, 0x2aa2=0x00, 0x2aa8=0x87, 0x2aa9=0x00], [0x2aaa=0x00],
+09-24 22:15:06.424  3628  3628 I         : [OFP][0][INFO][oplus_get_doze_disable_time:3679]oplus_get_doze_disable_time=0
+09-24 22:15:06.424  3628  3628 W [drm] [msm-dsi-warn]: dsi_display_check_status,time_gap=2003262355
+09-24 22:15:06.822 11788 11788 W audit   : audit_lost=5452092 audit_rate_limit=5 audit_backlog_limit=64
+09-24 22:15:06.822 11788 11788 E audit   : rate limit exceeded
+09-24 22:15:06.917   950   950 I logd    : logdr: UID=2000 GID=2000 PID=11794 n tail=0 logMask=99 pid=5454 start=0ns deadline=0ns
+09-24 22:15:09.108 11809 11809 W audit   : audit_lost=5452103 audit_rate_limit=5 audit_backlog_limit=64
+09-24 22:15:09.108 11809 11809 E audit   : rate limit exceeded
+09-24 22:15:10.205     0     0 W [    C0] gen7_err_callback: 340 callbacks suppressed
+09-24 22:15:10.205     0     0 F         : [    C0] kgsl kgsl-3d0: CP: AHB bus error, CP_RL_ERROR_DETAILS_0:0x10008e07 CP_RL_ERROR_DETAILS_1:0x12144
+09-24 22:15:10.233     0     0 F         : [    C0] kgsl kgsl-3d0: CP: AHB bus error, CP_RL_ERROR_DETAILS_0:0x10008e07 CP_RL_ERROR_DETAILS_1:0x12144
+09-24 22:15:10.251     0     0 F         : [    C0] kgsl kgsl-3d0: CP: AHB bus error, CP_RL_ERROR_DETAILS_0:0x10008e07 CP_RL_ERROR_DETAILS_1:0x12144
+09-24 22:15:10.251     0     0 F         : [    C0] kgsl kgsl-3d0: CP: AHB bus error, CP_RL_ERROR_DETAILS_0:0x10008e07 CP_RL_ERROR_DETAILS_1:0x12144
+09-24 22:15:10.251     0     0 F         : [    C0] kgsl kgsl-3d0: CP: AHB bus error, CP_RL_ERROR_DETAILS_0:0x10008e07 CP_RL_ERROR_DETAILS_1:0x12144
+09-24 22:15:10.256     0     0 F         : [    C0] kgsl kgsl-3d0: CP: AHB bus error, CP_RL_ERROR_DETAILS_0:0x10008e07 CP_RL_ERROR_DETAILS_1:0x12144
+09-24 22:15:10.257     0     0 F         : [    C0] kgsl kgsl-3d0: CP: AHB bus error, CP_RL_ERROR_DETAILS_0:0x10008e07 CP_RL_ERROR_DETAILS_1:0x12144
+09-24 22:15:10.260     0     0 F         : [    C0] kgsl kgsl-3d0: CP: AHB bus error, CP_RL_ERROR_DETAILS_0:0x10008e07 CP_RL_ERROR_DETAILS_1:0x12144
+09-24 22:15:10.265     0     0 F         : [    C0] kgsl kgsl-3d0: CP: AHB bus error, CP_RL_ERROR_DETAILS_0:0x10008e07 CP_RL_ERROR_DETAILS_1:0x12144
+09-24 22:15:10.288     0     0 F         : [    C0] kgsl kgsl-3d0: CP: AHB bus error, CP_RL_ERROR_DETAILS_0:0x10008e07 CP_RL_ERROR_DETAILS_1:0x12144
+09-24 22:15:10.520  8500  8500 E iostack : irqs = 15510200, self-block = 0
+09-24 22:15:11.316 13286 13286 I         : [INFO]: OPLUS_CHG[VOOC]([oplus_vooc_fastchg_allow_or_enable_check][1335]): temp:387, temp_range:6
+09-24 22:15:11.316 22068 22068 I         : [INFO]: OPLUS_CHG[CHG_COMM]([oplus_comm_smooth_to_soc][3416]): soc[0 2 83 83 85 85] avg[3 1 0 0 0] fifo[85 85 85 85]
+09-24 22:15:11.340 23258 23258 I OPLUS_CHG[oplus_charge_info]: BATTERY[388 387 4141 4141 1519 83 85 85 4450 5416 1 0x0 4749], CHARGE[4470 500 1 1], WIRED[1 450 4932 500 1 0x0 0 0 0 2 0], WIRELESS[0 0 0 0 0 0x0 0 0 0], VOOC[0 0 0 0 0x0], UFCS[0 0 0 0x0], COMMON[7 0 0 0x0 1 0 1 5416 100 0]
+09-24 22:15:11.342 23258 23258 I         : [INFO]: OPLUS_CHG[ADSP]([oplus_chg_8350_reg_dump][7390]): sm8450_st_dump: [chg_en=0, suspend=0, pd_svooc=0], subtype=0x01],[oplus_UsbCommCapable=0, oplus_pd_svooc=0, typec_mode=0, cid_status=0x01, usb_in_status=1],[0x2606=0x87, 0x2607=0x00, 0x2608=0x0a, 0x2609=0x02], [0x260a=0x05, 0x260b=0x57, 0x260c=0x00, 0x260d=0x18], [0x260e=0x00, 0x260f=0x01, 0x2610=0x00, 0x2640=0x01], [0x2641=0x02, 0x2642=0x05, 0x2646=0x00, 0x2650=0x03], [0x2706=0x0a, 0x2707=0x0a, 0x2708=0x0a, 0x2709=0x0a], [0x270b=0xe2, 0x270c=0x48, 0x2710=0xc0, 0x280c=0x38], [0x2810=0x00, 0x2840=0x03, 0x287f=0x00, 0x2906=0x02], [0x2908=0x0f, 0x290a=0x11, 0x290b=0x01, 0x290c=0x01], [0x2910=0x11, 0x2944=0x80, 0x2950=0x02, 0x2951=0x01], [0x2952=0x0a, 0x2954=0x00, 0x2960=0xe0, 0x2b06=0x08], [0x2b07=0x00, 0x2b08=0x00, 0x2b09=0x63, 0x2b0a=0x39], [0x2b0b=0x29, 0x2b0c=0x00, 0x29a8=0x81, 0x29a9=0x83], [0x29aa=0x00, 0x2aa2=0x00, 0x2aa8=0x87, 0x2aa9=0x00], [0x2aaa=0x00],
+09-24 22:15:11.450 11827 11827 W audit   : audit_lost=5452111 audit_rate_limit=5 audit_backlog_limit=64
+09-24 22:15:11.450 11827 11827 E audit   : rate limit exceeded
+09-24 22:15:11.480  1097  1097 I [   info] ts_panel_notifier_callback: Notification type:4, early_trigger:1
+09-24 22:15:11.480  1097  1097 I [   info] ts_panel_notifier_callback: shashank:Received fps change old fps:120 new fps:60
+09-24 22:15:11.484  1097  1097 E         : [LCD][0][ERR][oplus_panel_switch_vid_mode:475] oplus_panel_switch_vid_mode not support
+09-24 22:15:11.484  1097  1097 I [drm:dsi_display_set_mode [msm_drm]] [msm-dsi-info]: mdp_transfer_time=6290, hactive=1264, vactive=2780, fps=60, h_skew=1, clk_rate=1012000000, h_sync_width=2,				h_front_porch26, h_back_porch=26, v_back_porch=42, v_sync_width=2, v_front_porch=58
+09-24 22:15:11.485  1097  1097 I [ADFR][0][INFO][oplus_adfr_fakeframe_status_update:2140]h_active: 1264,refresh_rate:60,h_skew:1,sw_fps:0,fakeframe:0
+09-24 22:15:11.487  1097  1097 I         : [LCD][0][INFO][oplus_panel_cmd_print:120] [A0020] dsi_cmd: qcom,mdss-dsi-timing-switch-command, count=8
+09-24 22:15:11.487  1097  1097 I [ADFR][0][INFO][oplus_adfr_fakeframe_status_update:2140]h_active: 1264,refresh_rate:60,h_skew:1,sw_fps:0,fakeframe:0
+09-24 22:15:11.487  1097  1097 I         : [ADFR][0][INFO][oplus_adfr_status_reset:1851]sa status reset: auto_mode:0,fakeframe:0,sa_min_fps:60
+09-24 22:15:11.503  1097  1097 I [   info] ts_panel_notifier_callback: Notification type:4, early_trigger:0
+09-24 22:15:11.503  1097  1097 I [   info] ts_panel_notifier_callback: shashank:Received fps change old fps:120 new fps:60
+09-24 22:15:11.511  1097  1097 I [   info] ts_panel_notifier_callback: Notification type:4, early_trigger:1
+09-24 22:15:11.511  1097  1097 I [   info] ts_panel_notifier_callback: shashank:Received fps change old fps:60 new fps:120
+09-24 22:15:11.528  1097  1097 E         : [LCD][0][ERR][oplus_panel_switch_vid_mode:475] oplus_panel_switch_vid_mode not support
+09-24 22:15:11.528  1097  1097 I [drm:dsi_display_set_mode [msm_drm]] [msm-dsi-info]: mdp_transfer_time=6290, hactive=1264, vactive=2780, fps=120, h_skew=0, clk_rate=1012000000, h_sync_width=2,				h_front_porch26, h_back_porch=26, v_back_porch=42, v_sync_width=2, v_front_porch=58
+09-24 22:15:11.529  1097  1097 I [ADFR][0][INFO][oplus_adfr_fakeframe_status_update:2140]h_active: 1264,refresh_rate:120,h_skew:0,sw_fps:0,fakeframe:0
+09-24 22:15:11.532  1097  1097 I         : [LCD][0][INFO][oplus_panel_cmd_print:120] [A0020] dsi_cmd: qcom,mdss-dsi-timing-switch-command, count=8
+09-24 22:15:11.533  1097  1097 I [ADFR][0][INFO][oplus_adfr_fakeframe_status_update:2140]h_active: 1264,refresh_rate:120,h_skew:0,sw_fps:0,fakeframe:1
+09-24 22:15:11.533  1097  1097 I         : [ADFR][0][INFO][oplus_adfr_status_reset:1851]sa status reset: auto_mode:0,fakeframe:1,sa_min_fps:120
+09-24 22:15:11.544  3628  3628 I         : [OFP][0][INFO][oplus_get_doze_disable_time:3679]oplus_get_doze_disable_time=0
+09-24 22:15:11.544  3628  3628 W [drm] [msm-dsi-warn]: dsi_display_check_status,time_gap=2008382392
+09-24 22:15:11.551  1097  1097 I [   info] ts_panel_notifier_callback: Notification type:4, early_trigger:0
+09-24 22:15:11.551  1097  1097 I [   info] ts_panel_notifier_callback: shashank:Received fps change old fps:60 new fps:120
+09-24 22:15:13.585  1097  1097 I [   info] ts_panel_notifier_callback: Notification type:4, early_trigger:1
+09-24 22:15:13.585  1097  1097 I [   info] ts_panel_notifier_callback: shashank:Received fps change old fps:120 new fps:60
+09-24 22:15:13.589  1097  1097 E         : [LCD][0][ERR][oplus_panel_switch_vid_mode:475] oplus_panel_switch_vid_mode not support
+09-24 22:15:13.589  1097  1097 I [drm:dsi_display_set_mode [msm_drm]] [msm-dsi-info]: mdp_transfer_time=6290, hactive=1264, vactive=2780, fps=60, h_skew=1, clk_rate=1012000000, h_sync_width=2,				h_front_porch26, h_back_porch=26, v_back_porch=42, v_sync_width=2, v_front_porch=58
+09-24 22:15:13.590  1097  1097 I [ADFR][0][INFO][oplus_adfr_fakeframe_status_update:2140]h_active: 1264,refresh_rate:60,h_skew:1,sw_fps:0,fakeframe:0
+09-24 22:15:13.591  1097  1097 I         : [LCD][0][INFO][oplus_panel_cmd_print:120] [A0020] dsi_cmd: qcom,mdss-dsi-timing-switch-command, count=8
+09-24 22:15:13.592  1097  1097 I [ADFR][0][INFO][oplus_adfr_fakeframe_status_update:2140]h_active: 1264,refresh_rate:60,h_skew:1,sw_fps:0,fakeframe:0
+09-24 22:15:13.592  1097  1097 I         : [ADFR][0][INFO][oplus_adfr_status_reset:1851]sa status reset: auto_mode:0,fakeframe:0,sa_min_fps:60
+09-24 22:15:13.606  1097  1097 I         : <A0020> dsi_display_set_backlight time:16:45:26.407,bl_lvl:1683
+09-24 22:15:13.608  1097  1097 I [   info] ts_panel_notifier_callback: Notification type:4, early_trigger:0
+09-24 22:15:13.608  1097  1097 I [   info] ts_panel_notifier_callback: shashank:Received fps change old fps:120 new fps:60
+09-24 22:15:13.616  1097  1097 I [   info] ts_panel_notifier_callback: Notification type:4, early_trigger:1
+09-24 22:15:13.616  1097  1097 I [   info] ts_panel_notifier_callback: shashank:Received fps change old fps:60 new fps:120
+09-24 22:15:13.633  1097  1097 E         : [LCD][0][ERR][oplus_panel_switch_vid_mode:475] oplus_panel_switch_vid_mode not support
+09-24 22:15:13.633  1097  1097 I [drm:dsi_display_set_mode [msm_drm]] [msm-dsi-info]: mdp_transfer_time=6290, hactive=1264, vactive=2780, fps=120, h_skew=0, clk_rate=1012000000, h_sync_width=2,				h_front_porch26, h_back_porch=26, v_back_porch=42, v_sync_width=2, v_front_porch=58
+09-24 22:15:13.634  1097  1097 I [ADFR][0][INFO][oplus_adfr_fakeframe_status_update:2140]h_active: 1264,refresh_rate:120,h_skew:0,sw_fps:0,fakeframe:0
+09-24 22:15:13.637  1097  1097 I         : [LCD][0][INFO][oplus_panel_cmd_print:120] [A0020] dsi_cmd: qcom,mdss-dsi-timing-switch-command, count=8
+09-24 22:15:13.637  1097  1097 I [ADFR][0][INFO][oplus_adfr_fakeframe_status_update:2140]h_active: 1264,refresh_rate:120,h_skew:0,sw_fps:0,fakeframe:1
+09-24 22:15:13.637  1097  1097 I         : [ADFR][0][INFO][oplus_adfr_status_reset:1851]sa status reset: auto_mode:0,fakeframe:1,sa_min_fps:120
+09-24 22:15:13.656  1097  1097 I [   info] ts_panel_notifier_callback: Notification type:4, early_trigger:0
+09-24 22:15:13.656  1097  1097 I [   info] ts_panel_notifier_callback: shashank:Received fps change old fps:60 new fps:120
+09-24 22:15:13.717 11851 11851 W audit   : audit_lost=5452122 audit_rate_limit=5 audit_backlog_limit=64
+09-24 22:15:13.717 11851 11851 E audit   : rate limit exceeded
+09-24 22:15:14.863  1097  1097 I [   info] ts_panel_notifier_callback: Notification type:4, early_trigger:1
+09-24 22:15:14.863  1097  1097 I [   info] ts_panel_notifier_callback: shashank:Received fps change old fps:120 new fps:60
+09-24 22:15:14.868  1097  1097 E         : [LCD][0][ERR][oplus_panel_switch_vid_mode:475] oplus_panel_switch_vid_mode not support
+09-24 22:15:14.868  1097  1097 I [drm:dsi_display_set_mode [msm_drm]] [msm-dsi-info]: mdp_transfer_time=6290, hactive=1264, vactive=2780, fps=60, h_skew=1, clk_rate=1012000000, h_sync_width=2,				h_front_porch26, h_back_porch=26, v_back_porch=42, v_sync_width=2, v_front_porch=58
+09-24 22:15:14.869  1097  1097 I [ADFR][0][INFO][oplus_adfr_fakeframe_status_update:2140]h_active: 1264,refresh_rate:60,h_skew:1,sw_fps:0,fakeframe:0
+09-24 22:15:14.873  1097  1097 I         : [LCD][0][INFO][oplus_panel_cmd_print:120] [A0020] dsi_cmd: qcom,mdss-dsi-timing-switch-command, count=8
+09-24 22:15:14.873  1097  1097 I [ADFR][0][INFO][oplus_adfr_fakeframe_status_update:2140]h_active: 1264,refresh_rate:60,h_skew:1,sw_fps:0,fakeframe:0
+09-24 22:15:14.873  1097  1097 I         : [ADFR][0][INFO][oplus_adfr_status_reset:1851]sa status reset: auto_mode:0,fakeframe:0,sa_min_fps:60
+09-24 22:15:14.890  1097  1097 I [   info] ts_panel_notifier_callback: Notification type:4, early_trigger:0
+09-24 22:15:14.890  1097  1097 I [   info] ts_panel_notifier_callback: shashank:Received fps change old fps:120 new fps:60
+09-24 22:15:14.897  1097  1097 I [   info] ts_panel_notifier_callback: Notification type:4, early_trigger:1
+09-24 22:15:14.897  1097  1097 I [   info] ts_panel_notifier_callback: shashank:Received fps change old fps:60 new fps:120
+09-24 22:15:14.915  1097  1097 E         : [LCD][0][ERR][oplus_panel_switch_vid_mode:475] oplus_panel_switch_vid_mode not support
+09-24 22:15:14.915  1097  1097 I [drm:dsi_display_set_mode [msm_drm]] [msm-dsi-info]: mdp_transfer_time=6290, hactive=1264, vactive=2780, fps=120, h_skew=0, clk_rate=1012000000, h_sync_width=2,				h_front_porch26, h_back_porch=26, v_back_porch=42, v_sync_width=2, v_front_porch=58
+09-24 22:15:14.916  1097  1097 I [ADFR][0][INFO][oplus_adfr_fakeframe_status_update:2140]h_active: 1264,refresh_rate:120,h_skew:0,sw_fps:0,fakeframe:0
+09-24 22:15:14.919  1097  1097 I         : [LCD][0][INFO][oplus_panel_cmd_print:120] [A0020] dsi_cmd: qcom,mdss-dsi-timing-switch-command, count=8
+09-24 22:15:14.919  1097  1097 I [ADFR][0][INFO][oplus_adfr_fakeframe_status_update:2140]h_active: 1264,refresh_rate:120,h_skew:0,sw_fps:0,fakeframe:1
+09-24 22:15:14.919  1097  1097 I         : [ADFR][0][INFO][oplus_adfr_status_reset:1851]sa status reset: auto_mode:0,fakeframe:1,sa_min_fps:120
+09-24 22:15:14.937  1097  1097 I [   info] ts_panel_notifier_callback: Notification type:4, early_trigger:0
+09-24 22:15:14.937  1097  1097 I [   info] ts_panel_notifier_callback: shashank:Received fps change old fps:60 new fps:120
+09-24 22:15:15.227     0     0 W [    C0] gen7_err_callback: 308 callbacks suppressed
+09-24 22:15:15.227     0     0 F         : [    C0] kgsl kgsl-3d0: CP: AHB bus error, CP_RL_ERROR_DETAILS_0:0x10008e07 CP_RL_ERROR_DETAILS_1:0x12144
+09-24 22:15:15.227     0     0 F         : [    C0] kgsl kgsl-3d0: CP: AHB bus error, CP_RL_ERROR_DETAILS_0:0x10008e07 CP_RL_ERROR_DETAILS_1:0x12144
+09-24 22:15:15.229     0     0 F         : [    C0] kgsl kgsl-3d0: CP: AHB bus error, CP_RL_ERROR_DETAILS_0:0x10008e07 CP_RL_ERROR_DETAILS_1:0x12144
+09-24 22:15:15.230     0     0 F         : [    C0] kgsl kgsl-3d0: CP: AHB bus error, CP_RL_ERROR_DETAILS_0:0x10008e07 CP_RL_ERROR_DETAILS_1:0x12144
+09-24 22:15:15.235     0     0 F         : [    C0] kgsl kgsl-3d0: CP: AHB bus error, CP_RL_ERROR_DETAILS_0:0x10008e07 CP_RL_ERROR_DETAILS_1:0x12144
+09-24 22:15:15.254     0     0 F         : [    C0] kgsl kgsl-3d0: CP: AHB bus error, CP_RL_ERROR_DETAILS_0:0x10008e07 CP_RL_ERROR_DETAILS_1:0x12144
+09-24 22:15:15.277     0     0 F         : [    C1] kgsl kgsl-3d0: CP: AHB bus error, CP_RL_ERROR_DETAILS_0:0x10008e07 CP_RL_ERROR_DETAILS_1:0x12144
+09-24 22:15:15.304     0     0 F         : [    C1] kgsl kgsl-3d0: CP: AHB bus error, CP_RL_ERROR_DETAILS_0:0x10008e07 CP_RL_ERROR_DETAILS_1:0x12144
+09-24 22:15:15.304     0     0 F         : [    C0] kgsl kgsl-3d0: CP: AHB bus error, CP_RL_ERROR_DETAILS_0:0x10008e07 CP_RL_ERROR_DETAILS_1:0x12144
+09-24 22:15:15.350     0     0 F         : [    C1] kgsl kgsl-3d0: CP: AHB bus error, CP_RL_ERROR_DETAILS_0:0x10008e07 CP_RL_ERROR_DETAILS_1:0x12144
+09-24 22:15:15.988 11869 11869 W audit   : audit_lost=5452133 audit_rate_limit=5 audit_backlog_limit=64
+09-24 22:15:15.988 11869 11869 E audit   : rate limit exceeded
+09-24 22:15:16.439  4357  4357 I         : [INFO]: OPLUS_CHG[VOOC]([oplus_vooc_fastchg_allow_or_enable_check][1335]): temp:388, temp_range:6
+09-24 22:15:16.439 10931 10931 I         : [INFO]: OPLUS_CHG[CHG_COMM]([oplus_comm_smooth_to_soc][3416]): soc[0 2 83 83 85 85] avg[0 1 0 0 0] fifo[85 85 85 85]
+09-24 22:15:16.457 20220 20220 I OPLUS_CHG[oplus_charge_info]: BATTERY[389 388 4146 4146 1443 83 85 85 4448 5416 1 0x0 4747], CHARGE[4470 500 1 1], WIRED[1 450 4922 500 1 0x0 0 0 0 2 0], WIRELESS[0 0 0 0 0 0x0 0 0 0], VOOC[0 0 0 0 0x0], UFCS[0 0 0 0x0], COMMON[7 0 0 0x0 1 0 1 5416 100 0]
+09-24 22:15:16.460 20220 20220 I         : [INFO]: OPLUS_CHG[ADSP]([oplus_chg_8350_reg_dump][7390]): sm8450_st_dump: [chg_en=0, suspend=0, pd_svooc=0], subtype=0x01],[oplus_UsbCommCapable=0, oplus_pd_svooc=0, typec_mode=0, cid_status=0x01, usb_in_status=1],[0x2606=0x87, 0x2607=0x00, 0x2608=0x0a, 0x2609=0x02], [0x260a=0x05, 0x260b=0x57, 0x260c=0x00, 0x260d=0x18], [0x260e=0x00, 0x260f=0x01, 0x2610=0x00, 0x2640=0x01], [0x2641=0x02, 0x2642=0x05, 0x2646=0x00, 0x2650=0x03], [0x2706=0x0a, 0x2707=0x0a, 0x2708=0x0a, 0x2709=0x0a], [0x270b=0xe2, 0x270c=0x48, 0x2710=0xc0, 0x280c=0x38], [0x2810=0x00, 0x2840=0x03, 0x287f=0x00, 0x2906=0x02], [0x2908=0x0f, 0x290a=0x11, 0x290b=0x01, 0x290c=0x01], [0x2910=0x11, 0x2944=0x80, 0x2950=0x02, 0x2951=0x01], [0x2952=0x0a, 0x2954=0x00, 0x2960=0xe0, 0x2b06=0x08], [0x2b07=0x00, 0x2b08=0x00, 0x2b09=0x63, 0x2b0a=0x39], [0x2b0b=0x29, 0x2b0c=0x00, 0x29a8=0x81, 0x29a9=0x83], [0x29aa=0x00, 0x2aa2=0x00, 0x2aa8=0x87, 0x2aa9=0x00], [0x2aaa=0x00],
+09-24 22:15:16.664 20220 20220 I         : [OFP][0][INFO][oplus_get_doze_disable_time:3679]oplus_get_doze_disable_time=0
+09-24 22:15:16.665 20220 20220 W [drm] [msm-dsi-warn]: dsi_display_check_status,time_gap=2013502454
+09-24 22:15:16.909 27574 27574 E gsi soc : qcom,msm_gsi: gsi_stop_channel:3688 chan=1 busy try again
+09-24 22:15:16.911 27574 27574 E gsi soc : qcom,msm_gsi: gsi_stop_channel:3688 chan=14 busy try again
+09-24 22:15:17.131  1558  1558 W healthd : battery l=85 v=4146 t=38.9 h=2 st=4 c=1443 fc=6000000 cc=216 chg=u
+09-24 22:15:17.138  5498  5498 W audit   : audit_lost=5452144 audit_rate_limit=5 audit_backlog_limit=64
+09-24 22:15:17.138  5498  5498 E audit   : rate limit exceeded
+09-24 22:15:18.236 11888 11888 W audit   : audit_lost=5452145 audit_rate_limit=5 audit_backlog_limit=64
+09-24 22:15:18.236 11888 11888 E audit   : rate limit exceeded
+09-24 22:15:18.902  1097  1097 I [   info] ts_panel_notifier_callback: Notification type:4, early_trigger:1
+09-24 22:15:18.902  1097  1097 I [   info] ts_panel_notifier_callback: shashank:Received fps change old fps:120 new fps:60
+09-24 22:15:18.904  1097  1097 E         : [LCD][0][ERR][oplus_panel_switch_vid_mode:475] oplus_panel_switch_vid_mode not support
+09-24 22:15:18.904  1097  1097 I [drm:dsi_display_set_mode [msm_drm]] [msm-dsi-info]: mdp_transfer_time=6290, hactive=1264, vactive=2780, fps=60, h_skew=1, clk_rate=1012000000, h_sync_width=2,				h_front_porch26, h_back_porch=26, v_back_porch=42, v_sync_width=2, v_front_porch=58
+09-24 22:15:18.906  1097  1097 I [ADFR][0][INFO][oplus_adfr_fakeframe_status_update:2140]h_active: 1264,refresh_rate:60,h_skew:1,sw_fps:0,fakeframe:0
+09-24 22:15:18.908  1097  1097 I         : [LCD][0][INFO][oplus_panel_cmd_print:120] [A0020] dsi_cmd: qcom,mdss-dsi-timing-switch-command, count=8
+09-24 22:15:18.909  1097  1097 I [ADFR][0][INFO][oplus_adfr_fakeframe_status_update:2140]h_active: 1264,refresh_rate:60,h_skew:1,sw_fps:0,fakeframe:0
+09-24 22:15:18.909  1097  1097 I         : [ADFR][0][INFO][oplus_adfr_status_reset:1851]sa status reset: auto_mode:0,fakeframe:0,sa_min_fps:60
+09-24 22:15:18.925  1097  1097 I [   info] ts_panel_notifier_callback: Notification type:4, early_trigger:0
+09-24 22:15:18.925  1097  1097 I [   info] ts_panel_notifier_callback: shashank:Received fps change old fps:120 new fps:60
+09-24 22:15:18.965  1097  1097 I [   info] ts_panel_notifier_callback: Notification type:4, early_trigger:1
+09-24 22:15:18.965  1097  1097 I [   info] ts_panel_notifier_callback: shashank:Received fps change old fps:60 new fps:120
+09-24 22:15:18.968  1097  1097 E         : [LCD][0][ERR][oplus_panel_switch_vid_mode:475] oplus_panel_switch_vid_mode not support
+09-24 22:15:18.968  1097  1097 I [drm:dsi_display_set_mode [msm_drm]] [msm-dsi-info]: mdp_transfer_time=6290, hactive=1264, vactive=2780, fps=120, h_skew=0, clk_rate=1012000000, h_sync_width=2,				h_front_porch26, h_back_porch=26, v_back_porch=42, v_sync_width=2, v_front_porch=58
+09-24 22:15:18.970  1097  1097 I [ADFR][0][INFO][oplus_adfr_fakeframe_status_update:2140]h_active: 1264,refresh_rate:120,h_skew:0,sw_fps:0,fakeframe:0
+09-24 22:15:18.971  1097  1097 I         : [LCD][0][INFO][oplus_panel_cmd_print:120] [A0020] dsi_cmd: qcom,mdss-dsi-timing-switch-command, count=8
+09-24 22:15:18.971  1097  1097 I [ADFR][0][INFO][oplus_adfr_fakeframe_status_update:2140]h_active: 1264,refresh_rate:120,h_skew:0,sw_fps:0,fakeframe:1
+09-24 22:15:18.971  1097  1097 I         : [ADFR][0][INFO][oplus_adfr_status_reset:1851]sa status reset: auto_mode:0,fakeframe:1,sa_min_fps:120
+09-24 22:15:18.990  1097  1097 I [   info] ts_panel_notifier_callback: Notification type:4, early_trigger:0
+09-24 22:15:18.990  1097  1097 I [   info] ts_panel_notifier_callback: shashank:Received fps change old fps:60 new fps:120
+09-24 22:15:19.642   950   950 I logd    : logdr: UID=2000 GID=2000 PID=11899 n tail=0 logMask=99 pid=5454 start=0ns deadline=0ns
+09-24 22:15:20.231     0     0 W [    C1] gen7_err_callback: 336 callbacks suppressed
+09-24 22:15:20.231     0     0 F         : [    C1] kgsl kgsl-3d0: CP: AHB bus error, CP_RL_ERROR_DETAILS_0:0x10008e07 CP_RL_ERROR_DETAILS_1:0x12144
+09-24 22:15:20.259   867   867 I servicemanager: Caller(pid=2866,uid=1000,sid=u:r:system_server:s0) Since 'artd' could not be found trying to start it as a lazy AIDL service. (if it's not configured to be a lazy service, it may be stuck starting or still starting).
+09-24 22:15:20.261     1     1 I init    : starting service 'artd'...
+09-24 22:15:20.270     1     1 I init    : ... started service 'artd' has pid 11921
+09-24 22:15:20.270     1     1 I init    : Control message: Processed ctl.interface_start for 'aidl/artd' from pid: 867 (/system/bin/servicemanager)
+09-24 22:15:20.295     0     0 F         : [    C1] kgsl kgsl-3d0: CP: AHB bus error, CP_RL_ERROR_DETAILS_0:0x10008e07 CP_RL_ERROR_DETAILS_1:0x12144
+09-24 22:15:20.318     0     0 F         : [    C1] kgsl kgsl-3d0: CP: AHB bus error, CP_RL_ERROR_DETAILS_0:0x10008e07 CP_RL_ERROR_DETAILS_1:0x12144
+09-24 22:15:20.319     0     0 F         : [    C1] kgsl kgsl-3d0: CP: AHB bus error, CP_RL_ERROR_DETAILS_0:0x10008e07 CP_RL_ERROR_DETAILS_1:0x12144
+09-24 22:15:20.319     0     0 F         : [    C1] kgsl kgsl-3d0: CP: AHB bus error, CP_RL_ERROR_DETAILS_0:0x10008e07 CP_RL_ERROR_DETAILS_1:0x12144
+09-24 22:15:20.358   867   867 I servicemanager: Notifying artd they do (previously: don't) have clients when service is guaranteed to be in use
+09-24 22:15:20.358     0     0 F         : [    C0] kgsl kgsl-3d0: CP: AHB bus error, CP_RL_ERROR_DETAILS_0:0x10008e07 CP_RL_ERROR_DETAILS_1:0x12144
+09-24 22:15:20.358     0     0 F         : [    C1] kgsl kgsl-3d0: CP: AHB bus error, CP_RL_ERROR_DETAILS_0:0x10008e07 CP_RL_ERROR_DETAILS_1:0x12144
+09-24 22:15:20.361     0     0 F         : [    C0] kgsl kgsl-3d0: CP: AHB bus error, CP_RL_ERROR_DETAILS_0:0x10008e07 CP_RL_ERROR_DETAILS_1:0x12144
+09-24 22:15:20.385     0     0 F         : [    C1] kgsl kgsl-3d0: CP: AHB bus error, CP_RL_ERROR_DETAILS_0:0x10008e07 CP_RL_ERROR_DETAILS_1:0x12144
+09-24 22:15:20.434     0     0 F         : [    C0] kgsl kgsl-3d0: CP: AHB bus error, CP_RL_ERROR_DETAILS_0:0x10008e07 CP_RL_ERROR_DETAILS_1:0x12144
+09-24 22:15:20.510 11935 11935 W audit   : audit_lost=5452156 audit_rate_limit=5 audit_backlog_limit=64
+09-24 22:15:20.510 11935 11935 E audit   : rate limit exceeded
+09-24 22:15:20.760  8500  8500 E iostack : irqs = 15510537, self-block = 0
+09-24 22:15:21.157  1097  1097 I [   info] ts_panel_notifier_callback: Notification type:4, early_trigger:1
+09-24 22:15:21.157  1097  1097 I [   info] ts_panel_notifier_callback: shashank:Received fps change old fps:120 new fps:60
+09-24 22:15:21.161  1097  1097 E         : [LCD][0][ERR][oplus_panel_switch_vid_mode:475] oplus_panel_switch_vid_mode not support
+09-24 22:15:21.161  1097  1097 I [drm:dsi_display_set_mode [msm_drm]] [msm-dsi-info]: mdp_transfer_time=6290, hactive=1264, vactive=2780, fps=60, h_skew=1, clk_rate=1012000000, h_sync_width=2,				h_front_porch26, h_back_porch=26, v_back_porch=42, v_sync_width=2, v_front_porch=58
+09-24 22:15:21.162  1097  1097 I [ADFR][0][INFO][oplus_adfr_fakeframe_status_update:2140]h_active: 1264,refresh_rate:60,h_skew:1,sw_fps:0,fakeframe:0
+09-24 22:15:21.163  1097  1097 I         : [LCD][0][INFO][oplus_panel_cmd_print:120] [A0020] dsi_cmd: qcom,mdss-dsi-timing-switch-command, count=8
+09-24 22:15:21.163  1097  1097 I [ADFR][0][INFO][oplus_adfr_fakeframe_status_update:2140]h_active: 1264,refresh_rate:60,h_skew:1,sw_fps:0,fakeframe:0
+09-24 22:15:21.163  1097  1097 I         : [ADFR][0][INFO][oplus_adfr_status_reset:1851]sa status reset: auto_mode:0,fakeframe:0,sa_min_fps:60
+09-24 22:15:21.180  1097  1097 I [   info] ts_panel_notifier_callback: Notification type:4, early_trigger:0
+09-24 22:15:21.180  1097  1097 I [   info] ts_panel_notifier_callback: shashank:Received fps change old fps:120 new fps:60
+09-24 22:15:21.217  1097  1097 I [   info] ts_panel_notifier_callback: Notification type:4, early_trigger:1
+09-24 22:15:21.217  1097  1097 I [   info] ts_panel_notifier_callback: shashank:Received fps change old fps:60 new fps:120
+09-24 22:15:21.222  1097  1097 E         : [LCD][0][ERR][oplus_panel_switch_vid_mode:475] oplus_panel_switch_vid_mode not support
+09-24 22:15:21.222  1097  1097 I [drm:dsi_display_set_mode [msm_drm]] [msm-dsi-info]: mdp_transfer_time=6290, hactive=1264, vactive=2780, fps=120, h_skew=0, clk_rate=1012000000, h_sync_width=2,				h_front_porch26, h_back_porch=26, v_back_porch=42, v_sync_width=2, v_front_porch=58
+09-24 22:15:21.223  1097  1097 I [ADFR][0][INFO][oplus_adfr_fakeframe_status_update:2140]h_active: 1264,refresh_rate:120,h_skew:0,sw_fps:0,fakeframe:0
+09-24 22:15:21.226  1097  1097 I         : [LCD][0][INFO][oplus_panel_cmd_print:120] [A0020] dsi_cmd: qcom,mdss-dsi-timing-switch-command, count=8
+09-24 22:15:21.226  1097  1097 I [ADFR][0][INFO][oplus_adfr_fakeframe_status_update:2140]h_active: 1264,refresh_rate:120,h_skew:0,sw_fps:0,fakeframe:1
+09-24 22:15:21.226  1097  1097 I         : [ADFR][0][INFO][oplus_adfr_status_reset:1851]sa status reset: auto_mode:0,fakeframe:1,sa_min_fps:120
+09-24 22:15:21.245  1097  1097 I [   info] ts_panel_notifier_callback: Notification type:4, early_trigger:0
+09-24 22:15:21.245  1097  1097 I [   info] ts_panel_notifier_callback: shashank:Received fps change old fps:60 new fps:120
+09-24 22:15:21.276   950   950 I logd    : logdr: UID=2000 GID=2000 PID=11964 n tail=0 logMask=10 pid=0 start=0ns deadline=0ns
+09-24 22:15:21.316   950   950 I logd    : logdr: UID=2000 GID=2000 PID=11967 n tail=5000 logMask=9 pid=0 start=0ns deadline=0ns
+09-24 22:15:21.431  1097  1097 I [   info] ts_panel_notifier_callback: Notification type:4, early_trigger:1
+09-24 22:15:21.431  1097  1097 I [   info] ts_panel_notifier_callback: shashank:Received fps change old fps:120 new fps:60
+09-24 22:15:21.432  1097  1097 E         : [LCD][0][ERR][oplus_panel_switch_vid_mode:475] oplus_panel_switch_vid_mode not support
+09-24 22:15:21.432  1097  1097 I [drm:dsi_display_set_mode [msm_drm]] [msm-dsi-info]: mdp_transfer_time=6290, hactive=1264, vactive=2780, fps=60, h_skew=1, clk_rate=1012000000, h_sync_width=2,				h_front_porch26, h_back_porch=26, v_back_porch=42, v_sync_width=2, v_front_porch=58
+09-24 22:15:21.432  1097  1097 I [ADFR][0][INFO][oplus_adfr_fakeframe_status_update:2140]h_active: 1264,refresh_rate:60,h_skew:1,sw_fps:0,fakeframe:0
+09-24 22:15:21.438  1097  1097 I         : [LCD][0][INFO][oplus_panel_cmd_print:120] [A0020] dsi_cmd: qcom,mdss-dsi-timing-switch-command, count=8
+09-24 22:15:21.438  1097  1097 I [ADFR][0][INFO][oplus_adfr_fakeframe_status_update:2140]h_active: 1264,refresh_rate:60,h_skew:1,sw_fps:0,fakeframe:0
+09-24 22:15:21.438  1097  1097 I         : [ADFR][0][INFO][oplus_adfr_status_reset:1851]sa status reset: auto_mode:0,fakeframe:0,sa_min_fps:60
+09-24 22:15:21.450   950   950 I logd    : logdr: UID=2000 GID=2000 PID=11970 n tail=2000 logMask=4 pid=0 start=0ns deadline=0ns
+09-24 22:15:21.455  1097  1097 I [   info] ts_panel_notifier_callback: Notification type:4, early_trigger:0
+09-24 22:15:21.455  1097  1097 I [   info] ts_panel_notifier_callback: shashank:Received fps change old fps:120 new fps:60
+09-24 22:15:21.466  1097  1097 I [   info] ts_panel_notifier_callback: Notification type:4, early_trigger:1
+09-24 22:15:21.466  1097  1097 I [   info] ts_panel_notifier_callback: shashank:Received fps change old fps:60 new fps:120
+09-24 22:15:21.480  1097  1097 E         : [LCD][0][ERR][oplus_panel_switch_vid_mode:475] oplus_panel_switch_vid_mode not support
+09-24 22:15:21.480  1097  1097 I [drm:dsi_display_set_mode [msm_drm]] [msm-dsi-info]: mdp_transfer_time=6290, hactive=1264, vactive=2780, fps=120, h_skew=0, clk_rate=1012000000, h_sync_width=2,				h_front_porch26, h_back_porch=26, v_back_porch=42, v_sync_width=2, v_front_porch=58
+09-24 22:15:21.480  1097  1097 I [ADFR][0][INFO][oplus_adfr_fakeframe_status_update:2140]h_active: 1264,refresh_rate:120,h_skew:0,sw_fps:0,fakeframe:0
+09-24 22:15:21.484  1097  1097 I         : [LCD][0][INFO][oplus_panel_cmd_print:120] [A0020] dsi_cmd: qcom,mdss-dsi-timing-switch-command, count=8
+09-24 22:15:21.484  1097  1097 I [ADFR][0][INFO][oplus_adfr_fakeframe_status_update:2140]h_active: 1264,refresh_rate:120,h_skew:0,sw_fps:0,fakeframe:1
+09-24 22:15:21.484  1097  1097 I         : [ADFR][0][INFO][oplus_adfr_status_reset:1851]sa status reset: auto_mode:0,fakeframe:1,sa_min_fps:120
+09-24 22:15:21.502  1097  1097 I [   info] ts_panel_notifier_callback: Notification type:4, early_trigger:0
+09-24 22:15:21.502  1097  1097 I [   info] ts_panel_notifier_callback: shashank:Received fps change old fps:60 new fps:120
+09-24 22:15:21.548  1097  1097 I [   info] ts_panel_notifier_callback: Notification type:4, early_trigger:1
+09-24 22:15:21.548  1097  1097 I [   info] ts_panel_notifier_callback: shashank:Received fps change old fps:120 new fps:60
+09-24 22:15:21.550  1097  1097 E         : [LCD][0][ERR][oplus_panel_switch_vid_mode:475] oplus_panel_switch_vid_mode not support
+09-24 22:15:21.550  1097  1097 I [drm:dsi_display_set_mode [msm_drm]] [msm-dsi-info]: mdp_transfer_time=6290, hactive=1264, vactive=2780, fps=60, h_skew=1, clk_rate=1012000000, h_sync_width=2,				h_front_porch26, h_back_porch=26, v_back_porch=42, v_sync_width=2, v_front_porch=58
+09-24 22:15:21.550  1097  1097 I [ADFR][0][INFO][oplus_adfr_fakeframe_status_update:2140]h_active: 1264,refresh_rate:60,h_skew:1,sw_fps:0,fakeframe:0
+09-24 22:15:21.552   950   950 I logd    : logdr: UID=2000 GID=2000 PID=11973 n tail=500 logMask=80 pid=0 start=0ns deadline=0ns

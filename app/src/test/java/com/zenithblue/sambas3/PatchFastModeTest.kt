@@ -35,6 +35,21 @@ class PatchFastModeTest {
     }
 
     @Test
+    fun curatedFastPatchesForGodOfWar3() {
+        val testIds = listOf("BCUS98111", "BCES00510", "BCES00799", "BCJS37001", "BCAS25003", "BCKS15003")
+        val expected = setOf("Disable MLAA", "Disable Motion Blur", "Skip intro")
+        for (id in testIds) {
+            assertTrue("Expected $id to support Fast Mode", PatchFastMode.isFastModeSupported(id))
+            val patches = PatchFastMode.fastPatchNamesForTitle(id)
+            assertEquals(expected, patches)
+            assertTrue(
+                "Expected empty Fast Mode settings for $id",
+                PatchFastMode.fastModeSettingsForTitle(id).isEmpty()
+            )
+        }
+    }
+
+    @Test
     fun curatedFastPatchesForGtaV() {
         val testIds = listOf(
             "BLJM61019", "BLUS31156", "BLES01807",

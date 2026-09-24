@@ -1,0 +1,45 @@
+Threads: 40 total,   0 running,  40 sleeping,   0 stopped,   0 zombie
+  Mem:    11222M total,     5185M used,     6037M free,        0M buffers
+ Swap:     6143M total,     1925M used,     4218M free,     1383M cached
+800%cpu   7%user   0%nice  21%sys 768%idle   0%iow   4%irq   0%sirq   0%host
+  TID USER         PR  NI VIRT  RES  SHR S[%CPU] %MEM     TIME+ THREAD          PROCESS
+29639 u0_a463      20   0  71G 286M 162M S  0.0   2.5   0:00.00 InteractionJank com.zenithblue.sambas3
+29636 u0_a463      10 -10  71G 286M 162M S  0.0   2.5   0:00.00 RenderThread    com.zenithblue.sambas3
+29635 u0_a463      20   0  71G 286M 162M S  0.0   2.5   0:00.01 binder:29577_4  com.zenithblue.sambas3
+29633 u0_a463      20   0  71G 286M 162M S  0.0   2.5   0:00.00 SurfaceSyncGrou com.zenithblue.sambas3
+29631 u0_a463      20   0  71G 286M 162M S  0.0   2.5   0:00.01 GrallocUploadTh com.zenithblue.sambas3
+29630 u0_a463      20   0  71G 286M 162M S  0.0   2.5   0:00.03 DefaultDispatch com.zenithblue.sambas3
+29629 u0_a463      20   0  71G 286M 162M S  0.0   2.5   0:00.00 DefaultDispatch com.zenithblue.sambas3
+29623 u0_a463      20   0  71G 286M 162M S  0.0   2.5   0:00.00 DefaultDispatch com.zenithblue.sambas3
+29624 u0_a463      20   0  71G 286M 162M S  0.0   2.5   0:00.08 DefaultDispatch com.zenithblue.sambas3
+29626 u0_a463      20   0  71G 286M 162M S  0.0   2.5   0:00.03 DefaultDispatch com.zenithblue.sambas3
+29627 u0_a463      20   0  71G 286M 162M S  0.0   2.5   0:00.00 DefaultDispatch com.zenithblue.sambas3
+29628 u0_a463      20   0  71G 286M 162M S  0.0   2.5   0:00.00 DefaultDispatch com.zenithblue.sambas3
+29625 u0_a463      20   0  71G 286M 162M S  0.0   2.5   0:00.09 DefaultDispatch com.zenithblue.sambas3
+29613 u0_a463      18  -2  71G 286M 162M S  0.0   2.5   0:00.00 hwuiTask0       com.zenithblue.sambas3
+29614 u0_a463      18  -2  71G 286M 162M S  0.0   2.5   0:00.00 hwuiTask1       com.zenithblue.sambas3
+29612 u0_a463      20   0  71G 286M 162M S  0.0   2.5   0:00.00 pool-4-thread-1 com.zenithblue.sambas3
+29610 u0_a463      10 -10  71G 286M 162M S  0.0   2.5   0:00.00 TracingMuxer    com.zenithblue.sambas3
+29607 u0_a463      20   0  71G 286M 162M S  0.0   2.5   0:00.00 Thread-8        com.zenithblue.sambas3
+29606 u0_a463      20   0  71G 286M 162M S  0.0   2.5   0:00.00 Thread-7        com.zenithblue.sambas3
+29605 u0_a463      10 -10  71G 286M 162M S  0.0   2.5   0:00.00 ithblue.sambas3 com.zenithblue.sambas3
+29604 u0_a463      30  10  71G 286M 162M S  0.0   2.5   0:00.04 Log Writer      com.zenithblue.sambas3
+29602 u0_a463      20   0  71G 286M 162M S  0.0   2.5   0:00.13 DefaultDispatch com.zenithblue.sambas3
+29600 u0_a463      20   0  71G 286M 162M S  0.0   2.5   0:00.02 DefaultDispatch com.zenithblue.sambas3
+29601 u0_a463      20   0  71G 286M 162M S  0.0   2.5   0:00.00 DefaultExecutor com.zenithblue.sambas3
+29595 u0_a463      20   0  71G 286M 162M S  0.0   2.5   0:00.00 DefaultDispatch com.zenithblue.sambas3
+29596 u0_a463      20   0  71G 286M 162M S  0.0   2.5   0:00.08 DefaultDispatch com.zenithblue.sambas3
+29597 u0_a463      20   0  71G 286M 162M S  0.0   2.5   0:00.10 DefaultDispatch com.zenithblue.sambas3
+29592 u0_a463      10 -10  71G 286M 162M S  0.0   2.5   0:00.22 RenderThread    com.zenithblue.sambas3
+29591 u0_a463      29   9  71G 286M 162M S  0.0   2.5   0:00.00 Profile Saver   com.zenithblue.sambas3
+29589 u0_a463      20   0  71G 286M 162M S  0.0   2.5   0:00.00 binder:29577_3  com.zenithblue.sambas3
+29586 u0_a463      24   4  71G 286M 162M S  0.0   2.5   0:00.00 FinalizerWatchd com.zenithblue.sambas3
+29588 u0_a463      20   0  71G 286M 162M S  0.0   2.5   0:00.00 binder:29577_2  com.zenithblue.sambas3
+29587 u0_a463      20   0  71G 286M 162M S  0.0   2.5   0:00.00 binder:29577_1  com.zenithblue.sambas3
+29585 u0_a463      24   4  71G 286M 162M S  0.0   2.5   0:00.00 FinalizerDaemon com.zenithblue.sambas3
+29583 u0_a463      24   4  71G 286M 162M S  0.0   2.5   0:00.01 HeapTaskDaemon  com.zenithblue.sambas3
+29584 u0_a463      24   4  71G 286M 162M S  0.0   2.5   0:00.00 ReferenceQueueD com.zenithblue.sambas3
+29581 u0_a463       0 -20  71G 286M 162M S  0.0   2.5   0:00.00 perfetto_hprof_ com.zenithblue.sambas3
+29582 u0_a463      29   9  71G 286M 162M S  0.0   2.5   0:00.00 Jit thread pool com.zenithblue.sambas3
+29580 u0_a463       0 -20  71G 286M 162M S  0.0   2.5   0:00.00 Signal Catcher  com.zenithblue.sambas3
+29577 u0_a463      10 -10  71G 286M 162M S  0.0   2.5   0:00.44 ithblue.sambas3 com.zenithblue.sambas3

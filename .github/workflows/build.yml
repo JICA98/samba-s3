@@ -90,9 +90,10 @@ jobs:
         CMAKE_CXX_COMPILER_LAUNCHER: "ccache"
       run: |
         ./build_rpcsx.sh release
-        ls -lh app/src/main/jniLibs/*/*.so
+        ls -lh app/src/main/jniLibs/*/*.so app/src/main/jniLibs/*/*.manifest.json
         sha256sum app/src/main/jniLibs/*/*.so || true
-        strings app/src/main/jniLibs/arm64-v8a/librpcsx-android.so | grep -E "rpcsx=.*samba=.*patch_sha256=" | head -1 || echo "S3CORE build ID not found (fallback core?)"
+        python3 scripts/lib/core_provenance.py verify-jnilibs --root "$GITHUB_WORKSPACE"
+        strings app/src/main/jniLibs/arm64-v8a/librpcsx-android.so | grep -E "rpcsx=.*samba=.*patch_sha256=" | head -1 || echo "S3CORE build ID unknown"
 
     - name: Build with Gradle
       env: 
@@ -102,25 +103,38 @@ jobs:
         CMAKE_C_COMPILER_LAUNCHER: "ccache"
         CMAKE_CXX_COMPILER_LAUNCHER: "ccache"
       run: |
-        ./gradlew assembleStandardRelease assemblePlaystoreRelease
+        ./gradlew assembleStandardRelease assemblePlaystoreRelease bundleStandardRelease
 
-    - name: Verify APK core matches local build
+    - name: Verify APK/AAB core matches packaging-stage provenance
       run: |
-        for apk in app/build/outputs/apk/standard/release/*.apk app/build/outputs/apk/playstore/release/*.apk; do
-          [ -f "$apk" ] || continue
-          echo "=== Verifying $apk ==="
-          ./scripts/verify-apk-core.sh "$apk"
+        for artifact in app/build/outputs/apk/standard/release/*.apk app/build/outputs/apk/playstore/release/*.apk app/build/outputs/bundle/standardRelease/*.aab; do
+          [ -f "$artifact" ] || continue
+          echo "=== Verifying $artifact ==="
+          ./scripts/verify-apk-core.sh "$artifact"
         done
   
+    - name: Generate artifact SHA bindings and package provenance
+      run: |
+        mkdir -p build-provenance
+        cp app/src/main/jniLibs/*/librpcsx-android.manifest.json build-provenance/ 2>/dev/null || true
+        sha256sum app/build/outputs/apk/standard/release/*.apk \
+                  app/build/outputs/apk/playstore/release/*.apk \
+                  app/build/outputs/bundle/standardRelease/*.aab \
+                  app/src/main/jniLibs/*/librpcsx-android.so \
+                  app/src/main/jniLibs/*/librpcsx-android.manifest.json > build-provenance/artifact-sha256.txt 2>/dev/null || true
+        cat build-provenance/artifact-sha256.txt
+
     - name: Build release artifacts
       uses: actions/upload-artifact@v4
-      if: ${{ github.event_name != 'workflow_dispatch' }}
       with:
         name: rpcsx-build
         compression-level: 0
         path: |
           app/build/outputs/apk/standard/release/*.apk
           app/build/outputs/apk/playstore/release/*.apk
+          app/build/outputs/bundle/standardRelease/*.aab
+          app/src/main/jniLibs/*/librpcsx-android.manifest.json
+          build-provenance/*
 
     - name: Create release
       uses: softprops/action-gh-release@v2
@@ -133,6 +147,9 @@ jobs:
         # body_path: or/as/file.md
         files: |
           app/build/outputs/apk/standard/release/*.apk
+          app/build/outputs/bundle/standardRelease/*.aab
+          app/src/main/jniLibs/*/librpcsx-android.manifest.json
+          build-provenance/artifact-sha256.txt
 
     - name: Deploy build
       uses: softprops/action-gh-release@v2
@@ -147,5 +164,9 @@ jobs:
         repository: RPCSX/rpcsx-ui-android-build
         token: ${{ secrets.BUILD_TOKEN }}
         tag_name: v${{ env.RX_VERSION }}-${{ env.RX_SHA }}
-        files: app/build/outputs/apk/standard/release/*.apk
+        files: |
+          app/build/outputs/apk/standard/release/*.apk
+          app/src/main/jniLibs/*/librpcsx-android.manifest.json
+          build-provenance/artifact-sha256.txt
         body: ${{ github.server_url }}/${{ github.repository }}/commit/${{ github.sha }}
+

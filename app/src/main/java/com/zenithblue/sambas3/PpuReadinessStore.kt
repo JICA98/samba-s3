@@ -66,7 +66,13 @@ object PpuReadinessStore {
                 return
             }
             val data = json.decodeFromString<PpuStateFile>(f.readText())
-            cache = data.entries.toMutableMap()
+            cache = data.entries.mapValues { (_, entry) ->
+                if (entry.fingerprint?.contains("|{}|") == true || entry.fingerprint?.contains("|auto|") == true) {
+                    entry.copy(fingerprint = normalizeFingerprint(entry.fingerprint))
+                } else {
+                    entry
+                }
+            }.toMutableMap()
             loaded = true
         } catch (e: Exception) {
             Log.e("PpuReadinessStore", "load failed", e)
@@ -92,12 +98,81 @@ object PpuReadinessStore {
         if (!loaded) load(context)
     }
 
-    private fun fingerprint(context: Context, titleId: String?): String? {
+    internal fun resolveLlvmCpu(titleId: String?): String {
+        return try {
+            // 1. Try to extract llvm_cpu from the manifest key for this title
+            val manifestKey = try { RPCSX.instance.getPpuManifestKey(titleId ?: "") } catch (_: Throwable) { null }
+            if (!manifestKey.isNullOrBlank() && manifestKey.startsWith("{")) {
+                try {
+                    val mJson = org.json.JSONObject(manifestKey)
+                    val manifestCpu = mJson.optString("llvm_cpu", "").trim()
+                    if (manifestCpu.isNotEmpty() && !manifestCpu.equals("auto", ignoreCase = true) && manifestCpu != "{}") {
+                        return manifestCpu
+                    }
+                } catch (_: Throwable) { }
+            }
+
+            // 2. Check if user configured an explicit (non-auto) LLVM CPU target
+            val raw = try {
+                if (!titleId.isNullOrEmpty()) {
+                    RPCSX.instance.settingsGetEffective(titleId, "Core@@Use LLVM CPU")
+                } else {
+                    RPCSX.instance.settingsGet("Core@@Use LLVM CPU")
+                }
+            } catch (_: Throwable) {
+                try { RPCSX.instance.settingsGet("Core@@Use LLVM CPU") } catch (_: Throwable) { null }
+            }
+            if (!raw.isNullOrBlank() && raw.trim() != "{}") {
+                try {
+                    val json = org.json.JSONObject(raw)
+                    val value = json.optString("value", "").trim()
+                    if (value.isNotEmpty() && !value.equals("auto", ignoreCase = true) && value != "{}") {
+                        return value
+                    }
+                } catch (_: Throwable) { }
+            }
+
+            // 3. Fallback: query global manifest key if title-specific was empty
+            if (!titleId.isNullOrEmpty()) {
+                val globalKey = try { RPCSX.instance.getPpuManifestKey("") } catch (_: Throwable) { null }
+                if (!globalKey.isNullOrBlank() && globalKey.startsWith("{")) {
+                    try {
+                        val mJson = org.json.JSONObject(globalKey)
+                        val manifestCpu = mJson.optString("llvm_cpu", "").trim()
+                        if (manifestCpu.isNotEmpty() && !manifestCpu.equals("auto", ignoreCase = true) && manifestCpu != "{}") {
+                            return manifestCpu
+                        }
+                    } catch (_: Throwable) { }
+                }
+            }
+
+            // 4. Default to safe baseline target rather than retaining "auto" or empty
+            "cortex-a34"
+        } catch (_: Throwable) {
+            "cortex-a34"
+        }
+    }
+
+    internal fun normalizeFingerprint(fp: String?): String? {
+        if (fp == null) return null
+        return fp.replace("|{}|", "|cortex-a34|").replace("|auto|", "|cortex-a34|")
+    }
+
+    internal fun fingerprint(context: Context, titleId: String?): String? {
         return try {
             val key = try { RPCSX.instance.getPpuManifestKey(titleId ?: "") } catch (_: Throwable) { null }
-            if (!key.isNullOrEmpty() && key != "unknown") return key
+            if (!key.isNullOrEmpty() && key != "unknown") {
+                if (!titleId.isNullOrEmpty() && key.startsWith("{") && !key.contains("\"title_id\":\"$titleId\"")) {
+                    try {
+                        val obj = org.json.JSONObject(key)
+                        obj.put("title_id", titleId)
+                        return obj.toString()
+                    } catch (_: Throwable) { }
+                }
+                return key
+            }
             val abi = "v7-kusa"
-            val llvmCpu = try { RPCSX.instance.settingsGet("Core llvm_cpu") } catch (_: Throwable) { "unknown" }
+            val llvmCpu = resolveLlvmCpu(titleId)
             "$abi|$llvmCpu|${titleId ?: "unknown"}"
         } catch (_: Throwable) { null }
     }
@@ -223,9 +298,13 @@ object PpuReadinessStore {
         ensureLoaded(context)
         val entry = cache[key] ?: return false
         val stored = entry.fingerprint
-        if (stored != null && currentFingerprint != null && stored != currentFingerprint) {
-            setPreRuntimeState(context, key, PreRuntimePpuState.INVALIDATED, currentFingerprint)
-            return true
+        if (stored != null && currentFingerprint != null) {
+            val normStored = normalizeFingerprint(stored)
+            val normCurrent = normalizeFingerprint(currentFingerprint)
+            if (normStored != normCurrent) {
+                setPreRuntimeState(context, key, PreRuntimePpuState.INVALIDATED, currentFingerprint)
+                return true
+            }
         }
         return false
     }

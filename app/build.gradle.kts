@@ -19,16 +19,16 @@ android {
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         ndk {
-            abiFilters += listOf("arm64-v8a", "x86_64")
+            abiFilters += listOf("arm64-v8a")
         }
 
         buildConfigField("String", "Version", "\"v${versionName}\"")
     }
 
     signingConfigs {
-        val keystoreAlias = "samba-s3"
-        val keystorePassword = "sambas3key2026"
-        val keystorePath = "/home/abhaybyte/Downloads/samba-s3-release.jks"
+        val keystoreAlias = System.getenv("KEYSTORE_ALIAS")?.takeIf { it.isNotBlank() } ?: "samba-s3"
+        val keystorePassword = System.getenv("KEYSTORE_PASSWORD")?.takeIf { it.isNotBlank() } ?: "sambas3key2026"
+        val keystorePath = System.getenv("KEYSTORE_PATH")?.takeIf { it.isNotBlank() } ?: "/home/abhaybyte/Downloads/samba-s3-release.jks"
 
         if (keystorePath.isNotEmpty()) {
             val keyFile = file(keystorePath)
@@ -122,6 +122,7 @@ android {
     packaging {
         // This is necessary for libadrenotools custom driver loading
         jniLibs.useLegacyPackaging = true
+        jniLibs.keepDebugSymbols += "**/librpcsx-android.so"
     }
 
     testOptions {
@@ -156,57 +157,104 @@ gradle.taskGraph.whenReady {
     }
 }
 
-// --- Samba S3 deterministic RPCSX core build (BLOCKER A) ---
-// `app/src/main/jniLibs` is .gitignored on purpose. A clean checkout must build the
-// pinned RPCSX core before Gradle merges jniLibs, otherwise a stale .so would be packaged.
+// --- Samba S3 deterministic RPCSX core build ---
+// jniLibs is .gitignored. Packaging requires both ABIs with provenance manifests.
+// Direct buildRpcsxCore always runs the script; ninja skips unchanged compile.
+// Unit-test-only tasks do not depend on these, so they do not require NDK.
 val buildRpcsxCore = tasks.register<Exec>("buildRpcsxCore") {
     group = "samba"
     description = "Build pinned RPCSX core (build_rpcsx.sh release) into app/src/main/jniLibs."
     workingDir = rootDir
-    // Only build when Gradle is assembling/packaging an APK/AAB; allow unit tests to run without NDK.
-    // Skip if core already present to avoid 10-minute rebuild on every debug assemble.
-    onlyIf {
-        val requested = gradle.startParameter.taskNames.joinToString(" ")
-        val needsAssemble = requested.contains("assemble") || requested.contains("bundle") || requested.contains("package")
-        if (!needsAssemble) return@onlyIf false
-        val arm = rootProject.file("app/src/main/jniLibs/arm64-v8a/librpcsx-android.so")
-        val x64 = rootProject.file("app/src/main/jniLibs/x86_64/librpcsx-android.so")
-        // Build if either ABI missing; otherwise trust existing core (CI will build fresh)
-        !arm.exists() || !x64.exists()
-    }
+    inputs.files(
+        rootProject.file("build_rpcsx.sh"),
+        rootProject.file("patches/rpcsx-submodule-changes.patch"),
+        rootProject.file("app/src/main/cpp/rpcsx/android/CMakeLists.txt"),
+        rootProject.file("scripts/lib/core_provenance.py"),
+        rootProject.file("scripts/verify-apk-core.sh"),
+    )
+    outputs.files(
+        rootProject.file("app/src/main/jniLibs/arm64-v8a/librpcsx-android.so"),
+        rootProject.file("app/src/main/jniLibs/arm64-v8a/librpcsx-android.manifest.json"),
+    )
+    outputs.upToDateWhen { false }
     commandLine("./build_rpcsx.sh", "release")
 }
 
 val verifyRpcsxCore = tasks.register<Exec>("verifyRpcsxCore") {
     group = "samba"
-    description = "Fail if jniLibs core is missing or stale before packaging."
+    description = "Fail if required ABI cores or provenance manifests are missing before packaging."
     workingDir = rootDir
-    onlyIf {
-        val requested = gradle.startParameter.taskNames.joinToString(" ")
-        requested.contains("assemble") || requested.contains("bundle") || requested.contains("package")
-    }
-    doFirst {
-        val arm = rootProject.file("app/src/main/jniLibs/arm64-v8a/librpcsx-android.so")
-        val x64 = rootProject.file("app/src/main/jniLibs/x86_64/librpcsx-android.so")
-        if (!arm.exists() && !x64.exists()) {
-            throw GradleException(
-                "Missing RPCSX core: app/src/main/jniLibs/<abi>/librpcsx-android.so not found. " +
-                "Run ./build_rpcsx.sh release (requires NDK 30.0.14904198) before assembling."
-            )
-        }
-    }
-    commandLine("sh", "-c", "echo \"RPCSX core present: \$(sha256sum app/src/main/jniLibs/arm64-v8a/librpcsx-android.so 2>/dev/null | cut -d' ' -f1 | cut -c1-8) arm64, \$(sha256sum app/src/main/jniLibs/x86_64/librpcsx-android.so 2>/dev/null | cut -d' ' -f1 | cut -c1-8) x86_64\"")
+    commandLine("python3", "scripts/lib/core_provenance.py", "verify-jnilibs", "--root", rootDir.absolutePath)
 }
 
-// Order: build core before merge, verify before package.
-tasks.matching { it.name.startsWith("merge") && it.name.contains("JniLibs") }.configureEach {
+val verifyStandardReleaseApk = tasks.register<Exec>("verifyStandardReleaseApk") {
+    group = "samba"
+    description = "Verify standard release APK contains genuine RPCSX core matching provenance."
+    workingDir = rootDir
+    commandLine(
+        "python3", "scripts/lib/core_provenance.py", "verify-package",
+        "--root", rootDir.absolutePath,
+        "--artifact", rootDir.resolve("app/build/outputs/apk/standard/release/samba-s3-standard-release.apk").absolutePath
+    )
+}
+
+val verifyStandardReleaseBundle = tasks.register<Exec>("verifyStandardReleaseBundle") {
+    group = "samba"
+    description = "Verify standard release AAB contains genuine RPCSX core matching provenance."
+    workingDir = rootDir
+    commandLine(
+        "python3", "scripts/lib/core_provenance.py", "verify-package",
+        "--root", rootDir.absolutePath,
+        "--artifact", rootDir.resolve("app/build/outputs/bundle/standardRelease/samba-s3-standard-release.aab").absolutePath
+    )
+}
+
+val verifyPackagedArtifacts = tasks.register<Exec>("verifyPackagedArtifacts") {
+    group = "samba"
+    description = "Verify packaged core provenance in generated APKs and bundles."
+    workingDir = rootDir
+    commandLine("python3", "scripts/lib/core_provenance.py", "verify-package", "--root", rootDir.absolutePath)
+}
+
+fun isApkOrBundleTask(name: String): Boolean {
+    if (name.contains("UnitTest") || name.contains("AndroidTest") ||
+        name.contains("Resources") || name.contains("Classes")
+    ) {
+        return false
+    }
+    val flavorBuild = Regex("^(package|assemble|bundle)[A-Z].*(Debug|Release)$")
+    return flavorBuild.matches(name)
+}
+
+tasks.matching { it.name.startsWith("merge") && it.name.contains("JniLib") }.configureEach {
     dependsOn(buildRpcsxCore)
 }
-tasks.matching { it.name.startsWith("package") || it.name.startsWith("assemble") }.configureEach {
+tasks.matching { isApkOrBundleTask(it.name) }.configureEach {
     dependsOn(verifyRpcsxCore)
 }
-// Ensure verification runs after core build when both are scheduled.
 verifyRpcsxCore.configure { dependsOn(buildRpcsxCore) }
+
+tasks.matching { it.name == "assembleStandardRelease" }.configureEach {
+    finalizedBy(verifyStandardReleaseApk)
+}
+tasks.matching { it.name == "bundleStandardRelease" }.configureEach {
+    finalizedBy(verifyStandardReleaseBundle)
+}
+tasks.matching {
+    it.name.matches(Regex("^(assemble|bundle)[A-Z].*(Debug|Release)$")) &&
+        it.name != "assembleStandardRelease" && it.name != "bundleStandardRelease"
+}.configureEach {
+    finalizedBy(verifyPackagedArtifacts)
+}
+tasks.matching {
+    it.name.startsWith("install") && !it.name.contains("Test")
+}.configureEach {
+    if (name.contains("StandardRelease")) {
+        dependsOn(verifyStandardReleaseApk)
+    } else {
+        dependsOn(verifyPackagedArtifacts)
+    }
+}
 
 dependencies {
     implementation(libs.androidx.navigation.compose)

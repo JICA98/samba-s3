@@ -1,5 +1,6 @@
 package com.zenithblue.sambas3
 
+import android.content.Context
 import android.util.Log
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
@@ -36,6 +37,9 @@ object PatchRepository {
     @Volatile
     private var cached: List<Patch>? = null
 
+    @Volatile
+    private var appContext: Context? = null
+
     fun invalidate() {
         cached = null
     }
@@ -43,7 +47,36 @@ object PatchRepository {
     fun patchesDir(): File =
         File(RPCSX.rootDirectory + "config/patches/")
 
-    fun list(): List<Patch> {
+    fun ensureBundledPatches(context: Context, force: Boolean = false): Boolean {
+        appContext = context.applicationContext
+        val dest = File(patchesDir(), "patch.yml")
+        if (dest.exists() && !force) return true
+        return runCatching {
+            patchesDir().mkdirs()
+            val temp = File(patchesDir(), "patch.yml.tmp")
+            context.assets.open("patches/patch.yml").use { input ->
+                temp.outputStream().use { output ->
+                    input.copyTo(output)
+                }
+            }
+            if (dest.exists()) dest.delete()
+            if (!temp.renameTo(dest)) {
+                temp.copyTo(dest, overwrite = true)
+                temp.delete()
+            }
+            invalidate()
+            true
+        }.onFailure {
+            Log.e(TAG, "Failed copying bundled patch.yml", it)
+        }.getOrDefault(false)
+    }
+
+    fun list(context: Context? = null): List<Patch> {
+        val ctx = context?.applicationContext ?: appContext
+        val patchFile = File(patchesDir(), "patch.yml")
+        if (!patchFile.exists() && ctx != null) {
+            ensureBundledPatches(ctx)
+        }
         cached?.let { return it }
         val raw = runCatching { RPCSX.instance.patchesList() }.getOrElse {
             Log.e(TAG, "patchesList() JNI call failed", it)
@@ -94,9 +127,10 @@ object PatchRepository {
                 )
             }
 
-    fun importLocal(content: String): Boolean = runCatching {
+    fun importLocal(content: String, titleId: String? = null): Boolean = runCatching {
         patchesDir().mkdirs()
-        File(patchesDir(), "imported_patch.yml").writeText(content)
+        val fileName = if (titleId.isNullOrBlank()) "imported_patch.yml" else "${titleId}_patch.yml"
+        File(patchesDir(), fileName).writeText(content)
         invalidate()
         true
     }.getOrDefault(false)

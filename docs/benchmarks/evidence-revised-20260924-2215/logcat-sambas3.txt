@@ -1,0 +1,300 @@
+09-24 22:15:30.047  5454  5454 D S3PAD   : deviceKey via descriptor
+09-24 22:15:30.047  5454  5454 I S3PAD   : classify name='Xbox Wireless Controller' vid=1118 pid=736 sources=16778513 keyboardType=1 -> GAMEPAD/XBOX reason=gamepad-capability-or-identity
+09-24 22:15:30.047  5454  5454 D S3PAD   : deviceKey via descriptor
+09-24 22:15:30.047  5454  5454 I S3PAD   : classify name='Xbox Wireless Controller' vid=1118 pid=736 sources=16778513 keyboardType=1 -> GAMEPAD/XBOX reason=gamepad-capability-or-identity
+09-24 22:15:30.048  5454  5454 D S3PAD   : deviceKey via descriptor
+09-24 22:15:30.048  5454  5454 I S3PAD   : classify name='Xbox Wireless Controller' vid=1118 pid=736 sources=16778513 keyboardType=1 -> GAMEPAD/XBOX reason=gamepad-capability-or-identity
+09-24 22:15:30.048  5454  5454 D S3PAD   : deviceKey via descriptor
+09-24 22:15:30.131  5454  5454 I S3PAD   : classify name='Xbox Wireless Controller' vid=1118 pid=736 sources=16778513 keyboardType=1 -> GAMEPAD/XBOX reason=gamepad-capability-or-identity
+09-24 22:15:30.132  5454  5454 D S3PAD   : deviceKey via descriptor
+09-24 22:15:30.132  5454  5454 I S3PAD   : classify name='Xbox Wireless Controller' vid=1118 pid=736 sources=16778513 keyboardType=1 -> GAMEPAD/XBOX reason=gamepad-capability-or-identity
+09-24 22:15:30.132  5454  5454 D S3PAD   : deviceKey via descriptor
+09-24 22:15:30.132  5454  5454 I S3PAD   : classify name='Xbox Wireless Controller' vid=1118 pid=736 sources=16778513 keyboardType=1 -> GAMEPAD/XBOX reason=gamepad-capability-or-identity
+09-24 22:15:30.132  5454  5454 D S3PAD   : deviceKey via descriptor
+09-24 22:15:30.132  5454  5454 I S3PAD   : classify name='Xbox Wireless Controller' vid=1118 pid=736 sources=16778513 keyboardType=1 -> GAMEPAD/XBOX reason=gamepad-capability-or-identity
+09-24 22:15:30.132  5454  5454 D S3PAD   : deviceKey via descriptor
+09-24 22:15:30.244  5454  5498 D S3PERF  : crosscheck source=surface presented=3564 json_fps=8.47363 json_frametime_ms=90.684
+09-24 22:15:30.254  5454  5454 I S3PAD   : classify name='Xbox Wireless Controller' vid=1118 pid=736 sources=16778513 keyboardType=1 -> GAMEPAD/XBOX reason=gamepad-capability-or-identity
+09-24 22:15:30.254  5454  5454 D S3PAD   : deviceKey via descriptor
+09-24 22:15:30.254  5454  5454 I S3PAD   : classify name='Xbox Wireless Controller' vid=1118 pid=736 sources=16778513 keyboardType=1 -> GAMEPAD/XBOX reason=gamepad-capability-or-identity
+09-24 22:15:30.254  5454  5454 D S3PAD   : deviceKey via descriptor
+09-24 22:15:30.254  5454  5454 I S3PAD   : classify name='Xbox Wireless Controller' vid=1118 pid=736 sources=16778513 keyboardType=1 -> GAMEPAD/XBOX reason=gamepad-capability-or-identity
+09-24 22:15:30.254  5454  5454 D S3PAD   : deviceKey via descriptor
+09-24 22:15:30.254  5454  5454 I S3PAD   : classify name='Xbox Wireless Controller' vid=1118 pid=736 sources=16778513 keyboardType=1 -> GAMEPAD/XBOX reason=gamepad-capability-or-identity
+09-24 22:15:30.254  5454  5454 D S3PAD   : deviceKey via descriptor
+09-24 22:15:30.322  5454  5454 I S3PAD   : classify name='Xbox Wireless Controller' vid=1118 pid=736 sources=16778513 keyboardType=1 -> GAMEPAD/XBOX reason=gamepad-capability-or-identity
+09-24 22:15:30.322  5454  5454 D S3PAD   : deviceKey via descriptor
+09-24 22:15:30.322  5454  5454 I S3PAD   : classify name='Xbox Wireless Controller' vid=1118 pid=736 sources=16778513 keyboardType=1 -> GAMEPAD/XBOX reason=gamepad-capability-or-identity
+09-24 22:15:30.322  5454  5454 D S3PAD   : deviceKey via descriptor
+09-24 22:15:30.322  5454  5454 I S3PAD   : classify name='Xbox Wireless Controller' vid=1118 pid=736 sources=16778513 keyboardType=1 -> GAMEPAD/XBOX reason=gamepad-capability-or-identity
+09-24 22:15:30.323  5454  5454 D S3PAD   : deviceKey via descriptor
+09-24 22:15:30.323  5454  5454 I S3PAD   : classify name='Xbox Wireless Controller' vid=1118 pid=736 sources=16778513 keyboardType=1 -> GAMEPAD/XBOX reason=gamepad-capability-or-identity
+09-24 22:15:30.323  5454  5454 D S3PAD   : deviceKey via descriptor
+09-24 22:15:30.421  5454  5635 D RPCS3   : sys_tty_write(ch=0, buf=*0x58bf20, len=63, pwritelen=*0xd000fde0)
+09-24 22:15:30.421  5454  5635 D RPCS3   : sys_tty_write(): “BATCHJOB: AddJob: waiting for room in job list 3 for job 56...“ << endl
+09-24 22:15:30.441  5454  5454 I S3PAD   : classify name='Xbox Wireless Controller' vid=1118 pid=736 sources=16778513 keyboardType=1 -> GAMEPAD/XBOX reason=gamepad-capability-or-identity
+09-24 22:15:30.441  5454  5454 D S3PAD   : deviceKey via descriptor
+09-24 22:15:30.441  5454  5454 I S3PAD   : classify name='Xbox Wireless Controller' vid=1118 pid=736 sources=16778513 keyboardType=1 -> GAMEPAD/XBOX reason=gamepad-capability-or-identity
+09-24 22:15:30.441  5454  5454 D S3PAD   : deviceKey via descriptor
+09-24 22:15:30.441  5454  5454 I S3PAD   : classify name='Xbox Wireless Controller' vid=1118 pid=736 sources=16778513 keyboardType=1 -> GAMEPAD/XBOX reason=gamepad-capability-or-identity
+09-24 22:15:30.441  5454  5454 D S3PAD   : deviceKey via descriptor
+09-24 22:15:30.441  5454  5454 I S3PAD   : classify name='Xbox Wireless Controller' vid=1118 pid=736 sources=16778513 keyboardType=1 -> GAMEPAD/XBOX reason=gamepad-capability-or-identity
+09-24 22:15:30.441  5454  5454 D S3PAD   : deviceKey via descriptor
+09-24 22:15:30.522  5454  5454 I S3PAD   : classify name='Xbox Wireless Controller' vid=1118 pid=736 sources=16778513 keyboardType=1 -> GAMEPAD/XBOX reason=gamepad-capability-or-identity
+09-24 22:15:30.522  5454  5454 D S3PAD   : deviceKey via descriptor
+09-24 22:15:30.522  5454  5454 I S3PAD   : classify name='Xbox Wireless Controller' vid=1118 pid=736 sources=16778513 keyboardType=1 -> GAMEPAD/XBOX reason=gamepad-capability-or-identity
+09-24 22:15:30.522  5454  5454 D S3PAD   : deviceKey via descriptor
+09-24 22:15:30.522  5454  5454 I S3PAD   : classify name='Xbox Wireless Controller' vid=1118 pid=736 sources=16778513 keyboardType=1 -> GAMEPAD/XBOX reason=gamepad-capability-or-identity
+09-24 22:15:30.522  5454  5454 D S3PAD   : deviceKey via descriptor
+09-24 22:15:30.523  5454  5454 I S3PAD   : classify name='Xbox Wireless Controller' vid=1118 pid=736 sources=16778513 keyboardType=1 -> GAMEPAD/XBOX reason=gamepad-capability-or-identity
+09-24 22:15:30.523  5454  5454 D S3PAD   : deviceKey via descriptor
+09-24 22:15:30.652  5454  5454 I S3PAD   : classify name='Xbox Wireless Controller' vid=1118 pid=736 sources=16778513 keyboardType=1 -> GAMEPAD/XBOX reason=gamepad-capability-or-identity
+09-24 22:15:30.652  5454  5454 D S3PAD   : deviceKey via descriptor
+09-24 22:15:30.652  5454  5454 I S3PAD   : classify name='Xbox Wireless Controller' vid=1118 pid=736 sources=16778513 keyboardType=1 -> GAMEPAD/XBOX reason=gamepad-capability-or-identity
+09-24 22:15:30.652  5454  5454 D S3PAD   : deviceKey via descriptor
+09-24 22:15:30.652  5454  5454 I S3PAD   : classify name='Xbox Wireless Controller' vid=1118 pid=736 sources=16778513 keyboardType=1 -> GAMEPAD/XBOX reason=gamepad-capability-or-identity
+09-24 22:15:30.652  5454  5454 D S3PAD   : deviceKey via descriptor
+09-24 22:15:30.652  5454  5454 I S3PAD   : classify name='Xbox Wireless Controller' vid=1118 pid=736 sources=16778513 keyboardType=1 -> GAMEPAD/XBOX reason=gamepad-capability-or-identity
+09-24 22:15:30.652  5454  5454 D S3PAD   : deviceKey via descriptor
+09-24 22:15:30.733  5454  5454 I S3PAD   : classify name='Xbox Wireless Controller' vid=1118 pid=736 sources=16778513 keyboardType=1 -> GAMEPAD/XBOX reason=gamepad-capability-or-identity
+09-24 22:15:30.733  5454  5454 D S3PAD   : deviceKey via descriptor
+09-24 22:15:30.733  5454  5454 I S3PAD   : classify name='Xbox Wireless Controller' vid=1118 pid=736 sources=16778513 keyboardType=1 -> GAMEPAD/XBOX reason=gamepad-capability-or-identity
+09-24 22:15:30.733  5454  5454 D S3PAD   : deviceKey via descriptor
+09-24 22:15:30.733  5454  5454 I S3PAD   : classify name='Xbox Wireless Controller' vid=1118 pid=736 sources=16778513 keyboardType=1 -> GAMEPAD/XBOX reason=gamepad-capability-or-identity
+09-24 22:15:30.733  5454  5454 D S3PAD   : deviceKey via descriptor
+09-24 22:15:30.733  5454  5454 I S3PAD   : classify name='Xbox Wireless Controller' vid=1118 pid=736 sources=16778513 keyboardType=1 -> GAMEPAD/XBOX reason=gamepad-capability-or-identity
+09-24 22:15:30.734  5454  5454 D S3PAD   : deviceKey via descriptor
+09-24 22:15:30.853  5454  5454 I S3PAD   : classify name='Xbox Wireless Controller' vid=1118 pid=736 sources=16778513 keyboardType=1 -> GAMEPAD/XBOX reason=gamepad-capability-or-identity
+09-24 22:15:30.853  5454  5454 D S3PAD   : deviceKey via descriptor
+09-24 22:15:30.854  5454  5454 I S3PAD   : classify name='Xbox Wireless Controller' vid=1118 pid=736 sources=16778513 keyboardType=1 -> GAMEPAD/XBOX reason=gamepad-capability-or-identity
+09-24 22:15:30.854  5454  5454 D S3PAD   : deviceKey via descriptor
+09-24 22:15:30.854  5454  5454 I S3PAD   : classify name='Xbox Wireless Controller' vid=1118 pid=736 sources=16778513 keyboardType=1 -> GAMEPAD/XBOX reason=gamepad-capability-or-identity
+09-24 22:15:30.854  5454  5454 D S3PAD   : deviceKey via descriptor
+09-24 22:15:30.854  5454  5454 I S3PAD   : classify name='Xbox Wireless Controller' vid=1118 pid=736 sources=16778513 keyboardType=1 -> GAMEPAD/XBOX reason=gamepad-capability-or-identity
+09-24 22:15:30.854  5454  5454 D S3PAD   : deviceKey via descriptor
+09-24 22:15:30.965  5454  5454 I S3PAD   : classify name='Xbox Wireless Controller' vid=1118 pid=736 sources=16778513 keyboardType=1 -> GAMEPAD/XBOX reason=gamepad-capability-or-identity
+09-24 22:15:30.965  5454  5454 D S3PAD   : deviceKey via descriptor
+09-24 22:15:30.965  5454  5454 I S3PAD   : classify name='Xbox Wireless Controller' vid=1118 pid=736 sources=16778513 keyboardType=1 -> GAMEPAD/XBOX reason=gamepad-capability-or-identity
+09-24 22:15:30.965  5454  5454 D S3PAD   : deviceKey via descriptor
+09-24 22:15:30.965  5454  5454 I S3PAD   : classify name='Xbox Wireless Controller' vid=1118 pid=736 sources=16778513 keyboardType=1 -> GAMEPAD/XBOX reason=gamepad-capability-or-identity
+09-24 22:15:30.965  5454  5454 D S3PAD   : deviceKey via descriptor
+09-24 22:15:30.966  5454  5454 I S3PAD   : classify name='Xbox Wireless Controller' vid=1118 pid=736 sources=16778513 keyboardType=1 -> GAMEPAD/XBOX reason=gamepad-capability-or-identity
+09-24 22:15:30.966  5454  5454 D S3PAD   : deviceKey via descriptor
+09-24 22:15:31.061  5454  5454 I S3PAD   : classify name='Xbox Wireless Controller' vid=1118 pid=736 sources=16778513 keyboardType=1 -> GAMEPAD/XBOX reason=gamepad-capability-or-identity
+09-24 22:15:31.061  5454  5454 D S3PAD   : deviceKey via descriptor
+09-24 22:15:31.061  5454  5454 I S3PAD   : classify name='Xbox Wireless Controller' vid=1118 pid=736 sources=16778513 keyboardType=1 -> GAMEPAD/XBOX reason=gamepad-capability-or-identity
+09-24 22:15:31.061  5454  5454 D S3PAD   : deviceKey via descriptor
+09-24 22:15:31.061  5454  5454 I S3PAD   : classify name='Xbox Wireless Controller' vid=1118 pid=736 sources=16778513 keyboardType=1 -> GAMEPAD/XBOX reason=gamepad-capability-or-identity
+09-24 22:15:31.061  5454  5454 D S3PAD   : deviceKey via descriptor
+09-24 22:15:31.061  5454  5454 I S3PAD   : classify name='Xbox Wireless Controller' vid=1118 pid=736 sources=16778513 keyboardType=1 -> GAMEPAD/XBOX reason=gamepad-capability-or-identity
+09-24 22:15:31.061  5454  5454 D S3PAD   : deviceKey via descriptor
+09-24 22:15:31.131  5454  5454 I S3PAD   : classify name='Xbox Wireless Controller' vid=1118 pid=736 sources=16778513 keyboardType=1 -> GAMEPAD/XBOX reason=gamepad-capability-or-identity
+09-24 22:15:31.131  5454  5454 D S3PAD   : deviceKey via descriptor
+09-24 22:15:31.131  5454  5454 I S3PAD   : classify name='Xbox Wireless Controller' vid=1118 pid=736 sources=16778513 keyboardType=1 -> GAMEPAD/XBOX reason=gamepad-capability-or-identity
+09-24 22:15:31.131  5454  5454 D S3PAD   : deviceKey via descriptor
+09-24 22:15:31.131  5454  5454 I S3PAD   : classify name='Xbox Wireless Controller' vid=1118 pid=736 sources=16778513 keyboardType=1 -> GAMEPAD/XBOX reason=gamepad-capability-or-identity
+09-24 22:15:31.132  5454  5454 D S3PAD   : deviceKey via descriptor
+09-24 22:15:31.132  5454  5454 I S3PAD   : classify name='Xbox Wireless Controller' vid=1118 pid=736 sources=16778513 keyboardType=1 -> GAMEPAD/XBOX reason=gamepad-capability-or-identity
+09-24 22:15:31.132  5454  5454 D S3PAD   : deviceKey via descriptor
+09-24 22:15:31.150  5454  5635 D RPCS3   : sys_tty_write(ch=0, buf=*0x58bf20, len=63, pwritelen=*0xd000fde0)
+09-24 22:15:31.150  5454  5635 D RPCS3   : sys_tty_write(): “BATCHJOB: AddJob: waiting for room in job list 3 for job 56...“ << endl
+09-24 22:15:31.162  5454  5498 D S3PERF  : crosscheck ui_snapshot_fps=9.11331 ui_snapshot_frametime_ms=104.367
+09-24 22:15:31.257  5454  5454 I S3PAD   : classify name='Xbox Wireless Controller' vid=1118 pid=736 sources=16778513 keyboardType=1 -> GAMEPAD/XBOX reason=gamepad-capability-or-identity
+09-24 22:15:31.257  5454  5454 D S3PAD   : deviceKey via descriptor
+09-24 22:15:31.257  5454  5454 I S3PAD   : classify name='Xbox Wireless Controller' vid=1118 pid=736 sources=16778513 keyboardType=1 -> GAMEPAD/XBOX reason=gamepad-capability-or-identity
+09-24 22:15:31.257  5454  5454 D S3PAD   : deviceKey via descriptor
+09-24 22:15:31.257  5454  5454 I S3PAD   : classify name='Xbox Wireless Controller' vid=1118 pid=736 sources=16778513 keyboardType=1 -> GAMEPAD/XBOX reason=gamepad-capability-or-identity
+09-24 22:15:31.257  5454  5454 D S3PAD   : deviceKey via descriptor
+09-24 22:15:31.257  5454  5454 I S3PAD   : classify name='Xbox Wireless Controller' vid=1118 pid=736 sources=16778513 keyboardType=1 -> GAMEPAD/XBOX reason=gamepad-capability-or-identity
+09-24 22:15:31.257  5454  5454 D S3PAD   : deviceKey via descriptor
+09-24 22:15:31.360  5454  5454 I S3PAD   : classify name='Xbox Wireless Controller' vid=1118 pid=736 sources=16778513 keyboardType=1 -> GAMEPAD/XBOX reason=gamepad-capability-or-identity
+09-24 22:15:31.360  5454  5454 D S3PAD   : deviceKey via descriptor
+09-24 22:15:31.361  5454  5454 I S3PAD   : classify name='Xbox Wireless Controller' vid=1118 pid=736 sources=16778513 keyboardType=1 -> GAMEPAD/XBOX reason=gamepad-capability-or-identity
+09-24 22:15:31.361  5454  5454 D S3PAD   : deviceKey via descriptor
+09-24 22:15:31.361  5454  5454 I S3PAD   : classify name='Xbox Wireless Controller' vid=1118 pid=736 sources=16778513 keyboardType=1 -> GAMEPAD/XBOX reason=gamepad-capability-or-identity
+09-24 22:15:31.361  5454  5454 D S3PAD   : deviceKey via descriptor
+09-24 22:15:31.361  5454  5454 I S3PAD   : classify name='Xbox Wireless Controller' vid=1118 pid=736 sources=16778513 keyboardType=1 -> GAMEPAD/XBOX reason=gamepad-capability-or-identity
+09-24 22:15:31.361  5454  5454 D S3PAD   : deviceKey via descriptor
+09-24 22:15:31.481  5454  5454 I S3PAD   : classify name='Xbox Wireless Controller' vid=1118 pid=736 sources=16778513 keyboardType=1 -> GAMEPAD/XBOX reason=gamepad-capability-or-identity
+09-24 22:15:31.481  5454  5454 D S3PAD   : deviceKey via descriptor
+09-24 22:15:31.481  5454  5454 I S3PAD   : classify name='Xbox Wireless Controller' vid=1118 pid=736 sources=16778513 keyboardType=1 -> GAMEPAD/XBOX reason=gamepad-capability-or-identity
+09-24 22:15:31.481  5454  5454 D S3PAD   : deviceKey via descriptor
+09-24 22:15:31.482  5454  5454 I S3PAD   : classify name='Xbox Wireless Controller' vid=1118 pid=736 sources=16778513 keyboardType=1 -> GAMEPAD/XBOX reason=gamepad-capability-or-identity
+09-24 22:15:31.482  5454  5454 D S3PAD   : deviceKey via descriptor
+09-24 22:15:31.482  5454  5454 I S3PAD   : classify name='Xbox Wireless Controller' vid=1118 pid=736 sources=16778513 keyboardType=1 -> GAMEPAD/XBOX reason=gamepad-capability-or-identity
+09-24 22:15:31.482  5454  5454 D S3PAD   : deviceKey via descriptor
+09-24 22:15:31.483  5454  5498 D S3PERF  : crosscheck source=surface presented=3574 json_fps=8.29913 json_frametime_ms=169.993
+09-24 22:15:31.674  5454  5635 D RPCS3   : sys_tty_write(ch=0, buf=*0x58bf20, len=63, pwritelen=*0xd000fde0)
+09-24 22:15:31.674  5454  5635 D RPCS3   : sys_tty_write(): “BATCHJOB: AddJob: waiting for room in job list 3 for job 56...“ << endl
+09-24 22:15:31.757  5454  5635 D RPCS3   : sys_tty_write(ch=0, buf=*0x58bf20, len=63, pwritelen=*0xd000fde0)
+09-24 22:15:31.757  5454  5635 D RPCS3   : sys_tty_write(): “BATCHJOB: AddJob: waiting for room in job list 3 for job 56...“ << endl
+09-24 22:15:31.793  5454  5454 I S3PAD   : classify name='Xbox Wireless Controller' vid=1118 pid=736 sources=16778513 keyboardType=1 -> GAMEPAD/XBOX reason=gamepad-capability-or-identity
+09-24 22:15:31.793  5454  5454 D S3PAD   : deviceKey via descriptor
+09-24 22:15:31.793  5454  5454 I S3PAD   : classify name='Xbox Wireless Controller' vid=1118 pid=736 sources=16778513 keyboardType=1 -> GAMEPAD/XBOX reason=gamepad-capability-or-identity
+09-24 22:15:31.797  5454  5454 D S3PAD   : deviceKey via descriptor
+09-24 22:15:31.797  5454  5454 I S3PAD   : classify name='Xbox Wireless Controller' vid=1118 pid=736 sources=16778513 keyboardType=1 -> GAMEPAD/XBOX reason=gamepad-capability-or-identity
+09-24 22:15:31.798  5454  5454 D S3PAD   : deviceKey via descriptor
+09-24 22:15:31.798  5454  5454 I S3PAD   : classify name='Xbox Wireless Controller' vid=1118 pid=736 sources=16778513 keyboardType=1 -> GAMEPAD/XBOX reason=gamepad-capability-or-identity
+09-24 22:15:31.798  5454  5454 D S3PAD   : deviceKey via descriptor
+09-24 22:15:31.903  5454  5454 I S3PAD   : classify name='Xbox Wireless Controller' vid=1118 pid=736 sources=16778513 keyboardType=1 -> GAMEPAD/XBOX reason=gamepad-capability-or-identity
+09-24 22:15:31.903  5454  5454 D S3PAD   : deviceKey via descriptor
+09-24 22:15:31.903  5454  5454 I S3PAD   : classify name='Xbox Wireless Controller' vid=1118 pid=736 sources=16778513 keyboardType=1 -> GAMEPAD/XBOX reason=gamepad-capability-or-identity
+09-24 22:15:31.903  5454  5454 D S3PAD   : deviceKey via descriptor
+09-24 22:15:31.903  5454  5454 I S3PAD   : classify name='Xbox Wireless Controller' vid=1118 pid=736 sources=16778513 keyboardType=1 -> GAMEPAD/XBOX reason=gamepad-capability-or-identity
+09-24 22:15:31.903  5454  5454 D S3PAD   : deviceKey via descriptor
+09-24 22:15:31.903  5454  5454 I S3PAD   : classify name='Xbox Wireless Controller' vid=1118 pid=736 sources=16778513 keyboardType=1 -> GAMEPAD/XBOX reason=gamepad-capability-or-identity
+09-24 22:15:31.903  5454  5454 D S3PAD   : deviceKey via descriptor
+09-24 22:15:31.983  5454  5454 I S3PAD   : classify name='Xbox Wireless Controller' vid=1118 pid=736 sources=16778513 keyboardType=1 -> GAMEPAD/XBOX reason=gamepad-capability-or-identity
+09-24 22:15:31.983  5454  5454 D S3PAD   : deviceKey via descriptor
+09-24 22:15:31.983  5454  5454 I S3PAD   : classify name='Xbox Wireless Controller' vid=1118 pid=736 sources=16778513 keyboardType=1 -> GAMEPAD/XBOX reason=gamepad-capability-or-identity
+09-24 22:15:31.983  5454  5454 D S3PAD   : deviceKey via descriptor
+09-24 22:15:31.983  5454  5454 I S3PAD   : classify name='Xbox Wireless Controller' vid=1118 pid=736 sources=16778513 keyboardType=1 -> GAMEPAD/XBOX reason=gamepad-capability-or-identity
+09-24 22:15:31.983  5454  5454 D S3PAD   : deviceKey via descriptor
+09-24 22:15:31.983  5454  5454 I S3PAD   : classify name='Xbox Wireless Controller' vid=1118 pid=736 sources=16778513 keyboardType=1 -> GAMEPAD/XBOX reason=gamepad-capability-or-identity
+09-24 22:15:31.983  5454  5454 D S3PAD   : deviceKey via descriptor
+09-24 22:15:32.104  5454  5454 I S3PAD   : classify name='Xbox Wireless Controller' vid=1118 pid=736 sources=16778513 keyboardType=1 -> GAMEPAD/XBOX reason=gamepad-capability-or-identity
+09-24 22:15:32.105  5454  5454 D S3PAD   : deviceKey via descriptor
+09-24 22:15:32.105  5454  5454 I S3PAD   : classify name='Xbox Wireless Controller' vid=1118 pid=736 sources=16778513 keyboardType=1 -> GAMEPAD/XBOX reason=gamepad-capability-or-identity
+09-24 22:15:32.105  5454  5454 D S3PAD   : deviceKey via descriptor
+09-24 22:15:32.106  5454  5454 I S3PAD   : classify name='Xbox Wireless Controller' vid=1118 pid=736 sources=16778513 keyboardType=1 -> GAMEPAD/XBOX reason=gamepad-capability-or-identity
+09-24 22:15:32.106  5454  5454 D S3PAD   : deviceKey via descriptor
+09-24 22:15:32.106  5454  5454 I S3PAD   : classify name='Xbox Wireless Controller' vid=1118 pid=736 sources=16778513 keyboardType=1 -> GAMEPAD/XBOX reason=gamepad-capability-or-identity
+09-24 22:15:32.106  5454  5454 D S3PAD   : deviceKey via descriptor
+09-24 22:15:32.172  5454  5454 I S3PAD   : classify name='Xbox Wireless Controller' vid=1118 pid=736 sources=16778513 keyboardType=1 -> GAMEPAD/XBOX reason=gamepad-capability-or-identity
+09-24 22:15:32.173  5454  5454 D S3PAD   : deviceKey via descriptor
+09-24 22:15:32.173  5454  5454 I S3PAD   : classify name='Xbox Wireless Controller' vid=1118 pid=736 sources=16778513 keyboardType=1 -> GAMEPAD/XBOX reason=gamepad-capability-or-identity
+09-24 22:15:32.173  5454  5454 D S3PAD   : deviceKey via descriptor
+09-24 22:15:32.173  5454  5454 I S3PAD   : classify name='Xbox Wireless Controller' vid=1118 pid=736 sources=16778513 keyboardType=1 -> GAMEPAD/XBOX reason=gamepad-capability-or-identity
+09-24 22:15:32.173  5454  5454 D S3PAD   : deviceKey via descriptor
+09-24 22:15:32.173  5454  5454 I S3PAD   : classify name='Xbox Wireless Controller' vid=1118 pid=736 sources=16778513 keyboardType=1 -> GAMEPAD/XBOX reason=gamepad-capability-or-identity
+09-24 22:15:32.173  5454  5454 D S3PAD   : deviceKey via descriptor
+09-24 22:15:32.291  5454  5454 I S3PAD   : classify name='Xbox Wireless Controller' vid=1118 pid=736 sources=16778513 keyboardType=1 -> GAMEPAD/XBOX reason=gamepad-capability-or-identity
+09-24 22:15:32.291  5454  5454 D S3PAD   : deviceKey via descriptor
+09-24 22:15:32.292  5454  5454 I S3PAD   : classify name='Xbox Wireless Controller' vid=1118 pid=736 sources=16778513 keyboardType=1 -> GAMEPAD/XBOX reason=gamepad-capability-or-identity
+09-24 22:15:32.292  5454  5454 D S3PAD   : deviceKey via descriptor
+09-24 22:15:32.292  5454  5454 I S3PAD   : classify name='Xbox Wireless Controller' vid=1118 pid=736 sources=16778513 keyboardType=1 -> GAMEPAD/XBOX reason=gamepad-capability-or-identity
+09-24 22:15:32.292  5454  5454 D S3PAD   : deviceKey via descriptor
+09-24 22:15:32.292  5454  5454 I S3PAD   : classify name='Xbox Wireless Controller' vid=1118 pid=736 sources=16778513 keyboardType=1 -> GAMEPAD/XBOX reason=gamepad-capability-or-identity
+09-24 22:15:32.292  5454  5454 D S3PAD   : deviceKey via descriptor
+09-24 22:15:32.335  5454  5635 D RPCS3   : sys_tty_write(ch=0, buf=*0x58bf20, len=63, pwritelen=*0xd000fde0)
+09-24 22:15:32.335  5454  5635 D RPCS3   : sys_tty_write(): “BATCHJOB: AddJob: waiting for room in job list 3 for job 56...“ << endl
+09-24 22:15:32.371  5454  5454 I S3PAD   : classify name='Xbox Wireless Controller' vid=1118 pid=736 sources=16778513 keyboardType=1 -> GAMEPAD/XBOX reason=gamepad-capability-or-identity
+09-24 22:15:32.371  5454  5454 D S3PAD   : deviceKey via descriptor
+09-24 22:15:32.371  5454  5454 I S3PAD   : classify name='Xbox Wireless Controller' vid=1118 pid=736 sources=16778513 keyboardType=1 -> GAMEPAD/XBOX reason=gamepad-capability-or-identity
+09-24 22:15:32.371  5454  5454 D S3PAD   : deviceKey via descriptor
+09-24 22:15:32.371  5454  5454 I S3PAD   : classify name='Xbox Wireless Controller' vid=1118 pid=736 sources=16778513 keyboardType=1 -> GAMEPAD/XBOX reason=gamepad-capability-or-identity
+09-24 22:15:32.371  5454  5454 D S3PAD   : deviceKey via descriptor
+09-24 22:15:32.371  5454  5454 I S3PAD   : classify name='Xbox Wireless Controller' vid=1118 pid=736 sources=16778513 keyboardType=1 -> GAMEPAD/XBOX reason=gamepad-capability-or-identity
+09-24 22:15:32.371  5454  5454 D S3PAD   : deviceKey via descriptor
+09-24 22:15:32.440  5454  5635 D RPCS3   : sys_tty_write(ch=0, buf=*0x58bf20, len=63, pwritelen=*0xd000fde0)
+09-24 22:15:32.440  5454  5635 D RPCS3   : sys_tty_write(): “BATCHJOB: AddJob: waiting for room in job list 3 for job 56...“ << endl
+09-24 22:15:32.492  5454  5454 I S3PAD   : classify name='Xbox Wireless Controller' vid=1118 pid=736 sources=16778513 keyboardType=1 -> GAMEPAD/XBOX reason=gamepad-capability-or-identity
+09-24 22:15:32.492  5454  5454 D S3PAD   : deviceKey via descriptor
+09-24 22:15:32.492  5454  5454 I S3PAD   : classify name='Xbox Wireless Controller' vid=1118 pid=736 sources=16778513 keyboardType=1 -> GAMEPAD/XBOX reason=gamepad-capability-or-identity
+09-24 22:15:32.492  5454  5454 D S3PAD   : deviceKey via descriptor
+09-24 22:15:32.492  5454  5454 I S3PAD   : classify name='Xbox Wireless Controller' vid=1118 pid=736 sources=16778513 keyboardType=1 -> GAMEPAD/XBOX reason=gamepad-capability-or-identity
+09-24 22:15:32.492  5454  5454 D S3PAD   : deviceKey via descriptor
+09-24 22:15:32.492  5454  5454 I S3PAD   : classify name='Xbox Wireless Controller' vid=1118 pid=736 sources=16778513 keyboardType=1 -> GAMEPAD/XBOX reason=gamepad-capability-or-identity
+09-24 22:15:32.492  5454  5454 D S3PAD   : deviceKey via descriptor
+09-24 22:15:32.573  5454  5454 I S3PAD   : classify name='Xbox Wireless Controller' vid=1118 pid=736 sources=16778513 keyboardType=1 -> GAMEPAD/XBOX reason=gamepad-capability-or-identity
+09-24 22:15:32.573  5454  5454 D S3PAD   : deviceKey via descriptor
+09-24 22:15:32.573  5454  5454 I S3PAD   : classify name='Xbox Wireless Controller' vid=1118 pid=736 sources=16778513 keyboardType=1 -> GAMEPAD/XBOX reason=gamepad-capability-or-identity
+09-24 22:15:32.573  5454  5454 D S3PAD   : deviceKey via descriptor
+09-24 22:15:32.574  5454  5454 I S3PAD   : classify name='Xbox Wireless Controller' vid=1118 pid=736 sources=16778513 keyboardType=1 -> GAMEPAD/XBOX reason=gamepad-capability-or-identity
+09-24 22:15:32.574  5454  5454 D S3PAD   : deviceKey via descriptor
+09-24 22:15:32.574  5454  5454 I S3PAD   : classify name='Xbox Wireless Controller' vid=1118 pid=736 sources=16778513 keyboardType=1 -> GAMEPAD/XBOX reason=gamepad-capability-or-identity
+09-24 22:15:32.574  5454  5454 D S3PAD   : deviceKey via descriptor
+09-24 22:15:32.697  5454  5454 I S3PAD   : classify name='Xbox Wireless Controller' vid=1118 pid=736 sources=16778513 keyboardType=1 -> GAMEPAD/XBOX reason=gamepad-capability-or-identity
+09-24 22:15:32.697  5454  5454 D S3PAD   : deviceKey via descriptor
+09-24 22:15:32.697  5454  5454 I S3PAD   : classify name='Xbox Wireless Controller' vid=1118 pid=736 sources=16778513 keyboardType=1 -> GAMEPAD/XBOX reason=gamepad-capability-or-identity
+09-24 22:15:32.697  5454  5454 D S3PAD   : deviceKey via descriptor
+09-24 22:15:32.697  5454  5454 I S3PAD   : classify name='Xbox Wireless Controller' vid=1118 pid=736 sources=16778513 keyboardType=1 -> GAMEPAD/XBOX reason=gamepad-capability-or-identity
+09-24 22:15:32.697  5454  5454 D S3PAD   : deviceKey via descriptor
+09-24 22:15:32.697  5454  5454 I S3PAD   : classify name='Xbox Wireless Controller' vid=1118 pid=736 sources=16778513 keyboardType=1 -> GAMEPAD/XBOX reason=gamepad-capability-or-identity
+09-24 22:15:32.697  5454  5454 D S3PAD   : deviceKey via descriptor
+09-24 22:15:32.804  5454  5454 I S3PAD   : classify name='Xbox Wireless Controller' vid=1118 pid=736 sources=16778513 keyboardType=1 -> GAMEPAD/XBOX reason=gamepad-capability-or-identity
+09-24 22:15:32.804  5454  5454 D S3PAD   : deviceKey via descriptor
+09-24 22:15:32.804  5454  5454 I S3PAD   : classify name='Xbox Wireless Controller' vid=1118 pid=736 sources=16778513 keyboardType=1 -> GAMEPAD/XBOX reason=gamepad-capability-or-identity
+09-24 22:15:32.805  5454  5454 D S3PAD   : deviceKey via descriptor
+09-24 22:15:32.805  5454  5454 I S3PAD   : classify name='Xbox Wireless Controller' vid=1118 pid=736 sources=16778513 keyboardType=1 -> GAMEPAD/XBOX reason=gamepad-capability-or-identity
+09-24 22:15:32.805  5454  5454 D S3PAD   : deviceKey via descriptor
+09-24 22:15:32.805  5454  5454 I S3PAD   : classify name='Xbox Wireless Controller' vid=1118 pid=736 sources=16778513 keyboardType=1 -> GAMEPAD/XBOX reason=gamepad-capability-or-identity
+09-24 22:15:32.805  5454  5454 D S3PAD   : deviceKey via descriptor
+09-24 22:15:32.913  5454  5635 D RPCS3   : sys_tty_write(ch=0, buf=*0x58bf20, len=63, pwritelen=*0xd000fde0)
+09-24 22:15:32.913  5454  5635 D RPCS3   : sys_tty_write(): “BATCHJOB: AddJob: waiting for room in job list 3 for job 56...“ << endl
+09-24 22:15:32.922  5454  5454 I S3PAD   : classify name='Xbox Wireless Controller' vid=1118 pid=736 sources=16778513 keyboardType=1 -> GAMEPAD/XBOX reason=gamepad-capability-or-identity
+09-24 22:15:32.922  5454  5454 D S3PAD   : deviceKey via descriptor
+09-24 22:15:32.922  5454  5454 I S3PAD   : classify name='Xbox Wireless Controller' vid=1118 pid=736 sources=16778513 keyboardType=1 -> GAMEPAD/XBOX reason=gamepad-capability-or-identity
+09-24 22:15:32.922  5454  5454 D S3PAD   : deviceKey via descriptor
+09-24 22:15:32.922  5454  5454 I S3PAD   : classify name='Xbox Wireless Controller' vid=1118 pid=736 sources=16778513 keyboardType=1 -> GAMEPAD/XBOX reason=gamepad-capability-or-identity
+09-24 22:15:32.922  5454  5454 D S3PAD   : deviceKey via descriptor
+09-24 22:15:32.922  5454  5454 I S3PAD   : classify name='Xbox Wireless Controller' vid=1118 pid=736 sources=16778513 keyboardType=1 -> GAMEPAD/XBOX reason=gamepad-capability-or-identity
+09-24 22:15:32.922  5454  5454 D S3PAD   : deviceKey via descriptor
+09-24 22:15:33.022  5454  5454 I S3PAD   : classify name='Xbox Wireless Controller' vid=1118 pid=736 sources=16778513 keyboardType=1 -> GAMEPAD/XBOX reason=gamepad-capability-or-identity
+09-24 22:15:33.022  5454  5454 D S3PAD   : deviceKey via descriptor
+09-24 22:15:33.023  5454  5454 I S3PAD   : classify name='Xbox Wireless Controller' vid=1118 pid=736 sources=16778513 keyboardType=1 -> GAMEPAD/XBOX reason=gamepad-capability-or-identity
+09-24 22:15:33.023  5454  5454 D S3PAD   : deviceKey via descriptor
+09-24 22:15:33.023  5454  5454 I S3PAD   : classify name='Xbox Wireless Controller' vid=1118 pid=736 sources=16778513 keyboardType=1 -> GAMEPAD/XBOX reason=gamepad-capability-or-identity
+09-24 22:15:33.023  5454  5454 D S3PAD   : deviceKey via descriptor
+09-24 22:15:33.023  5454  5454 I S3PAD   : classify name='Xbox Wireless Controller' vid=1118 pid=736 sources=16778513 keyboardType=1 -> GAMEPAD/XBOX reason=gamepad-capability-or-identity
+09-24 22:15:33.023  5454  5454 D S3PAD   : deviceKey via descriptor
+09-24 22:15:33.094  5454  5498 D S3PERF  : crosscheck ui_snapshot_fps=7.29938 ui_snapshot_frametime_ms=202.615
+09-24 22:15:33.152  5454  5454 I S3PAD   : classify name='Xbox Wireless Controller' vid=1118 pid=736 sources=16778513 keyboardType=1 -> GAMEPAD/XBOX reason=gamepad-capability-or-identity
+09-24 22:15:33.152  5454  5454 D S3PAD   : deviceKey via descriptor
+09-24 22:15:33.152  5454  5454 I S3PAD   : classify name='Xbox Wireless Controller' vid=1118 pid=736 sources=16778513 keyboardType=1 -> GAMEPAD/XBOX reason=gamepad-capability-or-identity
+09-24 22:15:33.152  5454  5454 D S3PAD   : deviceKey via descriptor
+09-24 22:15:33.152  5454  5454 I S3PAD   : classify name='Xbox Wireless Controller' vid=1118 pid=736 sources=16778513 keyboardType=1 -> GAMEPAD/XBOX reason=gamepad-capability-or-identity
+09-24 22:15:33.152  5454  5454 D S3PAD   : deviceKey via descriptor
+09-24 22:15:33.152  5454  5454 I S3PAD   : classify name='Xbox Wireless Controller' vid=1118 pid=736 sources=16778513 keyboardType=1 -> GAMEPAD/XBOX reason=gamepad-capability-or-identity
+09-24 22:15:33.152  5454  5454 D S3PAD   : deviceKey via descriptor
+09-24 22:15:33.206  5454  5635 D RPCS3   : sys_tty_write(ch=0, buf=*0x58bf20, len=63, pwritelen=*0xd000fde0)
+09-24 22:15:33.206  5454  5635 D RPCS3   : sys_tty_write(): “BATCHJOB: AddJob: waiting for room in job list 3 for job 56...“ << endl
+09-24 22:15:33.242  5454  5454 I S3PAD   : classify name='Xbox Wireless Controller' vid=1118 pid=736 sources=16778513 keyboardType=1 -> GAMEPAD/XBOX reason=gamepad-capability-or-identity
+09-24 22:15:33.243  5454  5454 D S3PAD   : deviceKey via descriptor
+09-24 22:15:33.243  5454  5454 I S3PAD   : classify name='Xbox Wireless Controller' vid=1118 pid=736 sources=16778513 keyboardType=1 -> GAMEPAD/XBOX reason=gamepad-capability-or-identity
+09-24 22:15:33.243  5454  5454 D S3PAD   : deviceKey via descriptor
+09-24 22:15:33.243  5454  5454 I S3PAD   : classify name='Xbox Wireless Controller' vid=1118 pid=736 sources=16778513 keyboardType=1 -> GAMEPAD/XBOX reason=gamepad-capability-or-identity
+09-24 22:15:33.243  5454  5454 D S3PAD   : deviceKey via descriptor
+09-24 22:15:33.243  5454  5454 I S3PAD   : classify name='Xbox Wireless Controller' vid=1118 pid=736 sources=16778513 keyboardType=1 -> GAMEPAD/XBOX reason=gamepad-capability-or-identity
+09-24 22:15:33.243  5454  5454 D S3PAD   : deviceKey via descriptor
+09-24 22:15:33.352  5454  5454 I S3PAD   : classify name='Xbox Wireless Controller' vid=1118 pid=736 sources=16778513 keyboardType=1 -> GAMEPAD/XBOX reason=gamepad-capability-or-identity
+09-24 22:15:33.352  5454  5454 D S3PAD   : deviceKey via descriptor
+09-24 22:15:33.352  5454  5454 I S3PAD   : classify name='Xbox Wireless Controller' vid=1118 pid=736 sources=16778513 keyboardType=1 -> GAMEPAD/XBOX reason=gamepad-capability-or-identity
+09-24 22:15:33.352  5454  5454 D S3PAD   : deviceKey via descriptor
+09-24 22:15:33.352  5454  5454 I S3PAD   : classify name='Xbox Wireless Controller' vid=1118 pid=736 sources=16778513 keyboardType=1 -> GAMEPAD/XBOX reason=gamepad-capability-or-identity
+09-24 22:15:33.352  5454  5454 D S3PAD   : deviceKey via descriptor
+09-24 22:15:33.352  5454  5454 I S3PAD   : classify name='Xbox Wireless Controller' vid=1118 pid=736 sources=16778513 keyboardType=1 -> GAMEPAD/XBOX reason=gamepad-capability-or-identity
+09-24 22:15:33.352  5454  5454 D S3PAD   : deviceKey via descriptor
+09-24 22:15:33.411  5454  5498 D S3PERF  : crosscheck source=surface presented=3588 json_fps=7.91746 json_frametime_ms=124.616
+09-24 22:15:33.431  5454  5454 I S3PAD   : classify name='Xbox Wireless Controller' vid=1118 pid=736 sources=16778513 keyboardType=1 -> GAMEPAD/XBOX reason=gamepad-capability-or-identity
+09-24 22:15:33.431  5454  5454 D S3PAD   : deviceKey via descriptor
+09-24 22:15:33.431  5454  5454 I S3PAD   : classify name='Xbox Wireless Controller' vid=1118 pid=736 sources=16778513 keyboardType=1 -> GAMEPAD/XBOX reason=gamepad-capability-or-identity
+09-24 22:15:33.431  5454  5454 D S3PAD   : deviceKey via descriptor
+09-24 22:15:33.431  5454  5454 I S3PAD   : classify name='Xbox Wireless Controller' vid=1118 pid=736 sources=16778513 keyboardType=1 -> GAMEPAD/XBOX reason=gamepad-capability-or-identity
+09-24 22:15:33.431  5454  5454 D S3PAD   : deviceKey via descriptor
+09-24 22:15:33.431  5454  5454 I S3PAD   : classify name='Xbox Wireless Controller' vid=1118 pid=736 sources=16778513 keyboardType=1 -> GAMEPAD/XBOX reason=gamepad-capability-or-identity
+09-24 22:15:33.432  5454  5454 D S3PAD   : deviceKey via descriptor
+09-24 22:15:33.566  5454  5454 I S3PAD   : classify name='Xbox Wireless Controller' vid=1118 pid=736 sources=16778513 keyboardType=1 -> GAMEPAD/XBOX reason=gamepad-capability-or-identity
+09-24 22:15:33.568  5454  5454 D S3PAD   : deviceKey via descriptor
+09-24 22:15:33.568  5454  5454 I S3PAD   : classify name='Xbox Wireless Controller' vid=1118 pid=736 sources=16778513 keyboardType=1 -> GAMEPAD/XBOX reason=gamepad-capability-or-identity
+09-24 22:15:33.568  5454  5454 D S3PAD   : deviceKey via descriptor
+09-24 22:15:33.568  5454  5454 I S3PAD   : classify name='Xbox Wireless Controller' vid=1118 pid=736 sources=16778513 keyboardType=1 -> GAMEPAD/XBOX reason=gamepad-capability-or-identity
+09-24 22:15:33.568  5454  5454 D S3PAD   : deviceKey via descriptor
+09-24 22:15:33.568  5454  5454 I S3PAD   : classify name='Xbox Wireless Controller' vid=1118 pid=736 sources=16778513 keyboardType=1 -> GAMEPAD/XBOX reason=gamepad-capability-or-identity
+09-24 22:15:33.568  5454  5454 D S3PAD   : deviceKey via descriptor
+09-24 22:15:33.641  5454  5454 I S3PAD   : classify name='Xbox Wireless Controller' vid=1118 pid=736 sources=16778513 keyboardType=1 -> GAMEPAD/XBOX reason=gamepad-capability-or-identity
+09-24 22:15:33.641  5454  5454 D S3PAD   : deviceKey via descriptor
+09-24 22:15:33.641  5454  5454 I S3PAD   : classify name='Xbox Wireless Controller' vid=1118 pid=736 sources=16778513 keyboardType=1 -> GAMEPAD/XBOX reason=gamepad-capability-or-identity
+09-24 22:15:33.641  5454  5454 D S3PAD   : deviceKey via descriptor
+09-24 22:15:33.642  5454  5454 I S3PAD   : classify name='Xbox Wireless Controller' vid=1118 pid=736 sources=16778513 keyboardType=1 -> GAMEPAD/XBOX reason=gamepad-capability-or-identity
+09-24 22:15:33.642  5454  5454 D S3PAD   : deviceKey via descriptor
+09-24 22:15:33.642  5454  5454 I S3PAD   : classify name='Xbox Wireless Controller' vid=1118 pid=736 sources=16778513 keyboardType=1 -> GAMEPAD/XBOX reason=gamepad-capability-or-identity
+09-24 22:15:33.642  5454  5454 D S3PAD   : deviceKey via descriptor
+09-24 22:15:33.757  5454  5454 I S3PAD   : classify name='Xbox Wireless Controller' vid=1118 pid=736 sources=16778513 keyboardType=1 -> GAMEPAD/XBOX reason=gamepad-capability-or-identity
+09-24 22:15:33.757  5454  5454 D S3PAD   : deviceKey via descriptor
+09-24 22:15:33.760  5454  5454 I S3PAD   : classify name='Xbox Wireless Controller' vid=1118 pid=736 sources=16778513 keyboardType=1 -> GAMEPAD/XBOX reason=gamepad-capability-or-identity
+09-24 22:15:33.760  5454  5454 D S3PAD   : deviceKey via descriptor
+09-24 22:15:33.760  5454  5454 I S3PAD   : classify name='Xbox Wireless Controller' vid=1118 pid=736 sources=16778513 keyboardType=1 -> GAMEPAD/XBOX reason=gamepad-capability-or-identity
+09-24 22:15:33.760  5454  5454 D S3PAD   : deviceKey via descriptor
+09-24 22:15:33.760  5454  5454 I S3PAD   : classify name='Xbox Wireless Controller' vid=1118 pid=736 sources=16778513 keyboardType=1 -> GAMEPAD/XBOX reason=gamepad-capability-or-identity
+09-24 22:15:33.760  5454  5454 D S3PAD   : deviceKey via descriptor

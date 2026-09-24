@@ -1,0 +1,1 @@
+09-24 22:16:06.482  5454  5454 I DebugPad: registered sender=adb-shell

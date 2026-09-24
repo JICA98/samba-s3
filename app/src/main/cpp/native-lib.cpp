@@ -1567,7 +1567,36 @@ Java_com_zenithblue_sambas3_RPCSX_getPpuManifestKey(JNIEnv *env, jobject, jstrin
     __android_log_print(ANDROID_LOG_WARN, "RPCSX-UI", "getPpuManifestKey per-title not available, falling back to global for title='%s'", title.c_str());
   }
   const char* key = rpcsxLib.getPpuManifestKey();
-  return wrap(env, key ? std::string(key) : std::string{});
+  if (!key) return wrap(env, std::string{});
+  std::string keyStr(key);
+  if (!title.empty() && !keyStr.empty()) {
+    // Preserve title identity in fallback manifest key
+    const std::string needle = "\"title_id\":";
+    auto pos = keyStr.find(needle);
+    if (pos != std::string::npos) {
+      auto val_start = pos + needle.size();
+      while (val_start < keyStr.size() && (keyStr[val_start] == ' ' || keyStr[val_start] == '\t')) {
+        val_start++;
+      }
+      size_t val_end = val_start;
+      if (val_start < keyStr.size() && keyStr[val_start] == '\"') {
+        val_end = keyStr.find('\"', val_start + 1);
+        if (val_end != std::string::npos) val_end++;
+      } else {
+        while (val_end < keyStr.size() && keyStr[val_end] != ',' && keyStr[val_end] != '}') {
+          val_end++;
+        }
+      }
+      if (val_end > val_start) {
+        keyStr.replace(val_start, val_end - val_start, "\"" + title + "\"");
+      }
+    } else if (keyStr.front() == '{') {
+      keyStr.insert(1, "\"title_id\":\"" + title + "\",");
+    } else if (keyStr.find(title) == std::string::npos) {
+      keyStr += "|" + title;
+    }
+  }
+  return wrap(env, keyStr);
 }
 
 extern "C" JNIEXPORT jstring JNICALL

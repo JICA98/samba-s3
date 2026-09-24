@@ -78,11 +78,12 @@ fun PatchManagerScreen(
     var groups by remember { mutableStateOf<List<GameGroup>>(emptyList()) }
     var query by remember { mutableStateOf("") }
 
-    fun refresh() {
+    fun refresh(forceBundled: Boolean = false) {
         scope.launch {
             loading = true
             val all = withContext(Dispatchers.IO) {
-                val patches = PatchRepository.list()
+                PatchRepository.ensureBundledPatches(context, force = forceBundled)
+                val patches = PatchRepository.list(context)
                 if (titleId == null) patches else PatchRepository.forTitle(patches, titleId)
             }
             val grouped = withContext(Dispatchers.IO) { PatchRepository.group(all) }
@@ -140,7 +141,7 @@ fun PatchManagerScreen(
                             ?.readText().orEmpty()
                     }
                     if (content.isNotEmpty()) {
-                        PatchRepository.importLocal(content)
+                        PatchRepository.importLocal(content, titleId)
                         refresh()
                         Toast.makeText(context, "Patch imported", Toast.LENGTH_SHORT).show()
                     }
@@ -183,6 +184,21 @@ fun PatchManagerScreen(
             )
             // Actions stay next to search when top bar is hidden (split pane).
             if (isInSplitPane) {
+                IconButton(onClick = {
+                    scope.launch {
+                        withContext(Dispatchers.IO) {
+                            PatchRepository.ensureBundledPatches(context, force = true)
+                        }
+                        refresh(forceBundled = true)
+                        Toast.makeText(context, "Official patches restored", Toast.LENGTH_SHORT).show()
+                    }
+                }) {
+                    Icon(
+                        painter = painterResource(R.drawable.ic_restore),
+                        contentDescription = "Restore official patches",
+                        tint = RPCSXColors.textSecondary,
+                    )
+                }
                 IconButton(onClick = { importLauncher.launch("*/*") }) {
                     Icon(
                         painter = painterResource(R.drawable.ic_add),
@@ -224,6 +240,21 @@ fun PatchManagerScreen(
                             )
                         )
                         Spacer(modifier = Modifier.height(12.dp))
+                        OutlinedButton(onClick = {
+                            scope.launch {
+                                withContext(Dispatchers.IO) {
+                                    PatchRepository.ensureBundledPatches(context, force = true)
+                                }
+                                refresh(forceBundled = true)
+                                Toast.makeText(context, "Official patches restored", Toast.LENGTH_SHORT).show()
+                            }
+                        }) {
+                            Text(
+                                "RESTORE OFFICIAL PATCHES",
+                                fontFamily = FontFamily.Monospace,
+                            )
+                        }
+                        Spacer(modifier = Modifier.height(8.dp))
                         OutlinedButton(onClick = { importLauncher.launch("*/*") }) {
                             Text(
                                 "IMPORT PATCH.YML",
@@ -313,6 +344,21 @@ fun PatchManagerScreen(
             compact = true,
             showHints = false,
             actions = {
+                IconButton(onClick = {
+                    scope.launch {
+                        withContext(Dispatchers.IO) {
+                            PatchRepository.ensureBundledPatches(context, force = true)
+                        }
+                        refresh(forceBundled = true)
+                        Toast.makeText(context, "Official patches restored", Toast.LENGTH_SHORT).show()
+                    }
+                }) {
+                    Icon(
+                        painter = painterResource(R.drawable.ic_restore),
+                        contentDescription = "Restore official patches",
+                        tint = RPCSXColors.textSecondary,
+                    )
+                }
                 IconButton(onClick = { importLauncher.launch("*/*") }) {
                     Icon(
                         painter = painterResource(R.drawable.ic_add),
@@ -344,6 +390,21 @@ fun PatchManagerScreen(
                 }
             },
             actions = {
+                IconButton(onClick = {
+                    scope.launch {
+                        withContext(Dispatchers.IO) {
+                            PatchRepository.ensureBundledPatches(context, force = true)
+                        }
+                        refresh(forceBundled = true)
+                        Toast.makeText(context, "Official patches restored", Toast.LENGTH_SHORT).show()
+                    }
+                }) {
+                    Icon(
+                        painter = painterResource(R.drawable.ic_restore),
+                        contentDescription = "Restore official patches",
+                        tint = RPCSXColors.textSecondary,
+                    )
+                }
                 IconButton(onClick = { importLauncher.launch("*/*") }) {
                     Icon(
                         painter = painterResource(R.drawable.ic_add),
