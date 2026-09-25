@@ -125,14 +125,17 @@ def parse_logcat_line(line: str) -> Optional[FrameEvent]:
         line_clean,
     )
     if m_cross:
-        # Check if logcat timestamp is available at beginning (e.g., 09-24 22:15:30.244)
+        # Check if logcat timestamp is available at beginning (e.g., 09-24 22:15:30.244 or epoch 1790357440.935)
         m_time = re.match(r"^\d{2}-\d{2}\s+(?P<hh>\d{2}):(?P<mm>\d{2}):(?P<ss>\d{2})\.(?P<ms>\d{3})", line_clean)
+        m_epoch = re.match(r"^\s*(?P<epoch>\d{9,11}\.\d{3,6})", line_clean)
         if m_time:
             hh = int(m_time.group("hh"))
             mm = int(m_time.group("mm"))
             ss = int(m_time.group("ss"))
             ms = int(m_time.group("ms"))
             ts_us = (hh * 3600 + mm * 60 + ss) * 1_000_000 + ms * 1_000
+        elif m_epoch:
+            ts_us = int(float(m_epoch.group("epoch")) * 1_000_000)
         else:
             ts_us = 0
 
@@ -158,9 +161,12 @@ def parse_logcat_line(line: str) -> Optional[FrameEvent]:
     # Pattern 2: Generic key-value timestamps
     m_kv = re.search(r"timestamp(?:_us)?=(?P<ts>\d+)", line_clean)
     if m_kv:
-        ts_us = int(m_kv.group("ts"))
         m_fid = re.search(r"(?:frame|presented)=(?P<fid>\d+)", line_clean)
         m_src = re.search(r"source=(?P<src>[a-zA-Z0-9_-]+)", line_clean)
+        if m_fid is None and m_src is None and "S3PERF" not in line_clean:
+            return None
+
+        ts_us = int(m_kv.group("ts"))
         m_fps = re.search(r"fps=(?P<fps>[0-9.]+)", line_clean)
         m_ft = re.search(r"frametime(?:_ms)?=(?P<ft>[0-9.]+)", line_clean)
         m_sess = re.search(r"session(?:_id)?=(?P<sid>[^\s]+)", line_clean)

@@ -1,0 +1,3 @@
+--------- beginning of main
+W/S3BOOT  ( 9962): boot started path=direct_iso/BCUS98111 request_id=s3-1790357366411430732-2849980-13302
+I/S3BOOT  ( 9962): owner=Thread-15 operation=boot path=/proc/self/fd/244

@@ -1,0 +1,117 @@
+10000 : DefaultDispatch
+10001 : GrallocUploadTh
+10002 : DefaultDispatch
+10004 : SurfaceSyncGrou
+10009 : DefaultExecutor
+10012 : binder:9962_4
+10014 : binder:9962_4
+10017 : InteractionJank
+10028 : queued-work-loo
+10036 : Progress Dialog
+10037 : Performance Sen
+10038 : PS Move Worker 
+10039 : PS Move Worker 
+10040 : PS Move Worker 
+10041 : PS Move Worker 
+10042 : Gem Thread
+10043 : Camera Thread
+10044 : Usb Manager Thr
+10045 : cellAudio Threa
+10048 : MediaList Threa
+10049 : Network P2P Thr
+10050 : GDB Server
+10051 : CPU Profiler
+10052 : VUART AV Thread
+10053 : Timer Thread
+10054 : RsxAudioData Th
+10055 : Tcp Over Udp Ti
+10056 : Network Thread
+10057 : LV2 Watchdog Th
+10058 : cellAudio Threa
+10059 : PPU Syscall Usa
+10061 : cellAudio Threa
+10062 : Signaling Manag
+10063 : NetStart Hack
+10064 : cellAudio Threa
+10065 : MsgDialog Close
+10067 : Microphone Thre
+10068 : Overlay Input T
+10070 : com.ze:traceq0
+10073 : binder:9962_5
+10082 : RSX.W1
+10083 : RSX.W2
+10084 : Thread-15
+10086 : Pad Thread
+10087 : PPU[0x1000000] 
+10114 : AAudio_1
+10357 : SPU[0x0000100] 
+10358 : SPU[0x1000100] 
+10359 : SPU[0x2000100] 
+10360 : SPU[0x3000100] 
+10361 : SPU[0x4000100] 
+10362 : PPU[0x1000001] 
+10363 : PPU[0x1000002] 
+10364 : SPU[0x0000200] 
+10365 : PPU[0x1000003] 
+10366 : PPU[0x1000004] 
+10367 : PPU[0x1000005] 
+10368 : PPU[0x1000006] 
+10369 : PPU[0x1000007] 
+10370 : PPU[0x1000008] 
+10371 : PPU[0x1000009] 
+10372 : PPU[0x100000a] 
+10373 : PPU[0x100000b] 
+10376 : VBlank Thread
+10377 : PPU[0x100000e] 
+10379 : PPU[0x1000010] 
+10380 : PPU[0x1000011] 
+10381 : PPU[0x1000012] 
+10382 : PPU[0x1000013] 
+10383 : PPU[0x1000014] 
+10384 : PPU[0x1000015] 
+10385 : PPU[0x1000016] 
+10387 : PPU[0x1000017] 
+10388 : PPU[0x1000018] 
+10389 : PPU[0x1000019] 
+10390 : PPU[0x100001a] 
+10391 : PPU[0x100001b] 
+10392 : PPU[0x100001c] 
+10393 : PPU[0x100001d] 
+10394 : PPU[0x100001e] 
+10395 : PPU[0x100001f] 
+10396 : PPU[0x1000020] 
+10397 : PPU[0x1000021] 
+10398 : PPU[0x1000022] 
+10399 : PPU[0x1000023] 
+10400 : PPU[0x1000024] 
+10401 : PPU[0x1000025] 
+10402 : PPU[0x1000026] 
+10420 : PPU[0x1000027] 
+10459 : binder:9962_6
+9962 : ithblue.sambas3
+9963 : Signal Catcher
+9964 : perfetto_hprof_
+9965 : Jit thread pool
+9966 : HeapTaskDaemon
+9968 : ReferenceQueueD
+9969 : FinalizerDaemon
+9970 : FinalizerWatchd
+9971 : binder:9962_1
+9972 : binder:9962_2
+9975 : binder:9962_3
+9978 : Profile Saver
+9979 : RenderThread
+9982 : DefaultDispatch
+9983 : DefaultDispatch
+9984 : DefaultDispatch
+9986 : Log Writer
+9987 : ithblue.sambas3
+9988 : Thread-5
+9989 : Thread-6
+9990 : DefaultDispatch
+9991 : TracingMuxer
+9992 : pool-4-thread-1
+9993 : hwuiTask0
+9994 : hwuiTask1
+9995 : DefaultDispatch
+9999 : DefaultDispatch

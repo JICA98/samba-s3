@@ -1,0 +1,3 @@
+--------- beginning of main
+W/DebugPad( 9962): BUTTON START d1=8 d2=0 press 120ms request_id=s3-1790357388087524085-2850148-29253
+W/DebugPad( 9962): BUTTON START release request_id=s3-1790357388087524085-2850148-29253

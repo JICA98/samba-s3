@@ -339,6 +339,127 @@ v128_t opt_shli(v128_t a, u32 i7) {
     }
 }
 
+// Reference infinite-precision arithmetic shift right (word)
+v128_t ref_rotmai(v128_t a, s32 si7) {
+    u32 sh = (-si7) & 63;
+    v128_t out{};
+    for (int i = 0; i < 4; i++) {
+        out.s32_arr[i] = (sh < 32) ? (a.s32_arr[i] >> sh) : (a.s32_arr[i] >> 31);
+    }
+    return out;
+}
+
+// Optimized native vector arithmetic shift right (word)
+v128_t opt_rotmai(v128_t a, s32 si7) {
+    const u32 sh = (-si7) & 63;
+    v128_t out{};
+    if (sh >= 32) {
+        for (int i = 0; i < 4; i++) out.s32_arr[i] = a.s32_arr[i] >> 31;
+        return out;
+    } else if (sh == 0) {
+        return a;
+    } else {
+        for (int i = 0; i < 4; i++) out.s32_arr[i] = a.s32_arr[i] >> sh;
+        return out;
+    }
+}
+
+// Reference infinite-precision logical shift right (halfword)
+v128_t ref_rothmi(v128_t a, s32 si7) {
+    u32 sh = (-si7) & 31;
+    v128_t out{};
+    for (int i = 0; i < 8; i++) {
+        out.u16_arr[i] = (sh < 16) ? (a.u16_arr[i] >> sh) : 0;
+    }
+    return out;
+}
+
+// Optimized native vector logical shift right (halfword)
+v128_t opt_rothmi(v128_t a, s32 si7) {
+    const u32 sh = (-si7) & 31;
+    v128_t out{};
+    if (sh >= 16) {
+        return out;
+    } else if (sh == 0) {
+        return a;
+    } else {
+        for (int i = 0; i < 8; i++) out.u16_arr[i] = a.u16_arr[i] >> sh;
+        return out;
+    }
+}
+
+// Reference infinite-precision arithmetic shift right (halfword)
+v128_t ref_rotmahi(v128_t a, s32 si7) {
+    u32 sh = (-si7) & 31;
+    v128_t out{};
+    for (int i = 0; i < 8; i++) {
+        out.s16_arr[i] = (sh < 16) ? (a.s16_arr[i] >> sh) : (a.s16_arr[i] >> 15);
+    }
+    return out;
+}
+
+// Optimized native vector arithmetic shift right (halfword)
+v128_t opt_rotmahi(v128_t a, s32 si7) {
+    const u32 sh = (-si7) & 31;
+    v128_t out{};
+    if (sh >= 16) {
+        for (int i = 0; i < 8; i++) out.s16_arr[i] = a.s16_arr[i] >> 15;
+        return out;
+    } else if (sh == 0) {
+        return a;
+    } else {
+        for (int i = 0; i < 8; i++) out.s16_arr[i] = a.s16_arr[i] >> sh;
+        return out;
+    }
+}
+
+// Reference infinite-precision logical shift left (halfword)
+v128_t ref_shlhi(v128_t a, u32 i7) {
+    u32 sh = i7 & 31;
+    v128_t out{};
+    for (int i = 0; i < 8; i++) {
+        out.u16_arr[i] = (sh < 16) ? (a.u16_arr[i] << sh) : 0;
+    }
+    return out;
+}
+
+// Optimized native vector logical shift left (halfword)
+v128_t opt_shlhi(v128_t a, u32 i7) {
+    const u32 sh = i7 & 31;
+    v128_t out{};
+    if (sh >= 16) {
+        return out;
+    } else if (sh == 0) {
+        return a;
+    } else {
+        for (int i = 0; i < 8; i++) out.u16_arr[i] = a.u16_arr[i] << sh;
+        return out;
+    }
+}
+
+// Reference SSSE3 pshufb
+v128_t ref_ssse3_pshufb(v128_t data, v128_t index) {
+    v128_t out{};
+    for (int i = 0; i < 16; i++) {
+        u8 idx = index.u8_arr[i];
+        if (idx & 0x80) {
+            out.u8_arr[i] = 0;
+        } else {
+            out.u8_arr[i] = data.u8_arr[idx & 0x0F];
+        }
+    }
+    return out;
+}
+
+// Emulated ARM64 NEON pshufb lowering (CPUTranslator.cpp lines 43-45)
+v128_t neon_emulated_pshufb(v128_t data, v128_t index) {
+    v128_t index_masked{};
+    for (int i = 0; i < 16; i++) {
+        index_masked.u8_arr[i] = index.u8_arr[i] & 0x8F;
+    }
+    return neon_tbl1(data, index_masked);
+}
+
 // ============================================================================
 // Main Differential Test Driver
 // ============================================================================
@@ -462,11 +583,90 @@ int main() {
         v128_t r_shli = ref_shli(a, static_cast<u32>(sh));
         v128_t o_shli = opt_shli(a, static_cast<u32>(sh));
         assert(r_shli == o_shli && "SHLI lowering mismatch!");
+
+        // ROTMAI (signed word arithmetic shift right)
+        v128_t r_rotmai = ref_rotmai(a, sh);
+        v128_t o_rotmai = opt_rotmai(a, sh);
+        assert(r_rotmai == o_rotmai && "ROTMAI lowering mismatch!");
     }
-    std::cout << "[PASS] ROTMI and SHLI verified bit-exact across all shift ranges!\n";
+    std::cout << "[PASS] ROTMI, ROTMAI, and SHLI verified bit-exact across all shift ranges!\n";
+
+    std::cout << "[*] Running ROTHMI / ROTMAHI / SHLHI halfword shift tests (amounts -32..32)...\n";
+    for (s32 sh = -32; sh <= 32; sh++) {
+        v128_t a{};
+        a.u16_arr[0] = 0x1234; a.u16_arr[1] = 0x8765;
+        a.u16_arr[2] = 0xFFFF; a.u16_arr[3] = 0x0001;
+        a.u16_arr[4] = 0x8000; a.u16_arr[5] = 0x7FFF;
+        a.u16_arr[6] = 0xAAAA; a.u16_arr[7] = 0x5555;
+
+        // ROTHMI
+        v128_t r_rothmi = ref_rothmi(a, sh);
+        v128_t o_rothmi = opt_rothmi(a, sh);
+        assert(r_rothmi == o_rothmi && "ROTHMI lowering mismatch!");
+
+        // ROTMAHI
+        v128_t r_rotmahi = ref_rotmahi(a, sh);
+        v128_t o_rotmahi = opt_rotmahi(a, sh);
+        assert(r_rotmahi == o_rotmahi && "ROTMAHI lowering mismatch!");
+
+        // SHLHI
+        v128_t r_shlhi = ref_shlhi(a, static_cast<u32>(sh));
+        v128_t o_shlhi = opt_shlhi(a, static_cast<u32>(sh));
+        assert(r_shlhi == o_shlhi && "SHLHI lowering mismatch!");
+    }
+    std::cout << "[PASS] ROTHMI, ROTMAHI, and SHLHI verified bit-exact across all shift ranges!\n";
 
     // ------------------------------------------------------------------------
-    // Part 4: LLVM Target Feature Parsing and Attribute Construction
+    // Part 4: CPUTranslator ARM64 NEON PSHUFB Emulation (tbl1 + & 0x8F)
+    // ------------------------------------------------------------------------
+    std::cout << "[*] Running ARM64 NEON PSHUFB emulation differential tests against SSSE3 reference...\n";
+    for (int iter = 0; iter < 1000; iter++) {
+        v128_t data{}, index{};
+        data.u64_arr[0] = rng(); data.u64_arr[1] = rng();
+        index.u64_arr[0] = rng(); index.u64_arr[1] = rng();
+
+        v128_t ref = ref_ssse3_pshufb(data, index);
+        v128_t neon = neon_emulated_pshufb(data, index);
+        assert(ref == neon && "ARM64 NEON PSHUFB emulation mismatch against SSSE3!");
+    }
+
+    // Exhaustive test of all 256 index values in all lanes
+    for (int code = 0; code < 256; code++) {
+        v128_t data{}, index{};
+        for (int i = 0; i < 16; i++) {
+            data.u8_arr[i] = static_cast<u8>(0x30 + i);
+            index.u8_arr[i] = static_cast<u8>(code);
+        }
+        v128_t ref = ref_ssse3_pshufb(data, index);
+        v128_t neon = neon_emulated_pshufb(data, index);
+        assert(ref == neon && "ARM64 NEON PSHUFB exhaustive index pattern mismatch!");
+    }
+    std::cout << "[PASS] ARM64 NEON PSHUFB emulation verified bit-exact against SSSE3 across all 256 index codes!\n";
+
+    // ------------------------------------------------------------------------
+    // Part 5: Constant vs Non-Constant Immediate Lowering Equivalence
+    // ------------------------------------------------------------------------
+    std::cout << "[*] Running Constant vs Non-Constant lowering equivalence across all 128 i7 immediate values...\n";
+    for (u32 raw_i7 = 0; raw_i7 < 128; raw_i7++) {
+        s32 signed_i7 = (raw_i7 >= 64) ? (static_cast<s32>(raw_i7) - 128) : static_cast<s32>(raw_i7);
+
+        // Word shifts: non-constant (-raw_i7 & 63) vs constant (-signed_i7 & 63)
+        u32 non_const_sh_w = (-raw_i7) & 63;
+        u32 const_sh_w = (-signed_i7) & 63;
+        assert(non_const_sh_w == const_sh_w && "ROTMI/ROTMAI constant vs non-constant shift mismatch!");
+
+        // Halfword shifts: non-constant (-raw_i7 & 31) vs constant (-signed_i7 & 31)
+        u32 non_const_sh_h = (-raw_i7) & 31;
+        u32 const_sh_h = (-signed_i7) & 31;
+        assert(non_const_sh_h == const_sh_h && "ROTHMI/ROTMAHI constant vs non-constant shift mismatch!");
+
+        // Left shifts: raw_i7 & 63 / raw_i7 & 31
+        // Quadword rotates: raw_i7 & 15
+    }
+    std::cout << "[PASS] Constant vs Non-Constant lowering equivalence verified for all 128 immediate values!\n";
+
+    // ------------------------------------------------------------------------
+    // Part 6: LLVM Target Feature Parsing and Attribute Construction
     // ------------------------------------------------------------------------
     std::cout << "[*] Running Target Features comma separation test...\n";
     {

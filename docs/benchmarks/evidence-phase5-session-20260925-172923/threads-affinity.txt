@@ -1,0 +1,352 @@
+  PID   TID PSR COMM                       
+ 9962  9962   2 [ithblue.sambas3]
+ 9962  9963   5 [Signal Catcher]
+ 9962  9964   3 [perfetto_hprof_]
+ 9962  9965   2 [Jit thread pool]
+ 9962  9966   6 [HeapTaskDaemon]
+ 9962  9968   3 [ReferenceQueueD]
+ 9962  9969   5 [FinalizerDaemon]
+ 9962  9970   5 [FinalizerWatchd]
+ 9962  9971   2 [binder:9962_1]
+ 9962  9972   0 [binder:9962_2]
+ 9962  9975   3 [binder:9962_3]
+ 9962  9978   5 [Profile Saver]
+ 9962  9979   2 [RenderThread]
+ 9962  9982   4 [DefaultDispatch]
+ 9962  9983   6 [DefaultDispatch]
+ 9962  9984   6 [DefaultDispatch]
+ 9962  9986   6 [Log Writer]
+ 9962  9987   3 [ithblue.sambas3]
+ 9962  9988   1 [Thread-5]
+ 9962  9989   1 [Thread-6]
+ 9962  9990   5 [DefaultDispatch]
+ 9962  9991   2 [TracingMuxer]
+ 9962  9992   4 [pool-4-thread-1]
+ 9962  9993   4 [hwuiTask0]
+ 9962  9994   3 [hwuiTask1]
+ 9962  9995   6 [DefaultDispatch]
+ 9962  9999   2 [DefaultDispatch]
+ 9962 10000   2 [DefaultDispatch]
+ 9962 10001   1 [GrallocUploadTh]
+ 9962 10002   6 [DefaultDispatch]
+ 9962 10004   4 [SurfaceSyncGrou]
+ 9962 10009   1 [DefaultExecutor]
+ 9962 10012   1 [binder:9962_4]
+ 9962 10014   0 [binder:9962_4]
+ 9962 10017   0 [InteractionJank]
+ 9962 10028   3 [queued-work-loo]
+ 9962 10036   5 [Progress Dialog]
+ 9962 10037   1 [Performance Sen]
+ 9962 10038   3 [PS Move Worker ]
+ 9962 10039   7 [PS Move Worker ]
+ 9962 10040   4 [PS Move Worker ]
+ 9962 10041   3 [PS Move Worker ]
+ 9962 10042   7 [Gem Thread]
+ 9962 10043   6 [Camera Thread]
+ 9962 10044   1 [Usb Manager Thr]
+ 9962 10045   6 [cellAudio Threa]
+ 9962 10048   4 [MediaList Threa]
+ 9962 10049   7 [Network P2P Thr]
+ 9962 10050   5 [GDB Server]
+ 9962 10051   7 [CPU Profiler]
+ 9962 10052   0 [VUART AV Thread]
+ 9962 10053   5 [Timer Thread]
+ 9962 10054   3 [RsxAudioData Th]
+ 9962 10055   2 [Tcp Over Udp Ti]
+ 9962 10056   7 [Network Thread]
+ 9962 10057   6 [LV2 Watchdog Th]
+ 9962 10058   7 [cellAudio Threa]
+ 9962 10059   1 [PPU Syscall Usa]
+ 9962 10061   7 [cellAudio Threa]
+ 9962 10062   4 [Signaling Manag]
+ 9962 10063   7 [NetStart Hack]
+ 9962 10065   2 [MsgDialog Close]
+ 9962 10064   1 [cellAudio Threa]
+ 9962 10067   4 [Microphone Thre]
+ 9962 10068   4 [Overlay Input T]
+ 9962 10070   2 [com.ze:traceq0]
+ 9962 10073   1 [binder:9962_5]
+ 9962 10082   5 [RSX.W1]
+ 9962 10083   4 [RSX.W2]
+ 9962 10084   4 [Thread-15]
+ 9962 10086   6 [Pad Thread]
+ 9962 10087   5 [PPU[0x1000000] ]
+ 9962 10114   0 [AAudio_1]
+ 9962 10357   4 [SPU[0x0000100] ]
+ 9962 10358   3 [SPU[0x1000100] ]
+ 9962 10359   7 [SPU[0x2000100] ]
+ 9962 10360   6 [SPU[0x3000100] ]
+ 9962 10361   5 [SPU[0x4000100] ]
+ 9962 10362   4 [PPU[0x1000001] ]
+ 9962 10363   2 [PPU[0x1000002] ]
+ 9962 10364   6 [SPU[0x0000200] ]
+ 9962 10365   2 [PPU[0x1000003] ]
+ 9962 10366   3 [PPU[0x1000004] ]
+ 9962 10367   6 [PPU[0x1000005] ]
+ 9962 10368   5 [PPU[0x1000006] ]
+ 9962 10369   5 [PPU[0x1000007] ]
+ 9962 10370   6 [PPU[0x1000008] ]
+ 9962 10371   5 [PPU[0x1000009] ]
+ 9962 10372   6 [PPU[0x100000a] ]
+ 9962 10373   5 [PPU[0x100000b] ]
+ 9962 10376   6 [VBlank Thread]
+ 9962 10377   6 [PPU[0x100000e] ]
+ 9962 10379   4 [PPU[0x1000010] ]
+ 9962 10380   6 [PPU[0x1000011] ]
+ 9962 10381   5 [PPU[0x1000012] ]
+ 9962 10382   6 [PPU[0x1000013] ]
+ 9962 10383   5 [PPU[0x1000014] ]
+ 9962 10384   5 [PPU[0x1000015] ]
+ 9962 10385   6 [PPU[0x1000016] ]
+ 9962 10387   6 [PPU[0x1000017] ]
+ 9962 10388   5 [PPU[0x1000018] ]
+ 9962 10389   5 [PPU[0x1000019] ]
+ 9962 10390   5 [PPU[0x100001a] ]
+ 9962 10391   5 [PPU[0x100001b] ]
+ 9962 10392   6 [PPU[0x100001c] ]
+ 9962 10393   6 [PPU[0x100001d] ]
+ 9962 10394   6 [PPU[0x100001e] ]
+ 9962 10395   5 [PPU[0x100001f] ]
+ 9962 10396   6 [PPU[0x1000020] ]
+ 9962 10397   6 [PPU[0x1000021] ]
+ 9962 10398   5 [PPU[0x1000022] ]
+ 9962 10399   5 [PPU[0x1000023] ]
+ 9962 10400   6 [PPU[0x1000024] ]
+ 9962 10401   5 [PPU[0x1000025] ]
+ 9962 10402   6 [PPU[0x1000026] ]
+ 9962 10420   4 [PPU[0x1000027] ]
+ 9962 10459   1 [binder:9962_6]
+/proc/9962/task/10000/status:Cpus_allowed:	ff
+/proc/9962/task/10000/status:Cpus_allowed_list:	0-7
+/proc/9962/task/10001/status:Cpus_allowed:	ff
+/proc/9962/task/10001/status:Cpus_allowed_list:	0-7
+/proc/9962/task/10002/status:Cpus_allowed:	ff
+/proc/9962/task/10002/status:Cpus_allowed_list:	0-7
+/proc/9962/task/10004/status:Cpus_allowed:	ff
+/proc/9962/task/10004/status:Cpus_allowed_list:	0-7
+/proc/9962/task/10009/status:Cpus_allowed:	ff
+/proc/9962/task/10009/status:Cpus_allowed_list:	0-7
+/proc/9962/task/10012/status:Cpus_allowed:	ff
+/proc/9962/task/10012/status:Cpus_allowed_list:	0-7
+/proc/9962/task/10014/status:Cpus_allowed:	ff
+/proc/9962/task/10014/status:Cpus_allowed_list:	0-7
+/proc/9962/task/10017/status:Cpus_allowed:	ff
+/proc/9962/task/10017/status:Cpus_allowed_list:	0-7
+/proc/9962/task/10028/status:Cpus_allowed:	ff
+/proc/9962/task/10028/status:Cpus_allowed_list:	0-7
+/proc/9962/task/10036/status:Cpus_allowed:	ff
+/proc/9962/task/10036/status:Cpus_allowed_list:	0-7
+/proc/9962/task/10037/status:Cpus_allowed:	ff
+/proc/9962/task/10037/status:Cpus_allowed_list:	0-7
+/proc/9962/task/10038/status:Cpus_allowed:	ff
+/proc/9962/task/10038/status:Cpus_allowed_list:	0-7
+/proc/9962/task/10039/status:Cpus_allowed:	ff
+/proc/9962/task/10039/status:Cpus_allowed_list:	0-7
+/proc/9962/task/10040/status:Cpus_allowed:	ff
+/proc/9962/task/10040/status:Cpus_allowed_list:	0-7
+/proc/9962/task/10041/status:Cpus_allowed:	ff
+/proc/9962/task/10041/status:Cpus_allowed_list:	0-7
+/proc/9962/task/10042/status:Cpus_allowed:	ff
+/proc/9962/task/10042/status:Cpus_allowed_list:	0-7
+/proc/9962/task/10043/status:Cpus_allowed:	ff
+/proc/9962/task/10043/status:Cpus_allowed_list:	0-7
+/proc/9962/task/10044/status:Cpus_allowed:	ff
+/proc/9962/task/10044/status:Cpus_allowed_list:	0-7
+/proc/9962/task/10045/status:Cpus_allowed:	ff
+/proc/9962/task/10045/status:Cpus_allowed_list:	0-7
+/proc/9962/task/10048/status:Cpus_allowed:	ff
+/proc/9962/task/10048/status:Cpus_allowed_list:	0-7
+/proc/9962/task/10049/status:Cpus_allowed:	ff
+/proc/9962/task/10049/status:Cpus_allowed_list:	0-7
+/proc/9962/task/10050/status:Cpus_allowed:	ff
+/proc/9962/task/10050/status:Cpus_allowed_list:	0-7
+/proc/9962/task/10051/status:Cpus_allowed:	ff
+/proc/9962/task/10051/status:Cpus_allowed_list:	0-7
+/proc/9962/task/10052/status:Cpus_allowed:	ff
+/proc/9962/task/10052/status:Cpus_allowed_list:	0-7
+/proc/9962/task/10053/status:Cpus_allowed:	ff
+/proc/9962/task/10053/status:Cpus_allowed_list:	0-7
+/proc/9962/task/10054/status:Cpus_allowed:	ff
+/proc/9962/task/10054/status:Cpus_allowed_list:	0-7
+/proc/9962/task/10055/status:Cpus_allowed:	ff
+/proc/9962/task/10055/status:Cpus_allowed_list:	0-7
+/proc/9962/task/10056/status:Cpus_allowed:	ff
+/proc/9962/task/10056/status:Cpus_allowed_list:	0-7
+/proc/9962/task/10057/status:Cpus_allowed:	ff
+/proc/9962/task/10057/status:Cpus_allowed_list:	0-7
+/proc/9962/task/10058/status:Cpus_allowed:	ff
+/proc/9962/task/10058/status:Cpus_allowed_list:	0-7
+/proc/9962/task/10059/status:Cpus_allowed:	ff
+/proc/9962/task/10059/status:Cpus_allowed_list:	0-7
+/proc/9962/task/10061/status:Cpus_allowed:	ff
+/proc/9962/task/10061/status:Cpus_allowed_list:	0-7
+/proc/9962/task/10062/status:Cpus_allowed:	ff
+/proc/9962/task/10062/status:Cpus_allowed_list:	0-7
+/proc/9962/task/10063/status:Cpus_allowed:	ff
+/proc/9962/task/10063/status:Cpus_allowed_list:	0-7
+/proc/9962/task/10064/status:Cpus_allowed:	ff
+/proc/9962/task/10064/status:Cpus_allowed_list:	0-7
+/proc/9962/task/10065/status:Cpus_allowed:	ff
+/proc/9962/task/10065/status:Cpus_allowed_list:	0-7
+/proc/9962/task/10067/status:Cpus_allowed:	ff
+/proc/9962/task/10067/status:Cpus_allowed_list:	0-7
+/proc/9962/task/10068/status:Cpus_allowed:	ff
+/proc/9962/task/10068/status:Cpus_allowed_list:	0-7
+/proc/9962/task/10070/status:Cpus_allowed:	ff
+/proc/9962/task/10070/status:Cpus_allowed_list:	0-7
+/proc/9962/task/10073/status:Cpus_allowed:	ff
+/proc/9962/task/10073/status:Cpus_allowed_list:	0-7
+/proc/9962/task/10082/status:Cpus_allowed:	ff
+/proc/9962/task/10082/status:Cpus_allowed_list:	0-7
+/proc/9962/task/10083/status:Cpus_allowed:	ff
+/proc/9962/task/10083/status:Cpus_allowed_list:	0-7
+/proc/9962/task/10084/status:Cpus_allowed:	ff
+/proc/9962/task/10084/status:Cpus_allowed_list:	0-7
+/proc/9962/task/10086/status:Cpus_allowed:	ff
+/proc/9962/task/10086/status:Cpus_allowed_list:	0-7
+/proc/9962/task/10087/status:Cpus_allowed:	fc
+/proc/9962/task/10087/status:Cpus_allowed_list:	2-7
+/proc/9962/task/10114/status:Cpus_allowed:	ff
+/proc/9962/task/10114/status:Cpus_allowed_list:	0-7
+/proc/9962/task/10357/status:Cpus_allowed:	fc
+/proc/9962/task/10357/status:Cpus_allowed_list:	2-7
+/proc/9962/task/10358/status:Cpus_allowed:	fc
+/proc/9962/task/10358/status:Cpus_allowed_list:	2-7
+/proc/9962/task/10359/status:Cpus_allowed:	fc
+/proc/9962/task/10359/status:Cpus_allowed_list:	2-7
+/proc/9962/task/10360/status:Cpus_allowed:	fc
+/proc/9962/task/10360/status:Cpus_allowed_list:	2-7
+/proc/9962/task/10361/status:Cpus_allowed:	fc
+/proc/9962/task/10361/status:Cpus_allowed_list:	2-7
+/proc/9962/task/10362/status:Cpus_allowed:	fc
+/proc/9962/task/10362/status:Cpus_allowed_list:	2-7
+/proc/9962/task/10363/status:Cpus_allowed:	fc
+/proc/9962/task/10363/status:Cpus_allowed_list:	2-7
+/proc/9962/task/10364/status:Cpus_allowed:	fc
+/proc/9962/task/10364/status:Cpus_allowed_list:	2-7
+/proc/9962/task/10365/status:Cpus_allowed:	fc
+/proc/9962/task/10365/status:Cpus_allowed_list:	2-7
+/proc/9962/task/10366/status:Cpus_allowed:	fc
+/proc/9962/task/10366/status:Cpus_allowed_list:	2-7
+/proc/9962/task/10367/status:Cpus_allowed:	fc
+/proc/9962/task/10367/status:Cpus_allowed_list:	2-7
+/proc/9962/task/10368/status:Cpus_allowed:	fc
+/proc/9962/task/10368/status:Cpus_allowed_list:	2-7
+/proc/9962/task/10369/status:Cpus_allowed:	fc
+/proc/9962/task/10369/status:Cpus_allowed_list:	2-7
+/proc/9962/task/10370/status:Cpus_allowed:	fc
+/proc/9962/task/10370/status:Cpus_allowed_list:	2-7
+/proc/9962/task/10371/status:Cpus_allowed:	fc
+/proc/9962/task/10371/status:Cpus_allowed_list:	2-7
+/proc/9962/task/10372/status:Cpus_allowed:	fc
+/proc/9962/task/10372/status:Cpus_allowed_list:	2-7
+/proc/9962/task/10373/status:Cpus_allowed:	fc
+/proc/9962/task/10373/status:Cpus_allowed_list:	2-7
+/proc/9962/task/10376/status:Cpus_allowed:	fc
+/proc/9962/task/10376/status:Cpus_allowed_list:	2-7
+/proc/9962/task/10377/status:Cpus_allowed:	fc
+/proc/9962/task/10377/status:Cpus_allowed_list:	2-7
+/proc/9962/task/10379/status:Cpus_allowed:	fc
+/proc/9962/task/10379/status:Cpus_allowed_list:	2-7
+/proc/9962/task/10380/status:Cpus_allowed:	fc
+/proc/9962/task/10380/status:Cpus_allowed_list:	2-7
+/proc/9962/task/10381/status:Cpus_allowed:	fc
+/proc/9962/task/10381/status:Cpus_allowed_list:	2-7
+/proc/9962/task/10382/status:Cpus_allowed:	fc
+/proc/9962/task/10382/status:Cpus_allowed_list:	2-7
+/proc/9962/task/10383/status:Cpus_allowed:	fc
+/proc/9962/task/10383/status:Cpus_allowed_list:	2-7
+/proc/9962/task/10384/status:Cpus_allowed:	fc
+/proc/9962/task/10384/status:Cpus_allowed_list:	2-7
+/proc/9962/task/10385/status:Cpus_allowed:	fc
+/proc/9962/task/10385/status:Cpus_allowed_list:	2-7
+/proc/9962/task/10387/status:Cpus_allowed:	fc
+/proc/9962/task/10387/status:Cpus_allowed_list:	2-7
+/proc/9962/task/10388/status:Cpus_allowed:	fc
+/proc/9962/task/10388/status:Cpus_allowed_list:	2-7
+/proc/9962/task/10389/status:Cpus_allowed:	fc
+/proc/9962/task/10389/status:Cpus_allowed_list:	2-7
+/proc/9962/task/10390/status:Cpus_allowed:	fc
+/proc/9962/task/10390/status:Cpus_allowed_list:	2-7
+/proc/9962/task/10391/status:Cpus_allowed:	fc
+/proc/9962/task/10391/status:Cpus_allowed_list:	2-7
+/proc/9962/task/10392/status:Cpus_allowed:	fc
+/proc/9962/task/10392/status:Cpus_allowed_list:	2-7
+/proc/9962/task/10393/status:Cpus_allowed:	fc
+/proc/9962/task/10393/status:Cpus_allowed_list:	2-7
+/proc/9962/task/10394/status:Cpus_allowed:	fc
+/proc/9962/task/10394/status:Cpus_allowed_list:	2-7
+/proc/9962/task/10395/status:Cpus_allowed:	fc
+/proc/9962/task/10395/status:Cpus_allowed_list:	2-7
+/proc/9962/task/10396/status:Cpus_allowed:	fc
+/proc/9962/task/10396/status:Cpus_allowed_list:	2-7
+/proc/9962/task/10397/status:Cpus_allowed:	fc
+/proc/9962/task/10397/status:Cpus_allowed_list:	2-7
+/proc/9962/task/10398/status:Cpus_allowed:	fc
+/proc/9962/task/10398/status:Cpus_allowed_list:	2-7
+/proc/9962/task/10399/status:Cpus_allowed:	fc
+/proc/9962/task/10399/status:Cpus_allowed_list:	2-7
+/proc/9962/task/10400/status:Cpus_allowed:	fc
+/proc/9962/task/10400/status:Cpus_allowed_list:	2-7
+/proc/9962/task/10401/status:Cpus_allowed:	fc
+/proc/9962/task/10401/status:Cpus_allowed_list:	2-7
+/proc/9962/task/10402/status:Cpus_allowed:	fc
+/proc/9962/task/10402/status:Cpus_allowed_list:	2-7
+/proc/9962/task/10420/status:Cpus_allowed:	fc
+/proc/9962/task/10420/status:Cpus_allowed_list:	2-7
+/proc/9962/task/10459/status:Cpus_allowed:	ff
+/proc/9962/task/10459/status:Cpus_allowed_list:	0-7
+/proc/9962/task/9962/status:Cpus_allowed:	ff
+/proc/9962/task/9962/status:Cpus_allowed_list:	0-7
+/proc/9962/task/9963/status:Cpus_allowed:	ff
+/proc/9962/task/9963/status:Cpus_allowed_list:	0-7
+/proc/9962/task/9964/status:Cpus_allowed:	ff
+/proc/9962/task/9964/status:Cpus_allowed_list:	0-7
+/proc/9962/task/9965/status:Cpus_allowed:	ff
+/proc/9962/task/9965/status:Cpus_allowed_list:	0-7
+/proc/9962/task/9966/status:Cpus_allowed:	ff
+/proc/9962/task/9966/status:Cpus_allowed_list:	0-7
+/proc/9962/task/9968/status:Cpus_allowed:	ff
+/proc/9962/task/9968/status:Cpus_allowed_list:	0-7
+/proc/9962/task/9969/status:Cpus_allowed:	ff
+/proc/9962/task/9969/status:Cpus_allowed_list:	0-7
+/proc/9962/task/9970/status:Cpus_allowed:	ff
+/proc/9962/task/9970/status:Cpus_allowed_list:	0-7
+/proc/9962/task/9971/status:Cpus_allowed:	ff
+/proc/9962/task/9971/status:Cpus_allowed_list:	0-7
+/proc/9962/task/9972/status:Cpus_allowed:	ff
+/proc/9962/task/9972/status:Cpus_allowed_list:	0-7
+/proc/9962/task/9975/status:Cpus_allowed:	ff
+/proc/9962/task/9975/status:Cpus_allowed_list:	0-7
+/proc/9962/task/9978/status:Cpus_allowed:	ff
+/proc/9962/task/9978/status:Cpus_allowed_list:	0-7
+/proc/9962/task/9979/status:Cpus_allowed:	ff
+/proc/9962/task/9979/status:Cpus_allowed_list:	0-7
+/proc/9962/task/9982/status:Cpus_allowed:	ff
+/proc/9962/task/9982/status:Cpus_allowed_list:	0-7
+/proc/9962/task/9983/status:Cpus_allowed:	ff
+/proc/9962/task/9983/status:Cpus_allowed_list:	0-7
+/proc/9962/task/9984/status:Cpus_allowed:	ff
+/proc/9962/task/9984/status:Cpus_allowed_list:	0-7
+/proc/9962/task/9986/status:Cpus_allowed:	ff
+/proc/9962/task/9986/status:Cpus_allowed_list:	0-7
+/proc/9962/task/9987/status:Cpus_allowed:	ff
+/proc/9962/task/9987/status:Cpus_allowed_list:	0-7
+/proc/9962/task/9988/status:Cpus_allowed:	ff
+/proc/9962/task/9988/status:Cpus_allowed_list:	0-7
+/proc/9962/task/9989/status:Cpus_allowed:	ff
+/proc/9962/task/9989/status:Cpus_allowed_list:	0-7
+/proc/9962/task/9990/status:Cpus_allowed:	ff
+/proc/9962/task/9990/status:Cpus_allowed_list:	0-7
+/proc/9962/task/9991/status:Cpus_allowed:	ff
+/proc/9962/task/9991/status:Cpus_allowed_list:	0-7
+/proc/9962/task/9992/status:Cpus_allowed:	ff
+/proc/9962/task/9992/status:Cpus_allowed_list:	0-7
+/proc/9962/task/9993/status:Cpus_allowed:	ff
+/proc/9962/task/9993/status:Cpus_allowed_list:	0-7
+/proc/9962/task/9994/status:Cpus_allowed:	ff
+/proc/9962/task/9994/status:Cpus_allowed_list:	0-7
+/proc/9962/task/9995/status:Cpus_allowed:	ff
+/proc/9962/task/9995/status:Cpus_allowed_list:	0-7
+/proc/9962/task/9999/status:Cpus_allowed:	ff
+/proc/9962/task/9999/status:Cpus_allowed_list:	0-7

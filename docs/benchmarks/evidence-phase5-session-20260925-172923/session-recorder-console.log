@@ -1,0 +1,135 @@
+================================================================================
+ SambaS3 Phase 5 Live Session Recorder & Monitor
+ Target Device:       d30a1726
+ Workload:            direct_iso/BCUS98111
+ Evidence Directory:  /home/abhaybyte/repos/samba-s3/docs/benchmarks/evidence-phase5-session-20260925-172923
+ Stop Sentinel:       /tmp/stop_phase5_recording
+================================================================================
+[*] Launching game via scripts/debug-launch-game.sh...
+Starting: Intent { cmp=com.zenithblue.sambas3/.MainActivity }
+Broadcasting: Intent { act=com.zenithblue.sambas3.DEBUG_BOOT_GAME flg=0x400000 pkg=com.zenithblue.sambas3 (has extras) }
+Broadcast completed: result=0
+W/S3BOOT  ( 9962): boot started path=direct_iso/BCUS98111 request_id=s3-1790357366411430732-2849980-13302
+  mCurrentFocus=Window{6aadc34 u0 com.zenithblue.sambas3/com.zenithblue.sambas3.RPCSXActivity}
+[OK] Boot accepted and RPCSXActivity focused: direct_iso/BCUS98111
+Bridge evidence: /tmp/samba-bridge-qdsTYN/logcat.txt
+
+[+] Active emulator PID detected: 9962 (Start: 2026-09-25T17:29:28.656999+00:00)
+[+] Streaming logcat -> /home/abhaybyte/repos/samba-s3/docs/benchmarks/evidence-phase5-session-20260925-172923/logcat-streamed.log
+[*] Game is running! Recording live FPS, logs, and screenshots...
+[*] To stop recording: touch /tmp/stop_phase5_recording or tell the assistant 'stop'.
+
+[005s | PID 9962] loading/booting
+[011s | PID 9962] loading/booting
+[016s | SCREENSHOT] Saved screen_0016s.png
+[018s | PID 9962] loading/booting
+[024s | PID 9962] loading/booting
+[030s | PID 9962] loading/booting
+[032s | SCREENSHOT] Saved screen_0032s.png
+[036s | PID 9962] loading/booting
+[042s | PID 9962] loading/booting
+[048s | SCREENSHOT] Saved screen_0048s.png
+[048s | PID 9962] loading/booting
+[053s | PID 9962] loading/booting
+[060s | PID 9962] loading/booting
+[064s | SCREENSHOT] Saved screen_0064s.png
+[066s | PID 9962] presented=1001
+[073s | PID 9962] presented=1001
+[079s | PID 9962] presented=1001
+[081s | SCREENSHOT] Saved screen_0081s.png
+[084s | PID 9962] presented=1001
+[091s | PID 9962] presented=1001
+[097s | SCREENSHOT] Saved screen_0097s.png
+[097s | PID 9962] presented=1001
+[102s | PID 9962] presented=1001
+[109s | PID 9962] presented=1001
+[112s | SCREENSHOT] Saved screen_0112s.png
+[116s | PID 9962] presented=1001
+[123s | PID 9962] presented=1001
+[127s | SCREENSHOT] Saved screen_0127s.png
+[130s | PID 9962] presented=1001
+[136s | PID 9962] presented=1001
+[143s | SCREENSHOT] Saved screen_0143s.png
+[143s | PID 9962] presented=1001
+[148s | PID 9962] presented=1001
+[154s | PID 9962] presented=1001
+[159s | SCREENSHOT] Saved screen_0159s.png
+[163s | PID 9962] presented=1001
+[169s | PID 9962] presented=1001
+[176s | SCREENSHOT] Saved screen_0176s.png
+[176s | PID 9962] presented=1001
+[181s | PID 9962] presented=1001
+[188s | PID 9962] presented=1001
+[191s | SCREENSHOT] Saved screen_0191s.png
+[195s | PID 9962] presented=1001
+[201s | PID 9962] presented=1001
+[206s | SCREENSHOT] Saved screen_0206s.png
+[209s | PID 9962] presented=1001
+[216s | PID 9962] presented=1001
+[222s | SCREENSHOT] Saved screen_0222s.png
+[222s | PID 9962] presented=1001
+[228s | PID 9962] presented=1001
+[235s | PID 9962] presented=1001
+[238s | SCREENSHOT] Saved screen_0238s.png
+[241s | PID 9962] presented=1001
+[247s | PID 9962] presented=1001
+[253s | SCREENSHOT] Saved screen_0253s.png
+[253s | PID 9962] presented=1001
+[260s | PID 9962] presented=1001
+[266s | PID 9962] presented=1001
+[269s | SCREENSHOT] Saved screen_0269s.png
+[272s | PID 9962] presented=1001
+[278s | PID 9962] presented=1001
+[285s | SCREENSHOT] Saved screen_0285s.png
+[285s | PID 9962] presented=1001
+[291s | PID 9962] presented=1001
+[297s | PID 9962] presented=1001
+[300s | SCREENSHOT] Saved screen_0300s.png
+[303s | PID 9962] presented=1001
+[310s | PID 9962] presented=1001
+[316s | SCREENSHOT] Saved screen_0316s.png
+[316s | PID 9962] presented=1001
+[322s | PID 9962] presented=1001
+[329s | PID 9962] presented=1001
+[332s | SCREENSHOT] Saved screen_0332s.png
+[335s | PID 9962] presented=1001
+[341s | PID 9962] presented=1001
+[348s | SCREENSHOT] Saved screen_0348s.png
+[348s | PID 9962] presented=1001
+[354s | PID 9962] presented=1001
+[360s | PID 9962] presented=1001
+[364s | SCREENSHOT] Saved screen_0364s.png
+[367s | PID 9962] presented=1001
+[373s | PID 9962] presented=1001
+[379s | SCREENSHOT] Saved screen_0379s.png
+[379s | PID 9962] presented=1001
+[386s | PID 9962] presented=1001
+[392s | PID 9962] presented=1001
+[395s | SCREENSHOT] Saved screen_0395s.png
+
+[*] Stop signal received (/tmp/stop_phase5_recording found) at T+398s!
+
+[*] Recording finished at 2026-09-25T17:36:07.408464+00:00 (Duration: 398.8s, Stop Reason: USER_REQUESTED_STOP)
+[*] Collecting complete evidence packet (rotated logs, exit info, thermal, mem)...
+================================================================================
+ SambaS3 Run Evidence Collection
+ Target Device: d30a1726
+ Run ID:        phase5-session-20260925-172923
+ Scene:         gow3-phase5-session
+ Output Dir:    /home/abhaybyte/repos/samba-s3/docs/benchmarks/evidence-phase5-session-20260925-172923
+================================================================================
+[*] Capturing thread snapshot for live PID 9962...
+[*] Capturing screencap snapshot...
+[*] Capturing thermal & power diagnostics...
+[*] Capturing memory distribution...
+[*] Capturing ApplicationExitInfo...
+[*] Capturing device provenance and library checksums...
+[*] Delegating rotated logs collection to scripts/get-samba-logs.sh...
+[OK] Run evidence collection complete: /home/abhaybyte/repos/samba-s3/docs/benchmarks/evidence-phase5-session-20260925-172923
+[*] Run manifest: /home/abhaybyte/repos/samba-s3/docs/benchmarks/evidence-phase5-session-20260925-172923/run-manifest.json
+
+[*] Running analyze-frame-events.py...
+
+[OK] Phase 5 report successfully created:
+     -> /home/abhaybyte/repos/samba-s3/docs/benchmarks/evidence-phase5-session-20260925-172923/PHASE_5_DEVICE_TEST_REPORT.md
+     -> /home/abhaybyte/repos/samba-s3/docs/performance/PHASE_5_DEVICE_TEST_REPORT.md

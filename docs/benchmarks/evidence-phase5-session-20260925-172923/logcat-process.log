@@ -1,0 +1,127 @@
+--------- beginning of system
+09-25 22:59:24.455  9962  9979 I DisplayManager: Choreographer implicitly registered for the refresh rate.
+09-25 22:59:24.610  9962  9962 D InsetsController: Setting requestedVisibleTypes to 502 (was 503)
+09-25 22:59:26.625  9962  9962 D InsetsController: Setting requestedVisibleTypes to 496 (was 503)
+09-25 22:59:28.210  9962  9962 W NotificationManager: Shedding cancel (dupe) of NotificationKey[user=UserHandle{0}, pkg=com.zenithblue.sambas3, tag=null, id=2002], rate limit (5.0) exceeded: input 9.118145, output would be 6.3914266
+09-25 22:59:28.949  9962  9962 W NotificationManager: Shedding notify (update) of NotificationKey[user=UserHandle{0}, pkg=com.zenithblue.sambas3, tag=null, id=2000], rate limit (5.0) exceeded: input 8.478412, output would be 5.9425735
+09-25 22:59:29.386  9962  9962 W NotificationManager: Shedding cancel (dupe) of NotificationKey[user=UserHandle{0}, pkg=com.zenithblue.sambas3, tag=null, id=2002], rate limit (5.0) exceeded: input 23.310453, output would be 5.631285
+09-25 22:59:30.371  9962  9962 W NotificationManager: Shedding notify (update) of NotificationKey[user=UserHandle{0}, pkg=com.zenithblue.sambas3, tag=null, id=2000], rate limit (5.0) exceeded: input 12.521816, output would be 5.773852
+09-25 22:59:30.420  9962  9962 W NotificationManager: Shedding cancel (dupe) of NotificationKey[user=UserHandle{0}, pkg=com.zenithblue.sambas3, tag=null, id=2001], rate limit (5.0) exceeded: input 33.007286, output would be 5.795905
+09-25 22:59:31.532  9962  9962 W NotificationManager: Shedding cancel (dupe) of NotificationKey[user=UserHandle{0}, pkg=com.zenithblue.sambas3, tag=null, id=2002], rate limit (5.0) exceeded: input 20.931402, output would be 5.7596583
+09-25 22:59:31.692  9962  9962 W NotificationManager: Shedding notify (update) of NotificationKey[user=UserHandle{0}, pkg=com.zenithblue.sambas3, tag=null, id=2000], rate limit (5.0) exceeded: input 13.111601, output would be 6.200106
+09-25 22:59:32.533  9962  9962 W NotificationManager: Shedding cancel (dupe) of NotificationKey[user=UserHandle{0}, pkg=com.zenithblue.sambas3, tag=null, id=2002], rate limit (5.0) exceeded: input 40.685688, output would be 6.6304107
+09-25 22:59:32.726  9962  9962 W NotificationManager: Shedding notify (update) of NotificationKey[user=UserHandle{0}, pkg=com.zenithblue.sambas3, tag=null, id=2000], rate limit (5.0) exceeded: input 16.238628, output would be 6.8217707
+09-25 22:59:33.548  9962  9962 W NotificationManager: Shedding cancel (dupe) of NotificationKey[user=UserHandle{0}, pkg=com.zenithblue.sambas3, tag=null, id=2002], rate limit (5.0) exceeded: input 28.079, output would be 6.159338
+09-25 22:59:33.825  9962  9962 W NotificationManager: Shedding notify (update) of NotificationKey[user=UserHandle{0}, pkg=com.zenithblue.sambas3, tag=null, id=2000], rate limit (5.0) exceeded: input 10.410011, output would be 5.391031
+09-25 22:59:34.707  9962  9962 W NotificationManager: Shedding cancel (dupe) of NotificationKey[user=UserHandle{0}, pkg=com.zenithblue.sambas3, tag=null, id=2002], rate limit (5.0) exceeded: input 22.222355, output would be 5.9915867
+09-25 22:59:35.305  9962  9962 W NotificationManager: Shedding notify (update) of NotificationKey[user=UserHandle{0}, pkg=com.zenithblue.sambas3, tag=null, id=2000], rate limit (5.0) exceeded: input 11.965706, output would be 6.456065
+09-25 22:59:35.882  9962  9962 W NotificationManager: Shedding cancel (dupe) of NotificationKey[user=UserHandle{0}, pkg=com.zenithblue.sambas3, tag=null, id=2002], rate limit (5.0) exceeded: input 24.695887, output would be 5.7107215
+09-25 22:59:36.834  9962  9962 W NotificationManager: Shedding notify (update) of NotificationKey[user=UserHandle{0}, pkg=com.zenithblue.sambas3, tag=null, id=2000], rate limit (5.0) exceeded: input 9.753939, output would be 5.9937115
+09-25 22:59:36.996  9962  9962 W NotificationManager: Shedding cancel (dupe) of NotificationKey[user=UserHandle{0}, pkg=com.zenithblue.sambas3, tag=null, id=2002], rate limit (5.0) exceeded: input 24.75616, output would be 6.6361475
+09-25 22:59:38.079  9962  9962 W NotificationManager: Shedding cancel (dupe) of NotificationKey[user=UserHandle{0}, pkg=com.zenithblue.sambas3, tag=null, id=2002], rate limit (5.0) exceeded: input 22.30947, output would be 6.837018
+09-25 22:59:38.108  9962  9962 W NotificationManager: Shedding notify (update) of NotificationKey[user=UserHandle{0}, pkg=com.zenithblue.sambas3, tag=null, id=2000], rate limit (5.0) exceeded: input 13.067642, output would be 6.4444423
+09-25 22:59:39.090  9962  9962 W NotificationManager: Shedding cancel (dupe) of NotificationKey[user=UserHandle{0}, pkg=com.zenithblue.sambas3, tag=null, id=2001], rate limit (5.0) exceeded: input 34.37017, output would be 5.4544783
+09-25 22:59:39.398  9962  9962 W NotificationManager: Shedding notify (update) of NotificationKey[user=UserHandle{0}, pkg=com.zenithblue.sambas3, tag=null, id=2000], rate limit (5.0) exceeded: input 12.989645, output would be 5.132686
+09-25 22:59:40.138  9962  9962 W NotificationManager: Shedding cancel (dupe) of NotificationKey[user=UserHandle{0}, pkg=com.zenithblue.sambas3, tag=null, id=2002], rate limit (5.0) exceeded: input 26.636604, output would be 6.2686725
+09-25 22:59:40.571  9962  9962 W NotificationManager: Shedding notify (update) of NotificationKey[user=UserHandle{0}, pkg=com.zenithblue.sambas3, tag=null, id=2000], rate limit (5.0) exceeded: input 11.676161, output would be 6.110367
+09-25 22:59:41.152  9962  9962 W NotificationManager: Shedding cancel (dupe) of NotificationKey[user=UserHandle{0}, pkg=com.zenithblue.sambas3, tag=null, id=2002], rate limit (5.0) exceeded: input 28.810421, output would be 6.6502666
+09-25 22:59:41.730  9962  9962 W NotificationManager: Shedding notify (update) of NotificationKey[user=UserHandle{0}, pkg=com.zenithblue.sambas3, tag=null, id=2000], rate limit (5.0) exceeded: input 14.539284, output would be 5.31276
+09-25 22:59:42.310  9962  9962 W NotificationManager: Shedding cancel (dupe) of NotificationKey[user=UserHandle{0}, pkg=com.zenithblue.sambas3, tag=null, id=2002], rate limit (5.0) exceeded: input 18.360582, output would be 6.496417
+09-25 22:59:42.808  9962  9962 W NotificationManager: Shedding notify (update) of NotificationKey[user=UserHandle{0}, pkg=com.zenithblue.sambas3, tag=null, id=2000], rate limit (5.0) exceeded: input 12.415424, output would be 5.509027
+09-25 22:59:43.526  9962  9962 W NotificationManager: Shedding cancel (dupe) of NotificationKey[user=UserHandle{0}, pkg=com.zenithblue.sambas3, tag=null, id=2002], rate limit (5.0) exceeded: input 21.709316, output would be 6.8993006
+09-25 22:59:43.828  9962  9962 W NotificationManager: Shedding notify (update) of NotificationKey[user=UserHandle{0}, pkg=com.zenithblue.sambas3, tag=null, id=2000], rate limit (5.0) exceeded: input 10.479497, output would be 5.9782267
+09-25 22:59:44.563  9962  9962 W NotificationManager: Shedding cancel (dupe) of NotificationKey[user=UserHandle{0}, pkg=com.zenithblue.sambas3, tag=null, id=2002], rate limit (5.0) exceeded: input 12.192357, output would be 6.1604376
+09-25 22:59:45.638  9962  9962 W NotificationManager: Shedding cancel (dupe) of NotificationKey[user=UserHandle{0}, pkg=com.zenithblue.sambas3, tag=null, id=2002], rate limit (5.0) exceeded: input 21.205902, output would be 5.7071247
+09-25 22:59:45.924  9962  9962 W NotificationManager: Shedding notify (update) of NotificationKey[user=UserHandle{0}, pkg=com.zenithblue.sambas3, tag=null, id=2000], rate limit (5.0) exceeded: input 8.438292, output would be 5.713912
+09-25 22:59:46.645  9962  9962 W NotificationManager: Shedding cancel (dupe) of NotificationKey[user=UserHandle{0}, pkg=com.zenithblue.sambas3, tag=null, id=2001], rate limit (5.0) exceeded: input 59.03902, output would be 6.5386653
+09-25 22:59:46.927  9962  9962 W NotificationManager: Shedding notify (update) of NotificationKey[user=UserHandle{0}, pkg=com.zenithblue.sambas3, tag=null, id=2000], rate limit (5.0) exceeded: input 124.04647, output would be 5.9860263
+09-25 22:59:47.647  9962  9962 W NotificationManager: Shedding cancel (dupe) of NotificationKey[user=UserHandle{0}, pkg=com.zenithblue.sambas3, tag=null, id=2001], rate limit (5.0) exceeded: input 144.38481, output would be 6.672133
+09-25 22:59:47.935  9962  9962 W NotificationManager: Shedding notify (update) of NotificationKey[user=UserHandle{0}, pkg=com.zenithblue.sambas3, tag=null, id=2000], rate limit (5.0) exceeded: input 141.70042, output would be 6.047596
+09-25 22:59:48.650  9962  9962 W NotificationManager: Shedding cancel (dupe) of NotificationKey[user=UserHandle{0}, pkg=com.zenithblue.sambas3, tag=null, id=2001], rate limit (5.0) exceeded: input 174.6432, output would be 6.925535
+09-25 22:59:48.935  9962  9962 W NotificationManager: Shedding notify (update) of NotificationKey[user=UserHandle{0}, pkg=com.zenithblue.sambas3, tag=null, id=2000], rate limit (5.0) exceeded: input 132.32996, output would be 6.1900754
+09-25 22:59:49.655  9962  9962 W NotificationManager: Shedding cancel (dupe) of NotificationKey[user=UserHandle{0}, pkg=com.zenithblue.sambas3, tag=null, id=2001], rate limit (5.0) exceeded: input 204.00002, output would be 6.9687057
+09-25 22:59:49.936  9962  9962 W NotificationManager: Shedding notify (update) of NotificationKey[user=UserHandle{0}, pkg=com.zenithblue.sambas3, tag=null, id=2000], rate limit (5.0) exceeded: input 99.86318, output would be 6.2003717
+09-25 22:59:50.656  9962  9962 W NotificationManager: Shedding cancel (dupe) of NotificationKey[user=UserHandle{0}, pkg=com.zenithblue.sambas3, tag=null, id=2002], rate limit (5.0) exceeded: input 292.50092, output would be 7.098924
+09-25 22:59:50.936  9962  9962 W NotificationManager: Shedding notify (update) of NotificationKey[user=UserHandle{0}, pkg=com.zenithblue.sambas3, tag=null, id=2000], rate limit (5.0) exceeded: input 119.0273, output would be 6.3112464
+09-25 22:59:51.656  9962  9962 W NotificationManager: Shedding cancel (dupe) of NotificationKey[user=UserHandle{0}, pkg=com.zenithblue.sambas3, tag=null, id=2001], rate limit (5.0) exceeded: input 124.2064, output would be 5.102301
+09-25 22:59:51.977  9962  9962 W NotificationManager: Shedding notify (update) of NotificationKey[user=UserHandle{0}, pkg=com.zenithblue.sambas3, tag=null, id=2000], rate limit (5.0) exceeded: input 67.572105, output would be 6.0327864
+09-25 22:59:52.656  9962  9962 W NotificationManager: Shedding cancel (dupe) of NotificationKey[user=UserHandle{0}, pkg=com.zenithblue.sambas3, tag=null, id=2001], rate limit (5.0) exceeded: input 215.13994, output would be 5.300264
+09-25 22:59:52.985  9962  9962 W NotificationManager: Shedding notify (update) of NotificationKey[user=UserHandle{0}, pkg=com.zenithblue.sambas3, tag=null, id=2000], rate limit (5.0) exceeded: input 75.85334, output would be 6.080173
+09-25 22:59:53.675  9962  9962 W NotificationManager: Shedding cancel (dupe) of NotificationKey[user=UserHandle{0}, pkg=com.zenithblue.sambas3, tag=null, id=2001], rate limit (5.0) exceeded: input 151.4635, output would be 5.2009635
+09-25 22:59:53.986  9962  9962 W NotificationManager: Shedding notify (update) of NotificationKey[user=UserHandle{0}, pkg=com.zenithblue.sambas3, tag=null, id=2000], rate limit (5.0) exceeded: input 134.91042, output would be 6.1382327
+09-25 22:59:54.787  9962  9962 W NotificationManager: Shedding cancel (dupe) of NotificationKey[user=UserHandle{0}, pkg=com.zenithblue.sambas3, tag=null, id=2002], rate limit (5.0) exceeded: input 27.0419, output would be 6.3825755
+09-25 22:59:55.186  9962  9962 W NotificationManager: Shedding notify (update) of NotificationKey[user=UserHandle{0}, pkg=com.zenithblue.sambas3, tag=null, id=2000], rate limit (5.0) exceeded: input 19.250467, output would be 6.8670135
+09-25 22:59:55.957  9962  9962 W NotificationManager: Shedding cancel (dupe) of NotificationKey[user=UserHandle{0}, pkg=com.zenithblue.sambas3, tag=null, id=2002], rate limit (5.0) exceeded: input 25.793438, output would be 5.600301
+09-25 22:59:56.230  9962  9962 W NotificationManager: Shedding notify (update) of NotificationKey[user=UserHandle{0}, pkg=com.zenithblue.sambas3, tag=null, id=2000], rate limit (5.0) exceeded: input 21.429705, output would be 5.4423423
+09-25 22:59:56.965  9962  9962 W NotificationManager: Shedding cancel (dupe) of NotificationKey[user=UserHandle{0}, pkg=com.zenithblue.sambas3, tag=null, id=2001], rate limit (5.0) exceeded: input 229.66043, output would be 6.1923065
+09-25 22:59:57.235  9962  9962 W NotificationManager: Shedding notify (update) of NotificationKey[user=UserHandle{0}, pkg=com.zenithblue.sambas3, tag=null, id=2000], rate limit (5.0) exceeded: input 141.5363, output would be 5.478741
+09-25 22:59:58.016  9962  9962 W NotificationManager: Shedding cancel (dupe) of NotificationKey[user=UserHandle{0}, pkg=com.zenithblue.sambas3, tag=null, id=2001], rate limit (5.0) exceeded: input 65.504135, output would be 5.938493
+09-25 22:59:58.235  9962  9962 W NotificationManager: Shedding notify (update) of NotificationKey[user=UserHandle{0}, pkg=com.zenithblue.sambas3, tag=null, id=2000], rate limit (5.0) exceeded: input 87.6859, output would be 5.750289
+09-25 22:59:59.025  9962  9962 W NotificationManager: Shedding cancel (dupe) of NotificationKey[user=UserHandle{0}, pkg=com.zenithblue.sambas3, tag=null, id=2001], rate limit (5.0) exceeded: input 151.30771, output would be 5.8861613
+09-25 22:59:59.235  9962  9962 W NotificationManager: Shedding notify (update) of NotificationKey[user=UserHandle{0}, pkg=com.zenithblue.sambas3, tag=null, id=2000], rate limit (5.0) exceeded: input 138.8799, output would be 5.7830377
+09-25 23:00:00.047  9962  9962 W NotificationManager: Shedding cancel (dupe) of NotificationKey[user=UserHandle{0}, pkg=com.zenithblue.sambas3, tag=null, id=2002], rate limit (5.0) exceeded: input 55.676018, output would be 6.171936
+09-25 23:00:00.238  9962  9962 W NotificationManager: Shedding notify (update) of NotificationKey[user=UserHandle{0}, pkg=com.zenithblue.sambas3, tag=null, id=2000], rate limit (5.0) exceeded: input 128.45944, output would be 6.286728
+09-25 23:00:01.075  9962  9962 W NotificationManager: Shedding cancel (dupe) of NotificationKey[user=UserHandle{0}, pkg=com.zenithblue.sambas3, tag=null, id=2001], rate limit (5.0) exceeded: input 109.11008, output would be 5.956944
+09-25 23:00:01.255  9962  9962 W NotificationManager: Shedding notify (update) of NotificationKey[user=UserHandle{0}, pkg=com.zenithblue.sambas3, tag=null, id=2000], rate limit (5.0) exceeded: input 80.39018, output would be 6.18157
+09-25 23:00:02.075  9962  9962 W NotificationManager: Shedding cancel (dupe) of NotificationKey[user=UserHandle{0}, pkg=com.zenithblue.sambas3, tag=null, id=2001], rate limit (5.0) exceeded: input 159.4613, output would be 6.0026846
+09-25 23:00:02.255  9962  9962 W NotificationManager: Shedding notify (update) of NotificationKey[user=UserHandle{0}, pkg=com.zenithblue.sambas3, tag=null, id=2000], rate limit (5.0) exceeded: input 141.22314, output would be 6.2485194
+09-25 23:00:03.075  9962  9962 W NotificationManager: Shedding cancel (dupe) of NotificationKey[user=UserHandle{0}, pkg=com.zenithblue.sambas3, tag=null, id=2001], rate limit (5.0) exceeded: input 226.2357, output would be 6.1351776
+09-25 23:00:03.265  9962  9962 W NotificationManager: Shedding notify (update) of NotificationKey[user=UserHandle{0}, pkg=com.zenithblue.sambas3, tag=null, id=2000], rate limit (5.0) exceeded: input 74.75387, output would be 6.339807
+09-25 23:00:04.075  9962  9962 W NotificationManager: Shedding cancel (dupe) of NotificationKey[user=UserHandle{0}, pkg=com.zenithblue.sambas3, tag=null, id=2001], rate limit (5.0) exceeded: input 200.95493, output would be 6.303979
+09-25 23:00:04.265  9962  9962 W NotificationManager: Shedding notify (update) of NotificationKey[user=UserHandle{0}, pkg=com.zenithblue.sambas3, tag=null, id=2000], rate limit (5.0) exceeded: input 107.003716, output would be 6.463162
+09-25 23:00:05.097  9962  9962 W NotificationManager: Shedding cancel (dupe) of NotificationKey[user=UserHandle{0}, pkg=com.zenithblue.sambas3, tag=null, id=2001], rate limit (5.0) exceeded: input 77.72919, output would be 6.5381465
+09-25 23:00:05.265  9962  9962 W NotificationManager: Shedding notify (update) of NotificationKey[user=UserHandle{0}, pkg=com.zenithblue.sambas3, tag=null, id=2000], rate limit (5.0) exceeded: input 73.734726, output would be 6.971105
+09-25 23:00:06.116  9962  9962 W NotificationManager: Shedding cancel (dupe) of NotificationKey[user=UserHandle{0}, pkg=com.zenithblue.sambas3, tag=null, id=2001], rate limit (5.0) exceeded: input 101.24645, output would be 6.604967
+09-25 23:00:06.265  9962  9962 W NotificationManager: Shedding notify (update) of NotificationKey[user=UserHandle{0}, pkg=com.zenithblue.sambas3, tag=null, id=2000], rate limit (5.0) exceeded: input 74.531044, output would be 5.092791
+09-25 23:00:07.135  9962  9962 W NotificationManager: Shedding cancel (dupe) of NotificationKey[user=UserHandle{0}, pkg=com.zenithblue.sambas3, tag=null, id=2001], rate limit (5.0) exceeded: input 145.37048, output would be 6.546125
+09-25 23:00:07.267  9962  9962 W NotificationManager: Shedding notify (update) of NotificationKey[user=UserHandle{0}, pkg=com.zenithblue.sambas3, tag=null, id=2000], rate limit (5.0) exceeded: input 100.27807, output would be 5.1923366
+09-25 23:00:08.135  9962  9962 W NotificationManager: Shedding cancel (dupe) of NotificationKey[user=UserHandle{0}, pkg=com.zenithblue.sambas3, tag=null, id=2001], rate limit (5.0) exceeded: input 158.56747, output would be 6.7031407
+09-25 23:00:08.296  9962  9962 W NotificationManager: Shedding notify (update) of NotificationKey[user=UserHandle{0}, pkg=com.zenithblue.sambas3, tag=null, id=2000], rate limit (5.0) exceeded: input 53.91859, output would be 5.0563293
+09-25 23:00:09.227  9962  9962 W NotificationManager: Shedding cancel (dupe) of NotificationKey[user=UserHandle{0}, pkg=com.zenithblue.sambas3, tag=null, id=2002], rate limit (5.0) exceeded: input 33.49957, output would be 6.1241603
+09-25 23:00:09.305  9962  9962 W NotificationManager: Shedding notify (update) of NotificationKey[user=UserHandle{0}, pkg=com.zenithblue.sambas3, tag=null, id=2000], rate limit (5.0) exceeded: input 59.903774, output would be 5.3531804
+09-25 23:00:10.297  9962  9962 W NotificationManager: Shedding cancel (dupe) of NotificationKey[user=UserHandle{0}, pkg=com.zenithblue.sambas3, tag=null, id=2001], rate limit (5.0) exceeded: input 32.011795, output would be 5.7033486
+09-25 23:00:10.322  9962  9962 W NotificationManager: Shedding notify (update) of NotificationKey[user=UserHandle{0}, pkg=com.zenithblue.sambas3, tag=null, id=2000], rate limit (5.0) exceeded: input 31.874226, output would be 5.4606
+09-25 23:00:11.306  9962  9962 W NotificationManager: Shedding cancel (dupe) of NotificationKey[user=UserHandle{0}, pkg=com.zenithblue.sambas3, tag=null, id=2001], rate limit (5.0) exceeded: input 217.88603, output would be 5.745544
+09-25 23:00:11.325  9962  9962 W NotificationManager: Shedding notify (update) of NotificationKey[user=UserHandle{0}, pkg=com.zenithblue.sambas3, tag=null, id=2000], rate limit (5.0) exceeded: input 134.29305, output would be 5.5500274
+09-25 23:00:12.315  9962  9962 W NotificationManager: Shedding cancel (dupe) of NotificationKey[user=UserHandle{0}, pkg=com.zenithblue.sambas3, tag=null, id=2001], rate limit (5.0) exceeded: input 224.772, output would be 5.762976
+09-25 23:00:12.325  9962  9962 W NotificationManager: Shedding notify (update) of NotificationKey[user=UserHandle{0}, pkg=com.zenithblue.sambas3, tag=null, id=2000], rate limit (5.0) exceeded: input 135.51456, output would be 5.654716
+09-25 23:00:13.316  9962  9962 W NotificationManager: Shedding cancel (dupe) of NotificationKey[user=UserHandle{0}, pkg=com.zenithblue.sambas3, tag=null, id=2002], rate limit (5.0) exceeded: input 63.060276, output would be 6.9693737
+09-25 23:00:13.335  9962  9962 W NotificationManager: Shedding notify (update) of NotificationKey[user=UserHandle{0}, pkg=com.zenithblue.sambas3, tag=null, id=2000], rate limit (5.0) exceeded: input 28.37193, output would be 6.6961913
+09-25 23:00:14.326  9962  9962 W NotificationManager: Shedding cancel (dupe) of NotificationKey[user=UserHandle{0}, pkg=com.zenithblue.sambas3, tag=null, id=2002], rate limit (5.0) exceeded: input 266.28754, output would be 7.0623503
+09-25 23:00:14.338  9962  9962 W NotificationManager: Shedding notify (update) of NotificationKey[user=UserHandle{0}, pkg=com.zenithblue.sambas3, tag=null, id=2000], rate limit (5.0) exceeded: input 111.87122, output would be 6.8801084
+09-25 23:00:15.327  9962  9962 W NotificationManager: Shedding cancel (dupe) of NotificationKey[user=UserHandle{0}, pkg=com.zenithblue.sambas3, tag=null, id=2002], rate limit (5.0) exceeded: input 159.59023, output would be 7.1169744
+09-25 23:00:15.355  9962  9962 W NotificationManager: Shedding notify (update) of NotificationKey[user=UserHandle{0}, pkg=com.zenithblue.sambas3, tag=null, id=2000], rate limit (5.0) exceeded: input 76.68848, output would be 6.709337
+--------- beginning of main
+09-25 23:06:05.362  9962  9984 D S3PERF  : GPU load [/sys/class/kgsl/kgsl-3d0/gpubusy]: raw='0       0' -> load=null%
+09-25 23:06:05.663  9962  9962 W DefaultDispatch: type=1400 audit(0.0:7006882): avc:  denied  { search } for  name="zram0" dev="sysfs" ino=107524 scontext=u:r:untrusted_app:s0:c207,c257,c512,c768 tcontext=u:object_r:sysfs_zram:s0 tclass=dir permissive=0 app=com.zenithblue.sambas3
+09-25 23:06:05.663  9962  9962 W DefaultDispatch: type=1400 audit(0.0:7006883): avc:  denied  { search } for  name="zram0" dev="sysfs" ino=107524 scontext=u:r:untrusted_app:s0:c207,c257,c512,c768 tcontext=u:object_r:sysfs_zram:s0 tclass=dir permissive=0 app=com.zenithblue.sambas3
+09-25 23:06:07.165  9962 10037 D RPCS3   : CPU Usage: Total: 45.0%, Cores: 0.0%, 0.0%, 0.0%, 0.0%, 0.0%, 0.0%, 0.0%, 0.0%
+09-25 23:06:07.237  9962 10059 D RPCS3   : PPU Syscall Usage Stats:
+09-25 23:06:07.237  9962 10059 D RPCS3   : 	⁂ sys_timer_usleep [2626406]
+09-25 23:06:07.237  9962 10059 D RPCS3   : 	⁂ sys_event_queue_receive [143088]
+09-25 23:06:07.237  9962 10059 D RPCS3   : 	⁂ _sys_lwcond_queue_wait [97839]
+09-25 23:06:07.237  9962 10059 D RPCS3   : 	⁂ _sys_lwmutex_lock [84664]
+09-25 23:06:07.237  9962 10059 D RPCS3   : 	⁂ _sys_lwmutex_unlock [73998]
+09-25 23:06:07.237  9962 10059 D RPCS3   : 	⁂ sys_event_port_send [52997]
+09-25 23:06:07.237  9962 10059 D RPCS3   : 	⁂ _sys_lwcond_signal_all [47002]
+09-25 23:06:07.237  9962 10059 D RPCS3   : 	⁂ _sys_lwcond_signal [45192]
+09-25 23:06:07.237  9962 10059 D RPCS3   : 	⁂ sys_time_get_current_time [41167]
+09-25 23:06:07.237  9962 10059 D RPCS3   : 	⁂ sys_fs_read [10496]
+09-25 23:06:07.237  9962 10059 D RPCS3   : 	⁂ sys_fs_lseek [2500]
+09-25 23:06:14.163  9962  9962 W DefaultDispatch: type=1400 audit(0.0:7006884): avc:  denied  { search } for  name="zram0" dev="sysfs" ino=107524 scontext=u:r:untrusted_app:s0:c207,c257,c512,c768 tcontext=u:object_r:sysfs_zram:s0 tclass=dir permissive=0 app=com.zenithblue.sambas3
+09-25 23:06:14.163  9962  9962 W DefaultDispatch: type=1400 audit(0.0:7006885): avc:  denied  { search } for  name="zram0" dev="sysfs" ino=107524 scontext=u:r:untrusted_app:s0:c207,c257,c512,c768 tcontext=u:object_r:sysfs_zram:s0 tclass=dir permissive=0 app=com.zenithblue.sambas3
+09-25 23:06:14.308  9962  9972 I ithblue.sambas3: Explicit concurrent mark compact GC freed 14MB AllocSpace bytes, 185(3396KB) LOS objects, 77% free, 7007KB/30MB, paused 59us,549us total 29.687ms
+09-25 23:06:16.326  9962  9984 D S3PERF  : GPU load [/sys/class/kgsl/kgsl-3d0/gpubusy]: raw='0       0' -> load=null%
+09-25 23:06:17.165  9962 10037 D RPCS3   : CPU Usage: Total: 43.6%, Cores: 0.0%, 0.0%, 0.0%, 0.0%, 0.0%, 0.0%, 0.0%, 0.0%
+09-25 23:06:17.237  9962 10059 D RPCS3   : PPU Syscall Usage Stats:
+09-25 23:06:17.237  9962 10059 D RPCS3   : 	⁂ sys_timer_usleep [2736684]
+09-25 23:06:17.237  9962 10059 D RPCS3   : 	⁂ sys_event_queue_receive [147504]
+09-25 23:06:17.237  9962 10059 D RPCS3   : 	⁂ _sys_lwcond_queue_wait [99163]
+09-25 23:06:17.237  9962 10059 D RPCS3   : 	⁂ _sys_lwmutex_lock [85663]
+09-25 23:06:17.237  9962 10059 D RPCS3   : 	⁂ _sys_lwmutex_unlock [74717]
+09-25 23:06:17.237  9962 10059 D RPCS3   : 	⁂ sys_event_port_send [54837]
+09-25 23:06:17.237  9962 10059 D RPCS3   : 	⁂ _sys_lwcond_signal_all [47535]
+09-25 23:06:17.237  9962 10059 D RPCS3   : 	⁂ _sys_lwcond_signal [45569]
+09-25 23:06:17.237  9962 10059 D RPCS3   : 	⁂ sys_time_get_current_time [41433]
+09-25 23:06:17.237  9962 10059 D RPCS3   : 	⁂ sys_fs_read [10605]
+09-25 23:06:17.237  9962 10059 D RPCS3   : 	⁂ sys_fs_lseek [2552]

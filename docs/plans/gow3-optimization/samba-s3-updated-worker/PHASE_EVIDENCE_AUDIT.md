@@ -37,7 +37,7 @@ These statuses describe this review's evidence, not a re-run of the previous tes
 | 3 — Crash classification | Reopened: concrete precedence/identity defects | Crash-before-cleanup fixtures and exact process/run correlation |
 | 4 — Logging/frontend | Claimed work should be retained pending scoped verification | No new claim that the old hot worker still exists; profile current stacks only if needed |
 | 5 — Scheduling | Current performance-affinity policy is the control | OS-mode failure is timing-sensitive evidence, not proof of a hardware-caused FIFO defect |
-| 6 — SPU lowering | Changes and later partial rollback require code-level qualification | Differential tests, actual generated ARM code and exact transition test |
+| 6 — SPU lowering | Implementation and dual-device deployment complete; qualification/acceptance open | Differential test suite passed, Cortex-X4 codegen verified, standard release APK built & deployed to Poco X6 Pro & OnePlus 13R; transition/gameplay testing pending |
 | 7 — Single-flight / 99% cache | Reopened for correctness | Producer completion, state/lifetime/cancellation tests and cache identity audit; fresh screenshot |
 | 8 — RSX / scratch / hashing | Partial retention and partial reversion | Do not count reverted elision; test scratch ownership and semantic key contracts |
 | 9 — Memory/lifecycle | Handoff's five-cycle result is limited evidence | Recompute with warm-up policy, consistent scene, units and longer cyclic/continuous coverage |

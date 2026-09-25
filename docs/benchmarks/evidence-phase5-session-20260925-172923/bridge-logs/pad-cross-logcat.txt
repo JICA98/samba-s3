@@ -1,0 +1,3 @@
+--------- beginning of main
+W/DebugPad( 9962): BUTTON CROSS d1=0 d2=64 press 120ms request_id=s3-1790357402917350994-2850210-10807
+W/DebugPad( 9962): BUTTON CROSS release request_id=s3-1790357402917350994-2850210-10807
