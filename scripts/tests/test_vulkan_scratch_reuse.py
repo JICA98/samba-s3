@@ -32,7 +32,7 @@ class VulkanScratchReuseTests(unittest.TestCase):
             self.assertIn("ALL 5 VULKAN WORK & SCRATCH REUSE TESTS PASSED SUCCESSFULLY!", run_res.stdout)
 
     def test_vk_texture_cache_scratch_reuse(self):
-        """Verify VKTextureCache.h reuses thread-owned scratch buffer storage with capacity retention."""
+        """Verify VKTextureCache.h reuses thread-owned scratch buffer storage with capacity retention, checked ranges, and non-reentrancy."""
         header_file = os.path.join(ROOT_DIR, "app", "src", "main", "cpp", "rpcsx", "rpcs3", "Emu", "RSX", "VK", "VKTextureCache.h")
         with open(header_file, "r") as f:
             content = f.read()
@@ -45,9 +45,15 @@ class VulkanScratchReuseTests(unittest.TestCase):
         self.assertIn("s_swizzle_scratch.resize(swiz_size);", content)
         self.assertIn("std::memcpy(s_swizzle_scratch.data(), data, swiz_size);", content)
         self.assertIn("rsx::convert_linear_swizzle<u32, false>(s_swizzle_scratch.data(), data, width, height, rsx_pitch);", content)
+        # Check checked 64-bit multiplication and overflow guard
+        self.assertIn("const u64 swiz_size_64 = static_cast<u64>(rsx_pitch) * static_cast<u64>(height);", content)
+        # Check non-reentrancy assertion
+        self.assertIn("ensure(!s_swizzle_in_use);", content)
+        # Check high-water mark capacity bounding
+        self.assertIn("s_swizzle_scratch.shrink_to_fit();", content)
 
     def test_vk_pipeline_compiler_semantic_hashing(self):
-        """Verify VKPipelineCompiler.h hashes semantic properties directly and avoids pointer/padding hashing."""
+        """Verify VKPipelineCompiler.h hashes semantic properties directly, normalizes floats (-0.0f vs +0.0f), and avoids pointer/padding hashing."""
         header_file = os.path.join(ROOT_DIR, "app", "src", "main", "cpp", "rpcsx", "rpcs3", "Emu", "RSX", "VK", "VKPipelineCompiler.h")
         with open(header_file, "r") as f:
             content = f.read()
@@ -60,6 +66,9 @@ class VulkanScratchReuseTests(unittest.TestCase):
         self.assertIn("seed = hash64(seed, static_cast<u32>(pipelineProperties.state.rs.cullMode));", content)
         self.assertIn("seed = hash64(seed, static_cast<u32>(pipelineProperties.state.ds.depthCompareOp));", content)
         self.assertIn("seed = hash64(seed, pipelineProperties.state.cs.attachmentCount);", content)
+        # Float normalization for minSampleShading (-0.0f -> +0.0f)
+        self.assertIn("if (mss == 0.0f) mss = 0.0f;", content)
+        self.assertIn("if (mss_a == 0.0f) mss_a = 0.0f;", content)
         # Ensure pointers are NOT hashed
         self.assertNotIn("seed ^= hash_struct(ms_tmp);", content)
         self.assertNotIn("seed ^= hash_struct(tmp);", content)

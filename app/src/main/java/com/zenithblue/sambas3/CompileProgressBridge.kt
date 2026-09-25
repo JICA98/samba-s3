@@ -307,7 +307,7 @@ object CompileProgressBridge {
 
         // Reducer keyed by domain/jobId
         when (ev.domain) {
-            RPCSX.COMPILE_DOMAIN_PPU -> handlePpu(ev, appCtx)
+            RPCSX.COMPILE_DOMAIN_PPU, RPCSX.COMPILE_DOMAIN_SPU -> handlePpu(ev, appCtx)
             RPCSX.COMPILE_DOMAIN_SHADER -> handleShader(ev, appCtx)
             else -> Log.w(TAG, "Unknown domain ${ev.domain}")
         }

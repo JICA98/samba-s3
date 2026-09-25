@@ -214,6 +214,7 @@ class RPCSX {
     companion object {
         const val COMPILE_DOMAIN_PPU = 0
         const val COMPILE_DOMAIN_SHADER = 1
+        const val COMPILE_DOMAIN_SPU = 2
         const val COMPILE_PHASE_BEGIN = 0
         const val COMPILE_PHASE_PROGRESS = 1
         const val COMPILE_PHASE_COMPLETED = 2

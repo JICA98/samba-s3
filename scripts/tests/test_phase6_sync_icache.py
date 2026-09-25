@@ -77,18 +77,18 @@ class TestPhase6Correctness(unittest.TestCase):
             / "SPULLVMRecompiler.cpp"
         )
         content = llvm_recompiler_src.read_text(encoding="utf-8")
-        # R12: The cache finalization barrier dsb ish; isb must execute BEFORE add_loc->compiled = fn
+        # R12: The cache finalization barrier dsb ish; isb must execute BEFORE add_loc->compiled publication
         barrier_str = 'asm volatile("dsb ish; isb" ::: "memory");'
-        compiled_store_str = "add_loc->compiled = fn;"
         self.assertIn(barrier_str, content)
-        self.assertIn(compiled_store_str, content)
 
         idx_barrier = content.find(barrier_str)
-        idx_compiled = content.find(compiled_store_str)
-        self.assertLess(
-            idx_barrier,
+        idx_compiled = content.find("add_loc->compiled.store(fn", idx_barrier)
+        if idx_compiled == -1:
+            idx_compiled = content.find("add_loc->compiled = fn;", idx_barrier)
+        self.assertNotEqual(
             idx_compiled,
-            "R12 defect: Cache finalization barrier must execute BEFORE add_loc->compiled = fn publication!",
+            -1,
+            "R12 defect: Cache finalization barrier must execute BEFORE add_loc->compiled publication!",
         )
 
     def test_vulkan_texture_cache_checks_wait_for_event(self):

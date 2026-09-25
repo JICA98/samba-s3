@@ -326,8 +326,13 @@ namespace mock_vk
 				return false;
 
 			if (state.ms.rasterizationSamples != 1) {
+				float mss_a = state.ms.minSampleShading;
+				float mss_b = other.state.ms.minSampleShading;
+				if (mss_a == 0.0f) mss_a = 0.0f;
+				if (mss_b == 0.0f) mss_b = 0.0f;
+
 				if (state.ms.sampleShadingEnable != other.state.ms.sampleShadingEnable ||
-					state.ms.minSampleShading != other.state.ms.minSampleShading ||
+					mss_a != mss_b ||
 					state.ms.alphaToCoverageEnable != other.state.ms.alphaToCoverageEnable ||
 					state.ms.alphaToOneEnable != other.state.ms.alphaToOneEnable)
 					return false;
@@ -404,9 +409,11 @@ namespace mock_vk
 		seed = rpcs3::hash64(seed, static_cast<u32>(props.state.ms.rasterizationSamples));
 		if (props.state.ms.rasterizationSamples != 1) {
 			seed = rpcs3::hash64(seed, static_cast<u32>(props.state.ms.sampleShadingEnable));
-			u32 mss;
-			std::memcpy(&mss, &props.state.ms.minSampleShading, sizeof(u32));
-			seed = rpcs3::hash64(seed, mss);
+			float mss = props.state.ms.minSampleShading;
+			if (mss == 0.0f) mss = 0.0f;
+			u32 mss_bits;
+			std::memcpy(&mss_bits, &mss, sizeof(u32));
+			seed = rpcs3::hash64(seed, mss_bits);
 			seed = rpcs3::hash64(seed, static_cast<u32>(props.state.ms.alphaToCoverageEnable));
 			seed = rpcs3::hash64(seed, static_cast<u32>(props.state.ms.alphaToOneEnable));
 			seed = rpcs3::hash64(seed, static_cast<u32>(props.state.temp_storage.msaa_sample_mask));
@@ -423,14 +430,38 @@ void test_scratch_buffer_capacity_retention()
 {
 	std::printf("[TEST 1] Scratch buffer capacity retention across multiple readback cycles...\n");
 
-	// Simulated flush readback handler with capacity retention matching VKTextureCache.h
-	auto simulate_flush_readback = [](u32 swiz_size, u8* out_ptr_addr, usz* out_cap) {
+	// Simulated flush readback handler matching VKTextureCache.h
+	auto simulate_flush_readback = [](u32 rsx_pitch, u32 height, u8* out_ptr_addr, usz* out_cap) -> u8* {
+		// Checked 64-bit multiplication / overflow protection (Ticket CR06 / Phase 8)
+		const u64 swiz_size_64 = static_cast<u64>(rsx_pitch) * static_cast<u64>(height);
+		if (swiz_size_64 > 0x100000000ULL || swiz_size_64 == 0) {
+			return nullptr;
+		}
+		const u32 swiz_size = static_cast<u32>(swiz_size_64);
+
 		static thread_local std::vector<u8> s_swizzle_scratch;
+		static thread_local bool s_swizzle_in_use = false;
+
+		// Non-reentrancy guard
+		if (s_swizzle_in_use) {
+			return nullptr;
+		}
+		s_swizzle_in_use = true;
+
 		if (s_swizzle_scratch.size() < swiz_size) {
 			s_swizzle_scratch.resize(swiz_size);
 		}
-		*out_ptr_addr = s_swizzle_scratch.empty() ? 0 : s_swizzle_scratch[0];
-		*out_cap = s_swizzle_scratch.capacity();
+		if (out_ptr_addr) *out_ptr_addr = s_swizzle_scratch.empty() ? 0 : s_swizzle_scratch[0];
+		if (out_cap) *out_cap = s_swizzle_scratch.capacity();
+
+		// High-water capacity bounding: shrink if capacity exceeds 16MB and current request is under 4MB
+		if (s_swizzle_scratch.capacity() > 16 * 1024 * 1024 && swiz_size < 4 * 1024 * 1024) {
+			s_swizzle_scratch.resize(swiz_size);
+			s_swizzle_scratch.shrink_to_fit();
+			if (out_cap) *out_cap = s_swizzle_scratch.capacity();
+		}
+
+		s_swizzle_in_use = false;
 		return s_swizzle_scratch.data();
 	};
 
@@ -438,41 +469,54 @@ void test_scratch_buffer_capacity_retention()
 	u8 dummy = 0;
 
 	// Cycle 1: 512x512 ARGB8 (1,048,576 bytes)
-	const u32 size_512 = 512 * 512 * 4;
-	u8* ptr1 = simulate_flush_readback(size_512, &dummy, &cap1);
+	u8* ptr1 = simulate_flush_readback(512 * 4, 512, &dummy, &cap1);
 	TEST_ASSERT(ptr1 != nullptr, "Cycle 1 pointer must be non-null");
-	TEST_ASSERT(cap1 >= size_512, "Cycle 1 capacity must be at least 1MB");
+	TEST_ASSERT(cap1 >= 512 * 512 * 4, "Cycle 1 capacity must be at least 1MB");
 
 	// Cycle 2: 256x256 ARGB8 (262,144 bytes) - smaller readback
-	const u32 size_256 = 256 * 256 * 4;
-	u8* ptr2 = simulate_flush_readback(size_256, &dummy, &cap2);
+	u8* ptr2 = simulate_flush_readback(256 * 4, 256, &dummy, &cap2);
 	TEST_ASSERT(ptr2 == ptr1, "Cycle 2 must reuse existing memory buffer without reallocation");
 	TEST_ASSERT(cap2 == cap1, "Cycle 2 capacity must be retained");
 
 	// Cycle 3: 128x128 ARGB8 (65,536 bytes) - even smaller
-	const u32 size_128 = 128 * 128 * 4;
-	u8* ptr3 = simulate_flush_readback(size_128, &dummy, &cap3);
+	u8* ptr3 = simulate_flush_readback(128 * 4, 128, &dummy, &cap3);
 	TEST_ASSERT(ptr3 == ptr1, "Cycle 3 must reuse existing memory buffer");
 	TEST_ASSERT(cap3 == cap1, "Cycle 3 capacity must be retained");
 
 	// Cycle 4: 1024x1024 ARGB8 (4,194,304 bytes) - larger readback
-	const u32 size_1024 = 1024 * 1024 * 4;
 	usz cap4 = 0;
-	u8* ptr4 = simulate_flush_readback(size_1024, &dummy, &cap4);
+	u8* ptr4 = simulate_flush_readback(1024 * 4, 1024, &dummy, &cap4);
 	TEST_ASSERT(ptr4 != nullptr, "Cycle 4 pointer must be non-null");
-	TEST_ASSERT(cap4 >= size_1024, "Cycle 4 capacity must expand to at least 4MB");
+	TEST_ASSERT(cap4 >= 1024 * 1024 * 4, "Cycle 4 capacity must expand to at least 4MB");
 
 	// Cycle 5: 50 consecutive cycles of mixed smaller sizes (64x64 to 512x512)
 	// Must execute with 0 reallocations!
 	for (int i = 0; i < 50; ++i) {
-		u32 test_size = ((i % 4) + 1) * 128 * 128 * 4; // up to 1MB
+		u32 width = ((i % 4) + 1) * 128;
 		usz cap_cycle = 0;
-		u8* ptr_cycle = simulate_flush_readback(test_size, &dummy, &cap_cycle);
+		u8* ptr_cycle = simulate_flush_readback(width * 4, 128, &dummy, &cap_cycle);
 		TEST_ASSERT(ptr_cycle == ptr4, "Subsequent smaller readbacks must NEVER reallocate");
 		TEST_ASSERT(cap_cycle == cap4, "Capacity must remain retained across all cycles");
 	}
 
-	std::printf("  -> Verified: 0 allocations across all smaller/equal readback cycles, capacity preserved!\n");
+	// Cycle 6: Checked multiplication overflow prevention
+	u8* overflow_ptr = simulate_flush_readback(0x80000000u, 4, nullptr, nullptr);
+	TEST_ASSERT(overflow_ptr == nullptr, "Checked multiplication must reject 32-bit overflow");
+
+	// Cycle 7: High-water mark capacity shrinking
+	// Allocate 20MB (>16MB)
+	usz cap_large = 0;
+	u8* ptr_large = simulate_flush_readback(5120 * 4, 1024, nullptr, &cap_large);
+	TEST_ASSERT(ptr_large != nullptr, "Large allocation must succeed");
+	TEST_ASSERT(cap_large >= 20 * 1024 * 1024, "Capacity must exceed 20MB");
+
+	// Subsequent small allocation (<4MB) must shrink capacity to bound memory footprint
+	usz cap_shrunk = 0;
+	u8* ptr_shrunk = simulate_flush_readback(256 * 4, 256, nullptr, &cap_shrunk);
+	TEST_ASSERT(ptr_shrunk != nullptr, "Small allocation after high-water must succeed");
+	TEST_ASSERT(cap_shrunk <= 16 * 1024 * 1024, "High-water shrinking must reduce capacity to <= 16MB");
+
+	std::printf("  -> Verified: 0 allocations across readback cycles, checked multiplication & high-water bounds verified!\n");
 	PASS_TEST();
 }
 
@@ -693,7 +737,17 @@ void test_pipeline_props_semantic_hashing_and_equality()
 	TEST_ASSERT(h1 != h5, "Hash must change when primitive topology changes");
 	TEST_ASSERT(!(p1 == p2), "Operator== must evaluate false when primitive topology changes");
 
-	std::printf("  -> Verified: Semantic hashing is immune to pointers and padding; detects semantic changes!\n");
+	// Test -0.0f vs +0.0f floating-point semantic equality and hash invariant (Ticket CR06 / Phase 8)
+	p1.state.ms.rasterizationSamples = 2;
+	p1.state.ms.sampleShadingEnable = 1;
+	p1.state.ms.minSampleShading = -0.0f;
+	p2 = p1;
+	p2.state.ms.minSampleShading = +0.0f;
+	TEST_ASSERT(p1 == p2, "Operator== must evaluate true for -0.0f vs +0.0f minSampleShading");
+	TEST_ASSERT(mock_vk::hash_pipeline_props(p1) == mock_vk::hash_pipeline_props(p2),
+		"Hash of -0.0f must match hash of +0.0f: satisfies equal(a, b) => hash(a) == hash(b)");
+
+	std::printf("  -> Verified: Semantic hashing is immune to pointers and padding; detects semantic changes; normalizes -0.0f to +0.0f!\n");
 	PASS_TEST();
 }
 
