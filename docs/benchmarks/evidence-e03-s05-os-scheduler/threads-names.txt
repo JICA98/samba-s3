@@ -1,0 +1,118 @@
+303 : VBlank Thread
+305 : PPU[0x100000e] 
+306 : PPU[0x100000f] 
+307 : PPU[0x1000010] 
+308 : PPU[0x1000011] 
+309 : PPU[0x1000012] 
+310 : PPU[0x1000013] 
+311 : PPU[0x1000014] 
+312 : PPU[0x1000015] 
+313 : PPU[0x1000016] 
+314 : PPU[0x1000017] 
+315 : PPU[0x1000018] 
+316 : PPU[0x1000019] 
+317 : PPU[0x100001a] 
+318 : PPU[0x100001b] 
+319 : PPU[0x100001c] 
+320 : PPU[0x100001d] 
+321 : PPU[0x100001e] 
+322 : PPU[0x100001f] 
+323 : PPU[0x1000020] 
+324 : PPU[0x1000021] 
+32489 : ithblue.sambas3
+32490 : Signal Catcher
+32491 : perfetto_hprof_
+32493 : Jit thread pool
+32494 : HeapTaskDaemon
+32495 : ReferenceQueueD
+32496 : FinalizerDaemon
+32497 : FinalizerWatchd
+32498 : binder:32489_1
+32499 : binder:32489_2
+325 : PPU[0x1000022] 
+32501 : binder:32489_3
+32503 : Profile Saver
+32504 : RenderThread
+32507 : DefaultDispatch
+32508 : DefaultDispatch
+32509 : DefaultDispatch
+32511 : Log Writer
+32512 : ithblue.sambas3
+32513 : Thread-5
+32514 : Thread-6
+32515 : DefaultDispatch
+32516 : TracingMuxer
+32517 : pool-4-thread-1
+32518 : hwuiTask0
+32519 : hwuiTask1
+32525 : DefaultDispatch
+32527 : DefaultDispatch
+32528 : DefaultDispatch
+32529 : DefaultDispatch
+32530 : GrallocUploadTh
+32532 : SurfaceSyncGrou
+32535 : DefaultExecutor
+32540 : binder:32489_4
+32541 : binder:32489_3
+326 : PPU[0x1000023] 
+32600 : InteractionJank
+32619 : queued-work-loo
+32629 : Progress Dialog
+32630 : Performance Sen
+32631 : PS Move Worker 
+32632 : PS Move Worker 
+32633 : PS Move Worker 
+32634 : PS Move Worker 
+32635 : Gem Thread
+32636 : Camera Thread
+32637 : Usb Manager Thr
+32638 : cellAudio Threa
+32639 : cellAudio Threa
+32640 : cellAudio Threa
+32641 : cellAudio Threa
+32644 : MediaList Threa
+32645 : Network P2P Thr
+32646 : GDB Server
+32647 : CPU Profiler
+32648 : VUART AV Thread
+32650 : Timer Thread
+32651 : RsxAudioData Th
+32652 : Tcp Over Udp Ti
+32653 : Network Thread
+32654 : LV2 Watchdog Th
+32655 : PPU Syscall Usa
+32656 : Signaling Manag
+32657 : NetStart Hack
+32658 : MsgDialog Close
+32660 : Microphone Thre
+32661 : Overlay Input T
+32662 : com.ze:traceq0
+32670 : RSX.W1
+32671 : RSX.W2
+32672 : Thread-17
+32674 : Pad Thread
+32675 : PPU[0x1000000] 
+32677 : S3 Fresh Boot F
+32698 : AAudio_1
+327 : PPU[0x1000024] 
+32740 : binder:32489_5
+32751 : SPU[0x0000100] 
+32752 : SPU[0x1000100] 
+32753 : SPU[0x2000100] 
+32754 : SPU[0x3000100] 
+32755 : SPU[0x4000100] 
+32756 : PPU[0x1000001] 
+32757 : PPU[0x1000002] 
+32758 : SPU[0x0000200] 
+32759 : PPU[0x1000003] 
+32760 : PPU[0x1000004] 
+32761 : PPU[0x1000005] 
+32762 : PPU[0x1000006] 
+32763 : PPU[0x1000007] 
+32764 : PPU[0x1000008] 
+32765 : PPU[0x1000009] 
+32766 : PPU[0x100000a] 
+32767 : PPU[0x100000b] 
+328 : PPU[0x1000025] 
+329 : PPU[0x1000026] 
+504 : PPU[0x100002b] 

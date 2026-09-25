@@ -38,7 +38,7 @@ DEFAULT_DEVICE = "d30a1726"
 
 # Pinned commit and release hashes for verification
 EXPECTED_CORE_HASH = "ed8ba6c12c218249524a441b79f48d6bae842394"
-EXPECTED_APK_SHA256 = "8c65247dbfcd05f5bbc0de0775783b5b4e0277c2fc0fd6ae20cd4f78606c2e38"
+EXPECTED_APK_SHA256 = "d0e25751badc15835addb0f37b132413c4d67e456f217efa4bc0c4df93810306"
 EXPECTED_SO_SHA256 = "571426c33f8677ebec0f5fcc26c1c32d5e6ac6e9bdd2422bc0b1f0edb6afab09"
 
 
@@ -577,7 +577,12 @@ def main() -> int:
 
     # 9. Deterministic clean stop
     print("[*] Initiating clean game stop via debug-stop-game.sh...")
-    r_stop = run_cmd([str(SCRIPTS_DIR / "debug-stop-game.sh"), args.serial], timeout=45)
+    clean_stop = False
+    try:
+        r_stop = run_cmd([str(SCRIPTS_DIR / "debug-stop-game.sh"), args.serial], timeout=75)
+        clean_stop = (r_stop.returncode == 0)
+    except subprocess.TimeoutExpired:
+        print("[!] Warning: debug-stop-game.sh timed out waiting for stop confirmation", file=sys.stderr)
 
     # Refresh post-stop exit info in evidence directory
     r_exit = adb_shell(args.serial, f"dumpsys activity exit-info {PKG_NAME}")
@@ -588,8 +593,8 @@ def main() -> int:
     if manifest_path.exists():
         try:
             m_data = json.loads(manifest_path.read_text(encoding="utf-8"))
-            m_data["clean_stop"] = (r_stop.returncode == 0)
-            m_data["stop_reason"] = "DEBUG_STOP_GAME"
+            m_data["clean_stop"] = clean_stop
+            m_data["stop_reason"] = "DEBUG_STOP_GAME" if clean_stop else "STOP_FAILED_OR_CRASH"
             if effective_scheduler:
                 m_data["scheduler_mode"] = effective_scheduler
             manifest_path.write_text(json.dumps(m_data, indent=2), encoding="utf-8")
@@ -598,12 +603,14 @@ def main() -> int:
 
     # 10. Run frame events analyzer
     analysis_json_path = outdir / "frame-analysis.json"
-    logcat_sambas3 = outdir / "logcat-sambas3.txt"
-    if logcat_sambas3.exists():
-        print("[*] Running analyze-frame-events.py on collected session logs...")
+    log_for_analysis = outdir / "logcat-process.log"
+    if not log_for_analysis.exists() or log_for_analysis.stat().st_size == 0:
+        log_for_analysis = outdir / "logcat-sambas3.txt"
+    if log_for_analysis.exists():
+        print(f"[*] Running analyze-frame-events.py on collected session logs ({log_for_analysis.name})...")
         analyze_cmd = [
             str(PERF_DIR / "analyze-frame-events.py"),
-            str(logcat_sambas3),
+            str(log_for_analysis),
             "--json",
             "--output-json", str(analysis_json_path),
         ]

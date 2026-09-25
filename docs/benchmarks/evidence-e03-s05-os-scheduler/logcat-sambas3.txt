@@ -1,0 +1,300 @@
+09-25 07:29:38.479 32489 32673 D RPCS3   : [07f2] NV4097_SET_ATTRIB_TEX_COORD: 0xedcba987
+09-25 07:29:38.479 32489 32673 D RPCS3   : [07f3] NV4097_SET_ATTRIB_TEX_COORD_EX: 0x0000006f
+09-25 07:29:38.479 32489 32673 D RPCS3   : [07f4] NV4097_SET_ATTRIB_UCLIP0: 0x00171615
+09-25 07:29:38.479 32489 32673 D RPCS3   : [07f5] NV4097_SET_ATTRIB_UCLIP1: 0x001b1a19
+09-25 07:29:38.479 32489 32673 D RPCS3   : [07f8] NV4097_SET_REDUCE_DST_COLOR: 0x00000001
+09-25 07:29:38.479 32489 32673 D RPCS3   : [07fa] NV4097_SET_NO_PARANOID_TEXTURE_FETCHES: 0x00000000
+09-25 07:29:38.479 32489 32673 D RPCS3   : [07fb] NV4097_SET_SHADER_PACKER: 0x00000001
+09-25 07:29:38.479 32489 32673 D RPCS3   : [07fc] Transform program enabled inputs: in_pos in_normal in_point_size in_7
+09-25 07:29:38.479 32489 32673 D RPCS3   : [07fd] Transform program outputs: tc0 tc1 tc5
+09-25 07:29:38.479 32489 32673 D RPCS3   : [07fe] NV4097_SET_TRANSFORM_BRANCH_BITS: 0x00000000
+09-25 07:29:38.479 32489 32673 D RPCS3   : [0800] NV0039_SET_OBJECT: 0x31337303
+09-25 07:29:38.479 32489 32673 D RPCS3   : [0840] Unnamed method 0x0840: 0x00000000
+09-25 07:29:38.479 32489 32673 D RPCS3   : [0860] NV0039_SET_CONTEXT_DMA_NOTIFIES: 0x66604200
+09-25 07:29:38.479 32489 32673 D RPCS3   : [0861] NV0039: input DMA: Main-Buffer
+09-25 07:29:38.479 32489 32673 D RPCS3   : [0862] NV0039: output DMA: Local-Buffer
+09-25 07:29:38.479 32489 32673 D RPCS3   : [08c3] NV0039: input offset: 00x0
+09-25 07:29:38.479 32489 32673 D RPCS3   : [08c4] NV0039: output offset: 0x0
+09-25 07:29:38.479 32489 32673 D RPCS3   : [08c5] NV0039: input pitch: 0
+09-25 07:29:38.479 32489 32673 D RPCS3   : [08c6] NV0039: output pitch: 0
+09-25 07:29:38.479 32489 32673 D RPCS3   : [08c7] NV0039: line length input: 0
+09-25 07:29:38.479 32489 32673 D RPCS3   : [08c8] NV0039: line count: 0
+09-25 07:29:38.479 32489 32673 D RPCS3   : [08c9] NV0039: input format = 1, output format = 1
+09-25 07:29:38.479 32489 32673 D RPCS3   : [08ca] NV0039_BUFFER_NOTIFY: 0x00000000
+09-25 07:29:38.479 32489 32673 D RPCS3   : [1800] NV3062_SET_OBJECT: 0x313371c3
+09-25 07:29:38.479 32489 32673 D RPCS3   : [1860] NV3062_SET_CONTEXT_DMA_NOTIFIES: 0x66604200
+09-25 07:29:38.479 32489 32673 D RPCS3   : [1861] NV3062_SET_CONTEXT_DMA_IMAGE_SOURCE: 0xfeed0001
+09-25 07:29:38.479 32489 32673 D RPCS3   : [1862] NV3062: output DMA: Main-Buffer
+09-25 07:29:38.479 32489 32673 D RPCS3   : [18c0] NV3062: output fmt: y32
+09-25 07:29:38.479 32489 32673 D RPCS3   : [18c1] Blit engine: output alignment: 4096 pitch: 4096
+09-25 07:29:38.479 32489 32673 D RPCS3   : [18c2] NV3062_SET_OFFSET_SOURCE: 0x00000000
+09-25 07:29:38.479 32489 32673 D RPCS3   : [18c3] NV3062: output offset: 0x3d0d500
+09-25 07:29:38.479 32489 32673 D RPCS3   : [2000] NV309E_SET_OBJECT: 0x31337a73
+09-25 07:29:38.479 32489 32673 D RPCS3   : [2060] NV309E_SET_CONTEXT_DMA_NOTIFIES: 0x66604200
+09-25 07:29:38.479 32489 32673 D RPCS3   : [2061] NV309E: output DMA: Local-Buffer
+09-25 07:29:38.479 32489 32673 D RPCS3   : [20c0] NV309E: output fmt: a8r8g8b8 log2-width: 0 log2-height: 1
+09-25 07:29:38.479 32489 32673 D RPCS3   : [20c1] NV309E: offset: 0x0
+09-25 07:29:38.479 32489 32673 D RPCS3   : [2800] NV308A_SET_OBJECT: 0x31337808
+09-25 07:29:38.479 32489 32673 D RPCS3   : [2860] NV308A_SET_CONTEXT_DMA_NOTIFIES: 0x66604200
+09-25 07:29:38.479 32489 32673 D RPCS3   : [2861] NV308A_SET_CONTEXT_COLOR_KEY: 0x00000000
+09-25 07:29:38.479 32489 32673 D RPCS3   : [2862] NV308A_SET_CONTEXT_CLIP_RECTANGLE: 0x00000000
+09-25 07:29:38.479 32489 32673 D RPCS3   : [2863] NV308A_SET_CONTEXT_PATTERN: 0x00000000
+09-25 07:29:38.479 32489 32673 D RPCS3   : [2864] NV308A_SET_CONTEXT_ROP: 0x00000000
+09-25 07:29:38.479 32489 32673 D RPCS3   : [2865] NV308A_SET_CONTEXT_BETA1: 0x00000000
+09-25 07:29:38.479 32489 32673 D RPCS3   : [2866] NV308A_SET_CONTEXT_BETA4: 0x00000000
+09-25 07:29:38.479 32489 32673 D RPCS3   : [2867] NV308A_SET_CONTEXT_SURFACE: 0x313371c3
+09-25 07:29:38.479 32489 32673 D RPCS3   : [28be] NV308A_SET_COLOR_CONVERSION: 0x00000000
+09-25 07:29:38.479 32489 32673 D RPCS3   : [28bf] NV308A_SET_OPERATION: 0x00000003
+09-25 07:29:38.479 32489 32673 D RPCS3   : [28c0] NV308A_SET_COLOR_FORMAT: 0x00000004
+09-25 07:29:38.479 32489 32673 D RPCS3   : [28c1] NV308A: x: 8 y: 0
+09-25 07:29:38.479 32489 32673 D RPCS3   : [28c2] NV308A_SIZE_OUT: 0x00010004
+09-25 07:29:38.479 32489 32673 D RPCS3   : [28c3] NV308A_SIZE_IN: 0x00010004
+09-25 07:29:38.479 32489 32673 D RPCS3   : [3060] NV3089_SET_CONTEXT_DMA_NOTIFIES: 0x66604200
+09-25 07:29:38.479 32489 32673 D RPCS3   : [3061] NV3089: input DMA: Local-Buffer
+09-25 07:29:38.479 32489 32673 D RPCS3   : [3062] NV3089_SET_CONTEXT_PATTERN: 0x00000000
+09-25 07:29:38.479 32489 32673 D RPCS3   : [3063] NV3089_SET_CONTEXT_ROP: 0x00000000
+09-25 07:29:38.479 32489 32673 D RPCS3   : [3064] NV3089_SET_CONTEXT_BETA1: 0x00000000
+09-25 07:29:38.479 32489 32673 D RPCS3   : [3065] NV3089_SET_CONTEXT_BETA4: 0x00000000
+09-25 07:29:38.479 32489 32673 D RPCS3   : [3066] NV3089: context surface: surface 2d
+09-25 07:29:38.479 32489 32673 D RPCS3   : [30bf] NV3089_SET_COLOR_CONVERSION: 0x00000001
+09-25 07:29:38.479 32489 32673 D RPCS3   : [30c0] NV3089: source fmt: a8r8g8b8
+09-25 07:29:38.479 32489 32673 D RPCS3   : [30c1] NV3089: op: srccopy
+09-25 07:29:38.479 32489 32673 D RPCS3   : [30c2] Blit engine: clip x: 0 y: 0
+09-25 07:29:38.479 32489 32673 D RPCS3   : [30c3] Blit engine: clip width: 352 height: 1
+09-25 07:29:38.479 32489 32673 D RPCS3   : [30c4] Blit engine: output x: 0 y: 0
+09-25 07:29:38.479 32489 32673 D RPCS3   : [30c5] Blit engine: output width: 352 height: 1
+09-25 07:29:38.479 32489 32673 D RPCS3   : [30c6] NV3089: DS DX: 1
+09-25 07:29:38.479 32489 32673 D RPCS3   : [30c7] NV3089: DT DY: 1
+09-25 07:29:38.479 32489 32673 D RPCS3   : [3100] Blit engine: input width: 352 height: 1
+09-25 07:29:38.479 32489 32673 D RPCS3   : [3101] NV3089: input fmt: 1408 origin: corner interp: zoh
+09-25 07:29:38.479 32489 32673 D RPCS3   : [3102] NV3089: input offset: 0xbd74400
+09-25 07:29:38.479 32489 32673 D RPCS3   : [3103] NV3089: in x = 0 y = 0
+09-25 07:29:38.479 32489 32673 D RPCS3   : [3800] SET_DRIVER_OBJECT: 0xcafebabe
+09-25 07:29:38.479 32489 32673 D RPCS3   : [3a48] FLIP_HEAD: 0x00000000
+09-25 07:29:38.479 32489 32673 D RPCS3   : [3a49] FLIP_HEAD + 0x4: 0x8000010f
+09-25 07:29:38.479 32489 32673 D RPCS3   : [3a50] DRIVER_QUEUE + 0x0: 0x00000000
+09-25 07:29:38.479 32489 32673 D RPCS3   : [3a51] DRIVER_QUEUE + 0x4: 0x00000001
+09-25 07:29:38.479 32489 32673 D RPCS3   : [3a52] Unnamed method 0x3a52: 0x00000000
+09-25 07:29:38.479 32489 32673 D RPCS3   : [3a53] Unnamed method 0x3a53: 0x00000000
+09-25 07:29:38.479 32489 32673 D RPCS3   : [3a54] Unnamed method 0x3a54: 0x00000000
+09-25 07:29:38.479 32489 32673 D RPCS3   : [3a55] Unnamed method 0x3a55: 0x00000000
+09-25 07:29:38.479 32489 32673 D RPCS3   : [3a56] Unnamed method 0x3a56: 0x00000000
+09-25 07:29:38.479 32489 32673 D RPCS3   : [3a57] Unnamed method 0x3a57: 0x00000000
+09-25 07:29:38.479 32489 32673 D RPCS3   : [3ac0] SET_USER_COMMAND: 0x00000000
+09-25 07:29:38.479 32489 32673 D RPCS3   : [3ac1] Unnamed method 0x3ac1: 0x00000000
+09-25 07:29:38.479 32489 32673 D RPCS3   : [3c7e] Unnamed method 0x3c7e: 0x00000000
+09-25 07:29:38.479 32489 32673 D RPCS3   : [3fab] FLIP_COMMAND: 0x00000000
+09-25 07:29:38.479 32489 32673 D RPCS3   : 
+09-25 07:29:38.479 32489 32673 D RPCS3   : Call stack:
+09-25 07:29:38.479 32489 32673 D RPCS3   : =========
+09-25 07:29:38.479 32489 32673 D RPCS3   : 0x0016ec80 (0x0) called
+09-25 07:29:38.479 32489 32673 D RPCS3   : > from 0x00a27de8 (sp=0x00000000)
+09-25 07:29:38.479 32489 32673 D RPCS3   : 
+09-25 07:29:38.479 32489 32673 D RPCS3   : [0016ec00] ( )    NV406E semaphore: offset: 0x520
+09-25 07:29:38.479 32489 32673 D RPCS3   : [0016ec08] ( )    NV406E semaphore: release: 0x3016ec00
+09-25 07:29:38.479 32489 32673 D RPCS3   : [0016ec10] ( )    NV4097 semaphore: offset: 0x4f0
+09-25 07:29:38.479 32489 32673 D RPCS3   : [0016ec18] ( )    NV4097_TEXTURE_READ_SEMAPHORE_RELEASE: 0x00000001
+09-25 07:29:38.479 32489 32673 D RPCS3   : [0016ec20] ( )    NV4097_GET_REPORT: 0x0110e2f0
+09-25 07:29:38.479 32489 32673 D RPCS3   : [0016ec28] ( )    NV4097 semaphore: offset: 0x480
+09-25 07:29:38.479 32489 32673 D RPCS3   : [0016ec30] ( )    NV4097_BACK_END_WRITE_SEMAPHORE_RELEASE: 0x00d40900
+09-25 07:29:38.479 32489 32673 D RPCS3   : [0016ec38] ( )    NV406E Ref: 0x000009d4
+09-25 07:29:38.479 32489 32673 D RPCS3   : [0016ec40] ( )    NV406E semaphore: offset: 0x10
+09-25 07:29:38.479 32489 32673 D RPCS3   : [0016ec48] ( )    NV406E semaphore: acquire: 0x0
+09-25 07:29:38.479 32489 32673 D RPCS3   : [0016ec50] ( )    DRIVER_QUEUE + 0x4: 0x00000001
+09-25 07:29:38.479 32489 32673 D RPCS3   : [0016ec58] ( )    NV406E semaphore: context: DEVICE-R
+09-25 07:29:38.479 32489 32673 D RPCS3   : [0016ec60] ( )    NV406E semaphore: offset: 0x30
+09-25 07:29:38.479 32489 32673 D RPCS3   : [0016ec68] ( )    NV406E semaphore: release: 0x0
+09-25 07:29:38.479 32489 32673 D RPCS3   : [0016ec70] ( )    NV406E semaphore: offset: 0x30
+09-25 07:29:38.479 32489 32673 D RPCS3   : [0016ec78] ( )    NV406E semaphore: acquire: 0x1
+09-25 07:29:38.479 32489 32673 D RPCS3   : [0016ec80] (x)    call 0x0000000
+09-25 07:29:38.479 32489 32673 D RPCS3   : [0016ec84] ( )    NV406E semaphore: offset: 0x10
+09-25 07:29:38.479 32489 32673 D RPCS3   : [0016ec8c] ( )    NV406E semaphore: release: 0xffffffff
+09-25 07:29:38.479 32489 32673 D RPCS3   : [0016ec94] ( )    FLIP_HEAD + 0x4: 0x8000010f
+09-25 07:29:38.479 32489 32673 D RPCS3   : [0016ec9c] ( )    Surface: Color target(s): surface A
+09-25 07:29:38.479 32489 32673 D RPCS3   : [0016eca4] ( )    Surface: color mask A = true R = true G = true B = true
+09-25 07:29:38.479 32489 32673 D RPCS3   : [0016ecac] ( )    NV4097_SET_COLOR_MASK_MRT: 0x0000fff0
+09-25 07:29:38.479 32489 32673 D RPCS3   : [0016ecb4] ( )    Front Face: counter clock wise
+09-25 07:29:38.479 32489 32673 D RPCS3   : [0016ecbc] ( )    NV4097_SET_ATTRIB_TEX_COORD_EX: 0x0000006f
+09-25 07:29:38.479 32489 32673 D RPCS3   : [0016ecc4] ( )    REPORT: context DMA: memory host buffer
+09-25 07:29:38.479 32489 32673 D RPCS3   : [0016eccc] ( )    NV4097_SET_PERFORMANCE_PARAMS: 0x00080004
+09-25 07:29:38.479 32489 32673 D RPCS3   : [0016ecd4] ( )    (invalidate vertex cache file)
+09-25 07:29:38.479 32489 32673 D RPCS3   : [0016ecdc] ( )    (invalidate vertex file)
+09-25 07:29:38.479 32489 32673 D RPCS3   : [0016ece4] ( )    NV4097_INVALIDATE_L2: 0x00000001
+09-25 07:29:38.479 32489 32673 F RPCS3   : Thread terminated due to fatal error: Dead FIFO commands queue state has been detected!
+09-25 07:29:38.479 32489 32673 F RPCS3   : Try increasing "Driver Wake-Up Delay" setting or setting "RSX FIFO Accuracy" to "Atomic", both in Advanced settings. Called from 
+09-25 07:29:38.479 32489 32673 F RPCS3   : (in file /home/abhaybyte/repos/samba-s3/app/src/main/cpp/rpcsx/rpcs3/Emu/RSX/RSXFIFO.cpp:725[:6], in function 'void rsx::thread::run_FIFO()') (errno=22=Invalid argument)
+09-25 07:29:38.479 32489 32673 F RPCS3   : (in file /home/abhaybyte/repos/samba-s3/app/src/main/cpp/rpcsx/rpcs3/Emu/RSX/RSXThread.cpp:2670[:4], in function 'void rsx::thread::recover_fifo(std::source_location)') (errno=22=Invalid argument)
+09-25 07:29:38.505 32489 32673 D RPCS3   : Thread time: 39.344313s (0.000000Gc); Faults: 2580 [rsx:2580, spu:0]; [soft:850238 hard:0]; Switches:[vol:24840 unvol:35630]; Wait:[53.078s, spur:0]
+09-25 07:29:38.506 32489 32673 W RPCS3   : CPU Thread 'rsx::thread' terminated abnormally!
+09-25 07:29:38.518 32489 32670 I RPCS3   : Program compiled successfully
+09-25 07:29:38.638 32489 32630 D RPCS3   : CPU Usage: Total: 82.5%, Cores: 0.0%, 0.0%, 0.0%, 0.0%, 0.0%, 0.0%, 0.0%, 0.0%
+09-25 07:29:38.764 32489 32527 D S3PERF  : crosscheck source=surface presented=2514 json_fps=12.5368 json_frametime_ms=58.357
+09-25 07:29:38.764 32489 32655 D RPCS3   : PPU Syscall Usage Stats:
+09-25 07:29:38.764 32489 32655 D RPCS3   : 	⁂ sys_timer_usleep [257816]
+09-25 07:29:38.764 32489 32655 D RPCS3   : 	⁂ _sys_lwcond_queue_wait [105037]
+09-25 07:29:38.764 32489 32655 D RPCS3   : 	⁂ _sys_lwmutex_lock [101144]
+09-25 07:29:38.764 32489 32655 D RPCS3   : 	⁂ _sys_lwmutex_unlock [97301]
+09-25 07:29:38.764 32489 32655 D RPCS3   : 	⁂ _sys_lwcond_signal [63281]
+09-25 07:29:38.764 32489 32655 D RPCS3   : 	⁂ _sys_lwcond_signal_all [40495]
+09-25 07:29:38.764 32489 32655 D RPCS3   : 	⁂ sys_event_queue_receive [28744]
+09-25 07:29:38.764 32489 32655 D RPCS3   : 	⁂ sys_time_get_current_time [28501]
+09-25 07:29:38.764 32489 32655 D RPCS3   : 	⁂ sys_fs_read [16424]
+09-25 07:29:38.764 32489 32655 D RPCS3   : 	⁂ sys_fs_write [14254]
+09-25 07:29:38.764 32489 32655 D RPCS3   : 	⁂ sys_event_port_send [9809]
+09-25 07:29:38.764 32489 32655 D RPCS3   : 	⁂ sys_event_flag_wait [2912]
+09-25 07:29:38.764 32489 32655 D RPCS3   : 	⁂ sys_event_flag_clear [2912]
+09-25 07:29:38.764 32489 32655 D RPCS3   : 	⁂ sys_fs_fsync [2376]
+09-25 07:29:38.764 32489 32655 D RPCS3   : 	⁂ sys_fs_lseek [2046]
+09-25 07:29:38.764 32489 32655 D RPCS3   : 	⁂ _sys_lwmutex_trylock [109]
+09-25 07:29:38.764 32489 32655 D RPCS3   : 	⁂ sys_tty_write [38]
+09-25 07:29:38.766 32489 32671 I RPCS3   : Program compiled successfully
+09-25 07:29:39.298 32489   504 E RPCS3   : Video au decode has been waiting for a consumer for 5 seconds. (handle=0xf0000300, seq_id=1, cmd_id=63, queue_size=61)
+09-25 07:29:39.682 32489 32527 D S3PERF  : crosscheck ui_snapshot_fps=12.5368 ui_snapshot_frametime_ms=58.357
+09-25 07:29:39.986 32489 32527 D S3PERF  : crosscheck source=surface presented=2514 json_fps=12.5368 json_frametime_ms=58.357
+09-25 07:29:41.369 32489 32489 W DebugPad: BUTTON SQUARE d1=0 d2=128 press 120ms request_id=s3-1790301581322817029-1827017-27348
+09-25 07:29:41.489 32489 32489 W DebugPad: BUTTON SQUARE release request_id=s3-1790301581322817029-1827017-27348
+09-25 07:29:44.431 32489   504 E RPCS3   : Video au decode has been waiting for a consumer for 5 seconds. (handle=0xf0000300, seq_id=1, cmd_id=63, queue_size=61)
+09-25 07:29:47.313 32489 32527 D S3PERF  : GPU load [/sys/class/kgsl/kgsl-3d0/gpubusy]: raw='0       0' -> load=null%
+09-25 07:29:48.636 32489 32630 D RPCS3   : CPU Usage: Total: 47.2%, Cores: 0.0%, 0.0%, 0.0%, 0.0%, 0.0%, 0.0%, 0.0%, 0.0%
+09-25 07:29:48.763 32489 32655 D RPCS3   : PPU Syscall Usage Stats:
+09-25 07:29:48.763 32489 32655 D RPCS3   : 	⁂ sys_timer_usleep [362044]
+09-25 07:29:48.763 32489 32655 D RPCS3   : 	⁂ _sys_lwcond_queue_wait [106048]
+09-25 07:29:48.763 32489 32655 D RPCS3   : 	⁂ _sys_lwmutex_lock [101996]
+09-25 07:29:48.763 32489 32655 D RPCS3   : 	⁂ _sys_lwmutex_unlock [97681]
+09-25 07:29:48.763 32489 32655 D RPCS3   : 	⁂ _sys_lwcond_signal [63477]
+09-25 07:29:48.763 32489 32655 D RPCS3   : 	⁂ _sys_lwcond_signal_all [40779]
+09-25 07:29:48.763 32489 32655 D RPCS3   : 	⁂ sys_event_queue_receive [33068]
+09-25 07:29:48.763 32489 32655 D RPCS3   : 	⁂ sys_time_get_current_time [28633]
+09-25 07:29:48.763 32489 32655 D RPCS3   : 	⁂ sys_fs_read [16475]
+09-25 07:29:48.763 32489 32655 D RPCS3   : 	⁂ sys_event_port_send [11604]
+09-25 07:29:48.763 32489 32655 D RPCS3   : 	⁂ sys_fs_lseek [2071]
+09-25 07:29:49.524 32489   504 E RPCS3   : Video au decode has been waiting for a consumer for 5 seconds. (handle=0xf0000300, seq_id=1, cmd_id=63, queue_size=61)
+09-25 07:29:50.461 32489 32489 W DebugPad: BUTTON SQUARE d1=0 d2=128 press 120ms request_id=s3-1790301590428272938-1827300-9009
+09-25 07:29:50.582 32489 32489 W DebugPad: BUTTON SQUARE release request_id=s3-1790301590428272938-1827300-9009
+09-25 07:29:54.423 32489 32489 I S3TOUCH : root action=down x=1387 y=114
+09-25 07:29:54.423 32489 32489 I S3TOUCH : monitor action=down consumed=false
+09-25 07:29:54.423 32489 32489 I S3TOUCH : pad action=down menu=false
+09-25 07:29:54.429 32489 32674 D RPCS3   : FRONTEND_MENU home-request consumed
+09-25 07:29:54.435 32489 32489 I S3HOME  : source=NativeFrontendEvent edge=down action=open state=Running
+09-25 07:29:54.435 32489 32527 D RPCS3   : FRONTEND_MENU begin isPaused=0 wasRunning=1
+09-25 07:29:54.435 32489 32527 I RPCS3   : Emulation is being paused... (mark=0)
+09-25 07:29:54.435 32489 32527 D RPCS3   : FRONTEND_MENU begin pausedByMenu=1
+09-25 07:29:54.438 32489 32527 D RPCS3   : Loading RPCN config. Path: /storage/emulated/0/Android/data/com.zenithblue.sambas3/files/config/rpcn.yml
+09-25 07:29:54.468 32489 32489 I S3PERF  : monitor enabled=true intervalMs=300
+09-25 07:29:54.469 32489 32489 I S3MENU  : paused-frame captured generation=1 1920x872
+09-25 07:29:54.630 32489   504 E RPCS3   : Video au decode has been waiting for a consumer for 5 seconds. (handle=0xf0000300, seq_id=1, cmd_id=63, queue_size=61)
+09-25 07:29:54.763 32489 32655 D RPCS3   : PPU Syscall Usage Stats:
+09-25 07:29:54.763 32489 32655 D RPCS3   : 	⁂ sys_timer_usleep [421481]
+09-25 07:29:54.763 32489 32655 D RPCS3   : 	⁂ _sys_lwcond_queue_wait [106656]
+09-25 07:29:54.763 32489 32655 D RPCS3   : 	⁂ _sys_lwmutex_lock [102510]
+09-25 07:29:54.763 32489 32655 D RPCS3   : 	⁂ _sys_lwmutex_unlock [97921]
+09-25 07:29:54.763 32489 32655 D RPCS3   : 	⁂ _sys_lwcond_signal [63599]
+09-25 07:29:54.763 32489 32655 D RPCS3   : 	⁂ _sys_lwcond_signal_all [40952]
+09-25 07:29:54.763 32489 32655 D RPCS3   : 	⁂ sys_event_queue_receive [35544]
+09-25 07:29:54.763 32489 32655 D RPCS3   : 	⁂ sys_time_get_current_time [28716]
+09-25 07:29:54.763 32489 32655 D RPCS3   : 	⁂ sys_fs_read [16508]
+09-25 07:29:54.763 32489 32655 D RPCS3   : 	⁂ sys_fs_write [14254]
+09-25 07:29:54.763 32489 32655 D RPCS3   : 	⁂ sys_event_port_send [12647]
+09-25 07:29:54.763 32489 32655 D RPCS3   : 	⁂ sys_event_flag_wait [2912]
+09-25 07:29:54.763 32489 32655 D RPCS3   : 	⁂ sys_event_flag_clear [2912]
+09-25 07:29:54.763 32489 32655 D RPCS3   : 	⁂ sys_fs_fsync [2376]
+09-25 07:29:54.763 32489 32655 D RPCS3   : 	⁂ sys_fs_lseek [2085]
+09-25 07:29:54.763 32489 32655 D RPCS3   : 	⁂ sys_mmapper_map_shared_memory [425]
+09-25 07:29:54.763 32489 32655 D RPCS3   : 	⁂ sys_mmapper_unmap_shared_memory [255]
+09-25 07:29:54.763 32489 32655 D RPCS3   : 	⁂ sys_mmapper_allocate_shared_memory [200]
+09-25 07:29:54.763 32489 32655 D RPCS3   : 	⁂ sys_time_get_timezone [142]
+09-25 07:29:54.763 32489 32655 D RPCS3   : 	⁂ _sys_lwmutex_create [133]
+09-25 07:29:54.763 32489 32655 D RPCS3   : 	⁂ _sys_lwmutex_trylock [109]
+09-25 07:29:54.763 32489 32655 D RPCS3   : 	⁂ sys_fs_fcntl [68]
+09-25 07:29:54.763 32489 32655 D RPCS3   : 	⁂ sys_mutex_lock [50]
+09-25 07:29:54.763 32489 32655 D RPCS3   : 	⁂ sys_mutex_unlock [50]
+09-25 07:29:54.763 32489 32655 D RPCS3   : 	⁂ _sys_lwcond_create [50]
+09-25 07:29:54.763 32489 32655 D RPCS3   : 	⁂ sys_time_get_timebase_frequency [48]
+09-25 07:29:54.763 32489 32655 D RPCS3   : 	⁂ sys_rsx_context_attribute [46]
+09-25 07:29:54.763 32489 32655 D RPCS3   : 	⁂ _sys_ppu_thread_create [43]
+09-25 07:29:54.763 32489 32655 D RPCS3   : 	⁂ sys_fs_fstat [42]
+09-25 07:29:54.763 32489 32655 D RPCS3   : 	⁂ sys_fs_open [40]
+09-25 07:29:54.763 32489 32655 D RPCS3   : 	⁂ sys_ppu_thread_start [39]
+09-25 07:29:54.763 32489 32655 D RPCS3   : 	⁂ sys_tty_write [38]
+09-25 07:29:54.763 32489 32655 D RPCS3   : 	⁂ sys_semaphore_create [34]
+09-25 07:29:54.763 32489 32655 D RPCS3   : 	⁂ sys_fs_stat [27]
+09-25 07:29:54.763 32489 32655 D RPCS3   : 	⁂ _sys_prx_start_module [26]
+09-25 07:29:54.763 32489 32655 D RPCS3   : 	⁂ sys_fs_close [20]
+09-25 07:29:54.763 32489 32655 D RPCS3   : 	⁂ sys_rsx_context_iomap [16]
+09-25 07:29:54.763 32489 32655 D RPCS3   : 	⁂ _sys_prx_load_module [13]
+09-25 07:29:54.763 32489 32655 D RPCS3   : 	⁂ sys_event_queue_create [8]
+09-25 07:29:54.763 32489 32655 D RPCS3   : 	⁂ sys_rsx_context_iounmap [7]
+09-25 07:29:54.763 32489 32655 D RPCS3   : 	⁂ sys_event_flag_create [6]
+09-25 07:29:54.763 32489 32655 D RPCS3   : 	⁂ sys_event_port_create [6]
+09-25 07:29:54.763 32489 32655 D RPCS3   : 	⁂ sys_event_port_connect_local [6]
+09-25 07:29:54.763 32489 32655 D RPCS3   : 	⁂ sys_spu_thread_initialize [6]
+09-25 07:29:54.763 32489 32655 D RPCS3   : 	⁂ sys_process_getpid [5]
+09-25 07:29:54.763 32489 32655 D RPCS3   : 	⁂ sys_mutex_create [5]
+09-25 07:29:54.763 32489 32655 D RPCS3   : 	⁂ sys_spu_thread_group_connect_event_all_threads [5]
+09-25 07:29:54.763 32489 32655 D RPCS3   : 	⁂ sys_process_get_sdk_version [4]
+09-25 07:29:54.763 32489 32655 D RPCS3   : 	⁂ sys_memory_get_user_memory_size [4]
+09-25 07:29:54.763 32489 32655 D RPCS3   : 	⁂ sys_rsx_attribute [4]
+09-25 07:29:54.763 32489 32655 D RPCS3   : 	⁂ _sys_ppu_thread_exit [3]
+09-25 07:29:54.763 32489 32655 D RPCS3   : 	⁂ _sys_interrupt_thread_disestablish [3]
+09-25 07:29:54.763 32489 32655 D RPCS3   : 	⁂ sys_memory_allocate [3]
+09-25 07:29:54.763 32489 32655 D RPCS3   : 	⁂ sys_process_is_spu_lock_line_reservation_address [2]
+09-25 07:29:54.763 32489 32655 D RPCS3   : 	⁂ sys_cond_create [2]
+09-25 07:29:54.763 32489 32655 D RPCS3   : 	⁂ sys_spu_thread_group_create [2]
+09-25 07:29:54.763 32489 32655 D RPCS3   : 	⁂ sys_spu_thread_group_start [2]
+09-25 07:29:54.763 32489 32655 D RPCS3   : 	⁂ sys_spu_thread_group_join [2]
+09-25 07:29:54.763 32489 32655 D RPCS3   : 	⁂ sys_spu_thread_group_connect_event [2]
+09-25 07:29:54.763 32489 32655 D RPCS3   : 	⁂ _sys_prx_register_module [2]
+09-25 07:29:54.763 32489 32655 D RPCS3   : 	⁂ _sys_prx_get_module_id_by_name [2]
+09-25 07:29:54.763 32489 32655 D RPCS3   : 	⁂ sys_fs_get_block_size [2]
+09-25 07:29:54.763 32489 32655 D RPCS3   : 	⁂ sys_fs_disk_free [2]
+09-25 07:29:54.763 32489 32655 D RPCS3   : 	⁂ sys_ss_access_control_engine [2]
+09-25 07:29:54.763 32489 32655 D RPCS3   : 	⁂ _sys_process_get_paramsfo [1]
+09-25 07:29:54.763 32489 32655 D RPCS3   : 	⁂ sys_ppu_thread_get_priority [1]
+09-25 07:29:54.763 32489 32655 D RPCS3   : 	⁂ sys_timer_create [1]
+09-25 07:29:54.763 32489 32655 D RPCS3   : 	⁂ _sys_timer_start [1]
+09-25 07:29:54.763 32489 32655 D RPCS3   : 	⁂ sys_timer_connect_event_queue [1]
+09-25 07:29:54.763 32489 32655 D RPCS3   : 	⁂ sys_spu_initialize [1]
+09-25 07:29:54.763 32489 32655 D RPCS3   : 	⁂ sys_mmapper_allocate_address [1]
+09-25 07:29:54.763 32489 32655 D RPCS3   : 	⁂ syscall_462 [1]
+09-25 07:29:54.763 32489 32655 D RPCS3   : 	⁂ sys_rsx_memory_allocate [1]
+09-25 07:29:54.763 32489 32655 D RPCS3   : 	⁂ sys_rsx_context_allocate [1]
+09-25 07:29:54.763 32489 32655 D RPCS3   : 	⁂ sys_rsx_device_map [1]
+09-25 07:29:54.763 32489 32655 D RPCS3   : 	⁂ sys_fs_opendir [1]
+09-25 07:29:54.763 32489 32655 D RPCS3   : 	⁂ sys_fs_mkdir [1]
+09-25 07:29:56.510 32489 32489 I S3TOUCH : root action=down x=667 y=789
+09-25 07:29:57.275 32489 32489 I S3TOUCH : root action=down x=2254 y=787
+09-25 07:29:57.479 32489 32527 D S3PERF  : GPU load [/sys/class/kgsl/kgsl-3d0/gpubusy]: raw='0       0' -> load=null%
+09-25 07:29:58.071 32489 32489 I S3TOUCH : root action=down x=2409 y=835
+09-25 07:29:58.146 32489 32529 I S3PERF  : Selected GPU load source: path=/sys/class/kgsl/kgsl-3d0/gpubusy, format=KGSL_WINDOWED_PAIR, semantics=WINDOWED
+09-25 07:29:58.470 32489 32529 D S3PERF  : GPU load [/sys/class/kgsl/kgsl-3d0/gpubusy]: raw='411694 1012150' -> load=40.67519636417527%
+09-25 07:29:58.470 32489 32529 D S3PERF  : android telemetry available ram=true gpu=true temp=true power=false
+09-25 07:29:58.637 32489 32630 D RPCS3   : CPU Usage: Total: 14.4%, Cores: 0.0%, 0.0%, 0.0%, 0.0%, 0.0%, 0.0%, 0.0%, 0.0%
+09-25 07:29:59.547 32489 32489 I S3TOUCH : root action=down x=157 y=85
+09-25 07:29:59.632 32489 32489 W DebugPad: BUTTON SQUARE d1=0 d2=128 press 120ms request_id=s3-1790301599535015863-1827567-28275
+09-25 07:29:59.752 32489 32489 W DebugPad: BUTTON SQUARE release request_id=s3-1790301599535015863-1827567-28275
+09-25 07:29:59.754 32489   504 E RPCS3   : Video au decode has been waiting for a consumer for 5 seconds. (handle=0xf0000300, seq_id=1, cmd_id=63, queue_size=61)
+09-25 07:30:00.513 32489 32489 I S3TOUCH : root action=down x=577 y=482
+09-25 07:30:01.056 32489 32489 I S3TOUCH : root action=down x=432 y=340
+09-25 07:30:01.097 32489 32527 D RPCS3   : FRONTEND_MENU end resume_if_owned=1 owns_pause=1 isPaused=1
+09-25 07:30:01.097 32489 32527 D RPCS3   : Performance report begin (0 src, 0 acc):
+09-25 07:30:01.097 32489 32527 D RPCS3   : Performance report end.
+09-25 07:30:01.098 32489 32527 I RPCS3   : Emulation has been resumed!
+09-25 07:30:01.099 32489 32527 D RPCS3   : FRONTEND_MENU resumed
+09-25 07:30:01.128 32489 32489 I S3PERF  : monitor enabled=true intervalMs=300
+09-25 07:30:01.227 32489 32527 I S3PERF  : export=1 payload_length=455 version=2 source=surface presented=2514 vblank=null/null fps=null frametime_ms=null fps_samples=0 frametime_samples=0 merged_fallback=0 fallback_presented=2514 ppu=0.882373 spu=31.7654 rsx=0.0 rsx_load=0
+09-25 07:30:04.885 32489   504 E RPCS3   : Video au decode has been waiting for a consumer for 5 seconds. (handle=0xf0000300, seq_id=1, cmd_id=63, queue_size=61)
+09-25 07:30:08.636 32489 32630 D RPCS3   : CPU Usage: Total: 46.2%, Cores: 0.0%, 0.0%, 0.0%, 0.0%, 0.0%, 0.0%, 0.0%, 0.0%
+09-25 07:30:08.763 32489 32655 D RPCS3   : PPU Syscall Usage Stats:
+09-25 07:30:08.763 32489 32655 D RPCS3   : 	⁂ sys_timer_usleep [503475]
+09-25 07:30:08.763 32489 32655 D RPCS3   : 	⁂ _sys_lwcond_queue_wait [107436]
+09-25 07:30:08.763 32489 32655 D RPCS3   : 	⁂ _sys_lwmutex_lock [103162]
+09-25 07:30:08.763 32489 32655 D RPCS3   : 	⁂ _sys_lwmutex_unlock [98201]
+09-25 07:30:08.763 32489 32655 D RPCS3   : 	⁂ _sys_lwcond_signal [63744]
+09-25 07:30:08.763 32489 32655 D RPCS3   : 	⁂ _sys_lwcond_signal_all [41167]
+09-25 07:30:08.763 32489 32655 D RPCS3   : 	⁂ sys_event_queue_receive [38833]
+09-25 07:30:08.763 32489 32655 D RPCS3   : 	⁂ sys_time_get_current_time [28815]
+09-25 07:30:08.763 32489 32655 D RPCS3   : 	⁂ sys_fs_read [16547]
+09-25 07:30:08.763 32489 32655 D RPCS3   : 	⁂ sys_event_port_send [13995]
+09-25 07:30:08.763 32489 32655 D RPCS3   : 	⁂ sys_fs_lseek [2104]
+09-25 07:30:09.151 32489 32529 D S3PERF  : GPU load [/sys/class/kgsl/kgsl-3d0/gpubusy]: raw='0       0' -> load=null%
+09-25 07:30:10.019 32489   504 E RPCS3   : Video au decode has been waiting for a consumer for 5 seconds. (handle=0xf0000300, seq_id=1, cmd_id=63, queue_size=61)
