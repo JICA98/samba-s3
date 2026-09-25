@@ -1,0 +1,82 @@
+{
+  "timestamp": "2026-09-25T07:52:20Z",
+  "provenance_collected_at": "2026-09-25T09:20:00Z",
+  "device": {
+    "serial": "d30a1726",
+    "model": "CPH2691",
+    "soc": "SM8650 (Snapdragon 8 Gen 3)",
+    "android_version": "16",
+    "kernel": "6.1.174-gf870a38a2536",
+    "fingerprint": "OnePlus/CPH2691IN/OP5D3BL1:16/UKQ1.231108.001/V.R4T3.37e288c-13a765a-13fa038:user/release-keys",
+    "gpu": {
+      "renderer": "Qualcomm Adreno 750",
+      "gles_version": "GLES 3.2 V@0762.41",
+      "vulkan_version": "Vulkan 1.3",
+      "driver_path": "/vendor/lib64/hw/vulkan.adreno.so",
+      "driver_sha256": "979ac22c0d46c26804d559a93ab6c93c66272f224d3a5d0908f94a51247154b0",
+      "driver_package": "system_adreno",
+      "driver_version": "0762.41",
+      "mesa_commit": "unknown",
+      "pipeline_cache_uuid": "unknown",
+      "enabled_extensions": "unknown"
+    }
+  },
+  "package": {
+    "package_name": "com.zenithblue.sambas3",
+    "version_name": "2026.09.17",
+    "version_code": "20260917",
+    "code_path": "/data/app/~~vxGC51Lzpu6zPVsT4jRLxg==/com.zenithblue.sambas3-BjhVtN2ysAN9NvryQroXvQ==",
+    "base_apk_sha256": "5a35d5dcd69404eeb945817c1094bc6196c0310532954b5bd68017e6ba3054d9",
+    "librpcsx_so_path": "/data/app/~~vxGC51Lzpu6zPVsT4jRLxg==/com.zenithblue.sambas3-BjhVtN2ysAN9NvryQroXvQ==/lib/arm64/librpcsx-android.so",
+    "librpcsx_so_sha256": "e93f1faa806914f24f5c22e346dd4174e66b63c07ed0242a9d18c3dcd7fcc855",
+    "librpcsx_build_id": "802f78937de934c82a6b16891a6934fe52d96ea7",
+    "libsambas3_so_path": "/data/app/~~vxGC51Lzpu6zPVsT4jRLxg==/com.zenithblue.sambas3-BjhVtN2ysAN9NvryQroXvQ==/lib/arm64/libsambas3-android.so",
+    "libsambas3_so_sha256": "149251f8576683b86cf2f7a1ffea05e5805c885af79bff6ebb84a4f382c46ad2",
+    "libsambas3_build_id": "266450d34dbe0b3db637d54dc58f636e445f7807",
+    "s3core_identity": "rpcsx=141af96fa006f56c25ec335137e92c78b29b17e3 samba=e93784d8c4e4aac796b72a63a8f5a127affa29791b58b8a453aa74eae5c1460c"
+  },
+  "runtime_mapped_memory": {
+    "verification_method": "dumpsys meminfo (release package restricts unprivileged /proc/<pid>/maps)",
+    "so_mmap_pss_kb": 42559,
+    "total_pss_kb": 148569,
+    "jni_core_loader": "RPCSX.openLibrary() -> libsambas3-android.so dlopen(/data/app/.../lib/arm64/librpcsx-android.so)"
+  },
+  "title_and_gameplay_state": {
+    "title_id": "BCUS98111",
+    "title_name": "God of War® III",
+    "launch_mode": "DIRECT_ISO",
+    "source_iso_path": "primary:Download/1DM/Compressed/God of War III (USA) (v02.00).iso",
+    "game_update_lock": "BCUS98111_v01.00",
+    "cache_namespace": "cache/cache/BCUS98111/ppu-HQfb9JM3ziXgkTpuJGuiKhWEfSFq-EBOOT.BIN",
+    "spu_cache_files": [
+      "spu-mega-v1-tane.dat",
+      "spu-safe-v1-tane.dat"
+    ],
+    "total_device_savestates": 0,
+    "savestates_dir_empty": true
+  },
+  "historical_crash_evidence": {
+    "exit_info_record": "ApplicationExitInfo #0: pid=28772 reason=2 (SIGNALED) status=11 (SIGSEGV) rss=1.4GB timestamp=2026-09-25 12:54:28.369",
+    "crash_signature": "Native Crash (SIGSEGV)",
+    "correlated_ppu_workers": [31733, 31661, 31553, 31458]
+  },
+  "git": {
+    "frontend_head": "1edbebd7ce5c0be9b6949fb64f9d9039e1e179cd",
+    "rpcsx_submodule_head": "141af96fa006f56c25ec335137e92c78b29b17e3"
+  },
+  "configs": {
+    "config.yml": "824cfe3696bd67ae3e873afa05a6c979a138607156cef888e23ae63827e4d855",
+    "games.json": "3950906045318ff0e983c33d0f18b56207ced963de482db8d9b67e6f4e49ba30",
+    "patch_config.yml": "a0f0a4512d221e3a2d653dd9d0b9a443280b2383367b35c04d461942bd7ddfd8",
+    "ppu_state.json": "c2343393595c83fa086401037fbe043f7268af6e0f760633ddcfa1a35ecd1030"
+  },
+  "savedata_inventory": {
+    "savedata/BCUS98111-AUTOSAVE/ICON0.PNG": "dfea1cdcfd8796e56dbf41c47a9d3677eb20757ed2715feab863d1eb942079aa",
+    "savedata/BCUS98111-AUTOSAVE/PARAM.SFO": "106ec5511c4a70fad1e4378e74141e458b9d884417bf913c037dde61e4e8953e",
+    "savedata/BCUS98111-AUTOSAVE/SAVEDATA": "604695e19c27b9e743b76347ca970f62d3ddc8f769222501933ab3b4fd477a25",
+    "savedata/BCUS98111-USERDATA/ICON0.PNG": "dfea1cdcfd8796e56dbf41c47a9d3677eb20757ed2715feab863d1eb942079aa",
+    "savedata/BCUS98111-USERDATA/PARAM.SFO": "ca6cecdc3e4fc2501df67e06c2bc2de639ae1badb15dd74185ec15aacb712d16",
+    "savedata/BCUS98111-USERDATA/SAVEDATA": "ed4d022a40dee571fb52a86cf844eb271df159ce9eadee89c1204e91e733f2f2"
+  },
+  "raw_provenance_file": "docs/performance/baseline_preservation/device_provenance_commands.txt"
+}

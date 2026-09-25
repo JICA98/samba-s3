@@ -315,6 +315,74 @@ class TestClassifyCrash(unittest.TestCase):
         self.assertEqual(diag_4189.classification, ExitClassification.MEMORY_PRESSURE_KILL)
         self.assertEqual(diag_4189.pid, 4189)
 
+    def test_native_crash_with_cleanup_stop_retains_crash(self):
+        """CR01 / V01 / V02: A native crash followed by DEBUG_STOP_GAME cleanup must NOT pass as DELIBERATE_STOP."""
+        record = ProcessExitRecord(
+            pid=7777,
+            process_name="com.zenithblue.sambas3",
+            reason=5,  # CRASH_NATIVE
+            reason_name="CRASH_NATIVE",
+            status=11,  # SIGSEGV
+            description="segmentation fault in librpcsx-android.so",
+        )
+        diag = classify_exit(record, stop_reason="DEBUG_STOP_GAME")
+        self.assertEqual(diag.classification, ExitClassification.NATIVE_CRASH)
+        self.assertEqual(diag.signal, 11)
+        self.assertEqual(diag.signal_name, "SIGSEGV")
+        self.assertTrue(diag.cleanup_attempted)
+        self.assertTrue(diag.cleanup_success)
+        self.assertEqual(diag.first_failure, "FAIL_CRASH")
+
+    def test_java_crash_with_cleanup_stop_retains_java(self):
+        """CR01: Java Exception followed by DEBUG_STOP_GAME cleanup retains JAVA_EXCEPTION."""
+        record = ProcessExitRecord(
+            pid=7778,
+            process_name="com.zenithblue.sambas3",
+            reason=4,  # CRASH
+            reason_name="CRASH",
+            trace="FATAL EXCEPTION: main\njava.lang.NullPointerException: Surface lost",
+        )
+        diag = classify_exit(record, evidence_text=record.trace, stop_reason="DEBUG_STOP_GAME")
+        self.assertEqual(diag.classification, ExitClassification.JAVA_EXCEPTION)
+        self.assertTrue(diag.cleanup_attempted)
+        self.assertTrue(diag.cleanup_success)
+        self.assertEqual(diag.first_failure, "FAIL_CRASH")
+
+    def test_nonzero_exit_self_is_not_clean(self):
+        """CR01: EXIT_SELF with non-zero status is an abnormal termination, not clean deliberate stop."""
+        record = ProcessExitRecord(
+            pid=7779,
+            process_name="com.zenithblue.sambas3",
+            reason=1,  # EXIT_SELF
+            reason_name="EXIT_SELF",
+            status=1,  # non-zero error exit
+        )
+        diag = classify_exit(record)
+        self.assertNotEqual(diag.classification, ExitClassification.DELIBERATE_STOP)
+        self.assertEqual(diag.classification, ExitClassification.UNKNOWN)
+        self.assertIn("abnormally", diag.summary)
+
+    def test_generic_clean_word_does_not_trigger_deliberate_stop(self):
+        """CR01: Generic word 'clean' in stop_reason must NOT falsely trigger DELIBERATE_STOP."""
+        diag = classify_exit(None, stop_reason="not a clean run, encountered unhandled error")
+        self.assertNotEqual(diag.classification, ExitClassification.DELIBERATE_STOP)
+        self.assertEqual(diag.classification, ExitClassification.UNKNOWN)
+
+    def test_exact_package_matching_rejects_unrelated_process_without_colon(self):
+        """CR01: Match exit record must strictly match package name, not any process without ':'."""
+        records = [
+            ProcessExitRecord(
+                pid=999,
+                process_name="com.android.systemui",  # Has no colon!
+                reason=1,
+                reason_name="EXIT_SELF",
+                status=0,
+            )
+        ]
+        matched, method = match_exit_record(records, target_pid=999, package_name="com.zenithblue.sambas3")
+        self.assertIsNone(matched)
+
 
 if __name__ == "__main__":
     unittest.main()
+

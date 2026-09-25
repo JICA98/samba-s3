@@ -1,0 +1,92 @@
+--------- beginning of main
+09-25 19:02:49.738   579 10238 D S3PERF  : GPU load [/sys/class/kgsl/kgsl-3d0/gpubusy]: raw='0       0' -> load=null%
+09-25 19:02:50.476   579 15963 D RPCS3   : CPU Usage: Total: 58.8%, Cores: 0.0%, 0.0%, 0.0%, 0.0%, 0.0%, 0.0%, 0.0%, 0.0%
+09-25 19:02:50.544   579 15987 D RPCS3   : PPU Syscall Usage Stats:
+09-25 19:02:50.544   579 15987 D RPCS3   : 	⁂ sys_timer_usleep [2765758]
+09-25 19:02:50.544   579 15987 D RPCS3   : 	⁂ _sys_lwcond_queue_wait [277080]
+09-25 19:02:50.544   579 15987 D RPCS3   : 	⁂ _sys_lwmutex_lock [259269]
+09-25 19:02:50.544   579 15987 D RPCS3   : 	⁂ _sys_lwmutex_unlock [235176]
+09-25 19:02:50.544   579 15987 D RPCS3   : 	⁂ sys_event_queue_receive [193470]
+09-25 19:02:50.544   579 15987 D RPCS3   : 	⁂ _sys_lwcond_signal [153415]
+09-25 19:02:50.544   579 15987 D RPCS3   : 	⁂ _sys_lwcond_signal_all [112768]
+09-25 19:02:50.544   579 15987 D RPCS3   : 	⁂ sys_time_get_current_time [87445]
+09-25 19:02:50.544   579 15987 D RPCS3   : 	⁂ sys_event_port_send [68337]
+09-25 19:02:50.544   579 15987 D RPCS3   : 	⁂ sys_fs_read [37328]
+09-25 19:02:50.544   579 15987 D RPCS3   : 	⁂ sys_fs_lseek [6165]
+09-25 19:02:52.025   579   579 W Bundle  : Key battery_low expected Integer but value was a java.lang.Boolean.  The default value 0 was returned.
+09-25 19:02:52.026   579   579 W Bundle  : Attempt to cast generated internal exception:
+09-25 19:02:52.026   579   579 W Bundle  : java.lang.ClassCastException: java.lang.Boolean cannot be cast to java.lang.Integer
+09-25 19:02:52.026   579   579 W Bundle  : 	at android.os.BaseBundle.getInt(BaseBundle.java:1348)
+09-25 19:02:52.026   579   579 W Bundle  : 	at android.content.Intent.getIntExtra(Intent.java:9617)
+09-25 19:02:52.026   579   579 W Bundle  : 	at ry0.b0(r8-map-id-829dc4487d0d500cd2994be3a64f9d184aac50112651e684c7fffcf85fdf0b9e:47)
+09-25 19:02:52.026   579   579 W Bundle  : 	at qa.onReceive(r8-map-id-829dc4487d0d500cd2994be3a64f9d184aac50112651e684c7fffcf85fdf0b9e:16)
+09-25 19:02:52.026   579   579 W Bundle  : 	at android.app.LoadedApk$ReceiverDispatcher$Args.lambda$getRunnable$0(LoadedApk.java:1931)
+09-25 19:02:52.026   579   579 W Bundle  : 	at android.app.LoadedApk$ReceiverDispatcher$Args.$r8$lambda$mcNAAl1SQ4MyJPyDg8TJ2x2h0Rk(Unknown Source:0)
+09-25 19:02:52.026   579   579 W Bundle  : 	at android.app.LoadedApk$ReceiverDispatcher$Args$$ExternalSyntheticLambda0.run(D8$$SyntheticClass:0)
+09-25 19:02:52.026   579   579 W Bundle  : 	at android.os.Handler.handleCallback(Handler.java:1070)
+09-25 19:02:52.026   579   579 W Bundle  : 	at android.os.Handler.dispatchMessage(Handler.java:125)
+09-25 19:02:52.026   579   579 W Bundle  : 	at android.os.Looper.dispatchMessage(Looper.java:333)
+09-25 19:02:52.026   579   579 W Bundle  : 	at android.os.Looper.loopOnce(Looper.java:263)
+09-25 19:02:52.026   579   579 W Bundle  : 	at android.os.Looper.loop(Looper.java:367)
+09-25 19:02:52.026   579   579 W Bundle  : 	at android.app.ActivityThread.main(ActivityThread.java:9328)
+09-25 19:02:52.026   579   579 W Bundle  : 	at java.lang.reflect.Method.invoke(Native Method)
+09-25 19:02:52.026   579   579 W Bundle  : 	at com.android.internal.os.RuntimeInit$MethodAndArgsCaller.run(RuntimeInit.java:569)
+09-25 19:02:52.026   579   579 W Bundle  : 	at com.android.internal.os.ZygoteInit.main(ZygoteInit.java:929)
+09-25 19:02:52.028   579   579 W Bundle  : Key battery_low expected Integer but value was a java.lang.Boolean.  The default value 0 was returned.
+09-25 19:02:52.029   579   579 W Bundle  : Attempt to cast generated internal exception:
+09-25 19:02:52.029   579   579 W Bundle  : java.lang.ClassCastException: java.lang.Boolean cannot be cast to java.lang.Integer
+09-25 19:02:52.029   579   579 W Bundle  : 	at android.os.BaseBundle.getInt(BaseBundle.java:1348)
+09-25 19:02:52.029   579   579 W Bundle  : 	at android.content.Intent.getIntExtra(Intent.java:9617)
+09-25 19:02:52.029   579   579 W Bundle  : 	at ry0.b0(r8-map-id-829dc4487d0d500cd2994be3a64f9d184aac50112651e684c7fffcf85fdf0b9e:47)
+09-25 19:02:52.029   579   579 W Bundle  : 	at qa.onReceive(r8-map-id-829dc4487d0d500cd2994be3a64f9d184aac50112651e684c7fffcf85fdf0b9e:16)
+09-25 19:02:52.029   579   579 W Bundle  : 	at android.app.LoadedApk$ReceiverDispatcher$Args.lambda$getRunnable$0(LoadedApk.java:1931)
+09-25 19:02:52.029   579   579 W Bundle  : 	at android.app.LoadedApk$ReceiverDispatcher$Args.$r8$lambda$mcNAAl1SQ4MyJPyDg8TJ2x2h0Rk(Unknown Source:0)
+09-25 19:02:52.029   579   579 W Bundle  : 	at android.app.LoadedApk$ReceiverDispatcher$Args$$ExternalSyntheticLambda0.run(D8$$SyntheticClass:0)
+09-25 19:02:52.029   579   579 W Bundle  : 	at android.os.Handler.handleCallback(Handler.java:1070)
+09-25 19:02:52.029   579   579 W Bundle  : 	at android.os.Handler.dispatchMessage(Handler.java:125)
+09-25 19:02:52.029   579   579 W Bundle  : 	at android.os.Looper.dispatchMessage(Looper.java:333)
+09-25 19:02:52.029   579   579 W Bundle  : 	at android.os.Looper.loopOnce(Looper.java:263)
+09-25 19:02:52.029   579   579 W Bundle  : 	at android.os.Looper.loop(Looper.java:367)
+09-25 19:02:52.029   579   579 W Bundle  : 	at android.app.ActivityThread.main(ActivityThread.java:9328)
+09-25 19:02:52.029   579   579 W Bundle  : 	at java.lang.reflect.Method.invoke(Native Method)
+09-25 19:02:52.029   579   579 W Bundle  : 	at com.android.internal.os.RuntimeInit$MethodAndArgsCaller.run(RuntimeInit.java:569)
+09-25 19:02:52.029   579   579 W Bundle  : 	at com.android.internal.os.ZygoteInit.main(ZygoteInit.java:929)
+09-25 19:02:52.029   579   579 W Bundle  : Key battery_low expected Integer but value was a java.lang.Boolean.  The default value 0 was returned.
+09-25 19:02:52.030   579   579 W Bundle  : Attempt to cast generated internal exception:
+09-25 19:02:52.030   579   579 W Bundle  : java.lang.ClassCastException: java.lang.Boolean cannot be cast to java.lang.Integer
+09-25 19:02:52.030   579   579 W Bundle  : 	at android.os.BaseBundle.getInt(BaseBundle.java:1348)
+09-25 19:02:52.030   579   579 W Bundle  : 	at android.content.Intent.getIntExtra(Intent.java:9617)
+09-25 19:02:52.030   579   579 W Bundle  : 	at ry0.b0(r8-map-id-829dc4487d0d500cd2994be3a64f9d184aac50112651e684c7fffcf85fdf0b9e:47)
+09-25 19:02:52.030   579   579 W Bundle  : 	at qa.onReceive(r8-map-id-829dc4487d0d500cd2994be3a64f9d184aac50112651e684c7fffcf85fdf0b9e:16)
+09-25 19:02:52.030   579   579 W Bundle  : 	at android.app.LoadedApk$ReceiverDispatcher$Args.lambda$getRunnable$0(LoadedApk.java:1931)
+09-25 19:02:52.030   579   579 W Bundle  : 	at android.app.LoadedApk$ReceiverDispatcher$Args.$r8$lambda$mcNAAl1SQ4MyJPyDg8TJ2x2h0Rk(Unknown Source:0)
+09-25 19:02:52.030   579   579 W Bundle  : 	at android.app.LoadedApk$ReceiverDispatcher$Args$$ExternalSyntheticLambda0.run(D8$$SyntheticClass:0)
+09-25 19:02:52.030   579   579 W Bundle  : 	at android.os.Handler.handleCallback(Handler.java:1070)
+09-25 19:02:52.030   579   579 W Bundle  : 	at android.os.Handler.dispatchMessage(Handler.java:125)
+09-25 19:02:52.030   579   579 W Bundle  : 	at android.os.Looper.dispatchMessage(Looper.java:333)
+09-25 19:02:52.030   579   579 W Bundle  : 	at android.os.Looper.loopOnce(Looper.java:263)
+09-25 19:02:52.030   579   579 W Bundle  : 	at android.os.Looper.loop(Looper.java:367)
+09-25 19:02:52.030   579   579 W Bundle  : 	at android.app.ActivityThread.main(ActivityThread.java:9328)
+09-25 19:02:52.030   579   579 W Bundle  : 	at java.lang.reflect.Method.invoke(Native Method)
+09-25 19:02:52.030   579   579 W Bundle  : 	at com.android.internal.os.RuntimeInit$MethodAndArgsCaller.run(RuntimeInit.java:569)
+09-25 19:02:52.030   579   579 W Bundle  : 	at com.android.internal.os.ZygoteInit.main(ZygoteInit.java:929)
+09-25 19:02:56.187   579   579 W DefaultDispatch: type=1400 audit(0.0:6995732): avc:  denied  { search } for  name="zram0" dev="sysfs" ino=107524 scontext=u:r:untrusted_app:s0:c207,c257,c512,c768 tcontext=u:object_r:sysfs_zram:s0 tclass=dir permissive=0 app=com.zenithblue.sambas3
+09-25 19:02:56.187   579   579 W DefaultDispatch: type=1400 audit(0.0:6995733): avc:  denied  { search } for  name="zram0" dev="sysfs" ino=107524 scontext=u:r:untrusted_app:s0:c207,c257,c512,c768 tcontext=u:object_r:sysfs_zram:s0 tclass=dir permissive=0 app=com.zenithblue.sambas3
+09-25 19:03:00.477   579 15963 D RPCS3   : CPU Usage: Total: 58.1%, Cores: 0.0%, 0.0%, 0.0%, 0.0%, 0.0%, 0.0%, 0.0%, 0.0%
+09-25 19:03:00.543   579 15987 D RPCS3   : PPU Syscall Usage Stats:
+09-25 19:03:00.543   579 15987 D RPCS3   : 	⁂ sys_timer_usleep [2874896]
+09-25 19:03:00.543   579 15987 D RPCS3   : 	⁂ _sys_lwcond_queue_wait [278605]
+09-25 19:03:00.543   579 15987 D RPCS3   : 	⁂ _sys_lwmutex_lock [260449]
+09-25 19:03:00.543   579 15987 D RPCS3   : 	⁂ _sys_lwmutex_unlock [235916]
+09-25 19:03:00.543   579 15987 D RPCS3   : 	⁂ sys_event_queue_receive [197817]
+09-25 19:03:00.543   579 15987 D RPCS3   : 	⁂ _sys_lwcond_signal [153809]
+09-25 19:03:00.543   579 15987 D RPCS3   : 	⁂ _sys_lwcond_signal_all [113323]
+09-25 19:03:00.543   579 15987 D RPCS3   : 	⁂ sys_time_get_current_time [87723]
+09-25 19:03:00.543   579 15987 D RPCS3   : 	⁂ sys_event_port_send [70103]
+09-25 19:03:00.543   579 15987 D RPCS3   : 	⁂ sys_fs_read [37441]
+09-25 19:03:00.543   579 15987 D RPCS3   : 	⁂ sys_fs_lseek [6219]
+09-25 19:03:00.543   579 15987 D RPCS3   : 	⁂ _sys_lwmutex_trylock [1012]
+09-25 19:03:00.781   579 10238 D S3PERF  : GPU load [/sys/class/kgsl/kgsl-3d0/gpubusy]: raw='0       0' -> load=null%
+09-25 19:03:03.767   579 15498 I ithblue.sambas3: Explicit concurrent mark compact GC freed 4284KB AllocSpace bytes, 58(1032KB) LOS objects, 75% free, 9060KB/35MB, paused 155us,1.314ms total 38.760ms
+09-25 19:03:04.803   579   579 W DefaultDispatch: type=1400 audit(0.0:6995734): avc:  denied  { search } for  name="zram0" dev="sysfs" ino=107524 scontext=u:r:untrusted_app:s0:c207,c257,c512,c768 tcontext=u:object_r:sysfs_zram:s0 tclass=dir permissive=0 app=com.zenithblue.sambas3
+09-25 19:03:04.803   579   579 W DefaultDispatch: type=1400 audit(0.0:6995735): avc:  denied  { search } for  name="zram0" dev="sysfs" ino=107524 scontext=u:r:untrusted_app:s0:c207,c257,c512,c768 tcontext=u:object_r:sysfs_zram:s0 tclass=dir permissive=0 app=com.zenithblue.sambas3

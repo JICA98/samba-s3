@@ -123,7 +123,6 @@ DELIBERATE_STOP_KEYWORDS = {
     "homestop",
     "apprecoverycleanup",
     "user-exit",
-    "clean",
     "activity finish",
 }
 
@@ -151,7 +150,7 @@ class ProcessExitRecord:
 
     @property
     def is_primary_process(self) -> bool:
-        return ":" not in self.process_name
+        return self.process_name == "com.zenithblue.sambas3"
 
     @property
     def signal_name(self) -> Optional[str]:
@@ -186,6 +185,12 @@ class ProcessExitDiagnosis:
     memory_pressure_evidence: bool = False
     matched_by: str = "unmatched"
     ppu_compile_exits: List[Dict[str, Any]] = field(default_factory=list)
+    cleanup_attempted: bool = False
+    cleanup_success: bool = False
+    first_failure: Optional[str] = None
+    affinity_check_required: bool = False
+    affinity_notes: Optional[str] = None
+
 
 
 def parse_bytes(s: Optional[str]) -> int:
@@ -296,7 +301,7 @@ def extract_native_crash_info(
     exit_record: Optional[ProcessExitRecord], evidence: str
 ) -> Tuple[Optional[int], Optional[str], Optional[str], List[str]]:
     """Extracts signal number, signal name, PC, and backtrace frames."""
-    sig_num: Optional[int] = exit_record.status if (exit_record and exit_record.reason == 2) else None
+    sig_num: Optional[int] = exit_record.status if (exit_record and exit_record.reason in (2, 5)) else None
     sig_name: Optional[str] = SIGNAL_MAP.get(sig_num) if sig_num is not None else None
 
     # Check for signal pattern in text e.g. "Fatal signal 11 (SIGSEGV)" or "signal 6 (SIGABRT)"
@@ -466,9 +471,11 @@ def classify_exit(
         combined.append(evidence_text)
     combined_str = "\n".join(combined)
 
-    # 1. Vulkan Device Loss / GPU Reset
+    # 1. Vulkan Device Loss / GPU Reset (takes precedence over generic native abort when device lost triggered abort)
     if GPU_FAULT_REGEX.search(combined_str):
         sig_num, sig_name, pc, backtrace = extract_native_crash_info(exit_record, combined_str)
+        cleanup_att = bool(stop_reason)
+        cleanup_succ = bool(stop_reason and any(k in stop_reason.lower() for k in DELIBERATE_STOP_KEYWORDS))
         return ProcessExitDiagnosis(
             classification=ExitClassification.VULKAN_DEVICE_LOSS,
             pid=exit_record.pid if exit_record else target_pid,
@@ -492,24 +499,127 @@ def classify_exit(
             raw_trace=exit_record.trace if exit_record else None,
             matched_by=matched_by,
             ppu_compile_exits=ppu_compile_exits or [],
+            cleanup_attempted=cleanup_att,
+            cleanup_success=cleanup_succ,
+            first_failure="FAIL_CRASH",
         )
 
-    # 2. Deliberate Stop
+    # 2. Native Crash (hardware signals and fatal aborts)
+    has_native_sig = (
+        exit_record
+        and (
+            exit_record.reason == 5  # CRASH_NATIVE
+            or (exit_record.reason == 2 and exit_record.status in NATIVE_FATAL_SIGNALS)
+        )
+    )
+    has_tombstone = (
+        "backtrace:" in combined_str.lower()
+        or "fatal signal" in combined_str.lower()
+        or "*** *** *** ***" in combined_str
+    )
+    if has_native_sig or has_tombstone:
+        sig_num, sig_name, pc, backtrace = extract_native_crash_info(exit_record, combined_str)
+        summary_sig = sig_name or (f"Signal {sig_num}" if sig_num else "Native Abort")
+        pc_str = f" at pc {pc}" if pc else ""
+        cleanup_att = bool(stop_reason)
+        cleanup_succ = bool(stop_reason and any(k in stop_reason.lower() for k in DELIBERATE_STOP_KEYWORDS))
+
+        is_sigill = (sig_name == "SIGILL" or sig_num == 4)
+        affinity_check_req = is_sigill
+        affinity_notes = (
+            "SIGILL detected: verify process-allowed CPU capabilities and actual execution affinity for all threads per WORKER.md:465"
+            if is_sigill
+            else None
+        )
+        sigill_suffix = f" [Affinity check required: {affinity_notes}]" if is_sigill else ""
+
+        return ProcessExitDiagnosis(
+            classification=ExitClassification.NATIVE_CRASH,
+            pid=exit_record.pid if exit_record else target_pid,
+            process_name=exit_record.process_name if exit_record else None,
+            is_ppu_compile_process=exit_record.is_ppu_compile if exit_record else False,
+            signal=sig_num,
+            signal_name=sig_name,
+            status=exit_record.status if exit_record else None,
+            pc=pc,
+            backtrace=backtrace,
+            reason_code=exit_record.reason if exit_record else None,
+            reason_name=exit_record.reason_name if exit_record else None,
+            subreason_code=exit_record.subreason if exit_record else None,
+            subreason_name=exit_record.subreason_name if exit_record else None,
+            importance=exit_record.importance if exit_record else None,
+            timestamp=exit_record.timestamp_str if exit_record else None,
+            pss_bytes=exit_record.pss_bytes if exit_record else 0,
+            rss_bytes=exit_record.rss_bytes if exit_record else 0,
+            description=exit_record.description if exit_record else None,
+            summary=f"Native Crash ({summary_sig}{pc_str}){sigill_suffix}",
+            raw_trace=exit_record.trace if exit_record else None,
+            matched_by=matched_by,
+            ppu_compile_exits=ppu_compile_exits or [],
+            cleanup_attempted=cleanup_att,
+            cleanup_success=cleanup_succ,
+            first_failure="FAIL_CRASH",
+            affinity_check_required=affinity_check_req,
+            affinity_notes=affinity_notes,
+        )
+
+    # 3. Java Exception
+    is_java_crash = (
+        (exit_record and exit_record.reason == 4)  # CRASH
+        or "FATAL EXCEPTION:" in combined_str
+    )
+    if is_java_crash:
+        stack = extract_java_stack_trace(exit_record.trace if exit_record else None, combined_str)
+        first_line = stack.splitlines()[0] if stack else "Unhandled Java Exception"
+        cleanup_att = bool(stop_reason)
+        cleanup_succ = bool(stop_reason and any(k in stop_reason.lower() for k in DELIBERATE_STOP_KEYWORDS))
+        return ProcessExitDiagnosis(
+            classification=ExitClassification.JAVA_EXCEPTION,
+            pid=exit_record.pid if exit_record else target_pid,
+            process_name=exit_record.process_name if exit_record else None,
+            is_ppu_compile_process=exit_record.is_ppu_compile if exit_record else False,
+            status=exit_record.status if exit_record else None,
+            stack_trace=stack,
+            reason_code=exit_record.reason if exit_record else None,
+            reason_name=exit_record.reason_name if exit_record else None,
+            subreason_code=exit_record.subreason if exit_record else None,
+            subreason_name=exit_record.subreason_name if exit_record else None,
+            importance=exit_record.importance if exit_record else None,
+            timestamp=exit_record.timestamp_str if exit_record else None,
+            pss_bytes=exit_record.pss_bytes if exit_record else 0,
+            rss_bytes=exit_record.rss_bytes if exit_record else 0,
+            description=exit_record.description if exit_record else None,
+            summary=f"Java Exception: {first_line}",
+            raw_trace=exit_record.trace if exit_record else None,
+            matched_by=matched_by,
+            ppu_compile_exits=ppu_compile_exits or [],
+            cleanup_attempted=cleanup_att,
+            cleanup_success=cleanup_succ,
+            first_failure="FAIL_CRASH",
+        )
+
+    # 4. Deliberate Stop (only when NO fatal crash or exception occurred)
     is_deliberate = False
     deliberate_label = ""
-    if stop_reason and any(k in stop_reason.lower() for k in DELIBERATE_STOP_KEYWORDS):
-        is_deliberate = True
-        deliberate_label = f"Deliberate Stop ({stop_reason})"
-    elif exit_record:
-        if exit_record.reason == 1:  # EXIT_SELF
-            is_deliberate = True
-            deliberate_label = "Process exited cleanly (EXIT_SELF)"
-        elif exit_record.reason in (10, 11):  # USER_REQUESTED / USER_STOPPED
-            is_deliberate = True
-            deliberate_label = f"User Requested Stop ({exit_record.subreason_name})"
-        elif exit_record.is_ppu_compile and exit_record.status in (0, 9):
-            is_deliberate = True
-            deliberate_label = "PPU Worker Normal Recycling"
+    # Abnormal EXIT_SELF (status != 0) is NOT clean
+    is_abnormal_exit_self = (exit_record and exit_record.reason == 1 and exit_record.status != 0)
+
+    if not is_abnormal_exit_self:
+        if exit_record:
+            if exit_record.reason == 1 and exit_record.status == 0:  # EXIT_SELF clean
+                is_deliberate = True
+                deliberate_label = "Process exited cleanly (EXIT_SELF)"
+            elif exit_record.reason in (10, 11):  # USER_REQUESTED / USER_STOPPED
+                is_deliberate = True
+                deliberate_label = f"User Requested Stop ({exit_record.subreason_name})"
+            elif exit_record.is_ppu_compile and exit_record.status in (0, 9):
+                is_deliberate = True
+                deliberate_label = "PPU Worker Normal Recycling"
+        if not is_deliberate and stop_reason and any(k in stop_reason.lower() for k in DELIBERATE_STOP_KEYWORDS):
+            # Only accept manifest deliberate stop if exit_record doesn't contradict with fatal status
+            if not exit_record or exit_record.status == 0:
+                is_deliberate = True
+                deliberate_label = f"Deliberate Stop ({stop_reason})"
 
     if is_deliberate:
         method = matched_by
@@ -536,78 +646,24 @@ def classify_exit(
             raw_trace=exit_record.trace if exit_record else None,
             matched_by=method,
             ppu_compile_exits=ppu_compile_exits or [],
+            cleanup_attempted=True,
+            cleanup_success=True,
         )
 
-    # 3. Java Exception
-    is_java_crash = (
-        (exit_record and exit_record.reason == 4)  # CRASH
-        or "FATAL EXCEPTION:" in combined_str
-    )
-    if is_java_crash:
-        stack = extract_java_stack_trace(exit_record.trace if exit_record else None, combined_str)
-        first_line = stack.splitlines()[0] if stack else "Unhandled Java Exception"
+    # 4b. Abnormal EXIT_SELF with non-zero exit status
+    if is_abnormal_exit_self and exit_record:
         return ProcessExitDiagnosis(
-            classification=ExitClassification.JAVA_EXCEPTION,
-            pid=exit_record.pid if exit_record else target_pid,
-            process_name=exit_record.process_name if exit_record else None,
-            is_ppu_compile_process=exit_record.is_ppu_compile if exit_record else False,
-            status=exit_record.status if exit_record else None,
-            stack_trace=stack,
-            reason_code=exit_record.reason if exit_record else None,
-            reason_name=exit_record.reason_name if exit_record else None,
-            subreason_code=exit_record.subreason if exit_record else None,
-            subreason_name=exit_record.subreason_name if exit_record else None,
-            importance=exit_record.importance if exit_record else None,
-            timestamp=exit_record.timestamp_str if exit_record else None,
-            pss_bytes=exit_record.pss_bytes if exit_record else 0,
-            rss_bytes=exit_record.rss_bytes if exit_record else 0,
-            description=exit_record.description if exit_record else None,
-            summary=f"Java Exception: {first_line}",
-            raw_trace=exit_record.trace if exit_record else None,
+            classification=ExitClassification.UNKNOWN,
+            pid=exit_record.pid,
+            process_name=exit_record.process_name,
+            status=exit_record.status,
+            reason_code=exit_record.reason,
+            reason_name=exit_record.reason_name,
+            summary=f"Process exited abnormally (EXIT_SELF with status {exit_record.status})",
+            raw_trace=exit_record.trace,
             matched_by=matched_by,
             ppu_compile_exits=ppu_compile_exits or [],
-        )
-
-    # 4. Native Crash
-    has_native_sig = (
-        exit_record
-        and (
-            exit_record.reason == 5  # CRASH_NATIVE
-            or (exit_record.reason == 2 and exit_record.status in NATIVE_FATAL_SIGNALS)
-        )
-    )
-    has_tombstone = (
-        "backtrace:" in combined_str.lower()
-        or "fatal signal" in combined_str.lower()
-        or "*** *** *** ***" in combined_str
-    )
-    if has_native_sig or has_tombstone:
-        sig_num, sig_name, pc, backtrace = extract_native_crash_info(exit_record, combined_str)
-        summary_sig = sig_name or (f"Signal {sig_num}" if sig_num else "Native Abort")
-        pc_str = f" at pc {pc}" if pc else ""
-        return ProcessExitDiagnosis(
-            classification=ExitClassification.NATIVE_CRASH,
-            pid=exit_record.pid if exit_record else target_pid,
-            process_name=exit_record.process_name if exit_record else None,
-            is_ppu_compile_process=exit_record.is_ppu_compile if exit_record else False,
-            signal=sig_num,
-            signal_name=sig_name,
-            status=exit_record.status if exit_record else None,
-            pc=pc,
-            backtrace=backtrace,
-            reason_code=exit_record.reason if exit_record else None,
-            reason_name=exit_record.reason_name if exit_record else None,
-            subreason_code=exit_record.subreason if exit_record else None,
-            subreason_name=exit_record.subreason_name if exit_record else None,
-            importance=exit_record.importance if exit_record else None,
-            timestamp=exit_record.timestamp_str if exit_record else None,
-            pss_bytes=exit_record.pss_bytes if exit_record else 0,
-            rss_bytes=exit_record.rss_bytes if exit_record else 0,
-            description=exit_record.description if exit_record else None,
-            summary=f"Native Crash ({summary_sig}{pc_str})",
-            raw_trace=exit_record.trace if exit_record else None,
-            matched_by=matched_by,
-            ppu_compile_exits=ppu_compile_exits or [],
+            first_failure="FAIL_CRASH",
         )
 
     # 5. ANR

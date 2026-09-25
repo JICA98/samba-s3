@@ -57,6 +57,45 @@ def adb_shell(serial: str, shell_cmd: str, timeout: int = 30) -> subprocess.Comp
 
 
 @dataclass
+class ProcessIdentity:
+    pid: str
+    start_time: str = ""
+    boot_id: str = ""
+
+
+def get_process_identity(serial: str, package_name: str) -> Optional[ProcessIdentity]:
+    r_pid = adb_shell(serial, f"pidof -s {package_name}")
+    pid = r_pid.stdout.strip()
+    if not pid or not pid.isdigit():
+        r_all = adb_shell(serial, f"pidof {package_name}")
+        pids = r_all.stdout.strip().split()
+        if not pids or not pids[0].isdigit():
+            return None
+        pid = pids[0]
+
+    r_stat = adb_shell(serial, f"cat /proc/{pid}/stat 2>/dev/null")
+    start_time = ""
+    if r_stat.returncode == 0 and r_stat.stdout.strip():
+        parts = r_stat.stdout.strip().rsplit(")", 1)
+        if len(parts) > 1:
+            rest = parts[1].split()
+            if len(rest) >= 20:
+                start_time = rest[19]
+
+    r_boot = adb_shell(serial, "cat /proc/sys/kernel/random/boot_id 2>/dev/null || cat /proc/uptime 2>/dev/null")
+    boot_id = r_boot.stdout.strip().split()[0] if r_boot.stdout.strip() else ""
+
+    return ProcessIdentity(pid=pid, start_time=start_time, boot_id=boot_id)
+
+
+def write_manifest_atomic(manifest_path: Path, m_data: dict[str, Any]) -> None:
+    manifest_path.parent.mkdir(parents=True, exist_ok=True)
+    tmp_path = manifest_path.with_suffix(".tmp")
+    tmp_path.write_text(json.dumps(m_data, indent=2), encoding="utf-8")
+    tmp_path.replace(manifest_path)
+
+
+@dataclass
 class DeviceProvenance:
     serial: str
     model: str
@@ -148,14 +187,18 @@ def validate_provenance(
                 f"S3CORE mismatch: expected core commit '{expected_core}', but device library contains '{prov.s3core_identity}'"
             )
 
-    if expected_apk_sha and prov.base_apk_sha256:
-        if prov.base_apk_sha256.lower() != expected_apk_sha.lower():
+    if expected_apk_sha:
+        if not prov.base_apk_sha256 or prov.base_apk_sha256 == "unknown":
+            errors.append(f"base.apk SHA-256 missing/unknown on device {prov.serial}")
+        elif prov.base_apk_sha256.lower() != expected_apk_sha.lower():
             errors.append(
                 f"base.apk SHA-256 mismatch: expected {expected_apk_sha}, observed {prov.base_apk_sha256}"
             )
 
-    if expected_so_sha and prov.librpcsx_so_sha256:
-        if prov.librpcsx_so_sha256.lower() != expected_so_sha.lower():
+    if expected_so_sha:
+        if not prov.librpcsx_so_sha256 or prov.librpcsx_so_sha256 == "unknown":
+            errors.append(f"librpcsx-android.so SHA-256 missing/unknown on device {prov.serial}")
+        elif prov.librpcsx_so_sha256.lower() != expected_so_sha.lower():
             errors.append(
                 f"librpcsx-android.so SHA-256 mismatch: expected {expected_so_sha}, observed {prov.librpcsx_so_sha256}"
             )
@@ -384,6 +427,7 @@ def main() -> int:
     parser.add_argument("--run-id", help="Unique identifier for benchmark run")
     parser.add_argument("--scene", default="gow3-gaia-combat", help="Target benchmark scene (default: gow3-gaia-combat)")
     parser.add_argument("--duration", type=int, default=60, help="Gameplay duration in seconds (default: 60s)")
+    parser.add_argument("--provenance-manifest", help="Path to build/provenance manifest JSON to source expected hashes from")
     parser.add_argument("--monitor-preset", default="Performance", help="Monitor preset: Off, Minimal, Performance, Detailed (default: Performance)")
     parser.add_argument("--expected-core", default=EXPECTED_CORE_HASH, help=f"Expected backend core commit (default: {EXPECTED_CORE_HASH})")
     parser.add_argument("--expected-apk-sha", "--expected-apk-sha256", dest="expected_apk_sha", default=EXPECTED_APK_SHA256, help=f"Expected APK SHA-256 (default: {EXPECTED_APK_SHA256})")
@@ -403,6 +447,26 @@ def main() -> int:
     timestamp = time.strftime("%Y%m%d-%H%M%S", time.gmtime())
     run_id = args.run_id or f"gow3-bench-{timestamp}"
     outdir = Path(args.outdir or ROOT_DIR / "docs" / "benchmarks" / f"evidence-{run_id}")
+
+    expected_core = args.expected_core
+    expected_apk_sha = args.expected_apk_sha
+    expected_so_sha = args.expected_so_sha
+
+    # Load dynamic hashes from provenance manifest if available
+    prov_manifest_path = Path(args.provenance_manifest) if args.provenance_manifest else (ROOT_DIR / "docs" / "performance" / "baseline_preservation" / "manifest.json")
+    if prov_manifest_path.exists():
+        try:
+            p_data = json.loads(prov_manifest_path.read_text(encoding="utf-8"))
+            pkg_data = p_data.get("package", {})
+            git_data = p_data.get("git", {})
+            if "librpcsx_so_sha256" in pkg_data and args.expected_so_sha == EXPECTED_SO_SHA256:
+                expected_so_sha = pkg_data["librpcsx_so_sha256"]
+            if "base_apk_sha256" in pkg_data and args.expected_apk_sha == EXPECTED_APK_SHA256:
+                expected_apk_sha = pkg_data["base_apk_sha256"]
+            if "rpcsx_submodule_head" in git_data and args.expected_core == EXPECTED_CORE_HASH:
+                expected_core = git_data["rpcsx_submodule_head"]
+        except Exception as e:
+            print(f"[!] Warning: failed to parse provenance manifest at {prov_manifest_path}: {e}")
 
     print("================================================================================")
     print(" SambaS3 God of War® III Deterministic Benchmark Runner")
@@ -428,9 +492,9 @@ def main() -> int:
     prov = fetch_device_provenance(args.serial)
     is_valid, errors = validate_provenance(
         prov,
-        expected_core=args.expected_core,
-        expected_apk_sha=args.expected_apk_sha,
-        expected_so_sha=args.expected_so_sha,
+        expected_core=expected_core,
+        expected_apk_sha=expected_apk_sha,
+        expected_so_sha=expected_so_sha,
     )
 
     print(f"    Device Model:  {prov.model} (SoC: {prov.soc}, Android {prov.android_ver})")
@@ -445,11 +509,22 @@ def main() -> int:
             print(f"    - {err}", file=sys.stderr)
         if not args.no_strict_hashes:
             print("Error: Rejecting benchmark run due to mismatched binary/core provenance.", file=sys.stderr)
-            return 2
+            outdir.mkdir(parents=True, exist_ok=True)
+            manifest_path = outdir / "run-manifest.json"
+            m_data = {
+                "run_id": run_id,
+                "first_failure": "FAIL_PROVENANCE",
+                "verdict": "FAIL_PROVENANCE",
+                "provenance_errors": errors,
+                "strict_provenance": True,
+            }
+            write_manifest_atomic(manifest_path, m_data)
+            return 3
         else:
             print("[!] Continuing despite provenance warnings (--no-strict-hashes enabled)")
     else:
         print("[OK] Binary and S3CORE provenance verified 100% against expectation")
+
 
     # Configure scheduler mode if specified, otherwise inspect existing mode
     effective_scheduler: Optional[str] = None
@@ -480,167 +555,275 @@ def main() -> int:
         run_cmd([str(SCRIPTS_DIR / "debug-stop-game.sh"), args.serial], timeout=45)
         time.sleep(2)
 
-    # 4. Clear logcat buffers
+    outdir.mkdir(parents=True, exist_ok=True)
+
+    # 4a. Preserve prior logcat crash buffer before clear
+    print("[*] Preserving prior logcat crash buffer before clear...")
+    r_prior = adb_shell(args.serial, "logcat -d")
+    if r_prior.stdout:
+        (outdir / "logcat-prior-crash-buffer.log").write_text(r_prior.stdout, encoding="utf-8", errors="replace")
+
+    # 4b. Clear logcat buffers
     print("[*] Clearing logcat buffers for clean session acquisition...")
     adb_shell(args.serial, "logcat -c")
 
-    # 5. Launch game
-    print(f"[*] Launching {args.game} on {args.serial}...")
-    launch_cmd = [str(SCRIPTS_DIR / "debug-launch-game.sh"), args.serial, args.game]
-    r_launch = run_cmd(launch_cmd, timeout=35)
-    if r_launch.returncode != 0:
-        print(f"Error: Game launch failed: {r_launch.stderr.strip()}", file=sys.stderr)
-        # Still collect logs to diagnose why launch failed
+    # 4c. Start host-streamed logcat in background
+    host_log_file = open(outdir / "logcat-host-stream.log", "wb")
+    host_log_proc: Optional[subprocess.Popen[Any]] = None
+    try:
+        host_log_proc = subprocess.Popen(
+            ["adb", "-s", args.serial, "logcat", "-v", "threadtime"],
+            stdout=host_log_file,
+            stderr=subprocess.STDOUT
+        )
+    except Exception as e:
+        print(f"[!] Warning: failed to start host logcat stream: {e}", file=sys.stderr)
+
+    first_failure: Optional[str] = None
+    launch_identity: Optional[ProcessIdentity] = None
+    clean_stop = False
+    run_state = "LAUNCHING"
+    outdir_png = outdir / "device_screen.png"
+    gameplay_png = ROOT_DIR / "docs" / "benchmarks" / "screenshots" / "gow3-phase10-gameplay.png"
+    gameplay_png.parent.mkdir(parents=True, exist_ok=True)
+    qual_start_us = int(time.time() * 1_000_000)
+    qual_end_us = qual_start_us
+
+    try:
+        # 5. Launch game
+        print(f"[*] Launching {args.game} on {args.serial}...")
+        launch_cmd = [str(SCRIPTS_DIR / "debug-launch-game.sh"), args.serial, args.game]
+        r_launch = run_cmd(launch_cmd, timeout=35)
+        if r_launch.returncode != 0:
+            print(f"Error: Game launch failed: {r_launch.stderr.strip()}", file=sys.stderr)
+            first_failure = "FAIL_LAUNCH"
+        else:
+            print("[OK] Launch accepted and RPCSXActivity is focused!")
+            launch_identity = get_process_identity(args.serial, PKG_NAME)
+            if not launch_identity:
+                print("[!] ERROR: Process did not start after launch command!", file=sys.stderr)
+                first_failure = "FAIL_LAUNCH"
+
+        if first_failure is None and launch_identity is not None:
+            print(f"[OK] Launch verified with identity: PID {launch_identity.pid}, start: {launch_identity.start_time}")
+
+            # 6. Configure monitor overlay
+            time.sleep(1)
+            configure_monitor(args.serial, args.monitor_preset)
+
+            # 7. Progression loop (navigating intro and cutscenes to reach Gaia combat)
+            run_state = "NAVIGATING"
+            print("[*] Waiting for initial intro sequence and progression milestones...")
+            time.sleep(30)
+            deliver_pad_button(args.serial, "START", delay_s=5)
+
+            print("[*] Advancing opening cutscene...")
+            time.sleep(15)
+            deliver_pad_button(args.serial, "START", delay_s=5)
+
+            print("[*] Advancing dialogue / scene prompts...")
+            time.sleep(25)
+            deliver_pad_button(args.serial, "CROSS", delay_s=5)
+
+            # Check if process is still alive and matches launch identity
+            curr_id = get_process_identity(args.serial, PKG_NAME)
+            if not curr_id:
+                print("[!] ERROR: Process died before reaching gameplay window!", file=sys.stderr)
+                first_failure = "FAIL_CRASH"
+            elif curr_id.pid != launch_identity.pid or curr_id.start_time != launch_identity.start_time:
+                print(f"[!] ERROR: Process replaced before gameplay window: launch {launch_identity.pid} != current {curr_id.pid}!", file=sys.stderr)
+                first_failure = "FAIL_REPLACEMENT_PID"
+
+        if first_failure is None and launch_identity is not None:
+            run_state = "QUALIFYING"
+            print(f"[*] Process alive (PID {launch_identity.pid}). Executing gameplay benchmark window ({args.duration}s)...")
+            try:
+                r_sc = subprocess.run(["adb", "-s", args.serial, "exec-out", "screencap", "-p"], capture_output=True, timeout=15)
+                if r_sc.returncode == 0 and r_sc.stdout:
+                    with open(outdir_png, "wb") as f:
+                        f.write(r_sc.stdout)
+                    print(f"[*] Captured initial gameplay screenshot to {outdir_png}")
+            except Exception as e:
+                print(f"[!] Warning: initial screencap failed: {e}")
+
+            if not outdir_png.exists() or outdir_png.stat().st_size == 0:
+                print("[!] Error: Initial screencap missing or empty.", file=sys.stderr)
+                if first_failure is None:
+                    first_failure = "INCONCLUSIVE_EVIDENCE"
+
+            start_mono = time.monotonic()
+            qual_start_us = int(time.time() * 1_000_000)
+            next_pad_time = start_mono + 5.0
+
+            while time.monotonic() - start_mono < args.duration:
+                # Periodic pad inputs (SQUARE light attacks) to keep combat active
+                if time.monotonic() >= next_pad_time:
+                    deliver_pad_button(args.serial, "SQUARE", delay_s=0.5)
+                    next_pad_time = time.monotonic() + 8.0
+
+                # Check process liveness & exact PID/session identity
+                loop_id = get_process_identity(args.serial, PKG_NAME)
+                if not loop_id:
+                    print("[!] CRASH DETECTED during benchmark gameplay window!", file=sys.stderr)
+                    first_failure = "FAIL_CRASH"
+                    break
+                if loop_id.pid != launch_identity.pid or loop_id.start_time != launch_identity.start_time:
+                    print(f"[!] Process replacement detected: launch PID {launch_identity.pid} != current PID {loop_id.pid}!", file=sys.stderr)
+                    first_failure = "FAIL_REPLACEMENT_PID"
+                    break
+                time.sleep(2.0)
+
+            elapsed_gameplay = time.monotonic() - start_mono
+            qual_end_us = int(time.time() * 1_000_000)
+            print(f"[*] Benchmark window completed after {elapsed_gameplay:.1f}s.")
+
+    finally:
+        # 8. Evidence collection
+        run_state = "COLLECTING"
+        print(f"[*] Collecting run evidence to {outdir}...")
+        collect_scene = f"{args.scene}-{first_failure}" if first_failure else args.scene
         collect_cmd = [
             str(PERF_DIR / "collect-run-evidence.sh"),
             "--run-id", run_id,
-            "--scene", f"{args.scene}-launch-fail",
+            "--scene", collect_scene,
             args.serial,
             str(outdir),
         ]
-        run_cmd(collect_cmd, timeout=60)
-        return 3
+        r_collect = run_cmd(collect_cmd, timeout=60)
+        if r_collect.returncode != 0:
+            print(f"[!] Warning: collect-run-evidence.sh exited with code {r_collect.returncode}", file=sys.stderr)
+            if first_failure is None:
+                first_failure = "INCONCLUSIVE_EVIDENCE"
 
-    print("[OK] Launch accepted and RPCSXActivity is focused!")
+        # Capture thermal status
+        r_thermal = adb_shell(args.serial, "dumpsys thermalservice 2>/dev/null")
+        if r_thermal.returncode == 0 and r_thermal.stdout.strip():
+            (outdir / "thermal-status.txt").write_text(r_thermal.stdout, encoding="utf-8")
 
-    # 6. Configure monitor overlay
-    time.sleep(1)
-    configure_monitor(args.serial, args.monitor_preset)
+        # 9. Deterministic clean stop & terminate host logger
+        run_state = "CLEANUP"
+        if host_log_proc:
+            try:
+                host_log_proc.terminate()
+                host_log_proc.wait(timeout=3)
+            except Exception:
+                try:
+                    host_log_proc.kill()
+                except Exception:
+                    pass
+            try:
+                host_log_file.close()
+            except Exception:
+                pass
 
-    # 7. Progression loop (navigating intro and cutscenes to reach Gaia combat)
-    # Timeline as observed in baseline and revised benchmark:
-    # ~35s: First frame / Sony warning screen
-    # +10s: START
-    # ~55s: Opening Olympus cutscene
-    # +30s: START (advance cutscene)
-    # ~120s: Waterfall ascent
-    # +15s: CROSS
-    # ~160s: Mount Olympus summit
-    # ~250s: Transition into 3D gameplay on Gaia's back
-    print("[*] Waiting for initial intro sequence and progression milestones...")
-    time.sleep(30)
-    deliver_pad_button(args.serial, "START", delay_s=5)
-
-    print("[*] Advancing opening cutscene...")
-    time.sleep(15)
-    deliver_pad_button(args.serial, "START", delay_s=5)
-
-    print("[*] Advancing dialogue / scene prompts...")
-    time.sleep(25)
-    deliver_pad_button(args.serial, "CROSS", delay_s=5)
-
-    # Check if process is still alive
-    r_pid = adb_shell(args.serial, f"pidof {PKG_NAME}")
-    pid = r_pid.stdout.strip()
-    if not pid:
-        print("[!] ERROR: Process died before reaching gameplay window!", file=sys.stderr)
-        # Collect evidence immediately
-        run_cmd([
-            str(PERF_DIR / "collect-run-evidence.sh"),
-            "--run-id", run_id,
-            "--scene", f"{args.scene}-crashed-pre-gameplay",
-            args.serial,
-            str(outdir),
-        ], timeout=60)
-        return 4
-
-    print(f"[*] Process alive (PID {pid}). Executing gameplay benchmark window ({args.duration}s)...")
-    screencap_dest = "/home/abhaybyte/.gemini/antigravity-cli/brain/81b61061-cc69-40f0-8ee0-d16dcbef2009/device_screen_fixed.png"
-    gameplay_png = ROOT_DIR / "docs" / "benchmarks" / "screenshots" / "gow3-phase10-gameplay.png"
-    gameplay_png.parent.mkdir(parents=True, exist_ok=True)
-    outdir.mkdir(parents=True, exist_ok=True)
-    outdir_png = outdir / "device_screen.png"
-    try:
-        r_sc = subprocess.run(["adb", "-s", args.serial, "exec-out", "screencap", "-p"], capture_output=True, timeout=15)
-        if r_sc.returncode == 0 and r_sc.stdout:
-            with open(screencap_dest, "wb") as f:
-                f.write(r_sc.stdout)
-            with open(gameplay_png, "wb") as f:
-                f.write(r_sc.stdout)
-            with open(outdir_png, "wb") as f:
-                f.write(r_sc.stdout)
-            print(f"[*] Captured initial gameplay screenshot to {gameplay_png} and {outdir_png}")
-    except Exception as e:
-        print(f"[!] Warning: initial screencap failed: {e}")
-
-    start_time = time.time()
-    next_pad_time = start_time + 5.0
-
-    while time.time() - start_time < args.duration:
-        # Periodic pad inputs (SQUARE light attacks) to keep combat active
-        if time.time() >= next_pad_time:
-            deliver_pad_button(args.serial, "SQUARE", delay_s=0.5)
-            next_pad_time = time.time() + 8.0
-
-        # Check process liveness
-        r_alive = adb_shell(args.serial, f"pidof {PKG_NAME}")
-        if not r_alive.stdout.strip():
-            print("[!] CRASH DETECTED during benchmark gameplay window!", file=sys.stderr)
-            break
-        time.sleep(2.0)
-
-    elapsed_gameplay = time.time() - start_time
-    print(f"[*] Benchmark window completed after {elapsed_gameplay:.1f}s.")
-
-    # 8. Evidence collection (capture volatile thread snapshot and metrics while alive)
-    print(f"[*] Collecting run evidence to {outdir}...")
-    collect_cmd = [
-        str(PERF_DIR / "collect-run-evidence.sh"),
-        "--run-id", run_id,
-        "--scene", args.scene,
-        args.serial,
-        str(outdir),
-    ]
-    run_cmd(collect_cmd, timeout=60)
-
-    # 9. Deterministic clean stop
-    print("[*] Initiating clean game stop via debug-stop-game.sh...")
-    clean_stop = False
-    try:
-        r_stop = run_cmd([str(SCRIPTS_DIR / "debug-stop-game.sh"), args.serial], timeout=75)
-        clean_stop = (r_stop.returncode == 0)
-    except subprocess.TimeoutExpired:
-        print("[!] Warning: debug-stop-game.sh timed out waiting for stop confirmation", file=sys.stderr)
-
-    # Refresh post-stop exit info in evidence directory
-    r_exit = adb_shell(args.serial, f"dumpsys activity exit-info {PKG_NAME}")
-    if r_exit.returncode == 0 and r_exit.stdout.strip():
-        (outdir / "exit-info.txt").write_text(r_exit.stdout, encoding="utf-8")
-
-    manifest_path = outdir / "run-manifest.json"
-    if manifest_path.exists():
+        print("[*] Initiating clean game stop via debug-stop-game.sh...")
         try:
-            m_data = json.loads(manifest_path.read_text(encoding="utf-8"))
-            m_data["clean_stop"] = clean_stop
-            m_data["stop_reason"] = "DEBUG_STOP_GAME" if clean_stop else "STOP_FAILED_OR_CRASH"
-            if effective_scheduler:
-                m_data["scheduler_mode"] = effective_scheduler
-            manifest_path.write_text(json.dumps(m_data, indent=2), encoding="utf-8")
-        except Exception:
-            pass
+            r_stop = run_cmd([str(SCRIPTS_DIR / "debug-stop-game.sh"), args.serial], timeout=75)
+            clean_stop = (r_stop.returncode == 0)
+        except subprocess.TimeoutExpired:
+            print("[!] Warning: debug-stop-game.sh timed out waiting for stop confirmation", file=sys.stderr)
+            clean_stop = False
 
-    # 10. Run frame events analyzer
-    analysis_json_path = outdir / "frame-analysis.json"
-    log_for_analysis = outdir / "logcat-process.log"
-    if not log_for_analysis.exists() or log_for_analysis.stat().st_size == 0:
-        log_for_analysis = outdir / "logcat-sambas3.txt"
-    if log_for_analysis.exists():
-        print(f"[*] Running analyze-frame-events.py on collected session logs ({log_for_analysis.name})...")
-        analyze_cmd = [
-            str(PERF_DIR / "analyze-frame-events.py"),
-            str(log_for_analysis),
-            "--json",
-            "--output-json", str(analysis_json_path),
-        ]
-        r_an = run_cmd(analyze_cmd, timeout=30)
-        if r_an.returncode == 0:
-            print("[OK] Frame analysis complete!")
+        # Refresh post-stop exit info in evidence directory
+        r_exit = adb_shell(args.serial, f"dumpsys activity exit-info {PKG_NAME}")
+        if r_exit.returncode == 0 and r_exit.stdout.strip():
+            (outdir / "exit-info.txt").write_text(r_exit.stdout, encoding="utf-8")
+
+        # 10. Run frame events analyzer
+        analysis_json_path = outdir / "frame-analysis.json"
+        log_for_analysis = outdir / "logcat-process.log"
+        if not log_for_analysis.exists() or log_for_analysis.stat().st_size == 0:
+            log_for_analysis = outdir / "logcat-sambas3.txt"
+        if log_for_analysis.exists() and log_for_analysis.stat().st_size > 0:
+            print(f"[*] Running analyze-frame-events.py on collected session logs ({log_for_analysis.name})...")
+            analyze_cmd = [
+                str(PERF_DIR / "analyze-frame-events.py"),
+                str(log_for_analysis),
+                "--json",
+                "--output-json", str(analysis_json_path),
+                "--start-us", str(qual_start_us),
+                "--end-us", str(qual_end_us),
+            ]
+            thermal_file = outdir / "thermal-status.txt"
+            if thermal_file.exists():
+                analyze_cmd.extend(["--thermal-log", str(thermal_file)])
+
+            r_an = run_cmd(analyze_cmd, timeout=30)
+            if r_an.returncode == 0 and analysis_json_path.exists():
+                print("[OK] Frame analysis complete!")
+                try:
+                    analysis_data = json.loads(analysis_json_path.read_text(encoding="utf-8"))
+                    if analysis_data.get("qualified_frames", 0) == 0 and first_failure is None:
+                        print("[!] ERROR: Zero qualified frames during gameplay window!", file=sys.stderr)
+                        first_failure = "FAIL_GUEST_PROGRESS"
+                    elif analysis_data.get("error") and first_failure is None:
+                        first_failure = "INCONCLUSIVE_EVIDENCE"
+                except Exception:
+                    if first_failure is None:
+                        first_failure = "INCONCLUSIVE_EVIDENCE"
+            else:
+                print(f"[!] Warning: frame analysis exited with code {r_an.returncode}: {r_an.stderr.strip()}", file=sys.stderr)
+                if first_failure is None:
+                    first_failure = "INCONCLUSIVE_EVIDENCE"
         else:
-            print(f"[!] Warning: frame analysis exited with code {r_an.returncode}: {r_an.stderr.strip()}", file=sys.stderr)
+            print(f"[!] Log file for frame analysis missing or empty at {log_for_analysis}", file=sys.stderr)
+            if first_failure is None:
+                first_failure = "INCONCLUSIVE_EVIDENCE"
+
+        verdict = "PASS" if (first_failure is None) else first_failure
+
+        manifest_path = outdir / "run-manifest.json"
+        m_data = {}
+        if manifest_path.exists():
+            try:
+                m_data = json.loads(manifest_path.read_text(encoding="utf-8"))
+            except Exception:
+                m_data = {}
+
+        m_data["run_id"] = run_id
+        m_data["target_scene"] = args.scene
+        m_data["clean_stop"] = clean_stop
+        m_data["first_failure"] = first_failure
+        m_data["verdict"] = verdict
+        m_data["stop_reason"] = "DEBUG_STOP_GAME" if (clean_stop and first_failure is None) else (first_failure or "STOP_FAILED_OR_CRASH")
+        m_data["cleanup"] = {
+            "attempted": True,
+            "clean_stop": clean_stop,
+            "result": "SUCCESS" if clean_stop else "FAILED"
+        }
+        m_data["launch_identity"] = {
+            "pid": launch_identity.pid,
+            "start_time": launch_identity.start_time,
+            "boot_id": launch_identity.boot_id,
+        } if launch_identity else None
+        if effective_scheduler:
+            m_data["scheduler_mode"] = effective_scheduler
+
+        try:
+            write_manifest_atomic(manifest_path, m_data)
+        except Exception as e:
+            print(f"[!] Error writing run-manifest.json: {e}", file=sys.stderr)
+            if first_failure is None:
+                first_failure = "INCONCLUSIVE_EVIDENCE"
+                verdict = "INCONCLUSIVE_EVIDENCE"
+
+        # Publish screenshot only on verified PASS
+        if verdict == "PASS" and outdir_png.exists():
+            try:
+                with open(outdir_png, "rb") as f_in, open(gameplay_png, "wb") as f_out:
+                    f_out.write(f_in.read())
+            except Exception:
+                pass
+
+        run_state = "FINISHED"
 
     print("================================================================================")
     print(" Benchmark Run Summary")
     print(f" Run ID:          {run_id}")
+    print(f" Verdict:         {verdict}")
+    if first_failure:
+        print(f" First Failure:   {first_failure}")
+    print(f" Cleanup Result:  {'SUCCESS' if clean_stop else 'FAILED'}")
     if effective_scheduler:
         print(f" Scheduler Mode:  {effective_scheduler}")
     print(f" Output Dir:      {outdir}")
@@ -654,7 +837,16 @@ def main() -> int:
         except Exception:
             pass
     print("================================================================================")
+    if verdict != "PASS":
+        if first_failure in ("FAIL_CRASH", "FAIL_REPLACEMENT_PID"):
+            return 4
+        elif first_failure in ("FAIL_PROVENANCE", "FAIL_LAUNCH"):
+            return 3
+        elif first_failure in ("INCONCLUSIVE_EVIDENCE", "INCONCLUSIVE_SCENE"):
+            return 2
+        return 1
     return 0
+
 
 
 if __name__ == "__main__":

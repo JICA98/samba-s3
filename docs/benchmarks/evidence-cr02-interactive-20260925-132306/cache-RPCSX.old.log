@@ -1,0 +1,1100 @@
+﻿RPCSX-ps3-android v20260925-141af96 Draft
+ARM 2x"cortex-a520" + 5x"Cortex-A720" + 1x"Cortex-X4" | 8 Threads | 10.96 GiB RAM | TSC: 0.019GHz | FMA3
+Operating system: POSIX, Name: Linux, Release: 6.1.174-gf870a38a2536, Version: #1 SMP PREEMPT Sat Jul  4 02:49:09 EEST 2026
+Current Time: 2026-09-25T18:52:29
+rlimit[8] = 65536 (requested 18446744073709551615, max 65536)
+·E 0:00:00.000013 ANDROID: rlimit[7] = 32768 (requested 18446744073709551615, max 32768)
+·E 0:00:00.000017 ANDROID: rlimit[3] = 134217728 (requested 134217728, max 18446744073709551615)
+·E 0:00:00.000020 ANDROID: rlimit[9] = 18446744073709551615 (requested 18446744073709551615, max 18446744073709551615)
+·! 0:00:00.000056 SYS: Setting user ID '00000001'
+·A 0:00:00.000064 SYS: LLVM version: 20.1.3
+·! 0:00:00.006048 VFS: VFS config missing. Using default settings. Path: /storage/emulated/0/Android/data/com.zenithblue.sambas3/files/config/vfs.yml
+·! 0:00:00.006142 SYS: Using VFS config:
+$(EmulatorDir): ""
+/dev_hdd0/: $(EmulatorDir)dev_hdd0/
+/dev_hdd1/: $(EmulatorDir)dev_hdd1/
+/dev_flash/: $(EmulatorDir)dev_flash/
+/dev_flash2/: $(EmulatorDir)dev_flash2/
+/dev_flash3/: $(EmulatorDir)dev_flash3/
+/dev_bdvd/: $(EmulatorDir)dev_bdvd/
+/games/: $(EmulatorDir)games/
+/app_home/: ""
+/dev_usb***/:
+  /dev_usb000:
+    Path: $(EmulatorDir)dev_usb000/
+    Serial: ""
+    VID: ""
+    PID: ""
+·! 0:00:00.006206 VFS: Mounted path "/dev_hdd0" to "/storage/emulated/0/Android/data/com.zenithblue.sambas3/files/config/dev_hdd0/"
+·! 0:00:00.006235 VFS: Mounted path "/dev_flash" to "/storage/emulated/0/Android/data/com.zenithblue.sambas3/files/config/dev_flash/"
+·! 0:00:00.006264 VFS: Mounted path "/dev_flash2" to "/storage/emulated/0/Android/data/com.zenithblue.sambas3/files/config/dev_flash2/"
+·! 0:00:00.006290 VFS: Mounted path "/dev_flash3" to "/storage/emulated/0/Android/data/com.zenithblue.sambas3/files/config/dev_flash3/"
+·! 0:00:00.006303 VFS: Mounted path "/app_home" to "/"
+·! 0:00:00.006340 VFS: Mounted path "/dev_usb000" to "/storage/emulated/0/Android/data/com.zenithblue.sambas3/files/config/dev_usb000/"
+·! 0:00:00.006361 SYS: Applying global config: /storage/emulated/0/Android/data/com.zenithblue.sambas3/files/config/config.yml
+·! 0:00:00.010252 SYS: Logged in as user '00000001' with the username 'User'
+·! 0:00:00.010422 IPC: IPC config missing. Using default settings. Path: /storage/emulated/0/Android/data/com.zenithblue.sambas3/files/config/ipc.yml
+·! 0:00:00.010439 SYS: Using IPC config:
+IPC Server enabled: false
+IPC Port: 28012
+·! 0:00:00.010446 Input: Saving input configuration 'Default' to '/storage/emulated/0/Android/data/com.zenithblue.sambas3/files/config/input_configs/global/Default.yml'
+·! 0:00:00.015781 ANDROID: LLVM CPU: configured='cortex-a34', effective='cortex-a34'
+·! 0:00:00.015811 ANDROID: Thread Scheduler Mode: RPCS3 Scheduler
+·! 0:00:00.017133 SIG: CPU topology: allowed=0xff, perf=0xfc, eff=0x3, heterogeneous=true, discovery=success
+·! 0:00:00.017156 ANDROID: CPU Topology: allowed=0xff, perf=0xfc, eff=0x3, heterogeneous=true
+·! 0:00:00.017765 SYS: Setting user ID '00000001'
+·! 0:00:00.076233 SYS: Mounting iso: '/proc/self/fd/103' -> '/vfsv0_jXV1eeqh3rPrUKv35RPRN2_/'
+·! 0:00:00.076339 VFS: Mounted path "/dev_bdvd" to "/vfsv0_jXV1eeqh3rPrUKv35RPRN2_/"
+·S 0:00:00.080954 PPU: Enabled: Non-Java Mode Fixup
+·E 0:00:00.085321 PPU: PPU Cache location not initialized.
+·! 0:00:00.086894 cellSysutil: cellAudioOut: found support for Linear PCM 2 Ch.
+·! 0:00:00.086912 cellSysutil: cellAudioOut: found support for Linear PCM 5.1 Ch.
+·! 0:00:00.086916 cellSysutil: cellAudioOut: found support for Linear PCM 7.1 Ch.
+·! 0:00:00.086919 cellSysutil: cellAudioOut: found support for Dolby Digital 5.1 Ch.
+·! 0:00:00.086922 cellSysutil: cellAudioOut: found support for DTS 5.1 Ch.
+·! 0:00:00.086925 cellSysutil: cellAudioOut: added primary mode: type=0, channel=2, fs=4, layout=1
+·! 0:00:00.086928 cellSysutil: cellAudioOut: added secondary mode: type=0, channel=2, fs=4, layout=1
+·! 0:00:00.086931 cellSysutil: cellAudioOut: initial primary output configuration: channels=2, encoder=0, downmixer=0
+·! 0:00:00.086935 cellSysutil: cellAudioOut: initial secondary output configuration: channels=2, encoder=0, downmixer=0
+·! 0:00:00.087139 CFG: Loading usio config: /storage/emulated/0/Android/data/com.zenithblue.sambas3/files/config/usio.yml
+·! 0:00:00.087896 sys_usbd: USIO config=
+
+·S 0:00:00.087908 sys_usbd: Emulating device: Skylanders Portal (1)
+·S 0:00:00.087913 sys_usbd: Emulating device: Disney Infinity Base (1)
+·S 0:00:00.087917 sys_usbd: Emulating device: Lego Dimensions Portal (1)
+·S 0:00:00.087921 sys_usbd: Emulating device: PS3A-USJ (1)
+·! 0:00:00.088196 CFG: Loading gem_real config: /storage/emulated/0/Android/data/com.zenithblue.sambas3/files/config/gem_real.yml
+·! 0:00:00.088429 CFG: Loading gem config: /storage/emulated/0/Android/data/com.zenithblue.sambas3/files/config/gem.yml
+·! 0:00:00.088710 CFG: Loading gem_mouse config: /storage/emulated/0/Android/data/com.zenithblue.sambas3/files/config/gem_mouse.yml
+·! 0:00:00.089169 cellGem: Real gem config=
+
+·! 0:00:00.089265 cellGem: Fake gem config=
+
+·! 0:00:00.089440 cellGem: Mouse gem config=
+
+·! 0:00:00.089843 {Gem Thread} cellGem: Starting thread
+·! 0:00:00.090744 {GDB Server} GDB: Started listening on '127.0.0.1:2345'.
+·E 0:00:00.091761 {cellAudio Thread} Cubeb: cubeb_register_device_collection_changed() failed: -4
+·! 0:00:00.092077 {cellAudio Thread} Cubeb: Using backend aaudio
+·! 0:00:00.092104 {cellAudio Thread} cellAudio: cellAudio initializing. Backend: Cubeb
+·! 0:00:00.092113 {cellAudio Thread} Cubeb: Trying to open default device
+·! 0:00:00.092119 {cellAudio Thread} Cubeb: Searching for default device
+·E 0:00:00.092124 {cellAudio Thread} Cubeb: cubeb_enumerate_devices() failed: -4
+·! 0:00:00.092129 {cellAudio Thread} Cubeb: Starting alternative search for default device with freq=48000, sample_size=4 and ch_cnt=2
+·! 0:00:00.124569 ppu_loader: ** Segment: p_type=0x1, p_vaddr=0x10000, p_filesz=0x4e76e0, p_memsz=0x4e76e0, flags=0x400005
+·! 0:00:00.132136 ppu_loader: ** Segment: p_type=0x1, p_vaddr=0x500000, p_filesz=0x430c0, p_memsz=0x18f8a0, flags=0x600006
+·! 0:00:00.132878 ppu_loader: ** Segment: p_type=0x1, p_vaddr=0x0, p_filesz=0x0, p_memsz=0x0, flags=0x4
+·! 0:00:00.132889 ppu_loader: ** Segment: p_type=0x1, p_vaddr=0x0, p_filesz=0x0, p_memsz=0x0, flags=0x6
+·! 0:00:00.132892 ppu_loader: ** Segment: p_type=0x1, p_vaddr=0x0, p_filesz=0x0, p_memsz=0x0, flags=0x6600006
+·! 0:00:00.132896 ppu_loader: ** Segment: p_type=0x7, p_vaddr=0x52ad44, p_filesz=0x8, p_memsz=0x158, flags=0x4
+·! 0:00:00.132899 ppu_loader: ** Segment: p_type=0x60000001, p_vaddr=0x4f7680, p_filesz=0x20, p_memsz=0x20, flags=0x0
+·! 0:00:00.132902 ppu_loader: ** Segment: p_type=0x60000002, p_vaddr=0x4f76a0, p_filesz=0x40, p_memsz=0x40, flags=0x0
+·! 0:00:00.132905 ppu_loader: ** Section: sh_type=0x0, addr=0x0, size=0x0, flags=0x0
+·! 0:00:00.132909 ppu_loader: ** Section: sh_type=0x1000000, addr=0x10200, size=0x2c, flags=0x6
+·! 0:00:00.132912 ppu_loader: ** Section: sh_type=0x1000000, addr=0x10230, size=0x3b8eb0, flags=0x6
+·! 0:00:00.132916 ppu_loader: ** Section: sh_type=0x1000000, addr=0x3c90e0, size=0x24, flags=0x6
+·! 0:00:00.132919 ppu_loader: ** Section: sh_type=0x1000000, addr=0x3c9104, size=0x1700, flags=0x6
+·! 0:00:00.132922 ppu_loader: ** Section: sh_type=0x1000000, addr=0x3ca804, size=0xd4, flags=0x2
+·! 0:00:00.132925 ppu_loader: ** Section: sh_type=0x1000000, addr=0x3ca8d8, size=0x2e0, flags=0x2
+·! 0:00:00.132928 ppu_loader: ** Section: sh_type=0x1000000, addr=0x3cabb8, size=0x4, flags=0x2
+·! 0:00:00.132931 ppu_loader: ** Section: sh_type=0x1000000, addr=0x3cabbc, size=0x4, flags=0x2
+·! 0:00:00.132934 ppu_loader: ** Section: sh_type=0x1000000, addr=0x3cabc0, size=0x4, flags=0x2
+·! 0:00:00.132937 ppu_loader: ** Section: sh_type=0x1000000, addr=0x3cabc4, size=0x23c, flags=0x2
+·! 0:00:00.132940 ppu_loader: ** Section: sh_type=0x1000000, addr=0x3cae00, size=0x4, flags=0x2
+·! 0:00:00.132942 ppu_loader: ** Section: sh_type=0x1000000, addr=0x3cae10, size=0x30b68, flags=0x2
+·! 0:00:00.132945 ppu_loader: ** Section: sh_type=0x1000000, addr=0x3fb980, size=0xfbd00, flags=0x3
+·! 0:00:00.132948 ppu_loader: ** Section: sh_type=0x1000000, addr=0x4f7680, size=0x20, flags=0x3
+·! 0:00:00.132950 ppu_loader: ** Section: sh_type=0x1000000, addr=0x4f76a0, size=0x40, flags=0x2
+·! 0:00:00.132954 ppu_loader: ** Section: sh_type=0x1000000, addr=0x500000, size=0x240, flags=0x3
+·! 0:00:00.132957 ppu_loader: ** Section: sh_type=0x1000000, addr=0x500240, size=0x88, flags=0x3
+·! 0:00:00.132960 ppu_loader: ** Section: sh_type=0x1000000, addr=0x5002c8, size=0x4, flags=0x3
+·! 0:00:00.132963 ppu_loader: ** Section: sh_type=0x1000000, addr=0x5002d0, size=0x5aa0, flags=0x3
+·! 0:00:00.132966 ppu_loader: ** Section: sh_type=0x1000000, addr=0x505d70, size=0x2e0, flags=0x3
+·! 0:00:00.132969 ppu_loader: ** Section: sh_type=0x1000000, addr=0x506050, size=0x7d60, flags=0x3
+·! 0:00:00.132972 ppu_loader: ** Section: sh_type=0x1000000, addr=0x50ddb0, size=0x17918, flags=0x3
+·! 0:00:00.132975 ppu_loader: ** Section: sh_type=0x1000000, addr=0x5256c8, size=0x567c, flags=0x3
+·! 0:00:00.132978 ppu_loader: ** Section: sh_type=0x1000000, addr=0x52ad44, size=0x8, flags=0x403
+·! 0:00:00.132980 ppu_loader: ** Section: sh_type=0x8000000, addr=0x52ad50, size=0x14c, flags=0x403
+·! 0:00:00.132983 ppu_loader: ** Section: sh_type=0x1000000, addr=0x52aec0, size=0x18200, flags=0x3
+·! 0:00:00.132985 ppu_loader: ** Section: sh_type=0x8000000, addr=0x543100, size=0x14c7a0, flags=0x3
+·! 0:00:00.132988 ppu_loader: ** Section: sh_type=0x1000000, addr=0x0, size=0x608, flags=0x0
+·! 0:00:00.132991 ppu_loader: ** Section: sh_type=0x1000000, addr=0x0, size=0x1b4d, flags=0x0
+·! 0:00:00.132994 ppu_loader: ** Section: sh_type=0x3000000, addr=0x0, size=0x132, flags=0x0
+·W 0:00:00.133001 ppu_loader: PPU executable hash: PPU-4d5c51503a81a327c2a99427390a395b8dcb3767
+·! 0:00:00.134156 SPU: Found SPU function(s) at:
+[00] 0x03040, 0x034c0, 0x03bb8, 0x03bd0
+[00] 0x03be8, 0x03c00, 0x03c18, 0x03cb8
+[01] 0x03d68, 0x04118, 0x042f8, 0x04478
+[01] 0x049d0, 0x04dc0, 0x04e10, 0x04ec0
+[02] 0x04f50, 0x05000, 0x050b0, 0x05270
+[02] 0x052b0, 0x053a0, 0x053e8, 0x05408
+[03] 0x05480, 0x05518, 0x05654, 0x05830
+[03] 0x05b10, 0x05ce0, 0x05d70, 0x05e58
+·S 0:00:00.134172 SPU: Found 32 SPU function(s)
+·W 0:00:00.134201 ppu_loader: SPU executable hash: SPU-1c7a21a046d99d7f5dacbf86a21e04bfc22152a1
+	Segment: p_type=0x1, p_vaddr=0x3000, p_filesz=0x2fa0, p_memsz=0x2fa0, p_offset=0x100
+	Segment: p_type=0x1, p_vaddr=0x6000, p_filesz=0x20, p_memsz=0x374d0, p_offset=0x3100
+	Segment: p_type=0x4, p_vaddr=0x0, p_filesz=0x34, p_memsz=0x34, p_offset=0x3120
+	SPUNAME: 'Z:/src/Game/PS3 Platinum/SPUPost' (image addr: 0x3fb980, size: 0x3120)
+·! 0:00:00.134318 SPU: Found SPU function(s) at:
+[00] 0x03060, 0x030e8, 0x03118, 0x03170
+[00] 0x03640, 0x03b28, 0x03f40, 0x04680
+[01] 0x047e8, 0x049a0, 0x04f48, 0x0b2f0
+[01] 0x0b340, 0x0b5c0, 0x0c528, 0x0c798
+[02] 0x0cab0, 0x0ce00, 0x0da70, 0x0dac0
+[02] 0x0dad0, 0x0dad8, 0x0db28, 0x0ddf8
+[03] 0x0df00, 0x0e2a8, 0x0e398, 0x0e428
+[03] 0x0e508, 0x0e5d8, 0x0e6d8, 0x0e7a8
+[04] 0x0e910, 0x0ec50, 0x0f810, 0x0fbe8
+[04] 0x0fca8, 0x0fe28, 0x10120, 0x10368
+[05] 0x10450, 0x10ee0, 0x11068, 0x11360
+[05] 0x11688, 0x11838, 0x11860, 0x118d0
+[06] 0x11918, 0x11970, 0x11a28, 0x11a98
+[06] 0x11b10, 0x11bb8, 0x11dc0
+·S 0:00:00.134338 SPU: Found 55 SPU function(s)
+·W 0:00:00.134419 ppu_loader: SPU executable hash: SPU-d736f923ebb7513c078f592323265bd6ecdcf9dc
+	Segment: p_type=0x1, p_vaddr=0x3000, p_filesz=0xf180, p_memsz=0xf180, p_offset=0x100
+	Segment: p_type=0x1, p_vaddr=0x12180, p_filesz=0x90, p_memsz=0x24950, p_offset=0xf280
+	Segment: p_type=0x4, p_vaddr=0x0, p_filesz=0x34, p_memsz=0x34, p_offset=0xf310
+	SPUNAME: 'Z:/src/Game/PS3 Platinum/SPUPart' (image addr: 0x3feb00, size: 0xf310)
+·! 0:00:00.134517 SPU: Found SPU function(s) at:
+[00] 0x03040, 0x030d0, 0x03360, 0x035a0
+[00] 0x03710, 0x03b70, 0x04ec0, 0x052c0
+[01] 0x05308, 0x054b8, 0x05618, 0x05c00
+[01] 0x05e80, 0x06130, 0x064b8, 0x065d8
+[02] 0x08168, 0x08398, 0x084e8, 0x08630
+[02] 0x08730, 0x088d0, 0x08a40, 0x08db8
+[03] 0x08f20, 0x08f90, 0x08fd8, 0x090f0
+[03] 0x09168, 0x09200, 0x09518, 0x097f8
+[04] 0x09888, 0x09a80
+·S 0:00:00.134523 SPU: Found 34 SPU function(s)
+·W 0:00:00.134563 ppu_loader: SPU executable hash: SPU-530c255936b07b25467a58e24ceff5fd4e2960b7
+	Segment: p_type=0x1, p_vaddr=0x3000, p_filesz=0x7060, p_memsz=0x7060, p_offset=0x100
+	Segment: p_type=0x1, p_vaddr=0xa080, p_filesz=0x20, p_memsz=0x20, p_offset=0x7180
+	Segment: p_type=0x1, p_vaddr=0xa400, p_filesz=0x0, p_memsz=0x33560, p_offset=0x7000
+	Segment: p_type=0x4, p_vaddr=0x0, p_filesz=0x34, p_memsz=0x34, p_offset=0x71a0
+	SPUNAME: 'mlaascanline.PS3_Release/mlaasca' (image addr: 0x40de80, size: 0x71a0)
+·! 0:00:00.134652 SPU: Found SPU function(s) at:
+[00] 0x03040, 0x030d8, 0x03118, 0x03740
+[00] 0x03d80, 0x03f78, 0x042f0, 0x04430
+[01] 0x04478, 0x04b38, 0x07840, 0x08100
+[01] 0x08d40, 0x08d70, 0x08da0, 0x08e88
+[02] 0x08ed0, 0x08ef0, 0x08f88, 0x09390
+[02] 0x09528, 0x09698, 0x09748, 0x099a0
+[03] 0x09a30, 0x09ec0, 0x0a4c0, 0x0a5b0
+[03] 0x0a718, 0x0a7d8, 0x0a8c0, 0x0a940
+[04] 0x0aa00, 0x0aa50
+·S 0:00:00.134659 SPU: Found 34 SPU function(s)
+·W 0:00:00.134707 ppu_loader: SPU executable hash: SPU-50bf187cab7a7ca42192ce2738bbe0844f369f2c
+	Segment: p_type=0x1, p_vaddr=0x3000, p_filesz=0x8b40, p_memsz=0x8b40, p_offset=0x100
+	Segment: p_type=0x1, p_vaddr=0xbb80, p_filesz=0x30, p_memsz=0x2a980, p_offset=0x8c80
+	Segment: p_type=0x4, p_vaddr=0x0, p_filesz=0x34, p_memsz=0x34, p_offset=0x8cb0
+	SPUNAME: 'objs/release/edgezlib_inflate_ta' (image addr: 0x415080, size: 0x8cb0)
+·S 0:00:00.135789 PPU: Found valid roaming SPU code at 0x426b80..0x427600 (guessed_ls_addr=0x0, GUID=0x426b80..0x427600)
+·! 0:00:00.135814 SPU: Found SPU function(s) at:
+[00] 0x04030, 0x04038, 0x04498, 0x045e0
+[00] 0x04698, 0x04778, 0x048cc, 0x04948
+·S 0:00:00.135817 SPU: Found 8 SPU function(s)
+·S 0:00:00.135981 PPU: Found valid roaming SPU code at 0x427600..0x43d100 (guessed_ls_addr=0x0, GUID=0x427600..0x43d100)
+·! 0:00:00.136174 SPU: Found SPU function(s) at:
+[00] 0x04030, 0x040f0, 0x04120, 0x04228
+[00] 0x042a8, 0x042e8, 0x044c0, 0x04fa8
+[01] 0x05328, 0x05350, 0x05580, 0x057a8
+[01] 0x058b0, 0x05a58, 0x05c48, 0x05e60
+[02] 0x05ea8, 0x05f60, 0x06348, 0x070e8
+[02] 0x07998, 0x07bc8, 0x07e60, 0x096d8
+[03] 0x0c188, 0x0d9b0, 0x0d9e8, 0x0ddc0
+[03] 0x0dde0, 0x0e1b8, 0x0e1d8, 0x0e5b0
+[04] 0x0e5d0, 0x0e9a8, 0x0e9c8, 0x0eda0
+[04] 0x0edc0, 0x0fab8, 0x10828, 0x11f98
+[05] 0x12370, 0x12390, 0x12768, 0x12788
+[05] 0x12b60, 0x12f38, 0x13310, 0x13b48
+[06] 0x14910, 0x14980, 0x15190, 0x15470
+[06] 0x15620, 0x15a30, 0x15ae8, 0x15af0
+[07] 0x15b80, 0x15d20, 0x15df0, 0x16350
+[07] 0x16408, 0x16450, 0x16488, 0x16570
+[08] 0x16828, 0x16900, 0x169b0, 0x16b18
+[08] 0x16bc0, 0x16c80, 0x16d80, 0x16e60
+[09] 0x16f28, 0x16fe0, 0x170c0, 0x17178
+[09] 0x17518, 0x175d8, 0x17680, 0x17808
+[10] 0x178a0, 0x17958, 0x17b90, 0x17d10
+[10] 0x17e38, 0x17ee0, 0x17f88, 0x180b0
+[11] 0x18168, 0x18278, 0x18348, 0x18448
+[11] 0x184f0, 0x18598, 0x18640, 0x186e8
+[12] 0x187c0, 0x18890, 0x18938, 0x18a38
+[12] 0x18c58, 0x18db8, 0x18f18, 0x191c0
+[13] 0x19460, 0x19558, 0x19708
+·S 0:00:00.136183 SPU: Found 107 SPU function(s)
+·S 0:00:00.136291 PPU: Found valid roaming SPU code at 0x43d100..0x43d900 (guessed_ls_addr=0x0, GUID=0x43d100..0x43d900)
+·! 0:00:00.136300 SPU: Found SPU function(s) at: 0x04228, 0x04290
+·S 0:00:00.136302 SPU: Found 2 SPU function(s)
+·S 0:00:00.136409 PPU: Found valid roaming SPU code at 0x43d900..0x440b80 (guessed_ls_addr=0x0, GUID=0x43d900..0x440b80)
+·! 0:00:00.136430 SPU: Found SPU function(s) at:
+[00] 0x04048, 0x04190, 0x04288, 0x065d8
+[00] 0x06860, 0x068a0, 0x06d78, 0x06ff8
+[01] 0x070b0
+·S 0:00:00.136435 SPU: Found 9 SPU function(s)
+·S 0:00:00.136537 PPU: Found valid roaming SPU code at 0x440b80..0x444600 (guessed_ls_addr=0x0, GUID=0x440b80..0x444600)
+·! 0:00:00.136566 SPU: Found SPU function(s) at:
+[00] 0x040b0, 0x044c8, 0x04538, 0x046c0
+[00] 0x04ac8, 0x050d8, 0x05440, 0x059a0
+[01] 0x05d38, 0x06e90, 0x06f88, 0x07110
+[01] 0x07120, 0x072d0, 0x07598, 0x07830
+[02] 0x078e8
+·S 0:00:00.136569 SPU: Found 17 SPU function(s)
+·S 0:00:00.136682 PPU: Found valid roaming SPU code at 0x444600..0x452d80 (guessed_ls_addr=0x0, GUID=0x444600..0x452d80)
+·! 0:00:00.136764 SPU: Found SPU function(s) at:
+[00] 0x04048, 0x04bf0, 0x052f0, 0x05360
+[00] 0x05a98, 0x05ae0, 0x080a0, 0x080f0
+[01] 0x08248, 0x08470, 0x087d8, 0x08c50
+[01] 0x08fd8, 0x09530, 0x0a488, 0x0a878
+[02] 0x0b9a8, 0x0bff0, 0x0c0c0, 0x0c570
+[02] 0x0d348, 0x0d3a0, 0x0d458, 0x0d610
+[03] 0x0d620, 0x0d638, 0x0d650, 0x0d658
+[03] 0x0d668, 0x0d670, 0x0d680, 0x0d690
+[04] 0x0d698, 0x0d720, 0x0d7e8, 0x0dab8
+[04] 0x0dc20, 0x0dcd0, 0x0dd50, 0x0e010
+[05] 0x0e068, 0x0e0a8, 0x0e0f8, 0x0e108
+[05] 0x0e490, 0x0e5e0, 0x0e778, 0x0eaf8
+[06] 0x0ee60, 0x0f2f0, 0x0f330, 0x0f428
+[06] 0x0f870, 0x0fdd8, 0x0fe08, 0x0fec0
+[07] 0x106e0, 0x10760, 0x11740, 0x11970
+·S 0:00:00.136769 SPU: Found 60 SPU function(s)
+·S 0:00:00.137682 PPU: Found valid roaming SPU code at 0x466180..0x469100 (guessed_ls_addr=0x0, GUID=0x466180..0x469100)
+·! 0:00:00.137704 SPU: Found SPU function(s) at:
+[00] 0x04030, 0x04158, 0x04248, 0x042d0
+[00] 0x04368, 0x05438, 0x05980, 0x05c80
+[01] 0x060b8, 0x06148, 0x06360, 0x06510
+[01] 0x06690, 0x067e0, 0x06c58
+·S 0:00:00.137712 SPU: Found 15 SPU function(s)
+·S 0:00:00.137790 PPU: Found valid roaming SPU code at 0x469100..0x476b80 (guessed_ls_addr=0x0, GUID=0x469100..0x476b80)
+·! 0:00:00.137874 SPU: Found SPU function(s) at:
+[00] 0x04048, 0x04bf0, 0x05950, 0x059c0
+[00] 0x060f8, 0x06140, 0x08700, 0x08750
+[01] 0x088a8, 0x08ad0, 0x08e38, 0x092b0
+[01] 0x09638, 0x09b90, 0x0aae8, 0x0aed8
+[02] 0x0c008, 0x0c650, 0x0c720, 0x0cbd0
+[02] 0x0d9a8, 0x0da00, 0x0dab8, 0x0dc70
+[03] 0x0dc80, 0x0dc98, 0x0dcb0, 0x0dcb8
+[03] 0x0dcc8, 0x0dcd0, 0x0dce0, 0x0dcf0
+[04] 0x0dcf8, 0x0dd80, 0x0de48, 0x0e118
+[04] 0x0e280, 0x0e330, 0x0e3b0, 0x0e408
+[05] 0x0e448, 0x0e498, 0x0e4a8, 0x0e830
+[05] 0x0e980, 0x0eb18, 0x0ee98, 0x0f200
+[06] 0x0f690, 0x0f6d0, 0x0f7c8, 0x0fc10
+[06] 0x10178, 0x101a8, 0x10260, 0x10a80
+[07] 0x10b00, 0x10d30
+·S 0:00:00.137883 SPU: Found 58 SPU function(s)
+·S 0:00:00.138092 PPU: Found valid roaming SPU code at 0x47bd00..0x47c000 (guessed_ls_addr=0x0, GUID=0x47bd00..0x47c000)
+·! 0:00:00.138098 SPU: Found SPU function(s) at: 0x04038
+·S 0:00:00.138101 SPU: Found 1 SPU function(s)
+·S 0:00:00.138159 PPU: Found valid roaming SPU code at 0x47c000..0x47ea80 (guessed_ls_addr=0x0, GUID=0x47c000..0x47ea80)
+·! 0:00:00.138177 SPU: Found SPU function(s) at:
+[00] 0x04030, 0x05e78, 0x063b8, 0x06518
+[00] 0x06798, 0x06850
+·S 0:00:00.138183 SPU: Found 6 SPU function(s)
+·S 0:00:00.138236 PPU: Found valid roaming SPU code at 0x47ea80..0x480580 (guessed_ls_addr=0x0, GUID=0x47ea80..0x480580)
+·! 0:00:00.138251 SPU: Found SPU function(s) at: 0x04048, 0x04788, 0x05808
+·S 0:00:00.138254 SPU: Found 3 SPU function(s)
+·S 0:00:00.138300 PPU: Found valid roaming SPU code at 0x480580..0x481500 (guessed_ls_addr=0x0, GUID=0x480580..0x481500)
+·! 0:00:00.138312 SPU: Found SPU function(s) at:
+[00] 0x04080, 0x04a70, 0x04d90, 0x04e48
+·S 0:00:00.138315 SPU: Found 4 SPU function(s)
+·S 0:00:00.138363 PPU: Found valid roaming SPU code at 0x481500..0x482600 (guessed_ls_addr=0x0, GUID=0x481500..0x482600)
+·! 0:00:00.138374 SPU: Found SPU function(s) at: 0x04370, 0x04660
+·S 0:00:00.138376 SPU: Found 2 SPU function(s)
+·S 0:00:00.138419 PPU: Found valid roaming SPU code at 0x482600..0x483980 (guessed_ls_addr=0x0, GUID=0x482600..0x483980)
+·! 0:00:00.138428 SPU: Found SPU function(s) at: 0x043c0, 0x04790, 0x04d68
+·S 0:00:00.138431 SPU: Found 3 SPU function(s)
+·S 0:00:00.138495 PPU: Found valid roaming SPU code at 0x486b80..0x488480 (guessed_ls_addr=0x0, GUID=0x486b80..0x488480)
+·! 0:00:00.138516 SPU: Found SPU function(s) at: 0x044f0, 0x04d50, 0x053c8
+·S 0:00:00.138521 SPU: Found 3 SPU function(s)
+·S 0:00:00.138559 PPU: Found valid roaming SPU code at 0x488480..0x48a600 (guessed_ls_addr=0x0, GUID=0x488480..0x48a600)
+·! 0:00:00.138570 SPU: Found SPU function(s) at: 0x04b48, 0x05630
+·S 0:00:00.138573 SPU: Found 2 SPU function(s)
+·S 0:00:00.138609 PPU: Found valid roaming SPU code at 0x48a600..0x48c180 (guessed_ls_addr=0x0, GUID=0x48a600..0x48c180)
+·! 0:00:00.138620 SPU: Found SPU function(s) at:
+[00] 0x04630, 0x04c08, 0x050d8, 0x053e0
+·S 0:00:00.138623 SPU: Found 4 SPU function(s)
+·S 0:00:00.138658 PPU: Found valid roaming SPU code at 0x48c180..0x48df00 (guessed_ls_addr=0x0, GUID=0x48c180..0x48df00)
+·! 0:00:00.138670 SPU: Found SPU function(s) at:
+[00] 0x04500, 0x04640, 0x04a08, 0x05220
+·S 0:00:00.138673 SPU: Found 4 SPU function(s)
+·S 0:00:00.138796 PPU: Found valid roaming SPU code at 0x49f700..0x49ff80 (guessed_ls_addr=0x0, GUID=0x49f700..0x49ff80)
+·! 0:00:00.138806 SPU: Found SPU function(s) at:
+[00] 0x043b8, 0x04500, 0x045c8, 0x04620
+[00] 0x046a0
+·S 0:00:00.138809 SPU: Found 5 SPU function(s)
+·S 0:00:00.138901 PPU: Found valid roaming SPU code at 0x4a2e80..0x4a3180 (guessed_ls_addr=0x0, GUID=0x4a2e80..0x4a3180)
+·! 0:00:00.138908 SPU: Found SPU function(s) at: 0x04100
+·S 0:00:00.138911 SPU: Found 1 SPU function(s)
+·! 0:00:00.138995 PPU: Found IENABLE/IDSIABLE Pattern at 0x4a43d0
+·! 0:00:00.139001 PPU: Found IENABLE/IDSIABLE Pattern at 0x4a4498
+·! 0:00:00.139003 PPU: Found IENABLE/IDSIABLE Pattern at 0x4a44b0
+·! 0:00:00.139006 PPU: Found IENABLE/IDSIABLE Pattern at 0x4a44d8
+·! 0:00:00.139008 PPU: Found IENABLE/IDSIABLE Pattern at 0x4a44f0
+·! 0:00:00.139011 PPU: Found IENABLE/IDSIABLE Pattern at 0x4a45e0
+·! 0:00:00.139014 PPU: Found IENABLE/IDSIABLE Pattern at 0x4a4620
+·! 0:00:00.139022 PPU: Found IENABLE/IDSIABLE Pattern at 0x4a8810
+·! 0:00:00.139025 PPU: Found IENABLE/IDSIABLE Pattern at 0x4a8828
+·! 0:00:00.139029 PPU: Found IENABLE/IDSIABLE Pattern at 0x4a9638
+·! 0:00:00.139031 PPU: Found IENABLE/IDSIABLE Pattern at 0x4a9650
+·! 0:00:00.139034 PPU: Found IENABLE/IDSIABLE Pattern at 0x4a9670
+·! 0:00:00.139037 PPU: Found IENABLE/IDSIABLE Pattern at 0x4a9688
+·! 0:00:00.139040 PPU: Found IENABLE/IDSIABLE Pattern at 0x4a96a8
+·! 0:00:00.139042 PPU: Found IENABLE/IDSIABLE Pattern at 0x4a96c0
+·! 0:00:00.139052 PPU: Found IENABLE/IDSIABLE Pattern at 0x4adf98
+·! 0:00:00.139055 PPU: Found IENABLE/IDSIABLE Pattern at 0x4adfb0
+·! 0:00:00.139058 PPU: Found IENABLE/IDSIABLE Pattern at 0x4ae308
+·! 0:00:00.139061 PPU: Found IENABLE/IDSIABLE Pattern at 0x4ae320
+·! 0:00:00.139064 PPU: Found IENABLE/IDSIABLE Pattern at 0x4ae460
+·! 0:00:00.139066 PPU: Found IENABLE/IDSIABLE Pattern at 0x4ae478
+·! 0:00:00.139069 PPU: Found IENABLE/IDSIABLE Pattern at 0x4ae5c8
+·! 0:00:00.139071 PPU: Found IENABLE/IDSIABLE Pattern at 0x4ae5e0
+·! 0:00:00.139073 PPU: Found IENABLE/IDSIABLE Pattern at 0x4ae608
+·! 0:00:00.139076 PPU: Found IENABLE/IDSIABLE Pattern at 0x4ae668
+·! 0:00:00.139079 PPU: Found IENABLE/IDSIABLE Pattern at 0x4af0f8
+·! 0:00:00.139082 PPU: Found IENABLE/IDSIABLE Pattern at 0x4af120
+·! 0:00:00.139084 PPU: Found IENABLE/IDSIABLE Pattern at 0x4af178
+·! 0:00:00.139087 PPU: Found IENABLE/IDSIABLE Pattern at 0x4af1b0
+·! 0:00:00.139089 PPU: Found IENABLE/IDSIABLE Pattern at 0x4af270
+·! 0:00:00.139092 PPU: Found IENABLE/IDSIABLE Pattern at 0x4af2b0
+·! 0:00:00.139094 PPU: Found IENABLE/IDSIABLE Pattern at 0x4af358
+·! 0:00:00.139097 PPU: Found IENABLE/IDSIABLE Pattern at 0x4af380
+·! 0:00:00.139100 PPU: Found IENABLE/IDSIABLE Pattern at 0x4af408
+·! 0:00:00.139102 PPU: Found IENABLE/IDSIABLE Pattern at 0x4af440
+·! 0:00:00.139105 PPU: Found IENABLE/IDSIABLE Pattern at 0x4af4a8
+·! 0:00:00.139108 PPU: Found IENABLE/IDSIABLE Pattern at 0x4af4d0
+·! 0:00:00.139110 PPU: Found IENABLE/IDSIABLE Pattern at 0x4af4d8
+·! 0:00:00.139113 PPU: Found IENABLE/IDSIABLE Pattern at 0x4af500
+·! 0:00:00.139115 PPU: Found IENABLE/IDSIABLE Pattern at 0x4af528
+·! 0:00:00.139118 PPU: Found IENABLE/IDSIABLE Pattern at 0x4af558
+·! 0:00:00.139121 PPU: Found IENABLE/IDSIABLE Pattern at 0x4af5a0
+·! 0:00:00.139124 PPU: Found IENABLE/IDSIABLE Pattern at 0x4af5d0
+·! 0:00:00.139128 PPU: Found IENABLE/IDSIABLE Pattern at 0x4b0060
+·! 0:00:00.139130 PPU: Found IENABLE/IDSIABLE Pattern at 0x4b0080
+·! 0:00:00.139133 PPU: Found IENABLE/IDSIABLE Pattern at 0x4b00e0
+·! 0:00:00.139135 PPU: Found IENABLE/IDSIABLE Pattern at 0x4b00f8
+·! 0:00:00.139138 PPU: Found IENABLE/IDSIABLE Pattern at 0x4b0110
+·! 0:00:00.139141 PPU: Found IENABLE/IDSIABLE Pattern at 0x4b0130
+·! 0:00:00.139144 PPU: Found IENABLE/IDSIABLE Pattern at 0x4b0138
+·! 0:00:00.139147 PPU: Found IENABLE/IDSIABLE Pattern at 0x4b0158
+·! 0:00:00.139150 PPU: Found IENABLE/IDSIABLE Pattern at 0x4b0ad0
+·! 0:00:00.139153 PPU: Found IENABLE/IDSIABLE Pattern at 0x4b0ae8
+·! 0:00:00.139156 PPU: Found IENABLE/IDSIABLE Pattern at 0x4b0b68
+·! 0:00:00.139159 PPU: Found IENABLE/IDSIABLE Pattern at 0x4b0b80
+·! 0:00:00.139161 PPU: Found IENABLE/IDSIABLE Pattern at 0x4b0bb8
+·! 0:00:00.139164 PPU: Found IENABLE/IDSIABLE Pattern at 0x4b0bd0
+·! 0:00:00.139166 PPU: Found IENABLE/IDSIABLE Pattern at 0x4b0bf8
+·! 0:00:00.139169 PPU: Found IENABLE/IDSIABLE Pattern at 0x4b0c10
+·S 0:00:00.139178 PPU: Found valid roaming SPU code at 0x4a3180..0x4b5c00 (guessed_ls_addr=0x4000, GUID=0x4a3180..0x4b5c00)
+·! 0:00:00.139321 SPU: Found SPU function(s) at:
+[00] 0x041d0, 0x041f8, 0x04268, 0x04298
+[00] 0x04350, 0x044c8, 0x04668, 0x04bd0
+[01] 0x04c98, 0x04ec8, 0x05120, 0x05380
+[01] 0x054b0, 0x05520, 0x05bf8, 0x05f98
+[02] 0x05fd8, 0x06188, 0x06330, 0x067b0
+[02] 0x06b28, 0x07220, 0x07ba8, 0x07d78
+[03] 0x07e70, 0x09290, 0x0c200, 0x0c580
+[03] 0x0ca00, 0x0cd00, 0x0ce00, 0x0cf80
+[04] 0x0d080, 0x0d208, 0x0d2f8, 0x0d610
+[04] 0x0d6b8, 0x0d7d8, 0x0dc28, 0x0dfa8
+[05] 0x0e260, 0x0e4b0, 0x0e890, 0x0e958
+[05] 0x0ea00, 0x0eac8, 0x0eb30, 0x0ebc8
+[06] 0x0ec50, 0x0ede0, 0x0ef08, 0x0f1b0
+[06] 0x0f308, 0x0f470, 0x0f4c0, 0x0f528
+[07] 0x0f578, 0x0f588, 0x0f5a0, 0x0f5c0
+[07] 0x0f628, 0x0f688, 0x0f7a0, 0x0f928
+[08] 0x0fab0, 0x0fae0, 0x0fae8, 0x0faf0
+[08] 0x0fd10, 0x0fd18, 0x0fd20, 0x0fd60
+[09] 0x11b80, 0x11d00, 0x11f38, 0x11f68
+[09] 0x11fe0, 0x121a0, 0x12218, 0x12280
+[10] 0x122e0, 0x12320, 0x123a0, 0x123e8
+[10] 0x123f8, 0x12890, 0x12b70, 0x12d20
+[11] 0x12ff0, 0x13318
+·S 0:00:00.139329 SPU: Found 90 SPU function(s)
+·! 0:00:00.139440 PPU: Found IENABLE/IDSIABLE Pattern at 0x4b9970
+·! 0:00:00.139447 PPU: Found IENABLE/IDSIABLE Pattern at 0x4ba598
+·! 0:00:00.139449 PPU: Found IENABLE/IDSIABLE Pattern at 0x4ba5b0
+·! 0:00:00.139452 PPU: Found IENABLE/IDSIABLE Pattern at 0x4ba5d8
+·! 0:00:00.139454 PPU: Found IENABLE/IDSIABLE Pattern at 0x4ba5f0
+·! 0:00:00.139458 PPU: Found IENABLE/IDSIABLE Pattern at 0x4bb408
+·! 0:00:00.139460 PPU: Found IENABLE/IDSIABLE Pattern at 0x4bb448
+·! 0:00:00.139463 PPU: Found IENABLE/IDSIABLE Pattern at 0x4bb6f0
+·! 0:00:00.139465 PPU: Found IENABLE/IDSIABLE Pattern at 0x4bb708
+·! 0:00:00.139467 PPU: Found IENABLE/IDSIABLE Pattern at 0x4bb730
+·! 0:00:00.139469 PPU: Found IENABLE/IDSIABLE Pattern at 0x4bb748
+·! 0:00:00.139472 PPU: Found IENABLE/IDSIABLE Pattern at 0x4bbe18
+·! 0:00:00.139475 PPU: Found IENABLE/IDSIABLE Pattern at 0x4bbe30
+·! 0:00:00.139477 PPU: Found IENABLE/IDSIABLE Pattern at 0x4bc300
+·! 0:00:00.139480 PPU: Found IENABLE/IDSIABLE Pattern at 0x4bc320
+·! 0:00:00.139490 PPU: Found IENABLE/IDSIABLE Pattern at 0x4c17e8
+·! 0:00:00.139492 PPU: Found IENABLE/IDSIABLE Pattern at 0x4c1800
+·! 0:00:00.139495 PPU: Found IENABLE/IDSIABLE Pattern at 0x4c1848
+·! 0:00:00.139497 PPU: Found IENABLE/IDSIABLE Pattern at 0x4c1860
+·! 0:00:00.139500 PPU: Found IENABLE/IDSIABLE Pattern at 0x4c1888
+·! 0:00:00.139502 PPU: Found IENABLE/IDSIABLE Pattern at 0x4c18a0
+·! 0:00:00.139504 PPU: Found IENABLE/IDSIABLE Pattern at 0x4c18c8
+·! 0:00:00.139507 PPU: Found IENABLE/IDSIABLE Pattern at 0x4c18e0
+·! 0:00:00.139510 PPU: Found IENABLE/IDSIABLE Pattern at 0x4c24d8
+·! 0:00:00.139513 PPU: Found IENABLE/IDSIABLE Pattern at 0x4c24f0
+·! 0:00:00.139515 PPU: Found IENABLE/IDSIABLE Pattern at 0x4c2518
+·! 0:00:00.139517 PPU: Found IENABLE/IDSIABLE Pattern at 0x4c2530
+·! 0:00:00.139520 PPU: Found IENABLE/IDSIABLE Pattern at 0x4c2558
+·! 0:00:00.139522 PPU: Found IENABLE/IDSIABLE Pattern at 0x4c2570
+·! 0:00:00.139525 PPU: Found IENABLE/IDSIABLE Pattern at 0x4c2598
+·! 0:00:00.139527 PPU: Found IENABLE/IDSIABLE Pattern at 0x4c25b0
+·! 0:00:00.139530 PPU: Found IENABLE/IDSIABLE Pattern at 0x4c2ac8
+·! 0:00:00.139532 PPU: Found IENABLE/IDSIABLE Pattern at 0x4c2ae0
+·! 0:00:00.139535 PPU: Found IENABLE/IDSIABLE Pattern at 0x4c2bb0
+·! 0:00:00.139537 PPU: Found IENABLE/IDSIABLE Pattern at 0x4c2bd0
+·! 0:00:00.139540 PPU: Found IENABLE/IDSIABLE Pattern at 0x4c2c18
+·! 0:00:00.139542 PPU: Found IENABLE/IDSIABLE Pattern at 0x4c2c30
+·! 0:00:00.139544 PPU: Found IENABLE/IDSIABLE Pattern at 0x4c2c58
+·! 0:00:00.139547 PPU: Found IENABLE/IDSIABLE Pattern at 0x4c2c70
+·! 0:00:00.139549 PPU: Found IENABLE/IDSIABLE Pattern at 0x4c2c98
+·! 0:00:00.139551 PPU: Found IENABLE/IDSIABLE Pattern at 0x4c2cb0
+·! 0:00:00.139554 PPU: Found IENABLE/IDSIABLE Pattern at 0x4c2da0
+·! 0:00:00.139556 PPU: Found IENABLE/IDSIABLE Pattern at 0x4c2db8
+·! 0:00:00.139559 PPU: Found IENABLE/IDSIABLE Pattern at 0x4c31f0
+·! 0:00:00.139561 PPU: Found IENABLE/IDSIABLE Pattern at 0x4c3208
+·! 0:00:00.139564 PPU: Found IENABLE/IDSIABLE Pattern at 0x4c3340
+·! 0:00:00.139566 PPU: Found IENABLE/IDSIABLE Pattern at 0x4c3358
+·! 0:00:00.139569 PPU: Found IENABLE/IDSIABLE Pattern at 0x4c3748
+·! 0:00:00.139572 PPU: Found IENABLE/IDSIABLE Pattern at 0x4c3760
+·! 0:00:00.139575 PPU: Found IENABLE/IDSIABLE Pattern at 0x4c3e58
+·! 0:00:00.139578 PPU: Found IENABLE/IDSIABLE Pattern at 0x4c3e70
+·! 0:00:00.139582 PPU: Found IENABLE/IDSIABLE Pattern at 0x4c57b8
+·! 0:00:00.139585 PPU: Found IENABLE/IDSIABLE Pattern at 0x4c57d0
+·! 0:00:00.139587 PPU: Found IENABLE/IDSIABLE Pattern at 0x4c57f8
+·! 0:00:00.139590 PPU: Found IENABLE/IDSIABLE Pattern at 0x4c5810
+·! 0:00:00.139592 PPU: Found IENABLE/IDSIABLE Pattern at 0x4c5838
+·! 0:00:00.139595 PPU: Found IENABLE/IDSIABLE Pattern at 0x4c5850
+·! 0:00:00.139597 PPU: Found IENABLE/IDSIABLE Pattern at 0x4c5df0
+·! 0:00:00.139600 PPU: Found IENABLE/IDSIABLE Pattern at 0x4c5e08
+·! 0:00:00.139602 PPU: Found IENABLE/IDSIABLE Pattern at 0x4c5e58
+·! 0:00:00.139605 PPU: Found IENABLE/IDSIABLE Pattern at 0x4c5e70
+·! 0:00:00.139607 PPU: Found IENABLE/IDSIABLE Pattern at 0x4c5e98
+·! 0:00:00.139610 PPU: Found IENABLE/IDSIABLE Pattern at 0x4c5eb0
+·! 0:00:00.139612 PPU: Found IENABLE/IDSIABLE Pattern at 0x4c5ed8
+·! 0:00:00.139620 PPU: Found IENABLE/IDSIABLE Pattern at 0x4c5ef0
+·! 0:00:00.139623 PPU: Found IENABLE/IDSIABLE Pattern at 0x4c6168
+·! 0:00:00.139625 PPU: Found IENABLE/IDSIABLE Pattern at 0x4c6180
+·! 0:00:00.139628 PPU: Found IENABLE/IDSIABLE Pattern at 0x4c62e0
+·! 0:00:00.139630 PPU: Found IENABLE/IDSIABLE Pattern at 0x4c62f8
+·! 0:00:00.139633 PPU: Found IENABLE/IDSIABLE Pattern at 0x4c6320
+·! 0:00:00.139635 PPU: Found IENABLE/IDSIABLE Pattern at 0x4c6338
+·! 0:00:00.139637 PPU: Found IENABLE/IDSIABLE Pattern at 0x4c6360
+·! 0:00:00.139640 PPU: Found IENABLE/IDSIABLE Pattern at 0x4c6378
+·! 0:00:00.139642 PPU: Found IENABLE/IDSIABLE Pattern at 0x4c64f0
+·! 0:00:00.139645 PPU: Found IENABLE/IDSIABLE Pattern at 0x4c6508
+·! 0:00:00.139647 PPU: Found IENABLE/IDSIABLE Pattern at 0x4c6690
+·! 0:00:00.139650 PPU: Found IENABLE/IDSIABLE Pattern at 0x4c6938
+·! 0:00:00.139652 PPU: Found IENABLE/IDSIABLE Pattern at 0x4c6950
+·! 0:00:00.139655 PPU: Found IENABLE/IDSIABLE Pattern at 0x4c6978
+·! 0:00:00.139657 PPU: Found IENABLE/IDSIABLE Pattern at 0x4c6990
+·! 0:00:00.139659 PPU: Found IENABLE/IDSIABLE Pattern at 0x4c69b8
+·! 0:00:00.139662 PPU: Found IENABLE/IDSIABLE Pattern at 0x4c69d0
+·! 0:00:00.139664 PPU: Found IENABLE/IDSIABLE Pattern at 0x4c69f8
+·! 0:00:00.139666 PPU: Found IENABLE/IDSIABLE Pattern at 0x4c6a10
+·! 0:00:00.139669 PPU: Found IENABLE/IDSIABLE Pattern at 0x4c6d00
+·! 0:00:00.139671 PPU: Found IENABLE/IDSIABLE Pattern at 0x4c6d18
+·! 0:00:00.139674 PPU: Found IENABLE/IDSIABLE Pattern at 0x4c6d40
+·! 0:00:00.139676 PPU: Found IENABLE/IDSIABLE Pattern at 0x4c6d58
+·! 0:00:00.139679 PPU: Found IENABLE/IDSIABLE Pattern at 0x4c6f70
+·! 0:00:00.139681 PPU: Found IENABLE/IDSIABLE Pattern at 0x4c6f88
+·! 0:00:00.139684 PPU: Found IENABLE/IDSIABLE Pattern at 0x4c6fb0
+·! 0:00:00.139686 PPU: Found IENABLE/IDSIABLE Pattern at 0x4c6fc8
+·! 0:00:00.139694 PPU: Found IENABLE/IDSIABLE Pattern at 0x4caea8
+·! 0:00:00.139697 PPU: Found IENABLE/IDSIABLE Pattern at 0x4caec0
+·! 0:00:00.139700 PPU: Found IENABLE/IDSIABLE Pattern at 0x4cb098
+·! 0:00:00.139703 PPU: Found IENABLE/IDSIABLE Pattern at 0x4cb0b0
+·! 0:00:00.139705 PPU: Found IENABLE/IDSIABLE Pattern at 0x4cb0d8
+·! 0:00:00.139708 PPU: Found IENABLE/IDSIABLE Pattern at 0x4cb0f0
+·! 0:00:00.139710 PPU: Found IENABLE/IDSIABLE Pattern at 0x4cb1f0
+·! 0:00:00.139713 PPU: Found IENABLE/IDSIABLE Pattern at 0x4cb208
+·! 0:00:00.139716 PPU: Found IENABLE/IDSIABLE Pattern at 0x4cb230
+·! 0:00:00.139719 PPU: Found IENABLE/IDSIABLE Pattern at 0x4cb248
+·! 0:00:00.139722 PPU: Found IENABLE/IDSIABLE Pattern at 0x4cb5f8
+·! 0:00:00.139725 PPU: Found IENABLE/IDSIABLE Pattern at 0x4cb618
+·! 0:00:00.139728 PPU: Found IENABLE/IDSIABLE Pattern at 0x4cb9f8
+·! 0:00:00.139730 PPU: Found IENABLE/IDSIABLE Pattern at 0x4cba10
+·! 0:00:00.139732 PPU: Found IENABLE/IDSIABLE Pattern at 0x4cba38
+·! 0:00:00.139735 PPU: Found IENABLE/IDSIABLE Pattern at 0x4cba50
+·! 0:00:00.139737 PPU: Found IENABLE/IDSIABLE Pattern at 0x4cba78
+·! 0:00:00.139740 PPU: Found IENABLE/IDSIABLE Pattern at 0x4cba90
+·! 0:00:00.139749 PPU: Found IENABLE/IDSIABLE Pattern at 0x4cf698
+·! 0:00:00.139751 PPU: Found IENABLE/IDSIABLE Pattern at 0x4cf6b0
+·! 0:00:00.139754 PPU: Found IENABLE/IDSIABLE Pattern at 0x4cfa08
+·! 0:00:00.139756 PPU: Found IENABLE/IDSIABLE Pattern at 0x4cfa20
+·! 0:00:00.139759 PPU: Found IENABLE/IDSIABLE Pattern at 0x4cfb60
+·! 0:00:00.139762 PPU: Found IENABLE/IDSIABLE Pattern at 0x4cfb78
+·! 0:00:00.139764 PPU: Found IENABLE/IDSIABLE Pattern at 0x4cfcc8
+·! 0:00:00.139768 PPU: Found IENABLE/IDSIABLE Pattern at 0x4cfce0
+·! 0:00:00.139770 PPU: Found IENABLE/IDSIABLE Pattern at 0x4cfd08
+·! 0:00:00.139773 PPU: Found IENABLE/IDSIABLE Pattern at 0x4cfd68
+·! 0:00:00.139777 PPU: Found IENABLE/IDSIABLE Pattern at 0x4d07f8
+·! 0:00:00.139779 PPU: Found IENABLE/IDSIABLE Pattern at 0x4d0820
+·! 0:00:00.139782 PPU: Found IENABLE/IDSIABLE Pattern at 0x4d0878
+·! 0:00:00.139784 PPU: Found IENABLE/IDSIABLE Pattern at 0x4d08b0
+·! 0:00:00.139787 PPU: Found IENABLE/IDSIABLE Pattern at 0x4d0970
+·! 0:00:00.139789 PPU: Found IENABLE/IDSIABLE Pattern at 0x4d09b0
+·! 0:00:00.139793 PPU: Found IENABLE/IDSIABLE Pattern at 0x4d0a58
+·! 0:00:00.139795 PPU: Found IENABLE/IDSIABLE Pattern at 0x4d0a80
+·! 0:00:00.139798 PPU: Found IENABLE/IDSIABLE Pattern at 0x4d0b08
+·! 0:00:00.139800 PPU: Found IENABLE/IDSIABLE Pattern at 0x4d0b40
+·! 0:00:00.139803 PPU: Found IENABLE/IDSIABLE Pattern at 0x4d0ba8
+·! 0:00:00.139805 PPU: Found IENABLE/IDSIABLE Pattern at 0x4d0bd0
+·! 0:00:00.139808 PPU: Found IENABLE/IDSIABLE Pattern at 0x4d0bd8
+·! 0:00:00.139811 PPU: Found IENABLE/IDSIABLE Pattern at 0x4d0c00
+·! 0:00:00.139813 PPU: Found IENABLE/IDSIABLE Pattern at 0x4d0c28
+·! 0:00:00.139816 PPU: Found IENABLE/IDSIABLE Pattern at 0x4d0c58
+·! 0:00:00.139819 PPU: Found IENABLE/IDSIABLE Pattern at 0x4d0ca0
+·! 0:00:00.139821 PPU: Found IENABLE/IDSIABLE Pattern at 0x4d0cd0
+·! 0:00:00.139824 PPU: Found IENABLE/IDSIABLE Pattern at 0x4d1760
+·! 0:00:00.139827 PPU: Found IENABLE/IDSIABLE Pattern at 0x4d1780
+·! 0:00:00.139829 PPU: Found IENABLE/IDSIABLE Pattern at 0x4d17e0
+·! 0:00:00.139831 PPU: Found IENABLE/IDSIABLE Pattern at 0x4d17f8
+·! 0:00:00.139834 PPU: Found IENABLE/IDSIABLE Pattern at 0x4d1810
+·! 0:00:00.139836 PPU: Found IENABLE/IDSIABLE Pattern at 0x4d1830
+·! 0:00:00.139839 PPU: Found IENABLE/IDSIABLE Pattern at 0x4d1838
+·! 0:00:00.139842 PPU: Found IENABLE/IDSIABLE Pattern at 0x4d1858
+·! 0:00:00.139845 PPU: Found IENABLE/IDSIABLE Pattern at 0x4d21d0
+·! 0:00:00.139848 PPU: Found IENABLE/IDSIABLE Pattern at 0x4d21e8
+·! 0:00:00.139850 PPU: Found IENABLE/IDSIABLE Pattern at 0x4d2268
+·! 0:00:00.139853 PPU: Found IENABLE/IDSIABLE Pattern at 0x4d2280
+·! 0:00:00.139855 PPU: Found IENABLE/IDSIABLE Pattern at 0x4d22b8
+·! 0:00:00.139858 PPU: Found IENABLE/IDSIABLE Pattern at 0x4d22d0
+·! 0:00:00.139860 PPU: Found IENABLE/IDSIABLE Pattern at 0x4d22f8
+·! 0:00:00.139863 PPU: Found IENABLE/IDSIABLE Pattern at 0x4d2310
+·S 0:00:00.139875 PPU: Found valid roaming SPU code at 0x4b5c00..0x4d8b00 (guessed_ls_addr=0x4000, GUID=0x4b5c00..0x4d8b00)
+·! 0:00:00.140196 SPU: Found SPU function(s) at:
+[00] 0x041c8, 0x04980, 0x04c88, 0x04d90
+[00] 0x04de0, 0x04e28, 0x04e90, 0x04ef0
+[01] 0x04ff8, 0x050b8, 0x05170, 0x05288
+[01] 0x05418, 0x05500, 0x05658, 0x057a0
+[02] 0x05838, 0x05978, 0x05ab0, 0x05b48
+[02] 0x05bc8, 0x05d58, 0x05ee0, 0x061f8
+[03] 0x06488, 0x06530, 0x06778, 0x067e8
+[03] 0x068f8, 0x06b98, 0x06df8, 0x06f18
+[04] 0x07130, 0x07378, 0x073e8, 0x07440
+[04] 0x07680, 0x079c8, 0x07b00, 0x07d80
+[05] 0x08270, 0x08340, 0x087f0, 0x08c38
+[05] 0x08d80, 0x08ee8, 0x090b0, 0x091c0
+[06] 0x09728, 0x09858, 0x09b58, 0x09c80
+[06] 0x09d60, 0x09f88, 0x0a240, 0x0a398
+[07] 0x0a3d8, 0x0a480, 0x0a7b0, 0x0a908
+[07] 0x0a9d0, 0x0ae50, 0x0b348, 0x0b620
+[08] 0x0b7d8, 0x0bb28, 0x0bdc0, 0x0c0b0
+[08] 0x0c5a0, 0x0cf28, 0x0d160, 0x0d338
+[09] 0x0d4a0, 0x0d5a8, 0x0d6d0, 0x0d748
+[09] 0x0d9b0, 0x0daf8, 0x0dd58, 0x0dfa0
+[10] 0x0e130, 0x0e9c0, 0x0eb48, 0x0ec70
+[10] 0x0ede0, 0x0ef70, 0x0f128, 0x0f278
+[11] 0x0f520, 0x0f760, 0x0f880, 0x0fee0
+[11] 0x102f8, 0x10560, 0x10628, 0x109c0
+[12] 0x113a0, 0x11ac8, 0x11f78, 0x12078
+[12] 0x122e8, 0x12a80, 0x12c68, 0x12d48
+[13] 0x12e20, 0x12ef8, 0x131d0, 0x136c0
+[13] 0x13908, 0x13d40, 0x143f0, 0x14918
+[14] 0x14aa0, 0x14e20, 0x15168, 0x153d8
+[14] 0x15508, 0x157c8, 0x15948, 0x18de8
+[15] 0x19878, 0x1a280, 0x1a500, 0x1a700
+[15] 0x1a880, 0x1aa00, 0x1ab80, 0x1ad00
+[16] 0x1ae00, 0x1b300, 0x1b600, 0x1b780
+[16] 0x1b900, 0x1ba80, 0x1bb80, 0x1bd00
+[17] 0x1be88, 0x1bf78, 0x1c1c0, 0x1c290
+[17] 0x1c338, 0x1c458, 0x1c5d0, 0x1c8a8
+[18] 0x1d130, 0x1d510, 0x1d5d8, 0x1d680
+[18] 0x1d748, 0x1d7b0, 0x1d848, 0x1d8d0
+[19] 0x1da60, 0x1db88, 0x1de30, 0x1df88
+[19] 0x1e0f0, 0x1e140, 0x1e1a8, 0x1e1f8
+[20] 0x1e208, 0x1e220, 0x1e240, 0x1e2a8
+[20] 0x1e308, 0x1e420, 0x1e5a8, 0x1e730
+[21] 0x1e760, 0x1e768, 0x1e770, 0x1e778
+[21] 0x1e990, 0x1e9a0, 0x1e9e0, 0x207f8
+[22] 0x20a30, 0x20a60, 0x20ad8, 0x20c98
+[22] 0x20d10, 0x20d78, 0x20dd8, 0x20e18
+[23] 0x20e98, 0x20ee0, 0x20ef0, 0x21388
+[23] 0x21478, 0x216e0, 0x21760, 0x21910
+[24] 0x21be0, 0x21f08
+·S 0:00:00.140207 SPU: Found 194 SPU function(s)
+·! 0:00:00.140257 PPU: Found IENABLE/IDSIABLE Pattern at 0x4d9118
+·! 0:00:00.140280 PPU: Found IENABLE/IDSIABLE Pattern at 0x4e4998
+·! 0:00:00.140284 PPU: Found IENABLE/IDSIABLE Pattern at 0x4e49b0
+·! 0:00:00.140287 PPU: Found IENABLE/IDSIABLE Pattern at 0x4e4d08
+·! 0:00:00.140290 PPU: Found IENABLE/IDSIABLE Pattern at 0x4e4d20
+·! 0:00:00.140292 PPU: Found IENABLE/IDSIABLE Pattern at 0x4e4e60
+·! 0:00:00.140295 PPU: Found IENABLE/IDSIABLE Pattern at 0x4e4e78
+·! 0:00:00.140297 PPU: Found IENABLE/IDSIABLE Pattern at 0x4e4fc8
+·! 0:00:00.140300 PPU: Found IENABLE/IDSIABLE Pattern at 0x4e4fe0
+·! 0:00:00.140302 PPU: Found IENABLE/IDSIABLE Pattern at 0x4e5008
+·! 0:00:00.140305 PPU: Found IENABLE/IDSIABLE Pattern at 0x4e5068
+·! 0:00:00.140309 PPU: Found IENABLE/IDSIABLE Pattern at 0x4e5af8
+·! 0:00:00.140311 PPU: Found IENABLE/IDSIABLE Pattern at 0x4e5b20
+·! 0:00:00.140313 PPU: Found IENABLE/IDSIABLE Pattern at 0x4e5b78
+·! 0:00:00.140316 PPU: Found IENABLE/IDSIABLE Pattern at 0x4e5bb0
+·! 0:00:00.140318 PPU: Found IENABLE/IDSIABLE Pattern at 0x4e5c70
+·! 0:00:00.140321 PPU: Found IENABLE/IDSIABLE Pattern at 0x4e5cb0
+·! 0:00:00.140323 PPU: Found IENABLE/IDSIABLE Pattern at 0x4e5d58
+·! 0:00:00.140326 PPU: Found IENABLE/IDSIABLE Pattern at 0x4e5d80
+·! 0:00:00.140328 PPU: Found IENABLE/IDSIABLE Pattern at 0x4e5e08
+·! 0:00:00.140331 PPU: Found IENABLE/IDSIABLE Pattern at 0x4e5e40
+·! 0:00:00.140333 PPU: Found IENABLE/IDSIABLE Pattern at 0x4e5ea8
+·! 0:00:00.140336 PPU: Found IENABLE/IDSIABLE Pattern at 0x4e5ed0
+·! 0:00:00.140339 PPU: Found IENABLE/IDSIABLE Pattern at 0x4e5ed8
+·! 0:00:00.140341 PPU: Found IENABLE/IDSIABLE Pattern at 0x4e5f00
+·! 0:00:00.140344 PPU: Found IENABLE/IDSIABLE Pattern at 0x4e5f28
+·! 0:00:00.140347 PPU: Found IENABLE/IDSIABLE Pattern at 0x4e5f58
+·! 0:00:00.140349 PPU: Found IENABLE/IDSIABLE Pattern at 0x4e5fa0
+·! 0:00:00.140352 PPU: Found IENABLE/IDSIABLE Pattern at 0x4e5fd0
+·! 0:00:00.140355 PPU: Found IENABLE/IDSIABLE Pattern at 0x4e6a60
+·! 0:00:00.140358 PPU: Found IENABLE/IDSIABLE Pattern at 0x4e6a80
+·! 0:00:00.140360 PPU: Found IENABLE/IDSIABLE Pattern at 0x4e6ae0
+·! 0:00:00.140363 PPU: Found IENABLE/IDSIABLE Pattern at 0x4e6af8
+·! 0:00:00.140366 PPU: Found IENABLE/IDSIABLE Pattern at 0x4e6b10
+·! 0:00:00.140368 PPU: Found IENABLE/IDSIABLE Pattern at 0x4e6b30
+·! 0:00:00.140371 PPU: Found IENABLE/IDSIABLE Pattern at 0x4e6b38
+·! 0:00:00.140373 PPU: Found IENABLE/IDSIABLE Pattern at 0x4e6b58
+·! 0:00:00.140376 PPU: Found IENABLE/IDSIABLE Pattern at 0x4e74d0
+·! 0:00:00.140379 PPU: Found IENABLE/IDSIABLE Pattern at 0x4e74e8
+·! 0:00:00.140382 PPU: Found IENABLE/IDSIABLE Pattern at 0x4e7568
+·! 0:00:00.140384 PPU: Found IENABLE/IDSIABLE Pattern at 0x4e7580
+·! 0:00:00.140387 PPU: Found IENABLE/IDSIABLE Pattern at 0x4e75b8
+·! 0:00:00.140390 PPU: Found IENABLE/IDSIABLE Pattern at 0x4e75d0
+·! 0:00:00.140393 PPU: Found IENABLE/IDSIABLE Pattern at 0x4e75f8
+·! 0:00:00.140395 PPU: Found IENABLE/IDSIABLE Pattern at 0x4e7610
+·S 0:00:00.140410 PPU: Found valid roaming SPU code at 0x4d8b00..0x4efa80 (guessed_ls_addr=0x4000, GUID=0x4d8b00..0x4efa80)
+·! 0:00:00.140569 SPU: Found SPU function(s) at:
+[00] 0x041c8, 0x042e8, 0x04350, 0x04428
+[00] 0x044c0, 0x044f0, 0x04528, 0x04548
+[01] 0x045ec, 0x045f8, 0x04628, 0x04640
+[01] 0x046a0, 0x046b0, 0x046d0, 0x04770
+[02] 0x049d0, 0x049f0, 0x04a50, 0x04af8
+[02] 0x04b18, 0x05090, 0x05240, 0x05400
+[03] 0x055c8, 0x05728, 0x05e80, 0x05f98
+[03] 0x05fb8, 0x05fd8, 0x06030, 0x06758
+[04] 0x06b38, 0x06fa8, 0x07060, 0x07100
+[04] 0x07830, 0x07b98, 0x084f8, 0x087e8
+[05] 0x08888, 0x08e60, 0x08ed0, 0x098c0
+[05] 0x09bc8, 0x09c30, 0x09cf8, 0x09de0
+[06] 0x09e78, 0x09e98, 0x0bff0, 0x0c598
+[06] 0x0c778, 0x0ca48, 0x0d080, 0x0d180
+[07] 0x0d300, 0x0d680, 0x0d900, 0x0db80
+[07] 0x0e100, 0x0e288, 0x0e378, 0x0e690
+[08] 0x0e738, 0x0e858, 0x0f910, 0x0f9d8
+[08] 0x0fa80, 0x0fb48, 0x0fbb0, 0x0fc48
+[09] 0x0fcd0, 0x0fe60, 0x0ff88, 0x10230
+[09] 0x10388, 0x104f0, 0x10540, 0x105a8
+[10] 0x105f8, 0x10620, 0x10640, 0x106a8
+[10] 0x10708, 0x10820, 0x109a8, 0x10b70
+[11] 0x10b78, 0x10da0, 0x10de0, 0x12c00
+[11] 0x12d00, 0x12e80, 0x12ec0, 0x12f40
+[12] 0x12f88, 0x12f98, 0x13430
+·S 0:00:00.140578 SPU: Found 99 SPU function(s)
+·! 0:00:00.140598 PPU: Found IENABLE/IDSIABLE Pattern at 0x4f0020
+·! 0:00:00.140607 PPU: Found IENABLE/IDSIABLE Pattern at 0x4f02f0
+·! 0:00:00.140610 PPU: Found IENABLE/IDSIABLE Pattern at 0x4f0310
+·! 0:00:00.140612 PPU: Found IENABLE/IDSIABLE Pattern at 0x4f03a8
+·! 0:00:00.140615 PPU: Found IENABLE/IDSIABLE Pattern at 0x4f03c0
+·! 0:00:00.140618 PPU: Found IENABLE/IDSIABLE Pattern at 0x4f03e8
+·! 0:00:00.140622 PPU: Found IENABLE/IDSIABLE Pattern at 0x4f0400
+·! 0:00:00.140624 PPU: Found IENABLE/IDSIABLE Pattern at 0x4f0428
+·! 0:00:00.140627 PPU: Found IENABLE/IDSIABLE Pattern at 0x4f0440
+·! 0:00:00.140633 PPU: Found IENABLE/IDSIABLE Pattern at 0x4f2898
+·! 0:00:00.140635 PPU: Found IENABLE/IDSIABLE Pattern at 0x4f28b0
+·! 0:00:00.140638 PPU: Found IENABLE/IDSIABLE Pattern at 0x4f2c08
+·! 0:00:00.140640 PPU: Found IENABLE/IDSIABLE Pattern at 0x4f2c20
+·! 0:00:00.140643 PPU: Found IENABLE/IDSIABLE Pattern at 0x4f2d60
+·! 0:00:00.140645 PPU: Found IENABLE/IDSIABLE Pattern at 0x4f2d78
+·! 0:00:00.140648 PPU: Found IENABLE/IDSIABLE Pattern at 0x4f2ec8
+·! 0:00:00.140650 PPU: Found IENABLE/IDSIABLE Pattern at 0x4f2ee0
+·! 0:00:00.140652 PPU: Found IENABLE/IDSIABLE Pattern at 0x4f2f08
+·! 0:00:00.140655 PPU: Found IENABLE/IDSIABLE Pattern at 0x4f2f68
+·! 0:00:00.140659 PPU: Found IENABLE/IDSIABLE Pattern at 0x4f39f8
+·! 0:00:00.140662 PPU: Found IENABLE/IDSIABLE Pattern at 0x4f3a20
+·! 0:00:00.140664 PPU: Found IENABLE/IDSIABLE Pattern at 0x4f3a78
+·! 0:00:00.140666 PPU: Found IENABLE/IDSIABLE Pattern at 0x4f3ab0
+·! 0:00:00.140669 PPU: Found IENABLE/IDSIABLE Pattern at 0x4f3b70
+·! 0:00:00.140671 PPU: Found IENABLE/IDSIABLE Pattern at 0x4f3bb0
+·! 0:00:00.140674 PPU: Found IENABLE/IDSIABLE Pattern at 0x4f3c58
+·! 0:00:00.140676 PPU: Found IENABLE/IDSIABLE Pattern at 0x4f3c80
+·! 0:00:00.140679 PPU: Found IENABLE/IDSIABLE Pattern at 0x4f3d08
+·! 0:00:00.140682 PPU: Found IENABLE/IDSIABLE Pattern at 0x4f3d40
+·! 0:00:00.140684 PPU: Found IENABLE/IDSIABLE Pattern at 0x4f3da8
+·! 0:00:00.140687 PPU: Found IENABLE/IDSIABLE Pattern at 0x4f3dd0
+·! 0:00:00.140689 PPU: Found IENABLE/IDSIABLE Pattern at 0x4f3dd8
+·! 0:00:00.140691 PPU: Found IENABLE/IDSIABLE Pattern at 0x4f3e00
+·! 0:00:00.140694 PPU: Found IENABLE/IDSIABLE Pattern at 0x4f3e28
+·! 0:00:00.140696 PPU: Found IENABLE/IDSIABLE Pattern at 0x4f3e58
+·! 0:00:00.140699 PPU: Found IENABLE/IDSIABLE Pattern at 0x4f3ea0
+·! 0:00:00.140702 PPU: Found IENABLE/IDSIABLE Pattern at 0x4f3ed0
+·! 0:00:00.140705 PPU: Found IENABLE/IDSIABLE Pattern at 0x4f4960
+·! 0:00:00.140708 PPU: Found IENABLE/IDSIABLE Pattern at 0x4f4980
+·! 0:00:00.140710 PPU: Found IENABLE/IDSIABLE Pattern at 0x4f49e0
+·! 0:00:00.140712 PPU: Found IENABLE/IDSIABLE Pattern at 0x4f49f8
+·! 0:00:00.140714 PPU: Found IENABLE/IDSIABLE Pattern at 0x4f4a10
+·! 0:00:00.140717 PPU: Found IENABLE/IDSIABLE Pattern at 0x4f4a30
+·! 0:00:00.140720 PPU: Found IENABLE/IDSIABLE Pattern at 0x4f4a38
+·! 0:00:00.140723 PPU: Found IENABLE/IDSIABLE Pattern at 0x4f4a58
+·! 0:00:00.140728 PPU: Found IENABLE/IDSIABLE Pattern at 0x4f53d0
+·! 0:00:00.140731 PPU: Found IENABLE/IDSIABLE Pattern at 0x4f53e8
+·! 0:00:00.140735 PPU: Found IENABLE/IDSIABLE Pattern at 0x4f5468
+·! 0:00:00.140737 PPU: Found IENABLE/IDSIABLE Pattern at 0x4f5480
+·! 0:00:00.140741 PPU: Found IENABLE/IDSIABLE Pattern at 0x4f54b8
+·! 0:00:00.140743 PPU: Found IENABLE/IDSIABLE Pattern at 0x4f54d0
+·! 0:00:00.140745 PPU: Found IENABLE/IDSIABLE Pattern at 0x4f54f8
+·! 0:00:00.140748 PPU: Found IENABLE/IDSIABLE Pattern at 0x4f5510
+·S 0:00:00.140751 PPU: Found valid roaming SPU code at 0x4efa80..0x4f5e00 (guessed_ls_addr=0x4000, GUID=0x4efa80..0xffffffff)
+·! 0:00:00.140800 SPU: Found SPU function(s) at:
+[00] 0x04300, 0x04430, 0x04628, 0x05000
+[00] 0x05100, 0x05208, 0x052f8, 0x05610
+[01] 0x056b8, 0x057d8, 0x05c28, 0x06890
+[01] 0x06958, 0x06a00, 0x06ac8, 0x06b30
+[02] 0x06bc8, 0x06c50, 0x06de0, 0x06f08
+[02] 0x071b0, 0x07308, 0x07470, 0x074c0
+[03] 0x07528, 0x07578, 0x07588, 0x075a0
+[03] 0x075c0, 0x07628, 0x07688, 0x077a0
+[04] 0x07928, 0x07ae8, 0x07d20, 0x07d60
+[04] 0x09b80, 0x09c80, 0x09e00, 0x09f80
+[05] 0x09fc0, 0x0a040, 0x0a088, 0x0a098
+·S 0:00:00.140804 SPU: Found 44 SPU function(s)
+·! 0:00:00.141116 ppu_loader: TLS info segment found: tls-image=*0x52ad44, image-size=0x8, tls-size=0x158
+·! 0:00:00.141127 ppu_loader: *** sdk version: 0x310001
+·! 0:00:00.141131 ppu_loader: *** primary prio: 1000
+·! 0:00:00.141134 ppu_loader: *** primary stacksize: 0x10000
+·! 0:00:00.141136 ppu_loader: *** malloc pagesize: 0x100000
+·! 0:00:00.141139 ppu_loader: *** ppc seg: 0x0
+·! 0:00:00.141147 ppu_loader: * libent_start = *0x3cabbc
+·! 0:00:00.141149 ppu_loader: * libstub_start = *0x3cabc4
+·! 0:00:00.141152 ppu_loader: * unk0 = 0x310001
+·! 0:00:00.141154 ppu_loader: * unk2 = 0x0
+·! 0:00:00.141157 ppu_loader: ** Imported module 'sys_io' (ver=0x1, attr=0x9, 0x0, 0x0) [0x3cabc4]
+·! 0:00:00.141164 ppu_loader: **** sys_io import: [cellPadClearBuf] (0x0d5f2c14) -> 0x3c9104
+·! 0:00:00.141169 ppu_loader: **** sys_io import: [cellPadInit] (0x1cf98800) -> 0x3c9124
+·! 0:00:00.141173 ppu_loader: **** sys_io import: [cellPadEnd] (0x4d9b75d5) -> 0x3c9144
+·! 0:00:00.141177 ppu_loader: **** sys_io import: [cellPadSetPortSetting] (0x578e3c98) -> 0x3c9164
+·! 0:00:00.141181 ppu_loader: **** sys_io import: [cellPadGetData] (0x8b72cda1) -> 0x3c9184
+·! 0:00:00.141184 ppu_loader: **** sys_io import: [cellPadGetInfo2] (0xa703a51d) -> 0x3c91a4
+·! 0:00:00.141187 ppu_loader: **** sys_io import: [cellPadSetActDirect] (0xf65544ee) -> 0x3c91c4
+·! 0:00:00.141190 ppu_loader: ** Imported module 'sys_fs' (ver=0x1, attr=0x9, 0x0, 0x0) [0x3cabf0]
+·! 0:00:00.141195 ppu_loader: **** sys_fs import: [cellFsClose] (0x2cb51f0d) -> 0x3c91e4
+·! 0:00:00.141199 ppu_loader: **** sys_fs import: [cellFsRead] (0x4d5ff8e2) -> 0x3c9204
+·! 0:00:00.141202 ppu_loader: **** sys_fs import: [cellFsOpen] (0x718bf5f8) -> 0x3c9224
+·! 0:00:00.141206 ppu_loader: **** sys_fs import: [cellFsStat] (0x7de6dced) -> 0x3c9244
+·! 0:00:00.141210 ppu_loader: **** sys_fs import: [cellFsLseek] (0xa397d042) -> 0x3c9264
+·! 0:00:00.141214 ppu_loader: **** sys_fs import: [cellFsRmdir] (0x2796fdf3) -> 0x3ca104
+·! 0:00:00.141217 ppu_loader: **** sys_fs import: [cellFsOpendir] (0x3f61245c) -> 0x3ca124
+·! 0:00:00.141220 ppu_loader: **** sys_fs import: [cellFsReaddir] (0x5c74903d) -> 0x3ca144
+·! 0:00:00.141225 ppu_loader: **** sys_fs import: [cellFsSdataOpenByFd] (0x6d3bb15b) -> 0x3ca164
+·! 0:00:00.141228 ppu_loader: **** sys_fs import: [cellFsUnlink] (0x7f4677a8) -> 0x3ca184
+·! 0:00:00.141231 ppu_loader: **** sys_fs import: [cellFsFsync] (0x967a162b) -> 0x3ca1a4
+·! 0:00:00.141234 ppu_loader: **** sys_fs import: [cellFsGetFreeSize] (0xaa3b4bcd) -> 0x3ca1c4
+·! 0:00:00.141238 ppu_loader: **** sys_fs import: [cellFsSdataOpen] (0xb1840b53) -> 0x3ca1e4
+·! 0:00:00.141242 ppu_loader: **** sys_fs import: [cellFsMkdir] (0xba901fe6) -> 0x3ca204
+·! 0:00:00.141245 ppu_loader: **** sys_fs import: [cellFsWrite] (0xecdcf2ab) -> 0x3ca224
+·! 0:00:00.141249 ppu_loader: **** sys_fs import: [cellFsFstat] (0xef3efa34) -> 0x3ca244
+·! 0:00:00.141253 ppu_loader: **** sys_fs import: [cellFsClosedir] (0xff42dcc3) -> 0x3ca264
+·! 0:00:00.141256 ppu_loader: ** Imported module 'cellSpurs' (ver=0x1, attr=0x9, 0x0, 0x0) [0x3cac1c]
+·! 0:00:00.141261 ppu_loader: **** cellSpurs import: [cellSpursAttributeSetNamePrefix] (0x07529113) -> 0x3c9284
+·! 0:00:00.141265 ppu_loader: **** cellSpurs import: [_cellSpursTasksetAttributeInitialize] (0x16394a4e) -> 0x3c92a4
+·! 0:00:00.141269 ppu_loader: **** cellSpurs import: [cellSpursRequestIdleSpu] (0x182d9890) -> 0x3c92c4
+·! 0:00:00.141272 ppu_loader: **** cellSpurs import: [cellSpursDestroyTaskset2] (0x1ebcf459) -> 0x3c92e4
+·! 0:00:00.141276 ppu_loader: **** cellSpurs import: [cellSpursGetInfo] (0x1f402f8f) -> 0x3c9304
+·! 0:00:00.141280 ppu_loader: **** cellSpurs import: [cellSpursEventFlagDetachLv2EventQueue] (0x22aab31d) -> 0x3c9324
+·! 0:00:00.141284 ppu_loader: **** cellSpurs import: [cellSpursEventFlagWait] (0x373523d4) -> 0x3c9344
+·! 0:00:00.141287 ppu_loader: **** cellSpurs import: [cellSpursWorkloadAttributeSetName] (0x4a5eab63) -> 0x3c9364
+·! 0:00:00.141292 ppu_loader: **** cellSpurs import: [cellSpursCreateTaskset2] (0x4a6465e3) -> 0x3c9384
+·! 0:00:00.141296 ppu_loader: **** cellSpurs import: [cellSpursEventFlagClear] (0x4ac7bae4) -> 0x3c93a4
+·! 0:00:00.141302 ppu_loader: **** cellSpurs import: [cellSpursGetWorkloadInfo] (0x4e153e3e) -> 0x3c93c4
+·! 0:00:00.141305 ppu_loader: **** cellSpurs import: [cellSpursRemoveWorkload] (0x57e4dec3) -> 0x3c93e4
+·! 0:00:00.141308 ppu_loader: **** cellSpurs import: [cellSpursTasksetGetSpursAddress] (0x58d58fcf) -> 0x3c9404
+·! 0:00:00.141311 ppu_loader: **** cellSpurs import: [_cellSpursEventFlagInitialize] (0x5ef96465) -> 0x3c9424
+·! 0:00:00.141315 ppu_loader: **** cellSpurs import: [cellSpursWaitForWorkloadShutdown] (0x5fd43fe4) -> 0x3c9444
+·! 0:00:00.141318 ppu_loader: **** cellSpurs import: [cellSpursTasksetAttributeSetName] (0x652b70e2) -> 0x3c9464
+·! 0:00:00.141322 ppu_loader: **** cellSpurs import: [cellSpursBarrierInitialize] (0x7fdf4fef) -> 0x3c9484
+·! 0:00:00.141325 ppu_loader: **** cellSpurs import: [cellSpursSetPriorities] (0x80a29e27) -> 0x3c94a4
+·! 0:00:00.141329 ppu_loader: **** cellSpurs import: [cellSpursTryJoinTask2] (0x838fa4f0) -> 0x3c94c4
+·! 0:00:00.141332 ppu_loader: **** cellSpurs import: [cellSpursEventFlagAttachLv2EventQueue] (0x87630976) -> 0x3c94e4
+·! 0:00:00.141336 ppu_loader: **** cellSpurs import: [_cellSpursTaskAttribute2Initialize] (0x8adadf65) -> 0x3c9504
+·! 0:00:00.141340 ppu_loader: **** cellSpurs import: [cellSpursTaskGetContextSaveAreaSize] (0x9034e538) -> 0x3c9524
+·! 0:00:00.141344 ppu_loader: **** cellSpurs import: [_cellSpursAttributeInitialize] (0x95180230) -> 0x3c9544
+·! 0:00:00.141347 ppu_loader: **** cellSpurs import: [cellSpursShutdownWorkload] (0x98d5b343) -> 0x3c9564
+·! 0:00:00.141351 ppu_loader: **** cellSpurs import: [cellSpursJoinTaskset] (0x9f72add3) -> 0x3c9584
+·! 0:00:00.141356 ppu_loader: **** cellSpurs import: [cellSpursGetTasksetInfo] (0x9fcb567b) -> 0x3c95a4
+·! 0:00:00.141360 ppu_loader: **** cellSpurs import: [_cellSpursWorkloadFlagReceiver] (0xa73bf47e) -> 0x3c95c4
+·! 0:00:00.141363 ppu_loader: **** cellSpurs import: [cellSpursShutdownTaskset] (0xa789e631) -> 0x3c95e4
+·! 0:00:00.141367 ppu_loader: **** cellSpurs import: [cellSpursJoinTask2] (0xa7a94892) -> 0x3c9604
+·! 0:00:00.141370 ppu_loader: **** cellSpurs import: [cellSpursInitializeWithAttribute] (0xaa6269a8) -> 0x3c9624
+·! 0:00:00.141373 ppu_loader: **** cellSpurs import: [cellSpursAddWorkloadWithAttribute] (0xc0158d8b) -> 0x3c9644
+·! 0:00:00.141377 ppu_loader: **** cellSpurs import: [cellSpursCreateTasksetWithAttribute] (0xc10931cb) -> 0x3c9664
+·! 0:00:00.141381 ppu_loader: **** cellSpurs import: [_cellSpursTasksetAttribute2Initialize] (0xc2acdf43) -> 0x3c9684
+·! 0:00:00.141385 ppu_loader: **** cellSpurs import: [cellSpursGetWorkloadFlag] (0xc765b995) -> 0x3c96a4
+·! 0:00:00.141389 ppu_loader: **** cellSpurs import: [cellSpursFinalize] (0xca4c4600) -> 0x3c96c4
+·! 0:00:00.141393 ppu_loader: **** cellSpurs import: [cellSpursSetExceptionEventHandler] (0xd2e23fa9) -> 0x3c96e4
+·! 0:00:00.141396 ppu_loader: **** cellSpurs import: [cellSpursCreateTask2] (0xe14ca62d) -> 0x3c9704
+·! 0:00:00.141399 ppu_loader: **** cellSpurs import: [_cellSpursWorkloadAttributeInitialize] (0xefeb2679) -> 0x3c9724
+·! 0:00:00.141402 ppu_loader: **** cellSpurs import: [cellSpursReadyCountStore] (0xf843818d) -> 0x3c9744
+·! 0:00:00.141405 ppu_loader: **** cellSpurs import: [_cellSpursLFQueueInitialize] (0x011ee38b) -> 0x3ca284
+·! 0:00:00.141409 ppu_loader: **** cellSpurs import: [cellSpursLFQueueAttachLv2EventQueue] (0x1656d49f) -> 0x3ca2a4
+·! 0:00:00.141412 ppu_loader: **** cellSpurs import: [cellSpursLFQueueDetachLv2EventQueue] (0x73e06f91) -> 0x3ca2c4
+·! 0:00:00.141415 ppu_loader: **** cellSpurs import: [_cellSpursLFQueuePushBody] (0x8a85674d) -> 0x3ca2e4
+·! 0:00:00.141419 ppu_loader: **** cellSpurs import: [cellSpursCreateTask] (0xbeb600ac) -> 0x3ca304
+·! 0:00:00.141422 ppu_loader: ** Imported module 'cellGcmSys' (ver=0x1, attr=0x9, 0x0, 0x0) [0x3cac48]
+·! 0:00:00.141426 ppu_loader: **** cellGcmSys import: [cellGcmGetTiledPitchSize] (0x055bd74d) -> 0x3c9764
+·! 0:00:00.141430 ppu_loader: **** cellGcmSys import: [cellGcmSetUserHandler] (0x06edea9e) -> 0x3c9784
+·! 0:00:00.141436 ppu_loader: **** cellGcmSys import: [cellGcmSetQueueHandler] (0x0a862772) -> 0x3c97a4
+·! 0:00:00.141441 ppu_loader: **** cellGcmSys import: [_cellGcmInitBody] (0x15bae46b) -> 0x3c97c4
+·! 0:00:00.141446 ppu_loader: **** cellGcmSys import: [_cellGcmSetFlipCommand] (0x21397818) -> 0x3c97e4
+·! 0:00:00.141449 ppu_loader: **** cellGcmSys import: [cellGcmAddressToOffset] (0x21ac3697) -> 0x3c9804
+·! 0:00:00.141452 ppu_loader: **** cellGcmSys import: [cellGcmSortRemapEaIoAddress] (0x25b40ab4) -> 0x3c9824
+·! 0:00:00.141456 ppu_loader: **** cellGcmSys import: [cellGcmGetOffsetTable] (0x2922aed0) -> 0x3c9844
+·! 0:00:00.141460 ppu_loader: **** cellGcmSys import: [_cellGcmFunc15] (0x3a33c1fd) -> 0x3c9864
+·! 0:00:00.141463 ppu_loader: **** cellGcmSys import: [cellGcmSetFlipMode] (0x4ae8d215) -> 0x3c9884
+·! 0:00:00.141467 ppu_loader: **** cellGcmSys import: [cellGcmSetDebugOutputLevel] (0x51c9d62b) -> 0x3c98a4
+·! 0:00:00.141470 ppu_loader: **** cellGcmSys import: [cellGcmMapEaIoAddressWithFlags] (0x626e8518) -> 0x3c98c4
+·! 0:00:00.141474 ppu_loader: **** cellGcmSys import: [cellGcmMapEaIoAddress] (0x63441cb4) -> 0x3c98e4
+·! 0:00:00.141477 ppu_loader: **** cellGcmSys import: [cellGcmMapMainMemory] (0xa114ec67) -> 0x3c9904
+·! 0:00:00.141480 ppu_loader: **** cellGcmSys import: [cellGcmSetFlipHandler] (0xa41ef7e8) -> 0x3c9924
+·! 0:00:00.141483 ppu_loader: **** cellGcmSys import: [cellGcmSetDisplayBuffer] (0xa53d12ae) -> 0x3c9944
+·! 0:00:00.141489 ppu_loader: **** cellGcmSys import: [cellGcmGetControlRegister] (0xa547adde) -> 0x3c9964
+·! 0:00:00.141492 ppu_loader: **** cellGcmSys import: [cellGcmUnbindZcull] (0xa75640e8) -> 0x3c9984
+·! 0:00:00.141495 ppu_loader: **** cellGcmSys import: [cellGcmSetVBlankHandler] (0xa91b0402) -> 0x3c99a4
+·! 0:00:00.141498 ppu_loader: **** cellGcmSys import: [cellGcmSetFlipImmediate] (0xacee8542) -> 0x3c99c4
+·! 0:00:00.141502 ppu_loader: **** cellGcmSys import: [cellGcmSetInvalidateTile] (0xbd6d60d9) -> 0x3c99e4
+·! 0:00:00.141504 ppu_loader: **** cellGcmSys import: [cellGcmSetGraphicsHandler] (0xd01b570d) -> 0x3c9a04
+·! 0:00:00.141509 ppu_loader: **** cellGcmSys import: [cellGcmSetTile] (0xd0b1d189) -> 0x3c9a24
+·! 0:00:00.141512 ppu_loader: **** cellGcmSys import: [cellGcmSetZcull] (0xd34a420d) -> 0x3c9a44
+·! 0:00:00.141516 ppu_loader: **** cellGcmSys import: [_cellGcmSetFlipCommandWithWaitLabel] (0xd8f88e1a) -> 0x3c9a64
+·! 0:00:00.141520 ppu_loader: **** cellGcmSys import: [cellGcmUnmapIoAddress] (0xdb23e867) -> 0x3c9a84
+·! 0:00:00.141523 ppu_loader: **** cellGcmSys import: [cellGcmGetConfiguration] (0xe315a0b2) -> 0x3c9aa4
+·! 0:00:00.141526 ppu_loader: **** cellGcmSys import: [cellGcmGetLabelAddress] (0xf80196c1) -> 0x3c9ac4
+·! 0:00:00.141530 ppu_loader: ** Imported module 'cellSysutil' (ver=0x1, attr=0x9, 0x0, 0x0) [0x3cac74]
+·! 0:00:00.141535 ppu_loader: **** cellSysutil import: [cellVideoOutConfigure] (0x0bae8772) -> 0x3c9ae4
+·! 0:00:00.141540 ppu_loader: **** cellSysutil import: [cellSysutilCheckCallback] (0x189a74da) -> 0x3c9b04
+·! 0:00:00.141545 ppu_loader: **** cellSysutil import: [cellSaveDataListLoad2] (0x1dfbfdd6) -> 0x3c9b24
+·! 0:00:00.141550 ppu_loader: **** cellSysutil import: [cellSysCacheMount] (0x1e7bff94) -> 0x3c9b44
+·! 0:00:00.141553 ppu_loader: **** cellSysutil import: [cellSaveDataListAutoLoad] (0x21425307) -> 0x3c9b64
+·! 0:00:00.141557 ppu_loader: **** cellSysutil import: [cellSaveDataListSave2] (0x2de0d663) -> 0x3c9b84
+·! 0:00:00.141560 ppu_loader: **** cellSysutil import: [cellSysutilGetSystemParamInt] (0x40e895d3) -> 0x3c9ba4
+·! 0:00:00.141565 ppu_loader: **** cellSysutil import: [cellAudioOutConfigure] (0x4692ab35) -> 0x3c9bc4
+·! 0:00:00.141568 ppu_loader: **** cellSysutil import: [cellSysCacheClear] (0x744c1544) -> 0x3c9be4
+·! 0:00:00.141571 ppu_loader: **** cellSysutil import: [cellMsgDialogOpen2] (0x7603d3db) -> 0x3c9c04
+·! 0:00:00.141574 ppu_loader: **** cellSysutil import: [cellVideoOutGetState] (0x887572d5) -> 0x3c9c24
+·! 0:00:00.141577 ppu_loader: **** cellSysutil import: [cellSaveDataAutoSave2] (0x8b7ed64b) -> 0x3c9c44
+·! 0:00:00.141583 ppu_loader: **** cellSysutil import: [cellSysutilRegisterCallback] (0x9d98afa0) -> 0x3c9c64
+·! 0:00:00.141586 ppu_loader: **** cellSysutil import: [cellVideoOutGetResolutionAvailability] (0xa322db75) -> 0x3c9c84
+·! 0:00:00.141589 ppu_loader: **** cellSysutil import: [cellAudioOutGetSoundAvailability] (0xc01b4e7c) -> 0x3c9ca4
+·! 0:00:00.141592 ppu_loader: **** cellSysutil import: [cellVideoOutGetResolution] (0xe558748d) -> 0x3c9cc4
+·! 0:00:00.141595 ppu_loader: **** cellSysutil import: [cellSaveDataDelete2] (0xedadd797) -> 0x3c9ce4
+·! 0:00:00.141598 ppu_loader: **** cellSysutil import: [cellSaveDataAutoLoad2] (0xfbd5c856) -> 0x3c9d04
+·! 0:00:00.141603 ppu_loader: ** Imported module 'sceNp' (ver=0x1, attr=0x9, 0x0, 0x0) [0x3caca0]
+·! 0:00:00.141607 ppu_loader: **** sceNp import: [sceNpTerm] (0x4885aa18) -> 0x3c9d24
+·! 0:00:00.141610 ppu_loader: **** sceNp import: [sceNpDrmIsAvailable] (0xad218faf) -> 0x3c9d44
+·! 0:00:00.141614 ppu_loader: **** sceNp import: [sceNpInit] (0xbd28fdbf) -> 0x3c9d64
+·! 0:00:00.141617 ppu_loader: **** sceNp import: [sceNpDrmIsAvailable2] (0xf042b14f) -> 0x3ca324
+·! 0:00:00.141622 ppu_loader: ** Imported module 'sceNpTrophy' (ver=0x1, attr=0x9, 0x0, 0x0) [0x3caccc]
+·! 0:00:00.141626 ppu_loader: **** sceNpTrophy import: [sceNpTrophyRegisterContext] (0x1197b52c) -> 0x3c9d84
+·! 0:00:00.141630 ppu_loader: **** sceNpTrophy import: [sceNpTrophyCreateHandle] (0x1c25470d) -> 0x3c9da4
+·! 0:00:00.141634 ppu_loader: **** sceNpTrophy import: [sceNpTrophyGetRequiredDiskSpace] (0x370136fe) -> 0x3c9dc4
+·! 0:00:00.141637 ppu_loader: **** sceNpTrophy import: [sceNpTrophyDestroyContext] (0x3741ecc7) -> 0x3c9de4
+·! 0:00:00.141641 ppu_loader: **** sceNpTrophy import: [sceNpTrophyInit] (0x39567781) -> 0x3c9e04
+·! 0:00:00.141644 ppu_loader: **** sceNpTrophy import: [sceNpTrophyAbortHandle] (0x48bd97c7) -> 0x3c9e24
+·! 0:00:00.141647 ppu_loader: **** sceNpTrophy import: [sceNpTrophyDestroyHandle] (0x623cd2dc) -> 0x3c9e44
+·! 0:00:00.141651 ppu_loader: **** sceNpTrophy import: [sceNpTrophyUnlockTrophy] (0x8ceedd21) -> 0x3c9e64
+·! 0:00:00.141658 ppu_loader: **** sceNpTrophy import: [sceNpTrophyTerm] (0xa7fabf4d) -> 0x3c9e84
+·! 0:00:00.141662 ppu_loader: **** sceNpTrophy import: [sceNpTrophyGetTrophyUnlockState] (0xb3ac3478) -> 0x3c9ea4
+·! 0:00:00.141665 ppu_loader: **** sceNpTrophy import: [sceNpTrophyCreateContext] (0xe3bf9a28) -> 0x3c9ec4
+·! 0:00:00.141667 ppu_loader: ** Imported module 'cellSysmodule' (ver=0x1, attr=0x9, 0x0, 0x0) [0x3cacf8]
+·! 0:00:00.141671 ppu_loader: **** cellSysmodule import: [cellSysmoduleUnloadModule] (0x112a5ee9) -> 0x3c9ee4
+·! 0:00:00.141675 ppu_loader: **** cellSysmodule import: [cellSysmoduleLoadModule] (0x32267a31) -> 0x3c9f04
+·! 0:00:00.141679 ppu_loader: **** cellSysmodule import: [cellSysmoduleIsLoaded] (0x5a59e258) -> 0x3c9f24
+·! 0:00:00.141682 ppu_loader: **** cellSysmodule import: [cellSysmoduleInitialize] (0x63ff6ff9) -> 0x3ca344
+·! 0:00:00.141685 ppu_loader: ** Imported module 'cellSysutilAvconfExt' (ver=0x1, attr=0x9, 0x0, 0x0) [0x3cad24]
+·! 0:00:00.141689 ppu_loader: **** cellSysutilAvconfExt import: [cellVideoOutSetGamma] (0xc7020f62) -> 0x3c9f44
+·! 0:00:00.141692 ppu_loader: ** Imported module 'cellGame' (ver=0x1, attr=0x9, 0x0, 0x0) [0x3cad50]
+·! 0:00:00.141697 ppu_loader: **** cellGame import: [cellGameGetParamString] (0x3a5d726a) -> 0x3c9f64
+·! 0:00:00.141700 ppu_loader: **** cellGame import: [cellGameContentPermit] (0x70acec67) -> 0x3c9f84
+·! 0:00:00.141704 ppu_loader: **** cellGame import: [cellGameContentErrorDialog] (0xb0a1f8c6) -> 0x3c9fa4
+·! 0:00:00.141707 ppu_loader: **** cellGame import: [cellGameDataCheck] (0xdb9819f3) -> 0x3c9fc4
+·! 0:00:00.141710 ppu_loader: **** cellGame import: [cellGameBootCheck] (0xf52639ea) -> 0x3c9fe4
+·! 0:00:00.141712 ppu_loader: ** Imported module 'libvdec' (ver=0x1, attr=0x9, 0x0, 0x0) [0x3cad7c]
+·! 0:00:00.141716 ppu_loader: **** libvdec import: [cellVdecOpenEx] (0x0053e2d8) -> 0x3ca004
+·! 0:00:00.141720 ppu_loader: **** libvdec import: [cellVdecClose] (0x16698e83) -> 0x3ca024
+·! 0:00:00.141723 ppu_loader: **** libvdec import: [cellVdecGetPicItem] (0x17c702b9) -> 0x3ca044
+·! 0:00:00.141726 ppu_loader: **** libvdec import: [cellVdecDecodeAu] (0x2bf4ddd2) -> 0x3ca064
+·! 0:00:00.141729 ppu_loader: **** libvdec import: [cellVdecGetPicture] (0x807c861a) -> 0x3ca084
+·! 0:00:00.141734 ppu_loader: **** libvdec import: [cellVdecEndSeq] (0x824433f0) -> 0x3ca0a4
+·! 0:00:00.141737 ppu_loader: **** libvdec import: [cellVdecStartSeq] (0xc757c2aa) -> 0x3ca0c4
+·! 0:00:00.141740 ppu_loader: **** libvdec import: [cellVdecQueryAttrEx] (0xc982a84a) -> 0x3ca0e4
+·! 0:00:00.141743 ppu_loader: ** Imported module 'cellAudio' (ver=0x1, attr=0x9, 0x0, 0x0) [0x3cada8]
+·! 0:00:00.141747 ppu_loader: **** cellAudio import: [cellAudioInit] (0x0b168f92) -> 0x3ca364
+·! 0:00:00.141750 ppu_loader: **** cellAudio import: [cellAudioPortClose] (0x4129fe2d) -> 0x3ca384
+·! 0:00:00.141754 ppu_loader: **** cellAudio import: [cellAudioPortStop] (0x5b1e2c73) -> 0x3ca3a4
+·! 0:00:00.141757 ppu_loader: **** cellAudio import: [cellAudioGetPortConfig] (0x74a66af0) -> 0x3ca3c4
+·! 0:00:00.141761 ppu_loader: **** cellAudio import: [cellAudioPortStart] (0x89be28f2) -> 0x3ca3e4
+·! 0:00:00.141764 ppu_loader: **** cellAudio import: [cellAudioQuit] (0xca5ac370) -> 0x3ca404
+·! 0:00:00.141768 ppu_loader: **** cellAudio import: [cellAudioPortOpen] (0xcd7bc431) -> 0x3ca424
+·! 0:00:00.141771 ppu_loader: ** Imported module 'sysPrxForUser' (ver=0x1, attr=0x9, 0x0, 0x0) [0x3cadd4]
+·! 0:00:00.141774 ppu_loader: **** sysPrxForUser import: [sys_lwmutex_lock] (0x1573dc3f) -> 0x3ca444
+·! 0:00:00.141778 ppu_loader: **** sysPrxForUser import: [sys_lwmutex_unlock] (0x1bc200f4) -> 0x3ca464
+·! 0:00:00.141781 ppu_loader: **** sysPrxForUser import: [sys_lwcond_destroy] (0x1c9a942c) -> 0x3ca484
+·! 0:00:00.141784 ppu_loader: **** sysPrxForUser import: [sys_ppu_thread_create] (0x24a1ea07) -> 0x3ca4a4
+·! 0:00:00.141787 ppu_loader: **** sysPrxForUser import: [sys_prx_load_module] (0x26090058) -> 0x3ca4c4
+·! 0:00:00.141790 ppu_loader: **** sysPrxForUser import: [sys_lwcond_wait] (0x2a6d9d51) -> 0x3ca4e4
+·! 0:00:00.141793 ppu_loader: **** sysPrxForUser import: [_sys_process_atexitspawn] (0x2c847572) -> 0x3ca504
+·! 0:00:00.141796 ppu_loader: **** sysPrxForUser import: [sys_lwmutex_create] (0x2f85c0ef) -> 0x3ca524
+·! 0:00:00.141800 ppu_loader: **** sysPrxForUser import: [sys_ppu_thread_get_id] (0x350d454e) -> 0x3ca544
+·! 0:00:00.141803 ppu_loader: **** sysPrxForUser import: [sys_mmapper_free_memory] (0x409ad939) -> 0x3ca564
+·! 0:00:00.141806 ppu_loader: **** sysPrxForUser import: [sys_prx_register_library] (0x42b23552) -> 0x3ca584
+·! 0:00:00.141810 ppu_loader: **** sysPrxForUser import: [sys_mmapper_unmap_memory] (0x4643ba6e) -> 0x3ca5a4
+·! 0:00:00.141813 ppu_loader: **** sysPrxForUser import: [sys_process_is_stack] (0x4f7172c9) -> 0x3ca5c4
+·! 0:00:00.141818 ppu_loader: **** sysPrxForUser import: [sys_game_process_exitspawn2] (0x67f9fedb) -> 0x3ca5e4
+·! 0:00:00.141821 ppu_loader: **** sysPrxForUser import: [sys_initialize_tls] (0x744680a2) -> 0x3ca604
+·! 0:00:00.141824 ppu_loader: **** sysPrxForUser import: [sys_time_get_system_time] (0x8461e528) -> 0x3ca624
+·! 0:00:00.141827 ppu_loader: **** sysPrxForUser import: [_sys_process_at_Exitspawn] (0x96328741) -> 0x3ca644
+·! 0:00:00.141830 ppu_loader: **** sysPrxForUser import: [sys_prx_exitspawn_with_level] (0xa2c7ba64) -> 0x3ca664
+·! 0:00:00.141832 ppu_loader: **** sysPrxForUser import: [sys_prx_load_module_on_memcontainer_by_fd] (0xa330ad84) -> 0x3ca684
+·! 0:00:00.141835 ppu_loader: **** sysPrxForUser import: [sys_prx_load_module_on_memcontainer] (0xaa6d9bff) -> 0x3ca6a4
+·! 0:00:00.141839 ppu_loader: **** sysPrxForUser import: [sys_lwmutex_trylock] (0xaeb78725) -> 0x3ca6c4
+·! 0:00:00.141842 ppu_loader: **** sysPrxForUser import: [sys_ppu_thread_exit] (0xaff080a4) -> 0x3ca6e4
+·! 0:00:00.141845 ppu_loader: **** sysPrxForUser import: [sys_mmapper_allocate_memory] (0xb257540b) -> 0x3ca704
+·! 0:00:00.141848 ppu_loader: **** sysPrxForUser import: [sys_lwmutex_destroy] (0xc3476d0c) -> 0x3ca724
+·! 0:00:00.141851 ppu_loader: **** sysPrxForUser import: [sys_lwcond_create] (0xda0eb71a) -> 0x3ca744
+·! 0:00:00.141854 ppu_loader: **** sysPrxForUser import: [sys_mmapper_map_memory] (0xdc578057) -> 0x3ca764
+·! 0:00:00.141857 ppu_loader: **** sysPrxForUser import: [sys_process_exit] (0xe6f2c1e7) -> 0x3ca784
+·! 0:00:00.141860 ppu_loader: **** sysPrxForUser import: [sys_lwcond_signal_all] (0xe9a1bd84) -> 0x3ca7a4
+·! 0:00:00.141863 ppu_loader: **** sysPrxForUser import: [sys_prx_load_module_by_fd] (0xef68c17c) -> 0x3ca7c4
+·! 0:00:00.141866 ppu_loader: **** sysPrxForUser import: [sys_lwcond_signal] (0xef87a695) -> 0x3ca7e4
+·! 0:00:00.149282 PPU: Reading OPD section at 0x50ddb0...
+·! 0:00:00.171366 PPU: Function [0x33b1f4]: 'abort'
+·! 0:00:00.227241 PPU: Function analysis: 11244 functions (24905 enqueued)
+·! 0:00:00.264042 {cellAudio Thread} Cubeb: Cubeb log: cubeb_resampler_internal.h:521:Input and output sample-rate match, target rate of 48000Hz
+·E 0:00:00.264062 {cellAudio Thread} Cubeb: cubeb_stream_get_current_device() failed: err=-4, crnt_dev=0
+·! 0:00:00.290147 PPU: Block analysis: 144899 blocks (4 enqueued)
+·! 0:00:00.291304 SYS: Cache: /storage/emulated/0/Android/data/com.zenithblue.sambas3/files/cache/cache/BCUS98111/ppu-HQfb9JM3ziXgkTpuJGuiKhWEfSFq-EBOOT.BIN/
+·S 0:00:00.301752 PPU: LLVM: Module exists: v7-kusa-ov3VAnpAdmjaAisY7Qi1uH-00001P-cortex-a34-2.obj
+·S 0:00:00.305488 PPU: LLVM: Module exists: v7-kusa-rmhKCeCWv0UXHgxSmEkKvz-00001P-cortex-a34-2.obj
+·S 0:00:00.308278 PPU: LLVM: Module exists: v7-kusa-nTU1r6dZaTF8vNoeeaTSVA-00001P-cortex-a34-2.obj
+·S 0:00:00.311068 PPU: LLVM: Module exists: v7-kusa-WxnKHoLWWE2Nm0idMaTtTo-00001P-cortex-a34-2.obj
+·S 0:00:00.314205 PPU: LLVM: Module exists: v7-kusa-acX6Gs9ghFJjUyWJVwatUb-00001P-cortex-a34-2.obj
+·S 0:00:00.317663 PPU: LLVM: Module exists: v7-kusa-heqLJMQmqEd7JNmiWybiMe-00001P-cortex-a34-2.obj
+·S 0:00:00.320765 PPU: LLVM: Module exists: v7-kusa-CZyKdWCz9jaaMx5NiaKGbE-00001P-cortex-a34-2.obj
+·S 0:00:00.324057 PPU: LLVM: Module exists: v7-kusa-cXoTbm7hpMnnKA126VL6xG-00001P-cortex-a34-2.obj
+·S 0:00:00.326829 PPU: LLVM: Module exists: v7-kusa-hZ1qLH8L0RaPbNP0GgnQLt-00001P-cortex-a34-2.obj
+·S 0:00:00.330185 PPU: LLVM: Module exists: v7-kusa-UChn8HtCcbkbCXAgTEujhf-00001P-cortex-a34-2.obj
+·S 0:00:00.333136 PPU: LLVM: Module exists: v7-kusa-6CXo7d8EdFUNr8EthdML0N-00001P-cortex-a34-2.obj
+·S 0:00:00.336517 PPU: LLVM: Module exists: v7-kusa-2wYXSP2y2LhtQG37RxKg9A-00001P-cortex-a34-2.obj
+·S 0:00:00.339807 PPU: LLVM: Module exists: v7-kusa-irsjbo8E9cqRcMA8K6kKGg-00001P-cortex-a34-2.obj
+·S 0:00:00.342639 PPU: LLVM: Module exists: v7-kusa-VY2EhjCNQS7apXJVxPEqFu-00001P-cortex-a34-2.obj
+·S 0:00:00.345822 PPU: LLVM: Module exists: v7-kusa-dUo3htLLY4njHM6h6XcK7f-00001P-cortex-a34-2.obj
+·S 0:00:00.348728 PPU: LLVM: Module exists: v7-kusa-YERwFpYyd9Rdk7CFjayA3m-00001P-cortex-a34-2.obj
+·S 0:00:00.351884 PPU: LLVM: Module exists: v7-kusa-QVwhXVy6GyXhcGxCLwCk2u-00001P-cortex-a34-2.obj
+·S 0:00:00.354549 PPU: LLVM: Module exists: v7-kusa-LrvxY3Ck21sN71GnVZ2yZv-00001P-cortex-a34-2.obj
+·S 0:00:00.357264 PPU: LLVM: Module exists: v7-kusa-3ZPPReX4CYPkzz5RS5qJsQ-00001P-cortex-a34-2.obj
+·S 0:00:00.359913 PPU: LLVM: Module exists: v7-kusa-LzMhjq6Sx6eQX0vvEKYVjy-00001P-cortex-a34-2.obj
+·S 0:00:00.362898 PPU: LLVM: Module exists: v7-kusa-SVS5qXedSEgr3ye7sKeGyw-00001P-cortex-a34-2.obj
+·E 0:00:00.365647 {cellAudio Thread} Cubeb: Cannot detect default device. Channel count detection unavailable.
+·E 0:00:00.365666 {cellAudio Thread} Cubeb: Device reported invalid channel count, using stereo instead
+·! 0:00:00.365672 {cellAudio Thread} Cubeb: Channel count is 2
+·S 0:00:00.366109 PPU: LLVM: Module exists: v7-kusa-QGxuNUPtCxmSx3q8V7xMfs-00001P-cortex-a34-2.obj
+·S 0:00:00.368791 PPU: LLVM: Module exists: v7-kusa-SzSuGt3RazSS2trXYxn65K-00001P-cortex-a34-2.obj
+·S 0:00:00.372481 PPU: LLVM: Module exists: v7-kusa-V5RYr1GvqSEVygatX5ko70-00001P-cortex-a34-2.obj
+·S 0:00:00.375555 PPU: LLVM: Module exists: v7-kusa-aUgqw0rEwgNqnhCPMq9Jep-00001P-cortex-a34-2.obj
+·S 0:00:00.378391 PPU: LLVM: Module exists: v7-kusa-cPvckhtuJr1jW7p1px2j8P-00001P-cortex-a34-2.obj
+·S 0:00:00.381110 PPU: LLVM: Module exists: v7-kusa-FYn10iHXvsZfGi2CpknRe2-00001P-cortex-a34-2.obj
+·S 0:00:00.383846 PPU: LLVM: Module exists: v7-kusa-FCLd98yd6Y37tPtwU3qdRa-00001P-cortex-a34-2.obj
+·S 0:00:00.386382 PPU: LLVM: Module exists: v7-kusa-sK3K3M4qrrRbeh2CwCHxdw-00001P-cortex-a34-2.obj
+·S 0:00:00.389224 PPU: LLVM: Module exists: v7-kusa-pArsqofrmGkteKYUecd5kj-00001P-cortex-a34-2.obj
+·S 0:00:00.392484 PPU: LLVM: Module exists: v7-kusa-R9QRJpc9vofhdsvpFq6mwj-00001P-cortex-a34-2.obj
+·S 0:00:00.396140 PPU: LLVM: Module exists: v7-kusa-4yWSwefbfL6Qy9jvQNTkgE-00001P-cortex-a34-2.obj
+·S 0:00:00.400323 PPU: LLVM: Module exists: v7-kusa-eWwu4eX7PVW012yEZ7y138-00001P-cortex-a34-2.obj
+·S 0:00:00.403239 PPU: LLVM: Module exists: v7-kusa-612yr1qErztPsYWkn2tdvj-00001P-cortex-a34-2.obj
+·S 0:00:00.406029 PPU: LLVM: Module exists: v7-kusa-e0wUpNS7oPSPpyy0v4dQ89-00001P-cortex-a34-2.obj
+·S 0:00:00.409181 PPU: LLVM: Module exists: v7-kusa-C46jJvPVzcCaJzF2kCmVxj-00001P-cortex-a34-2.obj
+·S 0:00:00.412627 PPU: LLVM: Module exists: v7-kusa-m3qhZaXgZSbgq56VXMskJP-00001P-cortex-a34-2.obj
+·S 0:00:00.416369 PPU: LLVM: Module exists: v7-kusa-KNs3o5xSJnsewsw4kZGw2n-00001P-cortex-a34-2.obj
+·S 0:00:00.436223 PPU: LLVM: Module exists: v7-kusa-WkVCYsbZ3gG6TC5PgcQ0eZ-0004Xr-cortex-a34-2.obj
+·! 0:00:00.437809 PPU: PPU_MANIFEST miss path=/storage/emulated/0/Android/data/com.zenithblue.sambas3/files/cache/cache/ppu_manifest/BCUS98111.json; scanning executable directories
+·! 0:00:00.437824 PPU: Scanning directory: /vfsv0_jXV1eeqh3rPrUKv35RPRN2_/
+·! 0:00:00.437867 PPU: Scanning directory: /vfsv0_jXV1eeqh3rPrUKv35RPRN2_/PS3_CONTENT/
+·! 0:00:00.437888 PPU: Scanning directory: /vfsv0_jXV1eeqh3rPrUKv35RPRN2_/PS3_CONTENT/VIDEODIR/
+·! 0:00:00.437926 PPU: Scanning directory: /vfsv0_jXV1eeqh3rPrUKv35RPRN2_/PS3_CONTENT/VIDEODIR/D000/
+·! 0:00:00.437960 PPU: Scanning directory: /vfsv0_jXV1eeqh3rPrUKv35RPRN2_/PS3_CONTENT/VIDEODIR/D001/
+·! 0:00:00.437996 PPU: Scanning directory: /vfsv0_jXV1eeqh3rPrUKv35RPRN2_/PS3_CONTENT/VIDEODIR/D002/
+·! 0:00:00.438032 PPU: Scanning directory: /vfsv0_jXV1eeqh3rPrUKv35RPRN2_/PS3_CONTENT/VIDEODIR/D003/
+·! 0:00:00.438067 PPU: Scanning directory: /vfsv0_jXV1eeqh3rPrUKv35RPRN2_/PS3_GAME/
+·! 0:00:00.438116 PPU: Scanning directory: /vfsv0_jXV1eeqh3rPrUKv35RPRN2_/PS3_GAME/LICDIR/
+·! 0:00:00.438139 PPU: Scanning directory: /vfsv0_jXV1eeqh3rPrUKv35RPRN2_/PS3_GAME/PKGDIR/
+·! 0:00:00.438169 PPU: Scanning directory: /vfsv0_jXV1eeqh3rPrUKv35RPRN2_/PS3_GAME/PKGDIR/PKG00/
+·! 0:00:00.438199 PPU: Scanning directory: /vfsv0_jXV1eeqh3rPrUKv35RPRN2_/PS3_GAME/TROPDIR/
+·! 0:00:00.438221 PPU: Scanning directory: /vfsv0_jXV1eeqh3rPrUKv35RPRN2_/PS3_GAME/TROPDIR/NPWR00801_00/
+·! 0:00:00.438247 PPU: Scanning directory: /vfsv0_jXV1eeqh3rPrUKv35RPRN2_/PS3_GAME/USRDIR/
+·! 0:00:00.438332 PPU: Scanning directory: /vfsv0_jXV1eeqh3rPrUKv35RPRN2_/PS3_GAME/USRDIR/CINEMATICS/
+·! 0:00:00.438539 PPU: Scanning directory: /vfsv0_jXV1eeqh3rPrUKv35RPRN2_/PS3_GAME/USRDIR/SOUNDS/
+·! 0:00:00.438568 PPU: Scanning directory: /vfsv0_jXV1eeqh3rPrUKv35RPRN2_/PS3_GAME/USRDIR/SOUNDS/STREAMS/
+·! 0:00:00.438599 PPU: Scanning directory: /vfsv0_jXV1eeqh3rPrUKv35RPRN2_/PS3_GAME/USRDIR/SOUNDS/STREAMS/CINEMATICS/
+·! 0:00:00.438690 PPU: Scanning directory: /vfsv0_jXV1eeqh3rPrUKv35RPRN2_/PS3_UPDATE/
+·! 0:00:00.438709 PPU: Scanning directory: /vfsv0_jXV1eeqh3rPrUKv35RPRN2_/PS3_CONTENT/
+·! 0:00:00.438728 PPU: Scanning directory: /vfsv0_jXV1eeqh3rPrUKv35RPRN2_/PS3_GAME/
+·! 0:00:00.438777 PPU: Scanning directory: /vfsv0_jXV1eeqh3rPrUKv35RPRN2_/PS3_UPDATE/
+·! 0:00:00.438796 PPU: Scanning directory: /vfsv0_jXV1eeqh3rPrUKv35RPRN2_/PS3_CONTENT/VIDEODIR/
+·! 0:00:00.438829 PPU: Scanning directory: /vfsv0_jXV1eeqh3rPrUKv35RPRN2_/PS3_CONTENT/VIDEODIR/D000/
+·! 0:00:00.438864 PPU: Scanning directory: /vfsv0_jXV1eeqh3rPrUKv35RPRN2_/PS3_CONTENT/VIDEODIR/D001/
+·! 0:00:00.438923 PPU: Scanning directory: /vfsv0_jXV1eeqh3rPrUKv35RPRN2_/PS3_CONTENT/VIDEODIR/D002/
+·! 0:00:00.438958 PPU: Scanning directory: /vfsv0_jXV1eeqh3rPrUKv35RPRN2_/PS3_CONTENT/VIDEODIR/D003/
+·! 0:00:00.439006 PPU: Scanning directory: /vfsv0_jXV1eeqh3rPrUKv35RPRN2_/PS3_GAME/LICDIR/
+·! 0:00:00.439028 PPU: Scanning directory: /vfsv0_jXV1eeqh3rPrUKv35RPRN2_/PS3_GAME/PKGDIR/
+·! 0:00:00.439058 PPU: Scanning directory: /vfsv0_jXV1eeqh3rPrUKv35RPRN2_/PS3_GAME/TROPDIR/
+·! 0:00:00.439079 PPU: Scanning directory: /vfsv0_jXV1eeqh3rPrUKv35RPRN2_/PS3_GAME/USRDIR/
+·! 0:00:00.439163 PPU: Scanning directory: /vfsv0_jXV1eeqh3rPrUKv35RPRN2_/PS3_GAME/PKGDIR/PKG00/
+·! 0:00:00.439193 PPU: Scanning directory: /vfsv0_jXV1eeqh3rPrUKv35RPRN2_/PS3_GAME/TROPDIR/NPWR00801_00/
+·! 0:00:00.439217 PPU: Scanning directory: /vfsv0_jXV1eeqh3rPrUKv35RPRN2_/PS3_GAME/USRDIR/CINEMATICS/
+·! 0:00:00.439418 PPU: Scanning directory: /vfsv0_jXV1eeqh3rPrUKv35RPRN2_/PS3_GAME/USRDIR/SOUNDS/
+·! 0:00:00.439472 PPU: Scanning directory: /vfsv0_jXV1eeqh3rPrUKv35RPRN2_/PS3_GAME/USRDIR/SOUNDS/STREAMS/
+·! 0:00:00.439503 PPU: Scanning directory: /vfsv0_jXV1eeqh3rPrUKv35RPRN2_/PS3_GAME/USRDIR/SOUNDS/STREAMS/CINEMATICS/
+·! 0:00:00.439593 PPU: Scanning directory: /vfsv0_jXV1eeqh3rPrUKv35RPRN2_/PS3_CONTENT/VIDEODIR/
+·! 0:00:00.439625 PPU: Scanning directory: /vfsv0_jXV1eeqh3rPrUKv35RPRN2_/PS3_GAME/LICDIR/
+·! 0:00:00.439647 PPU: Scanning directory: /vfsv0_jXV1eeqh3rPrUKv35RPRN2_/PS3_GAME/PKGDIR/
+·! 0:00:00.439677 PPU: Scanning directory: /vfsv0_jXV1eeqh3rPrUKv35RPRN2_/PS3_GAME/TROPDIR/
+·! 0:00:00.439699 PPU: Scanning directory: /vfsv0_jXV1eeqh3rPrUKv35RPRN2_/PS3_GAME/USRDIR/
+·! 0:00:00.439782 PPU: Scanning directory: /vfsv0_jXV1eeqh3rPrUKv35RPRN2_/PS3_CONTENT/VIDEODIR/D000/
+·! 0:00:00.439817 PPU: Scanning directory: /vfsv0_jXV1eeqh3rPrUKv35RPRN2_/PS3_CONTENT/VIDEODIR/D001/
+·! 0:00:00.439852 PPU: Scanning directory: /vfsv0_jXV1eeqh3rPrUKv35RPRN2_/PS3_CONTENT/VIDEODIR/D002/
+·! 0:00:00.439888 PPU: Scanning directory: /vfsv0_jXV1eeqh3rPrUKv35RPRN2_/PS3_CONTENT/VIDEODIR/D003/
+·! 0:00:00.439923 PPU: Scanning directory: /vfsv0_jXV1eeqh3rPrUKv35RPRN2_/PS3_GAME/PKGDIR/PKG00/
+·! 0:00:00.439953 PPU: Scanning directory: /vfsv0_jXV1eeqh3rPrUKv35RPRN2_/PS3_GAME/TROPDIR/NPWR00801_00/
+·! 0:00:00.439977 PPU: Scanning directory: /vfsv0_jXV1eeqh3rPrUKv35RPRN2_/PS3_GAME/USRDIR/CINEMATICS/
+·! 0:00:00.440178 PPU: Scanning directory: /vfsv0_jXV1eeqh3rPrUKv35RPRN2_/PS3_GAME/USRDIR/SOUNDS/
+·! 0:00:00.440208 PPU: Scanning directory: /vfsv0_jXV1eeqh3rPrUKv35RPRN2_/PS3_GAME/USRDIR/SOUNDS/STREAMS/
+·! 0:00:00.440239 PPU: Scanning directory: /vfsv0_jXV1eeqh3rPrUKv35RPRN2_/PS3_GAME/USRDIR/SOUNDS/STREAMS/CINEMATICS/
+·! 0:00:00.440328 PPU: Scanning directory: /vfsv0_jXV1eeqh3rPrUKv35RPRN2_/PS3_CONTENT/VIDEODIR/D000/
+·! 0:00:00.440363 PPU: Scanning directory: /vfsv0_jXV1eeqh3rPrUKv35RPRN2_/PS3_CONTENT/VIDEODIR/D001/
+·! 0:00:00.440399 PPU: Scanning directory: /vfsv0_jXV1eeqh3rPrUKv35RPRN2_/PS3_CONTENT/VIDEODIR/D002/
+·! 0:00:00.440433 PPU: Scanning directory: /vfsv0_jXV1eeqh3rPrUKv35RPRN2_/PS3_CONTENT/VIDEODIR/D003/
+·! 0:00:00.440469 PPU: Scanning directory: /vfsv0_jXV1eeqh3rPrUKv35RPRN2_/PS3_GAME/PKGDIR/PKG00/
+·! 0:00:00.440499 PPU: Scanning directory: /vfsv0_jXV1eeqh3rPrUKv35RPRN2_/PS3_GAME/TROPDIR/NPWR00801_00/
+·! 0:00:00.440522 PPU: Scanning directory: /vfsv0_jXV1eeqh3rPrUKv35RPRN2_/PS3_GAME/USRDIR/CINEMATICS/
+·! 0:00:00.440723 PPU: Scanning directory: /vfsv0_jXV1eeqh3rPrUKv35RPRN2_/PS3_GAME/USRDIR/SOUNDS/
+·! 0:00:00.440753 PPU: Scanning directory: /vfsv0_jXV1eeqh3rPrUKv35RPRN2_/PS3_GAME/USRDIR/SOUNDS/STREAMS/
+·! 0:00:00.440785 PPU: Scanning directory: /vfsv0_jXV1eeqh3rPrUKv35RPRN2_/PS3_GAME/USRDIR/SOUNDS/STREAMS/CINEMATICS/
+·! 0:00:00.440913 PPU: Scanning directory: /vfsv0_jXV1eeqh3rPrUKv35RPRN2_/PS3_GAME/USRDIR/SOUNDS/STREAMS/
+·! 0:00:00.440944 PPU: Scanning directory: /vfsv0_jXV1eeqh3rPrUKv35RPRN2_/PS3_GAME/USRDIR/SOUNDS/STREAMS/CINEMATICS/
+·! 0:00:00.441033 PPU: Scanning directory: /vfsv0_jXV1eeqh3rPrUKv35RPRN2_/PS3_GAME/USRDIR/SOUNDS/STREAMS/CINEMATICS/
+·! 0:00:00.441122 PPU: PPU manifest: scan was aborted or file queue is empty; skipping manifest save and removing /storage/emulated/0/Android/data/com.zenithblue.sambas3/files/cache/cache/ppu_manifest/BCUS98111.json
+·! 0:00:00.530247 {cellAudio Thread} Cubeb: Cubeb log: cubeb_resampler_internal.h:521:Input and output sample-rate match, target rate of 48000Hz
+·! 0:00:00.575390 {cellAudio Thread} cellAudio: Opened audio backend (sampling_rate=48000, sample_size=4, channels=2, layout=Stereo)
+·! 0:00:00.697713 VFS: About to unmount '/dev_usb000'
+·! 0:00:00.697734 VFS: Unmounting 'dev_usb000' = '/storage/emulated/0/Android/data/com.zenithblue.sambas3/files/config/dev_usb000/'
+·! 0:00:00.697752 VFS: About to unmount '/dev_bdvd'
+·! 0:00:00.697755 VFS: Unmounting 'dev_bdvd' = '/vfsv0_jXV1eeqh3rPrUKv35RPRN2_/'
+·! 0:00:00.697770 VFS: About to unmount '/dev_flash3'
+·! 0:00:00.697773 VFS: Unmounting 'dev_flash3' = '/storage/emulated/0/Android/data/com.zenithblue.sambas3/files/config/dev_flash3/'
+·! 0:00:00.697787 VFS: About to unmount '/dev_flash2'
+·! 0:00:00.697790 VFS: Unmounting 'dev_flash2' = '/storage/emulated/0/Android/data/com.zenithblue.sambas3/files/config/dev_flash2/'
+·! 0:00:00.697804 VFS: About to unmount '/dev_flash'
+·! 0:00:00.697808 VFS: Unmounting 'dev_flash' = '/storage/emulated/0/Android/data/com.zenithblue.sambas3/files/config/dev_flash/'
+·! 0:00:00.697821 VFS: About to unmount '/dev_hdd0'
+·! 0:00:00.697825 VFS: Unmounting 'dev_hdd0' = '/storage/emulated/0/Android/data/com.zenithblue.sambas3/files/config/dev_hdd0/'
+·! 0:00:00.697849 VFS: About to unmount '/app_home'
+·! 0:00:00.697852 VFS: Unmounting 'app_home' = '/'

@@ -14,8 +14,8 @@ android {
         applicationId = "com.zenithblue.sambas3"
         minSdk = 29
         targetSdk = 37
-        versionCode = 20260917
-        versionName = "${System.getenv("RX_VERSION") ?: "2026.09.17"}${if (System.getenv("RX_SHA") != null) "-" + System.getenv("RX_SHA") else ""}"
+        versionCode = 20260925
+        versionName = "${System.getenv("RX_VERSION") ?: "2026.09.25"}${if (System.getenv("RX_SHA") != null) "-" + System.getenv("RX_SHA") else ""}"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         ndk {

@@ -1,0 +1,586 @@
+=== git_status: git status --short ===
+STDOUT:
+ M app/build.gradle.kts
+ M docs/play-store/CHANGELOG.md
+ M scripts/perf/analyze-frame-events.py
+ M scripts/perf/classify-crash.py
+ M scripts/perf/run-gow3-benchmark.py
+ M scripts/tests/test_analyze_frame_events.py
+ M scripts/tests/test_classify_crash.py
+ M scripts/tests/test_run_gow3_benchmark.py
+?? docs/performance/baseline_preservation/
+?? docs/performance/gaia-recovery-status.md
+?? docs/plans/gow3-optimization/samba-s3-updated-worker/
+
+STDERR:
+
+=== git_rev_parse: git rev-parse HEAD ===
+STDOUT:
+1edbebd7ce5c0be9b6949fb64f9d9039e1e179cd
+
+STDERR:
+
+=== git_remote: git remote -v ===
+STDOUT:
+origin	https://github.com/jica98/samba-s3 (fetch)
+origin	https://github.com/jica98/samba-s3 (push)
+
+STDERR:
+
+=== git_ls_tree_rpcsx: git ls-tree HEAD app/src/main/cpp/rpcsx ===
+STDOUT:
+160000 commit 141af96fa006f56c25ec335137e92c78b29b17e3	app/src/main/cpp/rpcsx
+
+STDERR:
+
+=== git_submodule_status: git submodule status --recursive ===
+STDOUT:
+ 8fae8ce254dfc1344527e05301e43f37dea2df80 app/src/main/cpp/libadrenotools (v1.0-18-g8fae8ce)
+ aa3975893d83ef1bc84c321ec60c65fbf1287887 app/src/main/cpp/libadrenotools/lib/linkernsbypass (heads/master)
+ 141af96fa006f56c25ec335137e92c78b29b17e3 app/src/main/cpp/rpcsx (heads/samba-android)
+ e5431fa6f5505e385c6f9367260717e9c47dc2ee app/src/main/cpp/rpcsx/3rdparty/7zip/7zip (24.09)
+ 091c6b4693ce507ac48037836a5a884e35cd2860 app/src/main/cpp/rpcsx/3rdparty/FAudio (25.04)
+ f5f590b1e72cbd1da257d87d1adf1e9db3b9e2a9 app/src/main/cpp/rpcsx/3rdparty/FFmpeg (n7.0.2-20-gf5f590b1e7)
+ 37064843398c69cc0ca7f8cf5b33128c03a2bd74 app/src/main/cpp/rpcsx/3rdparty/GPUOpen/VulkanMemoryAllocator (remotes/origin/v2.3.0)
+ 91d8e01307d8c7dd7018c049ba258f7d329a605b app/src/main/cpp/rpcsx/3rdparty/LibAtrac9 (heads/master)
+ dc7d7054a5b4f3bec1dc23a42fd616a0847af948 app/src/main/cpp/rpcsx/3rdparty/OpenAL/openal-soft (1.24.3)
+ f84c1fbe3cbb69fa99e9115f658e52df0e95f1bf app/src/main/cpp/rpcsx/3rdparty/SPIRV-Cross (vulkan-sdk-1.3.290.0-41-gf84c1fbe)
+ efb6b4099ddb8fa60f62956dee592c4b94ec6a49 app/src/main/cpp/rpcsx/3rdparty/SPIRV-Headers (1.5.4.raytracing.fixed-371-gefb6b40)
+ dafc684588304bdf3b745457fd517ec8f2edc3c6 app/src/main/cpp/rpcsx/3rdparty/SPIRV-Tools (heads/main)
+ 394e1f58b23dc80599214d2e9b6a5e0dfd0bbe07 app/src/main/cpp/rpcsx/3rdparty/SoundTouch/soundtouch (2.3.1-68-g394e1f5)
+ a4f8ada9f4f97c45b8c89c57997be9cebaae65d2 app/src/main/cpp/rpcsx/3rdparty/Vulkan-Headers (v1.4.328-6-ga4f8ada)
+ ae0461b671558197a9a50e5fcfcc3b2d3f406b42 app/src/main/cpp/rpcsx/3rdparty/Vulkan-Loader (sdk-0.1.0-3814-gae0461b67)
+ 416f7356967c1f66784dc1580fe157f9406d8bff app/src/main/cpp/rpcsx/3rdparty/asmjit/asmjit (416f735)
+ 70b4e3db7822de4d534959885cda109d6edbee36 app/src/main/cpp/rpcsx/3rdparty/cubeb/cubeb (cubeb-0.2-1427-g70b4e3d)
+ aab6948fa863bc1cbe5d0850bc46b9ef02ed4c1a app/src/main/cpp/rpcsx/3rdparty/cubeb/cubeb/cmake/sanitizers-cmake (aab6948)
+ 800f5422ac9d9e0ad59cd860a2ef3a679588acb4 app/src/main/cpp/rpcsx/3rdparty/cubeb/cubeb/googletest (release-1.6.0)
+ 57495c64871d18905a0941db9196ef90bafe9a29 app/src/main/cpp/rpcsx/3rdparty/curl/curl (curl-8_12_1)
+ 595bf0007ab1929570c7671f091313c8fc20644e app/src/main/cpp/rpcsx/3rdparty/flatbuffers (v24.3.25)
+ 486e7ba579a2c677772d004ecd0311142ba481be app/src/main/cpp/rpcsx/3rdparty/fmtlib (12.0.0-17-g486e7ba5)
+ 066d4a63b2c714b20b0a8073a01fda7c5c6763f6 app/src/main/cpp/rpcsx/3rdparty/fusion/fusion (v1.2.8)
+ 8e15281d34a8b9ee9271ccce38177a3d812456f8 app/src/main/cpp/rpcsx/3rdparty/glfw (3.4-53-g8e15281d)
+ a496a34b439022750d41d2ba04fbbe416ef81c9a app/src/main/cpp/rpcsx/3rdparty/glslang (11.1.0-1075-ga496a34b)
+ f42423643ec9011c98cccc0bb790722bbbd3f30b app/src/main/cpp/rpcsx/3rdparty/hidapi/hidapi (hidapi-0.14.0-53-gf424236)
+ 960b763ecd144f156d05ec61f577b04107290137 app/src/main/cpp/rpcsx/3rdparty/json (v3.11.2-98-g960b763ec)
+ 872555f4ba910252783af1507f9e7fe1653be252 app/src/main/cpp/rpcsx/3rdparty/libpng/libpng (v1.6.47)
+ 877399b2b2cf21e67554ed9046410f268ce1d1b2 app/src/main/cpp/rpcsx/3rdparty/libsdl-org/SDL (release-3.2.10)
+ a61afe5f75d969c4561a1d0ad753aa23cee6329a app/src/main/cpp/rpcsx/3rdparty/libusb/libusb (v1.0.23-rc1-581-ga61afe5f)
+ cd708029e0b2869e80abe31ddb175f7c35361f90 app/src/main/cpp/rpcsx/3rdparty/llvm/llvm (llvmorg-19.1.7)
+ 7f189988a0decca0ab7da89000051ab91751f70d app/src/main/cpp/rpcsx/3rdparty/miniupnp/miniupnp (miniupnpd_2_1-840-g7f18998)
+ f76628fb5b25746fcb75a7ce85be0d8c6439fc57 app/src/main/cpp/rpcsx/3rdparty/opencv/opencv (4.10.0)
+ ee86beb30e4973f5feffe3ce63bfa4fbadf72f38 app/src/main/cpp/rpcsx/3rdparty/pugixml (v1.15)
+ 1e5b49925aa60065db52de44c366d446a902547b app/src/main/cpp/rpcsx/3rdparty/rtmidi/rtmidi (2.1.1-365-g1e5b499)
+ 013ac3beddff3dbffafd5177e7972067cd2b5083 app/src/main/cpp/rpcsx/3rdparty/stblib/stb (013ac3b)
+ 239b85c80438bf60d9a5b9e0ebe9ff097a760d0d app/src/main/cpp/rpcsx/3rdparty/wolfssl/wolfssl (v5.7.6-stable)
+ 12557954c68a780563f9ab9fc24a3a156c96cba1 app/src/main/cpp/rpcsx/3rdparty/xbyak (heads/master)
+ 456c68f452da09d8ca84b375faa2b1397713eaba app/src/main/cpp/rpcsx/3rdparty/yaml-cpp/yaml-cpp (0.8.0-11-g456c68f)
+ 51b7f2abdade71cd9bb0e7a373ef2610ec6f9daf app/src/main/cpp/rpcsx/3rdparty/zlib/zlib (v1.3.1)
+ f8745da6ff1ad1e7bab384bd1f9d742439278e99 app/src/main/cpp/rpcsx/3rdparty/zstd/zstd (v1.5.7)
+ 3dc2c326cb4dc5815c6069970c13154898f58d48 app/src/main/cpp/rpcsx/rpcs3/3rdparty/discord-rpc/discord-rpc (3dc2c32)
+ ec6367d3ba9d0d57b9d22d4b87da8144acaf428f app/src/main/cpp/rpcsx/rpcs3/3rdparty/ffmpeg (ec6367d)
+
+STDERR:
+
+=== git_rpcsx_status: git -C app/src/main/cpp/rpcsx status --short ===
+STDOUT:
+
+STDERR:
+
+=== git_rpcsx_rev_parse: git -C app/src/main/cpp/rpcsx rev-parse HEAD ===
+STDOUT:
+141af96fa006f56c25ec335137e92c78b29b17e3
+
+STDERR:
+
+=== git_rpcsx_remote: git -C app/src/main/cpp/rpcsx remote -v ===
+STDOUT:
+origin	https://github.com/RPCSX/rpcsx.git (fetch)
+origin	https://github.com/RPCSX/rpcsx.git (push)
+publish	https://github.com/abhay-byte/samba-s3-core.git (fetch)
+publish	https://github.com/abhay-byte/samba-s3-core.git (push)
+
+STDERR:
+
+=== adb_get_state: adb -s d30a1726 get-state ===
+STDOUT:
+device
+
+STDERR:
+
+=== adb_fingerprint: adb -s d30a1726 shell getprop ro.build.fingerprint ===
+STDOUT:
+OnePlus/CPH2691IN/OP5D3BL1:16/UKQ1.231108.001/V.R4T3.37e288c-13a765a-13fa038:user/release-keys
+
+STDERR:
+
+=== adb_dumpsys_package: adb -s d30a1726 shell dumpsys package com.zenithblue.sambas3 ===
+STDOUT:
+Activity Resolver Table:
+  Non-Data Actions:
+      android.intent.action.MAIN:
+        b9c716e com.zenithblue.sambas3/.MainActivity filter 540000f
+          Action: "android.intent.action.MAIN"
+          Category: "android.intent.category.LAUNCHER"
+      sambas3.intent.action.Emulator:
+        43ac570 com.zenithblue.sambas3/.RPCSXActivity filter 9ce60e9
+          Action: "sambas3.intent.action.Emulator"
+          Category: "android.intent.category.DEFAULT"
+
+Receiver Resolver Table:
+  Non-Data Actions:
+      androidx.profileinstaller.action.SAVE_PROFILE:
+        6dec89c com.zenithblue.sambas3/androidx.profileinstaller.ProfileInstallReceiver filter 2068e2b
+          Action: "androidx.profileinstaller.action.SAVE_PROFILE"
+      androidx.profileinstaller.action.INSTALL_PROFILE:
+        6dec89c com.zenithblue.sambas3/androidx.profileinstaller.ProfileInstallReceiver filter 2a322a5
+          Action: "androidx.profileinstaller.action.INSTALL_PROFILE"
+      androidx.profileinstaller.action.SKIP_FILE:
+        6dec89c com.zenithblue.sambas3/androidx.profileinstaller.ProfileInstallReceiver filter 4a2367a
+          Action: "androidx.profileinstaller.action.SKIP_FILE"
+      androidx.profileinstaller.action.BENCHMARK_OPERATION:
+        6dec89c com.zenithblue.sambas3/androidx.profileinstaller.ProfileInstallReceiver filter c5dd288
+          Action: "androidx.profileinstaller.action.BENCHMARK_OPERATION"
+
+Provider Resolver Table:
+  Non-Data Actions:
+      android.content.action.DOCUMENTS_PROVIDER:
+        7484421 com.zenithblue.sambas3/.provider.AppDataDocumentProvider filter 10d4046
+          Action: "android.content.action.DOCUMENTS_PROVIDER"
+
+Domain verification status:
+
+Permissions:
+  Permission [com.zenithblue.sambas3.DYNAMIC_RECEIVER_NOT_EXPORTED_PERMISSION] (527a1bd):
+    sourcePackage=com.zenithblue.sambas3
+    uid=10463 gids=[] type=0 prot=signature
+    perm=PermissionInfo{ede6e84 com.zenithblue.sambas3.DYNAMIC_RECEIVER_NOT_EXPORTED_PERMISSION}
+    flags=0x0
+
+Registered ContentProviders:
+  com.zenithblue.sambas3/androidx.core.content.FileProvider:
+    Provider{879766d com.zenithblue.sambas3/androidx.core.content.FileProvider}
+  com.zenithblue.sambas3/androidx.startup.InitializationProvider:
+    Provider{31ad2a2 com.zenithblue.sambas3/androidx.startup.InitializationProvider}
+  com.zenithblue.sambas3/.provider.AppDataDocumentProvider:
+    Provider{7484421 com.zenithblue.sambas3/.provider.AppDataDocumentProvider}
+
+ContentProvider Authorities:
+  [com.zenithblue.sambas3.androidx-startup]:
+    Provider{31ad2a2 com.zenithblue.sambas3/androidx.startup.InitializationProvider}
+      applicationInfo=ApplicationInfo{a55a3b2 com.zenithblue.sambas3}
+  [com.zenithblue.sambas3.provider]:
+    Provider{879766d com.zenithblue.sambas3/androidx.core.content.FileProvider}
+      applicationInfo=ApplicationInfo{c031f03 com.zenithblue.sambas3}
+  [com.zenithblue.sambas3.documents]:
+    Provider{7484421 com.zenithblue.sambas3/.provider.AppDataDocumentProvider}
+      applicationInfo=ApplicationInfo{194e80 com.zenithblue.sambas3}
+
+Key Set Manager:
+  [com.zenithblue.sambas3]
+      Signing KeySets: 94
+
+Packages:
+  Package [com.zenithblue.sambas3] (b6eedb8):
+    appId=10463
+    pkg=Package{57776ee com.zenithblue.sambas3}
+    codePath=/data/app/~~vxGC51Lzpu6zPVsT4jRLxg==/com.zenithblue.sambas3-BjhVtN2ysAN9NvryQroXvQ==
+    resourcePath=/data/app/~~vxGC51Lzpu6zPVsT4jRLxg==/com.zenithblue.sambas3-BjhVtN2ysAN9NvryQroXvQ==
+    legacyNativeLibraryDir=/data/app/~~vxGC51Lzpu6zPVsT4jRLxg==/com.zenithblue.sambas3-BjhVtN2ysAN9NvryQroXvQ==/lib
+    extractNativeLibs=true
+    primaryCpuAbi=arm64-v8a
+    secondaryCpuAbi=null
+    cpuAbiOverride=null
+    versionCode=20260917 minSdk=29 targetSdk=37
+    minExtensionVersions=[]
+    versionName=2026.09.17
+    hiddenApiEnforcementPolicy=2
+    usesNonSdkApi=false
+    splits=[base]
+    apkSigningVersion=2
+    flags=[ HAS_CODE ALLOW_CLEAR_USER_DATA ALLOW_BACKUP KILL_AFTER_RESTORE ]
+    privateFlags=[ PRIVATE_FLAG_ACTIVITIES_RESIZE_MODE_RESIZEABLE_VIA_SDK_VERSION ALLOW_AUDIO_PLAYBACK_CAPTURE ]
+    forceQueryable=false
+    pageSizeCompat=0
+    scannedAsStoppedSystemApp=false
+    supportsScreens=[small, medium, large, xlarge, resizeable, anyDensity]
+    usesOptionalLibraries:
+      androidx.window.extensions
+      androidx.window.sidecar
+    usesLibraryFiles:
+      /system_ext/framework/androidx.window.extensions.jar
+      /system_ext/framework/androidx.window.sidecar.jar
+    timeStamp=2026-09-25 12:26:26
+    lastUpdateTime=2026-09-25 12:26:32
+    installerPackageName=null
+    installerPackageUid=-1
+    initiatingPackageName=com.android.shell
+    originatingPackageName=null
+    packageSource=1
+    appMetadataFilePath=null
+    appMetadataSource=0
+    signatures=PackageSignatures{c7da946 version:2, signatures:[8fc6fc9e], past signatures:[]}
+    installPermissionsFixed=false
+    pkgFlags=[ HAS_CODE ALLOW_CLEAR_USER_DATA ALLOW_BACKUP KILL_AFTER_RESTORE ]
+    privatePkgFlags=[ PRIVATE_FLAG_ACTIVITIES_RESIZE_MODE_RESIZEABLE_VIA_SDK_VERSION ALLOW_AUDIO_PLAYBACK_CAPTURE ]
+    apexModuleName=null
+    declared permissions:
+      com.zenithblue.sambas3.DYNAMIC_RECEIVER_NOT_EXPORTED_PERMISSION: prot=signature
+    requested permissions:
+      android.permission.POST_NOTIFICATIONS
+      android.permission.FOREGROUND_SERVICE
+      android.permission.FOREGROUND_SERVICE_SPECIAL_USE
+      android.permission.INTERNET
+      android.permission.FOREGROUND_SERVICE_DATA_SYNC
+      com.zenithblue.sambas3.DYNAMIC_RECEIVER_NOT_EXPORTED_PERMISSION
+      android.permission.VIBRATE
+      android.permission.USB_PERMISSION
+    install permissions:
+      android.permission.FOREGROUND_SERVICE: granted=true
+      android.permission.FOREGROUND_SERVICE_SPECIAL_USE: granted=true
+      android.permission.INTERNET: granted=true
+      android.permission.FOREGROUND_SERVICE_DATA_SYNC: granted=true
+      com.zenithblue.sambas3.DYNAMIC_RECEIVER_NOT_EXPORTED_PERMISSION: granted=true
+      android.permission.VIBRATE: granted=true
+    User 0: ceDataInode=372365 deDataInode=353684 installed=true hidden=false suspended=false distractionFlags=0 stopped=false notLaunched=false enabled=0 instant=false virtual=false quarantined=false
+      installReason=0
+      dataDir=/data/user/0/com.zenithblue.sambas3
+      firstInstallTime=2026-09-17 18:07:38
+      uninstallReason=0
+      overlay paths:
+        /data/resource-cache/com.android.systemui-accent-3F25.frro
+        /data/resource-cache/com.android.systemui-dynamic-QK74.frro
+        /data/resource-cache/com.android.systemui-neutral-7Fbs.frro
+      gids=[3003]
+      runtime permissions:
+        android.permission.POST_NOTIFICATIONS: granted=true, flags=[ USER_SET|USER_SENSITIVE_WHEN_GRANTED|USER_SENSITIVE_WHEN_DENIED]
+
+Queries:
+  system apps queryable: false
+  queries via forceQueryable:
+  queries via package name:
+  queries via component:
+    com.google.android.as.oss:
+      com.zenithblue.sambas3
+    com.google.android.as:
+      com.zenithblue.sambas3
+    com.android.settings.intelligence:
+      com.zenithblue.sambas3
+    com.google.android.settings.intelligence:
+      com.zenithblue.sambas3
+    com.phonepe.app:
+      com.zenithblue.sambas3
+    idm.internet.download.manager:
+      com.zenithblue.sambas3
+    com.whatsapp:
+      com.zenithblue.sambas3
+    ru.zdevs.zarchiver:
+      com.zenithblue.sambas3
+    com.xiaoji.egggame:
+      com.zenithblue.sambas3
+  queryable via interaction:
+    User 0:
+      [io.chaldeaprjkt.gamespace,org.lunaris.dolby,com.android.axion.quicklook,org.protonaosp.columbus,com.crdroid.ltpo.oplus,org.lineageos.lineagesettings,com.android.inputdevices,org.lineageos.lineageparts,com.android.applocker,com.android.keychain,co.aospa.sense,com.android.server.telecom,com.android.dynsystem,android,com.android.settings,com.android.DeviceAsWebcam,com.android.axion.axthemestore,lineageos.platform,com.android.axion.sandbox,com.android.location.fused,com.android.providers.settings,com.libremobileos.sidebar,org.lineageos.settings.device,com.android.localtransport,com.libremobileos.freeform]:
+        com.zenithblue.sambas3
+      com.android.externalstorage:
+        com.zenithblue.sambas3
+      com.google.android.as:
+        com.zenithblue.sambas3
+      com.google.android.gms:
+        com.zenithblue.sambas3
+      com.android.systemui:
+        com.zenithblue.sambas3
+      com.android.launcher3:
+        com.zenithblue.sambas3
+      juloo.keyboard2:
+        com.zenithblue.sambas3
+      com.zenithblue.sambas3:
+        com.android.documentsui
+      com.zenithblue.sambas3:
+        com.android.externalstorage
+  queryable via uses-library:
+
+Dexopt state:
+  [com.zenithblue.sambas3]
+    path: /data/app/~~vxGC51Lzpu6zPVsT4jRLxg==/com.zenithblue.sambas3-BjhVtN2ysAN9NvryQroXvQ==/base.apk
+      arm64: [status=verify] [reason=install] [primary-abi]
+        [location is /data/app/~~vxGC51Lzpu6zPVsT4jRLxg==/com.zenithblue.sambas3-BjhVtN2ysAN9NvryQroXvQ==/oat/arm64/base.odex]
+
+STDERR:
+
+=== adb_binary_sha256: adb -s d30a1726 shell "sha256sum /data/app/~~vxGC51Lzpu6zPVsT4jRLxg==/com.zenithblue.sambas3-BjhVtN2ysAN9NvryQroXvQ==/base.apk /data/app/~~vxGC51Lzpu6zPVsT4jRLxg==/com.zenithblue.sambas3-BjhVtN2ysAN9NvryQroXvQ==/lib/arm64/*.so /vendor/lib64/hw/vulkan.adreno.so" ===
+STDOUT:
+5a35d5dcd69404eeb945817c1094bc6196c0310532954b5bd68017e6ba3054d9  /data/app/~~vxGC51Lzpu6zPVsT4jRLxg==/com.zenithblue.sambas3-BjhVtN2ysAN9NvryQroXvQ==/base.apk
+41e9a793c43a0f4fddb19e33f346bace464f30f888ba7b9eaf96294ea115bfb6  /data/app/~~vxGC51Lzpu6zPVsT4jRLxg==/com.zenithblue.sambas3-BjhVtN2ysAN9NvryQroXvQ==/lib/arm64/libandroidx.graphics.path.so
+22515ff503e5e4b01ead7dc912139ca2869b918bc0604bc89c7282d15218b33a  /data/app/~~vxGC51Lzpu6zPVsT4jRLxg==/com.zenithblue.sambas3-BjhVtN2ysAN9NvryQroXvQ==/lib/arm64/libfile_redirect_hook.so
+4ae99c11d70a28b2370c1372ac983dedf71239b6c4317443e0897697acf5821a  /data/app/~~vxGC51Lzpu6zPVsT4jRLxg==/com.zenithblue.sambas3-BjhVtN2ysAN9NvryQroXvQ==/lib/arm64/libgsl_alloc_hook.so
+b9b07f2c8dbdf215da5d7d039f89a3e57402abac178eae9ee02fd2eb126abb14  /data/app/~~vxGC51Lzpu6zPVsT4jRLxg==/com.zenithblue.sambas3-BjhVtN2ysAN9NvryQroXvQ==/lib/arm64/libhook_impl.so
+4591dae02495cbc1a52009a1e46cedd1e031641da9f69ae5250e4920da353a30  /data/app/~~vxGC51Lzpu6zPVsT4jRLxg==/com.zenithblue.sambas3-BjhVtN2ysAN9NvryQroXvQ==/lib/arm64/libmain_hook.so
+e93f1faa806914f24f5c22e346dd4174e66b63c07ed0242a9d18c3dcd7fcc855  /data/app/~~vxGC51Lzpu6zPVsT4jRLxg==/com.zenithblue.sambas3-BjhVtN2ysAN9NvryQroXvQ==/lib/arm64/librpcsx-android.so
+149251f8576683b86cf2f7a1ffea05e5805c885af79bff6ebb84a4f382c46ad2  /data/app/~~vxGC51Lzpu6zPVsT4jRLxg==/com.zenithblue.sambas3-BjhVtN2ysAN9NvryQroXvQ==/lib/arm64/libsambas3-android.so
+979ac22c0d46c26804d559a93ab6c93c66272f224d3a5d0908f94a51247154b0  /vendor/lib64/hw/vulkan.adreno.so
+
+STDERR:
+
+=== adb_all_saves_inventory: adb -s d30a1726 shell "ls -laR /sdcard/Android/data/com.zenithblue.sambas3/files/config/dev_hdd0/home/00000001/savedata/" ===
+STDOUT:
+/sdcard/Android/data/com.zenithblue.sambas3/files/config/dev_hdd0/home/00000001/savedata:
+total 12
+drwxr-sr-x 4 u0_a463 ext_data_rw 3452 2026-09-25 12:37 .
+drwxr-sr-x 5 u0_a463 ext_data_rw 3452 2026-09-17 18:08 ..
+drwxr-sr-x 2 u0_a463 ext_data_rw 3452 2026-09-25 12:37 BCUS98111-AUTOSAVE
+drwxr-sr-x 2 u0_a463 ext_data_rw 3452 2026-09-23 11:26 BCUS98111-USERDATA
+
+/sdcard/Android/data/com.zenithblue.sambas3/files/config/dev_hdd0/home/00000001/savedata/BCUS98111-AUTOSAVE:
+total 194
+drwxr-sr-x 2 u0_a463 ext_data_rw   3452 2026-09-25 12:37 .
+drwxr-sr-x 4 u0_a463 ext_data_rw   3452 2026-09-25 12:37 ..
+-rw-r--r-- 1 u0_a463 ext_data_rw  38000 2026-09-25 12:37 ICON0.PNG
+-rw-r--r-- 1 u0_a463 ext_data_rw   2812 2026-09-25 12:37 PARAM.SFO
+-rw-r--r-- 1 u0_a463 ext_data_rw 147456 2026-09-25 12:37 SAVEDATA
+
+/sdcard/Android/data/com.zenithblue.sambas3/files/config/dev_hdd0/home/00000001/savedata/BCUS98111-USERDATA:
+total 54
+drwxr-sr-x 2 u0_a463 ext_data_rw  3452 2026-09-23 11:26 .
+drwxr-sr-x 4 u0_a463 ext_data_rw  3452 2026-09-25 12:37 ..
+-rw-r--r-- 1 u0_a463 ext_data_rw 38000 2026-09-23 11:26 ICON0.PNG
+-rw-r--r-- 1 u0_a463 ext_data_rw  2812 2026-09-23 11:26 PARAM.SFO
+-rw-r--r-- 1 u0_a463 ext_data_rw    32 2026-09-23 11:26 SAVEDATA
+
+STDERR:
+
+=== adb_all_saves_sha256: adb -s d30a1726 shell "sha256sum /sdcard/Android/data/com.zenithblue.sambas3/files/config/dev_hdd0/home/00000001/savedata/*/*" ===
+STDOUT:
+dfea1cdcfd8796e56dbf41c47a9d3677eb20757ed2715feab863d1eb942079aa  /sdcard/Android/data/com.zenithblue.sambas3/files/config/dev_hdd0/home/00000001/savedata/BCUS98111-AUTOSAVE/ICON0.PNG
+106ec5511c4a70fad1e4378e74141e458b9d884417bf913c037dde61e4e8953e  /sdcard/Android/data/com.zenithblue.sambas3/files/config/dev_hdd0/home/00000001/savedata/BCUS98111-AUTOSAVE/PARAM.SFO
+604695e19c27b9e743b76347ca970f62d3ddc8f769222501933ab3b4fd477a25  /sdcard/Android/data/com.zenithblue.sambas3/files/config/dev_hdd0/home/00000001/savedata/BCUS98111-AUTOSAVE/SAVEDATA
+dfea1cdcfd8796e56dbf41c47a9d3677eb20757ed2715feab863d1eb942079aa  /sdcard/Android/data/com.zenithblue.sambas3/files/config/dev_hdd0/home/00000001/savedata/BCUS98111-USERDATA/ICON0.PNG
+ca6cecdc3e4fc2501df67e06c2bc2de639ae1badb15dd74185ec15aacb712d16  /sdcard/Android/data/com.zenithblue.sambas3/files/config/dev_hdd0/home/00000001/savedata/BCUS98111-USERDATA/PARAM.SFO
+ed4d022a40dee571fb52a86cf844eb271df159ce9eadee89c1204e91e733f2f2  /sdcard/Android/data/com.zenithblue.sambas3/files/config/dev_hdd0/home/00000001/savedata/BCUS98111-USERDATA/SAVEDATA
+
+STDERR:
+
+=== adb_all_game_dirs: adb -s d30a1726 shell "ls -la /sdcard/Android/data/com.zenithblue.sambas3/files/config/dev_hdd0/game/" ===
+STDOUT:
+total 21
+drwxr-sr-x  7 u0_a463 ext_data_rw 3452 2026-09-23 11:25 .
+drwxr-sr-x 16 u0_a463 ext_data_rw 3452 2026-09-17 18:08 ..
+drwxr-sr-x  3 u0_a463 ext_data_rw 3452 2026-09-25 12:50 BCUS98125_INSTALL
+drwxr-sr-x  3 u0_a463 ext_data_rw 3452 2026-09-23 11:25 NPUO70219
+drwxr-sr-x  3 u0_a463 ext_data_rw 3452 2026-09-17 18:14 NPUO70223
+drwxr-sr-x  3 u0_a463 ext_data_rw 3452 2026-09-17 18:08 TEST12345
+drwxr-sr-x  2 u0_a463 ext_data_rw 3452 2026-09-23 11:25 ＄locks
+
+STDERR:
+
+=== adb_cache_dirs: adb -s d30a1726 shell "ls -la /sdcard/Android/data/com.zenithblue.sambas3/files/cache/" ===
+STDOUT:
+total 143
+drwxrwsrwx  6 u0_a463 ext_data_rw   3452 2026-09-25 12:54 .
+drwxrwsrwx  5 u0_a463 ext_data_rw   3452 2026-09-17 18:08 ..
+-rw-r--r--  1 u0_a463 ext_data_rw   3065 2026-09-25 12:54 RPCSX.log
+----------  1 u0_a463 ext_data_rw     10 2026-09-25 12:54 RPCSX.log.gz
+-rw-r--r--  1 u0_a463 ext_data_rw 105405 2026-09-25 12:46 RPCSX.old.log
+-rw-r--r--  1 u0_a463 ext_data_rw      0 2026-09-25 12:46 TTY.log
+drwxr-sr-x 84 u0_a463 ext_data_rw  20480 2026-09-23 11:19 cache
+drwxr-sr-x  2 u0_a463 ext_data_rw   3452 2026-09-17 18:08 ppu_progs
+drwxr-sr-x  2 u0_a463 ext_data_rw   3452 2026-09-17 18:08 shaderlog
+drwxr-sr-x  2 u0_a463 ext_data_rw   3452 2026-09-17 18:08 spu_progs
+
+STDERR:
+
+=== adb_patch_config: adb -s d30a1726 shell "cat /sdcard/Android/data/com.zenithblue.sambas3/files/config/patch_config.yml" ===
+STDOUT:
+PPU-4d5c51503a81a327c2a99427390a395b8dcb3767:
+  Disable Depth of Field:
+    God of War 3 (God of War III):
+      BCUS98111:
+        01.00:
+          Enabled: true
+  Disable Color Grading:
+    God of War 3 (God of War III):
+      BCUS98111:
+        01.00:
+          Enabled: true
+  Skip any videos with X button:
+    God of War 3 (God of War III):
+      BCUS98111:
+        01.00:
+          Enabled: true
+  Disable Motion Blur:
+    God of War 3 (God of War III):
+      BCUS98111:
+        01.00:
+          Enabled: true
+  Disable Layered Fog:
+    God of War 3 (God of War III):
+      BCUS98111:
+        01.00:
+          Enabled: true
+  Disable Bloom:
+    God of War 3 (God of War III):
+      BCUS98111:
+        01.00:
+          Enabled: true
+  Disable Camera sway:
+    God of War 3 (God of War III):
+      BCUS98111:
+        01.00:
+          Enabled: true
+  Disable MLAA:
+    God of War 3 (God of War III):
+      BCUS98111:
+        01.00:
+          Enabled: true
+PPU-19724fde16a5b111b7b4d2a065f5dccaf8e01962:
+  Disable Mesh Trimming:
+    God of War 3 (God of War III):
+      BCUS98111:
+        01.03:
+          Enabled: true
+  Disable Depth of Field:
+    God of War 3 (God of War III):
+      BCUS98111:
+        01.03:
+          Enabled: true
+  Skip intro:
+    God of War 3 (God of War III):
+      BCUS98111:
+        01.03:
+          Enabled: true
+  Disable Bloom:
+    God of War 3 (God of War III):
+      BCUS98111:
+        01.03:
+          Enabled: true
+  Disable Layered Fog:
+    God of War 3 (God of War III):
+      BCUS98111:
+        01.03:
+          Enabled: true
+  Skip any videos with X button:
+    God of War 3 (God of War III):
+      BCUS98111:
+        01.03:
+          Enabled: true
+  Disable Motion Blur:
+    God of War 3 (God of War III):
+      BCUS98111:
+        01.03:
+          Enabled: true
+  Disable Color Grading:
+    God of War 3 (God of War III):
+      BCUS98111:
+        01.03:
+          Enabled: true
+  Disable Camera Sway:
+    God of War 3 (God of War III):
+      BCUS98111:
+        01.03:
+          Enabled: true
+  Disable MLAA:
+    God of War 3 (God of War III):
+      BCUS98111:
+        01.03:
+          Enabled: true
+SPU-530c255936b07b25467a58e24ceff5fd4e2960b7:
+  Disable SPU MLAA:
+    God of War 3 (God of War III):
+      BCUS98111:
+        01.00:
+          Enabled: true
+PPU-ad7bfe5eb63563703c893ab10930c35cf80e8d0e:
+  Disable Mesh Trimming:
+    inFamous 2:
+      BCUS98125:
+        01.00:
+          Enabled: true
+SPU-2239af4827b17317522bd6323c646b45b34ebf14:
+  Disable SPU MLAA:
+    God of War 3 (God of War III):
+      BCUS98111:
+        01.03:
+          Enabled: true
+PPU-41a7d047c573c78c0307506c9d1b52d15a66e4f5:
+  Disable Mesh Trimming:
+    inFamous 2:
+      BCUS98125:
+        01.04:
+          Enabled: true
+  Extended FOV:
+    inFamous 2:
+      BCUS98125:
+        01.04:
+          Enabled: true
+  Skip Intro:
+    inFamous 2:
+      BCUS98125:
+        01.04:
+          Enabled: true
+STDERR:
+
+=== adb_savestates_search: adb -s d30a1726 shell "find /sdcard/Android/data/com.zenithblue.sambas3/files/ -name '*savestate*' -o -name '*.sav' 2>/dev/null" ===
+STDOUT:
+/sdcard/Android/data/com.zenithblue.sambas3/files/config/savestates
+STDERR:
+
+=== adb_savestates_dir: adb -s d30a1726 shell "ls -la /sdcard/Android/data/com.zenithblue.sambas3/files/config/savestates" ===
+STDOUT:
+total 6
+drwxr-sr-x  2 u0_a463 ext_data_rw 3452 2026-09-17 18:08 .
+drwxrwsrwx 17 u0_a463 ext_data_rw 3452 2026-09-25 12:46 ..
+STDERR:
+
+=== adb_home_users: adb -s d30a1726 shell "ls -la /sdcard/Android/data/com.zenithblue.sambas3/files/config/dev_hdd0/home/" ===
+STDOUT:
+total 9
+drwxr-sr-x  3 u0_a463 ext_data_rw 3452 2026-09-17 18:08 .
+drwxr-sr-x 16 u0_a463 ext_data_rw 3452 2026-09-17 18:08 ..
+drwxr-sr-x  5 u0_a463 ext_data_rw 3452 2026-09-17 18:08 00000001
+STDERR:
+
+=== adb_title_update_locks: adb -s d30a1726 shell "ls -la '/sdcard/Android/data/com.zenithblue.sambas3/files/config/dev_hdd0/game/＄locks'" ===
+STDOUT:
+total 6
+drwxr-sr-x 2 u0_a463 ext_data_rw 3452 2026-09-23 11:25 .
+drwxr-sr-x 7 u0_a463 ext_data_rw 3452 2026-09-23 11:25 ..
+-rw-r--r-- 1 u0_a463 ext_data_rw    0 2026-09-23 11:25 BCUS98111_v01.00
+-rw-r--r-- 1 u0_a463 ext_data_rw    0 2026-09-17 18:14 BCUS98125_v01.00
+STDERR:
+
+=== adb_cache_namespace: adb -s d30a1726 shell "ls -la /sdcard/Android/data/com.zenithblue.sambas3/files/cache/cache/BCUS98111" ===
+STDOUT:
+total 30
+drwxr-sr-x  4 u0_a463 ext_data_rw  3452 2026-09-23 11:22 .
+drwxr-sr-x 84 u0_a463 ext_data_rw 20480 2026-09-23 11:19 ..
+drwxr-sr-x  2 u0_a463 ext_data_rw  3452 2026-09-23 11:22 ppu-0000000000000000000000000000-
+drwxr-sr-x  3 u0_a463 ext_data_rw  8192 2026-09-25 12:34 ppu-HQfb9JM3ziXgkTpuJGuiKhWEfSFq-EBOOT.BIN
+STDERR:
+
+=== adb_spu_cache_files: adb -s d30a1726 shell "ls -la /sdcard/Android/data/com.zenithblue.sambas3/files/cache/cache/BCUS98111/ppu-HQfb9JM3ziXgkTpuJGuiKhWEfSFq-EBOOT.BIN/*.dat" ===
+STDOUT:
+-rw-r--r-- 1 u0_a463 ext_data_rw  995260 2026-09-25 12:37 /sdcard/Android/data/com.zenithblue.sambas3/files/cache/cache/BCUS98111/ppu-HQfb9JM3ziXgkTpuJGuiKhWEfSFq-EBOOT.BIN/spu-mega-v1-tane.dat
+-rw-r--r-- 1 u0_a463 ext_data_rw  994304 2026-09-25 07:28 /sdcard/Android/data/com.zenithblue.sambas3/files/cache/cache/BCUS98111/ppu-HQfb9JM3ziXgkTpuJGuiKhWEfSFq-EBOOT.BIN/spu-safe-v1-tane.dat
+STDERR:
+
+=== adb_activity_exit_info: adb -s d30a1726 shell "dumpsys activity exit-info com.zenithblue.sambas3" ===
+STDOUT:
+ACTIVITY MANAGER PROCESS EXIT INFO (dumpsys activity exit-info)
+Last Timestamp of Persistence Into Persistent Storage: 2026-09-25 13:43:58.795
+  package: com.zenithblue.sambas3
+    Historical Process Exit for uid=10463
+        ApplicationExitInfo #0:
+          timestamp=2026-09-25 12:54:28.369 pid=28772 realUid=10463 packageUid=10463 definingUid=10463 user=0
+          process=com.zenithblue.sambas3 reason=2 (SIGNALED) subreason=0 (UNKNOWN) status=11
+          importance=100 pss=0.00 rss=1.4GB description=null state=empty trace=null
+STDERR:
+
+=== adb_run_as_check: adb -s d30a1726 shell "run-as com.zenithblue.sambas3 cat /proc/579/maps || true" ===
+STDOUT:
+STDERR:
+run-as: package not debuggable: com.zenithblue.sambas3
+
+=== adb_meminfo_so_mmap: adb -s d30a1726 shell "dumpsys meminfo com.zenithblue.sambas3 | grep -E '\.so mmap|TOTAL'" ===
+STDOUT:
+     .so mmap    42559        0    40032     2862    80988
+        TOTAL   148569     2408    41744    98536   157412    81716    58644    19111
+STDERR:

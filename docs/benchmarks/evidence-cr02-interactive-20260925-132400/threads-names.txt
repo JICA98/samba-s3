@@ -1,0 +1,41 @@
+20631 : ithblue.sambas3
+20633 : Signal Catcher
+20634 : perfetto_hprof_
+20635 : Jit thread pool
+20636 : HeapTaskDaemon
+20638 : ReferenceQueueD
+20639 : FinalizerDaemon
+20640 : FinalizerWatchd
+20641 : binder:20631_1
+20642 : binder:20631_2
+20644 : binder:20631_3
+20647 : Profile Saver
+20648 : RenderThread
+20650 : SharedPreferenc
+20651 : DefaultDispatch
+20652 : DefaultDispatch
+20653 : DefaultDispatch
+20654 : DefaultDispatch
+20655 : DefaultDispatch
+20656 : DefaultDispatch
+20657 : DefaultDispatch
+20658 : DefaultDispatch
+20659 : DefaultDispatch
+20660 : DefaultExecutor
+20661 : DefaultDispatch
+20662 : DefaultDispatch
+20663 : DefaultDispatch
+20665 : Log Writer
+20666 : ithblue.sambas3
+20667 : Thread-14
+20668 : Thread-15
+20669 : TracingMuxer
+20670 : pool-4-thread-1
+20671 : hwuiTask0
+20672 : hwuiTask1
+20673 : GrallocUploadTh
+20675 : SurfaceSyncGrou
+20676 : RenderThread
+20682 : binder:20631_4
+20685 : RenderThread
+20688 : InteractionJank

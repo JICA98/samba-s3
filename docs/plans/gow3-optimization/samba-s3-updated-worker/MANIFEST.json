@@ -1,0 +1,27 @@
+{
+  "PHASE_EVIDENCE_AUDIT.md": {
+    "bytes": 6718,
+    "words": 939,
+    "sha256": "d3da88bf4d05fb880e65fed6d53cd29f26608e736d7643872908e26b5e0c0bb7"
+  },
+  "REVIEW_ADDENDUM.md": {
+    "bytes": 5650,
+    "words": 805,
+    "sha256": "109c8c838d35ba54a20e895ff164774aee9cc7558e4e667f8a168d6a95b87879"
+  },
+  "SOURCES.md": {
+    "bytes": 9323,
+    "words": 741,
+    "sha256": "7cd9d0e68f9373f540b14197f440c7a16c9e30bc18434263f4ae6eb12fac00f8"
+  },
+  "START_HERE.md": {
+    "bytes": 2101,
+    "words": 283,
+    "sha256": "c7bb13423844a4829f3ad443260cfab748ec4c033e86c4c0b9cedba2bc5cba7d"
+  },
+  "WORKER.md": {
+    "bytes": 64259,
+    "words": 8691,
+    "sha256": "bb0bf71a20de805c32ad28f6ecf5fad4874b616a89f3b457f6cd099703bbd7dc"
+  }
+}

@@ -1,0 +1,86 @@
+10219 : binder:579_6
+10221 : binder:579_7
+10232 : DefaultDispatch
+10235 : DefaultDispatch
+10238 : DefaultDispatch
+10418 : InsetsAnimation
+14978 : binder:579_8
+15498 : binder:579_9
+15523 : DefaultDispatch
+15524 : DefaultDispatch
+15531 : DefaultDispatch
+15532 : DefaultDispatch
+15956 : DefaultExecutor
+15959 : queued-work-loo
+15962 : Progress Dialog
+15963 : Performance Sen
+15964 : PS Move Worker 
+15965 : PS Move Worker 
+15966 : PS Move Worker 
+15967 : PS Move Worker 
+15968 : Gem Thread
+15969 : Camera Thread
+15970 : Usb Manager Thr
+15971 : cellAudio Threa
+15974 : MediaList Threa
+15975 : Network P2P Thr
+15976 : GDB Server
+15977 : CPU Profiler
+15978 : VUART AV Thread
+15979 : Timer Thread
+15980 : RsxAudioData Th
+15981 : Tcp Over Udp Ti
+15982 : cellAudio Threa
+15983 : cellAudio Threa
+15984 : Network Thread
+15985 : cellAudio Threa
+15986 : LV2 Watchdog Th
+15987 : PPU Syscall Usa
+15988 : Signaling Manag
+15989 : NetStart Hack
+15990 : MsgDialog Close
+15992 : Microphone Thre
+15993 : Overlay Input T
+15995 : com.ze:traceq0
+16003 : RSX.W1
+16004 : RSX.W2
+16005 : Thread-28
+16006 : rsx::thread
+16007 : Pad Thread
+16008 : PPU[0x1000000] 
+16010 : S3 Fresh Boot F
+16024 : AAudio_1
+16051 : SPU Worker 1
+16052 : SPU Worker 2
+579 : ithblue.sambas3
+580 : Signal Catcher
+581 : perfetto_hprof_
+583 : Jit thread pool
+584 : HeapTaskDaemon
+585 : ReferenceQueueD
+586 : FinalizerDaemon
+587 : FinalizerWatchd
+594 : binder:579_1
+596 : binder:579_2
+600 : binder:579_3
+603 : Profile Saver
+604 : RenderThread
+609 : DefaultDispatch
+610 : DefaultDispatch
+637 : Log Writer
+638 : ithblue.sambas3
+639 : Thread-5
+640 : Thread-6
+642 : TracingMuxer
+643 : pool-4-thread-1
+644 : hwuiTask0
+647 : hwuiTask1
+648 : DefaultDispatch
+653 : DefaultDispatch
+655 : GrallocUploadTh
+657 : SurfaceSyncGrou
+659 : binder:579_4
+660 : DefaultDispatch
+670 : binder:579_3
+681 : InteractionJank
+9979 : binder:579_5

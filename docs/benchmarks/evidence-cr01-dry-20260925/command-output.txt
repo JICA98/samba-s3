@@ -1,0 +1,20 @@
+$ python3 scripts/perf/run-gow3-benchmark.py --serial d30a1726 --dry-run --run-id cr01-dry-20260925 --outdir docs/benchmarks/evidence-cr01-dry-20260925
+================================================================================
+ SambaS3 God of War® III Deterministic Benchmark Runner
+ Target Device:   d30a1726
+ Run ID:          cr01-dry-20260925
+ Workload:        direct_iso/BCUS98111
+ Target Scene:    gow3-gaia-combat
+ Target Duration: 60 seconds
+ Monitor Preset:  Performance
+ Evidence Dir:    docs/benchmarks/evidence-cr01-dry-20260925
+================================================================================
+[*] Inspecting device provenance and installed binary signatures...
+    Device Model:  CPH2691 (SoC: SM8650, Android 16)
+    Version:       2026.09.17 (20260917)
+    base.apk SHA:  5a35d5dcd69404eeb945817c1094bc6196c0310532954b5bd68017e6ba3054d9
+    librpcsx SHA:  e93f1faa806914f24f5c22e346dd4174e66b63c07ed0242a9d18c3dcd7fcc855
+    S3CORE:        rpcsx=141af96fa006f56c25ec335137e92c78b29b17e3 samba=e93784d8c4e4aac796b72a63a8f5a127affa29791b58b8a453aa74eae5c1460c
+[OK] Binary and S3CORE provenance verified 100% against expectation
+[*] Dry run complete: environment and provenance verified. No launch performed.
+Exit status: 0

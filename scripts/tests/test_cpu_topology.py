@@ -46,6 +46,31 @@ def calculate_affinity_mask(group, sched_mode, topo=None, allowed_mask=None, cus
     if sched_mode == ThreadSchedulerMode.OS:
         return allowed_mask
 
+    # Alternative Scheduler Mode: Capacity-aware policy (WORKER.md:198)
+    # Prefers/pins the classified RSX thread to the discovered prime-core mask (subject to cpuset and syscall permissions),
+    # while pinning SPU and PPU to the remaining performance cores. Note: other processes/threads (system, driver, UI)
+    # may still share this core; this is not an exclusive kernel reservation.
+    if sched_mode == ThreadSchedulerMode.ALTERNATIVE:
+        if topo and topo.get("is_heterogeneous", False) and topo.get("performance_mask", 0) != 0:
+            perf_mask = topo["performance_mask"] & allowed_mask
+            prime_mask = topo.get("prime_mask", 0) & allowed_mask
+            big_mask = perf_mask & ~prime_mask
+
+            if group == ThreadClass.RSX:
+                if prime_mask != 0:
+                    return prime_mask
+                if perf_mask != 0:
+                    return perf_mask
+            elif group in (ThreadClass.SPU, ThreadClass.PPU):
+                if big_mask != 0:
+                    return big_mask
+                if perf_mask != 0:
+                    return perf_mask
+            elif group == ThreadClass.GENERAL:
+                return allowed_mask
+        return allowed_mask
+
+    # RPCS3 Scheduler mode
     if topo and topo.get("is_heterogeneous", False) and topo.get("performance_mask", 0) != 0:
         if group in (ThreadClass.SPU, ThreadClass.PPU, ThreadClass.RSX):
             perf_mask = topo["performance_mask"] & allowed_mask
@@ -72,17 +97,22 @@ def parse_cpu_topology(allowed_mask, capacities=None, max_freqs=None, midrs=None
             threshold = min_c + (max_c - min_c) // 2
             perf = 0
             eff = 0
+            prime = 0
             for cpu, cap in allowed_caps:
                 if cap >= threshold:
                     perf |= (1 << cpu)
+                    if cap == max_c:
+                        prime |= (1 << cpu)
                 else:
                     eff |= (1 << cpu)
             if perf and eff:
                 perf |= (allowed_mask & ~(perf | eff))
+                prime_m = (prime & allowed_mask) if (prime and prime != perf) else 0
                 return {
                     "allowed_mask": allowed_mask,
                     "performance_mask": perf & allowed_mask,
                     "efficiency_mask": eff & allowed_mask,
+                    "prime_mask": prime_m,
                     "is_heterogeneous": True,
                     "discovery_successful": True,
                 }
@@ -96,39 +126,50 @@ def parse_cpu_topology(allowed_mask, capacities=None, max_freqs=None, midrs=None
             threshold = min_f + (max_f - min_f) // 2
             perf = 0
             eff = 0
+            prime = 0
             for cpu, freq in allowed_freqs:
                 if freq >= threshold:
                     perf |= (1 << cpu)
+                    if freq == max_f:
+                        prime |= (1 << cpu)
                 else:
                     eff |= (1 << cpu)
             if perf and eff:
                 perf |= (allowed_mask & ~(perf | eff))
+                prime_m = (prime & allowed_mask) if (prime and prime != perf) else 0
                 return {
                     "allowed_mask": allowed_mask,
                     "performance_mask": perf & allowed_mask,
                     "efficiency_mask": eff & allowed_mask,
+                    "prime_mask": prime_m,
                     "is_heterogeneous": True,
                     "discovery_successful": True,
                 }
 
     # 3. MIDR
     little_parts = {0xd01, 0xd02, 0xd04, 0xd03, 0xd05, 0xd46, 0xd80, 0xd88}
+    prime_parts = {0xd44, 0xd48, 0xd4e, 0xd82, 0xd85}
     allowed_midrs = [(cpu, midr) for cpu, midr in midrs if (allowed_mask & (1 << cpu))]
     if allowed_midrs:
         perf = 0
         eff = 0
+        prime = 0
         for cpu, midr in allowed_midrs:
             part = (midr >> 4) & 0xFFF
             if part in little_parts:
                 eff |= (1 << cpu)
             elif part != 0:
                 perf |= (1 << cpu)
+                if part in prime_parts:
+                    prime |= (1 << cpu)
         if perf and eff:
             perf |= (allowed_mask & ~(perf | eff))
+            prime_m = (prime & allowed_mask) if (prime and prime != perf) else 0
             return {
                 "allowed_mask": allowed_mask,
                 "performance_mask": perf & allowed_mask,
                 "efficiency_mask": eff & allowed_mask,
+                "prime_mask": prime_m,
                 "is_heterogeneous": True,
                 "discovery_successful": True,
             }
@@ -138,6 +179,7 @@ def parse_cpu_topology(allowed_mask, capacities=None, max_freqs=None, midrs=None
         "allowed_mask": allowed_mask,
         "performance_mask": allowed_mask,
         "efficiency_mask": 0,
+        "prime_mask": 0,
         "is_heterogeneous": False,
         "discovery_successful": bool(capacities or max_freqs or midrs),
     }
@@ -169,6 +211,7 @@ class CpuTopologyTestCase(unittest.TestCase):
         self.assertTrue(topo["is_heterogeneous"])
         self.assertEqual(topo["performance_mask"], 0xFC)
         self.assertEqual(topo["efficiency_mask"], 0x03)
+        self.assertEqual(topo["prime_mask"], 0x80)
 
     def test_snapdragon_8_gen_3_realistic_eas_capacities(self):
         # OnePlus 13R / SM8650 actual Energy Aware Scheduling capacities
@@ -178,6 +221,7 @@ class CpuTopologyTestCase(unittest.TestCase):
         self.assertTrue(topo["is_heterogeneous"])
         self.assertEqual(topo["performance_mask"], 0xFC)
         self.assertEqual(topo["efficiency_mask"], 0x03)
+        self.assertEqual(topo["prime_mask"], 0x80)
         self.assertEqual(topo["performance_mask"] & ~topo["allowed_mask"], 0)
 
     def test_snapdragon_8_gen_3_cluster_frequencies(self):
@@ -188,6 +232,7 @@ class CpuTopologyTestCase(unittest.TestCase):
         self.assertTrue(topo["is_heterogeneous"])
         self.assertEqual(topo["performance_mask"], 0xFC)
         self.assertEqual(topo["efficiency_mask"], 0x03)
+        self.assertEqual(topo["prime_mask"], 0x80)
         self.assertEqual(topo["performance_mask"] & ~topo["allowed_mask"], 0)
 
     def test_snapdragon_8_gen_3_arm_midrs(self):
@@ -202,6 +247,7 @@ class CpuTopologyTestCase(unittest.TestCase):
         self.assertTrue(topo["is_heterogeneous"])
         self.assertEqual(topo["performance_mask"], 0xFC)
         self.assertEqual(topo["efficiency_mask"], 0x03)
+        self.assertEqual(topo["prime_mask"], 0x80)
         self.assertEqual(topo["performance_mask"] & ~topo["allowed_mask"], 0)
 
     def test_snapdragon_8_gen_3_scheduler_modes_and_affinity(self):
@@ -209,6 +255,7 @@ class CpuTopologyTestCase(unittest.TestCase):
             "allowed_mask": 0xFF,
             "performance_mask": 0xFC,
             "efficiency_mask": 0x03,
+            "prime_mask": 0x80,
             "is_heterogeneous": True,
         }
         # In OS mode, all thread groups (SPU, PPU, RSX, General) receive full allowed_mask (0xFF)
@@ -221,7 +268,18 @@ class CpuTopologyTestCase(unittest.TestCase):
         self.assertEqual(calculate_affinity_mask(ThreadClass.RSX, ThreadSchedulerMode.RPCS3, topo, 0xFF), 0xFC)
         self.assertEqual(calculate_affinity_mask(ThreadClass.GENERAL, ThreadSchedulerMode.RPCS3, topo, 0xFF), 0xFF)
 
-        # Offline Prime core 7 (allowed_mask = 0x7F) -> SPU, PPU, RSX receive 0x7C (cores 2-6 only)
+        # In Alternative mode, Prime core (0x80) is exclusively allocated to RSX (rendering backend),
+        # while SPU and PPU are restricted to Big cores (0x7C), preventing SPU/PPU from starving the render thread
+        self.assertEqual(calculate_affinity_mask(ThreadClass.RSX, ThreadSchedulerMode.ALTERNATIVE, topo, 0xFF), 0x80)
+        self.assertEqual(calculate_affinity_mask(ThreadClass.SPU, ThreadSchedulerMode.ALTERNATIVE, topo, 0xFF), 0x7C)
+        self.assertEqual(calculate_affinity_mask(ThreadClass.PPU, ThreadSchedulerMode.ALTERNATIVE, topo, 0xFF), 0x7C)
+        self.assertEqual(calculate_affinity_mask(ThreadClass.GENERAL, ThreadSchedulerMode.ALTERNATIVE, topo, 0xFF), 0xFF)
+
+        # Offline Prime core 7 (allowed_mask = 0x7F) -> RSX & SPU/PPU fall back to available big cores (0x7C)
+        self.assertEqual(calculate_affinity_mask(ThreadClass.RSX, ThreadSchedulerMode.ALTERNATIVE, topo, 0x7F), 0x7C)
+        self.assertEqual(calculate_affinity_mask(ThreadClass.SPU, ThreadSchedulerMode.ALTERNATIVE, topo, 0x7F), 0x7C)
+
+        # Offline Prime core 7 in RPCS3 mode (allowed_mask = 0x7F) -> SPU, PPU, RSX receive 0x7C (cores 2-6 only)
         self.assertEqual(calculate_affinity_mask(ThreadClass.SPU, ThreadSchedulerMode.RPCS3, topo, 0x7F), 0x7C)
         self.assertEqual(calculate_affinity_mask(ThreadClass.PPU, ThreadSchedulerMode.RPCS3, topo, 0x7F), 0x7C)
 
@@ -316,6 +374,19 @@ class CpuTopologyTestCase(unittest.TestCase):
         self.assertEqual(calculate_affinity_mask(ThreadClass.PPU, ThreadSchedulerMode.ALTERNATIVE, topo, 0xFF), 0xF8)
         self.assertEqual(calculate_affinity_mask(ThreadClass.RSX, ThreadSchedulerMode.ALTERNATIVE, topo, 0xFF), 0xF8)
         self.assertEqual(calculate_affinity_mask(ThreadClass.GENERAL, ThreadSchedulerMode.ALTERNATIVE, topo, 0xFF), 0xFF)
+
+        # Alternative mode with prime core: Prime core (0x80) exclusively for RSX, Big cores (0x7C) for SPU/PPU
+        topo_with_prime = {
+            "allowed_mask": 0xFF,
+            "performance_mask": 0xFC,
+            "efficiency_mask": 0x03,
+            "prime_mask": 0x80,
+            "is_heterogeneous": True,
+        }
+        self.assertEqual(calculate_affinity_mask(ThreadClass.RSX, ThreadSchedulerMode.ALTERNATIVE, topo_with_prime, 0xFF), 0x80)
+        self.assertEqual(calculate_affinity_mask(ThreadClass.SPU, ThreadSchedulerMode.ALTERNATIVE, topo_with_prime, 0xFF), 0x7C)
+        self.assertEqual(calculate_affinity_mask(ThreadClass.PPU, ThreadSchedulerMode.ALTERNATIVE, topo_with_prime, 0xFF), 0x7C)
+        self.assertEqual(calculate_affinity_mask(ThreadClass.GENERAL, ThreadSchedulerMode.ALTERNATIVE, topo_with_prime, 0xFF), 0xFF)
 
     def test_scheduler_mode_fallback_homogeneous_and_empty_overlap(self):
         topo_homo = {
@@ -438,13 +509,72 @@ class CpuTopologyTestCase(unittest.TestCase):
                 self.assertNotEqual(mask, 0)
                 self.assertEqual(mask & ~0x55, 0)
 
+    def test_dual_prime_tie_handling(self):
+        # 2 Little cores + 4 Big cores + 2 Prime cores tying at 1024
+        caps = [(0, 240), (1, 240), (2, 780), (3, 780), (4, 780), (5, 780), (6, 1024), (7, 1024)]
+        topo = parse_cpu_topology(0xFF, capacities=caps)
+        self.assertTrue(topo["is_heterogeneous"])
+        self.assertEqual(topo["performance_mask"], 0xFC)
+        self.assertEqual(topo["prime_mask"], 0xC0)  # Cores 6 and 7 tie
+
+        self.assertEqual(calculate_affinity_mask(ThreadClass.RSX, ThreadSchedulerMode.ALTERNATIVE, topo, 0xFF), 0xC0)
+        self.assertEqual(calculate_affinity_mask(ThreadClass.SPU, ThreadSchedulerMode.ALTERNATIVE, topo, 0xFF), 0x3C)
+        self.assertEqual(calculate_affinity_mask(ThreadClass.PPU, ThreadSchedulerMode.ALTERNATIVE, topo, 0xFF), 0x3C)
+        self.assertEqual(calculate_affinity_mask(ThreadClass.GENERAL, ThreadSchedulerMode.ALTERNATIVE, topo, 0xFF), 0xFF)
+
+    def test_alternative_mode_prime_mask_zero_fallback(self):
+        # Dimensity 8300: 4 Little + 4 Big (all 1024, no distinct prime tier)
+        caps = [(0, 350), (1, 350), (2, 350), (3, 350), (4, 1024), (5, 1024), (6, 1024), (7, 1024)]
+        topo = parse_cpu_topology(0xFF, capacities=caps)
+        self.assertEqual(topo["performance_mask"], 0xF0)
+        self.assertEqual(topo["prime_mask"], 0)
+
+        # Alternative mode cleanly falls back to performance_mask (0xF0)
+        self.assertEqual(calculate_affinity_mask(ThreadClass.RSX, ThreadSchedulerMode.ALTERNATIVE, topo, 0xFF), 0xF0)
+        self.assertEqual(calculate_affinity_mask(ThreadClass.SPU, ThreadSchedulerMode.ALTERNATIVE, topo, 0xFF), 0xF0)
+        self.assertEqual(calculate_affinity_mask(ThreadClass.PPU, ThreadSchedulerMode.ALTERNATIVE, topo, 0xFF), 0xF0)
+
+    def test_dynamic_allowed_mask_changes_alternative_mode(self):
+        topo = {
+            "allowed_mask": 0xFF,
+            "performance_mask": 0xFC,
+            "efficiency_mask": 0x03,
+            "prime_mask": 0x80,
+            "is_heterogeneous": True,
+        }
+        # Core 7 offline/disallowed (allowed_mask = 0x7F) -> RSX & SPU fall back to big cores (0x7C)
+        self.assertEqual(calculate_affinity_mask(ThreadClass.RSX, ThreadSchedulerMode.ALTERNATIVE, topo, 0x7F), 0x7C)
+        self.assertEqual(calculate_affinity_mask(ThreadClass.SPU, ThreadSchedulerMode.ALTERNATIVE, topo, 0x7F), 0x7C)
+
+        # Little cores only (allowed_mask = 0x03) -> clean fallback to 0x03
+        self.assertEqual(calculate_affinity_mask(ThreadClass.RSX, ThreadSchedulerMode.ALTERNATIVE, topo, 0x03), 0x03)
+        self.assertEqual(calculate_affinity_mask(ThreadClass.SPU, ThreadSchedulerMode.ALTERNATIVE, topo, 0x03), 0x03)
+
+    def test_custom_affinity_overrides_alternative_mode(self):
+        topo = {
+            "allowed_mask": 0xFF,
+            "performance_mask": 0xFC,
+            "efficiency_mask": 0x03,
+            "prime_mask": 0x80,
+            "is_heterogeneous": True,
+        }
+        # Explicitly map: cores 0-1 PPU, cores 2-3 RSX, cores 4-7 SPU
+        custom = [
+            ThreadClass.PPU, ThreadClass.PPU,
+            ThreadClass.RSX, ThreadClass.RSX,
+            ThreadClass.SPU, ThreadClass.SPU, ThreadClass.SPU, ThreadClass.SPU
+        ]
+        self.assertEqual(calculate_affinity_mask(ThreadClass.RSX, ThreadSchedulerMode.ALTERNATIVE, topo, 0xFF, custom), 0x0C)
+        self.assertEqual(calculate_affinity_mask(ThreadClass.SPU, ThreadSchedulerMode.ALTERNATIVE, topo, 0xFF, custom), 0xF0)
+        self.assertEqual(calculate_affinity_mask(ThreadClass.PPU, ThreadSchedulerMode.ALTERNATIVE, topo, 0xFF, custom), 0x03)
+
     def test_cpp_unit_test_binary(self):
         cpp_src = REPO_ROOT / "scripts" / "tests" / "test_cpu_topology.cpp"
         bin_path = REPO_ROOT / "scripts" / "tests" / "test_cpu_topology"
         if cpp_src.exists():
             subprocess.run(["g++", "-O2", "-std=c++20", str(cpp_src), "-o", str(bin_path)], check=True)
             res = subprocess.run([str(bin_path)], capture_output=True, text=True, check=True)
-            self.assertIn("ALL 24 CPU TOPOLOGY AND SCHEDULER TESTS PASSED!", res.stdout)
+            self.assertIn("ALL 25 CPU TOPOLOGY AND SCHEDULER TESTS PASSED!", res.stdout)
             if bin_path.exists():
                 bin_path.unlink()
 

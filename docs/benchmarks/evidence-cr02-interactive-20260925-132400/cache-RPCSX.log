@@ -1,0 +1,44 @@
+﻿RPCSX-ps3-android v20260925-141af96 Draft
+ARM 2x"cortex-a520" + 5x"Cortex-A720" + 1x"Cortex-X4" | 8 Threads | 10.96 GiB RAM | TSC: 0.019GHz | FMA3
+Operating system: POSIX, Name: Linux, Release: 6.1.174-gf870a38a2536, Version: #1 SMP PREEMPT Sat Jul  4 02:49:09 EEST 2026
+Current Time: 2026-09-25T19:03:39
+rlimit[8] = 65536 (requested 18446744073709551615, max 65536)
+·E 0:00:00.000012 ANDROID: rlimit[7] = 32768 (requested 18446744073709551615, max 32768)
+·E 0:00:00.000017 ANDROID: rlimit[3] = 134217728 (requested 134217728, max 18446744073709551615)
+·E 0:00:00.000023 ANDROID: rlimit[9] = 18446744073709551615 (requested 18446744073709551615, max 18446744073709551615)
+·! 0:00:00.000708 SYS: Setting user ID '00000001'
+·A 0:00:00.000744 SYS: LLVM version: 20.1.3
+·! 0:00:00.009815 VFS: VFS config missing. Using default settings. Path: /storage/emulated/0/Android/data/com.zenithblue.sambas3/files/config/vfs.yml
+·! 0:00:00.009931 SYS: Using VFS config:
+$(EmulatorDir): ""
+/dev_hdd0/: $(EmulatorDir)dev_hdd0/
+/dev_hdd1/: $(EmulatorDir)dev_hdd1/
+/dev_flash/: $(EmulatorDir)dev_flash/
+/dev_flash2/: $(EmulatorDir)dev_flash2/
+/dev_flash3/: $(EmulatorDir)dev_flash3/
+/dev_bdvd/: $(EmulatorDir)dev_bdvd/
+/games/: $(EmulatorDir)games/
+/app_home/: ""
+/dev_usb***/:
+  /dev_usb000:
+    Path: $(EmulatorDir)dev_usb000/
+    Serial: ""
+    VID: ""
+    PID: ""
+·! 0:00:00.010047 VFS: Mounted path "/dev_hdd0" to "/storage/emulated/0/Android/data/com.zenithblue.sambas3/files/config/dev_hdd0/"
+·! 0:00:00.010123 VFS: Mounted path "/dev_flash" to "/storage/emulated/0/Android/data/com.zenithblue.sambas3/files/config/dev_flash/"
+·! 0:00:00.010197 VFS: Mounted path "/dev_flash2" to "/storage/emulated/0/Android/data/com.zenithblue.sambas3/files/config/dev_flash2/"
+·! 0:00:00.010257 VFS: Mounted path "/dev_flash3" to "/storage/emulated/0/Android/data/com.zenithblue.sambas3/files/config/dev_flash3/"
+·! 0:00:00.010296 VFS: Mounted path "/app_home" to "/"
+·! 0:00:00.010363 VFS: Mounted path "/dev_usb000" to "/storage/emulated/0/Android/data/com.zenithblue.sambas3/files/config/dev_usb000/"
+·! 0:00:00.010431 SYS: Applying global config: /storage/emulated/0/Android/data/com.zenithblue.sambas3/files/config/config.yml
+·! 0:00:00.025258 SYS: Logged in as user '00000001' with the username 'User'
+·! 0:00:00.025750 IPC: IPC config missing. Using default settings. Path: /storage/emulated/0/Android/data/com.zenithblue.sambas3/files/config/ipc.yml
+·! 0:00:00.025803 SYS: Using IPC config:
+IPC Server enabled: false
+IPC Port: 28012
+·! 0:00:00.025813 Input: Saving input configuration 'Default' to '/storage/emulated/0/Android/data/com.zenithblue.sambas3/files/config/input_configs/global/Default.yml'
+·! 0:00:00.028779 ANDROID: LLVM CPU: configured='cortex-a34', effective='cortex-a34'
+·! 0:00:00.028879 ANDROID: Thread Scheduler Mode: RPCS3 Scheduler
+·! 0:00:00.031275 SIG: CPU topology: allowed=0xff, perf=0xfc, eff=0x3, heterogeneous=true, discovery=success
+·! 0:00:00.031334 ANDROID: CPU Topology: allowed=0xff, perf=0xfc, eff=0x3, heterogeneous=true

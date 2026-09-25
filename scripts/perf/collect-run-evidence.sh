@@ -73,17 +73,18 @@ if [[ -n "$PID" && "$PID" =~ ^[0-9]+$ ]]; then
   echo "[*] Capturing thread snapshot for live PID $PID..."
   adb -s "$SERIAL" shell top -H -b -n 1 -p "$PID" > "$OUTDIR/threads-top.txt" 2>&1 || true
   adb -s "$SERIAL" shell "ls -d /proc/$PID/task/* 2>/dev/null | while read -r t; do [ -f \"\$t/comm\" ] && cat \"\$t/comm\" | sed \"s|^|\$(basename \"\$t\") : |\"; done" > "$OUTDIR/threads-names.txt" 2>&1 || true
+  adb -s "$SERIAL" shell "ps -T -p $PID -o PID,TID,PSR,COMM 2>/dev/null || true" > "$OUTDIR/threads-affinity.txt" 2>&1 || true
+  adb -s "$SERIAL" shell "ls -d /proc/$PID/task/* 2>/dev/null | while read -r t; do [ -f \"\$t/status\" ] && grep -H 'Cpus_allowed' \"\$t/status\"; done 2>/dev/null || true" >> "$OUTDIR/threads-affinity.txt" 2>&1 || true
+  adb -s "$SERIAL" shell "run-as $PKG sh -c 'for t in /proc/$PID/task/*; do [ -f \"\$t/status\" ] && grep -H \"Cpus_allowed\" \"\$t/status\"; done' 2>/dev/null || true" >> "$OUTDIR/threads-affinity.txt" 2>&1 || true
 else
   echo "[!] Process $PKG is not currently running (capturing post-exit diagnostics)"
-  touch "$OUTDIR/threads-top.txt"
+  touch "$OUTDIR/threads-top.txt" "$OUTDIR/threads-affinity.txt"
 fi
 
 # 2b. Screencap snapshot (capture rendering state while process is alive)
 echo "[*] Capturing screencap snapshot..."
 adb -s "$SERIAL" exec-out screencap -p > "$OUTDIR/device_screen.png" 2>/dev/null || true
-if [[ -d "/home/abhaybyte/.gemini/antigravity-cli/brain/81b61061-cc69-40f0-8ee0-d16dcbef2009" ]]; then
-  cp "$OUTDIR/device_screen.png" "/home/abhaybyte/.gemini/antigravity-cli/brain/81b61061-cc69-40f0-8ee0-d16dcbef2009/device_screen_fixed.png" 2>/dev/null || true
-fi
+
 
 # 3. Thermal snapshot
 echo "[*] Capturing thermal & power diagnostics..."
@@ -125,6 +126,11 @@ fi
 echo "[*] Delegating rotated logs collection to scripts/get-samba-logs.sh..."
 "$ROOT_DIR/scripts/get-samba-logs.sh" "$SERIAL" "$OUTDIR" > "$OUTDIR/get-samba-logs.out" 2>&1 || true
 
+# Append kernel-applied thread affinity readbacks from logcat into threads-affinity.txt
+if [[ -f "$OUTDIR/logcat-sambas3.txt" ]]; then
+  grep -E "Thread affinity applied:|Failed to set thread affinity" "$OUTDIR/logcat-sambas3.txt" >> "$OUTDIR/threads-affinity.txt" 2>/dev/null || true
+fi
+
 # 8. Extract primary metrics if available via analyze-frame-events.py
 ANALYSIS_JSON="$OUTDIR/frame-analysis.json"
 if [[ -f "$OUTDIR/logcat-sambas3.txt" ]] && grep -q "crosscheck" "$OUTDIR/logcat-sambas3.txt" 2>/dev/null; then
@@ -159,6 +165,7 @@ cat <<EOF > "$OUTDIR/run-manifest.json"
   },
   "artifacts": {
     "threads_top": "threads-top.txt",
+    "threads_affinity": "threads-affinity.txt",
     "thermal": "thermal.txt",
     "battery": "battery.txt",
     "meminfo": "meminfo.txt",

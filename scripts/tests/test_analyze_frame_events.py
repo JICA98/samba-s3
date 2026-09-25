@@ -113,7 +113,7 @@ class TestAnalyzeFrameEvents(unittest.TestCase):
             FrameEvent(timestamp_us=1000000, frame_id=1, source="vk_present"),
             FrameEvent(timestamp_us=1000400, frame_id=1, source="surface"), # Duplicate frame_id & <800us
             FrameEvent(timestamp_us=1050000, frame_id=2, source="surface"), # Valid event
-            FrameEvent(timestamp_us=1050200, frame_id=3, source="vk_present"), # <800us from previous
+            FrameEvent(timestamp_us=1050200, frame_id=2, source="vk_present"), # Duplicate callback for frame 2
             FrameEvent(timestamp_us=1100000, frame_id=4, source="surface"), # Valid event
         ]
 
@@ -121,6 +121,19 @@ class TestAnalyzeFrameEvents(unittest.TestCase):
         self.assertEqual(len(deduped), 3)
         self.assertEqual(dup_cnt, 2)
         self.assertEqual([e.frame_id for e in deduped], [1, 2, 4])
+
+    def test_valid_closely_spaced_frames_not_dropped(self):
+        # WORKER.md CR03: Valid closely spaced frames with distinct IDs (<800us) must NOT be dropped
+        events = [
+            FrameEvent(timestamp_us=1000000, frame_id=1, source="surface"),
+            FrameEvent(timestamp_us=1000500, frame_id=2, source="surface"), # 500us (<800us) but distinct frame_id
+            FrameEvent(timestamp_us=1001200, frame_id=3, source="surface"), # 700us (<800us) but distinct frame_id
+        ]
+        deduped, dropped_cnt, dup_cnt = deduplicate_events(events, min_delta_us=800)
+        self.assertEqual(len(deduped), 3)
+        self.assertEqual(dup_cnt, 0)
+        self.assertEqual([e.frame_id for e in deduped], [1, 2, 3])
+
 
     def test_dropped_samples_and_zero_time(self):
         events = [
@@ -146,7 +159,7 @@ class TestAnalyzeFrameEvents(unittest.TestCase):
         self.assertEqual([e.frame_id for e in filtered], [2, 3, 4])
 
     def test_pauses_and_clock_changes(self):
-        # 3 frames at 100ms interval, then a 3000ms pause (e.g. cutscene transition), then 3 frames at 100ms
+        # When allow_inferred_pauses is explicitly True, large gaps are treated as intentional pauses
         events = [
             FrameEvent(timestamp_us=1000000, frame_id=1),
             FrameEvent(timestamp_us=1100000, frame_id=2),
@@ -155,7 +168,7 @@ class TestAnalyzeFrameEvents(unittest.TestCase):
             FrameEvent(timestamp_us=4300000, frame_id=5),
             FrameEvent(timestamp_us=4400000, frame_id=6),
         ]
-        res = compute_frame_metrics(events, pause_threshold_ms=1000.0)
+        res = compute_frame_metrics(events, pause_threshold_ms=1000.0, allow_inferred_pauses=True)
 
         self.assertEqual(res.pause_events_detected, 1)
         self.assertAlmostEqual(res.total_pause_duration_ms, 3000.0, places=1)
@@ -165,6 +178,68 @@ class TestAnalyzeFrameEvents(unittest.TestCase):
         self.assertAlmostEqual(res.elapsed_active_gameplay_ms, 400.0, places=1)
         # Throughput = 4 intervals / 0.4s = 10.0 FPS
         self.assertAlmostEqual(res.interval_throughput_fps, 10.0, places=1)
+
+    def test_two_second_stall_without_explicit_pause_lowers_throughput_and_stays_in_tails(self):
+        """CR03 / V05: Stalls inside qualification window must NOT be dropped as pauses without explicit pause evidence."""
+        # 10 frames at 16.66ms (~60 FPS), followed by a 2000ms stall, then 10 frames at 16.66ms
+        events = [FrameEvent(timestamp_us=1000000, frame_id=0)]
+        curr_us = 1000000
+        for i in range(1, 10):
+            curr_us += 16666
+            events.append(FrameEvent(timestamp_us=curr_us, frame_id=i))
+
+        # 2-second stall (2,000,000 us)
+        curr_us += 2000000
+        events.append(FrameEvent(timestamp_us=curr_us, frame_id=10))
+
+        for i in range(11, 20):
+            curr_us += 16666
+            events.append(FrameEvent(timestamp_us=curr_us, frame_id=i))
+
+        # Default: allow_inferred_pauses=False
+        res = compute_frame_metrics(events, pause_threshold_ms=1000.0, allow_inferred_pauses=False)
+
+        # 2-second stall must NOT be labeled as a pause
+        self.assertEqual(res.pause_events_detected, 0)
+        self.assertAlmostEqual(res.total_pause_duration_ms, 0.0)
+
+        # 2-second stall must be in stall bins and tail reporting
+        self.assertGreaterEqual(res.stalls_over_250ms, 1)
+        self.assertAlmostEqual(res.frametime_max_ms, 2000.0, places=0)
+        self.assertGreaterEqual(res.frametime_p99_ms, 1000.0)
+
+        # 2-second stall must lower throughput significantly: ~19 intervals over ~2.316s = ~8.2 FPS (NOT 60 FPS!)
+        self.assertLess(res.interval_throughput_fps, 15.0)
+
+    def test_known_60fps_stream(self):
+        """CR03: A known steady 60 FPS presentation stream."""
+        events = []
+        # 61 frames at 16,666 us intervals = 1.0 second
+        for i in range(61):
+            events.append(FrameEvent(timestamp_us=1000000 + i * 16666, frame_id=i))
+        res = compute_frame_metrics(events)
+        self.assertAlmostEqual(res.interval_throughput_fps, 60.0, places=0)
+        self.assertAlmostEqual(res.frametime_mean_ms, 16.666, places=1)
+        self.assertAlmostEqual(res.frametime_p50_ms, 16.666, places=1)
+        self.assertEqual(res.stalls_over_33ms, 0)
+        self.assertTrue(res.full_frame_percentiles_available)
+
+    def test_sampled_telemetry_stream_distinguishes_sampled_percentiles(self):
+        """CR03 / V04: Telemetry sampling snapshots must NOT claim full-frame percentile coverage."""
+        events = []
+        for i in range(46):
+            events.append(
+                FrameEvent(
+                    timestamp_us=1000000 + i * 1000000,
+                    frame_id=i * 15,
+                    rolling_fps=15.0,
+                    instantaneous_ft_ms=66.66,
+                )
+            )
+        res = compute_frame_metrics(events)
+        self.assertFalse(res.full_frame_percentiles_available)
+        self.assertIsNotNone(res.sampled_interval_p95_ms)
+        self.assertAlmostEqual(res.sampled_interval_p95_ms, 66.66, places=1)
 
     def test_separation_rolling_display_from_full_interval(self):
         # Simulation where rolling display metrics report 15 FPS, but actual interval throughput is 10 FPS
@@ -215,6 +290,102 @@ class TestAnalyzeFrameEvents(unittest.TestCase):
         self.assertEqual(res.stalls_over_100ms, 2)  # 2
         self.assertEqual(res.stalls_over_250ms, 0)  # 0
 
+    def test_sequence_loss_detection(self):
+        # Frame sequence skips from 12 to 16 (3 frames lost)
+        events = [
+            FrameEvent(timestamp_us=1_000_000, frame_id=10),
+            FrameEvent(timestamp_us=1_033_333, frame_id=11),
+            FrameEvent(timestamp_us=1_066_666, frame_id=12),
+            FrameEvent(timestamp_us=1_200_000, frame_id=16),
+            FrameEvent(timestamp_us=1_233_333, frame_id=17),
+        ]
+        res = compute_frame_metrics(events)
+        self.assertTrue(res.sequence_loss_detected)
+        self.assertEqual(res.lost_frames_count, 3)
+
+    def test_session_and_surface_recreation_detection(self):
+        events = [
+            FrameEvent(timestamp_us=1_000_000, session_id="sess_1", surface_id="0xaaa"),
+            FrameEvent(timestamp_us=1_033_333, session_id="sess_1", surface_id="0xaaa"),
+            FrameEvent(timestamp_us=1_066_666, session_id="sess_2", surface_id="0xbbb"),
+            FrameEvent(timestamp_us=1_100_000, session_id="sess_2", surface_id="0xbbb"),
+        ]
+        res = compute_frame_metrics(events)
+        self.assertEqual(res.session_resets_detected, 1)
+        self.assertEqual(res.surface_recreations_detected, 1)
+
+    def test_explicit_scene_window_bounds(self):
+        # Events spanning 1.0s to 1.5s, but explicit scene window requested is [0.5s, 2.5s] = 2.0s
+        events = [
+            FrameEvent(timestamp_us=1_000_000),
+            FrameEvent(timestamp_us=1_100_000),
+            FrameEvent(timestamp_us=1_200_000),
+            FrameEvent(timestamp_us=1_300_000),
+            FrameEvent(timestamp_us=1_400_000),
+            FrameEvent(timestamp_us=1_500_000),
+        ]
+        res = compute_frame_metrics(events, start_us=500_000, end_us=2_500_000)
+        self.assertEqual(res.elapsed_wall_time_ms, 2000.0)
+        # Wall throughput: 6 frames / 2.0s = 3.0 FPS
+        self.assertAlmostEqual(res.wall_throughput_fps, 3.0, places=2)
+
+    def test_parse_thermal_log(self):
+        parse_thermal_log = analyze.parse_thermal_log
+        sample_log = """
+        HAL Ready: true
+        Current temperatures from HAL:
+            Temperature{mValue=42.0, mType=0, mName=CPU0, mStatus=0}
+            Temperature{mValue=65.0, mType=8, mName=socd, mStatus=2}
+            Temperature{mValue=52.0, mType=3, mName=skin, mStatus=1}
+        Current cooling devices from HAL:
+            CoolingDevice{mValue=2400000, mType=2, mName=cpufreq-cpu0}
+            CoolingDevice{mValue=900000000, mType=3, mName=devfreq-3d00000.qcom,kgsl-3d0}
+        """
+        throttling_events, levels, c_freqs, g_freqs = parse_thermal_log(sample_log)
+        self.assertEqual(throttling_events, 2)
+        self.assertIn("STATUS_2", levels)
+        self.assertIn("STATUS_1", levels)
+        self.assertIn(2400000.0, c_freqs)
+        self.assertIn(900000000.0, g_freqs)
+
+    def test_empty_bounded_window_returns_error(self):
+        # Window [2000000, 3000000] with events at [1000000, 1050000]
+        events = [
+            FrameEvent(timestamp_us=1000000, frame_id=1),
+            FrameEvent(timestamp_us=1050000, frame_id=2),
+        ]
+        res = compute_frame_metrics(events, start_us=2000000, end_us=3000000)
+        self.assertEqual(res.qualified_frames, 0)
+        self.assertEqual(res.error, "NO_EVENTS_IN_WINDOW")
+
+    def test_sparse_stream_marks_full_frame_percentiles_unavailable(self):
+        # Sparse stream: events 200ms apart (5 FPS) without explicit pauses
+        events = [
+            FrameEvent(timestamp_us=1000000 + i * 200000, frame_id=i)
+            for i in range(10)
+        ]
+        res = compute_frame_metrics(events)
+        self.assertFalse(res.full_frame_percentiles_available)
+        self.assertIsNotNone(res.sampled_interval_p50_ms)
+        self.assertAlmostEqual(res.sampled_interval_p50_ms, 200.0, places=1)
+
+    def test_cross_session_resets_not_merged(self):
+        # Session A: frames 1, 2. Session B: frames 1, 2 with lower timestamps (clock/process reset)
+        events = [
+            FrameEvent(timestamp_us=2000000, frame_id=1, session_id="sess_A"),
+            FrameEvent(timestamp_us=2050000, frame_id=2, session_id="sess_A"),
+            FrameEvent(timestamp_us=1000000, frame_id=1, session_id="sess_B"),
+            FrameEvent(timestamp_us=1050000, frame_id=2, session_id="sess_B"),
+        ]
+        deduped, dropped_cnt, dup_cnt = deduplicate_events(events)
+        # All 4 events must survive because frame 1 and 2 in sess_B are a distinct session
+        self.assertEqual(len(deduped), 4)
+        self.assertEqual(dup_cnt, 0)
+        self.assertEqual([e.session_id for e in deduped], ["sess_A", "sess_A", "sess_B", "sess_B"])
+
 
 if __name__ == "__main__":
     unittest.main()
+
+
+

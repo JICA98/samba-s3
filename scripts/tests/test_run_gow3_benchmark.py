@@ -8,6 +8,7 @@ Validates:
 - Mocked device configuration flow
 """
 
+import json
 import sys
 import unittest
 from pathlib import Path
@@ -191,5 +192,392 @@ class TestCliArgumentParsing(unittest.TestCase):
             self.assertEqual(cm.exception.code, 2)
 
 
+class TestProvenanceValidation(unittest.TestCase):
+    def test_validate_provenance_rejects_missing_apk_hash(self):
+        prov = bench.DeviceProvenance(
+            serial="test_serial",
+            model="Test",
+            soc="SM8650",
+            android_ver="14",
+            package_name=bench.PKG_NAME,
+            version_name="1.0",
+            version_code="1",
+            code_path="/data/app/pkg",
+            base_apk_sha256="",  # Missing hash
+            librpcsx_so_sha256="abc",
+            s3core_identity="141af96fa006f56c25ec335137e92c78b29b17e3",
+        )
+        ok, errors = bench.validate_provenance(prov, expected_apk_sha="123456")
+        self.assertFalse(ok)
+        self.assertTrue(any("base.apk SHA-256 missing" in e for e in errors))
+
+    def test_validate_provenance_rejects_missing_so_hash(self):
+        prov = bench.DeviceProvenance(
+            serial="test_serial",
+            model="Test",
+            soc="SM8650",
+            android_ver="14",
+            package_name=bench.PKG_NAME,
+            version_name="1.0",
+            version_code="1",
+            code_path="/data/app/pkg",
+            base_apk_sha256="123456",
+            librpcsx_so_sha256="",  # Missing hash
+            s3core_identity="141af96fa006f56c25ec335137e92c78b29b17e3",
+        )
+        ok, errors = bench.validate_provenance(prov, expected_so_sha="abcdef")
+        self.assertFalse(ok)
+        self.assertTrue(any("librpcsx-android.so SHA-256 missing" in e for e in errors))
+
+
+class TestBenchmarkRunnerExecutionFixtures(unittest.TestCase):
+    def setUp(self):
+        import tempfile
+        self.temp_dir = tempfile.TemporaryDirectory()
+        self.outdir = Path(self.temp_dir.name)
+
+    def tearDown(self):
+        self.temp_dir.cleanup()
+
+    def _base_provenance(self):
+        return bench.DeviceProvenance(
+            serial="test_dev",
+            model="TestModel",
+            soc="SM8650",
+            android_ver="14",
+            package_name=bench.PKG_NAME,
+            version_name="1.0",
+            version_code="100",
+            code_path="/data/app/pkg",
+            base_apk_sha256="apk_hash",
+            librpcsx_so_sha256="so_hash",
+            s3core_identity=bench.EXPECTED_CORE_HASH,
+        )
+
+    @patch("time.sleep", return_value=None)
+    @patch.object(bench, "fetch_device_provenance")
+    @patch.object(bench, "run_cmd")
+    @patch.object(bench, "adb_shell")
+    @patch.object(bench, "get_process_identity")
+    @patch("subprocess.run")
+    def test_crash_then_cleanup_fixture(self, mock_subproc, mock_get_id, mock_adb, mock_run_cmd, mock_prov, mock_sleep):
+        """
+        WORKER.md Acceptance Gate:
+        Simulate qualification crash followed by successful debug-stop-game.sh cleanup.
+        Runner MUST return non-zero exit code (exit 4), manifest verdict MUST be FAIL_CRASH,
+        and stop_reason MUST NOT be overridden by cleanup success.
+        """
+        mock_prov.return_value = self._base_provenance()
+        mock_adb.return_value = MagicMock(returncode=0, stdout="test")
+        mock_run_cmd.return_value = MagicMock(returncode=0, stdout="device\n")
+
+        # Screencap succeeds and creates device_screen.png
+        def fake_screencap(*args, **kwargs):
+            (self.outdir / "device_screen.png").write_bytes(b"PNGDATA")
+            return MagicMock(returncode=0, stdout=b"PNGDATA")
+        mock_subproc.side_effect = fake_screencap
+
+        # Process dies during qualification loop
+        id_launch = bench.ProcessIdentity(pid="4321", start_time="999", boot_id="boot_a")
+        mock_get_id.side_effect = [
+            id_launch,  # Initial post-launch check
+            id_launch,  # Pre-gameplay check
+            None,       # Qualification loop crash!
+        ]
+
+        # Dummy log and analysis output
+        (self.outdir / "logcat-process.log").write_text("dummy log")
+        (self.outdir / "frame-analysis.json").write_text('{"interval_throughput_fps": 0.0}')
+
+        test_args = [
+            "run-gow3-benchmark.py",
+            "--serial", "test_dev",
+            "--outdir", str(self.outdir),
+            "--no-strict-hashes",
+            "--duration", "1",
+        ]
+        with patch.object(sys, "argv", test_args):
+            exit_code = bench.main()
+
+        # 1. Runner must return nonzero exit code 4 for crash
+        self.assertEqual(exit_code, 4)
+
+        # 2. Manifest must record FAIL_CRASH
+        manifest_path = self.outdir / "run-manifest.json"
+        self.assertTrue(manifest_path.exists())
+        manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
+        self.assertEqual(manifest["first_failure"], "FAIL_CRASH")
+        self.assertEqual(manifest["verdict"], "FAIL_CRASH")
+        self.assertEqual(manifest["stop_reason"], "FAIL_CRASH")
+
+        # 3. Cleanup success must be recorded without overriding failure
+        self.assertTrue(manifest["cleanup"]["clean_stop"])
+        self.assertEqual(manifest["cleanup"]["result"], "SUCCESS")
+
+    @patch("time.sleep", return_value=None)
+    @patch.object(bench, "fetch_device_provenance")
+    @patch.object(bench, "run_cmd")
+    @patch.object(bench, "adb_shell")
+    @patch.object(bench, "get_process_identity")
+    @patch("subprocess.run")
+    def test_pid_replacement_fixture(self, mock_subproc, mock_get_id, mock_adb, mock_run_cmd, mock_prov, mock_sleep):
+        """
+        Simulate original process death followed by a replacement process taking over.
+        Runner MUST catch PID change and fail with FAIL_REPLACEMENT_PID.
+        """
+        mock_prov.return_value = self._base_provenance()
+        mock_adb.return_value = MagicMock(returncode=0, stdout="test")
+        mock_run_cmd.return_value = MagicMock(returncode=0, stdout="device\n")
+
+        (self.outdir / "device_screen.png").write_bytes(b"PNGDATA")
+        mock_subproc.return_value = MagicMock(returncode=0, stdout=b"PNGDATA")
+
+        id_launch = bench.ProcessIdentity(pid="1000", start_time="100", boot_id="boot_a")
+        id_replaced = bench.ProcessIdentity(pid="2000", start_time="200", boot_id="boot_a")
+        mock_get_id.side_effect = [
+            id_launch,    # Initial post-launch check
+            id_launch,    # Pre-gameplay check
+            id_replaced,  # Process replaced during qualification loop!
+        ]
+
+        (self.outdir / "logcat-process.log").write_text("dummy log")
+        (self.outdir / "frame-analysis.json").write_text('{"interval_throughput_fps": 0.0}')
+
+        test_args = [
+            "run-gow3-benchmark.py",
+            "--serial", "test_dev",
+            "--outdir", str(self.outdir),
+            "--no-strict-hashes",
+            "--duration", "1",
+        ]
+        with patch.object(sys, "argv", test_args):
+            exit_code = bench.main()
+
+        self.assertEqual(exit_code, 4)
+        manifest_path = self.outdir / "run-manifest.json"
+        manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
+        self.assertEqual(manifest["first_failure"], "FAIL_REPLACEMENT_PID")
+        self.assertEqual(manifest["verdict"], "FAIL_REPLACEMENT_PID")
+
+    @patch("time.sleep", return_value=None)
+    @patch.object(bench, "fetch_device_provenance")
+    @patch.object(bench, "run_cmd")
+    @patch.object(bench, "adb_shell")
+    @patch.object(bench, "get_process_identity")
+    @patch("subprocess.run")
+    def test_missing_evidence_fixture(self, mock_subproc, mock_get_id, mock_adb, mock_run_cmd, mock_prov, mock_sleep):
+        """
+        Missing evidence (e.g. screencap fails) must result in INCONCLUSIVE_EVIDENCE,
+        never a false PASS.
+        """
+        mock_prov.return_value = self._base_provenance()
+        mock_adb.return_value = MagicMock(returncode=0, stdout="test")
+        mock_run_cmd.return_value = MagicMock(returncode=0, stdout="device\n")
+
+        # Screencap fails
+        mock_subproc.return_value = MagicMock(returncode=1, stdout=b"")
+
+        id_launch = bench.ProcessIdentity(pid="1000", start_time="100", boot_id="boot_a")
+        mock_get_id.return_value = id_launch
+
+        (self.outdir / "logcat-process.log").write_text("dummy log")
+        (self.outdir / "frame-analysis.json").write_text('{"interval_throughput_fps": 60.0}')
+
+        test_args = [
+            "run-gow3-benchmark.py",
+            "--serial", "test_dev",
+            "--outdir", str(self.outdir),
+            "--no-strict-hashes",
+            "--duration", "1",
+        ]
+        with patch.object(sys, "argv", test_args):
+            exit_code = bench.main()
+
+        # Nonzero exit code 2 for inconclusive evidence
+        self.assertEqual(exit_code, 2)
+        manifest_path = self.outdir / "run-manifest.json"
+        manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
+        self.assertEqual(manifest["first_failure"], "INCONCLUSIVE_EVIDENCE")
+        self.assertEqual(manifest["verdict"], "INCONCLUSIVE_EVIDENCE")
+
+    @patch("time.sleep", return_value=None)
+    @patch.object(bench, "fetch_device_provenance")
+    @patch.object(bench, "run_cmd")
+    @patch.object(bench, "adb_shell")
+    @patch.object(bench, "get_process_identity")
+    @patch("subprocess.run")
+    def test_clean_run_pass_fixture(self, mock_subproc, mock_get_id, mock_adb, mock_run_cmd, mock_prov, mock_sleep):
+        """
+        Complete clean run with intact process identity, valid evidence, and clean stop
+        must yield PASS with exit code 0.
+        """
+        mock_prov.return_value = self._base_provenance()
+        mock_adb.return_value = MagicMock(returncode=0, stdout="test")
+        mock_run_cmd.return_value = MagicMock(returncode=0, stdout="device\n")
+
+        def fake_screencap(*args, **kwargs):
+            (self.outdir / "device_screen.png").write_bytes(b"PNGDATA")
+            return MagicMock(returncode=0, stdout=b"PNGDATA")
+        mock_subproc.side_effect = fake_screencap
+
+        id_launch = bench.ProcessIdentity(pid="1000", start_time="100", boot_id="boot_a")
+        mock_get_id.return_value = id_launch
+
+        (self.outdir / "logcat-process.log").write_text("dummy log")
+        (self.outdir / "frame-analysis.json").write_text('{"interval_throughput_fps": 60.0, "qualified_frames": 60}')
+
+        test_args = [
+            "run-gow3-benchmark.py",
+            "--serial", "test_dev",
+            "--outdir", str(self.outdir),
+            "--no-strict-hashes",
+            "--duration", "1",
+        ]
+        with patch.object(sys, "argv", test_args), patch.object(bench, "ROOT_DIR", self.outdir):
+            exit_code = bench.main()
+
+        self.assertEqual(exit_code, 0)
+        manifest_path = self.outdir / "run-manifest.json"
+        manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
+        self.assertIsNone(manifest["first_failure"])
+        self.assertEqual(manifest["verdict"], "PASS")
+        self.assertEqual(manifest["cleanup"]["result"], "SUCCESS")
+        self.assertEqual(manifest["launch_identity"]["pid"], "1000")
+
+    @patch("time.sleep")
+    @patch.object(bench, "fetch_device_provenance")
+    @patch.object(bench, "run_cmd")
+    @patch.object(bench, "adb_shell")
+    @patch.object(bench, "get_process_identity")
+    def test_early_launch_failure_writes_manifest(self, mock_get_id, mock_adb, mock_run_cmd, mock_prov, mock_sleep):
+        """CR01: Launch command failure must write manifest with FAIL_LAUNCH and return exit 3."""
+        mock_prov.return_value = self._base_provenance()
+        mock_adb.return_value = MagicMock(returncode=0, stdout="test")
+
+        def fake_run(cmd, timeout=None):
+            if any("debug-launch-game.sh" in str(c) for c in cmd):
+                return MagicMock(returncode=1, stderr="Activity failed to start")
+            return MagicMock(returncode=0, stdout="device\n")
+
+        mock_run_cmd.side_effect = fake_run
+
+        test_args = [
+            "run-gow3-benchmark.py",
+            "--serial", "test_dev",
+            "--outdir", str(self.outdir),
+            "--no-strict-hashes",
+        ]
+        with patch.object(sys, "argv", test_args), patch.object(bench, "ROOT_DIR", self.outdir):
+            exit_code = bench.main()
+
+        self.assertEqual(exit_code, 3)
+        manifest_path = self.outdir / "run-manifest.json"
+        self.assertTrue(manifest_path.exists())
+        manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
+        self.assertEqual(manifest["first_failure"], "FAIL_LAUNCH")
+        self.assertEqual(manifest["verdict"], "FAIL_LAUNCH")
+        self.assertIsNone(manifest["launch_identity"])
+
+    @patch("time.sleep")
+    @patch.object(bench, "fetch_device_provenance")
+    @patch.object(bench, "run_cmd")
+    @patch.object(bench, "adb_shell")
+    @patch.object(bench, "get_process_identity")
+    @patch("subprocess.run")
+    def test_zero_qualified_frames_fails_guest_progress(self, mock_subproc, mock_get_id, mock_adb, mock_run_cmd, mock_prov, mock_sleep):
+        """CR01 / CR03: Zero qualified frames during gameplay window must latch FAIL_GUEST_PROGRESS and exit 1."""
+        mock_prov.return_value = self._base_provenance()
+        mock_adb.return_value = MagicMock(returncode=0, stdout="test")
+        mock_run_cmd.return_value = MagicMock(returncode=0, stdout="device\n")
+
+        def fake_screencap(*args, **kwargs):
+            (self.outdir / "device_screen.png").write_bytes(b"PNGDATA")
+            return MagicMock(returncode=0, stdout=b"PNGDATA")
+        mock_subproc.side_effect = fake_screencap
+
+        mock_get_id.return_value = bench.ProcessIdentity(pid="1000", start_time="100", boot_id="boot_a")
+
+        (self.outdir / "logcat-process.log").write_text("dummy log")
+        # Qualified frames == 0
+        (self.outdir / "frame-analysis.json").write_text('{"interval_throughput_fps": 0.0, "qualified_frames": 0}')
+
+        test_args = [
+            "run-gow3-benchmark.py",
+            "--serial", "test_dev",
+            "--outdir", str(self.outdir),
+            "--no-strict-hashes",
+            "--duration", "1",
+        ]
+        with patch.object(sys, "argv", test_args), patch.object(bench, "ROOT_DIR", self.outdir):
+            exit_code = bench.main()
+
+        self.assertEqual(exit_code, 1)
+        manifest = json.loads((self.outdir / "run-manifest.json").read_text(encoding="utf-8"))
+        self.assertEqual(manifest["first_failure"], "FAIL_GUEST_PROGRESS")
+        self.assertEqual(manifest["verdict"], "FAIL_GUEST_PROGRESS")
+
+    @patch("time.sleep")
+    @patch.object(bench, "fetch_device_provenance")
+    @patch.object(bench, "run_cmd")
+    def test_provenance_manifest_rejection(self, mock_run_cmd, mock_prov, mock_sleep):
+        """CR00 / CR01: Strict provenance rejection against manifest returns exit 3 and writes manifest."""
+        mock_prov.return_value = self._base_provenance()
+        mock_run_cmd.return_value = MagicMock(returncode=0, stdout="device\n")
+
+        prov_manifest = self.outdir / "test-prov-manifest.json"
+        prov_manifest.write_text(json.dumps({
+            "package": {"base_apk_sha256": "mismatch_sha", "librpcsx_so_sha256": "mismatch_so"},
+            "git": {"rpcsx_submodule_head": "mismatch_core"}
+        }), encoding="utf-8")
+
+        test_args = [
+            "run-gow3-benchmark.py",
+            "--serial", "test_dev",
+            "--outdir", str(self.outdir),
+            "--provenance-manifest", str(prov_manifest),
+        ]
+        with patch.object(sys, "argv", test_args), patch.object(bench, "ROOT_DIR", self.outdir):
+            exit_code = bench.main()
+
+        self.assertEqual(exit_code, 3)
+        manifest = json.loads((self.outdir / "run-manifest.json").read_text(encoding="utf-8"))
+        self.assertEqual(manifest["first_failure"], "FAIL_PROVENANCE")
+        self.assertEqual(manifest["verdict"], "FAIL_PROVENANCE")
+
+    @patch("time.sleep")
+    @patch.object(bench, "fetch_device_provenance")
+    @patch.object(bench, "run_cmd")
+    @patch.object(bench, "adb_shell")
+    @patch.object(bench, "get_process_identity")
+    def test_prior_logcat_crash_buffer_preserved(self, mock_get_id, mock_adb, mock_run_cmd, mock_prov, mock_sleep):
+        """CR01: Prior logcat crash buffer must be preserved to file before clearing."""
+        mock_prov.return_value = self._base_provenance()
+        mock_run_cmd.return_value = MagicMock(returncode=0, stdout="device\n")
+
+        def fake_adb(serial, cmd):
+            if cmd == "logcat -d":
+                return MagicMock(returncode=0, stdout="PRIOR_CRASH_LOGCAT_LINES")
+            return MagicMock(returncode=0, stdout="test")
+        mock_adb.side_effect = fake_adb
+
+        mock_get_id.return_value = None  # Die at launch
+
+        test_args = [
+            "run-gow3-benchmark.py",
+            "--serial", "test_dev",
+            "--outdir", str(self.outdir),
+            "--no-strict-hashes",
+        ]
+        with patch.object(sys, "argv", test_args), patch.object(bench, "ROOT_DIR", self.outdir):
+            bench.main()
+
+        prior_log = self.outdir / "logcat-prior-crash-buffer.log"
+        self.assertTrue(prior_log.exists())
+        self.assertIn("PRIOR_CRASH_LOGCAT_LINES", prior_log.read_text(encoding="utf-8"))
+
+
 if __name__ == "__main__":
     unittest.main()
+
+
+

@@ -31,6 +31,7 @@ struct cpu_topology_info
 	u64 allowed_mask = 0;
 	u64 performance_mask = 0;
 	u64 efficiency_mask = 0;
+	u64 prime_mask = 0;
 	bool is_heterogeneous = false;
 	bool discovery_successful = false;
 };
@@ -85,7 +86,50 @@ u64 calculate_affinity_mask(
 		return allowed_mask;
 	}
 
-	// Affinity explicitly requested (RPCS3 Scheduler or Alternative Scheduler mode)
+	// Alternative Scheduler Mode: Capacity-aware policy (WORKER.md:198)
+	// Prefers/pins the classified RSX thread to the discovered prime-core mask (subject to cpuset and syscall permissions),
+	// while pinning SPU and PPU to the remaining performance cores. Note: other processes/threads (system, driver, UI)
+	// may still share this core; this is not an exclusive kernel reservation.
+	if (sched_mode == thread_scheduler_mode::alt)
+	{
+		if (topo.is_heterogeneous && topo.performance_mask != 0)
+		{
+			const u64 perf_mask = topo.performance_mask & allowed_mask;
+			const u64 prime_mask = topo.prime_mask & allowed_mask;
+			const u64 big_mask = perf_mask & ~prime_mask;
+
+			if (group == thread_class::rsx)
+			{
+				if (prime_mask != 0)
+				{
+					return prime_mask;
+				}
+				if (perf_mask != 0)
+				{
+					return perf_mask;
+				}
+			}
+			else if (group == thread_class::spu || group == thread_class::ppu)
+			{
+				if (big_mask != 0)
+				{
+					return big_mask;
+				}
+				if (perf_mask != 0)
+				{
+					return perf_mask;
+				}
+			}
+			else if (group == thread_class::general)
+			{
+				return allowed_mask;
+			}
+		}
+
+		return allowed_mask;
+	}
+
+	// Affinity explicitly requested (RPCS3 Scheduler mode)
 	if (topo.is_heterogeneous && topo.performance_mask != 0)
 	{
 		if (group == thread_class::spu || group == thread_class::ppu || group == thread_class::rsx)
@@ -142,6 +186,7 @@ cpu_topology_info parse_cpu_topology(
 			const u64 threshold = min_cap + (max_cap - min_cap) / 2;
 			u64 perf = 0;
 			u64 eff = 0;
+			u64 prime = 0;
 
 			for (const auto& [cpu, cap] : capacities)
 			{
@@ -150,6 +195,10 @@ cpu_topology_info parse_cpu_topology(
 					if (cap >= threshold)
 					{
 						perf |= (1ull << cpu);
+						if (cap == max_cap)
+						{
+							prime |= (1ull << cpu);
+						}
 					}
 					else
 					{
@@ -163,6 +212,14 @@ cpu_topology_info parse_cpu_topology(
 				perf |= (allowed_mask & ~(perf | eff));
 				topo.performance_mask = perf & allowed_mask;
 				topo.efficiency_mask = eff & allowed_mask;
+				if (prime != 0 && prime != topo.performance_mask)
+				{
+					topo.prime_mask = prime & allowed_mask;
+				}
+				else
+				{
+					topo.prime_mask = 0;
+				}
 				topo.is_heterogeneous = true;
 				topo.discovery_successful = true;
 				return topo;
@@ -191,6 +248,7 @@ cpu_topology_info parse_cpu_topology(
 			const u64 threshold = min_f + (max_f - min_f) / 2;
 			u64 perf = 0;
 			u64 eff = 0;
+			u64 prime = 0;
 
 			for (const auto& [cpu, freq] : max_freqs)
 			{
@@ -199,6 +257,10 @@ cpu_topology_info parse_cpu_topology(
 					if (freq >= threshold)
 					{
 						perf |= (1ull << cpu);
+						if (freq == max_f)
+						{
+							prime |= (1ull << cpu);
+						}
 					}
 					else
 					{
@@ -212,6 +274,14 @@ cpu_topology_info parse_cpu_topology(
 				perf |= (allowed_mask & ~(perf | eff));
 				topo.performance_mask = perf & allowed_mask;
 				topo.efficiency_mask = eff & allowed_mask;
+				if (prime != 0 && prime != topo.performance_mask)
+				{
+					topo.prime_mask = prime & allowed_mask;
+				}
+				else
+				{
+					topo.prime_mask = 0;
+				}
 				topo.is_heterogeneous = true;
 				topo.discovery_successful = true;
 				return topo;
@@ -223,6 +293,7 @@ cpu_topology_info parse_cpu_topology(
 	{
 		u64 perf = 0;
 		u64 eff = 0;
+		u64 prime = 0;
 
 		for (const auto& [cpu, midr] : midrs)
 		{
@@ -237,6 +308,10 @@ cpu_topology_info parse_cpu_topology(
 				else
 				{
 					perf |= (1ull << cpu);
+					if (part == 0xd44 || part == 0xd48 || part == 0xd4e || part == 0xd82 || part == 0xd85)
+					{
+						prime |= (1ull << cpu);
+					}
 				}
 			}
 		}
@@ -246,6 +321,14 @@ cpu_topology_info parse_cpu_topology(
 			perf |= (allowed_mask & ~(perf | eff));
 			topo.performance_mask = perf & allowed_mask;
 			topo.efficiency_mask = eff & allowed_mask;
+			if (prime != 0 && prime != topo.performance_mask)
+			{
+				topo.prime_mask = prime & allowed_mask;
+			}
+			else
+			{
+				topo.prime_mask = 0;
+			}
 			topo.is_heterogeneous = true;
 			topo.discovery_successful = true;
 			return topo;
@@ -255,6 +338,7 @@ cpu_topology_info parse_cpu_topology(
 	// 4. Homogeneous or unclassifiable layout: fall back to full allowed mask
 	topo.performance_mask = allowed_mask;
 	topo.efficiency_mask = 0;
+	topo.prime_mask = 0;
 	topo.is_heterogeneous = false;
 	topo.discovery_successful = (!capacities.empty() || !max_freqs.empty() || !midrs.empty());
 	return topo;
@@ -304,8 +388,9 @@ int main()
 		assert(topo.is_heterogeneous);
 		assert(topo.performance_mask == 0xFC); // Cores 2-7
 		assert(topo.efficiency_mask == 0x03);
-		printf("Test 3 (Snapdragon 8 Gen 3): PASS (perf=0x%llx, eff=0x%llx)\n",
-			topo.performance_mask, topo.efficiency_mask);
+		assert(topo.prime_mask == 0x80); // Core 7
+		printf("Test 3 (Snapdragon 8 Gen 3): PASS (perf=0x%llx, eff=0x%llx, prime=0x%llx)\n",
+			topo.performance_mask, topo.efficiency_mask, topo.prime_mask);
 	}
 
 	// Test 3b: Snapdragon 8 Gen 3 Cluster Frequencies (2x A520, 2x A720 lower, 3x A720 higher, 1x X4 prime)
@@ -320,8 +405,9 @@ int main()
 		assert(topo.is_heterogeneous);
 		assert(topo.performance_mask == 0xFC);
 		assert(topo.efficiency_mask == 0x03);
-		printf("Test 3b (SD8Gen3 Frequencies): PASS (perf=0x%llx, eff=0x%llx)\n",
-			topo.performance_mask, topo.efficiency_mask);
+		assert(topo.prime_mask == 0x80);
+		printf("Test 3b (SD8Gen3 Frequencies): PASS (perf=0x%llx, eff=0x%llx, prime=0x%llx)\n",
+			topo.performance_mask, topo.efficiency_mask, topo.prime_mask);
 	}
 
 	// Test 3c: Snapdragon 8 Gen 3 MIDRs (0xd80 A520, 0xd81 A720, 0xd82 X4)
@@ -335,16 +421,18 @@ int main()
 		assert(topo.is_heterogeneous);
 		assert(topo.performance_mask == 0xFC);
 		assert(topo.efficiency_mask == 0x03);
-		printf("Test 3c (SD8Gen3 MIDRs): PASS (perf=0x%llx, eff=0x%llx)\n",
-			topo.performance_mask, topo.efficiency_mask);
+		assert(topo.prime_mask == 0x80);
+		printf("Test 3c (SD8Gen3 MIDRs): PASS (perf=0x%llx, eff=0x%llx, prime=0x%llx)\n",
+			topo.performance_mask, topo.efficiency_mask, topo.prime_mask);
 	}
 
-	// Test 3d: Snapdragon 8 Gen 3 Scheduler Modes (OS mode vs RPCS3 mode vs offline core)
+	// Test 3d: Snapdragon 8 Gen 3 Scheduler Modes (OS mode vs RPCS3 mode vs Alternative mode vs offline core)
 	{
 		cpu_topology_info topo;
 		topo.allowed_mask = 0xFF;
 		topo.performance_mask = 0xFC;
 		topo.efficiency_mask = 0x03;
+		topo.prime_mask = 0x80;
 		topo.is_heterogeneous = true;
 
 		// OS mode: all thread groups receive unconstrained 0xFF
@@ -359,7 +447,17 @@ int main()
 		assert(calculate_affinity_mask(thread_class::rsx, thread_scheduler_mode::old, topo, 0xFF) == 0xFC);
 		assert(calculate_affinity_mask(thread_class::general, thread_scheduler_mode::old, topo, 0xFF) == 0xFF);
 
-		// Offline core 7: allowed_mask = 0x7F -> SPU/PPU/RSX pinned to 0x7C
+		// Alternative mode: RSX pinned exclusively to prime core (0x80), SPU/PPU pinned to big cores (0x7C)
+		assert(calculate_affinity_mask(thread_class::rsx, thread_scheduler_mode::alt, topo, 0xFF) == 0x80);
+		assert(calculate_affinity_mask(thread_class::spu, thread_scheduler_mode::alt, topo, 0xFF) == 0x7C);
+		assert(calculate_affinity_mask(thread_class::ppu, thread_scheduler_mode::alt, topo, 0xFF) == 0x7C);
+		assert(calculate_affinity_mask(thread_class::general, thread_scheduler_mode::alt, topo, 0xFF) == 0xFF);
+
+		// Offline prime core 7: allowed_mask = 0x7F -> prime_mask becomes 0, RSX & SPU/PPU fall back to big cores (0x7C)
+		assert(calculate_affinity_mask(thread_class::rsx, thread_scheduler_mode::alt, topo, 0x7F) == 0x7C);
+		assert(calculate_affinity_mask(thread_class::spu, thread_scheduler_mode::alt, topo, 0x7F) == 0x7C);
+
+		// Offline core 7 in RPCS3 mode: allowed_mask = 0x7F -> SPU/PPU/RSX pinned to 0x7C
 		assert(calculate_affinity_mask(thread_class::spu, thread_scheduler_mode::old, topo, 0x7F) == 0x7C);
 
 		// Restricted to little cores 0-1: allowed_mask = 0x03 -> fallback to 0x03
@@ -696,6 +794,89 @@ int main()
 		printf("Test 21 (Non-empty subset guarantee): PASS\n");
 	}
 
-	printf("\nALL 24 CPU TOPOLOGY AND SCHEDULER TESTS PASSED!\n");
+	// Test 22: Dual-prime tie handling (e.g. 2 cores tying at max_cap / max_freq)
+	{
+		std::vector<std::pair<u32, u64>> caps = {
+			{0, 240}, {1, 240},
+			{2, 780}, {3, 780}, {4, 780}, {5, 780},
+			{6, 1024}, {7, 1024} // Dual prime cores tying at 1024
+		};
+		auto topo = parse_cpu_topology(0xFF, caps, {}, {});
+		assert(topo.is_heterogeneous);
+		assert(topo.performance_mask == 0xFC);
+		assert(topo.efficiency_mask == 0x03);
+		// Both cores 6 and 7 are in prime_mask
+		assert(topo.prime_mask == ((1ull << 6) | (1ull << 7))); // 0xC0
+
+		// Alternative mode: RSX gets dual-prime mask (0xC0), SPU/PPU get remaining perf cores (0x3C)
+		assert(calculate_affinity_mask(thread_class::rsx, thread_scheduler_mode::alt, topo, 0xFF) == 0xC0);
+		assert(calculate_affinity_mask(thread_class::spu, thread_scheduler_mode::alt, topo, 0xFF) == 0x3C);
+		assert(calculate_affinity_mask(thread_class::ppu, thread_scheduler_mode::alt, topo, 0xFF) == 0x3C);
+		assert(calculate_affinity_mask(thread_class::general, thread_scheduler_mode::alt, topo, 0xFF) == 0xFF);
+		printf("Test 22 (Dual-prime tie handling): PASS (prime=0x%llx, big=0x%llx)\n",
+			topo.prime_mask, (topo.performance_mask & ~topo.prime_mask));
+	}
+
+	// Test 23: Alternative mode with prime_mask == 0 (Dimensity 8300 / homogeneous perf cluster fallback)
+	{
+		std::vector<std::pair<u32, u64>> caps = {
+			{0, 350}, {1, 350}, {2, 350}, {3, 350},
+			{4, 1024}, {5, 1024}, {6, 1024}, {7, 1024} // 4 identical big cores, no distinct prime
+		};
+		auto topo = parse_cpu_topology(0xFF, caps, {}, {});
+		assert(topo.is_heterogeneous);
+		assert(topo.performance_mask == 0xF0);
+		assert(topo.prime_mask == 0); // No distinct prime tier
+
+		// Alternative mode falls back cleanly to performance_mask (0xF0) for all emulation threads
+		assert(calculate_affinity_mask(thread_class::rsx, thread_scheduler_mode::alt, topo, 0xFF) == 0xF0);
+		assert(calculate_affinity_mask(thread_class::spu, thread_scheduler_mode::alt, topo, 0xFF) == 0xF0);
+		assert(calculate_affinity_mask(thread_class::ppu, thread_scheduler_mode::alt, topo, 0xFF) == 0xF0);
+		assert(calculate_affinity_mask(thread_class::general, thread_scheduler_mode::alt, topo, 0xFF) == 0xFF);
+		printf("Test 23 (Alternative mode prime_mask=0 fallback to perf_mask): PASS\n");
+	}
+
+	// Test 24: Dynamic allowed_mask changes under Alternative Mode (offline prime core and little-only cpuset)
+	{
+		cpu_topology_info topo;
+		topo.allowed_mask = 0xFF;
+		topo.performance_mask = 0xFC;
+		topo.efficiency_mask = 0x03;
+		topo.prime_mask = 0x80;
+		topo.is_heterogeneous = true;
+
+		// Case A: Core 7 offline/disallowed (allowed_mask = 0x7F) -> prime_mask becomes 0, RSX and SPU fall back to big cores (0x7C)
+		assert(calculate_affinity_mask(thread_class::rsx, thread_scheduler_mode::alt, topo, 0x7F) == 0x7C);
+		assert(calculate_affinity_mask(thread_class::spu, thread_scheduler_mode::alt, topo, 0x7F) == 0x7C);
+
+		// Case B: Cpuset restricted to little cores 0-1 (allowed_mask = 0x03) -> clean fallback to 0x03
+		assert(calculate_affinity_mask(thread_class::rsx, thread_scheduler_mode::alt, topo, 0x03) == 0x03);
+		assert(calculate_affinity_mask(thread_class::spu, thread_scheduler_mode::alt, topo, 0x03) == 0x03);
+		printf("Test 24 (Dynamic allowed_mask changes under Alternative Mode): PASS\n");
+	}
+
+	// Test 25: Custom affinity configuration overrides Alternative Mode completely
+	{
+		cpu_topology_info topo;
+		topo.allowed_mask = 0xFF;
+		topo.performance_mask = 0xFC;
+		topo.efficiency_mask = 0x03;
+		topo.prime_mask = 0x80;
+		topo.is_heterogeneous = true;
+
+		// User explicitly assigns cores 0-1 to PPU, cores 2-3 to RSX, cores 4-7 to SPU
+		std::vector<thread_class> custom = {
+			thread_class::ppu, thread_class::ppu,
+			thread_class::rsx, thread_class::rsx,
+			thread_class::spu, thread_class::spu, thread_class::spu, thread_class::spu
+		};
+
+		assert(calculate_affinity_mask(thread_class::rsx, thread_scheduler_mode::alt, topo, 0xFF, custom) == 0x0C);
+		assert(calculate_affinity_mask(thread_class::spu, thread_scheduler_mode::alt, topo, 0xFF, custom) == 0xF0);
+		assert(calculate_affinity_mask(thread_class::ppu, thread_scheduler_mode::alt, topo, 0xFF, custom) == 0x03);
+		printf("Test 25 (Custom affinity override over Alternative Mode): PASS\n");
+	}
+
+	printf("\nALL 25 CPU TOPOLOGY AND SCHEDULER TESTS PASSED!\n");
 	return 0;
 }

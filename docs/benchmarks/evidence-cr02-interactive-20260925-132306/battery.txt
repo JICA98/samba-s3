@@ -1,0 +1,24 @@
+Current Battery Service state:
+  AC powered: false
+  USB powered: true
+  Wireless powered: false
+  Dock powered: false
+  Max charging current: 1515
+ Time when the latest updated value of the Max charging current was sent via battery changed broadcast: +11d1h3m35s735ms
+  Max charging voltage: 4165000
+  Charge counter: 4155000
+  status: 4
+  health: 2
+  present: true
+  level: 79
+  scale: 100
+  voltage: 4165
+ Time when the latest updated value of the voltage was sent via battery changed broadcast: +11d1h3m35s735ms
+ The last voltage value sent via the battery changed broadcast: 4165
+  temperature: 312
+  technology: Li-ion
+  Charging state: 0
+  Charging policy: 0
+  Capacity level: 3
+  Maximum capacity: 6000000
+  Design capacity: 6000000

@@ -1,6 +1,14 @@
-# SambaS3 — Play Store Release Notes (v2026.09.17+, code 20260917)
+# SambaS3 — Play Store Release Notes (v2026.09.25, code 20260925)
 
 ## What's New (short, for Play Store)
+
+- Performance: optimized ARM JIT compiler backend, SPU AArch64 SIMD lowering, deduplicated compilation
+- Graphics: Vulkan scratch memory reuse, semantic pipeline caching, and descriptor set batching
+- Fast Mode: per-game curated engine optimizations and granular profile management
+- Stability: enhanced exit classification, crash isolation, and memory lifecycle teardown
+- Diagnostics: buffered performance logging, typed GPU metrics parser, and decoupled resource accounting
+
+# SambaS3 — Play Store Release Notes (v2026.09.17, code 20260917)
 
 - New animated boot splash with the SambaS3 logo and home backdrop
 - Advanced settings: gamepad focus stays on the highlighted control with a visible highlight; settings rail text alignment + better spacing
