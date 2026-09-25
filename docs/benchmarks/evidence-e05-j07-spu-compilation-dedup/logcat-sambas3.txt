@@ -1,0 +1,300 @@
+09-25 08:57:55.404 11165 11744 D RPCS3   : SPU block is a loop at [0x10430 -> 0x103b0]
+09-25 08:57:55.404 11165 11744 D RPCS3   : Building function 0x10368... (size 57, __spu-0x10368-FRbLGdGmvkgE7UqGRsqUUakvc7y1-s3cg1-cortex-a34-neon)
+09-25 08:57:55.406 11165 11745 D RPCS3   : Building function 0xf928... (size 32, __spu-0x0f928-fudyY0y19o8sVpcbYLGgwfjFgsuA-s3cg1-cortex-a34-neon)
+09-25 08:57:55.410 11165 11747 D RPCS3   : Building function 0xed44... (size 25, __spu-0x0ed44-XqXwa2VeZrSnpv6E9TpfEC44qY7n-s3cg1-cortex-a34-neon)
+09-25 08:57:55.423 11165 11745 D RPCS3   : SPU block is a loop at [0x057dc -> 0x05748]
+09-25 08:57:55.423 11165 11745 D RPCS3   : Building function 0x56c8... (size 98, __spu-0x056c8-CwzZwnt5wwM2fd3E94ZGXjHsrkRQ-s3cg1-cortex-a34-neon)
+09-25 08:57:55.423 11165 11745 D RPCS3   : mpy32 in __spu-0x056c8-CwzZwnt5wwM2fd3E94ZGXjHsrkRQ-s3cg1-cortex-a34-neon at 0x0572c
+09-25 08:57:55.424 11165 11745 D RPCS3   : mpy32 in __spu-0x056c8-CwzZwnt5wwM2fd3E94ZGXjHsrkRQ-s3cg1-cortex-a34-neon at 0x057ec
+09-25 08:57:55.425 11165 11742 D RPCS3   : SPU block is a loop at [0x0d0e8 -> 0x0d0e8]
+09-25 08:57:55.425 11165 11742 D RPCS3   : SPU block is a loop at [0x0d1c0 -> 0x0d1b8]
+09-25 08:57:55.425 11165 11742 D RPCS3   : SPU block is a loop at [0x0d1b8 -> 0x0d1c0]
+09-25 08:57:55.425 11165 11742 D RPCS3   : Building function 0xd0c8... (size 140, __spu-0x0d0c8-cCJnd5giUGXAq1Nn559dzRPRsoCQ-s3cg1-cortex-a34-neon)
+09-25 08:57:55.426 11165 11742 W RPCS3   : [__spu-0x0d0c8-cCJnd5giUGXAq1Nn559dzRPRsoCQ-s3cg1-cortex-a34-neon:0x0d218] Unmatched spu_rsqrte(c) found in FMA
+09-25 08:57:55.426 11165 11742 W RPCS3   : [__spu-0x0d0c8-cCJnd5giUGXAq1Nn559dzRPRsoCQ-s3cg1-cortex-a34-neon:0x0d268] Unmatched spu_re(b) found in FMA
+09-25 08:57:55.430 11165 11747 D RPCS3   : Building function 0xeaa0... (size 36, __spu-0x0eaa0-7U1pHu5q1QXPdM2u7sxPtqW7g0fL-s3cg1-cortex-a34-neon)
+09-25 08:57:55.432 11165 11749 D RPCS3   : SPU block is a loop at [0x0fcc0 -> 0x0fcc0]
+09-25 08:57:55.432 11165 11749 D RPCS3   : SPU block is a loop at [0x0fd10 -> 0x0fd10]
+09-25 08:57:55.432 11165 11749 D RPCS3   : SPU block is a loop at [0x0fd60 -> 0x0fd60]
+09-25 08:57:55.432 11165 11749 D RPCS3   : Building function 0xfca8... (size 61, __spu-0x0fca8-anCrX6b2pUsG4Grywyh0VFA4jLKT-s3cg1-cortex-a34-neon)
+09-25 08:57:55.433 11165 11746 D RPCS3   : SPU block is a loop at [0x0fed8 -> 0x0fe98]
+09-25 08:57:55.433 11165 11746 D RPCS3   : Building function 0xfe28... (size 80, __spu-0x0fe28-KfaSbQyktY6Pik4Lid9RvXgAxcR1-s3cg1-cortex-a34-neon)
+09-25 08:57:55.437 11165 11744 D RPCS3   : Building function 0xece8... (size 23, __spu-0x0ece8-0TPsjnfvUxhHEV1UCxFFwb0Nsxpw-s3cg1-cortex-a34-neon)
+09-25 08:57:55.444 11165 11748 D RPCS3   : Building function 0xf89c... (size 35, __spu-0x0f89c-Uwv6mFYHowoQtGH6ksfxyKQodoYu-s3cg1-cortex-a34-neon)
+09-25 08:57:55.452 11165 11747 D RPCS3   : Building function 0xfbe8... (size 47, __spu-0x0fbe8-0NUyUPmekCdi7SxmaYtcp7odfoxp-s3cg1-cortex-a34-neon)
+09-25 08:57:55.453 11165 11744 D RPCS3   : Building function 0xe910... (size 100, __spu-0x0e910-eUVZd3X2SNAfkeVqnt7XiuncNozu-s3cg1-cortex-a34-neon)
+09-25 08:57:55.461 11165 11748 D RPCS3   : Building function 0xe058... (size 96, __spu-0x0e058-2kQoQ4iFbgC0dH3u7C8FNWCqLvkc-s3cg1-cortex-a34-neon)
+09-25 08:57:55.462 11165 11748 W RPCS3   : [__spu-0x0e058-2kQoQ4iFbgC0dH3u7C8FNWCqLvkc-s3cg1-cortex-a34-neon:0x0e18c] Unmatched spu_re(b) found in FMA
+09-25 08:57:55.462 11165 11748 W RPCS3   : [__spu-0x0e058-2kQoQ4iFbgC0dH3u7C8FNWCqLvkc-s3cg1-cortex-a34-neon:0x0e198] Unmatched spu_re(b) found in FMA
+09-25 08:57:55.462 11165 11748 W RPCS3   : [__spu-0x0e058-2kQoQ4iFbgC0dH3u7C8FNWCqLvkc-s3cg1-cortex-a34-neon:0x0e1a8] Unmatched spu_re(b) found in FMA
+09-25 08:57:55.462 11165 11748 W RPCS3   : [__spu-0x0e058-2kQoQ4iFbgC0dH3u7C8FNWCqLvkc-s3cg1-cortex-a34-neon:0x0e1b0] Unmatched spu_re(b) found in FMA
+09-25 08:57:55.462 11165 11746 D RPCS3   : Building function 0xec50... (size 38, __spu-0x0ec50-1bagj50xVLUoNg9rSueE8JY8SUUz-s3cg1-cortex-a34-neon)
+09-25 08:57:55.464 11165 11749 D RPCS3   : Building function 0xf810... (size 35, __spu-0x0f810-m3KkjeyrFMJ0hQPdLc90Hgk4RYC6-s3cg1-cortex-a34-neon)
+09-25 08:57:55.477 11165 11745 D RPCS3   : Building function 0xe7a8... (size 89, __spu-0x0e7a8-6nxMTKsHd4JWEoFP4xxtidCGPJCF-s3cg1-cortex-a34-neon)
+09-25 08:57:55.477 11165 11747 D RPCS3   : Building function 0xe668... (size 24, __spu-0x0e668-0jmK2NKdtMrfjFYuAhFuaz4SjHL0-s3cg1-cortex-a34-neon)
+09-25 08:57:55.486 11165 11749 D RPCS3   : SPU block is a loop at [0x055dc -> 0x05550]
+09-25 08:57:55.486 11165 11749 D RPCS3   : Building function 0x54c4... (size 129, __spu-0x054c4-NrCm8oSbkMhqWZmx2G3isVJ1SoAL-s3cg1-cortex-a34-neon)
+09-25 08:57:55.487 11165 11749 D RPCS3   : mpy32 in __spu-0x054c4-NrCm8oSbkMhqWZmx2G3isVJ1SoAL-s3cg1-cortex-a34-neon at 0x05530
+09-25 08:57:55.487 11165 11749 D RPCS3   : mpy32 in __spu-0x054c4-NrCm8oSbkMhqWZmx2G3isVJ1SoAL-s3cg1-cortex-a34-neon at 0x055ec
+09-25 08:57:55.490 11165 11746 D RPCS3   : Building function 0xe580... (size 4, __spu-0x0e580-MWoo0vJSVyaU9AaxbFgaqiLn5Svy-s3cg1-cortex-a34-neon)
+09-25 08:57:55.491 11165 11748 D RPCS3   : Building function 0xe5d8... (size 36, __spu-0x0e5d8-L7yxt9dtVU4VkPZ61SbGypPF0Fdw-s3cg1-cortex-a34-neon)
+09-25 08:57:55.491 11165 11748 W RPCS3   : [__spu-0x0e5d8-L7yxt9dtVU4VkPZ61SbGypPF0Fdw-s3cg1-cortex-a34-neon:0x0e638] Unmatched spu_re(b) found in FMA
+09-25 08:57:55.495 11165 11742 D RPCS3   : Building function 0xe6d8... (size 52, __spu-0x0e6d8-9Qvyz6ZSFRsHr0rVzRn673FgFPMC-s3cg1-cortex-a34-neon)
+09-25 08:57:55.497 11165 11747 D RPCS3   : Building function 0xcc88... (size 94, __spu-0x0cc88-Fz4KeZi00QQpFKhhJfTxMqqhjbYA-s3cg1-cortex-a34-neon)
+09-25 08:57:55.500 11165 11746 D RPCS3   : Building function 0xe508... (size 30, __spu-0x0e508-70rv4Wr3QYdRcF154Zhi3s3pGCFQ-s3cg1-cortex-a34-neon)
+09-25 08:57:55.506 11165 11744 D RPCS3   : SPU block is a loop at [0x0d050 -> 0x0d050]
+09-25 08:57:55.506 11165 11744 D RPCS3   : Building function 0xd040... (size 34, __spu-0x0d040-5TiLu3mUmmRM3qoneETPu2g5yGxi-s3cg1-cortex-a34-neon)
+09-25 08:57:55.515 11165 11745 D RPCS3   : Building function 0xdf00... (size 86, __spu-0x0df00-5L6XzH3Z9Arp0EHz8iXNPSrab9F9-s3cg1-cortex-a34-neon)
+09-25 08:57:55.521 11165 11742 D RPCS3   : Building function 0xe428... (size 55, __spu-0x0e428-JTCnRzpVL2nH02PPVLrtPRtvcJYL-s3cg1-cortex-a34-neon)
+09-25 08:57:55.523 11165 11746 D RPCS3   : Building function 0xdc68... (size 30, __spu-0x0dc68-TfbNXxAjgJ6rNm5EntP1b7ZbaXEf-s3cg1-cortex-a34-neon)
+09-25 08:57:55.526 11165 11744 D RPCS3   : Building function 0xe348... (size 2, __spu-0x0e348-0QvMbEAadeLfyWHHEZJ48J9PpHpV-s3cg1-cortex-a34-neon)
+09-25 08:57:55.531 11165 11748 D RPCS3   : Building function 0xe2a8... (size 40, __spu-0x0e2a8-pwsXZVhUGY7Kv1JzqPJ9nEYrhadX-s3cg1-cortex-a34-neon)
+09-25 08:57:55.532 11165 11744 D RPCS3   : Building function 0xdb28... (size 80, __spu-0x0db28-UnfnVAaxTEyKMjTJJkHToh2zavAH-s3cg1-cortex-a34-neon)
+09-25 08:57:55.534 11165 11747 D RPCS3   : Building function 0xe398... (size 36, __spu-0x0e398-Hex1a805Waf8yFxCPzjUieLVcAnW-s3cg1-cortex-a34-neon)
+09-25 08:57:55.544 11165 11746 D RPCS3   : SPU block is a loop at [0x05450 -> 0x05170]
+09-25 08:57:55.544 11165 11746 D RPCS3   : SPU block is a loop at [0x05310 -> 0x05310]
+09-25 08:57:55.544 11165 11746 D RPCS3   : SPU block is a loop at [0x05370 -> 0x05370]
+09-25 08:57:55.544 11165 11746 D RPCS3   : Building function 0x4f48... (size 351, __spu-0x04f48-6ZZvYybsv4zhNA726CmVnwTpR5yL-s3cg1-cortex-a34-neon)
+09-25 08:57:55.546 11165 11742 D RPCS3   : SPU block is a loop at [0x0cfc0 -> 0x0cfc0]
+09-25 08:57:55.546 11165 11742 D RPCS3   : Building function 0xcfa8... (size 38, __spu-0x0cfa8-mUjdkGV7QuZHrt0c86gFkkHdHpFe-s3cg1-cortex-a34-neon)
+09-25 08:57:55.547 11165 11749 D RPCS3   : [0x0de5c] GETLLAR pattern entry point
+09-25 08:57:55.547 11165 11749 D RPCS3   : PUTLLC pattern breakage [dec0 mem=5 lsa_const=1 cause=23] (lsa_pc=0xde44)
+09-25 08:57:55.547 11165 11749 D RPCS3   : Top Breaking Reasons: [cause=34, n=9] [cause=35, n=7] [cause=37, n=7] [cause=23, n=5] [cause=4, n=2]; More: 2 13 30 32 of 34 failures
+09-25 08:57:55.547 11165 11749 D RPCS3   : SPU block is a loop at [0x0de90 -> 0x0de28]
+09-25 08:57:55.548 11165 11749 D RPCS3   : Building function 0xddf8... (size 66, __spu-0x0ddf8-UUjHEL3qd3ksc5usX41VE1UzKi0T-s3cg1-cortex-a34-neon)
+09-25 08:57:55.554 11165 11748 D RPCS3   : Building function 0xcc70... (size 6, __spu-0x0cc70-hSEsYA7TxsoLiqoPmApFrZpebaPt-s3cg1-cortex-a34-neon)
+09-25 08:57:55.555 11165 11745 D RPCS3   : Building function 0xc798... (size 198, __spu-0x0c798-3o7sKVQafRdMobiPJk3onr5GF1d1-s3cg1-cortex-a34-neon)
+09-25 08:57:55.555 11165 11745 W RPCS3   : [__spu-0x0c798-3o7sKVQafRdMobiPJk3onr5GF1d1-s3cg1-cortex-a34-neon:0x0c858] Unmatched spu_re(b) found in FMA
+09-25 08:57:55.555 11165 11745 W RPCS3   : [__spu-0x0c798-3o7sKVQafRdMobiPJk3onr5GF1d1-s3cg1-cortex-a34-neon:0x0c9d8] Unmatched spu_re(b) found in FMA
+09-25 08:57:55.558 11165 11747 D RPCS3   : Building function 0xdad8... (size 20, __spu-0x0dad8-ofU4Ahhdk1YtURCARwWTCXhSiK9f-s3cg1-cortex-a34-neon)
+09-25 08:57:55.559 11165 11744 D RPCS3   : SPU block is a loop at [0x0cf10 -> 0x0cf10]
+09-25 08:57:55.559 11165 11744 D RPCS3   : Building function 0xcee8... (size 48, __spu-0x0cee8-rd1jUGWtfdzofgFLWp8VFs8JTCQY-s3cg1-cortex-a34-neon)
+09-25 08:57:55.565 11165 11748 D RPCS3   : Building function 0xcc60... (size 4, __spu-0x0cc60-hyHQQchRY8ddM0AsVgGdsf8UoTCq-s3cg1-cortex-a34-neon)
+09-25 08:57:55.567 11165 11742 D RPCS3   : SPU block is a loop at [0x0c690 -> 0x0c688]
+09-25 08:57:55.567 11165 11742 D RPCS3   : SPU block is a loop at [0x0c700 -> 0x0c690]
+09-25 08:57:55.567 11165 11742 D RPCS3   : SPU block is a loop at [0x0c5e0 -> 0x0c5e0]
+09-25 08:57:55.567 11165 11742 D RPCS3   : Building function 0xc5b8... (size 120, __spu-0x0c5b8-apQnEvefyK7XtU66J3tNGT3S3tvR-s3cg1-cortex-a34-neon)
+09-25 08:57:55.567 11165 11742 W RPCS3   : [__spu-0x0c5b8-apQnEvefyK7XtU66J3tNGT3S3tvR-s3cg1-cortex-a34-neon:0x0c6e8] Unmatched spu_rsqrte(c) found in FMA
+09-25 08:57:55.568 11165 11742 W RPCS3   : [__spu-0x0c5b8-apQnEvefyK7XtU66J3tNGT3S3tvR-s3cg1-cortex-a34-neon:0x0c738] Unmatched spu_re(b) found in FMA
+09-25 08:57:55.572 11165 11747 D RPCS3   : Building function 0xcc30... (size 12, __spu-0x0cc30-K4ea67yq2NiCncbjeUSXuyRgbQkp-s3cg1-cortex-a34-neon)
+09-25 08:57:55.574 11165 11748 D RPCS3   : Building function 0xda70... (size 20, __spu-0x0da70-qnnCnoCyuxfb1UULERmAmHZaFSUL-s3cg1-cortex-a34-neon)
+09-25 08:57:55.575 11165 11749 D RPCS3   : Building function 0xdad0... (size 2, __spu-0x0dad0-PVYbAF1nQAySSd1STHFdqRFvZRVC-s3cg1-cortex-a34-neon)
+09-25 08:57:55.580 11165 11749 D RPCS3   : Building function 0xce00... (size 58, __spu-0x0ce00-FJ2NGhHYTXaYKV58WG0ZRppCGW7e-s3cg1-cortex-a34-neon)
+09-25 08:57:55.584 11165 11744 D RPCS3   : Building function 0xdac0... (size 4, __spu-0x0dac0-fa0RS5HhiT1o8akW7WVp1tJvc6Vn-s3cg1-cortex-a34-neon)
+09-25 08:57:55.589 11165 11748 D RPCS3   : Building function 0x4cd0... (size 50, __spu-0x04cd0-Q4X9nG0Ap00XvF1wMoqT3sn7iE44-s3cg1-cortex-a34-neon)
+09-25 08:57:55.593 11165 11747 D RPCS3   : Building function 0xcab0... (size 96, __spu-0x0cab0-cE5cz9LKQZzNR154MQmXGzdKa5fM-s3cg1-cortex-a34-neon)
+09-25 08:57:55.594 11165 11744 D RPCS3   : Building function 0x3210... (size 192, __spu-0x03210-NqXeCVx0S3WNe48tW5qJLNK8UpA5-s3cg1-cortex-a34-neon)
+09-25 08:57:55.604 11165 11749 D RPCS3   : Building function 0xb340... (size 133, __spu-0x0b340-TocptYZvNTN8gi4TrVFZpdQtzHeq-s3cg1-cortex-a34-neon)
+09-25 08:57:55.621 11165 11742 D RPCS3   : Building function 0x3a44... (size 1, __spu-0x03a44-cXrF8niCUR0dSajH3q9pkX81E9t1-s3cg1-cortex-a34-neon)
+09-25 08:57:55.624 11165 11748 D RPCS3   : Building function 0x4bf0... (size 56, __spu-0x04bf0-nHmWCZnnmmLPaKZUS5Cxkq6m6eTZ-s3cg1-cortex-a34-neon)
+09-25 08:57:55.626 11165 11742 D RPCS3   : SPU block is a loop at [0x03a0c -> 0x039c8]
+09-25 08:57:55.626 11165 11742 D RPCS3   : Building function 0x39b8... (size 35, __spu-0x039b8-14oY7JUZrxfiS4a0afXnJz1F0s7P-s3cg1-cortex-a34-neon)
+09-25 08:57:55.633 11165 11745 D RPCS3   : Building function 0xc528... (size 36, __spu-0x0c528-bUSTf1RbexoTYS2uhHjotMAbnQyr-s3cg1-cortex-a34-neon)
+09-25 08:57:55.640 11165 11747 D RPCS3   : SPU block is a loop at [0x03f28 -> 0x03c18]
+09-25 08:57:55.640 11165 11747 D RPCS3   : SPU block is a loop at [0x03f20 -> 0x03f28]
+09-25 08:57:55.640 11165 11747 D RPCS3   : Building function 0x3b28... (size 262, __spu-0x03b28-Mq43EFYGGKhJabtNW7fKx7naZphv-s3cg1-cortex-a34-neon)
+09-25 08:57:55.640 11165 11742 D RPCS3   : SPU block is a loop at [0x0b5f8 -> 0x0b5f8]
+09-25 08:57:55.640 11165 11742 D RPCS3   : Building function 0xb5c0... (size 41, __spu-0x0b5c0-Xspgi5kP1XUE6tXTRNugNqh7VGVm-s3cg1-cortex-a34-neon)
+09-25 08:57:55.652 11165 11749 D RPCS3   : Building function 0x39b0... (size 2, __spu-0x039b0-ZSGVhhH9UU58Jh2gVkzbAARUZTfk-s3cg1-cortex-a34-neon)
+09-25 08:57:55.658 11165 11745 D RPCS3   : SPU block is a loop at [0x04af0 -> 0x04af0]
+09-25 08:57:55.658 11165 11745 D RPCS3   : SPU block is a loop at [0x04a90 -> 0x04a90]
+09-25 08:57:55.658 11165 11745 D RPCS3   : Building function 0x49a0... (size 148, __spu-0x049a0-PSA63qT3obTMz6Y4972ME0SCYYuK-s3cg1-cortex-a34-neon)
+09-25 08:57:55.659 11165 11742 D RPCS3   : Building function 0xb2f0... (size 20, __spu-0x0b2f0-5YuZE2o7xyvZJVhRjrj4fP8MaHim-s3cg1-cortex-a34-neon)
+09-25 08:57:55.659 11165 11745 D RPCS3   : mpy32 in __spu-0x049a0-PSA63qT3obTMz6Y4972ME0SCYYuK-s3cg1-cortex-a34-neon at 0x04a5c
+09-25 08:57:55.659 11165 11745 D RPCS3   : mpy32 in __spu-0x049a0-PSA63qT3obTMz6Y4972ME0SCYYuK-s3cg1-cortex-a34-neon at 0x04adc
+09-25 08:57:55.659 11165 11745 D RPCS3   : mpy32 in __spu-0x049a0-PSA63qT3obTMz6Y4972ME0SCYYuK-s3cg1-cortex-a34-neon at 0x04a88
+09-25 08:57:55.659 11165 11745 D RPCS3   : mpy32 in __spu-0x049a0-PSA63qT3obTMz6Y4972ME0SCYYuK-s3cg1-cortex-a34-neon at 0x04b44
+09-25 08:57:55.660 11165 11745 D RPCS3   : mpy32 in __spu-0x049a0-PSA63qT3obTMz6Y4972ME0SCYYuK-s3cg1-cortex-a34-neon at 0x04bb4
+09-25 08:57:55.660 11165 11748 D RPCS3   : SPU block is a loop at [0x0398c -> 0x03938]
+09-25 08:57:55.660 11165 11748 D RPCS3   : Building function 0x3920... (size 36, __spu-0x03920-SMiSuvV9ys9rSd2YS9vPu9pREdP5-s3cg1-cortex-a34-neon)
+09-25 08:57:55.664 11165 11749 D RPCS3   : Building function 0x36c0... (size 59, __spu-0x036c0-HyPRjqVVYVxT5gCnPyCdjS7SSdGQ-s3cg1-cortex-a34-neon)
+09-25 08:57:55.666 11165 11746 D RPCS3   : SPU block is a loop at [0x046f8 -> 0x046f8]
+09-25 08:57:55.667 11165 11746 D RPCS3   : Building function 0x4680... (size 89, __spu-0x04680-kCoyEXuJJg3GGjdcYxp3KpFVwCxh-s3cg1-cortex-a34-neon)
+09-25 08:57:55.667 11165 11746 D RPCS3   : mpy32 in __spu-0x04680-kCoyEXuJJg3GGjdcYxp3KpFVwCxh-s3cg1-cortex-a34-neon at 0x046ac
+09-25 08:57:55.667 11165 11746 W RPCS3   : [__spu-0x04680-kCoyEXuJJg3GGjdcYxp3KpFVwCxh-s3cg1-cortex-a34-neon:0x0477c] Unmatched spu_rsqrte(c) found in FMA
+09-25 08:57:55.672 11165 11742 D RPCS3   : Building function 0x3f40... (size 74, __spu-0x03f40-NwmfrNvhspC8eSmVcxfLxh9FCeN8-s3cg1-cortex-a34-neon)
+09-25 08:57:55.679 11165 11748 D RPCS3   : Building function 0x3908... (size 6, __spu-0x03908-6gYj1Ew23mbL22rxVCTNAo50mwPx-s3cg1-cortex-a34-neon)
+09-25 08:57:55.684 11165 11744 D RPCS3   : SPU block is a loop at [0x04850 -> 0x04850]
+09-25 08:57:55.684 11165 11744 D RPCS3   : Building function 0x47e8... (size 109, __spu-0x047e8-JR2Tb8i7nTCawt0p5FdzFdm35rn8-s3cg1-cortex-a34-neon)
+09-25 08:57:55.688 11165 11749 D RPCS3   : SPU block is a loop at [0x03808 -> 0x03808]
+09-25 08:57:55.689 11165 11749 D RPCS3   : SPU block is a loop at [0x03890 -> 0x03840]
+09-25 08:57:55.689 11165 11749 D RPCS3   : Building function 0x377c... (size 99, __spu-0x0377c-88MmVvyxC3L8wXSoJfgwrutSswFk-s3cg1-cortex-a34-neon)
+09-25 08:57:55.691 11165 11748 D RPCS3   : Building function 0x36b8... (size 2, __spu-0x036b8-0FwVcG4vhCeFAPfv1Sr1n4bhSTyA-s3cg1-cortex-a34-neon)
+09-25 08:57:55.699 11165 11748 D RPCS3   : Building function 0x30e0... (size 1, __spu-0x030e0-JdkmjZaaqx5KnzYasz209un6diCr-s3cg1-cortex-a34-neon)
+09-25 08:57:55.699 11165 11742 D RPCS3   : Building function 0x3640... (size 30, __spu-0x03640-6Yn3nPdn7NfZJ9zqs7JvF4Vmnqos-s3cg1-cortex-a34-neon)
+09-25 08:57:55.705 11165 11748 D RPCS3   : SPU block is a loop at [0x031c0 -> 0x031c0]
+09-25 08:57:55.705 11165 11748 D RPCS3   : Building function 0x3170... (size 40, __spu-0x03170-j0FZrUPi2kCn5P4QU4kHvk0JAUgp-s3cg1-cortex-a34-neon)
+09-25 08:57:55.714 11165 11742 D RPCS3   : Building function 0x5ea8... (size 10, __spu-0x05ea8-PAGpTj6cvkpRR7JLUM5osf3GdajV-s3cg1-cortex-a34-neon)
+09-25 08:57:55.716 11165 11746 D RPCS3   : Building function 0x30d4... (size 3, __spu-0x030d4-tWUjtmabfUyYxpAGsXkL7sMQiRVH-s3cg1-cortex-a34-neon)
+09-25 08:57:55.722 11165 11745 D RPCS3   : Building function 0x3118... (size 21, __spu-0x03118-FFN3EPdR0EyRPxUHLk9fJCW2kQeS-s3cg1-cortex-a34-neon)
+09-25 08:57:55.723 11165 11748 D RPCS3   : Building function 0x3770... (size 3, __spu-0x03770-7Ng5diTQXzhgRZCCF58NWZEYozwk-s3cg1-cortex-a34-neon)
+09-25 08:57:55.725 11165 11749 D RPCS3   : [0x05604] GETLLAR pattern entry point
+09-25 08:57:55.725 11165 11749 D RPCS3   : PUTLLC pattern breakage [5688 mem=4 lsa_const=1 cause=37] (lsa_pc=0x55dc)
+09-25 08:57:55.725 11165 11749 D RPCS3   : Top Breaking Reasons: [cause=34, n=9] [cause=37, n=8] [cause=35, n=7] [cause=23, n=5] [cause=4, n=2]; More: 2 13 30 32 of 35 failures
+09-25 08:57:55.725 11165 11749 D RPCS3   : SPU block is a loop at [0x05694 -> 0x055c8]
+09-25 08:57:55.725 11165 11749 D RPCS3   : SPU block is a loop at [0x05690 -> 0x05694]
+09-25 08:57:55.725 11165 11749 D RPCS3   : Building function 0x5518... (size 158, __spu-0x05518-cuSoTRJruCNpcoKqfyPAtHk55Lna-s3cg1-cortex-a34-neon)
+09-25 08:57:55.726 11165 11749 W RPCS3   : [0x55ec] MFC_EAH: $38 is not a zero constant
+09-25 08:57:55.727 11165 11749 W RPCS3   : [0x56d8] MFC_EAH: $56 is not a zero constant
+09-25 08:57:55.727 11165 11742 D RPCS3   : Building function 0x3070... (size 25, __spu-0x03070-EpjGbgx9xhSWh7mFz1cXGL7oE5Sm-s3cg1-cortex-a34-neon)
+09-25 08:57:55.730 11165 11746 D RPCS3   : Building function 0x3764... (size 3, __spu-0x03764-hJExtCGhoRpqWVMJoty7H6mvLqpd-s3cg1-cortex-a34-neon)
+09-25 08:57:55.734 11165 11748 D RPCS3   : Building function 0x30e8... (size 11, __spu-0x030e8-U5J6tTbqrcX2cSKML2rhXFY5LQ1E-s3cg1-cortex-a34-neon)
+09-25 08:57:55.735 11165 11746 D RPCS3   : Building function 0x5e58... (size 20, __spu-0x05e58-mtZ43T2sz046QtrHMK15bC9Z96Jb-s3cg1-cortex-a34-neon)
+09-25 08:57:55.737 11165 11747 D RPCS3   : SPU block is a loop at [0x04ce0 -> 0x04ab4]
+09-25 08:57:55.737 11165 11747 D RPCS3   : SPU block is a loop at [0x04ab4 -> 0x04ce0]
+09-25 08:57:55.738 11165 11747 D RPCS3   : SPU block is a loop at [0x04d50 -> 0x04d50]
+09-25 08:57:55.738 11165 11747 D RPCS3   : SPU block is a loop at [0x04a14 -> 0x04a14]
+09-25 08:57:55.738 11165 11747 D RPCS3   : Building function 0x49f8... (size 242, __spu-0x049f8-c8kRGoNwMUXRorML2EJ35nUYbckT-s3cg1-cortex-a34-neon)
+09-25 08:57:55.738 11165 11745 D RPCS3   : [0x05ddc] GETLLAR pattern entry point
+09-25 08:57:55.738 11165 11745 D RPCS3   : SPU block is a loop at [0x05dc8 -> 0x05dc8]
+09-25 08:57:55.738 11165 11745 D RPCS3   : Building function 0x5d70... (size 47, __spu-0x05d70-tK3TuzXPQ9EURN31CWoFC2UXEVGs-s3cg1-cortex-a34-neon)
+09-25 08:57:55.739 11165 11745 W RPCS3   : [0x5dcc] MFC_EAH: $7 is not a zero constant
+09-25 08:57:55.739 11165 11747 D RPCS3   : mpy32 in __spu-0x049f8-c8kRGoNwMUXRorML2EJ35nUYbckT-s3cg1-cortex-a34-neon at 0x04ba8
+09-25 08:57:55.739 11165 11745 W RPCS3   : [0x5e08] MFC_EAH: $7 is not a zero constant
+09-25 08:57:55.740 11165 11744 D RPCS3   : Building function 0x5cc0... (size 2, __spu-0x05cc0-LRQRfu2no6WcJGjsGNS4dCqRFcS9-s3cg1-cortex-a34-neon)
+09-25 08:57:55.749 11165 11744 D RPCS3   : Building function 0x3068... (size 2, __spu-0x03068-eAXtySvfARj8wHG088yE7jLdF4tr-s3cg1-cortex-a34-neon)
+09-25 08:57:55.751 11165 11748 D RPCS3   : Building function 0x3740... (size 9, __spu-0x03740-M7uNo1HjfT7gcJ4W42VNvUrp8hmJ-s3cg1-cortex-a34-neon)
+09-25 08:57:55.753 11165 11746 D RPCS3   : [0x05bb8] GETLLAR pattern entry point
+09-25 08:57:55.753 11165 11746 D RPCS3   : SPU block is a loop at [0x05c9c -> 0x05ba4]
+09-25 08:57:55.753 11165 11746 D RPCS3   : PUTLLC pattern breakage [5c74 mem=9 lsa_const=1 cause=37] (lsa_pc=0x5ba4)
+09-25 08:57:55.753 11165 11746 D RPCS3   : Top Breaking Reasons: [cause=34, n=9] [cause=37, n=9] [cause=35, n=7] [cause=23, n=5] [cause=4, n=2]; More: 2 13 30 32 of 36 failures
+09-25 08:57:55.753 11165 11746 D RPCS3   : Building function 0x5b10... (size 108, __spu-0x05b10-bMtALNv9ut4kb4eEw6akK7P9FWsT-s3cg1-cortex-a34-neon)
+09-25 08:57:55.753 11165 11746 W RPCS3   : [0x5ba8] MFC_EAH: $14 is not a zero constant
+09-25 08:57:55.754 11165 11746 W RPCS3   : [0x5c80] MFC_EAH: $14 is not a zero constant
+09-25 08:57:55.754 11165 11742 D RPCS3   : Building function 0x3060... (size 2, __spu-0x03060-VbajEtQfuAZKdikAKXj24XKbjGVG-s3cg1-cortex-a34-neon)
+09-25 08:57:55.759 11165 11744 D RPCS3   : Building function 0x5790... (size 3, __spu-0x05790-TzYH1iMvgULjp40zph6345WQsctS-s3cg1-cortex-a34-neon)
+09-25 08:57:55.760 11165 11745 D RPCS3   : SPU block is a loop at [0x036a0 -> 0x036a0]
+09-25 08:57:55.760 11165 11745 D RPCS3   : SPU block is a loop at [0x03728 -> 0x036d8]
+09-25 08:57:55.760 11165 11745 D RPCS3   : Building function 0x360c... (size 77, __spu-0x0360c-hvAzauiQTTXh6XVEr2z39fNy9M0p-s3cg1-cortex-a34-neon)
+09-25 08:57:55.767 11165 11744 D RPCS3   : Building function 0x5654... (size 79, __spu-0x05654-qiCZQkj1eXwSVikSire2FUm2hTea-s3cg1-cortex-a34-neon)
+09-25 08:57:55.767 11165 11744 W RPCS3   : [0x56d8] MFC_EAH: $56 is not a zero constant
+09-25 08:57:55.770 11165 11748 D RPCS3   : [0x05d20] GETLLAR pattern entry point
+09-25 08:57:55.770 11165 11748 D RPCS3   : SPU block is a loop at [0x05d0c -> 0x05d0c]
+09-25 08:57:55.770 11165 11748 D RPCS3   : Building function 0x5ce0... (size 35, __spu-0x05ce0-jqeqC1dgxEFQJX09zKvJC1KYAX0F-s3cg1-cortex-a34-neon)
+09-25 08:57:55.771 11165 11748 W RPCS3   : [0x5d10] MFC_EAH: $5 is not a zero constant
+09-25 08:57:55.771 11165 11748 W RPCS3   : [0x5d4c] MFC_EAH: $5 is not a zero constant
+09-25 08:57:55.772 11165 11742 D RPCS3   : Building function 0x5830... (size 24, __spu-0x05830-ep6syRwbEkefFk5Z2Rzbhm3oVdWj-s3cg1-cortex-a34-neon)
+09-25 08:57:55.779 11165 11749 D RPCS3   : Building function 0x53b0... (size 13, __spu-0x053b0-QyFpCvd6riCRyWUzYQJ99KLFkS0r-s3cg1-cortex-a34-neon)
+09-25 08:57:55.788 11165 11746 D RPCS3   : Building function 0x5480... (size 37, __spu-0x05480-JE4UWL50jqc34rtTyYfmZds6Qc8R-s3cg1-cortex-a34-neon)
+09-25 08:57:55.789 11165 11742 D RPCS3   : Building function 0x5458... (size 10, __spu-0x05458-tKG6guf9HSaJd3CuJjrnzXe2qGQY-s3cg1-cortex-a34-neon)
+09-25 08:57:55.793 11165 11749 D RPCS3   : SPU block is a loop at [0x048f8 -> 0x048c0]
+09-25 08:57:55.793 11165 11749 D RPCS3   : SPU block is a loop at [0x04858 -> 0x04820]
+09-25 08:57:55.793 11165 11749 D RPCS3   : Building function 0x4658... (size 170, __spu-0x04658-JMNv0Fw8a7J6phJMGNznN797vr4N-s3cg1-cortex-a34-neon)
+09-25 08:57:55.795 11165 11745 D RPCS3   : Building function 0x35c0... (size 19, __spu-0x035c0-rWYThTsXuetEstdVkyiwWacux18C-s3cg1-cortex-a34-neon)
+09-25 08:57:55.797 11165 11748 D RPCS3   : Building function 0x5424... (size 13, __spu-0x05424-Ug6aANVPVUjo66UvWrgMdx7r0qTd-s3cg1-cortex-a34-neon)
+09-25 08:57:55.798 11165 11744 D RPCS3   : SPU block is a loop at [0x052cc -> 0x05350]
+09-25 08:57:55.798 11165 11744 D RPCS3   : Building function 0x52b0... (size 46, __spu-0x052b0-bE4WR7zC2HYebAHsz8d73i9m8x0H-s3cg1-cortex-a34-neon)
+09-25 08:57:55.798 11165 11744 W RPCS3   : [0x52fc] MFC_EAH: $15 is not a zero constant
+09-25 08:57:55.798 11165 11744 W RPCS3   : [0x533c] MFC_Cmd: $11 is not a constant
+09-25 08:57:55.800 11165 11742 D RPCS3   : SPU block is a loop at [0x05210 -> 0x05210]
+09-25 08:57:55.800 11165 11742 D RPCS3   : Building function 0x50b0... (size 109, __spu-0x050b0-CnVc99rYGkUXTn9GNgajpJojYzqU-s3cg1-cortex-a34-neon)
+09-25 08:57:55.800 11165 11742 D RPCS3   : mpy32 in __spu-0x050b0-CnVc99rYGkUXTn9GNgajpJojYzqU-s3cg1-cortex-a34-neon at 0x051d0
+09-25 08:57:55.810 11165 11746 D RPCS3   : Building function 0x53e8... (size 7, __spu-0x053e8-anjJgwHw4tgmFihU8VgGGvEnUegx-s3cg1-cortex-a34-neon)
+09-25 08:57:55.819 11165 11745 D RPCS3   : Building function 0x53a0... (size 4, __spu-0x053a0-cCjoaSjhEZP3jqsv0dZAJWh7jUys-s3cg1-cortex-a34-neon)
+09-25 08:57:55.819 11165 11747 D RPCS3   : Building function 0x5408... (size 7, __spu-0x05408-3cAJGbVu4EaqZ9LxyGbXf3qsQJTy-s3cg1-cortex-a34-neon)
+09-25 08:57:55.819 11165 11748 D RPCS3   : Building function 0x35b8... (size 2, __spu-0x035b8-mfCtJFwp6GrYdNY5rPkQWnQYsVyv-s3cg1-cortex-a34-neon)
+09-25 08:57:55.822 11165 11746 W RPCS3   : [0x4f28] At 0x4f3c: indirect branch to 0x4f40 (E)
+09-25 08:57:55.822 11165 11746 D RPCS3   : Building function 0x4f28... (size 6, __spu-0x04f28-sPdy09Mw8PwJpHC88nqiLs7youEE-s3cg1-cortex-a34-neon)
+09-25 08:57:55.826 11165 11744 D RPCS3   : Building function 0x358c... (size 11, __spu-0x0358c-HZhk0pudKvsmYJ1yd2Thev60YTJm-s3cg1-cortex-a34-neon)
+09-25 08:57:55.827 11165 11742 W RPCS3   : [0x4f50] At 0x4f60: indirect branch to 0x4f64 (D)
+09-25 08:57:55.827 11165 11742 W RPCS3   : [0x4f50] At 0x4ff4: indirect branch to 0x4ff8 (E)
+09-25 08:57:55.827 11165 11742 D RPCS3   : Building function 0x4f50... (size 42, __spu-0x04f50-tjYgWAG2FYFLxFbLpG52VQSF1ZdU-s3cg1-cortex-a34-neon)
+09-25 08:57:55.830 11165 11748 D RPCS3   : SPU block is a loop at [0x05280 -> 0x05280]
+09-25 08:57:55.830 11165 11748 D RPCS3   : Building function 0x5270... (size 15, __spu-0x05270-pcg0gYMvvqRoNMG3MouroPLwvJa9-s3cg1-cortex-a34-neon)
+09-25 08:57:55.832 11165 11747 D RPCS3   : Building function 0x3f70... (size 13, __spu-0x03f70-cyqxsbV4SRkQNpxkmjFp19Reih82-s3cg1-cortex-a34-neon)
+09-25 08:57:55.832 11165 11745 W RPCS3   : [0x5000] At 0x5010: indirect branch to 0x5014 (D)
+09-25 08:57:55.832 11165 11745 W RPCS3   : [0x5000] At 0x50a4: indirect branch to 0x50a8 (E)
+09-25 08:57:55.832 11165 11745 D RPCS3   : Building function 0x5000... (size 42, __spu-0x05000-s9z4co7kue3spmYFHxLSEjWwy2Nm-s3cg1-cortex-a34-neon)
+09-25 08:57:55.840 11165 11742 W RPCS3   : [0x4ec0] At 0x4ee4: indirect branch to 0x4ee8 (D)
+09-25 08:57:55.840 11165 11742 D RPCS3   : Building function 0x4ec0... (size 26, __spu-0x04ec0-e5wTAT5gdbTHhKTHPEnZFQ0f7qem-s3cg1-cortex-a34-neon)
+09-25 08:57:55.840 11165 11746 D RPCS3   : Building function 0x3584... (size 2, __spu-0x03584-CmjdbYkCPkvN0wGN9UARyHVUyY9Z-s3cg1-cortex-a34-neon)
+09-25 08:57:55.842 11165 11744 W RPCS3   : [0x4e10] At 0x4e20: indirect branch to 0x4e24 (D)
+09-25 08:57:55.842 11165 11744 W RPCS3   : [0x4e10] At 0x4eb4: indirect branch to 0x4eb8 (E)
+09-25 08:57:55.842 11165 11744 D RPCS3   : Building function 0x4e10... (size 42, __spu-0x04e10-3unZq88XxhoAKiFLtT264u4b8qnq-s3cg1-cortex-a34-neon)
+09-25 08:57:55.842 11165 11745 D RPCS3   : Building function 0x3c88... (size 11, __spu-0x03c88-1G2zG1c007tgcQVP7P4et4S2oXfZ-s3cg1-cortex-a34-neon)
+09-25 08:57:55.847 11165 11747 D RPCS3   : Building function 0x357c... (size 2, __spu-0x0357c-oKZQ82WfagQhCSoXCqvJW4VFdYjG-s3cg1-cortex-a34-neon)
+09-25 08:57:55.850 11165 11746 D RPCS3   : Building function 0x4478... (size 120, __spu-0x04478-aC6SZNAZjfdbyEZMWcGc5RhuQn8E-s3cg1-cortex-a34-neon)
+09-25 08:57:55.851 11165 11748 W RPCS3   : [0x4dc0] At 0x4dd0: indirect branch to 0x4dd4 (D)
+09-25 08:57:55.851 11165 11748 W RPCS3   : [0x4dc0] At 0x4e04: indirect branch to 0x4e08 (E)
+09-25 08:57:55.851 11165 11748 D RPCS3   : Building function 0x4dc0... (size 18, __spu-0x04dc0-b4i5QeMYMHQRJdbVjCAwYCP4Ku6L-s3cg1-cortex-a34-neon)
+09-25 08:57:55.855 11165 11742 D RPCS3   : Building function 0x30c0... (size 1, __spu-0x030c0-1nqvCSVWEUeLVVmvRk8RnXQhZ9Su-s3cg1-cortex-a34-neon)
+09-25 08:57:55.858 11165 11747 D RPCS3   : Building function 0x3d40... (size 9, __spu-0x03d40-gq38G6R62nqhHEbZopVfV2J0w6tF-s3cg1-cortex-a34-neon)
+09-25 08:57:55.859 11165 11745 D RPCS3   : Building function 0x30b4... (size 3, __spu-0x030b4-pHNbX9uZVP7NKCZ6hXvMeAGwQeT0-s3cg1-cortex-a34-neon)
+09-25 08:57:55.860 11165 11744 D RPCS3   : Building function 0x3550... (size 11, __spu-0x03550-cfmhEZvjF5FKFjqqVbrhy2QTp8T8-s3cg1-cortex-a34-neon)
+09-25 08:57:55.863 11165 11748 D RPCS3   : Building function 0x3c80... (size 2, __spu-0x03c80-7gqj1z837c56uXpanPmYiERFGxpe-s3cg1-cortex-a34-neon)
+09-25 08:57:55.868 11165 11749 D RPCS3   : Building function 0x49d0... (size 10, __spu-0x049d0-H207xvLitxpqJ2M5UFYmhVQZLULr-s3cg1-cortex-a34-neon)
+09-25 08:57:55.868 11165 11742 D RPCS3   : Building function 0x3050... (size 25, __spu-0x03050-bZS7Fw0dAsSaWEd16rGz0vq36vr8-s3cg1-cortex-a34-neon)
+09-25 08:57:55.868 11165 11745 W RPCS3   : [0x3d68] At 0x3e08: indirect branch to 0x3e0c (D)
+09-25 08:57:55.868 11165 11745 D RPCS3   : SPU block is a loop at [0x03e54 -> 0x03eb0]
+09-25 08:57:55.868 11165 11745 D RPCS3   : Likely missed PUTLLC16 patterns. (entry=0x3d68)
+09-25 08:57:55.868 11165 11745 D RPCS3   : Building function 0x3d68... (size 130, __spu-0x03d68-N65XgtFKnXoifWq25HCytj3GJz6E-s3cg1-cortex-a34-neon)
+09-25 08:57:55.868 11165 11744 D RPCS3   : Building function 0x42a0... (size 7, __spu-0x042a0-kTfAyLnofLyGXpeUQNe7zFs2fc59-s3cg1-cortex-a34-neon)
+09-25 08:57:55.872 11165 11747 D RPCS3   : Building function 0x3d38... (size 2, __spu-0x03d38-SGiJ054H6as6JcChsbta367sW39g-s3cg1-cortex-a34-neon)
+09-25 08:57:55.878 11165 11744 D RPCS3   : Building function 0x34c0... (size 36, __spu-0x034c0-WHJSk92R8C6svyCTju91mZJGt6bg-s3cg1-cortex-a34-neon)
+09-25 08:57:55.879 11165 11747 W RPCS3   : [0x42f8] At 0x4314: indirect branch to 0x4318 (D)
+09-25 08:57:55.879 11165 11747 W RPCS3   : [0x42f8] At 0x4450: indirect branch to 0x4454 (E)
+09-25 08:57:55.879 11165 11747 D RPCS3   : [0x0438c] GETLLAR pattern entry point
+09-25 08:57:55.879 11165 11747 D RPCS3   : PUTLLC pattern breakage [4400 mem=4 lsa_const=2 cause=13] (lsa_pc=0x4374)
+09-25 08:57:55.879 11165 11747 D RPCS3   : Top Breaking Reasons: [cause=34, n=9] [cause=37, n=9] [cause=35, n=7] [cause=23, n=5] [cause=4, n=2] [cause=13, n=2]; More: 2 30 32 of 37 failures
+09-25 08:57:55.879 11165 11747 D RPCS3   : SPU block is a loop at [0x043d8 -> 0x04360]
+09-25 08:57:55.879 11165 11747 D RPCS3   : Building function 0x42f8... (size 87, __spu-0x042f8-LYFxwizrEkh44dKEd2vff6Q7sNgL-s3cg1-cortex-a34-neon)
+09-25 08:57:55.880 11165 11748 D RPCS3   : Building function 0x3048... (size 2, __spu-0x03048-X1taNFaSTimMTNfCJuHxmAKqN2Vy-s3cg1-cortex-a34-neon)
+09-25 08:57:55.883 11165 11749 D RPCS3   : Building function 0x3c18... (size 26, __spu-0x03c18-qcxcYQdfRYRh4APewGKXGeV92mYE-s3cg1-cortex-a34-neon)
+09-25 08:57:55.886 11165 11742 D RPCS3   : Building function 0x3bd0... (size 6, __spu-0x03bd0-StKTHwkRNzEfywjqEFmUSc8MnFM4-s3cg1-cortex-a34-neon)
+09-25 08:57:55.889 11165 11746 D RPCS3   : Building function 0x428c... (size 5, __spu-0x0428c-AHQz9iwcr6Fi1EmskrsaASkHQ96M-s3cg1-cortex-a34-neon)
+09-25 08:57:55.891 11165 11748 D RPCS3   : Building function 0x3040... (size 2, __spu-0x03040-XXeXMiF5Soip8vJ4YkH2p3eaP2ZH-s3cg1-cortex-a34-neon)
+09-25 08:57:55.893 11165 11747 D RPCS3   : Building function 0x3cb8... (size 32, __spu-0x03cb8-09xNCnNNnWPbEoknFjPq4Y709HPE-s3cg1-cortex-a34-neon)
+09-25 08:57:55.895 11165 11744 W RPCS3   : [0x4118] At 0x4150: indirect branch to 0x4154 (D)
+09-25 08:57:55.895 11165 11744 D RPCS3   : [0x041c4] GETLLAR pattern entry point
+09-25 08:57:55.895 11165 11744 D RPCS3   : PUTLLC pattern breakage [4248 mem=4 lsa_const=2 cause=13] (lsa_pc=0x41ac)
+09-25 08:57:55.895 11165 11744 D RPCS3   : Top Breaking Reasons: [cause=34, n=9] [cause=37, n=9] [cause=35, n=7] [cause=23, n=5] [cause=13, n=3] [cause=4, n=2]; More: 2 30 32 of 38 failures
+09-25 08:57:55.895 11165 11744 D RPCS3   : SPU block is a loop at [0x0421c -> 0x04198]
+09-25 08:57:55.895 11165 11744 D RPCS3   : Building function 0x4118... (size 93, __spu-0x04118-JfNJMKXmX5yhq6EQSNm8EqUGLeRS-s3cg1-cortex-a34-neon)
+09-25 08:57:55.898 11165 11748 D RPCS3   : Building function 0x3c00... (size 6, __spu-0x03c00-iaZMhU8ANPhZ9Rm0zz2zhk9vEp8R-s3cg1-cortex-a34-neon)
+09-25 08:57:55.900 11165 11746 D RPCS3   : Building function 0x3be8... (size 6, __spu-0x03be8-sXkbCnNz7PsVmt3r5GwccrR32wJt-s3cg1-cortex-a34-neon)
+09-25 08:57:55.903 11165 11749 D RPCS3   : Building function 0x3bb8... (size 5, __spu-0x03bb8-Gn813JNytquJaPgf5pQzeW6ugNEt-s3cg1-cortex-a34-neon)
+09-25 08:57:55.972 11165 11683 D RPCS3   : SPU Runtime: Worker 1 built 812 programs.
+09-25 08:57:55.972 11165 11683 D RPCS3   : SPU Runtime: Worker 2 built 0 programs.
+09-25 08:57:55.972 11165 11683 D RPCS3   : SPU Runtime: Worker 3 built 786 programs.
+09-25 08:57:55.972 11165 11683 D RPCS3   : SPU Runtime: Worker 4 built 756 programs.
+09-25 08:57:55.978 11165 11683 D RPCS3   : SPU Runtime: Worker 5 built 758 programs.
+09-25 08:57:55.978 11165 11683 D RPCS3   : SPU Runtime: Worker 6 built 735 programs.
+09-25 08:57:55.978 11165 11683 D RPCS3   : SPU Runtime: Worker 7 built 754 programs.
+09-25 08:57:55.982 11165 11683 D RPCS3   : SPU Runtime: Worker 8 built 810 programs.
+09-25 08:57:55.982 11165 11683 D RPCS3   : SPU Runtime: Workers built 5411 programs.
+09-25 08:57:55.982 11165 11683 I RPCS3   : SPU Runtime: Built 6048 functions.
+09-25 08:57:58.540 11165 11617 D RPCS3   : CPU Usage: Total: 4.2%, Cores: 0.0%, 0.0%, 0.0%, 0.0%, 0.0%, 0.0%, 0.0%, 0.0%
+09-25 08:58:02.353 11165 11370 D S3PERF  : GPU load [/sys/class/kgsl/kgsl-3d0/gpubusy]: raw='0       0' -> load=null%
+09-25 08:58:08.541 11165 11617 D RPCS3   : CPU Usage: Total: 3.6%, Cores: 0.0%, 0.0%, 0.0%, 0.0%, 0.0%, 0.0%, 0.0%, 0.0%
+09-25 08:58:11.043 11165 11165 W DebugPad: BUTTON START d1=8 d2=0 press 120ms request_id=s3-1790306890988091338-1991945-26569
+09-25 08:58:11.163 11165 11165 W DebugPad: BUTTON START release request_id=s3-1790306890988091338-1991945-26569
+09-25 08:58:12.452 11165 11370 D S3PERF  : GPU load [/sys/class/kgsl/kgsl-3d0/gpubusy]: raw='0       0' -> load=null%
+09-25 08:58:18.540 11165 11617 D RPCS3   : CPU Usage: Total: 3.1%, Cores: 0.0%, 0.0%, 0.0%, 0.0%, 0.0%, 0.0%, 0.0%, 0.0%
+09-25 08:58:23.577 11165 11370 D S3PERF  : GPU load [/sys/class/kgsl/kgsl-3d0/gpubusy]: raw='0       0' -> load=null%
+09-25 08:58:28.540 11165 11617 D RPCS3   : CPU Usage: Total: 3.8%, Cores: 0.0%, 0.0%, 0.0%, 0.0%, 0.0%, 0.0%, 0.0%, 0.0%
+09-25 08:58:33.621 11165 11370 D S3PERF  : GPU load [/sys/class/kgsl/kgsl-3d0/gpubusy]: raw='0       0' -> load=null%
+09-25 08:58:38.541 11165 11617 D RPCS3   : CPU Usage: Total: 3.8%, Cores: 0.0%, 0.0%, 0.0%, 0.0%, 0.0%, 0.0%, 0.0%, 0.0%
+09-25 08:58:41.468 11165 11165 W DebugPad: BUTTON CROSS d1=0 d2=64 press 120ms request_id=s3-1790306921426193495-1992824-25534
+09-25 08:58:41.588 11165 11165 W DebugPad: BUTTON CROSS release request_id=s3-1790306921426193495-1992824-25534
+09-25 08:58:43.650 11165 11370 D S3PERF  : GPU load [/sys/class/kgsl/kgsl-3d0/gpubusy]: raw='0       0' -> load=null%
+09-25 08:58:48.540 11165 11617 D RPCS3   : CPU Usage: Total: 3.6%, Cores: 0.0%, 0.0%, 0.0%, 0.0%, 0.0%, 0.0%, 0.0%, 0.0%
+09-25 08:58:53.144 11165 11165 W DebugPad: BUTTON SQUARE d1=0 d2=128 press 120ms request_id=s3-1790306933103897833-1993176-976
+09-25 08:58:53.264 11165 11165 W DebugPad: BUTTON SQUARE release request_id=s3-1790306933103897833-1993176-976
+09-25 08:58:53.704 11165 11370 D S3PERF  : GPU load [/sys/class/kgsl/kgsl-3d0/gpubusy]: raw='0       0' -> load=null%
+09-25 08:58:58.540 11165 11617 D RPCS3   : CPU Usage: Total: 3.9%, Cores: 0.0%, 0.0%, 0.0%, 0.0%, 0.0%, 0.0%, 0.0%, 0.0%
+09-25 08:59:02.342 11165 11165 W DebugPad: BUTTON SQUARE d1=0 d2=128 press 120ms request_id=s3-1790306942294810204-1993432-29853
+09-25 08:59:02.463 11165 11165 W DebugPad: BUTTON SQUARE release request_id=s3-1790306942294810204-1993432-29853
+09-25 08:59:04.910 11165 11370 D S3PERF  : GPU load [/sys/class/kgsl/kgsl-3d0/gpubusy]: raw='0       0' -> load=null%
+09-25 08:59:08.540 11165 11617 D RPCS3   : CPU Usage: Total: 3.8%, Cores: 0.0%, 0.0%, 0.0%, 0.0%, 0.0%, 0.0%, 0.0%, 0.0%
+09-25 08:59:11.542 11165 11165 W DebugPad: BUTTON SQUARE d1=0 d2=128 press 120ms request_id=s3-1790306951495999374-1993723-21585
+09-25 08:59:11.663 11165 11165 W DebugPad: BUTTON SQUARE release request_id=s3-1790306951495999374-1993723-21585
+09-25 08:59:14.944 11165 11370 D S3PERF  : GPU load [/sys/class/kgsl/kgsl-3d0/gpubusy]: raw='0       0' -> load=null%
+09-25 08:59:18.540 11165 11617 D RPCS3   : CPU Usage: Total: 3.8%, Cores: 0.0%, 0.0%, 0.0%, 0.0%, 0.0%, 0.0%, 0.0%, 0.0%
+09-25 08:59:20.748 11165 11165 W DebugPad: BUTTON SQUARE d1=0 d2=128 press 120ms request_id=s3-1790306960706710042-1994348-975
+09-25 08:59:20.870 11165 11165 W DebugPad: BUTTON SQUARE release request_id=s3-1790306960706710042-1994348-975
+09-25 08:59:26.183 11165 11370 D S3PERF  : GPU load [/sys/class/kgsl/kgsl-3d0/gpubusy]: raw='0       0' -> load=null%
+09-25 08:59:28.540 11165 11617 D RPCS3   : CPU Usage: Total: 3.6%, Cores: 0.0%, 0.0%, 0.0%, 0.0%, 0.0%, 0.0%, 0.0%, 0.0%
+09-25 08:59:29.954 11165 11165 W DebugPad: BUTTON SQUARE d1=0 d2=128 press 120ms request_id=s3-1790306969918581718-1994668-3392
+09-25 08:59:30.074 11165 11165 W DebugPad: BUTTON SQUARE release request_id=s3-1790306969918581718-1994668-3392
+09-25 08:59:37.375 11165 11370 D S3PERF  : GPU load [/sys/class/kgsl/kgsl-3d0/gpubusy]: raw='0       0' -> load=null%
+09-25 08:59:38.540 11165 11617 D RPCS3   : CPU Usage: Total: 3.1%, Cores: 0.0%, 0.0%, 0.0%, 0.0%, 0.0%, 0.0%, 0.0%, 0.0%

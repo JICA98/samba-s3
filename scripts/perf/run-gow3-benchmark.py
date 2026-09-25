@@ -36,10 +36,10 @@ PKG_NAME = "com.zenithblue.sambas3"
 DEFAULT_GAME = "direct_iso/BCUS98111"
 DEFAULT_DEVICE = "d30a1726"
 
-# Pinned commit and release hashes for verification (E08 / J06 SPU SIMD Lowering)
-EXPECTED_CORE_HASH = "c47f879bbeb1f152129f61a013fa84b823bba803"
-EXPECTED_APK_SHA256 = "69a27d474f7b974e026c598717ac53732b64a80147ce679ffc31646c813b271e"
-EXPECTED_SO_SHA256 = "a6711f512673e4e6c4885dbbfd4ce3432ce074967dc3ec27203a384efad31e43"
+# Pinned commit and release hashes for verification (E07 / J07 SPU Cache Fix)
+EXPECTED_CORE_HASH = "af45237121787df3a8ca3cd316529c6ae76acc44"
+EXPECTED_APK_SHA256 = "c826e7df74353cd70636ffed195144d1b7b5b024b200f3538c602c1dc9b1de2c"
+EXPECTED_SO_SHA256 = "5e23f636fd5aec47e4f4ba0ffa28faa455563be42d028686c07782807b966607"
 
 
 def run_cmd(cmd: List[str], timeout: Optional[int] = None) -> subprocess.CompletedProcess[str]:
@@ -545,6 +545,14 @@ def main() -> int:
         return 4
 
     print(f"[*] Process alive (PID {pid}). Executing gameplay benchmark window ({args.duration}s)...")
+    screencap_dest = "/home/abhaybyte/.gemini/antigravity-cli/brain/81b61061-cc69-40f0-8ee0-d16dcbef2009/device_screen_fixed.png"
+    try:
+        with open(screencap_dest, "wb") as f:
+            subprocess.run(["adb", "-s", args.serial, "exec-out", "screencap", "-p"], stdout=f, timeout=15)
+        print(f"[*] Captured initial gameplay screenshot to {screencap_dest}")
+    except Exception as e:
+        print(f"[!] Warning: initial screencap failed: {e}")
+
     start_time = time.time()
     next_pad_time = start_time + 5.0
 

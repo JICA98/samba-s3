@@ -1,0 +1,111 @@
+[*] Collecting from d30a1726 -> /home/abhaybyte/repos/samba-s3/docs/benchmarks/evidence-e05-j07-spu-compilation-dedup
+[*] Files:
+ 
+activity-state.txt 46K
+battery.txt 734
+cache-ls.txt 738
+cache-RPCSX.log 1.5M
+cache-RPCSX.old.log 2.8M
+cache-TTY.log 0
+dropbox.txt 0
+exit-info.txt 5.7K
+get-samba-logs.out 129
+input-state.txt 47K
+logcat-crash.log 0
+logcat-events.log 336K
+logcat-kernel.log 92K
+logcat-process.log 675K
+logcat-sambas3.txt 37K
+logcat-tail.log 733K
+logs-ls.txt 310
+manifest.txt 283
+meminfo.txt 3.5K
+process-maps.txt 55
+proc-meminfo.txt 1.3K
+pstore.txt 4
+rpcsx_app.log 3.2M
+rpcsx_backend.log 12M
+rpcsx_vulkan.log 1.1K
+surfaceflinger.txt 77K
+thermal.txt 8.9K
+threads-names.txt 1.7K
+threads-top.txt 8.2K
+tombstone-anr-ls.txt 300
+window-state.txt 62K
+
+--- Current core log: sync, GPU, crash, and boot evidence (not stale app rotations) ---
+/home/abhaybyte/repos/samba-s3/docs/benchmarks/evidence-e05-j07-spu-compilation-dedup/cache-RPCSX.log:1337:·! 0:00:02.428125 {TID: 500304466624} RSX: Vulkan: Renderer initialized on device 'Turnip Adreno (TM) 750'
+
+--- Backend FATAL/Access violation (backend + rotated, last 30) ---
+(none)
+
+--- Frontend/JNI errors (app log + rotated, last 20) ---
+4505:[09-17 18:21:34.403] I/S3EXIT: event=requested sessionId=1789649052362-2bad7cba activityInstanceId=1 stopRequestId=1 stopReason=InGameExit finishReason=ExplicitExit activeGame=direct_iso/BCUS98125 nativeState=reading journalState=RUNNING pendingRecovery=none fatalEventId=none timestamp=1789649494402
+4510:[09-17 18:21:34.408] I/S3EXIT: event=STOPPING sessionId=1789649052362-2bad7cba activityInstanceId=1 stopRequestId=1 stopReason=InGameExit finishReason=ExplicitExit activeGame=direct_iso/BCUS98125 nativeState=Paused journalState=STOPPING pendingRecovery=none fatalEventId=none timestamp=1789649494408
+4524:[09-17 18:21:35.431] I/S3EXIT: event=native-Stopped sessionId=1789649052362-2bad7cba activityInstanceId=1 stopRequestId=1 stopReason=InGameExit finishReason=ExplicitExit activeGame=direct_iso/BCUS98125 nativeState=Stopped journalState=STOPPING pendingRecovery=none fatalEventId=none timestamp=1789649495431
+4527:[09-17 18:21:35.501] I/S3EXIT: event=CLEAN_STOP sessionId=1789649052362-2bad7cba activityInstanceId=1 stopRequestId=1 stopReason=InGameExit finishReason=ExplicitExit activeGame=direct_iso/BCUS98125 nativeState=Stopped journalState=CLEAN_STOP pendingRecovery=none fatalEventId=none timestamp=1789649495501
+4528:[09-17 18:21:35.502] I/S3EXIT: event=activeGame-null sessionId=1789649052362-2bad7cba activityInstanceId=1 stopRequestId=1 stopReason=InGameExit finishReason=ExplicitExit activeGame=null nativeState=Stopped journalState=CLEAN_STOP pendingRecovery=none fatalEventId=none timestamp=1789649495502
+4531:[09-17 18:21:35.502] I/S3EXIT: event=finish-external-stop sessionId=1789649052362-2bad7cba activityInstanceId=1 stopRequestId=1 stopReason=InGameExit finishReason=ExplicitExit activeGame=null nativeState=Stopped journalState=CLEAN_STOP pendingRecovery=none fatalEventId=none timestamp=1789649495502
+4547:[09-17 18:21:36.080] I/S3EXIT: event=host-unregistered sessionId=1789649052362-2bad7cba activityInstanceId=1 stopRequestId=1 stopReason=InGameExit finishReason=ExplicitExit activeGame=null nativeState=Stopped journalState=CLEAN_STOP pendingRecovery=none fatalEventId=none timestamp=1789649496080
+29059:[09-23 19:47:42.575] I/S3EXIT: event=requested sessionId=1790172723487-88bfe318 activityInstanceId=1 stopRequestId=1 stopReason=InGameExit finishReason=ExplicitExit activeGame=direct_iso/BCUS98111 nativeState=reading journalState=RUNNING pendingRecovery=none fatalEventId=none timestamp=1790173062575
+29064:[09-23 19:47:42.582] I/S3EXIT: event=STOPPING sessionId=1790172723487-88bfe318 activityInstanceId=1 stopRequestId=1 stopReason=InGameExit finishReason=ExplicitExit activeGame=direct_iso/BCUS98111 nativeState=Paused journalState=STOPPING pendingRecovery=none fatalEventId=none timestamp=1790173062582
+29102:[09-23 19:47:45.413] I/S3EXIT: event=native-Stopped sessionId=1790172723487-88bfe318 activityInstanceId=1 stopRequestId=1 stopReason=InGameExit finishReason=ExplicitExit activeGame=direct_iso/BCUS98111 nativeState=Stopped journalState=STOPPING pendingRecovery=none fatalEventId=none timestamp=1790173065413
+29105:[09-23 19:47:45.488] I/S3EXIT: event=CLEAN_STOP sessionId=1790172723487-88bfe318 activityInstanceId=1 stopRequestId=1 stopReason=InGameExit finishReason=ExplicitExit activeGame=direct_iso/BCUS98111 nativeState=Stopped journalState=CLEAN_STOP pendingRecovery=none fatalEventId=none timestamp=1790173065488
+29106:[09-23 19:47:45.489] I/S3EXIT: event=activeGame-null sessionId=1790172723487-88bfe318 activityInstanceId=1 stopRequestId=1 stopReason=InGameExit finishReason=ExplicitExit activeGame=null nativeState=Stopped journalState=CLEAN_STOP pendingRecovery=none fatalEventId=none timestamp=1790173065489
+29109:[09-23 19:47:45.489] I/S3EXIT: event=finish-external-stop sessionId=1790172723487-88bfe318 activityInstanceId=1 stopRequestId=1 stopReason=InGameExit finishReason=ExplicitExit activeGame=null nativeState=Stopped journalState=CLEAN_STOP pendingRecovery=none fatalEventId=none timestamp=1790173065489
+29124:[09-23 19:47:46.140] I/S3EXIT: event=host-unregistered sessionId=1790172723487-88bfe318 activityInstanceId=1 stopRequestId=1 stopReason=InGameExit finishReason=ExplicitExit activeGame=null nativeState=Stopped journalState=CLEAN_STOP pendingRecovery=none fatalEventId=none timestamp=1790173066140
+33691:[09-24 23:26:28.529] I/S3EXIT: event=requested sessionId=1790272444569-3b3299e6 activityInstanceId=2 stopRequestId=1 stopReason=InGameExit finishReason=ExplicitExit activeGame=direct_iso/BCUS98111 nativeState=reading journalState=RUNNING pendingRecovery=none fatalEventId=none timestamp=1790272588529
+33696:[09-24 23:26:28.541] I/S3EXIT: event=STOPPING sessionId=1790272444569-3b3299e6 activityInstanceId=2 stopRequestId=1 stopReason=InGameExit finishReason=ExplicitExit activeGame=direct_iso/BCUS98111 nativeState=Paused journalState=STOPPING pendingRecovery=none fatalEventId=none timestamp=1790272588541
+
+--- Vulkan errors (vulkan + rotated, last 30) ---
+(none)
+
+--- RSX sleepy (last 20) ---
+(none)
+
+--- Crash buffer (last 20) ---
+(empty crash buffer)
+
+--- Exit-info summary ---
+          process=com.zenithblue.sambas3 reason=16 (PACKAGE UPDATED) subreason=0 (UNKNOWN) status=0
+          importance=400 pss=0.00 rss=487MB description=stop com.zenithblue.sambas3 due to installPackageLI state=empty trace=null
+        ApplicationExitInfo #1:
+          timestamp=2026-09-25 08:08:26.434 pid=1853 realUid=10463 packageUid=10463 definingUid=10463 user=0
+          process=com.zenithblue.sambas3 reason=16 (PACKAGE UPDATED) subreason=0 (UNKNOWN) status=0
+          importance=100 pss=0.00 rss=239MB description=stop com.zenithblue.sambas3 due to installPackageLI state=empty trace=null
+        ApplicationExitInfo #2:
+          timestamp=2026-09-25 07:30:14.471 pid=32489 realUid=10463 packageUid=10463 definingUid=10463 user=0
+          process=com.zenithblue.sambas3 reason=2 (SIGNALED) subreason=0 (UNKNOWN) status=6
+          importance=100 pss=0.00 rss=3.4GB description=null state=empty trace=null
+        ApplicationExitInfo #3:
+          timestamp=2026-09-25 07:27:32.889 pid=29971 realUid=10463 packageUid=10463 definingUid=10463 user=0
+          process=com.zenithblue.sambas3 reason=16 (PACKAGE UPDATED) subreason=0 (UNKNOWN) status=0
+          importance=100 pss=0.00 rss=355MB description=stop com.zenithblue.sambas3 due to installPackageLI state=empty trace=null
+        ApplicationExitInfo #4:
+          timestamp=2026-09-25 04:07:59.076 pid=28985 realUid=10463 packageUid=10463 definingUid=10463 user=0
+          process=com.zenithblue.sambas3 reason=2 (SIGNALED) subreason=0 (UNKNOWN) status=6
+          importance=100 pss=0.00 rss=2.7GB description=null state=empty trace=null
+        ApplicationExitInfo #5:
+          timestamp=2026-09-25 04:05:06.280 pid=27379 realUid=10463 packageUid=10463 definingUid=10463 user=0
+          process=com.zenithblue.sambas3 reason=16 (PACKAGE UPDATED) subreason=0 (UNKNOWN) status=0
+          importance=100 pss=0.00 rss=2.7GB description=stop com.zenithblue.sambas3 due to installPackageLI state=empty trace=null
+        ApplicationExitInfo #6:
+          timestamp=2026-09-25 03:37:20.246 pid=25144 realUid=10463 packageUid=10463 definingUid=10463 user=0
+          process=com.zenithblue.sambas3 reason=16 (PACKAGE UPDATED) subreason=0 (UNKNOWN) status=0
+          importance=100 pss=0.00 rss=2.7GB description=stop com.zenithblue.sambas3 due to installPackageLI state=empty trace=null
+        ApplicationExitInfo #7:
+          timestamp=2026-09-25 03:07:43.801 pid=22188 realUid=10463 packageUid=10463 definingUid=10463 user=0
+          process=com.zenithblue.sambas3 reason=16 (PACKAGE UPDATED) subreason=0 (UNKNOWN) status=0
+          importance=100 pss=0.00 rss=3.9GB description=stop com.zenithblue.sambas3 due to installPackageLI state=empty trace=null
+        ApplicationExitInfo #8:
+          timestamp=2026-09-25 02:41:35.649 pid=10950 realUid=10463 packageUid=10463 definingUid=10463 user=0
+          process=com.zenithblue.sambas3 reason=16 (PACKAGE UPDATED) subreason=0 (UNKNOWN) status=0
+          importance=400 pss=0.00 rss=270MB description=stop com.zenithblue.sambas3 due to installPackageLI state=empty trace=null
+        ApplicationExitInfo #9:
+          timestamp=2026-09-25 00:33:03.880 pid=4189 realUid=10463 packageUid=10463 definingUid=10463 user=0
+          process=com.zenithblue.sambas3 reason=3 (LOW_MEMORY) subreason=0 (UNKNOWN) status=0
+          importance=100 pss=0.00 rss=2.5GB description=null state=empty trace=null
+        ApplicationExitInfo #10:
+          timestamp=2026-09-25 00:05:36.338 pid=6927 realUid=10463 packageUid=10463 definingUid=10463 user=0
+
+[*] Done: /home/abhaybyte/repos/samba-s3/docs/benchmarks/evidence-e05-j07-spu-compilation-dedup

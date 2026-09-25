@@ -1,0 +1,77 @@
+11165 : ithblue.sambas3
+11183 : Metrics Backgro
+11184 : Signal Catcher
+11185 : perfetto_hprof_
+11187 : Jit thread pool
+11188 : HeapTaskDaemon
+11189 : ReferenceQueueD
+11190 : FinalizerDaemon
+11191 : FinalizerWatchd
+11192 : binder:11165_1
+11193 : binder:11165_2
+11195 : binder:11165_3
+11198 : Profile Saver
+11294 : RenderThread
+11360 : DefaultDispatch
+11361 : DefaultDispatch
+11370 : DefaultDispatch
+11404 : Log Writer
+11405 : ithblue.sambas3
+11419 : Thread-5
+11420 : Thread-6
+11421 : DefaultDispatch
+11424 : TracingMuxer
+11429 : pool-4-thread-1
+11430 : hwuiTask0
+11434 : hwuiTask1
+11484 : DefaultDispatch
+11497 : DefaultDispatch
+11501 : DefaultDispatch
+11508 : DefaultDispatch
+11517 : GrallocUploadTh
+11527 : binder:11165_4
+11534 : SurfaceSyncGrou
+11539 : DefaultExecutor
+11548 : binder:11165_2
+11566 : InteractionJank
+11590 : queued-work-loo
+11612 : Progress Dialog
+11617 : Performance Sen
+11619 : PS Move Worker 
+11620 : PS Move Worker 
+11621 : PS Move Worker 
+11622 : PS Move Worker 
+11630 : Gem Thread
+11631 : Camera Thread
+11632 : Usb Manager Thr
+11633 : cellAudio Threa
+11636 : MediaList Threa
+11640 : Network P2P Thr
+11642 : GDB Server
+11643 : CPU Profiler
+11644 : VUART AV Thread
+11645 : Timer Thread
+11646 : cellAudio Threa
+11647 : RsxAudioData Th
+11648 : cellAudio Threa
+11649 : cellAudio Threa
+11650 : Tcp Over Udp Ti
+11651 : Network Thread
+11652 : LV2 Watchdog Th
+11653 : PPU Syscall Usa
+11654 : Signaling Manag
+11655 : NetStart Hack
+11656 : MsgDialog Close
+11658 : Microphone Thre
+11659 : Overlay Input T
+11666 : com.ze:traceq0
+11678 : RSX.W1
+11679 : RSX.W2
+11680 : Thread-20
+11681 : rsx::thread
+11682 : Pad Thread
+11683 : PPU[0x1000000] 
+11685 : S3 Fresh Boot F
+11700 : AAudio_1
+11750 : binder:11165_5
+11753 : binder:11165_6

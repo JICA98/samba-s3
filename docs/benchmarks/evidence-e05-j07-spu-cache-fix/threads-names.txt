@@ -1,0 +1,119 @@
+13504 : ithblue.sambas3
+13506 : Signal Catcher
+13507 : perfetto_hprof_
+13508 : Jit thread pool
+13509 : HeapTaskDaemon
+13510 : ReferenceQueueD
+13511 : FinalizerDaemon
+13512 : FinalizerWatchd
+13513 : binder:13504_1
+13514 : binder:13504_2
+13515 : binder:13504_3
+13518 : Profile Saver
+13519 : RenderThread
+13523 : DefaultDispatch
+13524 : DefaultDispatch
+13526 : Log Writer
+13527 : ithblue.sambas3
+13528 : Thread-5
+13529 : Thread-6
+13530 : DefaultDispatch
+13531 : DefaultDispatch
+13532 : DefaultDispatch
+13533 : TracingMuxer
+13534 : pool-4-thread-1
+13535 : hwuiTask0
+13536 : hwuiTask1
+13538 : DefaultDispatch
+13539 : DefaultDispatch
+13543 : SurfaceSyncGrou
+13544 : GrallocUploadTh
+13546 : DefaultExecutor
+13551 : DefaultDispatch
+13552 : binder:13504_4
+13554 : binder:13504_1
+13561 : InteractionJank
+13574 : queued-work-loo
+13584 : Progress Dialog
+13585 : Performance Sen
+13586 : PS Move Worker 
+13587 : PS Move Worker 
+13588 : PS Move Worker 
+13589 : PS Move Worker 
+13590 : Gem Thread
+13591 : Camera Thread
+13592 : Usb Manager Thr
+13593 : cellAudio Threa
+13596 : MediaList Threa
+13597 : Network P2P Thr
+13598 : GDB Server
+13599 : CPU Profiler
+13600 : cellAudio Threa
+13601 : VUART AV Thread
+13602 : cellAudio Threa
+13603 : Timer Thread
+13604 : cellAudio Threa
+13605 : RsxAudioData Th
+13606 : Tcp Over Udp Ti
+13607 : Network Thread
+13608 : LV2 Watchdog Th
+13609 : PPU Syscall Usa
+13610 : Signaling Manag
+13611 : NetStart Hack
+13612 : MsgDialog Close
+13614 : Microphone Thre
+13616 : Overlay Input T
+13617 : com.ze:traceq0
+13621 : RSX.W1
+13622 : RSX.W2
+13623 : Thread-20
+13624 : rsx::thread
+13625 : Pad Thread
+13627 : PPU[0x1000000] 
+13651 : AAudio_1
+13716 : binder:13504_5
+13724 : SPU[0x0000100] 
+13725 : SPU[0x1000100] 
+13726 : SPU[0x2000100] 
+13727 : SPU[0x3000100] 
+13728 : SPU[0x4000100] 
+13729 : PPU[0x1000001] 
+13730 : PPU[0x1000002] 
+13731 : SPU[0x0000200] 
+13732 : PPU[0x1000003] 
+13733 : PPU[0x1000004] 
+13734 : PPU[0x1000005] 
+13735 : PPU[0x1000006] 
+13736 : PPU[0x1000007] 
+13737 : PPU[0x1000008] 
+13738 : PPU[0x1000009] 
+13739 : PPU[0x100000a] 
+13740 : PPU[0x100000b] 
+13743 : VBlank Thread
+13744 : PPU[0x100000e] 
+13745 : PPU[0x100000f] 
+13746 : PPU[0x1000010] 
+13747 : PPU[0x1000011] 
+13748 : PPU[0x1000012] 
+13751 : PPU[0x1000013] 
+13752 : PPU[0x1000014] 
+13753 : PPU[0x1000015] 
+13754 : PPU[0x1000016] 
+13755 : PPU[0x1000017] 
+13756 : PPU[0x1000018] 
+13757 : PPU[0x1000019] 
+13758 : PPU[0x100001a] 
+13759 : PPU[0x100001b] 
+13760 : PPU[0x100001c] 
+13761 : PPU[0x100001d] 
+13762 : PPU[0x100001e] 
+13763 : PPU[0x100001f] 
+13764 : PPU[0x1000020] 
+13765 : PPU[0x1000021] 
+13766 : PPU[0x1000022] 
+13767 : PPU[0x1000023] 
+13768 : PPU[0x1000024] 
+13769 : PPU[0x1000025] 
+13770 : PPU[0x1000026] 
+13771 : PPU[0x1000027] 
+13782 : binder:13504_6

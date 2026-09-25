@@ -1,0 +1,501 @@
+--------- beginning of kernel
+09-25 08:57:09.768  1097  1097 I         : [LCD][0][INFO][oplus_panel_cmd_print:120] [A0020] dsi_cmd: qcom,mdss-dsi-timing-switch-command, count=8
+09-25 08:57:09.768  1097  1097 I [ADFR][0][INFO][oplus_adfr_fakeframe_status_update:2140]h_active: 1264,refresh_rate:60,h_skew:1,sw_fps:0,fakeframe:0
+09-25 08:57:09.768  1097  1097 I         : [ADFR][0][INFO][oplus_adfr_status_reset:1851]sa status reset: auto_mode:0,fakeframe:0,sa_min_fps:60
+09-25 08:57:09.785  1097  1097 I [   info] ts_panel_notifier_callback: Notification type:4, early_trigger:0
+09-25 08:57:09.785  1097  1097 I [   info] ts_panel_notifier_callback: shashank:Received fps change old fps:120 new fps:60
+09-25 08:57:11.393  7510  7510 E iostack : irqs = 16821960, self-block = 0
+09-25 08:57:12.189  7497  7497 I         : [INFO]: OPLUS_CHG[VOOC]([oplus_vooc_fastchg_allow_or_enable_check][1335]): temp:327, temp_range:5
+09-25 08:57:12.189 10320 10320 I         : [INFO]: OPLUS_CHG[CHG_COMM]([oplus_comm_smooth_to_soc][3416]): soc[0 2 77 77 79 79] avg[3 1 0 0 0] fifo[79 79 79 79]
+09-25 08:57:12.208  9986  9986 I OPLUS_CHG[oplus_charge_info]: BATTERY[327 327 4079 4079 2041 77 79 79 4165 5416 1 0x0 4510], CHARGE[4490 500 1 1], WIRED[1 453 4893 500 1 0x0 0 0 0 2 0], WIRELESS[0 0 0 0 0 0x0 0 0 0], VOOC[0 0 0 0 0x0], UFCS[0 0 0 0x0], COMMON[6 0 0 0x0 1 0 1 5416 100 0]
+09-25 08:57:12.209  9986  9986 I         : [INFO]: OPLUS_CHG[ADSP]([oplus_chg_8350_reg_dump][7390]): sm8450_st_dump: [chg_en=0, suspend=0, pd_svooc=0], subtype=0x01],[oplus_UsbCommCapable=0, oplus_pd_svooc=0, typec_mode=0, cid_status=0x01, usb_in_status=1],[0x2606=0x87, 0x2607=0x00, 0x2608=0x0a, 0x2609=0x02], [0x260a=0x05, 0x260b=0x59, 0x260c=0x00, 0x260d=0x18], [0x260e=0x00, 0x260f=0x01, 0x2610=0x00, 0x2640=0x01], [0x2641=0x02, 0x2642=0x05, 0x2646=0x00, 0x2650=0x03], [0x2706=0x0a, 0x2707=0x0a, 0x2708=0x0a, 0x2709=0x0a], [0x270b=0xe2, 0x270c=0x48, 0x2710=0xc0, 0x280c=0x38], [0x2810=0x00, 0x2840=0x03, 0x287f=0x00, 0x2906=0x02], [0x2908=0x0f, 0x290a=0x11, 0x290b=0x01, 0x290c=0x01], [0x2910=0x11, 0x2944=0x80, 0x2950=0x02, 0x2951=0x01], [0x2952=0x0a, 0x2954=0x00, 0x2960=0xe0, 0x2b06=0x08], [0x2b07=0x00, 0x2b08=0x00, 0x2b09=0x63, 0x2b0a=0x39], [0x2b0b=0x29, 0x2b0c=0x00, 0x29a8=0x81, 0x29a9=0x83], [0x29aa=0x00, 0x2aa2=0x00, 0x2aa8=0x87, 0x2aa9=0x00], [0x2aaa=0x00],
+09-25 08:57:12.738  2949  2949 E gsi soc : qcom,msm_gsi: gsi_stop_channel:3688 chan=1 busy try again
+09-25 08:57:12.740  2949  2949 E gsi soc : qcom,msm_gsi: gsi_stop_channel:3688 chan=14 busy try again
+09-25 08:57:14.209  9986  9986 I         : [OFP][0][INFO][oplus_get_doze_disable_time:3679]oplus_get_doze_disable_time=0
+09-25 08:57:14.209  9986  9986 W [drm] [msm-dsi-warn]: dsi_display_check_status,time_gap=997708718
+09-25 08:57:14.334  5304  5304 W audit   : audit_lost=5535014 audit_rate_limit=5 audit_backlog_limit=64
+09-25 08:57:14.334  5304  5304 E audit   : rate limit exceeded
+09-25 08:57:14.832 10405 10405 E gsi soc : qcom,msm_gsi: gsi_stop_channel:3688 chan=1 busy try again
+09-25 08:57:14.835 10405 10405 E gsi soc : qcom,msm_gsi: gsi_stop_channel:3688 chan=14 busy try again
+09-25 08:57:16.781 10268 10268 E gsi soc : qcom,msm_gsi: gsi_stop_channel:3688 chan=1 busy try again
+09-25 08:57:16.784 10268 10268 E gsi soc : qcom,msm_gsi: gsi_stop_channel:3688 chan=14 busy try again
+09-25 08:57:17.311  9807  9807 I         : [INFO]: OPLUS_CHG[VOOC]([oplus_vooc_fastchg_allow_or_enable_check][1335]): temp:327, temp_range:5
+09-25 08:57:17.311 10320 10320 I         : [INFO]: OPLUS_CHG[CHG_COMM]([oplus_comm_smooth_to_soc][3416]): soc[0 2 77 77 79 79] avg[0 1 0 0 0] fifo[79 79 79 79]
+09-25 08:57:17.325  9805  9805 I OPLUS_CHG[oplus_charge_info]: BATTERY[327 327 4079 4079 1942 77 79 79 4162 5416 1 0x0 4507], CHARGE[4490 500 1 1], WIRED[1 453 4893 500 1 0x0 0 0 0 2 0], WIRELESS[0 0 0 0 0 0x0 0 0 0], VOOC[0 0 0 0 0x0], UFCS[0 0 0 0x0], COMMON[6 0 0 0x0 1 0 1 5416 100 0]
+09-25 08:57:17.327  9805  9805 I         : [INFO]: OPLUS_CHG[ADSP]([oplus_chg_8350_reg_dump][7390]): sm8450_st_dump: [chg_en=0, suspend=0, pd_svooc=0], subtype=0x01],[oplus_UsbCommCapable=0, oplus_pd_svooc=0, typec_mode=0, cid_status=0x01, usb_in_status=1],[0x2606=0x87, 0x2607=0x00, 0x2608=0x0a, 0x2609=0x02], [0x260a=0x05, 0x260b=0x59, 0x260c=0x00, 0x260d=0x18], [0x260e=0x00, 0x260f=0x01, 0x2610=0x00, 0x2640=0x01], [0x2641=0x02, 0x2642=0x05, 0x2646=0x00, 0x2650=0x03], [0x2706=0x0a, 0x2707=0x0a, 0x2708=0x0a, 0x2709=0x0a], [0x270b=0xe2, 0x270c=0x48, 0x2710=0xc0, 0x280c=0x38], [0x2810=0x00, 0x2840=0x03, 0x287f=0x00, 0x2906=0x02], [0x2908=0x0f, 0x290a=0x11, 0x290b=0x01, 0x290c=0x01], [0x2910=0x11, 0x2944=0x80, 0x2950=0x02, 0x2951=0x01], [0x2952=0x0a, 0x2954=0x00, 0x2960=0xe0, 0x2b06=0x08], [0x2b07=0x00, 0x2b08=0x00, 0x2b09=0x63, 0x2b0a=0x39], [0x2b0b=0x29, 0x2b0c=0x00, 0x29a8=0x81, 0x29a9=0x83], [0x29aa=0x00, 0x2aa2=0x00, 0x2aa8=0x87, 0x2aa9=0x00], [0x2aaa=0x00],
+09-25 08:57:19.329  9805  9805 I         : [OFP][0][INFO][oplus_get_doze_disable_time:3679]oplus_get_doze_disable_time=0
+09-25 08:57:19.329  9805  9805 W [drm] [msm-dsi-warn]: dsi_display_check_status,time_gap=1002828758
+09-25 08:57:20.685 10268 10268 E gsi soc : qcom,msm_gsi: gsi_stop_channel:3688 chan=1 busy try again
+09-25 08:57:20.686 10268 10268 E gsi soc : qcom,msm_gsi: gsi_stop_channel:3688 chan=14 busy try again
+09-25 08:57:21.370 10268 10268 E gsi soc : qcom,msm_gsi: gsi_stop_channel:3688 chan=1 busy try again
+09-25 08:57:21.372 10268 10268 E gsi soc : qcom,msm_gsi: gsi_stop_channel:3688 chan=14 busy try again
+09-25 08:57:21.637  7510  7510 E iostack : irqs = 16822035, self-block = 1
+09-25 08:57:21.665  1097  1097 I [   info] ts_panel_notifier_callback: Notification type:4, early_trigger:1
+09-25 08:57:21.665  1097  1097 I [   info] ts_panel_notifier_callback: shashank:Received fps change old fps:60 new fps:120
+09-25 08:57:21.674  1097  1097 E         : [LCD][0][ERR][oplus_panel_switch_vid_mode:475] oplus_panel_switch_vid_mode not support
+09-25 08:57:21.674  1097  1097 I [drm:dsi_display_set_mode [msm_drm]] [msm-dsi-info]: mdp_transfer_time=6290, hactive=1264, vactive=2780, fps=120, h_skew=0, clk_rate=1012000000, h_sync_width=2,				h_front_porch26, h_back_porch=26, v_back_porch=42, v_sync_width=2, v_front_porch=58
+09-25 08:57:21.675  1097  1097 I [ADFR][0][INFO][oplus_adfr_fakeframe_status_update:2140]h_active: 1264,refresh_rate:120,h_skew:0,sw_fps:0,fakeframe:0
+09-25 08:57:21.678  1097  1097 I         : [LCD][0][INFO][oplus_panel_cmd_print:120] [A0020] dsi_cmd: qcom,mdss-dsi-timing-switch-command, count=8
+09-25 08:57:21.678  1097  1097 I [ADFR][0][INFO][oplus_adfr_fakeframe_status_update:2140]h_active: 1264,refresh_rate:120,h_skew:0,sw_fps:0,fakeframe:1
+09-25 08:57:21.678  1097  1097 I         : [ADFR][0][INFO][oplus_adfr_status_reset:1851]sa status reset: auto_mode:0,fakeframe:1,sa_min_fps:120
+09-25 08:57:21.697  1097  1097 I [   info] ts_panel_notifier_callback: Notification type:4, early_trigger:0
+09-25 08:57:21.697  1097  1097 I [   info] ts_panel_notifier_callback: shashank:Received fps change old fps:60 new fps:120
+09-25 08:57:21.758  1097  1097 I [   info] ts_panel_notifier_callback: Notification type:4, early_trigger:1
+09-25 08:57:21.758  1097  1097 I [   info] ts_panel_notifier_callback: shashank:Received fps change old fps:120 new fps:60
+09-25 08:57:21.759  1097  1097 E         : [LCD][0][ERR][oplus_panel_switch_vid_mode:475] oplus_panel_switch_vid_mode not support
+09-25 08:57:21.759  1097  1097 I [drm:dsi_display_set_mode [msm_drm]] [msm-dsi-info]: mdp_transfer_time=6290, hactive=1264, vactive=2780, fps=60, h_skew=1, clk_rate=1012000000, h_sync_width=2,				h_front_porch26, h_back_porch=26, v_back_porch=42, v_sync_width=2, v_front_porch=58
+09-25 08:57:21.759  1097  1097 I [ADFR][0][INFO][oplus_adfr_fakeframe_status_update:2140]h_active: 1264,refresh_rate:60,h_skew:1,sw_fps:0,fakeframe:0
+09-25 08:57:21.765  1097  1097 I         : [LCD][0][INFO][oplus_panel_cmd_print:120] [A0020] dsi_cmd: qcom,mdss-dsi-timing-switch-command, count=8
+09-25 08:57:21.765  1097  1097 I [ADFR][0][INFO][oplus_adfr_fakeframe_status_update:2140]h_active: 1264,refresh_rate:60,h_skew:1,sw_fps:0,fakeframe:0
+09-25 08:57:21.765  1097  1097 I         : [ADFR][0][INFO][oplus_adfr_status_reset:1851]sa status reset: auto_mode:0,fakeframe:0,sa_min_fps:60
+09-25 08:57:21.782  1097  1097 I [   info] ts_panel_notifier_callback: Notification type:4, early_trigger:0
+09-25 08:57:21.782  1097  1097 I [   info] ts_panel_notifier_callback: shashank:Received fps change old fps:120 new fps:60
+09-25 08:57:21.815  1097  1097 I [   info] ts_panel_notifier_callback: Notification type:4, early_trigger:1
+09-25 08:57:21.815  1097  1097 I [   info] ts_panel_notifier_callback: shashank:Received fps change old fps:60 new fps:120
+09-25 08:57:21.823  1097  1097 E         : [LCD][0][ERR][oplus_panel_switch_vid_mode:475] oplus_panel_switch_vid_mode not support
+09-25 08:57:21.823  1097  1097 I [drm:dsi_display_set_mode [msm_drm]] [msm-dsi-info]: mdp_transfer_time=6290, hactive=1264, vactive=2780, fps=120, h_skew=0, clk_rate=1012000000, h_sync_width=2,				h_front_porch26, h_back_porch=26, v_back_porch=42, v_sync_width=2, v_front_porch=58
+09-25 08:57:21.825  1097  1097 I [ADFR][0][INFO][oplus_adfr_fakeframe_status_update:2140]h_active: 1264,refresh_rate:120,h_skew:0,sw_fps:0,fakeframe:0
+09-25 08:57:21.827  1097  1097 I         : [LCD][0][INFO][oplus_panel_cmd_print:120] [A0020] dsi_cmd: qcom,mdss-dsi-timing-switch-command, count=8
+09-25 08:57:21.828  1097  1097 I [ADFR][0][INFO][oplus_adfr_fakeframe_status_update:2140]h_active: 1264,refresh_rate:120,h_skew:0,sw_fps:0,fakeframe:1
+09-25 08:57:21.828  1097  1097 I         : [ADFR][0][INFO][oplus_adfr_status_reset:1851]sa status reset: auto_mode:0,fakeframe:1,sa_min_fps:120
+09-25 08:57:21.846  1097  1097 I [   info] ts_panel_notifier_callback: Notification type:4, early_trigger:0
+09-25 08:57:21.846  1097  1097 I [   info] ts_panel_notifier_callback: shashank:Received fps change old fps:60 new fps:120
+09-25 08:57:22.025  1097  1097 I [   info] ts_panel_notifier_callback: Notification type:4, early_trigger:1
+09-25 08:57:22.025  1097  1097 I [   info] ts_panel_notifier_callback: shashank:Received fps change old fps:120 new fps:60
+09-25 08:57:22.029  1097  1097 E         : [LCD][0][ERR][oplus_panel_switch_vid_mode:475] oplus_panel_switch_vid_mode not support
+09-25 08:57:22.029  1097  1097 I [drm:dsi_display_set_mode [msm_drm]] [msm-dsi-info]: mdp_transfer_time=6290, hactive=1264, vactive=2780, fps=60, h_skew=1, clk_rate=1012000000, h_sync_width=2,				h_front_porch26, h_back_porch=26, v_back_porch=42, v_sync_width=2, v_front_porch=58
+09-25 08:57:22.031  1097  1097 I [ADFR][0][INFO][oplus_adfr_fakeframe_status_update:2140]h_active: 1264,refresh_rate:60,h_skew:1,sw_fps:0,fakeframe:0
+09-25 08:57:22.040  1097  1097 I         : [LCD][0][INFO][oplus_panel_cmd_print:120] [A0020] dsi_cmd: qcom,mdss-dsi-timing-switch-command, count=8
+09-25 08:57:22.040  1097  1097 I [ADFR][0][INFO][oplus_adfr_fakeframe_status_update:2140]h_active: 1264,refresh_rate:60,h_skew:1,sw_fps:0,fakeframe:0
+09-25 08:57:22.040  1097  1097 I         : [ADFR][0][INFO][oplus_adfr_status_reset:1851]sa status reset: auto_mode:0,fakeframe:0,sa_min_fps:60
+09-25 08:57:22.056  1097  1097 I [   info] ts_panel_notifier_callback: Notification type:4, early_trigger:0
+09-25 08:57:22.056  1097  1097 I [   info] ts_panel_notifier_callback: shashank:Received fps change old fps:120 new fps:60
+09-25 08:57:22.088  1097  1097 I [   info] ts_panel_notifier_callback: Notification type:4, early_trigger:1
+09-25 08:57:22.088  1097  1097 I [   info] ts_panel_notifier_callback: shashank:Received fps change old fps:60 new fps:120
+09-25 08:57:22.098  1097  1097 E         : [LCD][0][ERR][oplus_panel_switch_vid_mode:475] oplus_panel_switch_vid_mode not support
+09-25 08:57:22.098  1097  1097 I [drm:dsi_display_set_mode [msm_drm]] [msm-dsi-info]: mdp_transfer_time=6290, hactive=1264, vactive=2780, fps=120, h_skew=0, clk_rate=1012000000, h_sync_width=2,				h_front_porch26, h_back_porch=26, v_back_porch=42, v_sync_width=2, v_front_porch=58
+09-25 08:57:22.098  1097  1097 I [ADFR][0][INFO][oplus_adfr_fakeframe_status_update:2140]h_active: 1264,refresh_rate:120,h_skew:0,sw_fps:0,fakeframe:0
+09-25 08:57:22.102  1097  1097 I         : [LCD][0][INFO][oplus_panel_cmd_print:120] [A0020] dsi_cmd: qcom,mdss-dsi-timing-switch-command, count=8
+09-25 08:57:22.102  1097  1097 I [ADFR][0][INFO][oplus_adfr_fakeframe_status_update:2140]h_active: 1264,refresh_rate:120,h_skew:0,sw_fps:0,fakeframe:1
+09-25 08:57:22.102  1097  1097 I         : [ADFR][0][INFO][oplus_adfr_status_reset:1851]sa status reset: auto_mode:0,fakeframe:1,sa_min_fps:120
+09-25 08:57:22.121  1097  1097 I <A0020> len: 900 dsi_display_set_backlight 03:27:08.696:2729,03:27:14.586:2729,03:27:14.669:2729,03:27:16.051:2729,03:27:18.047:2729,03:27:18.180:2729,03:27:18.987:2729,03:27:19.071:2729,03:27:19.170:2729,03:27:19.237:2729,03:27:19.337:2729,03:27:19.470:2729,03:27:19.936:2729,03:27:20.052:2729,03:27:20.202:2729,03:27:20.268:2729,03:27:20.335:2729,03:27:20.435:2729,03:27:20.543:2729,03:27:20.676:2729,03:27:20.809:2729,03:27:20.876:2729,03:27:20.942:2729,03:27:21.042:2729,03:27:21.167:2729,03:27:21.267:2729,03:27:21.350:2729,03:27:21.383:2729,03:27:21.417:2729,03:27:21.466:2729,03:27:21.533:2729,03:27:21.633:2729,03:27:21.733:2729,03:27:21.866:2729,03:27:21.932:2729,03:27:21.966:2729,03:27:22.024:2729,03:27:22.074:2729,03:27:22.124:2729,03:27:22.257:2729,03:27:22.323:2729,03:27:22.440:2729,03:27:22.523:2729,03:27:22.573:2729,03:27:22.606:2729,03:27:34.520:2729,03:27:34.603:2729,03:27:34.670:2729,03:27:34.878:2729,03:27:34.944:2729,
+09-25 08:57:22.121  1097  1097 I [   info] ts_panel_notifier_callback: Notification type:4, early_trigger:0
+09-25 08:57:22.121  1097  1097 I [   info] ts_panel_notifier_callback: shashank:Received fps change old fps:60 new fps:120
+09-25 08:57:22.429 10265 10265 I         : [INFO]: OPLUS_CHG[VOOC]([oplus_vooc_fastchg_allow_or_enable_check][1335]): temp:327, temp_range:5
+09-25 08:57:22.429  8761  8761 I         : [INFO]: OPLUS_CHG[CHG_COMM]([oplus_comm_smooth_to_soc][3416]): soc[0 2 77 77 79 79] avg[1 1 0 0 0] fifo[79 79 79 79]
+09-25 08:57:22.443 32316 32316 I OPLUS_CHG[oplus_charge_info]: BATTERY[327 327 4101 4101 1332 77 79 79 4160 5416 1 0x0 4504], CHARGE[4490 500 1 1], WIRED[1 450 4893 500 1 0x0 0 0 0 2 0], WIRELESS[0 0 0 0 0 0x0 0 0 0], VOOC[0 0 0 0 0x0], UFCS[0 0 0 0x0], COMMON[6 0 0 0x0 1 0 1 5416 100 0]
+09-25 08:57:22.444 32316 32316 I         : [INFO]: OPLUS_CHG[ADSP]([oplus_chg_8350_reg_dump][7390]): sm8450_st_dump: [chg_en=0, suspend=0, pd_svooc=0], subtype=0x01],[oplus_UsbCommCapable=0, oplus_pd_svooc=0, typec_mode=0, cid_status=0x01, usb_in_status=1],[0x2606=0x87, 0x2607=0x00, 0x2608=0x0a, 0x2609=0x02], [0x260a=0x05, 0x260b=0x59, 0x260c=0x00, 0x260d=0x18], [0x260e=0x00, 0x260f=0x01, 0x2610=0x00, 0x2640=0x01], [0x2641=0x02, 0x2642=0x05, 0x2646=0x00, 0x2650=0x03], [0x2706=0x0a, 0x2707=0x0a, 0x2708=0x0a, 0x2709=0x0a], [0x270b=0xe2, 0x270c=0x48, 0x2710=0xc0, 0x280c=0x38], [0x2810=0x00, 0x2840=0x03, 0x287f=0x00, 0x2906=0x02], [0x2908=0x0f, 0x290a=0x11, 0x290b=0x01, 0x290c=0x01], [0x2910=0x11, 0x2944=0x80, 0x2950=0x02, 0x2951=0x01], [0x2952=0x0a, 0x2954=0x00, 0x2960=0xe0, 0x2b06=0x08], [0x2b07=0x00, 0x2b08=0x00, 0x2b09=0x63, 0x2b0a=0x39], [0x2b0b=0x29, 0x2b0c=0x00, 0x29a8=0x81, 0x29a9=0x83], [0x29aa=0x00, 0x2aa2=0x00, 0x2aa8=0x87, 0x2aa9=0x00], [0x2aaa=0x00],
+09-25 08:57:22.474  1097  1097 I [   info] ts_panel_notifier_callback: Notification type:4, early_trigger:1
+09-25 08:57:22.474  1097  1097 I [   info] ts_panel_notifier_callback: shashank:Received fps change old fps:120 new fps:60
+09-25 08:57:22.478  1097  1097 E         : [LCD][0][ERR][oplus_panel_switch_vid_mode:475] oplus_panel_switch_vid_mode not support
+09-25 08:57:22.478  1097  1097 I [drm:dsi_display_set_mode [msm_drm]] [msm-dsi-info]: mdp_transfer_time=6290, hactive=1264, vactive=2780, fps=60, h_skew=1, clk_rate=1012000000, h_sync_width=2,				h_front_porch26, h_back_porch=26, v_back_porch=42, v_sync_width=2, v_front_porch=58
+09-25 08:57:22.479  1097  1097 I [ADFR][0][INFO][oplus_adfr_fakeframe_status_update:2140]h_active: 1264,refresh_rate:60,h_skew:1,sw_fps:0,fakeframe:0
+09-25 08:57:22.481  1097  1097 I         : [LCD][0][INFO][oplus_panel_cmd_print:120] [A0020] dsi_cmd: qcom,mdss-dsi-timing-switch-command, count=8
+09-25 08:57:22.481  1097  1097 I [ADFR][0][INFO][oplus_adfr_fakeframe_status_update:2140]h_active: 1264,refresh_rate:60,h_skew:1,sw_fps:0,fakeframe:0
+09-25 08:57:22.481  1097  1097 I         : [ADFR][0][INFO][oplus_adfr_status_reset:1851]sa status reset: auto_mode:0,fakeframe:0,sa_min_fps:60
+09-25 08:57:22.497  1097  1097 I [   info] ts_panel_notifier_callback: Notification type:4, early_trigger:0
+09-25 08:57:22.497  1097  1097 I [   info] ts_panel_notifier_callback: shashank:Received fps change old fps:120 new fps:60
+09-25 08:57:22.505  1097  1097 I [   info] ts_panel_notifier_callback: Notification type:4, early_trigger:1
+09-25 08:57:22.505  1097  1097 I [   info] ts_panel_notifier_callback: shashank:Received fps change old fps:60 new fps:120
+09-25 08:57:22.522  1097  1097 E         : [LCD][0][ERR][oplus_panel_switch_vid_mode:475] oplus_panel_switch_vid_mode not support
+09-25 08:57:22.522  1097  1097 I [drm:dsi_display_set_mode [msm_drm]] [msm-dsi-info]: mdp_transfer_time=6290, hactive=1264, vactive=2780, fps=120, h_skew=0, clk_rate=1012000000, h_sync_width=2,				h_front_porch26, h_back_porch=26, v_back_porch=42, v_sync_width=2, v_front_porch=58
+09-25 08:57:22.522  1097  1097 I [ADFR][0][INFO][oplus_adfr_fakeframe_status_update:2140]h_active: 1264,refresh_rate:120,h_skew:0,sw_fps:0,fakeframe:0
+09-25 08:57:22.526  1097  1097 I         : [LCD][0][INFO][oplus_panel_cmd_print:120] [A0020] dsi_cmd: qcom,mdss-dsi-timing-switch-command, count=8
+09-25 08:57:22.526  1097  1097 I [ADFR][0][INFO][oplus_adfr_fakeframe_status_update:2140]h_active: 1264,refresh_rate:120,h_skew:0,sw_fps:0,fakeframe:1
+09-25 08:57:22.526  1097  1097 I         : [ADFR][0][INFO][oplus_adfr_status_reset:1851]sa status reset: auto_mode:0,fakeframe:1,sa_min_fps:120
+09-25 08:57:22.545  1097  1097 I [   info] ts_panel_notifier_callback: Notification type:4, early_trigger:0
+09-25 08:57:22.545  1097  1097 I [   info] ts_panel_notifier_callback: shashank:Received fps change old fps:60 new fps:120
+09-25 08:57:22.564  5304  5304 W audit   : audit_lost=5535016 audit_rate_limit=5 audit_backlog_limit=64
+09-25 08:57:22.564  5304  5304 E audit   : rate limit exceeded
+09-25 08:57:22.651  1097  1097 I [   info] ts_panel_notifier_callback: Notification type:4, early_trigger:1
+09-25 08:57:22.651  1097  1097 I [   info] ts_panel_notifier_callback: shashank:Received fps change old fps:120 new fps:60
+09-25 08:57:22.656  1097  1097 E         : [LCD][0][ERR][oplus_panel_switch_vid_mode:475] oplus_panel_switch_vid_mode not support
+09-25 08:57:22.656  1097  1097 I [drm:dsi_display_set_mode [msm_drm]] [msm-dsi-info]: mdp_transfer_time=6290, hactive=1264, vactive=2780, fps=60, h_skew=1, clk_rate=1012000000, h_sync_width=2,				h_front_porch26, h_back_porch=26, v_back_porch=42, v_sync_width=2, v_front_porch=58
+09-25 08:57:22.657  1097  1097 I [ADFR][0][INFO][oplus_adfr_fakeframe_status_update:2140]h_active: 1264,refresh_rate:60,h_skew:1,sw_fps:0,fakeframe:0
+09-25 08:57:22.664  1097  1097 I         : [LCD][0][INFO][oplus_panel_cmd_print:120] [A0020] dsi_cmd: qcom,mdss-dsi-timing-switch-command, count=8
+09-25 08:57:22.664  1097  1097 I [ADFR][0][INFO][oplus_adfr_fakeframe_status_update:2140]h_active: 1264,refresh_rate:60,h_skew:1,sw_fps:0,fakeframe:0
+09-25 08:57:22.664  1097  1097 I         : [ADFR][0][INFO][oplus_adfr_status_reset:1851]sa status reset: auto_mode:0,fakeframe:0,sa_min_fps:60
+09-25 08:57:22.697  1097  1097 I [   info] ts_panel_notifier_callback: Notification type:4, early_trigger:0
+09-25 08:57:22.697  1097  1097 I [   info] ts_panel_notifier_callback: shashank:Received fps change old fps:120 new fps:60
+09-25 08:57:22.697  1097  1097 I [   info] ts_panel_notifier_callback: Notification type:4, early_trigger:1
+09-25 08:57:22.697  1097  1097 I [   info] ts_panel_notifier_callback: shashank:Received fps change old fps:60 new fps:120
+09-25 08:57:22.705  1097  1097 E         : [LCD][0][ERR][oplus_panel_switch_vid_mode:475] oplus_panel_switch_vid_mode not support
+09-25 08:57:22.705  1097  1097 I [drm:dsi_display_set_mode [msm_drm]] [msm-dsi-info]: mdp_transfer_time=6290, hactive=1264, vactive=2780, fps=120, h_skew=0, clk_rate=1012000000, h_sync_width=2,				h_front_porch26, h_back_porch=26, v_back_porch=42, v_sync_width=2, v_front_porch=58
+09-25 08:57:22.706  1097  1097 I [ADFR][0][INFO][oplus_adfr_fakeframe_status_update:2140]h_active: 1264,refresh_rate:120,h_skew:0,sw_fps:0,fakeframe:0
+09-25 08:57:22.709  1097  1097 I         : [LCD][0][INFO][oplus_panel_cmd_print:120] [A0020] dsi_cmd: qcom,mdss-dsi-timing-switch-command, count=8
+09-25 08:57:22.710  1097  1097 I [ADFR][0][INFO][oplus_adfr_fakeframe_status_update:2140]h_active: 1264,refresh_rate:120,h_skew:0,sw_fps:0,fakeframe:1
+09-25 08:57:22.710  1097  1097 I         : [ADFR][0][INFO][oplus_adfr_status_reset:1851]sa status reset: auto_mode:0,fakeframe:1,sa_min_fps:120
+09-25 08:57:22.728  1097  1097 I [   info] ts_panel_notifier_callback: Notification type:4, early_trigger:0
+09-25 08:57:22.728  1097  1097 I [   info] ts_panel_notifier_callback: shashank:Received fps change old fps:60 new fps:120
+09-25 08:57:23.309 10405 10405 E gsi soc : qcom,msm_gsi: gsi_stop_channel:3688 chan=1 busy try again
+09-25 08:57:23.311 10405 10405 E gsi soc : qcom,msm_gsi: gsi_stop_channel:3688 chan=14 busy try again
+09-25 08:57:24.449  9805  9805 I         : [OFP][0][INFO][oplus_get_doze_disable_time:3679]oplus_get_doze_disable_time=0
+09-25 08:57:24.449  9805  9805 W [drm] [msm-dsi-warn]: dsi_display_check_status,time_gap=1007948689
+09-25 08:57:25.006 10268 10268 E gsi soc : qcom,msm_gsi: gsi_stop_channel:3688 chan=1 busy try again
+09-25 08:57:25.008 10268 10268 E gsi soc : qcom,msm_gsi: gsi_stop_channel:3688 chan=14 busy try again
+09-25 08:57:26.953  2949  2949 E gsi soc : qcom,msm_gsi: gsi_stop_channel:3688 chan=1 busy try again
+09-25 08:57:26.955  2949  2949 E gsi soc : qcom,msm_gsi: gsi_stop_channel:3688 chan=14 busy try again
+09-25 08:57:27.548  9986  9986 I         : [INFO]: OPLUS_CHG[VOOC]([oplus_vooc_fastchg_allow_or_enable_check][1335]): temp:327, temp_range:5
+09-25 08:57:27.548 10320 10320 I         : [INFO]: OPLUS_CHG[CHG_COMM]([oplus_comm_smooth_to_soc][3416]): soc[0 2 77 77 79 79] avg[2 1 0 0 0] fifo[79 79 79 79]
+09-25 08:57:27.564  7497  7497 I OPLUS_CHG[oplus_charge_info]: BATTERY[327 327 4073 4073 1956 77 79 79 4157 5416 1 0x0 4502], CHARGE[4490 500 1 1], WIRED[1 450 4893 500 1 0x0 0 0 0 2 0], WIRELESS[0 0 0 0 0 0x0 0 0 0], VOOC[0 0 0 0 0x0], UFCS[0 0 0 0x0], COMMON[6 0 0 0x0 1 0 1 5416 100 0]
+09-25 08:57:27.567  7497  7497 I         : [INFO]: OPLUS_CHG[ADSP]([oplus_chg_8350_reg_dump][7390]): sm8450_st_dump: [chg_en=0, suspend=0, pd_svooc=0], subtype=0x01],[oplus_UsbCommCapable=0, oplus_pd_svooc=0, typec_mode=0, cid_status=0x01, usb_in_status=1],[0x2606=0x87, 0x2607=0x00, 0x2608=0x0a, 0x2609=0x02], [0x260a=0x05, 0x260b=0x59, 0x260c=0x00, 0x260d=0x18], [0x260e=0x00, 0x260f=0x01, 0x2610=0x00, 0x2640=0x01], [0x2641=0x02, 0x2642=0x05, 0x2646=0x00, 0x2650=0x03], [0x2706=0x0a, 0x2707=0x0a, 0x2708=0x0a, 0x2709=0x0a], [0x270b=0xe2, 0x270c=0x48, 0x2710=0xc0, 0x280c=0x38], [0x2810=0x00, 0x2840=0x03, 0x287f=0x00, 0x2906=0x02], [0x2908=0x0f, 0x290a=0x11, 0x290b=0x01, 0x290c=0x01], [0x2910=0x11, 0x2944=0x80, 0x2950=0x02, 0x2951=0x01], [0x2952=0x0a, 0x2954=0x00, 0x2960=0xe0, 0x2b06=0x08], [0x2b07=0x00, 0x2b08=0x00, 0x2b09=0x63, 0x2b0a=0x39], [0x2b0b=0x29, 0x2b0c=0x00, 0x29a8=0x81, 0x29a9=0x83], [0x29aa=0x00, 0x2aa2=0x00, 0x2aa8=0x87, 0x2aa9=0x00], [0x2aaa=0x00],
+09-25 08:57:29.569  7497  7497 I         : [OFP][0][INFO][oplus_get_doze_disable_time:3679]oplus_get_doze_disable_time=0
+09-25 08:57:29.569  7497  7497 W [drm] [msm-dsi-warn]: dsi_display_check_status,time_gap=1013068758
+09-25 08:57:30.961  2949  2949 E gsi soc : qcom,msm_gsi: gsi_stop_channel:3688 chan=1 busy try again
+09-25 08:57:30.963  2949  2949 E gsi soc : qcom,msm_gsi: gsi_stop_channel:3688 chan=14 busy try again
+09-25 08:57:30.968 11370 11370 W audit   : audit_lost=5535018 audit_rate_limit=5 audit_backlog_limit=64
+09-25 08:57:30.968 11370 11370 E audit   : rate limit exceeded
+09-25 08:57:31.079  7448  7448 E ipa_pm_handle_suspend: 1280 Client IPA_CLIENT_TEST_CONS woke up the system
+09-25 08:57:31.277  2949  2949 E gsi soc : qcom,msm_gsi: gsi_stop_channel:3688 chan=1 busy try again
+09-25 08:57:31.280  2949  2949 E gsi soc : qcom,msm_gsi: gsi_stop_channel:3688 chan=14 busy try again
+09-25 08:57:31.873  7510  7510 E iostack : irqs = 16822054, self-block = 0
+09-25 08:57:32.672  9805  9805 I         : [INFO]: OPLUS_CHG[VOOC]([oplus_vooc_fastchg_allow_or_enable_check][1335]): temp:327, temp_range:5
+09-25 08:57:32.672 10320 10320 I         : [INFO]: OPLUS_CHG[CHG_COMM]([oplus_comm_smooth_to_soc][3416]): soc[0 2 77 77 79 79] avg[3 1 0 0 0] fifo[79 79 79 79]
+09-25 08:57:32.689  9807  9807 I OPLUS_CHG[oplus_charge_info]: BATTERY[327 327 4076 4076 1871 77 79 79 4154 5416 1 0x0 4499], CHARGE[4490 500 1 1], WIRED[1 453 4892 500 1 0x0 0 0 0 2 0], WIRELESS[0 0 0 0 0 0x0 0 0 0], VOOC[0 0 0 0 0x0], UFCS[0 0 0 0x0], COMMON[6 0 0 0x0 1 0 1 5416 100 0]
+09-25 08:57:32.693  9807  9807 I         : [INFO]: OPLUS_CHG[ADSP]([oplus_chg_8350_reg_dump][7390]): sm8450_st_dump: [chg_en=0, suspend=0, pd_svooc=0], subtype=0x01],[oplus_UsbCommCapable=0, oplus_pd_svooc=0, typec_mode=0, cid_status=0x01, usb_in_status=1],[0x2606=0x87, 0x2607=0x00, 0x2608=0x0a, 0x2609=0x02], [0x260a=0x05, 0x260b=0x59, 0x260c=0x00, 0x260d=0x18], [0x260e=0x00, 0x260f=0x01, 0x2610=0x00, 0x2640=0x01], [0x2641=0x02, 0x2642=0x05, 0x2646=0x00, 0x2650=0x03], [0x2706=0x0a, 0x2707=0x0a, 0x2708=0x0a, 0x2709=0x0a], [0x270b=0xe2, 0x270c=0x48, 0x2710=0xc0, 0x280c=0x38], [0x2810=0x00, 0x2840=0x03, 0x287f=0x00, 0x2906=0x02], [0x2908=0x0f, 0x290a=0x11, 0x290b=0x01, 0x290c=0x01], [0x2910=0x11, 0x2944=0x80, 0x2950=0x02, 0x2951=0x01], [0x2952=0x0a, 0x2954=0x00, 0x2960=0xe0, 0x2b06=0x08], [0x2b07=0x00, 0x2b08=0x00, 0x2b09=0x63, 0x2b0a=0x39], [0x2b0b=0x29, 0x2b0c=0x00, 0x29a8=0x81, 0x29a9=0x83], [0x29aa=0x00, 0x2aa2=0x00, 0x2aa8=0x87, 0x2aa9=0x00], [0x2aaa=0x00],
+09-25 08:57:32.755  2949  2949 E gsi soc : qcom,msm_gsi: gsi_stop_channel:3688 chan=1 busy try again
+09-25 08:57:32.757  2949  2949 E gsi soc : qcom,msm_gsi: gsi_stop_channel:3688 chan=14 busy try again
+09-25 08:57:34.689  9807  9807 I         : [OFP][0][INFO][oplus_get_doze_disable_time:3679]oplus_get_doze_disable_time=0
+09-25 08:57:34.689  9807  9807 W [drm] [msm-dsi-warn]: dsi_display_check_status,time_gap=1018188914
+09-25 08:57:37.796 10318 10318 I         : [INFO]: OPLUS_CHG[VOOC]([oplus_vooc_fastchg_allow_or_enable_check][1335]): temp:327, temp_range:5
+09-25 08:57:37.796  8761  8761 I         : [INFO]: OPLUS_CHG[CHG_COMM]([oplus_comm_smooth_to_soc][3416]): soc[0 2 77 77 79 79] avg[0 1 0 0 0] fifo[79 79 79 79]
+09-25 08:57:37.817  9201  9201 I OPLUS_CHG[oplus_charge_info]: BATTERY[328 327 4075 4075 1877 77 79 79 4151 5416 1 0x0 4496], CHARGE[4490 500 1 1], WIRED[1 453 4895 500 1 0x0 0 0 0 2 0], WIRELESS[0 0 0 0 0 0x0 0 0 0], VOOC[0 0 0 0 0x0], UFCS[0 0 0 0x0], COMMON[6 0 0 0x0 1 0 1 5416 100 0]
+09-25 08:57:37.819  9201  9201 I         : [INFO]: OPLUS_CHG[ADSP]([oplus_chg_8350_reg_dump][7390]): sm8450_st_dump: [chg_en=0, suspend=0, pd_svooc=0], subtype=0x01],[oplus_UsbCommCapable=0, oplus_pd_svooc=0, typec_mode=0, cid_status=0x01, usb_in_status=1],[0x2606=0x87, 0x2607=0x00, 0x2608=0x0a, 0x2609=0x02], [0x260a=0x05, 0x260b=0x59, 0x260c=0x00, 0x260d=0x18], [0x260e=0x00, 0x260f=0x01, 0x2610=0x00, 0x2640=0x01], [0x2641=0x02, 0x2642=0x05, 0x2646=0x00, 0x2650=0x03], [0x2706=0x0a, 0x2707=0x0a, 0x2708=0x0a, 0x2709=0x0a], [0x270b=0xe2, 0x270c=0x48, 0x2710=0xc0, 0x280c=0x38], [0x2810=0x00, 0x2840=0x03, 0x287f=0x00, 0x2906=0x02], [0x2908=0x0f, 0x290a=0x11, 0x290b=0x01, 0x290c=0x01], [0x2910=0x11, 0x2944=0x80, 0x2950=0x02, 0x2951=0x01], [0x2952=0x0a, 0x2954=0x00, 0x2960=0xe0, 0x2b06=0x08], [0x2b07=0x00, 0x2b08=0x00, 0x2b09=0x63, 0x2b0a=0x39], [0x2b0b=0x29, 0x2b0c=0x00, 0x29a8=0x81, 0x29a9=0x83], [0x29aa=0x00, 0x2aa2=0x00, 0x2aa8=0x87, 0x2aa9=0x00], [0x2aaa=0x00],
+09-25 08:57:39.273  2949  2949 E gsi soc : qcom,msm_gsi: gsi_stop_channel:3688 chan=1 busy try again
+09-25 08:57:39.275  2949  2949 E gsi soc : qcom,msm_gsi: gsi_stop_channel:3688 chan=14 busy try again
+09-25 08:57:39.809  9807  9807 I         : [OFP][0][INFO][oplus_get_doze_disable_time:3679]oplus_get_doze_disable_time=0
+09-25 08:57:39.809  9807  9807 W [drm] [msm-dsi-warn]: dsi_display_check_status,time_gap=1023308850
+09-25 08:57:39.941  5304  5304 W audit   : audit_lost=5535020 audit_rate_limit=5 audit_backlog_limit=64
+09-25 08:57:39.941  5304  5304 E audit   : rate limit exceeded
+09-25 08:57:40.685  2949  2949 E gsi soc : qcom,msm_gsi: gsi_stop_channel:3688 chan=1 busy try again
+09-25 08:57:40.687  2949  2949 E gsi soc : qcom,msm_gsi: gsi_stop_channel:3688 chan=14 busy try again
+09-25 08:57:41.101  2949  2949 E gsi soc : qcom,msm_gsi: gsi_stop_channel:3688 chan=1 busy try again
+09-25 08:57:41.103  2949  2949 E gsi soc : qcom,msm_gsi: gsi_stop_channel:3688 chan=14 busy try again
+09-25 08:57:42.113  7510  7510 E iostack : irqs = 16822197, self-block = 0
+09-25 08:57:42.907 10318 10318 I         : [INFO]: OPLUS_CHG[MSG]([oplus_msg_queue_update][227]): battery: update, gp=5000 ms
+09-25 08:57:42.907 32316 32316 I         : [INFO]: OPLUS_CHG[VOOC]([oplus_vooc_fastchg_allow_or_enable_check][1335]): temp:328, temp_range:5
+09-25 08:57:42.907  8761  8761 I         : [INFO]: OPLUS_CHG[CHG_COMM]([oplus_comm_smooth_to_soc][3416]): soc[0 2 77 77 79 79] avg[1 1 0 0 0] fifo[79 79 79 79]
+09-25 08:57:42.907  8761  8761 I         : [INFO]: OPLUS_CHG[MSG]([oplus_msg_queue_update_work][106]): battery: update delay: 0 ms, update interval: 60920 ms
+09-25 08:57:42.930 10265 10265 I OPLUS_CHG[oplus_charge_info]: BATTERY[328 328 4076 4076 1784 77 79 79 4149 5416 1 0x0 4494], CHARGE[4490 500 1 1], WIRED[1 450 4892 500 1 0x0 0 0 0 2 0], WIRELESS[0 0 0 0 0 0x0 0 0 0], VOOC[0 0 0 0 0x0], UFCS[0 0 0 0x0], COMMON[6 0 0 0x0 1 0 1 5416 100 0]
+09-25 08:57:42.932 10265 10265 I         : [INFO]: OPLUS_CHG[ADSP]([oplus_chg_8350_reg_dump][7390]): sm8450_st_dump: [chg_en=0, suspend=0, pd_svooc=0], subtype=0x01],[oplus_UsbCommCapable=0, oplus_pd_svooc=0, typec_mode=0, cid_status=0x01, usb_in_status=1],[0x2606=0x87, 0x2607=0x00, 0x2608=0x0a, 0x2609=0x02], [0x260a=0x05, 0x260b=0x59, 0x260c=0x00, 0x260d=0x18], [0x260e=0x00, 0x260f=0x01, 0x2610=0x00, 0x2640=0x01], [0x2641=0x02, 0x2642=0x05, 0x2646=0x00, 0x2650=0x03], [0x2706=0x0a, 0x2707=0x0a, 0x2708=0x0a, 0x2709=0x0a], [0x270b=0xe2, 0x270c=0x48, 0x2710=0xc0, 0x280c=0x38], [0x2810=0x00, 0x2840=0x03, 0x287f=0x00, 0x2906=0x02], [0x2908=0x0f, 0x290a=0x11, 0x290b=0x01, 0x290c=0x01], [0x2910=0x11, 0x2944=0x80, 0x2950=0x02, 0x2951=0x01], [0x2952=0x0a, 0x2954=0x00, 0x2960=0xe0, 0x2b06=0x08], [0x2b07=0x00, 0x2b08=0x00, 0x2b09=0x63, 0x2b0a=0x39], [0x2b0b=0x29, 0x2b0c=0x00, 0x29a8=0x81, 0x29a9=0x83], [0x29aa=0x00, 0x2aa2=0x00, 0x2aa8=0x87, 0x2aa9=0x00], [0x2aaa=0x00],
+09-25 08:57:42.934  1558  1558 W healthd : battery l=79 v=4076 t=32.8 h=2 st=4 c=1784 fc=6000000 cc=216 chg=u
+09-25 08:57:43.209  1097  1097 I [   info] ts_panel_notifier_callback: Notification type:4, early_trigger:1
+09-25 08:57:43.209  1097  1097 I [   info] ts_panel_notifier_callback: shashank:Received fps change old fps:120 new fps:60
+09-25 08:57:43.213  1097  1097 E         : [LCD][0][ERR][oplus_panel_switch_vid_mode:475] oplus_panel_switch_vid_mode not support
+09-25 08:57:43.213  1097  1097 I [drm:dsi_display_set_mode [msm_drm]] [msm-dsi-info]: mdp_transfer_time=6290, hactive=1264, vactive=2780, fps=60, h_skew=1, clk_rate=1012000000, h_sync_width=2,				h_front_porch26, h_back_porch=26, v_back_porch=42, v_sync_width=2, v_front_porch=58
+09-25 08:57:43.214  1097  1097 I [ADFR][0][INFO][oplus_adfr_fakeframe_status_update:2140]h_active: 1264,refresh_rate:60,h_skew:1,sw_fps:0,fakeframe:0
+09-25 08:57:43.223  1097  1097 I         : [LCD][0][INFO][oplus_panel_cmd_print:120] [A0020] dsi_cmd: qcom,mdss-dsi-timing-switch-command, count=8
+09-25 08:57:43.224  1097  1097 I [ADFR][0][INFO][oplus_adfr_fakeframe_status_update:2140]h_active: 1264,refresh_rate:60,h_skew:1,sw_fps:0,fakeframe:0
+09-25 08:57:43.224  1097  1097 I         : [ADFR][0][INFO][oplus_adfr_status_reset:1851]sa status reset: auto_mode:0,fakeframe:0,sa_min_fps:60
+09-25 08:57:43.239  1097  1097 I [   info] ts_panel_notifier_callback: Notification type:4, early_trigger:0
+09-25 08:57:43.239  1097  1097 I [   info] ts_panel_notifier_callback: shashank:Received fps change old fps:120 new fps:60
+09-25 08:57:43.358  1097  1097 I [   info] ts_panel_notifier_callback: Notification type:4, early_trigger:1
+09-25 08:57:43.358  1097  1097 I [   info] ts_panel_notifier_callback: shashank:Received fps change old fps:60 new fps:120
+09-25 08:57:43.362  1097  1097 E         : [LCD][0][ERR][oplus_panel_switch_vid_mode:475] oplus_panel_switch_vid_mode not support
+09-25 08:57:43.362  1097  1097 I [drm:dsi_display_set_mode [msm_drm]] [msm-dsi-info]: mdp_transfer_time=6290, hactive=1264, vactive=2780, fps=120, h_skew=0, clk_rate=1012000000, h_sync_width=2,				h_front_porch26, h_back_porch=26, v_back_porch=42, v_sync_width=2, v_front_porch=58
+09-25 08:57:43.364  1097  1097 I [ADFR][0][INFO][oplus_adfr_fakeframe_status_update:2140]h_active: 1264,refresh_rate:120,h_skew:0,sw_fps:0,fakeframe:0
+09-25 08:57:43.368  1097  1097 I         : [LCD][0][INFO][oplus_panel_cmd_print:120] [A0020] dsi_cmd: qcom,mdss-dsi-timing-switch-command, count=8
+09-25 08:57:43.368  1097  1097 I [ADFR][0][INFO][oplus_adfr_fakeframe_status_update:2140]h_active: 1264,refresh_rate:120,h_skew:0,sw_fps:0,fakeframe:1
+09-25 08:57:43.368  1097  1097 I         : [ADFR][0][INFO][oplus_adfr_status_reset:1851]sa status reset: auto_mode:0,fakeframe:1,sa_min_fps:120
+09-25 08:57:43.387  1097  1097 I [   info] ts_panel_notifier_callback: Notification type:4, early_trigger:0
+09-25 08:57:43.387  1097  1097 I [   info] ts_panel_notifier_callback: shashank:Received fps change old fps:60 new fps:120
+09-25 08:57:43.441  1097  1097 I [   info] ts_panel_notifier_callback: Notification type:4, early_trigger:1
+09-25 08:57:43.441  1097  1097 I [   info] ts_panel_notifier_callback: shashank:Received fps change old fps:120 new fps:60
+09-25 08:57:43.443  1097  1097 E         : [LCD][0][ERR][oplus_panel_switch_vid_mode:475] oplus_panel_switch_vid_mode not support
+09-25 08:57:43.443  1097  1097 I [drm:dsi_display_set_mode [msm_drm]] [msm-dsi-info]: mdp_transfer_time=6290, hactive=1264, vactive=2780, fps=60, h_skew=1, clk_rate=1012000000, h_sync_width=2,				h_front_porch26, h_back_porch=26, v_back_porch=42, v_sync_width=2, v_front_porch=58
+09-25 08:57:43.445  1097  1097 I [ADFR][0][INFO][oplus_adfr_fakeframe_status_update:2140]h_active: 1264,refresh_rate:60,h_skew:1,sw_fps:0,fakeframe:0
+09-25 08:57:43.447  1097  1097 I         : [LCD][0][INFO][oplus_panel_cmd_print:120] [A0020] dsi_cmd: qcom,mdss-dsi-timing-switch-command, count=8
+09-25 08:57:43.448  1097  1097 I [ADFR][0][INFO][oplus_adfr_fakeframe_status_update:2140]h_active: 1264,refresh_rate:60,h_skew:1,sw_fps:0,fakeframe:0
+09-25 08:57:43.448  1097  1097 I         : [ADFR][0][INFO][oplus_adfr_status_reset:1851]sa status reset: auto_mode:0,fakeframe:0,sa_min_fps:60
+09-25 08:57:43.464  1097  1097 I [   info] ts_panel_notifier_callback: Notification type:4, early_trigger:0
+09-25 08:57:43.464  1097  1097 I [   info] ts_panel_notifier_callback: shashank:Received fps change old fps:120 new fps:60
+09-25 08:57:43.684  1097  1097 I [   info] ts_panel_notifier_callback: Notification type:4, early_trigger:1
+09-25 08:57:43.684  1097  1097 I [   info] ts_panel_notifier_callback: shashank:Received fps change old fps:60 new fps:120
+09-25 08:57:43.689  1097  1097 E         : [LCD][0][ERR][oplus_panel_switch_vid_mode:475] oplus_panel_switch_vid_mode not support
+09-25 08:57:43.689  1097  1097 I [drm:dsi_display_set_mode [msm_drm]] [msm-dsi-info]: mdp_transfer_time=6290, hactive=1264, vactive=2780, fps=120, h_skew=0, clk_rate=1012000000, h_sync_width=2,				h_front_porch26, h_back_porch=26, v_back_porch=42, v_sync_width=2, v_front_porch=58
+09-25 08:57:43.691  1097  1097 I [ADFR][0][INFO][oplus_adfr_fakeframe_status_update:2140]h_active: 1264,refresh_rate:120,h_skew:0,sw_fps:0,fakeframe:0
+09-25 08:57:43.693  1097  1097 I         : [LCD][0][INFO][oplus_panel_cmd_print:120] [A0020] dsi_cmd: qcom,mdss-dsi-timing-switch-command, count=8
+09-25 08:57:43.693  1097  1097 I [ADFR][0][INFO][oplus_adfr_fakeframe_status_update:2140]h_active: 1264,refresh_rate:120,h_skew:0,sw_fps:0,fakeframe:1
+09-25 08:57:43.693  1097  1097 I         : [ADFR][0][INFO][oplus_adfr_status_reset:1851]sa status reset: auto_mode:0,fakeframe:1,sa_min_fps:120
+09-25 08:57:43.712  1097  1097 I [   info] ts_panel_notifier_callback: Notification type:4, early_trigger:0
+09-25 08:57:43.712  1097  1097 I [   info] ts_panel_notifier_callback: shashank:Received fps change old fps:60 new fps:120
+09-25 08:57:43.757  1097  1097 I [   info] ts_panel_notifier_callback: Notification type:4, early_trigger:1
+09-25 08:57:43.757  1097  1097 I [   info] ts_panel_notifier_callback: shashank:Received fps change old fps:120 new fps:60
+09-25 08:57:43.758  1097  1097 E         : [LCD][0][ERR][oplus_panel_switch_vid_mode:475] oplus_panel_switch_vid_mode not support
+09-25 08:57:43.758  1097  1097 I [drm:dsi_display_set_mode [msm_drm]] [msm-dsi-info]: mdp_transfer_time=6290, hactive=1264, vactive=2780, fps=60, h_skew=1, clk_rate=1012000000, h_sync_width=2,				h_front_porch26, h_back_porch=26, v_back_porch=42, v_sync_width=2, v_front_porch=58
+09-25 08:57:43.759  1097  1097 I [ADFR][0][INFO][oplus_adfr_fakeframe_status_update:2140]h_active: 1264,refresh_rate:60,h_skew:1,sw_fps:0,fakeframe:0
+09-25 08:57:43.764  1097  1097 I         : [LCD][0][INFO][oplus_panel_cmd_print:120] [A0020] dsi_cmd: qcom,mdss-dsi-timing-switch-command, count=8
+09-25 08:57:43.764  1097  1097 I [ADFR][0][INFO][oplus_adfr_fakeframe_status_update:2140]h_active: 1264,refresh_rate:60,h_skew:1,sw_fps:0,fakeframe:0
+09-25 08:57:43.764  1097  1097 I         : [ADFR][0][INFO][oplus_adfr_status_reset:1851]sa status reset: auto_mode:0,fakeframe:0,sa_min_fps:60
+09-25 08:57:43.780  1097  1097 I [   info] ts_panel_notifier_callback: Notification type:4, early_trigger:0
+09-25 08:57:43.780  1097  1097 I [   info] ts_panel_notifier_callback: shashank:Received fps change old fps:120 new fps:60
+09-25 08:57:43.983  1097  1097 I [   info] ts_panel_notifier_callback: Notification type:4, early_trigger:1
+09-25 08:57:43.983  1097  1097 I [   info] ts_panel_notifier_callback: shashank:Received fps change old fps:60 new fps:120
+09-25 08:57:43.988  1097  1097 E         : [LCD][0][ERR][oplus_panel_switch_vid_mode:475] oplus_panel_switch_vid_mode not support
+09-25 08:57:43.988  1097  1097 I [drm:dsi_display_set_mode [msm_drm]] [msm-dsi-info]: mdp_transfer_time=6290, hactive=1264, vactive=2780, fps=120, h_skew=0, clk_rate=1012000000, h_sync_width=2,				h_front_porch26, h_back_porch=26, v_back_porch=42, v_sync_width=2, v_front_porch=58
+09-25 08:57:43.990  1097  1097 I [ADFR][0][INFO][oplus_adfr_fakeframe_status_update:2140]h_active: 1264,refresh_rate:120,h_skew:0,sw_fps:0,fakeframe:0
+09-25 08:57:43.992  1097  1097 I         : [LCD][0][INFO][oplus_panel_cmd_print:120] [A0020] dsi_cmd: qcom,mdss-dsi-timing-switch-command, count=8
+09-25 08:57:43.992  1097  1097 I [ADFR][0][INFO][oplus_adfr_fakeframe_status_update:2140]h_active: 1264,refresh_rate:120,h_skew:0,sw_fps:0,fakeframe:1
+09-25 08:57:43.992  1097  1097 I         : [ADFR][0][INFO][oplus_adfr_status_reset:1851]sa status reset: auto_mode:0,fakeframe:1,sa_min_fps:120
+09-25 08:57:44.011  1097  1097 I [   info] ts_panel_notifier_callback: Notification type:4, early_trigger:0
+09-25 08:57:44.011  1097  1097 I [   info] ts_panel_notifier_callback: shashank:Received fps change old fps:60 new fps:120
+09-25 08:57:44.015  1097  1097 I [   info] ts_panel_notifier_callback: Notification type:4, early_trigger:1
+09-25 08:57:44.015  1097  1097 I [   info] ts_panel_notifier_callback: shashank:Received fps change old fps:120 new fps:60
+09-25 08:57:44.017  1097  1097 E         : [LCD][0][ERR][oplus_panel_switch_vid_mode:475] oplus_panel_switch_vid_mode not support
+09-25 08:57:44.017  1097  1097 I [drm:dsi_display_set_mode [msm_drm]] [msm-dsi-info]: mdp_transfer_time=6290, hactive=1264, vactive=2780, fps=60, h_skew=1, clk_rate=1012000000, h_sync_width=2,				h_front_porch26, h_back_porch=26, v_back_porch=42, v_sync_width=2, v_front_porch=58
+09-25 08:57:44.019  1097  1097 I [ADFR][0][INFO][oplus_adfr_fakeframe_status_update:2140]h_active: 1264,refresh_rate:60,h_skew:1,sw_fps:0,fakeframe:0
+09-25 08:57:44.021  1097  1097 I         : [LCD][0][INFO][oplus_panel_cmd_print:120] [A0020] dsi_cmd: qcom,mdss-dsi-timing-switch-command, count=8
+09-25 08:57:44.022  1097  1097 I [ADFR][0][INFO][oplus_adfr_fakeframe_status_update:2140]h_active: 1264,refresh_rate:60,h_skew:1,sw_fps:0,fakeframe:0
+09-25 08:57:44.022  1097  1097 I         : [ADFR][0][INFO][oplus_adfr_status_reset:1851]sa status reset: auto_mode:0,fakeframe:0,sa_min_fps:60
+09-25 08:57:44.038  1097  1097 I [   info] ts_panel_notifier_callback: Notification type:4, early_trigger:0
+09-25 08:57:44.038  1097  1097 I [   info] ts_panel_notifier_callback: shashank:Received fps change old fps:120 new fps:60
+09-25 08:57:44.929  9807  9807 I         : [OFP][0][INFO][oplus_get_doze_disable_time:3679]oplus_get_doze_disable_time=0
+09-25 08:57:44.929  9807  9807 W [drm] [msm-dsi-warn]: dsi_display_check_status,time_gap=1028428835
+09-25 08:57:48.033  9201  9201 I         : [INFO]: OPLUS_CHG[VOOC]([oplus_vooc_fastchg_allow_or_enable_check][1335]): temp:328, temp_range:5
+09-25 08:57:48.033 10318 10318 I         : [INFO]: OPLUS_CHG[CHG_COMM]([oplus_comm_smooth_to_soc][3416]): soc[0 2 77 77 79 79] avg[2 1 0 0 0] fifo[79 79 79 79]
+09-25 08:57:48.050 32316 32316 I OPLUS_CHG[oplus_charge_info]: BATTERY[328 328 4152 4152 0 77 79 79 4148 5416 1 0x0 4493], CHARGE[4490 500 1 1], WIRED[1 253 5024 500 1 0x0 0 0 0 2 0], WIRELESS[0 0 0 0 0 0x0 0 0 0], VOOC[0 0 0 0 0x0], UFCS[0 0 0 0x0], COMMON[6 0 0 0x0 1 0 1 5416 100 0]
+09-25 08:57:48.053 32316 32316 I         : [INFO]: OPLUS_CHG[ADSP]([oplus_chg_8350_reg_dump][7390]): sm8450_st_dump: [chg_en=0, suspend=0, pd_svooc=0], subtype=0x01],[oplus_UsbCommCapable=0, oplus_pd_svooc=0, typec_mode=0, cid_status=0x01, usb_in_status=1],[0x2606=0x87, 0x2607=0x00, 0x2608=0x0a, 0x2609=0x02], [0x260a=0x05, 0x260b=0x59, 0x260c=0x00, 0x260d=0x18], [0x260e=0x00, 0x260f=0x01, 0x2610=0x00, 0x2640=0x01], [0x2641=0x02, 0x2642=0x05, 0x2646=0x00, 0x2650=0x03], [0x2706=0x0a, 0x2707=0x0a, 0x2708=0x0a, 0x2709=0x0a], [0x270b=0xe2, 0x270c=0x08, 0x2710=0x80, 0x280c=0x38], [0x2810=0x00, 0x2840=0x01, 0x287f=0x00, 0x2906=0x02], [0x2908=0x0f, 0x290a=0x11, 0x290b=0x01, 0x290c=0x01], [0x2910=0x11, 0x2944=0x80, 0x2950=0x02, 0x2951=0x01], [0x2952=0x0a, 0x2954=0x00, 0x2960=0xe0, 0x2b06=0x08], [0x2b07=0x00, 0x2b08=0x00, 0x2b09=0x63, 0x2b0a=0x39], [0x2b0b=0x29, 0x2b0c=0x00, 0x29a8=0x81, 0x29a9=0x83], [0x29aa=0x00, 0x2aa2=0x00, 0x2aa8=0x87, 0x2aa9=0x00], [0x2aaa=0x00],
+09-25 08:57:49.205  5304  5304 W audit   : audit_lost=5535022 audit_rate_limit=5 audit_backlog_limit=64
+09-25 08:57:49.205  5304  5304 E audit   : rate limit exceeded
+09-25 08:57:50.049  9807  9807 I         : [OFP][0][INFO][oplus_get_doze_disable_time:3679]oplus_get_doze_disable_time=0
+09-25 08:57:50.049  9807  9807 W [drm] [msm-dsi-warn]: dsi_display_check_status,time_gap=1033548760
+09-25 08:57:50.874  1558  1558 W healthd : battery l=79 v=4152 t=32.8 h=2 st=4 c=0 fc=6000000 cc=216 chg=u
+09-25 08:57:52.354  7510  7510 E iostack : irqs = 16822200, self-block = 0
+09-25 08:57:53.152 10265 10265 I         : [INFO]: OPLUS_CHG[VOOC]([oplus_vooc_fastchg_allow_or_enable_check][1335]): temp:328, temp_range:5
+09-25 08:57:53.152 10318 10318 I         : [INFO]: OPLUS_CHG[CHG_COMM]([oplus_comm_smooth_to_soc][3416]): soc[0 2 77 77 79 79] avg[3 1 0 0 0] fifo[79 79 79 79]
+09-25 08:57:53.167  8761  8761 I OPLUS_CHG[oplus_charge_info]: BATTERY[328 328 4156 4156 0 77 79 79 4148 5416 1 0x0 4493], CHARGE[4490 500 1 1], WIRED[1 103 5036 500 1 0x0 0 0 0 2 0], WIRELESS[0 0 0 0 0 0x0 0 0 0], VOOC[0 0 0 0 0x0], UFCS[0 0 0 0x0], COMMON[6 0 0 0x0 1 0 1 5416 100 0]
+09-25 08:57:53.168  8761  8761 I         : [INFO]: OPLUS_CHG[ADSP]([oplus_chg_8350_reg_dump][7390]): sm8450_st_dump: [chg_en=0, suspend=0, pd_svooc=0], subtype=0x01],[oplus_UsbCommCapable=0, oplus_pd_svooc=0, typec_mode=0, cid_status=0x01, usb_in_status=1],[0x2606=0x87, 0x2607=0x00, 0x2608=0x0a, 0x2609=0x02], [0x260a=0x05, 0x260b=0x59, 0x260c=0x00, 0x260d=0x18], [0x260e=0x00, 0x260f=0x01, 0x2610=0x00, 0x2640=0x01], [0x2641=0x02, 0x2642=0x05, 0x2646=0x00, 0x2650=0x03], [0x2706=0x0a, 0x2707=0x0a, 0x2708=0x0a, 0x2709=0x0a], [0x270b=0xe2, 0x270c=0x08, 0x2710=0x80, 0x280c=0x38], [0x2810=0x00, 0x2840=0x01, 0x287f=0x00, 0x2906=0x02], [0x2908=0x0f, 0x290a=0x11, 0x290b=0x01, 0x290c=0x01], [0x2910=0x11, 0x2944=0x80, 0x2950=0x02, 0x2951=0x01], [0x2952=0x0a, 0x2954=0x00, 0x2960=0xe0, 0x2b06=0x08], [0x2b07=0x00, 0x2b08=0x00, 0x2b09=0x63, 0x2b0a=0x39], [0x2b0b=0x29, 0x2b0c=0x00, 0x29a8=0x81, 0x29a9=0x83], [0x29aa=0x00, 0x2aa2=0x00, 0x2aa8=0x87, 0x2aa9=0x00], [0x2aaa=0x00],
+09-25 08:57:55.169  9807  9807 I         : [OFP][0][INFO][oplus_get_doze_disable_time:3679]oplus_get_doze_disable_time=0
+09-25 08:57:55.169  9807  9807 W [drm] [msm-dsi-warn]: dsi_display_check_status,time_gap=1038668820
+09-25 08:57:57.461  5304  5304 W audit   : audit_lost=5535024 audit_rate_limit=5 audit_backlog_limit=64
+09-25 08:57:57.461  5304  5304 E audit   : rate limit exceeded
+09-25 08:57:58.271  7497  7497 I         : [INFO]: OPLUS_CHG[VOOC]([oplus_vooc_fastchg_allow_or_enable_check][1335]): temp:328, temp_range:5
+09-25 08:57:58.271 10320 10320 I         : [INFO]: OPLUS_CHG[CHG_COMM]([oplus_comm_smooth_to_soc][3416]): soc[0 2 77 77 79 79] avg[0 1 0 0 0] fifo[79 79 79 79]
+09-25 08:57:58.288  9986  9986 I OPLUS_CHG[oplus_charge_info]: BATTERY[328 328 4159 4159 0 77 79 79 4148 5416 1 0x0 4493], CHARGE[4490 500 1 1], WIRED[1 147 5033 500 1 0x0 0 0 0 2 0], WIRELESS[0 0 0 0 0 0x0 0 0 0], VOOC[0 0 0 0 0x0], UFCS[0 0 0 0x0], COMMON[6 0 0 0x0 1 0 1 5416 100 0]
+09-25 08:57:58.291  9986  9986 I         : [INFO]: OPLUS_CHG[ADSP]([oplus_chg_8350_reg_dump][7390]): sm8450_st_dump: [chg_en=0, suspend=0, pd_svooc=0], subtype=0x01],[oplus_UsbCommCapable=0, oplus_pd_svooc=0, typec_mode=0, cid_status=0x01, usb_in_status=1],[0x2606=0x87, 0x2607=0x00, 0x2608=0x0a, 0x2609=0x02], [0x260a=0x05, 0x260b=0x59, 0x260c=0x00, 0x260d=0x18], [0x260e=0x00, 0x260f=0x01, 0x2610=0x00, 0x2640=0x01], [0x2641=0x02, 0x2642=0x05, 0x2646=0x00, 0x2650=0x03], [0x2706=0x0a, 0x2707=0x0a, 0x2708=0x0a, 0x2709=0x0a], [0x270b=0xe2, 0x270c=0x08, 0x2710=0x80, 0x280c=0x38], [0x2810=0x00, 0x2840=0x01, 0x287f=0x00, 0x2906=0x02], [0x2908=0x0f, 0x290a=0x11, 0x290b=0x01, 0x290c=0x01], [0x2910=0x11, 0x2944=0x80, 0x2950=0x02, 0x2951=0x01], [0x2952=0x0a, 0x2954=0x00, 0x2960=0xe0, 0x2b06=0x08], [0x2b07=0x00, 0x2b08=0x00, 0x2b09=0x63, 0x2b0a=0x39], [0x2b0b=0x29, 0x2b0c=0x00, 0x29a8=0x81, 0x29a9=0x83], [0x29aa=0x00, 0x2aa2=0x00, 0x2aa8=0x87, 0x2aa9=0x00], [0x2aaa=0x00],
+09-25 08:58:00.289  9986  9986 I         : [OFP][0][INFO][oplus_get_doze_disable_time:3679]oplus_get_doze_disable_time=0
+09-25 08:58:00.289  9986  9986 W [drm] [msm-dsi-warn]: dsi_display_check_status,time_gap=1043788751
+09-25 08:58:00.686  2949  2949 E gsi soc : qcom,msm_gsi: gsi_stop_channel:3688 chan=1 busy try again
+09-25 08:58:00.688  2949  2949 E gsi soc : qcom,msm_gsi: gsi_stop_channel:3688 chan=14 busy try again
+09-25 08:58:02.593  7510  7510 E iostack : irqs = 16822474, self-block = 0
+09-25 08:58:03.363  2086  2086 I         : [INFO]: OPLUS_CHG[ADSP]([smbchg_lcm_en][5786]): set lcm to 0
+09-25 08:58:03.363  2086  2086 I         : [INFO]: OPLUS_CHG[ADSP]([lcm_frequency_ctrl][5827]):  lcm_en_flag:3
+09-25 08:58:03.393 32316 32316 I         : [INFO]: OPLUS_CHG[VOOC]([oplus_vooc_fastchg_allow_or_enable_check][1335]): temp:328, temp_range:5
+09-25 08:58:03.393 10318 10318 I         : [INFO]: OPLUS_CHG[CHG_COMM]([oplus_comm_smooth_to_soc][3416]): soc[0 2 77 77 79 79] avg[1 1 0 0 0] fifo[79 79 79 79]
+09-25 08:58:03.412  9201  9201 I OPLUS_CHG[oplus_charge_info]: BATTERY[328 328 4161 4161 0 77 79 79 4148 5416 1 0x0 4493], CHARGE[4490 500 1 1], WIRED[1 200 5024 500 1 0x0 0 0 0 2 0], WIRELESS[0 0 0 0 0 0x0 0 0 0], VOOC[0 0 0 0 0x0], UFCS[0 0 0 0x0], COMMON[6 0 0 0x0 1 0 1 5416 100 0]
+09-25 08:58:03.414  9201  9201 I         : [INFO]: OPLUS_CHG[ADSP]([oplus_chg_8350_reg_dump][7390]): sm8450_st_dump: [chg_en=0, suspend=0, pd_svooc=0], subtype=0x01],[oplus_UsbCommCapable=0, oplus_pd_svooc=0, typec_mode=0, cid_status=0x01, usb_in_status=1],[0x2606=0x87, 0x2607=0x00, 0x2608=0x0a, 0x2609=0x02], [0x260a=0x05, 0x260b=0x59, 0x260c=0x00, 0x260d=0x18], [0x260e=0x00, 0x260f=0x01, 0x2610=0x00, 0x2640=0x01], [0x2641=0x02, 0x2642=0x05, 0x2646=0x00, 0x2650=0x03], [0x2706=0x0a, 0x2707=0x0a, 0x2708=0x0a, 0x2709=0x0a], [0x270b=0xe2, 0x270c=0x08, 0x2710=0x80, 0x280c=0x38], [0x2810=0x00, 0x2840=0x01, 0x287f=0x00, 0x2906=0x02], [0x2908=0x0f, 0x290a=0x11, 0x290b=0x01, 0x290c=0x01], [0x2910=0x11, 0x2944=0x80, 0x2950=0x02, 0x2951=0x01], [0x2952=0x0a, 0x2954=0x00, 0x2960=0xe0, 0x2b06=0x08], [0x2b07=0x00, 0x2b08=0x00, 0x2b09=0x63, 0x2b0a=0x39], [0x2b0b=0x29, 0x2b0c=0x00, 0x29a8=0x81, 0x29a9=0x83], [0x29aa=0x00, 0x2aa2=0x00, 0x2aa8=0x87, 0x2aa9=0x00], [0x2aaa=0x00],
+09-25 08:58:05.409  9986  9986 I         : [OFP][0][INFO][oplus_get_doze_disable_time:3679]oplus_get_doze_disable_time=0
+09-25 08:58:05.409  9986  9986 W [drm] [msm-dsi-warn]: dsi_display_check_status,time_gap=1048908741
+09-25 08:58:06.753  5304  5304 W audit   : audit_lost=5535026 audit_rate_limit=5 audit_backlog_limit=64
+09-25 08:58:06.753  5304  5304 E audit   : rate limit exceeded
+09-25 08:58:08.513  8761  8761 I         : [INFO]: OPLUS_CHG[VOOC]([oplus_vooc_fastchg_allow_or_enable_check][1335]): temp:328, temp_range:5
+09-25 08:58:08.513 10318 10318 I         : [INFO]: OPLUS_CHG[CHG_COMM]([oplus_comm_smooth_to_soc][3416]): soc[0 2 77 77 79 79] avg[2 1 0 0 0] fifo[79 79 79 79]
+09-25 08:58:08.529 10265 10265 I OPLUS_CHG[oplus_charge_info]: BATTERY[328 328 4162 4162 0 77 79 79 4148 5416 1 0x0 4493], CHARGE[4490 500 1 1], WIRED[1 94 5061 500 1 0x0 0 0 0 2 0], WIRELESS[0 0 0 0 0 0x0 0 0 0], VOOC[0 0 0 0 0x0], UFCS[0 0 0 0x0], COMMON[6 0 0 0x0 1 0 1 5416 100 0]
+09-25 08:58:08.532 10265 10265 I         : [INFO]: OPLUS_CHG[ADSP]([oplus_chg_8350_reg_dump][7390]): sm8450_st_dump: [chg_en=0, suspend=0, pd_svooc=0], subtype=0x01],[oplus_UsbCommCapable=0, oplus_pd_svooc=0, typec_mode=0, cid_status=0x01, usb_in_status=1],[0x2606=0x87, 0x2607=0x00, 0x2608=0x0a, 0x2609=0x02], [0x260a=0x05, 0x260b=0x59, 0x260c=0x00, 0x260d=0x18], [0x260e=0x00, 0x260f=0x01, 0x2610=0x00, 0x2640=0x01], [0x2641=0x02, 0x2642=0x05, 0x2646=0x00, 0x2650=0x03], [0x2706=0x0a, 0x2707=0x0a, 0x2708=0x0a, 0x2709=0x0a], [0x270b=0xe2, 0x270c=0x08, 0x2710=0x80, 0x280c=0x38], [0x2810=0x00, 0x2840=0x01, 0x287f=0x00, 0x2906=0x02], [0x2908=0x0f, 0x290a=0x11, 0x290b=0x01, 0x290c=0x01], [0x2910=0x11, 0x2944=0x80, 0x2950=0x02, 0x2951=0x01], [0x2952=0x0a, 0x2954=0x00, 0x2960=0xe0, 0x2b06=0x08], [0x2b07=0x00, 0x2b08=0x00, 0x2b09=0x63, 0x2b0a=0x39], [0x2b0b=0x29, 0x2b0c=0x00, 0x29a8=0x81, 0x29a9=0x83], [0x29aa=0x00, 0x2aa2=0x00, 0x2aa8=0x87, 0x2aa9=0x00], [0x2aaa=0x00],
+09-25 08:58:10.529  9986  9986 I         : [OFP][0][INFO][oplus_get_doze_disable_time:3679]oplus_get_doze_disable_time=0
+09-25 08:58:10.529  9986  9986 W [drm] [msm-dsi-warn]: dsi_display_check_status,time_gap=1054028760
+09-25 08:58:12.834  7510  7510 E iostack : irqs = 16822882, self-block = 0
+09-25 08:58:12.942  1097  1097 I [   info] ts_panel_notifier_callback: Notification type:4, early_trigger:1
+09-25 08:58:12.942  1097  1097 I [   info] ts_panel_notifier_callback: shashank:Received fps change old fps:60 new fps:120
+09-25 08:58:12.947  1097  1097 E         : [LCD][0][ERR][oplus_panel_switch_vid_mode:475] oplus_panel_switch_vid_mode not support
+09-25 08:58:12.947  1097  1097 I [drm:dsi_display_set_mode [msm_drm]] [msm-dsi-info]: mdp_transfer_time=6290, hactive=1264, vactive=2780, fps=120, h_skew=0, clk_rate=1012000000, h_sync_width=2,				h_front_porch26, h_back_porch=26, v_back_porch=42, v_sync_width=2, v_front_porch=58
+09-25 08:58:12.949  1097  1097 I [ADFR][0][INFO][oplus_adfr_fakeframe_status_update:2140]h_active: 1264,refresh_rate:120,h_skew:0,sw_fps:0,fakeframe:0
+09-25 08:58:12.954  1097  1097 I         : [LCD][0][INFO][oplus_panel_cmd_print:120] [A0020] dsi_cmd: qcom,mdss-dsi-timing-switch-command, count=8
+09-25 08:58:12.954  1097  1097 I [ADFR][0][INFO][oplus_adfr_fakeframe_status_update:2140]h_active: 1264,refresh_rate:120,h_skew:0,sw_fps:0,fakeframe:1
+09-25 08:58:12.954  1097  1097 I         : [ADFR][0][INFO][oplus_adfr_status_reset:1851]sa status reset: auto_mode:0,fakeframe:1,sa_min_fps:120
+09-25 08:58:12.972  1097  1097 I         : <A0020> dsi_display_set_backlight time:03:28:25.796,bl_lvl:2729
+09-25 08:58:12.973  1097  1097 I [   info] ts_panel_notifier_callback: Notification type:4, early_trigger:0
+09-25 08:58:12.973  1097  1097 I [   info] ts_panel_notifier_callback: shashank:Received fps change old fps:60 new fps:120
+09-25 08:58:13.144  1097  1097 I [   info] ts_panel_notifier_callback: Notification type:4, early_trigger:1
+09-25 08:58:13.144  1097  1097 I [   info] ts_panel_notifier_callback: shashank:Received fps change old fps:120 new fps:60
+09-25 08:58:13.149  1097  1097 E         : [LCD][0][ERR][oplus_panel_switch_vid_mode:475] oplus_panel_switch_vid_mode not support
+09-25 08:58:13.149  1097  1097 I [drm:dsi_display_set_mode [msm_drm]] [msm-dsi-info]: mdp_transfer_time=6290, hactive=1264, vactive=2780, fps=60, h_skew=1, clk_rate=1012000000, h_sync_width=2,				h_front_porch26, h_back_porch=26, v_back_porch=42, v_sync_width=2, v_front_porch=58
+09-25 08:58:13.151  1097  1097 I [ADFR][0][INFO][oplus_adfr_fakeframe_status_update:2140]h_active: 1264,refresh_rate:60,h_skew:1,sw_fps:0,fakeframe:0
+09-25 08:58:13.157  1097  1097 I         : [LCD][0][INFO][oplus_panel_cmd_print:120] [A0020] dsi_cmd: qcom,mdss-dsi-timing-switch-command, count=8
+09-25 08:58:13.157  1097  1097 I [ADFR][0][INFO][oplus_adfr_fakeframe_status_update:2140]h_active: 1264,refresh_rate:60,h_skew:1,sw_fps:0,fakeframe:0
+09-25 08:58:13.157  1097  1097 I         : [ADFR][0][INFO][oplus_adfr_status_reset:1851]sa status reset: auto_mode:0,fakeframe:0,sa_min_fps:60
+09-25 08:58:13.174  1097  1097 I [   info] ts_panel_notifier_callback: Notification type:4, early_trigger:0
+09-25 08:58:13.174  1097  1097 I [   info] ts_panel_notifier_callback: shashank:Received fps change old fps:120 new fps:60
+09-25 08:58:13.291  1097  1097 I [   info] ts_panel_notifier_callback: Notification type:4, early_trigger:1
+09-25 08:58:13.291  1097  1097 I [   info] ts_panel_notifier_callback: shashank:Received fps change old fps:60 new fps:120
+09-25 08:58:13.294  1097  1097 E         : [LCD][0][ERR][oplus_panel_switch_vid_mode:475] oplus_panel_switch_vid_mode not support
+09-25 08:58:13.294  1097  1097 I [drm:dsi_display_set_mode [msm_drm]] [msm-dsi-info]: mdp_transfer_time=6290, hactive=1264, vactive=2780, fps=120, h_skew=0, clk_rate=1012000000, h_sync_width=2,				h_front_porch26, h_back_porch=26, v_back_porch=42, v_sync_width=2, v_front_porch=58
+09-25 08:58:13.295  1097  1097 I [ADFR][0][INFO][oplus_adfr_fakeframe_status_update:2140]h_active: 1264,refresh_rate:120,h_skew:0,sw_fps:0,fakeframe:0
+09-25 08:58:13.295  1097  1097 I         : [LCD][0][INFO][oplus_panel_cmd_print:120] [A0020] dsi_cmd: qcom,mdss-dsi-timing-switch-command, count=8
+09-25 08:58:13.295  1097  1097 I [ADFR][0][INFO][oplus_adfr_fakeframe_status_update:2140]h_active: 1264,refresh_rate:120,h_skew:0,sw_fps:0,fakeframe:1
+09-25 08:58:13.295  1097  1097 I         : [ADFR][0][INFO][oplus_adfr_status_reset:1851]sa status reset: auto_mode:0,fakeframe:1,sa_min_fps:120
+09-25 08:58:13.305  1097  1097 I [   info] ts_panel_notifier_callback: Notification type:4, early_trigger:0
+09-25 08:58:13.305  1097  1097 I [   info] ts_panel_notifier_callback: shashank:Received fps change old fps:60 new fps:120
+09-25 08:58:13.368  1097  1097 I [   info] ts_panel_notifier_callback: Notification type:4, early_trigger:1
+09-25 08:58:13.368  1097  1097 I [   info] ts_panel_notifier_callback: shashank:Received fps change old fps:120 new fps:60
+09-25 08:58:13.370  1097  1097 E         : [LCD][0][ERR][oplus_panel_switch_vid_mode:475] oplus_panel_switch_vid_mode not support
+09-25 08:58:13.371  1097  1097 I [drm:dsi_display_set_mode [msm_drm]] [msm-dsi-info]: mdp_transfer_time=6290, hactive=1264, vactive=2780, fps=60, h_skew=1, clk_rate=1012000000, h_sync_width=2,				h_front_porch26, h_back_porch=26, v_back_porch=42, v_sync_width=2, v_front_porch=58
+09-25 08:58:13.373  1097  1097 I [ADFR][0][INFO][oplus_adfr_fakeframe_status_update:2140]h_active: 1264,refresh_rate:60,h_skew:1,sw_fps:0,fakeframe:0
+09-25 08:58:13.382  1097  1097 I         : [LCD][0][INFO][oplus_panel_cmd_print:120] [A0020] dsi_cmd: qcom,mdss-dsi-timing-switch-command, count=8
+09-25 08:58:13.382  1097  1097 I [ADFR][0][INFO][oplus_adfr_fakeframe_status_update:2140]h_active: 1264,refresh_rate:60,h_skew:1,sw_fps:0,fakeframe:0
+09-25 08:58:13.382  1097  1097 I         : [ADFR][0][INFO][oplus_adfr_status_reset:1851]sa status reset: auto_mode:0,fakeframe:0,sa_min_fps:60
+09-25 08:58:13.398  1097  1097 I [   info] ts_panel_notifier_callback: Notification type:4, early_trigger:0
+09-25 08:58:13.398  1097  1097 I [   info] ts_panel_notifier_callback: shashank:Received fps change old fps:120 new fps:60
+09-25 08:58:13.619  1097  1097 I [   info] ts_panel_notifier_callback: Notification type:4, early_trigger:1
+09-25 08:58:13.619  1097  1097 I [   info] ts_panel_notifier_callback: shashank:Received fps change old fps:60 new fps:120
+09-25 08:58:13.624  1097  1097 E         : [LCD][0][ERR][oplus_panel_switch_vid_mode:475] oplus_panel_switch_vid_mode not support
+09-25 08:58:13.624  1097  1097 I [drm:dsi_display_set_mode [msm_drm]] [msm-dsi-info]: mdp_transfer_time=6290, hactive=1264, vactive=2780, fps=120, h_skew=0, clk_rate=1012000000, h_sync_width=2,				h_front_porch26, h_back_porch=26, v_back_porch=42, v_sync_width=2, v_front_porch=58
+09-25 08:58:13.626  1097  1097 I [ADFR][0][INFO][oplus_adfr_fakeframe_status_update:2140]h_active: 1264,refresh_rate:120,h_skew:0,sw_fps:0,fakeframe:0
+09-25 08:58:13.627  1097  1097 I         : [LCD][0][INFO][oplus_panel_cmd_print:120] [A0020] dsi_cmd: qcom,mdss-dsi-timing-switch-command, count=8
+09-25 08:58:13.627  1097  1097 I [ADFR][0][INFO][oplus_adfr_fakeframe_status_update:2140]h_active: 1264,refresh_rate:120,h_skew:0,sw_fps:0,fakeframe:1
+09-25 08:58:13.627  1097  1097 I         : [ADFR][0][INFO][oplus_adfr_status_reset:1851]sa status reset: auto_mode:0,fakeframe:1,sa_min_fps:120
+09-25 08:58:13.631  9807  9807 I         : [INFO]: OPLUS_CHG[VOOC]([oplus_vooc_fastchg_allow_or_enable_check][1335]): temp:328, temp_range:5
+09-25 08:58:13.632 10320 10320 I         : [INFO]: OPLUS_CHG[CHG_COMM]([oplus_comm_smooth_to_soc][3416]): soc[0 2 77 77 79 79] avg[3 1 0 0 0] fifo[79 79 79 79]
+09-25 08:58:13.646  1097  1097 I [   info] ts_panel_notifier_callback: Notification type:4, early_trigger:0
+09-25 08:58:13.646  1097  1097 I [   info] ts_panel_notifier_callback: shashank:Received fps change old fps:60 new fps:120
+09-25 08:58:13.655  9805  9805 I OPLUS_CHG[oplus_charge_info]: BATTERY[329 328 4164 4164 0 77 79 79 4148 5416 1 0x0 4493], CHARGE[4490 500 1 1], WIRED[1 219 5006 500 1 0x0 0 0 0 2 0], WIRELESS[0 0 0 0 0 0x0 0 0 0], VOOC[0 0 0 0 0x0], UFCS[0 0 0 0x0], COMMON[6 0 0 0x0 1 0 1 5416 100 0]
+09-25 08:58:13.658  9805  9805 I         : [INFO]: OPLUS_CHG[ADSP]([oplus_chg_8350_reg_dump][7390]): sm8450_st_dump: [chg_en=0, suspend=0, pd_svooc=0], subtype=0x01],[oplus_UsbCommCapable=0, oplus_pd_svooc=0, typec_mode=0, cid_status=0x01, usb_in_status=1],[0x2606=0x87, 0x2607=0x00, 0x2608=0x0a, 0x2609=0x02], [0x260a=0x05, 0x260b=0x59, 0x260c=0x00, 0x260d=0x18], [0x260e=0x00, 0x260f=0x01, 0x2610=0x00, 0x2640=0x01], [0x2641=0x02, 0x2642=0x05, 0x2646=0x00, 0x2650=0x03], [0x2706=0x0a, 0x2707=0x0a, 0x2708=0x0a, 0x2709=0x0a], [0x270b=0xe2, 0x270c=0x08, 0x2710=0x80, 0x280c=0x38], [0x2810=0x00, 0x2840=0x01, 0x287f=0x00, 0x2906=0x02], [0x2908=0x0f, 0x290a=0x11, 0x290b=0x01, 0x290c=0x01], [0x2910=0x11, 0x2944=0x80, 0x2950=0x02, 0x2951=0x01], [0x2952=0x0a, 0x2954=0x00, 0x2960=0xe0, 0x2b06=0x08], [0x2b07=0x00, 0x2b08=0x00, 0x2b09=0x63, 0x2b0a=0x39], [0x2b0b=0x29, 0x2b0c=0x00, 0x29a8=0x81, 0x29a9=0x83], [0x29aa=0x00, 0x2aa2=0x00, 0x2aa8=0x87, 0x2aa9=0x00], [0x2aaa=0x00],
+09-25 08:58:13.684  1097  1097 I [   info] ts_panel_notifier_callback: Notification type:4, early_trigger:1
+09-25 08:58:13.684  1097  1097 I [   info] ts_panel_notifier_callback: shashank:Received fps change old fps:120 new fps:60
+09-25 08:58:13.686  1097  1097 E         : [LCD][0][ERR][oplus_panel_switch_vid_mode:475] oplus_panel_switch_vid_mode not support
+09-25 08:58:13.686  1097  1097 I [drm:dsi_display_set_mode [msm_drm]] [msm-dsi-info]: mdp_transfer_time=6290, hactive=1264, vactive=2780, fps=60, h_skew=1, clk_rate=1012000000, h_sync_width=2,				h_front_porch26, h_back_porch=26, v_back_porch=42, v_sync_width=2, v_front_porch=58
+09-25 08:58:13.689  1097  1097 I [ADFR][0][INFO][oplus_adfr_fakeframe_status_update:2140]h_active: 1264,refresh_rate:60,h_skew:1,sw_fps:0,fakeframe:0
+09-25 08:58:13.698  1097  1097 I         : [LCD][0][INFO][oplus_panel_cmd_print:120] [A0020] dsi_cmd: qcom,mdss-dsi-timing-switch-command, count=8
+09-25 08:58:13.698  1097  1097 I [ADFR][0][INFO][oplus_adfr_fakeframe_status_update:2140]h_active: 1264,refresh_rate:60,h_skew:1,sw_fps:0,fakeframe:0
+09-25 08:58:13.698  1097  1097 I         : [ADFR][0][INFO][oplus_adfr_status_reset:1851]sa status reset: auto_mode:0,fakeframe:0,sa_min_fps:60
+09-25 08:58:13.715  1097  1097 I [   info] ts_panel_notifier_callback: Notification type:4, early_trigger:0
+09-25 08:58:13.715  1097  1097 I [   info] ts_panel_notifier_callback: shashank:Received fps change old fps:120 new fps:60
+09-25 08:58:13.919  1097  1097 I [   info] ts_panel_notifier_callback: Notification type:4, early_trigger:1
+09-25 08:58:13.919  1097  1097 I [   info] ts_panel_notifier_callback: shashank:Received fps change old fps:60 new fps:120
+09-25 08:58:13.923  1097  1097 E         : [LCD][0][ERR][oplus_panel_switch_vid_mode:475] oplus_panel_switch_vid_mode not support
+09-25 08:58:13.923  1097  1097 I [drm:dsi_display_set_mode [msm_drm]] [msm-dsi-info]: mdp_transfer_time=6290, hactive=1264, vactive=2780, fps=120, h_skew=0, clk_rate=1012000000, h_sync_width=2,				h_front_porch26, h_back_porch=26, v_back_porch=42, v_sync_width=2, v_front_porch=58
+09-25 08:58:13.925  1097  1097 I [ADFR][0][INFO][oplus_adfr_fakeframe_status_update:2140]h_active: 1264,refresh_rate:120,h_skew:0,sw_fps:0,fakeframe:0
+09-25 08:58:13.926  1097  1097 I         : [LCD][0][INFO][oplus_panel_cmd_print:120] [A0020] dsi_cmd: qcom,mdss-dsi-timing-switch-command, count=8
+09-25 08:58:13.927  1097  1097 I [ADFR][0][INFO][oplus_adfr_fakeframe_status_update:2140]h_active: 1264,refresh_rate:120,h_skew:0,sw_fps:0,fakeframe:1
+09-25 08:58:13.927  1097  1097 I         : [ADFR][0][INFO][oplus_adfr_status_reset:1851]sa status reset: auto_mode:0,fakeframe:1,sa_min_fps:120
+09-25 08:58:13.946  1097  1097 I [   info] ts_panel_notifier_callback: Notification type:4, early_trigger:0
+09-25 08:58:13.946  1097  1097 I [   info] ts_panel_notifier_callback: shashank:Received fps change old fps:60 new fps:120
+09-25 08:58:13.953  1097  1097 I [   info] ts_panel_notifier_callback: Notification type:4, early_trigger:1
+09-25 08:58:13.953  1097  1097 I [   info] ts_panel_notifier_callback: shashank:Received fps change old fps:120 new fps:60
+09-25 08:58:13.954  1097  1097 E         : [LCD][0][ERR][oplus_panel_switch_vid_mode:475] oplus_panel_switch_vid_mode not support
+09-25 08:58:13.954  1097  1097 I [drm:dsi_display_set_mode [msm_drm]] [msm-dsi-info]: mdp_transfer_time=6290, hactive=1264, vactive=2780, fps=60, h_skew=1, clk_rate=1012000000, h_sync_width=2,				h_front_porch26, h_back_porch=26, v_back_porch=42, v_sync_width=2, v_front_porch=58
+09-25 08:58:13.955  1097  1097 I [ADFR][0][INFO][oplus_adfr_fakeframe_status_update:2140]h_active: 1264,refresh_rate:60,h_skew:1,sw_fps:0,fakeframe:0
+09-25 08:58:13.964  1097  1097 I         : [LCD][0][INFO][oplus_panel_cmd_print:120] [A0020] dsi_cmd: qcom,mdss-dsi-timing-switch-command, count=8
+09-25 08:58:13.964  1097  1097 I [ADFR][0][INFO][oplus_adfr_fakeframe_status_update:2140]h_active: 1264,refresh_rate:60,h_skew:1,sw_fps:0,fakeframe:0
+09-25 08:58:13.964  1097  1097 I         : [ADFR][0][INFO][oplus_adfr_status_reset:1851]sa status reset: auto_mode:0,fakeframe:0,sa_min_fps:60
+09-25 08:58:13.981  1097  1097 I [   info] ts_panel_notifier_callback: Notification type:4, early_trigger:0
+09-25 08:58:13.981  1097  1097 I [   info] ts_panel_notifier_callback: shashank:Received fps change old fps:120 new fps:60
+09-25 08:58:15.649  9805  9805 I         : [OFP][0][INFO][oplus_get_doze_disable_time:3679]oplus_get_doze_disable_time=0
+09-25 08:58:15.649  9805  9805 W [drm] [msm-dsi-warn]: dsi_display_check_status,time_gap=1059148740
+09-25 08:58:18.752  9201  9201 I         : [INFO]: OPLUS_CHG[VOOC]([oplus_vooc_fastchg_allow_or_enable_check][1335]): temp:329, temp_range:5
+09-25 08:58:18.752 10318 10318 I         : [INFO]: OPLUS_CHG[CHG_COMM]([oplus_comm_smooth_to_soc][3416]): soc[0 2 77 77 79 79] avg[0 1 0 0 0] fifo[79 79 79 79]
+09-25 08:58:18.767 32316 32316 I OPLUS_CHG[oplus_charge_info]: BATTERY[329 329 4165 4165 0 77 79 79 4148 5416 1 0x0 4493], CHARGE[4490 500 1 1], WIRED[1 100 5051 500 1 0x0 0 0 0 2 0], WIRELESS[0 0 0 0 0 0x0 0 0 0], VOOC[0 0 0 0 0x0], UFCS[0 0 0 0x0], COMMON[6 0 0 0x0 1 0 1 5416 100 0]
+09-25 08:58:18.770 32316 32316 I         : [INFO]: OPLUS_CHG[ADSP]([oplus_chg_8350_reg_dump][7390]): sm8450_st_dump: [chg_en=0, suspend=0, pd_svooc=0], subtype=0x01],[oplus_UsbCommCapable=0, oplus_pd_svooc=0, typec_mode=0, cid_status=0x01, usb_in_status=1],[0x2606=0x87, 0x2607=0x00, 0x2608=0x0a, 0x2609=0x02], [0x260a=0x05, 0x260b=0x59, 0x260c=0x00, 0x260d=0x18], [0x260e=0x00, 0x260f=0x01, 0x2610=0x00, 0x2640=0x01], [0x2641=0x02, 0x2642=0x05, 0x2646=0x00, 0x2650=0x03], [0x2706=0x0a, 0x2707=0x0a, 0x2708=0x0a, 0x2709=0x0a], [0x270b=0xe2, 0x270c=0x08, 0x2710=0x80, 0x280c=0x38], [0x2810=0x00, 0x2840=0x01, 0x287f=0x00, 0x2906=0x02], [0x2908=0x0f, 0x290a=0x11, 0x290b=0x01, 0x290c=0x01], [0x2910=0x11, 0x2944=0x80, 0x2950=0x02, 0x2951=0x01], [0x2952=0x0a, 0x2954=0x00, 0x2960=0xe0, 0x2b06=0x08], [0x2b07=0x00, 0x2b08=0x00, 0x2b09=0x63, 0x2b0a=0x39], [0x2b0b=0x29, 0x2b0c=0x00, 0x29a8=0x81, 0x29a9=0x83], [0x29aa=0x00, 0x2aa2=0x00, 0x2aa8=0x87, 0x2aa9=0x00], [0x2aaa=0x00],
+09-25 08:58:20.690  2949  2949 E gsi soc : qcom,msm_gsi: gsi_stop_channel:3688 chan=1 busy try again
+09-25 08:58:20.692  2949  2949 E gsi soc : qcom,msm_gsi: gsi_stop_channel:3688 chan=14 busy try again
+09-25 08:58:20.769  9805  9805 I         : [OFP][0][INFO][oplus_get_doze_disable_time:3679]oplus_get_doze_disable_time=0
+09-25 08:58:20.769  9805  9805 W [drm] [msm-dsi-warn]: dsi_display_check_status,time_gap=1064268752
+09-25 08:58:23.074  7510  7510 E iostack : irqs = 16822980, self-block = 0
+09-25 08:58:23.871 10265 10265 I         : [INFO]: OPLUS_CHG[VOOC]([oplus_vooc_fastchg_allow_or_enable_check][1335]): temp:329, temp_range:5
+09-25 08:58:23.872 10318 10318 I         : [INFO]: OPLUS_CHG[CHG_COMM]([oplus_comm_smooth_to_soc][3416]): soc[0 2 77 77 79 79] avg[1 1 0 0 0] fifo[79 79 79 79]
+09-25 08:58:23.887  8761  8761 I OPLUS_CHG[oplus_charge_info]: BATTERY[329 329 4165 4165 0 77 79 79 4148 5416 1 0x0 4493], CHARGE[4490 500 1 1], WIRED[1 147 5042 500 1 0x0 0 0 0 2 0], WIRELESS[0 0 0 0 0 0x0 0 0 0], VOOC[0 0 0 0 0x0], UFCS[0 0 0 0x0], COMMON[6 0 0 0x0 1 0 1 5416 100 0]
+09-25 08:58:23.889  8761  8761 I         : [INFO]: OPLUS_CHG[ADSP]([oplus_chg_8350_reg_dump][7390]): sm8450_st_dump: [chg_en=0, suspend=0, pd_svooc=0], subtype=0x01],[oplus_UsbCommCapable=0, oplus_pd_svooc=0, typec_mode=0, cid_status=0x01, usb_in_status=1],[0x2606=0x87, 0x2607=0x00, 0x2608=0x0a, 0x2609=0x02], [0x260a=0x05, 0x260b=0x59, 0x260c=0x00, 0x260d=0x18], [0x260e=0x00, 0x260f=0x01, 0x2610=0x00, 0x2640=0x01], [0x2641=0x02, 0x2642=0x05, 0x2646=0x00, 0x2650=0x03], [0x2706=0x0a, 0x2707=0x0a, 0x2708=0x0a, 0x2709=0x0a], [0x270b=0xe2, 0x270c=0x08, 0x2710=0x80, 0x280c=0x38], [0x2810=0x00, 0x2840=0x01, 0x287f=0x00, 0x2906=0x02], [0x2908=0x0f, 0x290a=0x11, 0x290b=0x01, 0x290c=0x01], [0x2910=0x11, 0x2944=0x80, 0x2950=0x02, 0x2951=0x01], [0x2952=0x0a, 0x2954=0x00, 0x2960=0xe0, 0x2b06=0x08], [0x2b07=0x00, 0x2b08=0x00, 0x2b09=0x63, 0x2b0a=0x39], [0x2b0b=0x29, 0x2b0c=0x00, 0x29a8=0x81, 0x29a9=0x83], [0x29aa=0x00, 0x2aa2=0x00, 0x2aa8=0x87, 0x2aa9=0x00], [0x2aaa=0x00],
+09-25 08:58:25.889  9805  9805 I         : [OFP][0][INFO][oplus_get_doze_disable_time:3679]oplus_get_doze_disable_time=0
+09-25 08:58:25.889  9805  9805 W [drm] [msm-dsi-warn]: dsi_display_check_status,time_gap=1069388738
+09-25 08:58:28.520   950   950 I logd    : logdr: UID=2000 GID=2000 PID=11797 b tail=20 logMask=99 pid=0 start=0ns deadline=0ns
+09-25 08:58:28.990  9986  9986 I         : [INFO]: OPLUS_CHG[VOOC]([oplus_vooc_fastchg_allow_or_enable_check][1335]): temp:329, temp_range:5
+09-25 08:58:28.990 11792 11792 I         : [INFO]: OPLUS_CHG[CHG_COMM]([oplus_comm_smooth_to_soc][3416]): soc[0 2 77 77 79 79] avg[2 1 0 0 0] fifo[79 79 79 79]
+09-25 08:58:29.005  7497  7497 I OPLUS_CHG[oplus_charge_info]: BATTERY[329 329 4166 4166 0 77 79 79 4148 5416 1 0x0 4493], CHARGE[4490 500 1 1], WIRED[1 137 4984 500 1 0x0 0 0 0 2 0], WIRELESS[0 0 0 0 0 0x0 0 0 0], VOOC[0 0 0 0 0x0], UFCS[0 0 0 0x0], COMMON[6 0 0 0x0 1 0 1 5416 100 0]
+09-25 08:58:29.008  7497  7497 I         : [INFO]: OPLUS_CHG[ADSP]([oplus_chg_8350_reg_dump][7390]): sm8450_st_dump: [chg_en=0, suspend=0, pd_svooc=0], subtype=0x01],[oplus_UsbCommCapable=0, oplus_pd_svooc=0, typec_mode=0, cid_status=0x01, usb_in_status=1],[0x2606=0x87, 0x2607=0x00, 0x2608=0x0a, 0x2609=0x02], [0x260a=0x05, 0x260b=0x59, 0x260c=0x00, 0x260d=0x18], [0x260e=0x00, 0x260f=0x01, 0x2610=0x00, 0x2640=0x01], [0x2641=0x02, 0x2642=0x05, 0x2646=0x00, 0x2650=0x03], [0x2706=0x0a, 0x2707=0x0a, 0x2708=0x0a, 0x2709=0x0a], [0x270b=0xe2, 0x270c=0x08, 0x2710=0x80, 0x280c=0x38], [0x2810=0x00, 0x2840=0x01, 0x287f=0x00, 0x2906=0x02], [0x2908=0x0f, 0x290a=0x11, 0x290b=0x01, 0x290c=0x01], [0x2910=0x11, 0x2944=0x80, 0x2950=0x02, 0x2951=0x01], [0x2952=0x0a, 0x2954=0x00, 0x2960=0xe0, 0x2b06=0x08], [0x2b07=0x00, 0x2b08=0x00, 0x2b09=0x63, 0x2b0a=0x39], [0x2b0b=0x29, 0x2b0c=0x00, 0x29a8=0x81, 0x29a9=0x83], [0x29aa=0x00, 0x2aa2=0x00, 0x2aa8=0x87, 0x2aa9=0x00], [0x2aaa=0x00],
+09-25 08:58:31.009  7497  7497 I         : [OFP][0][INFO][oplus_get_doze_disable_time:3679]oplus_get_doze_disable_time=0
+09-25 08:58:31.009  7497  7497 W [drm] [msm-dsi-warn]: dsi_display_check_status,time_gap=1074509221
+09-25 08:58:33.314  7510  7510 E iostack : irqs = 16823002, self-block = 0
+09-25 08:58:34.112 32316 32316 I         : [INFO]: OPLUS_CHG[VOOC]([oplus_vooc_fastchg_allow_or_enable_check][1335]): temp:329, temp_range:5
+09-25 08:58:34.112 10318 10318 I         : [INFO]: OPLUS_CHG[CHG_COMM]([oplus_comm_smooth_to_soc][3416]): soc[0 2 77 77 79 79] avg[3 1 0 0 0] fifo[79 79 79 79]
+09-25 08:58:34.129  9201  9201 I OPLUS_CHG[oplus_charge_info]: BATTERY[329 329 4166 4166 0 77 79 79 4148 5416 1 0x0 4493], CHARGE[4490 500 1 1], WIRED[1 109 5054 500 1 0x0 0 0 0 2 0], WIRELESS[0 0 0 0 0 0x0 0 0 0], VOOC[0 0 0 0 0x0], UFCS[0 0 0 0x0], COMMON[6 0 0 0x0 1 0 1 5416 100 0]
+09-25 08:58:34.132  9201  9201 I         : [INFO]: OPLUS_CHG[ADSP]([oplus_chg_8350_reg_dump][7390]): sm8450_st_dump: [chg_en=0, suspend=0, pd_svooc=0], subtype=0x01],[oplus_UsbCommCapable=0, oplus_pd_svooc=0, typec_mode=0, cid_status=0x01, usb_in_status=1],[0x2606=0x87, 0x2607=0x00, 0x2608=0x0a, 0x2609=0x02], [0x260a=0x05, 0x260b=0x59, 0x260c=0x00, 0x260d=0x18], [0x260e=0x00, 0x260f=0x01, 0x2610=0x00, 0x2640=0x01], [0x2641=0x02, 0x2642=0x05, 0x2646=0x00, 0x2650=0x03], [0x2706=0x0a, 0x2707=0x0a, 0x2708=0x0a, 0x2709=0x0a], [0x270b=0xe2, 0x270c=0x08, 0x2710=0x80, 0x280c=0x38], [0x2810=0x00, 0x2840=0x01, 0x287f=0x00, 0x2906=0x02], [0x2908=0x0f, 0x290a=0x11, 0x290b=0x01, 0x290c=0x01], [0x2910=0x11, 0x2944=0x80, 0x2950=0x02, 0x2951=0x01], [0x2952=0x0a, 0x2954=0x00, 0x2960=0xe0, 0x2b06=0x08], [0x2b07=0x00, 0x2b08=0x00, 0x2b09=0x63, 0x2b0a=0x39], [0x2b0b=0x29, 0x2b0c=0x00, 0x29a8=0x81, 0x29a9=0x83], [0x29aa=0x00, 0x2aa2=0x00, 0x2aa8=0x87, 0x2aa9=0x00], [0x2aaa=0x00],
+09-25 08:58:36.129  7497  7497 I         : [OFP][0][INFO][oplus_get_doze_disable_time:3679]oplus_get_doze_disable_time=0
+09-25 08:58:36.129  7497  7497 W [drm] [msm-dsi-warn]: dsi_display_check_status,time_gap=1079628834
+09-25 08:58:39.231  8761  8761 I         : [INFO]: OPLUS_CHG[VOOC]([oplus_vooc_fastchg_allow_or_enable_check][1335]): temp:329, temp_range:5
+09-25 08:58:39.231 10318 10318 I         : [INFO]: OPLUS_CHG[CHG_COMM]([oplus_comm_smooth_to_soc][3416]): soc[0 2 77 77 79 79] avg[0 1 0 0 0] fifo[79 79 79 79]
+09-25 08:58:39.246 10265 10265 I OPLUS_CHG[oplus_charge_info]: BATTERY[329 329 4166 4166 0 77 79 79 4148 5416 1 0x0 4493], CHARGE[4490 500 1 1], WIRED[1 162 5033 500 1 0x0 0 0 0 2 0], WIRELESS[0 0 0 0 0 0x0 0 0 0], VOOC[0 0 0 0 0x0], UFCS[0 0 0 0x0], COMMON[6 0 0 0x0 1 0 1 5416 100 0]
+09-25 08:58:39.248 10265 10265 I         : [INFO]: OPLUS_CHG[ADSP]([oplus_chg_8350_reg_dump][7390]): sm8450_st_dump: [chg_en=0, suspend=0, pd_svooc=0], subtype=0x01],[oplus_UsbCommCapable=0, oplus_pd_svooc=0, typec_mode=0, cid_status=0x01, usb_in_status=1],[0x2606=0x87, 0x2607=0x00, 0x2608=0x0a, 0x2609=0x02], [0x260a=0x05, 0x260b=0x59, 0x260c=0x00, 0x260d=0x18], [0x260e=0x00, 0x260f=0x01, 0x2610=0x00, 0x2640=0x01], [0x2641=0x02, 0x2642=0x05, 0x2646=0x00, 0x2650=0x03], [0x2706=0x0a, 0x2707=0x0a, 0x2708=0x0a, 0x2709=0x0a], [0x270b=0xe2, 0x270c=0x08, 0x2710=0x80, 0x280c=0x38], [0x2810=0x00, 0x2840=0x01, 0x287f=0x00, 0x2906=0x02], [0x2908=0x0f, 0x290a=0x11, 0x290b=0x01, 0x290c=0x01], [0x2910=0x11, 0x2944=0x80, 0x2950=0x02, 0x2951=0x01], [0x2952=0x0a, 0x2954=0x00, 0x2960=0xe0, 0x2b06=0x08], [0x2b07=0x00, 0x2b08=0x00, 0x2b09=0x63, 0x2b0a=0x39], [0x2b0b=0x29, 0x2b0c=0x00, 0x29a8=0x81, 0x29a9=0x83], [0x29aa=0x00, 0x2aa2=0x00, 0x2aa8=0x87, 0x2aa9=0x00], [0x2aaa=0x00],
+09-25 08:58:40.200   950   950 I logd    : logdr: UID=2000 GID=2000 PID=11814 b tail=20 logMask=99 pid=0 start=0ns deadline=0ns
+09-25 08:58:40.694 10405 10405 E gsi soc : qcom,msm_gsi: gsi_stop_channel:3688 chan=1 busy try again
+09-25 08:58:40.697 10405 10405 E gsi soc : qcom,msm_gsi: gsi_stop_channel:3688 chan=14 busy try again
+09-25 08:58:41.249  7497  7497 I         : [OFP][0][INFO][oplus_get_doze_disable_time:3679]oplus_get_doze_disable_time=0
+09-25 08:58:41.249  7497  7497 W [drm] [msm-dsi-warn]: dsi_display_check_status,time_gap=1084748758
+09-25 08:58:43.554  7510  7510 E iostack : irqs = 16823006, self-block = 0
+09-25 08:58:44.350 10265 10265 I         : [INFO]: OPLUS_CHG[MSG]([oplus_msg_queue_update][227]): battery: update, gp=5000 ms
+09-25 08:58:44.351 32316 32316 I         : [INFO]: OPLUS_CHG[VOOC]([oplus_vooc_fastchg_allow_or_enable_check][1335]): temp:329, temp_range:5
+09-25 08:58:44.351 10318 10318 I         : [INFO]: OPLUS_CHG[CHG_COMM]([oplus_comm_smooth_to_soc][3416]): soc[0 2 77 77 79 79] avg[1 1 0 0 0] fifo[79 79 79 79]
+09-25 08:58:44.351 10318 10318 I         : [INFO]: OPLUS_CHG[MSG]([oplus_msg_queue_update_work][106]): battery: update delay: 0 ms, update interval: 61444 ms
+09-25 08:58:44.377  1558  1558 W healthd : battery l=79 v=4167 t=33.0 h=2 st=4 c=0 fc=6000000 cc=216 chg=u
+09-25 08:58:44.379  9201  9201 I OPLUS_CHG[oplus_charge_info]: BATTERY[330 329 4167 4167 0 77 79 79 4148 5416 1 0x0 4493], CHARGE[4490 500 1 1], WIRED[1 153 5019 500 1 0x0 0 0 0 2 0], WIRELESS[0 0 0 0 0 0x0 0 0 0], VOOC[0 0 0 0 0x0], UFCS[0 0 0 0x0], COMMON[6 0 0 0x0 1 0 1 5416 100 0]
+09-25 08:58:44.382  9201  9201 I         : [INFO]: OPLUS_CHG[ADSP]([oplus_chg_8350_reg_dump][7390]): sm8450_st_dump: [chg_en=0, suspend=0, pd_svooc=0], subtype=0x01],[oplus_UsbCommCapable=0, oplus_pd_svooc=0, typec_mode=0, cid_status=0x01, usb_in_status=1],[0x2606=0x87, 0x2607=0x00, 0x2608=0x0a, 0x2609=0x02], [0x260a=0x05, 0x260b=0x59, 0x260c=0x00, 0x260d=0x18], [0x260e=0x00, 0x260f=0x01, 0x2610=0x00, 0x2640=0x01], [0x2641=0x02, 0x2642=0x05, 0x2646=0x00, 0x2650=0x03], [0x2706=0x0a, 0x2707=0x0a, 0x2708=0x0a, 0x2709=0x0a], [0x270b=0xe2, 0x270c=0x08, 0x2710=0x80, 0x280c=0x38], [0x2810=0x00, 0x2840=0x01, 0x287f=0x00, 0x2906=0x02], [0x2908=0x0f, 0x290a=0x11, 0x290b=0x01, 0x290c=0x01], [0x2910=0x11, 0x2944=0x80, 0x2950=0x02, 0x2951=0x01], [0x2952=0x0a, 0x2954=0x00, 0x2960=0xe0, 0x2b06=0x08], [0x2b07=0x00, 0x2b08=0x00, 0x2b09=0x63, 0x2b0a=0x39], [0x2b0b=0x29, 0x2b0c=0x00, 0x29a8=0x81, 0x29a9=0x83], [0x29aa=0x00, 0x2aa2=0x00, 0x2aa8=0x87, 0x2aa9=0x00], [0x2aaa=0x00],
+09-25 08:58:46.369  7497  7497 I         : [OFP][0][INFO][oplus_get_doze_disable_time:3679]oplus_get_doze_disable_time=0
+09-25 08:58:46.369  7497  7497 W [drm] [msm-dsi-warn]: dsi_display_check_status,time_gap=1089868989
+09-25 08:58:49.382   950   950 I logd    : logdr: UID=2000 GID=2000 PID=11831 b tail=20 logMask=99 pid=0 start=0ns deadline=0ns
+09-25 08:58:49.472  9805  9805 I         : [INFO]: OPLUS_CHG[VOOC]([oplus_vooc_fastchg_allow_or_enable_check][1335]): temp:330, temp_range:5
+09-25 08:58:49.472 11792 11792 I         : [INFO]: OPLUS_CHG[CHG_COMM]([oplus_comm_smooth_to_soc][3416]): soc[0 2 77 77 79 79] avg[2 1 0 0 0] fifo[79 79 79 79]
+09-25 08:58:49.485  9807  9807 I OPLUS_CHG[oplus_charge_info]: BATTERY[330 330 4167 4167 0 77 79 79 4148 5416 1 0x0 4493], CHARGE[4490 500 1 1], WIRED[1 141 5039 500 1 0x0 0 0 0 2 0], WIRELESS[0 0 0 0 0 0x0 0 0 0], VOOC[0 0 0 0 0x0], UFCS[0 0 0 0x0], COMMON[6 0 0 0x0 1 0 1 5416 100 0]
+09-25 08:58:49.487  9807  9807 I         : [INFO]: OPLUS_CHG[ADSP]([oplus_chg_8350_reg_dump][7390]): sm8450_st_dump: [chg_en=0, suspend=0, pd_svooc=0], subtype=0x01],[oplus_UsbCommCapable=0, oplus_pd_svooc=0, typec_mode=0, cid_status=0x01, usb_in_status=1],[0x2606=0x87, 0x2607=0x00, 0x2608=0x0a, 0x2609=0x02], [0x260a=0x05, 0x260b=0x59, 0x260c=0x00, 0x260d=0x18], [0x260e=0x00, 0x260f=0x01, 0x2610=0x00, 0x2640=0x01], [0x2641=0x02, 0x2642=0x05, 0x2646=0x00, 0x2650=0x03], [0x2706=0x0a, 0x2707=0x0a, 0x2708=0x0a, 0x2709=0x0a], [0x270b=0xe2, 0x270c=0x08, 0x2710=0x80, 0x280c=0x38], [0x2810=0x00, 0x2840=0x01, 0x287f=0x00, 0x2906=0x02], [0x2908=0x0f, 0x290a=0x11, 0x290b=0x01, 0x290c=0x01], [0x2910=0x11, 0x2944=0x80, 0x2950=0x02, 0x2951=0x01], [0x2952=0x0a, 0x2954=0x00, 0x2960=0xe0, 0x2b06=0x08], [0x2b07=0x00, 0x2b08=0x00, 0x2b09=0x63, 0x2b0a=0x39], [0x2b0b=0x29, 0x2b0c=0x00, 0x29a8=0x81, 0x29a9=0x83], [0x29aa=0x00, 0x2aa2=0x00, 0x2aa8=0x87, 0x2aa9=0x00], [0x2aaa=0x00],
+09-25 08:58:50.875  1558  1558 W healthd : battery l=79 v=4167 t=33.0 h=2 st=4 c=0 fc=6000000 cc=216 chg=u
+09-25 08:58:51.489  9807  9807 I         : [OFP][0][INFO][oplus_get_doze_disable_time:3679]oplus_get_doze_disable_time=0
+09-25 08:58:51.489  9807  9807 W [drm] [msm-dsi-warn]: dsi_display_check_status,time_gap=1094988818
+09-25 08:58:53.793  7510  7510 E iostack : irqs = 16823009, self-block = 0
+09-25 08:58:54.592  7497  7497 I         : [INFO]: OPLUS_CHG[VOOC]([oplus_vooc_fastchg_allow_or_enable_check][1335]): temp:330, temp_range:5
+09-25 08:58:54.592 11792 11792 I         : [INFO]: OPLUS_CHG[CHG_COMM]([oplus_comm_smooth_to_soc][3416]): soc[0 2 77 77 79 79] avg[3 1 0 0 0] fifo[79 79 79 79]
+09-25 08:58:54.619  9986  9986 I OPLUS_CHG[oplus_charge_info]: BATTERY[331 330 4167 4167 0 77 79 79 4148 5416 1 0x0 4493], CHARGE[4490 500 1 1], WIRED[1 184 5016 500 1 0x0 0 0 0 2 0], WIRELESS[0 0 0 0 0 0x0 0 0 0], VOOC[0 0 0 0 0x0], UFCS[0 0 0 0x0], COMMON[6 0 0 0x0 1 0 1 5416 100 0]
+09-25 08:58:54.622  9986  9986 I         : [INFO]: OPLUS_CHG[ADSP]([oplus_chg_8350_reg_dump][7390]): sm8450_st_dump: [chg_en=0, suspend=0, pd_svooc=0], subtype=0x01],[oplus_UsbCommCapable=0, oplus_pd_svooc=0, typec_mode=0, cid_status=0x01, usb_in_status=1],[0x2606=0x87, 0x2607=0x00, 0x2608=0x0a, 0x2609=0x02], [0x260a=0x05, 0x260b=0x59, 0x260c=0x00, 0x260d=0x18], [0x260e=0x00, 0x260f=0x01, 0x2610=0x00, 0x2640=0x01], [0x2641=0x02, 0x2642=0x05, 0x2646=0x00, 0x2650=0x03], [0x2706=0x0a, 0x2707=0x0a, 0x2708=0x0a, 0x2709=0x0a], [0x270b=0xe2, 0x270c=0x08, 0x2710=0x80, 0x280c=0x38], [0x2810=0x00, 0x2840=0x01, 0x287f=0x00, 0x2906=0x02], [0x2908=0x0f, 0x290a=0x11, 0x290b=0x01, 0x290c=0x01], [0x2910=0x11, 0x2944=0x80, 0x2950=0x02, 0x2951=0x01], [0x2952=0x0a, 0x2954=0x00, 0x2960=0xe0, 0x2b06=0x08], [0x2b07=0x00, 0x2b08=0x00, 0x2b09=0x63, 0x2b0a=0x39], [0x2b0b=0x29, 0x2b0c=0x00, 0x29a8=0x81, 0x29a9=0x83], [0x29aa=0x00, 0x2aa2=0x00, 0x2aa8=0x87, 0x2aa9=0x00], [0x2aaa=0x00],
+09-25 08:58:56.609  7497  7497 I         : [OFP][0][INFO][oplus_get_doze_disable_time:3679]oplus_get_doze_disable_time=0
+09-25 08:58:56.609  7497  7497 W [drm] [msm-dsi-warn]: dsi_display_check_status,time_gap=1100108737
+09-25 08:58:58.586   950   950 I logd    : logdr: UID=2000 GID=2000 PID=11848 b tail=20 logMask=99 pid=0 start=0ns deadline=0ns
+09-25 08:58:59.712  9807  9807 I         : [INFO]: OPLUS_CHG[VOOC]([oplus_vooc_fastchg_allow_or_enable_check][1335]): temp:331, temp_range:5
+09-25 08:58:59.713 11792 11792 I         : [INFO]: OPLUS_CHG[CHG_COMM]([oplus_comm_smooth_to_soc][3416]): soc[0 2 77 77 79 79] avg[0 1 0 0 0] fifo[79 79 79 79]
+09-25 08:58:59.729  9805  9805 I OPLUS_CHG[oplus_charge_info]: BATTERY[331 331 4167 4167 0 77 79 79 4148 5416 1 0x0 4493], CHARGE[4490 500 1 1], WIRED[1 122 5037 500 1 0x0 0 0 0 2 0], WIRELESS[0 0 0 0 0 0x0 0 0 0], VOOC[0 0 0 0 0x0], UFCS[0 0 0 0x0], COMMON[6 0 0 0x0 1 0 1 5416 100 0]
+09-25 08:58:59.732  9805  9805 I         : [INFO]: OPLUS_CHG[ADSP]([oplus_chg_8350_reg_dump][7390]): sm8450_st_dump: [chg_en=0, suspend=0, pd_svooc=0], subtype=0x01],[oplus_UsbCommCapable=0, oplus_pd_svooc=0, typec_mode=0, cid_status=0x01, usb_in_status=1],[0x2606=0x87, 0x2607=0x00, 0x2608=0x0a, 0x2609=0x02], [0x260a=0x05, 0x260b=0x59, 0x260c=0x00, 0x260d=0x18], [0x260e=0x00, 0x260f=0x01, 0x2610=0x00, 0x2640=0x01], [0x2641=0x02, 0x2642=0x05, 0x2646=0x00, 0x2650=0x03], [0x2706=0x0a, 0x2707=0x0a, 0x2708=0x0a, 0x2709=0x0a], [0x270b=0xe2, 0x270c=0x08, 0x2710=0x80, 0x280c=0x38], [0x2810=0x00, 0x2840=0x01, 0x287f=0x00, 0x2906=0x02], [0x2908=0x0f, 0x290a=0x11, 0x290b=0x01, 0x290c=0x01], [0x2910=0x11, 0x2944=0x80, 0x2950=0x02, 0x2951=0x01], [0x2952=0x0a, 0x2954=0x00, 0x2960=0xe0, 0x2b06=0x08], [0x2b07=0x00, 0x2b08=0x00, 0x2b09=0x63, 0x2b0a=0x39], [0x2b0b=0x29, 0x2b0c=0x00, 0x29a8=0x81, 0x29a9=0x83], [0x29aa=0x00, 0x2aa2=0x00, 0x2aa8=0x87, 0x2aa9=0x00], [0x2aaa=0x00],
+09-25 08:59:00.698 10268 10268 E gsi soc : qcom,msm_gsi: gsi_stop_channel:3688 chan=1 busy try again
+09-25 08:59:00.700 10268 10268 E gsi soc : qcom,msm_gsi: gsi_stop_channel:3688 chan=14 busy try again
+09-25 08:59:01.729  9805  9805 I         : [OFP][0][INFO][oplus_get_doze_disable_time:3679]oplus_get_doze_disable_time=0
+09-25 08:59:01.729  9805  9805 W [drm] [msm-dsi-warn]: dsi_display_check_status,time_gap=1105228739
+09-25 08:59:04.033  7510  7510 E iostack : irqs = 16823022, self-block = 0
+09-25 08:59:04.830  7497  7497 I         : [INFO]: OPLUS_CHG[VOOC]([oplus_vooc_fastchg_allow_or_enable_check][1335]): temp:331, temp_range:5
+09-25 08:59:04.830 11792 11792 I         : [INFO]: OPLUS_CHG[CHG_COMM]([oplus_comm_smooth_to_soc][3416]): soc[0 2 77 77 79 79] avg[1 1 0 0 0] fifo[79 79 79 79]
+09-25 08:59:04.844  9986  9986 I OPLUS_CHG[oplus_charge_info]: BATTERY[331 331 4167 4167 0 77 79 79 4148 5416 1 0x0 4493], CHARGE[4490 500 1 1], WIRED[1 116 5063 500 1 0x0 0 0 0 2 0], WIRELESS[0 0 0 0 0 0x0 0 0 0], VOOC[0 0 0 0 0x0], UFCS[0 0 0 0x0], COMMON[6 0 0 0x0 1 0 1 5416 100 0]
+09-25 08:59:04.847  9986  9986 I         : [INFO]: OPLUS_CHG[ADSP]([oplus_chg_8350_reg_dump][7390]): sm8450_st_dump: [chg_en=0, suspend=0, pd_svooc=0], subtype=0x01],[oplus_UsbCommCapable=0, oplus_pd_svooc=0, typec_mode=0, cid_status=0x01, usb_in_status=1],[0x2606=0x87, 0x2607=0x00, 0x2608=0x0a, 0x2609=0x02], [0x260a=0x05, 0x260b=0x59, 0x260c=0x00, 0x260d=0x18], [0x260e=0x00, 0x260f=0x01, 0x2610=0x00, 0x2640=0x01], [0x2641=0x02, 0x2642=0x05, 0x2646=0x00, 0x2650=0x03], [0x2706=0x0a, 0x2707=0x0a, 0x2708=0x0a, 0x2709=0x0a], [0x270b=0xe2, 0x270c=0x08, 0x2710=0x80, 0x280c=0x38], [0x2810=0x00, 0x2840=0x01, 0x287f=0x00, 0x2906=0x02], [0x2908=0x0f, 0x290a=0x11, 0x290b=0x01, 0x290c=0x01], [0x2910=0x11, 0x2944=0x80, 0x2950=0x02, 0x2951=0x01], [0x2952=0x0a, 0x2954=0x00, 0x2960=0xe0, 0x2b06=0x08], [0x2b07=0x00, 0x2b08=0x00, 0x2b09=0x63, 0x2b0a=0x39], [0x2b0b=0x29, 0x2b0c=0x00, 0x29a8=0x81, 0x29a9=0x83], [0x29aa=0x00, 0x2aa2=0x00, 0x2aa8=0x87, 0x2aa9=0x00], [0x2aaa=0x00],
+09-25 08:59:06.849  9986  9986 I         : [OFP][0][INFO][oplus_get_doze_disable_time:3679]oplus_get_doze_disable_time=0
+09-25 08:59:06.849  9986  9986 W [drm] [msm-dsi-warn]: dsi_display_check_status,time_gap=1110348918
+09-25 08:59:07.798   950   950 I logd    : logdr: UID=2000 GID=2000 PID=11865 b tail=20 logMask=99 pid=0 start=0ns deadline=0ns
+09-25 08:59:09.950  9805  9805 I         : [INFO]: OPLUS_CHG[VOOC]([oplus_vooc_fastchg_allow_or_enable_check][1335]): temp:331, temp_range:5
+09-25 08:59:09.950 11792 11792 I         : [INFO]: OPLUS_CHG[CHG_COMM]([oplus_comm_smooth_to_soc][3416]): soc[0 2 77 77 79 79] avg[2 1 0 0 0] fifo[79 79 79 79]
+09-25 08:59:09.964  9807  9807 I OPLUS_CHG[oplus_charge_info]: BATTERY[331 331 4167 4167 0 77 79 79 4148 5416 1 0x0 4493], CHARGE[4490 500 1 1], WIRED[1 100 5028 500 1 0x0 0 0 0 2 0], WIRELESS[0 0 0 0 0 0x0 0 0 0], VOOC[0 0 0 0 0x0], UFCS[0 0 0 0x0], COMMON[6 0 0 0x0 1 0 1 5416 100 0]
+09-25 08:59:09.967  9807  9807 I         : [INFO]: OPLUS_CHG[ADSP]([oplus_chg_8350_reg_dump][7390]): sm8450_st_dump: [chg_en=0, suspend=0, pd_svooc=0], subtype=0x01],[oplus_UsbCommCapable=0, oplus_pd_svooc=0, typec_mode=0, cid_status=0x01, usb_in_status=1],[0x2606=0x87, 0x2607=0x00, 0x2608=0x0a, 0x2609=0x02], [0x260a=0x05, 0x260b=0x59, 0x260c=0x00, 0x260d=0x18], [0x260e=0x00, 0x260f=0x01, 0x2610=0x00, 0x2640=0x01], [0x2641=0x02, 0x2642=0x05, 0x2646=0x00, 0x2650=0x03], [0x2706=0x0a, 0x2707=0x0a, 0x2708=0x0a, 0x2709=0x0a], [0x270b=0xe2, 0x270c=0x08, 0x2710=0x80, 0x280c=0x38], [0x2810=0x00, 0x2840=0x01, 0x287f=0x00, 0x2906=0x02], [0x2908=0x0f, 0x290a=0x11, 0x290b=0x01, 0x290c=0x01], [0x2910=0x11, 0x2944=0x80, 0x2950=0x02, 0x2951=0x01], [0x2952=0x0a, 0x2954=0x00, 0x2960=0xe0, 0x2b06=0x08], [0x2b07=0x00, 0x2b08=0x00, 0x2b09=0x63, 0x2b0a=0x39], [0x2b0b=0x29, 0x2b0c=0x00, 0x29a8=0x81, 0x29a9=0x83], [0x29aa=0x00, 0x2aa2=0x00, 0x2aa8=0x87, 0x2aa9=0x00], [0x2aaa=0x00],
+09-25 08:59:11.969  9807  9807 I         : [OFP][0][INFO][oplus_get_doze_disable_time:3679]oplus_get_doze_disable_time=0
+09-25 08:59:11.969  9807  9807 W [drm] [msm-dsi-warn]: dsi_display_check_status,time_gap=1115468784
+09-25 08:59:14.274  7510  7510 E iostack : irqs = 16823028, self-block = 0
+09-25 08:59:15.072  8761  8761 I         : [INFO]: OPLUS_CHG[VOOC]([oplus_vooc_fastchg_allow_or_enable_check][1335]): temp:331, temp_range:5
+09-25 08:59:15.072 10265 10265 I         : [INFO]: OPLUS_CHG[CHG_COMM]([oplus_comm_smooth_to_soc][3416]): soc[0 2 77 77 79 79] avg[3 1 0 0 0] fifo[79 79 79 79]
+09-25 08:59:15.087 32316 32316 I OPLUS_CHG[oplus_charge_info]: BATTERY[331 331 4168 4168 0 77 79 79 4148 5416 1 0x0 4493], CHARGE[4490 500 1 1], WIRED[1 84 5034 500 1 0x0 0 0 0 2 0], WIRELESS[0 0 0 0 0 0x0 0 0 0], VOOC[0 0 0 0 0x0], UFCS[0 0 0 0x0], COMMON[6 0 0 0x0 1 0 1 5416 100 0]
+09-25 08:59:15.090 32316 32316 I         : [INFO]: OPLUS_CHG[ADSP]([oplus_chg_8350_reg_dump][7390]): sm8450_st_dump: [chg_en=0, suspend=0, pd_svooc=0], subtype=0x01],[oplus_UsbCommCapable=0, oplus_pd_svooc=0, typec_mode=0, cid_status=0x01, usb_in_status=1],[0x2606=0x87, 0x2607=0x00, 0x2608=0x0a, 0x2609=0x02], [0x260a=0x05, 0x260b=0x59, 0x260c=0x00, 0x260d=0x18], [0x260e=0x00, 0x260f=0x01, 0x2610=0x00, 0x2640=0x01], [0x2641=0x02, 0x2642=0x05, 0x2646=0x00, 0x2650=0x03], [0x2706=0x0a, 0x2707=0x0a, 0x2708=0x0a, 0x2709=0x0a], [0x270b=0xe2, 0x270c=0x08, 0x2710=0x80, 0x280c=0x38], [0x2810=0x00, 0x2840=0x01, 0x287f=0x00, 0x2906=0x02], [0x2908=0x0f, 0x290a=0x11, 0x290b=0x01, 0x290c=0x01], [0x2910=0x11, 0x2944=0x80, 0x2950=0x02, 0x2951=0x01], [0x2952=0x0a, 0x2954=0x00, 0x2960=0xe0, 0x2b06=0x08], [0x2b07=0x00, 0x2b08=0x00, 0x2b09=0x63, 0x2b0a=0x39], [0x2b0b=0x29, 0x2b0c=0x00, 0x29a8=0x81, 0x29a9=0x83], [0x29aa=0x00, 0x2aa2=0x00, 0x2aa8=0x87, 0x2aa9=0x00], [0x2aaa=0x00],
+09-25 08:59:17.006   950   950 I logd    : logdr: UID=2000 GID=2000 PID=11884 b tail=20 logMask=99 pid=0 start=0ns deadline=0ns
+09-25 08:59:17.089  9807  9807 I         : [OFP][0][INFO][oplus_get_doze_disable_time:3679]oplus_get_doze_disable_time=0
+09-25 08:59:17.089  9807  9807 W [drm] [msm-dsi-warn]: dsi_display_check_status,time_gap=1120588785
+09-25 08:59:20.193  9201  9201 I         : [INFO]: OPLUS_CHG[VOOC]([oplus_vooc_fastchg_allow_or_enable_check][1335]): temp:331, temp_range:5
+09-25 08:59:20.193 10265 10265 I         : [INFO]: OPLUS_CHG[CHG_COMM]([oplus_comm_smooth_to_soc][3416]): soc[0 2 77 77 79 79] avg[0 1 0 0 0] fifo[79 79 79 79]
+09-25 08:59:20.208 10318 10318 I OPLUS_CHG[oplus_charge_info]: BATTERY[332 331 4168 4168 0 77 79 79 4148 5416 1 0x0 4493], CHARGE[4490 500 1 1], WIRED[1 153 5014 500 1 0x0 0 0 0 2 0], WIRELESS[0 0 0 0 0 0x0 0 0 0], VOOC[0 0 0 0 0x0], UFCS[0 0 0 0x0], COMMON[6 0 0 0x0 1 0 1 5416 100 0]
+09-25 08:59:20.211 10318 10318 I         : [INFO]: OPLUS_CHG[ADSP]([oplus_chg_8350_reg_dump][7390]): sm8450_st_dump: [chg_en=0, suspend=0, pd_svooc=0], subtype=0x01],[oplus_UsbCommCapable=0, oplus_pd_svooc=0, typec_mode=0, cid_status=0x01, usb_in_status=1],[0x2606=0x87, 0x2607=0x00, 0x2608=0x0a, 0x2609=0x02], [0x260a=0x05, 0x260b=0x59, 0x260c=0x00, 0x260d=0x18], [0x260e=0x00, 0x260f=0x01, 0x2610=0x00, 0x2640=0x01], [0x2641=0x02, 0x2642=0x05, 0x2646=0x00, 0x2650=0x03], [0x2706=0x0a, 0x2707=0x0a, 0x2708=0x0a, 0x2709=0x0a], [0x270b=0xe2, 0x270c=0x08, 0x2710=0x80, 0x280c=0x38], [0x2810=0x00, 0x2840=0x01, 0x287f=0x00, 0x2906=0x02], [0x2908=0x0f, 0x290a=0x11, 0x290b=0x01, 0x290c=0x01], [0x2910=0x11, 0x2944=0x80, 0x2950=0x02, 0x2951=0x01], [0x2952=0x0a, 0x2954=0x00, 0x2960=0xe0, 0x2b06=0x08], [0x2b07=0x00, 0x2b08=0x00, 0x2b09=0x63, 0x2b0a=0x39], [0x2b0b=0x29, 0x2b0c=0x00, 0x29a8=0x81, 0x29a9=0x83], [0x29aa=0x00, 0x2aa2=0x00, 0x2aa8=0x87, 0x2aa9=0x00], [0x2aaa=0x00],
+09-25 08:59:20.697 10268 10268 E gsi soc : qcom,msm_gsi: gsi_stop_channel:3688 chan=1 busy try again
+09-25 08:59:20.700 10268 10268 E gsi soc : qcom,msm_gsi: gsi_stop_channel:3688 chan=14 busy try again
+09-25 08:59:22.209  9807  9807 I         : [OFP][0][INFO][oplus_get_doze_disable_time:3679]oplus_get_doze_disable_time=0
+09-25 08:59:22.209  9807  9807 W [drm] [msm-dsi-warn]: dsi_display_check_status,time_gap=1125708752
+09-25 08:59:24.489 10268 10268 E gsi soc : qcom,msm_gsi: gsi_stop_channel:3688 chan=1 busy try again
+09-25 08:59:24.492 10268 10268 E gsi soc : qcom,msm_gsi: gsi_stop_channel:3688 chan=14 busy try again
+09-25 08:59:24.513  7510  7510 E iostack : irqs = 16823480, self-block = 0
+09-25 08:59:25.310  9986  9986 I         : [INFO]: OPLUS_CHG[VOOC]([oplus_vooc_fastchg_allow_or_enable_check][1335]): temp:332, temp_range:5
+09-25 08:59:25.310 11792 11792 I         : [INFO]: OPLUS_CHG[CHG_COMM]([oplus_comm_smooth_to_soc][3416]): soc[0 2 77 77 79 79] avg[1 1 0 0 0] fifo[79 79 79 79]
+09-25 08:59:25.324  7497  7497 I OPLUS_CHG[oplus_charge_info]: BATTERY[332 332 4158 4158 224 77 79 79 4148 5416 1 0x0 4493], CHARGE[4490 500 1 1], WIRED[1 450 4865 500 1 0x0 0 0 0 2 0], WIRELESS[0 0 0 0 0 0x0 0 0 0], VOOC[0 0 0 0 0x0], UFCS[0 0 0 0x0], COMMON[6 0 0 0x0 1 0 1 5416 100 0]
+09-25 08:59:25.326  7497  7497 I         : [INFO]: OPLUS_CHG[ADSP]([oplus_chg_8350_reg_dump][7390]): sm8450_st_dump: [chg_en=0, suspend=0, pd_svooc=0], subtype=0x01],[oplus_UsbCommCapable=0, oplus_pd_svooc=0, typec_mode=0, cid_status=0x01, usb_in_status=1],[0x2606=0x87, 0x2607=0x00, 0x2608=0x0a, 0x2609=0x02], [0x260a=0x05, 0x260b=0x59, 0x260c=0x00, 0x260d=0x18], [0x260e=0x00, 0x260f=0x01, 0x2610=0x00, 0x2640=0x01], [0x2641=0x02, 0x2642=0x05, 0x2646=0x00, 0x2650=0x03], [0x2706=0x0a, 0x2707=0x0a, 0x2708=0x0a, 0x2709=0x0a], [0x270b=0xe2, 0x270c=0x48, 0x2710=0xc0, 0x280c=0x38], [0x2810=0x00, 0x2840=0x03, 0x287f=0x00, 0x2906=0x02], [0x2908=0x0f, 0x290a=0x11, 0x290b=0x01, 0x290c=0x01], [0x2910=0x11, 0x2944=0x80, 0x2950=0x02, 0x2951=0x01], [0x2952=0x0a, 0x2954=0x00, 0x2960=0xe0, 0x2b06=0x08], [0x2b07=0x00, 0x2b08=0x00, 0x2b09=0x63, 0x2b0a=0x39], [0x2b0b=0x29, 0x2b0c=0x00, 0x29a8=0x81, 0x29a9=0x83], [0x29aa=0x00, 0x2aa2=0x00, 0x2aa8=0x87, 0x2aa9=0x00], [0x2aaa=0x00],
+09-25 08:59:25.902  2949  2949 E gsi soc : qcom,msm_gsi: gsi_stop_channel:3688 chan=1 busy try again
+09-25 08:59:25.904  2949  2949 E gsi soc : qcom,msm_gsi: gsi_stop_channel:3688 chan=14 busy try again
+09-25 08:59:26.904   950   950 I logd    : logdr: UID=2000 GID=2000 PID=12274 n tail=0 logMask=99 pid=11165 start=0ns deadline=0ns
+09-25 08:59:27.333  7497  7497 I         : [OFP][0][INFO][oplus_get_doze_disable_time:3679]oplus_get_doze_disable_time=0
+09-25 08:59:27.333  7497  7497 W [drm] [msm-dsi-warn]: dsi_display_check_status,time_gap=1130832705
+09-25 08:59:28.429   950   950 I logd    : logdr: UID=2000 GID=2000 PID=12314 n tail=0 logMask=10 pid=0 start=0ns deadline=0ns
+09-25 08:59:28.486   950   950 I logd    : logdr: UID=2000 GID=2000 PID=12317 n tail=5000 logMask=9 pid=0 start=0ns deadline=0ns
+09-25 08:59:28.600   950   950 I logd    : logdr: UID=2000 GID=2000 PID=12320 n tail=2000 logMask=4 pid=0 start=0ns deadline=0ns

@@ -78,6 +78,13 @@ else
   touch "$OUTDIR/threads-top.txt"
 fi
 
+# 2b. Screencap snapshot (capture rendering state while process is alive)
+echo "[*] Capturing screencap snapshot..."
+adb -s "$SERIAL" exec-out screencap -p > "$OUTDIR/device_screen.png" 2>/dev/null || true
+if [[ -d "/home/abhaybyte/.gemini/antigravity-cli/brain/81b61061-cc69-40f0-8ee0-d16dcbef2009" ]]; then
+  cp "$OUTDIR/device_screen.png" "/home/abhaybyte/.gemini/antigravity-cli/brain/81b61061-cc69-40f0-8ee0-d16dcbef2009/device_screen_fixed.png" 2>/dev/null || true
+fi
+
 # 3. Thermal snapshot
 echo "[*] Capturing thermal & power diagnostics..."
 adb -s "$SERIAL" shell dumpsys thermalservice > "$OUTDIR/thermal.txt" 2>&1 || true
