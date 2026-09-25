@@ -65,22 +65,22 @@ class VulkanScratchReuseTests(unittest.TestCase):
         self.assertNotIn("seed ^= hash_struct(tmp);", content)
 
     def test_vk_gs_render_redundant_state_filtering(self):
-        """Verify VKGSRender.cpp elides redundant load_program lookups when semantic state is unchanged."""
+        """Verify VKGSRender.cpp does not prematurely return true before program resolution."""
         cpp_file = os.path.join(ROOT_DIR, "app", "src", "main", "cpp", "rpcsx", "rpcs3", "Emu", "RSX", "VK", "VKGSRender.cpp")
         with open(cpp_file, "r") as f:
             content = f.read()
 
-        self.assertIn("m_pipeline_properties.state.ia.topology == vertex_state.primitive", content)
-        self.assertIn("m_pipeline_properties.state.ia.primitiveRestartEnable == static_cast<VkBool32>(vertex_state.restart_index_enabled)", content)
-        self.assertIn("m_pipeline_properties.renderpass_key == m_current_renderpass_key", content)
+        # Ensure premature return true was removed so shaders are properly resolved
+        self.assertNotIn("static_cast<VkBool32>(vertex_state.restart_index_enabled)", content)
 
     def test_vk_draw_descriptor_bind_batching(self):
-        """Verify VKDraw.cpp gates descriptor binding with reload_state || update_descriptors."""
+        """Verify VKDraw.cpp binds descriptor set unconditionally without skipping."""
         cpp_file = os.path.join(ROOT_DIR, "app", "src", "main", "cpp", "rpcsx", "rpcs3", "Emu", "RSX", "VK", "VKDraw.cpp")
         with open(cpp_file, "r") as f:
             content = f.read()
 
-        self.assertIn("if (reload_state || update_descriptors)", content)
+        # Ensure reload_state || update_descriptors guard was removed
+        self.assertNotIn("if (reload_state || update_descriptors)", content)
         self.assertIn("m_current_frame->descriptor_set.bind(*m_current_command_buffer, VK_PIPELINE_BIND_POINT_GRAPHICS, m_program->pipeline_layout);", content)
 
     def test_vk_texture_cache_dma_copy_reuse(self):
