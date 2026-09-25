@@ -1,0 +1,120 @@
+28772 : ithblue.sambas3
+28773 : Signal Catcher
+28774 : perfetto_hprof_
+28775 : Jit thread pool
+28776 : HeapTaskDaemon
+28777 : ReferenceQueueD
+28778 : FinalizerDaemon
+28779 : FinalizerWatchd
+28781 : binder:28772_1
+28782 : binder:28772_2
+28783 : binder:28772_3
+28784 : Profile Saver
+28785 : RenderThread
+28788 : DefaultDispatch
+28792 : Log Writer
+28793 : ithblue.sambas3
+28794 : Thread-5
+28795 : Thread-6
+28797 : TracingMuxer
+28798 : pool-4-thread-1
+28799 : hwuiTask0
+28800 : hwuiTask1
+28801 : DefaultDispatch
+28807 : DefaultDispatch
+28810 : DefaultDispatch
+28812 : GrallocUploadTh
+28813 : SurfaceSyncGrou
+28817 : binder:28772_4
+28821 : binder:28772_4
+28828 : InteractionJank
+28870 : queued-work-loo
+29022 : binder:28772_5
+29096 : DefaultDispatch
+29097 : DefaultDispatch
+29101 : DefaultDispatch
+29102 : DefaultDispatch
+29758 : DefaultExecutor
+29776 : Progress Dialog
+29777 : Performance Sen
+29778 : PS Move Worker 
+29779 : PS Move Worker 
+29780 : PS Move Worker 
+29781 : PS Move Worker 
+29782 : Gem Thread
+29783 : Camera Thread
+29784 : Usb Manager Thr
+29785 : cellAudio Threa
+29787 : cellAudio Threa
+29788 : cellAudio Threa
+29790 : MediaList Threa
+29791 : Network P2P Thr
+29792 : GDB Server
+29793 : cellAudio Threa
+29794 : CPU Profiler
+29795 : VUART AV Thread
+29796 : Timer Thread
+29797 : RsxAudioData Th
+29798 : Tcp Over Udp Ti
+29799 : Network Thread
+29800 : LV2 Watchdog Th
+29801 : PPU Syscall Usa
+29802 : Signaling Manag
+29803 : NetStart Hack
+29804 : MsgDialog Close
+29806 : Microphone Thre
+29807 : Overlay Input T
+29809 : com.ze:traceq0
+29812 : binder:28772_6
+29813 : binder:28772_7
+29816 : RSX.W1
+29817 : RSX.W2
+29818 : Thread-24
+29819 : rsx::thread
+29820 : Pad Thread
+29822 : PPU[0x1000000] 
+29844 : AAudio_1
+29874 : SPU[0x0000100] 
+29875 : SPU[0x1000100] 
+29876 : SPU[0x2000100] 
+29877 : SPU[0x3000100] 
+29878 : SPU[0x4000100] 
+29879 : PPU[0x1000001] 
+29880 : PPU[0x1000002] 
+29881 : SPU[0x0000200] 
+29882 : PPU[0x1000003] 
+29883 : PPU[0x1000004] 
+29885 : PPU[0x1000005] 
+29886 : PPU[0x1000006] 
+29887 : PPU[0x1000007] 
+29888 : PPU[0x1000008] 
+29889 : PPU[0x1000009] 
+29892 : PPU[0x100000a] 
+29893 : PPU[0x100000b] 
+29896 : VBlank Thread
+29897 : PPU[0x100000e] 
+29899 : PPU[0x1000010] 
+29966 : PPU[0x1000011] 
+29967 : PPU[0x1000012] 
+29968 : PPU[0x1000013] 
+29969 : PPU[0x1000014] 
+29970 : PPU[0x1000015] 
+29971 : PPU[0x1000016] 
+29972 : PPU[0x1000017] 
+29973 : PPU[0x1000018] 
+29974 : PPU[0x1000019] 
+29975 : PPU[0x100001a] 
+29976 : PPU[0x100001b] 
+29977 : PPU[0x100001c] 
+29978 : PPU[0x100001d] 
+29979 : PPU[0x100001e] 
+29980 : PPU[0x100001f] 
+29981 : PPU[0x1000020] 
+29982 : PPU[0x1000021] 
+29983 : PPU[0x1000022] 
+29984 : PPU[0x1000023] 
+29985 : PPU[0x1000024] 
+29986 : PPU[0x1000025] 
+29987 : PPU[0x1000026] 
+29988 : PPU[0x1000027] 
+30114 : PPU[0x100002b] 

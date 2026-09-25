@@ -36,10 +36,10 @@ PKG_NAME = "com.zenithblue.sambas3"
 DEFAULT_GAME = "direct_iso/BCUS98111"
 DEFAULT_DEVICE = "d30a1726"
 
-# Pinned commit and release hashes for verification (E09 / V08 RSX Scratch Reuse)
-EXPECTED_CORE_HASH = "9f3eb74df64cf57f59bbf5d67fda6529c8601afc"
-EXPECTED_APK_SHA256 = "c657a8ff19579e24e02e75e1396aefdaece6f0d02c27acc4ad1596cccc95a583"
-EXPECTED_SO_SHA256 = "c26565b9e8e4e93866de813bd4faaf1d6fee90fc91c9f79560116325de136453"
+# Pinned commit and release hashes for verification (Phase 10 / G10 Fast Mode)
+EXPECTED_CORE_HASH = "141af96fa006f56c25ec335137e92c78b29b17e3"
+EXPECTED_APK_SHA256 = "5a35d5dcd69404eeb945817c1094bc6196c0310532954b5bd68017e6ba3054d9"
+EXPECTED_SO_SHA256 = "e93f1faa806914f24f5c22e346dd4174e66b63c07ed0242a9d18c3dcd7fcc855"
 
 
 def run_cmd(cmd: List[str], timeout: Optional[int] = None) -> subprocess.CompletedProcess[str]:
@@ -546,8 +546,9 @@ def main() -> int:
 
     print(f"[*] Process alive (PID {pid}). Executing gameplay benchmark window ({args.duration}s)...")
     screencap_dest = "/home/abhaybyte/.gemini/antigravity-cli/brain/81b61061-cc69-40f0-8ee0-d16dcbef2009/device_screen_fixed.png"
-    gameplay_png = ROOT_DIR / "docs" / "benchmarks" / "screenshots" / "gow3-phase8-gameplay.png"
+    gameplay_png = ROOT_DIR / "docs" / "benchmarks" / "screenshots" / "gow3-phase10-gameplay.png"
     gameplay_png.parent.mkdir(parents=True, exist_ok=True)
+    outdir.mkdir(parents=True, exist_ok=True)
     outdir_png = outdir / "device_screen.png"
     try:
         r_sc = subprocess.run(["adb", "-s", args.serial, "exec-out", "screencap", "-p"], capture_output=True, timeout=15)
