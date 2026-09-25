@@ -27,15 +27,10 @@ class SpuSimdLoweringTests(unittest.TestCase):
             self.assertIn("ALL SPU SIMD LOWERING & TARGET FEATURE TESTS PASSED!", run_res.stdout)
 
     def test_source_lowering_tokens(self):
-        """Verify SPULLVMRecompiler.cpp implements targeted ARM64 SIMD lowering."""
+        """Verify SPULLVMRecompiler.cpp implements targeted ARM64 SIMD lowering without tbl2 emergency spill."""
         recompiler_file = os.path.join(ROOT_DIR, "app", "src", "main", "cpp", "rpcsx", "rpcs3", "Emu", "Cell", "SPULLVMRecompiler.cpp")
         with open(recompiler_file, "r") as f:
             content = f.read()
-
-        # SHUFB ARM64 tbl2 lowering
-        self.assertIn("llvm::Intrinsic::aarch64_neon_tbl2", content)
-        self.assertIn("(c ^ 0xf) & 0x1f", content)
-        self.assertIn("(c ^ 0xf) & 0x9f", content)
 
         # FSM/FSMH/FSMB cmtst / bitmask lowering
         self.assertIn("const auto bit_mask = build<u32[4]>(1, 2, 4, 8);", content)
@@ -48,24 +43,28 @@ class SpuSimdLoweringTests(unittest.TestCase):
         # ROTQBYI / SHLQBYI / ROTQMBYI constant zshuffle lowering
         self.assertIn("m_op_const_mask & op.i7.data_mask()", content)
 
+        # tbl2 eliminated to prevent register scavenging emergency spill crash on ARM64
+        self.assertNotIn("llvm::Intrinsic::aarch64_neon_tbl2", content)
+
     def test_jit_llvm_engine_mattrs(self):
-        """Verify JITLLVM.cpp forwards MAttrs on AArch64."""
+        """Verify JITLLVM.cpp avoids unsafe MAttrs on AArch64 that trigger emergency spill crashes."""
         jit_file = os.path.join(ROOT_DIR, "app", "src", "main", "cpp", "rpcsx", "rpcs3", "util", "JITLLVM.cpp")
         with open(jit_file, "r") as f:
             content = f.read()
 
-        self.assertIn("builder.setMAttrs(mattrs);", content)
+        # Verify builder does not inject unsafe SVE/SVE2 mattrs
+        self.assertNotIn("builder.setMAttrs(mattrs);", content)
 
     def test_aarch64_sve_hwcap_gating(self):
-        """Verify AArch64Common.cpp gates SVE/SVE2 on OS getauxval."""
+        """Verify AArch64Common.cpp does not expose SVE/SVE2 to LLVM backend."""
         common_file = os.path.join(ROOT_DIR, "app", "src", "main", "cpp", "rpcsx", "rpcs3", "Emu", "CPU", "Backends", "AArch64", "AArch64Common.cpp")
         with open(common_file, "r") as f:
             content = f.read()
 
-        self.assertIn("getauxval(AT_HWCAP)", content)
-        self.assertIn("getauxval(AT_HWCAP2)", content)
-        self.assertIn("has_os_sve", content)
-        self.assertIn("has_os_sve2", content)
+        # SVE/SVE2 are eliminated from feature string to prevent emergency spill crash on ARM64
+        self.assertNotIn("+sve", content)
+        self.assertNotIn("+sve2", content)
 
 if __name__ == "__main__":
     unittest.main()
+

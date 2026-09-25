@@ -178,20 +178,22 @@ fun GameLaunchCenter(
         com.zenithblue.sambas3.patch.PatchFastMode.isFastModeSupported(titleId)
     }
     var fastModeRefreshTick by remember { mutableIntStateOf(0) }
-    var fastModeActive by remember(titleId) { mutableStateOf(false) }
+    var fastModeReceipt by remember(titleId) {
+        mutableStateOf<com.zenithblue.sambas3.patch.FastModeReceipt?>(null)
+    }
     LaunchedEffect(titleId, enabledPatches, fastModeRefreshTick, isFastModeSupported) {
         if (!isFastModeSupported) {
-            fastModeActive = false
+            fastModeReceipt = null
         } else {
-            fastModeActive = com.zenithblue.sambas3.patch.PatchFastMode.isFastModeEnabled(titleId, context)
+            fastModeReceipt = com.zenithblue.sambas3.patch.PatchFastMode.getFastModeReceipt(titleId, context)
         }
     }
     fun toggleFastMode() {
         if (!isFastModeSupported) return
         scope.launch {
-            val next = !fastModeActive
-            com.zenithblue.sambas3.patch.PatchFastMode.setFastModeEnabled(titleId, next, context)
-            fastModeActive = next
+            val currentlyRequested = fastModeReceipt?.requested == true
+            val next = !currentlyRequested
+            fastModeReceipt = com.zenithblue.sambas3.patch.PatchFastMode.setFastModeEnabled(titleId, next, context)
             fastModeRefreshTick++
         }
     }
@@ -701,6 +703,7 @@ fun GameLaunchCenter(
                             }
                         }
                         val isFastModeFocused = focusedTarget == LaunchFocusTarget.FAST_MODE
+                        val receiptState = fastModeReceipt?.state
                         OutlinedButton(
                             onClick = { if (isFastModeSupported) toggleFastMode() },
                             enabled = isFastModeSupported,
@@ -712,19 +715,28 @@ fun GameLaunchCenter(
                             border = BorderStroke(
                                 if (isFastModeFocused && isFastModeSupported) 2.dp else 1.dp,
                                 if (!isFastModeSupported) MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.3f)
-                                else if (fastModeActive) Color(0xFF00E676)
-                                else if (isFastModeFocused) RPCSXColors.focusRing
-                                else MaterialTheme.colorScheme.outlineVariant
+                                else when (receiptState) {
+                                    com.zenithblue.sambas3.patch.FastModeState.EFFECTIVE -> Color(0xFF00E676)
+                                    com.zenithblue.sambas3.patch.FastModeState.PARTIAL -> Color(0xFFFFB300)
+                                    com.zenithblue.sambas3.patch.FastModeState.REQUESTED_NOT_APPLIED -> Color(0xFFFF9800)
+                                    else -> if (isFastModeFocused) RPCSXColors.focusRing else MaterialTheme.colorScheme.outlineVariant
+                                }
                             ),
                             colors = ButtonDefaults.outlinedButtonColors(
                                 containerColor = if (!isFastModeSupported) Color.Transparent
-                                else if (fastModeActive) Color(0xFF00C853).copy(alpha = 0.18f)
-                                else if (isFastModeFocused) RPCSXColors.primaryMuted
-                                else Color.Transparent,
+                                else when (receiptState) {
+                                    com.zenithblue.sambas3.patch.FastModeState.EFFECTIVE -> Color(0xFF00C853).copy(alpha = 0.18f)
+                                    com.zenithblue.sambas3.patch.FastModeState.PARTIAL -> Color(0xFFFFB300).copy(alpha = 0.18f)
+                                    com.zenithblue.sambas3.patch.FastModeState.REQUESTED_NOT_APPLIED -> Color(0xFFFF9800).copy(alpha = 0.18f)
+                                    else -> if (isFastModeFocused) RPCSXColors.primaryMuted else Color.Transparent
+                                },
                                 contentColor = if (!isFastModeSupported) RPCSXColors.textSecondary.copy(alpha = 0.38f)
-                                else if (fastModeActive) Color(0xFF00E676)
-                                else if (isFastModeFocused) RPCSXColors.primary
-                                else MaterialTheme.colorScheme.onSurface,
+                                else when (receiptState) {
+                                    com.zenithblue.sambas3.patch.FastModeState.EFFECTIVE -> Color(0xFF00E676)
+                                    com.zenithblue.sambas3.patch.FastModeState.PARTIAL -> Color(0xFFFFB300)
+                                    com.zenithblue.sambas3.patch.FastModeState.REQUESTED_NOT_APPLIED -> Color(0xFFFF9800)
+                                    else -> if (isFastModeFocused) RPCSXColors.primary else MaterialTheme.colorScheme.onSurface
+                                },
                                 disabledContainerColor = Color.Transparent,
                                 disabledContentColor = RPCSXColors.textSecondary.copy(alpha = 0.38f),
                             ),
@@ -732,20 +744,33 @@ fun GameLaunchCenter(
                             Icon(
                                 painter = painterResource(
                                     if (!isFastModeSupported) R.drawable.tune
-                                    else if (fastModeActive) R.drawable.ic_check_circle
-                                    else R.drawable.tune
+                                    else when (receiptState) {
+                                        com.zenithblue.sambas3.patch.FastModeState.EFFECTIVE -> R.drawable.ic_check_circle
+                                        else -> R.drawable.tune
+                                    }
                                 ),
                                 contentDescription = null,
                                 modifier = Modifier.size(16.dp),
                                 tint = if (!isFastModeSupported) RPCSXColors.textSecondary.copy(alpha = 0.38f)
-                                else if (fastModeActive) Color(0xFF00E676)
-                                else RPCSXColors.textSecondary
+                                else when (receiptState) {
+                                    com.zenithblue.sambas3.patch.FastModeState.EFFECTIVE -> Color(0xFF00E676)
+                                    com.zenithblue.sambas3.patch.FastModeState.PARTIAL -> Color(0xFFFFB300)
+                                    com.zenithblue.sambas3.patch.FastModeState.REQUESTED_NOT_APPLIED -> Color(0xFFFF9800)
+                                    else -> RPCSXColors.textSecondary
+                                }
                             )
                             Spacer(Modifier.width(6.dp))
                             Text(
                                 if (!isFastModeSupported) "FAST MODE: NOT SUPPORTED"
-                                else if (fastModeActive) "FAST MODE: ON"
-                                else "FAST MODE: OFF",
+                                else when (receiptState) {
+                                    com.zenithblue.sambas3.patch.FastModeState.EFFECTIVE -> "FAST MODE: ON"
+                                    com.zenithblue.sambas3.patch.FastModeState.PARTIAL ->
+                                        "FAST MODE: PARTIAL (${fastModeReceipt?.appliedPatches?.size ?: 0}/${fastModeReceipt?.targetPatchCount ?: 0})"
+                                    com.zenithblue.sambas3.patch.FastModeState.REQUESTED_NOT_APPLIED ->
+                                        "FAST MODE: REQUESTED, NOT APPLIED"
+                                    com.zenithblue.sambas3.patch.FastModeState.FAILED -> "FAST MODE: FAILED"
+                                    else -> "FAST MODE: OFF"
+                                },
                                 style = MaterialTheme.typography.labelSmall,
                                 fontWeight = FontWeight.Bold,
                                 maxLines = 1

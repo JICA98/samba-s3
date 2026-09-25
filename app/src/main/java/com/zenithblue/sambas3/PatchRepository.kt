@@ -40,6 +40,10 @@ object PatchRepository {
     @Volatile
     private var appContext: Context? = null
 
+    /** Seam for unit testing patch discovery and enabled-state mutation without JNI. */
+    internal var patchProvider: (() -> List<Patch>)? = null
+    internal var patchEnabler: ((hash: String, name: String, titleId: String?, enabled: Boolean) -> Boolean)? = null
+
     fun invalidate() {
         cached = null
     }
@@ -62,8 +66,8 @@ object PatchRepository {
             if (dest.exists()) dest.delete()
             if (!temp.renameTo(dest)) {
                 temp.copyTo(dest, overwrite = true)
-                temp.delete()
             }
+            temp.delete()
             invalidate()
             true
         }.onFailure {
@@ -72,6 +76,7 @@ object PatchRepository {
     }
 
     fun list(context: Context? = null): List<Patch> {
+        patchProvider?.let { return it() }
         val ctx = context?.applicationContext ?: appContext
         val patchFile = File(patchesDir(), "patch.yml")
         if (!patchFile.exists() && ctx != null) {
@@ -90,18 +95,27 @@ object PatchRepository {
         }
     }
 
-    fun setEnabled(hash: String, name: String, enabled: Boolean): Boolean =
-        runCatching {
+    fun setEnabled(hash: String, name: String, enabled: Boolean): Boolean {
+        patchEnabler?.let { enabler ->
+            return enabler(hash, name, null, enabled).also { invalidate() }
+        }
+        return runCatching {
             RPCSX.instance.patchSetEnabled(hash, name, enabled)
         }.getOrDefault(false).also { invalidate() }
+    }
 
-    fun setEnabled(group: PatchGroup, enabled: Boolean, titleId: String? = null): Boolean =
-        group.hashes.map { hash ->
+    fun setEnabled(group: PatchGroup, enabled: Boolean, titleId: String? = null): Boolean {
+        patchEnabler?.let { enabler ->
+            return group.hashes.map { hash -> enabler(hash, group.name, titleId, enabled) }
+                .all { it }.also { invalidate() }
+        }
+        return group.hashes.map { hash ->
             runCatching {
                 if (titleId == null) RPCSX.instance.patchSetEnabled(hash, group.name, enabled)
                 else RPCSX.instance.patchSetEnabledForTitle(hash, group.name, titleId, enabled)
             }.getOrDefault(false)
         }.all { it }.also { invalidate() }
+    }
 
     fun forTitle(patches: List<Patch>, titleId: String): List<Patch> =
         patches.filter { patch ->
