@@ -1,0 +1,5 @@
+total 29227
+-rw-rw-rw-  1 u0_a463 ext_data_rw  8635865 2026-09-25 10:01 rpcsx_app.log
+-rw-rw-rw-  1 u0_a463 ext_data_rw 21248939 2026-09-25 10:01 rpcsx_backend.log
+-rw-rw-rw-  1 u0_a463 ext_data_rw     2406 2026-09-25 09:59 rpcsx_vulkan.log
+drwxrwsrwx 18 u0_a463 ext_data_rw     3452 2026-09-25 10:04 sessions

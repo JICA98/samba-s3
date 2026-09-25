@@ -1,0 +1,19 @@
+[09-17 18:14:12.718] D/vulkan: searching for layers in '/data/app/~~4sd4u1TDsmdCRwGeae8T6A==/com.zenithblue.sambas3-TcICfNAhnFd2zQM5sNtCUg==/lib/arm64'
+[09-17 18:14:12.719] D/vulkan: searching for layers in '/data/app/~~4sd4u1TDsmdCRwGeae8T6A==/com.zenithblue.sambas3-TcICfNAhnFd2zQM5sNtCUg==/base.apk!/lib/arm64-v8a'
+[09-17 18:14:12.731] W/MESA: Gralloc doesn't support lock_ycbcr (video buffers won't be supported)
+[09-17 18:14:12.731] I/MESA: Using fallback gralloc implementation
+[09-23 19:42:03.797] D/vulkan: searching for layers in '/data/app/~~6L97M_mSb9XhdxJHBxxc6g==/com.zenithblue.sambas3-_3ZCpdHGVxtljPgn2uiSYQ==/lib/arm64'
+[09-23 19:42:03.797] D/vulkan: searching for layers in '/data/app/~~6L97M_mSb9XhdxJHBxxc6g==/com.zenithblue.sambas3-_3ZCpdHGVxtljPgn2uiSYQ==/base.apk!/lib/arm64-v8a'
+[09-23 19:42:03.826] W/MESA: Gralloc doesn't support lock_ycbcr (video buffers won't be supported)
+[09-23 19:42:03.826] I/MESA: Using fallback gralloc implementation
+[09-24 23:24:04.986] D/vulkan: searching for layers in '/data/app/~~ReeIKJ9aj1PquhxWJncQ4A==/com.zenithblue.sambas3-vBk5Ki0ojOX-Kl-HyhZwgg==/lib/arm64'
+[09-25 09:27:50.306] D/vulkan: searching for layers in '/data/app/~~uzkLFQyXAcLkSOWHtGrXZw==/com.zenithblue.sambas3-FJi3g4HtEFzHrwpvMmYIUQ==/lib/arm64'
+[09-25 09:27:50.306] D/vulkan: searching for layers in '/data/app/~~uzkLFQyXAcLkSOWHtGrXZw==/com.zenithblue.sambas3-FJi3g4HtEFzHrwpvMmYIUQ==/base.apk!/lib/arm64-v8a'
+[09-25 09:34:00.209] D/vulkan: searching for layers in '/data/app/~~uzkLFQyXAcLkSOWHtGrXZw==/com.zenithblue.sambas3-FJi3g4HtEFzHrwpvMmYIUQ==/lib/arm64'
+[09-25 09:34:00.209] D/vulkan: searching for layers in '/data/app/~~uzkLFQyXAcLkSOWHtGrXZw==/com.zenithblue.sambas3-FJi3g4HtEFzHrwpvMmYIUQ==/base.apk!/lib/arm64-v8a'
+[09-25 09:34:00.212] W/MESA: Gralloc doesn't support lock_ycbcr (video buffers won't be supported)
+[09-25 09:34:00.212] I/MESA: Using fallback gralloc implementation
+[09-25 09:58:58.261] D/vulkan: searching for layers in '/data/app/~~uzkLFQyXAcLkSOWHtGrXZw==/com.zenithblue.sambas3-FJi3g4HtEFzHrwpvMmYIUQ==/lib/arm64'
+[09-25 09:58:58.261] D/vulkan: searching for layers in '/data/app/~~uzkLFQyXAcLkSOWHtGrXZw==/com.zenithblue.sambas3-FJi3g4HtEFzHrwpvMmYIUQ==/base.apk!/lib/arm64-v8a'
+[09-25 09:58:58.264] W/MESA: Gralloc doesn't support lock_ycbcr (video buffers won't be supported)
+[09-25 09:58:58.264] I/MESA: Using fallback gralloc implementation

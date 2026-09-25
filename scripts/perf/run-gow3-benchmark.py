@@ -36,10 +36,10 @@ PKG_NAME = "com.zenithblue.sambas3"
 DEFAULT_GAME = "direct_iso/BCUS98111"
 DEFAULT_DEVICE = "d30a1726"
 
-# Pinned commit and release hashes for verification (E07 / J07 SPU Cache Fix)
-EXPECTED_CORE_HASH = "af45237121787df3a8ca3cd316529c6ae76acc44"
-EXPECTED_APK_SHA256 = "c826e7df74353cd70636ffed195144d1b7b5b024b200f3538c602c1dc9b1de2c"
-EXPECTED_SO_SHA256 = "5e23f636fd5aec47e4f4ba0ffa28faa455563be42d028686c07782807b966607"
+# Pinned commit and release hashes for verification (E09 / V08 RSX Scratch Reuse)
+EXPECTED_CORE_HASH = "9f3eb74df64cf57f59bbf5d67fda6529c8601afc"
+EXPECTED_APK_SHA256 = "c657a8ff19579e24e02e75e1396aefdaece6f0d02c27acc4ad1596cccc95a583"
+EXPECTED_SO_SHA256 = "c26565b9e8e4e93866de813bd4faaf1d6fee90fc91c9f79560116325de136453"
 
 
 def run_cmd(cmd: List[str], timeout: Optional[int] = None) -> subprocess.CompletedProcess[str]:
@@ -546,10 +546,19 @@ def main() -> int:
 
     print(f"[*] Process alive (PID {pid}). Executing gameplay benchmark window ({args.duration}s)...")
     screencap_dest = "/home/abhaybyte/.gemini/antigravity-cli/brain/81b61061-cc69-40f0-8ee0-d16dcbef2009/device_screen_fixed.png"
+    gameplay_png = ROOT_DIR / "docs" / "benchmarks" / "screenshots" / "gow3-phase8-gameplay.png"
+    gameplay_png.parent.mkdir(parents=True, exist_ok=True)
+    outdir_png = outdir / "device_screen.png"
     try:
-        with open(screencap_dest, "wb") as f:
-            subprocess.run(["adb", "-s", args.serial, "exec-out", "screencap", "-p"], stdout=f, timeout=15)
-        print(f"[*] Captured initial gameplay screenshot to {screencap_dest}")
+        r_sc = subprocess.run(["adb", "-s", args.serial, "exec-out", "screencap", "-p"], capture_output=True, timeout=15)
+        if r_sc.returncode == 0 and r_sc.stdout:
+            with open(screencap_dest, "wb") as f:
+                f.write(r_sc.stdout)
+            with open(gameplay_png, "wb") as f:
+                f.write(r_sc.stdout)
+            with open(outdir_png, "wb") as f:
+                f.write(r_sc.stdout)
+            print(f"[*] Captured initial gameplay screenshot to {gameplay_png} and {outdir_png}")
     except Exception as e:
         print(f"[!] Warning: initial screencap failed: {e}")
 

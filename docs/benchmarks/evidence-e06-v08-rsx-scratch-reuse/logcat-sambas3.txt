@@ -1,0 +1,168 @@
+09-25 10:05:02.599 16945 17015 D RPCS3   : CPU Usage: Total: 26.1%, Cores: 0.0%, 0.0%, 0.0%, 0.0%, 0.0%, 0.0%, 0.0%, 0.0%
+09-25 10:05:02.675 16945 17039 D RPCS3   : PPU Syscall Usage Stats:
+09-25 10:05:02.675 16945 17039 D RPCS3   : 	⁂ sys_timer_usleep [95838]
+09-25 10:05:02.675 16945 17039 D RPCS3   : 	⁂ _sys_lwcond_queue_wait [11846]
+09-25 10:05:02.675 16945 17039 D RPCS3   : 	⁂ _sys_lwmutex_lock [11408]
+09-25 10:05:02.675 16945 17039 D RPCS3   : 	⁂ _sys_lwmutex_unlock [10634]
+09-25 10:05:02.675 16945 17039 D RPCS3   : 	⁂ _sys_lwcond_signal [5909]
+09-25 10:05:02.675 16945 17039 D RPCS3   : 	⁂ sys_event_queue_receive [5458]
+09-25 10:05:02.675 16945 17039 D RPCS3   : 	⁂ _sys_lwcond_signal_all [3844]
+09-25 10:05:02.675 16945 17039 D RPCS3   : 	⁂ sys_time_get_current_time [3308]
+09-25 10:05:02.675 16945 17039 D RPCS3   : 	⁂ sys_fs_read [2144]
+09-25 10:05:02.675 16945 17039 D RPCS3   : 	⁂ sys_event_port_send [1967]
+09-25 10:05:02.675 16945 17039 D RPCS3   : 	⁂ sys_fs_write [1258]
+09-25 10:05:02.675 16945 17039 D RPCS3   : 	⁂ sys_mmapper_map_shared_memory [329]
+09-25 10:05:02.675 16945 17039 D RPCS3   : 	⁂ sys_fs_fsync [210]
+09-25 10:05:02.675 16945 17039 D RPCS3   : 	⁂ sys_mmapper_unmap_shared_memory [188]
+09-25 10:05:02.675 16945 17039 D RPCS3   : 	⁂ sys_fs_lseek [158]
+09-25 10:05:02.675 16945 17039 D RPCS3   : 	⁂ sys_time_get_timezone [130]
+09-25 10:05:02.675 16945 17039 D RPCS3   : 	⁂ sys_fs_fcntl [62]
+09-25 10:05:02.675 16945 17039 D RPCS3   : 	⁂ sys_rsx_context_attribute [46]
+09-25 10:05:02.675 16945 17039 D RPCS3   : 	⁂ sys_time_get_timebase_frequency [44]
+09-25 10:05:02.675 16945 17039 D RPCS3   : 	⁂ sys_mutex_lock [42]
+09-25 10:05:02.675 16945 17039 D RPCS3   : 	⁂ sys_mutex_unlock [42]
+09-25 10:05:02.675 16945 17039 D RPCS3   : 	⁂ _sys_ppu_thread_create [39]
+09-25 10:05:02.675 16945 17039 D RPCS3   : 	⁂ sys_fs_fstat [39]
+09-25 10:05:02.675 16945 17039 D RPCS3   : 	⁂ sys_ppu_thread_start [38]
+09-25 10:05:02.675 16945 17039 D RPCS3   : 	⁂ sys_fs_open [36]
+09-25 10:05:02.675 16945 17039 D RPCS3   : 	⁂ sys_fs_stat [25]
+09-25 10:05:02.675 16945 17039 D RPCS3   : 	⁂ sys_fs_close [18]
+09-25 10:05:02.675 16945 17039 D RPCS3   : 	⁂ sys_rsx_context_iomap [9]
+09-25 10:05:02.675 16945 17039 D RPCS3   : 	⁂ sys_event_queue_create [8]
+09-25 10:05:02.675 16945 17039 D RPCS3   : 	⁂ sys_event_port_create [6]
+09-25 10:05:02.675 16945 17039 D RPCS3   : 	⁂ sys_event_port_connect_local [6]
+09-25 10:05:02.675 16945 17039 D RPCS3   : 	⁂ sys_rsx_attribute [4]
+09-25 10:05:02.675 16945 17039 D RPCS3   : 	⁂ sys_event_flag_wait [3]
+09-25 10:05:02.675 16945 17039 D RPCS3   : 	⁂ _sys_lwmutex_trylock [3]
+09-25 10:05:02.675 16945 17039 D RPCS3   : 	⁂ sys_event_flag_clear [3]
+09-25 10:05:02.675 16945 17039 D RPCS3   : 	⁂ sys_rsx_context_iounmap [2]
+09-25 10:05:05.088 16945 16945 W DebugPad: BUTTON START d1=8 d2=0 press 120ms request_id=s3-1790310905015967813-2142375-16260
+09-25 10:05:05.208 16945 16945 W DebugPad: BUTTON START release request_id=s3-1790310905015967813-2142375-16260
+09-25 10:05:09.615 16945 16978 D S3PERF  : GPU load [/sys/class/kgsl/kgsl-3d0/gpubusy]: raw='0       0' -> load=null%
+09-25 10:05:12.599 16945 17015 D RPCS3   : CPU Usage: Total: 25.4%, Cores: 0.0%, 0.0%, 0.0%, 0.0%, 0.0%, 0.0%, 0.0%, 0.0%
+09-25 10:05:12.674 16945 17039 D RPCS3   : PPU Syscall Usage Stats:
+09-25 10:05:12.674 16945 17039 D RPCS3   : 	⁂ sys_timer_usleep [199844]
+09-25 10:05:12.674 16945 17039 D RPCS3   : 	⁂ _sys_lwcond_queue_wait [12745]
+09-25 10:05:12.674 16945 17039 D RPCS3   : 	⁂ _sys_lwmutex_lock [12239]
+09-25 10:05:12.674 16945 17039 D RPCS3   : 	⁂ _sys_lwmutex_unlock [10785]
+09-25 10:05:12.674 16945 17039 D RPCS3   : 	⁂ sys_event_queue_receive [9823]
+09-25 10:05:12.674 16945 17039 D RPCS3   : 	⁂ _sys_lwcond_signal [5990]
+09-25 10:05:12.674 16945 17039 D RPCS3   : 	⁂ _sys_lwcond_signal_all [3970]
+09-25 10:05:12.674 16945 17039 D RPCS3   : 	⁂ sys_event_port_send [3817]
+09-25 10:05:12.674 16945 17039 D RPCS3   : 	⁂ sys_time_get_current_time [3346]
+09-25 10:05:12.674 16945 17039 D RPCS3   : 	⁂ sys_fs_read [2155]
+09-25 10:05:20.669 16945 16978 D S3PERF  : GPU load [/sys/class/kgsl/kgsl-3d0/gpubusy]: raw='0       0' -> load=null%
+09-25 10:05:22.599 16945 17015 D RPCS3   : CPU Usage: Total: 25.4%, Cores: 0.0%, 0.0%, 0.0%, 0.0%, 0.0%, 0.0%, 0.0%, 0.0%
+09-25 10:05:22.674 16945 17039 D RPCS3   : PPU Syscall Usage Stats:
+09-25 10:05:22.674 16945 17039 D RPCS3   : 	⁂ sys_timer_usleep [303771]
+09-25 10:05:22.674 16945 17039 D RPCS3   : 	⁂ sys_event_queue_receive [14208]
+09-25 10:05:22.674 16945 17039 D RPCS3   : 	⁂ _sys_lwcond_queue_wait [13653]
+09-25 10:05:22.674 16945 17039 D RPCS3   : 	⁂ _sys_lwmutex_lock [13076]
+09-25 10:05:22.674 16945 17039 D RPCS3   : 	⁂ _sys_lwmutex_unlock [10942]
+09-25 10:05:22.674 16945 17039 D RPCS3   : 	⁂ _sys_lwcond_signal [6071]
+09-25 10:05:22.674 16945 17039 D RPCS3   : 	⁂ sys_event_port_send [5685]
+09-25 10:05:22.674 16945 17039 D RPCS3   : 	⁂ _sys_lwcond_signal_all [4103]
+09-25 10:05:22.674 16945 17039 D RPCS3   : 	⁂ sys_time_get_current_time [3387]
+09-25 10:05:22.674 16945 17039 D RPCS3   : 	⁂ sys_fs_read [2167]
+09-25 10:05:31.712 16945 16978 D S3PERF  : GPU load [/sys/class/kgsl/kgsl-3d0/gpubusy]: raw='105924 1022029' -> load=10.364089472999298%
+09-25 10:05:32.600 16945 17015 D RPCS3   : CPU Usage: Total: 25.5%, Cores: 0.0%, 0.0%, 0.0%, 0.0%, 0.0%, 0.0%, 0.0%, 0.0%
+09-25 10:05:32.675 16945 17039 D RPCS3   : PPU Syscall Usage Stats:
+09-25 10:05:32.675 16945 17039 D RPCS3   : 	⁂ sys_timer_usleep [407636]
+09-25 10:05:32.675 16945 17039 D RPCS3   : 	⁂ sys_event_queue_receive [18593]
+09-25 10:05:32.675 16945 17039 D RPCS3   : 	⁂ _sys_lwcond_queue_wait [14556]
+09-25 10:05:32.675 16945 17039 D RPCS3   : 	⁂ _sys_lwmutex_lock [13909]
+09-25 10:05:32.675 16945 17039 D RPCS3   : 	⁂ _sys_lwmutex_unlock [11095]
+09-25 10:05:32.675 16945 17039 D RPCS3   : 	⁂ sys_event_port_send [7554]
+09-25 10:05:32.675 16945 17039 D RPCS3   : 	⁂ _sys_lwcond_signal [6151]
+09-25 10:05:32.675 16945 17039 D RPCS3   : 	⁂ _sys_lwcond_signal_all [4233]
+09-25 10:05:32.675 16945 17039 D RPCS3   : 	⁂ sys_time_get_current_time [3428]
+09-25 10:05:32.675 16945 17039 D RPCS3   : 	⁂ sys_fs_read [2179]
+09-25 10:05:35.461 16945 16945 W DebugPad: BUTTON CROSS d1=0 d2=64 press 120ms request_id=s3-1790310935412233817-2143203-18527
+09-25 10:05:35.580 16945 16945 W DebugPad: BUTTON CROSS release request_id=s3-1790310935412233817-2143203-18527
+09-25 10:05:42.599 16945 17015 D RPCS3   : CPU Usage: Total: 25.1%, Cores: 0.0%, 0.0%, 0.0%, 0.0%, 0.0%, 0.0%, 0.0%, 0.0%
+09-25 10:05:42.674 16945 17039 D RPCS3   : PPU Syscall Usage Stats:
+09-25 10:05:42.674 16945 17039 D RPCS3   : 	⁂ sys_timer_usleep [512505]
+09-25 10:05:42.674 16945 17039 D RPCS3   : 	⁂ sys_event_queue_receive [22967]
+09-25 10:05:42.674 16945 17039 D RPCS3   : 	⁂ _sys_lwcond_queue_wait [15463]
+09-25 10:05:42.674 16945 17039 D RPCS3   : 	⁂ _sys_lwmutex_lock [14749]
+09-25 10:05:42.674 16945 17039 D RPCS3   : 	⁂ _sys_lwmutex_unlock [11255]
+09-25 10:05:42.674 16945 17039 D RPCS3   : 	⁂ sys_event_port_send [9411]
+09-25 10:05:42.674 16945 17039 D RPCS3   : 	⁂ _sys_lwcond_signal [6234]
+09-25 10:05:42.674 16945 17039 D RPCS3   : 	⁂ _sys_lwcond_signal_all [4363]
+09-25 10:05:42.674 16945 17039 D RPCS3   : 	⁂ sys_time_get_current_time [3469]
+09-25 10:05:42.674 16945 17039 D RPCS3   : 	⁂ sys_fs_read [2190]
+09-25 10:05:42.759 16945 16978 D S3PERF  : GPU load [/sys/class/kgsl/kgsl-3d0/gpubusy]: raw='0       0' -> load=null%
+09-25 10:05:47.475 16945 16945 W DebugPad: BUTTON SQUARE d1=0 d2=128 press 120ms request_id=s3-1790310947402076573-2143533-17475
+09-25 10:05:47.595 16945 16945 W DebugPad: BUTTON SQUARE release request_id=s3-1790310947402076573-2143533-17475
+09-25 10:05:52.599 16945 17015 D RPCS3   : CPU Usage: Total: 25.2%, Cores: 0.0%, 0.0%, 0.0%, 0.0%, 0.0%, 0.0%, 0.0%, 0.0%
+09-25 10:05:52.674 16945 17039 D RPCS3   : PPU Syscall Usage Stats:
+09-25 10:05:52.674 16945 17039 D RPCS3   : 	⁂ sys_timer_usleep [617203]
+09-25 10:05:52.674 16945 17039 D RPCS3   : 	⁂ sys_event_queue_receive [27336]
+09-25 10:05:52.674 16945 17039 D RPCS3   : 	⁂ _sys_lwcond_queue_wait [16364]
+09-25 10:05:52.674 16945 17039 D RPCS3   : 	⁂ _sys_lwmutex_lock [15585]
+09-25 10:05:52.674 16945 17039 D RPCS3   : 	⁂ _sys_lwmutex_unlock [11411]
+09-25 10:05:52.674 16945 17039 D RPCS3   : 	⁂ sys_event_port_send [11265]
+09-25 10:05:52.674 16945 17039 D RPCS3   : 	⁂ _sys_lwcond_signal [6316]
+09-25 10:05:52.674 16945 17039 D RPCS3   : 	⁂ _sys_lwcond_signal_all [4489]
+09-25 10:05:52.674 16945 17039 D RPCS3   : 	⁂ sys_time_get_current_time [3507]
+09-25 10:05:52.674 16945 17039 D RPCS3   : 	⁂ sys_fs_read [2201]
+09-25 10:05:53.804 16945 16970 D S3PERF  : GPU load [/sys/class/kgsl/kgsl-3d0/gpubusy]: raw='0       0' -> load=null%
+09-25 10:05:56.628 16945 16945 W DebugPad: BUTTON SQUARE d1=0 d2=128 press 120ms request_id=s3-1790310956553247894-2143814-24872
+09-25 10:05:56.748 16945 16945 W DebugPad: BUTTON SQUARE release request_id=s3-1790310956553247894-2143814-24872
+09-25 10:06:02.599 16945 17015 D RPCS3   : CPU Usage: Total: 25.5%, Cores: 0.0%, 0.0%, 0.0%, 0.0%, 0.0%, 0.0%, 0.0%, 0.0%
+09-25 10:06:02.674 16945 17039 D RPCS3   : PPU Syscall Usage Stats:
+09-25 10:06:02.674 16945 17039 D RPCS3   : 	⁂ sys_timer_usleep [722505]
+09-25 10:06:02.674 16945 17039 D RPCS3   : 	⁂ sys_event_queue_receive [31685]
+09-25 10:06:02.674 16945 17039 D RPCS3   : 	⁂ _sys_lwcond_queue_wait [17271]
+09-25 10:06:02.674 16945 17039 D RPCS3   : 	⁂ _sys_lwmutex_lock [16419]
+09-25 10:06:02.674 16945 17039 D RPCS3   : 	⁂ sys_event_port_send [13096]
+09-25 10:06:02.674 16945 17039 D RPCS3   : 	⁂ _sys_lwmutex_unlock [11565]
+09-25 10:06:02.674 16945 17039 D RPCS3   : 	⁂ _sys_lwcond_signal [6396]
+09-25 10:06:02.674 16945 17039 D RPCS3   : 	⁂ _sys_lwcond_signal_all [4622]
+09-25 10:06:02.674 16945 17039 D RPCS3   : 	⁂ sys_time_get_current_time [3548]
+09-25 10:06:02.674 16945 17039 D RPCS3   : 	⁂ sys_fs_read [2213]
+09-25 10:06:04.873 16945 16970 D S3PERF  : GPU load [/sys/class/kgsl/kgsl-3d0/gpubusy]: raw='0       0' -> load=null%
+09-25 10:06:05.772 16945 16945 W DebugPad: BUTTON SQUARE d1=0 d2=128 press 120ms request_id=s3-1790310965700014023-2144078-31165
+09-25 10:06:05.893 16945 16945 W DebugPad: BUTTON SQUARE release request_id=s3-1790310965700014023-2144078-31165
+09-25 10:06:12.599 16945 17015 D RPCS3   : CPU Usage: Total: 25.9%, Cores: 0.0%, 0.0%, 0.0%, 0.0%, 0.0%, 0.0%, 0.0%, 0.0%
+09-25 10:06:12.674 16945 17039 D RPCS3   : PPU Syscall Usage Stats:
+09-25 10:06:12.674 16945 17039 D RPCS3   : 	⁂ sys_timer_usleep [826750]
+09-25 10:06:12.674 16945 17039 D RPCS3   : 	⁂ sys_event_queue_receive [35997]
+09-25 10:06:12.674 16945 17039 D RPCS3   : 	⁂ _sys_lwcond_queue_wait [18175]
+09-25 10:06:12.674 16945 17039 D RPCS3   : 	⁂ _sys_lwmutex_lock [17253]
+09-25 10:06:12.674 16945 17039 D RPCS3   : 	⁂ sys_event_port_send [14892]
+09-25 10:06:12.674 16945 17039 D RPCS3   : 	⁂ _sys_lwmutex_unlock [11719]
+09-25 10:06:12.674 16945 17039 D RPCS3   : 	⁂ _sys_lwcond_signal [6478]
+09-25 10:06:12.674 16945 17039 D RPCS3   : 	⁂ _sys_lwcond_signal_all [4751]
+09-25 10:06:12.674 16945 17039 D RPCS3   : 	⁂ sys_time_get_current_time [3591]
+09-25 10:06:12.674 16945 17039 D RPCS3   : 	⁂ sys_fs_read [2225]
+09-25 10:06:14.907 16945 16945 W DebugPad: BUTTON SQUARE d1=0 d2=128 press 120ms request_id=s3-1790310974837912098-2144346-19833
+09-25 10:06:15.028 16945 16945 W DebugPad: BUTTON SQUARE release request_id=s3-1790310974837912098-2144346-19833
+09-25 10:06:16.239 16945 16970 D S3PERF  : GPU load [/sys/class/kgsl/kgsl-3d0/gpubusy]: raw='0       0' -> load=null%
+09-25 10:06:22.599 16945 17015 D RPCS3   : CPU Usage: Total: 25.6%, Cores: 0.0%, 0.0%, 0.0%, 0.0%, 0.0%, 0.0%, 0.0%, 0.0%
+09-25 10:06:22.674 16945 17039 D RPCS3   : PPU Syscall Usage Stats:
+09-25 10:06:22.674 16945 17039 D RPCS3   : 	⁂ sys_timer_usleep [930661]
+09-25 10:06:22.674 16945 17039 D RPCS3   : 	⁂ sys_event_queue_receive [40180]
+09-25 10:06:22.674 16945 17039 D RPCS3   : 	⁂ _sys_lwcond_queue_wait [19086]
+09-25 10:06:22.674 16945 17039 D RPCS3   : 	⁂ _sys_lwmutex_lock [18094]
+09-25 10:06:22.674 16945 17039 D RPCS3   : 	⁂ sys_event_port_send [16558]
+09-25 10:06:22.674 16945 17039 D RPCS3   : 	⁂ _sys_lwmutex_unlock [11880]
+09-25 10:06:22.674 16945 17039 D RPCS3   : 	⁂ _sys_lwcond_signal [6561]
+09-25 10:06:22.674 16945 17039 D RPCS3   : 	⁂ _sys_lwcond_signal_all [4884]
+09-25 10:06:22.674 16945 17039 D RPCS3   : 	⁂ sys_time_get_current_time [3632]
+09-25 10:06:22.674 16945 17039 D RPCS3   : 	⁂ sys_fs_read [2237]
+09-25 10:06:24.010 16945 16945 W DebugPad: BUTTON SQUARE d1=0 d2=128 press 120ms request_id=s3-1790310983939470058-2144614-1281
+09-25 10:06:24.131 16945 16945 W DebugPad: BUTTON SQUARE release request_id=s3-1790310983939470058-2144614-1281
+09-25 10:06:26.967 16945 16970 D S3PERF  : GPU load [/sys/class/kgsl/kgsl-3d0/gpubusy]: raw='0       0' -> load=null%
+09-25 10:06:32.599 16945 17015 D RPCS3   : CPU Usage: Total: 20.8%, Cores: 0.0%, 0.0%, 0.0%, 0.0%, 0.0%, 0.0%, 0.0%, 0.0%
+09-25 10:06:32.674 16945 17039 D RPCS3   : PPU Syscall Usage Stats:
+09-25 10:06:32.674 16945 17039 D RPCS3   : 	⁂ sys_timer_usleep [1036472]
+09-25 10:06:32.674 16945 17039 D RPCS3   : 	⁂ sys_event_queue_receive [44504]
+09-25 10:06:32.674 16945 17039 D RPCS3   : 	⁂ _sys_lwcond_queue_wait [19995]
+09-25 10:06:32.674 16945 17039 D RPCS3   : 	⁂ _sys_lwmutex_lock [18932]
+09-25 10:06:32.674 16945 17039 D RPCS3   : 	⁂ sys_event_port_send [18365]
+09-25 10:06:32.674 16945 17039 D RPCS3   : 	⁂ _sys_lwmutex_unlock [12038]
+09-25 10:06:32.674 16945 17039 D RPCS3   : 	⁂ _sys_lwcond_signal [6643]
+09-25 10:06:32.674 16945 17039 D RPCS3   : 	⁂ _sys_lwcond_signal_all [5017]
+09-25 10:06:32.674 16945 17039 D RPCS3   : 	⁂ sys_time_get_current_time [3673]
+09-25 10:06:32.674 16945 17039 D RPCS3   : 	⁂ sys_fs_read [2249]

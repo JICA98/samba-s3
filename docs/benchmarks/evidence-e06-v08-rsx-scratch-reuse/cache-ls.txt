@@ -1,0 +1,13 @@
+total 2429
+-rw-r--r--  1 u0_a463 ext_data_rw 2070261 2026-09-25 10:06 RPCSX.log
+----------  1 u0_a463 ext_data_rw  384810 2026-09-25 10:04 RPCSX.log.gz
+-rw-r--r--  1 u0_a463 ext_data_rw    3065 2026-09-25 10:01 RPCSX.old.log
+-rw-r--r--  1 u0_a463 ext_data_rw       0 2026-09-25 10:04 TTY.log
+drwxr-sr-x 84 u0_a463 ext_data_rw   20480 2026-09-23 11:19 cache
+drwxr-sr-x  2 u0_a463 ext_data_rw    3452 2026-09-17 18:08 ppu_progs
+drwxr-sr-x  2 u0_a463 ext_data_rw    3452 2026-09-17 18:08 shaderlog
+drwxr-sr-x  2 u0_a463 ext_data_rw    3452 2026-09-17 18:08 spu_progs
+---
+---
+3.5K	/storage/emulated/0/Android/data/com.zenithblue.sambas3/files/cache/ppu_progs
+3.5K	/storage/emulated/0/Android/data/com.zenithblue.sambas3/files/cache/spu_progs
