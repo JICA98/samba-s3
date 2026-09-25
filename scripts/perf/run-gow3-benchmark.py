@@ -36,10 +36,10 @@ PKG_NAME = "com.zenithblue.sambas3"
 DEFAULT_GAME = "direct_iso/BCUS98111"
 DEFAULT_DEVICE = "d30a1726"
 
-# Pinned commit and release hashes for verification
-EXPECTED_CORE_HASH = "ed8ba6c12c218249524a441b79f48d6bae842394"
-EXPECTED_APK_SHA256 = "d0e25751badc15835addb0f37b132413c4d67e456f217efa4bc0c4df93810306"
-EXPECTED_SO_SHA256 = "571426c33f8677ebec0f5fcc26c1c32d5e6ac6e9bdd2422bc0b1f0edb6afab09"
+# Pinned commit and release hashes for verification (E08 / J06 SPU SIMD Lowering)
+EXPECTED_CORE_HASH = "c47f879bbeb1f152129f61a013fa84b823bba803"
+EXPECTED_APK_SHA256 = "69a27d474f7b974e026c598717ac53732b64a80147ce679ffc31646c813b271e"
+EXPECTED_SO_SHA256 = "a6711f512673e4e6c4885dbbfd4ce3432ce074967dc3ec27203a384efad31e43"
 
 
 def run_cmd(cmd: List[str], timeout: Optional[int] = None) -> subprocess.CompletedProcess[str]:

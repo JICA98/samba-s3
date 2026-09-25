@@ -1,0 +1,33 @@
+09-25 08:18:35.185  6499  7403 D RPCS3   : CPU Usage: Total: 3.8%, Cores: 0.0%, 0.0%, 0.0%, 0.0%, 0.0%, 0.0%, 0.0%, 0.0%
+09-25 08:18:37.752  6499  6499 W DebugPad: BUTTON START d1=8 d2=0 press 120ms request_id=s3-1790304517695179338-1920114-32413
+09-25 08:18:37.873  6499  6499 W DebugPad: BUTTON START release request_id=s3-1790304517695179338-1920114-32413
+09-25 08:18:39.126  6499  6535 D S3PERF  : GPU load [/sys/class/kgsl/kgsl-3d0/gpubusy]: raw='0       0' -> load=null%
+09-25 08:18:45.185  6499  7403 D RPCS3   : CPU Usage: Total: 3.8%, Cores: 0.0%, 0.0%, 0.0%, 0.0%, 0.0%, 0.0%, 0.0%, 0.0%
+09-25 08:18:50.340  6499  6535 D S3PERF  : GPU load [/sys/class/kgsl/kgsl-3d0/gpubusy]: raw='0       0' -> load=null%
+09-25 08:18:55.185  6499  7403 D RPCS3   : CPU Usage: Total: 3.6%, Cores: 0.0%, 0.0%, 0.0%, 0.0%, 0.0%, 0.0%, 0.0%, 0.0%
+09-25 08:19:00.388  6499  6535 D S3PERF  : GPU load [/sys/class/kgsl/kgsl-3d0/gpubusy]: raw='0       0' -> load=null%
+09-25 08:19:05.186  6499  7403 D RPCS3   : CPU Usage: Total: 3.2%, Cores: 0.0%, 0.0%, 0.0%, 0.0%, 0.0%, 0.0%, 0.0%, 0.0%
+09-25 08:19:08.165  6499  6499 W DebugPad: BUTTON CROSS d1=0 d2=64 press 120ms request_id=s3-1790304548105411986-1921003-1693
+09-25 08:19:08.285  6499  6499 W DebugPad: BUTTON CROSS release request_id=s3-1790304548105411986-1921003-1693
+09-25 08:19:11.603  6499  6535 D S3PERF  : GPU load [/sys/class/kgsl/kgsl-3d0/gpubusy]: raw='0       0' -> load=null%
+09-25 08:19:15.185  6499  7403 D RPCS3   : CPU Usage: Total: 3.5%, Cores: 0.0%, 0.0%, 0.0%, 0.0%, 0.0%, 0.0%, 0.0%, 0.0%
+09-25 08:19:19.864  6499  6499 W DebugPad: BUTTON SQUARE d1=0 d2=128 press 120ms request_id=s3-1790304559790294561-1921343-10954
+09-25 08:19:19.985  6499  6499 W DebugPad: BUTTON SQUARE release request_id=s3-1790304559790294561-1921343-10954
+09-25 08:19:21.654  6499  6535 D S3PERF  : GPU load [/sys/class/kgsl/kgsl-3d0/gpubusy]: raw='0       0' -> load=null%
+09-25 08:19:25.185  6499  7403 D RPCS3   : CPU Usage: Total: 3.4%, Cores: 0.0%, 0.0%, 0.0%, 0.0%, 0.0%, 0.0%, 0.0%, 0.0%
+09-25 08:19:29.059  6499  6499 W DebugPad: BUTTON SQUARE d1=0 d2=128 press 120ms request_id=s3-1790304569005761731-1921620-16518
+09-25 08:19:29.179  6499  6499 W DebugPad: BUTTON SQUARE release request_id=s3-1790304569005761731-1921620-16518
+09-25 08:19:32.892  6499  6535 D S3PERF  : GPU load [/sys/class/kgsl/kgsl-3d0/gpubusy]: raw='0       0' -> load=null%
+09-25 08:19:35.185  6499  7403 D RPCS3   : CPU Usage: Total: 3.8%, Cores: 0.0%, 0.0%, 0.0%, 0.0%, 0.0%, 0.0%, 0.0%, 0.0%
+09-25 08:19:38.269  6499  6499 W DebugPad: BUTTON SQUARE d1=0 d2=128 press 120ms request_id=s3-1790304578191096488-1921886-1683
+09-25 08:19:38.390  6499  6499 W DebugPad: BUTTON SQUARE release request_id=s3-1790304578191096488-1921886-1683
+09-25 08:19:42.985  6499  6535 D S3PERF  : GPU load [/sys/class/kgsl/kgsl-3d0/gpubusy]: raw='0       0' -> load=null%
+09-25 08:19:45.185  6499  7403 D RPCS3   : CPU Usage: Total: 3.9%, Cores: 0.0%, 0.0%, 0.0%, 0.0%, 0.0%, 0.0%, 0.0%, 0.0%
+09-25 08:19:47.482  6499  6499 W DebugPad: BUTTON SQUARE d1=0 d2=128 press 120ms request_id=s3-1790304587409794516-1922159-28436
+09-25 08:19:47.603  6499  6499 W DebugPad: BUTTON SQUARE release request_id=s3-1790304587409794516-1922159-28436
+09-25 08:19:54.211  6499  6535 D S3PERF  : GPU load [/sys/class/kgsl/kgsl-3d0/gpubusy]: raw='0       0' -> load=null%
+09-25 08:19:55.185  6499  7403 D RPCS3   : CPU Usage: Total: 3.9%, Cores: 0.0%, 0.0%, 0.0%, 0.0%, 0.0%, 0.0%, 0.0%, 0.0%
+09-25 08:19:56.701  6499  6499 W DebugPad: BUTTON SQUARE d1=0 d2=128 press 120ms request_id=s3-1790304596622956985-1922428-16292
+09-25 08:19:56.823  6499  6499 W DebugPad: BUTTON SQUARE release request_id=s3-1790304596622956985-1922428-16292
+09-25 08:20:05.185  6499  7403 D RPCS3   : CPU Usage: Total: 2.9%, Cores: 0.0%, 0.0%, 0.0%, 0.0%, 0.0%, 0.0%, 0.0%, 0.0%
+09-25 08:20:05.445  6499  6535 D S3PERF  : GPU load [/sys/class/kgsl/kgsl-3d0/gpubusy]: raw='0       0' -> load=null%

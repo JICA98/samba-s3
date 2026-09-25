@@ -1,0 +1,76 @@
+6499 : ithblue.sambas3
+6501 : Signal Catcher
+6502 : perfetto_hprof_
+6503 : Jit thread pool
+6504 : HeapTaskDaemon
+6505 : ReferenceQueueD
+6506 : FinalizerDaemon
+6507 : FinalizerWatchd
+6508 : binder:6499_1
+6509 : binder:6499_2
+6511 : binder:6499_3
+6514 : Profile Saver
+6515 : RenderThread
+6523 : Log Writer
+6524 : ithblue.sambas3
+6525 : Thread-5
+6526 : Thread-6
+6527 : DefaultDispatch
+6528 : TracingMuxer
+6529 : pool-4-thread-1
+6530 : hwuiTask0
+6531 : hwuiTask1
+6532 : DefaultDispatch
+6534 : DefaultDispatch
+6535 : DefaultDispatch
+6540 : SurfaceSyncGrou
+6541 : GrallocUploadTh
+6543 : DefaultDispatch
+6544 : DefaultDispatch
+6545 : DefaultDispatch
+6546 : DefaultDispatch
+6548 : binder:6499_4
+6549 : binder:6499_4
+6560 : InteractionJank
+6574 : queued-work-loo
+6627 : binder:6499_5
+6694 : binder:6499_6
+7396 : DefaultExecutor
+7402 : Progress Dialog
+7403 : Performance Sen
+7405 : PS Move Worker 
+7406 : PS Move Worker 
+7407 : PS Move Worker 
+7408 : PS Move Worker 
+7409 : Gem Thread
+7410 : Camera Thread
+7411 : Usb Manager Thr
+7412 : cellAudio Threa
+7415 : MediaList Threa
+7416 : Network P2P Thr
+7417 : GDB Server
+7418 : CPU Profiler
+7419 : VUART AV Thread
+7420 : Timer Thread
+7421 : RsxAudioData Th
+7422 : cellAudio Threa
+7423 : cellAudio Threa
+7424 : Tcp Over Udp Ti
+7425 : cellAudio Threa
+7426 : Network Thread
+7427 : LV2 Watchdog Th
+7428 : PPU Syscall Usa
+7429 : Signaling Manag
+7430 : NetStart Hack
+7431 : MsgDialog Close
+7434 : Microphone Thre
+7435 : Overlay Input T
+7436 : com.ze:traceq0
+7440 : RSX.W1
+7441 : RSX.W2
+7442 : Thread-22
+7443 : rsx::thread
+7444 : Pad Thread
+7446 : PPU[0x1000000] 
+7449 : S3 Fresh Boot F
+7469 : AAudio_2

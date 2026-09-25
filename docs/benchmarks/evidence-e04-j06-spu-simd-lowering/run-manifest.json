@@ -1,0 +1,41 @@
+{
+  "run_id": "e04-j06-spu-simd-lowering",
+  "scene": "gow3-gaia-combat",
+  "collected_at": "2026-09-25T02:50:09Z",
+  "device": {
+    "serial": "d30a1726",
+    "model": "CPH2691",
+    "soc": "SM8650",
+    "android_version": "16",
+    "fingerprint": "OnePlus/CPH2691IN/OP5D3BL1:16/UKQ1.231108.001/V.R4T3.37e288c-13a765a-13fa038:user/release-keys"
+  },
+  "package": {
+    "package_name": "com.zenithblue.sambas3",
+    "version_name": "2026.09.17",
+    "version_code": "20260917",
+    "code_path": "/data/app/~~hp_T12SYWmi5vO0Th7vpUw==/com.zenithblue.sambas3-NiUeMSn5kvErPTAfjZe3WA==",
+    "base_apk_sha256": "69a27d474f7b974e026c598717ac53732b64a80147ce679ffc31646c813b271e",
+    "librpcsx_so_sha256": "a6711f512673e4e6c4885dbbfd4ce3432ce074967dc3ec27203a384efad31e43",
+    "s3core_identity": "rpcsx=c47f879bbeb1f152129f61a013fa84b823bba803 samba=e93784d8c4e4aac796b72a63a8f5a127affa29791b58b8a453aa74eae5c1460c"
+  },
+  "process": {
+    "pid": "6499"
+  },
+  "artifacts": {
+    "threads_top": "threads-top.txt",
+    "thermal": "thermal.txt",
+    "battery": "battery.txt",
+    "meminfo": "meminfo.txt",
+    "proc_meminfo": "proc-meminfo.txt",
+    "exit_info": "exit-info.txt",
+    "logcat_process": "logcat-process.log",
+    "logcat_sambas3": "logcat-sambas3.txt",
+    "logcat_crash": "logcat-crash.log",
+    "backend_log": "rpcsx_backend.log",
+    "cache_log": "cache-RPCSX.log",
+    "frame_analysis_json": "frame-analysis.json"
+  },
+  "clean_stop": true,
+  "stop_reason": "DEBUG_STOP_GAME",
+  "scheduler_mode": "RPCS3 Scheduler"
+}
