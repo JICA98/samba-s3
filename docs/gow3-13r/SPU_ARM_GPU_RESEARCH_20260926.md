@@ -19,7 +19,7 @@ Both tested CPU cores passed **400,640 full-vector cases**, including every cont
 
 The general-control synthetic loops used about **23.3–23.5% less thread CPU time**. Permutation-only loops were effectively unchanged. Thermal snapshots before and after the tests reported status 0. Clocks were not locked, and the second source is loop-invariant in both fixture types. These ratios describe the tested recurrences; they are **not a measured reduction in GOW3 SPU CPU usage or an FPS gain**. The standalone general functions both contain fifteen instructions including return; the permutation-only functions both contain ten. Instruction count alone does not explain or establish runtime benefit.
 
-Independent review approved this fixture as evidence for the next real-block test only. Source review also found a correctness problem in W12 v1: `set_reg_fixed` bypassed runtime destination-register routing when LLVM builds the shared interpreter. The isolated patch now uses a `value_t<u8[16]>` wrapper with `set_vr`, preserving that route. The corrected patch is SHA-256 `a8b70957463ecb4331ae271fc8932e6acddefa1a29c90ee7ee822cf125674783`; ARM64 syntax validation passes with 76 existing warnings and no errors. It remains isolated pending actual interpreter and real-block testing.
+Independent review approved this fixture as evidence for the next real-block test only. Source review also found a correctness problem in W12 v1: `set_reg_fixed` bypassed runtime destination-register routing when LLVM builds the shared interpreter. The corrected patch uses a `value_t<u8[16]>` wrapper with `set_vr`, preserving that route. Its SHA-256 is `a8b70957463ecb4331ae271fc8932e6acddefa1a29c90ee7ee822cf125674783`; ARM64 syntax validation passes with 76 existing warnings and no errors. Subsequent W21/W23 validation and default-OFF integration are described below.
 
 Private reproducible evidence is in `.git/gow3-13r-private/jobs/W19-SHUFB-CODEGEN-001/`: IR generator, scalar-reference runner, LLVM emitter, object/disassembly, device artifact hashes, raw timing records and `summarize.py`. The script checks all paired records and host/device artifact hashes. This fixture does not cover RPCSX's register routing, GHC transforms, guest execution, cache lifetime, interrupts, save/load, or the historical high-pressure spill case.
 
@@ -72,4 +72,25 @@ Both planned test cores include the previously reviewed W07 opt-in diagnostic tr
 
 This is diagnostic correlation only: an accepted present does not establish GPU completion, scanout, unique useful pixels or normal guest speed. Trace-on logging cost and on-device correlation still require validation. A claimed FPS improvement needs matched active gameplay and further frame-truth evidence; this trace alone cannot satisfy the final frame gate.
 
-Next, build and execute the integrated candidate, then measure matched, profiler-off gameplay with advancing useful frames, CPU time per frame, memory growth and the separate many-enemies-plus-magic crash scenario. Only the OnePlus is connected. The Poco's advertised wireless ADB endpoint refuses connection, so the repository rule requiring both phones to be updated after every release build currently prevents release deployment. Neither compiler success nor the microbenchmark completes the user's game-efficiency objective.
+## Integrated core artifacts and pending release testing
+
+W25 built both integrated ARM64 cores successfully from parent `2f667ccd5b7243270f50da7ac9643a289a139b11` and core `20a8d2abd9ceef9c1f260ba41d2f14af7c757d23`. Both use the same toolchain and single-job ThinLTO link setting. Independent artifact review approved the corrected pair for testing:
+
+| Variant | Core library SHA-256 |
+|---|---|
+| Baseline, SHUFB TBL1 OFF | `cae94f5a72c6fa687064df504347cdbe03df3f2985d7164fd0e497e2cc2b45dc` |
+| Candidate, SHUFB TBL1 ON | `7e94c503014a56dcb1d02de3d3d94dbaa61a23211a8112e96f5078e7de8d19a2` |
+
+Each manifest matches its library bytes and embedded option identity. Both carry integration digest `a7b57096ce893d698c85273c6fc4cb0b47450bf4f2df0089d1c152643963c503`. Earlier provisional artifacts omitted a CMake integration input and are excluded. The corrected ON cache and compiler database were independently inspected live, but were not archived before restoring OFF; the result record preserves that limitation. The build cache, identity stamp and output were restored to the accepted OFF baseline. Main packaged libraries remain unchanged.
+
+W27 prepares isolated standard release APKs from this pair, preserving provenance checks and skipping only the task that would rebuild and overwrite the selected core. No optimized app or core has been installed yet. Only the OnePlus is connected. The Poco's advertised wireless ADB endpoint refuses connection, so the repository rule requiring both phones to be updated after every release build currently prevents release deployment.
+
+Next, execute the integrated candidate and measure matched, profiler-off gameplay with advancing useful frames, scheduled CPU time per frame, memory growth and the separate many-enemies-plus-magic crash scenario. Neither compiler success nor the microbenchmark completes the user's game-efficiency objective.
+
+## Additional baseline and water-horse report
+
+At the user's request to start looping tests immediately, W28 run 1 used the **already installed release**, not either W25 artifact. Its effective log confirms LLVM SPU, `cortex-a34`, Mega blocks and Turnip `SambaS3-A7xx-V3` version 26.2.99. The opening sequence advanced into the water-horse scene. Two R2 pulses were delivered, but the screenshots do not establish magic executing against a large enemy group; this is not a reproduction or dismissal of the reported magic crash.
+
+The run ended with an intentional successful stop after approximately 5 minutes 45 seconds of backend lifetime. The captured backend log contains no fatal, access-violation, device-lost or frozen-emulation marker. Thermal monitoring reached SEVERE and did not reach the CRITICAL stop threshold. Overlay snapshots and surface-present counters are exploratory evidence only; they do not establish useful guest FPS or an optimization improvement. Private evidence is under `.git/gow3-13r-private/jobs/W28-LIVE-TEST-LOOP-001/run1/`.
+
+The user separately reports that **Kratos becomes bugged or invisible during phase 3 of the water-horse battle**. Phase 3 and that failure are not verified in W28 run 1. The next reproduction must preserve the scene before/after disappearance, delivered inputs, exact core/driver/settings, renderer errors, whether enemies and effects still advance, and whether Kratos still responds or takes damage. This distinguishes a missing character draw from a guest-state or whole-renderer failure without assigning a cause prematurely.
