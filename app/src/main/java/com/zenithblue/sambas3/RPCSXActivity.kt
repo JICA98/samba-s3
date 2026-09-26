@@ -302,11 +302,17 @@ class RPCSXActivity : ComponentActivity(), EmulationHost {
         // Put the Activity window into its final edge-to-edge dimensions before
         // resolving a Native output ratio or creating SurfaceView's first buffer.
         enableFullScreenImmersive()
-        // A previous process can leave a title's temporary global settings
-        // lease behind. Restore it before deriving this surface's global aspect.
-        val staleLeaseRecovered = runCatching { GameSettingsOverrides.recoverStaleLease(this) }
-            .onFailure { Log.e("S3OUTPUT", "stale settings lease recovery failed", it) }
+        // A previous process can leave a temporary settings lease behind.
+        // Restore it only when native emulation is stopped: a recreated
+        // Activity must preserve the still-running game's active lease.
+        val nativeStopped = runCatching { RPCSX.getState() == EmulatorState.Stopped }
+            .onFailure { Log.e("S3OUTPUT", "native state read failed", it) }
             .getOrDefault(false)
+        val settingsLeaseReady = if (nativeStopped) {
+            runCatching { GameSettingsOverrides.recoverStaleLease(this) }
+                .onFailure { Log.e("S3OUTPUT", "stale settings lease recovery failed", it) }
+                .getOrDefault(false)
+        } else true
         val outputTitleId = GameSettingsOverrides.resolveTitleId(requestedPath, this)
             ?: GameIdentity.titleIdOrNull(requestedPath, requestedGame.info.name.value)
         val titleOverrides = outputTitleId?.let { title ->
@@ -324,7 +330,7 @@ class RPCSXActivity : ComponentActivity(), EmulationHost {
             curatedDefault = outputTitleId?.let { GameSettingsOverrides.curatedDefaultsForTitle(it)[STRICT_RENDERING_SETTING] },
             engineGlobalValue = strictGlobalValue
         )
-        val selectedHeight = if (!staleLeaseRecovered || strictRendering || outputTitleId == null) null else
+        val selectedHeight = if (!settingsLeaseReady || strictRendering || outputTitleId == null) null else
             OutputResolutionStore.selectedHeight(this, outputTitleId)
         val outputSize = runCatching {
             OutputSurfaceResolver.resolve(selectedHeight, displayAspect, nativeAspect)
@@ -334,7 +340,7 @@ class RPCSXActivity : ComponentActivity(), EmulationHost {
             "S3OUTPUT",
             "title=${outputTitleId ?: "unknown"} selectedHeight=${selectedHeight ?: "layout"} " +
                 "aspect=$displayAspect nativeAspect=$nativeAspect strict=$strictRendering " +
-                "staleLeaseRecovered=$staleLeaseRecovered " +
+                "nativeStopped=$nativeStopped settingsLeaseReady=$settingsLeaseReady " +
                 "buffer=${outputSize?.let { "${it.width}x${it.height}" } ?: "layout"}"
         )
         surfaceLeaseManager = SurfaceLeaseManager(binding.surfaceHost, outputSize = outputSize)
