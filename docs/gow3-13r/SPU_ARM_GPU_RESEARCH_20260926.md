@@ -64,4 +64,12 @@ The lowering is integrated as the default-OFF CMake option `SAMBA_EXPERIMENTAL_S
 
 W24 makes the embedded core ID and artifact manifest record the option from the actual CMake cache, so a source-local compiler definition cannot leave the baseline and candidate with indistinguishable configuration identities. ON, OFF, absent and unavailable states are distinct; requested JSON metadata cannot override the cache. The 19-test provenance suite passes, including missing/malformed metadata and option-order regressions. The existing build directory was restored to OFF; no build was performed during configure verification.
 
+## Frame evidence for the integrated comparison
+
+The checked-in core does not call the bridge's exported guest-flip callback. Existing bridge fallbacks count Vulkan/ANativeWindow presentations, and S3BENCH previously labeled its start message `source=emu_flip` unconditionally. That start message now says `pending`, and each sample includes the native JSON's actual `fpsSource`. Coarse host-present data must not be relabeled as useful guest FPS.
+
+Both planned test cores include the previously reviewed W07 opt-in diagnostic trace. Set `debug.rpcsx.guest_present_trace=1` **before starting the app process or any renderer flip** to collect `GOW3_GUEST_PRESENT` records; leave it unset or `0` for normal operation. The trace pairs non-skipped guest flip metadata with the synchronous Vulkan present call and its exact result. It is disabled by default. The integrated diff matches reviewed patch SHA-256 `e94379869a6d39db1a7989e9136905edc1201b3170cc56de76ad4600bcbea728`, and ARM64 syntax checking passes.
+
+This is diagnostic correlation only: an accepted present does not establish GPU completion, scanout, unique useful pixels or normal guest speed. Trace-on logging cost and on-device correlation still require validation. A claimed FPS improvement needs matched active gameplay and further frame-truth evidence; this trace alone cannot satisfy the final frame gate.
+
 Next, build and execute the integrated candidate, then measure matched, profiler-off gameplay with advancing useful frames, CPU time per frame, memory growth and the separate many-enemies-plus-magic crash scenario. Only the OnePlus is connected. The Poco's advertised wireless ADB endpoint refuses connection, so the repository rule requiring both phones to be updated after every release build currently prevents release deployment. Neither compiler success nor the microbenchmark completes the user's game-efficiency objective.

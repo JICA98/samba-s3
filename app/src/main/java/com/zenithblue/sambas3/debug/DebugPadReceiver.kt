@@ -672,7 +672,7 @@ private object BenchmarkDebugController {
         active = true
         runCatching { RPCSX.instance.setPerfMetricsEnabled(true, INTERVAL_MS.toInt()) }
             .onFailure { Log.w("S3BENCH", "start failed: ${it.message}") }
-        Log.i("S3BENCH", "started source=emu_flip interval_ms=$INTERVAL_MS")
+        Log.i("S3BENCH", "started source=pending interval_ms=$INTERVAL_MS")
         handler.post(sample)
     }
 
@@ -705,6 +705,7 @@ private object BenchmarkDebugController {
         Log.i(
             "S3BENCH",
             "elapsed_ms=${SystemClock.elapsedRealtime()} state=ready " +
+                "fps_source=${value("fpsSource")} " +
                 "fps=${value("fps")} frametime_ms=${value("frametimeMs")} " +
                 "limiter_mode=${limiterValue("requestedMode")} limiter_effective=${limiterValue("effectiveMode")} " +
                 "limiter_target_fps=${limiterValue("targetFps")} limiter_uncapped=${limiterValue("uncapped")} " +
