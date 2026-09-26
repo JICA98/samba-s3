@@ -35,7 +35,16 @@ W17 is explicitly excluded from gameplay attribution: the assistant foregrounded
 
 All eight on-device `/proc/cpuinfo` entries report ASIMD, dot-product, I8MM and BF16, with no SVE/SVE2. A standalone `getauxval` probe confirms `AT_HWCAP=0xefbfffff`, `AT_HWCAP2=0x1ae181`, and no SVE/SVE2. The hardware timer reports 19,200,000 Hz. Linux's supported mechanism for checking these features is the auxiliary vector; CPU identity alone is insufficient. [Linux ARM64 HWCAP documentation](https://docs.kernel.org/arch/arm64/elf_hwcaps.html)
 
-The observed A34 target is explicitly configured, rather than evidence that CPU detection failed. The source already recognizes the device's three CPU part IDs. Its auto path can select A520, but LLVM's CPU defaults can include SVE/SVE2 despite their absence from the kernel-exposed feature set. W20 investigates explicit OS capability guards in LLVM target attributes before any experiment with that target. The installed setting stays unchanged. A34 already uses NEON; newer CPU tuning does not itself prove a speedup.
+The observed A34 target is explicitly configured, rather than evidence that CPU detection failed. The source already recognizes the device's three CPU part IDs. Its auto path can select A520, but LLVM's CPU defaults can include SVE/SVE2 despite their absence from the kernel-exposed feature set. W20 implements negative OS capability guards for ten modeled LLVM features, preserving explicit CPU selection. Linux ARM64 object-cache keys include a deterministic feature fingerprint. The installed setting stays unchanged. A34 already uses NEON; newer CPU tuning does not itself prove a speedup.
+
+Host policy tests, ARM64 and x86_64 syntax checks, and an exact LLVM 20.1.3 on-device feature probe passed. The expanded probe verifies that disabling SVE alone also disables SVE2/SVE2BitPerm, and disabling full FP16 disables FP16FML. A34 retains its baseline; A520 with the captured OnePlus capabilities retains the tested supported features while losing SVE/SVE2. Independent review approved source integration for testing. This is a prerequisite for newer CPU tuning, not a measured speedup or a complete guard for every ARM extension. The SPU feature label can say `base` despite inherited NEON; it is not authoritative ISA evidence.
+
+The portable policy regression can be run from the repository root with:
+
+```sh
+g++ -std=c++17 -Wall -Wextra -Werror -pedantic -Iapp/src/main/cpp/rpcsx scripts/tests/aarch64-feature-policy.cpp -o /tmp/samba-aarch64-feature-policy
+/tmp/samba-aarch64-feature-policy
+```
 
 ## GPU offload conclusion
 
