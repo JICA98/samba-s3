@@ -110,6 +110,17 @@ class CoreProvenanceTest(unittest.TestCase):
             _init_repo(rpcsx)
             lib = root / "librpcsx-android.so"
             lib.write_bytes(b"fake-so-bytes")
+            (root / "CMakeCache.txt").write_text(
+                "SAMBA_EXPERIMENTAL_SPU_SHUFB_TBL1:BOOL=ON\n"
+            )
+            (root / "cmake-effective-config.json").write_text(
+                json.dumps(
+                    {
+                        "spu_shufb_tbl1": "OFF",
+                        "spu_shufb_tbl1_raw": "spoofed-request-value",
+                    }
+                )
+            )
             ident_with_src = ident
             man = cp.write_manifest(
                 output=root / "m.json",
@@ -126,6 +137,8 @@ class CoreProvenanceTest(unittest.TestCase):
             self.assertIn("library_sha256", man)
             self.assertNotIn("library_sha256=", man["embedded_identity"])
             self.assertEqual(man["library_sha256"], hashlib.sha256(b"fake-so-bytes").hexdigest())
+            self.assertEqual(man["effective_spu_shufb_tbl1"], "ON")
+            self.assertIsNone(man["effective_spu_shufb_tbl1_raw"])
             self.assertEqual(man["schema_version"], 1)
 
     def test_missing_required_abi_fails(self):
@@ -546,6 +559,129 @@ class CoreProvenanceTest(unittest.TestCase):
             loaded_cfg2 = cp.effective_cmake_config(build_dir)
             token2, _, _, _ = cp.derive_flags_token(loaded_cfg2)
             self.assertNotEqual(token, token2)
+
+    def test_spu_shufb_identity_uses_effective_cmake_cache_only(self):
+        """The source-local SPU option is fingerprinted from CMake's configured cache."""
+        with tempfile.TemporaryDirectory() as tmp:
+            build_dir = Path(tmp)
+            metadata = {
+                "compiler": "Clang 21.0.0",
+                "cxx_flags": "-O3 -fPIC",
+                # A requested/generated value must not override configured state.
+                "spu_shufb_tbl1": "ON",
+                "spu_shufb_tbl1_raw": "spoofed-request-value",
+            }
+            (build_dir / "cmake-effective-config.json").write_text(json.dumps(metadata))
+
+            def config_for(cache: str | None) -> dict[str, str]:
+                cache_path = build_dir / "CMakeCache.txt"
+                if cache is None:
+                    cache_path.unlink(missing_ok=True)
+                else:
+                    cache_path.write_text(cache)
+                return cp.effective_cmake_config(build_dir)
+
+            def identity(config: dict[str, str]) -> str:
+                token, _, _, _ = cp.derive_flags_token(config)
+                return cp.format_identity(
+                    rpcsx_sha="core-revision",
+                    integration_digest_hex="integration-digest",
+                    patch_digest_hex="none",
+                    build_type="RelWithDebInfo",
+                    abi="arm64-v8a",
+                    ndk="ndk-30",
+                    cmake="cmake-3",
+                    compiler="clang-21",
+                    flags=token,
+                    spu_shufb_tbl1=config["spu_shufb_tbl1"],
+                )
+
+            on_cfg = config_for(
+                "SAMBA_EXPERIMENTAL_SPU_SHUFB_TBL1:BOOL=ON\n"
+            )
+            off_cfg = config_for(
+                "SAMBA_EXPERIMENTAL_SPU_SHUFB_TBL1:BOOL=OFF\n"
+            )
+            absent_cfg = config_for("CMAKE_BUILD_TYPE:STRING=RelWithDebInfo\n")
+            unavailable_cfg = config_for(None)
+
+            self.assertEqual(on_cfg["spu_shufb_tbl1"], "ON")
+            self.assertEqual(off_cfg["spu_shufb_tbl1"], "OFF")
+            self.assertNotIn("spu_shufb_tbl1_raw", off_cfg)
+            self.assertEqual(absent_cfg["spu_shufb_tbl1"], "absent")
+            self.assertEqual(unavailable_cfg["spu_shufb_tbl1"], "unavailable")
+
+            identities = {
+                identity(on_cfg),
+                identity(off_cfg),
+                identity(absent_cfg),
+                identity(unavailable_cfg),
+            }
+            self.assertEqual(len(identities), 4)
+            self.assertIn("spu_shufb_tbl1=ON", identity(on_cfg))
+            self.assertIn("spu_shufb_tbl1=OFF", identity(off_cfg))
+            self.assertIn("spu_shufb_tbl1=absent", identity(absent_cfg))
+            self.assertIn("spu_shufb_tbl1=unavailable", identity(unavailable_cfg))
+
+            # Same effective cache value remains reproducible even if the
+            # JSON metadata claims the opposite requested value.
+            (build_dir / "cmake-effective-config.json").write_text(
+                json.dumps({**metadata, "spu_shufb_tbl1": "OFF"})
+            )
+            (build_dir / "CMakeCache.txt").write_text(
+                "SAMBA_EXPERIMENTAL_SPU_SHUFB_TBL1:BOOL=ON\n"
+            )
+            repeat_on = cp.effective_cmake_config(build_dir)
+            self.assertEqual(repeat_on["spu_shufb_tbl1"], "ON")
+            self.assertEqual(identity(repeat_on), identity(on_cfg))
+
+    def test_cmake_cache_fallback_when_effective_json_missing_or_malformed(self):
+        """Legacy cache fields remain available when effective JSON cannot be loaded."""
+        with tempfile.TemporaryDirectory() as tmp:
+            build_dir = Path(tmp)
+            config_path = build_dir / "cmake-effective-config.json"
+            cache_path = build_dir / "CMakeCache.txt"
+
+            for json_state in ("missing", "malformed"):
+                with self.subTest(json_state=json_state):
+                    if json_state == "missing":
+                        config_path.unlink(missing_ok=True)
+                    else:
+                        config_path.write_text("{not valid json", encoding="utf-8")
+
+                    def write_cache(cxx_flags: str) -> None:
+                        cache_path.write_text(
+                            "\n".join(
+                                (
+                                    # Put the SPU option first to ensure reading
+                                    # it does not stop parsing later cache keys.
+                                    "SAMBA_EXPERIMENTAL_SPU_SHUFB_TBL1:BOOL=OFF",
+                                    "CMAKE_CXX_COMPILER:FILEPATH=/toolchain/bin/clang++",
+                                    f"CMAKE_CXX_FLAGS:STRING={cxx_flags}",
+                                    "CMAKE_SHARED_LINKER_FLAGS:STRING=-Wl,-z,defs",
+                                    "USE_ARCH:STRING=armv8.2-a+crc",
+                                    "CMAKE_BUILD_TYPE:STRING=RelWithDebInfo",
+                                )
+                            )
+                            + "\n",
+                            encoding="utf-8",
+                        )
+
+                    write_cache("-O3 -fPIC")
+                    cfg_o3 = cp.effective_cmake_config(build_dir)
+                    token_o3, cxx_opts, link_opts, use_arch = cp.derive_flags_token(cfg_o3)
+                    self.assertEqual(cfg_o3["compiler_path"], "/toolchain/bin/clang++")
+                    self.assertEqual(cxx_opts, "-O3 -fPIC")
+                    self.assertEqual(link_opts, "-Wl,-z,defs")
+                    self.assertEqual(use_arch, "armv8.2-a+crc")
+                    self.assertEqual(cfg_o3["build_type"], "RelWithDebInfo")
+                    self.assertIsNotNone(token_o3)
+
+                    write_cache("-O2 -fPIC")
+                    cfg_o2 = cp.effective_cmake_config(build_dir)
+                    token_o2, _, _, _ = cp.derive_flags_token(cfg_o2)
+                    self.assertNotEqual(token_o3, token_o2)
+                    self.assertEqual(cfg_o2["spu_shufb_tbl1"], "OFF")
 
     def test_r05_release_requires_clean_committed_source(self):
         """R05: Require clean committed source for release builds unless --allow-dirty is passed."""

@@ -22,6 +22,7 @@ REQUIRED_ABIS = ("arm64-v8a",)
 LIBRARY_NAME = "librpcsx-android.so"
 MANIFEST_NAME = "librpcsx-android.manifest.json"
 PLACEHOLDER_IDENTITY_REL = "android/src/samba-build-id.cpp"
+SPU_SHUFB_TBL1_CMAKE_OPTION = "SAMBA_EXPERIMENTAL_SPU_SHUFB_TBL1"
 
 INTEGRATION_RELPATHS = (
     "build_rpcsx.sh",
@@ -343,32 +344,65 @@ def compiler_identity(ndk_dir: str | None) -> str:
 
 def effective_cmake_config(build_dir: Path | None) -> dict[str, str]:
     config: dict[str, str] = {}
-    if not build_dir or not build_dir.is_dir():
-        return config
-    cfg_file = build_dir / "cmake-effective-config.json"
-    if cfg_file.is_file():
-        try:
-            loaded = json.loads(cfg_file.read_text(encoding="utf-8"))
-            if isinstance(loaded, dict):
-                return {k: str(v) for k, v in loaded.items()}
-        except Exception:
-            pass
-    cache_file = build_dir / "CMakeCache.txt"
-    if cache_file.is_file():
+    loaded_metadata = False
+    if build_dir and build_dir.is_dir():
+        cfg_file = build_dir / "cmake-effective-config.json"
+        if cfg_file.is_file():
+            try:
+                loaded = json.loads(cfg_file.read_text(encoding="utf-8"))
+                if isinstance(loaded, dict):
+                    config.update({k: str(v) for k, v in loaded.items()})
+                    loaded_metadata = True
+            except Exception:
+                pass
+
+    # This option controls a source-local compile definition and therefore must
+    # come from the actual configure cache. In particular, do not trust the
+    # generated JSON metadata (or a requested command-line/environment value)
+    # to identify which code CMake configured.
+    cache_file = build_dir / "CMakeCache.txt" if build_dir else None
+    option_state = "unavailable"
+    if cache_file and cache_file.is_file():
+        option_state = "absent"
         for line in cache_file.read_text(errors="replace").splitlines():
             line = line.strip()
-            if line.startswith("#") or not line:
+            if line.startswith("#") or not line or "=" not in line:
                 continue
-            if line.startswith("CMAKE_CXX_COMPILER:FILEPATH="):
-                config["compiler_path"] = line.split("=", 1)[1]
-            elif line.startswith("CMAKE_CXX_FLAGS:STRING="):
-                config["cxx_flags"] = line.split("=", 1)[1]
-            elif line.startswith("CMAKE_SHARED_LINKER_FLAGS:STRING="):
-                config["shared_linker_flags"] = line.split("=", 1)[1]
-            elif line.startswith("USE_ARCH:STRING="):
-                config["use_arch"] = line.split("=", 1)[1]
-            elif line.startswith("CMAKE_BUILD_TYPE:STRING="):
-                config["build_type"] = line.split("=", 1)[1]
+            key_type, value = line.split("=", 1)
+            key, separator, cache_type = key_type.partition(":")
+            value = value.strip()
+            # Preserve the legacy CMakeCache fallback when generated effective
+            # metadata is missing or malformed. A valid generated metadata file
+            # remains the higher-level source for these general fields.
+            if not loaded_metadata:
+                if key == "CMAKE_CXX_COMPILER" and cache_type == "FILEPATH":
+                    config["compiler_path"] = value
+                elif key == "CMAKE_CXX_FLAGS" and cache_type == "STRING":
+                    config["cxx_flags"] = value
+                elif key == "CMAKE_SHARED_LINKER_FLAGS" and cache_type == "STRING":
+                    config["shared_linker_flags"] = value
+                elif key == "USE_ARCH" and cache_type == "STRING":
+                    config["use_arch"] = value
+                elif key == "CMAKE_BUILD_TYPE" and cache_type == "STRING":
+                    config["build_type"] = value
+            if key == SPU_SHUFB_TBL1_CMAKE_OPTION and separator and cache_type == "BOOL":
+                normalized = value.upper()
+                if normalized in {"ON", "YES", "TRUE", "Y", "1"}:
+                    option_state = "ON"
+                elif normalized in {"OFF", "NO", "FALSE", "N", "0", "", "IGNORE", "NOTFOUND"} or normalized.endswith("-NOTFOUND"):
+                    option_state = "OFF"
+                else:
+                    option_state = "invalid"
+                    config["spu_shufb_tbl1_raw"] = value
+
+    # Replace any JSON value for this key unconditionally with cache-derived
+    # state. It is intentionally `unavailable` when the cache is missing and
+    # `absent` when a cache exists but does not contain the option.
+    # The raw cache value is only meaningful for an invalid CMake BOOL value;
+    # never carry a similarly named field from generated metadata.
+    if option_state != "invalid":
+        config.pop("spu_shufb_tbl1_raw", None)
+    config["spu_shufb_tbl1"] = option_state
     return config
 
 
@@ -388,6 +422,8 @@ def derive_flags_token(config: dict[str, str]) -> tuple[str | None, str, str, st
         parts.append(f"link={link_opts}")
     if use_arch:
         parts.append(f"arch={use_arch}")
+    if "spu_shufb_tbl1" in config:
+        parts.append(f"spu_shufb_tbl1={config['spu_shufb_tbl1']}")
     if not parts:
         return None, "", "", use_arch
     combined = " ".join(parts)
@@ -432,6 +468,7 @@ def format_identity(
     compiler: str,
     flags: str | None = None,
     src_digest: str | None = None,
+    spu_shufb_tbl1: str | None = None,
 ) -> str:
     parts = [
         f"rpcsx={rpcsx_sha}",
@@ -445,6 +482,8 @@ def format_identity(
     ]
     if flags:
         parts.append(f"flags={flags}")
+    if spu_shufb_tbl1 is not None:
+        parts.append(f"spu_shufb_tbl1={spu_shufb_tbl1}")
     if src_digest:
         parts.append(f"src_digest={src_digest}")
     ident = " ".join(parts)
@@ -571,6 +610,7 @@ def stamp(
         compiler=comp_ident,
         flags=flags_token,
         src_digest=src,
+        spu_shufb_tbl1=cfg.get("spu_shufb_tbl1"),
     )
     changed = write_if_changed(output, identity_cpp(ident))
     output.with_suffix(".txt").write_text(ident + "\n", encoding="utf-8")
@@ -632,6 +672,8 @@ def write_manifest(
         "normalized_link_options": link_opts,
         "use_arch": use_arch,
         "flags_identity": flags_token,
+        "effective_spu_shufb_tbl1": cfg.get("spu_shufb_tbl1", "unavailable"),
+        "effective_spu_shufb_tbl1_raw": cfg.get("spu_shufb_tbl1_raw"),
         "llvm_declared_version": resolved_llvm_ver,
         "llvm_resolved_version": resolved_llvm_ver,
         "llvm_submodule_sha": llvm_submodule_sha(rpcsx_dir),
