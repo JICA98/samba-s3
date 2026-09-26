@@ -83,7 +83,14 @@ W25 built both integrated ARM64 cores successfully from parent `2f667ccd5b724327
 
 Each manifest matches its library bytes and embedded option identity. Both carry integration digest `a7b57096ce893d698c85273c6fc4cb0b47450bf4f2df0089d1c152643963c503`. Earlier provisional artifacts omitted a CMake integration input and are excluded. The corrected ON cache and compiler database were independently inspected live, but were not archived before restoring OFF; the result record preserves that limitation. The build cache, identity stamp and output were restored to the accepted OFF baseline. Main packaged libraries remain unchanged.
 
-W27 prepares isolated standard release APKs from this pair, preserving provenance checks and skipping only the task that would rebuild and overwrite the selected core. No optimized app or core has been installed yet. Only the OnePlus is connected. The Poco's advertised wireless ADB endpoint refuses connection, so the repository rule requiring both phones to be updated after every release build currently prevents release deployment.
+W27 built isolated standard release APKs from this pair, preserving provenance checks and skipping only the task that would rebuild and overwrite the selected core. Both builds and packaged-core verification passed. Both APK signatures verify and match the signing certificate of the currently installed release, allowing an in-place update without uninstalling.
+
+| Standard release APK | APK SHA-256 |
+|---|---|
+| Baseline OFF | `543d9373c207c4f4674d1e9840519778233f8bdc2094f25f3db867daab1bbead` |
+| Candidate ON | `f07b98ba4ecf16483fdf18942b4d365f170126dc7eec393cd5c51fb02692ecbd` |
+
+Private artifacts are under `.git/gow3-13r-private/jobs/W27-RELEASE-PACKAGING-001/artifacts/`. No optimized app or core has been installed yet. Only the OnePlus is connected. The Poco remains unreachable, so installation is pending either both-device availability or an explicit exception to the repository's both-device update requirement.
 
 Next, execute the integrated candidate and measure matched, profiler-off gameplay with advancing useful frames, scheduled CPU time per frame, memory growth and the separate many-enemies-plus-magic crash scenario. Neither compiler success nor the microbenchmark completes the user's game-efficiency objective.
 
@@ -92,5 +99,9 @@ Next, execute the integrated candidate and measure matched, profiler-off gamepla
 At the user's request to start looping tests immediately, W28 run 1 used the **already installed release**, not either W25 artifact. Its effective log confirms LLVM SPU, `cortex-a34`, Mega blocks and Turnip `SambaS3-A7xx-V3` version 26.2.99. The opening sequence advanced into the water-horse scene. Two R2 pulses were delivered, but the screenshots do not establish magic executing against a large enemy group; this is not a reproduction or dismissal of the reported magic crash.
 
 The run ended with an intentional successful stop after approximately 5 minutes 45 seconds of backend lifetime. The captured backend log contains no fatal, access-violation, device-lost or frozen-emulation marker. Thermal monitoring reached SEVERE and did not reach the CRITICAL stop threshold. Overlay snapshots and surface-present counters are exploratory evidence only; they do not establish useful guest FPS or an optimization improvement. Private evidence is under `.git/gow3-13r-private/jobs/W28-LIVE-TEST-LOOP-001/run1/`.
+
+The installed package was subsequently hashed before any update: APK `fce24de193e40dc772570204e2f4f8061ed28a72453747b9fd97d09ac792f821`, packaged core `6027981f508bb11183190b01b6d38501b43c0ffd6889fac4b9ee83eee2300b44`. The fresh backend log identifies `v20260926-63e343b`; active process maps were unavailable on the non-debuggable release.
+
+W28 run 2 reused the process for a warm restart. An intentional stop during startup at 17:50:02 local triggered a `vkDestroyBuffer` read at address `0x120`, reported as SIGTRAP by the fatal handler. The stop acknowledgement was absent. The captured startup log ends before a game frame, so this is a lifecycle failure, not magic or phase-3 reproduction. A native caller backtrace is missing; source inspection alone does not identify which buffer owner supplied the invalid state. Further old-release testing was stopped to prioritize the optimization APK. Evidence is preserved in the adjacent `run2/` directory.
 
 The user separately reports that **Kratos becomes bugged or invisible during phase 3 of the water-horse battle**. Phase 3 and that failure are not verified in W28 run 1. The next reproduction must preserve the scene before/after disappearance, delivered inputs, exact core/driver/settings, renderer errors, whether enemies and effects still advance, and whether Kratos still responds or takes damage. This distinguishes a missing character draw from a guest-state or whole-renderer failure without assigning a cause prematurely.
