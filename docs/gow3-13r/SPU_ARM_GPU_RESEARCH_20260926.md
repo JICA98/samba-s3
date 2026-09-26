@@ -52,6 +52,12 @@ A general SPU GPU decoder is not the next candidate. SPU execution interacts wit
 
 A GPU experiment would need a measured, long-running, batchable pure-data guest kernel with no intermediate host interaction. No such GOW3 kernel is established by the current evidence. Any future test must include preparation, dispatch, synchronization and readback costs and must preserve RSX frame pacing.
 
-## Next acceptance evidence
+## Real SPU compiler validation and implementation
 
-Compile the corrected SHUFB lowering through the actual LLVM interpreter and representative SPU blocks with the production GHC transforms. Verify dynamic register routing and code generation before executing guest tests. Then measure matched, profiler-off gameplay with advancing useful frames, CPU time per frame, memory growth and the separate many-enemies-plus-magic crash scenario. Neither the microbenchmark nor syntax validation completes the user's game-efficiency objective.
+W21 links the corrected SPU recompiler translation unit ahead of an existing production support DSO in a standalone Android executable. It uses LLVM 20, the actual translator/GHC pipeline, `cortex-a34`, and Mega blocks. Both the 1,016-word shuffle-pressure fixture and a 118-word reservation-related fixture pass byte-for-byte analyzer comparison and complete MCJIT finalization on the phone. A private test hook returns before publishing or executing guest functions. The support DSO is from core `63e343bd8`; the candidate translation unit is based on `f2c35d714` plus W12. This hybrid is compiler evidence, not an integrated emulator build.
+
+The actual `make_llvm_recompiler(11)` interpreter also compiles successfully. Independent review of its captured `spu_SHUFB` IR confirms that the destination address is derived from the runtime opcode before storing the result. This verifies the routing path missed by W12 v1. It does not execute the generated interpreter function. Initial harness failures were fixed by matching FXO initialization, Android heap-tagging policy and Mega block settings; standalone teardown is deliberately bypassed after flushing results.
+
+The lowering is integrated as the default-OFF CMake option `SAMBA_EXPERIMENTAL_SPU_SHUFB_TBL1`. Enabling it on ARM64 selects the reviewed TBL1 lowering and `s3cg4` object-cache tag. Disabling it retains the old lowering and `s3cg2`. This permits an explicitly identified test build while preserving the existing default. W20's capability guards are separate from this switch. No updated app or core has been installed.
+
+Next, execute generated guest cases and build the integrated candidate, then measure matched, profiler-off gameplay with advancing useful frames, CPU time per frame, memory growth and the separate many-enemies-plus-magic crash scenario. Neither compiler success nor the microbenchmark completes the user's game-efficiency objective.
