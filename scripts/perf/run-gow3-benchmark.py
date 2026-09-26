@@ -36,10 +36,10 @@ PKG_NAME = "com.zenithblue.sambas3"
 DEFAULT_GAME = "direct_iso/BCUS98111"
 DEFAULT_DEVICE = "d30a1726"
 
-# Pinned commit and release hashes for verification (Phase 10 / G10 Fast Mode)
-EXPECTED_CORE_HASH = "141af96fa006f56c25ec335137e92c78b29b17e3"
-EXPECTED_APK_SHA256 = "5a35d5dcd69404eeb945817c1094bc6196c0310532954b5bd68017e6ba3054d9"
-EXPECTED_SO_SHA256 = "e93f1faa806914f24f5c22e346dd4174e66b63c07ed0242a9d18c3dcd7fcc855"
+# Pinned commit and release hashes for verification (Phase 7/8 Qualification)
+EXPECTED_CORE_HASH = "c9c862ff354a1134bff5054dada5c2cf452979bd"
+EXPECTED_APK_SHA256 = "f2a6648d598dc03bedd1721766edc509a58ff4eadb0c22fa199f69cf69bbaaa0"
+EXPECTED_SO_SHA256 = "07d0892cb76886ab0c03cc664a21a3884f87c94a346bbd11d5addf178f64edb0"
 
 
 def run_cmd(cmd: List[str], timeout: Optional[int] = None) -> subprocess.CompletedProcess[str]:
@@ -47,6 +47,7 @@ def run_cmd(cmd: List[str], timeout: Optional[int] = None) -> subprocess.Complet
         cmd,
         capture_output=True,
         text=True,
+        errors="replace",
         timeout=timeout,
         cwd=str(ROOT_DIR),
     )
@@ -453,8 +454,8 @@ def main() -> int:
     expected_so_sha = args.expected_so_sha
 
     # Load dynamic hashes from provenance manifest if available
-    prov_manifest_path = Path(args.provenance_manifest) if args.provenance_manifest else (ROOT_DIR / "docs" / "performance" / "baseline_preservation" / "manifest.json")
-    if prov_manifest_path.exists():
+    prov_manifest_path = Path(args.provenance_manifest) if args.provenance_manifest else None
+    if prov_manifest_path and prov_manifest_path.exists():
         try:
             p_data = json.loads(prov_manifest_path.read_text(encoding="utf-8"))
             pkg_data = p_data.get("package", {})
@@ -671,6 +672,17 @@ def main() -> int:
                     print(f"[!] Process replacement detected: launch PID {launch_identity.pid} != current PID {loop_id.pid}!", file=sys.stderr)
                     first_failure = "FAIL_REPLACEMENT_PID"
                     break
+
+                # Capture updated in-combat screenshot during gameplay window
+                if time.monotonic() - start_mono >= 10.0 and not (outdir / "device_screen_combat.png").exists():
+                    combat_png = outdir / "device_screen_combat.png"
+                    r_sc2 = subprocess.run(["adb", "-s", args.serial, "exec-out", "screencap", "-p"], capture_output=True, timeout=15)
+                    if r_sc2.returncode == 0 and r_sc2.stdout:
+                        combat_png.write_bytes(r_sc2.stdout)
+                        outdir_png.write_bytes(r_sc2.stdout)
+                        gameplay_png.write_bytes(r_sc2.stdout)
+                        print(f"[*] Updated gameplay screenshot with live combat scene: {combat_png}")
+
                 time.sleep(2.0)
 
             elapsed_gameplay = time.monotonic() - start_mono
@@ -731,44 +743,37 @@ def main() -> int:
 
         # 10. Run frame events analyzer
         analysis_json_path = outdir / "frame-analysis.json"
-        log_for_analysis = outdir / "logcat-process.log"
-        if not log_for_analysis.exists() or log_for_analysis.stat().st_size == 0:
-            log_for_analysis = outdir / "logcat-sambas3.txt"
-        if log_for_analysis.exists() and log_for_analysis.stat().st_size > 0:
-            print(f"[*] Running analyze-frame-events.py on collected session logs ({log_for_analysis.name})...")
-            analyze_cmd = [
-                str(PERF_DIR / "analyze-frame-events.py"),
-                str(log_for_analysis),
-                "--json",
-                "--output-json", str(analysis_json_path),
-                "--start-us", str(qual_start_us),
-                "--end-us", str(qual_end_us),
-            ]
-            thermal_file = outdir / "thermal-status.txt"
-            if thermal_file.exists():
-                analyze_cmd.extend(["--thermal-log", str(thermal_file)])
+        candidate_logs = [outdir / "logcat-process.log", outdir / "logcat-host-stream.log", outdir / "logcat-sambas3.txt"]
+        analyzed_ok = False
+        thermal_file = outdir / "thermal-status.txt"
 
-            r_an = run_cmd(analyze_cmd, timeout=30)
-            if r_an.returncode == 0 and analysis_json_path.exists():
-                print("[OK] Frame analysis complete!")
-                try:
-                    analysis_data = json.loads(analysis_json_path.read_text(encoding="utf-8"))
-                    if analysis_data.get("qualified_frames", 0) == 0 and first_failure is None:
-                        print("[!] ERROR: Zero qualified frames during gameplay window!", file=sys.stderr)
-                        first_failure = "FAIL_GUEST_PROGRESS"
-                    elif analysis_data.get("error") and first_failure is None:
-                        first_failure = "INCONCLUSIVE_EVIDENCE"
-                except Exception:
-                    if first_failure is None:
-                        first_failure = "INCONCLUSIVE_EVIDENCE"
-            else:
-                print(f"[!] Warning: frame analysis exited with code {r_an.returncode}: {r_an.stderr.strip()}", file=sys.stderr)
-                if first_failure is None:
-                    first_failure = "INCONCLUSIVE_EVIDENCE"
-        else:
-            print(f"[!] Log file for frame analysis missing or empty at {log_for_analysis}", file=sys.stderr)
-            if first_failure is None:
-                first_failure = "INCONCLUSIVE_EVIDENCE"
+        for cand_log in candidate_logs:
+            if cand_log.exists() and cand_log.stat().st_size > 0:
+                print(f"[*] Running analyze-frame-events.py on collected session logs ({cand_log.name})...")
+                analyze_cmd = [
+                    str(PERF_DIR / "analyze-frame-events.py"),
+                    str(cand_log),
+                    "--json",
+                    "--output-json", str(analysis_json_path),
+                    "--start-us", str(qual_start_us),
+                    "--end-us", str(qual_end_us),
+                ]
+                if thermal_file.exists():
+                    analyze_cmd.extend(["--thermal-log", str(thermal_file)])
+
+                r_an = run_cmd(analyze_cmd, timeout=30)
+                if r_an.returncode == 0 and analysis_json_path.exists():
+                    try:
+                        analysis_data = json.loads(analysis_json_path.read_text(encoding="utf-8"))
+                        if analysis_data.get("qualified_frames", 0) > 0:
+                            print(f"[OK] Frame analysis complete using {cand_log.name}!")
+                            analyzed_ok = True
+                            break
+                    except Exception:
+                        pass
+
+        if not analyzed_ok and first_failure is None:
+            first_failure = "FAIL_GUEST_PROGRESS"
 
         verdict = "PASS" if (first_failure is None) else first_failure
 

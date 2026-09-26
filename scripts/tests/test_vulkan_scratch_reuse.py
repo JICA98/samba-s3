@@ -22,14 +22,25 @@ class VulkanScratchReuseTests(unittest.TestCase):
     def test_cpp_unit_test(self):
         """Build and run the host C++ unit test validating scratch buffer reuse and Vulkan work."""
         cpp_file = os.path.join(ROOT_DIR, "scripts", "tests", "test_vulkan_scratch_reuse.cpp")
+        rx_inc = os.path.join(ROOT_DIR, "app", "src", "main", "cpp", "rpcsx", "rx", "include")
+        rpcsx_inc = os.path.join(ROOT_DIR, "app", "src", "main", "cpp", "rpcsx")
+        rpcs3_inc = os.path.join(ROOT_DIR, "app", "src", "main", "cpp", "rpcsx", "rpcs3")
+        vk_inc = os.path.join(ROOT_DIR, "app", "src", "main", "cpp", "rpcsx", "3rdparty", "Vulkan-Headers", "include")
+        fmt_inc = os.path.join(ROOT_DIR, "app", "src", "main", "cpp", "rpcsx", "3rdparty", "fmt", "include")
+        json_inc = os.path.join(ROOT_DIR, "app", "src", "main", "cpp", "rpcsx", "3rdparty", "json", "include")
         with tempfile.TemporaryDirectory() as tmpdir:
             bin_path = os.path.join(tmpdir, "test_vulkan_scratch_reuse")
-            compile_cmd = ["g++", "-O2", "-std=c++20", cpp_file, "-o", bin_path]
+            compile_cmd = [
+                "clang++", "-O2", "-std=c++20",
+                f"-I{rpcsx_inc}", f"-I{rpcs3_inc}", f"-I{rx_inc}", f"-I{vk_inc}", f"-I{fmt_inc}", f"-I{json_inc}",
+                "-Wno-deprecated-declarations", "-Wno-nontrivial-memcall",
+                cpp_file, "-o", bin_path
+            ]
             res = subprocess.run(compile_cmd, capture_output=True, text=True)
             self.assertEqual(res.returncode, 0, f"Compilation failed: {res.stderr}")
             run_res = subprocess.run([bin_path], capture_output=True, text=True)
             self.assertEqual(run_res.returncode, 0, f"Execution failed: {run_res.stderr}")
-            self.assertIn("ALL 5 VULKAN WORK & SCRATCH REUSE TESTS PASSED SUCCESSFULLY!", run_res.stdout)
+            self.assertIn("ALL 6 VULKAN WORK & SCRATCH REUSE TESTS PASSED SUCCESSFULLY!", run_res.stdout)
 
     def test_vk_texture_cache_scratch_reuse(self):
         """Verify VKTextureCache.h reuses thread-owned scratch buffer storage with capacity retention, checked ranges, and non-reentrancy."""
@@ -47,8 +58,9 @@ class VulkanScratchReuseTests(unittest.TestCase):
         self.assertIn("rsx::convert_linear_swizzle<u32, false>(s_swizzle_scratch.data(), data, width, height, rsx_pitch);", content)
         # Check checked 64-bit multiplication and overflow guard
         self.assertIn("const u64 swiz_size_64 = static_cast<u64>(rsx_pitch) * static_cast<u64>(height);", content)
-        # Check non-reentrancy assertion
-        self.assertIn("ensure(!s_swizzle_in_use);", content)
+        # Check non-reentrancy assertion and RAII guard
+        self.assertIn("ensure(!flag);", content)
+        self.assertIn("swizzle_scratch_guard", content)
         # Check high-water mark capacity bounding
         self.assertIn("s_swizzle_scratch.shrink_to_fit();", content)
 

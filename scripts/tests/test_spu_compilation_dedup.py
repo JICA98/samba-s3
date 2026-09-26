@@ -23,9 +23,18 @@ class SpuCompilationDedupTests(unittest.TestCase):
         """Build and run the host C++ unit test validating CR05 SPU single-flight & progress."""
         cpp_file = os.path.join(ROOT_DIR, "scripts", "tests", "test_spu_compilation_dedup.cpp")
         rx_inc = os.path.join(ROOT_DIR, "app", "src", "main", "cpp", "rpcsx", "rx", "include")
+        rpcsx_inc = os.path.join(ROOT_DIR, "app", "src", "main", "cpp", "rpcsx")
+        rpcs3_inc = os.path.join(ROOT_DIR, "app", "src", "main", "cpp", "rpcsx", "rpcs3")
+        fmt_inc = os.path.join(ROOT_DIR, "app", "src", "main", "cpp", "rpcsx", "3rdparty", "fmt", "include")
+        json_inc = os.path.join(ROOT_DIR, "app", "src", "main", "cpp", "rpcsx", "3rdparty", "json", "include")
         with tempfile.TemporaryDirectory() as tmpdir:
             bin_path = os.path.join(tmpdir, "test_spu_compilation_dedup")
-            compile_cmd = ["g++", "-O2", "-std=c++20", f"-I{rx_inc}", cpp_file, "-o", bin_path]
+            compile_cmd = [
+                "clang++", "-O2", "-std=c++20",
+                f"-I{rpcsx_inc}", f"-I{rpcs3_inc}", f"-I{rx_inc}", f"-I{fmt_inc}", f"-I{json_inc}",
+                "-Wno-deprecated-declarations",
+                cpp_file, "-o", bin_path
+            ]
             res = subprocess.run(compile_cmd, capture_output=True, text=True)
             self.assertEqual(res.returncode, 0, f"Compilation failed: {res.stderr}")
             run_res = subprocess.run([bin_path], capture_output=True, text=True)

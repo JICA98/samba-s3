@@ -1,0 +1,320 @@
+--------- beginning of system
+09-26 07:26:11.147 19880 19880 D InsetsController: Setting requestedVisibleTypes to 496 (was 503)
+09-26 07:26:12.703 19880 19880 W NotificationManager: Shedding cancel (dupe) of NotificationKey[user=UserHandle{0}, pkg=com.zenithblue.sambas3, tag=null, id=2002], rate limit (5.0) exceeded: input 9.506212, output would be 6.663851
+09-26 07:26:13.268 19880 19880 W NotificationManager: Shedding notify (update) of NotificationKey[user=UserHandle{0}, pkg=com.zenithblue.sambas3, tag=null, id=2000], rate limit (5.0) exceeded: input 8.83265, output would be 6.191057
+09-26 07:26:13.935 19880 19880 W NotificationManager: Shedding cancel (dupe) of NotificationKey[user=UserHandle{0}, pkg=com.zenithblue.sambas3, tag=null, id=2002], rate limit (5.0) exceeded: input 21.340832, output would be 5.368216
+09-26 07:26:14.307 19880 19880 W NotificationManager: Shedding notify (update) of NotificationKey[user=UserHandle{0}, pkg=com.zenithblue.sambas3, tag=null, id=2000], rate limit (5.0) exceeded: input 16.601755, output would be 6.5571256
+09-26 07:26:15.044 19880 19880 W NotificationManager: Shedding cancel (dupe) of NotificationKey[user=UserHandle{0}, pkg=com.zenithblue.sambas3, tag=null, id=2001], rate limit (5.0) exceeded: input 27.43724, output would be 5.6943464
+09-26 07:26:15.318 19880 19880 W NotificationManager: Shedding notify (update) of NotificationKey[user=UserHandle{0}, pkg=com.zenithblue.sambas3, tag=null, id=2000], rate limit (5.0) exceeded: input 12.999856, output would be 5.6988163
+09-26 07:26:16.112 19880 19880 W NotificationManager: Shedding cancel (dupe) of NotificationKey[user=UserHandle{0}, pkg=com.zenithblue.sambas3, tag=null, id=2002], rate limit (5.0) exceeded: input 23.530134, output would be 6.0965743
+09-26 07:26:16.593 19880 19880 W NotificationManager: Shedding notify (update) of NotificationKey[user=UserHandle{0}, pkg=com.zenithblue.sambas3, tag=null, id=2000], rate limit (5.0) exceeded: input 13.370631, output would be 6.6562533
+09-26 07:26:17.721 19880 19880 W NotificationManager: Shedding cancel (dupe) of NotificationKey[user=UserHandle{0}, pkg=com.zenithblue.sambas3, tag=null, id=2002], rate limit (5.0) exceeded: input 13.9147625, output would be 6.6954093
+09-26 07:26:17.962 19880 19880 W NotificationManager: Shedding notify (update) of NotificationKey[user=UserHandle{0}, pkg=com.zenithblue.sambas3, tag=null, id=2000], rate limit (5.0) exceeded: input 8.1194315, output would be 5.0451384
+09-26 07:26:18.800 19880 19880 W NotificationManager: Shedding cancel (dupe) of NotificationKey[user=UserHandle{0}, pkg=com.zenithblue.sambas3, tag=null, id=2001], rate limit (5.0) exceeded: input 18.099651, output would be 5.0059686
+09-26 07:26:19.313 19880 19880 W NotificationManager: Shedding notify (update) of NotificationKey[user=UserHandle{0}, pkg=com.zenithblue.sambas3, tag=null, id=2000], rate limit (5.0) exceeded: input 8.809475, output would be 5.31711
+09-26 07:26:19.876 19880 19880 W NotificationManager: Shedding cancel (dupe) of NotificationKey[user=UserHandle{0}, pkg=com.zenithblue.sambas3, tag=null, id=2001], rate limit (5.0) exceeded: input 16.646538, output would be 5.255898
+09-26 07:26:20.470 19880 19880 W NotificationManager: Shedding notify (update) of NotificationKey[user=UserHandle{0}, pkg=com.zenithblue.sambas3, tag=null, id=2000], rate limit (5.0) exceeded: input 11.03614, output would be 5.294274
+09-26 07:26:20.922 19880 19880 W NotificationManager: Shedding cancel (dupe) of NotificationKey[user=UserHandle{0}, pkg=com.zenithblue.sambas3, tag=null, id=2002], rate limit (5.0) exceeded: input 16.65308, output would be 5.801046
+09-26 07:26:21.677 19880 19880 W NotificationManager: Shedding notify (update) of NotificationKey[user=UserHandle{0}, pkg=com.zenithblue.sambas3, tag=null, id=2000], rate limit (5.0) exceeded: input 10.95564, output would be 5.136274
+09-26 07:26:22.032 19880 19880 W NotificationManager: Shedding cancel (dupe) of NotificationKey[user=UserHandle{0}, pkg=com.zenithblue.sambas3, tag=null, id=2002], rate limit (5.0) exceeded: input 24.884844, output would be 6.172686
+09-26 07:26:22.870 19880 19880 W NotificationManager: Shedding notify (update) of NotificationKey[user=UserHandle{0}, pkg=com.zenithblue.sambas3, tag=null, id=2000], rate limit (5.0) exceeded: input 13.264252, output would be 6.3560443
+09-26 07:26:23.080 19880 19880 W NotificationManager: Shedding cancel (dupe) of NotificationKey[user=UserHandle{0}, pkg=com.zenithblue.sambas3, tag=null, id=2002], rate limit (5.0) exceeded: input 22.713528, output would be 6.4993095
+09-26 07:26:23.870 19880 19880 W NotificationManager: Shedding notify (update) of NotificationKey[user=UserHandle{0}, pkg=com.zenithblue.sambas3, tag=null, id=2000], rate limit (5.0) exceeded: input 16.735416, output would be 5.442783
+09-26 07:26:24.144 19880 19880 W NotificationManager: Shedding cancel (dupe) of NotificationKey[user=UserHandle{0}, pkg=com.zenithblue.sambas3, tag=null, id=2002], rate limit (5.0) exceeded: input 19.944216, output would be 5.375867
+09-26 07:26:25.161 19880 19880 W NotificationManager: Shedding cancel (dupe) of NotificationKey[user=UserHandle{0}, pkg=com.zenithblue.sambas3, tag=null, id=2002], rate limit (5.0) exceeded: input 25.679464, output would be 6.6818376
+09-26 07:26:25.272 19880 19880 W NotificationManager: Shedding notify (update) of NotificationKey[user=UserHandle{0}, pkg=com.zenithblue.sambas3, tag=null, id=2000], rate limit (5.0) exceeded: input 11.816047, output would be 5.4608436
+09-26 07:26:26.324 19880 19880 W NotificationManager: Shedding cancel (dupe) of NotificationKey[user=UserHandle{0}, pkg=com.zenithblue.sambas3, tag=null, id=2002], rate limit (5.0) exceeded: input 18.56915, output would be 5.1068444
+09-26 07:26:26.468 19880 19880 W NotificationManager: Shedding notify (update) of NotificationKey[user=UserHandle{0}, pkg=com.zenithblue.sambas3, tag=null, id=2000], rate limit (5.0) exceeded: input 13.232033, output would be 5.7754335
+09-26 07:26:27.404 19880 19880 W NotificationManager: Shedding cancel (dupe) of NotificationKey[user=UserHandle{0}, pkg=com.zenithblue.sambas3, tag=null, id=2001], rate limit (5.0) exceeded: input 23.223, output would be 5.401293
+09-26 07:26:27.742 19880 19880 W NotificationManager: Shedding notify (update) of NotificationKey[user=UserHandle{0}, pkg=com.zenithblue.sambas3, tag=null, id=2000], rate limit (5.0) exceeded: input 14.850997, output would be 6.558279
+09-26 07:26:28.418 19880 19880 W NotificationManager: Shedding cancel (dupe) of NotificationKey[user=UserHandle{0}, pkg=com.zenithblue.sambas3, tag=null, id=2002], rate limit (5.0) exceeded: input 20.76851, output would be 6.520083
+09-26 07:26:28.852 19880 19880 W NotificationManager: Shedding notify (update) of NotificationKey[user=UserHandle{0}, pkg=com.zenithblue.sambas3, tag=null, id=2000], rate limit (5.0) exceeded: input 10.434227, output would be 6.206411
+09-26 07:26:29.851 19880 19880 W NotificationManager: Shedding cancel (dupe) of NotificationKey[user=UserHandle{0}, pkg=com.zenithblue.sambas3, tag=null, id=2001], rate limit (5.0) exceeded: input 13.432998, output would be 6.2785325
+09-26 07:26:30.155 19880 19880 W NotificationManager: Shedding notify (update) of NotificationKey[user=UserHandle{0}, pkg=com.zenithblue.sambas3, tag=null, id=2000], rate limit (5.0) exceeded: input 8.536564, output would be 5.6138525
+09-26 07:26:30.854 19880 19880 W NotificationManager: Shedding cancel (dupe) of NotificationKey[user=UserHandle{0}, pkg=com.zenithblue.sambas3, tag=null, id=2001], rate limit (5.0) exceeded: input 193.08488, output would be 5.2204666
+09-26 07:26:31.202 19880 19880 W NotificationManager: Shedding notify (update) of NotificationKey[user=UserHandle{0}, pkg=com.zenithblue.sambas3, tag=null, id=2000], rate limit (5.0) exceeded: input 29.41834, output would be 6.008214
+09-26 07:26:31.861 19880 19880 W NotificationManager: Shedding cancel (dupe) of NotificationKey[user=UserHandle{0}, pkg=com.zenithblue.sambas3, tag=null, id=2001], rate limit (5.0) exceeded: input 192.69379, output would be 5.568787
+09-26 07:26:32.211 19880 19880 W NotificationManager: Shedding notify (update) of NotificationKey[user=UserHandle{0}, pkg=com.zenithblue.sambas3, tag=null, id=2000], rate limit (5.0) exceeded: input 65.493835, output would be 6.266148
+09-26 07:26:32.864 19880 19880 W NotificationManager: Shedding cancel (dupe) of NotificationKey[user=UserHandle{0}, pkg=com.zenithblue.sambas3, tag=null, id=2001], rate limit (5.0) exceeded: input 153.45946, output would be 5.744331
+09-26 07:26:33.251 19880 19880 W NotificationManager: Shedding notify (update) of NotificationKey[user=UserHandle{0}, pkg=com.zenithblue.sambas3, tag=null, id=2000], rate limit (5.0) exceeded: input 32.683155, output would be 5.9725475
+09-26 07:26:33.881 19880 19880 W NotificationManager: Shedding cancel (dupe) of NotificationKey[user=UserHandle{0}, pkg=com.zenithblue.sambas3, tag=null, id=2001], rate limit (5.0) exceeded: input 113.64585, output would be 5.686552
+09-26 07:26:34.251 19880 19880 W NotificationManager: Shedding notify (update) of NotificationKey[user=UserHandle{0}, pkg=com.zenithblue.sambas3, tag=null, id=2000], rate limit (5.0) exceeded: input 127.55346, output would be 5.987675
+09-26 07:26:34.881 19880 19880 W NotificationManager: Shedding cancel (dupe) of NotificationKey[user=UserHandle{0}, pkg=com.zenithblue.sambas3, tag=null, id=2001], rate limit (5.0) exceeded: input 217.29054, output would be 5.793951
+09-26 07:26:35.252 19880 19880 W NotificationManager: Shedding notify (update) of NotificationKey[user=UserHandle{0}, pkg=com.zenithblue.sambas3, tag=null, id=2000], rate limit (5.0) exceeded: input 115.96784, output would be 6.1699085
+09-26 07:26:35.881 19880 19880 W NotificationManager: Shedding cancel (dupe) of NotificationKey[user=UserHandle{0}, pkg=com.zenithblue.sambas3, tag=null, id=2001], rate limit (5.0) exceeded: input 157.33162, output would be 5.9935055
+09-26 07:26:36.261 19880 19880 W NotificationManager: Shedding notify (update) of NotificationKey[user=UserHandle{0}, pkg=com.zenithblue.sambas3, tag=null, id=2000], rate limit (5.0) exceeded: input 100.37395, output would be 6.257771
+09-26 07:26:36.881 19880 19880 W NotificationManager: Shedding cancel (dupe) of NotificationKey[user=UserHandle{0}, pkg=com.zenithblue.sambas3, tag=null, id=2001], rate limit (5.0) exceeded: input 215.92076, output would be 6.2404056
+09-26 07:26:37.301 19880 19880 W NotificationManager: Shedding notify (update) of NotificationKey[user=UserHandle{0}, pkg=com.zenithblue.sambas3, tag=null, id=2000], rate limit (5.0) exceeded: input 48.76925, output would be 6.0546737
+09-26 07:26:37.881 19880 19880 W NotificationManager: Shedding cancel (dupe) of NotificationKey[user=UserHandle{0}, pkg=com.zenithblue.sambas3, tag=null, id=2001], rate limit (5.0) exceeded: input 88.140236, output would be 6.3591022
+09-26 07:26:38.301 19880 19880 W NotificationManager: Shedding notify (update) of NotificationKey[user=UserHandle{0}, pkg=com.zenithblue.sambas3, tag=null, id=2000], rate limit (5.0) exceeded: input 91.716774, output would be 6.344509
+09-26 07:26:38.882 19880 19880 W NotificationManager: Shedding cancel (dupe) of NotificationKey[user=UserHandle{0}, pkg=com.zenithblue.sambas3, tag=null, id=2001], rate limit (5.0) exceeded: input 236.17316, output would be 6.6902146
+09-26 07:26:39.301 19880 19880 W NotificationManager: Shedding notify (update) of NotificationKey[user=UserHandle{0}, pkg=com.zenithblue.sambas3, tag=null, id=2000], rate limit (5.0) exceeded: input 140.2687, output would be 6.524788
+09-26 07:26:39.982 19880 19880 W NotificationManager: Shedding cancel (dupe) of NotificationKey[user=UserHandle{0}, pkg=com.zenithblue.sambas3, tag=null, id=2002], rate limit (5.0) exceeded: input 21.870125, output would be 6.1984262
+09-26 07:26:40.301 19880 19880 W NotificationManager: Shedding notify (update) of NotificationKey[user=UserHandle{0}, pkg=com.zenithblue.sambas3, tag=null, id=2000], rate limit (5.0) exceeded: input 131.36176, output would be 5.096189
+09-26 07:26:41.121 19880 19880 W NotificationManager: Shedding cancel (dupe) of NotificationKey[user=UserHandle{0}, pkg=com.zenithblue.sambas3, tag=null, id=2001], rate limit (5.0) exceeded: input 21.188234, output would be 5.4065256
+09-26 07:26:41.301 19880 19880 W NotificationManager: Shedding notify (update) of NotificationKey[user=UserHandle{0}, pkg=com.zenithblue.sambas3, tag=null, id=2000], rate limit (5.0) exceeded: input 133.51266, output would be 5.595908
+09-26 07:26:42.121 19880 19880 W NotificationManager: Shedding cancel (dupe) of NotificationKey[user=UserHandle{0}, pkg=com.zenithblue.sambas3, tag=null, id=2001], rate limit (5.0) exceeded: input 226.74391, output would be 5.541247
+09-26 07:26:42.341 19880 19880 W NotificationManager: Shedding notify (update) of NotificationKey[user=UserHandle{0}, pkg=com.zenithblue.sambas3, tag=null, id=2000], rate limit (5.0) exceeded: input 56.945, output would be 5.3701367
+09-26 07:26:43.131 19880 19880 W NotificationManager: Shedding cancel (dupe) of NotificationKey[user=UserHandle{0}, pkg=com.zenithblue.sambas3, tag=null, id=2001], rate limit (5.0) exceeded: input 127.14989, output would be 5.6854553
+09-26 07:26:43.341 19880 19880 W NotificationManager: Shedding notify (update) of NotificationKey[user=UserHandle{0}, pkg=com.zenithblue.sambas3, tag=null, id=2000], rate limit (5.0) exceeded: input 124.58136, output would be 5.6156187
+09-26 07:26:44.131 19880 19880 W NotificationManager: Shedding cancel (dupe) of NotificationKey[user=UserHandle{0}, pkg=com.zenithblue.sambas3, tag=null, id=2001], rate limit (5.0) exceeded: input 128.66609, output would be 5.8396516
+09-26 07:26:44.352 19880 19880 W NotificationManager: Shedding notify (update) of NotificationKey[user=UserHandle{0}, pkg=com.zenithblue.sambas3, tag=null, id=2000], rate limit (5.0) exceeded: input 76.90162, output would be 5.637964
+09-26 07:26:45.131 19880 19880 W NotificationManager: Shedding cancel (dupe) of NotificationKey[user=UserHandle{0}, pkg=com.zenithblue.sambas3, tag=null, id=2001], rate limit (5.0) exceeded: input 108.57738, output would be 6.04707
+09-26 07:26:45.361 19880 19880 W NotificationManager: Shedding notify (update) of NotificationKey[user=UserHandle{0}, pkg=com.zenithblue.sambas3, tag=null, id=2000], rate limit (5.0) exceeded: input 103.77635, output would be 5.742517
+09-26 07:26:46.131 19880 19880 W NotificationManager: Shedding cancel (dupe) of NotificationKey[user=UserHandle{0}, pkg=com.zenithblue.sambas3, tag=null, id=2001], rate limit (5.0) exceeded: input 129.54459, output would be 6.214733
+09-26 07:26:46.361 19880 19880 W NotificationManager: Shedding notify (update) of NotificationKey[user=UserHandle{0}, pkg=com.zenithblue.sambas3, tag=null, id=2000], rate limit (5.0) exceeded: input 101.75048, output would be 5.8769655
+09-26 07:26:47.131 19880 19880 W NotificationManager: Shedding cancel (dupe) of NotificationKey[user=UserHandle{0}, pkg=com.zenithblue.sambas3, tag=null, id=2001], rate limit (5.0) exceeded: input 198.47816, output would be 6.221422
+09-26 07:26:47.361 19880 19880 W NotificationManager: Shedding notify (update) of NotificationKey[user=UserHandle{0}, pkg=com.zenithblue.sambas3, tag=null, id=2000], rate limit (5.0) exceeded: input 97.28289, output would be 5.881447
+09-26 07:26:48.131 19880 19880 W NotificationManager: Shedding cancel (dupe) of NotificationKey[user=UserHandle{0}, pkg=com.zenithblue.sambas3, tag=null, id=2001], rate limit (5.0) exceeded: input 225.3254, output would be 6.3414125
+09-26 07:26:48.361 19880 19880 W NotificationManager: Shedding notify (update) of NotificationKey[user=UserHandle{0}, pkg=com.zenithblue.sambas3, tag=null, id=2000], rate limit (5.0) exceeded: input 76.188354, output would be 6.027154
+09-26 07:26:49.151 19880 19880 W NotificationManager: Shedding cancel (dupe) of NotificationKey[user=UserHandle{0}, pkg=com.zenithblue.sambas3, tag=null, id=2001], rate limit (5.0) exceeded: input 115.557785, output would be 6.3303213
+09-26 07:26:49.371 19880 19880 W NotificationManager: Shedding notify (update) of NotificationKey[user=UserHandle{0}, pkg=com.zenithblue.sambas3, tag=null, id=2000], rate limit (5.0) exceeded: input 92.793304, output would be 6.0921803
+09-26 07:26:50.151 19880 19880 W NotificationManager: Shedding cancel (dupe) of NotificationKey[user=UserHandle{0}, pkg=com.zenithblue.sambas3, tag=null, id=2001], rate limit (5.0) exceeded: input 130.6939, output would be 6.6239047
+09-26 07:26:50.371 19880 19880 W NotificationManager: Shedding notify (update) of NotificationKey[user=UserHandle{0}, pkg=com.zenithblue.sambas3, tag=null, id=2000], rate limit (5.0) exceeded: input 70.0355, output would be 6.423414
+09-26 07:26:51.151 19880 19880 W NotificationManager: Shedding cancel (dupe) of NotificationKey[user=UserHandle{0}, pkg=com.zenithblue.sambas3, tag=null, id=2001], rate limit (5.0) exceeded: input 121.85777, output would be 6.762461
+09-26 07:26:51.381 19880 19880 W NotificationManager: Shedding notify (update) of NotificationKey[user=UserHandle{0}, pkg=com.zenithblue.sambas3, tag=null, id=2000], rate limit (5.0) exceeded: input 72.225975, output would be 6.3632917
+09-26 07:26:52.163 19880 19880 W NotificationManager: Shedding cancel (dupe) of NotificationKey[user=UserHandle{0}, pkg=com.zenithblue.sambas3, tag=null, id=2001], rate limit (5.0) exceeded: input 128.79216, output would be 6.7948656
+09-26 07:26:52.381 19880 19880 W NotificationManager: Shedding notify (update) of NotificationKey[user=UserHandle{0}, pkg=com.zenithblue.sambas3, tag=null, id=2000], rate limit (5.0) exceeded: input 82.653275, output would be 6.5545983
+09-26 07:26:53.171 19880 19880 W NotificationManager: Shedding cancel (dupe) of NotificationKey[user=UserHandle{0}, pkg=com.zenithblue.sambas3, tag=null, id=2001], rate limit (5.0) exceeded: input 215.7741, output would be 6.7183437
+09-26 07:26:53.381 19880 19880 W NotificationManager: Shedding notify (update) of NotificationKey[user=UserHandle{0}, pkg=com.zenithblue.sambas3, tag=null, id=2000], rate limit (5.0) exceeded: input 102.74838, output would be 6.5748425
+09-26 07:26:54.171 19880 19880 W NotificationManager: Shedding cancel (dupe) of NotificationKey[user=UserHandle{0}, pkg=com.zenithblue.sambas3, tag=null, id=2001], rate limit (5.0) exceeded: input 138.12196, output would be 6.7238383
+09-26 07:26:54.461 19880 19880 W NotificationManager: Shedding notify (update) of NotificationKey[user=UserHandle{0}, pkg=com.zenithblue.sambas3, tag=null, id=2000], rate limit (5.0) exceeded: input 27.225906, output would be 5.987452
+09-26 07:26:55.193 19880 19880 W NotificationManager: Shedding cancel (dupe) of NotificationKey[user=UserHandle{0}, pkg=com.zenithblue.sambas3, tag=null, id=2002], rate limit (5.0) exceeded: input 69.38598, output would be 7.040066
+09-26 07:26:55.511 19880 19880 W NotificationManager: Shedding notify (update) of NotificationKey[user=UserHandle{0}, pkg=com.zenithblue.sambas3, tag=null, id=2000], rate limit (5.0) exceeded: input 34.360798, output would be 5.9803004
+09-26 07:26:56.201 19880 19880 W NotificationManager: Shedding cancel (dupe) of NotificationKey[user=UserHandle{0}, pkg=com.zenithblue.sambas3, tag=null, id=2001], rate limit (5.0) exceeded: input 226.5025, output would be 5.37536
+09-26 07:26:56.511 19880 19880 W NotificationManager: Shedding notify (update) of NotificationKey[user=UserHandle{0}, pkg=com.zenithblue.sambas3, tag=null, id=2000], rate limit (5.0) exceeded: input 76.80534, output would be 6.428485
+09-26 07:26:57.202 19880 19880 W NotificationManager: Shedding cancel (dupe) of NotificationKey[user=UserHandle{0}, pkg=com.zenithblue.sambas3, tag=null, id=2001], rate limit (5.0) exceeded: input 204.93425, output would be 5.5485067
+09-26 07:26:57.511 19880 19880 W NotificationManager: Shedding notify (update) of NotificationKey[user=UserHandle{0}, pkg=com.zenithblue.sambas3, tag=null, id=2000], rate limit (5.0) exceeded: input 104.88853, output would be 6.557036
+09-26 07:26:58.204 19880 19880 W NotificationManager: Shedding cancel (dupe) of NotificationKey[user=UserHandle{0}, pkg=com.zenithblue.sambas3, tag=null, id=2001], rate limit (5.0) exceeded: input 183.76712, output would be 5.749108
+09-26 07:26:58.631 19880 19880 W NotificationManager: Shedding notify (update) of NotificationKey[user=UserHandle{0}, pkg=com.zenithblue.sambas3, tag=null, id=2000], rate limit (5.0) exceeded: input 20.863522, output would be 6.4149475
+09-26 07:26:59.211 19880 19880 W NotificationManager: Shedding cancel (dupe) of NotificationKey[user=UserHandle{0}, pkg=com.zenithblue.sambas3, tag=null, id=2001], rate limit (5.0) exceeded: input 126.294426, output would be 6.716255
+09-26 07:26:59.631 19880 19880 W NotificationManager: Shedding notify (update) of NotificationKey[user=UserHandle{0}, pkg=com.zenithblue.sambas3, tag=null, id=2000], rate limit (5.0) exceeded: input 134.45515, output would be 6.5402694
+09-26 07:27:00.211 19880 19880 W NotificationManager: Shedding cancel (dupe) of NotificationKey[user=UserHandle{0}, pkg=com.zenithblue.sambas3, tag=null, id=2001], rate limit (5.0) exceeded: input 186.54718, output would be 6.9771204
+09-26 07:27:00.641 19880 19880 W NotificationManager: Shedding notify (update) of NotificationKey[user=UserHandle{0}, pkg=com.zenithblue.sambas3, tag=null, id=2000], rate limit (5.0) exceeded: input 58.9559, output would be 6.701297
+--------- beginning of main
+09-26 07:28:26.527 19880 20097 D RPCS3   : sys_tty_write(ch=0, buf=*0x58bf20, len=63, pwritelen=*0xd000fde0)
+09-26 07:28:26.527 19880 20097 D RPCS3   : sys_tty_write(): “BATCHJOB: AddJob: waiting for room in job list 3 for job 56...“ << endl
+09-26 07:28:26.769 19880 20097 D RPCS3   : sys_tty_write(ch=0, buf=*0x58bf20, len=63, pwritelen=*0xd000fde0)
+09-26 07:28:26.769 19880 20097 D RPCS3   : sys_tty_write(): “BATCHJOB: AddJob: waiting for room in job list 3 for job 56...“ << endl
+09-26 07:28:26.938 19880 20097 D RPCS3   : sys_tty_write(ch=0, buf=*0x58bf20, len=63, pwritelen=*0xd000fde0)
+09-26 07:28:26.938 19880 20097 D RPCS3   : sys_tty_write(): “BATCHJOB: AddJob: waiting for room in job list 3 for job 56...“ << endl
+09-26 07:28:27.262 19880 19902 D S3PERF  : crosscheck source=surface presented=2874 json_fps=7.28265 json_frametime_ms=146.553
+09-26 07:28:27.263 19880 19902 D S3PERF  : crosscheck ui_snapshot_fps=7.28265 ui_snapshot_frametime_ms=146.553
+09-26 07:28:27.373 19880 20097 D RPCS3   : sys_tty_write(ch=0, buf=*0x58bf20, len=63, pwritelen=*0xd000fde0)
+09-26 07:28:27.373 19880 20097 D RPCS3   : sys_tty_write(): “BATCHJOB: AddJob: waiting for room in job list 3 for job 56...“ << endl
+09-26 07:28:27.478 19880 20097 D RPCS3   : sys_tty_write(ch=0, buf=*0x58bf20, len=63, pwritelen=*0xd000fde0)
+09-26 07:28:27.478 19880 20097 D RPCS3   : sys_tty_write(): “BATCHJOB: AddJob: waiting for room in job list 3 for job 56...“ << endl
+09-26 07:28:27.583 19880 20097 D RPCS3   : sys_tty_write(ch=0, buf=*0x58bf20, len=63, pwritelen=*0xd000fde0)
+09-26 07:28:27.583 19880 20097 D RPCS3   : sys_tty_write(): “BATCHJOB: AddJob: waiting for room in job list 3 for job 56...“ << endl
+09-26 07:28:27.706 19880 20097 D RPCS3   : sys_tty_write(ch=0, buf=*0x58bf20, len=63, pwritelen=*0xd000fde0)
+09-26 07:28:27.706 19880 20097 D RPCS3   : sys_tty_write(): “BATCHJOB: AddJob: waiting for room in job list 3 for job 56...“ << endl
+09-26 07:28:27.784 19880 20097 D RPCS3   : sys_tty_write(ch=0, buf=*0x58bf20, len=63, pwritelen=*0xd000fde0)
+09-26 07:28:27.784 19880 20097 D RPCS3   : sys_tty_write(): “BATCHJOB: AddJob: waiting for room in job list 3 for job 56...“ << endl
+09-26 07:28:27.961 19880 20095 E RPCS3   : FIFO error: possible desync event (last cmd = 0x35807fa0)
+09-26 07:28:27.963 19880 20095 D RPCS3   : Add program (vp id = 268, fp id = 274)
+09-26 07:28:27.963 19880 20092 I RPCS3   : Program compiled successfully
+09-26 07:28:27.969 19880 19880 I CompileBridge: startForegroundService requested for domain=1 phase=0 job=400
+09-26 07:28:27.970 19880 20097 D RPCS3   : sys_tty_write(ch=0, buf=*0x58bf20, len=63, pwritelen=*0xd000fde0)
+09-26 07:28:27.970 19880 20097 D RPCS3   : sys_tty_write(): “BATCHJOB: AddJob: waiting for room in job list 3 for job 56...“ << endl
+09-26 07:28:27.986 19880 19880 I CompileMonitorService: onCreate collected runtime+prelaunch+install projection
+09-26 07:28:27.987 19880 19880 I CompileMonitorService: onStartCommand domain=1 phase=0 origin=1 job=400 startId=1
+09-26 07:28:27.991 19880 19880 I CompileMonitorService: startForeground NOTIF_FGS isActive=false runtimePpu=false shader=false prelaunch=false
+09-26 07:28:27.991 19880 19880 I CompileMonitorService: No live compile jobs after promotion — scheduling stop
+09-26 07:28:27.996 19880 19880 I CompileMonitorService: Projection inactive — scheduling stop
+09-26 07:28:28.037 19880 20097 D RPCS3   : sys_tty_write(ch=0, buf=*0x58bf20, len=63, pwritelen=*0xd000fde0)
+09-26 07:28:28.037 19880 20097 D RPCS3   : sys_tty_write(): “BATCHJOB: AddJob: waiting for room in job list 3 for job 56...“ << endl
+09-26 07:28:28.511 19880 19902 D S3PERF  : crosscheck source=surface presented=2886 json_fps=9.58677 json_frametime_ms=150.322
+09-26 07:28:28.514 19880 19902 D S3PERF  : crosscheck ui_snapshot_fps=9.58677 ui_snapshot_frametime_ms=150.322
+09-26 07:28:28.720 19880 20097 D RPCS3   : sys_tty_write(ch=0, buf=*0x58bf20, len=63, pwritelen=*0xd000fde0)
+09-26 07:28:28.722 19880 20097 D RPCS3   : sys_tty_write(): “BATCHJOB: AddJob: waiting for room in job list 3 for job 56...“ << endl
+09-26 07:28:29.011 19880 20097 D RPCS3   : sys_tty_write(ch=0, buf=*0x58bf20, len=63, pwritelen=*0xd000fde0)
+09-26 07:28:29.011 19880 20097 D RPCS3   : sys_tty_write(): “BATCHJOB: AddJob: waiting for room in job list 3 for job 56...“ << endl
+09-26 07:28:29.773 19880 19902 D S3PERF  : crosscheck source=surface presented=2896 json_fps=7.70771 json_frametime_ms=172.863
+09-26 07:28:29.774 19880 19880 W DefaultDispatch: type=1400 audit(0.0:7162634): avc:  denied  { search } for  name="zram0" dev="sysfs" ino=107524 scontext=u:r:untrusted_app:s0:c207,c257,c512,c768 tcontext=u:object_r:sysfs_zram:s0 tclass=dir permissive=0 app=com.zenithblue.sambas3
+09-26 07:28:29.777 19880 19902 D S3PERF  : crosscheck ui_snapshot_fps=7.70771 ui_snapshot_frametime_ms=172.863
+09-26 07:28:29.774 19880 19880 W DefaultDispatch: type=1400 audit(0.0:7162635): avc:  denied  { search } for  name="zram0" dev="sysfs" ino=107524 scontext=u:r:untrusted_app:s0:c207,c257,c512,c768 tcontext=u:object_r:sysfs_zram:s0 tclass=dir permissive=0 app=com.zenithblue.sambas3
+09-26 07:28:29.794 19880 20097 D RPCS3   : sys_tty_write(ch=0, buf=*0x58bf20, len=63, pwritelen=*0xd000fde0)
+09-26 07:28:29.794 19880 20097 D RPCS3   : sys_tty_write(): “BATCHJOB: AddJob: waiting for room in job list 3 for job 56...“ << endl
+09-26 07:28:30.060 19880 20713 E RPCS3   : Video au decode has been waiting for a consumer for 5 seconds. (handle=0xf0000300, seq_id=1, cmd_id=63, queue_size=61)
+09-26 07:28:30.089 19880 19902 D S3PERF  : GPU load [/sys/class/kgsl/kgsl-3d0/gpubusy]: raw='550721 1002073' -> load=54.95817171004508%
+09-26 07:28:30.521 19880 20097 D RPCS3   : sys_tty_write(ch=0, buf=*0x58bf20, len=63, pwritelen=*0xd000fde0)
+09-26 07:28:30.521 19880 20097 D RPCS3   : sys_tty_write(): “BATCHJOB: AddJob: waiting for room in job list 3 for job 56...“ << endl
+09-26 07:28:30.991 19880 19880 I CompileMonitorService: Projection inactive after debounce delay — stopping foreground
+09-26 07:28:30.999 19880 19880 I CompileMonitorService: onDestroy
+09-26 07:28:31.029 19880 19902 D S3PERF  : crosscheck source=surface presented=2907 json_fps=8.08467 json_frametime_ms=160.195
+09-26 07:28:31.030 19880 19902 D S3PERF  : crosscheck ui_snapshot_fps=8.08467 ui_snapshot_frametime_ms=160.195
+09-26 07:28:31.037 19880 20097 D RPCS3   : sys_tty_write(ch=0, buf=*0x58bf20, len=63, pwritelen=*0xd000fde0)
+09-26 07:28:31.037 19880 20097 D RPCS3   : sys_tty_write(): “BATCHJOB: AddJob: waiting for room in job list 3 for job 56...“ << endl
+09-26 07:28:31.720 19880 20055 D RPCS3   : CPU Usage: Total: 71.9%, Cores: 0.0%, 0.0%, 0.0%, 0.0%, 0.0%, 0.0%, 0.0%, 0.0%
+09-26 07:28:31.796 19880 20079 D RPCS3   : PPU Syscall Usage Stats:
+09-26 07:28:31.796 19880 20079 D RPCS3   : 	⁂ sys_timer_usleep [357374]
+09-26 07:28:31.796 19880 20079 D RPCS3   : 	⁂ _sys_lwcond_queue_wait [145709]
+09-26 07:28:31.796 19880 20079 D RPCS3   : 	⁂ _sys_lwmutex_lock [144244]
+09-26 07:28:31.796 19880 20079 D RPCS3   : 	⁂ _sys_lwmutex_unlock [139363]
+09-26 07:28:31.796 19880 20079 D RPCS3   : 	⁂ _sys_lwcond_signal [91277]
+09-26 07:28:31.796 19880 20079 D RPCS3   : 	⁂ _sys_lwcond_signal_all [57819]
+09-26 07:28:31.796 19880 20079 D RPCS3   : 	⁂ sys_time_get_current_time [47265]
+09-26 07:28:31.796 19880 20079 D RPCS3   : 	⁂ sys_event_queue_receive [33134]
+09-26 07:28:31.796 19880 20079 D RPCS3   : 	⁂ sys_fs_read [23327]
+09-26 07:28:31.796 19880 20079 D RPCS3   : 	⁂ sys_fs_write [21400]
+09-26 07:28:31.796 19880 20079 D RPCS3   : 	⁂ sys_event_port_send [10998]
+09-26 07:28:31.796 19880 20079 D RPCS3   : 	⁂ sys_fs_fsync [3567]
+09-26 07:28:31.796 19880 20079 D RPCS3   : 	⁂ sys_fs_lseek [2519]
+09-26 07:28:31.796 19880 20079 D RPCS3   : 	⁂ sys_event_flag_wait [2078]
+09-26 07:28:31.796 19880 20079 D RPCS3   : 	⁂ sys_event_flag_clear [2078]
+09-26 07:28:31.796 19880 20079 D RPCS3   : 	⁂ _sys_lwmutex_trylock [229]
+09-26 07:28:31.796 19880 20079 D RPCS3   : 	⁂ sys_tty_write [70]
+09-26 07:28:31.796 19880 20079 D RPCS3   : 	⁂ sys_mutex_lock [54]
+09-26 07:28:31.796 19880 20079 D RPCS3   : 	⁂ sys_mutex_unlock [54]
+09-26 07:28:31.796 19880 20079 D RPCS3   : 	⁂ sys_time_get_timebase_frequency [50]
+09-26 07:28:31.796 19880 20079 D RPCS3   : 	⁂ _sys_ppu_thread_create [45]
+09-26 07:28:31.796 19880 20079 D RPCS3   : 	⁂ sys_ppu_thread_start [41]
+09-26 07:28:31.796 19880 20079 D RPCS3   : 	⁂ _sys_ppu_thread_exit [5]
+09-26 07:28:31.920 19880 20097 D RPCS3   : sys_tty_write(ch=0, buf=*0x58bf20, len=63, pwritelen=*0xd000fde0)
+09-26 07:28:31.920 19880 20097 D RPCS3   : sys_tty_write(): “BATCHJOB: AddJob: waiting for room in job list 3 for job 56...“ << endl
+09-26 07:28:32.055 19880 20097 D RPCS3   : sys_tty_write(ch=0, buf=*0x58bf20, len=63, pwritelen=*0xd000fde0)
+09-26 07:28:32.055 19880 20097 D RPCS3   : sys_tty_write(): “BATCHJOB: AddJob: waiting for room in job list 3 for job 56...“ << endl
+09-26 07:28:32.170 19880 19902 D S3PERF  : crosscheck ui_snapshot_fps=6.62415 ui_snapshot_frametime_ms=125.742
+09-26 07:28:32.211 19880 20097 D RPCS3   : sys_tty_write(ch=0, buf=*0x58bf20, len=63, pwritelen=*0xd000fde0)
+09-26 07:28:32.211 19880 20097 D RPCS3   : sys_tty_write(): “BATCHJOB: AddJob: waiting for room in job list 3 for job 56...“ << endl
+09-26 07:28:32.476 19880 19902 D S3PERF  : crosscheck source=surface presented=2918 json_fps=8.60382 json_frametime_ms=114.886
+09-26 07:28:32.477 19880 20097 D RPCS3   : sys_tty_write(ch=0, buf=*0x58bf20, len=63, pwritelen=*0xd000fde0)
+09-26 07:28:32.477 19880 20097 D RPCS3   : sys_tty_write(): “BATCHJOB: AddJob: waiting for room in job list 3 for job 56...“ << endl
+09-26 07:28:32.851 19880 20097 D RPCS3   : sys_tty_write(ch=0, buf=*0x58bf20, len=63, pwritelen=*0xd000fde0)
+09-26 07:28:32.851 19880 20097 D RPCS3   : sys_tty_write(): “BATCHJOB: AddJob: waiting for room in job list 3 for job 56...“ << endl
+09-26 07:28:33.084 19880 20097 D RPCS3   : sys_tty_write(ch=0, buf=*0x58bf20, len=63, pwritelen=*0xd000fde0)
+09-26 07:28:33.084 19880 20097 D RPCS3   : sys_tty_write(): “BATCHJOB: AddJob: waiting for room in job list 3 for job 56...“ << endl
+09-26 07:28:33.451 19880 19902 D S3PERF  : crosscheck ui_snapshot_fps=7.1645 ui_snapshot_frametime_ms=211.218
+09-26 07:28:33.696 19880 20097 D RPCS3   : sys_tty_write(ch=0, buf=*0x58bf20, len=63, pwritelen=*0xd000fde0)
+09-26 07:28:33.696 19880 20097 D RPCS3   : sys_tty_write(): “BATCHJOB: AddJob: waiting for room in job list 3 for job 56...“ << endl
+09-26 07:28:33.756 19880 19902 D S3PERF  : crosscheck source=surface presented=2927 json_fps=7.15603 json_frametime_ms=162.586
+09-26 07:28:33.816 19880 20097 D RPCS3   : sys_tty_write(ch=0, buf=*0x58bf20, len=63, pwritelen=*0xd000fde0)
+09-26 07:28:33.816 19880 20097 D RPCS3   : sys_tty_write(): “BATCHJOB: AddJob: waiting for room in job list 3 for job 56...“ << endl
+09-26 07:28:34.128 19880 20097 D RPCS3   : sys_tty_write(ch=0, buf=*0x58bf20, len=63, pwritelen=*0xd000fde0)
+09-26 07:28:34.128 19880 20097 D RPCS3   : sys_tty_write(): “BATCHJOB: AddJob: waiting for room in job list 3 for job 56...“ << endl
+09-26 07:28:34.241 19880 20097 D RPCS3   : sys_tty_write(ch=0, buf=*0x58bf20, len=63, pwritelen=*0xd000fde0)
+09-26 07:28:34.241 19880 20097 D RPCS3   : sys_tty_write(): “BATCHJOB: AddJob: waiting for room in job list 3 for job 56...“ << endl
+09-26 07:28:34.471 19880 20097 D RPCS3   : sys_tty_write(ch=0, buf=*0x58bf20, len=63, pwritelen=*0xd000fde0)
+09-26 07:28:34.471 19880 20097 D RPCS3   : sys_tty_write(): “BATCHJOB: AddJob: waiting for room in job list 3 for job 56...“ << endl
+09-26 07:28:34.719 19880 19902 D S3PERF  : crosscheck ui_snapshot_fps=8.62325 ui_snapshot_frametime_ms=124.531
+09-26 07:28:34.956 19880 20097 D RPCS3   : sys_tty_write(ch=0, buf=*0x58bf20, len=63, pwritelen=*0xd000fde0)
+09-26 07:28:34.956 19880 20097 D RPCS3   : sys_tty_write(): “BATCHJOB: AddJob: waiting for room in job list 3 for job 56...“ << endl
+09-26 07:28:35.038 19880 19902 D S3PERF  : crosscheck source=surface presented=2938 json_fps=9.32092 json_frametime_ms=92.224
+09-26 07:28:35.138 19880 20713 E RPCS3   : Video au decode has been waiting for a consumer for 5 seconds. (handle=0xf0000300, seq_id=1, cmd_id=63, queue_size=61)
+09-26 07:28:35.223 19880 20097 D RPCS3   : sys_tty_write(ch=0, buf=*0x58bf20, len=63, pwritelen=*0xd000fde0)
+09-26 07:28:35.223 19880 20097 D RPCS3   : sys_tty_write(): “BATCHJOB: AddJob: waiting for room in job list 3 for job 56...“ << endl
+09-26 07:28:35.378 19880 20097 D RPCS3   : sys_tty_write(ch=0, buf=*0x58bf20, len=63, pwritelen=*0xd000fde0)
+09-26 07:28:35.378 19880 20097 D RPCS3   : sys_tty_write(): “BATCHJOB: AddJob: waiting for room in job list 3 for job 56...“ << endl
+09-26 07:28:35.610 19880 20095 W RPCS3   : Cached object for address 0xC460B600 was found, but it does not match stored parameters (width=128 vs 64; height=64 vs 128; depth=1 vs 1; mipmaps=5 vs 5)
+09-26 07:28:35.994 19880 19902 D S3PERF  : crosscheck ui_snapshot_fps=7.9737 ui_snapshot_frametime_ms=125.543
+09-26 07:28:36.199 19880 20097 D RPCS3   : sys_tty_write(ch=0, buf=*0x58bf20, len=63, pwritelen=*0xd000fde0)
+09-26 07:28:36.199 19880 20097 D RPCS3   : sys_tty_write(): “BATCHJOB: AddJob: waiting for room in job list 3 for job 56...“ << endl
+09-26 07:28:36.304 19880 19902 D S3PERF  : crosscheck source=surface presented=2949 json_fps=8.23055 json_frametime_ms=88.796
+09-26 07:28:36.607 19880 20097 D RPCS3   : sys_tty_write(ch=0, buf=*0x58bf20, len=63, pwritelen=*0xd000fde0)
+09-26 07:28:36.608 19880 20097 D RPCS3   : sys_tty_write(): “BATCHJOB: AddJob: waiting for room in job list 3 for job 56...“ << endl
+09-26 07:28:36.690 19880 20097 D RPCS3   : sys_tty_write(ch=0, buf=*0x58bf20, len=63, pwritelen=*0xd000fde0)
+09-26 07:28:36.690 19880 20097 D RPCS3   : sys_tty_write(): “BATCHJOB: AddJob: waiting for room in job list 3 for job 56...“ << endl
+09-26 07:28:37.219 19880 20097 D RPCS3   : sys_tty_write(ch=0, buf=*0x58bf20, len=63, pwritelen=*0xd000fde0)
+09-26 07:28:37.220 19880 20097 D RPCS3   : sys_tty_write(): “BATCHJOB: AddJob: waiting for room in job list 3 for job 56...“ << endl
+09-26 07:28:37.260 19880 19902 D S3PERF  : crosscheck ui_snapshot_fps=8.68423 ui_snapshot_frametime_ms=179.577
+09-26 07:28:37.562 19880 19902 D S3PERF  : crosscheck source=surface presented=2959 json_fps=8.29765 json_frametime_ms=135.953
+09-26 07:28:37.688 19880 20233 W RPCS3   : sys_fs_fstat(fd=10, sb=*0xd005f624)
+09-26 07:28:38.011 19880 20097 D RPCS3   : sys_tty_write(ch=0, buf=*0x58bf20, len=63, pwritelen=*0xd000fde0)
+09-26 07:28:38.011 19880 20097 D RPCS3   : sys_tty_write(): “BATCHJOB: AddJob: waiting for room in job list 3 for job 56...“ << endl
+09-26 07:28:38.055 19880 19880 I S3PAD   : classify name='Xbox Wireless Controller' vid=1118 pid=736 sources=16778513 keyboardType=1 -> GAMEPAD/XBOX reason=gamepad-capability-or-identity
+09-26 07:28:38.055 19880 19880 D S3PAD   : deviceKey via descriptor
+09-26 07:28:38.180 19880 19880 I S3PAD   : classify name='Xbox Wireless Controller' vid=1118 pid=736 sources=16778513 keyboardType=1 -> GAMEPAD/XBOX reason=gamepad-capability-or-identity
+09-26 07:28:38.180 19880 19880 D S3PAD   : deviceKey via descriptor
+09-26 07:28:38.502 19880 19901 D S3PERF  : crosscheck ui_snapshot_fps=9.72916 ui_snapshot_frametime_ms=121.302
+09-26 07:28:38.520 19880 19893 I ithblue.sambas3: Explicit concurrent mark compact GC freed 19MB AllocSpace bytes, 230(4228KB) LOS objects, 78% free, 6807KB/30MB, paused 109us,934us total 33.897ms
+09-26 07:28:38.654 19880 20097 D RPCS3   : sys_tty_write(ch=0, buf=*0x58bf20, len=63, pwritelen=*0xd000fde0)
+09-26 07:28:38.654 19880 20097 D RPCS3   : sys_tty_write(): “BATCHJOB: AddJob: waiting for room in job list 3 for job 56...“ << endl
+09-26 07:28:38.820 19880 19902 D S3PERF  : crosscheck source=surface presented=2971 json_fps=8.48598 json_frametime_ms=134.611
+09-26 07:28:38.928 19880 19880 I S3PAD   : classify name='Xbox Wireless Controller' vid=1118 pid=736 sources=16778513 keyboardType=1 -> GAMEPAD/XBOX reason=gamepad-capability-or-identity
+09-26 07:28:38.928 19880 19880 D S3PAD   : deviceKey via descriptor
+09-26 07:28:38.931 19880 20097 D RPCS3   : sys_tty_write(ch=0, buf=*0x58bf20, len=63, pwritelen=*0xd000fde0)
+09-26 07:28:38.932 19880 20097 D RPCS3   : sys_tty_write(): “BATCHJOB: AddJob: waiting for room in job list 3 for job 56...“ << endl
+09-26 07:28:39.079 19880 20097 D RPCS3   : sys_tty_write(ch=0, buf=*0x58bf20, len=63, pwritelen=*0xd000fde0)
+09-26 07:28:39.079 19880 20097 D RPCS3   : sys_tty_write(): “BATCHJOB: AddJob: waiting for room in job list 3 for job 56...“ << endl
+09-26 07:28:39.126 19880 19880 W DefaultDispatch: type=1400 audit(0.0:7162636): avc:  denied  { search } for  name="zram0" dev="sysfs" ino=107524 scontext=u:r:untrusted_app:s0:c207,c257,c512,c768 tcontext=u:object_r:sysfs_zram:s0 tclass=dir permissive=0 app=com.zenithblue.sambas3
+09-26 07:28:39.126 19880 19880 W DefaultDispatch: type=1400 audit(0.0:7162637): avc:  denied  { search } for  name="zram0" dev="sysfs" ino=107524 scontext=u:r:untrusted_app:s0:c207,c257,c512,c768 tcontext=u:object_r:sysfs_zram:s0 tclass=dir permissive=0 app=com.zenithblue.sambas3
+09-26 07:28:39.224 19880 20097 D RPCS3   : sys_tty_write(ch=0, buf=*0x58bf20, len=63, pwritelen=*0xd000fde0)
+09-26 07:28:39.224 19880 20097 D RPCS3   : sys_tty_write(): “BATCHJOB: AddJob: waiting for room in job list 3 for job 56...“ << endl
+09-26 07:28:39.245 19880 19880 I S3PAD   : classify name='Xbox Wireless Controller' vid=1118 pid=736 sources=16778513 keyboardType=1 -> GAMEPAD/XBOX reason=gamepad-capability-or-identity
+09-26 07:28:39.245 19880 19880 D S3PAD   : deviceKey via descriptor
+09-26 07:28:39.373 19880 20097 D RPCS3   : sys_tty_write(ch=0, buf=*0x58bf20, len=63, pwritelen=*0xd000fde0)
+09-26 07:28:39.373 19880 20097 D RPCS3   : sys_tty_write(): “BATCHJOB: AddJob: waiting for room in job list 3 for job 56...“ << endl
+09-26 07:28:39.669 19880 20097 D RPCS3   : sys_tty_write(ch=0, buf=*0x58bf20, len=63, pwritelen=*0xd000fde0)
+09-26 07:28:39.669 19880 20097 D RPCS3   : sys_tty_write(): “BATCHJOB: AddJob: waiting for room in job list 3 for job 56...“ << endl
+09-26 07:28:39.756 19880 19902 D S3PERF  : crosscheck ui_snapshot_fps=7.75618 ui_snapshot_frametime_ms=170.51
+09-26 07:28:39.794 19880 20097 D RPCS3   : sys_tty_write(ch=0, buf=*0x58bf20, len=63, pwritelen=*0xd000fde0)
+09-26 07:28:39.795 19880 20097 D RPCS3   : sys_tty_write(): “BATCHJOB: AddJob: waiting for room in job list 3 for job 56...“ << endl
+09-26 07:28:39.945 19880 20097 D RPCS3   : sys_tty_write(ch=0, buf=*0x58bf20, len=63, pwritelen=*0xd000fde0)
+09-26 07:28:39.945 19880 20097 D RPCS3   : sys_tty_write(): “BATCHJOB: AddJob: waiting for room in job list 3 for job 56...“ << endl
+09-26 07:28:40.073 19880 19902 D S3PERF  : crosscheck source=surface presented=2980 json_fps=7.46537 json_frametime_ms=194.399
+09-26 07:28:40.245 19880 20713 E RPCS3   : Video au decode has been waiting for a consumer for 5 seconds. (handle=0xf0000300, seq_id=1, cmd_id=63, queue_size=61)
+09-26 07:28:40.526 19880 20097 D RPCS3   : sys_tty_write(ch=0, buf=*0x58bf20, len=63, pwritelen=*0xd000fde0)
+09-26 07:28:40.526 19880 20097 D RPCS3   : sys_tty_write(): “BATCHJOB: AddJob: waiting for room in job list 3 for job 56...“ << endl
+09-26 07:28:41.005 19880 19902 D S3PERF  : crosscheck ui_snapshot_fps=6.30426 ui_snapshot_frametime_ms=196.086
+09-26 07:28:41.111 19880 20097 D RPCS3   : sys_tty_write(ch=0, buf=*0x58bf20, len=63, pwritelen=*0xd000fde0)
+09-26 07:28:41.114 19880 20097 D RPCS3   : sys_tty_write(): “BATCHJOB: AddJob: waiting for room in job list 3 for job 56...“ << endl
+09-26 07:28:41.306 19880 20097 D RPCS3   : sys_tty_write(ch=0, buf=*0x58bf20, len=63, pwritelen=*0xd000fde0)
+09-26 07:28:41.306 19880 20097 D RPCS3   : sys_tty_write(): “BATCHJOB: AddJob: waiting for room in job list 3 for job 56...“ << endl
+09-26 07:28:41.317 19880 19902 D S3PERF  : crosscheck source=surface presented=2988 json_fps=5.5345 json_frametime_ms=206.959
+09-26 07:28:41.323 19880 19902 D S3PERF  : GPU load [/sys/class/kgsl/kgsl-3d0/gpubusy]: raw='475590 1008676' -> load=47.14992723134089%
+09-26 07:28:41.399 19880 20097 D RPCS3   : sys_tty_write(ch=0, buf=*0x58bf20, len=63, pwritelen=*0xd000fde0)
+09-26 07:28:41.399 19880 20097 D RPCS3   : sys_tty_write(): “BATCHJOB: AddJob: waiting for room in job list 3 for job 56...“ << endl
+09-26 07:28:41.501 19880 20097 D RPCS3   : sys_tty_write(ch=0, buf=*0x58bf20, len=63, pwritelen=*0xd000fde0)
+09-26 07:28:41.501 19880 20097 D RPCS3   : sys_tty_write(): “BATCHJOB: AddJob: waiting for room in job list 3 for job 56...“ << endl
+09-26 07:28:41.662 19880 20097 D RPCS3   : sys_tty_write(ch=0, buf=*0x58bf20, len=63, pwritelen=*0xd000fde0)
+09-26 07:28:41.662 19880 20097 D RPCS3   : sys_tty_write(): “BATCHJOB: AddJob: waiting for room in job list 3 for job 56...“ << endl
+09-26 07:28:41.720 19880 20055 D RPCS3   : CPU Usage: Total: 63.3%, Cores: 0.0%, 0.0%, 0.0%, 0.0%, 0.0%, 0.0%, 0.0%, 0.0%
+09-26 07:28:41.794 19880 20079 D RPCS3   : PPU Syscall Usage Stats:
+09-26 07:28:41.794 19880 20079 D RPCS3   : 	⁂ sys_timer_usleep [364231]
+09-26 07:28:41.794 19880 20079 D RPCS3   : 	⁂ _sys_lwcond_queue_wait [166301]
+09-26 07:28:41.794 19880 20079 D RPCS3   : 	⁂ _sys_lwmutex_lock [164927]
+09-26 07:28:41.794 19880 20079 D RPCS3   : 	⁂ _sys_lwmutex_unlock [159594]
+09-26 07:28:41.794 19880 20079 D RPCS3   : 	⁂ _sys_lwcond_signal [105330]
+09-26 07:28:41.794 19880 20079 D RPCS3   : 	⁂ _sys_lwcond_signal_all [65927]
+09-26 07:28:41.794 19880 20079 D RPCS3   : 	⁂ sys_time_get_current_time [53518]
+09-26 07:28:41.794 19880 20079 D RPCS3   : 	⁂ sys_event_queue_receive [35126]
+09-26 07:28:41.794 19880 20079 D RPCS3   : 	⁂ sys_fs_read [26748]
+09-26 07:28:41.794 19880 20079 D RPCS3   : 	⁂ sys_fs_write [25068]
+09-26 07:28:41.794 19880 20079 D RPCS3   : 	⁂ sys_event_port_send [11559]
+09-26 07:28:41.794 19880 20079 D RPCS3   : 	⁂ sys_fs_fsync [4180]
+09-26 07:28:41.794 19880 20079 D RPCS3   : 	⁂ sys_fs_lseek [2876]
+09-26 07:28:41.794 19880 20079 D RPCS3   : 	⁂ sys_event_flag_wait [2145]
+09-26 07:28:41.794 19880 20079 D RPCS3   : 	⁂ sys_event_flag_clear [2145]
+09-26 07:28:41.794 19880 20079 D RPCS3   : 	⁂ _sys_lwmutex_trylock [266]
+09-26 07:28:41.794 19880 20079 D RPCS3   : 	⁂ sys_tty_write [103]
+09-26 07:28:41.794 19880 20079 D RPCS3   : 	⁂ sys_fs_fstat [43]
+09-26 07:28:42.237 19880 20097 D RPCS3   : sys_tty_write(ch=0, buf=*0x58bf20, len=63, pwritelen=*0xd000fde0)
+09-26 07:28:42.237 19880 20097 D RPCS3   : sys_tty_write(): “BATCHJOB: AddJob: waiting for room in job list 3 for job 56...“ << endl
+09-26 07:28:42.249 19880 19902 D S3PERF  : crosscheck ui_snapshot_fps=8.47536 ui_snapshot_frametime_ms=100.762
+09-26 07:28:42.554 19880 19902 D S3PERF  : crosscheck source=surface presented=2998 json_fps=7.40363 json_frametime_ms=128.461
+09-26 07:28:42.566 19880 20097 D RPCS3   : sys_tty_write(ch=0, buf=*0x58bf20, len=63, pwritelen=*0xd000fde0)
+09-26 07:28:42.566 19880 20097 D RPCS3   : sys_tty_write(): “BATCHJOB: AddJob: waiting for room in job list 3 for job 56...“ << endl
+09-26 07:28:42.672 19880 20097 D RPCS3   : sys_tty_write(ch=0, buf=*0x58bf20, len=63, pwritelen=*0xd000fde0)
+09-26 07:28:42.672 19880 20097 D RPCS3   : sys_tty_write(): “BATCHJOB: AddJob: waiting for room in job list 3 for job 56...“ << endl
+09-26 07:28:42.804 19880 20097 D RPCS3   : sys_tty_write(ch=0, buf=*0x58bf20, len=63, pwritelen=*0xd000fde0)
+09-26 07:28:42.804 19880 20097 D RPCS3   : sys_tty_write(): “BATCHJOB: AddJob: waiting for room in job list 3 for job 56...“ << endl
+09-26 07:28:42.933 19880 20097 D RPCS3   : sys_tty_write(ch=0, buf=*0x58bf20, len=63, pwritelen=*0xd000fde0)
+09-26 07:28:42.933 19880 20097 D RPCS3   : sys_tty_write(): “BATCHJOB: AddJob: waiting for room in job list 3 for job 56...“ << endl
+09-26 07:28:43.414 19880 20097 D RPCS3   : sys_tty_write(ch=0, buf=*0x58bf20, len=63, pwritelen=*0xd000fde0)
+09-26 07:28:43.414 19880 20097 D RPCS3   : sys_tty_write(): “BATCHJOB: AddJob: waiting for room in job list 3 for job 56...“ << endl
+09-26 07:28:43.491 19880 19902 D S3PERF  : crosscheck ui_snapshot_fps=7.71354 ui_snapshot_frametime_ms=185.98
+09-26 07:28:43.587 19880 20097 D RPCS3   : sys_tty_write(ch=0, buf=*0x58bf20, len=63, pwritelen=*0xd000fde0)
+09-26 07:28:43.587 19880 20097 D RPCS3   : sys_tty_write(): “BATCHJOB: AddJob: waiting for room in job list 3 for job 56...“ << endl
+09-26 07:28:43.796 19880 19902 D S3PERF  : crosscheck source=surface presented=3007 json_fps=6.30587 json_frametime_ms=184.368
+09-26 07:28:43.835 19880 20097 D RPCS3   : sys_tty_write(ch=0, buf=*0x58bf20, len=63, pwritelen=*0xd000fde0)
+09-26 07:28:43.835 19880 20097 D RPCS3   : sys_tty_write(): “BATCHJOB: AddJob: waiting for room in job list 3 for job 56...“ << endl
+09-26 07:28:43.972 19880 20097 D RPCS3   : sys_tty_write(ch=0, buf=*0x58bf20, len=63, pwritelen=*0xd000fde0)
+09-26 07:28:43.972 19880 20097 D RPCS3   : sys_tty_write(): “BATCHJOB: AddJob: waiting for room in job list 3 for job 56...“ << endl
+09-26 07:28:44.176 19880 20097 D RPCS3   : sys_tty_write(ch=0, buf=*0x58bf20, len=63, pwritelen=*0xd000fde0)
+09-26 07:28:44.176 19880 20097 D RPCS3   : sys_tty_write(): “BATCHJOB: AddJob: waiting for room in job list 3 for job 56...“ << endl
+09-26 07:28:44.474 19880 20097 D RPCS3   : sys_tty_write(ch=0, buf=*0x58bf20, len=63, pwritelen=*0xd000fde0)
+09-26 07:28:44.474 19880 20097 D RPCS3   : sys_tty_write(): “BATCHJOB: AddJob: waiting for room in job list 3 for job 56...“ << endl
+09-26 07:28:44.475 19880 20097 D RPCS3   : sys_tty_write(ch=0, buf=*0x58bf20, len=63, pwritelen=*0xd000fde0)
+09-26 07:28:44.475 19880 20097 D RPCS3   : sys_tty_write(): “BATCHJOB: AddJob: waiting for room in job list 4 for job 70...“ << endl
+09-26 07:28:44.551 19880 20097 D RPCS3   : sys_tty_write(ch=0, buf=*0x58bf20, len=63, pwritelen=*0xd000fde0)
+09-26 07:28:44.552 19880 20097 D RPCS3   : sys_tty_write(): “BATCHJOB: AddJob: waiting for room in job list 4 for job 70...“ << endl

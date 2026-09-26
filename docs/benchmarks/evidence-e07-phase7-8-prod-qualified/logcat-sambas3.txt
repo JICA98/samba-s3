@@ -1,0 +1,127 @@
+09-26 07:28:41.399 19880 20097 D RPCS3   : sys_tty_write(ch=0, buf=*0x58bf20, len=63, pwritelen=*0xd000fde0)
+09-26 07:28:41.399 19880 20097 D RPCS3   : sys_tty_write(): “BATCHJOB: AddJob: waiting for room in job list 3 for job 56...“ << endl
+09-26 07:28:41.501 19880 20097 D RPCS3   : sys_tty_write(ch=0, buf=*0x58bf20, len=63, pwritelen=*0xd000fde0)
+09-26 07:28:41.501 19880 20097 D RPCS3   : sys_tty_write(): “BATCHJOB: AddJob: waiting for room in job list 3 for job 56...“ << endl
+09-26 07:28:41.662 19880 20097 D RPCS3   : sys_tty_write(ch=0, buf=*0x58bf20, len=63, pwritelen=*0xd000fde0)
+09-26 07:28:41.662 19880 20097 D RPCS3   : sys_tty_write(): “BATCHJOB: AddJob: waiting for room in job list 3 for job 56...“ << endl
+09-26 07:28:41.720 19880 20055 D RPCS3   : CPU Usage: Total: 63.3%, Cores: 0.0%, 0.0%, 0.0%, 0.0%, 0.0%, 0.0%, 0.0%, 0.0%
+09-26 07:28:41.794 19880 20079 D RPCS3   : PPU Syscall Usage Stats:
+09-26 07:28:41.794 19880 20079 D RPCS3   : 	⁂ sys_timer_usleep [364231]
+09-26 07:28:41.794 19880 20079 D RPCS3   : 	⁂ _sys_lwcond_queue_wait [166301]
+09-26 07:28:41.794 19880 20079 D RPCS3   : 	⁂ _sys_lwmutex_lock [164927]
+09-26 07:28:41.794 19880 20079 D RPCS3   : 	⁂ _sys_lwmutex_unlock [159594]
+09-26 07:28:41.794 19880 20079 D RPCS3   : 	⁂ _sys_lwcond_signal [105330]
+09-26 07:28:41.794 19880 20079 D RPCS3   : 	⁂ _sys_lwcond_signal_all [65927]
+09-26 07:28:41.794 19880 20079 D RPCS3   : 	⁂ sys_time_get_current_time [53518]
+09-26 07:28:41.794 19880 20079 D RPCS3   : 	⁂ sys_event_queue_receive [35126]
+09-26 07:28:41.794 19880 20079 D RPCS3   : 	⁂ sys_fs_read [26748]
+09-26 07:28:41.794 19880 20079 D RPCS3   : 	⁂ sys_fs_write [25068]
+09-26 07:28:41.794 19880 20079 D RPCS3   : 	⁂ sys_event_port_send [11559]
+09-26 07:28:41.794 19880 20079 D RPCS3   : 	⁂ sys_fs_fsync [4180]
+09-26 07:28:41.794 19880 20079 D RPCS3   : 	⁂ sys_fs_lseek [2876]
+09-26 07:28:41.794 19880 20079 D RPCS3   : 	⁂ sys_event_flag_wait [2145]
+09-26 07:28:41.794 19880 20079 D RPCS3   : 	⁂ sys_event_flag_clear [2145]
+09-26 07:28:41.794 19880 20079 D RPCS3   : 	⁂ _sys_lwmutex_trylock [266]
+09-26 07:28:41.794 19880 20079 D RPCS3   : 	⁂ sys_tty_write [103]
+09-26 07:28:41.794 19880 20079 D RPCS3   : 	⁂ sys_fs_fstat [43]
+09-26 07:28:42.237 19880 20097 D RPCS3   : sys_tty_write(ch=0, buf=*0x58bf20, len=63, pwritelen=*0xd000fde0)
+09-26 07:28:42.237 19880 20097 D RPCS3   : sys_tty_write(): “BATCHJOB: AddJob: waiting for room in job list 3 for job 56...“ << endl
+09-26 07:28:42.249 19880 19902 D S3PERF  : crosscheck ui_snapshot_fps=8.47536 ui_snapshot_frametime_ms=100.762
+09-26 07:28:42.554 19880 19902 D S3PERF  : crosscheck source=surface presented=2998 json_fps=7.40363 json_frametime_ms=128.461
+09-26 07:28:42.566 19880 20097 D RPCS3   : sys_tty_write(ch=0, buf=*0x58bf20, len=63, pwritelen=*0xd000fde0)
+09-26 07:28:42.566 19880 20097 D RPCS3   : sys_tty_write(): “BATCHJOB: AddJob: waiting for room in job list 3 for job 56...“ << endl
+09-26 07:28:42.672 19880 20097 D RPCS3   : sys_tty_write(ch=0, buf=*0x58bf20, len=63, pwritelen=*0xd000fde0)
+09-26 07:28:42.672 19880 20097 D RPCS3   : sys_tty_write(): “BATCHJOB: AddJob: waiting for room in job list 3 for job 56...“ << endl
+09-26 07:28:42.804 19880 20097 D RPCS3   : sys_tty_write(ch=0, buf=*0x58bf20, len=63, pwritelen=*0xd000fde0)
+09-26 07:28:42.804 19880 20097 D RPCS3   : sys_tty_write(): “BATCHJOB: AddJob: waiting for room in job list 3 for job 56...“ << endl
+09-26 07:28:42.933 19880 20097 D RPCS3   : sys_tty_write(ch=0, buf=*0x58bf20, len=63, pwritelen=*0xd000fde0)
+09-26 07:28:42.933 19880 20097 D RPCS3   : sys_tty_write(): “BATCHJOB: AddJob: waiting for room in job list 3 for job 56...“ << endl
+09-26 07:28:43.414 19880 20097 D RPCS3   : sys_tty_write(ch=0, buf=*0x58bf20, len=63, pwritelen=*0xd000fde0)
+09-26 07:28:43.414 19880 20097 D RPCS3   : sys_tty_write(): “BATCHJOB: AddJob: waiting for room in job list 3 for job 56...“ << endl
+09-26 07:28:43.491 19880 19902 D S3PERF  : crosscheck ui_snapshot_fps=7.71354 ui_snapshot_frametime_ms=185.98
+09-26 07:28:43.587 19880 20097 D RPCS3   : sys_tty_write(ch=0, buf=*0x58bf20, len=63, pwritelen=*0xd000fde0)
+09-26 07:28:43.587 19880 20097 D RPCS3   : sys_tty_write(): “BATCHJOB: AddJob: waiting for room in job list 3 for job 56...“ << endl
+09-26 07:28:43.796 19880 19902 D S3PERF  : crosscheck source=surface presented=3007 json_fps=6.30587 json_frametime_ms=184.368
+09-26 07:28:43.835 19880 20097 D RPCS3   : sys_tty_write(ch=0, buf=*0x58bf20, len=63, pwritelen=*0xd000fde0)
+09-26 07:28:43.835 19880 20097 D RPCS3   : sys_tty_write(): “BATCHJOB: AddJob: waiting for room in job list 3 for job 56...“ << endl
+09-26 07:28:43.972 19880 20097 D RPCS3   : sys_tty_write(ch=0, buf=*0x58bf20, len=63, pwritelen=*0xd000fde0)
+09-26 07:28:43.972 19880 20097 D RPCS3   : sys_tty_write(): “BATCHJOB: AddJob: waiting for room in job list 3 for job 56...“ << endl
+09-26 07:28:44.176 19880 20097 D RPCS3   : sys_tty_write(ch=0, buf=*0x58bf20, len=63, pwritelen=*0xd000fde0)
+09-26 07:28:44.176 19880 20097 D RPCS3   : sys_tty_write(): “BATCHJOB: AddJob: waiting for room in job list 3 for job 56...“ << endl
+09-26 07:28:44.474 19880 20097 D RPCS3   : sys_tty_write(ch=0, buf=*0x58bf20, len=63, pwritelen=*0xd000fde0)
+09-26 07:28:44.474 19880 20097 D RPCS3   : sys_tty_write(): “BATCHJOB: AddJob: waiting for room in job list 3 for job 56...“ << endl
+09-26 07:28:44.475 19880 20097 D RPCS3   : sys_tty_write(ch=0, buf=*0x58bf20, len=63, pwritelen=*0xd000fde0)
+09-26 07:28:44.475 19880 20097 D RPCS3   : sys_tty_write(): “BATCHJOB: AddJob: waiting for room in job list 4 for job 70...“ << endl
+09-26 07:28:44.551 19880 20097 D RPCS3   : sys_tty_write(ch=0, buf=*0x58bf20, len=63, pwritelen=*0xd000fde0)
+09-26 07:28:44.552 19880 20097 D RPCS3   : sys_tty_write(): “BATCHJOB: AddJob: waiting for room in job list 4 for job 70...“ << endl
+09-26 07:28:44.695 19880 20097 D RPCS3   : sys_tty_write(ch=0, buf=*0x58bf20, len=63, pwritelen=*0xd000fde0)
+09-26 07:28:44.695 19880 20097 D RPCS3   : sys_tty_write(): “BATCHJOB: AddJob: waiting for room in job list 3 for job 56...“ << endl
+09-26 07:28:44.744 19880 19902 D S3PERF  : crosscheck ui_snapshot_fps=7.70031 ui_snapshot_frametime_ms=123.486
+09-26 07:28:45.059 19880 19902 D S3PERF  : crosscheck source=surface presented=3015 json_fps=6.45755 json_frametime_ms=361.615
+09-26 07:28:45.109 19880 20097 D RPCS3   : sys_tty_write(ch=0, buf=*0x58bf20, len=63, pwritelen=*0xd000fde0)
+09-26 07:28:45.109 19880 20097 D RPCS3   : sys_tty_write(): “BATCHJOB: AddJob: waiting for room in job list 3 for job 56...“ << endl
+09-26 07:28:45.336 19880 20713 E RPCS3   : Video au decode has been waiting for a consumer for 5 seconds. (handle=0xf0000300, seq_id=1, cmd_id=63, queue_size=61)
+09-26 07:28:45.353 19880 20097 D RPCS3   : sys_tty_write(ch=0, buf=*0x58bf20, len=63, pwritelen=*0xd000fde0)
+09-26 07:28:45.353 19880 20097 D RPCS3   : sys_tty_write(): “BATCHJOB: AddJob: waiting for room in job list 3 for job 56...“ << endl
+09-26 07:28:45.435 19880 20097 D RPCS3   : sys_tty_write(ch=0, buf=*0x58bf20, len=63, pwritelen=*0xd000fde0)
+09-26 07:28:45.435 19880 20097 D RPCS3   : sys_tty_write(): “BATCHJOB: AddJob: waiting for room in job list 3 for job 56...“ << endl
+09-26 07:28:45.593 19880 20097 D RPCS3   : sys_tty_write(ch=0, buf=*0x58bf20, len=63, pwritelen=*0xd000fde0)
+09-26 07:28:45.593 19880 20097 D RPCS3   : sys_tty_write(): “BATCHJOB: AddJob: waiting for room in job list 4 for job 70...“ << endl
+09-26 07:28:45.793 19880 20097 D RPCS3   : sys_tty_write(ch=0, buf=*0x58bf20, len=63, pwritelen=*0xd000fde0)
+09-26 07:28:45.793 19880 20097 D RPCS3   : sys_tty_write(): “BATCHJOB: AddJob: waiting for room in job list 3 for job 56...“ << endl
+09-26 07:28:45.997 19880 19902 D S3PERF  : crosscheck ui_snapshot_fps=8.63124 ui_snapshot_frametime_ms=158.382
+09-26 07:28:46.195 19880 20097 D RPCS3   : sys_tty_write(ch=0, buf=*0x58bf20, len=63, pwritelen=*0xd000fde0)
+09-26 07:28:46.195 19880 20097 D RPCS3   : sys_tty_write(): “BATCHJOB: AddJob: waiting for room in job list 3 for job 56...“ << endl
+09-26 07:28:46.248 19880 19880 I S3PAD   : classify name='Xbox Wireless Controller' vid=1118 pid=736 sources=16778513 keyboardType=1 -> GAMEPAD/XBOX reason=gamepad-capability-or-identity
+09-26 07:28:46.248 19880 19880 D S3PAD   : deviceKey via descriptor
+09-26 07:28:46.249 19880 19880 I S3PAD   : classify name='Xbox Wireless Controller' vid=1118 pid=736 sources=16778513 keyboardType=1 -> GAMEPAD/XBOX reason=gamepad-capability-or-identity
+09-26 07:28:46.249 19880 19880 D S3PAD   : deviceKey via descriptor
+09-26 07:28:46.249 19880 19880 I S3PAD   : classify name='Xbox Wireless Controller' vid=1118 pid=736 sources=16778513 keyboardType=1 -> GAMEPAD/XBOX reason=gamepad-capability-or-identity
+09-26 07:28:46.249 19880 19880 D S3PAD   : deviceKey via descriptor
+09-26 07:28:46.249 19880 19880 I S3PAD   : classify name='Xbox Wireless Controller' vid=1118 pid=736 sources=16778513 keyboardType=1 -> GAMEPAD/XBOX reason=gamepad-capability-or-identity
+09-26 07:28:46.249 19880 19880 D S3PAD   : deviceKey via descriptor
+09-26 07:28:46.309 19880 19902 D S3PERF  : crosscheck source=surface presented=3025 json_fps=8.23156 json_frametime_ms=124.919
+09-26 07:28:46.449 19880 19880 I S3PAD   : classify name='Xbox Wireless Controller' vid=1118 pid=736 sources=16778513 keyboardType=1 -> GAMEPAD/XBOX reason=gamepad-capability-or-identity
+09-26 07:28:46.449 19880 19880 D S3PAD   : deviceKey via descriptor
+09-26 07:28:46.449 19880 19880 I S3PAD   : classify name='Xbox Wireless Controller' vid=1118 pid=736 sources=16778513 keyboardType=1 -> GAMEPAD/XBOX reason=gamepad-capability-or-identity
+09-26 07:28:46.449 19880 19880 D S3PAD   : deviceKey via descriptor
+09-26 07:28:46.450 19880 19880 I S3PAD   : classify name='Xbox Wireless Controller' vid=1118 pid=736 sources=16778513 keyboardType=1 -> GAMEPAD/XBOX reason=gamepad-capability-or-identity
+09-26 07:28:46.450 19880 19880 D S3PAD   : deviceKey via descriptor
+09-26 07:28:46.450 19880 19880 I S3PAD   : classify name='Xbox Wireless Controller' vid=1118 pid=736 sources=16778513 keyboardType=1 -> GAMEPAD/XBOX reason=gamepad-capability-or-identity
+09-26 07:28:46.450 19880 19880 D S3PAD   : deviceKey via descriptor
+09-26 07:28:46.479 19880 20097 D RPCS3   : sys_tty_write(ch=0, buf=*0x58bf20, len=63, pwritelen=*0xd000fde0)
+09-26 07:28:46.479 19880 20097 D RPCS3   : sys_tty_write(): “BATCHJOB: AddJob: waiting for room in job list 3 for job 56...“ << endl
+09-26 07:28:46.547 19880 19880 I S3PAD   : classify name='Xbox Wireless Controller' vid=1118 pid=736 sources=16778513 keyboardType=1 -> GAMEPAD/XBOX reason=gamepad-capability-or-identity
+09-26 07:28:46.547 19880 19880 D S3PAD   : deviceKey via descriptor
+09-26 07:28:46.547 19880 19880 I S3PAD   : classify name='Xbox Wireless Controller' vid=1118 pid=736 sources=16778513 keyboardType=1 -> GAMEPAD/XBOX reason=gamepad-capability-or-identity
+09-26 07:28:46.547 19880 19880 D S3PAD   : deviceKey via descriptor
+09-26 07:28:46.547 19880 19880 I S3PAD   : classify name='Xbox Wireless Controller' vid=1118 pid=736 sources=16778513 keyboardType=1 -> GAMEPAD/XBOX reason=gamepad-capability-or-identity
+09-26 07:28:46.547 19880 19880 D S3PAD   : deviceKey via descriptor
+09-26 07:28:46.547 19880 19880 I S3PAD   : classify name='Xbox Wireless Controller' vid=1118 pid=736 sources=16778513 keyboardType=1 -> GAMEPAD/XBOX reason=gamepad-capability-or-identity
+09-26 07:28:46.547 19880 19880 D S3PAD   : deviceKey via descriptor
+09-26 07:28:46.701 19880 19880 I S3PAD   : classify name='Xbox Wireless Controller' vid=1118 pid=736 sources=16778513 keyboardType=1 -> GAMEPAD/XBOX reason=gamepad-capability-or-identity
+09-26 07:28:46.701 19880 19880 D S3PAD   : deviceKey via descriptor
+09-26 07:28:46.701 19880 19880 I S3PAD   : classify name='Xbox Wireless Controller' vid=1118 pid=736 sources=16778513 keyboardType=1 -> GAMEPAD/XBOX reason=gamepad-capability-or-identity
+09-26 07:28:46.701 19880 19880 D S3PAD   : deviceKey via descriptor
+09-26 07:28:46.701 19880 19880 I S3PAD   : classify name='Xbox Wireless Controller' vid=1118 pid=736 sources=16778513 keyboardType=1 -> GAMEPAD/XBOX reason=gamepad-capability-or-identity
+09-26 07:28:46.701 19880 19880 D S3PAD   : deviceKey via descriptor
+09-26 07:28:46.701 19880 19880 I S3PAD   : classify name='Xbox Wireless Controller' vid=1118 pid=736 sources=16778513 keyboardType=1 -> GAMEPAD/XBOX reason=gamepad-capability-or-identity
+09-26 07:28:46.701 19880 19880 D S3PAD   : deviceKey via descriptor
+09-26 07:28:46.777 19880 19880 I S3PAD   : classify name='Xbox Wireless Controller' vid=1118 pid=736 sources=16778513 keyboardType=1 -> GAMEPAD/XBOX reason=gamepad-capability-or-identity
+09-26 07:28:46.778 19880 19880 D S3PAD   : deviceKey via descriptor
+09-26 07:28:46.778 19880 19880 I S3PAD   : classify name='Xbox Wireless Controller' vid=1118 pid=736 sources=16778513 keyboardType=1 -> GAMEPAD/XBOX reason=gamepad-capability-or-identity
+09-26 07:28:46.778 19880 19880 D S3PAD   : deviceKey via descriptor
+09-26 07:28:46.778 19880 19880 I S3PAD   : classify name='Xbox Wireless Controller' vid=1118 pid=736 sources=16778513 keyboardType=1 -> GAMEPAD/XBOX reason=gamepad-capability-or-identity
+09-26 07:28:46.778 19880 19880 D S3PAD   : deviceKey via descriptor
+09-26 07:28:46.778 19880 19880 I S3PAD   : classify name='Xbox Wireless Controller' vid=1118 pid=736 sources=16778513 keyboardType=1 -> GAMEPAD/XBOX reason=gamepad-capability-or-identity
+09-26 07:28:46.778 19880 19880 D S3PAD   : deviceKey via descriptor
+09-26 07:28:46.823 19880 20097 D RPCS3   : sys_tty_write(ch=0, buf=*0x58bf20, len=63, pwritelen=*0xd000fde0)
+09-26 07:28:46.823 19880 20097 D RPCS3   : sys_tty_write(): “BATCHJOB: AddJob: waiting for room in job list 3 for job 56...“ << endl
+09-26 07:28:46.949 19880 19880 I S3PAD   : classify name='Xbox Wireless Controller' vid=1118 pid=736 sources=16778513 keyboardType=1 -> GAMEPAD/XBOX reason=gamepad-capability-or-identity
+09-26 07:28:46.949 19880 19880 D S3PAD   : deviceKey via descriptor
+09-26 07:28:46.949 19880 19880 I S3PAD   : classify name='Xbox Wireless Controller' vid=1118 pid=736 sources=16778513 keyboardType=1 -> GAMEPAD/XBOX reason=gamepad-capability-or-identity
+09-26 07:28:46.949 19880 19880 D S3PAD   : deviceKey via descriptor
+09-26 07:28:46.949 19880 19880 I S3PAD   : classify name='Xbox Wireless Controller' vid=1118 pid=736 sources=16778513 keyboardType=1 -> GAMEPAD/XBOX reason=gamepad-capability-or-identity
+09-26 07:28:46.949 19880 19880 D S3PAD   : deviceKey via descriptor
+09-26 07:28:46.949 19880 19880 I S3PAD   : classify name='Xbox Wireless Controller' vid=1118 pid=736 sources=16778513 keyboardType=1 -> GAMEPAD/XBOX reason=gamepad-capability-or-identity
+09-26 07:28:46.950 19880 19880 D S3PAD   : deviceKey via descriptor
