@@ -16,7 +16,7 @@ import kotlin.math.abs
  */
 class PhysicalInputTracker(
     private val stickDeadzone: Float = 0.2f,
-    private val triggerThreshold: Float = 0.1f
+    private val triggerThreshold: Float = 0.25f
 ) {
     private val pressedKeys = mutableSetOf<Int>()
     private var l2 = 0f
@@ -54,8 +54,12 @@ class PhysicalInputTracker(
         hatY = event.getAxisValue(MotionEvent.AXIS_HAT_Y)
         lx = event.getAxisValue(MotionEvent.AXIS_X)
         ly = event.getAxisValue(MotionEvent.AXIS_Y)
-        rx = event.getAxisValue(MotionEvent.AXIS_Z)
-        ry = event.getAxisValue(MotionEvent.AXIS_RZ)
+        val rawRx = event.getAxisValue(MotionEvent.AXIS_Z)
+        val rawRy = event.getAxisValue(MotionEvent.AXIS_RZ)
+        val altRx = event.getAxisValue(MotionEvent.AXIS_RX)
+        val altRy = event.getAxisValue(MotionEvent.AXIS_RY)
+        rx = if (abs(rawRx) > abs(altRx)) rawRx else altRx
+        ry = if (abs(rawRy) > abs(altRy)) rawRy else altRy
         return true
     }
 

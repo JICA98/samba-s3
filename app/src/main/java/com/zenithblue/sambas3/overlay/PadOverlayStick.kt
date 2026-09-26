@@ -36,6 +36,10 @@ class PadOverlayStick(
     var alpha: Int = (0.3f * 255).toInt()
         set(value) { field = value }
 
+    var onTap: (() -> Unit)? = null
+    private var touchDownTime = 0L
+    private var dragged = false
+
     private var locked   = -1
     private var pressX   = -1
     private var pressY   = -1
@@ -70,6 +74,8 @@ class PadOverlayStick(
         val x = event.getX(pointerIndex).toInt()
         val y = event.getY(pointerIndex).toInt()
         pressX = x; pressY = y
+        touchDownTime = System.currentTimeMillis()
+        dragged = false
 
         val hw = ringBounds.width()  / 2
         val hh = ringBounds.height() / 2
@@ -79,19 +85,21 @@ class PadOverlayStick(
 
     fun onTouch(event: MotionEvent, pointerIndex: Int, padState: State): Int {
         val action = event.actionMasked
+        val isDown = action == MotionEvent.ACTION_DOWN || action == MotionEvent.ACTION_POINTER_DOWN
 
-        if ((pressBit != 0 && (action == MotionEvent.ACTION_DOWN || action == MotionEvent.ACTION_POINTER_DOWN)) ||
-            (locked != -1 && action == MotionEvent.ACTION_MOVE)) {
+        if (isDown || (locked != -1 && action == MotionEvent.ACTION_MOVE)) {
 
             var activePointerIndex = pointerIndex
 
-            if (action != MotionEvent.ACTION_MOVE) {
+            if (isDown) {
                 if (locked == -1) {
                     locked = event.getPointerId(pointerIndex)
                     pressX = event.getX(pointerIndex).toInt()
                     pressY = event.getY(pointerIndex).toInt()
                     bgOffsetX = ringBounds.centerX() - pressX
                     bgOffsetY = ringBounds.centerY() - pressY
+                    touchDownTime = System.currentTimeMillis()
+                    dragged = false
                     // Shift ring to touch point
                     ringBounds.offset(-bgOffsetX, -bgOffsetY)
                     centreNub()
@@ -105,13 +113,14 @@ class PadOverlayStick(
                 if (activePointerIndex == -1) return 0
             }
 
-            padState.digital[pressDigitalIndex] = padState.digital[pressDigitalIndex] or pressBit
-
             var dx = event.getX(activePointerIndex) - pressX
             var dy = event.getY(activePointerIndex) - pressY
 
             val bgR  = ringBounds.width() / 2f
             val dist = hypot(dx, dy)
+            if (dist > bgR * 0.15f) {
+                dragged = true
+            }
             if (dist > bgR) {
                 val L = atan2(dy, dx)
                 dx = bgR * cos(L)
@@ -135,6 +144,8 @@ class PadOverlayStick(
 
         if (action == MotionEvent.ACTION_UP || action == MotionEvent.ACTION_POINTER_UP || action == MotionEvent.ACTION_CANCEL) {
             if (locked != -1 && (action == MotionEvent.ACTION_CANCEL || event.getPointerId(pointerIndex) == locked)) {
+                val wasTap = !dragged && action != MotionEvent.ACTION_CANCEL &&
+                        (System.currentTimeMillis() - touchDownTime < 300L)
                 locked = -1
 
                 // Restore ring to original offset position
@@ -147,6 +158,10 @@ class PadOverlayStick(
                 if (isLeft) { padState.leftStickX  = 127; padState.leftStickY  = 127 }
                 else        { padState.rightStickX = 127; padState.rightStickY = 127 }
 
+                if (wasTap && pressBit != 0) {
+                    onTap?.invoke()
+                }
+
                 return -1
             }
         }
@@ -158,6 +173,7 @@ class PadOverlayStick(
         locked = -1
         pressX = -1
         pressY = -1
+        dragged = false
         ringBounds.offset(bgOffsetX, bgOffsetY)
         bgOffsetX = 0
         bgOffsetY = 0

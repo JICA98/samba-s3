@@ -102,7 +102,17 @@ class GamepadMapper(private var profile: ControllerProfile) {
     fun motion(event: MotionEvent): LogicalPadState {
         if (event.source and (InputDevice.SOURCE_JOYSTICK or InputDevice.SOURCE_GAMEPAD) == 0) return state
         val lx = tune(event.getAxisValue(profile.leftX.axis), event.getAxisValue(profile.leftY.axis), profile.leftStick)
-        val rx = tune(event.getAxisValue(profile.rightX.axis), event.getAxisValue(profile.rightY.axis), profile.rightStick)
+        var rxVal = event.getAxisValue(profile.rightX.axis)
+        var ryVal = event.getAxisValue(profile.rightY.axis)
+        if (rxVal == 0f && ryVal == 0f && (profile.rightX.axis == MotionAxis.Z || profile.rightY.axis == MotionAxis.RZ)) {
+            val altRx = event.getAxisValue(MotionEvent.AXIS_RX)
+            val altRy = event.getAxisValue(MotionEvent.AXIS_RY)
+            if (altRx != 0f || altRy != 0f) {
+                rxVal = altRx
+                ryVal = altRy
+            }
+        }
+        val rx = tune(rxVal, ryVal, profile.rightStick)
         var d1 = state.digital1 and (DigitalMask.dpad.inv())
         val hatX = event.getAxisValue(MotionAxis.HAT_X); val hatY = event.getAxisValue(MotionAxis.HAT_Y)
         if (hatX < -.1f) d1 = d1 or com.zenithblue.sambas3.Digital1Flags.CELL_PAD_CTRL_LEFT.bit else if (hatX > .1f) d1 = d1 or com.zenithblue.sambas3.Digital1Flags.CELL_PAD_CTRL_RIGHT.bit

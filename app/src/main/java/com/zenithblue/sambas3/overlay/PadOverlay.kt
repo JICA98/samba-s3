@@ -246,16 +246,17 @@ class PadOverlay(context: Context?, attrs: AttributeSet?) : View(context, attrs)
         rightStick.setBounds(rStickX, rStickY, rStickX + stickSize, rStickY + stickSize)
         rightStick.alpha = idleAlpha
 
-        // ── Fixed L3/R3 sticks ────────────────────────────────────────────────
         val l3 = PadOverlayStick(resources, true,  empty, empty,
             pressDigitalIndex = 0, pressBit = Digital1Flags.CELL_PAD_CTRL_L3.bit)
         l3.alpha = idleAlpha
         l3.setBounds(l3x, l3y, l3x + l3r3Size, l3y + l3r3Size)
+        l3.onTap = { pulseStickClick(0, Digital1Flags.CELL_PAD_CTRL_L3.bit) }
 
         val r3 = PadOverlayStick(resources, false, empty, empty,
             pressDigitalIndex = 0, pressBit = Digital1Flags.CELL_PAD_CTRL_R3.bit)
         r3.alpha = idleAlpha
         r3.setBounds(r3x, r3y, r3x + l3r3Size, r3y + l3r3Size)
+        r3.onTap = { pulseStickClick(0, Digital1Flags.CELL_PAD_CTRL_R3.bit) }
 
         sticks += l3
         sticks += r3
@@ -528,6 +529,26 @@ class PadOverlay(context: Context?, attrs: AttributeSet?) : View(context, attrs)
 
         try { RPCSX.instance.overlayPadData(0, 0, 127, 127, 127, 127) } catch (_: Exception) {}
         invalidate()
+    }
+
+    private fun pulseStickClick(digitalIndex: Int, bit: Int) {
+        if (GeneralSettings["haptic_feedback"] as Boolean? ?: true) {
+            vibrator.vibrate(VibrationEffect.createPredefined(VibrationEffect.EFFECT_CLICK))
+        }
+        state.digital[digitalIndex] = state.digital[digitalIndex] or bit
+        RPCSX.instance.overlayPadData(
+            state.digital[0], state.digital[1],
+            state.leftStickX, state.leftStickY,
+            state.rightStickX, state.rightStickY
+        )
+        postDelayed({
+            state.digital[digitalIndex] = state.digital[digitalIndex] and bit.inv()
+            RPCSX.instance.overlayPadData(
+                state.digital[0], state.digital[1],
+                state.leftStickX, state.leftStickY,
+                state.rightStickX, state.rightStickY
+            )
+        }, 100L)
     }
 
     // ── Menu mode ──────────────────────────────────────────────────────────
