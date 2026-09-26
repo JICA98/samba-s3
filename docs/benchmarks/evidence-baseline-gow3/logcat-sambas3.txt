@@ -1,0 +1,9 @@
+09-26 11:45:20.359 14961 15003 D S3PERF  : crosscheck source=surface presented=3286 json_fps=38.3931 json_frametime_ms=18.952
+09-26 11:45:21.314 14961 15003 D S3PERF  : crosscheck ui_snapshot_fps=35.3056 ui_snapshot_frametime_ms=17.088
+09-26 11:45:21.625 14961 15003 D S3PERF  : crosscheck source=surface presented=3320 json_fps=26.3665 json_frametime_ms=36.592
+09-26 11:45:22.566 14961 15003 D S3PERF  : crosscheck ui_snapshot_fps=28.3006 ui_snapshot_frametime_ms=26.114
+09-26 11:45:22.871 14961 15003 D S3PERF  : crosscheck source=surface presented=3355 json_fps=28.3191 json_frametime_ms=42.019
+09-26 11:45:23.789 14961 15003 D S3PERF  : crosscheck ui_snapshot_fps=39.0732 ui_snapshot_frametime_ms=21.76
+09-26 11:45:24.093 14961 15003 D S3PERF  : crosscheck source=surface presented=3405 json_fps=42.6119 json_frametime_ms=29.347
+09-26 11:45:25.016 14961 15003 D S3PERF  : crosscheck ui_snapshot_fps=43.0673 ui_snapshot_frametime_ms=23.385
+09-26 11:45:25.322 14961 15003 D S3PERF  : crosscheck source=surface presented=3458 json_fps=43.3045 json_frametime_ms=21.02

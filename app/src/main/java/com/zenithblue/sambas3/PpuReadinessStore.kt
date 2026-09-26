@@ -171,7 +171,7 @@ object PpuReadinessStore {
                 }
                 return key
             }
-            val abi = "v7-kusa"
+            val abi = "v8-kusa"
             val llvmCpu = resolveLlvmCpu(titleId)
             "$abi|$llvmCpu|${titleId ?: "unknown"}"
         } catch (_: Throwable) { null }

@@ -561,7 +561,7 @@ object GameSettingsOverrides {
     private fun leaseStoreOf(context: Context): OverrideTierStore =
         CommitTierStore(context.getSharedPreferences(LEASE_PREFS_FILE, Context.MODE_PRIVATE))
 
-    private fun readGlobalEncoded(path: String): String? = runCatching {
+    internal fun readGlobalEncoded(path: String): String? = runCatching {
         val node = JSONObject(RPCSX.instance.settingsGetGlobal(path))
         val type = node.optString("type")
         if (type.isBlank()) return@runCatching null

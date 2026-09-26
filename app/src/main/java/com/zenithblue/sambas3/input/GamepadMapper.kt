@@ -104,13 +104,10 @@ class GamepadMapper(private var profile: ControllerProfile) {
         val lx = tune(event.getAxisValue(profile.leftX.axis), event.getAxisValue(profile.leftY.axis), profile.leftStick)
         var rxVal = event.getAxisValue(profile.rightX.axis)
         var ryVal = event.getAxisValue(profile.rightY.axis)
-        if (rxVal == 0f && ryVal == 0f && (profile.rightX.axis == MotionAxis.Z || profile.rightY.axis == MotionAxis.RZ)) {
-            val altRx = event.getAxisValue(MotionEvent.AXIS_RX)
-            val altRy = event.getAxisValue(MotionEvent.AXIS_RY)
-            if (altRx != 0f || altRy != 0f) {
-                rxVal = altRx
-                ryVal = altRy
-            }
+        if ((profile.rightX.axis == MotionAxis.Z || profile.rightY.axis == MotionAxis.RZ) &&
+            useAlternateRightStick(event.device?.motionRanges?.map { it.axis } ?: emptyList(), profile.rightX.axis, profile.rightY.axis)) {
+            rxVal = event.getAxisValue(MotionEvent.AXIS_RX)
+            ryVal = event.getAxisValue(MotionEvent.AXIS_RY)
         }
         val rx = tune(rxVal, ryVal, profile.rightStick)
         var d1 = state.digital1 and (DigitalMask.dpad.inv())
@@ -148,3 +145,6 @@ class GamepadMapper(private var profile: ControllerProfile) {
     private fun toByte(value: Float) = ((value.coerceIn(-1f, 1f) * 127f) + 128f).toInt().coerceIn(0, 255)
     object DigitalMask { const val dpad = 0xF0 }
 }
+
+internal fun useAlternateRightStick(axes: List<Int>, x: Int, y: Int): Boolean =
+    (x !in axes || y !in axes) && MotionEvent.AXIS_RX in axes && MotionEvent.AXIS_RY in axes

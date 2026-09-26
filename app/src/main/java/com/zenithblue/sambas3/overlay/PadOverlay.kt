@@ -99,8 +99,10 @@ class PadOverlay(context: Context?, attrs: AttributeSet?) : View(context, attrs)
     private var preMenuModeAlpha = 1f
     private var preMenuModeOverlayVisible = true
 
-    private var fadeHandler:  Handler? = null
-    private var fadeRunnable: Runnable? = null
+    private val fadeHandler = Handler(Looper.getMainLooper())
+    private val fadeRunnable = Runnable { fadeOutOverlay() }
+    private val pulseHandler = Handler(Looper.getMainLooper())
+    private val pulseReleases = arrayOfNulls<Runnable>(2)
     private var isOverlayVisible = true
     private var lastTouchTime = System.currentTimeMillis()
 
@@ -493,10 +495,8 @@ class PadOverlay(context: Context?, attrs: AttributeSet?) : View(context, attrs)
 
     // ── Fade management ────────────────────────────────────────────────────
     private fun resetFadeTimer() {
-        fadeHandler?.removeCallbacks(fadeRunnable!!)
-        fadeHandler = Handler(Looper.getMainLooper())
-        fadeRunnable = Runnable { fadeOutOverlay() }
-        fadeHandler?.postDelayed(fadeRunnable!!, fadeTimeout)
+        fadeHandler.removeCallbacks(fadeRunnable)
+        fadeHandler.postDelayed(fadeRunnable, fadeTimeout)
     }
 
     private fun fadeOutOverlay() {
@@ -512,6 +512,8 @@ class PadOverlay(context: Context?, attrs: AttributeSet?) : View(context, attrs)
     }
 
     fun cancelActiveInputsAndNeutralize() {
+        pulseReleases.forEach { if (it != null) pulseHandler.removeCallbacks(it) }
+        pulseReleases.fill(null)
         // Reset the owner-side interaction state first. A synthetic neutral
         // frame alone is insufficient: a later ACTION_MOVE must not resurrect
         // a stale button that still owns an old pointer id.
@@ -532,6 +534,8 @@ class PadOverlay(context: Context?, attrs: AttributeSet?) : View(context, attrs)
     }
 
     private fun pulseStickClick(digitalIndex: Int, bit: Int) {
+        val slot = if (bit == Digital1Flags.CELL_PAD_CTRL_L3.bit) 0 else 1
+        pulseReleases[slot]?.let(pulseHandler::removeCallbacks)
         if (GeneralSettings["haptic_feedback"] as Boolean? ?: true) {
             vibrator.vibrate(VibrationEffect.createPredefined(VibrationEffect.EFFECT_CLICK))
         }
@@ -541,14 +545,17 @@ class PadOverlay(context: Context?, attrs: AttributeSet?) : View(context, attrs)
             state.leftStickX, state.leftStickY,
             state.rightStickX, state.rightStickY
         )
-        postDelayed({
+        val release = Runnable {
             state.digital[digitalIndex] = state.digital[digitalIndex] and bit.inv()
+            pulseReleases[slot] = null
             RPCSX.instance.overlayPadData(
                 state.digital[0], state.digital[1],
                 state.leftStickX, state.leftStickY,
                 state.rightStickX, state.rightStickY
             )
-        }, 100L)
+        }
+        pulseReleases[slot] = release
+        pulseHandler.postDelayed(release, 100L)
     }
 
     // ── Menu mode ──────────────────────────────────────────────────────────

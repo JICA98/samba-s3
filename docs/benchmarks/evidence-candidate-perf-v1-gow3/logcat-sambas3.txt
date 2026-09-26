@@ -1,0 +1,169 @@
+09-26 11:52:00.748 14961 23540 E RPCS3   : Video au decode has been waiting for a consumer for 5 seconds. (handle=0xf0000300, seq_id=1, cmd_id=63, queue_size=61)
+09-26 11:52:00.968 14961 23120 D RPCS3   : sys_tty_write(ch=0, buf=*0x58bf20, len=63, pwritelen=*0xd000fde0)
+09-26 11:52:00.968 14961 23120 D RPCS3   : sys_tty_write(): “BATCHJOB: AddJob: waiting for room in job list 3 for job 56...“ << endl
+09-26 11:52:01.072 14961 23120 D RPCS3   : sys_tty_write(ch=0, buf=*0x58bf20, len=63, pwritelen=*0xd000fde0)
+09-26 11:52:01.072 14961 23120 D RPCS3   : sys_tty_write(): “BATCHJOB: AddJob: waiting for room in job list 3 for job 56...“ << endl
+09-26 11:52:01.120 14961 15002 D S3PERF  : crosscheck ui_snapshot_fps=10.0535 ui_snapshot_frametime_ms=111.65
+09-26 11:52:01.137 14961 23120 D RPCS3   : sys_tty_write(ch=0, buf=*0x58bf20, len=63, pwritelen=*0xd000fde0)
+09-26 11:52:01.137 14961 23120 D RPCS3   : sys_tty_write(): “BATCHJOB: AddJob: waiting for room in job list 3 for job 56...“ << endl
+09-26 11:52:01.376 14961 23120 D RPCS3   : sys_tty_write(ch=0, buf=*0x58bf20, len=63, pwritelen=*0xd000fde0)
+09-26 11:52:01.376 14961 23120 D RPCS3   : sys_tty_write(): “BATCHJOB: AddJob: waiting for room in job list 3 for job 56...“ << endl
+09-26 11:52:01.432 14961 15002 D S3PERF  : crosscheck source=surface presented=6580 json_fps=10.3684 json_frametime_ms=70.752
+09-26 11:52:01.580 14961 23120 D RPCS3   : sys_tty_write(ch=0, buf=*0x58bf20, len=63, pwritelen=*0xd000fde0)
+09-26 11:52:01.580 14961 23120 D RPCS3   : sys_tty_write(): “BATCHJOB: AddJob: waiting for room in job list 3 for job 56...“ << endl
+09-26 11:52:01.900 14961 23120 D RPCS3   : sys_tty_write(ch=0, buf=*0x58bf20, len=63, pwritelen=*0xd000fde0)
+09-26 11:52:01.900 14961 23120 D RPCS3   : sys_tty_write(): “BATCHJOB: AddJob: waiting for room in job list 3 for job 56...“ << endl
+09-26 11:52:01.916 14961 14961 I S3PAD   : classify name='Xbox Wireless Controller' vid=1118 pid=736 sources=16778513 keyboardType=1 -> GAMEPAD/XBOX reason=gamepad-capability-or-identity
+09-26 11:52:01.916 14961 14961 D S3PAD   : deviceKey via descriptor
+09-26 11:52:02.149 14961 14961 I S3PAD   : classify name='Xbox Wireless Controller' vid=1118 pid=736 sources=16778513 keyboardType=1 -> GAMEPAD/XBOX reason=gamepad-capability-or-identity
+09-26 11:52:02.149 14961 14961 D S3PAD   : deviceKey via descriptor
+09-26 11:52:02.367 14961 15002 D S3PERF  : crosscheck ui_snapshot_fps=9.19886 ui_snapshot_frametime_ms=68.358
+09-26 11:52:02.379 14961 23120 D RPCS3   : sys_tty_write(ch=0, buf=*0x58bf20, len=63, pwritelen=*0xd000fde0)
+09-26 11:52:02.380 14961 23120 D RPCS3   : sys_tty_write(): “BATCHJOB: AddJob: waiting for room in job list 3 for job 56...“ << endl
+09-26 11:52:02.466 14961 14961 I S3PAD   : classify name='Xbox Wireless Controller' vid=1118 pid=736 sources=16778513 keyboardType=1 -> GAMEPAD/XBOX reason=gamepad-capability-or-identity
+09-26 11:52:02.466 14961 14961 D S3PAD   : deviceKey via descriptor
+09-26 11:52:02.466 14961 14961 I S3PAD   : classify name='Xbox Wireless Controller' vid=1118 pid=736 sources=16778513 keyboardType=1 -> GAMEPAD/XBOX reason=gamepad-capability-or-identity
+09-26 11:52:02.466 14961 14961 D S3PAD   : deviceKey via descriptor
+09-26 11:52:02.466 14961 14961 I S3PAD   : classify name='Xbox Wireless Controller' vid=1118 pid=736 sources=16778513 keyboardType=1 -> GAMEPAD/XBOX reason=gamepad-capability-or-identity
+09-26 11:52:02.466 14961 14961 D S3PAD   : deviceKey via descriptor
+09-26 11:52:02.467 14961 14961 I S3PAD   : classify name='Xbox Wireless Controller' vid=1118 pid=736 sources=16778513 keyboardType=1 -> GAMEPAD/XBOX reason=gamepad-capability-or-identity
+09-26 11:52:02.467 14961 14961 D S3PAD   : deviceKey via descriptor
+09-26 11:52:02.648 14961 23120 D RPCS3   : sys_tty_write(ch=0, buf=*0x58bf20, len=63, pwritelen=*0xd000fde0)
+09-26 11:52:02.649 14961 23120 D RPCS3   : sys_tty_write(): “BATCHJOB: AddJob: waiting for room in job list 3 for job 56...“ << endl
+09-26 11:52:02.672 14961 15002 D S3PERF  : crosscheck source=surface presented=6591 json_fps=8.60473 json_frametime_ms=132.893
+09-26 11:52:02.685 14961 14961 I S3PAD   : classify name='Xbox Wireless Controller' vid=1118 pid=736 sources=16778513 keyboardType=1 -> GAMEPAD/XBOX reason=gamepad-capability-or-identity
+09-26 11:52:02.685 14961 14961 D S3PAD   : deviceKey via descriptor
+09-26 11:52:02.685 14961 14961 I S3PAD   : classify name='Xbox Wireless Controller' vid=1118 pid=736 sources=16778513 keyboardType=1 -> GAMEPAD/XBOX reason=gamepad-capability-or-identity
+09-26 11:52:02.685 14961 14961 D S3PAD   : deviceKey via descriptor
+09-26 11:52:02.685 14961 14961 I S3PAD   : classify name='Xbox Wireless Controller' vid=1118 pid=736 sources=16778513 keyboardType=1 -> GAMEPAD/XBOX reason=gamepad-capability-or-identity
+09-26 11:52:02.685 14961 14961 D S3PAD   : deviceKey via descriptor
+09-26 11:52:02.685 14961 14961 I S3PAD   : classify name='Xbox Wireless Controller' vid=1118 pid=736 sources=16778513 keyboardType=1 -> GAMEPAD/XBOX reason=gamepad-capability-or-identity
+09-26 11:52:02.685 14961 14961 D S3PAD   : deviceKey via descriptor
+09-26 11:52:02.796 14961 23120 D RPCS3   : sys_tty_write(ch=0, buf=*0x58bf20, len=63, pwritelen=*0xd000fde0)
+09-26 11:52:02.796 14961 23120 D RPCS3   : sys_tty_write(): “BATCHJOB: AddJob: waiting for room in job list 3 for job 56...“ << endl
+09-26 11:52:02.833 14961 14961 I S3PAD   : classify name='Xbox Wireless Controller' vid=1118 pid=736 sources=16778513 keyboardType=1 -> GAMEPAD/XBOX reason=gamepad-capability-or-identity
+09-26 11:52:02.833 14961 14961 D S3PAD   : deviceKey via descriptor
+09-26 11:52:03.024 14961 14961 I S3PAD   : classify name='Xbox Wireless Controller' vid=1118 pid=736 sources=16778513 keyboardType=1 -> GAMEPAD/XBOX reason=gamepad-capability-or-identity
+09-26 11:52:03.025 14961 14961 D S3PAD   : deviceKey via descriptor
+09-26 11:52:03.300 14961 14961 I S3PAD   : classify name='Xbox Wireless Controller' vid=1118 pid=736 sources=16778513 keyboardType=1 -> GAMEPAD/XBOX reason=gamepad-capability-or-identity
+09-26 11:52:03.300 14961 14961 D S3PAD   : deviceKey via descriptor
+09-26 11:52:03.306 14961 14961 I S3PAD   : classify name='Xbox Wireless Controller' vid=1118 pid=736 sources=16778513 keyboardType=1 -> GAMEPAD/XBOX reason=gamepad-capability-or-identity
+09-26 11:52:03.306 14961 14961 D S3PAD   : deviceKey via descriptor
+09-26 11:52:03.314 14961 14961 I S3PAD   : classify name='Xbox Wireless Controller' vid=1118 pid=736 sources=16778513 keyboardType=1 -> GAMEPAD/XBOX reason=gamepad-capability-or-identity
+09-26 11:52:03.314 14961 14961 D S3PAD   : deviceKey via descriptor
+09-26 11:52:03.324 14961 14961 I S3PAD   : classify name='Xbox Wireless Controller' vid=1118 pid=736 sources=16778513 keyboardType=1 -> GAMEPAD/XBOX reason=gamepad-capability-or-identity
+09-26 11:52:03.324 14961 14961 D S3PAD   : deviceKey via descriptor
+09-26 11:52:03.330 14961 14961 I S3PAD   : classify name='Xbox Wireless Controller' vid=1118 pid=736 sources=16778513 keyboardType=1 -> GAMEPAD/XBOX reason=gamepad-capability-or-identity
+09-26 11:52:03.330 14961 14961 D S3PAD   : deviceKey via descriptor
+09-26 11:52:03.552 14961 23120 D RPCS3   : sys_tty_write(ch=0, buf=*0x58bf20, len=63, pwritelen=*0xd000fde0)
+09-26 11:52:03.552 14961 23120 D RPCS3   : sys_tty_write(): “BATCHJOB: AddJob: waiting for room in job list 3 for job 56...“ << endl
+09-26 11:52:03.605 14961 14961 I S3PAD   : classify name='Xbox Wireless Controller' vid=1118 pid=736 sources=16778513 keyboardType=1 -> GAMEPAD/XBOX reason=gamepad-capability-or-identity
+09-26 11:52:03.605 14961 14961 D S3PAD   : deviceKey via descriptor
+09-26 11:52:03.614 14961 14961 I S3PAD   : classify name='Xbox Wireless Controller' vid=1118 pid=736 sources=16778513 keyboardType=1 -> GAMEPAD/XBOX reason=gamepad-capability-or-identity
+09-26 11:52:03.614 14961 14961 D S3PAD   : deviceKey via descriptor
+09-26 11:52:03.621 14961 14961 I S3PAD   : classify name='Xbox Wireless Controller' vid=1118 pid=736 sources=16778513 keyboardType=1 -> GAMEPAD/XBOX reason=gamepad-capability-or-identity
+09-26 11:52:03.622 14961 14961 D S3PAD   : deviceKey via descriptor
+09-26 11:52:03.626 14961 15002 D S3PERF  : crosscheck ui_snapshot_fps=9.8393 ui_snapshot_frametime_ms=96.569
+09-26 11:52:03.632 14961 14961 I S3PAD   : classify name='Xbox Wireless Controller' vid=1118 pid=736 sources=16778513 keyboardType=1 -> GAMEPAD/XBOX reason=gamepad-capability-or-identity
+09-26 11:52:03.632 14961 14961 D S3PAD   : deviceKey via descriptor
+09-26 11:52:03.638 14961 14961 I S3PAD   : classify name='Xbox Wireless Controller' vid=1118 pid=736 sources=16778513 keyboardType=1 -> GAMEPAD/XBOX reason=gamepad-capability-or-identity
+09-26 11:52:03.638 14961 14961 D S3PAD   : deviceKey via descriptor
+09-26 11:52:03.663 14961 14961 I S3PAD   : classify name='Xbox Wireless Controller' vid=1118 pid=736 sources=16778513 keyboardType=1 -> GAMEPAD/XBOX reason=gamepad-capability-or-identity
+09-26 11:52:03.664 14961 14961 D S3PAD   : deviceKey via descriptor
+09-26 11:52:03.671 14961 14961 I S3PAD   : classify name='Xbox Wireless Controller' vid=1118 pid=736 sources=16778513 keyboardType=1 -> GAMEPAD/XBOX reason=gamepad-capability-or-identity
+09-26 11:52:03.671 14961 14961 D S3PAD   : deviceKey via descriptor
+09-26 11:52:03.680 14961 14961 I S3PAD   : classify name='Xbox Wireless Controller' vid=1118 pid=736 sources=16778513 keyboardType=1 -> GAMEPAD/XBOX reason=gamepad-capability-or-identity
+09-26 11:52:03.681 14961 14961 D S3PAD   : deviceKey via descriptor
+09-26 11:52:03.696 14961 14961 I S3PAD   : classify name='Xbox Wireless Controller' vid=1118 pid=736 sources=16778513 keyboardType=1 -> GAMEPAD/XBOX reason=gamepad-capability-or-identity
+09-26 11:52:03.697 14961 14961 D S3PAD   : deviceKey via descriptor
+09-26 11:52:03.704 14961 23120 D RPCS3   : sys_tty_write(ch=0, buf=*0x58bf20, len=63, pwritelen=*0xd000fde0)
+09-26 11:52:03.704 14961 23120 D RPCS3   : sys_tty_write(): “BATCHJOB: AddJob: waiting for room in job list 3 for job 56...“ << endl
+09-26 11:52:03.707 14961 14961 I S3PAD   : classify name='Xbox Wireless Controller' vid=1118 pid=736 sources=16778513 keyboardType=1 -> GAMEPAD/XBOX reason=gamepad-capability-or-identity
+09-26 11:52:03.707 14961 14961 D S3PAD   : deviceKey via descriptor
+09-26 11:52:03.715 14961 14961 I S3PAD   : classify name='Xbox Wireless Controller' vid=1118 pid=736 sources=16778513 keyboardType=1 -> GAMEPAD/XBOX reason=gamepad-capability-or-identity
+09-26 11:52:03.715 14961 14961 D S3PAD   : deviceKey via descriptor
+09-26 11:52:03.722 14961 14961 I S3PAD   : classify name='Xbox Wireless Controller' vid=1118 pid=736 sources=16778513 keyboardType=1 -> GAMEPAD/XBOX reason=gamepad-capability-or-identity
+09-26 11:52:03.722 14961 14961 D S3PAD   : deviceKey via descriptor
+09-26 11:52:03.730 14961 14961 I S3PAD   : classify name='Xbox Wireless Controller' vid=1118 pid=736 sources=16778513 keyboardType=1 -> GAMEPAD/XBOX reason=gamepad-capability-or-identity
+09-26 11:52:03.730 14961 14961 D S3PAD   : deviceKey via descriptor
+09-26 11:52:03.739 14961 14961 I S3PAD   : classify name='Xbox Wireless Controller' vid=1118 pid=736 sources=16778513 keyboardType=1 -> GAMEPAD/XBOX reason=gamepad-capability-or-identity
+09-26 11:52:03.739 14961 14961 D S3PAD   : deviceKey via descriptor
+09-26 11:52:03.755 14961 14961 I S3PAD   : classify name='Xbox Wireless Controller' vid=1118 pid=736 sources=16778513 keyboardType=1 -> GAMEPAD/XBOX reason=gamepad-capability-or-identity
+09-26 11:52:03.755 14961 14961 D S3PAD   : deviceKey via descriptor
+09-26 11:52:03.763 14961 14961 I S3PAD   : classify name='Xbox Wireless Controller' vid=1118 pid=736 sources=16778513 keyboardType=1 -> GAMEPAD/XBOX reason=gamepad-capability-or-identity
+09-26 11:52:03.763 14961 14961 D S3PAD   : deviceKey via descriptor
+09-26 11:52:03.773 14961 14961 I S3PAD   : classify name='Xbox Wireless Controller' vid=1118 pid=736 sources=16778513 keyboardType=1 -> GAMEPAD/XBOX reason=gamepad-capability-or-identity
+09-26 11:52:03.774 14961 14961 D S3PAD   : deviceKey via descriptor
+09-26 11:52:03.783 14961 14961 I S3PAD   : classify name='Xbox Wireless Controller' vid=1118 pid=736 sources=16778513 keyboardType=1 -> GAMEPAD/XBOX reason=gamepad-capability-or-identity
+09-26 11:52:03.783 14961 14961 D S3PAD   : deviceKey via descriptor
+09-26 11:52:03.797 14961 14961 I S3PAD   : classify name='Xbox Wireless Controller' vid=1118 pid=736 sources=16778513 keyboardType=1 -> GAMEPAD/XBOX reason=gamepad-capability-or-identity
+09-26 11:52:03.797 14961 14961 D S3PAD   : deviceKey via descriptor
+09-26 11:52:03.805 14961 14961 I S3PAD   : classify name='Xbox Wireless Controller' vid=1118 pid=736 sources=16778513 keyboardType=1 -> GAMEPAD/XBOX reason=gamepad-capability-or-identity
+09-26 11:52:03.805 14961 14961 D S3PAD   : deviceKey via descriptor
+09-26 11:52:03.814 14961 14961 I S3PAD   : classify name='Xbox Wireless Controller' vid=1118 pid=736 sources=16778513 keyboardType=1 -> GAMEPAD/XBOX reason=gamepad-capability-or-identity
+09-26 11:52:03.814 14961 14961 D S3PAD   : deviceKey via descriptor
+09-26 11:52:03.838 14961 14961 I S3PAD   : classify name='Xbox Wireless Controller' vid=1118 pid=736 sources=16778513 keyboardType=1 -> GAMEPAD/XBOX reason=gamepad-capability-or-identity
+09-26 11:52:03.838 14961 14961 D S3PAD   : deviceKey via descriptor
+09-26 11:52:03.930 14961 14961 I S3PAD   : classify name='Xbox Wireless Controller' vid=1118 pid=736 sources=16778513 keyboardType=1 -> GAMEPAD/XBOX reason=gamepad-capability-or-identity
+09-26 11:52:03.930 14961 14961 D S3PAD   : deviceKey via descriptor
+09-26 11:52:03.940 14961 15002 D S3PERF  : crosscheck source=surface presented=6603 json_fps=9.05037 json_frametime_ms=86.897
+09-26 11:52:04.064 14961 14961 I S3PAD   : classify name='Xbox Wireless Controller' vid=1118 pid=736 sources=16778513 keyboardType=1 -> GAMEPAD/XBOX reason=gamepad-capability-or-identity
+09-26 11:52:04.064 14961 14961 D S3PAD   : deviceKey via descriptor
+09-26 11:52:04.072 14961 14961 I S3PAD   : classify name='Xbox Wireless Controller' vid=1118 pid=736 sources=16778513 keyboardType=1 -> GAMEPAD/XBOX reason=gamepad-capability-or-identity
+09-26 11:52:04.074 14961 14961 D S3PAD   : deviceKey via descriptor
+09-26 11:52:04.077 14961 23120 D RPCS3   : sys_tty_write(ch=0, buf=*0x58bf20, len=63, pwritelen=*0xd000fde0)
+09-26 11:52:04.077 14961 23120 D RPCS3   : sys_tty_write(): “BATCHJOB: AddJob: waiting for room in job list 3 for job 56...“ << endl
+09-26 11:52:04.079 14961 14961 I S3PAD   : classify name='Xbox Wireless Controller' vid=1118 pid=736 sources=16778513 keyboardType=1 -> GAMEPAD/XBOX reason=gamepad-capability-or-identity
+09-26 11:52:04.080 14961 14961 D S3PAD   : deviceKey via descriptor
+09-26 11:52:04.096 14961 14961 I S3PAD   : classify name='Xbox Wireless Controller' vid=1118 pid=736 sources=16778513 keyboardType=1 -> GAMEPAD/XBOX reason=gamepad-capability-or-identity
+09-26 11:52:04.096 14961 14961 D S3PAD   : deviceKey via descriptor
+09-26 11:52:04.105 14961 14961 I S3PAD   : classify name='Xbox Wireless Controller' vid=1118 pid=736 sources=16778513 keyboardType=1 -> GAMEPAD/XBOX reason=gamepad-capability-or-identity
+09-26 11:52:04.105 14961 14961 D S3PAD   : deviceKey via descriptor
+09-26 11:52:04.116 14961 14961 I S3PAD   : classify name='Xbox Wireless Controller' vid=1118 pid=736 sources=16778513 keyboardType=1 -> GAMEPAD/XBOX reason=gamepad-capability-or-identity
+09-26 11:52:04.116 14961 14961 D S3PAD   : deviceKey via descriptor
+09-26 11:52:04.121 14961 14961 I S3PAD   : classify name='Xbox Wireless Controller' vid=1118 pid=736 sources=16778513 keyboardType=1 -> GAMEPAD/XBOX reason=gamepad-capability-or-identity
+09-26 11:52:04.121 14961 14961 D S3PAD   : deviceKey via descriptor
+09-26 11:52:04.248 14961 14961 I S3PAD   : classify name='Xbox Wireless Controller' vid=1118 pid=736 sources=16778513 keyboardType=1 -> GAMEPAD/XBOX reason=gamepad-capability-or-identity
+09-26 11:52:04.248 14961 14961 D S3PAD   : deviceKey via descriptor
+09-26 11:52:04.344 14961 23120 D RPCS3   : sys_tty_write(ch=0, buf=*0x58bf20, len=63, pwritelen=*0xd000fde0)
+09-26 11:52:04.344 14961 23120 D RPCS3   : sys_tty_write(): “BATCHJOB: AddJob: waiting for room in job list 3 for job 56...“ << endl
+09-26 11:52:04.421 14961 14961 I S3PAD   : classify name='Xbox Wireless Controller' vid=1118 pid=736 sources=16778513 keyboardType=1 -> GAMEPAD/XBOX reason=gamepad-capability-or-identity
+09-26 11:52:04.421 14961 14961 D S3PAD   : deviceKey via descriptor
+09-26 11:52:04.425 14961 23120 D RPCS3   : sys_tty_write(ch=0, buf=*0x58bf20, len=63, pwritelen=*0xd000fde0)
+09-26 11:52:04.425 14961 23120 D RPCS3   : sys_tty_write(): “BATCHJOB: AddJob: waiting for room in job list 3 for job 56...“ << endl
+09-26 11:52:04.493 14961 23120 D RPCS3   : sys_tty_write(ch=0, buf=*0x58bf20, len=63, pwritelen=*0xd000fde0)
+09-26 11:52:04.493 14961 23120 D RPCS3   : sys_tty_write(): “BATCHJOB: AddJob: waiting for room in job list 3 for job 56...“ << endl
+09-26 11:52:04.555 14961 14961 I S3PAD   : classify name='Xbox Wireless Controller' vid=1118 pid=736 sources=16778513 keyboardType=1 -> GAMEPAD/XBOX reason=gamepad-capability-or-identity
+09-26 11:52:04.555 14961 14961 D S3PAD   : deviceKey via descriptor
+09-26 11:52:04.555 14961 14961 I S3PAD   : classify name='Xbox Wireless Controller' vid=1118 pid=736 sources=16778513 keyboardType=1 -> GAMEPAD/XBOX reason=gamepad-capability-or-identity
+09-26 11:52:04.556 14961 14961 D S3PAD   : deviceKey via descriptor
+09-26 11:52:04.556 14961 14961 I S3PAD   : classify name='Xbox Wireless Controller' vid=1118 pid=736 sources=16778513 keyboardType=1 -> GAMEPAD/XBOX reason=gamepad-capability-or-identity
+09-26 11:52:04.556 14961 14961 D S3PAD   : deviceKey via descriptor
+09-26 11:52:04.556 14961 14961 I S3PAD   : classify name='Xbox Wireless Controller' vid=1118 pid=736 sources=16778513 keyboardType=1 -> GAMEPAD/XBOX reason=gamepad-capability-or-identity
+09-26 11:52:04.556 14961 14961 D S3PAD   : deviceKey via descriptor
+09-26 11:52:04.590 14961 23120 D RPCS3   : sys_tty_write(ch=0, buf=*0x58bf20, len=63, pwritelen=*0xd000fde0)
+09-26 11:52:04.590 14961 23120 D RPCS3   : sys_tty_write(): “BATCHJOB: AddJob: waiting for room in job list 3 for job 56...“ << endl
+09-26 11:52:04.736 14961 14961 I S3PAD   : classify name='Xbox Wireless Controller' vid=1118 pid=736 sources=16778513 keyboardType=1 -> GAMEPAD/XBOX reason=gamepad-capability-or-identity
+09-26 11:52:04.736 14961 14961 D S3PAD   : deviceKey via descriptor
+09-26 11:52:04.736 14961 14961 I S3PAD   : classify name='Xbox Wireless Controller' vid=1118 pid=736 sources=16778513 keyboardType=1 -> GAMEPAD/XBOX reason=gamepad-capability-or-identity
+09-26 11:52:04.736 14961 14961 D S3PAD   : deviceKey via descriptor
+09-26 11:52:04.737 14961 14961 I S3PAD   : classify name='Xbox Wireless Controller' vid=1118 pid=736 sources=16778513 keyboardType=1 -> GAMEPAD/XBOX reason=gamepad-capability-or-identity
+09-26 11:52:04.737 14961 14961 D S3PAD   : deviceKey via descriptor
+09-26 11:52:04.737 14961 14961 I S3PAD   : classify name='Xbox Wireless Controller' vid=1118 pid=736 sources=16778513 keyboardType=1 -> GAMEPAD/XBOX reason=gamepad-capability-or-identity
+09-26 11:52:04.737 14961 14961 D S3PAD   : deviceKey via descriptor
+09-26 11:52:04.888 14961 15002 D S3PERF  : crosscheck ui_snapshot_fps=11.0113 ui_snapshot_frametime_ms=82.907
+09-26 11:52:04.911 14961 23120 D RPCS3   : sys_tty_write(ch=0, buf=*0x58bf20, len=63, pwritelen=*0xd000fde0)
+09-26 11:52:04.911 14961 23120 D RPCS3   : sys_tty_write(): “BATCHJOB: AddJob: waiting for room in job list 3 for job 56...“ << endl
+09-26 11:52:04.928 14961 14961 I S3PAD   : classify name='Xbox Wireless Controller' vid=1118 pid=736 sources=16778513 keyboardType=1 -> GAMEPAD/XBOX reason=gamepad-capability-or-identity
+09-26 11:52:04.929 14961 14961 D S3PAD   : deviceKey via descriptor
+09-26 11:52:05.166 14961 14961 I S3PAD   : classify name='Xbox Wireless Controller' vid=1118 pid=736 sources=16778513 keyboardType=1 -> GAMEPAD/XBOX reason=gamepad-capability-or-identity
+09-26 11:52:05.167 14961 14961 D S3PAD   : deviceKey via descriptor
+09-26 11:52:05.193 14961 15002 D S3PERF  : crosscheck source=surface presented=6617 json_fps=11.546 json_frametime_ms=102.413
+09-26 11:52:05.315 14961 14961 I S3PAD   : classify name='Xbox Wireless Controller' vid=1118 pid=736 sources=16778513 keyboardType=1 -> GAMEPAD/XBOX reason=gamepad-capability-or-identity
+09-26 11:52:05.316 14961 14961 D S3PAD   : deviceKey via descriptor
+09-26 11:52:05.486 14961 14961 I S3PAD   : classify name='Xbox Wireless Controller' vid=1118 pid=736 sources=16778513 keyboardType=1 -> GAMEPAD/XBOX reason=gamepad-capability-or-identity
+09-26 11:52:05.486 14961 14961 D S3PAD   : deviceKey via descriptor
+09-26 11:52:05.848 14961 23540 E RPCS3   : Video au decode has been waiting for a consumer for 5 seconds. (handle=0xf0000300, seq_id=1, cmd_id=63, queue_size=61)
+09-26 11:52:06.155 14961 15002 D S3PERF  : crosscheck ui_snapshot_fps=8.13345 ui_snapshot_frametime_ms=108.923
+09-26 11:52:06.232 14961 23120 D RPCS3   : sys_tty_write(ch=0, buf=*0x58bf20, len=63, pwritelen=*0xd000fde0)
+09-26 11:52:06.232 14961 23120 D RPCS3   : sys_tty_write(): “BATCHJOB: AddJob: waiting for room in job list 3 for job 56...“ << endl

@@ -1,0 +1,114 @@
+14961 : ithblue.sambas3
+14963 : Signal Catcher
+14964 : perfetto_hprof_
+14966 : Jit thread pool
+14967 : HeapTaskDaemon
+14968 : ReferenceQueueD
+14969 : FinalizerDaemon
+14970 : FinalizerWatchd
+14973 : binder:14961_1
+14974 : binder:14961_2
+14976 : binder:14961_3
+14979 : Profile Saver
+14992 : RenderThread
+15001 : DefaultDispatch
+15002 : DefaultDispatch
+15003 : DefaultDispatch
+15095 : Log Writer
+15097 : ithblue.sambas3
+15115 : Thread-5
+15116 : Thread-6
+15134 : DefaultDispatch
+15144 : TracingMuxer
+15146 : pool-4-thread-1
+15147 : hwuiTask0
+15148 : hwuiTask1
+15197 : SurfaceSyncGrou
+15285 : binder:14961_4
+15286 : binder:14961_4
+15369 : InteractionJank
+20765 : binder:14961_5
+20766 : binder:14961_6
+20767 : binder:14961_7
+20808 : queued-work-loo
+20812 : DefaultExecutor
+20830 : Progress Dialog
+20831 : Performance Sen
+20832 : PS Move Worker 
+20833 : PS Move Worker 
+20834 : PS Move Worker 
+20835 : PS Move Worker 
+20836 : Gem Thread
+20837 : Camera Thread
+20838 : Usb Manager Thr
+20839 : cellAudio Threa
+20842 : MediaList Threa
+20843 : Network P2P Thr
+20844 : GDB Server
+20845 : CPU Profiler
+20846 : VUART AV Thread
+20847 : Timer Thread
+20848 : RsxAudioData Th
+20849 : Tcp Over Udp Ti
+20850 : Network Thread
+20851 : LV2 Watchdog Th
+20852 : cellAudio Threa
+20853 : cellAudio Threa
+20854 : PPU Syscall Usa
+20855 : Signaling Manag
+20856 : cellAudio Threa
+20857 : NetStart Hack
+20858 : MsgDialog Close
+20860 : Microphone Thre
+20861 : Overlay Input T
+20865 : com.ze:traceq0
+20868 : RSX.W1
+20869 : RSX.W2
+20870 : Thread-8
+20871 : rsx::thread
+20872 : Pad Thread
+20873 : PPU[0x1000000] 
+20909 : AAudio_1
+20971 : SPU[0x0000100] 
+20972 : SPU[0x1000100] 
+20973 : SPU[0x2000100] 
+20974 : SPU[0x3000100] 
+20975 : SPU[0x4000100] 
+20976 : PPU[0x1000001] 
+20977 : PPU[0x1000002] 
+20978 : SPU[0x0000200] 
+20979 : PPU[0x1000003] 
+20980 : PPU[0x1000004] 
+20981 : PPU[0x1000005] 
+20982 : PPU[0x1000006] 
+20983 : PPU[0x1000007] 
+20984 : PPU[0x1000008] 
+20985 : PPU[0x1000009] 
+20986 : PPU[0x100000a] 
+20987 : PPU[0x100000b] 
+20990 : VBlank Thread
+20991 : PPU[0x100000e] 
+20993 : PPU[0x1000010] 
+20994 : PPU[0x1000011] 
+20995 : PPU[0x1000012] 
+20996 : PPU[0x1000013] 
+20997 : PPU[0x1000014] 
+20998 : PPU[0x1000015] 
+20999 : PPU[0x1000016] 
+21000 : PPU[0x1000017] 
+21001 : PPU[0x1000018] 
+21002 : PPU[0x1000019] 
+21003 : PPU[0x100001a] 
+21004 : PPU[0x100001b] 
+21005 : PPU[0x100001c] 
+21006 : PPU[0x100001d] 
+21007 : PPU[0x100001e] 
+21008 : PPU[0x100001f] 
+21009 : PPU[0x1000020] 
+21010 : PPU[0x1000021] 
+21011 : PPU[0x1000022] 
+21012 : PPU[0x1000023] 
+21013 : PPU[0x1000024] 
+21014 : PPU[0x1000025] 
+21015 : PPU[0x1000026] 
+21016 : PPU[0x1000027] 

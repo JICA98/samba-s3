@@ -1,9 +1,11 @@
 package com.zenithblue.sambas3
 
 import android.graphics.SurfaceTexture
+import android.view.View
 import android.view.Surface
 import android.widget.FrameLayout
 import androidx.test.core.app.ApplicationProvider
+import com.zenithblue.sambas3.gameconfig.OutputSurfaceSize
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNotEquals
 import org.junit.Assert.assertTrue
@@ -16,6 +18,61 @@ import kotlinx.coroutines.runBlocking
 @RunWith(RobolectricTestRunner::class)
 class SurfaceLeaseManagerTest {
     private fun testSurface() = Surface(SurfaceTexture(0))
+
+    @Test
+    fun fixed_output_buffer_is_applied_to_each_surface_generation() {
+        val host = FrameLayout(ApplicationProvider.getApplicationContext())
+        val expected = OutputSurfaceSize(1200, 540)
+        val manager = SurfaceLeaseManager(
+            host,
+            SurfaceLeaseBridge { _, _, _ -> true },
+            outputSize = expected
+        )
+
+        manager.installInitial()
+        val first = manager.currentFrame!!
+        assertEquals(expected, first.fixedOutputSize)
+        assertEquals(host, first.parent)
+        measureHost(host, 1920, 1080)
+        assertEquals(1920, first.measuredWidth)
+        assertEquals(864, first.measuredHeight)
+        assertEquals(0, first.left)
+        assertEquals(108, first.top)
+
+        manager.onSurfaceCreated(first, first.generation, testSurface())
+        manager.replace {}
+        manager.onSurfaceDestroyed(first, first.generation, testSurface())
+
+        val replacement = manager.currentFrame!!
+        assertEquals(expected, replacement.fixedOutputSize)
+    }
+
+    @Test
+    fun fixed_output_frame_is_centered_and_letterboxed_to_preserve_aspect() {
+        val host = FrameLayout(ApplicationProvider.getApplicationContext())
+        val manager = SurfaceLeaseManager(
+            host,
+            SurfaceLeaseBridge { _, _, _ -> true },
+            outputSize = OutputSurfaceSize(1920, 1080)
+        )
+        manager.installInitial()
+        val frame = manager.currentFrame!!
+        measureHost(host, 2340, 1080)
+
+        assertEquals(1920, frame.measuredWidth)
+        assertEquals(1080, frame.measuredHeight)
+        assertEquals(210, frame.left)
+        assertEquals(0, frame.top)
+        assertEquals(0xff000000.toInt(), (host.background as android.graphics.drawable.ColorDrawable).color)
+    }
+
+    private fun measureHost(host: FrameLayout, width: Int, height: Int) {
+        host.measure(
+            View.MeasureSpec.makeMeasureSpec(width, View.MeasureSpec.EXACTLY),
+            View.MeasureSpec.makeMeasureSpec(height, View.MeasureSpec.EXACTLY)
+        )
+        host.layout(0, 0, width, height)
+    }
 
     @Test
     fun replacement_releases_old_before_creating_new_generation() {

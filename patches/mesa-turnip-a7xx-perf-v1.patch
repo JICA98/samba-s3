@@ -1,0 +1,74 @@
+diff --git a/src/freedreno/ir3/ir3_nir.c b/src/freedreno/ir3/ir3_nir.c
+index 4e1961f..0adfe6f 100644
+--- a/src/freedreno/ir3/ir3_nir.c
++++ b/src/freedreno/ir3/ir3_nir.c
+@@ -330,7 +330,7 @@ ir3_optimize_loop(struct ir3_compiler *compiler,
+ 
+       static int gcm = -1;
+       if (gcm == -1)
+-         gcm = debug_get_num_option("GCM", 0);
++         gcm = debug_get_num_option("GCM", 1);
+       if (gcm == 1)
+          progress |= OPT(s, nir_opt_gcm, true);
+       else if (gcm == 2)
+diff --git a/src/freedreno/vulkan/00-turnip-defaults.conf b/src/freedreno/vulkan/00-turnip-defaults.conf
+index 3227832..7609763 100644
+--- a/src/freedreno/vulkan/00-turnip-defaults.conf
++++ b/src/freedreno/vulkan/00-turnip-defaults.conf
+@@ -129,5 +129,12 @@
+             -->
+             <option name="tu_expose_device_local_only_memory_type" value="true" />
+         </application>
++        <application name="RPCS3" application_name_match="RPCS3|RPCSX|com.zenithblue.sambas3">
++            <option name="tu_allow_oob_indirect_ubo_loads" value="true" />
++            <option name="tu_dont_care_as_load" value="true" />
++            <option name="tu_enable_fast_border_color_for_undefined_formats" value="true" />
++            <option name="tu_allow_concurrent_binning" value="true" />
++            <option name="tu_dont_reserve_descriptor_set" value="true" />
++        </application>
+     </device>
+ </driconf>
+diff --git a/src/freedreno/vulkan/tu_device.cc b/src/freedreno/vulkan/tu_device.cc
+index 28e06b6..26a5766 100644
+--- a/src/freedreno/vulkan/tu_device.cc
++++ b/src/freedreno/vulkan/tu_device.cc
+@@ -1721,7 +1721,7 @@ tu_physical_device_init(struct tu_physical_device *device,
+    if (strncmp(fd_name, "FD", 2) == 0) {
+       device->name = vk_asprintf(&instance->vk.alloc,
+                                  VK_SYSTEM_ALLOCATION_SCOPE_INSTANCE,
+-                                 "Turnip Adreno (TM) %s%s", &fd_name[2],
++                                 "Turnip (SambaS3-A7xx-V1) Adreno (TM) %s%s", &fd_name[2],
+                                  rt_suffix);
+    } else {
+       device->name = vk_asprintf(&instance->vk.alloc,
+@@ -3054,7 +3054,7 @@ tu_CreateDevice(VkPhysicalDevice physicalDevice,
+       global_size += TU_BORDER_COLOR_COUNT * sizeof(struct bcolor_entry);
+ 
+    tu_bo_suballocator_init(
+-      &device->pipeline_suballoc, device, 128 * 1024,
++      &device->pipeline_suballoc, device, 512 * 1024,
+       (enum tu_bo_alloc_flags) (TU_BO_ALLOC_GPU_READ_ONLY |
+                                 TU_BO_ALLOC_ALLOW_DUMP |
+                                 TU_BO_ALLOC_INTERNAL_RESOURCE |
+@@ -3062,7 +3062,7 @@ tu_CreateDevice(VkPhysicalDevice physicalDevice,
+       "pipeline_suballoc");
+    if (is_kgsl(physical_device->instance)) {
+       tu_bo_suballocator_init(&device->kgsl_profiling_suballoc, device,
+-                              128 * 1024, TU_BO_ALLOC_INTERNAL_RESOURCE,
++                              512 * 1024, TU_BO_ALLOC_INTERNAL_RESOURCE,
+                               "kgsl_profiling_suballoc");
+    }
+ 
+diff --git a/src/util/disk_cache.c b/src/util/disk_cache.c
+index 1f43388..a97d52c 100644
+--- a/src/util/disk_cache.c
++++ b/src/util/disk_cache.c
+@@ -282,7 +282,7 @@ disk_cache_create(const char *gpu_name, const char *driver_id,
+ 
+    /* Default to 1GB for maximum cache size. */
+    if (max_size == 0) {
+-      max_size = 1024*1024*1024;
++      max_size = 4096ULL*1024*1024;
+    }
+ 
+    /* Create main writable cache. */

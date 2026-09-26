@@ -1,0 +1,515 @@
+--------- beginning of system
+09-26 11:49:57.262 14961 14961 D InsetsController: Setting requestedVisibleTypes to 496 (was 503)
+09-26 11:49:58.551 14961 14961 W NotificationManager: Shedding cancel (dupe) of NotificationKey[user=UserHandle{0}, pkg=com.zenithblue.sambas3, tag=null, id=2002], rate limit (5.0) exceeded: input 9.264856, output would be 6.4944253
+09-26 11:49:59.145 14961 14961 W NotificationManager: Shedding notify (update) of NotificationKey[user=UserHandle{0}, pkg=com.zenithblue.sambas3, tag=null, id=2000], rate limit (5.0) exceeded: input 8.66317, output would be 6.0721097
+09-26 11:49:59.581 14961 14961 W NotificationManager: Shedding cancel (dupe) of NotificationKey[user=UserHandle{0}, pkg=com.zenithblue.sambas3, tag=null, id=2002], rate limit (5.0) exceeded: input 84.71105, output would be 6.656905
+09-26 11:50:00.177 14961 14961 W NotificationManager: Shedding notify (update) of NotificationKey[user=UserHandle{0}, pkg=com.zenithblue.sambas3, tag=null, id=2000], rate limit (5.0) exceeded: input 16.202902, output would be 5.1190715
+09-26 11:50:00.951 14961 14961 W NotificationManager: Shedding cancel (dupe) of NotificationKey[user=UserHandle{0}, pkg=com.zenithblue.sambas3, tag=null, id=2002], rate limit (5.0) exceeded: input 16.136185, output would be 5.0103126
+09-26 11:50:01.560 14961 14961 W NotificationManager: Shedding notify (update) of NotificationKey[user=UserHandle{0}, pkg=com.zenithblue.sambas3, tag=null, id=2000], rate limit (5.0) exceeded: input 10.6701565, output would be 5.5582767
+09-26 11:50:02.029 14961 14961 W NotificationManager: Shedding cancel (dupe) of NotificationKey[user=UserHandle{0}, pkg=com.zenithblue.sambas3, tag=null, id=2001], rate limit (5.0) exceeded: input 16.294939, output would be 5.0571084
+09-26 11:50:02.579 14961 14961 W NotificationManager: Shedding notify (update) of NotificationKey[user=UserHandle{0}, pkg=com.zenithblue.sambas3, tag=null, id=2000], rate limit (5.0) exceeded: input 15.703772, output would be 6.185466
+09-26 11:50:03.162 14961 14961 W NotificationManager: Shedding cancel (dupe) of NotificationKey[user=UserHandle{0}, pkg=com.zenithblue.sambas3, tag=null, id=2002], rate limit (5.0) exceeded: input 22.941088, output would be 5.5871506
+09-26 11:50:03.739 14961 14961 W NotificationManager: Shedding notify (update) of NotificationKey[user=UserHandle{0}, pkg=com.zenithblue.sambas3, tag=null, id=2000], rate limit (5.0) exceeded: input 13.273888, output would be 6.110534
+09-26 11:50:04.307 14961 14961 W NotificationManager: Shedding cancel (dupe) of NotificationKey[user=UserHandle{0}, pkg=com.zenithblue.sambas3, tag=null, id=2002], rate limit (5.0) exceeded: input 24.45434, output would be 7.045897
+09-26 11:50:04.897 14961 14961 W NotificationManager: Shedding notify (update) of NotificationKey[user=UserHandle{0}, pkg=com.zenithblue.sambas3, tag=null, id=2000], rate limit (5.0) exceeded: input 12.852597, output would be 5.6086965
+09-26 11:50:05.316 14961 14961 W NotificationManager: Shedding cancel (dupe) of NotificationKey[user=UserHandle{0}, pkg=com.zenithblue.sambas3, tag=null, id=2001], rate limit (5.0) exceeded: input 29.020996, output would be 5.785923
+09-26 11:50:06.379 14961 14961 W NotificationManager: Shedding cancel (dupe) of NotificationKey[user=UserHandle{0}, pkg=com.zenithblue.sambas3, tag=null, id=2002], rate limit (5.0) exceeded: input 17.65039, output would be 6.350804
+09-26 11:50:06.637 14961 14961 W NotificationManager: Shedding notify (update) of NotificationKey[user=UserHandle{0}, pkg=com.zenithblue.sambas3, tag=null, id=2000], rate limit (5.0) exceeded: input 9.883228, output would be 5.7337136
+09-26 11:50:07.386 14961 14961 W NotificationManager: Shedding cancel (dupe) of NotificationKey[user=UserHandle{0}, pkg=com.zenithblue.sambas3, tag=null, id=2001], rate limit (5.0) exceeded: input 24.314535, output would be 5.844737
+09-26 11:50:08.369 14961 14961 W NotificationManager: Shedding notify (update) of NotificationKey[user=UserHandle{0}, pkg=com.zenithblue.sambas3, tag=null, id=2000], rate limit (5.0) exceeded: input 9.148998, output would be 5.458575
+09-26 11:50:08.557 14961 14961 W NotificationManager: Shedding cancel (dupe) of NotificationKey[user=UserHandle{0}, pkg=com.zenithblue.sambas3, tag=null, id=2002], rate limit (5.0) exceeded: input 20.867867, output would be 5.9561605
+09-26 11:50:09.370 14961 14961 W NotificationManager: Shedding notify (update) of NotificationKey[user=UserHandle{0}, pkg=com.zenithblue.sambas3, tag=null, id=2000], rate limit (5.0) exceeded: input 9.51691, output would be 5.2375197
+09-26 11:50:09.586 14961 14961 W NotificationManager: Shedding cancel (dupe) of NotificationKey[user=UserHandle{0}, pkg=com.zenithblue.sambas3, tag=null, id=2001], rate limit (5.0) exceeded: input 18.368874, output would be 5.144601
+09-26 11:50:10.816 14961 14961 W NotificationManager: Shedding cancel (dupe) of NotificationKey[user=UserHandle{0}, pkg=com.zenithblue.sambas3, tag=null, id=2002], rate limit (5.0) exceeded: input 16.688374, output would be 6.364488
+09-26 11:50:10.950 14961 14961 W NotificationManager: Shedding notify (update) of NotificationKey[user=UserHandle{0}, pkg=com.zenithblue.sambas3, tag=null, id=2000], rate limit (5.0) exceeded: input 8.295681, output would be 5.0624304
+09-26 11:50:11.932 14961 14961 W NotificationManager: Shedding cancel (dupe) of NotificationKey[user=UserHandle{0}, pkg=com.zenithblue.sambas3, tag=null, id=2002], rate limit (5.0) exceeded: input 26.716055, output would be 6.0665374
+09-26 11:50:12.371 14961 14961 W NotificationManager: Shedding notify (update) of NotificationKey[user=UserHandle{0}, pkg=com.zenithblue.sambas3, tag=null, id=2000], rate limit (5.0) exceeded: input 10.976049, output would be 5.8998046
+09-26 11:50:13.175 14961 14961 W NotificationManager: Shedding cancel (dupe) of NotificationKey[user=UserHandle{0}, pkg=com.zenithblue.sambas3, tag=null, id=2002], rate limit (5.0) exceeded: input 15.146453, output would be 5.401109
+09-26 11:50:13.467 14961 14961 W NotificationManager: Shedding notify (update) of NotificationKey[user=UserHandle{0}, pkg=com.zenithblue.sambas3, tag=null, id=2000], rate limit (5.0) exceeded: input 14.021302, output would be 6.654658
+09-26 11:50:14.218 14961 14961 W NotificationManager: Shedding cancel (dupe) of NotificationKey[user=UserHandle{0}, pkg=com.zenithblue.sambas3, tag=null, id=2001], rate limit (5.0) exceeded: input 21.179869, output would be 5.6759195
+09-26 11:50:14.528 14961 14961 W NotificationManager: Shedding notify (update) of NotificationKey[user=UserHandle{0}, pkg=com.zenithblue.sambas3, tag=null, id=2000], rate limit (5.0) exceeded: input 13.344454, output would be 5.1370993
+09-26 11:50:15.331 14961 14961 W NotificationManager: Shedding cancel (dupe) of NotificationKey[user=UserHandle{0}, pkg=com.zenithblue.sambas3, tag=null, id=2002], rate limit (5.0) exceeded: input 15.427571, output would be 5.0268745
+09-26 11:50:16.245 14961 14961 W NotificationManager: Shedding notify (update) of NotificationKey[user=UserHandle{0}, pkg=com.zenithblue.sambas3, tag=null, id=2000], rate limit (5.0) exceeded: input 10.004023, output would be 6.295485
+09-26 11:50:16.346 14961 14961 W NotificationManager: Shedding cancel (dupe) of NotificationKey[user=UserHandle{0}, pkg=com.zenithblue.sambas3, tag=null, id=2001], rate limit (5.0) exceeded: input 147.9331, output would be 6.312018
+09-26 11:50:17.255 14961 14961 W NotificationManager: Shedding notify (update) of NotificationKey[user=UserHandle{0}, pkg=com.zenithblue.sambas3, tag=null, id=2000], rate limit (5.0) exceeded: input 71.735115, output would be 6.4770637
+09-26 11:50:17.365 14961 14961 W NotificationManager: Shedding cancel (dupe) of NotificationKey[user=UserHandle{0}, pkg=com.zenithblue.sambas3, tag=null, id=2001], rate limit (5.0) exceeded: input 101.38493, output would be 6.2959566
+09-26 11:50:18.275 14961 14961 W NotificationManager: Shedding notify (update) of NotificationKey[user=UserHandle{0}, pkg=com.zenithblue.sambas3, tag=null, id=2000], rate limit (5.0) exceeded: input 95.56227, output would be 6.816647
+09-26 11:50:18.365 14961 14961 W NotificationManager: Shedding cancel (dupe) of NotificationKey[user=UserHandle{0}, pkg=com.zenithblue.sambas3, tag=null, id=2001], rate limit (5.0) exceeded: input 143.12166, output would be 6.5183206
+09-26 11:50:19.285 14961 14961 W NotificationManager: Shedding notify (update) of NotificationKey[user=UserHandle{0}, pkg=com.zenithblue.sambas3, tag=null, id=2000], rate limit (5.0) exceeded: input 138.52606, output would be 6.922111
+09-26 11:50:19.365 14961 14961 W NotificationManager: Shedding cancel (dupe) of NotificationKey[user=UserHandle{0}, pkg=com.zenithblue.sambas3, tag=null, id=2001], rate limit (5.0) exceeded: input 185.15173, output would be 6.9557085
+09-26 11:50:20.306 14961 14961 W NotificationManager: Shedding notify (update) of NotificationKey[user=UserHandle{0}, pkg=com.zenithblue.sambas3, tag=null, id=2000], rate limit (5.0) exceeded: input 78.877914, output would be 6.7959905
+09-26 11:50:20.377 14961 14961 W NotificationManager: Shedding cancel (dupe) of NotificationKey[user=UserHandle{0}, pkg=com.zenithblue.sambas3, tag=null, id=2002], rate limit (5.0) exceeded: input 152.07368, output would be 6.9133883
+09-26 11:50:21.306 14961 14961 W NotificationManager: Shedding notify (update) of NotificationKey[user=UserHandle{0}, pkg=com.zenithblue.sambas3, tag=null, id=2000], rate limit (5.0) exceeded: input 131.12804, output would be 6.963334
+09-26 11:50:21.385 14961 14961 W NotificationManager: Shedding cancel (dupe) of NotificationKey[user=UserHandle{0}, pkg=com.zenithblue.sambas3, tag=null, id=2002], rate limit (5.0) exceeded: input 256.0804, output would be 7.1070685
+09-26 11:50:22.325 14961 14961 W NotificationManager: Shedding notify (update) of NotificationKey[user=UserHandle{0}, pkg=com.zenithblue.sambas3, tag=null, id=2000], rate limit (5.0) exceeded: input 106.202866, output would be 6.856284
+09-26 11:50:22.385 14961 14961 W NotificationManager: Shedding cancel (dupe) of NotificationKey[user=UserHandle{0}, pkg=com.zenithblue.sambas3, tag=null, id=2001], rate limit (5.0) exceeded: input 213.29816, output would be 5.124761
+09-26 11:50:23.347 14961 14961 W NotificationManager: Shedding notify (update) of NotificationKey[user=UserHandle{0}, pkg=com.zenithblue.sambas3, tag=null, id=2000], rate limit (5.0) exceeded: input 94.40087, output would be 6.8534408
+09-26 11:50:23.416 14961 14961 W NotificationManager: Shedding cancel (dupe) of NotificationKey[user=UserHandle{0}, pkg=com.zenithblue.sambas3, tag=null, id=2002], rate limit (5.0) exceeded: input 98.09408, output would be 7.1179457
+09-26 11:50:24.356 14961 14961 W NotificationManager: Shedding notify (update) of NotificationKey[user=UserHandle{0}, pkg=com.zenithblue.sambas3, tag=null, id=2000], rate limit (5.0) exceeded: input 78.75242, output would be 6.912953
+09-26 11:50:24.426 14961 14961 W NotificationManager: Shedding cancel (dupe) of NotificationKey[user=UserHandle{0}, pkg=com.zenithblue.sambas3, tag=null, id=2002], rate limit (5.0) exceeded: input 186.01514, output would be 7.0962286
+09-26 11:50:25.369 14961 14961 W NotificationManager: Shedding notify (update) of NotificationKey[user=UserHandle{0}, pkg=com.zenithblue.sambas3, tag=null, id=2000], rate limit (5.0) exceeded: input 121.76936, output would be 6.8799543
+09-26 11:50:25.435 14961 14961 W NotificationManager: Shedding cancel (dupe) of NotificationKey[user=UserHandle{0}, pkg=com.zenithblue.sambas3, tag=null, id=2002], rate limit (5.0) exceeded: input 309.25668, output would be 7.1043715
+09-26 11:50:26.374 14961 14961 W NotificationManager: Shedding notify (update) of NotificationKey[user=UserHandle{0}, pkg=com.zenithblue.sambas3, tag=null, id=2000], rate limit (5.0) exceeded: input 28.56612, output would be 5.4015493
+09-26 11:50:26.437 14961 14961 W NotificationManager: Shedding cancel (dupe) of NotificationKey[user=UserHandle{0}, pkg=com.zenithblue.sambas3, tag=null, id=2001], rate limit (5.0) exceeded: input 98.130684, output would be 6.2113776
+09-26 11:50:27.515 14961 14961 W NotificationManager: Shedding notify (update) of NotificationKey[user=UserHandle{0}, pkg=com.zenithblue.sambas3, tag=null, id=2000], rate limit (5.0) exceeded: input 15.095465, output would be 5.0810423
+09-26 11:50:27.516 14961 14961 W NotificationManager: Shedding cancel (dupe) of NotificationKey[user=UserHandle{0}, pkg=com.zenithblue.sambas3, tag=null, id=2002], rate limit (5.0) exceeded: input 29.457066, output would be 6.037681
+09-26 11:50:28.515 14961 14961 W NotificationManager: Shedding notify (update) of NotificationKey[user=UserHandle{0}, pkg=com.zenithblue.sambas3, tag=null, id=2000], rate limit (5.0) exceeded: input 133.47662, output would be 5.1942863
+09-26 11:50:28.525 14961 14961 W NotificationManager: Shedding cancel (dupe) of NotificationKey[user=UserHandle{0}, pkg=com.zenithblue.sambas3, tag=null, id=2001], rate limit (5.0) exceeded: input 225.94835, output would be 6.1586313
+09-26 11:50:29.555 14961 14961 W NotificationManager: Shedding notify (update) of NotificationKey[user=UserHandle{0}, pkg=com.zenithblue.sambas3, tag=null, id=2000], rate limit (5.0) exceeded: input 39.009777, output would be 5.0032773
+09-26 11:50:29.555 14961 14961 W NotificationManager: Shedding cancel (dupe) of NotificationKey[user=UserHandle{0}, pkg=com.zenithblue.sambas3, tag=null, id=2001], rate limit (5.0) exceeded: input 49.01631, output would be 6.0727363
+09-26 11:50:30.555 14961 14961 W NotificationManager: Shedding notify (update) of NotificationKey[user=UserHandle{0}, pkg=com.zenithblue.sambas3, tag=null, id=2000], rate limit (5.0) exceeded: input 97.971016, output would be 5.128158
+09-26 11:50:30.555 14961 14961 W NotificationManager: Shedding cancel (dupe) of NotificationKey[user=UserHandle{0}, pkg=com.zenithblue.sambas3, tag=null, id=2001], rate limit (5.0) exceeded: input 150.93724, output would be 6.1923
+09-26 11:50:31.555 14961 14961 W NotificationManager: Shedding notify (update) of NotificationKey[user=UserHandle{0}, pkg=com.zenithblue.sambas3, tag=null, id=2000], rate limit (5.0) exceeded: input 122.300156, output would be 5.2155385
+09-26 11:50:31.555 14961 14961 W NotificationManager: Shedding cancel (dupe) of NotificationKey[user=UserHandle{0}, pkg=com.zenithblue.sambas3, tag=null, id=2001], rate limit (5.0) exceeded: input 203.42, output would be 6.2079988
+09-26 11:50:32.558 14961 14961 W NotificationManager: Shedding notify (update) of NotificationKey[user=UserHandle{0}, pkg=com.zenithblue.sambas3, tag=null, id=2000], rate limit (5.0) exceeded: input 84.36416, output would be 5.207696
+09-26 11:50:32.558 14961 14961 W NotificationManager: Shedding cancel (dupe) of NotificationKey[user=UserHandle{0}, pkg=com.zenithblue.sambas3, tag=null, id=2001], rate limit (5.0) exceeded: input 153.66068, output would be 6.646304
+09-26 11:50:33.565 14961 14961 W NotificationManager: Shedding notify (update) of NotificationKey[user=UserHandle{0}, pkg=com.zenithblue.sambas3, tag=null, id=2000], rate limit (5.0) exceeded: input 139.21156, output would be 5.196245
+09-26 11:50:33.565 14961 14961 W NotificationManager: Shedding cancel (dupe) of NotificationKey[user=UserHandle{0}, pkg=com.zenithblue.sambas3, tag=null, id=2001], rate limit (5.0) exceeded: input 227.52066, output would be 6.574879
+09-26 11:50:34.637 14961 14961 W NotificationManager: Shedding cancel (dupe) of NotificationKey[user=UserHandle{0}, pkg=com.zenithblue.sambas3, tag=null, id=2001], rate limit (5.0) exceeded: input 51.40177, output would be 5.9455843
+09-26 11:50:34.645 14961 14961 W NotificationManager: Shedding notify (update) of NotificationKey[user=UserHandle{0}, pkg=com.zenithblue.sambas3, tag=null, id=2000], rate limit (5.0) exceeded: input 57.37723, output would be 6.7357135
+09-26 11:50:35.646 14961 14961 W NotificationManager: Shedding cancel (dupe) of NotificationKey[user=UserHandle{0}, pkg=com.zenithblue.sambas3, tag=null, id=2001], rate limit (5.0) exceeded: input 218.77348, output would be 5.970513
+09-26 11:50:35.655 14961 14961 W NotificationManager: Shedding notify (update) of NotificationKey[user=UserHandle{0}, pkg=com.zenithblue.sambas3, tag=null, id=2000], rate limit (5.0) exceeded: input 139.53477, output would be 6.9200344
+09-26 11:50:36.659 14961 14961 W NotificationManager: Shedding cancel (dupe) of NotificationKey[user=UserHandle{0}, pkg=com.zenithblue.sambas3, tag=null, id=2001], rate limit (5.0) exceeded: input 55.74381, output would be 5.945788
+09-26 11:50:36.757 14961 14961 W NotificationManager: Shedding notify (update) of NotificationKey[user=UserHandle{0}, pkg=com.zenithblue.sambas3, tag=null, id=2000], rate limit (5.0) exceeded: input 24.80843, output would be 5.800318
+09-26 11:50:37.675 14961 14961 W NotificationManager: Shedding cancel (dupe) of NotificationKey[user=UserHandle{0}, pkg=com.zenithblue.sambas3, tag=null, id=2001], rate limit (5.0) exceeded: input 131.9133, output would be 5.9587784
+09-26 11:50:37.765 14961 14961 W NotificationManager: Shedding notify (update) of NotificationKey[user=UserHandle{0}, pkg=com.zenithblue.sambas3, tag=null, id=2000], rate limit (5.0) exceeded: input 129.49388, output would be 6.02435
+09-26 11:50:38.685 14961 14961 W NotificationManager: Shedding cancel (dupe) of NotificationKey[user=UserHandle{0}, pkg=com.zenithblue.sambas3, tag=null, id=2001], rate limit (5.0) exceeded: input 128.80638, output would be 6.094513
+09-26 11:50:38.765 14961 14961 W NotificationManager: Shedding notify (update) of NotificationKey[user=UserHandle{0}, pkg=com.zenithblue.sambas3, tag=null, id=2000], rate limit (5.0) exceeded: input 71.54806, output would be 6.235849
+09-26 11:50:39.685 14961 14961 W NotificationManager: Shedding cancel (dupe) of NotificationKey[user=UserHandle{0}, pkg=com.zenithblue.sambas3, tag=null, id=2001], rate limit (5.0) exceeded: input 214.29742, output would be 6.262207
+09-26 11:50:39.765 14961 14961 W NotificationManager: Shedding notify (update) of NotificationKey[user=UserHandle{0}, pkg=com.zenithblue.sambas3, tag=null, id=2000], rate limit (5.0) exceeded: input 115.137215, output would be 6.512165
+09-26 11:50:40.716 14961 14961 W NotificationManager: Shedding cancel (dupe) of NotificationKey[user=UserHandle{0}, pkg=com.zenithblue.sambas3, tag=null, id=2002], rate limit (5.0) exceeded: input 57.418076, output would be 6.2944345
+09-26 11:50:40.785 14961 14961 W NotificationManager: Shedding notify (update) of NotificationKey[user=UserHandle{0}, pkg=com.zenithblue.sambas3, tag=null, id=2000], rate limit (5.0) exceeded: input 46.519806, output would be 6.355648
+09-26 11:50:41.735 14961 14961 W NotificationManager: Shedding cancel (dupe) of NotificationKey[user=UserHandle{0}, pkg=com.zenithblue.sambas3, tag=null, id=2001], rate limit (5.0) exceeded: input 72.77813, output would be 6.234815
+09-26 11:50:41.855 14961 14961 W NotificationManager: Shedding notify (update) of NotificationKey[user=UserHandle{0}, pkg=com.zenithblue.sambas3, tag=null, id=2000], rate limit (5.0) exceeded: input 36.340454, output would be 6.133023
+09-26 11:50:42.735 14961 14961 W NotificationManager: Shedding cancel (dupe) of NotificationKey[user=UserHandle{0}, pkg=com.zenithblue.sambas3, tag=null, id=2001], rate limit (5.0) exceeded: input 60.10664, output would be 6.767895
+09-26 11:50:42.865 14961 14961 W NotificationManager: Shedding notify (update) of NotificationKey[user=UserHandle{0}, pkg=com.zenithblue.sambas3, tag=null, id=2000], rate limit (5.0) exceeded: input 53.740196, output would be 6.3013387
+09-26 11:50:43.736 14961 14961 W NotificationManager: Shedding cancel (dupe) of NotificationKey[user=UserHandle{0}, pkg=com.zenithblue.sambas3, tag=null, id=2002], rate limit (5.0) exceeded: input 90.2713, output would be 7.076669
+09-26 11:50:43.865 14961 14961 W NotificationManager: Shedding notify (update) of NotificationKey[user=UserHandle{0}, pkg=com.zenithblue.sambas3, tag=null, id=2000], rate limit (5.0) exceeded: input 106.31296, output would be 6.3862243
+09-26 11:50:44.745 14961 14961 W NotificationManager: Shedding cancel (dupe) of NotificationKey[user=UserHandle{0}, pkg=com.zenithblue.sambas3, tag=null, id=2001], rate limit (5.0) exceeded: input 149.82092, output would be 5.012799
+09-26 11:50:44.865 14961 14961 W NotificationManager: Shedding notify (update) of NotificationKey[user=UserHandle{0}, pkg=com.zenithblue.sambas3, tag=null, id=2000], rate limit (5.0) exceeded: input 99.992836, output would be 6.4405293
+09-26 11:50:45.867 14961 14961 W NotificationManager: Shedding cancel (dupe) of NotificationKey[user=UserHandle{0}, pkg=com.zenithblue.sambas3, tag=null, id=2002], rate limit (5.0) exceeded: input 26.436743, output would be 6.177205
+09-26 11:50:45.985 14961 14961 W NotificationManager: Shedding notify (update) of NotificationKey[user=UserHandle{0}, pkg=com.zenithblue.sambas3, tag=null, id=2000], rate limit (5.0) exceeded: input 20.479193, output would be 6.337869
+09-26 11:50:46.877 14961 14961 W NotificationManager: Shedding cancel (dupe) of NotificationKey[user=UserHandle{0}, pkg=com.zenithblue.sambas3, tag=null, id=2001], rate limit (5.0) exceeded: input 124.98559, output would be 6.1832104
+09-26 11:50:46.985 14961 14961 W NotificationManager: Shedding notify (update) of NotificationKey[user=UserHandle{0}, pkg=com.zenithblue.sambas3, tag=null, id=2000], rate limit (5.0) exceeded: input 92.930275, output would be 6.488555
+09-26 11:50:47.885 14961 14961 W NotificationManager: Shedding cancel (dupe) of NotificationKey[user=UserHandle{0}, pkg=com.zenithblue.sambas3, tag=null, id=2001], rate limit (5.0) exceeded: input 73.27258, output would be 6.318873
+09-26 11:50:48.025 14961 14961 W NotificationManager: Shedding notify (update) of NotificationKey[user=UserHandle{0}, pkg=com.zenithblue.sambas3, tag=null, id=2000], rate limit (5.0) exceeded: input 54.159107, output would be 6.5483274
+--------- beginning of main
+09-26 11:51:44.271 14961 23117 W RPCS3   : Cached object for address 0x30A80000 was found, but it does not match stored parameters (width=1280 vs 1280; height=720 vs 720; depth=1 vs 0; mipmaps=1 vs 0)
+09-26 11:51:44.321 14961 23117 W RPCS3   : Cached object for address 0x30A80000 was found, but it does not match stored parameters (width=1280 vs 1280; height=720 vs 720; depth=1 vs 0; mipmaps=1 vs 0)
+09-26 11:51:44.674 14961 15003 D S3PERF  : crosscheck ui_snapshot_fps=19.7538 ui_snapshot_frametime_ms=49.208
+09-26 11:51:44.999 14961 15003 D S3PERF  : crosscheck source=surface presented=6366 json_fps=20.071 json_frametime_ms=39.668
+09-26 11:51:45.934 14961 15003 D S3PERF  : crosscheck ui_snapshot_fps=21.3316 ui_snapshot_frametime_ms=47.188
+09-26 11:51:46.216 14961 14961 I S3PAD   : classify name='Xbox Wireless Controller' vid=1118 pid=736 sources=16778513 keyboardType=1 -> GAMEPAD/XBOX reason=gamepad-capability-or-identity
+09-26 11:51:46.216 14961 14961 D S3PAD   : deviceKey via descriptor
+09-26 11:51:46.216 14961 14961 I S3PAD   : classify name='Xbox Wireless Controller' vid=1118 pid=736 sources=16778513 keyboardType=1 -> GAMEPAD/XBOX reason=gamepad-capability-or-identity
+09-26 11:51:46.216 14961 14961 D S3PAD   : deviceKey via descriptor
+09-26 11:51:46.216 14961 14961 I S3PAD   : classify name='Xbox Wireless Controller' vid=1118 pid=736 sources=16778513 keyboardType=1 -> GAMEPAD/XBOX reason=gamepad-capability-or-identity
+09-26 11:51:46.216 14961 14961 D S3PAD   : deviceKey via descriptor
+09-26 11:51:46.216 14961 14961 I S3PAD   : classify name='Xbox Wireless Controller' vid=1118 pid=736 sources=16778513 keyboardType=1 -> GAMEPAD/XBOX reason=gamepad-capability-or-identity
+09-26 11:51:46.216 14961 14961 D S3PAD   : deviceKey via descriptor
+09-26 11:51:46.239 14961 15003 D S3PERF  : crosscheck source=surface presented=6393 json_fps=22.1456 json_frametime_ms=40.762
+09-26 11:51:46.245 14961 15003 D S3PERF  : GPU load [/sys/class/kgsl/kgsl-3d0/gpubusy]: raw='529720 1006444' -> load=52.632834017590646%
+09-26 11:51:46.367 14961 14961 I S3PAD   : classify name='Xbox Wireless Controller' vid=1118 pid=736 sources=16778513 keyboardType=1 -> GAMEPAD/XBOX reason=gamepad-capability-or-identity
+09-26 11:51:46.367 14961 14961 D S3PAD   : deviceKey via descriptor
+09-26 11:51:46.367 14961 14961 I S3PAD   : classify name='Xbox Wireless Controller' vid=1118 pid=736 sources=16778513 keyboardType=1 -> GAMEPAD/XBOX reason=gamepad-capability-or-identity
+09-26 11:51:46.367 14961 14961 D S3PAD   : deviceKey via descriptor
+09-26 11:51:46.368 14961 14961 I S3PAD   : classify name='Xbox Wireless Controller' vid=1118 pid=736 sources=16778513 keyboardType=1 -> GAMEPAD/XBOX reason=gamepad-capability-or-identity
+09-26 11:51:46.368 14961 14961 D S3PAD   : deviceKey via descriptor
+09-26 11:51:46.368 14961 14961 I S3PAD   : classify name='Xbox Wireless Controller' vid=1118 pid=736 sources=16778513 keyboardType=1 -> GAMEPAD/XBOX reason=gamepad-capability-or-identity
+09-26 11:51:46.368 14961 14961 D S3PAD   : deviceKey via descriptor
+09-26 11:51:47.181 14961 15003 D S3PERF  : crosscheck ui_snapshot_fps=20.3772 ui_snapshot_frametime_ms=33.219
+09-26 11:51:47.486 14961 15002 D S3PERF  : crosscheck source=surface presented=6417 json_fps=18.3799 json_frametime_ms=54.772
+09-26 11:51:47.606 14961 23078 D RPCS3   : CPU Usage: Total: 72.9%, Cores: 0.0%, 0.0%, 0.0%, 0.0%, 0.0%, 0.0%, 0.0%, 0.0%
+09-26 11:51:47.704 14961 23102 D RPCS3   : PPU Syscall Usage Stats:
+09-26 11:51:47.704 14961 23102 D RPCS3   : 	⁂ sys_timer_usleep [301584]
+09-26 11:51:47.704 14961 23102 D RPCS3   : 	⁂ _sys_lwmutex_lock [82749]
+09-26 11:51:47.704 14961 23102 D RPCS3   : 	⁂ _sys_lwcond_queue_wait [82673]
+09-26 11:51:47.704 14961 23102 D RPCS3   : 	⁂ _sys_lwmutex_unlock [79180]
+09-26 11:51:47.704 14961 23102 D RPCS3   : 	⁂ _sys_lwcond_signal [51044]
+09-26 11:51:47.704 14961 23102 D RPCS3   : 	⁂ _sys_lwcond_signal_all [32852]
+09-26 11:51:47.704 14961 23102 D RPCS3   : 	⁂ sys_time_get_current_time [24939]
+09-26 11:51:47.704 14961 23102 D RPCS3   : 	⁂ sys_event_queue_receive [24707]
+09-26 11:51:47.704 14961 23102 D RPCS3   : 	⁂ sys_fs_read [13405]
+09-26 11:51:47.704 14961 23102 D RPCS3   : 	⁂ sys_fs_write [11554]
+09-26 11:51:47.704 14961 23102 D RPCS3   : 	⁂ sys_event_port_send [8435]
+09-26 11:51:47.704 14961 23102 D RPCS3   : 	⁂ sys_fs_fsync [1926]
+09-26 11:51:47.704 14961 23102 D RPCS3   : 	⁂ sys_event_flag_wait [1522]
+09-26 11:51:47.704 14961 23102 D RPCS3   : 	⁂ sys_event_flag_clear [1522]
+09-26 11:51:47.704 14961 23102 D RPCS3   : 	⁂ sys_fs_lseek [1405]
+09-26 11:51:47.704 14961 23102 D RPCS3   : 	⁂ sys_mmapper_map_shared_memory [425]
+09-26 11:51:47.704 14961 23102 D RPCS3   : 	⁂ _sys_lwmutex_trylock [92]
+09-26 11:51:47.704 14961 23102 D RPCS3   : 	⁂ sys_fs_fcntl [68]
+09-26 11:51:47.704 14961 23102 D RPCS3   : 	⁂ sys_mutex_lock [52]
+09-26 11:51:47.704 14961 23102 D RPCS3   : 	⁂ sys_mutex_unlock [52]
+09-26 11:51:47.704 14961 23102 D RPCS3   : 	⁂ sys_time_get_timebase_frequency [49]
+09-26 11:51:47.704 14961 23102 D RPCS3   : 	⁂ _sys_ppu_thread_create [44]
+09-26 11:51:47.704 14961 23102 D RPCS3   : 	⁂ sys_fs_fstat [42]
+09-26 11:51:47.704 14961 23102 D RPCS3   : 	⁂ sys_fs_open [40]
+09-26 11:51:47.704 14961 23102 D RPCS3   : 	⁂ sys_rsx_context_iomap [16]
+09-26 11:51:48.414 14961 15002 D S3PERF  : crosscheck ui_snapshot_fps=14.1657 ui_snapshot_frametime_ms=53.462
+09-26 11:51:48.719 14961 15002 D S3PERF  : crosscheck source=surface presented=6435 json_fps=13.3195 json_frametime_ms=40.748
+09-26 11:51:49.676 14961 14961 W DefaultDispatch: type=1400 audit(0.0:7180218): avc:  denied  { search } for  name="zram0" dev="sysfs" ino=107524 scontext=u:r:untrusted_app:s0:c207,c257,c512,c768 tcontext=u:object_r:sysfs_zram:s0 tclass=dir permissive=0 app=com.zenithblue.sambas3
+09-26 11:51:49.676 14961 14961 W DefaultDispatch: type=1400 audit(0.0:7180219): avc:  denied  { search } for  name="zram0" dev="sysfs" ino=107524 scontext=u:r:untrusted_app:s0:c207,c257,c512,c768 tcontext=u:object_r:sysfs_zram:s0 tclass=dir permissive=0 app=com.zenithblue.sambas3
+09-26 11:51:50.001 14961 15002 D S3PERF  : crosscheck source=surface presented=6448 json_fps=10.2969 json_frametime_ms=113.992
+09-26 11:51:50.577 14961 23540 E RPCS3   : Video au decode has been waiting for a consumer for 5 seconds. (handle=0xf0000300, seq_id=1, cmd_id=63, queue_size=61)
+09-26 11:51:50.941 14961 15002 D S3PERF  : crosscheck ui_snapshot_fps=12.2333 ui_snapshot_frametime_ms=50.298
+09-26 11:51:51.255 14961 15002 D S3PERF  : crosscheck source=surface presented=6465 json_fps=13.0757 json_frametime_ms=42.944
+09-26 11:51:51.834 14961 14961 I S3PAD   : classify name='Xbox Wireless Controller' vid=1118 pid=736 sources=16778513 keyboardType=1 -> GAMEPAD/XBOX reason=gamepad-capability-or-identity
+09-26 11:51:51.834 14961 14961 D S3PAD   : deviceKey via descriptor
+09-26 11:51:51.834 14961 14961 I S3PAD   : classify name='Xbox Wireless Controller' vid=1118 pid=736 sources=16778513 keyboardType=1 -> GAMEPAD/XBOX reason=gamepad-capability-or-identity
+09-26 11:51:51.834 14961 14961 D S3PAD   : deviceKey via descriptor
+09-26 11:51:51.834 14961 14961 I S3PAD   : classify name='Xbox Wireless Controller' vid=1118 pid=736 sources=16778513 keyboardType=1 -> GAMEPAD/XBOX reason=gamepad-capability-or-identity
+09-26 11:51:51.834 14961 14961 D S3PAD   : deviceKey via descriptor
+09-26 11:51:51.834 14961 14961 I S3PAD   : classify name='Xbox Wireless Controller' vid=1118 pid=736 sources=16778513 keyboardType=1 -> GAMEPAD/XBOX reason=gamepad-capability-or-identity
+09-26 11:51:51.834 14961 14961 D S3PAD   : deviceKey via descriptor
+09-26 11:51:52.024 14961 14961 I S3PAD   : classify name='Xbox Wireless Controller' vid=1118 pid=736 sources=16778513 keyboardType=1 -> GAMEPAD/XBOX reason=gamepad-capability-or-identity
+09-26 11:51:52.024 14961 14961 D S3PAD   : deviceKey via descriptor
+09-26 11:51:52.024 14961 14961 I S3PAD   : classify name='Xbox Wireless Controller' vid=1118 pid=736 sources=16778513 keyboardType=1 -> GAMEPAD/XBOX reason=gamepad-capability-or-identity
+09-26 11:51:52.024 14961 14961 D S3PAD   : deviceKey via descriptor
+09-26 11:51:52.025 14961 14961 I S3PAD   : classify name='Xbox Wireless Controller' vid=1118 pid=736 sources=16778513 keyboardType=1 -> GAMEPAD/XBOX reason=gamepad-capability-or-identity
+09-26 11:51:52.025 14961 14961 D S3PAD   : deviceKey via descriptor
+09-26 11:51:52.025 14961 14961 I S3PAD   : classify name='Xbox Wireless Controller' vid=1118 pid=736 sources=16778513 keyboardType=1 -> GAMEPAD/XBOX reason=gamepad-capability-or-identity
+09-26 11:51:52.025 14961 14961 D S3PAD   : deviceKey via descriptor
+09-26 11:51:52.191 14961 15002 D S3PERF  : crosscheck ui_snapshot_fps=12.0915 ui_snapshot_frametime_ms=133.805
+09-26 11:51:52.495 14961 15002 D S3PERF  : crosscheck source=surface presented=6479 json_fps=12.0056 json_frametime_ms=82.991
+09-26 11:51:53.443 14961 15002 D S3PERF  : crosscheck ui_snapshot_fps=12.8527 ui_snapshot_frametime_ms=61.464
+09-26 11:51:53.754 14961 15002 D S3PERF  : crosscheck source=surface presented=6496 json_fps=13.1605 json_frametime_ms=76.946
+09-26 11:51:54.710 14961 15002 D S3PERF  : crosscheck ui_snapshot_fps=12.3452 ui_snapshot_frametime_ms=76.119
+09-26 11:51:55.023 14961 15002 D S3PERF  : crosscheck source=surface presented=6511 json_fps=11.5117 json_frametime_ms=95.53
+09-26 11:51:55.640 14961 23540 E RPCS3   : Video au decode has been waiting for a consumer for 5 seconds. (handle=0xf0000300, seq_id=1, cmd_id=63, queue_size=61)
+09-26 11:51:55.955 14961 15002 D S3PERF  : crosscheck ui_snapshot_fps=11.7797 ui_snapshot_frametime_ms=79.832
+09-26 11:51:56.155 14961 14961 I S3PAD   : classify name='Xbox Wireless Controller' vid=1118 pid=736 sources=16778513 keyboardType=1 -> GAMEPAD/XBOX reason=gamepad-capability-or-identity
+09-26 11:51:56.155 14961 14961 D S3PAD   : deviceKey via descriptor
+09-26 11:51:56.155 14961 14961 I S3PAD   : classify name='Xbox Wireless Controller' vid=1118 pid=736 sources=16778513 keyboardType=1 -> GAMEPAD/XBOX reason=gamepad-capability-or-identity
+09-26 11:51:56.155 14961 14961 D S3PAD   : deviceKey via descriptor
+09-26 11:51:56.156 14961 14961 I S3PAD   : classify name='Xbox Wireless Controller' vid=1118 pid=736 sources=16778513 keyboardType=1 -> GAMEPAD/XBOX reason=gamepad-capability-or-identity
+09-26 11:51:56.156 14961 14961 D S3PAD   : deviceKey via descriptor
+09-26 11:51:56.156 14961 14961 I S3PAD   : classify name='Xbox Wireless Controller' vid=1118 pid=736 sources=16778513 keyboardType=1 -> GAMEPAD/XBOX reason=gamepad-capability-or-identity
+09-26 11:51:56.156 14961 14961 D S3PAD   : deviceKey via descriptor
+09-26 11:51:56.269 14961 15002 D S3PERF  : crosscheck source=surface presented=6525 json_fps=11.7357 json_frametime_ms=82.796
+09-26 11:51:56.279 14961 15002 D S3PERF  : GPU load [/sys/class/kgsl/kgsl-3d0/gpubusy]: raw='640336 1008951' -> load=63.465520129322435%
+09-26 11:51:56.353 14961 14961 I S3PAD   : classify name='Xbox Wireless Controller' vid=1118 pid=736 sources=16778513 keyboardType=1 -> GAMEPAD/XBOX reason=gamepad-capability-or-identity
+09-26 11:51:56.353 14961 14961 D S3PAD   : deviceKey via descriptor
+09-26 11:51:56.353 14961 14961 I S3PAD   : classify name='Xbox Wireless Controller' vid=1118 pid=736 sources=16778513 keyboardType=1 -> GAMEPAD/XBOX reason=gamepad-capability-or-identity
+09-26 11:51:56.353 14961 14961 D S3PAD   : deviceKey via descriptor
+09-26 11:51:56.354 14961 14961 I S3PAD   : classify name='Xbox Wireless Controller' vid=1118 pid=736 sources=16778513 keyboardType=1 -> GAMEPAD/XBOX reason=gamepad-capability-or-identity
+09-26 11:51:56.354 14961 14961 D S3PAD   : deviceKey via descriptor
+09-26 11:51:56.354 14961 14961 I S3PAD   : classify name='Xbox Wireless Controller' vid=1118 pid=736 sources=16778513 keyboardType=1 -> GAMEPAD/XBOX reason=gamepad-capability-or-identity
+09-26 11:51:56.354 14961 14961 D S3PAD   : deviceKey via descriptor
+09-26 11:51:57.208 14961 15002 D S3PERF  : crosscheck ui_snapshot_fps=9.98025 ui_snapshot_frametime_ms=87.565
+09-26 11:51:57.264 14961 14961 I S3PAD   : classify name='Xbox Wireless Controller' vid=1118 pid=736 sources=16778513 keyboardType=1 -> GAMEPAD/XBOX reason=gamepad-capability-or-identity
+09-26 11:51:57.264 14961 14961 D S3PAD   : deviceKey via descriptor
+09-26 11:51:57.264 14961 14961 I S3PAD   : classify name='Xbox Wireless Controller' vid=1118 pid=736 sources=16778513 keyboardType=1 -> GAMEPAD/XBOX reason=gamepad-capability-or-identity
+09-26 11:51:57.264 14961 14961 D S3PAD   : deviceKey via descriptor
+09-26 11:51:57.264 14961 14961 I S3PAD   : classify name='Xbox Wireless Controller' vid=1118 pid=736 sources=16778513 keyboardType=1 -> GAMEPAD/XBOX reason=gamepad-capability-or-identity
+09-26 11:51:57.264 14961 14961 D S3PAD   : deviceKey via descriptor
+09-26 11:51:57.264 14961 14961 I S3PAD   : classify name='Xbox Wireless Controller' vid=1118 pid=736 sources=16778513 keyboardType=1 -> GAMEPAD/XBOX reason=gamepad-capability-or-identity
+09-26 11:51:57.264 14961 14961 D S3PAD   : deviceKey via descriptor
+09-26 11:51:57.415 14961 14961 I S3PAD   : classify name='Xbox Wireless Controller' vid=1118 pid=736 sources=16778513 keyboardType=1 -> GAMEPAD/XBOX reason=gamepad-capability-or-identity
+09-26 11:51:57.415 14961 14961 D S3PAD   : deviceKey via descriptor
+09-26 11:51:57.415 14961 14961 I S3PAD   : classify name='Xbox Wireless Controller' vid=1118 pid=736 sources=16778513 keyboardType=1 -> GAMEPAD/XBOX reason=gamepad-capability-or-identity
+09-26 11:51:57.415 14961 14961 D S3PAD   : deviceKey via descriptor
+09-26 11:51:57.415 14961 14961 I S3PAD   : classify name='Xbox Wireless Controller' vid=1118 pid=736 sources=16778513 keyboardType=1 -> GAMEPAD/XBOX reason=gamepad-capability-or-identity
+09-26 11:51:57.415 14961 14961 D S3PAD   : deviceKey via descriptor
+09-26 11:51:57.415 14961 14961 I S3PAD   : classify name='Xbox Wireless Controller' vid=1118 pid=736 sources=16778513 keyboardType=1 -> GAMEPAD/XBOX reason=gamepad-capability-or-identity
+09-26 11:51:57.415 14961 14961 D S3PAD   : deviceKey via descriptor
+09-26 11:51:57.524 14961 15002 D S3PERF  : crosscheck source=surface presented=6537 json_fps=9.42514 json_frametime_ms=65.235
+09-26 11:51:57.606 14961 23078 D RPCS3   : CPU Usage: Total: 65.9%, Cores: 0.0%, 0.0%, 0.0%, 0.0%, 0.0%, 0.0%, 0.0%, 0.0%
+09-26 11:51:57.705 14961 23102 D RPCS3   : PPU Syscall Usage Stats:
+09-26 11:51:57.705 14961 23102 D RPCS3   : 	⁂ sys_timer_usleep [316404]
+09-26 11:51:57.705 14961 23102 D RPCS3   : 	⁂ _sys_lwmutex_lock [105776]
+09-26 11:51:57.705 14961 23102 D RPCS3   : 	⁂ _sys_lwcond_queue_wait [105450]
+09-26 11:51:57.705 14961 23102 D RPCS3   : 	⁂ _sys_lwmutex_unlock [101839]
+09-26 11:51:57.705 14961 23102 D RPCS3   : 	⁂ _sys_lwcond_signal [65939]
+09-26 11:51:57.705 14961 23102 D RPCS3   : 	⁂ _sys_lwcond_signal_all [41958]
+09-26 11:51:57.705 14961 23102 D RPCS3   : 	⁂ sys_time_get_current_time [31534]
+09-26 11:51:57.705 14961 23102 D RPCS3   : 	⁂ sys_event_queue_receive [27806]
+09-26 11:51:57.705 14961 23102 D RPCS3   : 	⁂ sys_fs_read [17128]
+09-26 11:51:57.705 14961 23102 D RPCS3   : 	⁂ sys_fs_write [15403]
+09-26 11:51:57.705 14961 23102 D RPCS3   : 	⁂ sys_event_port_send [9357]
+09-26 11:51:57.705 14961 23102 D RPCS3   : 	⁂ sys_fs_fsync [2566]
+09-26 11:51:57.705 14961 23102 D RPCS3   : 	⁂ sys_fs_lseek [1823]
+09-26 11:51:57.705 14961 23102 D RPCS3   : 	⁂ sys_event_flag_wait [1623]
+09-26 11:51:57.705 14961 23102 D RPCS3   : 	⁂ sys_event_flag_clear [1623]
+09-26 11:51:57.705 14961 23102 D RPCS3   : 	⁂ _sys_lwmutex_trylock [119]
+09-26 11:51:57.794 14961 22456 I ithblue.sambas3: Explicit concurrent mark compact GC freed 2712KB AllocSpace bytes, 25(452KB) LOS objects, 81% free, 5718KB/29MB, paused 159us,986us total 24.219ms
+09-26 11:51:58.603 14961 15002 D S3PERF  : crosscheck ui_snapshot_fps=9.50291 ui_snapshot_frametime_ms=85.538
+09-26 11:51:58.913 14961 15002 D S3PERF  : crosscheck source=surface presented=6553 json_fps=11.7971 json_frametime_ms=83.073
+09-26 11:51:58.916 14961 14961 W DefaultDispatch: type=1400 audit(0.0:7180224): avc:  denied  { search } for  name="zram0" dev="sysfs" ino=107524 scontext=u:r:untrusted_app:s0:c207,c257,c512,c768 tcontext=u:object_r:sysfs_zram:s0 tclass=dir permissive=0 app=com.zenithblue.sambas3
+09-26 11:51:58.924 14961 14961 W DefaultDispatch: type=1400 audit(0.0:7180225): avc:  denied  { search } for  name="zram0" dev="sysfs" ino=107524 scontext=u:r:untrusted_app:s0:c207,c257,c512,c768 tcontext=u:object_r:sysfs_zram:s0 tclass=dir permissive=0 app=com.zenithblue.sambas3
+09-26 11:51:59.560 14961 23120 D RPCS3   : sys_tty_write(ch=0, buf=*0x58bf20, len=63, pwritelen=*0xd000fde0)
+09-26 11:51:59.562 14961 23120 D RPCS3   : PPU[0x1000000] main_thread's thread context:
+09-26 11:51:59.562 14961 23120 D RPCS3   : Type: PPU; State: 0x7279ff2bbc[w|t|p|s|a|sig|mem|pend-re|y|PAUSE|STEP|0x12|0x13|0x14|0x15|0x16|0x17|0x18|0x1b|0x1c|0x1d|0x1e|0x21|0x24|0x25|0x26]
+09-26 11:51:59.562 14961 23120 D RPCS3   : Priority: 1000
+09-26 11:51:59.562 14961 23120 D RPCS3   : Stack: 0xd0001000..0xd0010fff
+09-26 11:51:59.562 14961 23120 D RPCS3   : Joiner: detached
+09-26 11:51:59.562 14961 23120 D RPCS3   : In function: sys_tty_write
+09-26 11:51:59.562 14961 23120 D RPCS3   : 
+09-26 11:51:59.562 14961 23120 D RPCS3   : 
+09-26 11:51:59.562 14961 23120 D RPCS3   : r0 : 0x0
+09-26 11:51:59.562 14961 23120 D RPCS3   : r1 : 0xd000fd70 -> 00 00 00 00 d0 00 fe 10
+09-26 11:51:59.562 14961 23120 D RPCS3   : r2 : 0x52d6c8   -> e6 4c a6 d7 28 8a c4 d8
+09-26 11:51:59.562 14961 23120 D RPCS3   : r3 : 0x0
+09-26 11:51:59.562 14961 23120 D RPCS3   : r4 : 0x58bf20   -> "BATCHJOB: AddJob: waiting for ro"
+09-26 11:51:59.562 14961 23120 D RPCS3   : r5 : 0x3f
+09-26 11:51:59.562 14961 23120 D RPCS3   : r6 : 0xd000fde0 -> 35 8e d1 80 00 00 17 80
+09-26 11:51:59.562 14961 23120 D RPCS3   : r7 : 0x0
+09-26 11:51:59.562 14961 23120 D RPCS3   : r8 : 0x0
+09-26 11:51:59.562 14961 23120 D RPCS3   : r9 : 0x58bf20   -> "BATCHJOB: AddJob: waiting for ro"
+09-26 11:51:59.562 14961 23120 D RPCS3   : r10: 0x0
+09-26 11:51:59.562 14961 23120 D RPCS3   : r11© 0x193
+09-26 11:51:59.562 14961 23120 D RPCS3   : r12: 0x8d02e8   -> func(at=0x8b4ee4, toc=0x8d8ab0)
+09-26 11:51:59.562 14961 23120 D RPCS3   : r13: 0x10007060 -> 00 00 00 00 00 00 00 00
+09-26 11:51:59.562 14961 23120 D RPCS3   : r14: 0x0
+09-26 11:51:59.562 14961 23120 D RPCS3   : r15: 0x0
+09-26 11:51:59.562 14961 23120 D RPCS3   : r16: 0x0
+09-26 11:51:59.562 14961 23120 D RPCS3   : r17: 0x0
+09-26 11:51:59.562 14961 23120 D RPCS3   : r18: 0x358ea22c -> 00 50 2a 58 35 8d 20 38
+09-26 11:51:59.562 14961 23120 D RPCS3   : r19: 0x358ea22c -> 00 50 2a 58 35 8d 20 38
+09-26 11:51:59.562 14961 23120 D RPCS3   : r20: 0x1
+09-26 11:51:59.562 14961 23120 D RPCS3   : r21: 0x0
+09-26 11:51:59.562 14961 23120 D RPCS3   : r22: 0x4
+09-26 11:51:59.562 14961 23120 D RPCS3   : r23: 0x1
+09-26 11:51:59.562 14961 23120 D RPCS3   : r24: 0x542f90   -> 64 02 01 00 00 01 00 00
+09-26 11:51:59.562 14961 23120 D RPCS3   : r25: 0x3e9acf   -> 0a 00 00 00 00 00 00 00
+09-26 11:51:59.562 14961 23120 D RPCS3   : r26: 0x3e9ad0   -> 00 00 00 00 00 00 00 00
+09-26 11:51:59.562 14961 23120 D RPCS3   : r27: 0x3e9acc   -> cmpdi cr4,r14,0x2e0a
+09-26 11:51:59.562 14961 23120 D RPCS3   : r28: 0x0
+09-26 11:51:59.562 14961 23120 D RPCS3   : r29: 0x3f
+09-26 11:51:59.562 14961 23120 D RPCS3   : r30: 0x542f90   -> 64 02 01 00 00 01 00 00
+09-26 11:51:59.562 14961 23120 D RPCS3   : r31: 0x58bf20   -> "BATCHJOB: AddJob: waiting for ro"
+09-26 11:51:59.562 14961 23120 D RPCS3   : CR: 0x48002082, CR7: [LT=0 GT=0 EQ=1 SO=0]
+09-26 11:51:59.562 14961 23120 D RPCS3   : f0 : 0.00200224   [0x3f60670000000000] (f32=0x3b033800)
+09-26 11:51:59.562 14961 23120 D RPCS3   : f1 : 0.667497     [0x3fe55c22c0000000] (f32=0x3f2ae116)
+09-26 11:51:59.562 14961 23120 D RPCS3   : f2 : 1            [0x3ff0000000000000] (f32=0x3f800000)
+09-26 11:51:59.562 14961 23120 D RPCS3   : f3 : 0.975309     [0x3fef35ba80000000] (f32=0x3f79add4)
+09-26 11:51:59.562 14961 23120 D RPCS3   : f4 : 0.22         [0x3fcc28f5c0000000] (f32=0x3e6147ae)
+09-26 11:51:59.562 14961 23120 D RPCS3   : f5 : 1            [0x3ff0000000000000] (f32=0x3f800000)
+09-26 11:51:59.562 14961 23120 D RPCS3   : f6 : 0            [                  ] (f32=0x0)
+09-26 11:51:59.562 14961 23120 D RPCS3   : f7 : -720         [0xc086800000000000] (f32=0xc4340000)
+09-26 11:51:59.562 14961 23120 D RPCS3   : f8 : -360         [0xc076800000000000] (f32=0xc3b40000)
+09-26 11:51:59.562 14961 23120 D RPCS3   : f9 : 0            [                  ] (f32=0x0)
+09-26 11:51:59.562 14961 23120 D RPCS3   : f10: 360          [0x4076800000000000] (f32=0x43b40000)
+09-26 11:51:59.562 14961 23120 D RPCS3   : f11: 9.88131E-324 [0x0000000000000002] (f32=0x0)
+09-26 11:51:59.562 14961 23120 D RPCS3   : f12: 9.22337E+18  [0x43e0000000000000] (f32=0x5f000000)
+09-26 11:51:59.562 14961 23120 D RPCS3   : f13: 1            [0x3ff0000000000000] (f32=0x3f800000)
+09-26 11:51:59.562 14961 23120 D RPCS3   : f14: 0            [                  ] (f32=0x0)
+09-26 11:51:59.562 14961 23120 D RPCS3   : f15: 0            [                  ] (f32=0x0)
+09-26 11:51:59.562 14961 23120 D RPCS3   : f16: 0            [                  ] (f32=0x0)
+09-26 11:51:59.562 14961 23120 D RPCS3   : f17: 0            [                  ] (f32=0x0)
+09-26 11:51:59.562 14961 23120 D RPCS3   : f18: 0            [                  ] (f32=0x0)
+09-26 11:51:59.562 14961 23120 D RPCS3   : f19: 0            [                  ] (f32=0x0)
+09-26 11:51:59.562 14961 23120 D RPCS3   : f20: 0            [                  ] (f32=0x0)
+09-26 11:51:59.562 14961 23120 D RPCS3   : f21: 0            [                  ] (f32=0x0)
+09-26 11:51:59.562 14961 23120 D RPCS3   : f22: 0            [                  ] (f32=0x0)
+09-26 11:51:59.562 14961 23120 D RPCS3   : f23: 0            [                  ] (f32=0x0)
+09-26 11:51:59.562 14961 23120 D RPCS3   : f24: 0            [                  ] (f32=0x0)
+09-26 11:51:59.562 14961 23120 D RPCS3   : f25: 0            [                  ] (f32=0x0)
+09-26 11:51:59.562 14961 23120 D RPCS3   : f26: 0            [                  ] (f32=0x0)
+09-26 11:51:59.562 14961 23120 D RPCS3   : f27: 0            [                  ] (f32=0x0)
+09-26 11:51:59.562 14961 23120 D RPCS3   : f28: 0            [                  ] (f32=0x0)
+09-26 11:51:59.562 14961 23120 D RPCS3   : f29: 0            [                  ] (f32=0x0)
+09-26 11:51:59.562 14961 23120 D RPCS3   : f30: 0            [                  ] (f32=0x0)
+09-26 11:51:59.562 14961 23120 D RPCS3   : f31: 1            [0x3ff0000000000000] (f32=0x3f800000)
+09-26 11:51:59.562 14961 23120 D RPCS3   : v0 : 17c0ffd4 00031780 358ed180 00041c50 [x: 1.24723e-24 y: 2.83937e-40 z: 1.06408e-06 w: 3.77499e-40]
+09-26 11:51:59.562 14961 23120 D RPCS3   : v1 : 00051c50 002c0006 1c500000 47000007 [x: 4.69334e-40 y: 4.04077e-39 z: 6.88214e-22 w: 32768]
+09-26 11:51:59.562 14961 23120 D RPCS3   : v2 : 3f800000 [x: 1]
+09-26 11:51:59.562 14961 23120 D RPCS3   : v3 : 10111213 04050607 08090a0b 0c0d0e0f [x: 2.86101e-29 y: 1.56368e-36 z: 4.12387e-34 w: 1.08665e-31]
+09-26 11:51:59.562 14961 23120 D RPCS3   : v4 : bf0c1972 c0c21d6e c16f8942 3f7fffff [x: -0.547263 y: -6.06609 z: -14.971 w: 1]
+09-26 11:51:59.562 14961 23120 D RPCS3   : v5 : 00000000 00000000 00000000 ffffffff [x: 0 y: 0 z: 0 w: -nan]
+09-26 11:51:59.562 14961 23120 D RPCS3   : v6 : 408e38e3 00000000 00000000 00000000 [x: 4.44444 y: 0 z: 0 w: 0]
+09-26 11:51:59.562 14961 23120 D RPCS3   : v7 : 4091745d 80000000 3f4ccccd 3e4ccccd [x: 4.54545 y: -0 z: 0.8 w: 0.2]
+09-26 11:51:59.562 14961 23120 D RPCS3   : v8 : 00000000 ffffffff 00000000 00000000 [x: 0 y: -nan z: 0 w: 0]
+09-26 11:51:59.562 14961 23120 D RPCS3   : v9 : 3f800000 [x: 1]
+09-26 11:51:59.562 14961 23120 D RPCS3   : v10: 00000000 00000000 00000000 3f800000 [x: 0 y: 0 z: 0 w: 1]
+09-26 11:51:59.562 14961 23120 D RPCS3   : v11: 00000000 [x: 0]
+09-26 11:51:59.562 14961 23120 D RPCS3   : v12: 00000000 00000000 3f800000 00000000 [x: 0 y: 0 z: 1 w: 0]
+09-26 11:51:59.562 14961 23120 D RPCS3   : v13: 00000000 3f800000 00000000 00000000 [x: 0 y: 1 z: 0 w: 0]
+09-26 11:51:59.562 14961 23120 D RPCS3   : v14: 00000000 00000000 40300766 00000000 [x: 0 y: 0 z: 2.75045 w: 0]
+09-26 11:51:59.562 14961 23120 D RPCS3   : v15: 3c0ef30b bdbededc 3f187d61 00000000 [x: 0.00872494 y: -0.0931985 z: 0.595663 w: 0]
+09-26 11:51:59.562 14961 23120 D RPCS3   : v16: 00000000 [x: 0]
+09-26 11:51:59.562 14961 23120 D RPCS3   : v17: bf800000 [x: -1]
+09-26 11:51:59.562 14961 23120 D RPCS3   : v18: bf9f886a c09771d9 bfaa927d 00000000 [x: -1.24635 y: -4.73265 z: -1.3326 w: 0]
+09-26 11:51:59.562 14961 23120 D RPCS3   : v19: bd0721f0 c0a233b7 be3a97a8 00000000 [x: -0.0329913 y: -5.06881 z: -0.182219 w: 0]
+09-26 11:51:59.562 14961 23120 D RPCS3   : v20: 00000000 [x: 0]
+09-26 11:51:59.562 14961 23120 D RPCS3   : v21: 00000000 [x: 0]
+09-26 11:51:59.562 14961 23120 D RPCS3   : v22: 00000000 [x: 0]
+09-26 11:51:59.562 14961 23120 D RPCS3   : v23: 00000000 [x: 0]
+09-26 11:51:59.562 14961 23120 D RPCS3   : v24: 00000000 [x: 0]
+09-26 11:51:59.562 14961 23120 D RPCS3   : v25: 00000000 [x: 0]
+09-26 11:51:59.562 14961 23120 D RPCS3   : v26: 00000000 [x: 0]
+09-26 11:51:59.562 14961 23120 D RPCS3   : v27: 00000000 [x: 0]
+09-26 11:51:59.562 14961 23120 D RPCS3   : v28: 00000000 [x: 0]
+09-26 11:51:59.562 14961 23120 D RPCS3   : v29: 00000000 [x: 0]
+09-26 11:51:59.562 14961 23120 D RPCS3   : v30: 00000000 [x: 0]
+09-26 11:51:59.562 14961 23120 D RPCS3   : v31: 00000000 [x: 0]
+09-26 11:51:59.562 14961 23120 D RPCS3   : CIA: 0x336084
+09-26 11:51:59.562 14961 23120 D RPCS3   : LR: 0x32ab28
+09-26 11:51:59.562 14961 23120 D RPCS3   : CTR: 0x8b4ee4
+09-26 11:51:59.562 14961 23120 D RPCS3   : VRSAVE: 0xffffffff
+09-26 11:51:59.562 14961 23120 D RPCS3   : XER: [CA=1 | OV=0 | SO=0 | CNT=0]
+09-26 11:51:59.562 14961 23120 D RPCS3   : VSCR: [SAT=505297204128 | NJ=1]
+09-26 11:51:59.562 14961 23120 D RPCS3   : FPSCR: [FL=1 | FG=0 | FE=0 | FU=0]
+09-26 11:51:59.562 14961 23120 D RPCS3   : Reservation Addr: none
+09-26 11:51:59.562 14961 23120 D RPCS3   : Reservation Data (entire cache line):
+09-26 11:51:59.562 14961 23120 D RPCS3   : [0x00] 3189a530 31c402e4 ffffffff 00000000
+09-26 11:51:59.562 14961 23120 D RPCS3   : [0x10] 00000000 00000000 00000000 00000012
+09-26 11:51:59.562 14961 23120 D RPCS3   : [0x20] 00000000 00000000 00000000 00000012
+09-26 11:51:59.562 14961 23120 D RPCS3   : [0x30] 08000000 00000000 00000000 00000012
+09-26 11:51:59.562 14961 23120 D RPCS3   : [0x40] 00000000 00000000 00000000 00000012
+09-26 11:51:59.562 14961 23120 D RPCS3   : [0x50] 01000000 00000000 01000000 00000000
+09-26 11:51:59.562 14961 23120 D RPCS3   : [0x60] 01000000 00000000 305e7000 00000000
+09-26 11:51:59.562 14961 23120 D RPCS3   : [0x70] 00018004 00000000 0000015f 31cf2ff0
+09-26 11:51:59.562 14961 23120 D RPCS3   : 
+09-26 11:51:59.562 14961 23120 D RPCS3   : Call stack:
+09-26 11:51:59.562 14961 23120 D RPCS3   : =========
+09-26 11:51:59.562 14961 23120 D RPCS3   : 0x00336084 (0x0) called
+09-26 11:51:59.562 14961 23120 D RPCS3   : > from 0x0032ab28 (sp=0xd000fe10)
+09-26 11:51:59.562 14961 23120 D RPCS3   : > from 0x0032b084 (sp=0xd000fea0)
+09-26 11:51:59.562 14961 23120 D RPCS3   : > from 0x003331ec (sp=0xd000ff60)
+09-26 11:51:59.562 14961 23120 D RPCS3   : > from 0x00333c10 (sp=0xd000fff0)
+09-26 11:51:59.562 14961 23120 D RPCS3   : > from 0x0033318c (sp=0xd0010150)
+09-26 11:51:59.562 14961 23120 D RPCS3   : > from 0x002e5cc4 (sp=0xd00101f0)
+09-26 11:51:59.562 14961 23120 D RPCS3   : > from 0x002bf6bc (sp=0xd00102c0)
+09-26 11:51:59.562 14961 23120 D RPCS3   : > from 0x001a77e8 (sp=0xd0010350)
+09-26 11:51:59.562 14961 23120 D RPCS3   : > from 0x001a6070 (sp=0xd00104d0)
+09-26 11:51:59.562 14961 23120 D RPCS3   : > from 0x0019a0ac (sp=0xd00107b0)
+09-26 11:51:59.562 14961 23120 D RPCS3   : > from 0x001aad74 (sp=0xd0010830)
+09-26 11:51:59.562 14961 23120 D RPCS3   : > from 0x00260394 (sp=0xd00108c0)
+09-26 11:51:59.562 14961 23120 D RPCS3   : > from 0x001aa9ec (sp=0xd0010990)
+09-26 11:51:59.562 14961 23120 D RPCS3   : > from 0x00262700 (sp=0xd0010a20)
+09-26 11:51:59.562 14961 23120 D RPCS3   : > from 0x0026281c (sp=0xd0010ac0)
+09-26 11:51:59.562 14961 23120 D RPCS3   : > from 0x001b4b2c (sp=0xd0010b40)
+09-26 11:51:59.562 14961 23120 D RPCS3   : > from 0x000ed64c (sp=0xd0010be0)
+09-26 11:51:59.562 14961 23120 D RPCS3   : > from 0x000104d8 (sp=0xd0010c60)
+09-26 11:51:59.562 14961 23120 D RPCS3   : > from 0x00010250 (sp=0xd0010d00)
+09-26 11:51:59.562 14961 23120 D RPCS3   : 
+09-26 11:51:59.562 14961 23120 D RPCS3   : [00336034]  2f 83 00 00: cmpwi      cr7,r3,0
+09-26 11:51:59.562 14961 23120 D RPCS3   : [00336038]  7c 7d 1b 78: mr         r29,r3
+09-26 11:51:59.562 14961 23120 D RPCS3   : [0033603c]  40 de 00 c0: bne-       cr7,0x3360fc 
+09-26 11:51:59.562 14961 23120 D RPCS3   : [00336040]  80 a1 00 7c: lwz        r5,0x7c(r1)
+09-26 11:51:59.562 14961 23120 D RPCS3   : [00336044]  e8 01 00 b0: ld         r0,0xb0(r1)
+09-26 11:51:59.562 14961 23120 D RPCS3   : [00336048]  7c a3 07 b4: extsw      r3,r5
+09-26 11:51:59.562 14961 23120 D RPCS3   : [0033604c]  eb a1 00 88: ld         r29,0x88(r1)
+09-26 11:51:59.562 14961 23120 D RPCS3   : [00336050]  eb e1 00 98: ld         r31,0x98(r1)
+09-26 11:51:59.562 14961 23120 D RPCS3   : [00336054]  7c 08 03 a6: mtlr       r0
+09-26 11:51:59.562 14961 23120 D RPCS3   : [00336058]  38 21 00 a0: addi       r1,0xa0(r1)
+09-26 11:51:59.562 14961 23120 D RPCS3   : [0033605c]  4e 80 00 20: blr
+09-26 11:51:59.562 14961 23120 D RPCS3   : [00336060]  2f 84 00 00: cmpwi      cr7,r4,0
+09-26 11:51:59.562 14961 23120 D RPCS3   : [00336064]  41 de 00 ac: beq-       cr7,0x336110 
+09-26 11:51:59.562 14961 23120 D RPCS3   : [00336068]  2f 83 00 01: cmpwi      cr7,r3,1
+09-26 11:51:59.562 14961 23120 D RPCS3   : [0033606c]  41 9e 00 40: beq        cr7,0x3360ac 
+09-26 11:51:59.562 14961 23120 D RPCS3   : [00336070]  78 84 00 20: clrldi     r4,r4,32
+09-26 11:51:59.562 14961 23120 D RPCS3   : [00336074]  38 60 00 01: li         r3,1
+09-26 11:51:59.562 14961 23120 D RPCS3   : [00336078]  7b a5 00 20: clrldi     r5,r29,32
+09-26 11:51:59.562 14961 23120 D RPCS3   : [0033607c]  38 c1 00 70: addi       r6,0x70(r1)
+09-26 11:51:59.562 14961 23120 D RPCS3   : [00336080]  39 60 01 93: li         r11,0x193
+09-26 11:51:59.562 14961 23120 D RPCS3   : [00336084]  44 00 00 02: sc         #sys_tty_write
+09-26 11:51:59.562 14961 23120 D RPCS3   : [00336088]  2f 83 00 00: cmpwi      cr7,r3,0
+09-26 11:51:59.562 14961 23120 D RPCS3   : [0033608c]  7c 7f 1b 78: mr         r31,r3
+09-26 11:51:59.562 14961 23120 D RPCS3   : [00336090]  7f a5 eb 78: mr         r5,r29
+09-26 11:51:59.562 14961 23120 D RPCS3   : [00336094]  41 fe ff b0: beq+       cr7,0x336044 
+09-26 11:51:59.562 14961 23120 D RPCS3   : [00336098]  4b ff 48 01: bl         0x32a898
+09-26 11:51:59.562 14961 23120 D RPCS3   : [0033609c]  60 00 00 00: nop
+09-26 11:51:59.562 14961 23120 D RPCS3   : [003360a0]  38 a0 ff ff: li         r5,-1
+09-26 11:51:59.562 14961 23120 D RPCS3   : [003360a4]  93 e3 00 00: stw        r31,0(r3)
+09-26 11:51:59.562 14961 23120 D RPCS3   : [003360a8]  4b ff ff 9c: b          0x336044
+09-26 11:51:59.562 14961 23120 D RPCS3   : sys_tty_write(): “BATCHJOB: AddJob: waiting for room in job list 3 for job 56...“ << endl
+09-26 11:51:59.856 14961 15002 D S3PERF  : crosscheck ui_snapshot_fps=12.5493 ui_snapshot_frametime_ms=73.966
+09-26 11:51:59.988 14961 23120 D RPCS3   : sys_tty_write(ch=0, buf=*0x58bf20, len=63, pwritelen=*0xd000fde0)
+09-26 11:51:59.988 14961 23120 D RPCS3   : sys_tty_write(): “BATCHJOB: AddJob: waiting for room in job list 3 for job 56...“ << endl
+09-26 11:52:00.168 14961 15002 D S3PERF  : crosscheck source=surface presented=6567 json_fps=12.4644 json_frametime_ms=98.714
+09-26 11:52:00.579 14961 23120 D RPCS3   : sys_tty_write(ch=0, buf=*0x58bf20, len=63, pwritelen=*0xd000fde0)
+09-26 11:52:00.579 14961 23120 D RPCS3   : sys_tty_write(): “BATCHJOB: AddJob: waiting for room in job list 3 for job 56...“ << endl
+09-26 11:52:00.748 14961 23540 E RPCS3   : Video au decode has been waiting for a consumer for 5 seconds. (handle=0xf0000300, seq_id=1, cmd_id=63, queue_size=61)
+09-26 11:52:00.968 14961 23120 D RPCS3   : sys_tty_write(ch=0, buf=*0x58bf20, len=63, pwritelen=*0xd000fde0)
+09-26 11:52:00.968 14961 23120 D RPCS3   : sys_tty_write(): “BATCHJOB: AddJob: waiting for room in job list 3 for job 56...“ << endl
+09-26 11:52:01.072 14961 23120 D RPCS3   : sys_tty_write(ch=0, buf=*0x58bf20, len=63, pwritelen=*0xd000fde0)
+09-26 11:52:01.072 14961 23120 D RPCS3   : sys_tty_write(): “BATCHJOB: AddJob: waiting for room in job list 3 for job 56...“ << endl
+09-26 11:52:01.120 14961 15002 D S3PERF  : crosscheck ui_snapshot_fps=10.0535 ui_snapshot_frametime_ms=111.65
+09-26 11:52:01.137 14961 23120 D RPCS3   : sys_tty_write(ch=0, buf=*0x58bf20, len=63, pwritelen=*0xd000fde0)
+09-26 11:52:01.137 14961 23120 D RPCS3   : sys_tty_write(): “BATCHJOB: AddJob: waiting for room in job list 3 for job 56...“ << endl
+09-26 11:52:01.376 14961 23120 D RPCS3   : sys_tty_write(ch=0, buf=*0x58bf20, len=63, pwritelen=*0xd000fde0)
+09-26 11:52:01.376 14961 23120 D RPCS3   : sys_tty_write(): “BATCHJOB: AddJob: waiting for room in job list 3 for job 56...“ << endl
+09-26 11:52:01.432 14961 15002 D S3PERF  : crosscheck source=surface presented=6580 json_fps=10.3684 json_frametime_ms=70.752
+09-26 11:52:01.580 14961 23120 D RPCS3   : sys_tty_write(ch=0, buf=*0x58bf20, len=63, pwritelen=*0xd000fde0)
+09-26 11:52:01.580 14961 23120 D RPCS3   : sys_tty_write(): “BATCHJOB: AddJob: waiting for room in job list 3 for job 56...“ << endl
+09-26 11:52:01.900 14961 23120 D RPCS3   : sys_tty_write(ch=0, buf=*0x58bf20, len=63, pwritelen=*0xd000fde0)
+09-26 11:52:01.900 14961 23120 D RPCS3   : sys_tty_write(): “BATCHJOB: AddJob: waiting for room in job list 3 for job 56...“ << endl
+09-26 11:52:01.916 14961 14961 I S3PAD   : classify name='Xbox Wireless Controller' vid=1118 pid=736 sources=16778513 keyboardType=1 -> GAMEPAD/XBOX reason=gamepad-capability-or-identity
+09-26 11:52:01.916 14961 14961 D S3PAD   : deviceKey via descriptor
+09-26 11:52:02.149 14961 14961 I S3PAD   : classify name='Xbox Wireless Controller' vid=1118 pid=736 sources=16778513 keyboardType=1 -> GAMEPAD/XBOX reason=gamepad-capability-or-identity
+09-26 11:52:02.149 14961 14961 D S3PAD   : deviceKey via descriptor
+09-26 11:52:02.367 14961 15002 D S3PERF  : crosscheck ui_snapshot_fps=9.19886 ui_snapshot_frametime_ms=68.358
+09-26 11:52:02.379 14961 23120 D RPCS3   : sys_tty_write(ch=0, buf=*0x58bf20, len=63, pwritelen=*0xd000fde0)
+09-26 11:52:02.380 14961 23120 D RPCS3   : sys_tty_write(): “BATCHJOB: AddJob: waiting for room in job list 3 for job 56...“ << endl
+09-26 11:52:02.466 14961 14961 I S3PAD   : classify name='Xbox Wireless Controller' vid=1118 pid=736 sources=16778513 keyboardType=1 -> GAMEPAD/XBOX reason=gamepad-capability-or-identity
+09-26 11:52:02.466 14961 14961 D S3PAD   : deviceKey via descriptor
+09-26 11:52:02.466 14961 14961 I S3PAD   : classify name='Xbox Wireless Controller' vid=1118 pid=736 sources=16778513 keyboardType=1 -> GAMEPAD/XBOX reason=gamepad-capability-or-identity
+09-26 11:52:02.466 14961 14961 D S3PAD   : deviceKey via descriptor
+09-26 11:52:02.466 14961 14961 I S3PAD   : classify name='Xbox Wireless Controller' vid=1118 pid=736 sources=16778513 keyboardType=1 -> GAMEPAD/XBOX reason=gamepad-capability-or-identity
+09-26 11:52:02.466 14961 14961 D S3PAD   : deviceKey via descriptor
+09-26 11:52:02.467 14961 14961 I S3PAD   : classify name='Xbox Wireless Controller' vid=1118 pid=736 sources=16778513 keyboardType=1 -> GAMEPAD/XBOX reason=gamepad-capability-or-identity
+09-26 11:52:02.467 14961 14961 D S3PAD   : deviceKey via descriptor
+09-26 11:52:02.648 14961 23120 D RPCS3   : sys_tty_write(ch=0, buf=*0x58bf20, len=63, pwritelen=*0xd000fde0)
+09-26 11:52:02.649 14961 23120 D RPCS3   : sys_tty_write(): “BATCHJOB: AddJob: waiting for room in job list 3 for job 56...“ << endl
+09-26 11:52:02.672 14961 15002 D S3PERF  : crosscheck source=surface presented=6591 json_fps=8.60473 json_frametime_ms=132.893
+09-26 11:52:02.685 14961 14961 I S3PAD   : classify name='Xbox Wireless Controller' vid=1118 pid=736 sources=16778513 keyboardType=1 -> GAMEPAD/XBOX reason=gamepad-capability-or-identity
+09-26 11:52:02.685 14961 14961 D S3PAD   : deviceKey via descriptor
+09-26 11:52:02.685 14961 14961 I S3PAD   : classify name='Xbox Wireless Controller' vid=1118 pid=736 sources=16778513 keyboardType=1 -> GAMEPAD/XBOX reason=gamepad-capability-or-identity
+09-26 11:52:02.685 14961 14961 D S3PAD   : deviceKey via descriptor
+09-26 11:52:02.685 14961 14961 I S3PAD   : classify name='Xbox Wireless Controller' vid=1118 pid=736 sources=16778513 keyboardType=1 -> GAMEPAD/XBOX reason=gamepad-capability-or-identity
+09-26 11:52:02.685 14961 14961 D S3PAD   : deviceKey via descriptor
+09-26 11:52:02.685 14961 14961 I S3PAD   : classify name='Xbox Wireless Controller' vid=1118 pid=736 sources=16778513 keyboardType=1 -> GAMEPAD/XBOX reason=gamepad-capability-or-identity
+09-26 11:52:02.685 14961 14961 D S3PAD   : deviceKey via descriptor
+09-26 11:52:02.796 14961 23120 D RPCS3   : sys_tty_write(ch=0, buf=*0x58bf20, len=63, pwritelen=*0xd000fde0)
+09-26 11:52:02.796 14961 23120 D RPCS3   : sys_tty_write(): “BATCHJOB: AddJob: waiting for room in job list 3 for job 56...“ << endl
+09-26 11:52:02.833 14961 14961 I S3PAD   : classify name='Xbox Wireless Controller' vid=1118 pid=736 sources=16778513 keyboardType=1 -> GAMEPAD/XBOX reason=gamepad-capability-or-identity
+09-26 11:52:02.833 14961 14961 D S3PAD   : deviceKey via descriptor
+09-26 11:52:03.024 14961 14961 I S3PAD   : classify name='Xbox Wireless Controller' vid=1118 pid=736 sources=16778513 keyboardType=1 -> GAMEPAD/XBOX reason=gamepad-capability-or-identity
+09-26 11:52:03.025 14961 14961 D S3PAD   : deviceKey via descriptor
+09-26 11:52:03.300 14961 14961 I S3PAD   : classify name='Xbox Wireless Controller' vid=1118 pid=736 sources=16778513 keyboardType=1 -> GAMEPAD/XBOX reason=gamepad-capability-or-identity
+09-26 11:52:03.300 14961 14961 D S3PAD   : deviceKey via descriptor
+09-26 11:52:03.306 14961 14961 I S3PAD   : classify name='Xbox Wireless Controller' vid=1118 pid=736 sources=16778513 keyboardType=1 -> GAMEPAD/XBOX reason=gamepad-capability-or-identity
+09-26 11:52:03.306 14961 14961 D S3PAD   : deviceKey via descriptor
+09-26 11:52:03.314 14961 14961 I S3PAD   : classify name='Xbox Wireless Controller' vid=1118 pid=736 sources=16778513 keyboardType=1 -> GAMEPAD/XBOX reason=gamepad-capability-or-identity
+09-26 11:52:03.314 14961 14961 D S3PAD   : deviceKey via descriptor
+09-26 11:52:03.324 14961 14961 I S3PAD   : classify name='Xbox Wireless Controller' vid=1118 pid=736 sources=16778513 keyboardType=1 -> GAMEPAD/XBOX reason=gamepad-capability-or-identity
+09-26 11:52:03.324 14961 14961 D S3PAD   : deviceKey via descriptor
+09-26 11:52:03.330 14961 14961 I S3PAD   : classify name='Xbox Wireless Controller' vid=1118 pid=736 sources=16778513 keyboardType=1 -> GAMEPAD/XBOX reason=gamepad-capability-or-identity
+09-26 11:52:03.330 14961 14961 D S3PAD   : deviceKey via descriptor
+09-26 11:52:03.552 14961 23120 D RPCS3   : sys_tty_write(ch=0, buf=*0x58bf20, len=63, pwritelen=*0xd000fde0)
+09-26 11:52:03.552 14961 23120 D RPCS3   : sys_tty_write(): “BATCHJOB: AddJob: waiting for room in job list 3 for job 56...“ << endl
+09-26 11:52:03.605 14961 14961 I S3PAD   : classify name='Xbox Wireless Controller' vid=1118 pid=736 sources=16778513 keyboardType=1 -> GAMEPAD/XBOX reason=gamepad-capability-or-identity
+09-26 11:52:03.605 14961 14961 D S3PAD   : deviceKey via descriptor
+09-26 11:52:03.614 14961 14961 I S3PAD   : classify name='Xbox Wireless Controller' vid=1118 pid=736 sources=16778513 keyboardType=1 -> GAMEPAD/XBOX reason=gamepad-capability-or-identity
+09-26 11:52:03.614 14961 14961 D S3PAD   : deviceKey via descriptor
+09-26 11:52:03.621 14961 14961 I S3PAD   : classify name='Xbox Wireless Controller' vid=1118 pid=736 sources=16778513 keyboardType=1 -> GAMEPAD/XBOX reason=gamepad-capability-or-identity
+09-26 11:52:03.622 14961 14961 D S3PAD   : deviceKey via descriptor
+09-26 11:52:03.626 14961 15002 D S3PERF  : crosscheck ui_snapshot_fps=9.8393 ui_snapshot_frametime_ms=96.569
+09-26 11:52:03.632 14961 14961 I S3PAD   : classify name='Xbox Wireless Controller' vid=1118 pid=736 sources=16778513 keyboardType=1 -> GAMEPAD/XBOX reason=gamepad-capability-or-identity
+09-26 11:52:03.632 14961 14961 D S3PAD   : deviceKey via descriptor
+09-26 11:52:03.638 14961 14961 I S3PAD   : classify name='Xbox Wireless Controller' vid=1118 pid=736 sources=16778513 keyboardType=1 -> GAMEPAD/XBOX reason=gamepad-capability-or-identity
+09-26 11:52:03.638 14961 14961 D S3PAD   : deviceKey via descriptor
+09-26 11:52:03.663 14961 14961 I S3PAD   : classify name='Xbox Wireless Controller' vid=1118 pid=736 sources=16778513 keyboardType=1 -> GAMEPAD/XBOX reason=gamepad-capability-or-identity
+09-26 11:52:03.664 14961 14961 D S3PAD   : deviceKey via descriptor
+09-26 11:52:03.671 14961 14961 I S3PAD   : classify name='Xbox Wireless Controller' vid=1118 pid=736 sources=16778513 keyboardType=1 -> GAMEPAD/XBOX reason=gamepad-capability-or-identity
+09-26 11:52:03.671 14961 14961 D S3PAD   : deviceKey via descriptor
+09-26 11:52:03.680 14961 14961 I S3PAD   : classify name='Xbox Wireless Controller' vid=1118 pid=736 sources=16778513 keyboardType=1 -> GAMEPAD/XBOX reason=gamepad-capability-or-identity
+09-26 11:52:03.681 14961 14961 D S3PAD   : deviceKey via descriptor
+09-26 11:52:03.696 14961 14961 I S3PAD   : classify name='Xbox Wireless Controller' vid=1118 pid=736 sources=16778513 keyboardType=1 -> GAMEPAD/XBOX reason=gamepad-capability-or-identity
+09-26 11:52:03.697 14961 14961 D S3PAD   : deviceKey via descriptor
+09-26 11:52:03.704 14961 23120 D RPCS3   : sys_tty_write(ch=0, buf=*0x58bf20, len=63, pwritelen=*0xd000fde0)
+09-26 11:52:03.704 14961 23120 D RPCS3   : sys_tty_write(): “BATCHJOB: AddJob: waiting for room in job list 3 for job 56...“ << endl
+09-26 11:52:03.707 14961 14961 I S3PAD   : classify name='Xbox Wireless Controller' vid=1118 pid=736 sources=16778513 keyboardType=1 -> GAMEPAD/XBOX reason=gamepad-capability-or-identity
+09-26 11:52:03.707 14961 14961 D S3PAD   : deviceKey via descriptor
+09-26 11:52:03.715 14961 14961 I S3PAD   : classify name='Xbox Wireless Controller' vid=1118 pid=736 sources=16778513 keyboardType=1 -> GAMEPAD/XBOX reason=gamepad-capability-or-identity
+09-26 11:52:03.715 14961 14961 D S3PAD   : deviceKey via descriptor
+09-26 11:52:03.722 14961 14961 I S3PAD   : classify name='Xbox Wireless Controller' vid=1118 pid=736 sources=16778513 keyboardType=1 -> GAMEPAD/XBOX reason=gamepad-capability-or-identity
+09-26 11:52:03.722 14961 14961 D S3PAD   : deviceKey via descriptor
+09-26 11:52:03.730 14961 14961 I S3PAD   : classify name='Xbox Wireless Controller' vid=1118 pid=736 sources=16778513 keyboardType=1 -> GAMEPAD/XBOX reason=gamepad-capability-or-identity
+09-26 11:52:03.730 14961 14961 D S3PAD   : deviceKey via descriptor
+09-26 11:52:03.739 14961 14961 I S3PAD   : classify name='Xbox Wireless Controller' vid=1118 pid=736 sources=16778513 keyboardType=1 -> GAMEPAD/XBOX reason=gamepad-capability-or-identity
+09-26 11:52:03.739 14961 14961 D S3PAD   : deviceKey via descriptor
+09-26 11:52:03.755 14961 14961 I S3PAD   : classify name='Xbox Wireless Controller' vid=1118 pid=736 sources=16778513 keyboardType=1 -> GAMEPAD/XBOX reason=gamepad-capability-or-identity
+09-26 11:52:03.755 14961 14961 D S3PAD   : deviceKey via descriptor

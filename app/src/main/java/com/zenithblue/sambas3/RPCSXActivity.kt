@@ -9,12 +9,14 @@ import android.os.Build
 import android.os.Handler
 import android.os.Looper
 import android.os.Bundle
+import android.util.DisplayMetrics
 import android.util.Log
 import android.view.InputDevice
 import android.view.KeyEvent
 import android.view.MotionEvent
 import android.view.PixelCopy
 import android.view.View
+import android.view.WindowManager
 import android.view.ViewGroup.MarginLayoutParams
 import android.view.WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_MODE_SHORT_EDGES
 import androidx.activity.ComponentActivity
@@ -36,6 +38,10 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.zenithblue.sambas3.databinding.ActivityRpcs3Binding
 import com.zenithblue.sambas3.dialogs.AlertDialogQueue
 import com.zenithblue.sambas3.gameconfig.GameSettingsOverrides
+import com.zenithblue.sambas3.gameconfig.OutputResolutionStore
+import com.zenithblue.sambas3.gameconfig.OutputSurfaceResolver
+import com.zenithblue.sambas3.gameconfig.VideoOutputProfiles
+import com.zenithblue.sambas3.gameconfig.SettingsValueCodec
 import com.zenithblue.sambas3.utils.GpuDriverSelection
 import com.zenithblue.sambas3.overlay.State
 import com.zenithblue.sambas3.ppu.FreshBootFramePhase
@@ -112,6 +118,30 @@ private enum class FrontendHomeInputSource {
     ToolbarHome,
     MenuCommand
 }
+
+@Suppress("DEPRECATION")
+private fun ComponentActivity.outputWindowAspect(): Double = runCatching {
+    val width: Int
+    val height: Int
+    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+        // currentWindowMetrics describes this activity's fullscreen window,
+        // which is the area SurfaceView is composed into after immersive mode.
+        val bounds = windowManager.currentWindowMetrics.bounds
+        width = bounds.width()
+        height = bounds.height()
+    } else {
+        // Android 10 does not expose currentWindowMetrics. This activity is
+        // fullscreen and opts into the short cutout edges, so real display
+        // metrics match its output window.
+        val metrics = DisplayMetrics()
+        windowManager.defaultDisplay.getRealMetrics(metrics)
+        width = metrics.widthPixels
+        height = metrics.heightPixels
+    }
+    val longEdge = maxOf(width, height)
+    val shortEdge = minOf(width, height)
+    if (longEdge > 0 && shortEdge > 0) longEdge.toDouble() / shortEdge else 16.0 / 9.0
+}.getOrDefault(16.0 / 9.0)
 
 /**
  * Android host adapter only: lifecycle, views, surface, frontend-listener
@@ -269,7 +299,45 @@ class RPCSXActivity : ComponentActivity(), EmulationHost {
         binding.oscToggle.translationZ = 3f
         binding.shaderToastOverlay.translationZ = 4f
         binding.transitionOverlay.translationZ = 100f
-        surfaceLeaseManager = SurfaceLeaseManager(binding.surfaceHost)
+        // Put the Activity window into its final edge-to-edge dimensions before
+        // resolving a Native output ratio or creating SurfaceView's first buffer.
+        enableFullScreenImmersive()
+        // A previous process can leave a title's temporary global settings
+        // lease behind. Restore it before deriving this surface's global aspect.
+        val staleLeaseRecovered = runCatching { GameSettingsOverrides.recoverStaleLease(this) }
+            .onFailure { Log.e("S3OUTPUT", "stale settings lease recovery failed", it) }
+            .getOrDefault(false)
+        val outputTitleId = GameSettingsOverrides.resolveTitleId(requestedPath, this)
+            ?: GameIdentity.titleIdOrNull(requestedPath, requestedGame.info.name.value)
+        val titleOverrides = outputTitleId?.let { title ->
+            runCatching { GameSettingsOverrides.explicitUserOverrides(this, title) }
+                .onFailure { Log.w("S3OUTPUT", "title settings read failed title=$title: ${it.message}") }
+                .getOrDefault(emptyMap())
+        }.orEmpty()
+        val encodedAspect = titleOverrides[ASPECT_RATIO_SETTING]
+            ?: GameSettingsOverrides.readGlobalEncoded(ASPECT_RATIO_SETTING)
+        val displayAspect = encodedAspect?.let(SettingsValueCodec::decodeToDisplay) ?: DEFAULT_OUTPUT_ASPECT
+        val nativeAspect = outputWindowAspect()
+        val strictGlobalValue = GameSettingsOverrides.readGlobalEncoded(STRICT_RENDERING_SETTING)
+        val strictRendering = VideoOutputProfiles.effectiveStrictRendering(
+            explicitOverride = titleOverrides[STRICT_RENDERING_SETTING],
+            curatedDefault = outputTitleId?.let { GameSettingsOverrides.curatedDefaultsForTitle(it)[STRICT_RENDERING_SETTING] },
+            engineGlobalValue = strictGlobalValue
+        )
+        val selectedHeight = if (!staleLeaseRecovered || strictRendering || outputTitleId == null) null else
+            OutputResolutionStore.selectedHeight(this, outputTitleId)
+        val outputSize = runCatching {
+            OutputSurfaceResolver.resolve(selectedHeight, displayAspect, nativeAspect)
+        }.onFailure { Log.e("S3OUTPUT", "surface preset rejected title=$outputTitleId: ${it.message}") }
+            .getOrNull()
+        Log.i(
+            "S3OUTPUT",
+            "title=${outputTitleId ?: "unknown"} selectedHeight=${selectedHeight ?: "layout"} " +
+                "aspect=$displayAspect nativeAspect=$nativeAspect strict=$strictRendering " +
+                "staleLeaseRecovered=$staleLeaseRecovered " +
+                "buffer=${outputSize?.let { "${it.width}x${it.height}" } ?: "layout"}"
+        )
+        surfaceLeaseManager = SurfaceLeaseManager(binding.surfaceHost, outputSize = outputSize)
         surfaceLeaseManager.onFailure = { reason ->
             runOnUiThread {
                 if (bootMode != EmulatorBootMode.FreshGame && recoveryTransitionActive) failBootAndReturnHome(reason)
@@ -2381,6 +2449,9 @@ class RPCSXActivity : ComponentActivity(), EmulationHost {
         const val EXTRA_SAVESTATE_PATH = "savestatePath"
         const val EXTRA_SAVESTATE_SLOT = "savestateSlot"
         const val EXTRA_SAFE_RETRY = "safeRetry"
+        private const val ASPECT_RATIO_SETTING = "Video@@Aspect ratio"
+        private const val STRICT_RENDERING_SETTING = "Video@@Strict Rendering Mode"
+        private const val DEFAULT_OUTPUT_ASPECT = "16:9"
         private const val TITLE_ID_POLL_INTERVAL_MS = 250L
         private const val TITLE_ID_POLL_TIMEOUT_MS = 10_000L
         private const val FRAME_COPY_TIMEOUT_MS = 2_000L

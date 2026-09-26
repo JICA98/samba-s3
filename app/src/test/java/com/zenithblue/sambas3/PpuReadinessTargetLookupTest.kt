@@ -107,6 +107,7 @@ class PpuReadinessTargetLookupTest {
         val fp = PpuReadinessStore.fingerprint(ctx, "BLUS30443")
         assertTrue("Fingerprint must contain titleId BLUS30443", fp?.contains("BLUS30443") == true)
         assertFalse("Fingerprint must not retain auto", fp?.contains("|auto|") == true)
+        assertTrue("Fallback fingerprint must use the current PPU cache ABI", fp?.startsWith("v8-kusa|") == true)
         assertTrue("Fingerprint must contain effective baseline cortex-a34", fp?.contains("|cortex-a34|") == true)
     }
 

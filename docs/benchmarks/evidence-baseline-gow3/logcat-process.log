@@ -1,0 +1,120 @@
+--------- beginning of system
+09-26 11:43:18.152 14961 14961 D InsetsController: Setting requestedVisibleTypes to 496 (was 503)
+09-26 11:43:19.767 14961 14961 W NotificationManager: Shedding cancel (dupe) of NotificationKey[user=UserHandle{0}, pkg=com.zenithblue.sambas3, tag=null, id=2002], rate limit (5.0) exceeded: input 8.124765, output would be 5.694276
+09-26 11:43:20.375 14961 14961 W NotificationManager: Shedding notify (update) of NotificationKey[user=UserHandle{0}, pkg=com.zenithblue.sambas3, tag=null, id=2000], rate limit (5.0) exceeded: input 7.877752, output would be 5.5209503
+09-26 11:43:21.053 14961 14961 W NotificationManager: Shedding cancel (dupe) of NotificationKey[user=UserHandle{0}, pkg=com.zenithblue.sambas3, tag=null, id=2002], rate limit (5.0) exceeded: input 19.787142, output would be 5.6660533
+09-26 11:43:21.470 14961 14961 W NotificationManager: Shedding notify (update) of NotificationKey[user=UserHandle{0}, pkg=com.zenithblue.sambas3, tag=null, id=2000], rate limit (5.0) exceeded: input 15.90131, output would be 5.6784835
+09-26 11:43:22.101 14961 14961 W NotificationManager: Shedding cancel (dupe) of NotificationKey[user=UserHandle{0}, pkg=com.zenithblue.sambas3, tag=null, id=2002], rate limit (5.0) exceeded: input 36.65578, output would be 6.5676026
+09-26 11:43:22.534 14961 14961 W NotificationManager: Shedding notify (update) of NotificationKey[user=UserHandle{0}, pkg=com.zenithblue.sambas3, tag=null, id=2000], rate limit (5.0) exceeded: input 16.583378, output would be 6.4011955
+09-26 11:43:23.102 14961 14961 W NotificationManager: Shedding cancel (dupe) of NotificationKey[user=UserHandle{0}, pkg=com.zenithblue.sambas3, tag=null, id=2001], rate limit (5.0) exceeded: input 22.392265, output would be 5.4900584
+09-26 11:43:23.681 14961 14961 W NotificationManager: Shedding notify (update) of NotificationKey[user=UserHandle{0}, pkg=com.zenithblue.sambas3, tag=null, id=2000], rate limit (5.0) exceeded: input 13.102094, output would be 6.30468
+09-26 11:43:24.217 14961 14961 W NotificationManager: Shedding cancel (dupe) of NotificationKey[user=UserHandle{0}, pkg=com.zenithblue.sambas3, tag=null, id=2002], rate limit (5.0) exceeded: input 15.719065, output would be 5.619116
+09-26 11:43:25.074 14961 14961 W NotificationManager: Shedding notify (update) of NotificationKey[user=UserHandle{0}, pkg=com.zenithblue.sambas3, tag=null, id=2000], rate limit (5.0) exceeded: input 10.854051, output would be 5.944317
+09-26 11:43:25.285 14961 14961 W NotificationManager: Shedding cancel (dupe) of NotificationKey[user=UserHandle{0}, pkg=com.zenithblue.sambas3, tag=null, id=2002], rate limit (5.0) exceeded: input 27.748358, output would be 6.172694
+09-26 11:43:26.331 14961 14961 W NotificationManager: Shedding cancel (dupe) of NotificationKey[user=UserHandle{0}, pkg=com.zenithblue.sambas3, tag=null, id=2002], rate limit (5.0) exceeded: input 27.22767, output would be 6.9935184
+09-26 11:43:26.507 14961 14961 W NotificationManager: Shedding notify (update) of NotificationKey[user=UserHandle{0}, pkg=com.zenithblue.sambas3, tag=null, id=2000], rate limit (5.0) exceeded: input 11.253961, output would be 5.099686
+09-26 11:43:27.444 14961 14961 W NotificationManager: Shedding cancel (dupe) of NotificationKey[user=UserHandle{0}, pkg=com.zenithblue.sambas3, tag=null, id=2002], rate limit (5.0) exceeded: input 17.435167, output would be 5.3448095
+09-26 11:43:27.637 14961 14961 W NotificationManager: Shedding notify (update) of NotificationKey[user=UserHandle{0}, pkg=com.zenithblue.sambas3, tag=null, id=2000], rate limit (5.0) exceeded: input 13.042216, output would be 5.455438
+09-26 11:43:28.645 14961 14961 W NotificationManager: Shedding cancel (dupe) of NotificationKey[user=UserHandle{0}, pkg=com.zenithblue.sambas3, tag=null, id=2002], rate limit (5.0) exceeded: input 16.15542, output would be 5.4307446
+09-26 11:43:28.659 14961 14961 W NotificationManager: Shedding notify (update) of NotificationKey[user=UserHandle{0}, pkg=com.zenithblue.sambas3, tag=null, id=2000], rate limit (5.0) exceeded: input 11.434876, output would be 5.302878
+09-26 11:43:29.981 14961 14961 W NotificationManager: Shedding cancel (dupe) of NotificationKey[user=UserHandle{0}, pkg=com.zenithblue.sambas3, tag=null, id=2002], rate limit (5.0) exceeded: input 14.093393, output would be 5.301729
+09-26 11:43:30.205 14961 14961 W NotificationManager: Shedding notify (update) of NotificationKey[user=UserHandle{0}, pkg=com.zenithblue.sambas3, tag=null, id=2000], rate limit (5.0) exceeded: input 9.330868, output would be 5.260907
+09-26 11:43:31.027 14961 14961 W NotificationManager: Shedding cancel (dupe) of NotificationKey[user=UserHandle{0}, pkg=com.zenithblue.sambas3, tag=null, id=2002], rate limit (5.0) exceeded: input 17.85706, output would be 6.222102
+09-26 11:43:31.299 14961 14961 W NotificationManager: Shedding notify (update) of NotificationKey[user=UserHandle{0}, pkg=com.zenithblue.sambas3, tag=null, id=2000], rate limit (5.0) exceeded: input 10.266409, output would be 5.8462954
+09-26 11:43:32.265 14961 14961 W NotificationManager: Shedding cancel (dupe) of NotificationKey[user=UserHandle{0}, pkg=com.zenithblue.sambas3, tag=null, id=2002], rate limit (5.0) exceeded: input 12.995311, output would be 5.418272
+09-26 11:43:32.797 14961 14961 W NotificationManager: Shedding notify (update) of NotificationKey[user=UserHandle{0}, pkg=com.zenithblue.sambas3, tag=null, id=2000], rate limit (5.0) exceeded: input 10.3694105, output would be 6.6942563
+09-26 11:43:33.329 14961 14961 W NotificationManager: Shedding cancel (dupe) of NotificationKey[user=UserHandle{0}, pkg=com.zenithblue.sambas3, tag=null, id=2002], rate limit (5.0) exceeded: input 17.443153, output would be 5.8264236
+09-26 11:43:33.875 14961 14961 W NotificationManager: Shedding notify (update) of NotificationKey[user=UserHandle{0}, pkg=com.zenithblue.sambas3, tag=null, id=2000], rate limit (5.0) exceeded: input 13.0001335, output would be 5.0772047
+09-26 11:43:34.362 14961 14961 W NotificationManager: Shedding cancel (dupe) of NotificationKey[user=UserHandle{0}, pkg=com.zenithblue.sambas3, tag=null, id=2001], rate limit (5.0) exceeded: input 22.74456, output would be 5.118526
+09-26 11:43:35.059 14961 14961 W NotificationManager: Shedding notify (update) of NotificationKey[user=UserHandle{0}, pkg=com.zenithblue.sambas3, tag=null, id=2000], rate limit (5.0) exceeded: input 12.733289, output would be 5.1119404
+09-26 11:43:35.365 14961 14961 W NotificationManager: Shedding cancel (dupe) of NotificationKey[user=UserHandle{0}, pkg=com.zenithblue.sambas3, tag=null, id=2002], rate limit (5.0) exceeded: input 32.386932, output would be 6.366248
+09-26 11:43:36.507 14961 14961 W NotificationManager: Shedding cancel (dupe) of NotificationKey[user=UserHandle{0}, pkg=com.zenithblue.sambas3, tag=null, id=2002], rate limit (5.0) exceeded: input 14.108445, output would be 5.7903967
+09-26 11:43:37.344 14961 14961 W NotificationManager: Shedding notify (update) of NotificationKey[user=UserHandle{0}, pkg=com.zenithblue.sambas3, tag=null, id=2000], rate limit (5.0) exceeded: input 9.294172, output would be 5.9486823
+09-26 11:43:37.511 14961 14961 W NotificationManager: Shedding cancel (dupe) of NotificationKey[user=UserHandle{0}, pkg=com.zenithblue.sambas3, tag=null, id=2001], rate limit (5.0) exceeded: input 235.50513, output would be 5.3756046
+09-26 11:44:07.035 14961 14961 W NotificationManager: Shedding cancel (dupe) of NotificationKey[user=UserHandle{0}, pkg=com.zenithblue.sambas3, tag=null, id=2002], rate limit (5.0) exceeded: input 7.842652, output would be 5.4165344
+--------- beginning of main
+09-26 11:45:01.298 14961 15002 D S3PERF  : crosscheck ui_snapshot_fps=28.1148 ui_snapshot_frametime_ms=39.829
+09-26 11:45:01.605 14961 15002 D S3PERF  : crosscheck source=surface presented=2639 json_fps=25.1267 json_frametime_ms=36.075
+09-26 11:45:01.608 14961 14961 W DefaultDispatch: type=1400 audit(0.0:7179066): avc:  denied  { search } for  name="zram0" dev="sysfs" ino=107524 scontext=u:r:untrusted_app:s0:c207,c257,c512,c768 tcontext=u:object_r:sysfs_zram:s0 tclass=dir permissive=0 app=com.zenithblue.sambas3
+09-26 11:45:01.608 14961 14961 W DefaultDispatch: type=1400 audit(0.0:7179067): avc:  denied  { search } for  name="zram0" dev="sysfs" ino=107524 scontext=u:r:untrusted_app:s0:c207,c257,c512,c768 tcontext=u:object_r:sysfs_zram:s0 tclass=dir permissive=0 app=com.zenithblue.sambas3
+09-26 11:45:02.530 14961 15002 D S3PERF  : crosscheck ui_snapshot_fps=28.8924 ui_snapshot_frametime_ms=22.198
+09-26 11:45:02.833 14961 15002 D S3PERF  : crosscheck source=surface presented=2676 json_fps=32.4013 json_frametime_ms=21.838
+09-26 11:45:03.775 14961 15002 D S3PERF  : crosscheck ui_snapshot_fps=33.0616 ui_snapshot_frametime_ms=38.775
+09-26 11:45:04.060 14961 14961 W DebugPad: BUTTON SQUARE d1=0 d2=128 press 120ms request_id=s3-1790403303998138165-3450249-10624
+09-26 11:45:04.080 14961 15002 D S3PERF  : crosscheck source=surface presented=2715 json_fps=31.5465 json_frametime_ms=28.141
+09-26 11:45:04.180 14961 14961 W DebugPad: BUTTON SQUARE release request_id=s3-1790403303998138165-3450249-10624
+09-26 11:45:05.009 14961 15002 D S3PERF  : crosscheck ui_snapshot_fps=33.2347 ui_snapshot_frametime_ms=22.287
+09-26 11:45:05.330 14961 15003 D S3PERF  : crosscheck source=surface presented=2754 json_fps=30.6015 json_frametime_ms=46.238
+09-26 11:45:06.269 14961 15003 D S3PERF  : crosscheck ui_snapshot_fps=30.0418 ui_snapshot_frametime_ms=24.608
+09-26 11:45:06.598 14961 15003 D S3PERF  : crosscheck source=surface presented=2794 json_fps=30.7301 json_frametime_ms=53.801
+09-26 11:45:07.538 14961 15003 D S3PERF  : crosscheck ui_snapshot_fps=28.3232 ui_snapshot_frametime_ms=36.401
+09-26 11:45:07.853 14961 15003 D S3PERF  : crosscheck source=surface presented=2830 json_fps=27.3252 json_frametime_ms=43.893
+09-26 11:45:08.719 14961 20831 D RPCS3   : CPU Usage: Total: 68.5%, Cores: 0.0%, 0.0%, 0.0%, 0.0%, 0.0%, 0.0%, 0.0%, 0.0%
+09-26 11:45:08.789 14961 15003 D S3PERF  : crosscheck ui_snapshot_fps=32.9039 ui_snapshot_frametime_ms=32.047
+09-26 11:45:08.792 14961 20854 D RPCS3   : PPU Syscall Usage Stats:
+09-26 11:45:08.792 14961 20854 D RPCS3   : 	⁂ sys_timer_usleep [312650]
+09-26 11:45:08.792 14961 20854 D RPCS3   : 	⁂ _sys_lwcond_queue_wait [122088]
+09-26 11:45:08.792 14961 20854 D RPCS3   : 	⁂ _sys_lwmutex_lock [121716]
+09-26 11:45:08.792 14961 20854 D RPCS3   : 	⁂ _sys_lwmutex_unlock [117455]
+09-26 11:45:08.792 14961 20854 D RPCS3   : 	⁂ _sys_lwcond_signal [77120]
+09-26 11:45:08.792 14961 20854 D RPCS3   : 	⁂ _sys_lwcond_signal_all [46921]
+09-26 11:45:08.792 14961 20854 D RPCS3   : 	⁂ sys_time_get_current_time [41226]
+09-26 11:45:08.792 14961 20854 D RPCS3   : 	⁂ sys_event_queue_receive [24985]
+09-26 11:45:08.792 14961 20854 D RPCS3   : 	⁂ sys_fs_write [21242]
+09-26 11:45:08.792 14961 20854 D RPCS3   : 	⁂ sys_fs_read [20429]
+09-26 11:45:08.792 14961 20854 D RPCS3   : 	⁂ sys_event_port_send [9324]
+09-26 11:45:08.792 14961 20854 D RPCS3   : 	⁂ sys_fs_fsync [3541]
+09-26 11:45:08.792 14961 20854 D RPCS3   : 	⁂ sys_event_flag_wait [2341]
+09-26 11:45:08.792 14961 20854 D RPCS3   : 	⁂ sys_event_flag_clear [2341]
+09-26 11:45:08.792 14961 20854 D RPCS3   : 	⁂ sys_fs_lseek [1640]
+09-26 11:45:08.792 14961 20854 D RPCS3   : 	⁂ _sys_lwmutex_trylock [54]
+09-26 11:45:09.093 14961 15003 D S3PERF  : crosscheck source=surface presented=2872 json_fps=34.2534 json_frametime_ms=29.203
+09-26 11:45:09.102 14961 15003 D S3PERF  : GPU load [/sys/class/kgsl/kgsl-3d0/gpubusy]: raw='631734 1001846' -> load=63.05699678393685%
+09-26 11:45:10.035 14961 15003 D S3PERF  : crosscheck ui_snapshot_fps=27.8454 ui_snapshot_frametime_ms=48.144
+09-26 11:45:10.340 14961 15003 D S3PERF  : crosscheck source=surface presented=2908 json_fps=30.3715 json_frametime_ms=23.47
+09-26 11:45:10.340 14961 14961 W DefaultDispatch: type=1400 audit(0.0:7179068): avc:  denied  { search } for  name="zram0" dev="sysfs" ino=107524 scontext=u:r:untrusted_app:s0:c207,c257,c512,c768 tcontext=u:object_r:sysfs_zram:s0 tclass=dir permissive=0 app=com.zenithblue.sambas3
+09-26 11:45:10.344 14961 14961 W DefaultDispatch: type=1400 audit(0.0:7179069): avc:  denied  { search } for  name="zram0" dev="sysfs" ino=107524 scontext=u:r:untrusted_app:s0:c207,c257,c512,c768 tcontext=u:object_r:sysfs_zram:s0 tclass=dir permissive=0 app=com.zenithblue.sambas3
+09-26 11:45:10.969 14961 20984 W RPCS3   : sys_fs_fstat(fd=10, sb=*0xd005f624)
+09-26 11:45:11.299 14961 15003 D S3PERF  : crosscheck ui_snapshot_fps=32.4743 ui_snapshot_frametime_ms=29.58
+09-26 11:45:11.621 14961 15003 D S3PERF  : crosscheck source=surface presented=2949 json_fps=31.2299 json_frametime_ms=22.936
+09-26 11:45:12.548 14961 15003 D S3PERF  : crosscheck ui_snapshot_fps=31.4113 ui_snapshot_frametime_ms=22.416
+09-26 11:45:12.851 14961 15003 D S3PERF  : crosscheck source=surface presented=2993 json_fps=36.0887 json_frametime_ms=22.118
+09-26 11:45:13.792 14961 15003 D S3PERF  : crosscheck ui_snapshot_fps=37.5327 ui_snapshot_frametime_ms=17.517
+09-26 11:45:14.096 14961 15003 D S3PERF  : crosscheck source=surface presented=3043 json_fps=41.7496 json_frametime_ms=19.559
+09-26 11:45:15.038 14961 15003 D S3PERF  : crosscheck ui_snapshot_fps=44.3139 ui_snapshot_frametime_ms=18.747
+09-26 11:45:15.345 14961 15003 D S3PERF  : crosscheck source=surface presented=3097 json_fps=43.9089 json_frametime_ms=19.263
+09-26 11:45:16.286 14961 15003 D S3PERF  : crosscheck ui_snapshot_fps=46.0873 ui_snapshot_frametime_ms=21.87
+09-26 11:45:16.592 14961 15003 D S3PERF  : crosscheck source=surface presented=3151 json_fps=42.6574 json_frametime_ms=38.875
+09-26 11:45:17.536 14961 15003 D S3PERF  : crosscheck ui_snapshot_fps=35.09 ui_snapshot_frametime_ms=20.175
+09-26 11:45:17.856 14961 15003 D S3PERF  : crosscheck source=surface presented=3194 json_fps=33.5732 json_frametime_ms=28.35
+09-26 11:45:17.910 14961 14973 I ithblue.sambas3: Explicit concurrent mark compact GC freed 6744KB AllocSpace bytes, 85(1572KB) LOS objects, 81% free, 5418KB/29MB, paused 103us,850us total 40.857ms
+09-26 11:45:18.719 14961 20831 D RPCS3   : CPU Usage: Total: 58.1%, Cores: 0.0%, 0.0%, 0.0%, 0.0%, 0.0%, 0.0%, 0.0%, 0.0%
+09-26 11:45:18.792 14961 15003 D S3PERF  : crosscheck ui_snapshot_fps=34.9956 ui_snapshot_frametime_ms=19.922
+09-26 11:45:18.798 14961 20854 D RPCS3   : PPU Syscall Usage Stats:
+09-26 11:45:18.798 14961 20854 D RPCS3   : 	⁂ sys_timer_usleep [318751]
+09-26 11:45:18.798 14961 20854 D RPCS3   : 	⁂ _sys_lwcond_queue_wait [135924]
+09-26 11:45:18.798 14961 20854 D RPCS3   : 	⁂ _sys_lwmutex_lock [135480]
+09-26 11:45:18.798 14961 20854 D RPCS3   : 	⁂ _sys_lwmutex_unlock [130540]
+09-26 11:45:18.798 14961 20854 D RPCS3   : 	⁂ _sys_lwcond_signal [86023]
+09-26 11:45:18.798 14961 20854 D RPCS3   : 	⁂ _sys_lwcond_signal_all [52215]
+09-26 11:45:18.798 14961 20854 D RPCS3   : 	⁂ sys_time_get_current_time [46237]
+09-26 11:45:18.798 14961 20854 D RPCS3   : 	⁂ sys_event_queue_receive [28719]
+09-26 11:45:18.798 14961 20854 D RPCS3   : 	⁂ sys_fs_write [23699]
+09-26 11:45:18.798 14961 20854 D RPCS3   : 	⁂ sys_fs_read [22663]
+09-26 11:45:18.798 14961 20854 D RPCS3   : 	⁂ sys_event_port_send [10627]
+09-26 11:45:18.798 14961 20854 D RPCS3   : 	⁂ sys_fs_fsync [3951]
+09-26 11:45:18.798 14961 20854 D RPCS3   : 	⁂ sys_event_flag_wait [2944]
+09-26 11:45:18.798 14961 20854 D RPCS3   : 	⁂ sys_event_flag_clear [2944]
+09-26 11:45:18.798 14961 20854 D RPCS3   : 	⁂ sys_fs_lseek [1818]
+09-26 11:45:18.798 14961 20854 D RPCS3   : 	⁂ _sys_lwmutex_trylock [66]
+09-26 11:45:18.798 14961 20854 D RPCS3   : 	⁂ sys_fs_fstat [41]
+09-26 11:45:19.110 14961 15003 D S3PERF  : crosscheck source=surface presented=3238 json_fps=34.5265 json_frametime_ms=22.921
+09-26 11:45:19.119 14961 15003 D S3PERF  : GPU load [/sys/class/kgsl/kgsl-3d0/gpubusy]: raw='650130 1056015' -> load=61.56446641382935%
+09-26 11:45:19.116 14961 14961 W DefaultDispatch: type=1400 audit(0.0:7179070): avc:  denied  { search } for  name="zram0" dev="sysfs" ino=107524 scontext=u:r:untrusted_app:s0:c207,c257,c512,c768 tcontext=u:object_r:sysfs_zram:s0 tclass=dir permissive=0 app=com.zenithblue.sambas3
+09-26 11:45:19.116 14961 14961 W DefaultDispatch: type=1400 audit(0.0:7179071): avc:  denied  { search } for  name="zram0" dev="sysfs" ino=107524 scontext=u:r:untrusted_app:s0:c207,c257,c512,c768 tcontext=u:object_r:sysfs_zram:s0 tclass=dir permissive=0 app=com.zenithblue.sambas3
+09-26 11:45:20.048 14961 15003 D S3PERF  : crosscheck ui_snapshot_fps=37.6712 ui_snapshot_frametime_ms=23.293
+09-26 11:45:20.359 14961 15003 D S3PERF  : crosscheck source=surface presented=3286 json_fps=38.3931 json_frametime_ms=18.952
+09-26 11:45:21.314 14961 15003 D S3PERF  : crosscheck ui_snapshot_fps=35.3056 ui_snapshot_frametime_ms=17.088
+09-26 11:45:21.625 14961 15003 D S3PERF  : crosscheck source=surface presented=3320 json_fps=26.3665 json_frametime_ms=36.592
+09-26 11:45:22.566 14961 15003 D S3PERF  : crosscheck ui_snapshot_fps=28.3006 ui_snapshot_frametime_ms=26.114
+09-26 11:45:22.871 14961 15003 D S3PERF  : crosscheck source=surface presented=3355 json_fps=28.3191 json_frametime_ms=42.019

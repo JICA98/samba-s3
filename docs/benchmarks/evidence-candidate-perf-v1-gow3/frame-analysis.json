@@ -1,0 +1,62 @@
+{
+  "total_events_parsed": 15,
+  "qualified_frames": 2,
+  "deduplicated_events": 0,
+  "dropped_or_invalid_events": 0,
+  "pause_events_detected": 0,
+  "total_pause_duration_ms": 0.0,
+  "lost_frames_count": 49,
+  "sequence_loss_detected": true,
+  "session_resets_detected": 0,
+  "surface_recreations_detected": 0,
+  "window_start_us": 42704999000,
+  "window_end_us": 42707486000,
+  "elapsed_wall_time_ms": 20933.664,
+  "elapsed_active_gameplay_ms": 20933.664,
+  "interval_throughput_fps": 0.09553989210871064,
+  "wall_throughput_fps": 0.09553989210871064,
+  "active_throughput_fps": 0.09553989210871064,
+  "frametime_mean_ms": 45.06733333333333,
+  "frametime_stddev_ms": 6.876754337783357,
+  "frametime_min_ms": 39.668,
+  "frametime_p50_ms": 40.762,
+  "frametime_p90_ms": 51.97,
+  "frametime_p95_ms": 53.370999999999995,
+  "frametime_p99_ms": 54.4918,
+  "frametime_max_ms": 54.772,
+  "full_frame_percentiles_available": false,
+  "sampled_interval_p50_ms": 40.762,
+  "sampled_interval_p90_ms": 51.97,
+  "sampled_interval_p95_ms": 53.370999999999995,
+  "sampled_interval_p99_ms": 54.4918,
+  "error": null,
+  "stalls_over_33ms": 3,
+  "stalls_over_50ms": 1,
+  "stalls_over_100ms": 0,
+  "stalls_over_250ms": 0,
+  "rolling_fps_sample_count": 3,
+  "rolling_fps_mean": 20.198833333333337,
+  "rolling_fps_p50": 20.071,
+  "rolling_fps_p95": 21.93814,
+  "rolling_fps_min": 18.3799,
+  "rolling_fps_max": 22.1456,
+  "thermal_throttling_events": 6,
+  "thermal_status_levels": [
+    "STATUS_3"
+  ],
+  "cpu_frequencies_mhz": [
+    0.0,
+    0.0,
+    1.0,
+    0.0
+  ],
+  "gpu_frequencies_mhz": [
+    0.0,
+    0.0
+  ],
+  "qualified_intervals_ms": [
+    39.668,
+    40.762,
+    54.772
+  ]
+}

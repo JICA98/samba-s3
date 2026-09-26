@@ -1,0 +1,55 @@
+{
+  "run_id": "candidate-perf-v1-gow3",
+  "scene": "gow3-gaia-combat",
+  "collected_at": "2026-09-26T06:22:17Z",
+  "device": {
+    "serial": "d30a1726",
+    "model": "CPH2691",
+    "soc": "SM8650",
+    "android_version": "16",
+    "fingerprint": "OnePlus/CPH2691IN/OP5D3BL1:16/UKQ1.231108.001/V.R4T3.37e288c-13a765a-13fa038:user/release-keys"
+  },
+  "package": {
+    "package_name": "com.zenithblue.sambas3",
+    "version_name": "2026.09.25",
+    "version_code": "20260925",
+    "code_path": "/data/app/~~BY8i6AxNVQ-Jtu5h7jAOtQ==/com.zenithblue.sambas3-nLXm1OuR6GA5xicYW3JuTg==",
+    "base_apk_sha256": "fce24de193e40dc772570204e2f4f8061ed28a72453747b9fd97d09ac792f821",
+    "librpcsx_so_sha256": "6027981f508bb11183190b01b6d38501b43c0ffd6889fac4b9ee83eee2300b44",
+    "s3core_identity": "rpcsx=63e343bd8e4bf8b278fe1a32a5ebb2ca661b913c samba=e93784d8c4e4aac796b72a63a8f5a127affa29791b58b8a453aa74eae5c1460c"
+  },
+  "process": {
+    "pid": "14961"
+  },
+  "artifacts": {
+    "threads_top": "threads-top.txt",
+    "threads_affinity": "threads-affinity.txt",
+    "thermal": "thermal.txt",
+    "battery": "battery.txt",
+    "meminfo": "meminfo.txt",
+    "proc_meminfo": "proc-meminfo.txt",
+    "exit_info": "exit-info.txt",
+    "logcat_process": "logcat-process.log",
+    "logcat_sambas3": "logcat-sambas3.txt",
+    "logcat_crash": "logcat-crash.log",
+    "backend_log": "rpcsx_backend.log",
+    "cache_log": "cache-RPCSX.log",
+    "frame_analysis_json": "frame-analysis.json"
+  },
+  "target_scene": "gow3-gaia-combat",
+  "clean_stop": false,
+  "first_failure": null,
+  "verdict": "PASS",
+  "stop_reason": "STOP_FAILED_OR_CRASH",
+  "cleanup": {
+    "attempted": true,
+    "clean_stop": false,
+    "result": "FAILED"
+  },
+  "launch_identity": {
+    "pid": "14961",
+    "start_time": "101265879",
+    "boot_id": "3f05bdd4-2292-4845-8a4c-9e91b07279e0"
+  },
+  "scheduler_mode": "RPCS3 Scheduler"
+}

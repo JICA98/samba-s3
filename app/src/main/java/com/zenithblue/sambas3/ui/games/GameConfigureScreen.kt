@@ -2,11 +2,13 @@ package com.zenithblue.sambas3.ui.games
 
 import android.os.Build
 import android.os.SystemClock
+import android.util.DisplayMetrics
 import android.util.Log
 import android.view.InputDevice
 import android.view.KeyEvent
 import android.view.MotionEvent
 import android.view.View
+import android.view.WindowManager
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -88,8 +90,10 @@ import com.zenithblue.sambas3.RPCSX
 import com.zenithblue.sambas3.RPCSXColors
 import com.zenithblue.sambas3.dialogs.AlertDialogQueue
 import com.zenithblue.sambas3.gameconfig.GameSettingsOverrides
+import com.zenithblue.sambas3.gameconfig.OutputResolutionStore
 import com.zenithblue.sambas3.gameconfig.SettingsValueCodec
 import com.zenithblue.sambas3.gameconfig.SettingsValueCodec.SettingNodeSpec
+import com.zenithblue.sambas3.gameconfig.VideoOutputProfiles
 import com.zenithblue.sambas3.input.ControllerDeviceRepository
 import com.zenithblue.sambas3.input.InputDeviceType
 import com.zenithblue.sambas3.ui.settings.components.core.PreferenceIcon
@@ -120,6 +124,8 @@ private val CURATED_SECTIONS = listOf(
         nodePaths = listOf(
             "Video@@Resolution",
             "Video@@Aspect ratio",
+            "Video@@Resolution Scale",
+            "Video@@Strict Rendering Mode",
             "Video@@Anisotropic Filter",
             "Video@@MSAA",
             "Video@@Shader Mode",
@@ -156,6 +162,27 @@ private val GlassPanel = Color(0xCC16203A)
 private val GlassHeader = Color(0xE60D1224)
 private val GlassBorder = Color(0x38C9A84C)
 private val GlassDivider = Color(0x33C9A84C)
+private const val VIDEO_RESOLUTION_PATH = "Video@@Resolution"
+private const val ASPECT_RATIO_PATH = "Video@@Aspect ratio"
+private const val VIDEO_RESOLUTION_SCALE_PATH = "Video@@Resolution Scale"
+private const val STRICT_RENDERING_PATH = "Video@@Strict Rendering Mode"
+private const val AUTO_SURFACE_PROFILE_KEY = "auto"
+
+@Suppress("DEPRECATION")
+private fun currentNativeAspect(context: android.content.Context): Double = runCatching {
+    val manager = context.getSystemService(android.content.Context.WINDOW_SERVICE) as WindowManager
+    val (rawWidth, rawHeight) = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+        val bounds = manager.currentWindowMetrics.bounds
+        bounds.width() to bounds.height()
+    } else {
+        val metrics = DisplayMetrics()
+        manager.defaultDisplay.getRealMetrics(metrics)
+        metrics.widthPixels to metrics.heightPixels
+    }
+    val width = maxOf(rawWidth, rawHeight)
+    val height = minOf(rawWidth, rawHeight)
+    if (width > 0 && height > 0) width.toDouble() / height else 16.0 / 9.0
+}.getOrDefault(16.0 / 9.0)
 
 /** Flat focus targets for controller navigation. */
 private sealed interface ConfigTarget {
@@ -258,6 +285,9 @@ fun GameConfigureScreen(
     var overrides by remember(titleId) {
         mutableStateOf(GameSettingsOverrides.gameOverrides(context, titleId ?: ""))
     }
+    var selectedSurfaceHeight by remember(titleId) {
+        mutableStateOf(titleId?.let { OutputResolutionStore.selectedHeight(context, it) })
+    }
     var showResetAllConfirm by remember { mutableStateOf(false) }
     var resetAllMenuOpen by remember { mutableStateOf(false) }
 
@@ -265,8 +295,8 @@ fun GameConfigureScreen(
         overrides = GameSettingsOverrides.gameOverrides(context, titleId ?: "")
     }
 
-    fun commitOverride(path: String, node: JSONObject, newDisplayValue: String) {
-        val tid = titleId ?: return
+    fun commitOverride(path: String, node: JSONObject, newDisplayValue: String): Boolean {
+        val tid = titleId ?: return false
         val spec = nodeSpec(node)
         val encoded = SettingsValueCodec.encodedFromNode(spec, newDisplayValue)
         val previousEncoded = overrides[path] ?: engineEncodedValue(node)
@@ -279,7 +309,7 @@ fun GameConfigureScreen(
                 context.getString(R.string.error),
                 context.getString(R.string.failed_to_assign_value, newDisplayValue, path)
             )
-            return
+            return false
         }
         val applied = GameSettingsOverrides.recordGame(
             context = context,
@@ -296,7 +326,7 @@ fun GameConfigureScreen(
                 context.getString(R.string.error),
                 context.getString(R.string.failed_to_assign_value, newDisplayValue, path)
             )
-            return
+            return false
         }
         if (path == FRAME_LIMIT_PATH) {
             Log.i(
@@ -305,6 +335,20 @@ fun GameConfigureScreen(
             )
         }
         refreshOverrides()
+        return true
+    }
+
+    fun saveSurfaceHeight(height: Int?) {
+        val tid = titleId ?: return
+        runCatching { OutputResolutionStore.setSelectedHeight(context, tid, height) }
+            .onSuccess { selectedSurfaceHeight = height }
+            .onFailure { error ->
+                Log.e("GameConfig", "failed to save surface output height title=$tid height=$height", error)
+                AlertDialogQueue.showDialog(
+                    context.getString(R.string.error),
+                    "Could not save the surface output size. Please retry."
+                )
+            }
     }
 
     fun resetRow(path: String, node: JSONObject) {
@@ -312,6 +356,7 @@ fun GameConfigureScreen(
         val fallback = SettingsValueCodec.encodedDefault(nodeSpec(node))
             ?: engineEncodedValue(node)
         if (GameSettingsOverrides.clearGameSetting(context, tid, path, fallback)) {
+            if (path == VIDEO_RESOLUTION_SCALE_PATH) saveSurfaceHeight(null)
             refreshOverrides()
         } else {
             AlertDialogQueue.showDialog(
@@ -325,6 +370,30 @@ fun GameConfigureScreen(
     val menuAvailable = titleId != null || (onRemove != null && !isInGame)
     val curated = remember(tree) { buildConfigStructure(tree) }
     val rowRefs = curated.rows
+    val displayAspect = remember(tree, overrides) {
+        val encoded = overrides[ASPECT_RATIO_PATH]
+            ?: findCuratedNode(tree, ASPECT_RATIO_PATH)?.let(::engineEncodedValue)
+            ?: "\"16:9\""
+        SettingsValueCodec.decodeToDisplay(encoded)
+    }
+    val sourceMode = remember(tree, overrides) {
+        val encoded = overrides[VIDEO_RESOLUTION_PATH]
+            ?: findCuratedNode(tree, VIDEO_RESOLUTION_PATH)?.let(::engineEncodedValue)
+            ?: "\"1280x720\""
+        VideoOutputProfiles.dimensions(SettingsValueCodec.decodeToDisplay(encoded)) ?: (1280 to 720)
+    }
+    val nativeAspect = remember(context) { currentNativeAspect(context) }
+    val curatedStrictRendering = remember(titleId) {
+        GameSettingsOverrides.curatedDefaultsForTitle(titleId).containsKey(STRICT_RENDERING_PATH)
+    }
+    val strictRenderingEnabled = remember(tree, overrides, titleId) {
+        val engineStrict = findCuratedNode(tree, STRICT_RENDERING_PATH)?.optString("value")
+        VideoOutputProfiles.effectiveStrictRendering(
+            explicitOverride = overrides[STRICT_RENDERING_PATH],
+            curatedDefault = GameSettingsOverrides.curatedDefaultsForTitle(titleId)[STRICT_RENDERING_PATH],
+            engineGlobalValue = engineStrict
+        )
+    }
 
     val targets = remember(onClose, menuAvailable, showGate, rowRefs) {
         buildList {
@@ -641,7 +710,14 @@ fun GameConfigureScreen(
                     else -> CuratedList(
                         structure = curated,
                         overrides = overrides,
-                        resolvedGlobals = emptyMap(),
+                        resolvedGlobals = mapOf(STRICT_RENDERING_PATH to strictRenderingEnabled.toString()),
+                        aspect = displayAspect,
+                        sourceWidth = sourceMode.first,
+                        sourceHeight = sourceMode.second,
+                        nativeAspect = nativeAspect,
+                        strictRenderingEnabled = strictRenderingEnabled,
+                        curatedStrictRendering = curatedStrictRendering,
+                        selectedSurfaceHeight = selectedSurfaceHeight,
                         listState = listState,
                         rowModifier = { ref ->
                             Modifier
@@ -653,8 +729,10 @@ fun GameConfigureScreen(
                                     }
                                 }
                         },
-                        onCommit = ::commitOverride,
-                        onResetRow = ::resetRow
+                        onCommit = { path, node, value -> commitOverride(path, node, value) },
+                        onResetRow = ::resetRow,
+                        onSelectSurfaceHeight = { height -> saveSurfaceHeight(height) },
+                        onClearSurfaceHeight = { saveSurfaceHeight(null) }
                     )
                 }
             }
@@ -674,7 +752,10 @@ fun GameConfigureScreen(
                 TextButton(onClick = {
                     showResetAllConfirm = false
                     val tid = titleId
-                    if (GameSettingsOverrides.clearGame(context, tid)) refreshOverrides()
+                    if (GameSettingsOverrides.clearGame(context, tid)) {
+                        saveSurfaceHeight(null)
+                        refreshOverrides()
+                    }
                 }) { Text(stringResource(android.R.string.ok)) }
             },
             dismissButton = {
@@ -965,10 +1046,19 @@ private fun CuratedList(
     structure: ConfigStructure,
     overrides: Map<String, String>,
     resolvedGlobals: Map<String, String>,
+    aspect: String,
+    sourceWidth: Int,
+    sourceHeight: Int,
+    nativeAspect: Double,
+    strictRenderingEnabled: Boolean,
+    curatedStrictRendering: Boolean,
+    selectedSurfaceHeight: Int?,
     listState: LazyListState,
     rowModifier: (ConfigRowRef) -> Modifier,
-    onCommit: (String, JSONObject, String) -> Unit,
-    onResetRow: (String, JSONObject) -> Unit
+    onCommit: (String, JSONObject, String) -> Boolean,
+    onResetRow: (String, JSONObject) -> Unit,
+    onSelectSurfaceHeight: (Int) -> Unit,
+    onClearSurfaceHeight: () -> Unit
 ) {
     LazyColumn(
         state = listState,
@@ -993,9 +1083,18 @@ private fun CuratedList(
                             effectiveEncoded = overrides[ref.path]
                                 ?: resolvedGlobals[ref.path]
                                 ?: engineEncodedValue(ref.node),
+                            aspect = aspect,
+                            sourceWidth = sourceWidth,
+                            sourceHeight = sourceHeight,
+                            nativeAspect = nativeAspect,
+                            strictRenderingEnabled = strictRenderingEnabled,
+                            curatedStrictRendering = curatedStrictRendering,
+                            selectedSurfaceHeight = selectedSurfaceHeight,
                             modifier = rowModifier(ref),
                             onCommit = onCommit,
-                            onResetRow = onResetRow
+                            onResetRow = onResetRow,
+                            onSelectSurfaceHeight = onSelectSurfaceHeight,
+                            onClearSurfaceHeight = onClearSurfaceHeight
                         )
                     }
                 }
@@ -1041,21 +1140,135 @@ private fun CuratedRow(
     sectionIcon: Int,
     overridden: Boolean,
     effectiveEncoded: String,
+    aspect: String,
+    sourceWidth: Int,
+    sourceHeight: Int,
+    nativeAspect: Double,
+    strictRenderingEnabled: Boolean,
+    curatedStrictRendering: Boolean,
+    selectedSurfaceHeight: Int?,
     modifier: Modifier,
-    onCommit: (String, JSONObject, String) -> Unit,
-    onResetRow: (String, JSONObject) -> Unit
+    onCommit: (String, JSONObject, String) -> Boolean,
+    onResetRow: (String, JSONObject) -> Unit,
+    onSelectSurfaceHeight: (Int) -> Unit,
+    onClearSurfaceHeight: () -> Unit
 ) {
     val path = ref.path
     val node = ref.node
-    val label = path.substringAfterLast("@@")
+    val label = when (path) {
+        VIDEO_RESOLUTION_PATH -> "PS3 video mode"
+        VIDEO_RESOLUTION_SCALE_PATH -> "Output resolution preset"
+        else -> path.substringAfterLast("@@")
+    }
     val effectiveDisplay = SettingsValueCodec.decodeToDisplay(effectiveEncoded)
+
+    if (path == VIDEO_RESOLUTION_SCALE_PATH) {
+        val profiles = VideoOutputProfiles.presets(sourceWidth, sourceHeight, aspect, nativeAspect)
+        val selectedSurfaceProfile = VideoOutputProfiles.explicitlySelected(profiles, selectedSurfaceHeight)
+        val scalePercent = effectiveDisplay.toIntOrNull() ?: 100
+        if (strictRenderingEnabled) {
+            RegularPreference(
+                modifier = modifier,
+                title = { PreferenceTitle(title = label) },
+                subtitle = {
+                    Text(
+                        text = buildString {
+                            append("Unavailable while Strict Rendering Mode is enabled. RPCSX forces RSX scale to 100%; turn strict mode off to use these presets.")
+                            selectedSurfaceProfile?.let {
+                                append(" Saved surface target: ${it.surfaceWidth}×${it.height} is currently ignored while strict mode is on.")
+                            }
+                            append(" SurfaceHolder selection applies after the next game launch once strict mode is off.")
+                        },
+                        color = RPCSXColors.textSecondary,
+                        style = MaterialTheme.typography.labelSmall
+                    )
+                },
+                leadingIcon = { PreferenceIcon(icon = painterResource(id = sectionIcon)) },
+                value = { Text("Forced 100% · ${scalePercent}% configured") },
+                enabled = false,
+                onClick = {}
+            )
+            return
+        }
+        val values = listOf(AUTO_SURFACE_PROFILE_KEY) + profiles.map { it.key }
+        val currentValue = selectedSurfaceProfile?.key ?: AUTO_SURFACE_PROFILE_KEY
+        SingleSelectionDialog(
+            currentValue = currentValue,
+            values = values,
+            modifier = modifier,
+            icon = { PreferenceIcon(icon = painterResource(id = sectionIcon)) },
+            title = { PreferenceTitle(title = label) },
+            subtitle = {
+                Column {
+                    Text(
+                        text = selectedSurfaceProfile?.let {
+                            "Surface ${it.surfaceWidth}×${it.height} selected · RSX scale $scalePercent%"
+                        } ?: "Surface follows app window · RSX scale $scalePercent%",
+                        color = if (overridden) RPCSXColors.primary else RPCSXColors.textSecondary,
+                        style = MaterialTheme.typography.labelSmall
+                    )
+                    Text(
+                        text = if (aspect.equals("Native", ignoreCase = true))
+                            "Native width preview approximates the game window. Fixed size uses that ratio at game launch; reopen the game after resizing the window."
+                        else
+                            "RSX size is a nominal example from PS3 mode ${sourceWidth}×$sourceHeight; game buffers may differ. SurfaceHolder size applies next game launch.",
+                        color = RPCSXColors.textSecondary,
+                        style = MaterialTheme.typography.labelSmall
+                    )
+                    OverrideStateBadge(overridden)
+                }
+            },
+            trailingContent = {
+                if (overridden) {
+                    IconButton(onClick = { onResetRow(path, node) }) {
+                        Icon(
+                            painter = painterResource(id = R.drawable.ic_restore),
+                            contentDescription = stringResource(R.string.reset_row),
+                            tint = RPCSXColors.primary
+                        )
+                    }
+                }
+            },
+            onValueChange = { value ->
+                if (value == AUTO_SURFACE_PROFILE_KEY) {
+                    onClearSurfaceHeight()
+                } else {
+                    profiles.firstOrNull { it.key == value }?.let { profile ->
+                        if (onCommit(path, node, profile.scalePercent.toString())) {
+                            onSelectSurfaceHeight(profile.height)
+                        }
+                    }
+                }
+            },
+            onLongClick = { if (overridden) onResetRow(path, node) },
+            valueToText = { value ->
+                if (value == AUTO_SURFACE_PROFILE_KEY)
+                    "Auto · clears fixed size · keeps RSX scale $scalePercent%"
+                else profiles.firstOrNull { it.key == value }?.label ?: value
+            },
+            item = { value, current, onClick ->
+                com.zenithblue.sambas3.ui.settings.components.preference.ListPreferenceItem<String> { it }(
+                    value,
+                    current,
+                    onClick
+                )
+            }
+        )
+        return
+    }
 
     when (node.optString("type")) {
         "bool" -> SwitchPreference(
             modifier = modifier,
             checked = effectiveDisplay == "true",
             title = { PreferenceTitle(title = label) },
-            subtitle = { OverrideStateBadge(overridden) },
+            subtitle = {
+                if (path == STRICT_RENDERING_PATH && !overridden && curatedStrictRendering) {
+                    Text("Compatibility default for this game", color = RPCSXColors.textSecondary)
+                } else {
+                    OverrideStateBadge(overridden)
+                }
+            },
             leadingIcon = { PreferenceIcon(icon = painterResource(id = sectionIcon)) },
             onClick = { value -> onCommit(path, node, value.toString()) },
             onLongClick = { if (overridden) onResetRow(path, node) }

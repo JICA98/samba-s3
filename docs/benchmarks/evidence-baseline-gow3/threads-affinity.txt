@@ -1,0 +1,343 @@
+  PID   TID PSR COMM                       
+14961 14961   4 [ithblue.sambas3]
+14961 14963   5 [Signal Catcher]
+14961 14964   6 [perfetto_hprof_]
+14961 14966   1 [Jit thread pool]
+14961 14967   0 [HeapTaskDaemon]
+14961 14968   0 [ReferenceQueueD]
+14961 14969   2 [FinalizerDaemon]
+14961 14970   3 [FinalizerWatchd]
+14961 14973   2 [binder:14961_1]
+14961 14974   6 [binder:14961_2]
+14961 14976   4 [binder:14961_3]
+14961 14979   0 [Profile Saver]
+14961 14992   6 [RenderThread]
+14961 15001   3 [DefaultDispatch]
+14961 15002   0 [DefaultDispatch]
+14961 15003   4 [DefaultDispatch]
+14961 15095   2 [Log Writer]
+14961 15097   5 [ithblue.sambas3]
+14961 15115   1 [Thread-5]
+14961 15116   6 [Thread-6]
+14961 15134   3 [DefaultDispatch]
+14961 15144   5 [TracingMuxer]
+14961 15146   6 [pool-4-thread-1]
+14961 15147   3 [hwuiTask0]
+14961 15148   5 [hwuiTask1]
+14961 15197   4 [SurfaceSyncGrou]
+14961 15285   4 [binder:14961_4]
+14961 15286   1 [binder:14961_4]
+14961 15369   1 [InteractionJank]
+14961 20765   3 [binder:14961_5]
+14961 20766   0 [binder:14961_6]
+14961 20767   0 [binder:14961_7]
+14961 20808   4 [queued-work-loo]
+14961 20812   0 [DefaultExecutor]
+14961 20830   1 [Progress Dialog]
+14961 20831   0 [Performance Sen]
+14961 20832   3 [PS Move Worker ]
+14961 20833   3 [PS Move Worker ]
+14961 20834   7 [PS Move Worker ]
+14961 20835   4 [PS Move Worker ]
+14961 20836   3 [Gem Thread]
+14961 20837   0 [Camera Thread]
+14961 20838   5 [Usb Manager Thr]
+14961 20839   1 [cellAudio Threa]
+14961 20842   4 [MediaList Threa]
+14961 20843   3 [Network P2P Thr]
+14961 20844   1 [GDB Server]
+14961 20845   7 [CPU Profiler]
+14961 20846   1 [VUART AV Thread]
+14961 20847   2 [Timer Thread]
+14961 20848   2 [RsxAudioData Th]
+14961 20849   4 [Tcp Over Udp Ti]
+14961 20850   7 [Network Thread]
+14961 20851   0 [LV2 Watchdog Th]
+14961 20852   3 [cellAudio Threa]
+14961 20853   7 [cellAudio Threa]
+14961 20854   1 [PPU Syscall Usa]
+14961 20855   2 [Signaling Manag]
+14961 20856   1 [cellAudio Threa]
+14961 20857   3 [NetStart Hack]
+14961 20858   3 [MsgDialog Close]
+14961 20860   2 [Microphone Thre]
+14961 20861   2 [Overlay Input T]
+14961 20865   4 [com.ze:traceq0]
+14961 20868   2 [RSX.W1]
+14961 20869   3 [RSX.W2]
+14961 20870   3 [Thread-8]
+14961 20871   3 [rsx::thread]
+14961 20872   2 [Pad Thread]
+14961 20873   3 [PPU[0x1000000] ]
+14961 20909   0 [AAudio_1]
+14961 20971   6 [SPU[0x0000100] ]
+14961 20972   2 [SPU[0x1000100] ]
+14961 20973   5 [SPU[0x2000100] ]
+14961 20974   7 [SPU[0x3000100] ]
+14961 20975   4 [SPU[0x4000100] ]
+14961 20976   2 [PPU[0x1000001] ]
+14961 20977   4 [PPU[0x1000002] ]
+14961 20978   7 [SPU[0x0000200] ]
+14961 20979   2 [PPU[0x1000003] ]
+14961 20980   4 [PPU[0x1000004] ]
+14961 20981   7 [PPU[0x1000005] ]
+14961 20982   7 [PPU[0x1000006] ]
+14961 20983   7 [PPU[0x1000007] ]
+14961 20984   2 [PPU[0x1000008] ]
+14961 20985   5 [PPU[0x1000009] ]
+14961 20986   5 [PPU[0x100000a] ]
+14961 20987   6 [PPU[0x100000b] ]
+14961 20990   2 [VBlank Thread]
+14961 20991   6 [PPU[0x100000e] ]
+14961 20993   4 [PPU[0x1000010] ]
+14961 20994   6 [PPU[0x1000011] ]
+14961 20995   6 [PPU[0x1000012] ]
+14961 20996   6 [PPU[0x1000013] ]
+14961 20997   6 [PPU[0x1000014] ]
+14961 20998   6 [PPU[0x1000015] ]
+14961 20999   5 [PPU[0x1000016] ]
+14961 21000   5 [PPU[0x1000017] ]
+14961 21001   5 [PPU[0x1000018] ]
+14961 21002   3 [PPU[0x1000019] ]
+14961 21003   6 [PPU[0x100001a] ]
+14961 21004   5 [PPU[0x100001b] ]
+14961 21005   6 [PPU[0x100001c] ]
+14961 21006   6 [PPU[0x100001d] ]
+14961 21007   5 [PPU[0x100001e] ]
+14961 21008   5 [PPU[0x100001f] ]
+14961 21009   5 [PPU[0x1000020] ]
+14961 21010   6 [PPU[0x1000021] ]
+14961 21011   3 [PPU[0x1000022] ]
+14961 21012   6 [PPU[0x1000023] ]
+14961 21013   2 [PPU[0x1000024] ]
+14961 21014   5 [PPU[0x1000025] ]
+14961 21015   5 [PPU[0x1000026] ]
+14961 21016   3 [PPU[0x1000027] ]
+/proc/14961/task/14961/status:Cpus_allowed:	ff
+/proc/14961/task/14961/status:Cpus_allowed_list:	0-7
+/proc/14961/task/14963/status:Cpus_allowed:	ff
+/proc/14961/task/14963/status:Cpus_allowed_list:	0-7
+/proc/14961/task/14964/status:Cpus_allowed:	ff
+/proc/14961/task/14964/status:Cpus_allowed_list:	0-7
+/proc/14961/task/14966/status:Cpus_allowed:	ff
+/proc/14961/task/14966/status:Cpus_allowed_list:	0-7
+/proc/14961/task/14967/status:Cpus_allowed:	ff
+/proc/14961/task/14967/status:Cpus_allowed_list:	0-7
+/proc/14961/task/14968/status:Cpus_allowed:	ff
+/proc/14961/task/14968/status:Cpus_allowed_list:	0-7
+/proc/14961/task/14969/status:Cpus_allowed:	ff
+/proc/14961/task/14969/status:Cpus_allowed_list:	0-7
+/proc/14961/task/14970/status:Cpus_allowed:	ff
+/proc/14961/task/14970/status:Cpus_allowed_list:	0-7
+/proc/14961/task/14973/status:Cpus_allowed:	ff
+/proc/14961/task/14973/status:Cpus_allowed_list:	0-7
+/proc/14961/task/14974/status:Cpus_allowed:	ff
+/proc/14961/task/14974/status:Cpus_allowed_list:	0-7
+/proc/14961/task/14976/status:Cpus_allowed:	ff
+/proc/14961/task/14976/status:Cpus_allowed_list:	0-7
+/proc/14961/task/14979/status:Cpus_allowed:	ff
+/proc/14961/task/14979/status:Cpus_allowed_list:	0-7
+/proc/14961/task/14992/status:Cpus_allowed:	ff
+/proc/14961/task/14992/status:Cpus_allowed_list:	0-7
+/proc/14961/task/15001/status:Cpus_allowed:	ff
+/proc/14961/task/15001/status:Cpus_allowed_list:	0-7
+/proc/14961/task/15002/status:Cpus_allowed:	ff
+/proc/14961/task/15002/status:Cpus_allowed_list:	0-7
+/proc/14961/task/15003/status:Cpus_allowed:	ff
+/proc/14961/task/15003/status:Cpus_allowed_list:	0-7
+/proc/14961/task/15095/status:Cpus_allowed:	ff
+/proc/14961/task/15095/status:Cpus_allowed_list:	0-7
+/proc/14961/task/15097/status:Cpus_allowed:	ff
+/proc/14961/task/15097/status:Cpus_allowed_list:	0-7
+/proc/14961/task/15115/status:Cpus_allowed:	ff
+/proc/14961/task/15115/status:Cpus_allowed_list:	0-7
+/proc/14961/task/15116/status:Cpus_allowed:	ff
+/proc/14961/task/15116/status:Cpus_allowed_list:	0-7
+/proc/14961/task/15134/status:Cpus_allowed:	ff
+/proc/14961/task/15134/status:Cpus_allowed_list:	0-7
+/proc/14961/task/15144/status:Cpus_allowed:	ff
+/proc/14961/task/15144/status:Cpus_allowed_list:	0-7
+/proc/14961/task/15146/status:Cpus_allowed:	ff
+/proc/14961/task/15146/status:Cpus_allowed_list:	0-7
+/proc/14961/task/15147/status:Cpus_allowed:	ff
+/proc/14961/task/15147/status:Cpus_allowed_list:	0-7
+/proc/14961/task/15148/status:Cpus_allowed:	ff
+/proc/14961/task/15148/status:Cpus_allowed_list:	0-7
+/proc/14961/task/15197/status:Cpus_allowed:	ff
+/proc/14961/task/15197/status:Cpus_allowed_list:	0-7
+/proc/14961/task/15285/status:Cpus_allowed:	ff
+/proc/14961/task/15285/status:Cpus_allowed_list:	0-7
+/proc/14961/task/15286/status:Cpus_allowed:	ff
+/proc/14961/task/15286/status:Cpus_allowed_list:	0-7
+/proc/14961/task/15369/status:Cpus_allowed:	ff
+/proc/14961/task/15369/status:Cpus_allowed_list:	0-7
+/proc/14961/task/20765/status:Cpus_allowed:	ff
+/proc/14961/task/20765/status:Cpus_allowed_list:	0-7
+/proc/14961/task/20766/status:Cpus_allowed:	ff
+/proc/14961/task/20766/status:Cpus_allowed_list:	0-7
+/proc/14961/task/20767/status:Cpus_allowed:	ff
+/proc/14961/task/20767/status:Cpus_allowed_list:	0-7
+/proc/14961/task/20808/status:Cpus_allowed:	ff
+/proc/14961/task/20808/status:Cpus_allowed_list:	0-7
+/proc/14961/task/20812/status:Cpus_allowed:	ff
+/proc/14961/task/20812/status:Cpus_allowed_list:	0-7
+/proc/14961/task/20830/status:Cpus_allowed:	ff
+/proc/14961/task/20830/status:Cpus_allowed_list:	0-7
+/proc/14961/task/20831/status:Cpus_allowed:	ff
+/proc/14961/task/20831/status:Cpus_allowed_list:	0-7
+/proc/14961/task/20832/status:Cpus_allowed:	ff
+/proc/14961/task/20832/status:Cpus_allowed_list:	0-7
+/proc/14961/task/20833/status:Cpus_allowed:	ff
+/proc/14961/task/20833/status:Cpus_allowed_list:	0-7
+/proc/14961/task/20834/status:Cpus_allowed:	ff
+/proc/14961/task/20834/status:Cpus_allowed_list:	0-7
+/proc/14961/task/20835/status:Cpus_allowed:	ff
+/proc/14961/task/20835/status:Cpus_allowed_list:	0-7
+/proc/14961/task/20836/status:Cpus_allowed:	ff
+/proc/14961/task/20836/status:Cpus_allowed_list:	0-7
+/proc/14961/task/20837/status:Cpus_allowed:	ff
+/proc/14961/task/20837/status:Cpus_allowed_list:	0-7
+/proc/14961/task/20838/status:Cpus_allowed:	ff
+/proc/14961/task/20838/status:Cpus_allowed_list:	0-7
+/proc/14961/task/20839/status:Cpus_allowed:	ff
+/proc/14961/task/20839/status:Cpus_allowed_list:	0-7
+/proc/14961/task/20842/status:Cpus_allowed:	ff
+/proc/14961/task/20842/status:Cpus_allowed_list:	0-7
+/proc/14961/task/20843/status:Cpus_allowed:	ff
+/proc/14961/task/20843/status:Cpus_allowed_list:	0-7
+/proc/14961/task/20844/status:Cpus_allowed:	ff
+/proc/14961/task/20844/status:Cpus_allowed_list:	0-7
+/proc/14961/task/20845/status:Cpus_allowed:	ff
+/proc/14961/task/20845/status:Cpus_allowed_list:	0-7
+/proc/14961/task/20846/status:Cpus_allowed:	ff
+/proc/14961/task/20846/status:Cpus_allowed_list:	0-7
+/proc/14961/task/20847/status:Cpus_allowed:	ff
+/proc/14961/task/20847/status:Cpus_allowed_list:	0-7
+/proc/14961/task/20848/status:Cpus_allowed:	ff
+/proc/14961/task/20848/status:Cpus_allowed_list:	0-7
+/proc/14961/task/20849/status:Cpus_allowed:	ff
+/proc/14961/task/20849/status:Cpus_allowed_list:	0-7
+/proc/14961/task/20850/status:Cpus_allowed:	ff
+/proc/14961/task/20850/status:Cpus_allowed_list:	0-7
+/proc/14961/task/20851/status:Cpus_allowed:	ff
+/proc/14961/task/20851/status:Cpus_allowed_list:	0-7
+/proc/14961/task/20852/status:Cpus_allowed:	ff
+/proc/14961/task/20852/status:Cpus_allowed_list:	0-7
+/proc/14961/task/20853/status:Cpus_allowed:	ff
+/proc/14961/task/20853/status:Cpus_allowed_list:	0-7
+/proc/14961/task/20854/status:Cpus_allowed:	ff
+/proc/14961/task/20854/status:Cpus_allowed_list:	0-7
+/proc/14961/task/20855/status:Cpus_allowed:	ff
+/proc/14961/task/20855/status:Cpus_allowed_list:	0-7
+/proc/14961/task/20856/status:Cpus_allowed:	ff
+/proc/14961/task/20856/status:Cpus_allowed_list:	0-7
+/proc/14961/task/20857/status:Cpus_allowed:	ff
+/proc/14961/task/20857/status:Cpus_allowed_list:	0-7
+/proc/14961/task/20858/status:Cpus_allowed:	ff
+/proc/14961/task/20858/status:Cpus_allowed_list:	0-7
+/proc/14961/task/20860/status:Cpus_allowed:	ff
+/proc/14961/task/20860/status:Cpus_allowed_list:	0-7
+/proc/14961/task/20861/status:Cpus_allowed:	ff
+/proc/14961/task/20861/status:Cpus_allowed_list:	0-7
+/proc/14961/task/20865/status:Cpus_allowed:	ff
+/proc/14961/task/20865/status:Cpus_allowed_list:	0-7
+/proc/14961/task/20868/status:Cpus_allowed:	ff
+/proc/14961/task/20868/status:Cpus_allowed_list:	0-7
+/proc/14961/task/20869/status:Cpus_allowed:	ff
+/proc/14961/task/20869/status:Cpus_allowed_list:	0-7
+/proc/14961/task/20870/status:Cpus_allowed:	ff
+/proc/14961/task/20870/status:Cpus_allowed_list:	0-7
+/proc/14961/task/20871/status:Cpus_allowed:	fc
+/proc/14961/task/20871/status:Cpus_allowed_list:	2-7
+/proc/14961/task/20872/status:Cpus_allowed:	ff
+/proc/14961/task/20872/status:Cpus_allowed_list:	0-7
+/proc/14961/task/20873/status:Cpus_allowed:	fc
+/proc/14961/task/20873/status:Cpus_allowed_list:	2-7
+/proc/14961/task/20909/status:Cpus_allowed:	ff
+/proc/14961/task/20909/status:Cpus_allowed_list:	0-7
+/proc/14961/task/20971/status:Cpus_allowed:	fc
+/proc/14961/task/20971/status:Cpus_allowed_list:	2-7
+/proc/14961/task/20972/status:Cpus_allowed:	fc
+/proc/14961/task/20972/status:Cpus_allowed_list:	2-7
+/proc/14961/task/20973/status:Cpus_allowed:	fc
+/proc/14961/task/20973/status:Cpus_allowed_list:	2-7
+/proc/14961/task/20974/status:Cpus_allowed:	fc
+/proc/14961/task/20974/status:Cpus_allowed_list:	2-7
+/proc/14961/task/20975/status:Cpus_allowed:	fc
+/proc/14961/task/20975/status:Cpus_allowed_list:	2-7
+/proc/14961/task/20976/status:Cpus_allowed:	fc
+/proc/14961/task/20976/status:Cpus_allowed_list:	2-7
+/proc/14961/task/20977/status:Cpus_allowed:	fc
+/proc/14961/task/20977/status:Cpus_allowed_list:	2-7
+/proc/14961/task/20978/status:Cpus_allowed:	fc
+/proc/14961/task/20978/status:Cpus_allowed_list:	2-7
+/proc/14961/task/20979/status:Cpus_allowed:	fc
+/proc/14961/task/20979/status:Cpus_allowed_list:	2-7
+/proc/14961/task/20980/status:Cpus_allowed:	fc
+/proc/14961/task/20980/status:Cpus_allowed_list:	2-7
+/proc/14961/task/20981/status:Cpus_allowed:	fc
+/proc/14961/task/20981/status:Cpus_allowed_list:	2-7
+/proc/14961/task/20982/status:Cpus_allowed:	fc
+/proc/14961/task/20982/status:Cpus_allowed_list:	2-7
+/proc/14961/task/20983/status:Cpus_allowed:	fc
+/proc/14961/task/20983/status:Cpus_allowed_list:	2-7
+/proc/14961/task/20984/status:Cpus_allowed:	fc
+/proc/14961/task/20984/status:Cpus_allowed_list:	2-7
+/proc/14961/task/20985/status:Cpus_allowed:	fc
+/proc/14961/task/20985/status:Cpus_allowed_list:	2-7
+/proc/14961/task/20986/status:Cpus_allowed:	fc
+/proc/14961/task/20986/status:Cpus_allowed_list:	2-7
+/proc/14961/task/20987/status:Cpus_allowed:	fc
+/proc/14961/task/20987/status:Cpus_allowed_list:	2-7
+/proc/14961/task/20990/status:Cpus_allowed:	fc
+/proc/14961/task/20990/status:Cpus_allowed_list:	2-7
+/proc/14961/task/20991/status:Cpus_allowed:	fc
+/proc/14961/task/20991/status:Cpus_allowed_list:	2-7
+/proc/14961/task/20993/status:Cpus_allowed:	fc
+/proc/14961/task/20993/status:Cpus_allowed_list:	2-7
+/proc/14961/task/20994/status:Cpus_allowed:	fc
+/proc/14961/task/20994/status:Cpus_allowed_list:	2-7
+/proc/14961/task/20995/status:Cpus_allowed:	fc
+/proc/14961/task/20995/status:Cpus_allowed_list:	2-7
+/proc/14961/task/20996/status:Cpus_allowed:	fc
+/proc/14961/task/20996/status:Cpus_allowed_list:	2-7
+/proc/14961/task/20997/status:Cpus_allowed:	fc
+/proc/14961/task/20997/status:Cpus_allowed_list:	2-7
+/proc/14961/task/20998/status:Cpus_allowed:	fc
+/proc/14961/task/20998/status:Cpus_allowed_list:	2-7
+/proc/14961/task/20999/status:Cpus_allowed:	fc
+/proc/14961/task/20999/status:Cpus_allowed_list:	2-7
+/proc/14961/task/21000/status:Cpus_allowed:	fc
+/proc/14961/task/21000/status:Cpus_allowed_list:	2-7
+/proc/14961/task/21001/status:Cpus_allowed:	fc
+/proc/14961/task/21001/status:Cpus_allowed_list:	2-7
+/proc/14961/task/21002/status:Cpus_allowed:	fc
+/proc/14961/task/21002/status:Cpus_allowed_list:	2-7
+/proc/14961/task/21003/status:Cpus_allowed:	fc
+/proc/14961/task/21003/status:Cpus_allowed_list:	2-7
+/proc/14961/task/21004/status:Cpus_allowed:	fc
+/proc/14961/task/21004/status:Cpus_allowed_list:	2-7
+/proc/14961/task/21005/status:Cpus_allowed:	fc
+/proc/14961/task/21005/status:Cpus_allowed_list:	2-7
+/proc/14961/task/21006/status:Cpus_allowed:	fc
+/proc/14961/task/21006/status:Cpus_allowed_list:	2-7
+/proc/14961/task/21007/status:Cpus_allowed:	fc
+/proc/14961/task/21007/status:Cpus_allowed_list:	2-7
+/proc/14961/task/21008/status:Cpus_allowed:	fc
+/proc/14961/task/21008/status:Cpus_allowed_list:	2-7
+/proc/14961/task/21009/status:Cpus_allowed:	fc
+/proc/14961/task/21009/status:Cpus_allowed_list:	2-7
+/proc/14961/task/21010/status:Cpus_allowed:	fc
+/proc/14961/task/21010/status:Cpus_allowed_list:	2-7
+/proc/14961/task/21011/status:Cpus_allowed:	fc
+/proc/14961/task/21011/status:Cpus_allowed_list:	2-7
+/proc/14961/task/21012/status:Cpus_allowed:	fc
+/proc/14961/task/21012/status:Cpus_allowed_list:	2-7
+/proc/14961/task/21013/status:Cpus_allowed:	fc
+/proc/14961/task/21013/status:Cpus_allowed_list:	2-7
+/proc/14961/task/21014/status:Cpus_allowed:	fc
+/proc/14961/task/21014/status:Cpus_allowed_list:	2-7
+/proc/14961/task/21015/status:Cpus_allowed:	fc
+/proc/14961/task/21015/status:Cpus_allowed_list:	2-7
+/proc/14961/task/21016/status:Cpus_allowed:	fc
+/proc/14961/task/21016/status:Cpus_allowed_list:	2-7

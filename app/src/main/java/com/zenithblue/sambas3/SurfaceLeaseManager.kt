@@ -1,8 +1,11 @@
 package com.zenithblue.sambas3
 
+import android.graphics.Color
 import android.util.Log
+import android.view.Gravity
 import android.view.Surface
 import android.widget.FrameLayout
+import com.zenithblue.sambas3.gameconfig.OutputSurfaceSize
 import kotlinx.coroutines.suspendCancellableCoroutine
 import kotlinx.coroutines.withTimeoutOrNull
 import kotlin.coroutines.resume
@@ -27,7 +30,8 @@ class SurfaceLeaseManager(
     private val host: FrameLayout,
     private val bridge: SurfaceLeaseBridge = SurfaceLeaseBridge { surface, event, generation ->
         RPCSX.instance.surfaceEventV2(surface, event, generation)
-    }
+    },
+    private val outputSize: OutputSurfaceSize? = null
 ) : GraphicsFrame.Listener {
     var onFailure: ((String) -> Unit)? = null
     private var nextGeneration = 0L
@@ -117,13 +121,18 @@ class SurfaceLeaseManager(
         val frame = GraphicsFrame(host.context).also {
             it.generation = ++nextGeneration
             it.listener = this
+            it.setFixedOutputSize(outputSize)
         }
         current = frame
         host.addView(frame, FrameLayout.LayoutParams(
             FrameLayout.LayoutParams.MATCH_PARENT,
             FrameLayout.LayoutParams.MATCH_PARENT
-        ))
+        ).apply { gravity = Gravity.CENTER })
         Log.i(TAG, "S3SURFACE new-generation-created generation=${frame.generation}")
+        Log.i(
+            OUTPUT_TAG,
+            "requested-buffer generation=${frame.generation} size=${outputSize?.let { "${it.width}x${it.height}" } ?: "layout"}"
+        )
     }
 
     override fun onSurfaceCreated(frame: GraphicsFrame, generation: Long, surface: Surface) {
@@ -212,9 +221,12 @@ class SurfaceLeaseManager(
     init {
         // A frame may be created before its SurfaceHolder callback arrives.
         // The callback is drained in onSurfaceCreated below.
+        // Keep the unoccupied area around fixed-aspect frames letterboxed.
+        host.setBackgroundColor(Color.BLACK)
     }
 
     companion object {
         private const val TAG = "S3SURFACE"
+        private const val OUTPUT_TAG = "S3OUTPUT"
     }
 }
