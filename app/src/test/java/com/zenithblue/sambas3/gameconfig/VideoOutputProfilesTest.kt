@@ -25,6 +25,11 @@ class VideoOutputProfilesTest {
     }
 
     @Test
+    fun aspectChoicesIncludeUltrawideAndNative() {
+        assertEquals(listOf("4:3", "16:9", "20:9", "21:9", "Native"), VideoOutputProfiles.aspects)
+    }
+
+    @Test
     fun widthUsesSelectedAspectForEachRequestedHeight() {
         assertEquals(800, VideoOutputProfiles.widthForHeight(360, "20:9", 16.0 / 9.0))
         assertEquals(1200, VideoOutputProfiles.widthForHeight(540, "20:9", 16.0 / 9.0))

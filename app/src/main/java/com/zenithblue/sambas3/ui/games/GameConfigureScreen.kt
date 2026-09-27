@@ -1247,7 +1247,10 @@ private fun CuratedRow(
                 else profiles.firstOrNull { it.key == value }?.label ?: value
             },
             item = { value, current, onClick ->
-                com.zenithblue.sambas3.ui.settings.components.preference.ListPreferenceItem<String> { it }(
+                val label = if (value == AUTO_SURFACE_PROFILE_KEY)
+                    "Auto · clears fixed size · keeps RSX scale $scalePercent%"
+                else profiles.firstOrNull { it.key == value }?.label ?: value
+                com.zenithblue.sambas3.ui.settings.components.preference.ListPreferenceItem<String> { label }(
                     value,
                     current,
                     onClick
@@ -1276,10 +1279,10 @@ private fun CuratedRow(
 
         "enum" -> {
             val allVariants = variantsOf(node)
-            val variants = if (path == FRAME_LIMIT_PATH) {
-                frameLimitOptions(allVariants, effectiveDisplay)
-            } else {
-                allVariants
+            val variants = when (path) {
+                FRAME_LIMIT_PATH -> frameLimitOptions(allVariants, effectiveDisplay)
+                ASPECT_RATIO_PATH -> VideoOutputProfiles.aspects
+                else -> allVariants
             }
             val coerced =
                 if (effectiveDisplay in variants) effectiveDisplay else variants.firstOrNull()

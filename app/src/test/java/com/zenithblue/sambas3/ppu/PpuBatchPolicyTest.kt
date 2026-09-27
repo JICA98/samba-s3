@@ -9,6 +9,8 @@ class PpuBatchPolicyTest {
 
     @Test
     fun nextBatchSizeOnFailure_fallsBackStepwise() {
+        assertEquals(0, PpuBatchPolicy.DEFAULT_BATCH_SIZE)
+        assertEquals(1, PpuBatchPolicy.nextBatchSizeOnFailure(1))
         assertEquals(8, PpuBatchPolicy.nextBatchSizeOnFailure(16))
         assertEquals(4, PpuBatchPolicy.nextBatchSizeOnFailure(8))
         assertEquals(2, PpuBatchPolicy.nextBatchSizeOnFailure(4))

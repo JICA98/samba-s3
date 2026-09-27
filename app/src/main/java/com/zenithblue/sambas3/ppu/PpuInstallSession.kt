@@ -32,7 +32,7 @@ data class PpuInstallSession(
     val totalModules: Int = 0,
     val completedModules: Int = 0,
     val batchIndex: Int = 0,
-    val batchSize: Int = 16,
+    val batchSize: Int = 0,
     val phase: PpuSessionPhase = PpuSessionPhase.CREATED,
     val lastWorkerPid: Int? = null,
     val lastWorkerInstanceId: String? = null,

@@ -1,7 +1,7 @@
 package com.zenithblue.sambas3.ppu
 
 object PpuBatchPolicy {
-    const val DEFAULT_BATCH_SIZE = 16
+    const val DEFAULT_BATCH_SIZE = 0
     const val MIN_BATCH_SIZE = 1
     const val MAX_RETRIES_PER_BATCH_SIZE = 2
 

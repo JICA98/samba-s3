@@ -23,6 +23,7 @@ data class VideoOutputProfile(
  */
 object VideoOutputProfiles {
     val heights: List<Int> = listOf(360, 540, 720, 1080)
+    val aspects: List<String> = listOf("4:3", "16:9", "20:9", "21:9", "Native")
 
     /** Explicit title value > curated compatibility default > canonical global value. */
     fun effectiveStrictRendering(

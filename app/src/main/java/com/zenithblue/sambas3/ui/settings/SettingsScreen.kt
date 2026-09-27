@@ -948,11 +948,12 @@ fun AdvancedSettingsScreen(
                             for (i in 0..<variantsJson.length()) {
                                 allVariants.add(variantsJson.getString(i))
                             }
-                            val isFrameLimit = SettingsBackendAudit.normalizePath(itemPath) == FRAME_LIMIT_PATH
-                            val variants = if (isFrameLimit) {
-                                frameLimitOptions(allVariants, itemValue)
-                            } else {
-                                allVariants
+                            val normalizedPath = SettingsBackendAudit.normalizePath(itemPath)
+                            val isFrameLimit = normalizedPath == FRAME_LIMIT_PATH
+                            val variants = when (normalizedPath) {
+                                FRAME_LIMIT_PATH -> frameLimitOptions(allVariants, itemValue)
+                                "Video@@Aspect ratio" -> com.zenithblue.sambas3.gameconfig.VideoOutputProfiles.aspects
+                                else -> allVariants
                             }
 
                             SingleSelectionDialog(

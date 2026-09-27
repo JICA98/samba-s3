@@ -690,43 +690,19 @@ class RPCSXActivity : ComponentActivity(), EmulationHost {
             // background (visible only in the Android notification shade), blinding the user.
             //
             // THE CONTRACT:
-            // 1. `progress.ppuActive` MUST ALWAYS update the loading screen progress overlay whenever
-            //    active (`hadPpuWork = true`). Never filter this out with `!isPrecompiled` flags.
-            // 2. `hadPpuWork` tracks whether PPU work actually occurred in this session. The transition
-            //    to "Starting game… - 100% / Waiting for game output" must ONLY execute if PPU work
-            //    was active and has now completed (`hadPpuWork && !progress.ppuActive`). It must NEVER
-            //    fire on initial boot when `ppuActive` is simply false.
+            // 1. PPU/SPU percent never paints this overlay. Launcher card and progress screen own it.
+            // 2. Do not swap the boot label to "Starting game… - 100%" just because ppuActive flipped.
             // 3. When `freshBootFrameValidated` arrives (first stable rendered frame), the transition
             //    overlay is cleanly dismissed via `releaseFreshBootTransitionOverlayIfVisible()`.
             // =========================================================================================
-            var hadPpuWork = false
             CompileProgressBridge.state.onEach { progress ->
                 if (!progress.shaderActive) shaderToastShownForActivePeriod = false
                 if (recoveryTransitionActive) return@onEach
+                // PPU and SPU compile progress belongs on the launcher card only.
+                // The boot overlay stays "Preparing game…" until the first frame.
                 if (freshBootFrameValidated || freshBootOverlayReleased) {
-                    // The game proved real rendering; Runtime PPU/shader work keeps
-                    // running in the background without re-covering the surface.
                     releaseFreshBootTransitionOverlayIfVisible()
                     if (progress.shaderActive) showRuntimeShaderToast()
-                    return@onEach
-                }
-                if (progress.ppuActive) {
-                    hadPpuWork = true
-                    val messages = progress.ppuMsg.orEmpty().lines()
-                    if (binding.transitionOverlay.visibility != View.VISIBLE) showTransitionOverlay("Preparing game…")
-                    updateTransitionProgress(
-                        messages.firstOrNull()?.takeIf(String::isNotBlank) ?: "Preparing game",
-                        messages.drop(1).joinToString(" ").ifBlank { "Processing game modules" },
-                        progress.ppuPercent,
-                    )
-                } else if (hadPpuWork && !freshBootFrameValidated && !freshBootOverlayReleased) {
-                    if (binding.transitionOverlay.visibility == View.VISIBLE) {
-                        updateTransitionProgress(
-                            "Starting game…",
-                            "Waiting for game output",
-                            100,
-                        )
-                    }
                 }
             }.launchIn(lifecycleScope)
         }
