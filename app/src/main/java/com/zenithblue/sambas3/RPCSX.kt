@@ -81,6 +81,10 @@ class RPCSX {
     external fun install(fd: Int, progressId: Long): Boolean
     external fun installKey(fd: Int, requestId: Long, gamePath: String): Boolean
     external fun boot(path: String): Int
+    /** Boots only a caller-validated bundled SPU diagnostic ELF with the core's private session override. */
+    external fun bootSpuFastLlvmDiagnostic(path: String): Int
+    /** Boots a named, caller-allowlisted compiler diagnostic case; case IDs are not exposed to intents. */
+    external fun bootSpuFastLlvmDiagnosticCase(path: String, testCase: Int): Int
     external fun bootSavestate(savestatePath: String, originalGamePath: String): Int
     external fun clearSavestateProgress()
     external fun surfaceEvent(surface: Surface, event: Int): Boolean

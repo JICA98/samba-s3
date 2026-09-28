@@ -1,0 +1,265 @@
+diff --git a/app/src/main/java/com/zenithblue/sambas3/RPCSXActivity.kt b/app/src/main/java/com/zenithblue/sambas3/RPCSXActivity.kt
+index e0db62a..4b2a221 100644
+--- a/app/src/main/java/com/zenithblue/sambas3/RPCSXActivity.kt
++++ b/app/src/main/java/com/zenithblue/sambas3/RPCSXActivity.kt
+@@ -690,7 +690,7 @@ class RPCSXActivity : ComponentActivity(), EmulationHost {
+             // background (visible only in the Android notification shade), blinding the user.
+             //
+             // THE CONTRACT:
+-            // 1. PPU/SPU percent never paints this overlay. Launcher card and progress screen own it.
++            // 1. Do not paint emulator compile text or a PPU/SPU percent bar here.
+             // 2. Do not swap the boot label to "Starting game… - 100%" just because ppuActive flipped.
+             // 3. When `freshBootFrameValidated` arrives (first stable rendered frame), the transition
+             //    overlay is cleanly dismissed via `releaseFreshBootTransitionOverlayIfVisible()`.
+@@ -698,8 +698,6 @@ class RPCSXActivity : ComponentActivity(), EmulationHost {
+             CompileProgressBridge.state.onEach { progress ->
+                 if (!progress.shaderActive) shaderToastShownForActivePeriod = false
+                 if (recoveryTransitionActive) return@onEach
+-                // PPU and SPU compile progress belongs on the launcher card only.
+-                // The boot overlay stays "Preparing game…" until the first frame.
+                 if (freshBootFrameValidated || freshBootOverlayReleased) {
+                     releaseFreshBootTransitionOverlayIfVisible()
+                     if (progress.shaderActive) showRuntimeShaderToast()
+diff --git a/app/src/main/java/com/zenithblue/sambas3/patch/PatchFastMode.kt b/app/src/main/java/com/zenithblue/sambas3/patch/PatchFastMode.kt
+index 61eba7e..33d5907 100644
+--- a/app/src/main/java/com/zenithblue/sambas3/patch/PatchFastMode.kt
++++ b/app/src/main/java/com/zenithblue/sambas3/patch/PatchFastMode.kt
+@@ -137,7 +137,7 @@ object PatchFastMode {
+     private fun gowFastModeSettings(): Map<String, String> = mapOf(
+         "Core@@Thread Scheduler Mode" to SettingsValueCodec.quoteCfgString("RPCS3 Scheduler"),
+         "Core@@Max LLVM Compile Threads" to "2",
+-        "Core@@SPU Block Size" to SettingsValueCodec.quoteCfgString("Mega"),
++        "Core@@SPU Block Size" to SettingsValueCodec.quoteCfgString("Safe"),
+     )
+ 
+     /**
+diff --git a/patches/rpcsx-submodule-changes.patch b/patches/rpcsx-submodule-changes.patch
+index 4f4ab11..994f794 100644
+--- a/patches/rpcsx-submodule-changes.patch
++++ b/patches/rpcsx-submodule-changes.patch
+@@ -1,9 +1,216 @@
+-# RPCSX engine Android integration edits live in the samba-s3-core submodule
+-# on branch samba-android, including 2b074811c (engine worktree) and
+-# 829cd6582 (out-of-tree samba-build-id CMake). Later samba-android commits
+-# supersede these pins.
+-#
+-# This parent patch is intentionally empty of git-diff hunks so build_rpcsx.sh
+-# skips apply. Do not regenerate a full diff of already-committed engine code.
+-# New engine edits belong in the submodule; keep this file comment-only unless
+-# a real git diff is required for an uncommitted engine change.
++diff --git a/rpcs3/Emu/Cell/SPUCommonRecompiler.cpp b/rpcs3/Emu/Cell/SPUCommonRecompiler.cpp
++index ba87d43b4..4ea1b8087 100644
++--- a/rpcs3/Emu/Cell/SPUCommonRecompiler.cpp
+++++ b/rpcs3/Emu/Cell/SPUCommonRecompiler.cpp
++@@ -7785,11 +7785,11 @@ struct spu_fast : public spu_recompiler_base
++ 
++ 	virtual spu_function_t compile(spu_program&& _func) override
++ 	{
++-#if !defined(ARCH_X64)
+++#if !defined(ARCH_X64) && !defined(ARCH_ARM64)
++ 		UNUSED(_func);
++-		fmt::throw_exception("Fast LLVM recompiler is unimplemented for architectures other than X86-64");
+++		fmt::throw_exception("Fast LLVM recompiler is unimplemented for architectures other than X86-64 and ARM64");
++ 		return nullptr;
++-#else
+++#elif defined(ARCH_X64)
++ 		const auto add_loc = m_spurt->add_empty(std::move(_func));
++ 
++ 		if (!add_loc)
++@@ -8134,6 +8134,107 @@ struct spu_fast : public spu_recompiler_base
++ 			add_loc->compiled.notify_all();
++ 		}
++ 
+++		return fn;
+++#elif defined(ARCH_ARM64)
+++		const auto add_loc = m_spurt->add_empty(std::move(_func));
+++
+++		if (!add_loc)
+++		{
+++			return nullptr;
+++		}
+++
+++		if (add_loc->compiled)
+++		{
+++			return add_loc->compiled;
+++		}
+++
+++		const spu_program& func = add_loc->data;
+++
+++		if (g_cfg.core.spu_debug && !add_loc->logged.exchange(1))
+++		{
+++			std::string log;
+++			this->dump(func, log);
+++			fs::write_file(m_spurt->get_cache_path() + "spu.log", fs::create + fs::write + fs::append, log);
+++		}
+++
+++		// Allocate executable area for the gate stub
+++		const auto result = jit_runtime::alloc(64, 16);
+++
+++		if (!result)
+++		{
+++			return nullptr;
+++		}
+++
+++		{
+++			sha1_context ctx;
+++			u8 output[20];
+++
+++			sha1_starts(&ctx);
+++			sha1_update(&ctx, reinterpret_cast<const u8*>(func.data.data()), func.data.size() * 4);
+++			sha1_finish(&ctx, output);
+++
+++			be_t<u64> hash_start;
+++			std::memcpy(&hash_start, output, sizeof(hash_start));
+++			m_hash_start = hash_start;
+++		}
+++
+++#if defined(__APPLE__)
+++		pthread_jit_write_protect_np(false);
+++#endif
+++
+++		u32* raw32 = reinterpret_cast<u32*>(result);
+++		*raw32++ = 0x1000000f; // adr x15, gate
+++		*raw32++ = 0x58000170; // ldr x16, ptr_compiled
+++		*raw32++ = 0xc8dffe11; // ldar x17, [x16]
+++		*raw32++ = 0xeb0f023f; // cmp x17, x15
+++		*raw32++ = 0x54000080; // b.eq fallback
+++		*raw32++ = 0xb4000071; // cbz x17, fallback
+++		*raw32++ = 0xd5033fdf; // isb
+++		*raw32++ = 0xd61f0220; // br x17
+++		// fallback:
+++		*raw32++ = 0x580000d0; // ldr x16, ptr_dispatch
+++		*raw32++ = 0xf9400211; // ldr x17, [x16]
+++		*raw32++ = 0xd61f0220; // br x17
+++		*raw32++ = 0xd503201f; // nop (alignment)
+++
+++		u64* raw64 = reinterpret_cast<u64*>(raw32);
+++		*raw64++ = reinterpret_cast<u64>(&add_loc->compiled);
+++		*raw64++ = reinterpret_cast<u64>(&spu_runtime::tr_dispatch);
+++
+++		__builtin___clear_cache(reinterpret_cast<char*>(result), reinterpret_cast<char*>(raw64));
+++
+++#if defined(__APPLE__)
+++		pthread_jit_write_protect_np(true);
+++#endif
+++
+++		const auto fn = reinterpret_cast<spu_function_t>(result);
+++
+++		// Install pointer carefully
+++		const bool added = !add_loc->compiled && add_loc->compiled.compare_and_swap_test(nullptr, fn);
+++
+++		const bool inverse_bounds = g_cfg.core.spu_llvm_lower_bound > g_cfg.core.spu_llvm_upper_bound;
+++
+++		if ((!inverse_bounds && (m_hash_start < g_cfg.core.spu_llvm_lower_bound || m_hash_start > g_cfg.core.spu_llvm_upper_bound)) ||
+++			(inverse_bounds && (m_hash_start < g_cfg.core.spu_llvm_lower_bound && m_hash_start > g_cfg.core.spu_llvm_upper_bound)))
+++		{
+++			spu_log.error("[Debug] Skipped function %s", fmt::base57(be_t<u64>{m_hash_start}));
+++		}
+++		else if (added)
+++		{
+++			// Send work to LLVM compiler thread
+++			g_fxo->get<spu_llvm_thread>().registered.push(m_hash_start, add_loc);
+++		}
+++
+++		if (!m_spurt->rebuild_ubertrampoline(func.data[0]))
+++		{
+++			return nullptr;
+++		}
+++
+++		if (added)
+++		{
+++			add_loc->compiled.notify_all();
+++		}
+++
++ 		return fn;
++ #endif
++ 	}
++diff --git a/rpcs3/Emu/Cell/SPUThread.cpp b/rpcs3/Emu/Cell/SPUThread.cpp
++index 0a585003c..a93298d26 100644
++--- a/rpcs3/Emu/Cell/SPUThread.cpp
+++++ b/rpcs3/Emu/Cell/SPUThread.cpp
++@@ -2184,10 +2184,8 @@ spu_thread::spu_thread(lv2_spu_group* group, u32 index, std::string_view name, u
++ 		// while the fast tier (make_fast_llvm_recompiler()) is strictly x86_64-only (ARCH_X64).
++ 		// No ARM SPU tier-1 fast compiler is claimed or enabled.
++ 		// Ticket J07: SPU single-flight state machine deduplicates block compilation across all 6 concurrent SPU workers.
++-#if defined(ARCH_X64)
+++#if defined(ARCH_X64) || defined(ARCH_ARM64)
++ 		jit = spu_recompiler_base::make_fast_llvm_recompiler();
++-#elif defined(ARCH_ARM64)
++-		jit = spu_recompiler_base::make_llvm_recompiler();
++ #else
++ #error "Unimplemented"
++ #endif
++@@ -2255,10 +2253,8 @@ spu_thread::spu_thread(utils::serial& ar, lv2_spu_group* group)
++ 		// while the fast tier (make_fast_llvm_recompiler()) is strictly x86_64-only (ARCH_X64).
++ 		// No ARM SPU tier-1 fast compiler is claimed or enabled.
++ 		// Ticket J07: SPU single-flight state machine deduplicates block compilation across all 6 concurrent SPU workers.
++-#if defined(ARCH_X64)
+++#if defined(ARCH_X64) || defined(ARCH_ARM64)
++ 		jit = spu_recompiler_base::make_fast_llvm_recompiler();
++-#elif defined(ARCH_ARM64)
++-		jit = spu_recompiler_base::make_llvm_recompiler();
++ #else
++ #error "Unimplemented"
++ #endif
++diff --git a/rx/include/rx/asm.hpp b/rx/include/rx/asm.hpp
++index 930bc6e99..9d02df4bf 100644
++--- a/rx/include/rx/asm.hpp
+++++ b/rx/include/rx/asm.hpp
++@@ -361,8 +361,17 @@ inline void busy_wait(usz cycles = 3000) {
++   const u64 ticks = cycles_to_ticks(cycles, host_freq);
++ 
++   const u64 start = get_tsc();
+++  u32 spin_count = 0;
++   do {
++-    pause();
+++    if (++spin_count > 100) {
+++#if defined(__ANDROID__) || defined(__linux__)
+++      std::this_thread::yield();
+++#else
+++      pause();
+++#endif
+++    } else {
+++      pause();
+++    }
++   } while ((get_tsc() - start) < ticks);
++ }
++ 
++@@ -376,8 +385,17 @@ inline void busy_wait_ticks(u64 ticks) {
++   }
++ 
++   const u64 start = get_tsc();
+++  u32 spin_count = 0;
++   do {
++-    pause();
+++    if (++spin_count > 100) {
+++#if defined(__ANDROID__) || defined(__linux__)
+++      std::this_thread::yield();
+++#else
+++      pause();
+++#endif
+++    } else {
+++      pause();
+++    }
++   } while ((get_tsc() - start) < ticks);
++ }
++ 
++@@ -393,8 +411,17 @@ inline void busy_wait_ns(u64 ns) {
++   const u64 ticks = ns_to_ticks(ns, host_freq);
++ 
++   const u64 start = get_tsc();
+++  u32 spin_count = 0;
++   do {
++-    pause();
+++    if (++spin_count > 100) {
+++#if defined(__ANDROID__) || defined(__linux__)
+++      std::this_thread::yield();
+++#else
+++      pause();
+++#endif
+++    } else {
+++      pause();
+++    }
++   } while ((get_tsc() - start) < ticks);
++ }
++ 

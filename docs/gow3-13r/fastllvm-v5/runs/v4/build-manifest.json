@@ -1,0 +1,15 @@
+{
+  "version": "2026.09.28-fastllvm-v4",
+  "variant": "standardRelease",
+  "apk": "samba-s3-fastllvm-v4-release.apk",
+  "apk_sha256": "f0c5bfdd74690fcb0e20708e71c108090179acf1466d68f7bbb642b91df1bcbc",
+  "core_sha256": "607a30fd7cd0cbe58a9054b7b930f1bea9203250771040d75e79030bd1991d6a",
+  "source_digest": "2e8d2eb2383dceaed0cbe746cd23e36585ac6ad3812c6e4ffab012d0aca55c9a",
+  "native_build_exit": 0,
+  "build_exit": 0,
+  "verifyRpcsxCore": "PASS",
+  "verifyStandardReleaseApk": "PASS",
+  "signature": "PASS",
+  "zipalign_16k": "PASS",
+  "purpose": "Android VMA 64 MiB preferred blocks and best-fit packing"
+}

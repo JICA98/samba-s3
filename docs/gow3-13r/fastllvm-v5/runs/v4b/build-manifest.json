@@ -1,0 +1,15 @@
+{
+  "version": "2026.09.28-fastllvm-v4b-probe",
+  "variant": "standardRelease",
+  "apk": "samba-s3-fastllvm-v4b-probe-release.apk",
+  "apk_sha256": "880d35af172a490b4fb7ab27589a8be1abc77601a8b483a545dff2328812c16b",
+  "core_sha256": "2bda1ff2ee59ab9afb2fb3080e00def90843cad1283d22d2897845a562e46c86",
+  "source_digest": "aff6e5c9ef3f3bebdae358546147a1f838123c7ebba4a91cbcc004cced78f3fe",
+  "native_build_exit": 0,
+  "build_exit": 0,
+  "verifyRpcsxCore": "PASS",
+  "verifyStandardReleaseApk": "PASS",
+  "signature": "PASS",
+  "zipalign_16k": "PASS",
+  "purpose": "VMA v4 policy retained, process resident-memory and report-context attribution"
+}

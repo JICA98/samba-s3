@@ -58,7 +58,8 @@ data class EmulatorBootRequest(
                 requestId = intent.getLongExtra(RPCSXActivity.EXTRA_RECOVERY_REQUEST_ID, -1L).takeIf { it >= 0 }
                     ?: pending?.requestId,
                 safeRetry = intent.getBooleanExtra(RPCSXActivity.EXTRA_SAFE_RETRY, false),
-                parseError = if (rawMode != null && requestedMode == null) "invalid-boot-mode" else null,
+                parseError = intent.getStringExtra(RPCSXActivity.EXTRA_BOOT_PARSE_ERROR)
+                    ?: if (rawMode != null && requestedMode == null) "invalid-boot-mode" else null,
             )
         }
     }

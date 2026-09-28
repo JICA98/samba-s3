@@ -1,0 +1,13 @@
+{
+  "version": "2026.09.28-fastllvm-v3-probe",
+  "variant": "standardRelease",
+  "apk": "samba-s3-fastllvm-v3-probe-release.apk",
+  "apk_sha256": "b0ecff0a6bd33a7d3011bd7a8cea0ea2b824d870c5d8fac91333ee66505dbad1",
+  "core_sha256": "66db2ea6861d31f5ac724629100f85c9e6722ef843e23a1300b40a6b58d2b60b",
+  "source_digest": "b6033e31f9434621328d10c0157160521ed0884aa785c6374068252d175fd99b",
+  "build_exit": 0,
+  "native_build_exit": 0,
+  "verifyRpcsxCore": "PASS",
+  "verifyStandardReleaseApk": "PASS",
+  "purpose": "diagnostic allocation attribution; no performance claim"
+}

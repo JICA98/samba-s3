@@ -4,22 +4,40 @@ record-gow3-live-gameplay.py — Continuous gameplay monitoring and telemetry co
 Records screenshots, thermal telemetry, and streams logcat while the user plays God of War III.
 """
 
-import os
+import argparse
 import sys
 import time
 import subprocess
 from datetime import datetime
 from pathlib import Path
 
-SERIAL = "d30a1726"
-OUTDIR = Path("docs/benchmarks/evidence-candidate-perf-v2-gow3")
-OUTDIR.mkdir(parents=True, exist_ok=True)
+SERIAL = None
+OUTDIR = None
 
 def run_adb(cmd, capture=True):
     full_cmd = ["adb", "-s", SERIAL] + cmd
     return subprocess.run(full_cmd, capture_output=capture, text=True)
 
 def main():
+    global SERIAL, OUTDIR
+    parser = argparse.ArgumentParser(
+        description="Capture a bounded, diagnostic-only GOW3 gameplay telemetry window."
+    )
+    parser.add_argument(
+        "--serial", required=True,
+        help="explicit adb serial for the already-authorized tester device",
+    )
+    parser.add_argument(
+        "--out-dir", default="docs/benchmarks/evidence-candidate-perf-v2-gow3",
+        help="directory for captured logs and telemetry (default: %(default)s)",
+    )
+    args = parser.parse_args()
+    SERIAL = args.serial.strip()
+    if not SERIAL:
+        parser.error("--serial must not be empty")
+    OUTDIR = Path(args.out_dir)
+    OUTDIR.mkdir(parents=True, exist_ok=True)
+
     print(f"[*] Starting live gameplay telemetry to {OUTDIR}...")
     
     # Start streaming logcat in background

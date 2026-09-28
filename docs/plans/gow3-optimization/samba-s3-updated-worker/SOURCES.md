@@ -8,9 +8,9 @@ Reviewed on September 25, 2026. Repository URLs below are pinned to the reviewed
 [Commit](https://github.com/JICA98/samba-s3/commit/1edbebd7ce5c0be9b6949fb64f9d9039e1e179cd).
 
 **S02 — Backend revision.** Actual samba-android revision: `141af96fa006f56c25ec335137e92c78b29b17e3`.
-[Commit](https://github.com/abhay-byte/samba-s3-core/commit/141af96fa006f56c25ec335137e92c78b29b17e3).
+[Commit](https://github.com/zenithblue-oss/samba-s3-core/commit/141af96fa006f56c25ec335137e92c78b29b17e3).
 
-**S03 — Frontend submodule binding.** The gitlink at `app/src/main/cpp/rpcsx` is `141af96fa006f56c25ec335137e92c78b29b17e3` and points to `abhay-byte/samba-s3-core`.
+**S03 — Frontend submodule binding.** The gitlink at `app/src/main/cpp/rpcsx` is `141af96fa006f56c25ec335137e92c78b29b17e3` and points to `zenithblue-oss/samba-s3-core`.
 [Pinned contents metadata](https://api.github.com/repos/JICA98/samba-s3/contents/app/src/main/cpp/rpcsx?ref=1edbebd7ce5c0be9b6949fb64f9d9039e1e179cd).
 
 **S04 — Benchmark runner.**
@@ -42,18 +42,18 @@ Reviewed periodic crosscheck parsing, deduplication, source mixing, `compute_fra
 Metadata proves Phase 7 and the older revised combat screenshot share a Git blob. Image pixels could not be rendered in this review; see PHASE_EVIDENCE_AUDIT.md.
 
 **S11 — Progress completion.**
-[system_progress.cpp](https://github.com/abhay-byte/samba-s3-core/blob/141af96fa006f56c25ec335137e92c78b29b17e3/rpcs3/Emu/system_progress.cpp) and
-[SPUCommonRecompiler.cpp](https://github.com/abhay-byte/samba-s3-core/blob/141af96fa006f56c25ec335137e92c78b29b17e3/rpcs3/Emu/Cell/SPUCommonRecompiler.cpp).
+[system_progress.cpp](https://github.com/zenithblue-oss/samba-s3-core/blob/141af96fa006f56c25ec335137e92c78b29b17e3/rpcs3/Emu/system_progress.cpp) and
+[SPUCommonRecompiler.cpp](https://github.com/zenithblue-oss/samba-s3-core/blob/141af96fa006f56c25ec335137e92c78b29b17e3/rpcs3/Emu/Cell/SPUCommonRecompiler.cpp).
 The introduced counter-forcing and `ptotal-1` behavior is also visible in
-[commit af45237121787df3a8ca3cd316529c6ae76acc44](https://github.com/abhay-byte/samba-s3-core/commit/af45237121787df3a8ca3cd316529c6ae76acc44).
+[commit af45237121787df3a8ca3cd316529c6ae76acc44](https://github.com/zenithblue-oss/samba-s3-core/commit/af45237121787df3a8ca3cd316529c6ae76acc44).
 Current progress-server completion region approximately lines 335–415 was inspected directly.
 
 **S12 — Current SPU compilation and cache-key path.**
-[SPULLVMRecompiler.cpp](https://github.com/abhay-byte/samba-s3-core/blob/141af96fa006f56c25ec335137e92c78b29b17e3/rpcs3/Emu/Cell/SPULLVMRecompiler.cpp).
+[SPULLVMRecompiler.cpp](https://github.com/zenithblue-oss/samba-s3-core/blob/141af96fa006f56c25ec335137e92c78b29b17e3/rpcs3/Emu/Cell/SPULLVMRecompiler.cpp).
 Current compile entry/state/cache-tag region approximately lines 1490–1635 was inspected directly.
 
 **S13 — Latest ARM rollback.**
-[commit 141af96fa006f56c25ec335137e92c78b29b17e3](https://github.com/abhay-byte/samba-s3-core/commit/141af96fa006f56c25ec335137e92c78b29b17e3).
+[commit 141af96fa006f56c25ec335137e92c78b29b17e3](https://github.com/zenithblue-oss/samba-s3-core/commit/141af96fa006f56c25ec335137e92c78b29b17e3).
 Removes the explicit SHUFB tbl2 paths, explicit SVE feature additions, and the EngineBuilder `setMAttrs` block. Compiler/ISA safety beyond the observed rollback requires further verification.
 
 **S14 — Current Fast Mode implementation.**
@@ -61,11 +61,11 @@ Removes the explicit SHUFB tbl2 paths, explicit SVE feature additions, and the E
 Reviewed curated GOW settings, receipt construction, enabled-name matching, ALL-versus-granular experiment handling, patch enable/disable and preference persistence.
 
 **S15 — Renderer optimization and subsequent correction.**
-[V08 commit 9f3eb74df64cf57f59bbf5d67fda6529c8601afc](https://github.com/abhay-byte/samba-s3-core/commit/9f3eb74df64cf57f59bbf5d67fda6529c8601afc) adds scratch reuse, semantic pipeline hashing and descriptor/pipeline elision.
-[Correction aae290b7a8db0e9af696cb9ee7093da0ffc99326](https://github.com/abhay-byte/samba-s3-core/commit/aae290b7a8db0e9af696cb9ee7093da0ffc99326) removes the unsafe descriptor guard and early pipeline return.
+[V08 commit 9f3eb74df64cf57f59bbf5d67fda6529c8601afc](https://github.com/zenithblue-oss/samba-s3-core/commit/9f3eb74df64cf57f59bbf5d67fda6529c8601afc) adds scratch reuse, semantic pipeline hashing and descriptor/pipeline elision.
+[Correction aae290b7a8db0e9af696cb9ee7093da0ffc99326](https://github.com/zenithblue-oss/samba-s3-core/commit/aae290b7a8db0e9af696cb9ee7093da0ffc99326) removes the unsafe descriptor guard and early pipeline return.
 
 **S16 — Single-flight introduction.**
-[commit 1ce15c156fb529aa9245a3f6fbe94a4d3528a4a4](https://github.com/abhay-byte/samba-s3-core/commit/1ce15c156fb529aa9245a3f6fbe94a4d3528a4a4).
+[commit 1ce15c156fb529aa9245a3f6fbe94a4d3528a4a4](https://github.com/zenithblue-oss/samba-s3-core/commit/1ce15c156fb529aa9245a3f6fbe94a4d3528a4a4).
 Reviewed state machine, publication, waiters, cache tagging, ASMJIT changes and post-publication mapping cleanup. This is the actual expanded SHA resolved from the short ID.
 
 **S17 — Phase 8 report.**
@@ -81,7 +81,7 @@ Documents `debug-pad.sh`, `gamepad.sh`, button/hold/stick support and DebugPad a
 Contains useful build/tool locations but also architecture/install guidance that must be reconciled with current build/loader code and preservation of user data. It does not override this task's declared device scope.
 
 **S20 — Current pipeline key equality and hashing.**
-[VKPipelineCompiler.h](https://github.com/abhay-byte/samba-s3-core/blob/141af96fa006f56c25ec335137e92c78b29b17e3/rpcs3/Emu/RSX/VK/VKPipelineCompiler.h).
+[VKPipelineCompiler.h](https://github.com/zenithblue-oss/samba-s3-core/blob/141af96fa006f56c25ec335137e92c78b29b17e3/rpcs3/Emu/RSX/VK/VKPipelineCompiler.h).
 Reviewed equality near lines 1–100 and multisample hashing near lines 270–300. The proposed float-key/reachability tests are an investigation, not a confirmed cause of the Gaia failure.
 
 ## Primary external technical references

@@ -1,0 +1,14 @@
+{
+  "status": "recording_stopped_by_user",
+  "event": "",
+  "ended_utc": "2026-09-28T04:17:50.528306+00:00",
+  "monitor_seconds": 139.44,
+  "pid": "23712",
+  "session": "1790568831391-d9e3a487",
+  "screenshots": 7,
+  "collector_exit_code": 0,
+  "game_controls_sent_by_monitor": false,
+  "performance_verdict": "REJECTED",
+  "user_feedback": "V2 is worse: RAM usage increased and FPS decreased.",
+  "game_stop_requested_by_assistant": false
+}

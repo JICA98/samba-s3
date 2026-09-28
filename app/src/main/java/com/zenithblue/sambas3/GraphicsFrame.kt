@@ -1,7 +1,6 @@
 package com.zenithblue.sambas3
 
 import android.content.Context
-import android.graphics.Color
 import android.util.AttributeSet
 import android.util.Log
 import android.view.Surface
@@ -72,7 +71,6 @@ class GraphicsFrame : SurfaceView, SurfaceHolder.Callback {
         fixedOutputSize = size
         if (size == null) return
         holder.setFixedSize(size.width, size.height)
-        setBackgroundColor(Color.BLACK)
         requestLayout()
     }
 

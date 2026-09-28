@@ -1,0 +1,11 @@
+{
+  "status": "clean_stop",
+  "event": "         1790568046.249 21225 21250 I S3EXIT  : event=CLEAN_STOP sessionId=1790567792091-45e8ec3a activityInstanceId=1 stopRequestId=1 stopReason=HomeStop finishReason=ExplicitExit activeGame=direct_iso/BCUS98111 nativeState=Stopped journalState=CLEAN_STOP pendingRecovery=none fatalEventId=none timestamp=1790568046249",
+  "ended_utc": "2026-09-28T04:00:48.176758+00:00",
+  "monitor_seconds": 34.41,
+  "pid": "21225",
+  "session": "1790567792091-45e8ec3a",
+  "screenshots": 2,
+  "collector_exit_code": 0,
+  "game_controls_sent_by_monitor": false
+}

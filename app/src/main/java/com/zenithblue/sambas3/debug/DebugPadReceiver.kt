@@ -35,8 +35,10 @@ import com.zenithblue.sambas3.monitoring.MonitoringPosition
 import com.zenithblue.sambas3.monitoring.MonitoringPreset
 import com.zenithblue.sambas3.monitoring.MonitoringPresets
 import com.zenithblue.sambas3.utils.FileUtil
+import com.zenithblue.sambas3.ui.games.launch.GameSavestateRepository
 import org.json.JSONObject
 import java.io.File
+import kotlin.concurrent.thread
 
 /**
  * Agent ADB bridge for controller injection — no coordinate taps.
@@ -145,6 +147,17 @@ class DebugPadReceiver(
         }
         if (action == ACTION_BOOT_GAME) {
             handleBootGame(context, intent)
+            return
+        }
+        if (action == ACTION_RUN_SPU_FIXTURE) {
+            handleRunSpuFixture(context, intent)
+            return
+        }
+        if (action == ACTION_SPU_CACHE_LEASE_BEGIN ||
+            action == ACTION_SPU_CACHE_LEASE_STATUS ||
+            action == ACTION_SPU_CACHE_LEASE_RESTORE
+        ) {
+            handleSpuCacheLease(context, intent, action)
             return
         }
         when {
@@ -323,6 +336,13 @@ class DebugPadReceiver(
     private fun handleBootGame(context: Context?, intent: Intent) {
         val requestId = intent.getStringExtra("request_id").orEmpty()
         val app = context?.applicationContext ?: return
+        val requestedMode = intent.getStringExtra(RPCSXActivity.EXTRA_BOOT_MODE)
+        val hasSlotRequest = intent.hasExtra(RPCSXActivity.EXTRA_SAVESTATE_SLOT) ||
+            requestedMode == EmulatorBootMode.UserSelectedSavestate.name
+        if (hasSlotRequest) {
+            handleSlotZeroBootGame(app, intent, requestId, requestedMode)
+            return
+        }
         val path = intent.getStringExtra("originalGamePath")?.trim().orEmpty()
             .ifEmpty { intent.getStringExtra("path")?.trim().orEmpty() }
         if (path.isEmpty()) {
@@ -400,6 +420,204 @@ class DebugPadReceiver(
         }
         app.startActivity(boot)
         Log.w("S3BOOT", "boot started path=$bootPath request_id=$requestId")
+    }
+
+    /** Resolve only the registered target game's fixed slot 0; never accept a state path from shell. */
+    private fun handleSlotZeroBootGame(
+        app: Context,
+        intent: Intent,
+        requestId: String,
+        requestedMode: String?,
+    ) {
+        val rawSlot = if (intent.hasExtra(RPCSXActivity.EXTRA_SAVESTATE_SLOT)) {
+            intent.getIntExtra(RPCSXActivity.EXTRA_SAVESTATE_SLOT, Int.MIN_VALUE)
+        } else {
+            Int.MIN_VALUE
+        }
+        val hasCallerProvidedStatePath = intent.hasExtra(RPCSXActivity.EXTRA_SAVESTATE_PATH) ||
+            intent.hasExtra(RPCSXActivity.EXTRA_USER_SAVESTATE) ||
+            intent.hasExtra(RPCSXActivity.EXTRA_RECOVERY_SAVESTATE)
+        val hasAlternateSlot = intent.hasExtra(RPCSXActivity.EXTRA_USER_SAVESTATE_SLOT)
+        if (!DebugSavedSlotLaunchPolicy.isRequestShapeValid(
+                requestedMode, rawSlot, hasCallerProvidedStatePath || hasAlternateSlot,
+            )
+        ) {
+            Log.w("S3BOOT", "slot-restore rejected reason=invalid-request mode=$requestedMode slot=$rawSlot request_id=$requestId")
+            return
+        }
+        val path = intent.getStringExtra("originalGamePath")?.trim().orEmpty()
+            .ifEmpty { intent.getStringExtra("path")?.trim().orEmpty() }
+        if (path.isEmpty()) {
+            Log.w("S3BOOT", "slot-restore rejected reason=missing-game-path request_id=$requestId")
+            return
+        }
+
+        val pending = SpuCacheLeaseGate.tryWithLock {
+            // A stale journal must be recovered before launch; an in-process armed lease is
+            // intentionally retained for Activity's final saved-state boot admission.
+            val recovery = runCatching { SpuCacheLease.recoverOnProcessStart(app) }.getOrNull()
+            if (recovery?.ok == false) return@tryWithLock SlotZeroAdmission.Denied("lease-recovery-${recovery.state}")
+            if (runCatching { RPCSX.getState() }.getOrNull() != EmulatorState.Stopped) {
+                return@tryWithLock SlotZeroAdmission.Denied("native-not-stopped")
+            }
+            if (com.zenithblue.sambas3.ppu.ImportPpuPreparationCoordinator.activeOwnerSnapshot() != null) {
+                return@tryWithLock SlotZeroAdmission.Denied("ppu-owner-active")
+            }
+
+            val registration = runCatching { resolveRegisteredGame(app, path) }.getOrElse {
+                return@tryWithLock SlotZeroAdmission.Denied("game-resolution-failed")
+            } ?: return@tryWithLock SlotZeroAdmission.Denied("game-not-registered")
+            val titleId = GameIdentity.titleIdOrNull(registration.info.path, registration.info.name.value)
+            if (!DebugSavedSlotLaunchPolicy.isAllowed(titleId, rawSlot)) {
+                return@tryWithLock SlotZeroAdmission.Denied("target-title-or-slot-mismatch")
+            }
+            val slot = runCatching {
+                GameSavestateRepository.slots(app, registration).firstOrNull { it.slot == 0 }
+            }.getOrNull() ?: return@tryWithLock SlotZeroAdmission.Denied("slot-not-found")
+            val stateFile = slot.path?.let(::File)
+            val stateRoot = File(
+                if (RPCSX.rootDirectory.isNotBlank()) RPCSX.rootDirectory
+                else app.getExternalFilesDir(null)?.path.orEmpty(),
+            )
+            if (!DebugSavedSlotLaunchPolicy.isUsableSlotZero(
+                    titleId = titleId,
+                    slot = slot.slot,
+                    reportedExists = slot.exists,
+                    stateFile = stateFile,
+                    stateRoot = stateRoot,
+                )
+            ) {
+                return@tryWithLock SlotZeroAdmission.Denied("slot-missing-invalid-or-empty")
+            }
+            val canonicalStatePath = stateFile!!.canonicalPath
+            GameRepository.onBoot(registration)
+            val boot = Intent(app, RPCSXActivity::class.java).apply {
+                addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                putExtra("path", registration.info.path)
+                putExtra(RPCSXActivity.EXTRA_ORIGINAL_GAME_PATH, registration.info.path)
+                putExtra(RPCSXActivity.EXTRA_BOOT_MODE, EmulatorBootMode.UserSelectedSavestate.name)
+                putExtra(RPCSXActivity.EXTRA_SAVESTATE_PATH, canonicalStatePath)
+                putExtra(RPCSXActivity.EXTRA_SAVESTATE_SLOT, 0)
+            }
+            app.startActivity(boot)
+            SlotZeroAdmission.Accepted(registration.info.path, canonicalStatePath)
+        }
+        when {
+            pending == null -> Log.w("S3BOOT", "slot-restore rejected reason=boot-gate-busy request_id=$requestId")
+            pending is SlotZeroAdmission.Denied -> Log.w(
+                "S3BOOT",
+                "slot-restore rejected reason=${pending.reason} request_id=$requestId",
+            )
+            pending is SlotZeroAdmission.Accepted -> Log.w(
+                "S3BOOT",
+                "request_id=$requestId status=accepted mode=UserSelectedSavestate slot=0 " +
+                    "game_path=${pending.gamePath} savestate_path=${pending.statePath} start_activity_requested=true",
+            )
+        }
+    }
+
+    /** Apply the same direct-ISO registration path as the existing warm-start bridge. */
+    private fun resolveRegisteredGame(app: Context, path: String): com.zenithblue.sambas3.Game? {
+        var bootPath = path
+        var resolvedGame: com.zenithblue.sambas3.Game? = null
+        if (path.endsWith(".iso", ignoreCase = true)) {
+            val existing = GameRepository.list().firstOrNull { it.info.path == path || it.info.sourceUri.value == path }
+                ?: findRegisteredDirectIso(app, File(path).name)
+            val resolved = if (existing != null) {
+                if (
+                    existing.info.sourceMode.value == GameSourceMode.DIRECT_ISO &&
+                    GameIdentity.titleIdOrNull(existing.info.path, existing.info.name.value) == null
+                ) {
+                    val sourceUri = existing.info.sourceUri.value
+                        ?: error("Direct ISO registration has no persisted source URI")
+                    com.zenithblue.sambas3.iso.DirectIsoManager.validateAndRegister(app, Uri.parse(sourceUri))
+                } else existing
+            } else {
+                val fileUri = Uri.fromFile(File(path))
+                val documentUri = com.zenithblue.sambas3.iso.DirectIsoSession.resolveDocumentUri(app, fileUri)
+                val registered = if (documentUri != null && documentUri != fileUri) {
+                    com.zenithblue.sambas3.iso.DirectIsoManager.validateAndRegister(app, documentUri)
+                } else {
+                    com.zenithblue.sambas3.iso.DirectIsoManager.registerFromFilePath(app, File(path))
+                }
+                GameRepository.list().firstOrNull { it.info.path == registered.info.path } ?: registered
+            }
+            GameRepository.onBoot(resolved)
+            bootPath = resolved.info.path
+            resolvedGame = resolved
+        }
+        return resolvedGame
+            ?: GameRepository.list().firstOrNull { it.info.path == bootPath }
+            ?: GameRepository.list().firstOrNull { it.info.path == path }
+    }
+
+    private sealed interface SlotZeroAdmission {
+        data class Accepted(val gamePath: String, val statePath: String) : SlotZeroAdmission
+        data class Denied(val reason: String) : SlotZeroAdmission
+    }
+
+    /** Launch one content-locked SPU ELF through the normal in-process core boot path. */
+    private fun handleRunSpuFixture(context: Context?, intent: Intent) {
+        val ctx = context?.applicationContext ?: return
+        val requestId = intent.getStringExtra("request_id").orEmpty()
+        val fixtureId = intent.getStringExtra("fixture_id")?.trim().orEmpty()
+        if (fixtureId.isBlank()) {
+            Log.e("S3FASTLLVM", "fixture-rejected reason=missing-id request_id=$requestId")
+            return
+        }
+        if (RPCSX.initialized && runCatching { RPCSX.getState() }.getOrNull() != EmulatorState.Stopped) {
+            Log.e("S3FASTLLVM", "fixture-rejected reason=native-not-stopped request_id=$requestId")
+            return
+        }
+        if (com.zenithblue.sambas3.ppu.ImportPpuPreparationCoordinator.activeOwnerSnapshot() != null) {
+            Log.e("S3FASTLLVM", "fixture-rejected reason=ppu-owner-active request_id=$requestId")
+            return
+        }
+        val fixture = SpuDiagnosticFixture.materialize(ctx, fixtureId)
+        if (fixture == null) {
+            Log.e("S3FASTLLVM", "fixture-rejected reason=invalid-or-unknown fixture=$fixtureId request_id=$requestId")
+            return
+        }
+        val boot = Intent(ctx, RPCSXActivity::class.java).apply {
+            addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+            putExtra("path", fixture.canonicalPath)
+            putExtra(RPCSXActivity.EXTRA_ORIGINAL_GAME_PATH, fixture.canonicalPath)
+            putExtra(RPCSXActivity.EXTRA_BOOT_MODE, EmulatorBootMode.FreshGame.name)
+            putExtra(RPCSXActivity.EXTRA_SPU_FAST_LLVM_DIAGNOSTIC, true)
+            putExtra(RPCSXActivity.EXTRA_SPU_FAST_LLVM_FIXTURE_ID, fixtureId)
+        }
+        ctx.startActivity(boot)
+        Log.i(
+            "S3FASTLLVM",
+            "fixture-launch-requested id=$fixtureId path=${fixture.canonicalPath} sha256=${SpuDiagnosticFixture.sha256Of(fixture)} request_id=$requestId",
+        )
+    }
+
+    /** Exact-file cache lease commands; filesystem hashing and durable renames run off main. */
+    private fun handleSpuCacheLease(context: Context?, intent: Intent, action: String) {
+        val appContext = context?.applicationContext ?: return
+        val requestId = intent.getStringExtra("request_id").orEmpty()
+        val expectedHash = intent.getStringExtra("expected_sha256").orEmpty()
+        val pending = goAsync()
+        thread(name = "spu-cache-lease") {
+            try {
+                val result = when (action) {
+                    ACTION_SPU_CACHE_LEASE_BEGIN -> SpuCacheLease.begin(appContext, expectedHash)
+                    ACTION_SPU_CACHE_LEASE_STATUS -> SpuCacheLease.status(appContext)
+                    ACTION_SPU_CACHE_LEASE_RESTORE -> SpuCacheLease.restore(appContext)
+                    else -> error("unknown cache lease operation")
+                }
+                Log.i(
+                    "S3SPUCACHE",
+                    "request_id=$requestId action=${action.substringAfterLast('_').lowercase()} " +
+                        "ok=${result.ok} state=${result.state} detail=${result.detail}",
+                )
+            } catch (error: Throwable) {
+                Log.e("S3SPUCACHE", "request_id=$requestId action=failed error=${error.message}", error)
+            } finally {
+                pending.finish()
+            }
+        }
     }
 
     /** Resolve a raw debug path back to the persisted SAF-backed direct ISO entry. */
@@ -573,6 +791,12 @@ class DebugPadReceiver(
         const val ACTION_INSTALL_FILE = "com.zenithblue.sambas3.DEBUG_INSTALL_FILE"
         /** Debug-only: boot a game in-process (same extras as GamesScreen.bootGame). */
         const val ACTION_BOOT_GAME = "com.zenithblue.sambas3.DEBUG_BOOT_GAME"
+        /** Shell/DUMP-only; starts only a bundled, SHA-pinned SPU ELF diagnostic fixture. */
+        const val ACTION_RUN_SPU_FIXTURE = "com.zenithblue.sambas3.DEBUG_RUN_SPU_FIXTURE"
+        /** Shell/DUMP only; a fixed-path, pinned-hash SPU cache lease. */
+        const val ACTION_SPU_CACHE_LEASE_BEGIN = "com.zenithblue.sambas3.DEBUG_SPU_CACHE_LEASE_BEGIN"
+        const val ACTION_SPU_CACHE_LEASE_STATUS = "com.zenithblue.sambas3.DEBUG_SPU_CACHE_LEASE_STATUS"
+        const val ACTION_SPU_CACHE_LEASE_RESTORE = "com.zenithblue.sambas3.DEBUG_SPU_CACHE_LEASE_RESTORE"
         const val ACTION_STOP_GAME = "com.zenithblue.sambas3.DEBUG_STOP_GAME"
         const val ACTION_DRIVER_SYSMEM = "com.zenithblue.sambas3.DEBUG_DRIVER_SYSMEM"
         const val ACTION_DRIVER_TU_DEBUG = "com.zenithblue.sambas3.DEBUG_DRIVER_TU_DEBUG"
@@ -603,6 +827,10 @@ class DebugPadReceiver(
                 addAction(ACTION_REMOVE_GAME)
                 addAction(ACTION_INSTALL_FILE)
                 addAction(ACTION_BOOT_GAME)
+                addAction(ACTION_RUN_SPU_FIXTURE)
+                addAction(ACTION_SPU_CACHE_LEASE_BEGIN)
+                addAction(ACTION_SPU_CACHE_LEASE_STATUS)
+                addAction(ACTION_SPU_CACHE_LEASE_RESTORE)
                 addAction(ACTION_STOP_GAME)
                 addAction(ACTION_DRIVER_SYSMEM)
                 addAction(ACTION_DRIVER_TU_DEBUG)
@@ -642,6 +870,10 @@ class DebugPadReceiver(
 
         private fun isReleaseShellAction(action: String): Boolean =
             action == ACTION_BOOT_GAME ||
+                action == ACTION_RUN_SPU_FIXTURE ||
+                action == ACTION_SPU_CACHE_LEASE_BEGIN ||
+                action == ACTION_SPU_CACHE_LEASE_STATUS ||
+                action == ACTION_SPU_CACHE_LEASE_RESTORE ||
                 action == ACTION_STOP_GAME ||
                 action == ACTION_PAD ||
                 action == ACTION_MONITOR_SET ||
@@ -655,6 +887,41 @@ class DebugPadReceiver(
  * counter remains gated inside the core; this reads one already-aggregated
  * snapshot per second and emits no overlay or Compose work.
  */
+internal object DebugSavedSlotLaunchPolicy {
+    private const val TARGET_TITLE = "BCUS98111"
+
+    fun isAllowed(titleId: String?, slot: Int): Boolean = titleId == TARGET_TITLE && slot == 0
+
+    fun isRequestShapeValid(mode: String?, slot: Int, callerProvidedStatePathOrAlternateSlot: Boolean): Boolean =
+        mode == com.zenithblue.sambas3.EmulatorBootMode.UserSelectedSavestate.name &&
+            slot == 0 && !callerProvidedStatePathOrAlternateSlot
+
+    fun isUsableSlotZero(
+        titleId: String?,
+        slot: Int,
+        reportedExists: Boolean,
+        stateFile: File?,
+        stateRoot: File,
+    ): Boolean {
+        if (!isAllowed(titleId, slot) || !reportedExists || stateFile == null || stateRoot.path.isBlank()) return false
+        return runCatching {
+            val root = stateRoot.canonicalFile
+            val expectedDirectory = File(root, "config/savestates/$TARGET_TITLE")
+            val expectedBase = File(expectedDirectory, "${TARGET_TITLE}_1_0.SAVESTAT")
+            val candidates = listOf(
+                expectedBase,
+                File(expectedBase.path + ".zst"),
+                File(expectedBase.path + ".gz"),
+            ).map { it.absoluteFile.normalize() }
+            val supplied = stateFile.absoluteFile.normalize()
+            if (java.nio.file.Files.isSymbolicLink(supplied.toPath())) return@runCatching false
+            if (expectedDirectory.absoluteFile.normalize() != expectedDirectory.canonicalFile) return@runCatching false
+            if (supplied.canonicalFile != supplied || supplied !in candidates) return@runCatching false
+            supplied.isFile && supplied.length() > 0L
+        }.getOrDefault(false)
+    }
+}
+
 private object BenchmarkDebugController {
     private const val INTERVAL_MS = 1_000L
     private val handler = Handler(Looper.getMainLooper())

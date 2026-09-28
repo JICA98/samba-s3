@@ -1,1 +1,3 @@
 *.patch whitespace=-space-before-tab
+# Preserve archived prototype patches byte for byte.
+docs/gow3-13r/fastllvm-v5/superseded/*.patch -whitespace

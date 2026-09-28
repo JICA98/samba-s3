@@ -29,6 +29,8 @@ object ImportPpuPreparationCoordinator {
     private var currentJob: Job? = null
     private val owners = PpuPreparationOwners.registry
 
+    data class ActiveOwnerSnapshot(val titleId: String, val sessionId: Long)
+
     @Volatile
     var lastSessionId: Long = -1L
         private set
@@ -150,6 +152,11 @@ object ImportPpuPreparationCoordinator {
 
     fun hasActiveOwner(): Boolean = owners.peek()?.let { !it.retired } == true
 
+    /** Read owner identity atomically from the registry's immutable owner record. */
+    fun activeOwnerSnapshot(): ActiveOwnerSnapshot? = owners.peek()?.takeUnless { it.retired }?.let {
+        ActiveOwnerSnapshot(titleId = it.titleId, sessionId = it.sessionNumeric)
+    }
+
     /** Keeps Start/Retry blocked when a signaled worker has not produced real death evidence. */
     fun onWorkerExitUnverified(titleId: String, sessionNumeric: Long) {
         val owner = owners.peek() ?: return
@@ -194,8 +201,8 @@ object ImportPpuPreparationCoordinator {
                     markStoppedTitle(context, titleId)
                     stopping = false
                     activeTitleId = null
-                    publishState(false)
                     owners.retire(owner)
+                    publishState(false)
                     PpuDiagnosticLog.emit("lock_released", titleId = titleId, attemptId = owner.key.attemptId)
                 }
             }
@@ -232,8 +239,8 @@ object ImportPpuPreparationCoordinator {
                     markStoppedTitle(context, titleId)
                     stopping = false
                     activeTitleId = null
-                    publishState(false)
                     owners.retire(owner)
+                    publishState(false)
                     PpuDiagnosticLog.emit("lock_released", titleId = titleId, attemptId = owner.key.attemptId)
                 }
             }
@@ -254,6 +261,17 @@ object ImportPpuPreparationCoordinator {
     }
 
     private fun admitOwner(titleId: String, path: String, kind: PpuKind): PpuOwnerRegistry.Owner? {
+        // Never block Home behind a native boot or cache mutation. Taking this
+        // gate before the owner registry keeps cache/boot/PPU admission ordered.
+        return com.zenithblue.sambas3.debug.SpuCacheLeaseGate.tryWithLock {
+            admitOwnerUnderLeaseGate(titleId, path, kind)
+        } ?: run {
+            Log.i(TAG, "admit rejected — native boot or cache lease gate busy title=$titleId")
+            null
+        }
+    }
+
+    private fun admitOwnerUnderLeaseGate(titleId: String, path: String, kind: PpuKind): PpuOwnerRegistry.Owner? {
         val cur = owners.peek()
         if (cur != null && !cur.retired) {
             Log.i(TAG, "admit rejected — owner still held title=${cur.titleId} stage=${cur.contract.stage}")

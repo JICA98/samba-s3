@@ -1,0 +1,15 @@
+{
+  "version": "2026.09.28-fastllvm-v3b-probe",
+  "variant": "standardRelease",
+  "apk": "samba-s3-fastllvm-v3b-probe-release.apk",
+  "apk_sha256": "eb0b3948ec85f9828618b9f86efe10ae9d64d45e32446beba54e2d31f90db56b",
+  "core_sha256": "c1ea86e31025037b127827a2f2f6f4e6238637eb6e63f0f4a5bc021fc3f66c91",
+  "source_digest": "406e7c7b07877633e6d67edf19cb57c0c2fc6d8b22a8d0d43e58c22a90bcd11d",
+  "native_build_exit": 0,
+  "build_exit": 0,
+  "verifyRpcsxCore": "PASS",
+  "verifyStandardReleaseApk": "PASS",
+  "signature": "PASS",
+  "zipalign_16k": "PASS",
+  "purpose": "VMA reserved vs live allocations and invalid report context"
+}

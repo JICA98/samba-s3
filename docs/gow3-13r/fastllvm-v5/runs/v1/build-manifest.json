@@ -1,0 +1,18 @@
+{
+  "version": "2026.09.28-fastllvm-v1",
+  "variant": "standardRelease",
+  "apk": "samba-s3-fastllvm-v1-release.apk",
+  "apk_sha256": "603fd743b046fb33eff1ec57d615a0e07d870130c8e428c4f5ea10963e9e9ae2",
+  "core_sha256": "9b6860196091f8b898d55f664a42b4e67b5ad879d00c50cb48d98a8d34df09a6",
+  "source_stage": ".git/gow3-13r-private/jobs/W36-ARM-FAST-LLVM-001/followup-cases-m12",
+  "version_label_via": "RX_VERSION",
+  "native_core": "Existing built ARM64 Fast LLVM plus decoder cleanup; no new saturation policy",
+  "build_exit": 0,
+  "verifyRpcsxCore": "PASS",
+  "verifyStandardReleaseApk": "PASS",
+  "signature": "PASS",
+  "zipalign_16k": "PASS",
+  "serial": "d30a1726",
+  "install": "adb install -r: Success",
+  "testing": "User will test gameplay"
+}

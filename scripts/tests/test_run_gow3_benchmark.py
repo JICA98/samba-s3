@@ -9,6 +9,7 @@ Validates:
 """
 
 import json
+import tempfile
 import sys
 import unittest
 from pathlib import Path
@@ -211,6 +212,7 @@ class TestProvenanceValidation(unittest.TestCase):
         self.assertFalse(ok)
         self.assertTrue(any("base.apk SHA-256 missing" in e for e in errors))
 
+
     def test_validate_provenance_rejects_missing_so_hash(self):
         prov = bench.DeviceProvenance(
             serial="test_serial",
@@ -228,6 +230,29 @@ class TestProvenanceValidation(unittest.TestCase):
         ok, errors = bench.validate_provenance(prov, expected_so_sha="abcdef")
         self.assertFalse(ok)
         self.assertTrue(any("librpcsx-android.so SHA-256 missing" in e for e in errors))
+
+
+class TestBootSessionBinding(unittest.TestCase):
+    def test_boot_session_is_bound_to_unique_pid_and_running_record(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            log = Path(tmp) / "logcat.txt"
+            log.write_text(
+                "09-28 10:00:00.000 1000 1000 W S3BOOT  : boot started request_id=req-1\n"
+                "09-28 10:00:01.000 2000 2000 I S3SESSION: journal state=RUNNING session=wrong\n"
+                "09-28 10:00:02.000 1000 1001 I S3SESSION: journal state=RUNNING session=sess-1\n"
+            )
+            self.assertEqual(bench.extract_boot_session_id(log, "1000"), "sess-1")
+
+    def test_multiple_boots_for_same_pid_do_not_guess_session(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            log = Path(tmp) / "logcat.txt"
+            log.write_text(
+                "09-28 10:00:00.000 1000 1000 W S3BOOT  : boot started request_id=req-1\n"
+                "09-28 10:00:01.000 1000 1001 I S3SESSION: journal state=RUNNING session=sess-1\n"
+                "09-28 10:00:02.000 1000 1000 W S3BOOT  : boot started request_id=req-2\n"
+                "09-28 10:00:03.000 1000 1001 I S3SESSION: journal state=RUNNING session=sess-2\n"
+            )
+            self.assertIsNone(bench.extract_boot_session_id(log, "1000"))
 
 
 class TestBenchmarkRunnerExecutionFixtures(unittest.TestCase):
@@ -406,10 +431,9 @@ class TestBenchmarkRunnerExecutionFixtures(unittest.TestCase):
     @patch.object(bench, "adb_shell")
     @patch.object(bench, "get_process_identity")
     @patch("subprocess.run")
-    def test_clean_run_pass_fixture(self, mock_subproc, mock_get_id, mock_adb, mock_run_cmd, mock_prov, mock_sleep):
+    def test_preloaded_analysis_without_raw_guest_evidence_cannot_pass(self, mock_subproc, mock_get_id, mock_adb, mock_run_cmd, mock_prov, mock_sleep):
         """
-        Complete clean run with intact process identity, valid evidence, and clean stop
-        must yield PASS with exit code 0.
+        A caller-preloaded analysis object and non-raw logs cannot qualify this run.
         """
         mock_prov.return_value = self._base_provenance()
         mock_adb.return_value = MagicMock(returncode=0, stdout="test")
@@ -436,11 +460,11 @@ class TestBenchmarkRunnerExecutionFixtures(unittest.TestCase):
         with patch.object(sys, "argv", test_args), patch.object(bench, "ROOT_DIR", self.outdir):
             exit_code = bench.main()
 
-        self.assertEqual(exit_code, 0)
+        self.assertEqual(exit_code, 2)
         manifest_path = self.outdir / "run-manifest.json"
         manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
-        self.assertIsNone(manifest["first_failure"])
-        self.assertEqual(manifest["verdict"], "PASS")
+        self.assertEqual(manifest["first_failure"], "INCONCLUSIVE_EVIDENCE")
+        self.assertEqual(manifest["verdict"], "INCONCLUSIVE_EVIDENCE")
         self.assertEqual(manifest["cleanup"]["result"], "SUCCESS")
         self.assertEqual(manifest["launch_identity"]["pid"], "1000")
 
@@ -485,7 +509,7 @@ class TestBenchmarkRunnerExecutionFixtures(unittest.TestCase):
     @patch.object(bench, "get_process_identity")
     @patch("subprocess.run")
     def test_zero_qualified_frames_fails_guest_progress(self, mock_subproc, mock_get_id, mock_adb, mock_run_cmd, mock_prov, mock_sleep):
-        """CR01 / CR03: Zero qualified frames during gameplay window must latch FAIL_GUEST_PROGRESS and exit 1."""
+        """Missing raw run-bound guest frames remain evidence-inconclusive, never a pass."""
         mock_prov.return_value = self._base_provenance()
         mock_adb.return_value = MagicMock(returncode=0, stdout="test")
         mock_run_cmd.return_value = MagicMock(returncode=0, stdout="device\n")
@@ -511,10 +535,10 @@ class TestBenchmarkRunnerExecutionFixtures(unittest.TestCase):
         with patch.object(sys, "argv", test_args), patch.object(bench, "ROOT_DIR", self.outdir):
             exit_code = bench.main()
 
-        self.assertEqual(exit_code, 1)
+        self.assertEqual(exit_code, 2)
         manifest = json.loads((self.outdir / "run-manifest.json").read_text(encoding="utf-8"))
-        self.assertEqual(manifest["first_failure"], "FAIL_GUEST_PROGRESS")
-        self.assertEqual(manifest["verdict"], "FAIL_GUEST_PROGRESS")
+        self.assertEqual(manifest["first_failure"], "INCONCLUSIVE_EVIDENCE")
+        self.assertEqual(manifest["verdict"], "INCONCLUSIVE_EVIDENCE")
 
     @patch("time.sleep")
     @patch.object(bench, "fetch_device_provenance")
@@ -578,6 +602,3 @@ class TestBenchmarkRunnerExecutionFixtures(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
-
-
-

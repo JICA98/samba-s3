@@ -1,0 +1,15 @@
+{
+  "status": "observation_limit",
+  "version": "2026.09.28-fastllvm-v3b-probe",
+  "serial": "d30a1726",
+  "pid": "27569",
+  "session": "1790570891034-d4659b2c",
+  "request": "s3-1790570890872405480-423351-5774",
+  "fast_llvm_enabled": true,
+  "cache": "existing cache preserved",
+  "game_left_running": false,
+  "gameplay_test_owner": "root diagnostic run",
+  "collector_exit": 0,
+  "stop_exit": 0,
+  "clean_stop_confirmed": true
+}

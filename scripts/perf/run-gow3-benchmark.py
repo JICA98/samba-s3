@@ -19,8 +19,10 @@ Conforms to SambaS3 WORKER.md Section 15 and 16.
 from __future__ import annotations
 
 import argparse
+import hashlib
 import json
 import os
+import re
 import subprocess
 import sys
 import time
@@ -87,6 +89,30 @@ def get_process_identity(serial: str, package_name: str) -> Optional[ProcessIden
     boot_id = r_boot.stdout.strip().split()[0] if r_boot.stdout.strip() else ""
 
     return ProcessIdentity(pid=pid, start_time=start_time, boot_id=boot_id)
+
+
+def extract_boot_session_id(log_path: Path, pid: str) -> Optional[str]:
+    """Return the unique app session tied to this PID's warm-boot log stream."""
+    try:
+        lines = log_path.read_text(encoding="utf-8", errors="replace").splitlines()
+    except OSError:
+        return None
+    pid_prefix = re.compile(r"^\s*(?:\d{2}-\d{2}\s+\d{2}:\d{2}:\d{2}\.\d{3}|\d{9,11}\.\d{3,6})\s+(\d+)\s+\d+\s+[VDIWEF]\s+")
+    request_ids: set[str] = set()
+    sessions: set[str] = set()
+    for line in lines:
+        match = pid_prefix.match(line)
+        if not match or match.group(1) != str(pid):
+            continue
+        if "S3BOOT" in line and "boot started" in line:
+            value = re.search(r"\brequest_id=([^\s]+)", line)
+            if value:
+                request_ids.add(value.group(1))
+        if "S3SESSION" in line and "journal state=RUNNING" in line:
+            value = re.search(r"\bsession=([^\s]+)", line)
+            if value:
+                sessions.add(value.group(1))
+    return next(iter(sessions)) if len(request_ids) == 1 and len(sessions) == 1 else None
 
 
 def write_manifest_atomic(manifest_path: Path, m_data: dict[str, Any]) -> None:
@@ -743,37 +769,92 @@ def main() -> int:
 
         # 10. Run frame events analyzer
         analysis_json_path = outdir / "frame-analysis.json"
-        candidate_logs = [outdir / "logcat-process.log", outdir / "logcat-host-stream.log", outdir / "logcat-sambas3.txt"]
+        # Never let a prior/caller-supplied analysis object qualify this run.
+        analysis_json_path.unlink(missing_ok=True)
+        raw_frames_path = outdir / "frames.raw.jsonl"
+        capture_window_path = outdir / "frames.capture-window.json"
+        capture_admission_path = outdir / "frames.capture-admission.json"
+        host_capture_log = outdir / "logcat-host-stream.log"
+        expected_app_session = extract_boot_session_id(
+            host_capture_log, launch_identity.pid
+        ) if launch_identity else None
         analyzed_ok = False
         thermal_file = outdir / "thermal-status.txt"
-
-        for cand_log in candidate_logs:
-            if cand_log.exists() and cand_log.stat().st_size > 0:
-                print(f"[*] Running analyze-frame-events.py on collected session logs ({cand_log.name})...")
-                analyze_cmd = [
-                    str(PERF_DIR / "analyze-frame-events.py"),
-                    str(cand_log),
-                    "--json",
-                    "--output-json", str(analysis_json_path),
-                    "--start-us", str(qual_start_us),
-                    "--end-us", str(qual_end_us),
-                ]
-                if thermal_file.exists():
-                    analyze_cmd.extend(["--thermal-log", str(thermal_file)])
-
-                r_an = run_cmd(analyze_cmd, timeout=30)
-                if r_an.returncode == 0 and analysis_json_path.exists():
-                    try:
-                        analysis_data = json.loads(analysis_json_path.read_text(encoding="utf-8"))
-                        if analysis_data.get("qualified_frames", 0) > 0:
-                            print(f"[OK] Frame analysis complete using {cand_log.name}!")
-                            analyzed_ok = True
-                            break
-                    except Exception:
-                        pass
+        if (launch_identity is not None and raw_frames_path.exists() and capture_window_path.exists()
+                and capture_admission_path.exists() and expected_app_session):
+            print("[*] Running strict guest-frame analysis against the independently admitted device window...")
+            analyze_cmd = [
+                str(PERF_DIR / "analyze-frame-events.py"),
+                str(raw_frames_path),
+                "--json",
+                "--output-json", str(analysis_json_path),
+                "--require-raw-guest-frames",
+                "--run-id", run_id,
+                "--expected-pid", str(launch_identity.pid),
+                "--process-start-time", launch_identity.start_time,
+                "--capture-window-json", str(capture_window_path),
+                "--capture-admission-json", str(capture_admission_path),
+                "--expected-session-id", expected_app_session,
+                "--requested-window-seconds", str(args.duration),
+            ]
+            if thermal_file.exists():
+                analyze_cmd.extend(["--thermal-log", str(thermal_file)])
+            r_an = run_cmd(analyze_cmd, timeout=30)
+            if r_an.returncode == 0 and analysis_json_path.exists():
+                try:
+                    analysis_data = json.loads(analysis_json_path.read_text(encoding="utf-8"))
+                    identity = analysis_data.get("measurement_identity") or {}
+                    expected_input_sha = hashlib.sha256(raw_frames_path.read_bytes()).hexdigest()
+                    expected_window_sha = hashlib.sha256(capture_window_path.read_bytes()).hexdigest()
+                    expected_admission_sha = hashlib.sha256(capture_admission_path.read_bytes()).hexdigest()
+                    analyzed_ok = bool(
+                        analysis_data.get("evaluation_status") == "QUALIFIED"
+                        and analysis_data.get("qualified_frames", 0) >= 3
+                        and analysis_data.get("input_sha256") == expected_input_sha
+                        and analysis_data.get("capture_window_sha256") == expected_window_sha
+                        and analysis_data.get("capture_admission_sha256") == expected_admission_sha
+                        and identity.get("run_id") == run_id
+                        and identity.get("process_id") == int(launch_identity.pid)
+                        and identity.get("process_start_time") == launch_identity.start_time
+                        and identity.get("session_id") == expected_app_session
+                        and identity.get("accepted_frame_source") == "emu_flip"
+                        and bool(identity.get("session_id"))
+                        and identity.get("capture_window_sha256") == expected_window_sha
+                        and identity.get("guest_frame_records", 0) >= 3
+                    )
+                except Exception:
+                    analyzed_ok = False
+        else:
+            reason = "INCONCLUSIVE_CAPTURE_ADMISSION_OR_SESSION_MISSING"
+            if not raw_frames_path.exists() or raw_frames_path.stat().st_size == 0:
+                reason = "INCONCLUSIVE_RAW_GUEST_FRAME_EXPORT_MISSING"
+            elif not capture_window_path.exists():
+                reason = "INCONCLUSIVE_DEVICE_MONOTONIC_CAPTURE_WINDOW_MISSING"
+            elif not capture_admission_path.exists():
+                reason = "INCONCLUSIVE_INDEPENDENT_CAPTURE_ADMISSION_MISSING"
+            elif not expected_app_session:
+                reason = "INCONCLUSIVE_BOOT_SESSION_NOT_UNIQUELY_BOUND"
+            analysis_json_path.write_text(json.dumps({
+                "evaluation_status": "INCONCLUSIVE_EVIDENCE",
+                "inconclusive_reason": reason,
+                "qualified_frames": 0,
+                "measurement_identity": {
+                    "run_id": run_id,
+                    "process_id": int(launch_identity.pid) if launch_identity else None,
+                    "process_start_time": launch_identity.start_time if launch_identity else None,
+                    "accepted_frame_source": None,
+                },
+                "input_sha256": hashlib.sha256(raw_frames_path.read_bytes()).hexdigest()
+                    if raw_frames_path.exists() else None,
+                "capture_window_sha256": hashlib.sha256(capture_window_path.read_bytes()).hexdigest()
+                    if capture_window_path.exists() else None,
+                "capture_admission_sha256": hashlib.sha256(capture_admission_path.read_bytes()).hexdigest()
+                    if capture_admission_path.exists() else None,
+            }, indent=2) + "\n", encoding="utf-8")
+            print(f"[!] {reason}; presentation telemetry is diagnostic only.")
 
         if not analyzed_ok and first_failure is None:
-            first_failure = "FAIL_GUEST_PROGRESS"
+            first_failure = "INCONCLUSIVE_EVIDENCE"
 
         verdict = "PASS" if (first_failure is None) else first_failure
 

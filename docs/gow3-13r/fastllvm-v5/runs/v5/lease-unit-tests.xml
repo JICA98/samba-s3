@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.zenithblue.sambas3.gameconfig.GameSettingsOverridesTest" tests="22" skipped="0" failures="0" errors="0" timestamp="2026-09-28T05:24:52.775Z" hostname="abhaybyte-82k2" time="0.085">
+  <properties/>
+  <testcase name="apply_title_tier_ignores_blank_titles" classname="com.zenithblue.sambas3.gameconfig.GameSettingsOverridesTest" time="0.013"/>
+  <testcase name="lease_skips_keys_absent_before_boot" classname="com.zenithblue.sambas3.gameconfig.GameSettingsOverridesTest" time="0.031"/>
+  <testcase name="curated_defaults_enable_rendering_and_safe_savestates_for_infamous_2" classname="com.zenithblue.sambas3.gameconfig.GameSettingsOverridesTest" time="0.014"/>
+  <testcase name="cross_title_sequence_does_not_leak" classname="com.zenithblue.sambas3.gameconfig.GameSettingsOverridesTest" time="0.008"/>
+  <testcase name="curated_defaults_stub_ppu_traps_only_for_tested_uncharted_2_title" classname="com.zenithblue.sambas3.gameconfig.GameSettingsOverridesTest" time="0.0"/>
+  <testcase name="empty_learning_map_falls_back_to_null" classname="com.zenithblue.sambas3.gameconfig.GameSettingsOverridesTest" time="0.001"/>
+  <testcase name="record_global_and_overrides_are_readable_back" classname="com.zenithblue.sambas3.gameconfig.GameSettingsOverridesTest" time="0.0"/>
+  <testcase name="apply_title_tier_emits_only_title_paths" classname="com.zenithblue.sambas3.gameconfig.GameSettingsOverridesTest" time="0.001"/>
+  <testcase name="clear_game_wipes_only_that_title" classname="com.zenithblue.sambas3.gameconfig.GameSettingsOverridesTest" time="0.0"/>
+  <testcase name="changing_global_moves_only_use_global_rows" classname="com.zenithblue.sambas3.gameconfig.GameSettingsOverridesTest" time="0.001"/>
+  <testcase name="apply_for_game_replays_full_ladder_in_exact_order" classname="com.zenithblue.sambas3.gameconfig.GameSettingsOverridesTest" time="0.0"/>
+  <testcase name="clear_all_on_curated_title_succeeds_and_keeps_profile_separate" classname="com.zenithblue.sambas3.gameconfig.GameSettingsOverridesTest" time="0.0"/>
+  <testcase name="recording_game_override_never_writes_global_or_another_title" classname="com.zenithblue.sambas3.gameconfig.GameSettingsOverridesTest" time="0.0"/>
+  <testcase name="clear_game_setting_removes_row_and_reapplies_restored_value_live" classname="com.zenithblue.sambas3.gameconfig.GameSettingsOverridesTest" time="0.0"/>
+  <testcase name="explicit_user_map_excludes_compat_and_user_value_wins_resolved" classname="com.zenithblue.sambas3.gameconfig.GameSettingsOverridesTest" time="0.001"/>
+  <testcase name="curated_defaults_require_write_color_buffers_for_demons_souls_and_rdr" classname="com.zenithblue.sambas3.gameconfig.GameSettingsOverridesTest" time="0.001"/>
+  <testcase name="scoped_lease_restores_exact_globals_and_recovers_after_crash" classname="com.zenithblue.sambas3.gameconfig.GameSettingsOverridesTest" time="0.001"/>
+  <testcase name="failed_backend_apply_is_not_masked_by_local_mirror" classname="com.zenithblue.sambas3.gameconfig.GameSettingsOverridesTest" time="0.004"/>
+  <testcase name="apply_for_game_with_null_title_applies_everything_but_title_tier" classname="com.zenithblue.sambas3.gameconfig.GameSettingsOverridesTest" time="0.001"/>
+  <testcase name="clear_game_setting_prefers_baseline_over_fallback_and_ignores_unknown_rows" classname="com.zenithblue.sambas3.gameconfig.GameSettingsOverridesTest" time="0.0"/>
+  <testcase name="record_game_captures_previous_value_into_baseline_once" classname="com.zenithblue.sambas3.gameconfig.GameSettingsOverridesTest" time="0.0"/>
+  <testcase name="learn_title_id_persists_path_mapping_and_lookup_reads_it_back" classname="com.zenithblue.sambas3.gameconfig.GameSettingsOverridesTest" time="0.001"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

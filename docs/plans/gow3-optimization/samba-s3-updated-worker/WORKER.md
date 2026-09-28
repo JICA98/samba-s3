@@ -24,7 +24,7 @@ Read `REVIEW_ADDENDUM.md`, `PHASE_EVIDENCE_AUDIT.md`, and `SOURCES.md` alongside
 |---|---|
 | Frontend repository | `JICA98/samba-s3` |
 | Frontend `master` | `1edbebd7ce5c0be9b6949fb64f9d9039e1e179cd` |
-| Backend repository | `abhay-byte/samba-s3-core` |
+| Backend repository | `zenithblue-oss/samba-s3-core` |
 | Backend `samba-android` | `141af96fa006f56c25ec335137e92c78b29b17e3` |
 | Frontend submodule path | `app/src/main/cpp/rpcsx` |
 | Reviewed frontend gitlink | `141af96fa006f56c25ec335137e92c78b29b17e3` |

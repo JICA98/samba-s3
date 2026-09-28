@@ -1,0 +1,237 @@
+[
+  {
+    "repository": "core",
+    "path": "android/src/rpcsx-android.cpp",
+    "sha256": "6871e7c8e0cdf01c51af3c3781fbdc5d0ef10ac3f9b8be695cfdd95442b714ba"
+  },
+  {
+    "repository": "core",
+    "path": "ps3fw/cellVideoOut.cpp",
+    "sha256": "d080255bab83350dc348131fac25095b176fdb0be7de249f7e6749e5ade9e54d"
+  },
+  {
+    "repository": "core",
+    "path": "rpcs3/Emu/CMakeLists.txt",
+    "sha256": "99e18dbadf5c5e5f943f6bc099e9a41180c7f0fb24da6cc7399d29580a218628"
+  },
+  {
+    "repository": "core",
+    "path": "rpcs3/Emu/Cell/RawSPUThread.cpp",
+    "sha256": "3988a8b5cb29c6517d0256557e5d477d72eb5d865530412326486b7b7cc1776d"
+  },
+  {
+    "repository": "core",
+    "path": "rpcs3/Emu/Cell/SPUCommonRecompiler.cpp",
+    "sha256": "9737023473511e8c683d2d83c81c2e015a44b2b3c0899fcde599d37f3cb2fee7"
+  },
+  {
+    "repository": "core",
+    "path": "rpcs3/Emu/Cell/SPULLVMRecompiler.cpp",
+    "sha256": "63c5e76bb417dbd21b03f205d8b7a837ec6979dddb5d6b6722658d0a585f5b59"
+  },
+  {
+    "repository": "core",
+    "path": "rpcs3/Emu/Cell/SPURecompiler.h",
+    "sha256": "12bb6d1a7ba4ae844178119f923bf86227b99e16db1cfd27b7321eba7ae3c457"
+  },
+  {
+    "repository": "core",
+    "path": "rpcs3/Emu/Cell/SPUThread.cpp",
+    "sha256": "3f373e6790c502e50ab77bc97cce04c861c5c0515805d4512cf014d44411373c"
+  },
+  {
+    "repository": "core",
+    "path": "rpcs3/Emu/Cell/SPUThread.h",
+    "sha256": "ec91cb553b7ab7387fde4b61ea9e561beedb569532235bbc772b4c95639fd9ba"
+  },
+  {
+    "repository": "core",
+    "path": "rpcs3/Emu/RSX/NV47/HW/common.cpp",
+    "sha256": "85a157b4e92bf0139acc424025ea9d719bacdb34dca06c82462f33d91fff34d8"
+  },
+  {
+    "repository": "core",
+    "path": "rpcs3/Emu/RSX/VK/VKPresent.cpp",
+    "sha256": "4199aae5edf85ab2842b80570f065711316f83f63154fae86afc664bc1f2fd98"
+  },
+  {
+    "repository": "core",
+    "path": "rpcs3/Emu/RSX/VK/vkutils/data_heap.cpp",
+    "sha256": "9e46daa6459bbc4275b924e5b17444536ebefb965ae34105685e66dbff241f8c"
+  },
+  {
+    "repository": "core",
+    "path": "rpcs3/Emu/RSX/VK/vkutils/memory.cpp",
+    "sha256": "66e4782e6d8c7174a8f86553e6c84c718add15dd408e57f0850c10800ed02e6d"
+  },
+  {
+    "repository": "core",
+    "path": "rpcs3/Emu/System.cpp",
+    "sha256": "680ba21c32b78c55507fd4e2681f7039d1d9728115928fc6e36350156b14ff91"
+  },
+  {
+    "repository": "core",
+    "path": "rpcs3/Emu/System.h",
+    "sha256": "0abc4eef3119875cd7de90feb1de9b12a6dd71f79c75be31630a0cef0dd7f2ee"
+  },
+  {
+    "repository": "core",
+    "path": "rpcs3/Emu/system_config.h",
+    "sha256": "a8d23bfd6699082076c045562fd5fd243d4c3f087f7e6ada8896a7af67395c72"
+  },
+  {
+    "repository": "core",
+    "path": "rpcs3/util/serialization_ext.cpp",
+    "sha256": "b3dc889e250c681bc6efe6306e2e7e6ca73c6a17429989b92d2608b480340760"
+  },
+  {
+    "repository": "app",
+    "path": "app/src/main/assets/spu-fast-llvm-fixtures/spu_fast_alias_matrix.elf",
+    "sha256": "07e6763d014fcdf5e8c871c01cfd9c24a2093889d222e73ab0a8a6112609cf22"
+  },
+  {
+    "repository": "app",
+    "path": "app/src/main/assets/spu-fast-llvm-fixtures/spu_fast_branch_reloc_reuse.elf",
+    "sha256": "eae18ede394ae144f212ec39b810026f36fdc8a3406268f98ecfc601d4ee7d00"
+  },
+  {
+    "repository": "app",
+    "path": "app/src/main/assets/spu-fast-llvm-fixtures/spu_fast_branch_wrap_high.elf",
+    "sha256": "b4ac13b1e9f9a68e3deeac405ce61d9aebada7b474f6e7de53f31a4957e9b431"
+  },
+  {
+    "repository": "app",
+    "path": "app/src/main/assets/spu-fast-llvm-fixtures/spu_fast_branch_wrap_mid.elf",
+    "sha256": "c897aef2764e65c006fc26dbcdb83113fa54b2256e18716b77bb75962d81eaf1"
+  },
+  {
+    "repository": "app",
+    "path": "app/src/main/assets/spu-fast-llvm-fixtures/spu_fast_hot_promotion.elf",
+    "sha256": "b12be6df7fa8e2fffa421797f2c340711746b2703716336809c86a8895a8240e"
+  },
+  {
+    "repository": "app",
+    "path": "app/src/main/assets/spu-fast-llvm-fixtures/spu_fast_il_signed_matrix.elf",
+    "sha256": "0fb1a49aa42f0ad5c68c9f853548ff6403608f16e8d2e3f650c221518349087b"
+  },
+  {
+    "repository": "app",
+    "path": "app/src/main/assets/spu-fast-llvm-fixtures/spu_fast_oversize_513.elf",
+    "sha256": "9bf564d4109c23c42fa8fcc89752d2d31d9f08ecae064dbc7373e29a224ec868"
+  },
+  {
+    "repository": "app",
+    "path": "app/src/main/assets/spu-fast-llvm-fixtures/spu_fast_retained_selector_self_modify.elf",
+    "sha256": "294ad18669bd212c7e1d419b5591ee71d5e1c1647e8f4770794c19068c3b17ea"
+  },
+  {
+    "repository": "app",
+    "path": "app/src/main/assets/spu-fast-llvm-fixtures/spu_fast_sequential_wrap.elf",
+    "sha256": "2ec7e4d4467431bc89214806781c894f384b37b0ac91a60794a35ce5711ecf2a"
+  },
+  {
+    "repository": "app",
+    "path": "app/src/main/cpp/native-lib.cpp",
+    "sha256": "4ab62ba84dc7a71812d00662b1d67ee2105dadc88fdb7086c4ef85f26ab584bb"
+  },
+  {
+    "repository": "app",
+    "path": "app/src/main/java/com/zenithblue/sambas3/EmulatorBootRequest.kt",
+    "sha256": "b99aca806e984d168ce89ed4847c57cf23949c6fd2a9b862bae5f8692376d26f"
+  },
+  {
+    "repository": "app",
+    "path": "app/src/main/java/com/zenithblue/sambas3/GraphicsFrame.kt",
+    "sha256": "9a343509d56866e564f2635bc01688cf5bf993d1232caa5ad3484eb44af73b33"
+  },
+  {
+    "repository": "app",
+    "path": "app/src/main/java/com/zenithblue/sambas3/MainActivity.kt",
+    "sha256": "d803067812568956047ea8661b2615bfd962912c81024f58171e0c54b21dfcc7"
+  },
+  {
+    "repository": "app",
+    "path": "app/src/main/java/com/zenithblue/sambas3/RPCSX.kt",
+    "sha256": "9ff48f0d18186895fe3ec9eb51d4d4b65f3bfaf45eba362734e598fd92fcdd0a"
+  },
+  {
+    "repository": "app",
+    "path": "app/src/main/java/com/zenithblue/sambas3/RPCSXActivity.kt",
+    "sha256": "329ad794995aa264867108947bb91f540ead20a2cba51a1a7a5b2c269d55f1df"
+  },
+  {
+    "repository": "app",
+    "path": "app/src/main/java/com/zenithblue/sambas3/debug/DebugPadReceiver.kt",
+    "sha256": "1a443277cbe332380e09c4a3ff6c034160af7b2ed0be641efacbcdc292e3f054"
+  },
+  {
+    "repository": "app",
+    "path": "app/src/main/java/com/zenithblue/sambas3/debug/SpuCacheLease.kt",
+    "sha256": "c7bc4bb210172448c5897c8de2a392925ef0ac7024615b306cb27779d23ed2aa"
+  },
+  {
+    "repository": "app",
+    "path": "app/src/main/java/com/zenithblue/sambas3/debug/SpuDiagnosticFixture.kt",
+    "sha256": "f1fee55def8d13c8b123294fd9cf5fb5317fe15ddcd365d8120c1d80bce79927"
+  },
+  {
+    "repository": "app",
+    "path": "app/src/main/java/com/zenithblue/sambas3/debug/SpuDiagnosticRoutePolicy.kt",
+    "sha256": "91c21022556acad5670bc0f7a7199a149585982917c5e8a908c9b3bc4165ea7b"
+  },
+  {
+    "repository": "app",
+    "path": "app/src/main/java/com/zenithblue/sambas3/gameconfig/GameSettingsOverrides.kt",
+    "sha256": "1a8c18ab311e07f312bf64b7ab26650ff041cbfb12e5de418ac37fab280246c2"
+  },
+  {
+    "repository": "app",
+    "path": "app/src/main/java/com/zenithblue/sambas3/ppu/ImportPpuPreparationCoordinator.kt",
+    "sha256": "f07cc977a3d52b23337d3e39117b00e142626c95dfcc591391dc0176f9b5e94f"
+  },
+  {
+    "repository": "app",
+    "path": "app/src/main/java/com/zenithblue/sambas3/ppu/PpuBootContinuationDelivery.kt",
+    "sha256": "db05c3a400e8d258b5bcae59393ff4e6eb316f3af801fa9e36b63c8966558302"
+  },
+  {
+    "repository": "app",
+    "path": "app/src/main/java/com/zenithblue/sambas3/ppu/PpuBootContinuationPolicy.kt",
+    "sha256": "70842862b3f3cbf52510d1a57de3c41556d243e0e9cb99f4d2c12dbc915d3def"
+  },
+  {
+    "repository": "app",
+    "path": "app/src/main/java/com/zenithblue/sambas3/ppu/PpuBootContinuationRequestState.kt",
+    "sha256": "dc68e90c6e14599c5d865b338d684b09aabd5bf608ed74e588a5e98571ed20ee"
+  },
+  {
+    "repository": "app",
+    "path": "app/src/test/java/com/zenithblue/sambas3/debug/DebugSavedSlotLaunchPolicyTest.kt",
+    "sha256": "d5458fd246c71c0eedca3d3ee2a6a86749ae3fa076f35fea6a093b7b02c5168f"
+  },
+  {
+    "repository": "app",
+    "path": "app/src/test/java/com/zenithblue/sambas3/debug/SpuCacheLeaseStoreTest.kt",
+    "sha256": "8a948b3ec9c292ad9f8f12ed06f022e924ce60ab269874c396d461a8da204b7b"
+  },
+  {
+    "repository": "app",
+    "path": "app/src/test/java/com/zenithblue/sambas3/debug/SpuDiagnosticFixtureTest.kt",
+    "sha256": "a0be79adebcad8f4a0fa5aa1d47ca249e10f38762f994364678bcc550039680f"
+  },
+  {
+    "repository": "app",
+    "path": "app/src/test/java/com/zenithblue/sambas3/debug/SpuDiagnosticRoutePolicyTest.kt",
+    "sha256": "be8f75959fbcbd554ffa9cbacc944bee87b7cf7006f2ad48da5bdbaf53e7c24f"
+  },
+  {
+    "repository": "app",
+    "path": "app/src/test/java/com/zenithblue/sambas3/ppu/PpuBootContinuationPolicyTest.kt",
+    "sha256": "5b5449f1f6e8b78c6637fdb90cc3d939e8a1b3fdedcd63d42d9ad255f4668ad6"
+  },
+  {
+    "repository": "app",
+    "path": "app/src/test/java/com/zenithblue/sambas3/ppu/PpuBootContinuationRequestStateTest.kt",
+    "sha256": "e999a735d8aec02e29af3531536a70b27b20ebece2b744a3cc073084d4a5eced"
+  }
+]

@@ -1,0 +1,8 @@
+{
+  "reason": "quoted YAML FIFO value mismatched expected marker",
+  "host_parent_stopped": 486791,
+  "host_helper_stopped": 486792,
+  "device_process_restarted": false,
+  "raw_logs_modified": false,
+  "resumed_from_existing_launch": true
+}

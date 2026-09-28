@@ -1,0 +1,17 @@
+{
+  "status": "fatal",
+  "version": "2026.09.28-fastllvm-v4b-probe",
+  "serial": "d30a1726",
+  "pid": "31088",
+  "session": "1790572477456-ee2772cd",
+  "request": "s3-1790572477306113842-464685-13759",
+  "fast_llvm_enabled": true,
+  "cache": "existing cache preserved",
+  "game_left_running": false,
+  "gameplay_test_owner": "root diagnostic run",
+  "collector_exit": 0,
+  "stop_exit": 1,
+  "clean_stop_confirmed": false,
+  "original_process_aborted_during_stop": true,
+  "recovery_pid": "31966"
+}

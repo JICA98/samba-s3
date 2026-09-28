@@ -856,6 +856,8 @@ struct RPCSXApi {
                            long progressId);
   void (*shutdown)();
   int (*boot)(std::string_view path_);
+  int (*bootSpuFastLlvmDiagnostic)(const char* path);
+  int (*bootSpuFastLlvmDiagnosticCase)(const char* path, uint32_t testCase);
   int (*getState)();
   void (*kill)();
   void (*resume)();
@@ -970,6 +972,8 @@ struct RPCSXLibrary : RPCSXApi {
     result.collectGameInfo = reinterpret_cast<decltype(collectGameInfo)>(dlsym(handle, "_rpcsx_collectGameInfo"));
     result.shutdown = reinterpret_cast<decltype(shutdown)>(dlsym(handle, "_rpcsx_shutdown"));
     result.boot = reinterpret_cast<decltype(boot)>(dlsym(handle, "_rpcsx_boot"));
+    result.bootSpuFastLlvmDiagnostic = reinterpret_cast<decltype(bootSpuFastLlvmDiagnostic)>(dlsym(handle, "_rpcsx_bootSpuFastLlvmDiagnostic"));
+    result.bootSpuFastLlvmDiagnosticCase = reinterpret_cast<decltype(bootSpuFastLlvmDiagnosticCase)>(dlsym(handle, "_rpcsx_bootSpuFastLlvmDiagnosticCase"));
     result.getState = reinterpret_cast<decltype(getState)>(dlsym(handle, "_rpcsx_getState"));
     result.kill = reinterpret_cast<decltype(kill)>(dlsym(handle, "_rpcsx_kill"));
     result.resume = reinterpret_cast<decltype(resume)>(dlsym(handle, "_rpcsx_resume"));
@@ -1134,6 +1138,33 @@ extern "C" JNIEXPORT jint JNICALL Java_com_zenithblue_sambas3_RPCSX_boot(JNIEnv 
   if (!rpcsxLib.boot) return 1; // GenericError
   s3_iso_hook::install_direct_iso_hooks(reinterpret_cast<void*>(rpcsxLib.boot));
   return rpcsxLib.boot(unwrap(env, jpath));
+}
+
+extern "C" JNIEXPORT jint JNICALL Java_com_zenithblue_sambas3_RPCSX_bootSpuFastLlvmDiagnostic(
+    JNIEnv *env, jobject, jstring jpath) {
+  if (!rpcsxLib.bootSpuFastLlvmDiagnostic) {
+    __android_log_print(ANDROID_LOG_ERROR, "S3FASTLLVM",
+                        "fixture unsupported: missing _rpcsx_bootSpuFastLlvmDiagnostic");
+    return 1; // GenericError
+  }
+  if (!jpath) return 1; // GenericError
+  const std::string path = unwrap(env, jpath);
+  if (path.empty()) return 1;
+  return rpcsxLib.bootSpuFastLlvmDiagnostic(path.c_str());
+}
+
+extern "C" JNIEXPORT jint JNICALL Java_com_zenithblue_sambas3_RPCSX_bootSpuFastLlvmDiagnosticCase(
+    JNIEnv *env, jobject, jstring jpath, jint testCase) {
+  if (!rpcsxLib.bootSpuFastLlvmDiagnosticCase) {
+    __android_log_print(ANDROID_LOG_ERROR, "S3FASTLLVM",
+                        "fixture unsupported: missing _rpcsx_bootSpuFastLlvmDiagnosticCase");
+    return 1; // GenericError
+  }
+  if (!jpath || (testCase != 1 && testCase != 2 && testCase != 3 &&
+                 testCase != 4 && testCase != 5 && testCase != 6)) return 1;
+  const std::string path = unwrap(env, jpath);
+  if (path.empty()) return 1;
+  return rpcsxLib.bootSpuFastLlvmDiagnosticCase(path.c_str(), static_cast<uint32_t>(testCase));
 }
 
 extern "C" JNIEXPORT jint JNICALL Java_com_zenithblue_sambas3_RPCSX_bootSavestate(

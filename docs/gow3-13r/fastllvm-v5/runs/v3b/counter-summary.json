@@ -1,0 +1,264 @@
+{
+  "allocator_samples": [
+    {
+      "epoch": 1790570960.772,
+      "block_bytes": 503316480,
+      "allocation_bytes": 420202112,
+      "slack_bytes": 83114368
+    },
+    {
+      "epoch": 1790570965.811,
+      "block_bytes": 905969664,
+      "allocation_bytes": 490182848,
+      "slack_bytes": 415786816
+    },
+    {
+      "epoch": 1790570970.823,
+      "block_bytes": 1711276032,
+      "allocation_bytes": 889427520,
+      "slack_bytes": 821848512
+    },
+    {
+      "epoch": 1790570975.825,
+      "block_bytes": 1711276032,
+      "allocation_bytes": 946296384,
+      "slack_bytes": 764979648
+    },
+    {
+      "epoch": 1790570980.896,
+      "block_bytes": 1711276032,
+      "allocation_bytes": 931383104,
+      "slack_bytes": 779892928
+    },
+    {
+      "epoch": 1790570985.921,
+      "block_bytes": 1979711488,
+      "allocation_bytes": 1053119808,
+      "slack_bytes": 926591680
+    },
+    {
+      "epoch": 1790570990.99,
+      "block_bytes": 2248146944,
+      "allocation_bytes": 1052427584,
+      "slack_bytes": 1195719360
+    },
+    {
+      "epoch": 1790570996.025,
+      "block_bytes": 2248146944,
+      "allocation_bytes": 949966144,
+      "slack_bytes": 1298180800
+    },
+    {
+      "epoch": 1790571001.312,
+      "block_bytes": 2785017856,
+      "allocation_bytes": 1506805056,
+      "slack_bytes": 1278212800
+    },
+    {
+      "epoch": 1790571006.386,
+      "block_bytes": 2384789504,
+      "allocation_bytes": 1043105088,
+      "slack_bytes": 1341684416
+    },
+    {
+      "epoch": 1790571011.404,
+      "block_bytes": 2384789504,
+      "allocation_bytes": 870759744,
+      "slack_bytes": 1514029760
+    },
+    {
+      "epoch": 1790571016.409,
+      "block_bytes": 2384789504,
+      "allocation_bytes": 1029389632,
+      "slack_bytes": 1355399872
+    }
+  ],
+  "surface_samples": [
+    {
+      "epoch": 1790570975.051,
+      "presented": 337,
+      "reported_fps": 15.2107
+    },
+    {
+      "epoch": 1790570976.306,
+      "presented": 355,
+      "reported_fps": 15.4546
+    },
+    {
+      "epoch": 1790570977.539,
+      "presented": 376,
+      "reported_fps": 16.9687
+    },
+    {
+      "epoch": 1790570978.811,
+      "presented": 394,
+      "reported_fps": 14.5407
+    },
+    {
+      "epoch": 1790570980.054,
+      "presented": 409,
+      "reported_fps": 12.309
+    },
+    {
+      "epoch": 1790570981.333,
+      "presented": 425,
+      "reported_fps": 12.1797
+    },
+    {
+      "epoch": 1790570982.576,
+      "presented": 443,
+      "reported_fps": 14.2227
+    },
+    {
+      "epoch": 1790570983.838,
+      "presented": 459,
+      "reported_fps": 14.1391
+    },
+    {
+      "epoch": 1790570985.13,
+      "presented": 472,
+      "reported_fps": 8.44677
+    },
+    {
+      "epoch": 1790570986.384,
+      "presented": 493,
+      "reported_fps": 17.1916
+    },
+    {
+      "epoch": 1790570987.626,
+      "presented": 510,
+      "reported_fps": 13.5422
+    },
+    {
+      "epoch": 1790570988.918,
+      "presented": 527,
+      "reported_fps": 12.6168
+    },
+    {
+      "epoch": 1790570990.157,
+      "presented": 542,
+      "reported_fps": 11.4992
+    },
+    {
+      "epoch": 1790570991.41,
+      "presented": 562,
+      "reported_fps": 15.5485
+    },
+    {
+      "epoch": 1790570992.576,
+      "presented": 574,
+      "reported_fps": 10.3792
+    },
+    {
+      "epoch": 1790570993.85,
+      "presented": 591,
+      "reported_fps": 13.7654
+    },
+    {
+      "epoch": 1790570995.14,
+      "presented": 610,
+      "reported_fps": 15.3136
+    },
+    {
+      "epoch": 1790570996.395,
+      "presented": 632,
+      "reported_fps": 17.568
+    },
+    {
+      "epoch": 1790570997.676,
+      "presented": 651,
+      "reported_fps": 14.146
+    },
+    {
+      "epoch": 1790570998.921,
+      "presented": 666,
+      "reported_fps": 11.5772
+    },
+    {
+      "epoch": 1790571000.186,
+      "presented": 678,
+      "reported_fps": 9.46018
+    },
+    {
+      "epoch": 1790571001.446,
+      "presented": 686,
+      "reported_fps": 6.14419
+    },
+    {
+      "epoch": 1790571002.718,
+      "presented": 702,
+      "reported_fps": 12.3944
+    },
+    {
+      "epoch": 1790571003.981,
+      "presented": 720,
+      "reported_fps": 15.0008
+    },
+    {
+      "epoch": 1790571005.249,
+      "presented": 736,
+      "reported_fps": 12.3973
+    },
+    {
+      "epoch": 1790571006.489,
+      "presented": 749,
+      "reported_fps": 12.4726
+    },
+    {
+      "epoch": 1790571007.731,
+      "presented": 770,
+      "reported_fps": 16.6361
+    },
+    {
+      "epoch": 1790571009.007,
+      "presented": 787,
+      "reported_fps": 13.8643
+    },
+    {
+      "epoch": 1790571010.268,
+      "presented": 803,
+      "reported_fps": 12.4514
+    },
+    {
+      "epoch": 1790571011.521,
+      "presented": 824,
+      "reported_fps": 16.6188
+    },
+    {
+      "epoch": 1790571012.727,
+      "presented": 840,
+      "reported_fps": 13.2085
+    },
+    {
+      "epoch": 1790571013.975,
+      "presented": 856,
+      "reported_fps": 13.0293
+    },
+    {
+      "epoch": 1790571015.245,
+      "presented": 875,
+      "reported_fps": 15.6208
+    },
+    {
+      "epoch": 1790571016.489,
+      "presented": 893,
+      "reported_fps": 14.7151
+    },
+    {
+      "epoch": 1790571017.734,
+      "presented": 912,
+      "reported_fps": 16.3032
+    },
+    {
+      "epoch": 1790571018.966,
+      "presented": 930,
+      "reported_fps": 14.0704
+    },
+    {
+      "epoch": 1790571020.23,
+      "presented": 946,
+      "reported_fps": 13.0545
+    }
+  ],
+  "surface_rate_is_not_useful_gameplay_fps": true
+}

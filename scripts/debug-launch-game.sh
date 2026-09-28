@@ -5,9 +5,25 @@ set -euo pipefail
 SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
 source "$SCRIPT_DIR/lib/debug-bridge.sh"
 
-usage() { echo "Usage: $0 [SERIAL] GAME_PATH (absolute on-device path or registered direct_iso/<TITLE_ID>; current APK required)"; }
+usage() {
+  echo "Usage: $0 [SERIAL] GAME_PATH (fresh boot; absolute path or registered direct_iso/<TITLE_ID>)"
+  echo "       $0 --savestate-slot0 SERIAL GAME_PATH (explicit slot 0 restore; current APK required)"
+}
 if [[ "${1:-}" == --help || "${1:-}" == -h ]]; then usage; exit 0; fi
-if [[ $# == 1 ]]; then SERIAL=""; GAME="$1"
+SAVESTATE_SLOT0=0
+BOOT_ACK='boot started'
+MAX_ATTEMPTS=2
+if [[ "${1:-}" == --savestate-slot0 ]]; then
+  shift
+  if [[ $# != 2 || -z "$1" || -z "$2" ]]; then usage; exit 1; fi
+  # Restore runs must be tied to the tester's explicitly leased device.
+  SERIAL="$1"
+  GAME="$2"
+  SAVESTATE_SLOT0=1
+  BOOT_ACK='status=accepted mode=UserSelectedSavestate slot=0'
+  # An unacknowledged state restore is ambiguous; never submit it twice.
+  MAX_ATTEMPTS=1
+elif [[ $# == 1 ]]; then SERIAL=""; GAME="$1"
 elif [[ $# == 2 ]]; then SERIAL="$1"; GAME="$2"
 else usage; exit 1; fi
 bridge_device
@@ -31,11 +47,47 @@ fi
 bridge_capture S3BOOT
 trap bridge_cleanup EXIT
 bridge_shell am start -n "$PKG/.MainActivity"
-# Two registration attempts maximum. A rejected or acknowledged boot is never resent.
-for attempt in 1 2; do
+
+wait_for_slot0_ack() {
+  local deadline=$((SECONDS + 5)) lines
+  while (( SECONDS < deadline )); do
+    lines="$(grep -F "request_id=$REQUEST_ID" "$BRIDGE_LOG" || true)"
+    if grep -Fq "$BOOT_ACK" <<< "$lines"; then
+      echo "$lines"
+      return 0
+    fi
+    if grep -Fq 'slot-restore rejected' <<< "$lines"; then
+      echo "$lines" >&2
+      return 2
+    fi
+    sleep 0.2
+  done
+  echo "Missing '$BOOT_ACK' acknowledgement for request_id=$REQUEST_ID" >&2
+  return 1
+}
+
+# Fresh boots get at most two registration attempts. Slot restores get one because
+# a lost acknowledgement cannot prove the Activity did not already accept them.
+for (( attempt=1; attempt<=MAX_ATTEMPTS; attempt++ )); do
   sleep 2
-  bridge_send "$PKG.DEBUG_BOOT_GAME" --es path "$GAME" --es originalGamePath "$GAME"
-  if bridge_wait 'boot started' 5; then
+  BOOT_EXTRAS=(--es path "$GAME" --es originalGamePath "$GAME")
+  if (( SAVESTATE_SLOT0 )); then
+    BOOT_EXTRAS+=(--es bootMode UserSelectedSavestate --ei savestateSlot 0)
+  fi
+  bridge_send "$PKG.DEBUG_BOOT_GAME" "${BOOT_EXTRAS[@]}"
+  ACKED=0
+  if (( SAVESTATE_SLOT0 )); then
+    if wait_for_slot0_ack; then ACKED=1; else
+      wait_status=$?
+      if (( wait_status == 2 )); then
+        echo 'Saved-state request was explicitly rejected; do not resend it.' >&2
+        exit 1
+      fi
+    fi
+  elif bridge_wait "$BOOT_ACK" 5; then
+    ACKED=1
+  fi
+  if (( ACKED )); then
     deadline=$((SECONDS + 20))
     while (( SECONDS < deadline )); do
       if bridge_shell dumpsys window | grep 'mCurrentFocus.*RPCSXActivity'; then

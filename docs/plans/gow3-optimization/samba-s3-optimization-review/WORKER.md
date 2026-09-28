@@ -11,7 +11,7 @@ Reviewed public snapshot:
 | Layer | Repository | Revision |
 |---|---|---|
 | Frontend | JICA98/samba-s3 | `270d72a56a926375f16f6c9a22474acdda99cd8c` |
-| Backend | abhay-byte/samba-s3-core, branch `samba-android` | `ed8ba6c12c218249524a441b79f48d6bae842394` |
+| Backend | zenithblue-oss/samba-s3-core, branch `samba-android` | `ed8ba6c12c218249524a441b79f48d6bae842394` |
 | Core named by the revised benchmark | Embedded S3CORE identifier | `05ed8aed420f7cf4975835f4baebda91cec14748` |
 
 The frontend gitlink now matches the backend branch above. Earlier observations of an older frontend pin are superseded. The benchmark identifies a different core, so do not reuse its results to certify the current binary without a revision comparison and a new run. Source identifiers in this plan are immutable review anchors, not instructions to discard later work. [S01–S04]

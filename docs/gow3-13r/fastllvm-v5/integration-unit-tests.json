@@ -1,0 +1,51 @@
+[
+  {
+    "name": "com.zenithblue.sambas3.debug.DebugSavedSlotLaunchPolicyTest",
+    "tests": "3",
+    "failures": "0",
+    "errors": "0",
+    "skipped": "0"
+  },
+  {
+    "name": "com.zenithblue.sambas3.debug.SpuCacheLeaseStoreTest",
+    "tests": "8",
+    "failures": "0",
+    "errors": "0",
+    "skipped": "0"
+  },
+  {
+    "name": "com.zenithblue.sambas3.debug.SpuDiagnosticFixtureTest",
+    "tests": "2",
+    "failures": "0",
+    "errors": "0",
+    "skipped": "0"
+  },
+  {
+    "name": "com.zenithblue.sambas3.debug.SpuDiagnosticRoutePolicyTest",
+    "tests": "2",
+    "failures": "0",
+    "errors": "0",
+    "skipped": "0"
+  },
+  {
+    "name": "com.zenithblue.sambas3.gameconfig.GameSettingsOverridesTest",
+    "tests": "22",
+    "failures": "0",
+    "errors": "0",
+    "skipped": "0"
+  },
+  {
+    "name": "com.zenithblue.sambas3.ppu.PpuBootContinuationPolicyTest",
+    "tests": "10",
+    "failures": "0",
+    "errors": "0",
+    "skipped": "0"
+  },
+  {
+    "name": "com.zenithblue.sambas3.ppu.PpuBootContinuationRequestStateTest",
+    "tests": "2",
+    "failures": "0",
+    "errors": "0",
+    "skipped": "0"
+  }
+]

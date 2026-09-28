@@ -1,0 +1,17 @@
+{
+  "version": "2026.09.28-fastllvm-v2",
+  "variant": "standardRelease",
+  "apk": "samba-s3-fastllvm-v2-release.apk",
+  "apk_sha256": "d1dfa03a88b70b49dcc148c5efcc4eab73c6b504b6c4c24a17afa9cf3c2283c6",
+  "core_sha256": "31039ae86dc251b2ec282c1a2900d182eb97ed541f63e1eaa6d1f0a2e754032c",
+  "source_stage": ".git/gow3-13r-private/jobs/W36-ARM-FAST-LLVM-001/followup-cases-m12",
+  "native_build_exit": 0,
+  "build_exit": 0,
+  "verifyRpcsxCore": "PASS",
+  "verifyStandardReleaseApk": "PASS",
+  "signature": "PASS",
+  "zipalign_16k": "PASS",
+  "serial": "d30a1726",
+  "change": "One startup allocator purge after reader/compile cleanup with RSS and duration logging",
+  "testing": "User-controlled gameplay; native gain to be measured"
+}

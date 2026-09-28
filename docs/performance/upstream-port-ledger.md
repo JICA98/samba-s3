@@ -1,6 +1,6 @@
 # SambaS3 Upstream Port Ledger (RPCS3 / RPCSX Synchronization)
 
-This ledger tracks the evaluation, dependency mapping, and integration status of upstream RPCS3/RPCSX commits, PRs, and architectural enhancements into the SambaS3 core fork (`abhay-byte/samba-s3-core`, branch `samba-android`).
+This ledger tracks the evaluation, dependency mapping, and integration status of upstream RPCS3/RPCSX commits, PRs, and architectural enhancements into the SambaS3 core fork (`zenithblue-oss/samba-s3-core`, branch `samba-android`).
 
 ## Upstream Synchronization Table
 

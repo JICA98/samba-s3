@@ -1,0 +1,15 @@
+{
+  "status": "failed_render_thread_then_stop_abort",
+  "pid": "26155",
+  "session": "1790569943844-3ecd94c4",
+  "request": "s3-1790569943723594732-397918-22684",
+  "first_frame_epoch": 1790570017.43,
+  "fatal_backend_seconds": 93.824281,
+  "failure": "Local RSX REPORT offset out of range: offset=0x10dca0 location=0x66626660",
+  "stop_script": "sent; no success acknowledgement within host 50-second timeout",
+  "original_process_exit": "SIGABRT at epoch 1790570092.227; exit-info status=6",
+  "current_state": "MainActivity PID26889; original game process gone",
+  "performance_verdict": "FAIL; 60 FPS / under 6 GB not achieved",
+  "recorder": "no continuous gameplay recorder started; bounded launch and one-shot failure evidence",
+  "timestamp_utc": "2026-09-28T04:38:09.830043+00:00"
+}

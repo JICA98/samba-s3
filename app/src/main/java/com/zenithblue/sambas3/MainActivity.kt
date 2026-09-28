@@ -176,6 +176,12 @@ class MainActivity : ComponentActivity() {
         } else {
             unregisterUsbEventListener = {}
         }
+
+        // Recover a cache lease left by a killed prior process while native is
+        // stopped. Hashing and durable renames stay off the UI thread.
+        lifecycleScope.launch(kotlinx.coroutines.Dispatchers.IO) {
+            com.zenithblue.sambas3.debug.SpuCacheLease.recoverOnProcessStart(this@MainActivity)
+        }
     }
 
     override fun onResume() {

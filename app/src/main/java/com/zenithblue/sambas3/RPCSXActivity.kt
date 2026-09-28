@@ -4,6 +4,7 @@ import android.content.Intent
 import android.graphics.Bitmap
 import android.graphics.RenderEffect
 import android.graphics.Shader
+import android.graphics.Color
 import android.net.Uri
 import android.os.Build
 import android.os.Handler
@@ -19,6 +20,10 @@ import android.view.View
 import android.view.WindowManager
 import android.view.ViewGroup.MarginLayoutParams
 import android.view.WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_MODE_SHORT_EDGES
+import android.view.Gravity
+import android.widget.LinearLayout
+import android.widget.ProgressBar
+import android.widget.TextView
 import androidx.activity.ComponentActivity
 import androidx.activity.OnBackPressedCallback
 import androidx.compose.runtime.getValue
@@ -93,6 +98,8 @@ import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.cancel
 import org.json.JSONObject
 import kotlin.concurrent.thread
 import kotlin.math.abs
@@ -206,30 +213,185 @@ class RPCSXActivity : ComponentActivity(), EmulationHost {
 
     private lateinit var backCallback: OnBackPressedCallback
     private var ppuLaunchDeferred = false
+    private var ppuContinuationActive = false
+    private var ppuContinuationTitleId: String? = null
+    private var ppuContinuationSessionId: Long? = null
+    private var ppuContinuationJob: Job? = null
+    private var ppuContinuationBackCallback: OnBackPressedCallback? = null
+    private var ppuContinuationDelivery: com.zenithblue.sambas3.ppu.PpuBootContinuationDelivery? = null
+    private var ppuContinuationBootRequest: EmulatorBootRequest? = null
+    private var spuFastLlvmFixtureId: String? = null
+    private var spuDiagnosticTimeoutJob: Job? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         // All entry points (including debug launches and save loads) must use
         // Home's PPU gate before creating a surface or starting a native boot.
-        val requestedPath = EmulatorBootRequest.fromIntent(
-            intent, PendingSavestateRecoveryStore.validForLaunch(this),
-        ).originalGamePath
+        val requestedBoot = restorePpuContinuationBootRequest(savedInstanceState)
+            ?: EmulatorBootRequest.fromIntent(intent, PendingSavestateRecoveryStore.validForLaunch(this))
+        val requestedPath = requestedBoot.originalGamePath
+        val diagnosticRequested = intent.getBooleanExtra(EXTRA_SPU_FAST_LLVM_DIAGNOSTIC, false)
+        val requestedFixtureId = intent.getStringExtra(EXTRA_SPU_FAST_LLVM_FIXTURE_ID)
+        if (diagnosticRequested || requestedFixtureId != null) {
+            val validFixture = diagnosticRequested &&
+                requestedBoot.mode == EmulatorBootMode.FreshGame &&
+                !requestedFixtureId.isNullOrBlank() &&
+                com.zenithblue.sambas3.debug.SpuDiagnosticFixture.validate(
+                    this, requestedFixtureId, requestedPath,
+                )
+            val noPpuOwner = com.zenithblue.sambas3.ppu.ImportPpuPreparationCoordinator
+                .activeOwnerSnapshot() == null
+            val nativeIdle = !RPCSX.initialized ||
+                runCatching { RPCSX.getState() == EmulatorState.Stopped }.getOrDefault(false)
+            if (!validFixture || !noPpuOwner || !nativeIdle) {
+                Log.e(
+                    "S3FASTLLVM",
+                    "fixture-request-rejected valid=$validFixture ppuOwnerFree=$noPpuOwner nativeIdle=$nativeIdle " +
+                        "mode=${requestedBoot.mode} fixture=${requestedFixtureId ?: "none"}",
+                )
+                // This early reject occurs before the view binding is created;
+                // use the deferred teardown path so onDestroy never touches it.
+                ppuLaunchDeferred = true
+                finish()
+                return
+            }
+            spuFastLlvmFixtureId = requestedFixtureId
+            Log.i("S3FASTLLVM", "fixture-request-validated id=$requestedFixtureId path=$requestedPath")
+        }
         val registeredGame = GameRepository.find(requestedPath)
         val requestedGame = registeredGame ?: Game(GameInfoStore(requestedPath))
+
+        val resumedTitle = savedInstanceState?.getString(STATE_PPU_CONTINUATION_TITLE)
+        val resumedSession = savedInstanceState?.getLong(STATE_PPU_CONTINUATION_SESSION, -1L)
+            ?.takeIf { it > 0L }
+        if (!resumedTitle.isNullOrBlank() && resumedSession != null) {
+            when (continuationState(resumedTitle, resumedSession)) {
+                com.zenithblue.sambas3.ppu.PpuBootContinuationState.WAITING -> {
+                    startPpuBootContinuation(
+                        resumedTitle, resumedSession, requestedBoot,
+                        "Waiting for the active PPU preparation…",
+                    )
+                    return
+                }
+                com.zenithblue.sambas3.ppu.PpuBootContinuationState.READY -> {
+                    Log.i("S3BOOT", "continuation-restored-ready title=$resumedTitle session=$resumedSession")
+                }
+                com.zenithblue.sambas3.ppu.PpuBootContinuationState.FAILED,
+                com.zenithblue.sambas3.ppu.PpuBootContinuationState.REPLACED -> {
+                    deferPpuBootToHome(requestedPath, "restored preparation did not reach ready")
+                    return
+                }
+            }
+        }
+
         val ppuOwnerActive = com.zenithblue.sambas3.ppu.ImportPpuPreparationCoordinator.hasActiveOwner()
-        if (RPCSX.initialized && RPCSX.state.value == EmulatorState.Stopped && !ppuOwnerActive) {
+        if (spuFastLlvmFixtureId == null && RPCSX.initialized && RPCSX.state.value == EmulatorState.Stopped && !ppuOwnerActive) {
             GameIdentity.titleIdOrNull(requestedPath, requestedGame.info.name.value)?.let { titleId ->
                 PpuReadinessStore.invalidateIfFingerprintChanged(this, titleId)
             }
         }
-        val availability = com.zenithblue.sambas3.ppu.GameRunEligibilityHelper.evaluateAvailability(
-            this, requestedGame,
-            installPpuActive = CompileProgressBridge.installState.value.ppuActive || ppuOwnerActive,
-            prelaunchState = CompileProgressBridge.prelaunchState.value,
-            runtimeState = CompileProgressBridge.state.value,
-            emulatorState = RPCSX.state.value,
-            activeGame = RPCSX.activeGame.value,
-        )
+        var availability = if (spuFastLlvmFixtureId != null) {
+            com.zenithblue.sambas3.ppu.GameLaunchAvailability.Ready
+        } else {
+            com.zenithblue.sambas3.ppu.GameRunEligibilityHelper.evaluateAvailability(
+                this, requestedGame,
+                installPpuActive = CompileProgressBridge.installState.value.ppuActive || ppuOwnerActive,
+                prelaunchState = CompileProgressBridge.prelaunchState.value,
+                runtimeState = CompileProgressBridge.state.value,
+                emulatorState = RPCSX.state.value,
+                activeGame = RPCSX.activeGame.value,
+            )
+        }
+        val canContinuePpuPreparation = com.zenithblue.sambas3.ppu.PpuBootContinuationPolicy
+            .shouldAdmitPreparationContinuation(availability)
+        if (canContinuePpuPreparation && registeredGame != null) {
+            val titleId = GameIdentity.titleIdOrNull(requestedPath, requestedGame.info.name.value)
+            if (!titleId.isNullOrBlank()) {
+                val coordinator = com.zenithblue.sambas3.ppu.ImportPpuPreparationCoordinator
+                val ownerBeforeRequest = coordinator.activeOwnerSnapshot()
+                val wasPreparing = availability is com.zenithblue.sambas3.ppu.GameLaunchAvailability.PreparingPpu
+                val action = if (ownerBeforeRequest == null) {
+                    coordinator.requestPreparation(applicationContext, registeredGame).name
+                } else {
+                    "existing-owner"
+                }
+                val owner = coordinator.activeOwnerSnapshot()
+                val preRuntime = PpuReadinessStore.getPreRuntimeState(this, titleId)
+                val runtime = PpuReadinessStore.getRuntimeState(this, titleId)
+                when (com.zenithblue.sambas3.ppu.PpuBootContinuationPolicy.resolvePreparationOutcome(
+                    expectedTitleId = titleId,
+                    activeOwner = owner,
+                    preRuntime = preRuntime,
+                    runtime = runtime,
+                )) {
+                    com.zenithblue.sambas3.ppu.PpuBootContinuationState.WAITING -> {
+                        val sessionId = owner?.sessionId ?: -1L
+                        if (sessionId > 0L) {
+                            Log.i(
+                                "S3BOOT",
+                                "continuation-start title=$titleId session=$sessionId action=$action " +
+                                    "availability=$availability request_mode=${requestedBoot.mode} " +
+                                    "request_id=${requestedBoot.requestId ?: "none"}",
+                            )
+                            startPpuBootContinuation(titleId, sessionId, requestedBoot, "Resuming PPU preparation…")
+                            return
+                        }
+                        Log.w("S3BOOT", "continuation-owner-invalid title=$titleId action=$action")
+                        deferPpuBootToHome(requestedPath, "matching preparation owner has no session")
+                        return
+                    }
+                    com.zenithblue.sambas3.ppu.PpuBootContinuationState.REPLACED -> {
+                        Log.w(
+                            "S3BOOT",
+                            "continuation-owner-mismatch expected=$titleId actual=${owner?.titleId} " +
+                                "availability=$availability",
+                        )
+                        deferPpuBootToHome(requestedPath, "another title owns PPU preparation")
+                        return
+                    }
+                    com.zenithblue.sambas3.ppu.PpuBootContinuationState.READY -> {
+                        val refreshed = com.zenithblue.sambas3.ppu.GameRunEligibilityHelper.evaluateAvailability(
+                            this, requestedGame,
+                            installPpuActive = CompileProgressBridge.installState.value.ppuActive || coordinator.hasActiveOwner(),
+                            prelaunchState = CompileProgressBridge.prelaunchState.value,
+                            runtimeState = CompileProgressBridge.state.value,
+                            emulatorState = RPCSX.state.value,
+                            activeGame = RPCSX.activeGame.value,
+                        )
+                        if (refreshed == com.zenithblue.sambas3.ppu.GameLaunchAvailability.Ready ||
+                            refreshed == com.zenithblue.sambas3.ppu.GameLaunchAvailability.GameplayRunning
+                        ) {
+                            Log.i(
+                                "S3BOOT",
+                                "continuation-ready-before-owner-observed title=$titleId action=$action " +
+                                    "was_preparing=$wasPreparing request_mode=${requestedBoot.mode}",
+                            )
+                            availability = refreshed
+                        } else {
+                            Log.w(
+                                "S3BOOT",
+                                "continuation-ready-state-not-launchable title=$titleId availability=$refreshed",
+                            )
+                            deferPpuBootToHome(requestedPath, "preparation completed but launch state is not ready")
+                            return
+                        }
+                    }
+                    com.zenithblue.sambas3.ppu.PpuBootContinuationState.FAILED -> {
+                        Log.w(
+                            "S3BOOT",
+                            "continuation-not-started title=$titleId action=$action " +
+                                "owner=${owner?.titleId ?: "none"} pre=$preRuntime runtime=$runtime",
+                        )
+                        deferPpuBootToHome(
+                            requestedPath,
+                            if (wasPreparing) "preparing PPU state has no matching live owner" else
+                                "retryable PPU preparation could not acquire matching owner",
+                        )
+                        return
+                    }
+                }
+            }
+        }
         if (availability != com.zenithblue.sambas3.ppu.GameLaunchAvailability.Ready &&
             availability != com.zenithblue.sambas3.ppu.GameLaunchAvailability.GameplayRunning
         ) {
@@ -239,8 +401,9 @@ class RPCSXActivity : ComponentActivity(), EmulationHost {
                 addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_NEW_TASK)
             })
             if (registeredGame != null &&
-                (availability == com.zenithblue.sambas3.ppu.GameLaunchAvailability.NeedsPreparation ||
-                    availability is com.zenithblue.sambas3.ppu.GameLaunchAvailability.Failed)
+                com.zenithblue.sambas3.ppu.PpuBootContinuationPolicy
+                    .shouldAdmitPreparationContinuation(availability) &&
+                availability !is com.zenithblue.sambas3.ppu.GameLaunchAvailability.PreparingPpu
             ) {
                 com.zenithblue.sambas3.ppu.ImportPpuPreparationCoordinator.requestPreparation(
                     applicationContext, registeredGame,
@@ -360,7 +523,9 @@ class RPCSXActivity : ComponentActivity(), EmulationHost {
         binding.monitoringOverlay.isFocusable = false
         binding.monitoringOverlay.setOnTouchListener { _, _ -> false }
         monitoringRepository.start(lifecycleScope)
-        startNoFrameWatchdog()
+        if (com.zenithblue.sambas3.debug.SpuDiagnosticRoutePolicy.usesNoFrameWatchdog(spuFastLlvmFixtureId != null)) {
+            startNoFrameWatchdog()
+        }
         binding.monitoringOverlay.setViewCompositionStrategy(
             ViewCompositionStrategy.DisposeOnViewTreeLifecycleDestroyed
         )
@@ -609,7 +774,7 @@ class RPCSXActivity : ComponentActivity(), EmulationHost {
         pendingRecovery?.let {
             thumbnailStore.recoverCommitted(it.requestId, it.slot, it.savestatePath)
         }
-        bootRequest = EmulatorBootRequest.fromIntent(intent, pendingRecovery)
+        bootRequest = requestedBoot
         bootMode = bootRequest.mode
         originalGamePath = bootRequest.originalGamePath
         recoverySavestatePath = bootRequest.savestatePath.takeIf { bootMode == EmulatorBootMode.DurableRecovery }
@@ -739,6 +904,11 @@ class RPCSXActivity : ComponentActivity(), EmulationHost {
                 return@thread
             }
             if (stateBeforeBoot != EmulatorState.Stopped) {
+                if (spuFastLlvmFixtureId != null) {
+                    Log.e("S3FASTLLVM", "fixture-boot-rejected reason=native-not-idle state=$stateBeforeBoot id=$spuFastLlvmFixtureId")
+                    runOnUiThread { failBootAndReturnHome("diagnostic-core-not-idle") }
+                    return@thread
+                }
                 val stopResult = kotlinx.coroutines.runBlocking {
                     CoreRecoveryCoordinator.ensureStoppedForFreshBoot(
                         reason = "RPCSXActivity boot",
@@ -762,6 +932,13 @@ class RPCSXActivity : ComponentActivity(), EmulationHost {
                 Log.e("S3HOMELOAD", "post-stop state was $stoppedState")
                 runOnUiThread { failBootAndReturnHome("core-not-stopped") }
                 return@thread
+            }
+            if (spuFastLlvmFixtureId != null) {
+                if (com.zenithblue.sambas3.ppu.ImportPpuPreparationCoordinator.activeOwnerSnapshot() != null) {
+                    Log.e("S3FASTLLVM", "fixture-boot-rejected reason=ppu-owner-active id=$spuFastLlvmFixtureId")
+                    runOnUiThread { failBootAndReturnHome("diagnostic-ppu-owner-active") }
+                    return@thread
+                }
             }
             Log.i("S3HOMELOAD", "stopped mode=$bootMode state=$stoppedState")
 
@@ -920,6 +1097,10 @@ class RPCSXActivity : ComponentActivity(), EmulationHost {
                     Log.i("S3HOMELOAD", "boot-savestate-return result=NoErrors")
                     Log.i("S3HOMELOAD", "state=${RPCSX.getState()}")
                     confirmRecoveryFrameAndClear()
+                } else if (!com.zenithblue.sambas3.debug.SpuDiagnosticRoutePolicy
+                        .usesFrameReadiness(spuFastLlvmFixtureId != null)
+                ) {
+                    beginSpuDiagnosticWait()
                 } else {
                     Log.i(
                         "S3BOOTFRAME",
@@ -929,8 +1110,54 @@ class RPCSXActivity : ComponentActivity(), EmulationHost {
                     )
                     confirmFreshBootFrameAndValidate()
                 }
-                pollAndLearnTitleId(gamePath)
+                if (spuFastLlvmFixtureId == null) pollAndLearnTitleId(gamePath)
             }
+        }
+    }
+
+    /** A standalone SPU fixture has no guest video; tester consumes its native STOP report. */
+    private fun beginSpuDiagnosticWait() {
+        val fixtureId = spuFastLlvmFixtureId ?: return
+        Log.i(
+            "S3FASTLLVM",
+            "fixture-awaiting-native-stop id=$fixtureId timeout_ms=${com.zenithblue.sambas3.debug.SpuDiagnosticRoutePolicy.WAIT_TIMEOUT_MS} " +
+                "frame_readiness=skipped ppu_readiness_persistence=skipped",
+        )
+        runOnUiThread {
+            if (!isFinishing && ::binding.isInitialized) {
+                showTransitionOverlay(
+                    "SPU fast-LLVM diagnostic",
+                    "Waiting for the native STOP report. Keep SambaS3 open while the test captures its bounded diagnostics.",
+                    100,
+                )
+            }
+        }
+        spuDiagnosticTimeoutJob?.cancel()
+        val startedAt = android.os.SystemClock.elapsedRealtime()
+        spuDiagnosticTimeoutJob = lifecycleScope.launch(kotlinx.coroutines.Dispatchers.IO) {
+            while (kotlinx.coroutines.currentCoroutineContext().isActive) {
+                val elapsed = android.os.SystemClock.elapsedRealtime() - startedAt
+                if (com.zenithblue.sambas3.debug.SpuDiagnosticRoutePolicy.timedOut(true, elapsed)) {
+                    stopSpuDiagnostic("timeout", fixtureId, elapsed)
+                    return@launch
+                }
+                if (isFinishing || isDestroyed || spuFastLlvmFixtureId != fixtureId) return@launch
+                delay(250L)
+            }
+        }
+    }
+
+    private fun stopSpuDiagnostic(reason: String, fixtureId: String, elapsedMs: Long? = null) {
+        if (!terminalFailure.compareAndSet(false, true)) return
+        spuDiagnosticTimeoutJob?.cancel()
+        val nativeState = runCatching { RPCSX.getState() }.getOrNull()
+        Log.e(
+            "S3FASTLLVM",
+            "fixture-$reason id=$fixtureId elapsed_ms=${elapsedMs ?: -1} native_state=$nativeState action=bounded-stop",
+        )
+        lifecycleScope.launch(kotlinx.coroutines.Dispatchers.IO) {
+            val stopped = EmulatorStopCoordinator.stop(this@RPCSXActivity, EmulatorStopReason.BootFailureCleanup)
+            Log.e("S3FASTLLVM", "fixture-$reason-stop id=$fixtureId stopped=$stopped")
         }
     }
 
@@ -1255,6 +1482,12 @@ class RPCSXActivity : ComponentActivity(), EmulationHost {
 
     /** Boot/load failures return to Home; RPCSXActivity never owns recovery presentation. */
     private fun failBootAndReturnHome(reason: String) {
+        val fixtureId = spuFastLlvmFixtureId
+        if (fixtureId != null) {
+            stopSpuDiagnostic("failed", fixtureId)
+            Log.e("S3FASTLLVM", "fixture-boot-failed id=$fixtureId reason=$reason")
+            return
+        }
         if (!terminalFailure.compareAndSet(false, true)) return
         com.zenithblue.sambas3.iso.DirectIsoSession.release("fail-boot-$reason")
         interactionLock.lock(EmulatorInteractionLock.CrashView)
@@ -1328,6 +1561,7 @@ class RPCSXActivity : ComponentActivity(), EmulationHost {
     }
 
     private fun toggleOnScreenControls() {
+        if (ppuLaunchDeferred || !::binding.isInitialized) return
         if (interactionLock.isLocked()) return
         binding.padOverlay.isInvisible = !binding.padOverlay.isInvisible
         binding.oscToggle.setImageResource(
@@ -1345,6 +1579,33 @@ class RPCSXActivity : ComponentActivity(), EmulationHost {
             "S3INTENT",
             "activity=$activityInstanceId oldMode=$bootMode oldPath=$currentPath newMode=${incoming.mode} newPath=${incoming.originalGamePath} nativeState=$nativeState activeGame=${RPCSX.activeGame.value} action=pending"
         )
+        val diagnosticRequested = intent.getBooleanExtra(EXTRA_SPU_FAST_LLVM_DIAGNOSTIC, false)
+        val fixtureId = intent.getStringExtra(EXTRA_SPU_FAST_LLVM_FIXTURE_ID)
+        if (diagnosticRequested || fixtureId != null) {
+            val valid = diagnosticRequested && incoming.mode == EmulatorBootMode.FreshGame &&
+                !fixtureId.isNullOrBlank() &&
+                com.zenithblue.sambas3.debug.SpuDiagnosticFixture.validate(
+                    this, fixtureId, incoming.originalGamePath,
+                )
+            val ownerFree = com.zenithblue.sambas3.ppu.ImportPpuPreparationCoordinator
+                .activeOwnerSnapshot() == null
+            if (!valid || nativeState != EmulatorState.Stopped || !ownerFree) {
+                Log.e(
+                    "S3FASTLLVM",
+                    "fixture-onNewIntent-rejected valid=$valid nativeState=$nativeState " +
+                        "ppuOwnerFree=$ownerFree fixture=${fixtureId ?: "none"}",
+                )
+                return
+            }
+            cancelPpuContinuation("replaced by diagnostic fixture", clearRequest = true)
+            setIntent(intent)
+            preserveBootRequestInIntent(incoming)
+            isRecoveryRecreate = true
+            finishReason = EmulatorActivityFinishReason.RecoveryRecreate
+            Log.i("S3FASTLLVM", "fixture-onNewIntent-accepted id=$fixtureId action=recreate")
+            recreate()
+            return
+        }
         if (incoming.originalGamePath.isBlank()) {
             Log.w("S3INTENT", "activity=$activityInstanceId action=reject-invalid")
             return
@@ -1353,12 +1614,16 @@ class RPCSXActivity : ComponentActivity(), EmulationHost {
             RPCSX.activeGame.value == incoming.originalGamePath &&
             currentPath == incoming.originalGamePath
         ) {
+            cancelPpuContinuation("replaced by matching running request", clearRequest = true)
             setIntent(intent)
             Log.i("S3INTENT", "activity=$activityInstanceId action=reuse-current")
             return
         }
         if (nativeState == EmulatorState.Stopped) {
+            cancelPpuContinuation("replaced by new boot request", clearRequest = true)
+            ppuContinuationBootRequest = incoming
             setIntent(intent)
+            preserveBootRequestInIntent(incoming)
             isRecoveryRecreate = true
             finishReason = EmulatorActivityFinishReason.RecoveryRecreate
             Log.i("S3INTENT", "activity=$activityInstanceId action=recreate-stopped")
@@ -1368,11 +1633,164 @@ class RPCSXActivity : ComponentActivity(), EmulationHost {
         Log.w("S3INTENT", "activity=$activityInstanceId action=reject-busy nativeState=$nativeState")
     }
 
+    override fun onSaveInstanceState(outState: Bundle) {
+        if (ppuContinuationTitleId != null && ppuContinuationSessionId != null) {
+            ppuContinuationTitleId?.let { outState.putString(STATE_PPU_CONTINUATION_TITLE, it) }
+            ppuContinuationSessionId?.let { outState.putLong(STATE_PPU_CONTINUATION_SESSION, it) }
+            ppuContinuationBootRequest?.let {
+                com.zenithblue.sambas3.ppu.PpuBootContinuationRequestState.save(outState, it)
+            }
+        }
+        super.onSaveInstanceState(outState)
+    }
+
+    private fun continuationState(
+        titleId: String,
+        sessionId: Long,
+    ): com.zenithblue.sambas3.ppu.PpuBootContinuationState {
+        val coordinator = com.zenithblue.sambas3.ppu.ImportPpuPreparationCoordinator
+        val owner = coordinator.activeOwnerSnapshot()
+        return com.zenithblue.sambas3.ppu.PpuBootContinuationPolicy.decide(
+            expectedTitleId = titleId,
+            expectedSessionId = sessionId,
+            activeOwner = owner,
+            currentSessionId = coordinator.lastSessionId,
+            preRuntime = PpuReadinessStore.getPreRuntimeState(this, titleId),
+            runtime = PpuReadinessStore.getRuntimeState(this, titleId),
+        )
+    }
+
+    private fun startPpuBootContinuation(
+        titleId: String,
+        sessionId: Long,
+        request: EmulatorBootRequest,
+        message: String,
+    ) {
+        ppuLaunchDeferred = true
+        ppuContinuationActive = true
+        ppuContinuationTitleId = titleId
+        ppuContinuationSessionId = sessionId
+        ppuContinuationBootRequest = request
+        ppuContinuationDelivery = com.zenithblue.sambas3.ppu.PpuBootContinuationDelivery()
+        preserveBootRequestInIntent(request)
+        ppuContinuationBackCallback?.remove()
+        ppuContinuationBackCallback = object : OnBackPressedCallback(true) {
+            override fun handleOnBackPressed() {
+                cancelPpuContinuation("user-cancelled", clearRequest = true)
+                finish()
+            }
+        }.also { onBackPressedDispatcher.addCallback(this, it) }
+        showPpuContinuationScreen(message)
+        ppuContinuationJob?.cancel()
+        ppuContinuationJob = lifecycleScope.launch {
+            while (isActive && ppuContinuationActive) {
+                if (!lifecycle.currentState.isAtLeast(Lifecycle.State.RESUMED)) {
+                    delay(100L)
+                    continue
+                }
+                when (continuationState(titleId, sessionId)) {
+                    com.zenithblue.sambas3.ppu.PpuBootContinuationState.WAITING -> delay(100L)
+                    com.zenithblue.sambas3.ppu.PpuBootContinuationState.READY -> {
+                        if (ppuContinuationDelivery?.consume() != true) return@launch
+                        Log.i("S3BOOT", "continuation-ready title=$titleId session=$sessionId action=recreate-original-request")
+                        ppuContinuationActive = false
+                        ppuContinuationJob = null
+                        ppuContinuationBackCallback?.remove()
+                        ppuContinuationBackCallback = null
+                        if (!isFinishing && !isDestroyed) recreate()
+                        return@launch
+                    }
+                    com.zenithblue.sambas3.ppu.PpuBootContinuationState.FAILED -> {
+                        Log.w("S3BOOT", "continuation-terminal-failure title=$titleId session=$sessionId")
+                        deferPpuBootToHome(request.originalGamePath, "current preparation session failed")
+                        return@launch
+                    }
+                    com.zenithblue.sambas3.ppu.PpuBootContinuationState.REPLACED -> {
+                        Log.w("S3BOOT", "continuation-replaced title=$titleId session=$sessionId")
+                        deferPpuBootToHome(request.originalGamePath, "matching preparation session was replaced")
+                        return@launch
+                    }
+                }
+            }
+        }
+    }
+
+    private fun cancelPpuContinuation(reason: String, clearRequest: Boolean) {
+        if (ppuContinuationActive || ppuContinuationJob != null || ppuContinuationBackCallback != null) {
+            Log.i("S3BOOT", "continuation-cancel reason=$reason")
+        }
+        ppuContinuationActive = false
+        ppuContinuationJob?.cancel()
+        ppuContinuationJob = null
+        ppuContinuationBackCallback?.remove()
+        ppuContinuationBackCallback = null
+        ppuContinuationDelivery = null
+        if (clearRequest) {
+            ppuContinuationTitleId = null
+            ppuContinuationSessionId = null
+            ppuContinuationBootRequest = null
+        }
+    }
+
+    private fun preserveBootRequestInIntent(request: EmulatorBootRequest) {
+        val preserved = Intent(intent)
+        preserved.removeExtra(EXTRA_SAVESTATE_PATH)
+        preserved.removeExtra(EXTRA_RECOVERY_SAVESTATE)
+        preserved.removeExtra(EXTRA_USER_SAVESTATE)
+        preserved.removeExtra(EXTRA_SAVESTATE_SLOT)
+        preserved.removeExtra(EXTRA_USER_SAVESTATE_SLOT)
+        preserved.removeExtra(EXTRA_RECOVERY_REQUEST_ID)
+        preserved.removeExtra(EXTRA_BOOT_PARSE_ERROR)
+        preserved
+            .putExtra(EXTRA_BOOT_MODE, request.mode.name)
+            .putExtra(EXTRA_ORIGINAL_GAME_PATH, request.originalGamePath)
+            .putExtra(EXTRA_SAFE_RETRY, request.safeRetry)
+        request.savestatePath?.let { preserved.putExtra(EXTRA_SAVESTATE_PATH, it) }
+        request.slot?.let { preserved.putExtra(EXTRA_SAVESTATE_SLOT, it) }
+        request.requestId?.let { preserved.putExtra(EXTRA_RECOVERY_REQUEST_ID, it) }
+        request.parseError?.let { preserved.putExtra(EXTRA_BOOT_PARSE_ERROR, it) }
+        setIntent(preserved)
+    }
+
+    private fun restorePpuContinuationBootRequest(state: Bundle?): EmulatorBootRequest? =
+        com.zenithblue.sambas3.ppu.PpuBootContinuationRequestState.restore(state)
+
+    private fun deferPpuBootToHome(path: String, reason: String) {
+        ppuLaunchDeferred = true
+        cancelPpuContinuation("terminal-$reason", clearRequest = true)
+        Log.i("S3BOOT", "boot deferred to Home path=$path reason=$reason")
+        startActivity(Intent(this, MainActivity::class.java).apply {
+            addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_NEW_TASK)
+        })
+        finish()
+    }
+
+    private fun showPpuContinuationScreen(message: String) {
+        val label = TextView(this).apply {
+            text = "$message\nKeep SambaS3 open while preparation resumes. Press Back to cancel this launch."
+            textSize = 18f
+            setTextColor(Color.WHITE)
+            gravity = Gravity.CENTER
+        }
+        val progress = ProgressBar(this).apply { isIndeterminate = true }
+        val layout = LinearLayout(this).apply {
+            orientation = LinearLayout.VERTICAL
+            gravity = Gravity.CENTER
+            setPadding(48, 48, 48, 48)
+            setBackgroundColor(Color.BLACK)
+            addView(progress, LinearLayout.LayoutParams(-2, -2))
+            addView(label, LinearLayout.LayoutParams(-1, -2).apply { topMargin = 32 })
+        }
+        setContentView(layout)
+    }
+
     override fun prepareForExternalStop(reason: EmulatorStopReason) {
         if (Looper.myLooper() != Looper.getMainLooper()) {
             Log.w("S3HOST", "prepare-external-stop off-main activity=$activityInstanceId")
         }
         externalStopReason = reason
+        spuDiagnosticTimeoutJob?.cancel()
+        spuDiagnosticTimeoutJob = null
         finishReason = if (reason == EmulatorStopReason.HomeStop) {
             EmulatorActivityFinishReason.HomeStop
         } else {
@@ -1405,6 +1823,11 @@ class RPCSXActivity : ComponentActivity(), EmulationHost {
     }
 
     private fun handleAndroidBack() {
+        val fixtureId = spuFastLlvmFixtureId
+        if (fixtureId != null) {
+            stopSpuDiagnostic("cancelled-by-back", fixtureId)
+            return
+        }
         val state = runCatching { RPCSX.getState() }.getOrNull()
         if (state == null) {
             Log.e("S3BACK", "state-read-failed; consuming Back")
@@ -1948,15 +2371,60 @@ class RPCSXActivity : ComponentActivity(), EmulationHost {
         recreate()
     }
 
-    private fun bootSerialized(path: String): Int = synchronized(bootMutex) {
+    private fun bootSerialized(path: String): Int = com.zenithblue.sambas3.debug.SpuCacheLeaseGate.withLock {
+      synchronized(bootMutex) {
+        if (!com.zenithblue.sambas3.debug.SpuCacheLease.allowsUnleasedBoot(this)) {
+            Log.e("S3SPUCACHE", "native-boot-refused reason=active-or-unrecoverable-cache-lease operation=fresh")
+            return@synchronized BootResult.CurrentlyRestricted.ordinal
+        }
+        if (spuFastLlvmFixtureId != null) {
+            val nativeIdle = runCatching { RPCSX.getState() == EmulatorState.Stopped }.getOrDefault(false)
+            val ppuOwnerFree = com.zenithblue.sambas3.ppu.ImportPpuPreparationCoordinator.activeOwnerSnapshot() == null
+            val fixtureValid = com.zenithblue.sambas3.debug.SpuDiagnosticFixture.validate(
+                this, spuFastLlvmFixtureId!!, path,
+            )
+            if (!nativeIdle || !ppuOwnerFree || !fixtureValid) {
+                Log.e(
+                    "S3FASTLLVM",
+                    "fixture-boot-refused id=$spuFastLlvmFixtureId nativeIdle=$nativeIdle " +
+                        "ppuOwnerFree=$ppuOwnerFree fixtureValid=$fixtureValid",
+                )
+                return@synchronized -1
+            }
+            Log.i("S3FASTLLVM", "fixture-boot-begin id=$spuFastLlvmFixtureId path=$path mode=FreshGame")
+            val diagnosticCase = com.zenithblue.sambas3.debug.SpuDiagnosticFixture
+                .diagnosticCase(spuFastLlvmFixtureId!!)
+            val result = if (diagnosticCase == null) {
+                RPCSX.instance.bootSpuFastLlvmDiagnostic(path)
+            } else {
+                Log.i("S3FASTLLVM", "fixture-diagnostic-case id=$spuFastLlvmFixtureId case=$diagnosticCase")
+                RPCSX.instance.bootSpuFastLlvmDiagnosticCase(path, diagnosticCase)
+            }
+            Log.i("S3FASTLLVM", "fixture-boot-return id=$spuFastLlvmFixtureId result=$result nativeState=${RPCSX.getState()}")
+            return@synchronized result
+        }
         Log.i("S3BOOT", "owner=${Thread.currentThread().name} operation=boot path=$path")
         RPCSX.instance.boot(path)
+      }
     }
 
     private fun bootSavestateSerialized(savestatePath: String, originalGamePath: String): Int =
-        synchronized(bootMutex) {
+        com.zenithblue.sambas3.debug.SpuCacheLeaseGate.withLock {
+          synchronized(bootMutex) {
+            val trustedOriginal = this@RPCSXActivity.originalGamePath
+            val gameInfo = GameRepository.find(trustedOriginal)?.info
+            val titleId = GameIdentity.titleIdOrNull(trustedOriginal, gameInfo?.name?.value)
+            val slot = userSavestateSlot ?: -1
+            val leaseBootAllowed = com.zenithblue.sambas3.debug.SpuCacheLease.consumeSavedStateRestore(
+                this, titleId, slot, isRestore = bootMode == EmulatorBootMode.UserSelectedSavestate,
+            )
+            if (!leaseBootAllowed) {
+                Log.e("S3SPUCACHE", "native-boot-refused reason=lease-recovery-or-arm-mismatch title=$titleId slot=$slot mode=$bootMode")
+                return@synchronized BootResult.CurrentlyRestricted.ordinal
+            }
             Log.i("S3BOOT", "owner=${Thread.currentThread().name} operation=boot-savestate path=$savestatePath original=$originalGamePath")
             RPCSX.instance.bootSavestate(savestatePath, originalGamePath)
+          }
         }
 
     /**
@@ -2097,7 +2565,12 @@ class RPCSXActivity : ComponentActivity(), EmulationHost {
     }
 
     override fun onDestroy() {
+        spuDiagnosticTimeoutJob?.cancel()
+        spuDiagnosticTimeoutJob = null
         if (ppuLaunchDeferred) {
+            if (isFinishing && !isChangingConfigurations) {
+                cancelPpuContinuation("activity-finished", clearRequest = true)
+            }
             super.onDestroy()
             return
         }
@@ -2174,7 +2647,7 @@ class RPCSXActivity : ComponentActivity(), EmulationHost {
         }
     }
 
-    private fun isMenuOpen(): Boolean = coordinator.state.value.isOpen
+    private fun isMenuOpen(): Boolean = ::coordinator.isInitialized && coordinator.state.value.isOpen
 
     private fun logSessionSnapshot(reason: String) {
         val nativeState = runCatching { RPCSX.getState() }.getOrNull()
@@ -2210,6 +2683,14 @@ class RPCSXActivity : ComponentActivity(), EmulationHost {
     /** Intercept before child views can interpret Enter, arrows, Tab, Home, etc. */
     @android.annotation.SuppressLint("RestrictedApi") // Activity override must delegate unhandled input.
     override fun dispatchKeyEvent(event: KeyEvent): Boolean {
+        if (ppuLaunchDeferred) {
+            if (event.action == KeyEvent.ACTION_DOWN && event.repeatCount == 0 &&
+                (event.keyCode == KeyEvent.KEYCODE_BACK || event.keyCode == KeyEvent.KEYCODE_ESCAPE)
+            ) {
+                onBackPressedDispatcher.onBackPressed()
+            }
+            return true
+        }
         val routed = mapperRegistry.resolve(event)
         if (isExternalKeyboardEvent(event, routed)) {
             return when (event.action) {
@@ -2222,6 +2703,12 @@ class RPCSXActivity : ComponentActivity(), EmulationHost {
     }
 
     override fun onKeyDown(keyCode: Int, event: KeyEvent?): Boolean {
+        if (ppuLaunchDeferred) {
+            if ((keyCode == KeyEvent.KEYCODE_BACK || keyCode == KeyEvent.KEYCODE_ESCAPE) &&
+                (event?.repeatCount ?: 0) == 0
+            ) onBackPressedDispatcher.onBackPressed()
+            return true
+        }
         if (interactionLock.isLocked()) return true
         physicalTracker.onKeyEvent(keyCode, event?.action ?: KeyEvent.ACTION_UP)
         val routed = event?.let(mapperRegistry::resolve)
@@ -2292,6 +2779,7 @@ class RPCSXActivity : ComponentActivity(), EmulationHost {
     }
 
     override fun onKeyUp(keyCode: Int, event: KeyEvent?): Boolean {
+        if (ppuLaunchDeferred) return true
         if (interactionLock.isLocked()) return true
         physicalTracker.onKeyEvent(keyCode, event?.action ?: KeyEvent.ACTION_UP)
         val routed = event?.let(mapperRegistry::resolve)
@@ -2331,6 +2819,7 @@ class RPCSXActivity : ComponentActivity(), EmulationHost {
     }
 
     override fun onGenericMotionEvent(event: MotionEvent?): Boolean {
+        if (ppuLaunchDeferred) return true
         if (interactionLock.isLocked()) return true
         if (event != null) physicalTracker.onMotionEvent(event)
         if (isMenuOpen()) {
@@ -2358,6 +2847,7 @@ class RPCSXActivity : ComponentActivity(), EmulationHost {
     }
 
     private fun sendGamepadData() {
+        if (ppuLaunchDeferred || !::coordinator.isInitialized) return
         if (isMenuOpen()) return
         if (!inputGate.onPhysicalEvent()) return
         RPCSX.instance.overlayPadData(
@@ -2381,10 +2871,11 @@ class RPCSXActivity : ComponentActivity(), EmulationHost {
             }
             attributes.layoutInDisplayCutoutMode = LAYOUT_IN_DISPLAY_CUTOUT_MODE_SHORT_EDGES
         }
-        applyInsetsToPadOverlay()
+        if (::binding.isInitialized && !ppuLaunchDeferred) applyInsetsToPadOverlay()
     }
 
     private fun applyInsetsToPadOverlay() {
+        if (!::binding.isInitialized || ppuLaunchDeferred) return
         ViewCompat.setOnApplyWindowInsetsListener(binding.padOverlay) { view, windowInsets ->
             val insets = windowInsets.getInsets(WindowInsetsCompat.Type.systemBars())
             view.updateLayoutParams<MarginLayoutParams> {
@@ -2399,7 +2890,7 @@ class RPCSXActivity : ComponentActivity(), EmulationHost {
 
     override fun onWindowFocusChanged(hasFocus: Boolean) {
         super.onWindowFocusChanged(hasFocus)
-        if (hasFocus) enableFullScreenImmersive()
+        if (hasFocus && !ppuLaunchDeferred) enableFullScreenImmersive()
     }
 
     override fun onPause() {
@@ -2409,12 +2900,14 @@ class RPCSXActivity : ComponentActivity(), EmulationHost {
 
     override fun onResume() {
         super.onResume()
+        if (ppuLaunchDeferred) return
         mapperRegistry.invalidateAll()
         // Menu re-arming/stale sessions are owned by the coordinator via state;
         // no blind native calls here (§17 rule 8).
     }
 
     override fun dispatchTouchEvent(event: android.view.MotionEvent): Boolean {
+        if (ppuLaunchDeferred) return true
         if (event.actionMasked == android.view.MotionEvent.ACTION_DOWN) {
             Log.i("S3TOUCH", "root action=down x=${event.x.toInt()} y=${event.y.toInt()}")
         }
@@ -2422,6 +2915,8 @@ class RPCSXActivity : ComponentActivity(), EmulationHost {
     }
 
     companion object {
+        private const val STATE_PPU_CONTINUATION_TITLE = "ppuContinuationTitleId"
+        private const val STATE_PPU_CONTINUATION_SESSION = "ppuContinuationSessionId"
         const val EXTRA_RECOVERY_SAVESTATE = "recoverySavestatePath"
         const val EXTRA_RECOVERY_REQUEST_ID = "recoveryRequestId"
         const val EXTRA_USER_SAVESTATE = "userSavestatePath"
@@ -2431,6 +2926,9 @@ class RPCSXActivity : ComponentActivity(), EmulationHost {
         const val EXTRA_SAVESTATE_PATH = "savestatePath"
         const val EXTRA_SAVESTATE_SLOT = "savestateSlot"
         const val EXTRA_SAFE_RETRY = "safeRetry"
+        const val EXTRA_BOOT_PARSE_ERROR = "bootParseError"
+        const val EXTRA_SPU_FAST_LLVM_DIAGNOSTIC = "spuFastLlvmDiagnostic"
+        const val EXTRA_SPU_FAST_LLVM_FIXTURE_ID = "spuFastLlvmFixtureId"
         private const val ASPECT_RATIO_SETTING = "Video@@Aspect ratio"
         private const val STRICT_RENDERING_SETTING = "Video@@Strict Rendering Mode"
         private const val DEFAULT_OUTPUT_ASPECT = "16:9"

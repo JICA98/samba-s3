@@ -101,6 +101,12 @@ object GameSettingsOverrides {
     fun curatedDefaultsForTitle(titleId: String?): Map<String, String> {
         if (titleId.isNullOrBlank()) return emptyMap()
         return when (titleId.uppercase()) {
+            // Private v5 candidate: the BCUS98111 probe hit an unmatched FIFO
+            // RET immediately before an invalid report address. Test ordered
+            // atomic fetch through the existing reversible title lease.
+            "BCUS98111" -> mapOf(
+                "Core@@RSX FIFO Accuracy" to SettingsValueCodec.quoteCfgString("Ordered & Atomic")
+            )
             // The tested North American Uncharted 2 build reaches a recoverable
             // PPU trap in foreground.cpp during startup. RPCSX recommends 1 for
             // this exact trap; keep the workaround scoped to the evidenced ID.
